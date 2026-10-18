@@ -2,6 +2,7 @@ import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
 import type { AuraParticle } from "../../runtime/particles";
 import { glow, spritePx } from "../../runtime/texture";
+import { memo } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const HAZE = ["#3a1656", "#4a1c6e", "#26103a"];
@@ -33,14 +34,17 @@ export const blindAura: AuraAnimation = {
     g.arc(cx, cy, r * 1.04, 0, Math.PI * 2);
     g.clip();
 
-    const band = g.createLinearGradient(0, y - h, 0, y + h);
+    g.fillStyle = memo(ctx, "band", () => {
+      const band = g.createLinearGradient(0, y - h, 0, y + h);
 
-    band.addColorStop(0, "rgba(10,4,16,0)");
-    band.addColorStop(0.22, "rgba(16,6,24,0.92)");
-    band.addColorStop(0.5, "rgba(26,10,38,0.97)");
-    band.addColorStop(0.78, "rgba(16,6,24,0.92)");
-    band.addColorStop(1, "rgba(10,4,16,0)");
-    g.fillStyle = band;
+      band.addColorStop(0, "rgba(10,4,16,0)");
+      band.addColorStop(0.22, "rgba(16,6,24,0.92)");
+      band.addColorStop(0.5, "rgba(26,10,38,0.97)");
+      band.addColorStop(0.78, "rgba(16,6,24,0.92)");
+      band.addColorStop(1, "rgba(10,4,16,0)");
+
+      return band;
+    });
     g.beginPath();
     g.moveTo(cx - r * 1.1, y - h + wave * r * 0.03);
     g.quadraticCurveTo(cx, y - h - r * 0.06, cx + r * 1.1, y - h - wave * r * 0.03);

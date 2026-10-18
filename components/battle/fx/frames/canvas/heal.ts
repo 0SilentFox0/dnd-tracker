@@ -36,13 +36,16 @@ export const healFrame: FrameAnimation = async (s, box) => {
 
   const pluses: Plus[] = Array.from({ length: count }, (_, i) => ({ x: box.x + ((i + rand(0.15, 0.85)) / count) * box.w, y: box.y + box.h - rand(4, box.h * 0.35), size: rand(7, 12), at: rand(0, 0.45), rise: rand(25, Math.max(30, box.h * 0.7)), drift: rand(-6, 6) }));
 
+  const fill = verticalFill(s.g, box, [[0, "rgba(110,230,110,0.42)"], [0.6, "rgba(90,200,100,0.1)"], [1, "rgba(90,200,100,0)"]]);
+
   const hide = show(s, (g) => {
     const a = envelope(k, 0.2, 0.35);
 
     g.save();
     g.globalCompositeOperation = "lighter";
     edgeGlow(g, box, {
-      fill: verticalFill(g, box, [[0, `rgba(110,230,110,${0.42 * a})`], [0.6, `rgba(90,200,100,${0.1 * a})`], [1, "rgba(90,200,100,0)"]]),
+      fill,
+      fillAlpha: a,
       shadow: "#7dff8a",
       blur: 14 * a,
       stroke: `rgba(160,255,160,${0.75 * a})`,

@@ -41,8 +41,21 @@ function curlOffset(g: Gust, u: number) {
   return { dx: Math.sin(a) * 9, dy: -(1 - Math.cos(a)) * 7 };
 }
 
+// Spans the gust from its tail at x = 0; translated along with the gust, so it is built once.
+function gustGradient(g: CanvasRenderingContext2D, length: number) {
+  const grad = g.createLinearGradient(0, 0, length, 0);
+
+  grad.addColorStop(0, "rgba(220,250,255,0)");
+  grad.addColorStop(0.7, "rgba(230,250,255,0.55)");
+  grad.addColorStop(1, "rgba(255,255,255,0.95)");
+
+  return grad;
+}
+
 export const windFrame: FrameAnimation = async (s, box) => {
   const gusts: Gust[] = Array.from({ length: 7 }, (_, i) => ({ y: box.y + box.h * ((i + 0.5) / 7) + rand(-4, 4), delay: rand(0, 0.25), len: rand(0.35, 0.6), width: rand(1.2, 2.6), amp: rand(1.5, 4), phase: rand(0, 6), curl: i % 3 === 1 }));
+
+  const grads = gusts.map((gu) => gustGradient(s.g, box.w * gu.len));
 
   const specks: Speck[] = Array.from({ length: 9 }, () => ({ y: box.y + rand(6, box.h - 6), delay: rand(0, 0.3), size: rand(2.5, 4.5), spin: rand(8, 16), leaf: Math.random() < 0.5, color: pick(SPECKS) }));
 
@@ -68,36 +81,33 @@ export const windFrame: FrameAnimation = async (s, box) => {
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";
 
-    for (const gu of gusts) {
+    gusts.forEach((gu, i) => {
       const u = (k - gu.delay) / (1 - gu.delay);
 
-      if (u <= 0 || u >= 1) continue;
+      if (u <= 0 || u >= 1) return;
 
       const headX = box.x - box.w * 0.2 + u * box.w * 1.6;
 
       const tailX = headX - box.w * gu.len;
 
-      const fade = Math.sin(u * Math.PI);
-
-      const grad = g.createLinearGradient(tailX, 0, headX, 0);
-
-      grad.addColorStop(0, "rgba(220,250,255,0)");
-      grad.addColorStop(0.7, `rgba(230,250,255,${0.55 * fade})`);
-      grad.addColorStop(1, `rgba(255,255,255,${0.95 * fade})`);
-      g.strokeStyle = grad;
+      g.globalAlpha = Math.sin(u * Math.PI);
       g.lineWidth = gu.width;
       g.beginPath();
 
-      for (let i = 0; i <= 16; i++) {
-        const x = tailX + ((headX - tailX) * i) / 16;
+      for (let j = 0; j <= 16; j++) {
+        const x = tailX + ((headX - tailX) * j) / 16;
 
-        const c = curlOffset(gu, u - (1 - i / 16) * gu.len * 0.6);
+        const c = curlOffset(gu, u - (1 - j / 16) * gu.len * 0.6);
 
         g.lineTo(x + c.dx, gustY(gu, box, x, k) + c.dy);
       }
 
+      g.save();
+      g.translate(tailX, 0);
+      g.strokeStyle = grads[i];
       g.stroke();
-    }
+      g.restore();
+    });
 
     g.globalCompositeOperation = "source-over";
 

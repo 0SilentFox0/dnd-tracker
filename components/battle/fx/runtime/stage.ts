@@ -1,3 +1,4 @@
+import { fitCanvas } from "./canvas-size";
 import { SpriteParticles } from "./particles";
 import { subscribe } from "./ticker";
 
@@ -41,10 +42,8 @@ export function stageFor(layer: HTMLElement) {
     stages.set(layer, s);
   }
 
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = fitCanvas(s.canvas, layer.clientWidth, layer.clientHeight);
 
-  s.canvas.width = layer.clientWidth * dpr;
-  s.canvas.height = layer.clientHeight * dpr;
   s.g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   return s;

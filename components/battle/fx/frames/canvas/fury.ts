@@ -18,15 +18,15 @@ export const furyFrame: FrameAnimation = async (s, box) => {
 
   const cy = box.y + box.h / 2;
 
+  const vignette = s.g.createRadialGradient(cx, cy, Math.min(box.w, box.h) * 0.25, cx, cy, Math.hypot(box.w, box.h) / 2);
+
+  vignette.addColorStop(0, "rgba(120,0,10,0)");
+  vignette.addColorStop(1, "rgba(170,10,20,0.55)");
+
   const hide = show(s, (g) => {
     g.save();
-
-    const vignette = g.createRadialGradient(cx, cy, Math.min(box.w, box.h) * 0.25, cx, cy, Math.hypot(box.w, box.h) / 2);
-
-    vignette.addColorStop(0, "rgba(120,0,10,0)");
-    vignette.addColorStop(1, `rgba(170,10,20,${0.55 * beat})`);
     // The wave below keeps this glow.
-    edgeGlow(g, box, { fill: vignette, shadow: "#ff1a1a", blur: 8 + 22 * beat, stroke: `rgba(215,25,35,${0.35 + 0.65 * beat})`, width: 2 + 2 * beat });
+    edgeGlow(g, box, { fill: vignette, fillAlpha: beat, shadow: "#ff1a1a", blur: 8 + 22 * beat, stroke: `rgba(215,25,35,${0.35 + 0.65 * beat})`, width: 2 + 2 * beat });
 
     const out = wave * 12;
 

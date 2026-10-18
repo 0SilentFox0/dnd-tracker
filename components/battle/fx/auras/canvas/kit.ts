@@ -38,3 +38,68 @@ export function rimGlow(g: CanvasRenderingContext2D, ctx: AuraCtx, rgb: string, 
 export function twinkleDraw(color: string, alpha = 1) {
   return (g: CanvasRenderingContext2D, p: AuraParticle, k: number) => twinkle(g, p.x, p.y, p.size0 * Math.sin(k * Math.PI), color, alpha);
 }
+
+/** Builds a value once per aura instance (its canvas size never changes; a resize attaches a new one). */
+export function memo<T>(ctx: AuraCtx, key: string, make: () => T): T {
+  if (!ctx.cache.has(key)) ctx.cache.set(key, make());
+
+  return ctx.cache.get(key) as T;
+}
+
+/** A full-canvas layer painted once at device resolution (same coordinates as `frame`), then only blitted. */
+export function staticLayer(ctx: AuraCtx, key: string, paint: (g: CanvasRenderingContext2D) => void) {
+  return memo(ctx, key, () => {
+    const canvas = document.createElement("canvas");
+
+    canvas.width = canvas.height = Math.round(ctx.box * ctx.dpr);
+
+    const lg = canvas.getContext("2d");
+
+    if (lg) {
+      lg.setTransform(ctx.dpr, 0, 0, ctx.dpr, 0, 0);
+      paint(lg);
+    }
+
+    return canvas;
+  });
+}
+
+// Pixel for pixel: the layer has the target's backing size, so no resampling.
+export function drawLayer(g: CanvasRenderingContext2D, layer: HTMLCanvasElement, alpha = 1, op: GlobalCompositeOperation = "source-over") {
+  g.save();
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.globalAlpha = alpha;
+  g.globalCompositeOperation = op;
+  g.drawImage(layer, 0, 0);
+  g.restore();
+}
+
+/** A canvas `half` device px from its centre to each edge, painted once with the origin at that centre (CSS px units). */
+export function centredSprite(ctx: AuraCtx, key: string, halfCss: number, paint: (g: CanvasRenderingContext2D) => void) {
+  return memo(ctx, key, () => {
+    const half = Math.ceil(halfCss * ctx.dpr);
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = canvas.height = half * 2;
+
+    const lg = canvas.getContext("2d");
+
+    if (lg) {
+      lg.setTransform(ctx.dpr, 0, 0, ctx.dpr, half, half);
+      paint(lg);
+    }
+
+    return canvas;
+  });
+}
+
+// Snapped to whole device pixels so the sprite stays as crisp as a direct draw.
+export function drawCentred(g: CanvasRenderingContext2D, ctx: AuraCtx, sprite: HTMLCanvasElement, x: number, y: number) {
+  g.save();
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.globalAlpha = 1;
+  g.globalCompositeOperation = "source-over";
+  g.drawImage(sprite, Math.round(x * ctx.dpr) - sprite.width / 2, Math.round(y * ctx.dpr) - sprite.height / 2);
+  g.restore();
+}

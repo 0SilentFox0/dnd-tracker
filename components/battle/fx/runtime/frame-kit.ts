@@ -1,3 +1,4 @@
+import { clamp01 } from "./easing";
 import { type FxPoint, rand } from "./geometry";
 import { emit, type EmitOptions } from "./primitives";
 import type { Stage } from "./stage";
@@ -43,13 +44,18 @@ export function perimeter(b: FrameBox, t: number): EdgePoint {
 /**
  * The frame's tinted body and glowing border. The shadow stays set afterwards (some frames draw more
  * strokes in the same glow), so reset `shadowBlur` when the next strokes must not glow.
+ * `fillAlpha` fades the body, so a gradient built once can stand in for one rebuilt every frame with scaled stops.
  */
-export function edgeGlow(g: CanvasRenderingContext2D, box: FrameBox, o: { fill?: string | CanvasGradient; stroke: string; width: number; shadow?: string; blur?: number; radius?: number }) {
+export function edgeGlow(g: CanvasRenderingContext2D, box: FrameBox, o: { fill?: string | CanvasGradient; fillAlpha?: number; stroke: string; width: number; shadow?: string; blur?: number; radius?: number }) {
   roundRect(g, box, o.radius);
 
   if (o.fill) {
+    const alpha = g.globalAlpha;
+
+    g.globalAlpha = alpha * clamp01(o.fillAlpha ?? 1);
     g.fillStyle = o.fill;
     g.fill();
+    g.globalAlpha = alpha;
   }
 
   if (o.shadow) {

@@ -59,14 +59,15 @@ export const coldFrame: FrameAnimation = async (s, box) => {
 
   let fade = 1;
 
+  const tint = s.g.createRadialGradient(box.x + box.w / 2, box.y + box.h / 2, Math.min(box.w, box.h) * 0.2, box.x + box.w / 2, box.y + box.h / 2, Math.max(box.w, box.h) * 0.7);
+
+  tint.addColorStop(0, "rgba(160,215,255,0.14)");
+  tint.addColorStop(1, "rgba(190,232,255,0.72)");
+
   const hide = show(s, (g) => {
     const a = Math.min(1, grow) * fade;
 
-    const tint = g.createRadialGradient(box.x + box.w / 2, box.y + box.h / 2, Math.min(box.w, box.h) * 0.2, box.x + box.w / 2, box.y + box.h / 2, Math.max(box.w, box.h) * 0.7);
-
-    tint.addColorStop(0, `rgba(160,215,255,${0.14 * a})`);
-    tint.addColorStop(1, `rgba(190,232,255,${0.72 * a})`);
-    g.globalAlpha = 1;
+    g.globalAlpha = a;
     g.globalCompositeOperation = "source-over";
     roundRect(g, box);
     g.fillStyle = tint;

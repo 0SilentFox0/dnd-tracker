@@ -13,12 +13,24 @@ interface Streak {
   dy: number;
   len: number;
   bend: number;
+  grad?: CanvasGradient;
 }
 
 function streakY({ cx, cy, r, dy, bend }: Streak, x: number) {
   const near = Math.max(0, 1 - ((x - cx) / (r * 1.5)) ** 2);
 
   return cy + dy * r + Math.sign(dy || 1) * bend * r * near;
+}
+
+// The gradient spans the streak from its tail at x = 0, so one per particle serves its whole life (moved by translate).
+function streakGradient(g: CanvasRenderingContext2D, length: number) {
+  const grad = g.createLinearGradient(0, 0, length, 0);
+
+  grad.addColorStop(0, "rgba(200,245,255,0)");
+  grad.addColorStop(0.75, "rgba(220,250,255,0.55)");
+  grad.addColorStop(1, "rgba(255,255,255,0.95)");
+
+  return grad;
 }
 
 function drawStreak(g: CanvasRenderingContext2D, p: AuraParticle<Streak>, k: number) {
@@ -28,16 +40,8 @@ function drawStreak(g: CanvasRenderingContext2D, p: AuraParticle<Streak>, k: num
 
   const tail = head - len * r;
 
-  const a = Math.sin(k * Math.PI);
-
-  const grad = g.createLinearGradient(tail, 0, head, 0);
-
-  grad.addColorStop(0, "rgba(200,245,255,0)");
-  grad.addColorStop(0.75, `rgba(220,250,255,${0.55 * a * p.alpha})`);
-  grad.addColorStop(1, `rgba(255,255,255,${0.95 * a * p.alpha})`);
   g.globalCompositeOperation = "lighter";
-  g.globalAlpha = 1;
-  g.strokeStyle = grad;
+  g.globalAlpha = Math.sin(k * Math.PI) * p.alpha;
   g.lineWidth = p.size0 * s;
   g.lineCap = "round";
   g.beginPath();
@@ -48,7 +52,12 @@ function drawStreak(g: CanvasRenderingContext2D, p: AuraParticle<Streak>, k: num
     g.lineTo(x, streakY(p.data, x));
   }
 
+  p.data.grad ??= streakGradient(g, len * r);
+  g.save();
+  g.translate(tail, 0);
+  g.strokeStyle = p.data.grad;
   g.stroke();
+  g.restore();
 }
 
 export const hasteAura: AuraAnimation = {

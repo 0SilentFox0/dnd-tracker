@@ -35,11 +35,13 @@ export const natureFrame: FrameAnimation = async (s, box) => {
 
   const leaves: Leaf[] = Array.from({ length: 22 }, () => ({ t: Math.random(), speed: rand(0.18, 0.32), lift: rand(2, 10), phase: rand(0, Math.PI * 2), size: rand(4.5, 7.5), color: LEAF[Math.floor(Math.random() * LEAF.length)], spin: rand(-3, 3) }));
 
+  const fill = verticalFill(s.g, box, [[0, "rgba(120,190,40,0.3)"], [1, "rgba(120,190,40,0.05)"]]);
+
   const hide = show(s, (g) => {
     const a = envelope(k, 0.15, 0.3);
 
     g.save();
-    edgeGlow(g, box, { fill: verticalFill(g, box, [[0, `rgba(120,190,40,${0.3 * a})`], [1, `rgba(120,190,40,${0.05 * a})`]]), shadow: "#9be03a", blur: 10 * a, stroke: `rgba(170,225,80,${0.7 * a})`, width: 1.8 });
+    edgeGlow(g, box, { fill, fillAlpha: a, shadow: "#9be03a", blur: 10 * a, stroke: `rgba(170,225,80,${0.7 * a})`, width: 1.8 });
     g.shadowBlur = 0;
     g.globalAlpha = a;
     g.strokeStyle = "rgba(40,70,15,0.8)";

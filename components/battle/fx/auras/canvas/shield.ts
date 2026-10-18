@@ -1,3 +1,4 @@
+import { memo } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const SWEEP_S = 2.6;
@@ -8,12 +9,15 @@ export const shieldAura: AuraAnimation = {
 
     const R = r * 1.2;
 
-    const shell = g.createRadialGradient(cx, cy, r * 0.75, cx, cy, R);
+    g.fillStyle = memo(ctx, "shell", () => {
+      const shell = g.createRadialGradient(cx, cy, r * 0.75, cx, cy, R);
 
-    shell.addColorStop(0, "rgba(90,160,255,0)");
-    shell.addColorStop(0.75, "rgba(110,180,255,0.18)");
-    shell.addColorStop(1, "rgba(150,210,255,0.5)");
-    g.fillStyle = shell;
+      shell.addColorStop(0, "rgba(90,160,255,0)");
+      shell.addColorStop(0.75, "rgba(110,180,255,0.18)");
+      shell.addColorStop(1, "rgba(150,210,255,0.5)");
+
+      return shell;
+    });
     g.beginPath();
     g.arc(cx, cy, R, 0, Math.PI * 2);
     g.fill();

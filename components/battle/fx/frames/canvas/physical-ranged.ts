@@ -127,6 +127,12 @@ export const physicalRangedFrame: FrameAnimation = async (s, box) => {
 
   const cracks = Array.from({ length: 5 }, (_, i) => [(i / 5) * Math.PI * 2 + rand(-0.3, 0.3), rand(7, 12)] as const);
 
+  const hole = s.g.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 9);
+
+  hole.addColorStop(0, "rgba(0,0,0,0.75)");
+  hole.addColorStop(0.5, "rgba(40,10,5,0.45)");
+  hole.addColorStop(1, "rgba(0,0,0,0)");
+
   let flight = 0;
 
   let k = -1;
@@ -164,15 +170,14 @@ export const physicalRangedFrame: FrameAnimation = async (s, box) => {
 
     const fade = fadeOut(k, FADE_FROM);
 
-    const hole = g.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 9);
+    const alpha = g.globalAlpha;
 
-    hole.addColorStop(0, `rgba(0,0,0,${0.75 * fade})`);
-    hole.addColorStop(0.5, `rgba(40,10,5,${0.45 * fade})`);
-    hole.addColorStop(1, "rgba(0,0,0,0)");
+    g.globalAlpha = alpha * fade;
     g.fillStyle = hole;
     g.beginPath();
     g.ellipse(tip.x, tip.y, 9, 6, ANGLE, 0, Math.PI * 2);
     g.fill();
+    g.globalAlpha = alpha;
     g.strokeStyle = `rgba(12,6,3,${0.8 * fade})`;
     g.lineWidth = 1.2;
     g.lineCap = "round";

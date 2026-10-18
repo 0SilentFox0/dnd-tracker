@@ -15,13 +15,16 @@ const BURN_MS = 1300;
 export const fireFrame: FrameAnimation = async (s, box) => {
   let k = 0;
 
+  const fill = verticalFill(s.g, box, [[0, "rgba(255,110,20,0.75)"], [0.6, "rgba(255,70,0,0.2)"], [1, "rgba(255,70,0,0)"]]);
+
   const hide = show(s, (g) => {
     const heat = pulse(k, 0.12);
 
     g.globalAlpha = 1;
     g.globalCompositeOperation = "lighter";
     edgeGlow(g, box, {
-      fill: verticalFill(g, box, [[0, `rgba(255,110,20,${0.75 * heat})`], [0.6, `rgba(255,70,0,${0.2 * heat})`], [1, "rgba(255,70,0,0)"]]),
+      fill,
+      fillAlpha: heat,
       shadow: "#ff6a00",
       blur: 16 * heat,
       stroke: `rgba(255,170,60,${0.9 * heat})`,

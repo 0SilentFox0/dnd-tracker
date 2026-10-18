@@ -34,6 +34,16 @@ export const radiantFrame: FrameAnimation = async (s, box) => {
 
   const core = glow("#fff3c0");
 
+  const fill = s.g.createRadialGradient(cx, cy, 0, cx, cy, reach);
+
+  fill.addColorStop(0, "rgba(255,205,90,0.3)");
+  fill.addColorStop(1, "rgba(255,200,80,0.08)");
+
+  const rays = s.g.createRadialGradient(cx, cy, 0, cx, cy, reach);
+
+  rays.addColorStop(0, "rgba(255,225,130,0.55)");
+  rays.addColorStop(1, "rgba(255,185,50,0)");
+
   const hide = show(s, (g) => {
     const burst = k < 0.1 ? k / 0.1 : (1 - k) ** 1.5 / 0.9 ** 1.5;
 
@@ -42,18 +52,9 @@ export const radiantFrame: FrameAnimation = async (s, box) => {
     g.save();
     roundRect(g, box);
     g.clip();
-
-    const fill = g.createRadialGradient(cx, cy, 0, cx, cy, reach);
-
-    fill.addColorStop(0, `rgba(255,205,90,${0.3 * burst})`);
-    fill.addColorStop(1, `rgba(255,200,80,${0.08 * burst})`);
+    g.globalAlpha = burst;
     g.fillStyle = fill;
     g.fillRect(box.x, box.y, box.w, box.h);
-
-    const rays = g.createRadialGradient(cx, cy, 0, cx, cy, reach);
-
-    rays.addColorStop(0, `rgba(255,225,130,${0.55 * burst})`);
-    rays.addColorStop(1, "rgba(255,185,50,0)");
     g.fillStyle = rays;
 
     for (let i = 0; i < RAYS; i++) {

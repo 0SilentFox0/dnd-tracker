@@ -1,3 +1,4 @@
+import { fitCanvas } from "../../runtime/canvas-size";
 import { AuraParticles } from "../../runtime/particles";
 import { subscribe } from "../../runtime/ticker";
 import { AURA_ANIMATIONS } from "./index";
@@ -92,12 +93,9 @@ export function attachAura(canvas: HTMLCanvasElement, kinds: FxAuraKind[], size:
 
   const box = size + pad * 2;
 
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = fitCanvas(canvas, box, box);
 
-  canvas.width = Math.round(box * dpr);
-  canvas.height = Math.round(box * dpr);
-
-  const layers = kinds.map((kind) => ({ anim: AURA_ANIMATIONS[kind], ctx: { cx: box / 2, cy: box / 2, r: size / 2, s: size / 48, parts: new AuraParticles() } }));
+  const layers = kinds.map((kind) => ({ anim: AURA_ANIMATIONS[kind], ctx: { cx: box / 2, cy: box / 2, r: size / 2, s: size / 48, parts: new AuraParticles(), box, dpr, cache: new Map() } }));
 
   // Random phase so neighbouring rows do not pulse in lockstep.
   const entry: Entry = { canvas, g, dpr, layers, visible: false, t0: performance.now() - Math.random() * 4000 };

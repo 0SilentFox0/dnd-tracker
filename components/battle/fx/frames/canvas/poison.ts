@@ -25,11 +25,14 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
 
   let glow = 0;
 
+  const fill = verticalFill(s.g, box, [[0, "rgba(110,200,30,0.5)"], [0.55, "rgba(90,160,20,0.16)"], [1, "rgba(90,160,20,0.06)"]]);
+
   const hide = show(s, (g) => {
     g.save();
 
     edgeGlow(g, box, {
-      fill: verticalFill(g, box, [[0, `rgba(110,200,30,${0.5 * glow})`], [0.55, `rgba(90,160,20,${0.16 * glow})`], [1, `rgba(90,160,20,${0.06 * glow})`]]),
+      fill,
+      fillAlpha: glow,
       shadow: "#8be02a",
       blur: 14 * glow,
       stroke: `rgba(170,240,70,${0.85 * glow})`,

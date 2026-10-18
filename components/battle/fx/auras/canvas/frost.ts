@@ -1,6 +1,6 @@
 import { rand } from "../../runtime/geometry";
 import { glow, spritePx } from "../../runtime/texture";
-import { onRim, rimGlow, twinkleDraw } from "./kit";
+import { memo, onRim, rimGlow, twinkleDraw } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const sparkle = twinkleDraw("#ffffff");
@@ -38,14 +38,20 @@ export const frostAura: AuraAnimation = {
 
     const shimmer = 0.8 + Math.sin(t * 1.6) * 0.15;
 
-    const tint = g.createRadialGradient(cx, cy, r * 0.45, cx, cy, r);
+    // The first stop is transparent, so scaling the alpha of the whole fill equals scaling the outer stop.
+    g.fillStyle = memo(ctx, "tint", () => {
+      const tint = g.createRadialGradient(cx, cy, r * 0.45, cx, cy, r);
 
-    tint.addColorStop(0, "rgba(170,225,255,0)");
-    tint.addColorStop(1, `rgba(190,232,255,${0.45 * shimmer})`);
-    g.fillStyle = tint;
+      tint.addColorStop(0, "rgba(170,225,255,0)");
+      tint.addColorStop(1, "rgba(190,232,255,0.45)");
+
+      return tint;
+    });
+    g.globalAlpha = shimmer;
     g.beginPath();
     g.arc(cx, cy, r, 0, Math.PI * 2);
     g.fill();
+    g.globalAlpha = 1;
 
     rimGlow(g, ctx, "170,225,255", 0.9 * shimmer, 0.3);
 

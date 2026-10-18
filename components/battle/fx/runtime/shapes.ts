@@ -82,15 +82,28 @@ export function polyline(g: CanvasRenderingContext2D, pts: FxPoint[], upTo = 1) 
   g.stroke();
 }
 
-/** Segment i is `width × (1 − i/span × taper)` wide, never under `min`: thick at the root, thin at the tip. */
-export function taperedStroke(g: CanvasRenderingContext2D, pts: FxPoint[], color: string, width: number, taper: number, min: number, span = pts.length) {
+const TAPER_BANDS = 6;
+
+/**
+ * Segment i is `width × (1 − i/span × taper)` wide, never under `min`: thick at the root, thin at the tip.
+ * Widths step in `bands` runs (one stroke each) instead of one stroke per segment.
+ */
+export function taperedStroke(g: CanvasRenderingContext2D, pts: FxPoint[], color: string, width: number, taper: number, min: number, span = pts.length, bands = TAPER_BANDS) {
+  const n = pts.length - 1;
+
+  const per = Math.max(1, Math.ceil(n / bands));
+
   g.strokeStyle = color;
 
-  for (let i = 1; i < pts.length; i++) {
-    g.lineWidth = Math.max(min, width * (1 - (i / span) * taper));
+  for (let from = 0; from < n; from += per) {
+    const to = Math.min(n, from + per);
+
+    g.lineWidth = Math.max(min, width * (1 - ((from + 1 + to) / 2 / span) * taper));
     g.beginPath();
-    g.moveTo(pts[i - 1].x, pts[i - 1].y);
-    g.lineTo(pts[i].x, pts[i].y);
+    g.moveTo(pts[from].x, pts[from].y);
+
+    for (let i = from + 1; i <= to; i++) g.lineTo(pts[i].x, pts[i].y);
+
     g.stroke();
   }
 }

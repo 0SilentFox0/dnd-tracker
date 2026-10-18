@@ -2,7 +2,7 @@ import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
 import type { AuraParticle } from "../../runtime/particles";
 import { glow, spritePx } from "../../runtime/texture";
-import { outside } from "./kit";
+import { drawLayer, outside, staticLayer } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const DUST = ["#b08a58", "#9a7444", "#c8a46e"];
@@ -55,30 +55,33 @@ function pebblePath(g: CanvasRenderingContext2D, x: number, y: number, size: num
   g.closePath();
 }
 
+function paintGround(g: CanvasRenderingContext2D, cx: number, ground: number, r: number, s: number) {
+  // The cracks keep the sprite's 0.8 alpha.
+  spritePx(g, glow("#7a5a32"), cx, ground, r * 3.2, r * 0.8, 0.8, false);
+  g.lineCap = "round";
+  g.lineJoin = "round";
+
+  for (const [i, line] of CRACKS.entries()) {
+    g.beginPath();
+
+    for (const [x, y] of line) g.lineTo(cx + x * r, ground + y * r);
+
+    g.lineWidth = (i < 2 ? 3 : 1.8) * s;
+    g.strokeStyle = "rgba(225,190,135,0.55)";
+    g.stroke();
+    g.lineWidth = (i < 2 ? 1.3 : 0.8) * s;
+    g.strokeStyle = "#1e130a";
+    g.stroke();
+  }
+}
+
 export const dustAura: AuraAnimation = {
   frame(g, ctx, t, dt) {
     const { cx, cy, r, s, parts } = ctx;
 
     const ground = cy + r * 1.08;
 
-    g.globalCompositeOperation = "source-over";
-    spritePx(g, glow("#7a5a32"), cx, ground, r * 3.2, r * 0.8, 0.8, false);
-
-    g.lineCap = "round";
-    g.lineJoin = "round";
-
-    for (const [i, line] of CRACKS.entries()) {
-      g.beginPath();
-
-      for (const [x, y] of line) g.lineTo(cx + x * r, ground + y * r);
-
-      g.lineWidth = (i < 2 ? 3 : 1.8) * s;
-      g.strokeStyle = "rgba(225,190,135,0.55)";
-      g.stroke();
-      g.lineWidth = (i < 2 ? 1.3 : 0.8) * s;
-      g.strokeStyle = "#1e130a";
-      g.stroke();
-    }
+    drawLayer(g, staticLayer(ctx, "ground", (lg) => paintGround(lg, cx, ground, r, s)));
 
     parts.emit(14, dt, () => ({ x: cx, y: ground, data: { ox: cx, oy: cy + r * rand(0.78, 1.0), rad: r * rand(0.95, 1.35), speed: rand(2.4, 3.6), cx, cy, r }, life: rand(1, 1.8), size0: rand(13, 19) * s, tint: pick(DUST), alpha: 0.75, move: swirl, draw: drawDust }));
     parts.step(g, dt);
@@ -89,6 +92,7 @@ export const dustAura: AuraAnimation = {
       const y = ground - Math.sin(k * Math.PI) * h * r;
 
       g.globalAlpha = 1;
+      g.lineJoin = "round";
       g.fillStyle = "#86663f";
       g.strokeStyle = "#20160c";
       g.lineWidth = 0.8 * s;

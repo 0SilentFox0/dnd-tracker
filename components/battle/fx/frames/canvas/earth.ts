@@ -58,6 +58,8 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
   const floor = box.y + box.h - 3;
 
+  const fill = verticalFill(s.g, box, [[0, "rgba(120,85,45,0.5)"], [0.5, "rgba(120,85,45,0.12)"], [1, "rgba(120,85,45,0)"]]);
+
   const hide = show(s, (g) => {
     const crackGrow = clamp01(k / 0.25);
 
@@ -65,7 +67,7 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
     g.save();
 
-    edgeGlow(g, box, { fill: verticalFill(g, box, [[0, `rgba(120,85,45,${0.5 * tone})`], [0.5, `rgba(120,85,45,${0.12 * tone})`], [1, "rgba(120,85,45,0)"]]), stroke: `rgba(215,170,105,${0.9 * tone})`, width: 2 });
+    edgeGlow(g, box, { fill, fillAlpha: tone, stroke: `rgba(215,170,105,${0.9 * tone})`, width: 2 });
     g.lineCap = "round";
     g.lineJoin = "round";
     g.globalAlpha = fade;
