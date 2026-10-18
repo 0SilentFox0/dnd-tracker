@@ -49,6 +49,7 @@ const SAMPLES: Record<string, Ability[]> = {
   ],
   restoreSlotOnce: [catalog.restoreSlotOnce("Передача мани")],
   drainMana: [catalog.drainMana()],
+  rangedRetaliation: [catalog.rangedRetaliation("Відповідний постріл")],
   summonGroupOnce: [catalog.summonGroupOnce("Виклик пекла", "Демони", 6)],
   raiseOnKill: [catalog.raiseOnKill("necromancers-skeleton")],
   extraDamage: [catalog.extraDamage("Вогняний клинок", "1d4", "fire"), catalog.extraDamage("Блискавка", "1d6", "lightning")],

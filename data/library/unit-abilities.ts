@@ -188,6 +188,14 @@ export const elemental = (element: "fire" | "cold" | "lightning" | null, vulnera
   return mindless("unit-elemental", "Елементаль", `${parts.join(", ")}.`, extra);
 };
 
+export const rangedRetaliation = (name: string): Ability => ({
+  id: "unit-ranged-retaliation",
+  name,
+  description: "Відповідає пострілом на дальні атаки (раз за раунд, як звичайна відсіч).",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 0 }],
+});
+
 export const magicResist = (percent: number): Ability => ({
   id: "unit-magic-resist",
   name: `Опір магії ${percent} %`,
