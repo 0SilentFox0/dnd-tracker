@@ -61,6 +61,14 @@ describe("мій герой", () => {
     expect(bonusTargetSide(ability({}))).toBeNull();
   });
 
+  it("bonusTargetSide: прапорці, що шкодять цілі, — на ворога (Мисливець)", () => {
+    const flag = (f: FlagEffect["flag"]) => ability({ effects: [{ kind: "flag", flag: f, duration: { rounds: 1 }, target: "eventTarget" }] as ResolvedAbility["effects"] });
+
+    expect(bonusTargetSide(flag("advantageForAttackers"))).toBe("enemy");
+    expect(bonusTargetSide(flag("disadvantage"))).toBe("enemy");
+    expect(bonusTargetSide(flag("disadvantageForAttackers"))).toBe("ally");
+  });
+
   it("lastAction пропускає end_turn", () => {
     const log = [{ actionType: "attack", actionIndex: 1 }, { actionType: "end_turn", actionIndex: 2 }] as BattleAction[];
 

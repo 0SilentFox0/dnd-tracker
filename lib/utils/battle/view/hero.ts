@@ -64,13 +64,18 @@ export function abilityCharges(p: BattleParticipant, triggers: readonly string[]
 
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 
+// flags read from the holder's side: these help whoever attacks the holder
+const HOSTILE_FLAGS = new Set(["advantageForAttackers", "disadvantage"]);
+
 export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   const aimed = a.effects.filter((e) => "target" in e && e.target === "eventTarget");
 
   if (aimed.length === 0) return null;
 
   const hostile = aimed.some((e) =>
-    HOSTILE.has(e.kind) || (("flat" in e && typeof e.flat === "number" && e.flat < 0) || ("percent" in e && typeof e.percent === "number" && e.percent < 0)),
+    HOSTILE.has(e.kind) ||
+    (e.kind === "flag" && HOSTILE_FLAGS.has(e.flag)) ||
+    (("flat" in e && typeof e.flat === "number" && e.flat < 0) || ("percent" in e && typeof e.percent === "number" && e.percent < 0)),
   );
 
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
