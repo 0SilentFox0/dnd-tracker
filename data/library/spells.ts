@@ -552,10 +552,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Корені",
     school: NATURE,
     level: 1,
-    description: "Ворог робить рятівний кидок Сили; при провалі 1 раунд не може атакувати в ближньому бою і отримує −2 до ініціативи. Успіх — без ефекту.",
+    description: "Ворог робить рятівний кидок Сили; при провалі 1 раунд не може рухатися й атакувати (ні в ближньому, ні в дальньому бою) і отримує −2 до ініціативи. Успіх — без ефекту.",
     appearanceDescription:
       "Земля під ногами ворога розверзається, і з неї вириваються вузлуваті корені, обплітаючи щиколотки й коліна. Від них пахне вологою глиною і старим лісом.",
-    definition: def(0, ENEMY, [condition("disable_melee_attacks", 1), stat("initiative", -2, 1)], { resolution: save("strength", "none") }),
+    definition: def(0, ENEMY, [condition("disable_melee_attacks", 1), condition("disable_ranged_attacks", 1), stat("initiative", -2, 1)], { resolution: save("strength", "none") }),
     raceModifiers: [],
   },
   {

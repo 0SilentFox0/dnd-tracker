@@ -125,7 +125,7 @@ export function completeBattle(
     ...SYSTEM_ACTOR,
     actionType: "end_turn",
     targets: [],
-    actionDetails: {},
+    actionDetails: { battleResult: result },
     resultText:
       result === "victory"
         ? "🎉 Бій завершено! Перемога союзників!"

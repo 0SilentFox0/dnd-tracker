@@ -9,6 +9,7 @@ import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
 import {
+  loadAllEvents,
   loadBattle,
   loadBattleAccess,
   loadEventsBefore,
@@ -41,4 +42,6 @@ export const defaultReadDeps: BattleReadDeps = {
   getUserId: getSessionUserId,
   loadAccess: (args) => loadBattleAccess(prisma, args),
   loadEventsBefore: (battleId, page) => loadEventsBefore(prisma, battleId, page),
+  loadAllEvents: (battleId) => loadAllEvents(prisma, battleId),
+  loadParticipants: async (args) => (await loadBattle(prisma, args))?.participants ?? [],
 };

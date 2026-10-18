@@ -29,4 +29,12 @@ describe("morale-check mutation", () => {
       expect.objectContaining({ code: "action_used" }),
     );
   });
+
+  it("у додатковому ході мораль не перевіряється — action_used", () => {
+    const inExtra = { ...hero, battleData: { ...hero.battleData, extraTurnActive: true } };
+
+    expect(() => moraleCheckMutation(context({ participants: [inExtra, context().participants[1]] }), { participantId: "hero", d10Roll: 10 })).toThrow(
+      expect.objectContaining({ code: "action_used" }),
+    );
+  });
 });

@@ -79,11 +79,7 @@ export async function createBattleParticipantFromCharacter(
 
   const proficiencyBonus = getProficiencyBonus(character.level);
 
-  const scores = { strength: character.strength, dexterity: character.dexterity, constitution: character.constitution, intelligence: character.intelligence, wisdom: character.wisdom, charisma: character.charisma };
-
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
-
-  const spell = spellcastingDerived(character.level, character.spellcastingAbility, scores);
 
   const computedMaxHp = heroBaseHp(character).total;
 
@@ -147,8 +143,6 @@ export async function createBattleParticipantFromCharacter(
         | "wisdom"
         | "charisma"
         | undefined,
-      spellSaveDC: spell?.saveDC,
-      spellAttackBonus: spell?.attackBonus,
       spellSlots: resolvedSpellSlots,
       knownSpells,
     },
@@ -170,5 +164,10 @@ export async function createBattleParticipantFromCharacter(
     },
   };
 
-  return bakePassives(participant);
+  const baked = bakePassives(participant);
+
+  // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
+  const spell = spellcastingDerived(character.level, character.spellcastingAbility, baked.abilities);
+
+  return { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
 }

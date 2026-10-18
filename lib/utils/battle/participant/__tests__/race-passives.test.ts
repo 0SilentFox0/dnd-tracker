@@ -70,6 +70,15 @@ async function build(raceKey: string | null, morale = 0): Promise<BattleParticip
 }
 
 describe("race innate passives reach the battle participant", () => {
+  it("spell save DC and attack bonus use the baked score (mages +2 INT: 10 → 12)", async () => {
+    const race = raceRow("mages");
+
+    const p = await createBattleParticipantFromCharacter({ ...character(race.name), spellcastingAbility: "intelligence" } as never, "b1", ParticipantSide.ALLY, undefined, context(race));
+
+    expect(p.abilities.modifiers.intelligence).toBe(1);
+    expect(p.spellcasting).toMatchObject({ spellSaveDC: 8 + 3 + 1, spellAttackBonus: 3 + 1 });
+  });
+
   it("stat bonuses are baked into the participant abilities", async () => {
     for (const race of RACES) {
       const base = await build(null);

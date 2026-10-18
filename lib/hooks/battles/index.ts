@@ -20,3 +20,4 @@ export {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "./useBattles";
+export { useBattleSummary } from "./useBattleSummary";

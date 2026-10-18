@@ -84,6 +84,7 @@ describe("мій герой", () => {
     expect(needsMoraleCheck(m(-1, [{ kind: "flag", flag: "noNegativeMorale" }]), [], null)).toBe(false);
     expect(needsMoraleCheck(m(2, [{ kind: "flag", flag: "ignoreMorale" }], "necromancer"), [], null)).toBe(false);
     expect(needsMoraleCheck(m(1), [], { participantId: p.basicInfo.id })).toBe(false);
+    expect(needsMoraleCheck({ ...m(1), battleData: { ...m(1).battleData, extraTurnActive: true } }, [], null)).toBe(false);
   });
 
   it("weaponPreview: бонус ближнього бою видно на мечі, але не на луку; оцінка з бонусом", () => {

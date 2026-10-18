@@ -109,6 +109,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     enemies: [gob],
     reserve: [],
     awaiting: null,
+    resultScreen: { open: false, setOpen: vi.fn() },
     effects: buildDisplayEffects(order),
     connection: "connected",
     dmControlledId: null,

@@ -98,6 +98,7 @@ export interface AwaitingDialogState {
 
 export interface BattleSceneValue extends BattleSceneData {
   awaitingDialog: AwaitingDialogState;
+  resultScreen: AwaitingDialogState;
   connection: PusherConnectionState;
   selectedId: string | null;
   toast: BattleToastApi;
@@ -269,6 +270,13 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     setOpen: (open) => setDismissedAwaiting(open ? null : awaitingNow),
   };
 
+  const [resultDismissed, setResultDismissed] = useState(false);
+
+  const resultScreen: AwaitingDialogState = {
+    open: battle?.status === BattleStatus.COMPLETED && !resultDismissed,
+    setOpen: (open) => setResultDismissed(!open),
+  };
+
   const order = battle?.initiativeOrder;
 
   const effects = useDisplayEffectMap(order ?? NO_ORDER);
@@ -283,6 +291,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     ...derived,
     effects,
     awaitingDialog,
+    resultScreen,
     connection: connectionState,
     dmControlledId,
     setDmControlledId,

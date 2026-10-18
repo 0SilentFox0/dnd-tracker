@@ -57,6 +57,16 @@ export async function loadEventsBefore(
   return { events: toActions(rows.slice(0, page.limit).reverse(), battleId), hasMore: rows.length > page.limit };
 }
 
+export async function loadAllEvents(db: BattleDb, battleId: string): Promise<BattleAction[]> {
+  const rows = await db.battleEvent.findMany({
+    where: { battleId, cancelledAt: null },
+    orderBy: { seq: "asc" },
+    select: { seq: true, round: true, type: true, actorId: true, hpChanges: true, details: true },
+  });
+
+  return rows.map((r) => eventToBattleAction({ ...r, targets: [], resultText: "" } as unknown as StoredBattleEvent, battleId));
+}
+
 export async function loadSnapshotsFrom(
   db: BattleDb,
   battleId: string,

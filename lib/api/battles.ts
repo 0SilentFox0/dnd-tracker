@@ -14,6 +14,7 @@ import type {
   BattleEventsPage,
   BattleMutationResponse,
   BattleScene,
+  BattleSummary,
   BattleVersion,
   BonusActionData,
   MoraleCheckData,
@@ -87,6 +88,10 @@ export async function getBattleEvents(
   const query = new URLSearchParams({ before: String(page.before), limit: String(page.limit ?? BATTLE_LOG_PAGE_SIZE) });
 
   return campaignGet<BattleEventsPage>(campaignId, `/battles/${battleId}/events?${query}`, { cache: "no-store" });
+}
+
+export async function getBattleSummary(campaignId: string, battleId: string): Promise<BattleSummary> {
+  return campaignGet<BattleSummary>(campaignId, `/battles/${battleId}/summary`, { cache: "no-store" });
 }
 
 export async function nextTurn(campaignId: string, battleId: string, body: WithVersion<object> = {}): Promise<BattleMutationResponse> {

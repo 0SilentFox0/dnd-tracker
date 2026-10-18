@@ -17,7 +17,7 @@ vi.mock("@/lib/utils/battle/pipeline/default-deps", () => ({
     loadRecentEvents: vi.fn(),
     loadKnowledge: vi.fn(),
   },
-  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn() },
+  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn(), loadAllEvents: vi.fn(), loadParticipants: vi.fn() },
 }));
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn(), requireAuth: vi.fn() }));
@@ -96,6 +96,35 @@ describe("GET /battles/[battleId]/events", () => {
     readDeps.loadAccess.mockResolvedValueOnce({ version: 9, isMember: false });
     expect((await GET(new Request("http://x/api?before=5"), params)).status).toBe(403);
     expect(readDeps.loadEventsBefore).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /battles/[battleId]/summary", () => {
+  it("підсумок з усіх подій і учасників бою", async () => {
+    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/summary/route");
+
+    readDeps.loadAllEvents.mockResolvedValue([
+      { round: 4, actorId: hero.basicInfo.id, actionDetails: {}, hpChanges: [{ participantId: goblin.basicInfo.id, participantName: "g", oldHp: 7, newHp: 0, change: 7 }] } as never,
+    ]);
+    readDeps.loadParticipants.mockResolvedValue([hero, goblin]);
+
+    const res = await GET(new Request("http://x/api"), params);
+
+    expect(res.status).toBe(200);
+    expect(readDeps.loadAllEvents).toHaveBeenCalledWith("b1");
+    expect(readDeps.loadParticipants).toHaveBeenCalledWith({ battleId: "b1", campaignId: "c1", userId: "user-1" });
+    expect(await res.json()).toMatchObject({ rounds: 4, heroes: [expect.objectContaining({ damageDealt: 7, kills: 1 })] });
+  });
+
+  it("без сесії — 401; не учасник — 403 без читання подій", async () => {
+    const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/summary/route");
+
+    readDeps.getUserId.mockResolvedValueOnce(null);
+    expect((await GET(new Request("http://x/api"), params)).status).toBe(401);
+
+    readDeps.loadAccess.mockResolvedValueOnce({ version: 9, isMember: false });
+    expect((await GET(new Request("http://x/api"), params)).status).toBe(403);
+    expect(readDeps.loadAllEvents).not.toHaveBeenCalled();
   });
 });
 

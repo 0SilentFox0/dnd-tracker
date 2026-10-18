@@ -133,6 +133,15 @@ describe("advanceTurn", () => {
       expect(second.scene.round).toBe(2);
       expect(second.participants.every((p) => p.actionFlags.hasExtraTurn === false)).toBe(true);
     });
+
+    it("успішна мораль у самому додатковому ході не дає ще одного — раунд закінчується", () => {
+      const inExtra = { ...hero, battleData: { ...hero.battleData, extraTurnActive: true } };
+
+      const out = advanceTurn({ participants: [inExtra, goblin], pending: [], scene: { ...scene, turnIndex: 0, pendingMoraleCheck: moraleExtra } });
+
+      expect(out.scene.round).toBe(2);
+      expect(out.participants.every((p) => !p.actionFlags.hasExtraTurn)).toBe(true);
+    });
   });
 
   it("expireAtTurnEnd effects end with the owner's first full turn, not the turn they were applied in", () => {

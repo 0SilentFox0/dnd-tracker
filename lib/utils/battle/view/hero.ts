@@ -105,7 +105,7 @@ export function lastAction(log: BattleAction[]): BattleAction | null {
 }
 
 export function needsMoraleCheck(p: BattleParticipant, participants: BattleParticipant[], pendingMoraleCheck: unknown): boolean {
-  if ((pendingMoraleCheck as { participantId?: string } | null)?.participantId === p.basicInfo.id) return false;
+  if (p.battleData.extraTurnActive || (pendingMoraleCheck as { participantId?: string } | null)?.participantId === p.basicInfo.id) return false;
 
   return effectiveMorale(p, participants).value !== 0;
 }

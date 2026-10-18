@@ -1,6 +1,6 @@
 import type { GroupedSkillPayload } from "./hooks";
 
-import { BattleStatus,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 
 // Skills API
@@ -91,6 +91,23 @@ export interface ClientBattleDelta {
 export interface BattleEventsPage {
   events: BattleAction[];
   hasMore: boolean;
+}
+
+export interface BattleSummaryHero {
+  participantId: string;
+  name: string;
+  avatar?: string;
+  damageDealt: number;
+  healingDone: number;
+  kills: number;
+  damageTaken: number;
+  status: CombatStatusType;
+}
+
+export interface BattleSummary {
+  outcome: "victory" | "defeat" | null;
+  rounds: number;
+  heroes: BattleSummaryHero[];
 }
 
 export interface BattleVersion {

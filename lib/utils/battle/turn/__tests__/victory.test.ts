@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
+import type { BattleAction } from "@/types/battle";
 
 describe("completeBattle", () => {
   it("перемога: hpChanges містять відроджених союзників", () => {
@@ -15,6 +16,11 @@ describe("completeBattle", () => {
 
     expect(updatedParticipants[0].combatStats.status).toBe("active");
     expect(battleAction.hpChanges).toEqual([expect.objectContaining({ participantId: "hero", oldHp: 0, newHp: downed.combatStats.maxHp })]);
+    expect(battleAction.actionDetails.battleResult).toBe("victory");
+  });
+
+  it("поразка: battleResult у actionDetails", () => {
+    expect(completeBattle([createMockParticipant()], "defeat", 2).battleAction.actionDetails.battleResult).toBe("defeat");
   });
 });
 
@@ -51,9 +57,12 @@ describe("зачарований юніт і перемога", () => {
   it("applyVictoryCompletion завершує бій і відновлює сторони зачарованих", () => {
     const enemy = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "e", side: ParticipantSide.ENEMY }, combatStats: { ...base.combatStats, currentHp: 0, status: "dead" } });
 
-    const out = applyVictoryCompletion({ updatedInitiativeOrder: [hero, enemy, { ...charmedLast, combatStats: { ...charmedLast.combatStats, currentHp: 0, status: "dead" } }], initiativeOrder: [hero, enemy, charmedLast], battleStatus: "active", battleId: "b", nextRound: 2, currentBattleLogLength: 0, newLogEntries: [], getStateBeforeForEntry: () => undefined });
+    const newLogEntries: BattleAction[] = [];
+
+    const out = applyVictoryCompletion({ updatedInitiativeOrder: [hero, enemy, { ...charmedLast, combatStats: { ...charmedLast.combatStats, currentHp: 0, status: "dead" } }], initiativeOrder: [hero, enemy, charmedLast], battleStatus: "active", battleId: "b", nextRound: 2, currentBattleLogLength: 0, newLogEntries, getStateBeforeForEntry: () => undefined });
 
     expect(out.finalStatus).toBe("completed");
+    expect(newLogEntries[0].actionDetails.battleResult).toBe("victory");
     expect(out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "ogre")?.basicInfo.side).toBe(ParticipantSide.ENEMY);
   });
 });

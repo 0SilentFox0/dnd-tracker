@@ -118,12 +118,13 @@ describe("Корені (roots)", () => {
     expect(byId(r.allParticipantsUpdated, "e1").battleData.activeEffects).toHaveLength(0);
   });
 
-  it("провал: −2 ініціативи і заборона ближніх атак", () => {
+  it("провал: −2 ініціативи і заборона ближніх і дальніх атак", () => {
     const r = cast("roots", order(), ["e1"], { saves: { e1: FAIL } });
 
     const e1 = byId(r.allParticipantsUpdated, "e1");
 
     expect(hasEffectMarker(e1, "disable_melee_attacks")).toBe(true);
+    expect(hasEffectMarker(e1, "disable_ranged_attacks")).toBe(true);
     expect(calculateInitiative(e1, r.allParticipantsUpdated)).toBe(calculateInitiative(unit("e1")) - 2);
   });
 

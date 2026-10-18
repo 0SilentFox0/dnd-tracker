@@ -279,6 +279,8 @@ export interface BattleAction {
     participantName: string;
   }>;
   actionDetails: {
+    /** Лише в записі про завершення бою: бік союзників виграв чи програв */
+    battleResult?: "victory" | "defeat";
     // Для атак:
     weaponName?: string;
     /** Тип атаки: melee / ranged */

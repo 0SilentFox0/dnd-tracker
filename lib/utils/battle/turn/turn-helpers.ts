@@ -86,7 +86,7 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
       ...SYSTEM_ACTOR,
       actionType: "end_turn",
       targets: [],
-      actionDetails: {},
+      actionDetails: { battleResult: victoryCheck.result },
       resultText: victoryCheck.message,
       hpChanges: calculateAllyHpChangesOnVictory(
         initiativeOrder,

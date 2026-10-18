@@ -6,7 +6,9 @@ import { BattleAccess, battleErrorResponse, runBattleMutation } from "./run-batt
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { BattleAccessError } from "@/lib/utils/battle/store";
-import type { BattleEventsPage, BattleVersion } from "@/types/api";
+import { summarizeBattle } from "@/lib/utils/battle/view/summary";
+import type { BattleEventsPage, BattleSummary, BattleVersion } from "@/types/api";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 type BattleParams = { id: string; battleId: string };
 
@@ -14,6 +16,8 @@ export interface BattleReadDeps {
   getUserId(): Promise<string | null>;
   loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean } | null>;
   loadEventsBefore(battleId: string, page: { before: number; limit: number }): Promise<BattleEventsPage>;
+  loadAllEvents(battleId: string): Promise<BattleAction[]>;
+  loadParticipants(args: { battleId: string; campaignId: string; userId: string }): Promise<BattleParticipant[]>;
 }
 
 async function authorize(params: BattleParams, deps: BattleReadDeps) {
@@ -27,7 +31,7 @@ async function authorize(params: BattleParams, deps: BattleReadDeps) {
 
   if (!access.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  return access;
+  return { ...access, userId };
 }
 
 /** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
@@ -61,6 +65,21 @@ export async function readBattleEvents(
     await authorize(params, deps);
 
     return NextResponse.json(await deps.loadEventsBefore(params.battleId, page));
+  } catch (err) {
+    return battleErrorResponse(err);
+  }
+}
+
+export async function readBattleSummary(params: BattleParams, deps: BattleReadDeps = defaultReadDeps): Promise<NextResponse> {
+  try {
+    const { userId } = await authorize(params, deps);
+
+    const [events, participants] = await Promise.all([
+      deps.loadAllEvents(params.battleId),
+      deps.loadParticipants({ battleId: params.battleId, campaignId: params.id, userId }),
+    ]);
+
+    return NextResponse.json(summarizeBattle(events, participants) satisfies BattleSummary);
   } catch (err) {
     return battleErrorResponse(err);
   }
