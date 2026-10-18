@@ -45,12 +45,16 @@ export function isPlayable(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked
   return inBounds(map, p) && !blockedSet(map).has(cellKey(p));
 }
 
-export function marginCells(map: Pick<BattleMapConfig, "cols" | "rows">, n: number): string[] {
+export type Margins = { top: number; right: number; bottom: number; left: number };
+
+export function marginCells(map: Pick<BattleMapConfig, "cols" | "rows">, n: number | Margins): string[] {
+  const m: Margins = typeof n === "number" ? { top: n, right: n, bottom: n, left: n } : n;
+
   const keys: string[] = [];
 
   for (let y = 0; y < map.rows; y++) {
     for (let x = 0; x < map.cols; x++) {
-      if (x < n || y < n || x >= map.cols - n || y >= map.rows - n) keys.push(cellKey({ x, y }));
+      if (x < m.left || y < m.top || x >= map.cols - m.right || y >= map.rows - m.bottom) keys.push(cellKey({ x, y }));
     }
   }
 

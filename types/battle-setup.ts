@@ -1,4 +1,5 @@
 import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { BattleMapConfig } from "@/types/battle";
 
 export interface SetupCharacter {
   id: string;
@@ -74,6 +75,7 @@ export interface CreateBattleData {
     side: ParticipantSide;
     quantity?: number;
   }>;
+  map?: BattleMapConfig | null;
 }
 
 export interface BattleBalanceBody {

@@ -5,18 +5,20 @@ import { useMemo, useState } from "react";
 import { useBattle } from "../useBattles";
 import { useBalanceSuggestions } from "./useBalanceSuggestions";
 import { useBattleForm } from "./useBattleForm";
+import { useBattleMapEditor } from "./useBattleMapEditor";
 import { useBattleParticipants } from "./useBattleParticipants";
 import { useFairBalance } from "./useFairBalance";
 import { useNewBattleData } from "./useNewBattleData";
 
 import { CharacterType } from "@/lib/constants/characters";
 import { sharedEnemyRace } from "@/lib/utils/battle/balance/setup";
-import type { BattlePreparationParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattlePreparationParticipant } from "@/types/battle";
 
 export interface BattleSetupInitial {
   name: string;
   description: string;
   participants: BattlePreparationParticipant[];
+  map?: BattleMapConfig | null;
 }
 
 export function useBattleSetup(campaignId: string, battleId?: string, initial?: BattleSetupInitial) {
@@ -26,7 +28,9 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const participantsBag = useBattleParticipants(initial?.participants);
 
-  const form = useBattleForm({ campaignId, battleId, formData, participants: participantsBag.participants });
+  const mapEditor = useBattleMapEditor(initial?.map);
+
+  const form = useBattleForm({ campaignId, battleId, formData, participants: participantsBag.participants, map: mapEditor.value });
 
   const balanceBag = useBalanceSuggestions({
     campaignId,
@@ -57,6 +61,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
     ...participantsBag,
     ...balanceBag,
     ...form,
+    mapEditor,
     fair,
     playerCharacters,
     npcCharacters,
@@ -71,7 +76,7 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
   const initial = useMemo<BattleSetupInitial | undefined>(
     () =>
       battle
-        ? { name: battle.name || "", description: (battle.description as string) || "", participants: (battle.participants ?? []) as unknown as BattlePreparationParticipant[] }
+        ? { name: battle.name || "", description: (battle.description as string) || "", participants: (battle.participants ?? []) as unknown as BattlePreparationParticipant[], map: battle.map ?? null }
         : undefined,
     [battle],
   );

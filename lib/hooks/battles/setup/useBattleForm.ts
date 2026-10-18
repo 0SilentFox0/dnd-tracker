@@ -6,16 +6,17 @@ import { useRouter } from "next/navigation";
 import { useCreateBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
 
 import { useConfirm, useNotify } from "@/lib/hooks/common";
-import type { BattlePreparationParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattlePreparationParticipant } from "@/types/battle";
 
 interface UseBattleFormParams {
   campaignId: string;
   battleId?: string;
   formData: { name: string; description: string };
   participants: BattlePreparationParticipant[];
+  map?: BattleMapConfig | null;
 }
 
-export function useBattleForm({ campaignId, battleId, formData, participants }: UseBattleFormParams) {
+export function useBattleForm({ campaignId, battleId, formData, participants, map }: UseBattleFormParams) {
   const notify = useNotify();
 
   const confirm = useConfirm();
@@ -40,7 +41,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants }: 
         return;
       }
 
-      const body = { name: formData.name, description: formData.description, participants };
+      const body = { name: formData.name, description: formData.description, participants, map: map ?? null };
 
       if (battleId) {
         update.mutate(body, {
@@ -59,7 +60,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants }: 
         onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при створенні бою"),
       });
     },
-    [battleId, formData.name, formData.description, participants, router, notify, create, update, listHref],
+    [battleId, formData.name, formData.description, participants, map, router, notify, create, update, listHref],
   );
 
   const handleDelete = useCallback(async () => {

@@ -108,6 +108,6 @@ describe("BattleSetupForm", () => {
     fireEvent.submit(document.getElementById("battle-edit-form") as HTMLFormElement);
 
     await waitFor(() => expect(api.updateBattle).toHaveBeenCalled());
-    expect(api.updateBattle.mock.calls[0]?.[2]).toEqual({ name: "Засідка", description: "Ніч", participants: battle.participants });
+    expect(api.updateBattle.mock.calls[0]?.[2]).toEqual({ name: "Засідка", description: "Ніч", participants: battle.participants, map: null });
   });
 });
