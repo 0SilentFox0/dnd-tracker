@@ -8,6 +8,8 @@ import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
+export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
+
 export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) {
   const [enabled, setEnabled] = useState(Boolean(initial));
 
@@ -17,14 +19,17 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const [paint, setPaint] = useState(false);
 
+  const [notice, setNotice] = useState<string | null>(null);
+
   const setSize = useCallback(
     (cols: number, rows: number) => {
       const nextMargins = clampMargins({ cols, rows }, margins);
 
       const next = applyMargins(resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows), nextMargins, NO_MARGINS);
 
-      if (!hasPlayableArea(next)) return;
+      if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
+      setNotice(null);
       setMap(next);
       setMarginsState(nextMargins);
     },
@@ -35,8 +40,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     (next: Margins) => {
       const nextMap = applyMargins(map, next, margins);
 
-      if (!hasPlayableArea(nextMap)) return;
+      if (!hasPlayableArea(nextMap)) return setNotice(NO_PLAYABLE_NOTICE);
 
+      setNotice(null);
       setMap(nextMap);
       setMarginsState(next);
     },
@@ -53,7 +59,10 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
       const next = toggleBlocked(map, p);
 
-      if (hasPlayableArea(next)) setMap(next);
+      if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
+
+      setNotice(null);
+      setMap(next);
     },
     [paint, map],
   );
@@ -69,6 +78,7 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     paint,
     setPaint,
     onCellClick,
+    notice,
     setBackground,
     value: enabled ? map : null,
   };

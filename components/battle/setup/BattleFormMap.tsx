@@ -96,8 +96,13 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
               </Button>
             </div>
           </div>
-          <div className="h-[55vh] min-w-0 lg:h-[60vh]">
-            <BattleMap map={previewMap} participants={[]} actions={{ onCellClick: editor.onCellClick }} className="h-full" clickableBlocked={editor.paint} showBlocked />
+          <div className="min-w-0 space-y-2">
+            <p aria-live="polite" role="status" className="min-h-5 text-sm text-hud-gold-bright">
+              {editor.notice}
+            </p>
+            <div className="h-[55vh] lg:h-[60vh]">
+              <BattleMap map={previewMap} participants={[]} actions={{ onCellClick: editor.onCellClick }} className="h-full" clickableBlocked={editor.paint} showBlocked />
+            </div>
           </div>
         </div>
       )}

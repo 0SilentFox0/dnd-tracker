@@ -60,7 +60,19 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.setPaint(true));
     act(() => result.current.onCellClick({ x: 1, y: 2 }));
     expect(result.current.map.blocked).toHaveLength(9);
+    expect(result.current.notice).toBe("Має лишитися хоча б одна вільна ділянка 2×2");
     act(() => result.current.onCellClick({ x: 2, y: 2 }));
     expect(result.current.map.blocked).toHaveLength(8);
+    expect(result.current.notice).toBeNull();
+  });
+
+  it("setSize/setMargins без вільної 2×2 показують повідомлення", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1 }));
+
+    act(() => result.current.setMargins({ top: 2, right: 0, bottom: 2, left: 0 }));
+    expect(result.current.notice).toBeTruthy();
+    expect(result.current.margins.top).toBe(0);
+    act(() => result.current.setMargins({ top: 1, right: 0, bottom: 0, left: 0 }));
+    expect(result.current.notice).toBeNull();
   });
 });
