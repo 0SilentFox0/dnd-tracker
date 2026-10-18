@@ -3,6 +3,7 @@ import { berserkBonusOf, runBerserkTurn } from "./berserk";
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
   processEndOfTurn,
   processStartOfRound,
@@ -41,6 +42,15 @@ export function runAdvanceTurnLoop(
     pendingSummons,
     rng = Math.random,
   } = params;
+
+  const reserve = reserveOf(pendingSummons);
+
+  // очікування рішення ДМ щодо резерву зупиняє бій так само, як перемога
+  const battleOver = (order: BattleParticipant[]) => {
+    const v = checkVictoryConditions(order, reserve);
+
+    return v.result !== null || v.awaiting !== null;
+  };
 
   let activeParticipantFound = false;
 
@@ -245,16 +255,14 @@ export function runAdvanceTurnLoop(
       updatedInitiativeOrder = berserk.participants;
       newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
 
-      if (checkVictoryConditions(updatedInitiativeOrder).result) break;
+      if (battleOver(updatedInitiativeOrder)) break;
 
       continue;
     }
 
     if (isActive(turnResult.participant)) activeParticipantFound = true;
 
-    const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
-
-    if (victoryCheck.result) break;
+    if (battleOver(updatedInitiativeOrder)) break;
   }
 
   return {

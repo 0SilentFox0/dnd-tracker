@@ -8,6 +8,7 @@ import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/u
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { BattleParticipant } from "@/types/battle";
 
@@ -229,9 +230,11 @@ export function processStartOfRound(
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
 
-  const updatedOrder = [...baseOrder, ...pendingSummons];
+  const summons = summonsOf(pendingSummons);
 
-  const newSummonIds = new Set(pendingSummons.map((p) => p.basicInfo.id));
+  const updatedOrder = [...baseOrder, ...summons];
+
+  const newSummonIds = new Set(summons.map((p) => p.basicInfo.id));
 
   const ctx = { round: currentRound, rng };
 

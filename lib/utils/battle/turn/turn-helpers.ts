@@ -14,6 +14,7 @@ export interface ApplyVictoryParams {
   nextRound: number;
   currentBattleLogLength: number;
   newLogEntries: BattleAction[];
+  reserve?: BattleParticipant[];
   getStateBeforeForEntry: () =>
     | {
         initiativeOrder: BattleParticipant[];
@@ -38,10 +39,11 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
     nextRound,
     currentBattleLogLength,
     newLogEntries,
+    reserve = [],
     getStateBeforeForEntry,
   } = params;
 
-  const victoryCheck = checkVictoryConditions(order);
+  const victoryCheck = checkVictoryConditions(order, reserve);
 
   let finalStatus = battleStatus;
 

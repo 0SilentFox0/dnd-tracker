@@ -151,3 +151,34 @@ describe("advanceTurn", () => {
     expect(out.actions.some((a) => a.resultText.includes("Кам'яна шкіра"))).toBe(true);
   });
 });
+
+describe("резерв", () => {
+  const imp = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "imp", side: ParticipantSide.ENEMY, controlledBy: "dm" }, battleData: { ...base.battleData, reserved: true } });
+
+  it("резерв не входить у чергу на новому раунді й лишається в pending", () => {
+    const out = advanceTurn({ participants: [hero, goblin], pending: [imp], scene: { ...scene, turnIndex: 1 } });
+
+    expect(out.scene.round).toBe(2);
+    expect(out.participants.map((p) => p.basicInfo.id)).not.toContain("imp");
+    expect(out.pending.map((p) => p.basicInfo.id)).toEqual(["imp"]);
+  });
+
+  it("видимі вороги мертві, ворог у резерві — бій не завершується", () => {
+    const dead = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
+
+    const out = advanceTurn({ participants: [hero, dead], pending: [imp], scene });
+
+    expect(out.scene.status).toBe("active");
+    expect(out.scene.completedAt).toBeUndefined();
+    expect(out.pending).toHaveLength(1);
+  });
+
+  it("знімає revealPending з учасника, чий хід почався", () => {
+    const revealed = { ...imp, battleData: { ...base.battleData, revealPending: true } };
+
+    const out = advanceTurn({ participants: [hero, revealed, goblin], pending: [], scene });
+
+    expect(out.scene.turnIndex).toBe(1);
+    expect(out.participants[1].battleData.revealPending).toBeUndefined();
+  });
+});

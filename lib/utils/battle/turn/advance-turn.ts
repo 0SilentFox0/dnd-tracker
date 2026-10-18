@@ -6,6 +6,7 @@ import { applyVictoryCompletion } from "./turn-helpers";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -88,6 +89,8 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
     };
   }
 
+  const reserve = reserveOf(pending);
+
   const loop = runAdvanceTurnLoop({
     initiativeOrder: order,
     // після додаткового ходу раунд закінчено: з останнього індексу цикл переходить у новий раунд
@@ -109,12 +112,17 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
     nextRound: loop.nextRound,
     currentBattleLogLength: scene.eventSeq + actions.length,
     newLogEntries,
+    reserve,
     getStateBeforeForEntry: () => undefined,
   });
 
+  const participantsAfter = victory.updatedInitiativeOrder.map((p, i) =>
+    i === loop.nextTurnIndex && p.battleData.revealPending ? dropBattleFlag(p, "revealPending") : p,
+  );
+
   return {
-    participants: victory.updatedInitiativeOrder,
-    pending: loop.clearedPendingSummons ? [] : pending,
+    participants: participantsAfter,
+    pending: loop.clearedPendingSummons ? reserve : pending,
     scene: {
       turnIndex: loop.nextTurnIndex,
       round: loop.nextRound,
