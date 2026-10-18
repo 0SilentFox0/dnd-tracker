@@ -170,7 +170,7 @@ describe("поле бою", () => {
     const renderRow = () => {
       const onSelect = vi.fn();
 
-      render(<TooltipProvider><ParticipantRow delay={0} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
+      render(<TooltipProvider><ParticipantRow impact={null} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
 
       return onSelect;
     };

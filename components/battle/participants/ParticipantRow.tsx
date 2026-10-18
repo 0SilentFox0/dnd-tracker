@@ -4,24 +4,28 @@ import { memo } from "react";
 import { Shield } from "lucide-react";
 
 import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
+import { ImpactFrame } from "@/components/battle/fx/frames/ImpactFrame";
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import { signedDelta } from "@/lib/utils/common/format";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, delay, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, impact, onSelect }: {
   participant: BattleParticipant;
   effects: ActiveEffect[];
   exact: boolean;
   acText: string;
   current: boolean;
-  delay: number;
+  impact: FxImpact | null;
   onSelect: (id: string) => void;
 }) {
   const { currentHp, maxHp } = participant.combatStats;
+
+  const delay = impact?.delayMs ?? 0;
 
   const change = useHpChange(currentHp);
 
@@ -32,13 +36,14 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
   return (
     <div ref={shake} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
+      {change && impact && <ImpactFrame key={`frame:${change.id}`} impact={impact} />}
       {change && (
         <span key={`float:${change.id}`} style={{ animationDelay: `${delay}ms` }} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
           {signedDelta(change.delta)}
         </span>
       )}
       <span className="relative shrink-0">
-        <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} flashDelayMs={delay} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+        <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} flashDelayMs={delay} className={cn("pointer-events-none", change && !impact && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
         <StatusAuras effects={effects} size={48} />
       </span>
       <div className="min-w-0 flex-1">

@@ -10,6 +10,9 @@ import "@/components/battle/fx/fx.css";
 import "./fx-lab.css";
 import { ANIMATIONS } from "@/components/battle/fx/animations";
 import { AuraLayer } from "@/components/battle/fx/auras/StatusAuras";
+import { FRAME_ANIMATIONS, HEAL_FRAME } from "@/components/battle/fx/frames/canvas";
+import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
+import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import type { FxArchetype, FxAuraKind, FxElement } from "@/lib/utils/battle/fx";
@@ -25,6 +28,27 @@ const ELEMENT_LABEL: Record<FxElement, string> = { fire: "Вогонь", cold: "
 const AURA_LABEL: Record<FxAuraKind, string> = { stun: "Оглушення", charm: "Чарм", rage: "Шал", bind: "Пута", plague: "Мор", burning: "Горіння", frost: "Холод", decay: "Тлін", bleeding: "Кровотеча", static: "Розряд", marked: "Мітка", curse: "Прокляття", regen: "Регенерація", shield: "Захист", blessing: "Благословення" };
 
 const AURA_KINDS = Object.keys(AURA_LABEL) as FxAuraKind[];
+
+function CanvasFrameTile({ label, frame }: { label: string; frame: FrameAnimation }) {
+  const [token, setToken] = useState(0);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] px-2 py-2 text-[#d6cbb7]">
+        {token > 0 && <CanvasFrame key={token} frame={frame} delayMs={0} />}
+        <span className="flex size-12 items-center justify-center rounded-full bg-[#241d16] text-xs font-bold shadow-[0_0_0_2px_var(--enemy),0_0_0_3px_#000]">Ог</span>
+        <span className="min-w-0 flex-1">
+          <span className="hud-sc block font-bold text-[var(--ink)]">Огр · {label}</span>
+          <span className="mt-1 block h-1.5 rounded-full bg-[#c0392b]" />
+        </span>
+      </div>
+      <button type="button" onClick={() => setToken((t) => t + 1)} aria-label={`Програти рамку: ${label}`} className="flex h-8 items-center gap-1.5 rounded-full px-3 text-xs text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
+        <Play className="size-3" />
+        Програти
+      </button>
+    </div>
+  );
+}
 
 export function FxLab() {
   const [archetype, setArchetype] = useState<FxArchetype>("bolt");
@@ -57,6 +81,13 @@ export function FxLab() {
           <HudChipTabs ariaLabel="Параметри" items={[toggle("Крит", critical, setCritical), toggle("Промах", miss, setMiss)]} />
         </HudPageHeader>
         <FxLabPanel archetype={archetype} element={element} critical={critical} hit={!miss} playToken={token} />
+        <section aria-label="Рамки" className="mt-8">
+          <h2 className="hud-sc mb-4 text-lg font-bold text-[var(--ink)]">Рамки</h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {ELEMENTS.map((e) => <CanvasFrameTile key={e} label={ELEMENT_LABEL[e]} frame={FRAME_ANIMATIONS[e]} />)}
+            <CanvasFrameTile label="Лікування" frame={HEAL_FRAME} />
+          </div>
+        </section>
         <section aria-label="Аури" className="mt-8">
           <h2 className="hud-sc mb-4 text-lg font-bold text-[var(--ink)]">Аури</h2>
           <div className="grid grid-cols-3 gap-x-4 gap-y-10 sm:grid-cols-5">

@@ -4,9 +4,10 @@ import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
 import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
+import { ImpactFrame } from "@/components/battle/fx/frames/ImpactFrame";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleSceneData, useDamageShake, useFxImpactDelay, useHpChange } from "@/lib/hooks/battle";
+import { useBattleSceneData, useDamageShake, useFxImpact, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -21,7 +22,9 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const change = useHpChange(hero.combatStats.currentHp);
 
-  const delay = useFxImpactDelay(hero.basicInfo.id);
+  const impact = useFxImpact(hero.basicInfo.id);
+
+  const delay = impact?.delayMs ?? 0;
 
   const shake = useDamageShake<HTMLDivElement>(change, delay);
 
@@ -33,6 +36,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   return (
     <div ref={shake} className="relative">
+      {change && impact && <ImpactFrame key={`frame:${change.id}`} impact={impact} />}
       {change && change.delta < 0 && <div key={change.id} style={{ animationDelay: `${delay}ms` }} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
         <span className="relative shrink-0">

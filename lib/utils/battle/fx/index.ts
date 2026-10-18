@@ -1,5 +1,6 @@
 export { auraOf, aurasOf, type FxAuraKind, MAX_AURAS } from "./aura";
 export { elementOf } from "./element";
+export { type FxImpact, impactFor } from "./impact";
 export { impactDelayFor } from "./impact-delay";
 export { mapAction } from "./map-action";
 export { takeNewActions } from "./new-events";

@@ -6,7 +6,7 @@ import { ParticipantRow } from "./ParticipantRow";
 import { ReserveParticipantRow } from "./ReserveParticipantRow";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { useBattleSceneData, useFxImpactDelays } from "@/lib/hooks/battle";
+import { useBattleSceneData, useFxImpacts } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from "@/lib/utils/battle/view";
@@ -14,7 +14,7 @@ import { canSeeExactStats, formatKnownArmorClass, resolveKnownArmorClass } from 
 export const ParticipantList = memo(function ParticipantList({ side, className }: { side: ParticipantSide; className?: string }) {
   const { allies, enemies, battle, viewer, current, select, effects, reserve } = useBattleSceneData();
 
-  const delayFor = useFxImpactDelays();
+  const impactFor = useFxImpacts();
 
   const list = side === ParticipantSide.ALLY ? allies : enemies;
 
@@ -37,7 +37,7 @@ export const ParticipantList = memo(function ParticipantList({ side, className }
   return (
     <div className={cn("px-4", className)}>
       {rows.map(({ participant, exact, acText }) => (
-        <ParticipantRow key={participant.basicInfo.id} participant={participant} effects={effects.get(participant.basicInfo.id) ?? []} exact={exact} acText={acText} current={current?.basicInfo.id === participant.basicInfo.id} delay={delayFor(participant.basicInfo.id)} onSelect={select} />
+        <ParticipantRow key={participant.basicInfo.id} participant={participant} effects={effects.get(participant.basicInfo.id) ?? []} exact={exact} acText={acText} current={current?.basicInfo.id === participant.basicInfo.id} impact={impactFor(participant.basicInfo.id)} onSelect={select} />
       ))}
       {reserved.map((p) => (
         <ReserveParticipantRow key={p.basicInfo.id} participant={p} />
