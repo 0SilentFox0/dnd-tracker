@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { Play } from "lucide-react";
 
-import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL, FRAME_LABEL } from "../labels";
 import type { SpellCardData } from "./types";
 
+import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL, FRAME_LABEL } from "@/components/battle/fx/labels";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard, HudPill } from "@/components/hud/page";

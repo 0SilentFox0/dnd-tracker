@@ -12,6 +12,7 @@ import "@/components/battle/hud/battle-hud.css";
 import "@/components/battle/fx/fx.css";
 import "../fx-lab.css";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
+import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
 
 const ALL = "all";
 
@@ -32,7 +33,12 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
 
   const tabs = [{ key: ALL, label: "Усі" }, ...groups.map((g) => ({ key: g.school, label: g.school }))];
 
-  const play = (spell: SpellCardData) => arena.current?.play(spell);
+  const [picked, setPicked] = useState<SpellCardData | null>(null);
+
+  const play = (spell: SpellCardData) => {
+    setPicked(spell);
+    arena.current?.play(spell);
+  };
 
   return (
     <div className="battle-hud min-h-dvh">
@@ -52,6 +58,13 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
           <div className="lg:sticky lg:top-[calc(var(--app-header-h)+1rem)] lg:order-2">
             <SpellArena ref={arena} />
+            {picked && (
+              <div data-testid="fx-spells-book" className="hud-book mt-3 rounded-xl bg-[#e9dec5] p-4 text-[#2a2018]">
+                <p className="text-[13px] italic text-[#7a6650]">Так закляття виглядає в книзі магій і довіднику</p>
+                <p className="hud-sc text-lg font-bold">{picked.name}</p>
+                <SpellBattlePreview key={picked.key} spell={picked.previewSpell} className="mt-3" />
+              </div>
+            )}
           </div>
           <div className="space-y-6 lg:order-1">
             {groups

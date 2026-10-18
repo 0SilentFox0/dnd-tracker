@@ -4,6 +4,7 @@ import { frameKindOf, type FxFrameKind } from "./frame-kind";
 import { impactFor } from "./impact";
 import { mapAction } from "./map-action";
 import { previewParticipant } from "./preview-participant";
+import { PREVIEW_UNITS, type PreviewUnitId } from "./preview-units";
 import { effectLabel, targetingLabel } from "./spell-labels";
 import type { FxSpec } from "./types";
 
@@ -14,22 +15,7 @@ import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
-
-export type PreviewUnitId = "caster" | "ally" | "fallen" | "e1" | "e2";
-
-export interface PreviewUnit {
-  id: PreviewUnitId;
-  name: string;
-  side: "ally" | "enemy";
-}
-
-export const PREVIEW_UNITS: readonly PreviewUnit[] = [
-  { id: "caster", name: "Чарівниця", side: "ally" },
-  { id: "ally", name: "Воїн", side: "ally" },
-  { id: "fallen", name: "Полеглий", side: "ally" },
-  { id: "e1", name: "Огр", side: "enemy" },
-  { id: "e2", name: "Лич", side: "enemy" },
-];
+import type { SpellRules } from "@/types/spells";
 
 export interface SpellFxTarget {
   id: string;
@@ -37,7 +23,18 @@ export interface SpellFxTarget {
   auras: FxAuraKind[];
 }
 
-export interface SpellFxPreview {
+export interface SpellFxResult {
+  spec: FxSpec | null;
+  /** Arena units the spell is aimed at (the caster stands apart). */
+  targetIds: PreviewUnitId[];
+  /** Arena units the cast changed: hit frame (HP changed) and auras after the cast. */
+  targets: SpellFxTarget[];
+  frames: FxFrameKind[];
+  auras: FxAuraKind[];
+  error?: string;
+}
+
+export interface SpellFxPreview extends SpellFxResult {
   key: string;
   name: string;
   school: string;
@@ -45,12 +42,15 @@ export interface SpellFxPreview {
   description: string;
   effects: string[];
   targeting: string;
-  spec: FxSpec | null;
-  /** Arena units the cast changed: hit frame (HP changed) and auras after the cast. */
-  targets: SpellFxTarget[];
-  frames: FxFrameKind[];
-  auras: FxAuraKind[];
-  error?: string;
+}
+
+/** A campaign spell (book or reference) as the preview needs it; rules are re-read, so raw DB columns are fine too. */
+export interface PreviewSpell {
+  id: string;
+  name: string;
+  level: number;
+  groupId: string | null;
+  rules: SpellRules;
 }
 
 const SLOTS = Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9].map((l) => [String(l), { max: 3, current: 3 }]));
@@ -65,7 +65,7 @@ function arena(): BattleParticipant[] {
   ];
 }
 
-function targetIdsFor(t: SpellTargeting): string[] {
+function targetIdsFor(t: SpellTargeting): PreviewUnitId[] {
   switch (t.kind) {
     case "self":
       return ["caster"];
@@ -79,7 +79,7 @@ function targetIdsFor(t: SpellTargeting): string[] {
     case "everyone":
       return ["caster", "ally", "e1", "e2"];
     case "area":
-      return (t.side === "ally" ? ["caster", "ally"] : ["e1", "e2"]).slice(0, t.maxTargets);
+      return (t.side === "ally" ? (["caster", "ally"] as const) : (["e1", "e2"] as const)).slice(0, t.maxTargets);
     case "allEnemies":
       return ["e1", "e2"];
     case "enemy":
@@ -87,42 +87,32 @@ function targetIdsFor(t: SpellTargeting): string[] {
   }
 }
 
-/** Builds the castable spell from the library entry the way the seeder writes and the engine reads a DB row. */
-export function libraryCastable(spell: LibrarySpell): CastableSpell {
-  const d = spell.definition;
-
-  const definition = readSpellDefinition({
-    id: spell.key,
-    dice: d.dice,
-    cost: d.cost,
-    targeting: d.targeting,
-    resolution: d.resolution,
-    spellEffects: d.effects,
-    raceModifiers: [],
-    stackable: d.stackable ?? false,
-    maxStacks: d.maxStacks ?? null,
-  });
-
-  return { id: spell.key, name: spell.name, level: spell.level, groupId: null, definition };
+export function castableOf({ id, name, level, groupId, rules }: PreviewSpell): CastableSpell {
+  return { id, name, level, groupId, definition: readSpellDefinition({ id, ...rules }) };
 }
 
-/** Casts the library spell on a synthetic arena (every save fails, dice roll 4) and reads off what the client would play. */
-export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
-  const castable = libraryCastable(spell);
+/** The library entry as the seeder writes it to the DB, so it previews like a campaign spell. */
+export function libraryPreviewSpell(spell: LibrarySpell): PreviewSpell {
+  const d = spell.definition;
 
-  const base = {
-    key: spell.key,
+  return {
+    id: spell.key,
     name: spell.name,
-    school: spell.school,
     level: spell.level,
-    description: spell.description ?? "",
-    effects: [...new Set(castable.definition.effects.map(effectLabel))],
-    targeting: targetingLabel(castable.definition.targeting),
+    groupId: null,
+    rules: { dice: d.dice, cost: d.cost, targeting: d.targeting, resolution: d.resolution, spellEffects: d.effects, stackable: d.stackable ?? false, maxStacks: d.maxStacks ?? null },
   };
+}
 
+export const libraryCastable = (spell: LibrarySpell): CastableSpell => castableOf(libraryPreviewSpell(spell));
+
+/** Casts the spell on a synthetic arena (every save fails, dice roll 4) and reads off what the client would play. */
+export function previewCastFx(castable: CastableSpell): SpellFxResult {
   const participants = arena();
 
   const targetIds = targetIdsFor(castable.definition.targeting);
+
+  const failed = (error: string): SpellFxResult => ({ spec: null, targetIds, targets: [], frames: [], auras: [], error });
 
   try {
     const result = castSpell({
@@ -137,7 +127,7 @@ export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
       rng: () => 0.01,
     });
 
-    if (!result.success) return { ...base, spec: null, targets: [], frames: [], auras: [], error: "заклинання не спрацювало" };
+    if (!result.success) return failed("заклинання не спрацювало");
 
     const spec = mapAction(result.battleAction)[0] ?? null;
 
@@ -154,13 +144,28 @@ export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
     });
 
     return {
-      ...base,
       spec,
+      targetIds,
       targets,
       frames: [...new Set(targets.flatMap((t) => (t.frame ? [t.frame] : [])))],
       auras: [...new Set(targets.flatMap((t) => t.auras))],
     };
   } catch (e) {
-    return { ...base, spec: null, targets: [], frames: [], auras: [], error: e instanceof Error ? e.message : String(e) };
+    return failed(e instanceof Error ? e.message : String(e));
   }
+}
+
+export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
+  const castable = libraryCastable(spell);
+
+  return {
+    key: spell.key,
+    name: spell.name,
+    school: spell.school,
+    level: spell.level,
+    description: spell.description ?? "",
+    effects: [...new Set(castable.definition.effects.map(effectLabel))],
+    targeting: targetingLabel(castable.definition.targeting),
+    ...previewCastFx(castable),
+  };
 }

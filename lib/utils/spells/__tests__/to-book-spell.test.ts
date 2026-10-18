@@ -20,4 +20,11 @@ describe("toBookSpell", () => {
     expect(toBookSpell(row)).toMatchObject({ dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } });
     expect(toBookSpell({ ...row, targeting: { kind: "area" }, resolution: "dex", cost: "x" })).toMatchObject({ targeting: { kind: "enemy" }, resolution: { kind: "auto" }, cost: "action" });
   });
+
+  it("ефекти й стакання — для прев'ю ефекту в бою; стакання лише коли увімкнене", () => {
+    const effects = [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }];
+
+    expect(toBookSpell({ ...row, spellEffects: effects, stackable: false, maxStacks: 5 })).toEqual({ ...row, dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: effects });
+    expect(toBookSpell({ ...row, spellEffects: [{ kind: "teleport" }], stackable: true, maxStacks: 3 })).toMatchObject({ spellEffects: [], stackable: true, maxStacks: 3 });
+  });
 });

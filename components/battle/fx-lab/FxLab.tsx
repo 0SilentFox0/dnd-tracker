@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 
 import { FxLabPanel } from "./FxLabPanel";
-import { ARCHETYPE_LABEL, AURA_KINDS, AURA_LABEL, ELEMENT_LABEL } from "./labels";
 
 import "@/components/battle/hud/battle-hud.css";
 import "@/components/battle/fx/fx.css";
@@ -15,6 +14,7 @@ import { AuraCanvas } from "@/components/battle/fx/auras/canvas/AuraCanvas";
 import { FRAMES } from "@/components/battle/fx/frames/canvas";
 import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
 import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types";
+import { ARCHETYPE_LABEL, AURA_KINDS, AURA_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import type { FxArchetype, FxElement } from "@/lib/utils/battle/fx";

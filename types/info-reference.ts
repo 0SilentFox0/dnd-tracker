@@ -1,3 +1,6 @@
+import type { SpellRules } from "@/types/spells";
+
+
 export interface SkillForReference {
   id: string;
   name: string;
@@ -28,6 +31,7 @@ export interface SpellForReference {
   appearanceDescription: string | null;
   groupName: string | null;
   icon: string | null;
+  rules?: SpellRules;
 }
 
 export interface ArtifactForReference {

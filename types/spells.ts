@@ -47,7 +47,18 @@ export interface SpellFormData {
   maxStacks: number | null;
 }
 
-export type BookSpell = {
+/** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */
+export interface SpellRules {
+  dice?: number;
+  cost?: SpellCost;
+  targeting?: SpellTargeting;
+  resolution?: SpellResolution;
+  spellEffects?: Effect[];
+  stackable?: boolean;
+  maxStacks?: number | null;
+}
+
+export type BookSpell = SpellRules & {
   id: string;
   name: string;
   level: number;
@@ -55,8 +66,4 @@ export type BookSpell = {
   appearanceDescription?: string | null;
   icon?: string | null;
   spellGroup?: { id: string; name: string } | null;
-  dice?: number;
-  cost?: SpellCost;
-  targeting?: SpellTargeting;
-  resolution?: SpellResolution;
 };

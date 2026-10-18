@@ -20,3 +20,4 @@ export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
+export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";

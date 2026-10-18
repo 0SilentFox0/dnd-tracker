@@ -2,54 +2,21 @@
 
 import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
 
-import { ARCHETYPE_LABEL, ELEMENT_LABEL } from "../labels";
 import type { SpellArenaHandle } from "./types";
 
-import { AuraCanvas } from "@/components/battle/fx/auras/canvas/AuraCanvas";
-import { FRAMES } from "@/components/battle/fx/frames/canvas";
-import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
+import { ARCHETYPE_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
+import { PreviewUnitRow } from "@/components/battle/fx/preview/PreviewUnitRow";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { cn } from "@/lib/utils";
 import { IMPACT_MS } from "@/lib/utils/battle/fx";
-import { PREVIEW_UNITS, type PreviewUnit, type SpellFxPreview, type SpellFxTarget } from "@/lib/utils/battle/fx/spell-preview";
+import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
+import type { SpellFxPreview } from "@/lib/utils/battle/fx/spell-preview";
 
 const AURA_MS = 4000;
-
-const PORTRAIT = 40;
-
-const HP: Record<PreviewUnit["id"], number> = { caster: 1, ally: 0.2, fallen: 0, e1: 1, e2: 1 };
 
 interface Shown {
   token: number;
   spell: SpellFxPreview;
-}
-
-function UnitRow({ unit, target, shown, aurasOn }: { unit: PreviewUnit; target: SpellFxTarget | undefined; shown: Shown | null; aurasOn: boolean }) {
-  const frame = target?.frame && shown?.spell.spec ? <CanvasFrame key={shown.token} frame={FRAMES[target.frame]} delayMs={IMPACT_MS[shown.spell.spec.archetype]} /> : null;
-
-  const fallen = unit.id === "fallen";
-
-  return (
-    <div data-fx-participant={unit.id} className="relative flex min-h-[60px] items-center gap-2.5 rounded-lg border border-white/[.08] bg-black/30 px-3 py-2 text-sm font-bold text-[var(--ink)]">
-      {frame}
-      <span className="relative shrink-0">
-        <span
-          className={cn("flex items-center justify-center rounded-full bg-[#241d16] text-xs text-[var(--bone)]", fallen && "opacity-50 grayscale")}
-          style={{ width: PORTRAIT, height: PORTRAIT, boxShadow: `0 0 0 2px ${unit.side === "ally" ? "var(--ally)" : "var(--enemy)"}, 0 0 0 3px #000` }}
-        >
-          {fallen ? "†" : unit.name.slice(0, 2)}
-        </span>
-        {aurasOn && target?.auras.length ? <AuraCanvas kinds={target.auras} size={PORTRAIT} /> : null}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className={cn("block truncate", fallen && "text-hud-muted")}>{unit.name}</span>
-        <span className="mt-1 block h-1 rounded-full bg-white/10">
-          <span className="block h-full rounded-full bg-[#c0392b]" style={{ width: `${HP[unit.id] * 100}%` }} />
-        </span>
-      </span>
-    </div>
-  );
 }
 
 // the app header is fixed, so "visible" starts below it
@@ -130,7 +97,13 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
   const column = (side: PreviewUnit["side"]) => (
     <div className="space-y-2">
       {PREVIEW_UNITS.filter((u) => u.side === side).map((u) => (
-        <UnitRow key={u.id} unit={u} target={shown?.spell.targets.find((t) => t.id === u.id)} shown={shown} aurasOn={aurasOn} />
+        <PreviewUnitRow
+          key={u.id}
+          unit={u}
+          target={shown?.spell.targets.find((t) => t.id === u.id)}
+          hit={shown?.spell.spec ? { token: shown.token, delayMs: IMPACT_MS[shown.spell.spec.archetype] } : null}
+          aurasOn={aurasOn}
+        />
       ))}
     </div>
   );
