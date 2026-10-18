@@ -1,5 +1,6 @@
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
+export { useBattleMapPlayground } from "./useBattleMapPlayground";
 export { useBattlePageDialogs } from "./useBattlePageDialogs";
 export {
   BattleSceneContext,
