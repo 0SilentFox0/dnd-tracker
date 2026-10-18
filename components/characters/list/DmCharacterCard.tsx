@@ -52,7 +52,6 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
         <HudStatChip short="HP" value={heroBaseHp(character).total} />
         <HudStatChip short="AC" value={character.armorClass} />
         <HudStatChip short="Ініц" value={character.initiative} />
-        <HudStatChip short="XP" value={character.experience} />
       </div>
     </HudCard>
   );

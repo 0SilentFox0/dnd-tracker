@@ -31,7 +31,6 @@ export function characterToFormData(
       subrace: character.subrace,
       alignment: character.alignment,
       background: character.background,
-      experience: character.experience || 0,
       avatar: character.avatar,
     },
     abilityScores: {
@@ -114,7 +113,6 @@ export function formDataToCharacter(
     subrace: formData.basicInfo.subrace,
     alignment: formData.basicInfo.alignment,
     background: formData.basicInfo.background,
-    experience: formData.basicInfo.experience,
     avatar: formData.basicInfo.avatar,
     strength: formData.abilityScores.strength,
     dexterity: formData.abilityScores.dexterity,

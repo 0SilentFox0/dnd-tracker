@@ -23,7 +23,6 @@ const LIST_SELECT = {
   archetype: true,
   armorClass: true,
   initiative: true,
-  experience: true,
   user: { select: { displayName: true } },
 } as const;
 

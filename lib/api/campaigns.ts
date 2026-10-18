@@ -21,7 +21,6 @@ export async function updateCampaign(
     name: string;
     description: string | null;
     maxLevel: number;
-    xpMultiplier: number;
     allowPlayerEdit: boolean;
     status: string;
   }>,
@@ -60,7 +59,6 @@ export async function createCampaign(data: {
   name: string;
   description?: string;
   maxLevel?: number;
-  xpMultiplier?: number;
   allowPlayerEdit?: boolean;
 }): Promise<Campaign> {
   return request<Campaign>("/api/campaigns", {

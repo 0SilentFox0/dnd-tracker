@@ -16,7 +16,6 @@ export const createCharacterSchema = z.object({
   subrace: z.string().optional(),
   alignment: z.string().optional(),
   background: z.string().optional(),
-  experience: z.number().min(0).default(0),
   avatar: z.string().optional(),
 
   strength: z.number().min(1).max(30).default(10),

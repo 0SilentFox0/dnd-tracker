@@ -26,7 +26,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (userId: string, role: "dm" | "player") =>
-  ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1, members: [{ userId, role }] } }) as never;
+  ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, members: [{ userId, role }] } }) as never;
 
 const CHAR = { id: "ch", level: 3, race: "Ельф", skillTreeProgress: { "json-id": { unlockedSkills: ["attack_basic_level"] } }, seenLevel: 2, controlledBy: "owner" };
 
@@ -134,7 +134,6 @@ describe("progression actions", () => {
       ...CHAR,
       campaignId: "camp",
       type: "player",
-      experience: 0,
       spellSlots: {},
       immunities: [],
       strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,

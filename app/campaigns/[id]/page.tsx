@@ -55,7 +55,6 @@ export default async function CampaignDetailPage({
                     name: campaign.name,
                     description: campaign.description || null,
                     maxLevel: campaign.maxLevel,
-                    xpMultiplier: campaign.xpMultiplier,
                     allowPlayerEdit: campaign.allowPlayerEdit,
                     status: campaign.status,
                   }}
@@ -68,10 +67,6 @@ export default async function CampaignDetailPage({
             <div>
               <p className={LABEL}>Макс. рівень</p>
               <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
-            </div>
-            <div>
-              <p className={LABEL}>Множник XP</p>
-              <p className="text-lg font-semibold text-hud-ink">{campaign.xpMultiplier}</p>
             </div>
             <div>
               <p className={`${LABEL} mb-2`}>Код запрошення</p>

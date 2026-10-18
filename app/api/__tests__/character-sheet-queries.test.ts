@@ -50,7 +50,7 @@ const skill = (id: string) => ({ id, campaignId: "c", name: id, icon: null, desc
 
 const character = {
   id: "ch", campaignId: "c", type: "player", controlledBy: "u", name: "Ліра", level: 5, class: "Ranger", subclass: null, race: "Ельф", subrace: null, alignment: null,
-  background: null, experience: 0, avatar: null, strength: 10, dexterity: 16, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 14, initiative: 2, speed: 30,
+  background: null, avatar: null, strength: 10, dexterity: 16, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 14, initiative: 2, speed: 30,
   savingThrows: {}, skills: {},
   spellcastingAbility: "wisdom", spellSlots: {}, knownSpells: ["sp1"], languages: [], proficiencies: {},
   skillTreeProgress: { "row-tree": { unlockedSkills: ["attack_basic_level", "o1"] } }, seenLevel: 3, createdAt: new Date(), updatedAt: new Date(), immunities: [], morale: 0,

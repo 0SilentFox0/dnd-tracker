@@ -19,10 +19,10 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (role: "dm" | "player", maxLevel = 20) =>
-  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, xpMultiplier: 2.5, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
+  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
 
 const CHARACTER = {
-  id: "ch", campaignId: "camp", controlledBy: "owner", type: "player", race: "Ельф", level: 3, experience: 0, seenLevel: 3,
+  id: "ch", campaignId: "camp", controlledBy: "owner", type: "player", race: "Ельф", level: 3, seenLevel: 3,
   strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
   spellSlots: { "1": { max: 3, current: 1 } }, immunities: [],
 };
@@ -49,14 +49,13 @@ describe("PATCH персонажа: рівень і слоти", () => {
 
   afterEach(() => random.mockReset());
 
-  it("гравець не змінює рівень і XP; раса не читається", async () => {
+  it("гравець не змінює рівень; раса не читається", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
 
-    const res = await patch({ level: 6, experience: 999_999, name: "Нове" });
+    const res = await patch({ level: 6, name: "Нове" });
 
     expect(res.status).toBe(200);
     expect(written()).toMatchObject({ level: 3, name: "Нове" });
-    expect(written().experience).toBeUndefined();
     expect(written().spellSlots).toBeUndefined();
     expect(prisma.race.findFirst).not.toHaveBeenCalled();
   });
@@ -68,25 +67,6 @@ describe("PATCH персонажа: рівень і слоти", () => {
 
     expect(res.status).toBe(422);
     expect(prisma.character.update).not.toHaveBeenCalled();
-  });
-
-  it("ДМ: персонаж на maxLevel з XP понад поріг — правка імені проходить, рівень не змінюється", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", 3));
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...CHARACTER, experience: 999_999 } as never);
-
-    const res = await patch({ name: "Нове", experience: 999_999 });
-
-    expect(res.status).toBe(200);
-    expect(written()).toMatchObject({ level: 3, name: "Нове" });
-  });
-
-  it("ДМ: нове XP понад maxLevel підвищує лише до maxLevel", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", 4));
-
-    const res = await patch({ experience: 999_999 });
-
-    expect(res.status).toBe(200);
-    expect(written()).toMatchObject({ level: 4 });
   });
 
   it("ДМ: без зміни рівня слоти не перераховуються; ручна правка слотів проходить як є", async () => {
