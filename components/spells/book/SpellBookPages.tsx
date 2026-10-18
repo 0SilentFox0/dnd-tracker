@@ -103,7 +103,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
         ))}
       </div>
       {spell.appearanceDescription && <p className="mt-5 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.appearanceDescription}</p>}
-      <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, rules: spell }} className="clear-left mt-4" />
+      <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, rules: spell }} variant="book" className="clear-left mt-4" />
       {children}
     </>
   );

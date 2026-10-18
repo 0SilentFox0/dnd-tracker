@@ -35,6 +35,8 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
 
   const [picked, setPicked] = useState<SpellCardData | null>(null);
 
+  const [bookLook, setBookLook] = useState(true);
+
   const play = (spell: SpellCardData) => {
     setPicked(spell);
     arena.current?.play(spell);
@@ -62,7 +64,11 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
               <div data-testid="fx-spells-book" className="hud-book mt-3 rounded-xl bg-[#e9dec5] p-4 text-[#2a2018]">
                 <p className="text-[13px] italic text-[#7a6650]">Так закляття виглядає в книзі магій і довіднику</p>
                 <p className="hud-sc text-lg font-bold">{picked.name}</p>
-                <SpellBattlePreview key={picked.key} spell={picked.previewSpell} className="mt-3" />
+                <label className="mt-1 flex items-center gap-2 text-[13px]">
+                  <input type="checkbox" checked={bookLook} onChange={(e) => setBookLook(e.target.checked)} />
+                  Вигляд у книзі
+                </label>
+                <SpellBattlePreview key={`${picked.key}-${bookLook}`} spell={picked.previewSpell} variant={bookLook ? "book" : "hud"} className="mt-3" />
               </div>
             )}
           </div>
