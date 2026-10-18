@@ -8,7 +8,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useSpellBookPrefetch } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -63,9 +63,13 @@ export function BattleScreen() {
 
   useSpellBookPrefetch();
 
+  const { userEnabled: fxOn } = useFxEnabled();
+
   useEffect(() => {
-    void import("@/components/battle/fx/preload").then((m) => m.preloadFx());
-  }, []);
+    if (!fxOn) return;
+
+    import("@/components/battle/fx/preload").then((m) => m.preloadFx()).catch(() => undefined);
+  }, [fxOn]);
 
   if (battle.status === BattleStatus.PREPARED) {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);

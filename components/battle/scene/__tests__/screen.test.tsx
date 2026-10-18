@@ -9,6 +9,11 @@ const media = vi.hoisted(() => ({ wide: false }));
 
 vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => media.wide }));
 
+const fx = vi.hoisted(() => ({ on: true, preloadFx: vi.fn(() => Promise.resolve()) }));
+
+vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: fx.on, userEnabled: fx.on, motionAllowed: true, setEnabled: vi.fn() }) }));
+vi.mock("@/components/battle/fx/preload", () => ({ preloadFx: fx.preloadFx }));
+
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
@@ -88,6 +93,23 @@ describe("BattleScreen", () => {
 
     expect(await screen.findByRole("button", { name: "Скинути" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Наступний хід" })).toBeNull();
+  });
+
+  it("FX chunks are preloaded only while the player keeps FX on", async () => {
+    media.wide = false;
+
+    const { wrapper } = fakeScene({ isMyTurn: false });
+
+    fx.on = false;
+    fx.preloadFx.mockClear();
+    render(<BattleScreen />, { wrapper });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(fx.preloadFx).not.toHaveBeenCalled();
+    cleanup();
+
+    fx.on = true;
+    render(<BattleScreen />, { wrapper });
+    await vi.waitFor(() => expect(fx.preloadFx).toHaveBeenCalled());
   });
 
   it("телефон: журнал відкривається станом сцени (openLog)", () => {

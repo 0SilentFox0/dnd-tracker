@@ -76,6 +76,19 @@ describe("ticker", () => {
     expect(fast).toHaveBeenCalledTimes(10);
     expect(slow.mock.calls.length).toBeLessThanOrEqual(5);
   });
+
+  it("a throttled subscriber runs on the first frame after subscribing", async () => {
+    const { subscribe } = await load();
+
+    const fn = vi.fn();
+
+    vi.advanceTimersByTime(1000);
+    subscribe(fn, { fps: 30 });
+    flushFrames(1, 1);
+
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][1]).toBeCloseTo(1 / 60);
+  });
 });
 
 describe("stage", () => {
@@ -165,5 +178,28 @@ describe("stage", () => {
     cancelLayer(layer);
 
     expect(layer.children).toHaveLength(0);
+  });
+
+  it("stopStage cancels the DOM animations it owns", async () => {
+    const { animateEl, stageFor, stopStage } = await load();
+
+    const s = stageFor(document.createElement("div"));
+
+    let reject: (e: unknown) => void = () => undefined;
+
+    const anim = { finished: new Promise((_, r) => (reject = r)), cancel: vi.fn(() => reject(new DOMException("aborted", "AbortError"))) };
+
+    const el = document.createElement("div");
+
+    el.animate = vi.fn(() => anim as unknown as Animation);
+
+    const done = vi.fn();
+
+    void animateEl(s, el, [{ transform: "none" }], { duration: 420 }).then(done);
+    stopStage(s);
+    await vi.waitFor(() => expect(done).toHaveBeenCalled());
+
+    expect(anim.cancel).toHaveBeenCalledTimes(1);
+    expect(s.animations.size).toBe(0);
   });
 });

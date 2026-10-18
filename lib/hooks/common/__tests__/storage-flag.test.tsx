@@ -49,4 +49,32 @@ describe("createStorageFlag", () => {
 
     expect(result.current).toBe(true);
   });
+
+  it("re-reads after a gap with no subscribers (another tab may have changed it)", () => {
+    const flag = createStorageFlag("f6", true);
+
+    const first = renderHook(() => useStorageFlag(flag));
+
+    expect(first.result.current).toBe(true);
+    first.unmount();
+
+    window.localStorage.setItem("f6", "off");
+
+    const second = renderHook(() => useStorageFlag(flag));
+
+    expect(second.result.current).toBe(false);
+  });
+
+  it("ignores sessionStorage events", () => {
+    const flag = createStorageFlag("f7", true);
+
+    const { result } = renderHook(() => useStorageFlag(flag));
+
+    window.localStorage.setItem("f7", "off");
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "f7", storageArea: window.sessionStorage }));
+    });
+
+    expect(result.current).toBe(true);
+  });
 });

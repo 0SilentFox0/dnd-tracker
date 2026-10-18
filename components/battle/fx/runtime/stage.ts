@@ -20,6 +20,7 @@ export interface Stage {
   draws: Set<Draw>;
   timers: Set<number>;
   waits: Set<() => void>;
+  animations: Set<Animation>;
   unsubscribe: (() => void) | null;
   stopped: boolean;
 }
@@ -38,7 +39,7 @@ export function stageFor(layer: HTMLElement) {
 
     if (!g) throw new Error("Canvas 2D недоступний");
 
-    s = { layer, canvas, g, particles: new SpriteParticles(), tweens: new Set(), draws: new Set(), timers: new Set(), waits: new Set(), unsubscribe: null, stopped: false };
+    s = { layer, canvas, g, particles: new SpriteParticles(), tweens: new Set(), draws: new Set(), timers: new Set(), waits: new Set(), animations: new Set(), unsubscribe: null, stopped: false };
     stages.set(layer, s);
   }
 
@@ -66,6 +67,10 @@ export function stopStage(s: Stage) {
   for (const id of s.timers) window.clearTimeout(id);
 
   s.timers.clear();
+
+  for (const a of s.animations) a.cancel();
+
+  s.animations.clear();
 
   const tweens = [...s.tweens];
 
@@ -116,6 +121,8 @@ function tick(s: Stage, dt: number) {
 
   for (const draw of s.draws) draw(g);
 
+  // A glow left set by a draw would blur every particle (and cost a blur pass each).
+  g.shadowBlur = 0;
   s.particles.step(g, dt);
 
   return s.particles.count > 0 || s.tweens.size > 0 || s.draws.size > 0;
@@ -181,4 +188,18 @@ export function wait(s: Stage, ms: number) {
     s.waits.add(done);
     schedule(s, ms, done);
   });
+}
+
+/** A WAAPI animation on a DOM element, owned by the stage so `stopStage` cancels it; resolves when it ends either way. */
+export function animateEl(s: Stage, el: Element, keyframes: Keyframe[], opts: KeyframeAnimationOptions) {
+  if (s.stopped) return Promise.resolve();
+
+  const anim = el.animate(keyframes, opts);
+
+  s.animations.add(anim);
+
+  return anim.finished.then(
+    () => undefined,
+    () => undefined,
+  ).finally(() => s.animations.delete(anim));
 }

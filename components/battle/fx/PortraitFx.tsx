@@ -9,8 +9,7 @@ import type { ActiveEffect } from "@/types/battle";
 
 const ImpactFrame = dynamic(() => import("@/components/battle/fx/frames/ImpactFrame").then((m) => m.ImpactFrame), { ssr: false });
 
-/** The portrait with its status auras drawn around it. */
-export function PortraitFx({ effects, size, children }: { effects: ActiveEffect[]; size: number; children: ReactNode }) {
+export function PortraitFx({ effects, size, children }: { effects: readonly ActiveEffect[]; size: number; children: ReactNode }) {
   return (
     <span className="relative shrink-0">
       {children}

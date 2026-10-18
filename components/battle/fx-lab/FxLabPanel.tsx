@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { playFx } from "@/components/battle/fx/runtime/play";
+import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { cn } from "@/lib/utils";
 import { type FxArchetype, type FxElement, type FxSpec, IMPACT_MS } from "@/lib/utils/battle/fx";
 
@@ -40,6 +41,8 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
 
   const busy = useRef(false);
 
+  const hitTimer = useRef(0);
+
   const [hitId, setHitId] = useState<{ ids: string[]; key: number }>({ ids: [], key: 0 });
 
   const [status, setStatus] = useState("");
@@ -63,10 +66,10 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
 
       const started = performance.now();
 
-      const timer = setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), IMPACT_MS[archetype]);
+      hitTimer.current = window.setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), IMPACT_MS[archetype]);
 
       await playFx(layer, spec, arena);
-      clearTimeout(timer);
+      window.clearTimeout(hitTimer.current);
       setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${IMPACT_MS[archetype]} мс)`);
     } catch (e) {
       setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`);
@@ -80,6 +83,16 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
   useEffect(() => {
     if (playToken) onToken();
   }, [playToken]);
+
+  useEffect(() => {
+    const layer = layerRef.current;
+
+    return () => {
+      window.clearTimeout(hitTimer.current);
+
+      if (layer) cancelLayer(layer);
+    };
+  }, []);
 
   const column = (side: LabUnit["side"]) => (
     <div className="space-y-2">

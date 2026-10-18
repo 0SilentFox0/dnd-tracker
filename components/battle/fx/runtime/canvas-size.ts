@@ -1,7 +1,7 @@
 // Past 2× the extra pixels are invisible in soft glows yet cost 2.25× the fill rate on 3× phones.
 const MAX_DPR = 2;
 
-export function canvasDpr() {
+function canvasDpr() {
   return Math.min(MAX_DPR, window.devicePixelRatio || 1);
 }
 

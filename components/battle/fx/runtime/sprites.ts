@@ -1,7 +1,7 @@
 import type { FxPoint } from "./geometry";
 import type { Stage } from "./stage";
 
-export interface Sheet {
+interface Sheet {
   src: string;
   frames: number;
   fw: number;

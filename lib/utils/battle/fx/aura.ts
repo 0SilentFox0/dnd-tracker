@@ -91,7 +91,7 @@ export function auraOf(effect: ActiveEffect): FxAuraKind | null {
   return null;
 }
 
-export function aurasOf(effects: ActiveEffect[]): FxAuraKind[] {
+export function aurasOf(effects: readonly ActiveEffect[]): FxAuraKind[] {
   const kinds = new Set<FxAuraKind>();
 
   for (const effect of effects) {

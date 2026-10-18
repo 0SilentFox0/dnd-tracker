@@ -15,7 +15,7 @@ import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, impact, onSelect }: {
   participant: BattleParticipant;
-  effects: ActiveEffect[];
+  effects: readonly ActiveEffect[];
   exact: boolean;
   acText: string;
   current: boolean;

@@ -17,6 +17,8 @@ export function createStorageFlag(key: string, defaultValue: boolean): StorageFl
 
   let cached: boolean | undefined;
 
+  let unheard = false;
+
   const read = () => {
     try {
       const raw = window.localStorage.getItem(key);
@@ -28,7 +30,7 @@ export function createStorageFlag(key: string, defaultValue: boolean): StorageFl
   };
 
   const onStorage = (e: StorageEvent) => {
-    if (e.key !== null && e.key !== key) return;
+    if ((e.storageArea && e.storageArea !== window.localStorage) || (e.key !== null && e.key !== key)) return;
 
     cached = read();
     listeners.forEach((l) => l());
@@ -47,14 +49,22 @@ export function createStorageFlag(key: string, defaultValue: boolean): StorageFl
       listeners.forEach((l) => l());
     },
     subscribe(onChange) {
-      if (!listeners.size) window.addEventListener("storage", onStorage);
+      if (!listeners.size) {
+        // Another tab may have changed the value while nobody listened for `storage` events.
+        if (unheard) cached = undefined;
+
+        window.addEventListener("storage", onStorage);
+      }
 
       listeners.add(onChange);
 
       return () => {
         listeners.delete(onChange);
 
-        if (!listeners.size) window.removeEventListener("storage", onStorage);
+        if (!listeners.size) {
+          window.removeEventListener("storage", onStorage);
+          unheard = true;
+        }
       };
     },
   };

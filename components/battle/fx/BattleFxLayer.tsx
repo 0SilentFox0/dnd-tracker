@@ -38,7 +38,11 @@ export function BattleFxLayer() {
       done(current.key);
     };
 
-    const guard = window.setTimeout(finish, MAX_FX_MS);
+    // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.
+    const guard = window.setTimeout(() => {
+      cancelLayer(el);
+      finish();
+    }, MAX_FX_MS);
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()

@@ -1,4 +1,4 @@
-export const TEX = 64;
+const TEX = 64;
 
 const textures = new Map<string, HTMLCanvasElement>();
 

@@ -10,7 +10,7 @@ export interface FrameBox {
   h: number;
 }
 
-export interface EdgePoint {
+interface EdgePoint {
   x: number;
   y: number;
   nx: number;
@@ -68,7 +68,6 @@ export function edgeGlow(g: CanvasRenderingContext2D, box: FrameBox, o: { fill?:
   g.stroke();
 }
 
-/** A bottom-to-top linear gradient over the box. */
 export function verticalFill(g: CanvasRenderingContext2D, box: FrameBox, stops: [number, string][]) {
   const grad = g.createLinearGradient(0, box.y + box.h, 0, box.y);
 
@@ -83,7 +82,7 @@ export function bloodFlash(g: CanvasRenderingContext2D, box: FrameBox, red: numb
 }
 
 /** A random point on the border, pushed inward by `offset` px. */
-export function onPerimeter(box: FrameBox, offset: [number, number] = [0, 0]): EdgePoint {
+function onPerimeter(box: FrameBox, offset: [number, number] = [0, 0]): EdgePoint {
   const p = perimeter(box, Math.random());
 
   const d = rand(...offset);

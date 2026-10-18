@@ -1,4 +1,4 @@
-export type TickFn = (now: number, dt: number) => boolean | void;
+type TickFn = (now: number, dt: number) => boolean | void;
 
 interface Subscriber {
   fn: TickFn;
@@ -24,7 +24,8 @@ function frame(now: number) {
   for (const sub of subscribers) {
     if (now - sub.last < sub.gap) continue;
 
-    const dt = (now - sub.last) / 1000;
+    // A fresh subscriber paints on the next frame instead of waiting out a gap measured from subscribe time.
+    const dt = sub.last === -Infinity ? 1 / 60 : (now - sub.last) / 1000;
 
     sub.last = now;
 
@@ -42,7 +43,7 @@ function frame(now: number) {
 // One rAF loop for every canvas; `fn` returning false unsubscribes it. `fps` throttles one subscriber without slowing the rest.
 export function subscribe(fn: TickFn, opts: { fps?: number } = {}) {
   // 2 ms slack so a 60 Hz display still paints every second frame at 30 fps.
-  const sub: Subscriber = { fn, last: performance.now(), gap: opts.fps ? 1000 / opts.fps - 2 : 0 };
+  const sub: Subscriber = { fn, last: -Infinity, gap: opts.fps ? 1000 / opts.fps - 2 : 0 };
 
   subscribers.add(sub);
   raf ||= requestAnimationFrame(frame);

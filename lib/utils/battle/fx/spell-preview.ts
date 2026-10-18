@@ -104,7 +104,7 @@ export function libraryPreviewSpell(spell: LibrarySpell): PreviewSpell {
   };
 }
 
-export const libraryCastable = (spell: LibrarySpell): CastableSpell => castableOf(libraryPreviewSpell(spell));
+const libraryCastable = (spell: LibrarySpell): CastableSpell => castableOf(libraryPreviewSpell(spell));
 
 /** Casts the spell on a synthetic arena (every save fails, dice roll 4) and reads off what the client would play. */
 export function previewCastFx(castable: CastableSpell): SpellFxResult {

@@ -61,8 +61,26 @@ function paint(e: Entry, t: number, dt: number) {
   }
 }
 
+let warned = false;
+
+// One subscriber serves every aura, so a throwing paint drops only its own canvas instead of the whole loop.
 function tick(now: number, dt: number) {
-  for (const e of entries.values()) if (e.visible) paint(e, (now - e.t0) / 1000, Math.min(0.1, dt));
+  for (const e of entries.values()) {
+    if (!e.visible) continue;
+
+    try {
+      paint(e, (now - e.t0) / 1000, Math.min(0.1, dt));
+    } catch (err) {
+      unregister(e.canvas);
+      e.g.setTransform(1, 0, 0, 1, 0, 0);
+      e.g.clearRect(0, 0, e.canvas.width, e.canvas.height);
+
+      if (!warned) {
+        warned = true;
+        console.warn("fx aura", err);
+      }
+    }
+  }
 }
 
 // Auras only need ~30 fps, whatever the display rate.

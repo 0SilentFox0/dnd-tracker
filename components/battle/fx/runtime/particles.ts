@@ -65,7 +65,7 @@ export abstract class ParticlePool<P extends Body> {
   }
 }
 
-export interface SpriteParticle extends Body {
+interface SpriteParticle extends Body {
   scale0: number;
   scale1: number;
   alpha0: number;
@@ -93,7 +93,7 @@ export interface AuraParticle<D = unknown> extends Body {
   draw?(g: CanvasRenderingContext2D, p: AuraParticle<D>, k: number): void;
 }
 
-export type AuraParticleInit<D = unknown> = Partial<AuraParticle<D>> & Pick<AuraParticle<D>, "x" | "y" | "life" | "size0">;
+type AuraParticleInit<D = unknown> = Partial<AuraParticle<D>> & Pick<AuraParticle<D>, "x" | "y" | "life" | "size0">;
 
 const MAX_AURA_PARTICLES = 70;
 

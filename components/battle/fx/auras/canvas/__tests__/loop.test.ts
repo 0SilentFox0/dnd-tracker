@@ -133,4 +133,33 @@ describe("aura loop", () => {
     expect(frame).toHaveBeenCalled();
     expect(auraLoopState()).toEqual({ registered: 0, running: false });
   });
+
+  it("a throwing aura drops only its own canvas; the loop keeps painting the rest", async () => {
+    const { attachAura, auraLoopState } = await loadLoop();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const bad = makeCanvas();
+
+    const good = makeCanvas();
+
+    attachAura(bad, ["burning"], 48);
+    attachAura(good, ["frost"], 48);
+    setVisible(bad, true);
+    setVisible(good, true);
+
+    frame.mockImplementationOnce(() => {
+      throw new Error("boom");
+    });
+    flushFrames(1);
+
+    expect(auraLoopState()).toEqual({ registered: 1, running: true });
+
+    frame.mockClear();
+    flushFrames(3);
+
+    expect(frame).toHaveBeenCalledTimes(3);
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
 });

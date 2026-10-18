@@ -1,7 +1,7 @@
 import { lungeOffset } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { playSheet, SHEETS } from "../runtime/sprites";
-import { show, tween, wait } from "../runtime/stage";
+import { animateEl, show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 import { IMPACT_MS } from "@/lib/utils/battle/fx";
@@ -15,7 +15,7 @@ export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palet
   if (!target) return;
 
   const move = actorEl
-    ? actorEl.animate([{ transform: "none" }, { transform: `translateX(${lungeOffset(from, target)}px) scale(1.06)`, offset: 0.45 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.5,0,.2,1)" }).finished.catch(() => undefined)
+    ? animateEl(stage, actorEl, [{ transform: "none" }, { transform: `translateX(${lungeOffset(from, target)}px) scale(1.06)`, offset: 0.45 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.5,0,.2,1)" })
     : wait(stage, 0);
 
   const at = spec.hit ? target : { x: target.x + 30, y: target.y };

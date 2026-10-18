@@ -29,7 +29,7 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
   );
 }
 
-export function EffectLine({ effects, max = 2 }: { effects: ActiveEffect[]; max?: number }) {
+export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffect[]; max?: number }) {
   const [expanded, setExpanded] = useState(false);
 
   const overflow = effects.length > max;
