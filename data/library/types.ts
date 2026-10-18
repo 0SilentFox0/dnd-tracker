@@ -98,6 +98,7 @@ export interface LibraryUnit {
   abilities: Ability[];
   spellKeys?: string[];
   flying?: boolean;
+  gridSize?: 1 | 2 | 3;
   levelScaling?: LevelScaling;
 }
 

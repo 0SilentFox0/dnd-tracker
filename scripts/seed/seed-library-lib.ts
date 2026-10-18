@@ -128,6 +128,7 @@ export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells
 
   return {
     name: unit.name,
+    gridSize: unit.gridSize ?? 1,
     raceId: unit.raceKey === null ? null : lookup(races, unit.raceKey, "расу"),
     level: unit.tier,
     ...scores,

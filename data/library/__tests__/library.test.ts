@@ -318,6 +318,76 @@ describe("library content", () => {
 
   const content = it.skipIf(!LIBRARY_COMPLETE);
 
+  content("only the listed large creatures occupy 2x2", () => {
+    const large = UNITS.filter((u) => (u.gridSize ?? 1) > 1);
+
+    expect(large.every((u) => u.gridSize === 2)).toBe(true);
+    expect(large.map((u) => u.key).sort()).toEqual([
+      "dark-elves-black-dragon",
+      "dark-elves-dark-rider",
+      "dark-elves-deep-hydra",
+      "dark-elves-gloom-rider",
+      "dark-elves-hydra",
+      "dark-elves-red-dragon",
+      "dark-elves-rotting-hydra",
+      "dark-elves-shadow-dragon",
+      "dark-elves-swift-rider",
+      "demons-archdemon",
+      "demons-archdevil",
+      "demons-cave-abomination",
+      "demons-cave-demon",
+      "demons-cave-lord",
+      "demons-devil",
+      "demons-gloom",
+      "demons-hell-nightmare",
+      "demons-nightmare",
+      "dwarves-arkat-dragon",
+      "dwarves-bear-rider",
+      "dwarves-black-bear-rider",
+      "dwarves-earl",
+      "dwarves-fire-dragon",
+      "dwarves-jarl",
+      "dwarves-lava-dragon",
+      "dwarves-thane",
+      "dwarves-white-bear-rider",
+      "elves-ancient-ent",
+      "elves-crystal-dragon",
+      "elves-emerald-dragon",
+      "elves-ent",
+      "elves-green-dragon",
+      "elves-light-unicorn",
+      "elves-unicorn",
+      "elves-war-unicorn",
+      "elves-wild-ent",
+      "humans-angel",
+      "humans-archangel",
+      "humans-battle-griffin",
+      "humans-champion",
+      "humans-griffin",
+      "humans-knight",
+      "humans-paladin",
+      "humans-royal-griffin",
+      "humans-seraph",
+      "mages-colossus",
+      "mages-genie",
+      "mages-genie-sultan",
+      "mages-genie-vizier",
+      "mages-rakshasa-kshatriya",
+      "mages-rakshasa-princess",
+      "mages-rakshasa-raja",
+      "mages-storm-lord",
+      "mages-titan",
+      "necromancers-archlich",
+      "necromancers-bone-dragon",
+      "necromancers-high-lich",
+      "necromancers-lich",
+      "necromancers-sorrow-dragon",
+      "necromancers-spectral-dragon",
+      "neutral-death-avatar",
+      "neutral-phoenix",
+    ]);
+  });
+
   content("has 8 branches with 3 levels and 3/2/1 slots", () => {
     expect(BRANCHES).toHaveLength(8);
 

@@ -167,6 +167,11 @@ describe("seed-library-lib", () => {
       expect(row).not.toHaveProperty("avatar");
     });
 
+    it("writes gridSize, defaulting to 1", () => {
+      expect(unitRow(base, maps, races).gridSize).toBe(1);
+      expect(unitRow({ ...base, gridSize: 2 }, maps, races).gridSize).toBe(2);
+    });
+
     it("total to-hit of every attack equals the unit attack bonus", () => {
       const row = unitRow(base, maps, races);
 
