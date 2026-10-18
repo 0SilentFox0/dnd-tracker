@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
+import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleSceneData, useDamageShake, useFxImpactDelay, useHpChange } from "@/lib/hooks/battle";
@@ -15,6 +16,8 @@ import type { BattleParticipant } from "@/types/battle";
 
 export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
   const { battle, queue, isMyTurn, effects } = useBattleSceneData();
+
+  const heroEffects = effects.get(hero.basicInfo.id) ?? [];
 
   const change = useHpChange(hero.combatStats.currentHp);
 
@@ -32,7 +35,10 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
     <div ref={shake} className="relative">
       {change && change.delta < 0 && <div key={change.id} style={{ animationDelay: `${delay}ms` }} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
-        <ZoomablePortrait participant={hero} fxId={hero.basicInfo.id} size={compact ? 48 : 64} me />
+        <span className="relative shrink-0">
+          <ZoomablePortrait participant={hero} fxId={hero.basicInfo.id} size={compact ? 48 : 64} me />
+          <StatusAuras effects={heroEffects} size={compact ? 48 : 64} />
+        </span>
         <div className="min-w-0 flex-1">
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="flex min-w-0 items-baseline gap-2">
@@ -58,7 +64,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
           {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
         </div>
       )}
-      {!compact && <EffectLine effects={effects.get(hero.basicInfo.id) ?? []} />}
+      {!compact && <EffectLine effects={heroEffects} />}
     </div>
   );
 });

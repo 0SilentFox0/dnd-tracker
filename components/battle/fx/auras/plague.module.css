@@ -1,0 +1,5 @@
+.root { position: absolute; inset: 0; pointer-events: none; }
+.glow { position: absolute; left: -20%; right: -20%; bottom: -25%; height: 70%; border-radius: 50%; background: radial-gradient(ellipse at 50% 100%, rgba(125, 255, 90, .55), rgba(70, 200, 40, .2) 45%, transparent 70%); filter: blur(2px); mix-blend-mode: screen; animation: plague-pulse 2.4s ease-in-out infinite; }
+.spore { position: absolute; bottom: 0; width: 4px; height: 4px; border-radius: 50%; background: #b6ff8a; box-shadow: 0 0 6px #7dff5a; opacity: 0; animation: plague-rise 2.4s ease-out infinite; }
+@keyframes plague-pulse { 50% { opacity: .55; transform: scaleY(.85); } }
+@keyframes plague-rise { 15% { opacity: .9; } to { opacity: 0; transform: translateY(calc(var(--s, 48px) * -0.9)) translateX(4px); } }

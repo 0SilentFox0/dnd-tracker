@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { Shield } from "lucide-react";
 
+import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
 import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,10 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
           {signedDelta(change.delta)}
         </span>
       )}
-      <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} flashDelayMs={delay} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+      <span className="relative shrink-0">
+        <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} flashDelayMs={delay} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+        <StatusAuras effects={effects} size={48} />
+      </span>
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
