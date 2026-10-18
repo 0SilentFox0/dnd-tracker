@@ -49,5 +49,5 @@ export function BattleFxLayer() {
       });
   }, [current, done]);
 
-  return <div ref={layer} className="fx-layer" aria-hidden />;
+  return <div ref={layer} className="fx-layer fixed" aria-hidden />;
 }
