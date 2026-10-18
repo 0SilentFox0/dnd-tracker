@@ -21,6 +21,7 @@ import {
   useCastSpell,
   useCompleteBattle,
   useMoraleCheck,
+  useMoveParticipant,
   useNextTurn,
   useRefreshBattleSources,
   useResetBattle,
@@ -54,6 +55,7 @@ export interface BattleSceneActions {
   nextTurn: ReturnType<typeof useNextTurn>;
   attack: ReturnType<typeof useAttack>;
   moraleCheck: ReturnType<typeof useMoraleCheck>;
+  move: ReturnType<typeof useMoveParticipant>;
   bonusAction: ReturnType<typeof useBonusAction>;
   abilityAction: ReturnType<typeof useAbilityAction>;
   auraZone: ReturnType<typeof useAuraZone>;
@@ -103,6 +105,9 @@ export interface BattleSceneValue extends BattleSceneData {
   resultScreen: AwaitingDialogState;
   connection: PusherConnectionState;
   selectedId: string | null;
+  attackIntent: string | null;
+  requestAttack(targetId: string): void;
+  clearAttackIntent(): void;
   toast: BattleToastApi;
   result: ResultFx | null;
   showResult(fx: ResultFx | null): void;
@@ -204,6 +209,10 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const [selectedId, select] = useState<string | null>(null);
 
+  const [attackIntent, setAttackIntent] = useState<string | null>(null);
+
+  const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
+
   const [result, showResult] = useState<ResultFx | null>(null);
 
   const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
@@ -238,6 +247,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     nextTurn: useNextTurn(campaignId, battleId, o),
     attack: useAttack(campaignId, battleId, o),
     moraleCheck: useMoraleCheck(campaignId, battleId, o),
+    move: useMoveParticipant(campaignId, battleId, o),
     bonusAction: useBonusAction(campaignId, battleId, o),
     abilityAction: useAbilityAction(campaignId, battleId, o),
     auraZone: useAuraZone(campaignId, battleId, o),
@@ -300,6 +310,9 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     setDmControlledId,
     selectedId,
     select,
+    attackIntent,
+    requestAttack: setAttackIntent,
+    clearAttackIntent,
     toast,
     result,
     showResult,

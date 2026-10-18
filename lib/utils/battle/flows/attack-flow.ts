@@ -34,7 +34,7 @@ export interface AttackFlowState {
 }
 
 export type AttackFlowAction =
-  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[] }
+  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[] }
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "TOGGLE_TARGET"; id: string }
   | { type: "SET_TARGETS"; ids: string[] }
@@ -65,7 +65,7 @@ const prevHit = (strikes: Strike[], before: number) => {
 export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
   switch (a.type) {
     case "OPEN":
-      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots };
+      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets) };
     case "SELECT_WEAPON":
       return { ...s, step: "target", attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: s.targetIds.slice(0, a.maxTargets) };
     case "TOGGLE_TARGET": {

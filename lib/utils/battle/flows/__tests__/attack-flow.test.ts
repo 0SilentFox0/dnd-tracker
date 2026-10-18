@@ -13,6 +13,15 @@ describe("attackFlow", () => {
     expect(run(open(3), { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 2, diceSlots: [8] })).toMatchObject({ step: "target", attackId: "bow", maxTargets: 2 });
   });
 
+  it("OPEN з targetIds: одна зброя — крок цілі з обраною ціллю; кілька — крок зброї, SELECT_WEAPON обрізає", () => {
+    const withTargets = (weaponCount: number, maxTargets: number, targetIds: string[]): AttackFlowAction => ({ type: "OPEN", weaponCount, attackId: "rapier", maxTargets, diceSlots: [8], targetIds });
+
+    expect(run(withTargets(1, 1, ["e1"]))).toMatchObject({ step: "target", targetIds: ["e1"] });
+    expect(run(withTargets(1, 1, ["e1", "e2"])).targetIds).toEqual(["e1"]);
+    expect(run(withTargets(2, 2, ["e1"]))).toMatchObject({ step: "weapon", targetIds: ["e1"] });
+    expect(run(withTargets(2, 2, ["e1", "e2"]), { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 1, diceSlots: [8] }).targetIds).toEqual(["e1"]);
+  });
+
   it("одна ціль — заміна; кілька — перемикання до максимуму", () => {
     expect(run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }).targetIds).toEqual(["b"]);
 

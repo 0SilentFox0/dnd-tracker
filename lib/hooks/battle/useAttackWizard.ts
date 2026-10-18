@@ -176,13 +176,26 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   return {
     state, attack, attacks, targets, steps, estimate, unknownDefense, previews,
-    open: () => {
+    open: (targetId?: string) => {
       const first = attacks[0];
 
       if (!first) return;
 
-      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
-      preselectAll();
+      const target = targetId ? byId(targetId) : undefined;
+
+      if (!target) {
+        dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
+        preselectAll();
+
+        return;
+      }
+
+      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first), targetIds: [target.basicInfo.id] });
+
+      if (attacks.length === 1 && attacker) {
+        dispatch({ type: "SET_MODE", mode: predictAttack(attacker, target, first, order, scene.battle.currentRound).mode });
+        dispatch({ type: "CONFIRM_TARGETS" });
+      }
     },
     selectWeapon: (a: BattleAttack) => {
       dispatch({ type: "SELECT_WEAPON", ...describe(a) });
