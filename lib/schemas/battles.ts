@@ -15,6 +15,17 @@ export const battleMapSchema = z.object({
     .nullable(),
   opacity: z.number().min(0).max(1),
   blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
+  terrain: z
+    .record(
+      z.string().regex(/^\d+:\d+$/),
+      z.object({
+        kind: z.enum(["wall", "barrier", "hazard"]),
+        label: z.string().max(60).optional(),
+        untilRound: z.number().int().min(1).optional(),
+      }),
+    )
+    .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
+    .optional(),
 }).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
 
 export const createBattleSchema = z.object({

@@ -100,7 +100,7 @@ export function clampMargins(map: Pick<BattleMapConfig, "cols" | "rows">, margin
   return next;
 }
 
-export function hasPlayableArea(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked">, side = MIN_PLAYABLE): boolean {
+export function hasPlayableArea(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked" | "terrain">, side = MIN_PLAYABLE): boolean {
   for (let y = 0; y + side <= map.rows; y++) {
     for (let x = 0; x + side <= map.cols; x++) {
       let ok = true;

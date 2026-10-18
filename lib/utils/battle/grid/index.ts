@@ -7,3 +7,4 @@ export * from "./map-view";
 export * from "./occupancy";
 export * from "./path";
 export * from "./placement";
+export * from "./terrain";

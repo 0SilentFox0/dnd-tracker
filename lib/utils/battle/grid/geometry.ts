@@ -1,4 +1,4 @@
-import type { BattleMapConfig, GridPoint } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, TerrainCell } from "@/types/battle";
 
 const DIRS = [
   [-1, -1], [0, -1], [1, -1],
@@ -41,8 +41,29 @@ export function blockedSet(map: Pick<BattleMapConfig, "blocked">): ReadonlySet<s
   return set;
 }
 
-export function isPlayable(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked">, p: GridPoint): boolean {
-  return inBounds(map, p) && !blockedSet(map).has(cellKey(p));
+const impassableCache = new WeakMap<Record<string, TerrainCell>, Set<string>>();
+
+export function impassableSet(map: Pick<BattleMapConfig, "terrain">): ReadonlySet<string> {
+  const terrain = map.terrain;
+
+  if (!terrain) return EMPTY_SET;
+
+  let set = impassableCache.get(terrain);
+
+  if (!set) {
+    set = new Set(Object.keys(terrain).filter((k) => terrain[k].kind !== "hazard"));
+    impassableCache.set(terrain, set);
+  }
+
+  return set;
+}
+
+export function isPlayable(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked" | "terrain">, p: GridPoint): boolean {
+  if (!inBounds(map, p)) return false;
+
+  const key = cellKey(p);
+
+  return !blockedSet(map).has(key) && !impassableSet(map).has(key);
 }
 
 export type Margins = { top: number; right: number; bottom: number; left: number };

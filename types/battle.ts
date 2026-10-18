@@ -163,6 +163,17 @@ export interface BattleMapConfig {
   opacity: number;
   /** Неігрові клітинки (ключі "x:y") */
   blocked?: string[];
+  /** Місцевість за ключем "x:y" */
+  terrain?: Record<string, TerrainCell>;
+}
+
+export type TerrainKind = "wall" | "barrier" | "hazard";
+
+export interface TerrainCell {
+  kind: TerrainKind;
+  label?: string;
+  /** Барʼєр діє до кінця цього раунду */
+  untilRound?: number;
 }
 
 export type BattleMapMark = "move" | "target" | "invalid-target";

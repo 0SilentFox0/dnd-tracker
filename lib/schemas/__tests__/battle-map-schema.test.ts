@@ -21,3 +21,19 @@ describe("battleMapSchema.blocked", () => {
     expect(battleMapSchema.safeParse({ ...map, blocked: Array(3601).fill("1:1") }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.terrain", () => {
+  it("приймає місцевість за ключами x:y, відхиляє невідомий вид, довгий підпис і надто багато записів", () => {
+    const terrain = { "1:1": { kind: "wall" }, "2:2": { kind: "barrier", untilRound: 3 }, "3:3": { kind: "hazard", label: "Вогонь" } };
+
+    expect(battleMapSchema.safeParse({ ...map, terrain }).success).toBe(true);
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "a:b": { kind: "wall" } } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "lava" } } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", label: "x".repeat(61) } } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "barrier", untilRound: 0 } } }).success).toBe(false);
+
+    const many = Object.fromEntries(Array.from({ length: 3601 }, (_, i) => [`${i}:0`, { kind: "wall" }]));
+
+    expect(battleMapSchema.safeParse({ ...map, terrain: many }).success).toBe(false);
+  });
+});
