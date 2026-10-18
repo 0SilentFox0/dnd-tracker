@@ -97,7 +97,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       return {
         participants: ctx.participants,
         pending: [...ctx.pending, ...added.map(toReserve)],
-        events: [dmEvent(ctx, added, "DM додав у резерв")],
+        events: [],
       };
     }
 
@@ -112,7 +112,20 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
       const found = order.findIndex((other) => compareInitiative(p, other) < 0);
 
-      const at = found === -1 ? order.length : found;
+      let at = found === -1 ? order.length : found;
+
+      // ті, кого ДМ щойно ввів, ходять одразу після поточного — новачок не обганяє їх
+      if (at > turnIndex) {
+        let afterRun = turnIndex + 1;
+
+        while (order[afterRun]?.battleData.revealPending) afterRun++;
+
+        if (at < afterRun) {
+          const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
+
+          at = next === -1 ? order.length : next;
+        }
+      }
 
       // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
       if (at <= turnIndex) turnIndex++;

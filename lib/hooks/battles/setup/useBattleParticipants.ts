@@ -52,6 +52,7 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
                   side,
                   ...(type === ParticipantSourceType.UNIT && {
                     quantity: quantity ?? p.quantity ?? 1,
+                    ...(p.reserved !== undefined && { reserved: Math.min(p.reserved, quantity ?? p.quantity ?? 1) }),
                   }),
                 }
               : p,

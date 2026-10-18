@@ -224,6 +224,7 @@ export async function runBattleMutation<TBody>(
     if (
       loaded.scene.status === BattleStatus.ACTIVE &&
       !options.allowWhileAwaitingDm &&
+      !options.dryRun?.(parsed.body) &&
       checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
     ) {
       throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);

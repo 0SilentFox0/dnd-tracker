@@ -387,6 +387,15 @@ describe("резерв і рішення ДМ", () => {
     expect((await res.json()).code).toBe("awaiting_dm");
   });
 
+  it("dryRun у стані очікування не відхиляється", async () => {
+    const d = deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => awaiting()) });
+
+    const res = await runBattleMutation(req(), { params, access: "member", dryRun: () => true, mutate: noop }, d);
+
+    expect(res.status).toBe(200);
+    expect(d.saveBattle).not.toHaveBeenCalled();
+  });
+
   it("allowWhileAwaitingDm пропускає і не завершує бій", async () => {
     const d = deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => awaiting()) });
 

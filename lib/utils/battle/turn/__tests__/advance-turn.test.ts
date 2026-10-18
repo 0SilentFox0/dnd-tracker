@@ -181,4 +181,33 @@ describe("резерв", () => {
     expect(out.scene.turnIndex).toBe(1);
     expect(out.participants[1].battleData.revealPending).toBeUndefined();
   });
+
+  it("revealPending знімається з пропущеного (непритомного) учасника", () => {
+    const down = { ...imp, combatStats: { ...base.combatStats, currentHp: 0, status: "unconscious" as const }, battleData: { ...base.battleData, revealPending: true } };
+
+    const out = advanceTurn({ participants: [hero, down, goblin], pending: [], scene });
+
+    expect(out.scene.turnIndex).toBe(2);
+    expect(out.participants[1].battleData.revealPending).toBeUndefined();
+  });
+
+  it("revealPending знімається з усіх при новому раунді", () => {
+    const stale = { ...goblin, battleData: { ...goblin.battleData, revealPending: true } };
+
+    const out = advanceTurn({ participants: [hero, stale], pending: [], scene: { ...scene, turnIndex: 1 } });
+
+    expect(out.scene.round).toBe(2);
+    expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
+  });
+
+  it("розкритий під час додаткового ходу діє наступним, раунд не форситься", () => {
+    const extra = { ...hero, battleData: { ...hero.battleData, extraTurnActive: true } };
+
+    const revealed = { ...imp, battleData: { ...base.battleData, revealPending: true } };
+
+    const out = advanceTurn({ participants: [extra, revealed, goblin], pending: [], scene });
+
+    expect(out.scene).toMatchObject({ turnIndex: 1, round: 1 });
+    expect(out.participants[1].battleData.revealPending).toBeUndefined();
+  });
 });

@@ -12,6 +12,7 @@ export async function POST(
     params: await params,
     access: BattleAccess.MEMBER,
     requireStatus: BattleStatus.ACTIVE,
+    allowWhileAwaitingDm: true,
     schema: moraleCheckSchema,
     respond: "wrapped",
     mutate: moraleCheckMutation,

@@ -63,7 +63,9 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
     );
   }
 
-  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isActive);
+  const revealedNext = order[scene.turnIndex + 1]?.battleData.revealPending === true;
+
+  const roundIsOver = (endingExtraTurn && !revealedNext) || !order.slice(scene.turnIndex + 1).some(isActive);
 
   const extraIndex = roundIsOver ? order.findIndex((p) => isActive(p) && p.actionFlags.hasExtraTurn) : -1;
 
@@ -94,7 +96,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
   const loop = runAdvanceTurnLoop({
     initiativeOrder: order,
     // після додаткового ходу раунд закінчено: з останнього індексу цикл переходить у новий раунд
-    currentTurnIndex: endingExtraTurn ? order.length - 1 : scene.turnIndex,
+    currentTurnIndex: endingExtraTurn && !revealedNext ? order.length - 1 : scene.turnIndex,
     currentRound: scene.round,
     battleId: scene.id,
     currentBattleLogLength: scene.eventSeq + actions.length,
@@ -116,8 +118,10 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
     getStateBeforeForEntry: () => undefined,
   });
 
+  const newRound = loop.nextRound > scene.round;
+
   const participantsAfter = victory.updatedInitiativeOrder.map((p, i) =>
-    i === loop.nextTurnIndex && p.battleData.revealPending ? dropBattleFlag(p, "revealPending") : p,
+    p.battleData.revealPending && (newRound || (i >= scene.turnIndex && i <= loop.nextTurnIndex)) ? dropBattleFlag(p, "revealPending") : p,
   );
 
   return {

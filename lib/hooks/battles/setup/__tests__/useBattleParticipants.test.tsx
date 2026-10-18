@@ -21,6 +21,15 @@ describe("useBattleParticipants reserve", () => {
     expect(result.current.participants[0].reserved).toBe(2);
   });
 
+  it("handleAddToSide зі зменшеною кількістю обмежує резерв", () => {
+    const { result } = renderHook(() => useBattleParticipants());
+
+    act(() => result.current.handleAddToSide("wolf", ParticipantSourceType.UNIT, ParticipantSide.ENEMY, 5));
+    act(() => result.current.handleReserveChange("wolf", 4));
+    act(() => result.current.handleAddToSide("wolf", ParticipantSourceType.UNIT, ParticipantSide.ENEMY, 2));
+    expect(result.current.participants[0].reserved).toBe(2);
+  });
+
   it("герой: резерв 0 або 1", () => {
     const { result } = renderHook(() => useBattleParticipants());
 

@@ -47,7 +47,20 @@ describe("add-participant mutation", () => {
 
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
     expect(out.pending.map((p) => [p.basicInfo.id, p.battleData.reserved])).toEqual([["new-u1", true], ["new-u2", true]]);
-    expect(out.events[0].resultText).toContain("у резерв");
+    expect(out.events).toEqual([]);
+  });
+
+  it("новачок не обганяє щойно розкритого після поточного", async () => {
+    const revealed = { ...withInit("rev", 5), battleData: { ...participant("rev").battleData, revealPending: true } };
+
+    const d = deps({ fromUnit: vi.fn(async () => withInit("x", 8)) });
+
+    const out = await createAddParticipantMutation(d)(
+      context({ participants: [withInit("a", 20), withInit("b", 15), revealed, withInit("c", 10)], scene: { ...context().scene, turnIndex: 1 } }),
+      { sourceId: "u1", type: "unit", side: "enemy", quantity: 1 },
+    );
+
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["a", "b", "rev", "c", "x"]);
   });
 
   it("персонаж іншої кампанії — 404", async () => {
