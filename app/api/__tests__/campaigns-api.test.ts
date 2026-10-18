@@ -77,7 +77,6 @@ describe("GET /api/campaigns/[id]", () => {
       inviteCode: "invite-1",
       dmUserId: "dm-1",
       maxLevel: 20,
-      xpMultiplier: 2.5,
       allowPlayerEdit: true,
       status: "active",
       createdAt: new Date(),
@@ -116,7 +115,6 @@ describe("GET /api/campaigns/[id]", () => {
       inviteCode: "invite-1",
       dmUserId: "dm-1",
       maxLevel: 20,
-      xpMultiplier: 2.5,
       allowPlayerEdit: true,
       status: "active",
       createdAt: new Date(),
@@ -189,7 +187,6 @@ describe("PATCH /api/campaigns/[id]", () => {
       campaign: {
         id: campaignId,
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -205,7 +202,6 @@ describe("PATCH /api/campaigns/[id]", () => {
       inviteCode: "invite-1",
       dmUserId: "dm-1",
       maxLevel: 20,
-      xpMultiplier: 2.5,
       allowPlayerEdit: true,
       status: "active",
       createdAt: new Date(),

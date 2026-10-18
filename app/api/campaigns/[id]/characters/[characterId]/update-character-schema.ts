@@ -16,7 +16,6 @@ export const updateCharacterSchema = z.object({
   subrace: z.string().nullable().optional(),
   alignment: z.string().nullable().optional(),
   background: z.string().max(20000).nullable().optional(),
-  experience: z.number().min(0).optional(),
   avatar: z.string().nullable().optional(),
 
   strength: z.number().min(1).max(30).optional(),

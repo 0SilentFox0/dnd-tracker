@@ -100,7 +100,6 @@ export async function PATCH(
         description:
           data.description === undefined ? undefined : data.description || null,
         maxLevel: data.maxLevel,
-        xpMultiplier: data.xpMultiplier,
         allowPlayerEdit: data.allowPlayerEdit,
         status: data.status,
       },

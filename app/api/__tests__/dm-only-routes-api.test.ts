@@ -74,7 +74,6 @@ const asRole = (role: string | null) => {
   findCampaign.mockResolvedValue({
     id: "c1",
     maxLevel: 20,
-    xpMultiplier: 1,
     members: role ? [{ userId: "u1", role }] : [],
   });
 };

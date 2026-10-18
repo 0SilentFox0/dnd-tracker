@@ -62,7 +62,7 @@ describe("PATCH archetype", () => {
   const params = { params: Promise.resolve({ id: "camp", characterId: "ch" }) };
 
   const access = (userId: string, isDM: boolean) =>
-    ({ userId, isDM, campaign: { id: "camp", maxLevel: 20, xpMultiplier: 1 } }) as never;
+    ({ userId, isDM, campaign: { id: "camp", maxLevel: 20 } }) as never;
 
   const patch = async (body: unknown) => {
     const { PATCH } = await import("@/app/api/campaigns/[id]/characters/[characterId]/route");
@@ -72,7 +72,7 @@ describe("PATCH archetype", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", level: 3, experience: 0, race: "Ельф", controlledBy: "owner", type: "player", archetype: "rogue" } as never);
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", level: 3, race: "Ельф", controlledBy: "owner", type: "player", archetype: "rogue" } as never);
     vi.mocked(prisma.character.update).mockResolvedValue({ id: "ch" } as never);
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ allowPlayerEdit: true } as never);
     vi.mocked(prisma.race.findFirst).mockResolvedValue(null);

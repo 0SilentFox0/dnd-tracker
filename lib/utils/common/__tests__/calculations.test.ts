@@ -2,11 +2,9 @@ import { describe, expect,it } from "vitest";
 
 import {
   getAbilityModifier,
-  getLevelFromXP,
   getProficiencyBonus,
   getSpellAttackBonus,
   getSpellSaveDC,
-  getXPForLevel,
   isHit,
 } from "../calculations";
 import { getAttackAbilityModifier } from "../calculations";
@@ -44,24 +42,6 @@ describe("calculations", () => {
   describe("getSpellAttackBonus", () => {
     it("proficiency + ability modifier", () => {
       expect(getSpellAttackBonus(2, 3)).toBe(5);
-    });
-  });
-
-  describe("getXPForLevel", () => {
-    it("рівень 1 = 1000 XP", () => {
-      expect(getXPForLevel(1)).toBe(1000);
-    });
-    it("кожен наступний рівень = попередній * multiplier", () => {
-      expect(getXPForLevel(2, 2.5)).toBe(2500);
-    });
-  });
-
-  describe("getLevelFromXP", () => {
-    it("0 XP = рівень 1", () => {
-      expect(getLevelFromXP(0)).toBe(1);
-    });
-    it("1000+ XP = рівень 2", () => {
-      expect(getLevelFromXP(1000)).toBe(2);
     });
   });
 

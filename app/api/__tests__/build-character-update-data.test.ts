@@ -4,7 +4,6 @@ import { buildCharacterUpdateData } from "@/app/api/campaigns/[id]/characters/[c
 
 const character = {
   level: 3,
-  experience: 0,
   seenLevel: null,
   strength: 10,
   dexterity: 10,
@@ -16,7 +15,7 @@ const character = {
   immunities: [],
 };
 
-const base = { xpMultiplier: 1, campaign: { maxLevel: 20 }, race: null, rng: () => 0 };
+const base = { campaign: { maxLevel: 20 }, race: null, rng: () => 0 };
 
 describe("buildCharacterUpdateData", () => {
   it("підвищення через пряме level фіксує seenLevel = старий рівень", () => {
@@ -38,10 +37,6 @@ describe("buildCharacterUpdateData", () => {
     expect(r).toMatchObject({ finalLevel: 3, gained: [] });
     expect(r.spellSlots).toBeUndefined();
     expect(r.abilityScores).toBeUndefined();
-  });
-
-  it("без level і experience у тілі рівень не рахується з XP", () => {
-    expect(buildCharacterUpdateData({ ...base, character: { ...character, experience: 999_999 }, data: { name: "x" } }).finalLevel).toBe(3);
   });
 
   it("підвищення: +1 на рівень поверх значень із тіла, слоти — приріст за таблицею", () => {

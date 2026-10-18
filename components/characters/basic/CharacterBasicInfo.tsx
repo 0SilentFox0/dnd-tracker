@@ -27,7 +27,6 @@ interface CharacterBasicInfoProps {
     subrace?: string;
     alignment?: string;
     background?: string;
-    experience: number;
     avatar?: string;
     setters: {
       setName: (value: string) => void;
@@ -41,7 +40,6 @@ interface CharacterBasicInfoProps {
       setSubrace: (value: string) => void;
       setAlignment: (value: string) => void;
       setBackground: (value: string) => void;
-      setExperience: (value: number) => void;
       setAvatar: (value: string) => void;
     };
   };
@@ -67,7 +65,6 @@ export function CharacterBasicInfo({
     race,
     subrace,
     alignment,
-    experience,
     avatar,
     setters,
   } = basicInfo;
@@ -200,17 +197,6 @@ export function CharacterBasicInfo({
           max="30"
           value={level}
           onChange={(e) => setters.setLevel(parseInt(e.target.value) || 1)}
-          containerClassName="w-full min-w-0"
-          className="w-full"
-        />
-        <LabeledInput
-          id="experience"
-          label="Досвід (XP)"
-          labelClassName="text-xs leading-tight"
-          type="number"
-          min="0"
-          value={experience}
-          onChange={(e) => setters.setExperience(parseInt(e.target.value) || 0)}
           containerClassName="w-full min-w-0"
           className="w-full"
         />

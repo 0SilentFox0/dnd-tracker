@@ -52,7 +52,6 @@ export async function POST(request: Request) {
         inviteCode: generateInviteCode(),
         dmUserId: userId,
         maxLevel: data.maxLevel,
-        xpMultiplier: data.xpMultiplier,
         allowPlayerEdit: data.allowPlayerEdit,
         members: {
           create: {

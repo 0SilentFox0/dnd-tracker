@@ -42,33 +42,6 @@ export function getSpellAttackBonus(
 }
 
 /**
- * Розраховує XP для рівня
- * Level 1 = 1000 XP
- * Кожен наступний рівень = попередній × multiplier
- */
-export function getXPForLevel(level: number, multiplier: number = 2.5): number {
-  if (level === 1) return 1000;
-
-  return Math.floor(getXPForLevel(level - 1, multiplier) * multiplier);
-}
-
-/**
- * Розраховує рівень на основі XP
- */
-export function getLevelFromXP(xp: number, multiplier: number = 2.5): number {
-  let level = 1;
-
-  let requiredXP = 1000;
-
-  while (xp >= requiredXP) {
-    level++;
-    requiredXP = Math.floor(requiredXP * multiplier);
-  }
-
-  return level;
-}
-
-/**
  * Розраховує чи попадання успішне
  */
 export function isHit(attackRoll: number, targetAC: number): boolean {

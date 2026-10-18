@@ -9,8 +9,8 @@ const deleteAllCharacters = vi.fn(async () => ({}));
 
 const getCharacters = vi.hoisted(() =>
   vi.fn(async () => [
-    { id: "ch1", name: "Арвен", type: "player", race: "Ельф", class: "Лучник", level: 3, strength: 10, armorClass: 14, initiative: 2, experience: 0, avatar: null },
-    { id: "ch2", name: "Борин", type: "npc_hero", race: "Гном", class: "Воїн", level: 4, strength: 14, armorClass: 16, initiative: 1, experience: 0, avatar: null },
+    { id: "ch1", name: "Арвен", type: "player", race: "Ельф", class: "Лучник", level: 3, strength: 10, armorClass: 14, initiative: 2, avatar: null },
+    { id: "ch2", name: "Борин", type: "npc_hero", race: "Гном", class: "Воїн", level: 4, strength: 14, armorClass: 16, initiative: 1, avatar: null },
   ]),
 );
 

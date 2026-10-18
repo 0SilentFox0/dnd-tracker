@@ -55,7 +55,6 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         subrace: data.subrace,
         alignment: data.alignment,
         background: data.background,
-        experience: data.experience,
         avatar: avatar.avatar ?? undefined,
 
         strength: data.strength,

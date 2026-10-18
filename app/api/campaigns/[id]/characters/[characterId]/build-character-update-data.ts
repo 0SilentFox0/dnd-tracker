@@ -3,16 +3,14 @@ import { Prisma } from "@prisma/client";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
-import { getLevelFromXP } from "@/lib/utils/common/calculations";
 import { fullSpellSlots, type SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
 type AbilityScores = Record<AbilityKey, number>;
 
 export interface BuildCharacterUpdateDataParams {
-  character: AbilityScores & { level: number; experience: number; spellSlots: unknown; seenLevel?: number | null };
-  data: Partial<AbilityScores> & { level?: number; experience?: number; spellSlots?: SpellSlots; [key: string]: unknown };
-  xpMultiplier: number;
+  character: AbilityScores & { level: number; spellSlots: unknown; seenLevel?: number | null };
+  data: Partial<AbilityScores> & { level?: number; spellSlots?: SpellSlots; [key: string]: unknown };
   campaign: { maxLevel: number };
   race: { spellSlotProgression: unknown } | null;
   rng?: () => number;
@@ -27,17 +25,8 @@ export interface CharacterUpdateComputed {
   seenLevel: number | undefined;
 }
 
-export function resolveFinalLevel(
-  character: { level: number; experience: number },
-  data: { level?: number; experience?: number },
-  xpMultiplier: number,
-  maxLevel: number = Number.POSITIVE_INFINITY,
-): number {
-  const explicit = data.level ?? character.level;
-
-  if (data.experience === undefined || data.experience === character.experience) return explicit;
-
-  return Math.max(explicit, Math.min(getLevelFromXP(data.experience, xpMultiplier), maxLevel));
+export function resolveFinalLevel(character: { level: number }, data: { level?: number }): number {
+  return data.level ?? character.level;
 }
 
 function tableSlots(level: number, existing: SpellSlots | null | undefined, progression: SpellSlotProgression[] | null, maxLevel: number): SpellSlots {
@@ -54,8 +43,8 @@ function tableSlots(level: number, existing: SpellSlots | null | undefined, prog
   return slots;
 }
 
-export function buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race, rng }: BuildCharacterUpdateDataParams): CharacterUpdateComputed {
-  const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
+export function buildCharacterUpdateData({ character, data, campaign, race, rng }: BuildCharacterUpdateDataParams): CharacterUpdateComputed {
+  const finalLevel = resolveFinalLevel(character, data);
 
   const existingSlots = (data.spellSlots ?? character.spellSlots) as SpellSlots | null | undefined;
 

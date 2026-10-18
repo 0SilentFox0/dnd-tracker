@@ -43,7 +43,6 @@ export interface CharacterFormData {
     subrace?: string;
     alignment?: string;
     background?: string;
-    experience: number;
     avatar?: string;
   };
   abilityScores: {
@@ -99,7 +98,6 @@ export interface Character {
   subrace?: string;
   alignment?: string;
   background?: string;
-  experience: number;
   avatar?: string;
   strength: number;
   dexterity: number;
@@ -152,7 +150,7 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative" | "experience"
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative"
 > & { user?: { displayName: string } | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";

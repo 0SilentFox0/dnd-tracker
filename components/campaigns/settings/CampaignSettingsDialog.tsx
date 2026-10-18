@@ -106,18 +106,6 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
               onChange={(e) => set("maxLevel", parseInt(e.target.value) || 1)}
               disabled={isSaving}
             />
-            <LabeledInput
-              id="campaign-xp"
-              label="Множник XP"
-              labelClassName="text-xs leading-tight"
-              type="number"
-              min="1"
-              max="10"
-              step="0.1"
-              value={fields.xpMultiplier}
-              onChange={(e) => set("xpMultiplier", parseFloat(e.target.value) || 1)}
-              disabled={isSaving}
-            />
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="allow-player-edit" checked={fields.allowPlayerEdit} onCheckedChange={(v) => set("allowPlayerEdit", v === true)} disabled={isSaving} />

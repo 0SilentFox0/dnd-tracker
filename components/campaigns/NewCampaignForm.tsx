@@ -22,7 +22,6 @@ export function NewCampaignForm() {
     name: "",
     description: "",
     maxLevel: 20,
-    xpMultiplier: 2.5,
     allowPlayerEdit: true,
   });
 
@@ -88,17 +87,6 @@ export function NewCampaignForm() {
                 max="30"
                 value={formData.maxLevel}
                 onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) })}
-              />
-              <LabeledInput
-                id="xpMultiplier"
-                label="Множник досвіду"
-                labelClassName="text-xs leading-tight"
-                type="number"
-                min="1"
-                max="10"
-                step="0.1"
-                value={formData.xpMultiplier}
-                onChange={(e) => setFormData({ ...formData, xpMultiplier: parseFloat(e.target.value) })}
               />
             </div>
             <div className="flex items-center space-x-2">

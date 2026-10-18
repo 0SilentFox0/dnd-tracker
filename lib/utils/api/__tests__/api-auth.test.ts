@@ -17,7 +17,6 @@ vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: findCampaign } } 
 const campaign = (role?: CampaignRoleValue) => ({
   id: "c1",
   maxLevel: 20,
-  xpMultiplier: 2,
   members: role ? [{ userId: "u1", role }] : [],
 });
 

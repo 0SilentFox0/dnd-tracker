@@ -55,7 +55,6 @@ describe("GET /api/campaigns/[id]/skills", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -118,7 +117,6 @@ describe("GET /api/campaigns/[id]/skills", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -144,7 +142,7 @@ describe("GET /api/campaigns/[id]/skills", () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
       isDM: false,
-      campaign: { id: "c1", maxLevel: 20, xpMultiplier: 2.5, members: [{ userId: "user-1", role: "player" }] },
+      campaign: { id: "c1", maxLevel: 20, members: [{ userId: "user-1", role: "player" }] },
     });
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
 
@@ -200,7 +198,6 @@ describe("POST /api/campaigns/[id]/skills", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -228,7 +225,6 @@ describe("POST /api/campaigns/[id]/skills", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -323,7 +319,6 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -376,7 +371,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -404,7 +398,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -456,7 +449,6 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -542,7 +534,6 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -570,7 +561,6 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -669,7 +659,6 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -695,7 +684,6 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
