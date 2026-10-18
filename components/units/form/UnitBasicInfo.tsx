@@ -18,6 +18,12 @@ const NUMBER_FIELDS: Array<{ key: NumericKey; label: string; required?: boolean 
   { key: "maxTargets", label: "Макс. цілей" },
 ];
 
+const GRID_SIZE_OPTIONS = [
+  { value: "1", label: "1×1 — звичайна" },
+  { value: "2", label: "2×2 — велика" },
+  { value: "3", label: "3×3 — величезна" },
+];
+
 interface UnitBasicInfoProps {
   formData: Partial<Unit>;
   races: Race[];
@@ -61,6 +67,17 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
             />
           </div>
         ))}
+        <div className="col-span-2 flex flex-col justify-end">
+          <Label htmlFor="gridSize" className="text-xs leading-tight">
+            Розмір на сітці
+          </Label>
+          <SelectField
+            id="gridSize"
+            value={String(formData.gridSize ?? 1)}
+            onValueChange={(value) => onChange({ gridSize: Number(value) || 1 })}
+            options={GRID_SIZE_OPTIONS}
+          />
+        </div>
       </div>
     </div>
   );

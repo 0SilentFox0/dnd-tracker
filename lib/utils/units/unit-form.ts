@@ -23,6 +23,7 @@ export function buildUnitFormData(unit: Unit): Partial<Unit> {
     avatar: unit.avatar || null,
     minTargets: unit.minTargets,
     maxTargets: unit.maxTargets,
+    gridSize: unit.gridSize ?? 1,
   };
 }
 
@@ -49,6 +50,7 @@ export function emptyUnitFormDefaults(): Partial<Unit> {
     avatar: null,
     minTargets: 1,
     maxTargets: 1,
+    gridSize: 1,
   };
 }
 

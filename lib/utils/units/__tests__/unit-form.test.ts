@@ -14,6 +14,14 @@ describe("unit form", () => {
     expect(f.avatar).toBe("https://x/a.png");
   });
 
+  it("gridSize: дефолт 1, юніт із 2 зберігає 2 у формі й payload", () => {
+    const big = { ...unit, gridSize: 2 } as unknown as Unit;
+
+    expect(emptyUnitFormDefaults().gridSize).toBe(1);
+    expect(buildUnitFormData(big).gridSize).toBe(2);
+    expect(buildUnitUpdatePayload(buildUnitFormData(big), big).gridSize).toBe(2);
+  });
+
   it("немає фолбеку на назву групи", () => {
     const legacy = { ...unit, raceId: null, race: " ", unitGroup: { name: "Гобліни" } } as unknown as Unit;
 
