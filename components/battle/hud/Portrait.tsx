@@ -12,15 +12,19 @@ export interface PortraitProps {
   me?: boolean;
   extra?: boolean;
   className?: string;
+  fxId?: string;
+  fxAnchor?: "track";
 }
 
-export function Portrait({ participant, size = 40, current, me, extra, className }: PortraitProps) {
+export function Portrait({ participant, size = 40, current, me, extra, className, fxId, fxAnchor }: PortraitProps) {
   const { avatar, name, side } = participant.basicInfo;
 
   const ring = side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)";
 
   return (
     <span
+      data-fx-participant={fxId}
+      data-fx-anchor={fxAnchor}
       className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#241d16] text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
       style={{
         width: size,

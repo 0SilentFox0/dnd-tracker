@@ -47,6 +47,8 @@ const BattleResultScreen = dynamic(() => import("@/components/battle/overlays/Ba
 
 const DmRevivePrompt = dynamic(() => import("@/components/battle/dm/DmRevivePrompt").then((m) => m.DmRevivePrompt), { ssr: false });
 
+const BattleFxLayer = dynamic(() => import("@/components/battle/fx/BattleFxLayer").then((m) => m.BattleFxLayer), { ssr: false });
+
 const BattlePreparationView = dynamic(() => import("@/components/battle/overlays/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
@@ -81,6 +83,7 @@ export function BattleScreen() {
       <BattleToast />
       {isDM && <DmRevivePrompt />}
       {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
+      <BattleFxLayer />
     </div>
   );
 }

@@ -31,7 +31,7 @@ export const InitiativeTrack = memo(function InitiativeTrack() {
           </span>
         ) : (
           <button key={keys[i]} data-flip={keys[i]} type="button" onClick={() => select(e.participant.basicInfo.id)} className="shrink-0">
-            <Portrait key={e.current ? "current" : "queued"} className={cn(e.current && "animate-[hud-turn_.6s_ease-out]")} participant={e.participant} size={e.current ? 52 : 36} current={e.current} me={!e.current && mine.has(e.participant.basicInfo.id)} extra={e.kind === "extra"} />
+            <Portrait fxId={e.participant.basicInfo.id} fxAnchor="track" key={e.current ? "current" : "queued"} className={cn(e.current && "animate-[hud-turn_.6s_ease-out]")} participant={e.participant} size={e.current ? 52 : 36} current={e.current} me={!e.current && mine.has(e.participant.basicInfo.id)} extra={e.kind === "extra"} />
           </button>
         ),
       )}
