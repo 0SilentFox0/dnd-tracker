@@ -75,3 +75,12 @@ export function stepBodies(list: Debris[], dt: number, gravity: number, floor?: 
     }
   }
 }
+
+/** ±1: the side away from the caster (where the target's foes stand); by the field half when both share a column. */
+export function farSide(target: FxPoint, from: FxPoint, fieldWidth: number) {
+  const dx = target.x - from.x;
+
+  if (Math.abs(dx) > 20) return Math.sign(dx);
+
+  return target.x < fieldWidth / 2 ? 1 : -1;
+}

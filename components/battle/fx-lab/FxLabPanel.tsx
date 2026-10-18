@@ -28,10 +28,14 @@ interface Props {
   playToken: number;
 }
 
-function targetsFor(archetype: FxArchetype) {
-  if (archetype === "heal" || archetype === "buff" || archetype === "haste" || archetype === "stoneskin") return ["a1"];
+const ON_ALLY = new Set<FxArchetype>(["heal", "buff", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "sunbeam", "resurrect"]);
 
-  return archetype === "area" || archetype === "meteor" || archetype === "entangle" ? ["e1", "e2"] : ["e1"];
+const ON_ALL_ENEMIES = new Set<FxArchetype>(["area", "meteor", "entangle", "holyword"]);
+
+function targetsFor(archetype: FxArchetype) {
+  if (ON_ALLY.has(archetype)) return ["a1"];
+
+  return ON_ALL_ENEMIES.has(archetype) ? ["e1", "e2"] : ["e1"];
 }
 
 export function FxLabPanel({ archetype, element, critical, hit, playToken }: Props) {

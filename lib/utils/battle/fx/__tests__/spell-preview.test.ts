@@ -64,7 +64,7 @@ describe("previewSpellFx", () => {
   it("resurrection heals the fallen ally with the heal frame", () => {
     const p = preview("Воскресіння");
 
-    expect(p.spec).toMatchObject({ archetype: "heal" });
+    expect(p.spec).toMatchObject({ archetype: "resurrect" });
     expect(p.targets).toEqual([{ id: "fallen", frame: "heal", auras: [] }]);
     expect(p.targeting).toBe("полеглий союзник");
   });

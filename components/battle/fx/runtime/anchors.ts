@@ -37,3 +37,10 @@ export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from
 
   return { from, to, targetEls, actorEl };
 }
+
+/** Half the width and height of a target row, for effects that wrap it; `fallback` when it is gone. */
+export function halfSize(el: HTMLElement | null | undefined, fallback = { w: 88, h: 30 }) {
+  const r = el?.getBoundingClientRect();
+
+  return r && r.width > 0 ? { w: r.width / 2, h: r.height / 2 } : fallback;
+}

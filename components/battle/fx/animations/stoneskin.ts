@@ -1,3 +1,4 @@
+import { type BadgeLook, shieldBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
@@ -63,40 +64,7 @@ function plates(target: FxPoint): Plate[] {
   });
 }
 
-// The badge rises over the shell: a stone shield reading «+КБ».
-function badge(g: CanvasRenderingContext2D, x: number, y: number, alpha: number) {
-  g.save();
-  g.globalAlpha = alpha;
-  g.globalCompositeOperation = "source-over";
-  g.translate(x, y);
-  g.scale(1.3, 1.3);
-  g.shadowColor = "rgba(0,0,0,0.7)";
-  g.shadowBlur = 6;
-  g.beginPath();
-  g.moveTo(-19, -12);
-  g.lineTo(19, -12);
-  g.lineTo(19, 0);
-  g.quadraticCurveTo(19, 10, 0, 16);
-  g.quadraticCurveTo(-19, 10, -19, 0);
-  g.closePath();
-
-  const grad = g.createLinearGradient(0, -12, 0, 16);
-
-  grad.addColorStop(0, "#b4aea4");
-  grad.addColorStop(1, "#5a5650");
-  g.fillStyle = grad;
-  g.fill();
-  g.shadowBlur = 0;
-  g.strokeStyle = "#e6c25a";
-  g.lineWidth = 1.6;
-  g.stroke();
-  g.fillStyle = "#1e1a16";
-  g.font = "800 12px system-ui, sans-serif";
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  g.fillText("+КБ", 0, 0);
-  g.restore();
-}
+const STONE_BADGE: BadgeLook = { top: "#b4aea4", bottom: "#5a5650", rim: "#e6c25a", ink: "#1e1a16" };
 
 // Granite veins (relative to the centre) over the hero inside the shell: the skin itself turning to stone.
 function veins(): FxPoint[][] {
@@ -220,7 +188,7 @@ export const stoneskin: FxAnimation = ({ stage, to, targetEls }) =>
 
       const b = clamp01((t - SNAP_MS - 80) / 1300);
 
-      if (b > 0 && b < 1) badge(g, target.x, target.y - RY - 14 - easeOutCubic(b) * 24, envelope(b, 0.12, 0.3));
+      if (b > 0 && b < 1) shieldBadge(g, target.x, target.y - RY - 14 - easeOutCubic(b) * 24, envelope(b, 0.12, 0.3), "+КБ", STONE_BADGE);
     });
 
     const landed = wait(stage, SNAP_MS).then(() => thud(stage, target, targetEls[i]));

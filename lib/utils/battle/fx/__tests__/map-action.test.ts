@@ -123,4 +123,19 @@ describe("mapAction", () => {
     expect(spell("Сповільнення", { spellTargeting: "enemy", spellEffectKinds: ["modifyStat"], appliedEffects: [{ id: "s", name: "Сповільнення", duration: 3, type: "debuff", targetId: "t" }] })).toMatchObject({ archetype: "slow", element: "arcane" });
     expect(spell("Кам'яна шкіра", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "stoneskin", element: "earth" });
   });
+
+  it("Light signatures override the computed archetype", () => {
+    const ally = { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] };
+
+    expect(spell("Очищення", { spellTargeting: "ally", spellEffectKinds: ["cleanse"] })).toMatchObject({ archetype: "cleanse", element: "radiant" });
+    expect(spell("Регенерація", { spellTargeting: "ally", spellEffectKinds: ["hot"] })).toMatchObject({ archetype: "regenerate", element: "nature" });
+    expect(spell("Праведна міць", ally)).toMatchObject({ archetype: "might", element: "radiant" });
+    expect(spell("Ухилення", { spellTargeting: "ally", spellEffectKinds: ["flag"] })).toMatchObject({ archetype: "deflect" });
+    expect(spell("Божественна сила", { spellTargeting: "ally", spellEffectKinds: ["damageBonus"] })).toMatchObject({ archetype: "empower", element: "radiant" });
+    expect(spell("Магічний імунітет", { spellTargeting: "ally", spellEffectKinds: ["flag"] })).toMatchObject({ archetype: "spellward", element: "arcane" });
+    expect(spell("Вічне світло", { spellTargeting: "ally", spellEffectKinds: ["heal", "hot"], totalHealing: 12 })).toMatchObject({ archetype: "sunbeam", element: "radiant" });
+    expect(spell("Воскресіння", { spellTargeting: "allyDead", spellEffectKinds: ["heal"], totalHealing: 20 })).toMatchObject({ archetype: "resurrect", element: "radiant" });
+    expect(spell("Божественна відплата", { spellDamageType: "radiant", spellTargeting: "enemy", spellEffectKinds: ["dealDamage"], totalDamage: 30 })).toMatchObject({ archetype: "retribution", element: "radiant" });
+    expect(spell("Слово світла", { spellDamageType: "radiant", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"], totalDamage: 30 })).toMatchObject({ archetype: "holyword", element: "radiant" });
+  });
 });

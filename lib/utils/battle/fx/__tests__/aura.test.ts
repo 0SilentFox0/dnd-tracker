@@ -61,6 +61,18 @@ describe("spell-check aura rules", () => {
     expect(auraOf(fx({ name: "Кам'яна шкіра", type: "buff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: 3 }] as ActiveEffect["abilityEffects"] }))).toBe("stoneskin");
   });
 
+  it("Light buffs get their own auras by name, ahead of the generic regen/blessing", () => {
+    const buff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ name, type: "buff", ...over }));
+
+    expect(buff("Регенерація", { hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>)).toBe("lifedome");
+    expect(buff("Вічне світло", { hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>)).toBe("sunglow");
+    expect(buff("Магічний імунітет")).toBe("spellward");
+    expect(buff("Ухилення")).toBe("deflect");
+    expect(buff("Праведна міць")).toBe("might");
+    expect(buff("Божественна сила")).toBe("holyweapon");
+    expect(aurasOf([fx({ id: "a", name: "Божественна сила", type: "buff" }), fx({ id: "b", name: "Магічний імунітет", type: "buff" }), fx({ id: "c", name: "Регенерація", type: "buff" })])).toEqual(["lifedome", "spellward"]);
+  });
+
   it("fxElement maps debuffs and conditions", () => {
     const el = (fxElement: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ fxElement, ...over }));
 

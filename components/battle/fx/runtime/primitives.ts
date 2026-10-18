@@ -67,7 +67,8 @@ export async function shoot(s: Stage, from: FxPoint, to: FxPoint, ms: number, ti
   hide();
 }
 
-export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: number, width = 3) {
+/** An expanding ring; `squash` < 1 flattens it into an ellipse lying round a row. */
+export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: number, width = 3, squash = 1) {
   let k = 0;
 
   const hide = show(s, (g) => {
@@ -78,7 +79,7 @@ export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: numbe
     g.strokeStyle = color;
     g.lineWidth = width * (1 - k) + 0.5;
     g.beginPath();
-    g.arc(at.x, at.y, 8 + e * to, 0, Math.PI * 2);
+    g.ellipse(at.x, at.y, 8 + e * to, (8 + e * to) * squash, 0, 0, Math.PI * 2);
     g.stroke();
   });
 

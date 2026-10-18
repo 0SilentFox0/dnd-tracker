@@ -64,4 +64,17 @@ describe("impactFor", () => {
     expect(cast("Поспіх", { spellEffectKinds: ["modifyStat"] })).toBeNull();
     expect(cast("Кам'яна шкіра", { spellEffectKinds: ["modifyStat"] })).toBeNull();
   });
+
+  it("Light: the smites hit with radiant damage, sunbeam and resurrection heal, the wards and blessings have no frame", () => {
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+
+    const smite = { spellDamageType: "radiant", spellEffectKinds: ["dealDamage"], totalDamage: 20 };
+
+    expect(cast("Слово світла", smite)).toEqual({ element: "radiant", kind: "damage", delayMs: IMPACT_MS.holyword });
+    expect(cast("Божественна відплата", smite)).toEqual({ element: "radiant", kind: "damage", delayMs: IMPACT_MS.retribution });
+    expect(cast("Вічне світло", { spellEffectKinds: ["heal", "hot"], totalHealing: 9 })).toMatchObject({ kind: "heal", delayMs: IMPACT_MS.sunbeam });
+    expect(cast("Воскресіння", { spellEffectKinds: ["heal"], totalHealing: 9 })).toMatchObject({ kind: "heal", delayMs: IMPACT_MS.resurrect });
+
+    for (const name of ["Очищення", "Регенерація", "Праведна міць", "Ухилення", "Божественна сила", "Магічний імунітет"]) expect(cast(name, { spellEffectKinds: ["modifyStat"] })).toBeNull();
+  });
 });

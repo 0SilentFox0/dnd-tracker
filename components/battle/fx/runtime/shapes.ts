@@ -217,3 +217,77 @@ export function stonePlate(g: CanvasRenderingContext2D, pts: FxPoint[], size: nu
   g.quadraticCurveTo(0, size * 0.15, pts[Math.floor(pts.length / 2)].x * 0.6, pts[Math.floor(pts.length / 2)].y * 0.6);
   g.stroke();
 }
+
+/** A «+» centred on (x, y), `size` px across. */
+export function plusSign(g: CanvasRenderingContext2D, x: number, y: number, size: number, fill: string) {
+  const h = size / 2;
+
+  const w = h * 0.36;
+
+  g.fillStyle = fill;
+  g.fillRect(x - w, y - h, w * 2, h * 2);
+  g.fillRect(x - h, y - w, h * 2, w * 2);
+}
+
+/** A sword along the x axis: pommel at the origin, tip at `len`. Fills the blade with `blade`, hilt and guard with `hilt`. */
+export function sword(g: CanvasRenderingContext2D, len: number, blade: string | CanvasGradient, hilt: string) {
+  const grip = len * 0.2;
+
+  const w = len * 0.055;
+
+  g.beginPath();
+  g.moveTo(grip, -w);
+  g.lineTo(len * 0.86, -w * 0.8);
+  g.lineTo(len, 0);
+  g.lineTo(len * 0.86, w * 0.8);
+  g.lineTo(grip, w);
+  g.closePath();
+  g.fillStyle = blade;
+  g.fill();
+  g.fillStyle = hilt;
+  g.fillRect(grip - len * 0.025, -len * 0.14, len * 0.05, len * 0.28);
+  g.fillRect(len * 0.02, -w * 0.6, grip - len * 0.02, w * 1.2);
+  g.beginPath();
+  g.arc(len * 0.02, 0, w * 1.1, 0, Math.PI * 2);
+  g.fill();
+}
+
+export function hexPath(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  g.beginPath();
+
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
+
+    g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+  }
+
+  g.closePath();
+}
+
+/** An arrow with its tip at the origin and the shaft running back along −x for `len`. */
+export function arrow(g: CanvasRenderingContext2D, len: number, shaft = "#8a5a2b", fletch = "#efe6d2") {
+  g.lineCap = "round";
+  g.strokeStyle = shaft;
+  g.lineWidth = Math.max(1, len * 0.06);
+  g.beginPath();
+  g.moveTo(-len * 0.1, 0);
+  g.lineTo(-len, 0);
+  g.stroke();
+  g.fillStyle = "#cfd6dc";
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.lineTo(-len * 0.16, -len * 0.07);
+  g.lineTo(-len * 0.16, len * 0.07);
+  g.closePath();
+  g.fill();
+  g.fillStyle = fletch;
+
+  for (const side of [-1, 1]) {
+    g.beginPath();
+    g.moveTo(-len * 0.82, 0);
+    g.lineTo(-len * 1.02, side * len * 0.1);
+    g.lineTo(-len * 0.94, 0);
+    g.closePath();
+    g.fill();
+  }
+}
