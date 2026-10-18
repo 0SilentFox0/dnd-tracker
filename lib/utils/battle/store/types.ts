@@ -1,6 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { AbilityUsageCounter } from "@/types/abilities";
-import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant, GridPoint } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -42,6 +42,8 @@ export interface ParticipantState {
   activeEffects: unknown[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
   pendingExtraActions?: number;
+  position?: GridPoint;
+  movementUsed?: number;
   spellSlotsCurrent: Record<string, number>;
 }
 
@@ -72,6 +74,7 @@ export interface BattleMeta {
   description: string | null;
   setup: BattlePreparationParticipant[];
   friendlyFire: boolean;
+  map: BattleMapConfig | null;
   createdAt: Date;
 }
 

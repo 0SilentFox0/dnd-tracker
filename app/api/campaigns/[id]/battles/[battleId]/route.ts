@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { createBattleSchema } from "@/lib/schemas";
+import { battleMapSchema, createBattleSchema } from "@/lib/schemas";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -18,6 +19,7 @@ const patchBattleSchema = z
     name: z.string().min(1).optional(),
     description: z.string().nullable().optional(),
     participants: createBattleSchema.shape.participants.optional(),
+    map: battleMapSchema.nullable().optional(),
   })
   .strict();
 
@@ -45,7 +47,12 @@ export async function PATCH(request: Request, { params }: Params) {
       return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
-    await prisma.battleScene.update({ where: { id: battleId }, data: { ...parsed, version: { increment: 1 } } });
+    const { map, ...rest } = parsed;
+
+    await prisma.battleScene.update({
+      where: { id: battleId },
+      data: { ...rest, ...(map !== undefined && { map: map ?? Prisma.DbNull }), version: { increment: 1 } },
+    });
 
     return readBattleScene({ id, battleId });
   } catch (error) {

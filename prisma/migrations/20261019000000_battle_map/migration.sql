@@ -1,0 +1,3 @@
+ALTER TABLE "battle_scenes" ADD COLUMN "map" JSONB;
+
+ALTER TABLE "units" ADD COLUMN "gridSize" INTEGER NOT NULL DEFAULT 1;

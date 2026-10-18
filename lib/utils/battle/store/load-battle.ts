@@ -6,7 +6,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
-import type { BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleDb = Pick<
   PrismaClient,
@@ -101,6 +101,7 @@ export async function loadBattle(
       version: true,
       eventSeq: true,
       pendingMoraleCheck: true,
+      map: true,
       startedAt: true,
       completedAt: true,
       createdAt: true,
@@ -138,6 +139,7 @@ export async function loadBattle(
       description: row.description,
       setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
       friendlyFire: row.campaign.friendlyFire ?? false,
+      map: (row.map ?? null) as BattleMapConfig | null,
       createdAt: row.createdAt,
     },
     participants: all.filter((p) => !p.isPending).map((p) => p.participant),

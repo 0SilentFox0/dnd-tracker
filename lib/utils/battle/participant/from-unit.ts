@@ -125,6 +125,7 @@ export async function createBattleParticipantFromUnit(
       tempHp: 0,
       armorClass: unit.armorClass,
       speed: unit.speed,
+      gridSize: unit.gridSize ?? 1,
       morale: (unit as { morale?: number }).morale || 0,
       status: CombatStatus.ACTIVE,
       minTargets: unit.minTargets ?? 1,

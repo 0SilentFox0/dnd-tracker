@@ -21,6 +21,7 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     armorClass: row.armorClass,
     initiative: row.initiative,
     speed: row.speed,
+    gridSize: row.gridSize,
     maxHp: row.maxHp,
     proficiencyBonus: row.proficiencyBonus,
     minTargets: row.minTargets,

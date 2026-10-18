@@ -42,7 +42,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
     ...init.scene,
   };
 
-  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: CREATED_AT };
+  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: CREATED_AT };
 
   let rows: StoredParticipant[] = wire([
     ...init.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })),

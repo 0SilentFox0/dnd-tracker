@@ -42,6 +42,7 @@ export function toBattleResponse(
     initiativeOrder: participants,
     pendingSummons: pending,
     pendingMoraleCheck: scene.pendingMoraleCheck,
+    map: meta.map,
     battleLog: log.entries,
     ...(log.mode === "append" && { battleLogMode: "append" as const }),
     ...(log.cancelledFrom !== undefined && { battleLogCancelledFrom: log.cancelledFrom }),

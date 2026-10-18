@@ -12,7 +12,7 @@ const scene: BattleSceneState = {
   version: 1, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", battleId: "b1" } });
 

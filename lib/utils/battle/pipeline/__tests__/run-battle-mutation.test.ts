@@ -28,7 +28,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       startedAt: null,
       completedAt: null,
     },
-    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date("2026-01-01") },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date("2026-01-01") },
     participants: [hero, goblin],
     pending: [],
     isDM: false,

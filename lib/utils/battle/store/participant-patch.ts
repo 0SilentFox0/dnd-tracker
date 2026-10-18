@@ -11,7 +11,7 @@ export const PATCHABLE_PARTICIPANT_FIELDS = {
   abilities: ["initiative"],
   combatStats: ["currentHp", "tempHp", "maxHp", "morale", "status"],
   spellcasting: ["spellSlots"],
-  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions"],
+  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions", "position", "movementUsed"],
   actionFlags: ["hasUsedAction", "hasUsedBonusAction", "hasUsedReaction", "hasExtraTurn"],
 } as const satisfies PatchableFields;
 

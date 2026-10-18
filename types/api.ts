@@ -2,6 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
+import type { BattleMapConfig } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -56,6 +57,7 @@ export interface BattleScene {
   /** Записи з actionIndex ≥ цього значення скасовано відкатом */
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
+  map?: BattleMapConfig | null;
   /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
   knowledge?: BattleKnowledge;
 }

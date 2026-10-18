@@ -10,7 +10,7 @@ const scene: BattleSceneState = {
   eventSeq: 4, pendingMoraleCheck: null, startedAt: null, completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 

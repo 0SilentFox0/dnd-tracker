@@ -138,6 +138,7 @@ model Unit {
   armorClass       Int      @default(10)
   initiative       Int      @default(0)
   speed            Int      @default(30)
+  gridSize         Int      @default(1)
   maxHp            Int      @default(10)
   proficiencyBonus Int      @default(2)
   attacks          Json     @default("[]")
@@ -308,6 +309,7 @@ model BattleScene {
   currentRound       Int                 @default(1)
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
+  map                Json?
   createdAt          DateTime            @default(now())
   startedAt          DateTime?
   completedAt        DateTime?

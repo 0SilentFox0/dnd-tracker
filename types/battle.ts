@@ -175,6 +175,8 @@ export interface BattleParticipantCombatStats {
   tempHp: number;
   armorClass: number;
   speed: number; // швидкість переміщення
+  /** Сторона footprint у клітинках (1–3); немає = 1 */
+  gridSize?: number;
   morale: number; // від -3 до +3, default 0
   status: CombatStatusType;
   minTargets: number;
@@ -218,6 +220,10 @@ export interface BattleParticipantBattleData {
   schoolMastery?: Record<string, "basic" | "advanced" | "expert">;
   /** Раунд, у якому власник востаннє вказав зону кожної аури в області (auraId → раунд), навіть порожню */
   auraZones?: Record<string, number>;
+  /** Якір (лівий верхній кут footprint) на карті бою; немає — учасник поза картою */
+  position?: GridPoint;
+  /** Клітинок пройдено в поточному ході */
+  movementUsed?: number;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

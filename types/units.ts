@@ -20,6 +20,7 @@ export interface Unit {
   armorClass: number;
   initiative: number;
   speed: number;
+  gridSize: number;
   maxHp: number;
   proficiencyBonus: number;
   minTargets: number;

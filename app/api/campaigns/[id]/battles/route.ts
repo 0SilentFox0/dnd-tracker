@@ -37,6 +37,7 @@ export async function POST(
         participants: data.participants,
         currentRound: 1,
         currentTurnIndex: 0,
+        ...(data.map && { map: data.map }),
       },
     });
 

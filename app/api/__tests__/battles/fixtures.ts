@@ -27,7 +27,7 @@ export function context(over: Partial<BattleMutationContext> = {}): BattleMutati
       startedAt: null,
       completedAt: null,
     },
-    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date() },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() },
     participants: [hero, goblin],
     pending: [],
     userId: "user-1",

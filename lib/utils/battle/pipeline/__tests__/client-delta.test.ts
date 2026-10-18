@@ -17,7 +17,7 @@ const scene: BattleSceneState = {
   eventSeq: 10, pendingMoraleCheck: null, startedAt: new Date("2026-01-01"), completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() };
 
 describe("buildClientDelta", () => {
   it("зміна HP наявного учасника — лише патч поля, без order, коли порядок той самий", () => {
