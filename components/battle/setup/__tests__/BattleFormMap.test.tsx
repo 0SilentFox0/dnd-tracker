@@ -1,13 +1,13 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleFormMap } from "@/components/battle/setup/BattleFormMap";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
 
-vi.mock("next/image", () => ({ default: () => null }));
+vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
 vi.stubGlobal(
   "ResizeObserver",
   class {
@@ -96,5 +96,27 @@ describe("BattleFormMap", () => {
     enable();
     fireEvent.click(screen.getByRole("button", { name: "Стандартний фон" }));
     expect(seen.editor.map.background).toBeNull();
+  });
+
+  it("typed foreign url does not reach next/image; default background shown until saved", () => {
+    const { container } = render(<Harness />);
+
+    enable();
+    act(() => seen.editor.setBackground("h"));
+    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
+
+    act(() => seen.editor.setBackground("https://evil.example/a.png"));
+    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
+
+    act(() => seen.editor.setBackground("data:image/webp;base64,AAAA"));
+    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("data:image/webp;base64,AAAA");
+  });
+
+  it("blocked cells are tinted in the editor preview", () => {
+    const { container } = render(<Harness />);
+
+    enable();
+    fireEvent.change(screen.getByLabelText("Зверху"), { target: { value: "1" } });
+    expect(blocked(container)[0].getAttribute("fill")).not.toBe("transparent");
   });
 });

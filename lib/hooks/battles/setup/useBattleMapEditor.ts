@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { applyMargins, inBounds, inferMargins, type Margins, resizeMap, toggleBlocked } from "@/lib/utils/battle/grid";
+import { applyMargins, clampMargins, hasPlayableArea, inBounds, inferMargins, type Margins, resizeMap, toggleBlocked } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -18,16 +18,29 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   const [paint, setPaint] = useState(false);
 
   const setSize = useCallback(
-    (cols: number, rows: number) => setMap((m) => applyMargins(resizeMap(applyMargins(m, NO_MARGINS, margins), cols, rows), margins, NO_MARGINS)),
-    [margins],
+    (cols: number, rows: number) => {
+      const nextMargins = clampMargins({ cols, rows }, margins);
+
+      const next = applyMargins(resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows), nextMargins, NO_MARGINS);
+
+      if (!hasPlayableArea(next)) return;
+
+      setMap(next);
+      setMarginsState(nextMargins);
+    },
+    [map, margins],
   );
 
   const setMargins = useCallback(
     (next: Margins) => {
-      setMap((m) => applyMargins(m, next, margins));
+      const nextMap = applyMargins(map, next, margins);
+
+      if (!hasPlayableArea(nextMap)) return;
+
+      setMap(nextMap);
       setMarginsState(next);
     },
-    [margins],
+    [map, margins],
   );
 
   const setOpacity = useCallback((opacity: number) => setMap((m) => ({ ...m, opacity })), []);
@@ -36,7 +49,11 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const onCellClick = useCallback(
     (p: GridPoint) => {
-      if (paint && inBounds(map, p)) setMap((m) => toggleBlocked(m, p));
+      if (!paint || !inBounds(map, p)) return;
+
+      const next = toggleBlocked(map, p);
+
+      if (hasPlayableArea(next)) setMap(next);
     },
     [paint, map],
   );

@@ -8,15 +8,7 @@ import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { Switch } from "@/components/ui/switch";
 import type { BattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
-import type { Margins } from "@/lib/utils/battle/grid";
-
-const MIN_SIDE = 4;
-
-const MAX_SIDE = 40;
-
-const MAX_MARGIN = 10;
-
-const MIN_PLAYABLE = 2;
+import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE } from "@/lib/utils/battle/grid";
 
 const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
   { key: "top", label: "Зверху" },
@@ -24,10 +16,6 @@ const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
   { key: "bottom", label: "Знизу" },
   { key: "left", label: "Зліва" },
 ];
-
-const OPPOSITE: Record<keyof Margins, keyof Margins> = { top: "bottom", bottom: "top", left: "right", right: "left" };
-
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
 function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -41,11 +29,9 @@ function ToggleRow({ id, label, checked, onChange }: { id: string; label: string
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
   const { enabled, map, margins } = editor;
 
-  const span = (key: keyof Margins) => (key === "top" || key === "bottom" ? map.rows : map.cols);
+  const setMargin = (key: keyof Margins, raw: number | undefined) => editor.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, marginLimit(map, margins, key)) });
 
-  const limit = (key: keyof Margins) => clamp(span(key) - margins[OPPOSITE[key]] - MIN_PLAYABLE, 0, MAX_MARGIN);
-
-  const setMargin = (key: keyof Margins, raw: number | undefined) => editor.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, limit(key)) });
+  const previewMap = isPreviewSafeBackground(map.background) || map.background === null ? map : { ...map, background: null };
 
   const setEqual = () => {
     const cap = Math.min(MAX_MARGIN, Math.floor((map.rows - MIN_PLAYABLE) / 2), Math.floor((map.cols - MIN_PLAYABLE) / 2));
@@ -111,7 +97,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
             </div>
           </div>
           <div className="h-[55vh] min-w-0 lg:h-[60vh]">
-            <BattleMap map={map} participants={[]} actions={{ onCellClick: editor.onCellClick }} className="h-full" clickableBlocked={editor.paint} />
+            <BattleMap map={previewMap} participants={[]} actions={{ onCellClick: editor.onCellClick }} className="h-full" clickableBlocked={editor.paint} showBlocked />
           </div>
         </div>
       )}

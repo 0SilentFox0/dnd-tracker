@@ -1,4 +1,4 @@
-import { cellKey, inBounds, marginCells,type Margins } from "./geometry";
+import { cellKey, inBounds, isPlayable, marginCells, type Margins } from "./geometry";
 
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
@@ -72,4 +72,52 @@ export function applyMargins(map: BattleMapConfig, m: Margins, prev: Margins = i
   const drawn = (map.blocked ?? []).filter((k) => !old.has(k));
 
   return withBlocked(map, [...marginsBlocked(map.cols, map.rows, m), ...drawn]);
+}
+
+export const MIN_SIDE = 4;
+
+export const MAX_SIDE = 40;
+
+export const MAX_MARGIN = 10;
+
+export const MIN_PLAYABLE = 2;
+
+const OPPOSITE: Record<keyof Margins, keyof Margins> = { top: "bottom", bottom: "top", left: "right", right: "left" };
+
+export const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+
+export function marginLimit(map: Pick<BattleMapConfig, "cols" | "rows">, margins: Margins, key: keyof Margins): number {
+  const span = key === "top" || key === "bottom" ? map.rows : map.cols;
+
+  return clamp(span - margins[OPPOSITE[key]] - MIN_PLAYABLE, 0, MAX_MARGIN);
+}
+
+export function clampMargins(map: Pick<BattleMapConfig, "cols" | "rows">, margins: Margins): Margins {
+  const next = { ...margins };
+
+  for (const key of ["top", "bottom", "left", "right"] as const) next[key] = clamp(next[key], 0, marginLimit(map, next, key));
+
+  return next;
+}
+
+export function hasPlayableArea(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked">, side = MIN_PLAYABLE): boolean {
+  for (let y = 0; y + side <= map.rows; y++) {
+    for (let x = 0; x + side <= map.cols; x++) {
+      let ok = true;
+
+      for (let dy = 0; dy < side && ok; dy++) for (let dx = 0; dx < side && ok; dx++) ok = isPlayable(map, { x: x + dx, y: y + dy });
+
+      if (ok) return true;
+    }
+  }
+
+  return false;
+}
+
+const STORAGE_URL = /^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\/v1\/object\/public\/\S+$/;
+
+export function isPreviewSafeBackground(src: string | null | undefined): src is string {
+  if (!src) return false;
+
+  return /^\/battle-maps\/[\w.-]+\.(webp|jpg|png)$/.test(src) || /^data:image\/(png|jpeg|webp);base64,/.test(src) || STORAGE_URL.test(src);
 }

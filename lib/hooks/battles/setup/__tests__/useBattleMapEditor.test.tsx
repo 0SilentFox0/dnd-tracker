@@ -44,4 +44,23 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.setSize(10, 10));
     expect(result.current.map.blocked).toHaveLength(100 - 64);
   });
+
+  it("зменшення розміру перетискає поля", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 12, rows: 12, background: null, opacity: 1 }));
+
+    act(() => result.current.setMargins({ top: 8, right: 0, bottom: 0, left: 0 }));
+    act(() => result.current.setSize(12, 4));
+    expect(result.current.margins.top).toBe(2);
+    expect(result.current.map.rows).toBe(4);
+  });
+
+  it("малювання не залишає менше 2×2 вільних клітинок", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1, blocked: ["0:0", "1:0", "2:0", "3:0", "0:1", "1:1", "2:1", "3:1", "2:2"] }));
+
+    act(() => result.current.setPaint(true));
+    act(() => result.current.onCellClick({ x: 1, y: 2 }));
+    expect(result.current.map.blocked).toHaveLength(9);
+    act(() => result.current.onCellClick({ x: 2, y: 2 }));
+    expect(result.current.map.blocked).toHaveLength(8);
+  });
 });

@@ -49,7 +49,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
             router.push(listHref);
             router.refresh();
           },
-          onError: () => void notify("Помилка при оновленні бою"),
+          onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при оновленні бою"),
         });
 
         return;

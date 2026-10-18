@@ -271,3 +271,60 @@ describe("POST /api/campaigns/[id]/battles — map background", () => {
     expect(await getResponseStatus(await post("/battle-maps/nicolas-tomb.webp"))).toBe(200);
   });
 });
+
+describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
+  const dm = { userId: "dm-1", isDM: true, campaign: { id: "c1" } };
+
+  async function patch(map: Record<string, unknown>) {
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1" } as never);
+    vi.mocked(prisma.battleScene.update).mockResolvedValue({} as never);
+
+    const { PATCH } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
+    const request = createRequest("http://localhost/api/campaigns/c1/battles/b1", {
+      method: "PATCH",
+      body: JSON.stringify({ map }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return PATCH(request, { params: Promise.resolve({ id: "c1", battleId: "b1" }) });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resolveMock.mockReset();
+  });
+
+  it("зберігає нормалізований фон", async () => {
+    resolveMock.mockResolvedValue({ ok: true, background: "https://s/battle-maps/c1/x.webp" });
+
+    await patch({ cols: 10, rows: 10, opacity: 1, background: "data:image/webp;base64,AAAA" });
+    expect(resolveMock).toHaveBeenCalledWith("data:image/webp;base64,AAAA", { campaignId: "c1" });
+    expect(prisma.battleScene.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ map: expect.objectContaining({ background: "https://s/battle-maps/c1/x.webp" }) }) }),
+    );
+  });
+
+  it("помилка завантаження дає 400 без запису", async () => {
+    resolveMock.mockResolvedValue({ ok: false, message: "Файл завеликий" });
+
+    const res = await patch({ cols: 10, rows: 10, opacity: 1, background: "data:image/webp;base64,AAAA" });
+
+    expect(await getResponseStatus(res)).toBe(400);
+    expect(await getResponseJson(res)).toEqual({ error: "Файл завеликий" });
+    expect(prisma.battleScene.update).not.toHaveBeenCalled();
+  });
+
+  it("карта без ігрової зони 2×2 відхиляється схемою з українським повідомленням", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const blocked = Array.from({ length: 16 }, (_, i) => `${i % 4}:${Math.floor(i / 4)}`);
+
+    const res = await patch({ cols: 4, rows: 4, opacity: 1, background: null, blocked });
+
+    expect(await getResponseStatus(res)).toBe(400);
+    expect(JSON.stringify(await getResponseJson(res))).toContain("Ігрова зона");
+    expect(prisma.battleScene.update).not.toHaveBeenCalled();
+  });
+});

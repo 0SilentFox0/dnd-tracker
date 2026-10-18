@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cellKey } from "../geometry";
-import { applyMargins, inferMargins, marginsBlocked, resizeMap, toggleBlocked } from "../map-editor";
+import { applyMargins, clampMargins, hasPlayableArea, inferMargins, isPreviewSafeBackground, marginsBlocked, resizeMap, toggleBlocked } from "../map-editor";
 
 import type { BattleMapConfig } from "@/types/battle";
 
@@ -46,5 +46,20 @@ describe("map-editor", () => {
     expect(next.blocked).toContain("10:6");
     expect(next.blocked).toHaveLength(20 * 12 - 18 * 10 + 1);
     expect(next.blocked).not.toContain("2:2");
+  });
+
+  it("clampMargins лишає 2 клітинки", () => {
+    expect(clampMargins({ cols: 12, rows: 4 }, { top: 8, right: 0, bottom: 0, left: 0 })).toEqual({ top: 2, right: 0, bottom: 0, left: 0 });
+  });
+
+  it("hasPlayableArea шукає блок 2×2", () => {
+    expect(hasPlayableArea({ cols: 4, rows: 4, blocked: ["0:1", "1:0", "3:3", "2:2"] })).toBe(true);
+    expect(hasPlayableArea({ cols: 4, rows: 4, blocked: ["0:1", "1:2", "2:1", "3:2", "1:0", "3:0"] })).toBe(false);
+  });
+
+  it("isPreviewSafeBackground пропускає лише безпечні джерела", () => {
+    for (const ok of ["/battle-maps/a.webp", "data:image/webp;base64,AAAA", "https://abc.supabase.co/storage/v1/object/public/battle-maps/x.webp"]) expect(isPreviewSafeBackground(ok)).toBe(true);
+
+    for (const bad of ["h", "https://evil.com/a.png", "http://abc.supabase.co/storage/v1/object/public/x", "", null]) expect(isPreviewSafeBackground(bad)).toBe(false);
   });
 });

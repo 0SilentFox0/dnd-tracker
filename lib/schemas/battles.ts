@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
@@ -14,7 +15,7 @@ export const battleMapSchema = z.object({
     .nullable(),
   opacity: z.number().min(0).max(1),
   blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
-});
+}).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
 
 export const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
