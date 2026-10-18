@@ -14,6 +14,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
+import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -33,7 +34,7 @@ import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
 import type { BattleScene } from "@/types/api";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
@@ -123,6 +124,12 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
     scene: { ...result.scene, status: BattleStatus.COMPLETED, completedAt: new Date() },
     events: [...result.events, battleActionToEvent({ ...battleAction, round })],
   };
+}
+
+function withPlacement(map: BattleMapConfig | null, status: BattleStatus, result: MutationResult): MutationResult {
+  if (!map || (result.scene?.status ?? status) !== BattleStatus.ACTIVE) return result;
+
+  return { ...result, participants: placeParticipants(map, result.participants) };
 }
 
 function respondWith(
@@ -238,9 +245,13 @@ export async function runBattleMutation<TBody>(
 
     const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting !== null;
 
-    const result = withVictory(loaded.scene, guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop()));
+    const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop());
 
-    if (options.dryRun?.(parsed.body)) {
+    const isDryRun = options.dryRun?.(parsed.body) ?? false;
+
+    const result = withVictory(loaded.scene, isDryRun ? mutated : withPlacement(loaded.meta.map, loaded.scene.status, mutated));
+
+    if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
 
       const [entries, knowledge] = await Promise.all([

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { GridShape, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -35,6 +35,12 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
     isMember: true,
     ...over,
   };
+}
+
+function withMap(): LoadedBattle & { isMember: boolean } {
+  const base = loaded();
+
+  return { ...base, meta: { ...base.meta, map: { grid: GridShape.SQUARE, cols: 10, rows: 5, background: null, opacity: 0.3 } } };
 }
 
 function delta(): BattleDelta {
@@ -317,6 +323,37 @@ describe("runBattleMutation", () => {
     expect(await res.json()).toEqual({ preview: true });
     expect(d.saveBattle).not.toHaveBeenCalled();
     expect(d.publish).not.toHaveBeenCalled();
+  });
+
+  it("розставляє учасників без позиції, коли в бою є карта", async () => {
+    const d = deps({ loadBattle: vi.fn(async () => withMap()) });
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    const saved = vi.mocked(d.saveBattle).mock.calls[0][1].participants;
+
+    expect(saved.every((p) => p.battleData.position !== undefined)).toBe(true);
+  });
+
+  it("бій без карти позицій не додає", async () => {
+    const d = deps();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    const saved = vi.mocked(d.saveBattle).mock.calls[0][1].participants;
+
+    expect(saved.some((p) => p.battleData.position !== undefined)).toBe(false);
+  });
+
+  it("dryRun з картою позицій не додає і нічого не зберігає", async () => {
+    const d = deps({ loadBattle: vi.fn(async () => withMap()) });
+
+    const res = await runBattleMutation(req(), { params, access: "member", dryRun: () => true, mutate: noop }, d);
+
+    const json = await res.json();
+
+    expect(d.saveBattle).not.toHaveBeenCalled();
+    expect(JSON.stringify(json)).not.toContain('"position"');
   });
 
   it("expectedVersion перевіряється, навіть якщо схема роуту його не оголошує", async () => {
