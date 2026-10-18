@@ -3,6 +3,7 @@ import { applyBalanceDamageMultiplier } from "../damage/balance-multiplier";
 import { applyMainActionUsed } from "../participant";
 import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
+import { diffAppliedEffects } from "./applied-effects";
 import { computeSpellPower, spellSaveDc } from "./power";
 import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
@@ -66,6 +67,20 @@ function abilityOf(spell: CastableSpell): ResolvedAbility {
     key: `spell:${spell.id}`,
     source: { type: "skill", id: spell.id, name: spell.name, icon: spell.icon },
   } as ResolvedAbility;
+}
+
+const flatEffects = (effects: Effect[]): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" ? e.options : [e]));
+
+function fxMeta(def: CastableSpell["definition"]) {
+  const effects = flatEffects(def.effects);
+
+  const damage = effects.find(isDamageEffect) as { damageType?: string } | undefined;
+
+  return {
+    ...(damage?.damageType && { spellDamageType: damage.damageType }),
+    spellTargeting: def.targeting.kind,
+    spellEffectKinds: [...new Set(effects.map((e) => e.kind))],
+  };
 }
 
 function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: string): BattleAction {
@@ -291,7 +306,11 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, currentRound, [`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages].join(" | "));
 
+  const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
+
   Object.assign(action.actionDetails, {
+    ...fxMeta(def),
+    ...(applied.length > 0 && { appliedEffects: applied }),
     spellSlotUsed: spell.level,
     ...(dealt > 0 && { totalDamage: dealt }),
     ...(healed > 0 && { totalHealing: healed }),

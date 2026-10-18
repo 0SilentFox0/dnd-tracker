@@ -332,7 +332,12 @@ export interface BattleAction {
       id: string;
       name: string;
       duration: number;
+      type?: "buff" | "debuff" | "condition";
+      targetId?: string;
     }>;
+    spellDamageType?: string;
+    spellTargeting?: string;
+    spellEffectKinds?: string[];
     // Для пасивок:
     triggeredAbilities?: Array<{
       id: string;

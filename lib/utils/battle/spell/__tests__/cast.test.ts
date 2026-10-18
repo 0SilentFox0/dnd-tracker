@@ -385,3 +385,31 @@ describe("castSpell", () => {
     expect(r.battleAction.actionDetails.damageSteps?.e1).toHaveLength(2);
   });
 });
+
+describe("fx metadata", () => {
+  it("records damage type, targeting and effect kinds", () => {
+    const r = cast(spellOf({ targeting: { kind: "allEnemies" } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
+
+    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "fire", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"] });
+  });
+
+  it("finds damage type and kinds inside randomOf and omits damage type when none", () => {
+    const random = { kind: "randomOf", options: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 1 } }, dmg("cold")] } as Effect;
+
+    const r = cast(spellOf({ effects: [random] }), ["e1"], [enemy("e1")]);
+
+    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "cold", spellEffectKinds: expect.arrayContaining(["applyCondition", "dealDamage"]) });
+
+    const none = cast(spellOf({ effects: [{ kind: "note", text: "x" } as Effect] }), ["e1"], [enemy("e1")]);
+
+    expect("spellDamageType" in none.battleAction.actionDetails).toBe(false);
+  });
+
+  it("records applied debuffs per target", () => {
+    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+
+    expect(r.battleAction.actionDetails.appliedEffects?.[0]).toMatchObject({ targetId: "e1" });
+  });
+});
