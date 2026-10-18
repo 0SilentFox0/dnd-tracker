@@ -1,0 +1,58 @@
+import { cellKey, neighbors } from "./geometry";
+import { fits, occupiedBy, sizeOf } from "./occupancy";
+
+import { CELL_FEET } from "@/lib/constants/battle";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+
+export function movementBudget(p: BattleParticipant): number {
+  if (hasEffectMarker(p, "immobilized")) return 0;
+
+  return Math.max(0, Math.floor(p.combatStats.speed / CELL_FEET));
+}
+
+export function remainingMovement(p: BattleParticipant): number {
+  return Math.max(0, movementBudget(p) - (p.battleData.movementUsed ?? 0));
+}
+
+// союзники прохідні, вороги — стіна; стати можна лише на вільне місце
+export function reachable(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, budget: number): Map<string, number> {
+  const start = mover.battleData.position;
+
+  const result = new Map<string, number>();
+
+  if (!start) return result;
+
+  const size = sizeOf(mover);
+
+  const notMe = (p: BattleParticipant) => p.basicInfo.id !== mover.basicInfo.id;
+
+  const walls = occupiedBy(map.grid, participants, (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side);
+
+  const taken = occupiedBy(map.grid, participants, notMe);
+
+  const seen = new Map([[cellKey(start), 0]]);
+
+  const queue = [start];
+
+  for (let i = 0; i < queue.length; i++) {
+    const cur = queue[i];
+
+    const cost = seen.get(cellKey(cur)) ?? 0;
+
+    if (cost >= budget) continue;
+
+    for (const next of neighbors(map.grid, cur)) {
+      const key = cellKey(next);
+
+      if (seen.has(key) || !fits(map, next, size, walls)) continue;
+
+      seen.set(key, cost + 1);
+      queue.push(next);
+
+      if (fits(map, next, size, taken)) result.set(key, cost + 1);
+    }
+  }
+
+  return result;
+}

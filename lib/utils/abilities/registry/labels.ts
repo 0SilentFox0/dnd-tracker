@@ -65,6 +65,7 @@ export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> =
   disable_ranged_attacks: "без дальніх атак",
   disable_spell_casting: "без заклинань",
   skip_action: "втрата дії",
+  immobilized: "знерухомлений",
 };
 
 export function limitsLabel(l: Limits | undefined): string[] {

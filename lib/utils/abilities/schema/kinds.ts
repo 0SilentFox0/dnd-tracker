@@ -49,6 +49,7 @@ export const CONDITION_KEYS = [
   "disable_ranged_attacks",
   "disable_spell_casting",
   "skip_action",
+  "immobilized",
 ] as const;
 
 export type AbilityTarget = (typeof ABILITY_TARGETS)[number];
