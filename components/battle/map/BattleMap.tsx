@@ -20,6 +20,7 @@ export interface BattleMapProps {
   view?: BattleMapView;
   actions?: BattleMapActions;
   className?: string;
+  clickableBlocked?: boolean;
 }
 
 function markFill(mark: CellMark | number | undefined): string {
@@ -35,9 +36,10 @@ interface GridLayerProps {
   marks: BattleMapView["marks"];
   actions?: BattleMapActions;
   wasDragged: () => boolean;
+  clickableBlocked?: boolean;
 }
 
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: GridLayerProps) {
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked }: GridLayerProps) {
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -52,7 +54,17 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
     <>
       {cells.map((p) =>
         blocked.has(cellKey(p)) ? (
-          <polygon key={cellKey(p)} data-fx-cell={cellKey(p)} data-blocked="" points={cellPolygon(p)} fill="transparent" stroke="none" pointerEvents="none" />
+          <polygon
+            key={cellKey(p)}
+            data-fx-cell={cellKey(p)}
+            data-blocked=""
+            points={cellPolygon(p)}
+            fill="transparent"
+            stroke="none"
+            pointerEvents={clickableBlocked ? "all" : "none"}
+            style={{ cursor: clickableBlocked ? "pointer" : undefined }}
+            onClick={clickableBlocked ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
+          />
         ) : (
         <polygon
           key={cellKey(p)}
@@ -86,7 +98,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
   );
 });
 
-export function BattleMap({ map, participants, view, actions, className }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, clickableBlocked }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
   const { cols, rows } = map;
@@ -147,7 +159,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} />
+          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} />
           {from && end && (
             <g pointerEvents="none">
               <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />

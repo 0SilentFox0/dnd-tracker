@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AutopickCard } from "./AutopickCard";
 import { BalanceSummary } from "./BalanceSummary";
 import { BattleFormBasicInfo } from "./BattleFormBasicInfo";
+import { BattleFormMap } from "./BattleFormMap";
 import { CharactersListCard } from "./CharactersListCard";
 import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
@@ -69,6 +70,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
         />
       ),
     },
+    { id: BATTLE_FORM_TAB.map, label: "Карта", content: <BattleFormMap editor={setup.mapEditor} /> },
     {
       id: BATTLE_FORM_TAB.heroes,
       label: "Герої",
