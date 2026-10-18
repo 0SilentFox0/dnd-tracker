@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { EffectIcon, HealthBar, HealthLabel } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -23,7 +25,7 @@ const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effects, raised }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, effects, raised }: MapTokenHudProps) {
   const { currentHp, maxHp } = participant.combatStats;
 
   const change = useHpChange(currentHp);
@@ -135,3 +137,5 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
     </div>
   );
 }
+
+export const MapTokenHud = memo(MapTokenHudImpl);

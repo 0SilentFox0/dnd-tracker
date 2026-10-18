@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 import { MapToken } from "./MapToken";
@@ -31,6 +31,56 @@ function markFill(mark: CellMark | number | undefined): string {
 
 const NO_EFFECTS: ActiveEffect[] = [];
 
+interface GridLayerProps {
+  map: BattleMapConfig;
+  marks: BattleMapView["marks"];
+  actions?: BattleMapActions;
+  wasDragged: () => boolean;
+}
+
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: GridLayerProps) {
+  const cells = useMemo(() => {
+    const list: GridPoint[] = [];
+
+    for (let y = 0; y < map.rows; y++) for (let x = 0; x < map.cols; x++) list.push({ x, y });
+
+    return list;
+  }, [map.cols, map.rows]);
+
+  return (
+    <>
+      {cells.map((p) => (
+        <polygon
+          key={cellKey(p)}
+          data-fx-cell={cellKey(p)}
+          points={cellPolygon(p)}
+          fill={markFill(marks?.get(cellKey(p)))}
+          stroke="rgba(255,255,255,1)"
+          strokeOpacity={map.opacity}
+          strokeWidth={1.5}
+          vectorEffect="non-scaling-stroke"
+          style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
+          onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
+          onPointerEnter={() => actions?.onCellHover?.(p)}
+        />
+      ))}
+      {cells.map((p) => {
+        const mark = marks?.get(cellKey(p));
+
+        if (typeof mark !== "number") return null;
+
+        const c = cellCenter(p);
+
+        return (
+          <text key={`t${cellKey(p)}`} x={c.x} y={c.y} fontSize={UNIT * 0.22} textAnchor="middle" dominantBaseline="central" fill="#e8dcc4" opacity={0.8} pointerEvents="none">
+            {mark}
+          </text>
+        );
+      })}
+    </>
+  );
+});
+
 export function BattleMap({ map, participants, view, actions, className }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
@@ -60,17 +110,19 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
 
   const pxPerUnit = fit.width / size.width;
 
-  const cells: GridPoint[] = [];
+  const tokens = useMemo(
+    () =>
+      participants
+        .filter((p) => !p.battleData.reserved)
+        .flatMap((p) => {
+          const box = tokenBox(p);
 
-  for (let y = 0; y < map.rows; y++) for (let x = 0; x < map.cols; x++) cells.push({ x, y });
+          return box ? [{ p, box }] : [];
+        }),
+    [participants],
+  );
 
-  const tokens = participants
-    .filter((p) => !p.battleData.reserved)
-    .flatMap((p) => {
-      const box = tokenBox(p);
-
-      return box ? [{ p, box }] : [];
-    });
+  const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
   const from = view?.trajectory ? tokens.find((t) => t.p.basicInfo.id === view.trajectory?.fromId) : undefined;
 
@@ -88,38 +140,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
         <Image src={map.background ?? "/screen-bg/battle-bg.webp"} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          {cells.map((p) => {
-            const mark = view?.marks?.get(cellKey(p));
-
-            return (
-              <polygon
-                key={cellKey(p)}
-                data-fx-cell={cellKey(p)}
-                points={cellPolygon(p)}
-                fill={markFill(mark)}
-                stroke="rgba(255,255,255,1)"
-                strokeOpacity={map.opacity}
-                strokeWidth={1.5}
-                vectorEffect="non-scaling-stroke"
-                style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
-                onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
-                onPointerEnter={() => actions?.onCellHover?.(p)}
-              />
-            );
-          })}
-          {cells.map((p) => {
-            const mark = view?.marks?.get(cellKey(p));
-
-            if (typeof mark !== "number") return null;
-
-            const c = cellCenter(p);
-
-            return (
-              <text key={`t${cellKey(p)}`} x={c.x} y={c.y} fontSize={UNIT * 0.22} textAnchor="middle" dominantBaseline="central" fill="#e8dcc4" opacity={0.8} pointerEvents="none">
-                {mark}
-              </text>
-            );
-          })}
+          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} />
           {from && end && (
             <g pointerEvents="none">
               <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
@@ -136,7 +157,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
             pxPerUnit={pxPerUnit}
             selected={view?.selectedId === p.basicInfo.id}
             current={view?.currentId === p.basicInfo.id}
-            onClick={(id) => !wasDragged() && actions?.onTokenClick?.(id)}
+            onClick={onTokenClick}
           />
         ))}
         {tokens.map(({ p, box }) => {

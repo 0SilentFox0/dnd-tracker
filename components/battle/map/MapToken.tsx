@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Portrait } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -16,7 +18,7 @@ export interface MapTokenProps {
   onClick?: (id: string) => void;
 }
 
-export function MapToken({ participant, box, mapSize, pxPerUnit, selected, current, onClick }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, onClick }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
@@ -61,3 +63,5 @@ export function MapToken({ participant, box, mapSize, pxPerUnit, selected, curre
     </div>
   );
 }
+
+export const MapToken = memo(MapTokenImpl);
