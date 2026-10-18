@@ -9,24 +9,9 @@ import { MapTokenHud } from "./MapTokenHud";
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
-import type { ActiveEffect, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { ActiveEffect, BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
-export interface BattleMapView {
-  selectedId?: string | null;
-  currentId?: string | null;
-  /** cellKey → позначка; число — вартість руху (показується дрібно в клітинці) */
-  marks?: Map<string, CellMark | number>;
-  /** Лінія траєкторії від учасника до клітинки/учасника */
-  trajectory?: { fromId: string; to: GridPoint } | null;
-  /** Плашка над токеном: без запису — exact і без ефектів */
-  hud?: Map<string, { exact: boolean; effects: ActiveEffect[] }>;
-}
-
-export interface BattleMapActions {
-  onCellClick?: (p: GridPoint) => void;
-  onCellHover?: (p: GridPoint | null) => void;
-  onTokenClick?: (id: string) => void;
-}
+export type { BattleMapActions, BattleMapView };
 
 export interface BattleMapProps {
   map: BattleMapConfig;

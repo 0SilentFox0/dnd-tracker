@@ -163,6 +163,25 @@ export interface BattleMapConfig {
   opacity: number;
 }
 
+export type BattleMapMark = "move" | "target" | "invalid-target";
+
+export interface BattleMapView {
+  selectedId?: string | null;
+  currentId?: string | null;
+  /** cellKey → позначка; число — вартість руху (показується дрібно в клітинці) */
+  marks?: Map<string, BattleMapMark | number>;
+  /** Лінія траєкторії від учасника до клітинки/учасника */
+  trajectory?: { fromId: string; to: GridPoint } | null;
+  /** Плашка над токеном: без запису — exact і без ефектів */
+  hud?: Map<string, { exact: boolean; effects: ActiveEffect[] }>;
+}
+
+export interface BattleMapActions {
+  onCellClick?: (p: GridPoint) => void;
+  onCellHover?: (p: GridPoint | null) => void;
+  onTokenClick?: (id: string) => void;
+}
+
 /**
  * Бойові параметри учасника.
  * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись

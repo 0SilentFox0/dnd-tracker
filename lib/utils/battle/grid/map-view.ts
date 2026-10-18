@@ -4,9 +4,9 @@ import { cellsOf, isOnMap } from "./occupancy";
 import { reachable, remainingMovement } from "./path";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant } from "@/types/battle";
 
-export type CellMark = "move" | "target" | "invalid-target";
+export type CellMark = BattleMapMark;
 
 export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant): Map<string, number> {
   return reachable(map, participants, mover, remainingMovement(mover));
