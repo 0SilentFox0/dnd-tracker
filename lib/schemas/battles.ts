@@ -6,7 +6,7 @@ export const battleMapSchema = z.object({
   grid: z.enum([GridShape.SQUARE, GridShape.HEX]),
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),
-  background: z.string().url().nullable(),
+  background: z.string().url().refine((u) => u.startsWith("https://"), "Лише https-посилання").nullable(),
   opacity: z.number().min(0).max(1),
 });
 

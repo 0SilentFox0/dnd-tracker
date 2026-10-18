@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -109,6 +110,20 @@ describe("attack mutation", () => {
       const onMap = { ...ctx, participants: placed, meta: { map } } as unknown as BattleMutationContext;
 
       expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
+    });
+
+    it("атакер із attackHitsAllEnemies не підпадає під правило досяжності", async () => {
+      const sweeper = {
+        ...placed[0],
+        battleData: {
+          ...placed[0].battleData,
+          resolvedAbilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "attackHitsAllEnemies" }] })],
+        },
+      };
+
+      const onMap = { ...ctx, participants: [sweeper, placed[1]], meta: { map } } as unknown as BattleMutationContext;
+
+      expect(await errorCode(attackMutation(onMap, body()))).not.toBe("action_rejected");
     });
 
     it("без карти та сама атака проходить як раніше", async () => {

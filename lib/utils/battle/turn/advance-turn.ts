@@ -76,7 +76,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
         ? {
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
-            battleData: { ...p.battleData, extraTurnActive: true },
+            battleData: { ...p.battleData, extraTurnActive: true, ...(p.battleData.movementUsed && { movementUsed: 0 }) },
           }
         : p,
     );

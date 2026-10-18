@@ -121,6 +121,22 @@ describe("advanceTurn", () => {
       expect(extra.battleData.activeEffects[0].duration).toBe(2);
     });
 
+    it("додатковий хід скидає витрачений рух", () => {
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, movementUsed: 6 } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+
+      expect(out.participants[0].battleData.movementUsed).toBe(0);
+    });
+
+    it("додатковий хід без руху не додає movementUsed", () => {
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+
+      expect(out.participants[0].battleData.movementUsed).toBeUndefined();
+    });
+
     it("після додаткового ходу починається новий раунд", () => {
       const first = advanceTurn({
         participants: [{ ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true } }, goblin],

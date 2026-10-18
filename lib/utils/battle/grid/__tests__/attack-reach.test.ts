@@ -58,6 +58,24 @@ describe("правила атак на карті", () => {
     expect(attackReachError(map, [hero, corpse, target], hero, bow, [target])).toBeNull();
   });
 
+  it("непритомний ворог поруч не заважає стріляти", () => {
+    const adj = { ...at("e1", { x: 5, y: 6 }, ParticipantSide.ENEMY), combatStats: { ...createMockParticipant().combatStats, status: CombatStatus.UNCONSCIOUS, currentHp: 0 } };
+
+    const target = at("e2", { x: 15, y: 5 }, ParticipantSide.ENEMY);
+
+    expect(attackReachError(map, [hero, adj, target], hero, bow, [target])).toBeNull();
+  });
+
+  it("AoE-атака і ignoreReach не мають просторових правил", () => {
+    const far = at("e2", { x: 25, y: 5 }, ParticipantSide.ENEMY);
+
+    const breath = { id: "br", name: "Подих", type: AttackType.MELEE, targetType: "aoe" } as BattleAttack;
+
+    expect(attackReachError(map, [hero, far], hero, breath, [far])).toBeNull();
+    expect(attackReachError(map, [hero, far], hero, sword, [far], { ignoreReach: true })).toBeNull();
+    expect(attackReachError(map, [hero, far], hero, sword, [far])).toMatch(/поруч/);
+  });
+
   it("ціль поза дальністю", () => {
     const target = at("e2", { x: 15, y: 5 }, ParticipantSide.ENEMY);
 

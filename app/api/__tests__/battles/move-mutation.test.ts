@@ -46,6 +46,25 @@ describe("move mutation", () => {
     expect(out.participants[1].battleData.movementUsed).toBeUndefined();
   });
 
+  it("ДМ із free ставить учасника в його хід без бюджету; гравець із free — звичайні правила", () => {
+    const far = { participantId: "hero", to: { x: 8, y: 0 }, free: true };
+
+    const out = moveMutation({ ...ctx(), isDM: true }, far);
+
+    expect(out.participants[0].battleData.position).toEqual({ x: 8, y: 0 });
+    expect(out.participants[0].battleData.movementUsed).toBeUndefined();
+    expect(() => moveMutation(ctx(), far)).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+
+  it("учасник без позиції спершу розставляється, потім рухається", () => {
+    const loose = { ...hero, combatStats: { ...hero.combatStats, speed: 30 } };
+
+    const out = moveMutation(ctx({ participants: [loose, at(goblin, { x: 9, y: 4 })] }), { participantId: "hero", to: { x: 2, y: 2 } });
+
+    expect(out.participants[0].battleData.position).toEqual({ x: 2, y: 2 });
+    expect(out.participants[0].battleData.movementUsed).toBeGreaterThan(0);
+  });
+
   it("без карти — відмова", () => {
     expect(() => moveMutation(context(), { participantId: "hero", to: { x: 1, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });

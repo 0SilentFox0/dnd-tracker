@@ -1,8 +1,7 @@
 import { cellDistance, cellKey, footprint } from "./geometry";
-import { fits, isOnMap, sizeOf } from "./occupancy";
+import { fits, occupiesCells, sizeOf } from "./occupancy";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
@@ -26,12 +25,21 @@ function nearAnchors(map: BattleMapConfig, center: GridPoint): GridPoint[] {
 }
 
 export function placeParticipants(map: BattleMapConfig, participants: BattleParticipant[]): BattleParticipant[] {
-  const blocked = new Set(participants.filter(isOnMap).flatMap((p) => footprint(map.grid, p.battleData.position!, sizeOf(p)).map(cellKey)));
+  const blocked = new Set<string>();
 
-  const positions = new Map(participants.filter(isOnMap).map((p) => [p.basicInfo.id, p.battleData.position!]));
+  const positions = new Map<string, GridPoint>();
+
+  for (const p of participants) {
+    const position = p.battleData.position;
+
+    if (!position || !occupiesCells(p) || !fits(map, position, sizeOf(p), blocked)) continue;
+
+    for (const c of footprint(map.grid, position, sizeOf(p))) blocked.add(cellKey(c));
+    positions.set(p.basicInfo.id, position);
+  }
 
   return participants.map((p) => {
-    if (p.battleData.position || p.battleData.reserved || !isActive(p)) return p;
+    if (!occupiesCells(p) || positions.has(p.basicInfo.id)) return p;
 
     const size = sizeOf(p);
 
@@ -40,7 +48,9 @@ export function placeParticipants(map: BattleMapConfig, participants: BattlePart
 
     const summoner = p.battleData.summonedBy ? positions.get(p.battleData.summonedBy) : undefined;
 
-    const candidates = summoner ? nearAnchors(map, summoner) : sideAnchors(map, p.basicInfo.side).map(shift);
+    const near = p.battleData.position ?? summoner;
+
+    const candidates = near ? nearAnchors(map, near) : sideAnchors(map, p.basicInfo.side).map(shift);
 
     const anchor = candidates.find((a) => fits(map, a, size, blocked));
 

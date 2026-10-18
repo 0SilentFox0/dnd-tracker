@@ -149,11 +149,6 @@ export interface BattleParticipantAbilities {
   archetypeName?: string;
 }
 
-/**
- * Бойові параметри учасника.
- * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись
- * (наприклад, лікування -10% maxHP на час бою); після завершення бою стан не зберігається.
- */
 export interface GridPoint {
   x: number;
   y: number;
@@ -169,6 +164,11 @@ export interface BattleMapConfig {
   opacity: number;
 }
 
+/**
+ * Бойові параметри учасника.
+ * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись
+ * (наприклад, лікування -10% maxHP на час бою); після завершення бою стан не зберігається.
+ */
 export interface BattleParticipantCombatStats {
   maxHp: number;
   currentHp: number;

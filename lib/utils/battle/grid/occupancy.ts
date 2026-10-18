@@ -1,15 +1,18 @@
 import { cellKey, footprint, inBounds } from "./geometry";
 
-import type { GridShape } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { CombatStatus, type GridShape } from "@/lib/constants/battle";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export function sizeOf(p: BattleParticipant): number {
   return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));
 }
 
+export function occupiesCells(p: BattleParticipant): boolean {
+  return !p.battleData.reserved && p.combatStats.status !== CombatStatus.DEAD;
+}
+
 export function isOnMap(p: BattleParticipant): boolean {
-  return p.battleData.position !== undefined && !p.battleData.reserved && isActive(p);
+  return p.battleData.position !== undefined && occupiesCells(p);
 }
 
 export function cellsOf(grid: GridShape, p: BattleParticipant): GridPoint[] {

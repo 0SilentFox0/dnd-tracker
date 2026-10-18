@@ -165,6 +165,7 @@ export interface AuraZoneData {
 export interface MoveParticipantData {
   participantId: string;
   to: GridPoint;
+  free?: boolean;
 }
 
 export interface AbilityActionData {
