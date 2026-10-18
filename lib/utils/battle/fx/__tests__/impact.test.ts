@@ -17,6 +17,24 @@ describe("impactFor", () => {
     expect(impactFor(a, "t")).toMatchObject({ kind: "heal", delayMs: IMPACT_MS.heal });
   });
 
+  it("melee physical hit → attack melee", () => {
+    const a = action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, damageRolls: [{ dice: "1d8", results: [5], total: 5, damageType: "slashing" }] } });
+
+    expect(impactFor(a, "t")).toMatchObject({ element: "physical", attack: "melee" });
+  });
+
+  it("ranged physical hit → attack ranged", () => {
+    const a = action({ actionType: "attack", actionDetails: { attackKind: "ranged", isHit: true, damageRolls: [{ dice: "1d8", results: [5], total: 5, damageType: "piercing" }] } });
+
+    expect(impactFor(a, "t")).toMatchObject({ element: "physical", attack: "ranged" });
+  });
+
+  it("spell bolt → no attack kind", () => {
+    const a = action({ actionType: "spell", actionDetails: { spellDamageType: "fire", spellEffectKinds: ["dealDamage"] } });
+
+    expect(impactFor(a, "t")?.attack).toBeUndefined();
+  });
+
   it("miss → null", () => {
     const a = action({ actionType: "attack", actionDetails: { attackKind: "ranged", isHit: false } });
 

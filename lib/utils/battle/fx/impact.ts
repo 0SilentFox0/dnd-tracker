@@ -8,6 +8,7 @@ export interface FxImpact {
   element: FxElement;
   kind: "damage" | "heal";
   delayMs: number;
+  attack?: "melee" | "ranged";
 }
 
 export function impactFor(action: BattleAction | undefined, participantId: string): FxImpact | null {
@@ -15,5 +16,9 @@ export function impactFor(action: BattleAction | undefined, participantId: strin
 
   if (!spec || !spec.hit || !spec.targetIds.includes(participantId)) return null;
 
-  return { element: spec.element, kind: spec.archetype === "heal" ? "heal" : "damage", delayMs: IMPACT_MS[spec.archetype] };
+  const impact: FxImpact = { element: spec.element, kind: spec.archetype === "heal" ? "heal" : "damage", delayMs: IMPACT_MS[spec.archetype] };
+
+  if (spec.archetype === "melee" || spec.archetype === "ranged") impact.attack = spec.archetype;
+
+  return impact;
 }
