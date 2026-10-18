@@ -14,6 +14,7 @@ interface SidePanelCardProps {
   units: SetupUnit[];
   onSideChange: (participantId: string, newSide: ParticipantSide) => void;
   onRemove: (participantId: string) => void;
+  onReserveChange: (participantId: string, reserved: number) => void;
 }
 
 const SIDE_CONFIG = {
@@ -34,6 +35,7 @@ export function SidePanelCard({
   units,
   onSideChange,
   onRemove,
+  onReserveChange,
 }: SidePanelCardProps) {
   const config = SIDE_CONFIG[side];
 
@@ -69,8 +71,12 @@ export function SidePanelCard({
                     name={entity.name}
                     avatar={entity.avatar}
                     side={side}
-                    onMoveToOtherSide={() => onSideChange(participant.id, otherSide)}
-                    onRemove={() => onRemove(participant.id)}
+                    reserved={participant.reserved ?? 0}
+                    actions={{
+                      onMoveToOtherSide: () => onSideChange(participant.id, otherSide),
+                      onRemove: () => onRemove(participant.id),
+                      onReserveChange: (n) => onReserveChange(participant.id, n),
+                    }}
                   />
                 );
               })}
@@ -95,8 +101,12 @@ export function SidePanelCard({
                     avatar={entity.avatar}
                     quantity={participant.quantity ?? 1}
                     side={side}
-                    onMoveToOtherSide={() => onSideChange(participant.id, otherSide)}
-                    onRemove={() => onRemove(participant.id)}
+                    reserved={participant.reserved ?? 0}
+                    actions={{
+                      onMoveToOtherSide: () => onSideChange(participant.id, otherSide),
+                      onRemove: () => onRemove(participant.id),
+                      onReserveChange: (n) => onReserveChange(participant.id, n),
+                    }}
                   />
                 );
               })}

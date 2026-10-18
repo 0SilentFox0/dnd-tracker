@@ -1,16 +1,19 @@
 "use client";
 
+import { Eye, EyeOff, Minus, Plus } from "lucide-react";
+
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Button } from "@/components/ui/button";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { cn } from "@/lib/utils";
 
 interface SetupParticipantRowProps {
   name: string;
   avatar: string | null;
   quantity?: number;
   side: ParticipantSide;
-  onMoveToOtherSide: () => void;
-  onRemove: () => void;
+  reserved: number;
+  actions: { onMoveToOtherSide: () => void; onRemove: () => void; onReserveChange: (reserved: number) => void };
 }
 
 export function SetupParticipantRow({
@@ -18,8 +21,8 @@ export function SetupParticipantRow({
   avatar,
   quantity,
   side,
-  onMoveToOtherSide,
-  onRemove,
+  reserved,
+  actions,
 }: SetupParticipantRowProps) {
   const isAlly = side === ParticipantSide.ALLY;
 
@@ -28,9 +31,7 @@ export function SetupParticipantRow({
     : "bg-red-50 dark:bg-red-950/20";
 
   return (
-    <div
-      className={`flex items-center justify-between gap-2 p-3 border rounded-lg ${bgClass}`}
-    >
+    <div className={cn("flex items-center justify-between gap-2 p-3 border rounded-lg", bgClass, reserved > 0 && "opacity-60")}>
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <EntityIcon src={avatar} name={name} alt={name} size={36} className="size-9 rounded" fallback={<span>{side === ParticipantSide.ALLY ? "👤" : "⚔️"}</span>} />
         <span className="text-sm font-medium truncate">{name}</span>
@@ -41,11 +42,32 @@ export function SetupParticipantRow({
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
+        {reserved > 0 && (quantity ?? 1) > 1 && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Button type="button" variant="ghost" size="sm" aria-label="Менше в резерві" onClick={() => actions.onReserveChange(reserved - 1)}>
+              <Minus className="size-3" />
+            </Button>
+            у резерві: {reserved}
+            <Button type="button" variant="ghost" size="sm" aria-label="Більше в резерві" onClick={() => actions.onReserveChange(reserved + 1)}>
+              <Plus className="size-3" />
+            </Button>
+          </span>
+        )}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          onClick={onMoveToOtherSide}
+          aria-pressed={reserved > 0}
+          title={reserved > 0 ? "Прибрати з резерву" : "У резерв: з'явиться, коли ДМ введе в бій"}
+          onClick={() => actions.onReserveChange(reserved > 0 ? 0 : (quantity ?? 1))}
+        >
+          {reserved > 0 ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={actions.onMoveToOtherSide}
           title={isAlly ? "Перемістити до ворогів" : "Перемістити до союзників"}
         >
           {isAlly ? "→" : "←"}
@@ -54,7 +76,7 @@ export function SetupParticipantRow({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={onRemove}
+          onClick={actions.onRemove}
           title="Видалити зі списку"
           className="text-muted-foreground hover:text-destructive"
         >
