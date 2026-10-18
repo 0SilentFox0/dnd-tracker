@@ -1627,6 +1627,24 @@ Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`comp
 
 ---
 
+### Task 7d: Physical hit frames split into melee and ranged (arrow) (user request 2026-10-18)
+
+User: «до фізичної атаки додай окремо атаку ближню і дальню стрілою». Today every physical hit plays the single `physicalFrame` (components/battle/fx/frames/canvas/physical.ts). Split it:
+
+- `physical-melee.ts` (rename/rework the current physical.ts): a weapon strike — 1–2 bright slash streaks across the tile (diagonal, fast wipe-in then fade), short red flash, steel sparks flying from the cut point, slight dent/shadow line left for ~0.5 s. ~0.9 s.
+- `physical-ranged.ts` (new): an arrow hit — the arrow streaks in from the attacker's side (left for an ally shooter / right for an enemy shooter is not known inside the frame → come in from the side nearest the tile's horizontal edge closest to screen centre is overkill; just come in from the left at a slight downward angle) and **sticks into the tile** near the portrait/left third: draw a shaft (thin brown line) with fletching (two small angled strokes) and a dark head buried in the tile; on impact a small thunk ring + wood splinters/dust particles; the arrow stays stuck ~0.8 s, quivers (small sinusoidal wobble of the tail for 0.3 s), then fades. ~1.4 s.
+
+Plumbing:
+- `lib/utils/battle/fx/impact.ts`: `FxImpact` gains `attack?: "melee" | "ranged"` — set from the primary spec's archetype (`melee` → "melee", `ranged` → "ranged"; otherwise undefined). Tests in `lib/utils/battle/fx/__tests__/impact.test.ts`: melee physical hit → attack "melee"; ranged physical hit → attack "ranged"; spell bolt → attack undefined.
+- `components/battle/fx/frames/canvas/index.ts`: export `frameFor(impact: FxImpact): FrameAnimation` — heal → HEAL_FRAME; `element === "physical"` → `impact.attack === "ranged" ? physicalRangedFrame : physicalMeleeFrame`; else `FRAME_ANIMATIONS[element]` (keep `FRAME_ANIMATIONS` with `physical: physicalMeleeFrame` so the Record stays exhaustive). `ImpactFrame` uses `frameFor`.
+- Elemental ranged attacks (e.g. a fire arrow, if `damageRolls[0].damageType` is fire) keep their element frame — only physical splits.
+- `/dev/fx-lab` «Рамки» gallery: replace the single «Фізичний» tile by «Ближня атака» and «Стріла».
+
+Verify: `pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle`, tsc, eslint --fix; headless screenshots of both new tiles at ~3 moments (deviceScaleFactor 2) — the arrow must read as an arrow stuck in the tile.
+Commit: `feat(battle): separate melee and arrow hit frames for physical attacks` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+---
+
 ### Task 8: Full verification
 
 - [ ] **Step 1: Static checks and tests**
