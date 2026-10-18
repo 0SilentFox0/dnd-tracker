@@ -196,7 +196,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
               box={box}
               mapSize={size}
               pxPerUnit={pxPerUnit}
-              exact={hud?.exact ?? true}
+              exact={hud?.exact ?? false}
               raised={view?.selectedId === id || view?.currentId === id}
             />
           );

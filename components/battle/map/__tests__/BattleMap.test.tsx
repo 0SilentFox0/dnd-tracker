@@ -141,7 +141,7 @@ describe("BattleMap", () => {
     it("tiny cells show only the bar", () => {
       avail = { width: 80, height: 60 };
 
-      const { container } = render(<BattleMap map={square} participants={[at("h", 0, 0)]} />);
+      const { container } = render(<BattleMap map={square} participants={[at("h", 0, 0)]} view={{ hud: new Map([["h", { exact: true }]]) }} />);
 
       expect(container.querySelector('[data-map-hud="h"]')?.textContent).toBe("");
     });
@@ -158,11 +158,17 @@ describe("BattleMap", () => {
       );
 
     it("exact: HP numbers (size 1)", () => {
-      const { container } = renderHud(undefined);
+      const { container } = renderHud(new Map([["h", { exact: true }]]));
 
       const max = base.combatStats.maxHp;
 
       expect(container.textContent).toContain(`${base.combatStats.currentHp}/${max}`);
+    });
+
+    it("missing hud entry hides exact HP", () => {
+      const { container } = renderHud(undefined);
+
+      expect(container.textContent).not.toMatch(/\d+\/\d+/);
     });
 
     it("not exact: no HP numbers", () => {
