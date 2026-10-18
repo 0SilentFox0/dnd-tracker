@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ConfirmCancelFooter } from "@/components/battle/dm/dialogs/ConfirmCancelFooter";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -43,25 +44,30 @@ export function AddParticipantDialog({
 
   const [quantity, setQuantity] = useState(1);
 
+  const [reserved, setReserved] = useState(false);
+
   const { data: characters = [] } = useCharacters(campaignId, { compact: true, enabled: open });
 
   const { data: units = [] } = useUnits(campaignId, undefined, { enabled: open });
 
   const handleSubmit = () => {
     if (type === ParticipantSourceType.CHARACTER && characterId) {
-      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side });
+      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
       onOpenChange(false);
       setCharacterId("");
+      setReserved(false);
     } else if (type === ParticipantSourceType.UNIT && unitId) {
       onAdd({
         sourceId: unitId,
         type: ParticipantSourceType.UNIT,
         side,
         quantity: quantity || 1,
+        reserved,
       });
       onOpenChange(false);
       setUnitId("");
       setQuantity(1);
+      setReserved(false);
     }
   };
 
@@ -75,7 +81,7 @@ export function AddParticipantDialog({
       size="md"
       hud
       title="Додати учасника на поле"
-      description="Обраний герой або юніт з'явиться одразу після завершення ходу поточного активного гравця."
+      description="Учасник займе місце в черзі за своєю ініціативою або чекатиме в резерві."
     >
       <div className="space-y-4 py-2">
         <div className="space-y-2">
@@ -158,6 +164,10 @@ export function AddParticipantDialog({
             </div>
           </>
         )}
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox checked={reserved} onCheckedChange={(v) => setReserved(v === true)} />
+          У резерв — з&apos;явиться, коли ДМ введе в бій
+        </label>
         <ConfirmCancelFooter
           onCancel={() => onOpenChange(false)}
           confirmLabel="Додати"

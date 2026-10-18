@@ -20,6 +20,7 @@ import {
   moraleCheck,
   nextTurn,
   resetBattle,
+  revealBattleParticipants,
   rollbackBattleAction,
   scaleBattleUnits,
   setAuraZone,
@@ -178,6 +179,9 @@ export const useCompleteBattle = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useRollbackBattleAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<{ actionIndex: number }>(c, b, (body) => rollbackBattleAction(c, b, body), { ...o, invalidate: ["battles"] });
+
+export const useRevealBattleParticipants = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<{ participantIds: string[] }>(c, b, (body) => revealBattleParticipants(c, b, body), o);
 
 export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);

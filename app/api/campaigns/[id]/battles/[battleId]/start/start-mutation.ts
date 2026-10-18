@@ -11,11 +11,15 @@ export function createStartMutation(build = buildStartOrder) {
       throw new BattleRuleError("invalid_target", "Немає учасників для бою");
     }
 
-    const { order, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup);
+    const { order, reserve, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup);
+
+    if (order.length === 0) {
+      throw new BattleRuleError("invalid_target", "Хоча б один учасник має бути на полі");
+    }
 
     return {
       participants: assignUnitControl(order, ctx.userId),
-      pending: [],
+      pending: reserve,
       scene: { status: BattleStatus.ACTIVE, startedAt: new Date(), completedAt: null, round: 1, turnIndex: 0, pendingMoraleCheck: null },
       events: triggerLogEntries.map(battleActionToEvent),
       history: { clear: true },

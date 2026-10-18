@@ -3,6 +3,7 @@ import { berserkBonusOf, runBerserkTurn } from "./berserk";
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
   processEndOfTurn,
   processStartOfRound,
@@ -41,6 +42,10 @@ export function runAdvanceTurnLoop(
     pendingSummons,
     rng = Math.random,
   } = params;
+
+  const reserve = reserveOf(pendingSummons);
+
+  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve);
 
   let activeParticipantFound = false;
 
@@ -228,6 +233,19 @@ export function runAdvanceTurnLoop(
       });
     }
 
+    const beforeAuto = verdict(updatedInitiativeOrder);
+
+    if (beforeAuto.result) break;
+
+    // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
+    if (beforeAuto.awaiting) {
+      if (!updatedInitiativeOrder.some(isActive)) break;
+
+      if (isActive(turnResult.participant)) activeParticipantFound = true;
+
+      continue;
+    }
+
     const berserkBonus = berserkBonusOf(nextParticipant);
 
     if (berserkBonus !== undefined && isActive(turnResult.participant)) {
@@ -245,16 +263,14 @@ export function runAdvanceTurnLoop(
       updatedInitiativeOrder = berserk.participants;
       newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
 
-      if (checkVictoryConditions(updatedInitiativeOrder).result) break;
+      if (verdict(updatedInitiativeOrder).result) break;
 
       continue;
     }
 
     if (isActive(turnResult.participant)) activeParticipantFound = true;
 
-    const victoryCheck = checkVictoryConditions(updatedInitiativeOrder);
-
-    if (victoryCheck.result) break;
+    if (verdict(updatedInitiativeOrder).result) break;
   }
 
   return {

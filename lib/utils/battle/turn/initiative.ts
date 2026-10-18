@@ -28,24 +28,15 @@ export function calculateInitiative(participant: BattleParticipant, participants
   return participant.abilities.baseInitiative + collectModifiers(withSelf(participants, participant), participant.basicInfo.id, { stat: "initiative" }).flat;
 }
 
-/**
- * Сортує учасників за ініціативою
- * Порядок: initiative (desc) → baseInitiative (desc) → dexterity (desc)
- * @param participants - масив учасників
- * @returns відсортований масив
- */
-export function sortByInitiative(
-  participants: BattleParticipant[]
-): BattleParticipant[] {
-  return [...participants].sort((a, b) => {
-    if (b.abilities.initiative !== a.abilities.initiative) {
-      return b.abilities.initiative - a.abilities.initiative;
-    }
+export function compareInitiative(a: BattleParticipant, b: BattleParticipant): number {
+  if (b.abilities.initiative !== a.abilities.initiative) return b.abilities.initiative - a.abilities.initiative;
 
-    if (b.abilities.baseInitiative !== a.abilities.baseInitiative) {
-      return b.abilities.baseInitiative - a.abilities.baseInitiative;
-    }
+  if (b.abilities.baseInitiative !== a.abilities.baseInitiative) return b.abilities.baseInitiative - a.abilities.baseInitiative;
 
-    return b.abilities.dexterity - a.abilities.dexterity;
-  });
+  return b.abilities.dexterity - a.abilities.dexterity;
+}
+
+/** Порядок: initiative (desc) → baseInitiative (desc) → dexterity (desc). */
+export function sortByInitiative(participants: BattleParticipant[]): BattleParticipant[] {
+  return [...participants].sort(compareInitiative);
 }

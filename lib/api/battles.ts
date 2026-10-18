@@ -179,6 +179,10 @@ export async function addBattleParticipant(
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/add-participant`, data);
 }
 
+export async function revealBattleParticipants(campaignId: string, battleId: string, data: WithVersion<{ participantIds: string[] }>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/reveal-participant`, data);
+}
+
 export async function scaleBattleUnits(campaignId: string, battleId: string, data: WithVersion<{ direction: "buff" | "debuff" }>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/scale-units`, data);
 }

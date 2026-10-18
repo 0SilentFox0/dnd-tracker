@@ -52,6 +52,7 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
                   side,
                   ...(type === ParticipantSourceType.UNIT && {
                     quantity: quantity ?? p.quantity ?? 1,
+                    ...(p.reserved !== undefined && { reserved: Math.min(p.reserved, quantity ?? p.quantity ?? 1) }),
                   }),
                 }
               : p,
@@ -80,12 +81,20 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
     (participantId: string, quantity: number) => {
       setParticipants((prev) =>
         prev.map((p) =>
-          p.id === participantId ? { ...p, quantity } : p,
+          p.id === participantId
+            ? { ...p, quantity, ...(p.reserved !== undefined && { reserved: Math.min(p.reserved, quantity) }) }
+            : p,
         ),
       );
     },
     [],
   );
+
+  const handleReserveChange = useCallback((participantId: string, reserved: number) => {
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === participantId ? { ...p, reserved: Math.max(0, Math.min(reserved, p.quantity ?? 1)) } : p)),
+    );
+  }, []);
 
   const isParticipantSelected = useCallback(
     (participantId: string) =>
@@ -126,6 +135,7 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
     handleAddToSide,
     handleRemoveParticipant,
     handleQuantityChange,
+    handleReserveChange,
     isParticipantSelected,
     getParticipantQuantity,
     getParticipantSide,

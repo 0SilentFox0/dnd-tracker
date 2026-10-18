@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { AddParticipantDialog } from "@/components/battle/dm/dialogs/AddParticipantDialog";
+import { AwaitingDmDialog } from "@/components/battle/dm/dialogs/AwaitingDmDialog";
 import { ChangeHpDialog } from "@/components/battle/dm/dialogs/ChangeHpDialog";
 import { DmCasterPickerDialog } from "@/components/battle/dm/dialogs/DmCasterPickerDialog";
 import { DmQuickActionsPanel } from "@/components/battle/dm/DmQuickActionsPanel";
@@ -47,6 +48,7 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
         onConfirm={(participantId, newHp) => actions.updateParticipant.mutate({ participantId, data: { currentHp: newHp } }, { onSuccess: dialogs.closeHpDialog })} />
       <DmCasterPickerDialog open={pickCaster} onOpenChange={setPickCaster} participants={battle.initiativeOrder}
         onSelectCaster={(p) => { setCaster(p); setPickCaster(false); book.open(undefined, p); }} />
+      <AwaitingDmDialog />
       <SpellBook book={book} />
     </>
   );

@@ -58,6 +58,23 @@ describe("buildPusherMessages", () => {
     expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
+  it("бій очікує рішення ДМ про резерв — без turn-started", () => {
+    const imp = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "imp", side: ParticipantSide.ENEMY }, battleData: { ...createMockParticipant().battleData, reserved: true } });
+
+    const deadGob = { ...goblin, basicInfo: { ...goblin.basicInfo, side: ParticipantSide.ENEMY }, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
+
+    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, deadGob], pending: [imp], delta: payload });
+
+    expect(messages.map((m) => m.event)).toEqual(["battle-delta"]);
+  });
+
+  it("ДМ вирішив очікування розкриттям — гравець поточного слота отримує turn-started без зсуву ходу", () => {
+    const messages = buildPusherMessages({ before: scene, after: scene, participants: [hero, goblin], wasAwaiting: true, delta: payload });
+
+    expect(messages.map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
+    expect(messages[1]).toMatchObject({ channel: "private-user-u-player" });
+  });
+
   it("велика дельта — refetch", () => {
     const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 

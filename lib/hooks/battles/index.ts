@@ -14,6 +14,7 @@ export {
   useMoraleCheck,
   useNextTurn,
   useResetBattle,
+  useRevealBattleParticipants,
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,

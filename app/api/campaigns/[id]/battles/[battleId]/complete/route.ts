@@ -11,6 +11,7 @@ export async function POST(
     params: await params,
     access: BattleAccess.DM,
     requireStatus: BattleStatus.ACTIVE,
+    allowWhileAwaitingDm: true,
     schema: completeBattleSchema,
     mutate: completeMutation,
   });

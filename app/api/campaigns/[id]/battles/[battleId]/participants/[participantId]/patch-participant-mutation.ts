@@ -2,6 +2,7 @@ import type { PatchParticipantData } from "./patch-participant-schema";
 
 import { CombatStatus, DM_ACTOR } from "@/lib/constants/battle";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
@@ -29,7 +30,7 @@ export function patchParticipantMutation(
 function removeParticipant(ctx: BattleMutationContext, participantId: string): MutationResult {
   const removedIndex = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
 
-  if (removedIndex === -1) throw new BattleAccessError(404, "Учасника не знайдено");
+  if (removedIndex === -1) return removeFromReserve(ctx, participantId);
 
   const removed = ctx.participants[removedIndex];
 
@@ -76,6 +77,26 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
     pending: ctx.pending,
     scene: { turnIndex },
     events: [removalEvent],
+  };
+}
+
+function removeFromReserve(ctx: BattleMutationContext, participantId: string): MutationResult {
+  const removed = reserveOf(ctx.pending).find((p) => p.basicInfo.id === participantId);
+
+  if (!removed) throw new BattleAccessError(404, "Учасника не знайдено");
+
+  return {
+    participants: ctx.participants,
+    pending: ctx.pending.filter((p) => p !== removed),
+    events: [
+      {
+        type: "ability",
+        round: ctx.scene.round,
+        actorId: DM_ACTOR.actorId,
+        resultText: `Видалено з резерву (DM): ${removed.basicInfo.name}`,
+        details: DM_DETAILS,
+      },
+    ],
   };
 }
 

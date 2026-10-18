@@ -23,6 +23,7 @@ import { moraleCheckMutation } from "@/app/api/campaigns/[id]/battles/[battleId]
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation";
 import { patchParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-schema";
+import { revealParticipantMutation, revealParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation";
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
@@ -240,6 +241,10 @@ const AURA_ZONE = { access: "member", requireStatus: "active", schema: auraZoneS
 const MORALE = { access: "member", requireStatus: "active", schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
 
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
+
+const REVEAL = { access: "dm", requireStatus: "active", allowWhileAwaitingDm: true, schema: revealParticipantSchema, mutate: revealParticipantMutation };
+
+const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 
 // ---------- підготовка ----------
 const HEROES = ["Лорд Годрик Єдиноріг", "Ізабель Грейхаунд", "Зехір", "Аграїл", "Айвен", "Маркел", "Раїлаг", "Семгрун"];
@@ -742,6 +747,8 @@ async function main() {
 
   if (MODE === "all" || MODE === "targeted" || MODE === "aura") await auraZoneCheck();
 
+  if (MODE === "all" || MODE === "targeted" || MODE === "reserve") await reserveCheck();
+
   if (targetedResults.length) report.push("\n## Цільові перевірки", ...targetedResults.map((t) => `- ${t}`));
 
   if (MODE === "all" || MODE === "sweep") report.push(...coverageReport());
@@ -1151,6 +1158,43 @@ async function auraZoneCheck() {
   const armorSame = heroes.every((h, i) => statWithModifiers(P(), h.basicInfo.id, "armor", 10) === armorBefore[i]);
 
   tcheck("Зона аури: Кошмар задає зону, штраф моралі лише на обраних", pending.length === 1 && asPlayer.status === 403 && r.status === 200 && members.join() === zone.join() && zone.every(inZone) && outside && armorSame && pendingAreaAuras(P(), nm.basicInfo.id, state.currentRound).length === 0, `аур=${pending.length} гравець=${asPlayer.status} DM=${r.status} у зоні: ${members.map((id) => byId(id).basicInfo.name).join(", ")}; ${r.log.map((e: any) => e.resultText).join(" | ")}`);
+}
+
+async function reserveCheck() {
+  await applyRotation(0);
+  battleLabel = "Резерв";
+
+  const [front, back] = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, take: 2 });
+
+  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: front.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }, { id: back.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 2, reserved: 2 }];
+
+  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Резерв", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx.battleId = b.id; state = await readState(); await call("start", START);
+
+  const reserve = () => (state.pendingSummons ?? []).filter((p: any) => p.battleData.reserved);
+
+  const startedOk = P().length === heroRows.length + 1 && reserve().length === 2 && reserve().every((p: any) => p.battleData.hpMultiplier !== undefined);
+
+  const before = current().basicInfo.id;
+
+  const revealedId = reserve()[0].basicInfo.id;
+
+  const r = await call("reveal-participant", REVEAL, { participantIds: [revealedId] });
+
+  await nextOnly();
+
+  const actedNext = current().basicInfo.id === revealedId && before !== revealedId;
+
+  for (const e of P().filter((p) => p.basicInfo.side === "enemy" && alive(p))) await call("participants", KILL(e.basicInfo.id), { kill: true });
+
+  const awaitingOk = state.status === "active" && reserve().length === 1;
+
+  const blocked = await call("next-turn", NEXT);
+
+  const r2 = await call("reveal-participant", REVEAL, { participantIds: [reserve()[0].basicInfo.id] });
+
+  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });

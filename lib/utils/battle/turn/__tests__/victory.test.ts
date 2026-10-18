@@ -57,3 +57,35 @@ describe("зачарований юніт і перемога", () => {
     expect(out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "ogre")?.basicInfo.side).toBe(ParticipantSide.ENEMY);
   });
 });
+
+describe("перемога з резервом", () => {
+  const base = createMockParticipant();
+
+  const hero = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero", side: ParticipantSide.ALLY } });
+
+  const deadGob = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY }, combatStats: { ...base.combatStats, currentHp: 0, status: "dead" } });
+
+  const reserveEnemy = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "imp", side: ParticipantSide.ENEMY }, battleData: { ...base.battleData, reserved: true } });
+
+  const reserveAlly = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "pal", side: ParticipantSide.ALLY }, battleData: { ...base.battleData, reserved: true } });
+
+  it("видимі вороги впали, у резерві ворог — очікування, не перемога", () => {
+    expect(checkVictoryConditions([hero, deadGob], [reserveEnemy])).toMatchObject({ result: null, awaiting: "victory" });
+  });
+
+  it("резерв лише союзників не заважає перемозі", () => {
+    expect(checkVictoryConditions([hero, deadGob], [reserveAlly])).toMatchObject({ result: "victory", awaiting: null });
+  });
+
+  it("поразка з союзниками в резерві — очікування", () => {
+    const downed = { ...hero, combatStats: { ...hero.combatStats, currentHp: 0, status: "unconscious" as const } };
+
+    const gob = { ...deadGob, combatStats: { ...deadGob.combatStats, currentHp: 5, status: "active" as const } };
+
+    expect(checkVictoryConditions([downed, gob], [reserveAlly])).toMatchObject({ result: null, awaiting: "defeat" });
+  });
+
+  it("без резерву — як раніше", () => {
+    expect(checkVictoryConditions([hero, deadGob])).toMatchObject({ result: "victory", awaiting: null });
+  });
+});

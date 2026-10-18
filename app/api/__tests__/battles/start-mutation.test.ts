@@ -17,7 +17,7 @@ describe("start mutation", () => {
   it("будує учасників із лобі, ставить active, раунд 1, хід 0", async () => {
     const hero = createMockParticipant();
 
-    const build = vi.fn(async () => ({ order: [hero], triggerLogEntries: [] }));
+    const build = vi.fn(async () => ({ order: [hero], reserve: [], triggerLogEntries: [] }));
 
     const out = await createStartMutation(build)(ctx);
 
@@ -26,6 +26,24 @@ describe("start mutation", () => {
     expect(out.scene).toMatchObject({ status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, completedAt: null });
     expect(out.scene?.startedAt).toBeInstanceOf(Date);
     expect(out.history).toEqual({ clear: true });
+  });
+
+  it("резерв зі старту йде в pending", async () => {
+    const imp = createMockParticipant({ battleData: { ...createMockParticipant().battleData, reserved: true } });
+
+    const build = vi.fn(async () => ({ order: [createMockParticipant()], reserve: [imp], triggerLogEntries: [] }));
+
+    const out = await createStartMutation(build)(ctx);
+
+    expect(out.pending).toEqual([imp]);
+  });
+
+  it("увесь склад у резерві — 422, на полі нікого", async () => {
+    const imp = createMockParticipant({ battleData: { ...createMockParticipant().battleData, reserved: true } });
+
+    const build = vi.fn(async () => ({ order: [], reserve: [imp], triggerLogEntries: [] }));
+
+    await expect(createStartMutation(build)(ctx)).rejects.toMatchObject({ code: "invalid_target", message: "Хоча б один учасник має бути на полі" });
   });
 
   it("порожнє лобі — 422 invalid_target", async () => {

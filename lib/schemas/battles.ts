@@ -11,6 +11,7 @@ export const createBattleSchema = z.object({
       type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
       side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
       quantity: z.number().min(1).optional(),
+      reserved: z.number().int().min(0).optional(),
     }),
   ),
 });

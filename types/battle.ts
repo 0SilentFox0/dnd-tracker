@@ -191,6 +191,10 @@ export interface BattleParticipantBattleData {
   summonedBy?: string;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
+  /** Учасник у резерві бою: ще не на полі, бачить лише ДМ */
+  reserved?: boolean;
+  /** Щойно введений з резерву: ходить після поточного, у порядку введення */
+  revealPending?: boolean;
   resolvedAbilities: ResolvedAbility[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
@@ -235,6 +239,8 @@ export interface BattlePreparationParticipant {
   type: ParticipantSourceTypeValue;
   side: ParticipantSide;
   quantity?: number;
+  /** Скільки з quantity (герой — 0 або 1) у резерві */
+  reserved?: number;
 }
 
 export interface DamageStep {
@@ -374,4 +380,5 @@ export type AddParticipantData = {
   type: ParticipantSourceTypeValue;
   side: ParticipantSide;
   quantity?: number;
+  reserved?: boolean;
 };

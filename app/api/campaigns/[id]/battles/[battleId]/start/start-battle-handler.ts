@@ -4,6 +4,7 @@
 
 import { buildCampaignContextForStart } from "./start-build-context";
 import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
+import { isReservedSlot, partitionReserve } from "./start-reserve";
 
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
@@ -23,12 +24,13 @@ export async function buildStartOrder(
   battleId: string,
   campaignId: string,
   setup: BattlePreparationParticipant[],
-): Promise<{ order: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
+): Promise<{ order: BattleParticipant[]; reserve: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
   const participantsRaw = setup as Array<{
     id: string;
     type: ParticipantSourceTypeValue;
     side: string;
     quantity?: number;
+    reserved?: number;
   }>;
 
   const participants = participantsRaw.map((p) => ({
@@ -71,12 +73,13 @@ export async function buildStartOrder(
   const { campaignContext, racesById } = await buildCampaignContextForStart(campaignId, characters, units);
 
   type ParticipantSlot =
-    | { type: typeof ParticipantSourceType.CHARACTER; character: (typeof characters)[number]; side: ParticipantSide }
+    | { type: typeof ParticipantSourceType.CHARACTER; character: (typeof characters)[number]; side: ParticipantSide; reserved: boolean }
     | {
         type: typeof ParticipantSourceType.UNIT;
         unit: (typeof units)[number];
         side: ParticipantSide;
         instanceNumber: number;
+        reserved: boolean;
       };
 
   const slots: ParticipantSlot[] = [];
@@ -86,7 +89,7 @@ export async function buildStartOrder(
       const character = characterMap.get(participant.id);
 
       if (character) {
-        slots.push({ type: ParticipantSourceType.CHARACTER, character, side: participant.side });
+        slots.push({ type: ParticipantSourceType.CHARACTER, character, side: participant.side, reserved: isReservedSlot(participant, 0) });
       }
     } else if (participant.type === ParticipantSourceType.UNIT) {
       const unit = unitMap.get(participant.id);
@@ -100,6 +103,7 @@ export async function buildStartOrder(
             unit,
             side: participant.side,
             instanceNumber: i + 1,
+            reserved: isReservedSlot(participant, i),
           });
         }
       }
@@ -122,7 +126,9 @@ export async function buildStartOrder(
 
   const built = await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
 
-  const initiativeOrder = applyBakedAuras(built, new Set(built.map((p) => p.basicInfo.id)));
+  const { field, reserve } = partitionReserve(slots, built);
+
+  const initiativeOrder = applyBakedAuras(field, new Set(field.map((p) => p.basicInfo.id)));
 
   const sortedInitiativeOrder = applyStartOfBattleAndSort(
     initiativeOrder,
@@ -131,6 +137,7 @@ export async function buildStartOrder(
 
   return {
     order: sortedInitiativeOrder.order,
+    reserve,
     triggerLogEntries: sortedInitiativeOrder.triggerLogEntries,
   };
 }

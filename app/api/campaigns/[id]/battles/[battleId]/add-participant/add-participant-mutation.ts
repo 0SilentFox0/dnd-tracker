@@ -7,10 +7,11 @@ import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
+import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
-import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
+import { BattleAccessError, type NewBattleEvent } from "@/lib/utils/battle/store";
+import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
@@ -18,6 +19,7 @@ export const addParticipantSchema = z.object({
   type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
+  reserved: z.boolean().optional(),
 });
 
 export type AddParticipantBody = z.infer<typeof addParticipantSchema>;
@@ -44,7 +46,7 @@ const defaultDeps: AddParticipantDeps = {
   fromUnit: createBattleParticipantFromUnit,
 };
 
-/** A unit added mid-battle copies the multipliers of a same-source enemy already on the field; none there means ×1. */
+/** A unit added mid-battle copies the multipliers of a same-source enemy on the field or in the reserve; none there means ×1. */
 function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): BattleParticipant {
   const { hpMultiplier, damageMultiplier } = twin.battleData;
 
@@ -82,7 +84,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, "Юніта не знайдено");
       }
 
-      const twin = side === ParticipantSide.ENEMY ? ctx.participants.find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
+      const twin = side === ParticipantSide.ENEMY ? [...ctx.participants, ...reserveOf(ctx.pending)].find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
 
       for (let i = 0; i < (data.quantity ?? 1); i++) {
         const fresh = await deps.fromUnit(unit, battleId, side, i + 1);
@@ -91,36 +93,65 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       }
     }
 
-    const insertAt = ctx.scene.turnIndex + 1;
+    if (data.reserved) {
+      return {
+        participants: ctx.participants,
+        pending: [...ctx.pending, ...added.map(toReserve)],
+        events: [],
+      };
+    }
 
     const addedIds = new Set(added.map((p) => p.basicInfo.id));
 
-    const participants = applyBakedAuras([
-      ...ctx.participants.slice(0, insertAt),
-      ...added,
-      ...ctx.participants.slice(insertAt),
-    ], addedIds);
+    const baked = applyBakedAuras([...ctx.participants, ...added], addedIds);
 
-    for (const p of participants.filter((x) => addedIds.has(x.basicInfo.id))) {
-      const initiative = calculateInitiative(p);
+    let order = baked.slice(0, ctx.participants.length);
 
-      p.abilities.initiative = initiative;
-      p.abilities.baseInitiative = initiative;
+    let turnIndex = ctx.scene.turnIndex;
+
+    for (const newcomer of baked.slice(ctx.participants.length)) {
+      const initiative = calculateInitiative(newcomer, [...order, newcomer]);
+
+      const p = { ...newcomer, abilities: { ...newcomer.abilities, initiative } };
+
+      const current = order[turnIndex];
+
+      let at: number;
+
+      if (current && compareInitiative(p, current) < 0) {
+        // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+        at = order.findIndex((other) => compareInitiative(p, other) < 0);
+        turnIndex++;
+      } else {
+        // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
+        let afterRun = turnIndex + 1;
+
+        while (order[afterRun]?.battleData.revealPending) afterRun++;
+
+        const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
+
+        at = next === -1 ? order.length : next;
+      }
+
+      order = [...order.slice(0, at), p, ...order.slice(at)];
     }
 
     return {
-      participants: assignUnitControl(participants, ctx.userId),
+      participants: assignUnitControl(order, ctx.userId),
       pending: ctx.pending,
-      events: [
-        {
-          type: "ability",
-          round: ctx.scene.round,
-          actorId: DM_ACTOR.actorId,
-          targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
-          resultText: `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`,
-          details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-        },
-      ],
+      ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
+      events: [dmEvent(ctx, added, "DM додав на поле")],
     };
+  };
+}
+
+function dmEvent(ctx: BattleMutationContext, added: BattleParticipant[], verb: string): NewBattleEvent {
+  return {
+    type: "ability",
+    round: ctx.scene.round,
+    actorId: DM_ACTOR.actorId,
+    targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
+    resultText: `${verb}: ${added.map((p) => p.basicInfo.name).join(", ")}`,
+    details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
   };
 }

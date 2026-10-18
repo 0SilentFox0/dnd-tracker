@@ -14,6 +14,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
   BattleMeta,
@@ -69,6 +70,7 @@ export interface RunBattleMutationOptions<TBody> {
   params: { id: string; battleId: string };
   access: BattleAccess;
   requireStatus?: BattleStatus | BattleStatus[];
+  allowWhileAwaitingDm?: boolean;
   schema?: ZodType<TBody>;
   rateLimitScope?: keyof typeof BATTLE_RATE_LIMITS;
   dryRun?: (body: TBody) => boolean;
@@ -107,7 +109,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
 
   if (status !== BattleStatus.ACTIVE) return result;
 
-  const victory = checkVictoryConditions(result.participants);
+  const victory = checkVictoryConditions(result.participants, reserveOf(result.pending));
 
   if (!victory.result) return result;
 
@@ -219,11 +221,22 @@ export async function runBattleMutation<TBody>(
       throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
     }
 
+    if (
+      loaded.scene.status === BattleStatus.ACTIVE &&
+      !options.allowWhileAwaitingDm &&
+      !options.dryRun?.(parsed.body) &&
+      checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
+    ) {
+      throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
+    }
+
     const expected = parsed.expectedVersion;
 
     if (expected !== undefined && expected !== loaded.scene.version) {
       throw new BattleConflictError(loaded.scene.version);
     }
+
+    const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting !== null;
 
     const result = withVictory(loaded.scene, guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop()));
 
@@ -280,7 +293,7 @@ export async function runBattleMutation<TBody>(
       knowledge,
     });
 
-    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, delta: clientDelta }));
+    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {

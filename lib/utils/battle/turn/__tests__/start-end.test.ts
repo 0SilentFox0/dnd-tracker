@@ -72,3 +72,18 @@ describe("processStartOfRound", () => {
     expect(out.updatedInitiativeOrder.map((p) => p.basicInfo.id)).toEqual(["b", "c", "a"]);
   });
 });
+
+it("processStartOfRound додає саммонів, але не резерв", () => {
+  const b = createMockParticipant();
+
+  const hero = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "hero" } });
+
+  const wolf = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "wolf" } });
+
+  const imp = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "imp" }, battleData: { ...b.battleData, reserved: true } });
+
+  const ids = processStartOfRound([hero], 2, [wolf, imp]).updatedInitiativeOrder.map((p) => p.basicInfo.id);
+
+  expect(ids).toContain("wolf");
+  expect(ids).not.toContain("imp");
+});

@@ -11,6 +11,7 @@ export interface VictoryCheckResult {
   isVictory: boolean;
   isDefeat: boolean;
   result: "victory" | "defeat" | null;
+  awaiting: "victory" | "defeat" | null;
   message: string;
 }
 
@@ -22,8 +23,11 @@ function originalSide(p: BattleParticipant): ParticipantSide {
 }
 
 export function checkVictoryConditions(
-  initiativeOrder: BattleParticipant[]
+  initiativeOrder: BattleParticipant[],
+  reserve: BattleParticipant[] = []
 ): VictoryCheckResult {
+  const reserveHas = (side: ParticipantSide) => reserve.some((p) => p.basicInfo.side === side);
+
   // слот екстра-ходу — не окремий учасник
   const real = initiativeOrder.filter((p) => !p.basicInfo.isExtraTurnSlot);
 
@@ -40,19 +44,29 @@ export function checkVictoryConditions(
   );
 
   if (allEnemiesDefeated && enemies.length > 0) {
+    if (reserveHas(ParticipantSide.ENEMY)) {
+      return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "У резерві ще є вороги — рішення за ДМ" };
+    }
+
     return {
       isVictory: true,
       isDefeat: false,
       result: "victory",
+      awaiting: null,
       message: "🎉 Перемога! Всі вороги переможені!",
     };
   }
 
   if (allAlliesDefeated && allies.length > 0) {
+    if (reserveHas(ParticipantSide.ALLY)) {
+      return { isVictory: false, isDefeat: false, result: null, awaiting: "defeat", message: "У резерві ще є союзники — рішення за ДМ" };
+    }
+
     return {
       isVictory: false,
       isDefeat: true,
       result: "defeat",
+      awaiting: null,
       message: "💀 Поразка! Всі союзники переможені!",
     };
   }
@@ -61,6 +75,7 @@ export function checkVictoryConditions(
     isVictory: false,
     isDefeat: false,
     result: null,
+    awaiting: null,
     message: "",
   };
 }

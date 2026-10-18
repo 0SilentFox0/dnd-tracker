@@ -52,6 +52,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       units={setup.units}
       onSideChange={setup.handleSideChange}
       onRemove={setup.handleRemoveParticipant}
+      onReserveChange={setup.handleReserveChange}
     />
   );
 

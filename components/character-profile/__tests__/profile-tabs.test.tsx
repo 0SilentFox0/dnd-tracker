@@ -71,6 +71,12 @@ describe("таби профілю", () => {
     expect(screen.getByText("прокачка")).toBeTruthy();
   });
 
+  it("Вміння: іконка персонального вміння — аватар героя", () => {
+    inProfile(<SkillsTab />, withSheet({ identity: { ...sheetFixture.identity, avatar: "/heroes/lira.png" }, personalSkill: { id: "s", name: "Око яструба", icon: null, description: null } }));
+
+    expect(screen.getByRole("img", { name: "Ліра" }).getAttribute("src")).toContain("lira.png");
+  });
+
   it("Речі: однакові ефекти показуються обидва, а шторка під час закриття зберігає назву", () => {
     mockMatchMedia(true);
 
