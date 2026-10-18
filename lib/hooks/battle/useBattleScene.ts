@@ -91,7 +91,13 @@ export interface BattleSceneData {
   readBattle(): BattleScene | undefined;
 }
 
+export interface AwaitingDialogState {
+  open: boolean;
+  setOpen(open: boolean): void;
+}
+
 export interface BattleSceneValue extends BattleSceneData {
+  awaitingDialog: AwaitingDialogState;
   connection: PusherConnectionState;
   selectedId: string | null;
   toast: BattleToastApi;
@@ -135,14 +141,16 @@ export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneDat
   );
 }
 
-function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
+export function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
   const isDM = battle.isDM === true;
-
-  const turn = deriveTurn(battle, userId, isDM, dmControlledId);
 
   const order = battle.initiativeOrder ?? [];
 
   const reserveAll = reserveOf(battle.pendingSummons ?? []);
+
+  const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null;
+
+  const turn = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
 
   return {
     isDM,
@@ -152,11 +160,11 @@ function deriveScene(battle: BattleScene, userId: string | null, dmControlledId:
     allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
     enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
     reserve: isDM ? reserveAll : NO_ORDER,
-    awaiting: battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null,
+    awaiting,
   };
 }
 
-export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null) {
+export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null, awaiting = false) {
   const order = battle.initiativeOrder ?? [];
 
   const current = order[battle.currentTurnIndex] ?? null;
@@ -167,7 +175,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
     p.basicInfo.controlledBy === userId ||
     (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === CONTROLLED_BY_DM || p.basicInfo.side === ParticipantSide.ENEMY));
 
-  const isMyTurn = battle.status === BattleStatus.ACTIVE && !!current && !!userId && controls(current);
+  const isMyTurn = battle.status === BattleStatus.ACTIVE && !awaiting && !!current && !!userId && controls(current);
 
   const dmHero = isDM && dmControlledId ? order.find((p) => p.basicInfo.id === dmControlledId) ?? null : null;
 
@@ -250,6 +258,17 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId) : null), [battle, userId, dmControlledId]);
 
+  const [dismissedAwaiting, setDismissedAwaiting] = useState<"victory" | "defeat" | null>(null);
+
+  const awaitingNow = derived?.awaiting ?? null;
+
+  if (!awaitingNow && dismissedAwaiting) setDismissedAwaiting(null);
+
+  const awaitingDialog: AwaitingDialogState = {
+    open: !!derived?.isDM && !!awaitingNow && dismissedAwaiting !== awaitingNow,
+    setOpen: (open) => setDismissedAwaiting(open ? null : awaitingNow),
+  };
+
   const order = battle?.initiativeOrder;
 
   const effects = useDisplayEffectMap(order ?? NO_ORDER);
@@ -263,6 +282,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     userId,
     ...derived,
     effects,
+    awaitingDialog,
     connection: connectionState,
     dmControlledId,
     setDmControlledId,

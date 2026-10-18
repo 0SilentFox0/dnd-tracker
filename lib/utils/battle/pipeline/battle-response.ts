@@ -4,7 +4,9 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
+import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -56,9 +58,10 @@ export function buildPusherMessages(args: {
   before: BattleSceneState;
   after: BattleSceneState;
   participants: BattleParticipant[];
+  pending?: BattleParticipant[];
   delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, delta } = args;
+  const { before, after, participants, pending = [], delta } = args;
 
   const channel = battleChannelName(after.id);
 
@@ -72,7 +75,9 @@ export function buildPusherMessages(args: {
 
   const active = participants[after.turnIndex];
 
-  if (after.status === BattleStatus.ACTIVE && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
+  const awaiting = checkVictoryConditions(participants, reserveOf(pending)).awaiting !== null;
+
+  if (after.status === BattleStatus.ACTIVE && !awaiting && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
     messages.push({
       channel: userChannelName(active.basicInfo.controlledBy),
       event: "turn-started",

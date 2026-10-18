@@ -8,6 +8,7 @@ interface BattlePreparationViewProps {
   isDM: boolean;
   onStartBattle: () => void;
   isStarting: boolean;
+  canStart?: boolean;
 }
 
 export function BattlePreparationView({
@@ -16,6 +17,7 @@ export function BattlePreparationView({
   isDM,
   onStartBattle,
   isStarting,
+  canStart = true,
 }: BattlePreparationViewProps) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 animate-in fade-in duration-1000 relative">
@@ -72,7 +74,7 @@ export function BattlePreparationView({
               type="button"
               className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] shadow-[0_0_40px_rgba(230,194,90,.35)] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
               onClick={onStartBattle}
-              disabled={isStarting}
+              disabled={isStarting || !canStart}
             >
               {isStarting ? "ЗБІР ВІЙСЬКА..." : "ДО БОЮ!"}
             </button>
@@ -81,6 +83,7 @@ export function BattlePreparationView({
               🗡️ Очікуйте наказу DM...
             </div>
           )}
+          {isDM && !canStart && <p className="mt-3 text-sm italic text-[var(--hud-muted)]">Хоча б один учасник має бути на полі</p>}
         </div>
       </div>
     </div>

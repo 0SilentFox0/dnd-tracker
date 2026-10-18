@@ -36,7 +36,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
       <ConnectionBanner />
       <BattleTopBar onComplete={onComplete} />
       {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
-      {awaiting && !isDM && <AwaitingDmBanner />}
+      {awaiting && <AwaitingDmBanner />}
       <div className="flex h-20 items-center border-y border-white/[.08]">
         <div className="min-w-0 flex-1"><InitiativeTrack /></div>
         <div className="w-[420px] shrink-0"><LastActionTicker /></div>

@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 
 export function AwaitingDmDialog() {
-  const { awaiting, reserve, actions, isDM } = useBattleScene();
+  const { awaiting, reserve, actions, isDM, awaitingDialog } = useBattleScene();
 
-  const [dismissedFor, setDismissedFor] = useState<typeof awaiting>(null);
-
-  if (!awaiting && dismissedFor) setDismissedFor(null);
-
-  if (!isDM || !awaiting || dismissedFor === awaiting) return null;
+  if (!isDM || !awaiting || !awaitingDialog.open) return null;
 
   const side = awaiting === "victory" ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 
@@ -25,7 +19,7 @@ export function AwaitingDmDialog() {
   return (
     <ResponsiveDialog
       open
-      onOpenChange={() => setDismissedFor(awaiting)}
+      onOpenChange={() => awaitingDialog.setOpen(false)}
       size="sm"
       hud
       title={awaiting === "victory" ? "У резерві ще є вороги" : "У резерві ще є союзники"}

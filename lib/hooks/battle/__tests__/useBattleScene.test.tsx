@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 
-import { deriveTurn } from "../useBattleScene";
+import { deriveScene, deriveTurn } from "../useBattleScene";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -50,5 +50,44 @@ describe("deriveTurn — завершений бій", () => {
 
     expect(deriveTurn(done, "u1", false, null).isMyTurn).toBe(false);
     expect(deriveTurn(done, "dm-user", true, null).isMyTurn).toBe(false);
+  });
+});
+
+describe("резерв і очікування рішення ДМ", () => {
+  const dead = (id: string) => {
+    const e = p(id, "dm", ParticipantSide.ENEMY);
+
+    return { ...e, combatStats: { ...e.combatStats, currentHp: 0, status: "dead" as const } };
+  };
+
+  const imp = { ...p("imp", "dm", ParticipantSide.ENEMY), battleData: { ...createMockParticipant().battleData, reserved: true } };
+
+  const scene = (isDM: boolean, pendingSummons = [imp]) =>
+    ({ initiativeOrder: [p("h1", "u1"), dead("gob")], currentTurnIndex: 0, currentRound: 1, status: "active", isDM, pendingSummons }) as unknown as BattleScene;
+
+  it("DM бачить резерв і awaiting", () => {
+    const out = deriveScene(scene(true), "dm-user", null);
+
+    expect(out.reserve.map((x) => x.basicInfo.id)).toEqual(["imp"]);
+    expect(out.awaiting).toBe("victory");
+  });
+
+  it("гравець: резерв порожній, але awaiting відомий", () => {
+    const out = deriveScene(scene(false), "u1", null);
+
+    expect(out.reserve).toEqual([]);
+    expect(out.awaiting).toBe("victory");
+  });
+
+  it("без резерву ворогів awaiting немає; завершений бій теж не awaiting", () => {
+    expect(deriveScene(scene(true, []), "dm-user", null).awaiting).toBeNull();
+    expect(deriveScene({ ...scene(true), status: "completed" } as unknown as BattleScene, "dm-user", null).awaiting).toBeNull();
+  });
+
+  it("під час awaiting ні в кого немає свого ходу", () => {
+    expect(deriveScene(scene(false), "u1", null).isMyTurn).toBe(false);
+    expect(deriveScene(scene(true), "dm-user", null).isMyTurn).toBe(false);
+    expect(deriveTurn(scene(false), "u1", false, null).isMyTurn).toBe(true);
+    expect(deriveTurn(scene(false), "u1", false, null, true).isMyTurn).toBe(false);
   });
 });

@@ -49,7 +49,7 @@ export function MobileBattleLayout() {
       <LastActionTicker onOpenLog={openLatestLog} />
       {battle.status === BattleStatus.COMPLETED ? (
         <BattleOverBanner />
-      ) : awaiting && !isDM ? (
+      ) : awaiting ? (
         <AwaitingDmBanner />
       ) : isMyTurn ? (
         <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>

@@ -291,7 +291,7 @@ export async function runBattleMutation<TBody>(
       knowledge,
     });
 
-    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, delta: clientDelta }));
+    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, delta: clientDelta }));
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {

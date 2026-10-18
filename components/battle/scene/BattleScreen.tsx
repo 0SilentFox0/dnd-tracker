@@ -62,9 +62,11 @@ export function BattleScreen() {
   if (battle.status === BattleStatus.PREPARED) {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
 
+    const onField = battle.participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
+
     return (
       <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
-        <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} />
+        <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onField > 0} />
       </div>
     );
   }
