@@ -65,7 +65,13 @@ describe("BattleMap", () => {
 
   describe("hud placement", () => {
     it("card sits below the token, and flips above at the bottom edge", () => {
-      const { container } = render(<BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} />);
+      const fx = { id: "fx", name: "fx", type: "buff", duration: 1, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
+
+      const { container } = render(
+        <TooltipProvider>
+          <BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} view={{ hud: new Map([["e", { exact: true, effects: [fx, fx] }]]) }} />
+        </TooltipProvider>,
+      );
 
       const cards = container.querySelectorAll<HTMLElement>("[class*=backdrop-blur]");
 
@@ -73,6 +79,28 @@ describe("BattleMap", () => {
       expect(cards[0].style.bottom).toBe("");
       expect(cards[1].style.bottom).not.toBe("");
       expect(cards[1].style.top).toBe("");
+    });
+  });
+
+  describe("hud sizing", () => {
+    it("card width does not exceed footprint width, size-1 card has no name", () => {
+      const big = { ...at("g", 0, 0), combatStats: { ...base.combatStats, gridSize: 2 } };
+
+      const { container } = render(<BattleMap map={square} participants={[at("small", 3, 0), big]} />);
+
+      const cardPx = 200;
+
+      const [first, second] = [...container.querySelectorAll<HTMLElement>("[class*=backdrop-blur]")];
+
+      const widths = [parseFloat(first.style.width), parseFloat(second.style.width)];
+
+      expect(Math.max(...widths)).toBeLessThanOrEqual(2 * cardPx * 1.1);
+      expect(Math.min(...widths)).toBeLessThanOrEqual(cardPx * 1.1);
+      expect(widths.sort()[0]).toBeCloseTo(cardPx);
+
+      const smallCard = [first, second].find((c) => parseFloat(c.style.width) < cardPx * 1.5) as HTMLElement;
+
+      expect(smallCard.textContent).not.toContain("small");
     });
   });
 
@@ -86,19 +114,18 @@ describe("BattleMap", () => {
         </TooltipProvider>,
       );
 
-    it("exact: name and HP / max", () => {
+    it("exact: HP numbers (size 1)", () => {
       const { container } = renderHud(undefined);
 
       const max = base.combatStats.maxHp;
 
-      expect(container.textContent).toContain("h");
-      expect(container.textContent).toContain(`${base.combatStats.currentHp} / ${max}`);
+      expect(container.textContent).toContain(`${base.combatStats.currentHp}/${max}`);
     });
 
     it("not exact: no HP numbers", () => {
       const { container } = renderHud(new Map([["h", { exact: false, effects: [] }]]));
 
-      expect(container.textContent).not.toContain(" / ");
+      expect(container.textContent).not.toMatch(/\d+\/\d+/);
     });
 
     it("shows the effect", () => {

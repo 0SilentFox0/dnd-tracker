@@ -14,3 +14,5 @@ Task 4: complete (..43b71d9) hex removed
 Task 5: fix round 1/5 (page scroll, card clipping, card overlap, effect names → icons; 5fdeded..2936d1e)
 Task 5: complete (43b71d9..2936d1e) — browser: no page scroll at 1512x799, cards readable
 Task 5: minor (deferred): bottom-row card could clip vertically
+Task 5: fix round 2/5 (card below portrait; 4e53066)
+Task 5: fix round 3/5 in progress — card width = footprint width (user: too big for 1-cell)

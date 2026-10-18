@@ -3,6 +3,7 @@
 import { EffectIcon, HealthBar, HealthLabel } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import { signedDelta } from "@/lib/utils/common/format";
@@ -18,9 +19,7 @@ export interface MapTokenHudProps {
   raised: boolean;
 }
 
-const TEXT_MIN_CELL = 22;
-
-const MAX_ICONS = 5;
+const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -39,13 +38,19 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
 
   const boxPx = box.size * pxPerUnit;
 
-  const cardPx = Math.max(boxPx, cellPx * 2.2);
+  const cells = sizeOf(participant);
+
+  const small = cells === 1;
+
+  const cardPx = cells * cellPx;
+
+  const maxIcons = small ? 3 : 5;
 
   const gap = Math.round(boxPx * 0.1);
 
-  const nameFont = clamp(9, cellPx * 0.2, 14);
+  const nameFont = small ? clamp(7, cellPx * 0.17, 11) : clamp(9, cellPx * 0.2 / Math.sqrt(cells), 14);
 
-  const hpFont = clamp(8, cellPx * 0.18, 12);
+  const hpFont = small ? nameFont : clamp(8, cellPx * 0.17, 12);
 
   const mapPx = mapSize.width * pxPerUnit;
 
@@ -53,7 +58,7 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
 
   const relLeft = clamp(-wrapperLeft, (boxPx - cardPx) / 2, mapPx - cardPx - wrapperLeft);
 
-  const iconPx = Math.round(clamp(12, cellPx * 0.22, 16));
+  const iconPx = Math.round(small ? clamp(8, cellPx * 0.2, 12) : clamp(12, cellPx * 0.22, 16));
 
   const cardHeight = nameFont * 1.3 + 12 + (showText && effects.length > 0 ? iconPx + 2 : 0);
 
@@ -72,7 +77,7 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
     >
       <div
         ref={shake}
-        className={cn("absolute rounded-md border border-white/10 bg-black/70 backdrop-blur-[2px]", showText ? "px-1.5 py-1" : "p-0.5", down && "opacity-40")}
+        className={cn("absolute rounded-md border border-white/10 bg-black/70 backdrop-blur-[2px]", showText ? (small ? "px-1 py-0.5" : "px-1.5 py-1") : "p-0.5", down && "opacity-40")}
         style={{
           width: cardPx,
           left: relLeft,
@@ -88,7 +93,20 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
             {signedDelta(change.delta)}
           </span>
         )}
-        {showText && (
+        {showText && small && (
+          <div className={cn("flex justify-center whitespace-nowrap font-sans font-medium leading-tight", down && "line-through")} style={{ fontSize: hpFont }}>
+            {exact ? (
+              <span className={cn("truncate", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>
+                {currentHp}/{maxHp}
+              </span>
+            ) : (
+              <span className="truncate [&>span]:ml-0 [&>span]:text-[length:inherit]">
+                <HealthLabel participant={participant} />
+              </span>
+            )}
+          </div>
+        )}
+        {showText && !small && (
           <div className={cn("hud-sc flex items-center whitespace-nowrap font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
             <span className="truncate">{participant.basicInfo.name}</span>
             {exact ? (
@@ -104,13 +122,13 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
         )}
         <HealthBar participant={participant} exact={exact} className={showText ? "mt-0.5" : "mt-0"} />
         {showText && effects.length > 0 && (
-          <div className="mt-0.5 flex items-center gap-1 overflow-hidden text-[#cdb87e]" style={{ height: iconPx }}>
-            {effects.slice(0, MAX_ICONS).map((e) => (
+          <div className="mt-0.5 flex items-center gap-0.5 overflow-hidden text-[#cdb87e]" style={{ height: iconPx }}>
+            {effects.slice(0, maxIcons).map((e) => (
               <span key={e.id} role="img" aria-label={e.name} title={e.name} className={e.type === "buff" ? undefined : "text-hud-danger"}>
                 <EffectIcon effect={e} size={iconPx} />
               </span>
             ))}
-            {effects.length > MAX_ICONS && <span className="text-[var(--hud-muted)]" style={{ fontSize: hpFont }}>+{effects.length - MAX_ICONS}</span>}
+            {effects.length > maxIcons && <span className="text-[var(--hud-muted)]" style={{ fontSize: hpFont }}>+{effects.length - maxIcons}</span>}
           </div>
         )}
       </div>

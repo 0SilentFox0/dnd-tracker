@@ -8,3 +8,6 @@ Playground uses the existing .below-header class (100dvh minus --app-header-h) i
 
 ## Fix round 2
 HUD card now sits below the portrait; flips above only when the estimated card height would overflow the map bottom. Height check at 20x12 in ~1166x700 (cell 58px): name 11.6px font + bar + icon row ~44px, starts ~4px under the portrait, so it ends inside the single empty row below (58px). No font change needed. Test added for below/above placement. Full suite 2699 passed, tsc and lint clean.
+
+## Fix round 3
+Card width = footprint cells x cell px (1/2/3 cells). Size 1: centred HP "cur/max" (or short health label), no name, bar, up to 3 tiny icons + "+N"; size >=2: name + HP, bar, up to 5 icons. Text hidden below 28px cells (bar only). Fonts clamped, truncate/nowrap. Tests: width <= footprint x1.1, size-1 card has no name. Full suite 2700 passed, tsc and lint clean.
