@@ -6,6 +6,10 @@ import { cellsOf, isOnMap } from "./occupancy";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { ActiveEffect, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
+export function mapHudEffects(effects: ActiveEffect[] | undefined): ActiveEffect[] {
+  return (effects ?? []).filter((e) => !e.permanent);
+}
+
 export interface MapSceneInput {
   map: BattleMapConfig;
   participants: BattleParticipant[];
@@ -51,7 +55,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
   const hud: NonNullable<BattleMapView["hud"]> = new Map();
 
-  for (const p of participants) hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer), effects: effects.get(p.basicInfo.id) ?? [] });
+  for (const p of participants) hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer), effects: mapHudEffects(effects.get(p.basicInfo.id)) });
 
   const hoverMark = hoverCell ? marks.get(cellKey(hoverCell)) : undefined;
 

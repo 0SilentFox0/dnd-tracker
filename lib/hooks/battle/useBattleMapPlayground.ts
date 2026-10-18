@@ -7,7 +7,7 @@ import { useDisplayEffectMap } from "./useDisplayEffectMap";
 import type { BattleMapActions, BattleMapView } from "@/components/battle/map";
 import { buildMockParticipants } from "@/components/battle/map/dev/mock-participants";
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { cellKey, cellsOf, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
+import { cellKey, cellsOf, mapHudEffects, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack";
@@ -46,7 +46,7 @@ export function useBattleMapPlayground() {
 
   const effects = useDisplayEffectMap(participants);
 
-  const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true, effects: effects.get(p.basicInfo.id) ?? [] }])), [participants, effects]);
+  const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true, effects: mapHudEffects(effects.get(p.basicInfo.id)) }])), [participants, effects]);
 
   const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks, trajectory, hud };
 
