@@ -18,6 +18,7 @@ import type {
   BattleVersion,
   BonusActionData,
   MoraleCheckData,
+  MoveParticipantData,
   SpellCastData,
 } from "@/types/api";
 import type {
@@ -112,6 +113,10 @@ export async function abilityAction(campaignId: string, battleId: string, data: 
 
 export async function setAuraZone(campaignId: string, battleId: string, data: WithVersion<AuraZoneData>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/aura-zone`, data);
+}
+
+export async function moveParticipant(campaignId: string, battleId: string, data: WithVersion<MoveParticipantData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/move`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

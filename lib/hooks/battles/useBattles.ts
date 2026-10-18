@@ -18,6 +18,7 @@ import {
   deleteBattle,
   getBattle,
   moraleCheck,
+  moveParticipant,
   nextTurn,
   refreshBattleSources,
   resetBattle,
@@ -39,6 +40,7 @@ import type {
   BattleScene,
   BonusActionData,
   MoraleCheckData,
+  MoveParticipantData,
   SpellCastData,
 } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
@@ -159,6 +161,9 @@ export const useAbilityAction = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useAuraZone = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AuraZoneData>(c, b, (data) => setAuraZone(c, b, data), o);
+
+export const useMoveParticipant = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MoveParticipantData>(c, b, (data) => moveParticipant(c, b, data), o);
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

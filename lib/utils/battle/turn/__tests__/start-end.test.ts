@@ -35,6 +35,22 @@ describe("processStartOfTurn", () => {
   });
 });
 
+describe("рух на початку ходу", () => {
+  it("на початку власного ходу обнуляє пройдений рух", () => {
+    const base = createMockParticipant();
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, movementUsed: 4 } });
+
+    expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBe(0);
+  });
+
+  it("без пройденого руху поле не зʼявляється", () => {
+    const p = createMockParticipant();
+
+    expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBeUndefined();
+  });
+});
+
 describe("critical effects at the start of turn", () => {
   const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], effect: { type, duration: type === "lose_action" ? 1 : 2 } });
 

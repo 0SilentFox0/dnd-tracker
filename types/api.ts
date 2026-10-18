@@ -2,7 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { BattleMapConfig } from "@/types/battle";
+import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -160,6 +160,11 @@ export interface AuraZoneData {
   participantId: string;
   auraId: string;
   targetIds: string[];
+}
+
+export interface MoveParticipantData {
+  participantId: string;
+  to: GridPoint;
 }
 
 export interface AbilityActionData {

@@ -120,6 +120,10 @@ export function processStartOfTurn(
     },
   };
 
+  if (updatedParticipant.battleData.movementUsed) {
+    updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, movementUsed: 0 } };
+  }
+
   const id = participant.basicInfo.id;
 
   // скидання перед нарахуванням: залишок пулу з минулого ходу не подвоює бонус
