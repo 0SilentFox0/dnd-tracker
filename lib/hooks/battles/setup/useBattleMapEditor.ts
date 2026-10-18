@@ -11,15 +11,27 @@ const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
 
 export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) {
-  const [enabled, setEnabled] = useState(Boolean(initial));
+  const [enabled, setEnabledState] = useState(Boolean(initial));
 
   const [map, setMap] = useState<BattleMapConfig>(() => initial ?? { ...DEFAULT_BATTLE_MAP });
 
   const [margins, setMarginsState] = useState<Margins>(() => (initial ? inferMargins(initial) : NO_MARGINS));
 
-  const [paint, setPaint] = useState(false);
+  const [paint, setPaintState] = useState(false);
 
   const [notice, setNotice] = useState<string | null>(null);
+
+  const setEnabled = useCallback((value: boolean) => {
+    setEnabledState(value);
+
+    if (!value) setNotice(null);
+  }, []);
+
+  const setPaint = useCallback((value: boolean) => {
+    setPaintState(value);
+
+    if (!value) setNotice(null);
+  }, []);
 
   const setSize = useCallback(
     (cols: number, rows: number) => {

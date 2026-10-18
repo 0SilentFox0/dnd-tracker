@@ -2,7 +2,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { useBattleMapEditor } from "../useBattleMapEditor";
+import { NO_PLAYABLE_NOTICE, useBattleMapEditor } from "../useBattleMapEditor";
 
 import { DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
 
@@ -73,6 +73,30 @@ describe("useBattleMapEditor", () => {
     expect(result.current.notice).toBeTruthy();
     expect(result.current.margins.top).toBe(0);
     act(() => result.current.setMargins({ top: 1, right: 0, bottom: 0, left: 0 }));
+    expect(result.current.notice).toBeNull();
+  });
+
+  it("setSize відхиляє розмір без вільної 2×2 і лишає карту", () => {
+    const blocked = ["1:0", "1:1", "3:0", "3:1"];
+
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1, blocked }));
+
+    act(() => result.current.setSize(4, 2));
+    expect(result.current.notice).toBe(NO_PLAYABLE_NOTICE);
+    expect(result.current.map.rows).toBe(4);
+  });
+
+  it("notice зникає, коли вимикають paint або карту", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1 }));
+
+    act(() => result.current.setMargins({ top: 2, right: 0, bottom: 2, left: 0 }));
+    expect(result.current.notice).toBeTruthy();
+    act(() => result.current.setPaint(false));
+    expect(result.current.notice).toBeNull();
+
+    act(() => result.current.setMargins({ top: 2, right: 0, bottom: 2, left: 0 }));
+    expect(result.current.notice).toBeTruthy();
+    act(() => result.current.setEnabled(false));
     expect(result.current.notice).toBeNull();
   });
 });
