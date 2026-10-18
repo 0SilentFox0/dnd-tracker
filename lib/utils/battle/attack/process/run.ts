@@ -141,6 +141,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     actionModifiers: actionModifiers[attackerId],
     bonusPercent: params.bonusPercent,
     bonusLabel: params.bonusLabel,
+    obstacle: params.obstacle,
   });
 
   const {
@@ -153,6 +154,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     damageSteps,
     oldHp,
   } = hitDamage;
+
+  if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${totalFinalDamage}`);
 
   fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
 

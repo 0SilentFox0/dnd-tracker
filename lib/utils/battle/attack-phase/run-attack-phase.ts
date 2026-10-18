@@ -36,6 +36,7 @@ export type AttackPhaseInput = {
     secondRolls?: number[];
     advantageRoll?: number;
     disadvantageRoll?: number;
+    obstacle?: boolean;
     damageRolls: number[];
   };
   battleId: string;
@@ -248,6 +249,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
+      obstacle: data.obstacle,
       rng,
     });
 

@@ -2,6 +2,7 @@ import { calculateDamageWithModifiers } from "../../damage";
 import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damage/balance-multiplier";
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
+import { applyObstacle, obstacleStep } from "../../damage/obstacle";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import { applyCriticalEffect } from "..";
@@ -30,6 +31,7 @@ export interface ComputeHitDamageParams {
   bonusPercent?: number;
   bonusLabel?: string;
   offTurn?: boolean;
+  obstacle?: boolean;
   rng?: () => number;
 }
 
@@ -182,13 +184,21 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attackKindOf(attack.type),
   );
 
-  const totalFinalDamage = resistanceResult.finalDamage + totalAdditionalDamage;
+  const unhalvedDamage = resistanceResult.finalDamage + totalAdditionalDamage;
+
+  const totalFinalDamage = params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
 
   if (dmgMult !== 1) damageSteps.push({ label: "Частка шкоди", side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
 
   damageSteps.push(...resistanceResult.steps);
 
-  if (totalAdditionalDamage > 0) damageSteps.push({ label: "Додаткова шкода", side: "attacker", kind: "flat", value: totalAdditionalDamage, after: totalFinalDamage });
+  if (totalAdditionalDamage > 0) damageSteps.push({ label: "Додаткова шкода", side: "attacker", kind: "flat", value: totalAdditionalDamage, after: unhalvedDamage });
+
+  if (params.obstacle) {
+    damageSteps.push(obstacleStep(unhalvedDamage));
+    damageCalculation.breakdown.push("──────────");
+    damageCalculation.breakdown.push(`× 0.5 (перешкода) = ${totalFinalDamage}`);
+  }
 
   const oldHp = updatedTarget.combatStats.currentHp;
 

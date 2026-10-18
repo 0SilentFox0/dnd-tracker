@@ -21,6 +21,7 @@ export const attackBodySchema = z
     secondRolls: z.array(z.number().min(1).max(20)).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
+    obstacle: z.boolean().default(false),
     damageRolls: z.array(z.number()).default([]),
     endTurn: z.boolean().default(false),
   })

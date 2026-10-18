@@ -27,6 +27,7 @@ export interface AttackFlowState {
   diceSlots: number[];
   targetIds: string[];
   mode: AttackMode;
+  obstacle: boolean;
   strikes: Strike[];
   index: number;
   error?: string;
@@ -40,6 +41,7 @@ export type AttackFlowAction =
   | { type: "SET_TARGETS"; ids: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_MODE"; mode: AttackMode }
+  | { type: "TOGGLE_OBSTACLE" }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
@@ -49,7 +51,7 @@ export type AttackFlowAction =
   | { type: "CLOSE" };
 
 export const initialAttackFlow: AttackFlowState = {
-  step: "closed", weaponCount: 0, maxTargets: 1, diceSlots: [], targetIds: [], mode: "normal", strikes: [], index: 0, results: [],
+  step: "closed", weaponCount: 0, maxTargets: 1, diceSlots: [], targetIds: [], mode: "normal", obstacle: false, strikes: [], index: 0, results: [],
 };
 
 const isHit = (s: Strike) => s.outcome === "hit" || s.outcome === "crit";
@@ -83,6 +85,8 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
         : { ...s, step: "roll", index: 0, error: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [] })) };
     case "SET_MODE":
       return { ...s, mode: a.mode };
+    case "TOGGLE_OBSTACLE":
+      return { ...s, obstacle: !s.obstacle };
     case "ROLL": {
       const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
 
@@ -134,7 +138,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 }
 
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
-  const base = { attackerId, attackId: s.attackId, endTurn: false };
+  const base = { attackerId, attackId: s.attackId, ...(s.obstacle && { obstacle: true }), endTurn: false };
 
   if (s.strikes.length === 1) {
     const [st] = s.strikes;
