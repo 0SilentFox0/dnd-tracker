@@ -365,3 +365,47 @@ export function useMapViewport(): {
 - [ ] **Step 3:** Сторінка й мок; `pnpm exec tsc --noEmit`, `pnpm lint`, повний `pnpm test:run`.
 - [ ] **Step 4:** Ручна перевірка: `pnpm dev`, відкрити `http://localhost:3000/dev/battle-map` (потрібен вхід — сторінка під авторизацією, як решта застосунку): видно фон, сітку, 8 токенів; клік по клітинці рухає; «Атака» підсвічує цілі; «Гекси» перемальовує. Зафіксуй у звіті, що саме перевірив (або що dev-сервер не вдалося запустити).
 - [ ] **Step 5: Commit** — `feat(battle-map): /dev/battle-map playground with mock participants`
+
+---
+
+## Зворотний звʼязок користувача (2026-10-18) → задачі 4–5
+
+- «Гекси прибираємо» — лишається лише квадратна сітка.
+- «HUD персонажів і юнітів взяти з поточної реалізації в колонках» — обрано варіант «картка на самому токені»: над кожним токеном компактна плашка в стилі `ParticipantRow` (імʼя, HP, смуга здоровʼя, іконки ефектів).
+
+### Task 4: Прибрати гекси
+
+**Files:** усі, що згадують `GridShape` / `grid` (знайти: `grep -rln "GridShape" lib app components types`), зокрема `lib/constants/battle.ts`, `types/battle.ts`, `lib/schemas/battles.ts`, `lib/utils/battle/grid/{geometry,occupancy,layout,path,placement,attack-reach,map-view}.ts`, їхні тести, `components/battle/map/**`, `lib/hooks/battle/useBattleMapPlayground.ts`, `app/api/__tests__/battles/move-mutation.test.ts`, `lib/utils/battle/pipeline/__tests__/run-battle-mutation.test.ts`, `docs/superpowers/specs/2026-10-18-battle-map.md`.
+
+- Видалити `GridShape` і поле `grid` з `BattleMapConfig`, `DEFAULT_BATTLE_MAP`, `battleMapSchema` (старі тіла з `grid` просто ігноруються Zod — схема не `strict`).
+- Функції геометрії/відмальовки втрачають параметр `grid`: `neighbors(p)`, `cellDistance(a, b)`, `footprint(anchor, size)`, `footprintDistance(a, b)`, `cellsOf(p)`, `cellCenter(p)`, `cellPolygon(p)`, `tokenBox(p)`, `mapSize(map)`; гекс-гілки, `toCube`, `HEX_*` — видалити. Оновити всі виклики.
+- Тести: видалити гекс-кейси; квадратні лишаються без змін за змістом.
+- Пісочниця: прибрати перемикач «Квадрати/Гекси».
+- Spec: розділ «Рішення» — лише квадратна сітка (Чебишев), прибрати згадки гексів.
+- Перевірка: `pnpm test:run`, `pnpm exec tsc --noEmit`, `pnpm lint`; `grep -rn "hex\|Hex\|HEX\|GridShape" lib app components types` — порожньо (крім випадкових слів не про сітку).
+- Commit: `refactor(battle-map): drop hex grid — square only`
+
+### Task 5: Картка HUD над токеном
+
+**Files:**
+- Modify: `components/battle/map/MapToken.tsx`, `components/battle/map/BattleMap.tsx`
+- Modify: `lib/hooks/battle/useBattleMapPlayground.ts`, `components/battle/map/dev/BattleMapPlayground.tsx`
+- Test: `components/battle/map/__tests__/BattleMap.test.tsx`
+
+**Interfaces:**
+- `BattleMapView` отримує `hud?: Map<string, { exact: boolean; effects: ActiveEffect[] }>`; без запису для учасника — `exact: true`, ефекти — `[]`.
+
+**Поведінка й верстка — як `components/battle/participants/ParticipantRow.tsx`, у компактному вигляді:**
+- Над портретом токена (по центру, з відступом ~4 px) — плашка `rounded-md bg-black/70 px-1.5 py-1 backdrop-blur-[2px] border border-white/10`, ширина = більше з (ширина токена, ~2.2 клітинки в px), `pointer-events-none`.
+- Рядок 1: імʼя (`hud-sc font-bold text-[var(--ink)] truncate`) + праворуч HP: при `exact` — `currentHp / maxHp` (червоний `#e04a35` при `hpRatio ≤ 0.25`, інакше `#d6cbb7`), інакше `HealthLabel`.
+- Рядок 2: `HealthBar participant exact` (на всю ширину плашки).
+- Рядок 3 (лише якщо є ефекти): `EffectLine effects` (іконки).
+- Розміри шрифтів масштабуються від розміру клітинки в px (`clamp`, мін. 9 px імʼя / 8 px HP), щоб на 20×12 у десктопі читалось, а на телефоні не розвалювалось; якщо клітинка < 22 px — показувати лише смугу HP без тексту.
+- Мертвий/непритомний (`isDown`) — `opacity-40`, імʼя `line-through`, як у рядку.
+- Зміна HP: плаваюче число й спалах портрета, як у `ParticipantRow` (`useHpChange`, `useDamageShake`, класи `animate-[hud-float…]`, `animate-[hud-flash-red…]`/`green`).
+- Прибрати поточну тонку `HealthBar` під портретом (її замінює плашка).
+- Шар плашок вище за токени (`z-index`), щоб сусідні портрети не перекривали текст; плашка поточного/обраного учасника — найвище.
+- Пісочниця: будує `hud` з `exact: true` для всіх і ефектами з `useDisplayEffectMap(participants)` (як сцена бою), щоб іконки ефектів відображались; додати двом мок-учасникам по 1–2 активні ефекти (наприклад, бафф і дебафф — подивися формат `ActiveEffect` у `types/battle.ts` і приклади в тестах), щоб рядок ефектів був видимий.
+- Тести: плашка показує імʼя й «HP / max» для `exact`; при `exact: false` — немає чисел HP; є іконка ефекту, коли ефект передано.
+- Перевірка: focused tests, `pnpm exec tsc --noEmit`, `pnpm lint`, повний `pnpm test:run`.
+- Commit: `feat(battle-map): row-style HUD card above map tokens`
