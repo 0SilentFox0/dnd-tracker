@@ -90,7 +90,7 @@ export interface LoadedBattle {
 
 export type ScenePatch = Partial<
   Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "startedAt" | "completedAt">
->;
+> & { map?: BattleMapConfig | null };
 
 export interface BattleMutationOutcome {
   scene?: ScenePatch;

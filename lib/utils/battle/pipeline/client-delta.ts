@@ -3,11 +3,20 @@ import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import type { BattleParticipantPatch, ClientBattleDelta } from "@/types/api";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 
 const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id, i) => id === b[i]);
+
+// фон може бути великим data-URL: порівнюємо його рядком окремо від решти
+function sameMap(a: BattleMapConfig | null, b: BattleMapConfig | null): boolean {
+  if (a === b) return true;
+
+  if (!a || !b || a.background !== b.background) return false;
+
+  return JSON.stringify({ ...a, background: null }) === JSON.stringify({ ...b, background: null });
+}
 
 export function buildClientDelta(args: {
   before: { scene: BattleSceneState; meta: BattleMeta; participants: BattleParticipant[]; pending: BattleParticipant[] };
@@ -21,8 +30,10 @@ export function buildClientDelta(args: {
   log: BattleAction[];
   cancelledFrom?: number;
   knowledge?: BattleKnowledge;
+  /** карта після мутації, якщо мутація її повернула */
+  map?: BattleMapConfig | null;
 }): ClientBattleDelta {
-  const { before, after, participants, pending, log, cancelledFrom, knowledge } = args;
+  const { before, after, participants, pending, log, cancelledFrom, knowledge, map } = args;
 
   const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
 
@@ -73,6 +84,7 @@ export function buildClientDelta(args: {
       ...(after.completedAt
         ? { completedAt: after.completedAt.toISOString() }
         : before.scene.completedAt && { completedAt: null }),
+      ...(map !== undefined && !sameMap(before.meta.map, map) && { map }),
     },
     upserted,
     ...(patched.length > 0 && { patched }),

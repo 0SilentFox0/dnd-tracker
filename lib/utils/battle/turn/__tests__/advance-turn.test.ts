@@ -5,6 +5,7 @@ import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
+import type { BattleMapConfig } from "@/types/battle";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
@@ -28,6 +29,26 @@ describe("advanceTurn", () => {
     const out = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.scene.round).toBe(2);
+  });
+
+  it("новий раунд прибирає барʼєри, що діяли до кінця минулого раунду", () => {
+    const map: BattleMapConfig = {
+      cols: 10, rows: 10, background: null, opacity: 0.3,
+      terrain: { "1:1": { kind: "barrier", untilRound: 1 }, "2:2": { kind: "barrier", untilRound: 2 } },
+    };
+
+    const sameRound = advanceTurn({ participants: [hero, goblin], pending: [], scene, map });
+
+    expect(sameRound.scene.map).toBeUndefined();
+
+    const out = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
+
+    expect(out.scene.round).toBe(2);
+    expect(out.scene.map?.terrain).toEqual({ "2:2": { kind: "barrier", untilRound: 2 } });
+
+    const nothing = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: null });
+
+    expect(nothing.scene.map).toBeUndefined();
   });
 
   it("саммони з pending входять у бій у новому раунді", () => {

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SnapshotState } from "@/lib/utils/battle/store";
 import { BattleRuleError, loadSnapshotsFrom, restoreParticipantsAt } from "@/lib/utils/battle/store";
@@ -39,6 +40,8 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
 
     const { scene } = first.state;
 
+    const map = ctx.meta.map && scene.terrain !== undefined ? replaceTerrain(ctx.meta.map, scene.terrain) : undefined;
+
     return {
       participants,
       pending,
@@ -48,6 +51,7 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
         status: scene.status,
         pendingMoraleCheck: scene.pendingMoraleCheck,
         ...(scene.status !== BattleStatus.COMPLETED && { completedAt: null }),
+        ...(map && { map }),
       },
       events: [],
       history: { cancelFromSeq: first.seq },

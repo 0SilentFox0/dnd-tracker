@@ -6,15 +6,17 @@ import { applyVictoryCompletion } from "./turn-helpers";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { pruneExpiredBarriers } from "@/lib/utils/battle/grid/terrain";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnInput {
   rng?: () => number;
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   scene: BattleSceneState;
+  map?: BattleMapConfig | null;
 }
 
 export interface AdvanceTurnOutput {
@@ -24,7 +26,7 @@ export interface AdvanceTurnOutput {
   actions: BattleAction[];
 }
 
-export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnInput): AdvanceTurnOutput {
+export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceTurnInput): AdvanceTurnOutput {
   let order = participants;
 
   const actions: BattleAction[] = [];
@@ -122,6 +124,8 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
     p.battleData.revealPending && (newRound || (i >= scene.turnIndex && i <= loop.nextTurnIndex)) ? dropBattleFlag(p, "revealPending") : p,
   );
 
+  const prunedMap = newRound && map ? pruneExpiredBarriers(map, loop.nextRound) : null;
+
   return {
     participants: participantsAfter,
     pending: loop.clearedPendingSummons ? reserve : pending,
@@ -131,6 +135,7 @@ export function advanceTurn({ participants, pending, scene, rng }: AdvanceTurnIn
       status: victory.finalStatus as BattleSceneState["status"],
       ...(victory.completedAt && { completedAt: victory.completedAt }),
       pendingMoraleCheck: null,
+      ...(prunedMap && { map: prunedMap }),
     },
     actions: [...actions, ...newLogEntries],
   };

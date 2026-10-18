@@ -24,6 +24,34 @@ describe("rollback mutation", () => {
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
   });
 
+  it("відкат повертає місцевість зі знімка: барʼєр, поставлений пізніше, зникає", async () => {
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+    const withBarrier = { ...map, terrain: { "1:1": { kind: "barrier" as const, untilRound: 2 } } };
+
+    const mapped = { ...ctx, meta: { ...ctx.meta, map: withBarrier } };
+
+    const before = { seq: 4, state: buildSnapshotState({ ...ctx.scene, status: "active" }, s, diffParticipants(s, s), map) };
+
+    const out = await createRollbackMutation(vi.fn(async () => [before]), vi.fn(async () => true))(mapped, { actionIndex: 4 });
+
+    expect(out.scene?.map).toEqual(map);
+
+    const same = { seq: 4, state: buildSnapshotState({ ...ctx.scene, status: "active" }, s, diffParticipants(s, s), withBarrier) };
+
+    const kept = await createRollbackMutation(vi.fn(async () => [same]), vi.fn(async () => true))(mapped, { actionIndex: 4 });
+
+    expect(kept.scene?.map?.terrain).toEqual(withBarrier.terrain);
+  });
+
+  it("старий знімок без місцевості або бій без карти — карту не чіпає", async () => {
+    const mapped = { ...ctx, meta: { ...ctx.meta, map: { cols: 8, rows: 8, background: null, opacity: 0.3 } } };
+
+    const out = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(mapped, { actionIndex: 5 });
+
+    expect(out.scene).not.toHaveProperty("map");
+  });
+
   it("немає знімків — action_rejected", async () => {
     await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({
       code: "action_rejected",

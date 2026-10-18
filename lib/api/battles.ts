@@ -17,6 +17,7 @@ import type {
   BattleSummary,
   BattleVersion,
   BonusActionData,
+  MapTerrainData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -117,6 +118,10 @@ export async function setAuraZone(campaignId: string, battleId: string, data: Wi
 
 export async function moveParticipant(campaignId: string, battleId: string, data: WithVersion<MoveParticipantData>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/move`, data);
+}
+
+export async function setMapTerrain(campaignId: string, battleId: string, data: WithVersion<MapTerrainData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/map-terrain`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

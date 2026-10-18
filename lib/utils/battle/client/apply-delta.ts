@@ -63,6 +63,7 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
     pendingMoraleCheck: scene.pendingMoraleCheck,
+    ...(scene.map !== undefined && { map: scene.map }),
     startedAt: scene.startedAt === null ? undefined : (scene.startedAt ?? cached.startedAt),
     completedAt: scene.completedAt === null ? undefined : (scene.completedAt ?? cached.completedAt),
     initiativeOrder,

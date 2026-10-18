@@ -249,7 +249,9 @@ export async function runBattleMutation<TBody>(
 
     const isDryRun = options.dryRun?.(parsed.body) ?? false;
 
-    const result = withVictory(loaded.scene, isDryRun ? mutated : withPlacement(loaded.meta.map, loaded.scene.status, mutated));
+    const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
+
+    const result = withVictory(loaded.scene, isDryRun ? mutated : withPlacement(map, loaded.scene.status, mutated));
 
     if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
@@ -273,9 +275,11 @@ export async function runBattleMutation<TBody>(
 
     const delta = await deps.saveBattle(loaded, result);
 
+    const { map: _map, ...scenePatch } = result.scene ?? {};
+
     const after: BattleSceneState = {
       ...loaded.scene,
-      ...result.scene,
+      ...scenePatch,
       version: delta.version,
       eventSeq: delta.events.at(-1)?.seq ?? loaded.scene.eventSeq,
     };
@@ -302,6 +306,7 @@ export async function runBattleMutation<TBody>(
       log: entries,
       cancelledFrom,
       knowledge,
+      map: result.scene?.map,
     });
 
     deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));

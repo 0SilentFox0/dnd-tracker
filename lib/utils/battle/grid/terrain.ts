@@ -47,10 +47,10 @@ export function threatCells(
   return result;
 }
 
-function withTerrain(map: BattleMapConfig, terrain: Record<string, TerrainCell>): BattleMapConfig {
+export function replaceTerrain(map: BattleMapConfig, terrain: Record<string, TerrainCell> | null | undefined): BattleMapConfig {
   const { terrain: _old, ...rest } = map;
 
-  return Object.keys(terrain).length > 0 ? { ...rest, terrain } : rest;
+  return terrain && Object.keys(terrain).length > 0 ? { ...rest, terrain } : rest;
 }
 
 const isExpired = (c: TerrainCell, round: number) => c.kind === "barrier" && c.untilRound !== undefined && c.untilRound < round;
@@ -60,7 +60,7 @@ export function pruneExpiredBarriers(map: BattleMapConfig, round: number): Battl
 
   if (!terrain || !Object.values(terrain).some((c) => isExpired(c, round))) return null;
 
-  return withTerrain(map, Object.fromEntries(Object.entries(terrain).filter(([, c]) => !isExpired(c, round))));
+  return replaceTerrain(map, Object.fromEntries(Object.entries(terrain).filter(([, c]) => !isExpired(c, round))));
 }
 
 export function applyTerrain(map: BattleMapConfig, cells: string[], value: TerrainCell | null): BattleMapConfig {
@@ -71,5 +71,5 @@ export function applyTerrain(map: BattleMapConfig, cells: string[], value: Terra
     else delete terrain[key];
   }
 
-  return withTerrain(map, terrain);
+  return replaceTerrain(map, terrain);
 }

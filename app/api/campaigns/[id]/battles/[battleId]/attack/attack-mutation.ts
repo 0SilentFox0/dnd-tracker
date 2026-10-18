@@ -90,7 +90,7 @@ export function createAttackMutation(deps: SummonDeps = defaultDeps) {
 
     if (!endTurn) return { participants: order, pending: ctx.pending, events };
 
-    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng });
+    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map });
 
     return {
       participants: advanced.participants,

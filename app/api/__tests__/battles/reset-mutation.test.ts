@@ -13,4 +13,17 @@ describe("reset mutation", () => {
     expect(out.scene).toEqual({ status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null });
     expect(out.history).toEqual({ clear: true });
   });
+
+  it("прибирає барʼєри з карти (вони лише для бою), решту місцевості лишає", () => {
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+    const terrain = { "1:1": { kind: "barrier" as const, untilRound: 5 }, "2:2": { kind: "wall" as const } };
+
+    const ctx = context();
+
+    const out = resetMutation({ ...ctx, meta: { ...ctx.meta, map: { ...map, terrain } } });
+
+    expect(out.scene?.map).toEqual({ ...map, terrain: { "2:2": { kind: "wall" } } });
+    expect(resetMutation({ ...ctx, meta: { ...ctx.meta, map } }).scene).not.toHaveProperty("map");
+  });
 });

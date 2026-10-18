@@ -11,6 +11,7 @@ export {
   useCastSpell,
   useCompleteBattle,
   useDeleteAllBattles,
+  useMapTerrain,
   useMoraleCheck,
   useMoveParticipant,
   useNextTurn,

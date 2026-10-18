@@ -42,6 +42,29 @@ describe("buildClientDelta", () => {
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
   });
 
+  it("карта в scene лише тоді, коли вона змінилась", () => {
+    const a = p("a");
+
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+    const withTerrain = { ...map, terrain: { "1:1": { kind: "wall" as const } } };
+
+    const args = {
+      before: { scene, meta: { ...meta, map }, participants: [a], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [a],
+      pending: [],
+      stored: [],
+      fullIds: [],
+      log: [],
+    };
+
+    expect(buildClientDelta(args).scene).not.toHaveProperty("map");
+    expect(buildClientDelta({ ...args, map: { ...map } }).scene).not.toHaveProperty("map");
+    expect(buildClientDelta({ ...args, map: withTerrain }).scene.map).toEqual(withTerrain);
+    expect(buildClientDelta({ ...args, map: null }).scene.map).toBeNull();
+  });
+
   it("видалення і зміна порядку → removed + order", () => {
     const a = p("a"), b = p("b"), c = p("c");
 

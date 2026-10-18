@@ -34,6 +34,21 @@ describe("buildSnapshotState", () => {
     expect(state.removed).toBeUndefined();
   });
 
+  it("бій із картою — зберігає місцевість (без фону); порожня місцевість — null", () => {
+    const before = [splitParticipant(createMockParticipant(), { orderIndex: 0, isPending: false })];
+
+    const map = { cols: 8, rows: 8, background: "data:image/png;base64,AAAA", opacity: 0.3 };
+
+    const terrain = { "1:1": { kind: "barrier" as const, untilRound: 3 } };
+
+    const diff = diffParticipants(before, before);
+
+    expect(buildSnapshotState(scene, before, diff, { ...map, terrain }).scene.terrain).toEqual(terrain);
+    expect(buildSnapshotState(scene, before, diff, map).scene.terrain).toBeNull();
+    expect(buildSnapshotState(scene, before, diff, null).scene).not.toHaveProperty("terrain");
+    expect(JSON.stringify(buildSnapshotState(scene, before, diff, map))).not.toContain("base64");
+  });
+
   it("якщо дія змінила snapshot — кладе СТАРИЙ snapshot; видалених — повністю", () => {
     const p = createMockParticipant();
 

@@ -52,6 +52,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
       participants,
       pending: ctx.pending,
       scene: { ...ctx.scene, turnIndex: removedIndex - 1, pendingMoraleCheck: null },
+      map: ctx.meta.map,
     });
 
     return {

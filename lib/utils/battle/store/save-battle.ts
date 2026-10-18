@@ -119,7 +119,9 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     resultText: e.resultText,
   }));
 
-  const nextScene: BattleSceneState = { ...scene, ...outcome.scene };
+  const { map: _map, ...scenePatch } = outcome.scene ?? {};
+
+  const nextScene: BattleSceneState = { ...scene, ...scenePatch };
 
   const delta: BattleDelta = {
     battleId: scene.id,
@@ -164,6 +166,7 @@ export async function saveBattle(
         ...(patch.pendingMoraleCheck !== undefined && { pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck) }),
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
+        ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
       },
     });
 
@@ -210,7 +213,7 @@ export async function saveBattle(
           {
             battleId: scene.id,
             seq: events[0].seq,
-            state: buildSnapshotState(scene, beforeStored, diff) as unknown as Prisma.InputJsonValue,
+            state: buildSnapshotState(scene, beforeStored, diff, before.meta.map) as unknown as Prisma.InputJsonValue,
           },
         ],
       });

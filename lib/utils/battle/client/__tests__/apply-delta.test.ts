@@ -52,6 +52,20 @@ describe("applyBattleDelta", () => {
     expect(next).toMatchObject({ isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false } });
   });
 
+  it("scene.map замінює карту в кеші; без неї карта лишається", () => {
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+    const withMap = { ...cached, map };
+
+    expect((applyBattleDelta(withMap, delta()) as BattleScene).map).toBe(map);
+
+    const terrain = { ...map, terrain: { "1:1": { kind: "barrier" as const, untilRound: 2 } } };
+
+    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, map: terrain };
+
+    expect((applyBattleDelta(withMap, delta({ scene })) as BattleScene).map).toEqual(terrain);
+  });
+
   it("patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання", () => {
     const effects = [{ id: "e1", name: "Кровотеча" }] as unknown as BattleParticipant["battleData"]["activeEffects"];
 

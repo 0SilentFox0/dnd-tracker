@@ -26,6 +26,7 @@ import {
   rollbackBattleAction,
   scaleBattleUnits,
   setAuraZone,
+  setMapTerrain,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -39,6 +40,7 @@ import type {
   AuraZoneData,
   BattleScene,
   BonusActionData,
+  MapTerrainData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -164,6 +166,9 @@ export const useAuraZone = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useMoveParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoveParticipantData>(c, b, (data) => moveParticipant(c, b, data), o);
+
+export const useMapTerrain = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MapTerrainData>(c, b, (data) => setMapTerrain(c, b, data), o);
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

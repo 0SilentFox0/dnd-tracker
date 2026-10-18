@@ -335,6 +335,42 @@ describe("runBattleMutation", () => {
     expect(saved.every((p) => p.battleData.position !== undefined)).toBe(true);
   });
 
+  it("змінена мутацією карта йде в збереження, розстановку, відповідь і Pusher", async () => {
+    const d = deps({ loadBattle: vi.fn(async () => withMap()) });
+
+    const nextMap = { cols: 10, rows: 5, background: null, opacity: 0.3, terrain: { "0:0": { kind: "wall" as const } } };
+
+    const res = await runBattleMutation(
+      req(),
+      {
+        params,
+        access: "member",
+        mutate: (ctx) => ({
+          participants: ctx.participants.map((p) => ({ ...p, battleData: { ...p.battleData, position: { x: 0, y: 0 } } })),
+          pending: ctx.pending,
+          events: [],
+          scene: { map: nextMap },
+        }),
+      },
+      d,
+    );
+
+    const outcome = vi.mocked(d.saveBattle).mock.calls[0][1];
+
+    expect(outcome.scene?.map).toEqual(nextMap);
+    expect(outcome.participants.some((p) => p.battleData.position?.x === 0 && p.battleData.position.y === 0)).toBe(false);
+    expect((await res.json()).delta.scene.map).toEqual(nextMap);
+    expect(vi.mocked(d.publish).mock.calls[0][0][0].payload).toMatchObject({ scene: { map: nextMap } });
+  });
+
+  it("без зміни карти дельта її не несе", async () => {
+    const d = deps({ loadBattle: vi.fn(async () => withMap()) });
+
+    const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    expect((await res.json()).delta.scene).not.toHaveProperty("map");
+  });
+
   it("бій без карти позицій не додає", async () => {
     const d = deps();
 
