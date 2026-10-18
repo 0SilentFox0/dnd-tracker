@@ -21,7 +21,7 @@ function nearAnchors(map: BattleMapConfig, center: GridPoint): GridPoint[] {
     for (let x = 0; x < map.cols; x++) all.push({ x, y });
   }
 
-  return all.sort((a, b) => cellDistance(map.grid, a, center) - cellDistance(map.grid, b, center));
+  return all.sort((a, b) => cellDistance(a, center) - cellDistance(b, center));
 }
 
 export function placeParticipants(map: BattleMapConfig, participants: BattleParticipant[]): BattleParticipant[] {
@@ -34,7 +34,7 @@ export function placeParticipants(map: BattleMapConfig, participants: BattlePart
 
     if (!position || !occupiesCells(p) || !fits(map, position, sizeOf(p), blocked)) continue;
 
-    for (const c of footprint(map.grid, position, sizeOf(p))) blocked.add(cellKey(c));
+    for (const c of footprint(position, sizeOf(p))) blocked.add(cellKey(c));
     positions.set(p.basicInfo.id, position);
   }
 
@@ -56,7 +56,7 @@ export function placeParticipants(map: BattleMapConfig, participants: BattlePart
 
     if (!anchor) return p;
 
-    for (const c of footprint(map.grid, anchor, size)) blocked.add(cellKey(c));
+    for (const c of footprint(anchor, size)) blocked.add(cellKey(c));
     positions.set(p.basicInfo.id, anchor);
 
     return { ...p, battleData: { ...p.battleData, position: anchor } };

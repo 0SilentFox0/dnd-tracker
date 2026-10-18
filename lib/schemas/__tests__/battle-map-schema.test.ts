@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { battleMapSchema } from "../battles";
 
-const map = { grid: "square", cols: 10, rows: 10, background: null, opacity: 0.3 };
+const map = { cols: 10, rows: 10, background: null, opacity: 0.3 };
 
 describe("battleMapSchema.background", () => {
   it("приймає null і https, відхиляє інші схеми", () => {

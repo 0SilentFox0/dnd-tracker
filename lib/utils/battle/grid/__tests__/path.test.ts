@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { canStand } from "../occupancy";
 import { movementBudget, reachable, remainingMovement } from "../path";
 
-import { CombatStatus, GridShape, ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const map: BattleMapConfig = { grid: GridShape.SQUARE, cols: 6, rows: 3, background: null, opacity: 0.3 };
+const map: BattleMapConfig = { cols: 6, rows: 3, background: null, opacity: 0.3 };
 
 function at(id: string, position: GridPoint, side: string = ParticipantSide.ALLY, extra: Partial<BattleParticipant["combatStats"]> = {}): BattleParticipant {
   const p = createMockParticipant();

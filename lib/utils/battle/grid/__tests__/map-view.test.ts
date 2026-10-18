@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { moveMarks, targetMarks } from "../map-view";
 
-import { AttackType, GridShape, ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const map: BattleMapConfig = { grid: GridShape.SQUARE, cols: 10, rows: 5, background: null, opacity: 0.3 };
+const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
 function at(id: string, position: GridPoint, side: string): BattleParticipant {
   const p = createMockParticipant();

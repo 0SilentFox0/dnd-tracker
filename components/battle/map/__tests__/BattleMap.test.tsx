@@ -3,7 +3,6 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMap } from "@/components/battle/map";
-import { GridShape } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -23,7 +22,7 @@ function at(id: string, x: number, y: number): BattleParticipant {
   return { ...base, basicInfo: { ...base.basicInfo, id, name: id, avatar: undefined }, battleData: { ...base.battleData, position: { x, y } } };
 }
 
-const square: BattleMapConfig = { grid: GridShape.SQUARE, cols: 4, rows: 3, background: null, opacity: 0.3 };
+const square: BattleMapConfig = { cols: 4, rows: 3, background: null, opacity: 0.3 };
 
 const people = [at("h", 0, 0), at("e", 3, 2)];
 
@@ -61,15 +60,6 @@ describe("BattleMap", () => {
     const { container } = render(<BattleMap map={square} participants={people} view={{ marks: new Map([["0:0", "target"]]) }} />);
 
     expect(container.querySelectorAll("polygon")[0].getAttribute("fill")).toBe("rgba(230,80,60,.35)");
-  });
-
-  it("renders hex cells with six vertices", () => {
-    const { container } = render(<BattleMap map={{ ...square, grid: GridShape.HEX }} participants={people} />);
-
-    const polygons = container.querySelectorAll("polygon");
-
-    expect(polygons).toHaveLength(12);
-    expect(polygons[0].getAttribute("points")?.split(" ")).toHaveLength(6);
   });
 
   it("a drag does not produce a click", () => {

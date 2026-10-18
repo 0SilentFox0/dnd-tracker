@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { cellDistance } from "../geometry";
 import { placeParticipants } from "../placement";
 
-import { GridShape, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const map: BattleMapConfig = { grid: GridShape.SQUARE, cols: 10, rows: 5, background: null, opacity: 0.3 };
+const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
 function p(id: string, side: string, battleData: Partial<BattleParticipant["battleData"]> = {}, gridSize?: number): BattleParticipant {
   const b = createMockParticipant();
@@ -49,7 +49,7 @@ describe("авторозстановка", () => {
 
     const out = placeParticipants(map, [summoner, p("wolf", ParticipantSide.ALLY, { summonedBy: "s" })]);
 
-    expect(cellDistance(map.grid, out[1].battleData.position as GridPoint, { x: 5, y: 2 })).toBe(1);
+    expect(cellDistance(out[1].battleData.position as GridPoint, { x: 5, y: 2 })).toBe(1);
   });
 
   it("непритомний займає клітинку, мертвий — ні", () => {
@@ -81,6 +81,6 @@ describe("авторозстановка", () => {
     const out = placeParticipants(map, [first, second]);
 
     expect(out[0]).toBe(first);
-    expect(cellDistance(map.grid, out[1].battleData.position as GridPoint, { x: 3, y: 2 })).toBe(1);
+    expect(cellDistance(out[1].battleData.position as GridPoint, { x: 3, y: 2 })).toBe(1);
   });
 });

@@ -24,9 +24,9 @@ export function attackReachError(
 ): string | null {
   if (!map || !attacker.battleData.position || options.ignoreReach || attack.targetType === "aoe") return null;
 
-  const mine = cellsOf(map.grid, attacker);
+  const mine = cellsOf(attacker);
 
-  const distanceTo = (p: BattleParticipant) => footprintDistance(map.grid, mine, cellsOf(map.grid, p));
+  const distanceTo = (p: BattleParticipant) => footprintDistance(mine, cellsOf(p));
 
   const placed = targets.filter((t) => t.battleData.position);
 

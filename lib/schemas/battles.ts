@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-import { GridShape, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 
 export const battleMapSchema = z.object({
-  grid: z.enum([GridShape.SQUARE, GridShape.HEX]),
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),
   background: z.string().url().refine((u) => u.startsWith("https://"), "Лише https-посилання").nullable(),

@@ -3,11 +3,10 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
-import { GridShape } from "@/lib/constants/battle";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const map: BattleMapConfig = { grid: GridShape.SQUARE, cols: 10, rows: 5, background: null, opacity: 0.3 };
+const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
 const at = (p: BattleParticipant, position: GridPoint, movementUsed?: number): BattleParticipant => ({
   ...p,

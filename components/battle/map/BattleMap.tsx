@@ -71,14 +71,14 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
   const tokens = participants
     .filter((p) => !p.battleData.reserved)
     .flatMap((p) => {
-      const box = tokenBox(map.grid, p);
+      const box = tokenBox(p);
 
       return box ? [{ p, box }] : [];
     });
 
   const from = view?.trajectory ? tokens.find((t) => t.p.basicInfo.id === view.trajectory?.fromId) : undefined;
 
-  const end = view?.trajectory ? cellCenter(map.grid, view.trajectory.to) : null;
+  const end = view?.trajectory ? cellCenter(view.trajectory.to) : null;
 
   return (
     <div
@@ -96,7 +96,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
             return (
               <polygon
                 key={cellKey(p)}
-                points={cellPolygon(map.grid, p)}
+                points={cellPolygon(p)}
                 fill={markFill(mark)}
                 stroke="rgba(255,255,255,1)"
                 strokeOpacity={map.opacity}
@@ -113,7 +113,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
 
             if (typeof mark !== "number") return null;
 
-            const c = cellCenter(map.grid, p);
+            const c = cellCenter(p);
 
             return (
               <text key={`t${cellKey(p)}`} x={c.x} y={c.y} fontSize={UNIT * 0.22} textAnchor="middle" dominantBaseline="central" fill="#e8dcc4" opacity={0.8} pointerEvents="none">

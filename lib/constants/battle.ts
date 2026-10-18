@@ -105,17 +105,9 @@ export const BATTLE_LOG_PAGE_MAX = 100;
 // відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
-export const GridShape = {
-  SQUARE: "square",
-  HEX: "hex",
-} as const;
-
-export type GridShape = (typeof GridShape)[keyof typeof GridShape];
-
 export const CELL_FEET = 5;
 
 export const DEFAULT_BATTLE_MAP = {
-  grid: GridShape.SQUARE,
   cols: 20,
   rows: 12,
   background: null,

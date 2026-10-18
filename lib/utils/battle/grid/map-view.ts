@@ -20,7 +20,7 @@ export function targetMarks(map: BattleMapConfig, participants: BattleParticipan
 
     const mark: CellMark = attackReachError(map, participants, attacker, attack, [t]) === null ? "target" : "invalid-target";
 
-    for (const c of cellsOf(map.grid, t)) marks.set(cellKey(c), mark);
+    for (const c of cellsOf(t)) marks.set(cellKey(c), mark);
   }
 
   return marks;

@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { attackRangeCells, attackReachError } from "../attack-reach";
 
-import { AttackType, CombatStatus, GridShape, ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const map: BattleMapConfig = { grid: GridShape.SQUARE, cols: 30, rows: 10, background: null, opacity: 0.3 };
+const map: BattleMapConfig = { cols: 30, rows: 10, background: null, opacity: 0.3 };
 
 function at(id: string, position: GridPoint | undefined, side: string, dead = false): BattleParticipant {
   const p = createMockParticipant();

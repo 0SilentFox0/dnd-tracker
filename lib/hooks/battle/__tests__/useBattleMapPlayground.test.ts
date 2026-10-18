@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 
 import { useBattleMapPlayground } from "../useBattleMapPlayground";
 
-import { GridShape } from "@/lib/constants/battle";
 import { occupiedBy } from "@/lib/utils/battle/grid";
 
 type Hook = { current: ReturnType<typeof useBattleMapPlayground> };
@@ -65,17 +64,17 @@ describe("useBattleMapPlayground", () => {
     expect(active(result).battleData.movementUsed ?? 0).toBe(0);
   });
 
-  it("re-places everyone without overlaps when the grid becomes hex", () => {
+  it("re-places everyone without overlaps when the map size changes", () => {
     const { result } = renderHook(() => useBattleMapPlayground());
 
-    act(() => result.current.setMap({ ...result.current.map, grid: GridShape.HEX }));
+    act(() => result.current.setMap({ ...result.current.map, cols: 12 }));
 
     const { participants, map } = result.current;
 
-    expect(map.grid).toBe(GridShape.HEX);
+    expect(map.cols).toBe(12);
     expect(participants.every((p) => p.battleData.position)).toBe(true);
 
-    const cells = participants.flatMap((p) => [...occupiedBy(map.grid, [p], () => true)]);
+    const cells = participants.flatMap((p) => [...occupiedBy([p], () => true)]);
 
     expect(new Set(cells).size).toBe(cells.length);
   });
@@ -89,7 +88,7 @@ describe("useBattleMapPlayground", () => {
 
     const key = [...result.current.view.marks!.entries()].find(([, v]) => v === "target")![0];
 
-    const targetId = result.current.participants.find((p) => p.basicInfo.side === "enemy" && occupiedBy("square", [p], () => true).has(key))!.basicInfo.id;
+    const targetId = result.current.participants.find((p) => p.basicInfo.side === "enemy" && occupiedBy([p], () => true).has(key))!.basicInfo.id;
 
     const hpBefore = result.current.participants.find((p) => p.basicInfo.id === targetId)!.combatStats.currentHp;
 

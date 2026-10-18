@@ -4,7 +4,6 @@ import { BattleMap } from "../BattleMap";
 
 import "@/components/battle/hud/battle-hud.css";
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
-import { GridShape } from "@/lib/constants/battle";
 import { useBattleMapPlayground } from "@/lib/hooks/battle";
 import { remainingMovement } from "@/lib/utils/battle/grid";
 
@@ -29,13 +28,6 @@ export function BattleMapPlayground() {
       <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         <div className="flex flex-col gap-3">
           <HudPanel className="flex flex-col gap-3">
-            <HudChipTabs
-              ariaLabel="Форма сітки"
-              items={[
-                { key: "square", label: "Квадрати", active: map.grid === GridShape.SQUARE, onSelect: () => setMap({ ...map, grid: GridShape.SQUARE }) },
-                { key: "hex", label: "Гекси", active: map.grid === GridShape.HEX, onSelect: () => setMap({ ...map, grid: GridShape.HEX }) },
-              ]}
-            />
             <label className="flex flex-col gap-1 text-sm">
               Прозорість сітки: {map.opacity.toFixed(2)}
               <input type="range" min={0} max={1} step={0.05} value={map.opacity} onChange={(e) => setMap({ ...map, opacity: Number(e.target.value) })} />

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { GridShape, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -40,7 +40,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
 function withMap(): LoadedBattle & { isMember: boolean } {
   const base = loaded();
 
-  return { ...base, meta: { ...base.meta, map: { grid: GridShape.SQUARE, cols: 10, rows: 5, background: null, opacity: 0.3 } } };
+  return { ...base, meta: { ...base.meta, map: { cols: 10, rows: 5, background: null, opacity: 0.3 } } };
 }
 
 function delta(): BattleDelta {

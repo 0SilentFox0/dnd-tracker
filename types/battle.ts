@@ -1,7 +1,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { AttackType, type CombatStatusType, type GridShape,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { AttackType, type CombatStatusType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -156,7 +156,6 @@ export interface GridPoint {
 
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
 export interface BattleMapConfig {
-  grid: GridShape;
   cols: number;
   rows: number;
   background: string | null;

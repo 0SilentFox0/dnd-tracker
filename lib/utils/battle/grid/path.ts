@@ -27,9 +27,9 @@ export function reachable(map: BattleMapConfig, participants: BattleParticipant[
 
   const notMe = (p: BattleParticipant) => p.basicInfo.id !== mover.basicInfo.id;
 
-  const walls = occupiedBy(map.grid, participants, (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side);
+  const walls = occupiedBy(participants, (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side);
 
-  const taken = occupiedBy(map.grid, participants, notMe);
+  const taken = occupiedBy(participants, notMe);
 
   const seen = new Map([[cellKey(start), 0]]);
 
@@ -42,7 +42,7 @@ export function reachable(map: BattleMapConfig, participants: BattleParticipant[
 
     if (cost >= budget) continue;
 
-    for (const next of neighbors(map.grid, cur)) {
+    for (const next of neighbors(cur)) {
       const key = cellKey(next);
 
       if (seen.has(key) || !fits(map, next, size, walls)) continue;

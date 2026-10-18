@@ -99,7 +99,7 @@ describe("attack mutation", () => {
   });
 
   describe("карта", () => {
-    const map = { grid: "square", cols: 10, rows: 5, background: null, opacity: 0.3 };
+    const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
     const placed = [
       { ...hero, battleData: { ...hero.battleData, position: { x: 0, y: 0 } } },

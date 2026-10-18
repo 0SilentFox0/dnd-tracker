@@ -48,7 +48,7 @@ export function useBattleMapPlayground() {
 
   const setMap = useCallback((next: BattleMapConfig) => {
     setMapState((prev) => {
-      if (next.cols !== prev.cols || next.rows !== prev.rows || next.grid !== prev.grid) setParticipants(initial(next));
+      if (next.cols !== prev.cols || next.rows !== prev.rows) setParticipants(initial(next));
 
       return next;
     });
@@ -75,7 +75,7 @@ export function useBattleMapPlayground() {
 
       if (marks.get(key) !== "target") return;
 
-      const target = participants.find((q) => q.basicInfo.side !== active.basicInfo.side && cellsOf(map.grid, q).some((c) => cellKey(c) === key));
+      const target = participants.find((q) => q.basicInfo.side !== active.basicInfo.side && cellsOf(q).some((c) => cellKey(c) === key));
 
       if (!target) return;
 
@@ -90,7 +90,7 @@ export function useBattleMapPlayground() {
       );
       pushLog(`${active.basicInfo.name} б'є ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
     },
-    [mode, marks, activeId, active, participants, map.grid, pushLog],
+    [mode, marks, activeId, active, participants, pushLog],
   );
 
   const nextTurn = useCallback(() => {
