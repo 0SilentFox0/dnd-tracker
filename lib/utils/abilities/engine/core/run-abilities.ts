@@ -52,7 +52,12 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (!withinLimits(owner, ability)) continue;
 
-      if (ability.limits?.chance !== undefined && ctx.rng() * 100 >= ability.limits.chance) continue;
+      if (ability.limits?.chance !== undefined && ctx.rng() * 100 >= ability.limits.chance) {
+        // лише вміння самого діяча: чужі шансові тригери на кожну подію засмітили б журнал
+        if ("actorId" in event && event.actorId === ownerId) messages.push(`🎲 ${ability.name}: не спрацювало (шанс ${ability.limits.chance} %)`);
+
+        continue;
+      }
 
       ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key));
       fired.push(ability.key);

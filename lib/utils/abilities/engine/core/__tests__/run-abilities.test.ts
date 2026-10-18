@@ -131,4 +131,19 @@ describe("resolveDowned", () => {
     expect(run(lucky).length).toBeGreaterThan(0);
     expect(run(plain).some((m) => m.includes("шанс"))).toBe(false);
   });
+
+  it("невдалий chance власного вміння діяча видно в журналі; чужі вміння мовчать", () => {
+    const seduce = resolved({ name: "Спокуса", trigger: { event: "hit", role: "attacker" }, limits: { chance: 15 }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const enemyChance = resolved({ name: "Чужий шанс", trigger: { event: "hit", role: "target" }, limits: { chance: 15 }, effects: [{ kind: "changeMorale", delta: 1 }] }, { id: "x" });
+
+    const r = runAbilities(
+      [makeParticipant({ id: "a", abilities: [seduce] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY, abilities: [enemyChance] })],
+      hit,
+      { round: 1, rng: () => 0.99 },
+    );
+
+    expect(r.messages).toEqual(["🎲 Спокуса: не спрацювало (шанс 15 %)"]);
+    expect(r.fired).toEqual([]);
+  });
 });
