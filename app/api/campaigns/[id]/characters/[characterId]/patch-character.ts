@@ -40,7 +40,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     ? parsed
     : ({ ...parsed, level: undefined, archetype: undefined, avatar: undefined, experience: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
 
-  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId, current: character.avatar });
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 

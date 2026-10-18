@@ -25,6 +25,13 @@ describe("resolveMapBackgroundForPersistence", () => {
     expect(storage.resolveArtifactIconForPersistence).not.toHaveBeenCalled();
   });
 
+  it("фон, що збігається зі збереженим, лишається як є", async () => {
+    const url = "https://game-icons.net/a.svg";
+
+    expect(await resolveMapBackgroundForPersistence(url, { campaignId: "c", current: url })).toEqual({ ok: true, background: url });
+    expect(storage.resolveArtifactIconForPersistence).not.toHaveBeenCalled();
+  });
+
   it("data URL і зовнішній https вантажаться в бакет battle-maps з річним cacheControl", async () => {
     vi.mocked(storage.resolveArtifactIconForPersistence).mockResolvedValue({ ok: true, icon: "https://s/battle-maps/c/x.webp" });
 

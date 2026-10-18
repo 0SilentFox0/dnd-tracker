@@ -76,6 +76,7 @@ export async function PATCH(
 
     if (
       data.icon !== undefined &&
+      data.icon !== artifact.icon &&
       shouldMirrorArtifactIconUrl(data.icon)
     ) {
       const sourceUrl = (typeof data.icon === "string" ? data.icon : "").trim();

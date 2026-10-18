@@ -24,6 +24,12 @@ const patchBattleSchema = z
   })
   .strict();
 
+function storedBackground(map: Prisma.JsonValue): string | null {
+  const bg = map && typeof map === "object" && !Array.isArray(map) ? map.background : null;
+
+  return typeof bg === "string" ? bg : null;
+}
+
 export async function GET(req: Request, { params }: Params) {
   if (new URL(req.url).searchParams.has(BATTLE_VERSION_ONLY_PARAM)) return readBattleVersion(await params);
 
@@ -42,7 +48,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (parsed instanceof NextResponse) return parsed;
 
-    const battle = await prisma.battleScene.findUnique({ where: { id: battleId }, select: { campaignId: true } });
+    const battle = await prisma.battleScene.findUnique({ where: { id: battleId }, select: { campaignId: true, map: true } });
 
     if (!battle || battle.campaignId !== id) {
       return errorResponse(API_ERRORS.NOT_FOUND, 404);
@@ -53,7 +59,7 @@ export async function PATCH(request: Request, { params }: Params) {
     let map = rawMap;
 
     if (map) {
-      const bg = await resolveMapBackgroundForPersistence(map.background, { campaignId: id });
+      const bg = await resolveMapBackgroundForPersistence(map.background, { campaignId: id, current: storedBackground(battle.map) });
 
       if (!bg.ok) return errorResponse(bg.message, 400);
 

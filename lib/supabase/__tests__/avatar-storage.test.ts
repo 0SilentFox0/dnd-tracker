@@ -24,6 +24,13 @@ describe("resolveAvatarForPersistence", () => {
     expect(storage.resolveArtifactIconForPersistence).not.toHaveBeenCalled();
   });
 
+  it("значення, що збігається зі збереженим, лишається як є", async () => {
+    const url = "https://game-icons.net/a.svg";
+
+    expect(await resolveAvatarForPersistence(url, { campaignId: "c", current: url })).toEqual({ ok: true, avatar: url });
+    expect(storage.resolveArtifactIconForPersistence).not.toHaveBeenCalled();
+  });
+
   it("data URL вантажиться в бакет avatars з річним cacheControl", async () => {
     vi.mocked(storage.resolveArtifactIconForPersistence).mockResolvedValue({ ok: true, icon: "https://s/avatars/c/x.webp" });
 

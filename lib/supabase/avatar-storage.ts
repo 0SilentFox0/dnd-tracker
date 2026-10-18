@@ -6,9 +6,11 @@ const YEAR_SECONDS = "31536000";
 
 export async function resolveAvatarForPersistence(
   avatar: string | null | undefined,
-  opts: { campaignId: string },
+  opts: { campaignId: string; current?: string | null },
 ): Promise<{ ok: true; avatar: string | null | undefined } | { ok: false; message: string }> {
   if (avatar === undefined) return { ok: true, avatar: undefined };
+
+  if (avatar && avatar === opts.current) return { ok: true, avatar };
 
   if (avatar && isArtifactIconHostedOnProjectStorage(avatar)) return { ok: true, avatar };
 

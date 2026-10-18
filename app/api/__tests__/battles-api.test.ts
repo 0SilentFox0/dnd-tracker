@@ -277,7 +277,7 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
 
   async function patch(map: Record<string, unknown>) {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1" } as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1", map: null } as never);
     vi.mocked(prisma.battleScene.update).mockResolvedValue({} as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
@@ -300,10 +300,25 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
     resolveMock.mockResolvedValue({ ok: true, background: "https://s/battle-maps/c1/x.webp" });
 
     await patch({ cols: 10, rows: 10, opacity: 1, background: "data:image/webp;base64,AAAA" });
-    expect(resolveMock).toHaveBeenCalledWith("data:image/webp;base64,AAAA", { campaignId: "c1" });
+    expect(resolveMock).toHaveBeenCalledWith("data:image/webp;base64,AAAA", { campaignId: "c1", current: null });
     expect(prisma.battleScene.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ map: expect.objectContaining({ background: "https://s/battle-maps/c1/x.webp" }) }) }),
     );
+  });
+
+  it("передає збережений фон як current", async () => {
+    resolveMock.mockResolvedValue({ ok: true, background: "https://game.example/a.svg" });
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1", map: { cols: 10, rows: 10, background: "https://game.example/a.svg" } } as never);
+    vi.mocked(prisma.battleScene.update).mockResolvedValue({} as never);
+
+    const { PATCH } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
+
+    await PATCH(
+      createRequest("http://localhost/api/campaigns/c1/battles/b1", { method: "PATCH", body: JSON.stringify({ map: { cols: 10, rows: 10, opacity: 1, background: "https://game.example/a.svg" } }), headers: { "Content-Type": "application/json" } }),
+      { params: Promise.resolve({ id: "c1", battleId: "b1" }) },
+    );
+    expect(resolveMock).toHaveBeenCalledWith("https://game.example/a.svg", { campaignId: "c1", current: "https://game.example/a.svg" });
   });
 
   it("помилка завантаження дає 400 без запису", async () => {

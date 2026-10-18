@@ -8,9 +8,11 @@ const LOCAL_MAP_PATH = /^\/battle-maps\/[\w.-]+\.(webp|jpg|png)$/;
 
 export async function resolveMapBackgroundForPersistence(
   background: string | null | undefined,
-  opts: { campaignId: string },
+  opts: { campaignId: string; current?: string | null },
 ): Promise<{ ok: true; background: string | null | undefined } | { ok: false; message: string }> {
   if (!background) return { ok: true, background };
+
+  if (background === opts.current) return { ok: true, background };
 
   if (LOCAL_MAP_PATH.test(background) || isArtifactIconHostedOnProjectStorage(background)) return { ok: true, background };
 

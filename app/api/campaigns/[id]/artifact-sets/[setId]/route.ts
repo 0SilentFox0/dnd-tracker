@@ -72,7 +72,7 @@ export async function PATCH(
 
     let patch = data;
 
-    if (data.icon !== undefined) {
+    if (data.icon !== undefined && data.icon !== existing.icon) {
       const raw =
         data.icon === null ? null : String(data.icon).trim() || null;
 
