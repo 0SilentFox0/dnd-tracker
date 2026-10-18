@@ -39,7 +39,7 @@ export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
-    if (participant.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", "Дію вже використано цього ходу");
+    if (participant.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
 
     if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 

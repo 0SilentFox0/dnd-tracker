@@ -1,5 +1,6 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
@@ -102,7 +103,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   }
 
   if (attacker.actionFlags.hasUsedAction) {
-    throw new BattleRuleError("action_rejected", "Атакуючий уже використав дію");
+    throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
   }
 
   if (!isActive(attacker)) {

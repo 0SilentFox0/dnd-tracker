@@ -273,7 +273,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     updatedCaster = { ...updatedCaster, spellcasting: { ...updatedCaster.spellcasting, spellSlots: { ...updatedCaster.spellcasting.spellSlots, [slotKey]: { ...spent, current: spent.current - 1 } } } };
   }
 
-  updatedCaster = def.cost === "bonusAction" ? { ...updatedCaster, actionFlags: { ...updatedCaster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(updatedCaster);
+  if (!isDMCast) {
+    updatedCaster = def.cost === "bonusAction" ? { ...updatedCaster, actionFlags: { ...updatedCaster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(updatedCaster);
+  }
 
   put(flow, updatedCaster);
 
