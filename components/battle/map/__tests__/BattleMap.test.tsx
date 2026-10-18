@@ -52,7 +52,7 @@ describe("BattleMap", () => {
     const blocked = container.querySelector('polygon[data-fx-cell="1:1"]') as SVGPolygonElement;
 
     expect(blocked.getAttribute("stroke")).toBe("none");
-    expect(blocked.getAttribute("fill")).toBe("rgba(0,0,0,.55)");
+    expect(blocked.getAttribute("fill")).toBe("transparent");
     expect(blocked.getAttribute("pointer-events")).toBe("none");
 
     fireEvent.click(blocked);

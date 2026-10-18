@@ -52,7 +52,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
     <>
       {cells.map((p) =>
         blocked.has(cellKey(p)) ? (
-          <polygon key={cellKey(p)} data-fx-cell={cellKey(p)} data-blocked="" points={cellPolygon(p)} fill="rgba(0,0,0,.55)" stroke="none" pointerEvents="none" />
+          <polygon key={cellKey(p)} data-fx-cell={cellKey(p)} data-blocked="" points={cellPolygon(p)} fill="transparent" stroke="none" pointerEvents="none" />
         ) : (
         <polygon
           key={cellKey(p)}
