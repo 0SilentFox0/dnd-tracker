@@ -952,6 +952,34 @@ git commit -m "feat(fx): archetype animation library (one file per animation) + 
 
 ---
 
+### Task 4b: User decisions on unclear spells (overrides, new archetypes/elements)
+
+The user answered the flagged-spell questions (2026-10-18):
+1. «Шал» (spell effect kind `berserk`, cast on an enemy) → **debuff, red frenzy**. Rule (not by name): any spell whose `spellEffectKinds` contains `berserk` → `{ archetype: "debuff", element: "fury" }`.
+2. Damage + lasting effect (Крижаний болт, Блискавка, Коло зими, Глибока заморозка, Місячний промінь, Рій ос, Землетрус, Шторм природи) → **only the hit animation; the lasting effect is shown later by the persistent aura (Task 7)**. No mapper change — current behaviour (bolt/area) is correct; add one test pinning it for a dealDamage+applyCondition spell.
+3. «Рій ос» → **a swarm**: yellow-black insect swarm flies to the target(s). «Землетрус» → **new element "earth"**: brown dust, cracks and debris under the enemies.
+4. «Телепортація» (no mechanics, `note` effect only) → **blink**: a blue-white flash on the target as if it vanishes and reappears.
+
+**Files:**
+- Modify: `lib/utils/battle/fx/types.ts` (FxArchetype += `"swarm" | "quake" | "teleport"`; FxElement += `"earth" | "fury"`), `lib/utils/battle/fx/timing.ts` (IMPACT_MS: `swarm: 700, quake: 400, teleport: 300`), `lib/utils/battle/fx/map-action.ts`, `lib/utils/battle/fx/index.ts`
+- Create: `lib/utils/battle/fx/overrides.ts` — `SPELL_FX_OVERRIDES: Record<string, { archetype?: FxArchetype; element?: FxElement }>` keyed by exact spell name: `"Рій ос": { archetype: "swarm", element: "nature" }`, `"Землетрус": { archetype: "quake", element: "earth" }`, `"Телепортація": { archetype: "teleport", element: "arcane" }`. Applied in `spellArchetype` AFTER the rules (override fields replace the computed ones). Names are what library spells are called in every campaign (seeded from data/library/spells.ts — verify the exact names there).
+- Modify: `components/battle/fx/runtime/palette.ts` — add `earth` (core `#b08850`, tints `#e8d3a8 #c8a26a #8a6234 #5a3e20`, non-additive feel is fine via colours) and `fury` (core `#ff3030`, tints `#ffd0c0 #ff6a4a #e01818 #7a0808`).
+- Create (one animation = one file): `components/battle/fx/animations/swarm.ts`, `quake.ts`, `teleport.ts`; register them in `animations/index.ts` (the Record<FxArchetype, FxAnimation> must stay exhaustive).
+  - `swarm.ts`: ~40 small dark/yellow dots (non-additive dark `#2a2210` and additive `#ffd23a`) flying from the actor to each target along jittery noisy paths (each dot its own bezier + sine jitter), arriving around 700 ms, then buzzing in a tight cloud around the target for ~500 ms and dispersing.
+  - `quake.ts`: no projectile. For every target at once: screen-space shake of the target anchors is NOT allowed (DOM is owned by React) — instead draw on canvas: 3–4 jagged crack lines (brown, `#5a3e20`, width 2–3) growing outward from under the target (y + 20), dust particles (non-additive, earth tints, rising and spreading), and 6–10 debris chunks (small dark squares/circles) thrown up with gravity. Impact (cracks reach full length) at ~400 ms.
+  - `teleport.ts`: on each target: a tall thin blue-white vertical flash (stretched glow sprite) that collapses to a line and fades, a burst of 20 small arcane particles, then ~250 ms later a reverse expand (reappear). Total ~800 ms.
+- Modify: `components/battle/fx-lab/*` — the playground must list the new archetypes and elements automatically (it iterates ANIMATIONS / PALETTE keys; verify).
+- Test: `lib/utils/battle/fx/__tests__/map-action.test.ts` — add:
+  - berserk spell → `{ archetype: "debuff", element: "fury" }`
+  - `spellName: "Рій ос"` with dealDamage/piercing on area → `{ archetype: "swarm", element: "nature" }`
+  - `spellName: "Землетрус"` → `{ archetype: "quake", element: "earth" }`
+  - `spellName: "Телепортація"` with kinds ["note"] → `{ archetype: "teleport", element: "arcane" }`
+  - dealDamage + applyCondition single target (e.g. «Глибока заморозка») → still `bolt` with its damage element.
+
+Steps: RED tests → implement → GREEN (`pnpm test:run lib/utils/battle/fx`) → tsc + eslint --fix → headless screenshots of /dev/fx-lab for swarm, quake (earth), teleport, debuff (fury) — look at them → commit `feat(fx): swarm, quake and teleport animations; fury and earth elements (user decisions)`.
+
+---
+
 ### Task 5: Anchors, queue hook and the battle overlay
 
 **Files:**
@@ -1527,6 +1555,78 @@ git commit -m "feat(battle): persistent status auras for effects lasting 1+ roun
 
 ---
 
+### Task 7b: Element hit frames on the target tile (user request 2026-10-18)
+
+User: «якщо шкода вогнем — рамки не просто червоні, а з вогнем; якщо холодом — плитка ворога замерзає за декілька секунд, і так далі».
+Today a hit only flashes the portrait red (`hud-flash-red`), floats the number and shakes the row. With FX enabled, the moment the hit lands (the same `delay` the row already uses from `useFxImpactDelay`), the whole participant tile (row on desktop/mobile lists, and the hero panel) gets an element-themed frame/overlay that lives 1.5–3 s and then fades. The red portrait flash stays only when FX is off.
+
+**Files:**
+- Create: `lib/utils/battle/fx/impact.ts` — `interface FxImpact { element: FxElement; kind: "damage" | "heal"; delayMs: number }`, `impactFor(action: BattleAction | undefined, participantId: string): FxImpact | null` (uses `mapAction(action)[0]`; null when the participant is not a target or the spec is a miss (`hit === false`); `kind` = `"heal"` for archetype `heal`, else `"damage"`; `delayMs` = `IMPACT_MS[archetype]`). Re-implement `impactDelayFor` as `impactFor(...)?.delayMs ?? 0` (keep its export and tests green). Export from the barrel.
+- Create: `lib/hooks/battle/useFxImpact.ts` — `useFxImpact(participantId): FxImpact | null` (same last-non-cancelled-action logic as `useFxImpactDelay`, returns null when FX disabled). `useFxImpactDelay` may delegate to it.
+- Create (one frame = one file pair, `components/battle/fx/frames/<name>.tsx` + `<name>.module.css`), CSS-only (transform/opacity/filter/background keyframes, no JS timers), each a `pointer-events-none absolute inset-0` overlay that plays once and ends fully transparent:
+  - `fire`: flames licking along the tile border — orange/yellow gradient tongues rising from the bottom edge and sides (a few `<span>` flame shapes with flicker keyframes) + orange inner glow; 1.6 s, fades out.
+  - `cold`: the tile freezes over a few seconds — frost creeps in from the edges (radial/linear white-blue gradients with a frosty noise-like layered gradient), icy blue border, slight blue `backdrop-filter`/tint; creep 1.2 s, hold 1.5 s, thaw 0.8 s (total ~3.5 s).
+  - `lightning`: electric crackle — 2–3 zigzag bolts (inline SVG polylines) blinking along the border, white-blue flicker of the whole tile; 1.2 s.
+  - `poison`: green bubbles rising from the bottom edge + sickly green inner glow; 1.8 s.
+  - `necrotic`: the tile withers — dark violet vignette closing in from edges, desaturate via a dark overlay; 1.8 s.
+  - `radiant`: bright golden rim burst + light rays from the target; 1.2 s.
+  - `arcane`: violet runic ring sweeping around the border (conic gradient rotating); 1.4 s.
+  - `physical`: red flash + a short diagonal white slash mark across the tile; 0.8 s.
+  - `earth`: brown dust puff at the bottom + small debris + a crack line; 1.4 s.
+  - `fury`: deep red pulsing border (2 pulses); 1.2 s.
+  - `nature` (damage, e.g. Рій ос): green-yellow leaf/insect specks swirling around the border; 1.4 s.
+  - `heal` (kind heal, any element): soft green glow + small "+" sparkles rising inside the tile; 1.4 s.
+- Create: `components/battle/fx/frames/ImpactFrame.tsx` — `ImpactFrame({ impact }: { impact: FxImpact })` picks the frame component (`impact.kind === "heal"` → heal frame, else by `impact.element`) and wraps it in a span with `style={{ animationDelay: `${impact.delayMs}ms` }}` propagated to children via a CSS custom property `--fx-delay` used in every frame's `animation-delay` (so the frame starts exactly at impact). Respect reduced motion: `.battle-hud` already stops animations — make sure frames then render nothing visible (base opacity 0).
+- Modify: `components/battle/participants/ParticipantRow.tsx` and `MyHeroPanel.tsx` — render `{change && impact && <ImpactFrame key={change.id} impact={impact} />}` inside the relative tile root (keyed by the HP change id so it replays per hit). When `impact` is non-null, skip the portrait `hud-flash-red`/`hud-flash-green` class (the frame replaces it); keep it when FX is off/impact null. Keep the hero panel's full-screen vignette.
+- Modify: `/dev/fx-lab` — add «Рамки» gallery: a sample tile per element + heal with a ▶ that replays the frame.
+- Test: `lib/utils/battle/fx/__tests__/impact.test.ts` — fire bolt target → `{ element: "fire", kind: "damage", delayMs: IMPACT_MS.bolt }`; heal spell target → kind heal; miss (ranged, isHit false) → null; non-target → null; undefined action → null; existing impact-delay tests still green.
+
+Steps: RED → GREEN (`pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle`) → tsc + eslint --fix → headless screenshots of the «Рамки» gallery mid-animation (fire, cold at ~1.5 s, lightning, heal) — look at them → commit `feat(battle): element-themed hit frames on the target tile (fire burns, cold freezes)`.
+
+---
+
+### Task 7c: Persistent status auras on Canvas 2D (user request 2026-10-18)
+
+Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`components/battle/fx/auras/<kind>.tsx` + `.module.css`), rendered by `AuraLayer`/`StatusAuras` (`components/battle/fx/auras/StatusAuras.tsx`) around the portrait in `ParticipantRow` and `MyHeroPanel`, plus a gallery in `/dev/fx-lab`. The pure logic `aurasOf(effects)` / `auraOf` / `FxAuraKind` / `MAX_AURAS` in `lib/utils/battle/fx/aura.ts` is correct — keep it untouched. The user rejected CSS-only element frames as ugly and approved Canvas 2D particle frames (`components/battle/fx/frames/canvas/*`, e.g. fire.ts, cold.ts). The user now wants the auras on Canvas too.
+
+**Goal:** same 15 aura kinds, same placement and rules, rendered with Canvas 2D particles/glows in the style of the approved frames — looping for as long as the effect is active.
+
+**Architecture (binding):**
+- One aura = one file: `components/battle/fx/auras/canvas/<kind>.ts` exporting `AuraAnimation = { start?(ctx): State; frame(g: CanvasRenderingContext2D, ctx: AuraCtx, t: number, dt: number): void }` (or an equivalent small interface you define in `auras/canvas/types.ts`) — an *endless* per-frame painter, not a promise. `AuraCtx` gives the portrait centre/radius inside the aura canvas (canvas is the portrait box + padding, e.g. pad = 0.6 × size so glows/particles can extend below/above) and a tiny per-aura particle list helper (spawn/update/draw with additive glow sprites — reuse `glow()`/`sprite()` from `components/battle/fx/runtime/canvas.ts`; do not create a Stage per aura).
+- **One shared animation loop for all auras on the page** (`auras/canvas/loop.ts`): a registry of mounted aura canvases; a single `requestAnimationFrame` loop throttled to ~30 fps paints every *visible* registered canvas (IntersectionObserver marks visibility; offscreen canvases are skipped), stops completely when the registry is empty, and naturally pauses in hidden tabs. Per canvas, clear then paint its kinds (max 2).
+- `AuraCanvas` component (`auras/canvas/AuraCanvas.tsx`): `{ kinds: FxAuraKind[]; size: number }` → a `pointer-events-none absolute` span centred on the portrait with a DPR-scaled canvas; registers in the loop on mount, unregisters on unmount/kinds change. `StatusAuras` keeps its props/behaviour (FX off → null) but renders `AuraCanvas`. Keep `AuraLayer`'s role for the lab gallery or replace it — your call, keep imports consistent.
+- Reduced motion (`matchMedia("(prefers-reduced-motion: reduce)")`): paint a single static frame (t fixed) and do not register in the loop.
+- Rows are memo'd and must not subscribe to the battle scene context (render-count tests in components/battle must stay green).
+- Delete the 15 CSS file pairs once replaced.
+
+**Look of each aura** (keep the Task 7 intent; make them read clearly at 48 px):
+- plague: green glow rising from below + green spores drifting up and fading.
+- burning: flames licking up from below the portrait + embers.
+- frost: icy rim, a few ice needles around the circle, slow sparkles.
+- decay: dark violet smoke curling around the portrait.
+- bleeding: red drops falling from the lower edge.
+- static: tiny white-blue arcs crackling on the rim.
+- regen: soft green motes rising inside/around the circle, breathing green rim.
+- blessing: golden halo ring above the head, gently bobbing, sparkles.
+- shield: translucent blue shell around the portrait with a slow shine sweep.
+- curse: purple glow sinking from above, faint downward wisps.
+- marked: emerald leaf sigil above the portrait, pulsing (Hunter's mark).
+- stun: 3 small stars orbiting above the head.
+- bind: grey chain links (dashed ring) tightening/loosening around the portrait.
+- charm: pink hearts floating up beside the portrait.
+- rage: deep red pulsing glow + rising red wisps.
+
+**Files:**
+- Create: `components/battle/fx/auras/canvas/{types.ts,loop.ts,AuraCanvas.tsx,index.ts}` + 15 `<kind>.ts`
+- Modify: `components/battle/fx/auras/StatusAuras.tsx`, `components/battle/fx-lab/FxLab.tsx` (gallery uses the canvas auras)
+- Delete: `components/battle/fx/auras/*.module.css` and the CSS `<kind>.tsx` files
+- Test: `components/battle/fx/auras/canvas/__tests__/loop.test.ts` (happy-dom; fake rAF/IntersectionObserver): registering starts the loop, unregistering the last canvas stops it, offscreen canvases are not painted, reduced motion paints once without registering.
+
+**Verify:** `pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle` (incl. render-count), tsc, eslint --fix; headless screenshots of the «Аури» gallery (deviceScaleFactor 2) at two moments — every aura distinct and recognisable; also open the gallery in the profiler-free sense: confirm via a quick `performance.now()` sample in the page that the loop runs ≤ ~30 fps and stops when the gallery section is removed/scrolled away (IntersectionObserver).
+**Commit:** `feat(battle): status auras on Canvas 2D with one shared throttled loop` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+---
+
 ### Task 8: Full verification
 
 - [ ] **Step 1: Static checks and tests**
@@ -1545,6 +1645,7 @@ Expected: exit 0. The report has no errors; the new `actionDetails` fields appea
   - Mobile 390×844: an enemy attack while the Allies tab is shown comes from the top edge. An attack on a target on the hidden tab plays nothing and the queue continues.
   - Reload the page: nothing replays. «Показати раніші»: nothing plays. DM undo: nothing plays.
   - Toggle off in the top bar: no animations, numbers not delayed, no auras. Reload: the setting persists.
+  - Hit frames: fire damage → the target tile burns; cold → the tile freezes over for ~3 s and thaws; lightning crackle; heal glow; miss → no frame.
   - Status auras: cast a poison DoT (plague glow from below), a fire DoT, a stun, a buff and the elves' Hunter mark. Each aura appears on cast, stays across turns and disappears when the effect expires or is cleansed. A participant with 4 effects shows exactly 2 auras. Mobile: auras visible on rows and on the hero panel.
   - Console: no errors.
 
