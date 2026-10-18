@@ -33,4 +33,12 @@ export const AURA_ANIMATIONS: Record<FxAuraKind, AuraAnimation> = {
   regen: regenAura,
   shield: shieldAura,
   blessing: blessingAura,
+  frozen: frostAura,
+  moonmark: markedAura,
+  dust: decayAura,
+  stings: plagueAura,
+  roots: bindAura,
+  blind: curseAura,
+  bloodlust: rageAura,
+  haste: blessingAura,
 };

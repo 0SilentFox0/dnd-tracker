@@ -14,4 +14,4 @@ import type { FxAnimation } from "./types";
 
 import type { FxArchetype } from "@/lib/utils/battle/fx";
 
-export const ANIMATIONS: Record<FxArchetype, FxAnimation> = { melee, ranged, bolt, area, heal, buff, debuff, summon, death, swarm, quake, teleport };
+export const ANIMATIONS: Record<FxArchetype, FxAnimation> = { melee, ranged, bolt, area, heal, buff, debuff, summon, death, swarm, quake, teleport, entangle: debuff, meteor: area };

@@ -86,4 +86,32 @@ describe("mapAction", () => {
   it("damage + lasting condition on one target stays a bolt with the damage element", () => {
     expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Глибока заморозка", spellDamageType: "cold", spellTargeting: "enemy", spellEffectKinds: ["dealDamage", "applyCondition"], totalDamage: 6 } }))[0]).toMatchObject({ archetype: "bolt", element: "cold" });
   });
+
+  const spell = (spellName: string, actionDetails: Record<string, unknown> = {}) => mapAction(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }))[0];
+
+  it("«Корені» → entangle/nature", () => {
+    expect(spell("Корені", { spellTargeting: "enemy", spellEffectKinds: ["applyCondition"] })).toMatchObject({ archetype: "entangle", element: "nature" });
+  });
+
+  it("summon takes the override element", () => {
+    expect(spell("Прикликання елементаля: Вода", { spellTargeting: "self", spellEffectKinds: ["summon"] })).toMatchObject({ archetype: "summon", element: "cold" });
+    expect(spell("Призив Фенікса", { spellEffectKinds: ["summon"] })).toMatchObject({ archetype: "summon", element: "fire" });
+  });
+
+  it("«Аватар» → necrotic", () => {
+    expect(spell("Аватар", { spellTargeting: "self", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "buff", element: "necrotic" });
+  });
+
+  it("«Кам'яні шипи» → earth element, computed archetype", () => {
+    expect(spell("Кам'яні шипи", { spellDamageType: "piercing", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toMatchObject({ archetype: "area", element: "earth" });
+  });
+
+  it("«Метеоритний дощ» → meteor/fire", () => {
+    expect(spell("Метеоритний дощ", { spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toMatchObject({ archetype: "meteor", element: "fire" });
+  });
+
+  it("«Поспіх» → buff/wind, «Вампіризм» → fury", () => {
+    expect(spell("Поспіх", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "buff", element: "wind" });
+    expect(spell("Вампіризм", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ element: "fury" });
+  });
 });

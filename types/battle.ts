@@ -38,6 +38,8 @@ export interface ActiveEffect {
   hotHeal?: {
     healPerRound: number;
   };
+  /** Сирий тип шкоди заклинання, що наклало ефект (для візуалу ауры) */
+  fxElement?: string;
   breakOnDamage?: boolean;
   consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
   expireAtTurnEnd?: boolean;

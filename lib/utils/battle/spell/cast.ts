@@ -308,8 +308,20 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
 
+  const meta = fxMeta(def);
+
+  if (meta.spellDamageType) {
+    for (const { id, targetId } of applied) {
+      const target = findParticipant(flow.ps, targetId);
+
+      if (!target) continue;
+
+      put(flow, { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => (e.id === id ? { ...e, fxElement: meta.spellDamageType } : e)) } });
+    }
+  }
+
   Object.assign(action.actionDetails, {
-    ...fxMeta(def),
+    ...meta,
     ...(applied.length > 0 && { appliedEffects: applied }),
     spellSlotUsed: spell.level,
     ...(dealt > 0 && { totalDamage: dealt }),

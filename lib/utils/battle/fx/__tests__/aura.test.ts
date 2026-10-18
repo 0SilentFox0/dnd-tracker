@@ -46,6 +46,46 @@ describe("auraOf", () => {
   });
 });
 
+describe("spell-check aura rules", () => {
+  it("name map", () => {
+    const named = (name: string) => auraOf(fx({ name, type: "debuff" }));
+
+    expect(named("Корені")).toBe("roots");
+    expect(named("Сплутування")).toBe("roots");
+    expect(named("Сліпота")).toBe("blind");
+    expect(named("Вампіризм")).toBe("bloodlust");
+    expect(named("Поспіх")).toBe("haste");
+    expect(named("Землетрус")).toBe("dust");
+    expect(named("Рій ос")).toBe("stings");
+  });
+
+  it("fxElement maps debuffs and conditions", () => {
+    const el = (fxElement: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ fxElement, ...over }));
+
+    expect(el("cold")).toBe("frost");
+    expect(el("cold", { type: "condition", effects: [{ type: "skip_action", value: 100 }] })).toBe("frozen");
+    expect(el("lightning")).toBe("static");
+    expect(el("fire")).toBe("burning");
+    expect(el("poison")).toBe("plague");
+    expect(el("necrotic")).toBe("decay");
+    expect(el("radiant", { abilityEffects: [{ kind: "flag", flag: "advantageForAttackers" }] as ActiveEffect["abilityEffects"] })).toBe("moonmark");
+    expect(el("radiant")).toBe("curse");
+  });
+
+  it("charm and berserk beat fxElement; buffs ignore it", () => {
+    expect(auraOf(fx({ fxElement: "cold", charmOrigin: { side: ParticipantSide.ALLY, controlledBy: "u" } }))).toBe("charm");
+    expect(auraOf(fx({ fxElement: "cold", type: "condition", effects: [{ type: "berserk", value: 50 }] }))).toBe("rage");
+    expect(auraOf(fx({ fxElement: "fire", type: "buff" }))).toBe("blessing");
+  });
+
+  it("priority places new kinds", () => {
+    const kinds = (...names: string[]) => aurasOf(names.map((name, i) => fx({ id: String(i), name })));
+
+    expect(kinds("Корені", "Сліпота")).toEqual(["roots", "blind"]);
+    expect(aurasOf([fx({ id: "a", type: "condition", fxElement: "cold", effects: [{ type: "skip_action", value: 1 }] }), fx({ id: "b", type: "condition", effects: [{ type: "skip_action", value: 1 }] })])).toEqual(["stun", "frozen"]);
+    expect(kinds("Поспіх", "Корені")).toEqual(["roots", "haste"]);
+  });
+});
 describe("aurasOf", () => {
   it(`keeps at most ${MAX_AURAS}, by priority, without duplicates`, () => {
     const list = [

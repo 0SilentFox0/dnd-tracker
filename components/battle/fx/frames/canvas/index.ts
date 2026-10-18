@@ -27,6 +27,7 @@ export const FRAME_ANIMATIONS: Record<FxElement, FrameAnimation> = {
   nature: natureFrame,
   earth: earthFrame,
   fury: furyFrame,
+  wind: arcaneFrame,
 };
 
 export const HEAL_FRAME = healFrame;

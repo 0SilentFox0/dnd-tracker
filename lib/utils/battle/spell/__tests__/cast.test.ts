@@ -412,4 +412,23 @@ describe("fx metadata", () => {
 
     expect(r.battleAction.actionDetails.appliedEffects?.[0]).toMatchObject({ targetId: "e1" });
   });
+
+  it("tags lasting effects with the spell damage type", () => {
+    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [enemy("e1")]);
+
+    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+
+    expect(effects.length).toBeGreaterThan(0);
+    expect(effects.every((e) => e.fxElement === "cold")).toBe(true);
+  });
+
+  it("leaves fxElement unset when the spell has no damage type", () => {
+    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+
+    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects[0].fxElement).toBeUndefined();
+  });
 });
