@@ -10,7 +10,7 @@ import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
+import { canConsumeIntent, COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -49,13 +49,15 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
 
   const { open: openAttack } = attack;
 
-  useEffect(() => {
-    if (attackIntent === null || phase === "morale") return;
+  const { currentRound: round, currentTurnIndex: turnIndex } = battle;
 
-    if (phase === "acting" && !actionUsed && !skipped) openAttack(attackIntent);
+  useEffect(() => {
+    if (attackIntent === null) return;
+
+    if (canConsumeIntent(attackIntent, { heroId: hero.basicInfo.id, round, turnIndex, phase, actionUsed, skipped })) openAttack(attackIntent.targetId, attackIntent.attackId);
 
     clearAttackIntent();
-  }, [attackIntent, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
+  }, [attackIntent, hero.basicInfo.id, round, turnIndex, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
 
   return (
     <>

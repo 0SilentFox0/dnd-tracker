@@ -31,6 +31,7 @@ import {
   useStartBattle,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
+import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
@@ -105,8 +106,8 @@ export interface BattleSceneValue extends BattleSceneData {
   resultScreen: AwaitingDialogState;
   connection: PusherConnectionState;
   selectedId: string | null;
-  attackIntent: string | null;
-  requestAttack(targetId: string): void;
+  attackIntent: AttackIntent | null;
+  requestAttack(intent: AttackIntent): void;
   clearAttackIntent(): void;
   toast: BattleToastApi;
   result: ResultFx | null;
@@ -209,7 +210,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const [selectedId, select] = useState<string | null>(null);
 
-  const [attackIntent, setAttackIntent] = useState<string | null>(null);
+  const [attackIntent, setAttackIntent] = useState<AttackIntent | null>(null);
 
   const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
 
@@ -293,6 +294,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const order = battle?.initiativeOrder;
 
   const effects = useDisplayEffectMap(order ?? NO_ORDER);
+
+  if (attackIntent && battle && isIntentStale(attackIntent, { round: battle.currentRound, turnIndex: battle.currentTurnIndex })) setAttackIntent(null);
 
   if (!battle || !derived) return { value: null, loading: isLoading };
 

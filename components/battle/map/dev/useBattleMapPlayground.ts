@@ -2,13 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import { useDisplayEffectMap } from "./useDisplayEffectMap";
+import { buildMockParticipants } from "./mock-participants";
 
-import type { BattleMapActions, BattleMapView } from "@/components/battle/map";
-import { buildMockParticipants } from "@/components/battle/map/dev/mock-participants";
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
+import { useDisplayEffectMap } from "@/lib/hooks/battle";
 import { cellKey, cellsOf, mapHudEffects, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack";
 
@@ -38,7 +37,7 @@ export function useBattleMapPlayground() {
   const attack = active.battleData.attacks[0];
 
   const marks = useMemo(
-    () => (mode === "move" ? moveMarks(map, participants, active) : attack ? targetMarks(map, participants, active, attack) : new Map()),
+    () => (mode === "move" ? moveMarks(map, participants, active) : attack ? targetMarks(map, participants, active, [attack]) : new Map()),
     [mode, map, participants, active, attack],
   );
 

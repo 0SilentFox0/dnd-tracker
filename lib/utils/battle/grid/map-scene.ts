@@ -1,6 +1,5 @@
-import { attackReachError } from "./attack-reach";
 import { cellKey } from "./geometry";
-import { type CellMark, moveMarks, targetMarks } from "./map-view";
+import { type CellMark, moveMarks, reachingAttack, targetMarks } from "./map-view";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
@@ -17,17 +16,19 @@ export interface MapSceneInput {
   viewer: Viewer;
   canAct: boolean;
   isDM: boolean;
+  placing: boolean;
+  placingId: string | null;
   selectedId: string | null;
-  hoverCell: GridPoint | null;
   effects: Map<string, ActiveEffect[]>;
 }
 
 export type MapClick =
   | { kind: "none" }
   | { kind: "move"; participantId: string; to: GridPoint; free: boolean }
-  | { kind: "attack"; targetId: string }
+  | { kind: "attack"; targetId: string; attackId?: string }
   | { kind: "reject"; reason: string }
-  | { kind: "select"; id: string };
+  | { kind: "select"; id: string }
+  | { kind: "arm"; id: string };
 
 export interface MapScene {
   participants: BattleParticipant[];
@@ -36,55 +37,67 @@ export interface MapScene {
   tokenClick(id: string): MapClick;
 }
 
+export function deriveTrajectory(marks: BattleMapView["marks"], currentId: string | null, hoverCell: GridPoint | null): BattleMapView["trajectory"] {
+  return currentId && hoverCell && marks?.get(cellKey(hoverCell)) === "target" ? { fromId: currentId, to: hoverCell } : null;
+}
+
 export function deriveMapScene(input: MapSceneInput): MapScene {
-  const { map, current, viewer, canAct, isDM, selectedId, hoverCell, effects } = input;
+  const { map, current, viewer, canAct, isDM, selectedId, placingId, effects } = input;
+
+  const placing = input.placing && isDM;
 
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
   const marks = new Map<string, CellMark | number>();
 
-  const attack = current?.battleData.attacks[0];
+  const attacks = current?.battleData.attacks ?? [];
 
-  const canAttack = !!current && !!attack && (!current.actionFlags.hasUsedAction || (current.battleData.pendingExtraActions ?? 0) > 0);
+  const canAttack = !!current && attacks.length > 0 && (!current.actionFlags.hasUsedAction || (current.battleData.pendingExtraActions ?? 0) > 0);
 
-  if (canAct && current?.battleData.position) {
+  if (!placing && canAct && current?.battleData.position) {
     for (const [key, cost] of moveMarks(map, participants, current)) marks.set(key, cost);
 
-    if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attack)) marks.set(key, mark);
+    if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
   }
 
   const hud: NonNullable<BattleMapView["hud"]> = new Map();
 
   for (const p of participants) hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer), effects: mapHudEffects(effects.get(p.basicInfo.id)) });
 
-  const hoverMark = hoverCell ? marks.get(cellKey(hoverCell)) : undefined;
-
   const view: BattleMapView = {
-    selectedId,
+    selectedId: placing ? placingId : selectedId,
     currentId: current?.basicInfo.id ?? null,
     marks,
-    trajectory: current && hoverCell && hoverMark === "target" ? { fromId: current.basicInfo.id, to: hoverCell } : null,
+    trajectory: null,
     hud,
   };
 
   function tokenClick(id: string): MapClick {
     const target = participants.find((p) => p.basicInfo.id === id);
 
-    if (canAct && current && attack && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
+    if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
+
+    if (canAct && canAttack && current && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
       const mark = marks.get(cellKey(cellsOf(target)[0]));
 
-      if (mark === "target") return { kind: "attack", targetId: id };
+      if (mark === "target") {
+        const { attack } = reachingAttack(map, participants, current, attacks, target);
 
-      if (mark === "invalid-target") return { kind: "reject", reason: attackReachError(map, participants, current, attack, [target]) ?? "Ціль недосяжна" };
+        return { kind: "attack", targetId: id, ...(attack && { attackId: attack.id ?? attack.name }) };
+      }
+
+      if (mark === "invalid-target") return { kind: "reject", reason: reachingAttack(map, participants, current, attacks, target).error ?? "Ціль недосяжна" };
     }
 
     return { kind: "select", id };
   }
 
   function cellClick(p: GridPoint): MapClick {
-    const selected = selectedId && selectedId !== current?.basicInfo.id ? participants.find((x) => x.basicInfo.id === selectedId) : undefined;
+    if (placing) {
+      const placed = placingId ? participants.find((x) => x.basicInfo.id === placingId) : undefined;
 
-    if (isDM && selected && isOnMap(selected)) return { kind: "move", participantId: selected.basicInfo.id, to: p, free: true };
+      return placed && isOnMap(placed) ? { kind: "move", participantId: placed.basicInfo.id, to: p, free: true } : { kind: "none" };
+    }
 
     const key = cellKey(p);
 

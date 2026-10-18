@@ -11,9 +11,17 @@ function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
 
   const byMid = Array.from({ length: map.rows }, (_, i) => i).sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b);
 
-  const rows = [...byMid.filter((y) => y % 2 === byMid[0] % 2), ...byMid.filter((y) => y % 2 !== byMid[0] % 2)];
+  const base = byMid[0] % 2;
 
-  return cols.flatMap((x) => rows.map((y) => ({ x, y })));
+  const spread = cols.slice(0, Math.max(1, Math.floor(map.cols / 2)));
+
+  const primary = spread.flatMap((x, i) => byMid.filter((y) => (y + i) % 2 === base).map((y) => ({ x, y })));
+
+  const taken = new Set(primary.map(cellKey));
+
+  const rest = cols.flatMap((x) => byMid.map((y) => ({ x, y }))).filter((a) => !taken.has(cellKey(a)));
+
+  return [...primary, ...rest];
 }
 
 function nearAnchors(map: BattleMapConfig, center: GridPoint): GridPoint[] {

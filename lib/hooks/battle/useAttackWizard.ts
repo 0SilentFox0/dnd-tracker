@@ -176,7 +176,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   return {
     state, attack, attacks, targets, steps, estimate, unknownDefense, previews,
-    open: (targetId?: string) => {
+    open: (targetId?: string, attackId?: string) => {
       const first = attacks[0];
 
       if (!first) return;
@@ -190,10 +190,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         return;
       }
 
-      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first), targetIds: [target.basicInfo.id] });
+      const chosen = (attackId && attacks.find((a) => (a.id ?? a.name) === attackId)) || first;
 
-      if (attacks.length === 1 && attacker) {
-        dispatch({ type: "SET_MODE", mode: predictAttack(attacker, target, first, order, scene.battle.currentRound).mode });
+      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(chosen), targetIds: [target.basicInfo.id] });
+
+      if (attacks.length === 1 || attackId) {
+        if (attacks.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
+
+        if (attacker) dispatch({ type: "SET_MODE", mode: predictAttack(attacker, target, chosen, order, scene.battle.currentRound).mode });
+
         dispatch({ type: "CONFIRM_TARGETS" });
       }
     },

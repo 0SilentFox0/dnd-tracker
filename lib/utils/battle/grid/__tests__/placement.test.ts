@@ -94,4 +94,17 @@ describe("авторозстановка", () => {
     expect(out[0]).toBe(first);
     expect(cellDistance(out[1].battleData.position as GridPoint, { x: 3, y: 2 })).toBe(1);
   });
+
+  it("8 союзників на 20×12: жодних двох поруч по вертикалі, колонки заповнюються шахівницею", () => {
+    const wide: BattleMapConfig = { cols: 20, rows: 12, background: null, opacity: 0.3 };
+
+    const out = placeParticipants(wide, Array.from({ length: 8 }, (_, i) => p(`a${i}`, ParticipantSide.ALLY)));
+
+    const cells = out.map((x) => x.battleData.position as GridPoint);
+
+    for (const a of cells) expect(cells.some((b) => b.x === a.x && Math.abs(b.y - a.y) === 1)).toBe(false);
+
+    expect(new Set(cells.map((c) => c.x)).size).toBeGreaterThan(1);
+    expect(new Set(cells.map((c) => `${c.x}:${c.y}`)).size).toBe(8);
+  });
 });

@@ -124,4 +124,34 @@ describe("useAttackWizard", () => {
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss", critFail: expect.objectContaining({ name: "Падіння", flavor: "Ви спотикаєтесь." }) })));
   });
+
+  it("open(ціль, зброя): пропускає вибір зброї й одразу веде до кидка з цією зброєю", () => {
+    const scene = fakeScene();
+
+    const bow = { id: "bow", name: "Лук", type: "ranged", attackBonus: 4, damageDice: "1d6", damageType: "piercing", range: "80/320" };
+
+    const archer = { ...scene.me, battleData: { ...scene.me.battleData, attacks: [...scene.me.battleData.attacks, bow] } } as typeof scene.me;
+
+    const { result } = renderHook(() => useAttackWizard(archer), { wrapper: scene.wrapper });
+
+    act(() => result.current.open("gob", "bow"));
+
+    expect(result.current.state.step).toBe("roll");
+    expect(result.current.state.attackId).toBe("bow");
+    expect(result.current.state.targetIds).toEqual(["gob"]);
+  });
+
+  it("open(ціль) без зброї при кількох атаках лишає вибір зброї", () => {
+    const scene = fakeScene();
+
+    const bow = { id: "bow", name: "Лук", type: "ranged", attackBonus: 4, damageDice: "1d6", damageType: "piercing" };
+
+    const archer = { ...scene.me, battleData: { ...scene.me.battleData, attacks: [...scene.me.battleData.attacks, bow] } } as typeof scene.me;
+
+    const { result } = renderHook(() => useAttackWizard(archer), { wrapper: scene.wrapper });
+
+    act(() => result.current.open("gob"));
+
+    expect(result.current.state.step).toBe("weapon");
+  });
 });

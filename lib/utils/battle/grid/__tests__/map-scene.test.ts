@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveMapScene, type MapSceneInput } from "../map-scene";
+import { deriveMapScene, deriveTrajectory, type MapSceneInput } from "../map-scene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -37,9 +37,10 @@ function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
     viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false },
     canAct: true,
     isDM: false,
-    selectedId: null,
-    hoverCell: null,
     effects: new Map(),
+    placing: false,
+    placingId: null,
+    selectedId: null,
     ...over,
   };
 }
@@ -70,8 +71,8 @@ describe("deriveMapScene", () => {
   it("сусідній ворог — атака, клік по його клітинці теж", () => {
     const s = deriveMapScene(input());
 
-    expect(s.tokenClick("e1")).toEqual({ kind: "attack", targetId: "e1" });
-    expect(s.cellClick({ x: 1, y: 0 })).toEqual({ kind: "attack", targetId: "e1" });
+    expect(s.tokenClick("e1")).toEqual({ kind: "attack", targetId: "e1", attackId: "s" });
+    expect(s.cellClick({ x: 1, y: 0 })).toEqual({ kind: "attack", targetId: "e1", attackId: "s" });
   });
 
   it("далекий ворог мечем — reject з причиною", () => {
@@ -83,10 +84,56 @@ describe("deriveMapScene", () => {
     expect(click.kind === "reject" && click.reason.length > 0).toBe(true);
   });
 
-  it("ДМ із вибраним не-поточним — вільний рух", () => {
+  it("ДМ поза режимом розстановки: вибраний токен не телепортується, клітинка нічого не робить", () => {
     const s = deriveMapScene(input({ isDM: true, canAct: false, selectedId: "e2" }));
 
+    expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "none" });
+  });
+
+  it("розстановка: клік по токену (і союзнику під час ходу ДМ) озброює, а не атакує", () => {
+    const s = deriveMapScene(input({ isDM: true, placing: true }));
+
+    expect(s.tokenClick("e1")).toEqual({ kind: "arm", id: "e1" });
+    expect(s.tokenClick("h")).toEqual({ kind: "arm", id: "h" });
+    expect(s.view.marks?.size).toBe(0);
+  });
+
+  it("розстановка: клітинка — вільний рух озброєного токена, режим лишається", () => {
+    const s = deriveMapScene(input({ isDM: true, placing: true, placingId: "e2" }));
+
+    expect(s.view.selectedId).toBe("e2");
     expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "move", participantId: "e2", to: { x: 9, y: 4 }, free: true });
+    expect(s.cellClick({ x: 8, y: 4 })).toEqual({ kind: "move", participantId: "e2", to: { x: 8, y: 4 }, free: true });
+  });
+
+  it("розстановка без озброєного токена: клітинка нічого не робить", () => {
+    expect(deriveMapScene(input({ isDM: true, placing: true })).cellClick({ x: 3, y: 3 })).toEqual({ kind: "none" });
+  });
+
+  it("не-ДМ ігнорує режим розстановки", () => {
+    const s = deriveMapScene(input({ isDM: false, placing: true, placingId: "e2" }));
+
+    expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "none" });
+    expect(s.tokenClick("e1")).toEqual({ kind: "attack", targetId: "e1", attackId: "s" });
+  });
+
+  it("ДМ поза режимом на ході ворога: союзник — атака", () => {
+    const enemy = at("e1", { x: 1, y: 0 }, ParticipantSide.ENEMY);
+
+    const s = deriveMapScene(input({ isDM: true, current: enemy, participants: [hero, enemy, far] }));
+
+    expect(s.tokenClick("h")).toEqual({ kind: "attack", targetId: "h", attackId: "s" });
+  });
+
+  it("будь-яка атака, що дістає, робить ціль валідною; атака вибирається перша, що дістає", () => {
+    const bow = { id: "b", name: "Лук", type: AttackType.RANGED, range: "60 ft" } as BattleAttack;
+
+    const archer = { ...hero, battleData: { ...hero.battleData, attacks: [sword, bow] } };
+
+    const s = deriveMapScene(input({ current: archer, participants: [archer, far] }));
+
+    expect(s.view.marks?.get("5:0")).toBe("target");
+    expect(s.tokenClick("e2")).toEqual({ kind: "attack", targetId: "e2", attackId: "b" });
   });
 
   it("hud: ворог не exact, союзник exact; резерву немає", () => {
@@ -97,11 +144,12 @@ describe("deriveMapScene", () => {
     expect(s.participants.map((p) => p.basicInfo.id)).toEqual(["h", "e1", "e2"]);
   });
 
-  it("траєкторія: наведення на ціль", () => {
-    const s = deriveMapScene(input({ hoverCell: { x: 1, y: 0 } }));
+  it("траєкторія: лише наведення на ціль", () => {
+    const { view } = deriveMapScene(input());
 
-    expect(s.view.trajectory).toEqual({ fromId: "h", to: { x: 1, y: 0 } });
-    expect(deriveMapScene(input({ hoverCell: { x: 0, y: 1 } })).view.trajectory).toBeNull();
+    expect(deriveTrajectory(view.marks, "h", { x: 1, y: 0 })).toEqual({ fromId: "h", to: { x: 1, y: 0 } });
+    expect(deriveTrajectory(view.marks, "h", { x: 0, y: 1 })).toBeNull();
+    expect(deriveTrajectory(view.marks, "h", null)).toBeNull();
   });
 
   it("атака вже використана — цілей немає", () => {
