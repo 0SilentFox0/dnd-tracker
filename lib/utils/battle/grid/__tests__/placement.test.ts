@@ -33,6 +33,17 @@ describe("авторозстановка", () => {
     expect(e1.x).toBe(8);
   });
 
+  it("одного боку розставляє через рядок, а коли місця мало — заповнює проміжки", () => {
+    const tall: BattleMapConfig = { cols: 1, rows: 5, background: null, opacity: 0.3 };
+
+    const rowsOf = (n: number) => placeParticipants(tall, Array.from({ length: n }, (_, i) => p(`a${i}`, ParticipantSide.ALLY))).map((x) => (x.battleData.position as GridPoint).y);
+
+    const three = rowsOf(3).sort();
+
+    expect(three.every((y, i) => i === 0 || y - three[i - 1] >= 2)).toBe(true);
+    expect(new Set(rowsOf(5)).size).toBe(5);
+  });
+
   it("вже розставлених і резерв не чіпає", () => {
     const placed = p("a1", ParticipantSide.ALLY, { position: { x: 4, y: 4 } });
 

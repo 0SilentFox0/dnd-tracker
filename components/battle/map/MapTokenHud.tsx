@@ -1,6 +1,6 @@
 "use client";
 
-import { EffectLine, HealthBar, HealthLabel } from "@/components/battle/hud";
+import { EffectIcon, HealthBar, HealthLabel } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isDown } from "@/lib/utils/battle/participant/state";
@@ -19,6 +19,8 @@ export interface MapTokenHudProps {
 }
 
 const TEXT_MIN_CELL = 22;
+
+const MAX_ICONS = 5;
 
 const UNIT_PX_FLOOR = 0.6;
 
@@ -47,6 +49,14 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
 
   const hpFont = clamp(8, cellPx * 0.18, 12);
 
+  const mapPx = mapSize.width * pxPerUnit;
+
+  const wrapperLeft = ((box.cx - box.size / 2) / mapSize.width) * mapPx;
+
+  const relLeft = clamp(-wrapperLeft, (boxPx - cardPx) / 2, mapPx - cardPx - wrapperLeft);
+
+  const iconPx = Math.round(clamp(12, cellPx * 0.22, 16));
+
   const below = (box.cy - box.size / 2) / 100 < UNIT_PX_FLOOR;
 
   return (
@@ -62,10 +72,10 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
     >
       <div
         ref={shake}
-        className={cn("absolute left-1/2 rounded-md border border-white/10 bg-black/70 backdrop-blur-[2px]", showText ? "px-1.5 py-1" : "p-0.5", down && "opacity-40")}
+        className={cn("absolute rounded-md border border-white/10 bg-black/70 backdrop-blur-[2px]", showText ? "px-1.5 py-1" : "p-0.5", down && "opacity-40")}
         style={{
           width: cardPx,
-          marginLeft: -cardPx / 2,
+          left: relLeft,
           ...(below ? { top: `calc(100% - ${gap}px + 4px)` } : { bottom: `calc(100% - ${gap}px + 4px)` }),
         }}
       >
@@ -93,7 +103,16 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
           </div>
         )}
         <HealthBar participant={participant} exact={exact} className={showText ? "mt-0.5" : "mt-0"} />
-        {showText && effects.length > 0 && <EffectLine effects={effects} />}
+        {showText && effects.length > 0 && (
+          <div className="mt-0.5 flex items-center gap-1 overflow-hidden text-[#cdb87e]" style={{ height: iconPx }}>
+            {effects.slice(0, MAX_ICONS).map((e) => (
+              <span key={e.id} role="img" aria-label={e.name} title={e.name} className={e.type === "buff" ? undefined : "text-hud-danger"}>
+                <EffectIcon effect={e} size={iconPx} />
+              </span>
+            ))}
+            {effects.length > MAX_ICONS && <span className="text-[var(--hud-muted)]" style={{ fontSize: hpFont }}>+{effects.length - MAX_ICONS}</span>}
+          </div>
+        )}
       </div>
     </div>
   );

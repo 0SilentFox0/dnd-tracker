@@ -9,7 +9,9 @@ function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
 
   const mid = (map.rows - 1) / 2;
 
-  const rows = Array.from({ length: map.rows }, (_, i) => i).sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b);
+  const byMid = Array.from({ length: map.rows }, (_, i) => i).sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b);
+
+  const rows = [...byMid.filter((y) => y % 2 === byMid[0] % 2), ...byMid.filter((y) => y % 2 !== byMid[0] % 2)];
 
   return cols.flatMap((x) => rows.map((y) => ({ x, y })));
 }

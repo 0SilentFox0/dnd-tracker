@@ -36,7 +36,7 @@ export function BattleMapPlayground() {
 
   return (
     <TooltipProvider>
-    <div className="battle-hud flex h-dvh flex-col overflow-hidden p-3 sm:p-4">
+    <div className="battle-hud below-header flex flex-col overflow-hidden p-3 sm:p-4">
       <h1 className="mb-2 shrink-0 text-lg font-semibold">Карта бою — пісочниця</h1>
       <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 lg:hidden">
         {modeTabs}

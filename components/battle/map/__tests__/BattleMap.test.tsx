@@ -89,9 +89,10 @@ describe("BattleMap", () => {
     });
 
     it("shows the effect", () => {
-      const { getByLabelText } = renderHud(new Map([["h", { exact: true, effects: [effect] }]]));
+      const { getByLabelText, container } = renderHud(new Map([["h", { exact: true, effects: [effect] }]]));
 
-      expect(getByLabelText(/Благословення/)).not.toBeNull();
+      expect(getByLabelText("Благословення")).not.toBeNull();
+      expect(container.textContent).not.toContain("Благословення");
     });
   });
 
