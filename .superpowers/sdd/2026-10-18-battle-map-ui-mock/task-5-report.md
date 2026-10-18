@@ -5,3 +5,6 @@ Concerns: not visually checked. Cards flip below the token for tokens in the fir
 
 ## Fix round 1
 Playground uses the existing .below-header class (100dvh minus --app-header-h) instead of h-dvh. HUD card clamped horizontally inside the map. Card is compact: name + HP, bar, effect icons only (aria-label/title carry the name). Placement prefers every other row per side, then fills gaps (test added). Full suite 2698 passed, tsc and lint clean.
+
+## Fix round 2
+HUD card now sits below the portrait; flips above only when the estimated card height would overflow the map bottom. Height check at 20x12 in ~1166x700 (cell 58px): name 11.6px font + bar + icon row ~44px, starts ~4px under the portrait, so it ends inside the single empty row below (58px). No font change needed. Test added for below/above placement. Full suite 2699 passed, tsc and lint clean.

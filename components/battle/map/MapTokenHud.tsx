@@ -22,8 +22,6 @@ const TEXT_MIN_CELL = 22;
 
 const MAX_ICONS = 5;
 
-const UNIT_PX_FLOOR = 0.6;
-
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
 export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effects, raised }: MapTokenHudProps) {
@@ -57,7 +55,9 @@ export function MapTokenHud({ participant, box, mapSize, pxPerUnit, exact, effec
 
   const iconPx = Math.round(clamp(12, cellPx * 0.22, 16));
 
-  const below = (box.cy - box.size / 2) / 100 < UNIT_PX_FLOOR;
+  const cardHeight = nameFont * 1.3 + 12 + (showText && effects.length > 0 ? iconPx + 2 : 0);
+
+  const below = (box.cy + box.size / 2) * pxPerUnit - gap + 4 + cardHeight <= mapSize.height * pxPerUnit;
 
   return (
     <div

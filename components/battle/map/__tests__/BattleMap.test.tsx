@@ -63,6 +63,19 @@ describe("BattleMap", () => {
     expect(parseFloat(clip.style.width)).toBeCloseTo(250);
   });
 
+  describe("hud placement", () => {
+    it("card sits below the token, and flips above at the bottom edge", () => {
+      const { container } = render(<BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} />);
+
+      const cards = container.querySelectorAll<HTMLElement>("[class*=backdrop-blur]");
+
+      expect(cards[0].style.top).not.toBe("");
+      expect(cards[0].style.bottom).toBe("");
+      expect(cards[1].style.bottom).not.toBe("");
+      expect(cards[1].style.top).toBe("");
+    });
+  });
+
   describe("hud", () => {
     const effect = { id: "e1", name: "Благословення", type: "buff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
 
