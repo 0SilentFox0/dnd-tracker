@@ -409,3 +409,9 @@ export function useMapViewport(): {
 - Тести: плашка показує імʼя й «HP / max» для `exact`; при `exact: false` — немає чисел HP; є іконка ефекту, коли ефект передано.
 - Перевірка: focused tests, `pnpm exec tsc --noEmit`, `pnpm lint`, повний `pnpm test:run`.
 - Commit: `feat(battle-map): row-style HUD card above map tokens`
+
+**Доповнення до Task 5 (вимога користувача): карта завжди вміщується в екран без скролу.**
+- `BattleMap` займає весь наданий батьком прямокутник і вписує в нього карту з пропорцією `cols:rows` (contain): обчислення через `ResizeObserver` на зовнішній обгортці (`h-full w-full flex items-center justify-center`) → внутрішній блок отримує `width/height` у px = `min(W, H·ratio)` × `min(H, W/ratio)`. Обчислення — чиста функція `fitMapBox(avail: {width,height}, map) → {width,height}` у `lib/utils/battle/grid/layout.ts` з тестом (широкий і високий контейнер, 20×12 і 20×40).
+- Пісочниця: сторінка `h-dvh overflow-hidden`, шапка/панель керування фіксованої висоти; область карти — `flex-1 min-h-0`. На мобілці панель керування згорнута над картою (компактний рядок кнопок), карта займає решту висоти.
+- Тест компонента: при контейнері 1000×500 і карті 20×40 внутрішній блок має висоту ≤ 500.
+- Ручна перевірка: 20×12 і 40×40 у вікні 1440×800 — без прокрутки сторінки.
