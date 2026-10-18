@@ -6,17 +6,28 @@ const KEY = "battle-fx";
 
 const listeners = new Set<() => void>();
 
-function read(): boolean {
-  try {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
+let reducedMotion: MediaQueryList | null | undefined;
 
+// Cached: every row reads the snapshot on each render.
+function reducedMotionQuery() {
+  if (reducedMotion === undefined) reducedMotion = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
+  return reducedMotion;
+}
+
+function readUser(): boolean {
+  try {
     return window.localStorage.getItem(KEY) !== "off";
   } catch {
     return true;
   }
 }
 
-function subscribe(cb: () => void) {
+function readMotion(): boolean {
+  return !reducedMotionQuery()?.matches;
+}
+
+function subscribeUser(cb: () => void) {
   listeners.add(cb);
   window.addEventListener("storage", cb);
 
@@ -26,8 +37,19 @@ function subscribe(cb: () => void) {
   };
 }
 
+function subscribeMotion(cb: () => void) {
+  const mql = reducedMotionQuery();
+
+  mql?.addEventListener?.("change", cb);
+
+  return () => mql?.removeEventListener?.("change", cb);
+}
+
+/** `userEnabled` — перемикач гравця (аури); `motionAllowed` — системне «зменшити рух»; `enabled` — анімації дій і рамки. */
 export function useFxEnabled() {
-  const enabled = useSyncExternalStore(subscribe, read, () => false);
+  const userEnabled = useSyncExternalStore(subscribeUser, readUser, () => false);
+
+  const motionAllowed = useSyncExternalStore(subscribeMotion, readMotion, () => true);
 
   const setEnabled = useCallback((v: boolean) => {
     try {
@@ -39,5 +61,5 @@ export function useFxEnabled() {
     listeners.forEach((l) => l());
   }, []);
 
-  return { enabled, setEnabled };
+  return { enabled: userEnabled && motionAllowed, userEnabled, motionAllowed, setEnabled };
 }

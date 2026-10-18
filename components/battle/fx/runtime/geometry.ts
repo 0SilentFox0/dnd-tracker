@@ -21,12 +21,6 @@ export function bezier(from: FxPoint, ctrl: FxPoint, to: FxPoint, t: number): Fx
   return { x: u * u * from.x + 2 * u * t * ctrl.x + t * t * to.x, y: u * u * from.y + 2 * u * t * ctrl.y + t * t * to.y };
 }
 
-export function sampleArc(from: FxPoint, to: FxPoint, lift: number, steps = 24): FxPoint[] {
-  const ctrl = arcControl(from, to, lift);
-
-  return Array.from({ length: steps + 1 }, (_, i) => bezier(from, ctrl, to, i / steps));
-}
-
 export function lungeOffset(from: FxPoint, to: FxPoint, max = 46) {
   const dx = to.x - from.x;
 

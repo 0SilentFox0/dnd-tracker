@@ -424,6 +424,22 @@ describe("fx metadata", () => {
     expect(effects.every((e) => e.fxElement === "cold")).toBe(true);
   });
 
+  it("does not tag effects applied during the cast by a trigger", () => {
+    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+
+    const target = enemy("e1");
+
+    target.battleData.resolvedAbilities = [resolved({ name: "Відплата", trigger: { event: "spellCast", phase: "after", role: "target" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 2 }, target: "self" } as Effect] })];
+
+    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [target]);
+
+    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+
+    expect(effects.find((e) => e.name === "Заклинання")?.fxElement).toBe("cold");
+    expect(effects.find((e) => e.name === "Відплата")).toBeDefined();
+    expect(effects.find((e) => e.name === "Відплата")?.fxElement).toBeUndefined();
+  });
+
   it("leaves fxElement unset when the spell has no damage type", () => {
     const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
 

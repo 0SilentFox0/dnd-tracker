@@ -15,7 +15,7 @@ export {
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useFxEnabled } from "./useFxEnabled";
 export { useFxImpact, useFxImpacts } from "./useFxImpact";
-export { useDamageShake, useHpChange } from "./useHpChange";
+export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";

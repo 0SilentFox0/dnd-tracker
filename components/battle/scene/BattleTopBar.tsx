@@ -12,7 +12,9 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
 
   const confirm = useConfirm();
 
-  const { enabled: fxOn, setEnabled: setFxOn } = useFxEnabled();
+  const { enabled: fxOn, motionAllowed, setEnabled: setFxOn } = useFxEnabled();
+
+  const fxHint = motionAllowed ? undefined : "Анімації вимкнено: у системі ввімкнено «Зменшити рух»";
 
   const reset = async () => {
     if (await confirm({ title: "Скинути бій?", description: "Бій повернеться до підготовки, журнал буде очищено.", confirmLabel: "Скинути" })) {
@@ -26,7 +28,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
     <header className="flex h-12 items-center gap-3 px-4">
       <span className="hud-sc truncate text-[15px] tracking-[.08em]">{battle.name}</span>
       {isMyTurn && battle.status === BattleStatus.ACTIVE && <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">Твій хід</span>}
-      <button type="button" onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? "Анімації дій: увімк." : "Анімації дій: вимк."} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10", fxOn ? "text-[var(--gold)]" : "text-[#b8ab95]/60")}>
+      <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? "Анімації дій: увімк." : "Анімації дій: вимк."} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-[#b8ab95]/60")}>
         <Sparkles className="size-4" />
       </button>
       <span className="hud-sc flex items-center gap-2 text-sm text-[#b8ab95]">

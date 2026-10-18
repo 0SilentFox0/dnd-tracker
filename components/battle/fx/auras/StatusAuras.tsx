@@ -7,11 +7,11 @@ import { aurasOf } from "@/lib/utils/battle/fx";
 import type { ActiveEffect } from "@/types/battle";
 
 export function StatusAuras({ effects, size }: { effects: ActiveEffect[]; size: number }) {
-  const { enabled } = useFxEnabled();
+  const { userEnabled, motionAllowed } = useFxEnabled();
 
   const kinds = aurasOf(effects);
 
-  if (!enabled || !kinds.length) return null;
+  if (!userEnabled || !kinds.length) return null;
 
-  return <AuraCanvas kinds={kinds} size={size} />;
+  return <AuraCanvas kinds={kinds} size={size} still={!motionAllowed} />;
 }

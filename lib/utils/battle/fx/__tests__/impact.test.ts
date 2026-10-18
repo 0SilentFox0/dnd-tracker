@@ -47,4 +47,9 @@ describe("impactFor", () => {
     expect(impactFor(a, "x")).toBeNull();
     expect(impactFor(undefined, "t")).toBeNull();
   });
+
+  it("buff/debuff → null (no damage frame borrowed)", () => {
+    expect(impactFor(action({ actionType: "spell", actionDetails: { spellEffectKinds: ["modifyStat"] } }), "t")).toBeNull();
+    expect(impactFor(action({ actionType: "spell", actionDetails: { spellEffectKinds: ["applyCondition"] } }), "t")).toBeNull();
+  });
 });

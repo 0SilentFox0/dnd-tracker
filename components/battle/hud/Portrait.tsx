@@ -14,10 +14,9 @@ export interface PortraitProps {
   className?: string;
   fxId?: string;
   fxAnchor?: "track";
-  flashDelayMs?: number;
 }
 
-export function Portrait({ participant, size = 40, current, me, extra, className, fxId, fxAnchor, flashDelayMs }: PortraitProps) {
+export function Portrait({ participant, size = 40, current, me, extra, className, fxId, fxAnchor }: PortraitProps) {
   const { avatar, name, side } = participant.basicInfo;
 
   const ring = side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)";
@@ -30,7 +29,6 @@ export function Portrait({ participant, size = 40, current, me, extra, className
       style={{
         width: size,
         height: size,
-        animationDelay: flashDelayMs ? `${flashDelayMs}ms` : undefined,
         boxShadow: current
           ? `0 0 0 2px var(--bone), 0 0 0 4px ${ring}`
           : me

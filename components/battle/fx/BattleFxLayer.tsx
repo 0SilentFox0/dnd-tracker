@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import "@/components/battle/fx/fx.css";
 import { ANIMATIONS } from "@/components/battle/fx/animations";
@@ -16,7 +16,12 @@ export function BattleFxLayer() {
 
   const { enabled } = useFxEnabled();
 
-  const { current, done } = useBattleFxQueue(enabled);
+  const { current, done, active } = useBattleFxQueue(enabled);
+
+  // Hidden tab or FX off: a fresh layer element detaches the running animation, so nothing stale resumes later.
+  const [stage, setStage] = useState({ active, n: 0 });
+
+  if (stage.active !== active) setStage({ active, n: active ? stage.n : stage.n + 1 });
 
   useEffect(() => {
     const el = layer.current;
@@ -29,7 +34,7 @@ export function BattleFxLayer() {
       if (finished) return;
 
       finished = true;
-      done();
+      done(current.key);
     };
 
     // a broken animation must never stall the queue
@@ -49,5 +54,5 @@ export function BattleFxLayer() {
       });
   }, [current, done]);
 
-  return <div ref={layer} className="fx-layer fixed" aria-hidden />;
+  return <div key={stage.n} ref={layer} className="fx-layer fixed" aria-hidden />;
 }

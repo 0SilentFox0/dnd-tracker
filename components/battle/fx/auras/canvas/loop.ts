@@ -95,12 +95,8 @@ function unregister(canvas: HTMLCanvasElement) {
   }
 }
 
-function prefersReducedMotion() {
-  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-// Sizes the canvas to the portrait plus padding and starts painting `kinds`; returns the detach function.
-export function attachAura(canvas: HTMLCanvasElement, kinds: FxAuraKind[], size: number) {
+// Sizes the canvas to the portrait plus padding and starts painting `kinds` (`still`: one static frame, no loop); returns the detach function.
+export function attachAura(canvas: HTMLCanvasElement, kinds: FxAuraKind[], size: number, still = false) {
   const g = canvas.getContext("2d");
 
   if (!g || !kinds.length) return () => undefined;
@@ -121,7 +117,7 @@ export function attachAura(canvas: HTMLCanvasElement, kinds: FxAuraKind[], size:
   // Random phase so neighbouring rows do not pulse in lockstep.
   const entry: Entry = { canvas, g, dpr, layers, visible: false, t0: performance.now() - Math.random() * 4000 };
 
-  if (prefersReducedMotion()) {
+  if (still) {
     for (let i = 0; i < WARMUP_FRAMES; i++) paint(entry, 1.2 + i / 30, 1 / 30);
 
     return () => undefined;

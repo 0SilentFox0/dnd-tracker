@@ -20,13 +20,11 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const heroEffects = effects.get(hero.basicInfo.id) ?? [];
 
-  const change = useHpChange(hero.combatStats.currentHp);
-
   const impact = useFxImpact(hero.basicInfo.id);
 
-  const delay = impact?.delayMs ?? 0;
+  const change = useHpChange(hero.combatStats.currentHp, impact);
 
-  const shake = useDamageShake<HTMLDivElement>(change, delay);
+  const shake = useDamageShake<HTMLDivElement>(change);
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
@@ -36,8 +34,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   return (
     <div ref={shake} className="relative">
-      {change && impact && <ImpactFrame key={`frame:${change.id}`} impact={impact} />}
-      {change && change.delta < 0 && <div key={change.id} style={{ animationDelay: `${delay}ms` }} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
+      {change?.impact && <ImpactFrame key={`frame:${change.id}`} impact={change.impact} />}
+      {change && change.delta < 0 && <div key={change.id} style={{ animationDelay: `${change.impact?.delayMs ?? 0}ms` }} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
         <span className="relative shrink-0">
           <ZoomablePortrait participant={hero} fxId={hero.basicInfo.id} size={compact ? 48 : 64} me />

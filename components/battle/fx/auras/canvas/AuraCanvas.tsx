@@ -6,7 +6,7 @@ import { attachAura, AURA_PAD } from "./loop";
 
 import type { FxAuraKind } from "@/lib/utils/battle/fx";
 
-export function AuraCanvas({ kinds, size }: { kinds: FxAuraKind[]; size: number }) {
+export function AuraCanvas({ kinds, size, still = false }: { kinds: FxAuraKind[]; size: number; still?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   const key = kinds.join(",");
@@ -16,8 +16,8 @@ export function AuraCanvas({ kinds, size }: { kinds: FxAuraKind[]; size: number 
 
     if (!canvas || !key) return;
 
-    return attachAura(canvas, key.split(",") as FxAuraKind[], size);
-  }, [key, size]);
+    return attachAura(canvas, key.split(",") as FxAuraKind[], size, still);
+  }, [key, size, still]);
 
   const pad = Math.round(size * AURA_PAD);
 

@@ -12,18 +12,23 @@ export interface FxQueueState {
 
 export const INITIAL_FX_QUEUE: FxQueueState = { log: null, seen: null, queue: [] };
 
-const MAX_FX_QUEUE = 12;
+export const MAX_FX_QUEUE = 12;
 
-export function advanceFxQueue(state: FxQueueState, log: BattleAction[], enabled: boolean): FxQueueState {
-  if (state.log === log) return state;
+/** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */
+export function advanceFxQueue(state: FxQueueState, log: BattleAction[], active: boolean): FxQueueState {
+  if (state.log === log && (active || !state.queue.length)) return state;
 
   const { actions, seen } = takeNewActions(log, state.seen);
 
-  const added = enabled ? actions.flatMap(mapAction) : [];
+  if (!active) return { log, seen, queue: [] };
 
-  return { log, seen, queue: [...state.queue, ...added].slice(-MAX_FX_QUEUE) };
+  const queue = [...state.queue, ...actions.flatMap(mapAction)];
+
+  // the head may be playing right now, so trimming keeps it
+  return { log, seen, queue: queue.length > MAX_FX_QUEUE ? [queue[0], ...queue.slice(1 - MAX_FX_QUEUE)] : queue };
 }
 
-export function shiftFxQueue(state: FxQueueState): FxQueueState {
-  return { ...state, queue: state.queue.slice(1) };
+/** Знімає голову лише якщо це та сама анімація: запізнілий `done` після очищення черги нічого не пропускає. */
+export function shiftFxQueue(state: FxQueueState, key: string): FxQueueState {
+  return state.queue[0]?.key === key ? { ...state, queue: state.queue.slice(1) } : state;
 }

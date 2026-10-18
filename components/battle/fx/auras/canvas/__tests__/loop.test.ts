@@ -25,10 +25,6 @@ function setVisible(canvas: HTMLCanvasElement, isIntersecting: boolean) {
   ioCallback?.([{ target: canvas, isIntersecting } as unknown as IntersectionObserverEntry], {} as IntersectionObserver);
 }
 
-function mockReducedMotion(matches: boolean) {
-  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches })));
-}
-
 async function loadLoop() {
   vi.resetModules();
 
@@ -61,7 +57,6 @@ beforeEach(() => {
 
     unobserve() {}
   });
-  mockReducedMotion(false);
 });
 
 afterEach(() => {
@@ -130,12 +125,10 @@ describe("aura loop", () => {
     expect(frame).toHaveBeenCalledTimes(1);
   });
 
-  it("under reduced motion paints a static frame without registering", async () => {
-    mockReducedMotion(true);
-
+  it("still (reduced motion) paints a static frame without registering", async () => {
     const { attachAura, auraLoopState } = await loadLoop();
 
-    attachAura(makeCanvas(), ["shield"], 48);
+    attachAura(makeCanvas(), ["shield"], 48, true);
 
     expect(frame).toHaveBeenCalled();
     expect(auraLoopState()).toEqual({ registered: 0, running: false });

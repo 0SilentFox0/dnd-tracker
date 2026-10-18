@@ -311,7 +311,10 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   const meta = fxMeta(def);
 
   if (meta.spellDamageType) {
-    for (const { id, targetId } of applied) {
+    // only the spell's own effects: one applied by a trigger during the cast keeps its own look
+    for (const { id, name, targetId } of applied) {
+      if (name !== spell.name) continue;
+
       const target = findParticipant(flow.ps, targetId);
 
       if (!target) continue;

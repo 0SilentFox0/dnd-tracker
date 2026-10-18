@@ -21,7 +21,8 @@ export function CanvasFrame({ frame, delayMs }: { frame: FrameAnimation; delayMs
     if (!el) return;
 
     void wait(delayMs).then(() => {
-      if (cancelled || !el.isConnected) return;
+      // a collapsed host would give the frames a negative gradient radius
+      if (cancelled || !el.isConnected || el.clientWidth <= PAD * 2 || el.clientHeight <= PAD * 2) return;
 
       stage = stageFor(el);
       stage.canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%";

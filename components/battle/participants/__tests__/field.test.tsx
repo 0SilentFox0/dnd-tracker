@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/battle/fx/frames/ImpactFrame", () => ({ ImpactFrame: ({ impact }: { impact: FxImpact }) => <i data-testid="impact-frame" data-element={impact.element} /> }));
 
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
@@ -13,6 +14,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import type { FxImpact } from "@/lib/utils/battle/fx";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { ActiveEffect, BattleAction } from "@/types/battle";
@@ -190,6 +192,42 @@ describe("поле бою", () => {
       fireEvent.click(screen.getByLabelText(/Ефект a/));
 
       expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    describe("декорації удару фіксуються в момент зміни HP", () => {
+      const hit: FxImpact = { element: "fire", kind: "damage", delayMs: 600 };
+
+      const row = (hp: number, impact: FxImpact | null) => <TooltipProvider><ParticipantRow impact={impact} participant={p("gob", "Гоблін", ParticipantSide.ENEMY, hp)} effects={[]} exact acText="15" current={false} onSelect={vi.fn()} /></TooltipProvider>;
+
+      const portrait = (container: HTMLElement) => container.querySelector('[data-fx-participant="gob"]') as HTMLElement;
+
+      it("пізніша дія без цієї цілі не перезапускає спалах і рамку", () => {
+        const { container, rerender } = render(row(20, null), { wrapper: wrap(scene()) });
+
+        rerender(row(12, hit));
+
+        const frame = screen.getByTestId("impact-frame");
+
+        expect(portrait(container).className).not.toMatch(/hud-flash/);
+
+        rerender(row(12, null));
+
+        expect(portrait(container).className).not.toMatch(/hud-flash/);
+        expect(screen.getByTestId("impact-frame")).toBe(frame);
+      });
+
+      it("бафф без зміни HP не показує рамку шкоди", () => {
+        const { container, rerender } = render(row(20, null), { wrapper: wrap(scene()) });
+
+        rerender(row(12, null));
+
+        expect(portrait(container).className).toMatch(/hud-flash-red/);
+        expect(screen.queryByTestId("impact-frame")).toBeNull();
+
+        rerender(row(12, { element: "radiant", kind: "damage", delayMs: 400 }));
+
+        expect(screen.queryByTestId("impact-frame")).toBeNull();
+      });
     });
   });
 });
