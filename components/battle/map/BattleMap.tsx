@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { MapToken } from "./MapToken";
+import { MapTokenHud } from "./MapTokenHud";
 
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { cellCenter, cellKey, type CellMark, cellPolygon, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import { cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
+import type { ActiveEffect, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface BattleMapView {
   selectedId?: string | null;
@@ -17,6 +18,8 @@ export interface BattleMapView {
   marks?: Map<string, CellMark | number>;
   /** Лінія траєкторії від учасника до клітинки/учасника */
   trajectory?: { fromId: string; to: GridPoint } | null;
+  /** Плашка над токеном: без запису — exact і без ефектів */
+  hud?: Map<string, { exact: boolean; effects: ActiveEffect[] }>;
 }
 
 export interface BattleMapActions {
@@ -41,28 +44,36 @@ function markFill(mark: CellMark | number | undefined): string {
   return mark === "target" ? "rgba(230,80,60,.35)" : "rgba(120,120,120,.25)";
 }
 
+const NO_EFFECTS: ActiveEffect[] = [];
+
 export function BattleMap({ map, participants, view, actions, className }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
   const size = mapSize(map);
 
-  const [containerWidth, setContainerWidth] = useState(0);
+  const outerRef = useRef<HTMLDivElement>(null);
+
+  const [avail, setAvail] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    const el = containerRef.current;
+    const el = outerRef.current;
 
     if (!el) return;
 
-    setContainerWidth(el.getBoundingClientRect().width);
+    const rect = el.getBoundingClientRect();
 
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
+    setAvail({ width: rect.width, height: rect.height });
+
+    const observer = new ResizeObserver(([entry]) => setAvail({ width: entry.contentRect.width, height: entry.contentRect.height }));
 
     observer.observe(el);
 
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, []);
 
-  const pxPerUnit = containerWidth / size.width;
+  const fit = fitMapBox(avail, map);
+
+  const pxPerUnit = fit.width / size.width;
 
   const cells: GridPoint[] = [];
 
@@ -81,10 +92,12 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
   const end = view?.trajectory ? cellCenter(view.trajectory.to) : null;
 
   return (
+    <div ref={outerRef} className={cn("flex h-full w-full items-center justify-center", className)}>
     <div
       ref={containerRef}
-      className={cn("relative touch-none select-none overflow-hidden rounded-xl border border-white/10 bg-black", className)}
-      style={{ aspectRatio: size.width / size.height }}
+      data-fx-clip
+      className="relative shrink-0 touch-none select-none overflow-hidden rounded-xl border border-white/10 bg-black"
+      style={{ width: fit.width, height: fit.height }}
       {...bind}
     >
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
@@ -96,6 +109,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
             return (
               <polygon
                 key={cellKey(p)}
+                data-fx-cell={cellKey(p)}
                 points={cellPolygon(p)}
                 fill={markFill(mark)}
                 stroke="rgba(255,255,255,1)"
@@ -140,7 +154,26 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
             onClick={(id) => !wasDragged() && actions?.onTokenClick?.(id)}
           />
         ))}
+        {tokens.map(({ p, box }) => {
+          const id = p.basicInfo.id;
+
+          const hud = view?.hud?.get(id);
+
+          return (
+            <MapTokenHud
+              key={`hud:${id}`}
+              participant={p}
+              box={box}
+              mapSize={size}
+              pxPerUnit={pxPerUnit}
+              exact={hud?.exact ?? true}
+              effects={hud?.effects ?? NO_EFFECTS}
+              raised={view?.selectedId === id || view?.currentId === id}
+            />
+          );
+        })}
       </div>
+    </div>
     </div>
   );
 }

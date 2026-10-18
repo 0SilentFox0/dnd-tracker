@@ -1,5 +1,5 @@
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 
 function unitIcon(file: string): string | undefined {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,6 +17,7 @@ interface MockSpec {
   speed: number;
   gridSize?: number;
   attack: BattleAttack;
+  effects?: ActiveEffect[];
 }
 
 const melee = (name: string, damageDice: string): BattleAttack => ({
@@ -36,14 +37,23 @@ const ranged = (name: string, range: string, damageDice: string): BattleAttack =
   range,
 });
 
+const effect = (id: string, name: string, type: ActiveEffect["type"], duration: number): ActiveEffect => ({
+  id,
+  name,
+  type,
+  duration,
+  appliedAt: { round: 1, timestamp: new Date(0) },
+  effects: [],
+});
+
 const SPECS: MockSpec[] = [
-  { id: "knight", name: "Лицар", side: ParticipantSide.ALLY, icon: "humans-knight", hp: 52, hpNow: 44, speed: 30, attack: melee("Меч", "1d8+3") },
+  { id: "knight", name: "Лицар", side: ParticipantSide.ALLY, icon: "humans-knight", hp: 52, hpNow: 44, speed: 30, attack: melee("Меч", "1d8+3"), effects: [effect("bless", "Благословення", "buff", 3), effect("slow", "Сповільнення", "debuff", 2)] },
   { id: "archer", name: "Лучниця", side: ParticipantSide.ALLY, icon: "humans-marksman", hp: 34, speed: 30, attack: ranged("Довгий лук", "80/320 фт", "1d8+2") },
   { id: "mage", name: "Маг", side: ParticipantSide.ALLY, icon: "mages-mage", hp: 26, hpNow: 18, speed: 30, attack: ranged("Магічна стріла", "60 фт", "2d4+2") },
   { id: "griffin", name: "Грифон", side: ParticipantSide.ALLY, icon: "humans-griffin", hp: 60, speed: 40, gridSize: 2, attack: melee("Кігті", "2d6+3") },
   { id: "skel1", name: "Скелет-воїн 1", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, speed: 30, attack: melee("Іржавий меч", "1d6+2") },
   { id: "skel2", name: "Скелет-воїн 2", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, hpNow: 9, speed: 30, attack: melee("Іржавий меч", "1d6+2") },
-  { id: "skelArcher", name: "Скелет-лучник", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-archer", hp: 24, speed: 30, attack: ranged("Кістяний лук", "80/320 фт", "1d6+2") },
+  { id: "skelArcher", name: "Скелет-лучник", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-archer", hp: 24, speed: 30, attack: ranged("Кістяний лук", "80/320 фт", "1d6+2"), effects: [effect("poison", "Отрута", "debuff", 4)] },
   { id: "dragon", name: "Кістяний дракон", side: ParticipantSide.ENEMY, icon: "necromancers-bone-dragon", hp: 120, hpNow: 96, speed: 40, gridSize: 2, attack: melee("Укус", "3d8+5") },
 ];
 
@@ -86,7 +96,7 @@ function build(s: MockSpec, index: number): BattleParticipant {
       maxTargets: 1,
     },
     spellcasting: { spellSlots: {}, knownSpells: [] },
-    battleData: { attacks: [s.attack], activeEffects: [], equippedArtifacts: [], resolvedAbilities: [] },
+    battleData: { attacks: [s.attack], activeEffects: s.effects ?? [], equippedArtifacts: [], resolvedAbilities: [] },
     actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
   };
 }

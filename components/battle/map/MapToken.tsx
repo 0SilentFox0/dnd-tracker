@@ -1,4 +1,7 @@
-import { HealthBar, Portrait } from "@/components/battle/hud";
+"use client";
+
+import { Portrait } from "@/components/battle/hud";
+import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
@@ -18,11 +21,15 @@ export function MapToken({ participant, box, mapSize, pxPerUnit, selected, curre
 
   const { width, height } = mapSize;
 
+  const change = useHpChange(participant.combatStats.currentHp);
+
+  const shake = useDamageShake<HTMLButtonElement>(change);
+
   const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * 0.8));
 
   return (
     <div
-      className="absolute flex items-center justify-center"
+      className="absolute flex items-center justify-center transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{
         left: `${((box.cx - box.size / 2) / width) * 100}%`,
         top: `${((box.cy - box.size / 2) / height) * 100}%`,
@@ -32,17 +39,24 @@ export function MapToken({ participant, box, mapSize, pxPerUnit, selected, curre
       }}
     >
       <button
+        ref={shake}
         type="button"
         aria-label={name}
         data-fx-participant={id}
+        data-fx-anchor="map"
         onClick={(e) => {
           e.stopPropagation();
           onClick?.(id);
         }}
         className={cn("flex h-full w-full flex-col items-center justify-center rounded-full", selected && "ring-2 ring-[var(--gold)]")}
       >
-        <Portrait participant={participant} size={portraitPx} current={current} />
-        <HealthBar participant={participant} exact className="mt-0.5 w-[90%]" />
+        <Portrait
+          key={`portrait:${change?.id ?? ""}`}
+          participant={participant}
+          size={portraitPx}
+          current={current}
+          className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))}
+        />
       </button>
     </div>
   );

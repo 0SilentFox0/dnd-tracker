@@ -38,3 +38,9 @@ export function tokenBox(p: BattleParticipant): { cx: number; cy: number; size: 
 
   return { cx, cy, size: size * UNIT * 0.86 };
 }
+
+export function fitMapBox(avail: { width: number; height: number }, map: Pick<BattleMapConfig, "cols" | "rows">): { width: number; height: number } {
+  const ratio = map.cols / map.rows;
+
+  return { width: Math.min(avail.width, avail.height * ratio), height: Math.min(avail.height, avail.width / ratio) };
+}

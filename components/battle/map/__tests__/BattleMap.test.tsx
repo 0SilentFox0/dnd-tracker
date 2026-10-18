@@ -3,13 +3,22 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMap } from "@/components/battle/map";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  avail = { width: 800, height: 600 };
+});
+
+let avail = { width: 800, height: 600 };
 
 class RO {
-  observe() {}
+  constructor(private cb: (entries: { contentRect: { width: number; height: number } }[]) => void) {}
+  observe() {
+    this.cb([{ contentRect: avail }]);
+  }
   disconnect() {}
   unobserve() {}
 }
@@ -33,6 +42,57 @@ describe("BattleMap", () => {
     expect(container.querySelectorAll("polygon")).toHaveLength(12);
     expect(container.querySelector('[data-fx-participant="h"]')).not.toBeNull();
     expect(container.querySelector('[data-fx-participant="e"]')).not.toBeNull();
+  });
+
+  it("exposes FX hooks: anchor, cell, clip", () => {
+    const { container } = render(<BattleMap map={square} participants={people} />);
+
+    expect(container.querySelector('[data-fx-participant="h"]')?.getAttribute("data-fx-anchor")).toBe("map");
+    expect(container.querySelector('polygon[data-fx-cell="3:2"]')).not.toBeNull();
+    expect(container.querySelectorAll("[data-fx-clip]")).toHaveLength(1);
+  });
+
+  it("fits a tall map into the container height", () => {
+    avail = { width: 1000, height: 500 };
+
+    const { container } = render(<BattleMap map={{ ...square, cols: 20, rows: 40 }} participants={[]} />);
+
+    const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
+
+    expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(500);
+    expect(parseFloat(clip.style.width)).toBeCloseTo(250);
+  });
+
+  describe("hud", () => {
+    const effect = { id: "e1", name: "Благословення", type: "buff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
+
+    const renderHud = (hud: Map<string, { exact: boolean; effects: ActiveEffect[] }> | undefined) =>
+      render(
+        <TooltipProvider>
+          <BattleMap map={square} participants={[at("h", 1, 1)]} view={{ hud }} />
+        </TooltipProvider>,
+      );
+
+    it("exact: name and HP / max", () => {
+      const { container } = renderHud(undefined);
+
+      const max = base.combatStats.maxHp;
+
+      expect(container.textContent).toContain("h");
+      expect(container.textContent).toContain(`${base.combatStats.currentHp} / ${max}`);
+    });
+
+    it("not exact: no HP numbers", () => {
+      const { container } = renderHud(new Map([["h", { exact: false, effects: [] }]]));
+
+      expect(container.textContent).not.toContain(" / ");
+    });
+
+    it("shows the effect", () => {
+      const { getByLabelText } = renderHud(new Map([["h", { exact: true, effects: [effect] }]]));
+
+      expect(getByLabelText(/Благословення/)).not.toBeNull();
+    });
   });
 
   it("cell click reports the point", () => {
@@ -69,7 +129,7 @@ describe("BattleMap", () => {
 
     const { container } = render(<BattleMap map={square} participants={people} actions={{ onCellClick, onTokenClick }} />);
 
-    const root = container.firstElementChild as Element;
+    const root = container.querySelector("[data-fx-clip]") as Element;
 
     const cell = container.querySelectorAll("polygon")[5];
 
@@ -88,7 +148,7 @@ describe("BattleMap", () => {
   it("wheel is non-passive and prevented", () => {
     const { container } = render(<BattleMap map={square} participants={people} />);
 
-    const notPrevented = fireEvent.wheel(container.firstElementChild as Element, { deltaY: -100 });
+    const notPrevented = fireEvent.wheel(container.querySelector("[data-fx-clip]") as Element, { deltaY: -100 });
 
     expect(notPrevented).toBe(false);
   });

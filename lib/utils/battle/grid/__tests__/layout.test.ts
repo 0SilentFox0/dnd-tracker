@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellCenter, cellPolygon, mapSize, tokenBox, UNIT } from "../layout";
+import { cellCenter, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "../layout";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
@@ -25,5 +25,19 @@ describe("квадрати", () => {
 
   it("учасник без позиції — без токена", () => {
     expect(tokenBox(createMockParticipant())).toBeNull();
+  });
+});
+
+describe("fitMapBox", () => {
+  it("широкий контейнер — обмежує висота", () => {
+    expect(fitMapBox({ width: 1000, height: 300 }, { cols: 20, rows: 12 })).toEqual({ width: 500, height: 300 });
+  });
+
+  it("високий контейнер — обмежує ширина", () => {
+    expect(fitMapBox({ width: 300, height: 1000 }, { cols: 20, rows: 12 })).toEqual({ width: 300, height: 180 });
+  });
+
+  it("висока карта 20×40 у широкому контейнері", () => {
+    expect(fitMapBox({ width: 1000, height: 500 }, { cols: 20, rows: 40 })).toEqual({ width: 250, height: 500 });
   });
 });

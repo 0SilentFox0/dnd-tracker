@@ -4,7 +4,9 @@ import { BattleMap } from "../BattleMap";
 
 import "@/components/battle/hud/battle-hud.css";
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useBattleMapPlayground } from "@/lib/hooks/battle";
+import { cn } from "@/lib/utils";
 import { remainingMovement } from "@/lib/utils/battle/grid";
 
 const FIELD = "h-8 w-full rounded-md border border-hud-rule bg-black/30 px-2 text-sm";
@@ -22,11 +24,31 @@ export function BattleMapPlayground() {
 
   const attack = active.battleData.attacks[0];
 
+  const modeTabs = (
+    <HudChipTabs
+      ariaLabel="Режим"
+      items={[
+        { key: "move", label: "Рух", active: mode === "move", onSelect: () => controls.setMode("move") },
+        { key: "attack", label: "Атака", active: mode === "attack", onSelect: () => controls.setMode("attack") },
+      ]}
+    />
+  );
+
   return (
-    <div className="battle-hud min-h-screen p-3 sm:p-6">
-      <h1 className="mb-4 text-xl font-semibold">Карта бою — пісочниця</h1>
-      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
-        <div className="flex flex-col gap-3">
+    <TooltipProvider>
+    <div className="battle-hud flex h-dvh flex-col overflow-hidden p-3 sm:p-4">
+      <h1 className="mb-2 shrink-0 text-lg font-semibold">Карта бою — пісочниця</h1>
+      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 lg:hidden">
+        {modeTabs}
+        <button type="button" className={cn(BUTTON, "h-8")} onClick={controls.nextTurn}>
+          Наступний хід
+        </button>
+        <button type="button" className={cn(BUTTON, "h-8")} onClick={controls.reset}>
+          Скинути
+        </button>
+      </div>
+      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_1fr]">
+        <div className="hidden min-h-0 flex-col gap-3 overflow-y-auto lg:flex">
           <HudPanel className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-sm">
               Прозорість сітки: {map.opacity.toFixed(2)}
@@ -42,13 +64,7 @@ export function BattleMapPlayground() {
                 <input className={FIELD} type="number" min={4} max={40} value={map.rows} onChange={(e) => setMap({ ...map, rows: clampSize(e.target.value, map.rows) })} />
               </label>
             </div>
-            <HudChipTabs
-              ariaLabel="Режим"
-              items={[
-                { key: "move", label: "Рух", active: mode === "move", onSelect: () => controls.setMode("move") },
-                { key: "attack", label: "Атака", active: mode === "attack", onSelect: () => controls.setMode("attack") },
-              ]}
-            />
+            {modeTabs}
             <div className="flex gap-2">
               <button type="button" className={BUTTON} onClick={controls.nextTurn}>
                 Наступний хід
@@ -75,8 +91,11 @@ export function BattleMapPlayground() {
             {log.length === 0 ? <div className="text-hud-muted">Порожньо</div> : log.map((line, i) => <div key={`${i}-${line}`}>{line}</div>)}
           </HudPanel>
         </div>
-        <BattleMap map={map} participants={participants} view={view} actions={actions} className="w-full" />
+        <div className="h-full min-h-0 min-w-0">
+          <BattleMap map={map} participants={participants} view={view} actions={actions} />
+        </div>
       </div>
     </div>
+    </TooltipProvider>
   );
 }

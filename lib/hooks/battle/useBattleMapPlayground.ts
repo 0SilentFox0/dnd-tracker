@@ -2,6 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { useDisplayEffectMap } from "./useDisplayEffectMap";
+
 import type { BattleMapActions, BattleMapView } from "@/components/battle/map";
 import { buildMockParticipants } from "@/components/battle/map/dev/mock-participants";
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
@@ -42,7 +44,11 @@ export function useBattleMapPlayground() {
 
   const trajectory = mode === "attack" && hover && marks.get(cellKey(hover)) === "target" ? { fromId: activeId, to: hover } : null;
 
-  const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks, trajectory };
+  const effects = useDisplayEffectMap(participants);
+
+  const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true, effects: effects.get(p.basicInfo.id) ?? [] }])), [participants, effects]);
+
+  const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks, trajectory, hud };
 
   const pushLog = useCallback((line: string) => setLog((prev) => [line, ...prev].slice(0, LOG_LIMIT)), []);
 
