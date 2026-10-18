@@ -1,7 +1,9 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { twinkle } from "./shapes";
-import { type AuraAnimation } from "./types";
+import { glow, spritePx } from "../../runtime/texture";
+import { twinkleDraw } from "./kit";
+import type { AuraAnimation } from "./types";
+
+const sparkle = twinkleDraw("#fff1b0");
 
 function halo(g: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, from: number, to: number) {
   g.beginPath();
@@ -21,8 +23,8 @@ export const blessingAura: AuraAnimation = {
 
     const shine = 0.85 + Math.sin(t * 3.1) * 0.15;
 
-    sprite(g, glow("#ffc93a"), cx, hy, (rx * 3.2) / 64, (ry * 5) / 64, 0.7 * shine);
-    sprite(g, glow("#ffe9a0"), cx, cy, (r * 2.7) / 64, undefined, 0.18);
+    spritePx(g, glow("#ffc93a"), cx, hy, rx * 3.2, ry * 5, 0.7 * shine);
+    spritePx(g, glow("#ffe9a0"), cx, cy, r * 2.7, undefined, 0.18);
 
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";
@@ -38,7 +40,7 @@ export const blessingAura: AuraAnimation = {
     parts.emit(5, dt, () => {
       const a = rand(0, Math.PI * 2);
 
-      return { x: cx + Math.cos(a) * rx, y: hy + Math.sin(a) * ry, vy: rand(6, 14) * s, life: rand(0.6, 1.1), size0: rand(3, 4.5) * s, draw: (gg, p, k) => twinkle(gg, p.x, p.y, p.size0 * Math.sin(k * Math.PI), "#fff1b0", 1) };
+      return { x: cx + Math.cos(a) * rx, y: hy + Math.sin(a) * ry, vy: rand(6, 14) * s, life: rand(0.6, 1.1), size0: rand(3, 4.5) * s, draw: sparkle };
     });
     parts.step(g, dt);
   },

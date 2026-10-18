@@ -3,28 +3,23 @@
 import { memo } from "react";
 import { Heart, Shield } from "lucide-react";
 
-import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
-import { ImpactFrame } from "@/components/battle/fx/frames/ImpactFrame";
+import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleSceneData, useDamageShake, useFxImpact, useHpChange } from "@/lib/hooks/battle";
+import { useBattleSceneData, useFxImpact, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { abilityCharges, turnsUntil } from "@/lib/utils/battle/view";
+import { abilityCharges, NO_EFFECTS, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
   const { battle, queue, isMyTurn, effects } = useBattleSceneData();
 
-  const heroEffects = effects.get(hero.basicInfo.id) ?? [];
+  const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
-  const impact = useFxImpact(hero.basicInfo.id);
-
-  const change = useHpChange(hero.combatStats.currentHp, impact);
-
-  const shake = useDamageShake<HTMLDivElement>(change);
+  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpact(hero.basicInfo.id));
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
@@ -33,14 +28,13 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
   const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
   return (
-    <div ref={shake} className="relative">
-      {change?.impact && <ImpactFrame key={`frame:${change.id}`} impact={change.impact} />}
-      {change && change.delta < 0 && <div key={change.id} style={{ animationDelay: `${change.impact?.delayMs ?? 0}ms` }} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
+    <div ref={shakeRef} className="relative">
+      <HitFrame change={change} />
+      {change && change.delta < 0 && <div key={change.id} style={delayStyle} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
-        <span className="relative shrink-0">
-          <ZoomablePortrait participant={hero} fxId={hero.basicInfo.id} size={compact ? 48 : 64} me />
-          <StatusAuras effects={heroEffects} size={compact ? 48 : 64} />
-        </span>
+        <PortraitFx effects={heroEffects} size={compact ? 48 : 64}>
+          <ZoomablePortrait participant={hero} fx="main" size={compact ? 48 : 64} me />
+        </PortraitFx>
         <div className="min-w-0 flex-1">
           <div className="hud-sc flex h-6 items-center justify-between text-[19px] font-bold text-[var(--ink)]">
             <span className="flex min-w-0 items-baseline gap-2">

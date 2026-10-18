@@ -1,4 +1,4 @@
-import { type AuraAnimation } from "./types";
+import type { AuraAnimation } from "./types";
 
 const LINKS = 14;
 

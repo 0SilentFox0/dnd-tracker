@@ -1,7 +1,9 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { twinkle } from "./shapes";
-import { type AuraAnimation, onRim, rimGlow } from "./types";
+import { glow, spritePx } from "../../runtime/texture";
+import { onRim, rimGlow, twinkleDraw } from "./kit";
+import type { AuraAnimation } from "./types";
+
+const sparkle = twinkleDraw("#ffffff");
 
 // [angle, length × r] of the fixed ice needles around the rim.
 const NEEDLES: [number, number][] = [[-2.6, 0.42], [-1.95, 0.3], [-1.2, 0.5], [-0.55, 0.32], [0.1, 0.45], [0.75, 0.3], [1.35, 0.4], [2.0, 0.33], [2.6, 0.48], [3.1, 0.28]];
@@ -59,10 +61,10 @@ export const frostAura: AuraAnimation = {
     for (const [a, len] of NEEDLES) {
       const tip = onRim(ctx, a, 1 + len);
 
-      sprite(g, glow("#bfe9ff"), tip.x, tip.y, (6 * s) / 64, undefined, 0.5 + Math.sin(t * 2 + a * 3) * 0.3);
+      spritePx(g, glow("#bfe9ff"), tip.x, tip.y, 6 * s, undefined, 0.5 + Math.sin(t * 2 + a * 3) * 0.3);
     }
 
-    parts.emit(3.5, dt, () => ({ ...onRim(ctx, rand(0, Math.PI * 2), rand(0.85, 1.45)), vy: 3 * s, life: rand(0.6, 1.1), size0: rand(3, 4.5) * s, draw: (gg, p, k) => twinkle(gg, p.x, p.y, p.size0 * Math.sin(k * Math.PI), "#ffffff", 1) }));
+    parts.emit(3.5, dt, () => ({ ...onRim(ctx, rand(0, Math.PI * 2), rand(0.85, 1.45)), vy: 3 * s, life: rand(0.6, 1.1), size0: rand(3, 4.5) * s, draw: sparkle }));
     parts.step(g, dt);
   },
 };

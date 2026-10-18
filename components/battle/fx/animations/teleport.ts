@@ -1,9 +1,13 @@
+import { pulse } from "../runtime/easing";
 import { emit, flash } from "../runtime/primitives";
+import { perTarget } from "../runtime/recipes";
 import { show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-const OUT_MS = 300;
+import { IMPACT_MS } from "@/lib/utils/battle/fx";
+
+const OUT_MS = IMPACT_MS.teleport;
 
 const GAP_MS = 250;
 
@@ -14,39 +18,37 @@ export const teleport: FxAnimation = async ({ stage, to, palette }) => {
 
   const core = glow("#ffffff");
 
-  await Promise.all(
-    to.map(async (target) => {
-      let width = 1;
+  await perTarget(stage, to, 0, async (target) => {
+    let width = 1;
 
-      let height = 0.6;
+    let height = 0.6;
 
-      let alpha = 0;
+    let alpha = 0;
 
-      const hide = show(stage, (g) => {
-        if (alpha <= 0) return;
+    const hide = show(stage, (g) => {
+      if (alpha <= 0) return;
 
-        sprite(g, tex, target.x, target.y, width, height * 2.2, alpha);
-        sprite(g, core, target.x, target.y, width * 0.35, height * 2, alpha);
-      });
+      sprite(g, tex, target.x, target.y, width, height * 2.2, alpha);
+      sprite(g, core, target.x, target.y, width * 0.35, height * 2, alpha);
+    });
 
-      await tween(stage, OUT_MS, (k) => {
-        width = 0.9 * (1 - k) + 0.12;
-        height = 0.7 + k * 0.5;
-        alpha = k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8;
-      });
+    await tween(stage, OUT_MS, (k) => {
+      width = 0.9 * (1 - k) + 0.12;
+      height = 0.7 + k * 0.5;
+      alpha = pulse(k, 0.2);
+    });
 
-      for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [40, 190], life: [0.4, 0.8], scale: [0.4, 0.05], drag: 3 });
+    for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [40, 190], life: [0.4, 0.8], scale: [0.4, 0.05], drag: 3 });
 
-      await wait(stage, GAP_MS);
+    await wait(stage, GAP_MS);
 
-      void flash(stage, target, "#bfe6ff", 70, 300);
+    void flash(stage, target, "#bfe6ff", 70, 300);
 
-      await tween(stage, IN_MS, (k) => {
-        width = 0.12 + 0.8 * k;
-        height = 1.2 - k * 0.5;
-        alpha = k < 0.5 ? k * 2 : 1 - (k - 0.5) * 2;
-      });
-      hide();
-    }),
-  );
+    await tween(stage, IN_MS, (k) => {
+      width = 0.12 + 0.8 * k;
+      height = 1.2 - k * 0.5;
+      alpha = pulse(k, 0.5);
+    });
+    hide();
+  });
 };

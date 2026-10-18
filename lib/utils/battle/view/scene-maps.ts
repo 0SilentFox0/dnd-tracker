@@ -7,6 +7,9 @@ export interface ParticipantFace {
   avatar?: string;
 }
 
+/** Спільний порожній список: учасник без ефектів не ламає memo-рядки новим `[]`. */
+export const NO_EFFECTS: ActiveEffect[] = [];
+
 /** Список ефектів лишається тим самим масивом, поки його вміст не змінився, — memo-рядки не перемальовуються. */
 export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<string, ActiveEffect[]>): Map<string, ActiveEffect[]> {
   return new Map(

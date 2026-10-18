@@ -1,8 +1,9 @@
-import type { FxPoint } from "../../runtime/geometry";
-import { rand } from "../../runtime/geometry";
+import { edgeGlow, type FrameBox, perimeter } from "../../runtime/frame-kit";
+import { type FxPoint, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
+import { polyline } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
-import { type FrameAnimation, type FrameBox, perimeter, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 const SPARK = ["#ffffff", "#d6f0ff", "#7fd0ff"];
 
@@ -43,15 +44,6 @@ function bolt(b: FrameBox): FxPoint[][] {
   return [main, fork];
 }
 
-function stroke(g: CanvasRenderingContext2D, path: FxPoint[]) {
-  g.beginPath();
-  g.moveTo(path[0].x, path[0].y);
-
-  for (const p of path.slice(1)) g.lineTo(p.x, p.y);
-
-  g.stroke();
-}
-
 export const lightningFrame: FrameAnimation = async (s, box) => {
   let bolts: FxPoint[][] = [];
 
@@ -64,15 +56,8 @@ export const lightningFrame: FrameAnimation = async (s, box) => {
   const hide = show(s, (g) => {
     g.save();
     g.globalCompositeOperation = "lighter";
-    roundRect(g, box);
-    g.fillStyle = `rgba(170,215,255,${0.38 * flicker * fade})`;
-    g.fill();
-    g.shadowColor = "#7fd0ff";
-    g.shadowBlur = 10 + 10 * flicker;
-    g.strokeStyle = `rgba(150,215,255,${(0.55 + 0.45 * flicker) * fade})`;
-    g.lineWidth = 1.5;
-    roundRect(g, box);
-    g.stroke();
+    // The bolts below keep this glow.
+    edgeGlow(g, box, { fill: `rgba(170,215,255,${0.38 * flicker * fade})`, shadow: "#7fd0ff", blur: 10 + 10 * flicker, stroke: `rgba(150,215,255,${(0.55 + 0.45 * flicker) * fade})`, width: 1.5 });
     g.lineCap = "round";
     g.lineJoin = "round";
 
@@ -80,10 +65,10 @@ export const lightningFrame: FrameAnimation = async (s, box) => {
       g.globalAlpha = fade;
       g.strokeStyle = "rgba(90,170,255,0.8)";
       g.lineWidth = 5;
-      stroke(g, path);
+      polyline(g, path);
       g.strokeStyle = "#ffffff";
       g.lineWidth = 1.4;
-      stroke(g, path);
+      polyline(g, path);
     }
 
     g.restore();

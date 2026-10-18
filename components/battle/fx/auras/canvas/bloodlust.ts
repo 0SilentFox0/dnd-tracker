@@ -1,28 +1,36 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { dropPath } from "./shapes";
-import { type AuraAnimation, type AuraParticle, outside, rimGlow } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { dropPath } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import { outside, rimGlow } from "./kit";
+import type { AuraAnimation } from "./types";
 
-// pts = [angle, start distance × r]: the drop is pulled in along its ray and shrinks into the rim.
-function drain(r: number, cx: number, cy: number) {
-  return (p: AuraParticle) => {
-    const [a, d0] = p.pts ?? [0, 2];
-
-    const k = p.age / p.life;
-
-    const d = r * (d0 - (d0 - 1.02) * k ** 1.6);
-
-    p.x = cx + Math.cos(a) * d;
-    p.y = cy + Math.sin(a) * d;
-  };
+// The drop starts `d0` × r out on its ray, is pulled in along it and shrinks into the rim.
+interface Ray {
+  cx: number;
+  cy: number;
+  r: number;
+  a: number;
+  d0: number;
 }
 
-function drawDrop(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
-  const [a] = p.pts ?? [0];
+function drain(p: AuraParticle<Ray>) {
+  const { cx, cy, r, a, d0 } = p.data;
+
+  const k = p.age / p.life;
+
+  const d = r * (d0 - (d0 - 1.02) * k ** 1.6);
+
+  p.x = cx + Math.cos(a) * d;
+  p.y = cy + Math.sin(a) * d;
+}
+
+function drawDrop(g: CanvasRenderingContext2D, p: AuraParticle<Ray>, k: number) {
+  const { a } = p.data;
 
   const rad = p.size0 * (1 - k * 0.55);
 
-  sprite(g, glow("#c0101a"), p.x, p.y, (rad * 4) / 64, undefined, 0.35 * Math.min(1, k * 4));
+  spritePx(g, glow("#c0101a"), p.x, p.y, rad * 4, undefined, 0.35 * Math.min(1, k * 4));
   g.save();
   g.translate(p.x, p.y);
   // The tail trails outward, the round end leads toward the portrait.
@@ -56,14 +64,12 @@ export const bloodlustAura: AuraAnimation = {
     const p = throb(t);
 
     outside(g, ctx, () => {
-      sprite(g, glow("#3a0006"), cx, cy, (r * 3.6) / 64, undefined, 0.75, false);
-      sprite(g, glow("#a00010"), cx, cy, (r * (3 + p * 0.5)) / 64, undefined, 0.45 + p * 0.45);
+      spritePx(g, glow("#3a0006"), cx, cy, r * 3.6, undefined, 0.75, false);
+      spritePx(g, glow("#a00010"), cx, cy, r * (3 + p * 0.5), undefined, 0.45 + p * 0.45);
     });
     rimGlow(g, ctx, "200,20,30", 0.7 + p * 0.3, 0.32 + p * 0.12);
 
-    const move = drain(r, cx, cy);
-
-    parts.emit(9, dt, () => ({ x: cx, y: cy, pts: [rand(0, Math.PI * 2), rand(1.75, 2.1)], life: rand(0.8, 1.2), size0: rand(2.8, 3.8) * s, move, draw: drawDrop }));
+    parts.emit(9, dt, () => ({ x: cx, y: cy, data: { cx, cy, r, a: rand(0, Math.PI * 2), d0: rand(1.75, 2.1) }, life: rand(0.8, 1.2), size0: rand(2.8, 3.8) * s, move: drain, draw: drawDrop }));
     parts.step(g, dt);
   },
 };

@@ -1,7 +1,7 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { starPath } from "./shapes";
-import { type AuraAnimation } from "./types";
+import { starPath } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import type { AuraAnimation } from "./types";
 
 export const stunAura: AuraAnimation = {
   frame(g, ctx, t, dt) {
@@ -24,7 +24,7 @@ export const stunAura: AuraAnimation = {
     for (const st of stars) {
       const size = (4.2 + st.depth * 2.2) * s;
 
-      sprite(g, glow("#ffd84a"), st.x, st.y, (size * 3.2) / 64, undefined, 0.5 + st.depth * 0.4);
+      spritePx(g, glow("#ffd84a"), st.x, st.y, size * 3.2, undefined, 0.5 + st.depth * 0.4);
       g.globalCompositeOperation = "source-over";
       g.globalAlpha = 0.65 + st.depth * 0.35;
       g.fillStyle = "#ffd23a";

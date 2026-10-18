@@ -1,4 +1,6 @@
 export { ConfirmContext, type ConfirmFn } from "./confirm-context";
+export { prefersReducedMotion } from "./media-query";
+export { createStorageFlag, type StorageFlag, useStorageFlag } from "./storage-flag";
 export { useAppearanceSave } from "./useAppearanceSave";
 export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
@@ -8,3 +10,5 @@ export { useFlip } from "./useFlip";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNotify } from "./useNotify";
+export { usePageHidden } from "./usePageHidden";
+export { useReducedMotion } from "./useReducedMotion";

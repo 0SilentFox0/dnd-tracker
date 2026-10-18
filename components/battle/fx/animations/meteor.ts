@@ -1,21 +1,21 @@
-import { type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash } from "../runtime/primitives";
-import { playSheet, SHEETS } from "../runtime/sprites";
-import { show, tween, wait } from "../runtime/stage";
+import { easeOutCubic } from "../runtime/easing";
+import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { emit } from "../runtime/primitives";
+import { burst, impactSplash, perTarget } from "../runtime/recipes";
+import { jaggedShape, polyPath } from "../runtime/shapes";
+import { show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-interface Rock {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+import { IMPACT_MS } from "@/lib/utils/battle/fx";
+
+interface Rock extends Debris {
   rot: number;
   spin: number;
   shape: FxPoint[];
 }
 
-const FALL_MS = 700;
+const FALL_MS = IMPACT_MS.meteor;
 
 const AFTER_MS = 800;
 
@@ -23,23 +23,7 @@ const STAGGER_MS = 120;
 
 const SMOKE = ["#3a2a22", "#4a3a30", "#2a201a"];
 
-function rockShape(size: number): FxPoint[] {
-  return Array.from({ length: 7 }, (_, i) => {
-    const a = (i / 7) * Math.PI * 2 + rand(-0.25, 0.25);
-
-    const d = size * rand(0.7, 1);
-
-    return { x: Math.cos(a) * d, y: Math.sin(a) * d };
-  });
-}
-
-function poly(g: CanvasRenderingContext2D, shape: FxPoint[]) {
-  g.beginPath();
-
-  for (const p of shape) g.lineTo(p.x, p.y);
-
-  g.closePath();
-}
+const rockShape = (size: number) => jaggedShape(7, size, 0.25, 0.7);
 
 async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], target: FxPoint) {
   const start = { x: target.x - Math.max(140, (target.y + 80) * 0.42), y: -80 };
@@ -79,7 +63,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
     g.globalCompositeOperation = "source-over";
     g.translate(pos.x, pos.y);
     g.rotate(spin);
-    poly(g, core);
+    polyPath(g, core);
     g.fillStyle = "#3a2216";
     g.fill();
     g.strokeStyle = "#ffb347";
@@ -113,11 +97,11 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
   let k = 0;
 
   const hideBlast = show(stage, (g) => {
-    const e = 1 - (1 - Math.min(1, k * 1.6)) ** 3;
+    const e = easeOutCubic(Math.min(1, k * 1.6));
 
     g.globalCompositeOperation = "lighter";
     g.globalAlpha = Math.max(0, 1 - k * 1.6);
-    g.strokeStyle = palette.tints[1] ?? palette.core;
+    g.strokeStyle = palette.accent;
     g.lineWidth = 5 * (1 - k) + 1;
     g.beginPath();
     g.ellipse(target.x, ground, 14 + e * 90, (14 + e * 90) * 0.3, 0, 0, Math.PI * 2);
@@ -136,7 +120,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
       g.save();
       g.translate(r.x, r.y);
       g.rotate(r.rot);
-      poly(g, r.shape);
+      polyPath(g, r.shape);
       g.fillStyle = "#2a1a10";
       g.fill();
       g.strokeStyle = "#ff9a3a";
@@ -148,31 +132,17 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
     g.globalAlpha = 1;
   });
 
-  for (let n = 0; n < (spec.critical ? 60 : 40); n++) emit(stage, target, { tints: palette.tints, speed: [60, 320], life: [0.35, 0.8], scale: [0.6, 0.05], drag: 3.5, gravity: 80 });
+  burst(stage, target, palette.tints, spec.critical ? 60 : 40, { speed: [60, 320], life: [0.35, 0.8], gravity: 80 });
   for (let n = 0; n < 12; n++) emit(stage, { x: target.x, y: ground }, { tints: SMOKE, speed: [20, 90], angle: [-Math.PI, 0], life: [0.6, 1.1], scale: [0.6, 1.6], drag: 2, additive: false, alpha: 0.55, gravity: -25 });
 
   await Promise.all([
-    flash(stage, target, palette.core, spec.critical ? 190 : 150, 420),
-    palette.sprite ? playSheet(stage, SHEETS[palette.sprite], target, { scale: spec.critical ? 2.8 : 2.3, ms: 560, filter: palette.filter }) : wait(stage, 0),
+    impactSplash(stage, target, palette, { flash: spec.critical ? 190 : 150, flashMs: 420, sheetScale: spec.critical ? 2.8 : 2.3 }),
     tween(stage, AFTER_MS, (v, dt) => {
       k = v;
-
-      for (const r of rocks) {
-        r.vy += 900 * dt;
-        r.x += r.vx * dt;
-        r.y += r.vy * dt;
-        r.rot += r.spin * dt;
-      }
+      stepBodies(rocks, dt, 900);
     }),
   ]);
   hideBlast();
 }
 
-export const meteor: FxAnimation = async (run) => {
-  await Promise.all(
-    run.to.map(async (target, i) => {
-      await wait(run.stage, i * STAGGER_MS);
-      await strike(run, target);
-    }),
-  );
-};
+export const meteor: FxAnimation = (run) => perTarget(run.stage, run.to, STAGGER_MS, (target) => strike(run, target));

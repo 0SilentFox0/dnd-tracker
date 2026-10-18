@@ -6,8 +6,7 @@ import "@/components/battle/fx/fx.css";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
-
-const MAX_FX_MS = 3000;
+import { MAX_FX_MS } from "@/lib/utils/battle/fx";
 
 export function BattleFxLayer() {
   const layer = useRef<HTMLDivElement>(null);
@@ -39,7 +38,6 @@ export function BattleFxLayer() {
       done(current.key);
     };
 
-    // a broken animation must never stall the queue
     const guard = window.setTimeout(finish, MAX_FX_MS);
 
     // async so done() never runs synchronously inside the effect

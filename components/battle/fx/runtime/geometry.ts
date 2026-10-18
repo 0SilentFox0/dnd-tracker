@@ -26,3 +26,52 @@ export function lungeOffset(from: FxPoint, to: FxPoint, max = 46) {
 
   return Math.sign(dx) * Math.min(max, Math.abs(dx) * 0.35);
 }
+
+export function cubicBezier(p: readonly [FxPoint, FxPoint, FxPoint, FxPoint], t: number): FxPoint {
+  const u = 1 - t;
+
+  const a = u * u * u;
+
+  const b = 3 * u * u * t;
+
+  const c = 3 * u * t * t;
+
+  const d = t * t * t;
+
+  return { x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x, y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y };
+}
+
+export interface Debris {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  rot?: number;
+  spin?: number;
+  rest?: boolean;
+}
+
+/** Falling debris; with `floor` a piece bounces (losing speed) until it is slow enough to rest. */
+export function stepBodies(list: Debris[], dt: number, gravity: number, floor?: number) {
+  for (const b of list) {
+    if (b.rest) continue;
+
+    b.vy += gravity * dt;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+
+    if (b.rot !== undefined && b.spin !== undefined) b.rot += b.spin * dt;
+
+    if (floor === undefined || b.y < floor || b.vy < 0) continue;
+
+    b.y = floor;
+
+    if (Math.abs(b.vy) < 80) b.rest = true;
+    else {
+      b.vy *= -0.35;
+      b.vx *= 0.5;
+
+      if (b.spin !== undefined) b.spin *= 0.5;
+    }
+  }
+}

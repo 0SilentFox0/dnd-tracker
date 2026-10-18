@@ -1,7 +1,9 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { dropPath } from "./shapes";
-import { type AuraAnimation, type AuraParticle, onRim, outside } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { dropPath } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import { onRim, outside } from "./kit";
+import type { AuraAnimation } from "./types";
 
 const HANG = 0.45;
 
@@ -34,7 +36,7 @@ export const bleedingAura: AuraAnimation = {
   frame(g, ctx, t, dt) {
     const { cx, cy, r, s, parts } = ctx;
 
-    outside(g, ctx, () => sprite(g, glow("#d4141e"), cx, cy + r * 0.85, (r * 2.4) / 64, (r * 1.3) / 64, 0.55 + Math.sin(t * 3) * 0.1));
+    outside(g, ctx, () => spritePx(g, glow("#d4141e"), cx, cy + r * 0.85, r * 2.4, r * 1.3, 0.55 + Math.sin(t * 3) * 0.1));
 
     g.lineCap = "round";
     g.globalAlpha = 0.85;

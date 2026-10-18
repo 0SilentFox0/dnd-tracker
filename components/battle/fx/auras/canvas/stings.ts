@@ -1,4 +1,4 @@
-import { type AuraAnimation } from "./types";
+import type { AuraAnimation } from "./types";
 
 // [orbit radius × r, angular speed, phase, jitter frequency]
 const WASPS: [number, number, number, number][] = [[1.3, 2.6, 0, 7], [1.18, -3.1, 2.1, 9], [1.42, 2.2, 4.2, 6], [1.25, -2.4, 1, 8]];

@@ -1,8 +1,10 @@
+import { edgeGlow, roundRect } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
+import { starPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
-import { glow, sprite } from "../../runtime/texture";
-import { type FrameAnimation, roundRect } from "./types";
+import { glow, spritePx } from "../../runtime/texture";
+import type { FrameAnimation } from "./types";
 
 interface Twinkle {
   x: number;
@@ -16,21 +18,6 @@ const GOLD = ["#fff6c8", "#ffe07a", "#ffc93c"];
 const BURST_MS = 1300;
 
 const RAYS = 12;
-
-function star(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  g.beginPath();
-
-  for (let i = 0; i < 8; i++) {
-    const a = (i * Math.PI) / 4;
-
-    const d = i % 2 ? r * 0.22 : r;
-
-    g.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
-  }
-
-  g.closePath();
-  g.fill();
-}
 
 export const radiantFrame: FrameAnimation = async (s, box) => {
   let k = 0;
@@ -83,17 +70,12 @@ export const radiantFrame: FrameAnimation = async (s, box) => {
     }
 
     g.restore();
-    sprite(g, core, cx, cy, (Math.min(box.h, 80) * 1.2 * (0.6 + k)) / 64, undefined, burst * 0.6);
+    spritePx(g, core, cx, cy, Math.min(box.h, 80) * 1.2 * (0.6 + k), undefined, burst * 0.6);
     g.globalAlpha = 1;
 
     const rim = 1 + 5 * k;
 
-    g.shadowColor = "#ffd34a";
-    g.shadowBlur = 22 * burst;
-    g.strokeStyle = `rgba(255,236,150,${burst})`;
-    g.lineWidth = 2.5;
-    roundRect(g, { x: box.x - rim, y: box.y - rim, w: box.w + rim * 2, h: box.h + rim * 2 }, 6 + rim);
-    g.stroke();
+    edgeGlow(g, { x: box.x - rim, y: box.y - rim, w: box.w + rim * 2, h: box.h + rim * 2 }, { shadow: "#ffd34a", blur: 22 * burst, stroke: `rgba(255,236,150,${burst})`, width: 2.5, radius: 6 + rim });
     g.shadowBlur = 8;
     g.fillStyle = "#fffbe6";
 
@@ -103,7 +85,11 @@ export const radiantFrame: FrameAnimation = async (s, box) => {
       if (p <= 0 || p >= 1) continue;
 
       g.globalAlpha = Math.sin(p * Math.PI);
-      star(g, t.x, t.y, t.size * Math.sin(p * Math.PI));
+
+      const r = t.size * Math.sin(p * Math.PI);
+
+      starPath(g, t.x, t.y, r, r * 0.22, 4, 0);
+      g.fill();
     }
 
     g.restore();

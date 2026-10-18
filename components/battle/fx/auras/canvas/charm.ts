@@ -1,7 +1,10 @@
+import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { heartPath } from "./shapes";
-import { type AuraAnimation, type AuraParticle, fadeInOut, rimGlow } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { heartPath } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import { rimGlow } from "./kit";
+import type { AuraAnimation } from "./types";
 
 const PINK = ["#ff5fa8", "#ff7ab8", "#ff3f8e"];
 
@@ -15,7 +18,7 @@ function drawHeart(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
 
   const w = p.size0 * (0.7 + Math.min(1, k * 4) * 0.3);
 
-  sprite(g, glow("#ff6fb0"), p.x, p.y, (w * 2.6) / 64, undefined, a * 0.6);
+  spritePx(g, glow("#ff6fb0"), p.x, p.y, w * 2.6, undefined, a * 0.6);
   g.globalCompositeOperation = "source-over";
   g.globalAlpha = a;
   g.fillStyle = p.tint;

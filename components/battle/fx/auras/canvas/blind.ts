@@ -1,11 +1,13 @@
+import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation, type AuraParticle, fadeInOut } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { glow, spritePx } from "../../runtime/texture";
+import type { AuraAnimation } from "./types";
 
 const HAZE = ["#3a1656", "#4a1c6e", "#26103a"];
 
 function drawHaze(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
-  sprite(g, glow(p.tint), p.x, p.y, (p.size0 * (1 + k * 0.4)) / 64, (p.size0 * 0.6) / 64, p.alpha * fadeInOut(k, 0.35), false);
+  spritePx(g, glow(p.tint), p.x, p.y, p.size0 * (1 + k * 0.4), p.size0 * 0.6, p.alpha * fadeInOut(k, 0.35), false);
 }
 
 export const blindAura: AuraAnimation = {
@@ -49,7 +51,7 @@ export const blindAura: AuraAnimation = {
 
     const sx = cx + Math.sin(t * 0.9) * r * 0.7;
 
-    sprite(g, glow("#7a3ab0"), sx, y, (r * 0.9) / 64, (r * 0.25) / 64, 0.35);
+    spritePx(g, glow("#7a3ab0"), sx, y, r * 0.9, r * 0.25, 0.35);
     g.globalAlpha = 1;
     g.globalCompositeOperation = "source-over";
     g.strokeStyle = "rgba(150,90,200,0.45)";

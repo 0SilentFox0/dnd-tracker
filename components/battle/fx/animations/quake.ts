@@ -1,18 +1,20 @@
-import { type FxPoint, rand } from "../runtime/geometry";
+import { fadeOut } from "../runtime/easing";
+import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
-import { show, tween, wait } from "../runtime/stage";
+import { perTarget } from "../runtime/recipes";
+import { show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
+
+import { IMPACT_MS } from "@/lib/utils/battle/fx";
 
 interface Crack {
   pts: FxPoint[];
   width: number;
 }
 
-interface Chunk {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+const QUAKE_MS = 1000;
+
+interface Chunk extends Debris {
   size: number;
   round: boolean;
 }
@@ -37,82 +39,73 @@ function makeCrack(angle: number): Crack {
 }
 
 export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
-  await Promise.all(
-    to.map(async (target, ti) => {
-      await wait(stage, ti * 50);
+  await perTarget(stage, to, 50, async (target, ti) => {
+    const base = { x: target.x, y: target.y + 20 };
 
-      const base = { x: target.x, y: target.y + 20 };
+    const n = spec.critical ? 4 : 3 + (ti % 2);
 
-      const n = spec.critical ? 4 : 3 + (ti % 2);
+    const cracks = Array.from({ length: n }, (_, i) => makeCrack((i / n) * Math.PI * 2 + rand(-0.4, 0.4)));
 
-      const cracks = Array.from({ length: n }, (_, i) => makeCrack((i / n) * Math.PI * 2 + rand(-0.4, 0.4)));
+    const chunks: Chunk[] = Array.from({ length: spec.critical ? 10 : 6 + (ti % 5) }, () => ({ x: base.x + rand(-30, 30), y: base.y, vx: rand(-70, 70), vy: rand(-320, -180), size: rand(2.5, 5), round: Math.random() > 0.5 }));
 
-      const chunks: Chunk[] = Array.from({ length: spec.critical ? 10 : 6 + (ti % 5) }, () => ({ x: base.x + rand(-30, 30), y: base.y, vx: rand(-70, 70), vy: rand(-320, -180), size: rand(2.5, 5), round: Math.random() > 0.5 }));
+    let k = 0;
 
-      let k = 0;
+    const hide = show(stage, (g) => {
+      // The cracks finish growing at the impact moment.
+      const grow = Math.min(1, (k * QUAKE_MS) / IMPACT_MS.quake);
 
-      const hide = show(stage, (g) => {
-        const grow = Math.min(1, k / 0.4);
+      g.globalAlpha = fadeOut(k, 0.75);
+      g.globalCompositeOperation = "source-over";
+      g.strokeStyle = "#5a3e20";
+      g.lineCap = "round";
+      g.lineJoin = "round";
 
-        g.globalAlpha = k > 0.75 ? 1 - (k - 0.75) / 0.25 : 1;
-        g.globalCompositeOperation = "source-over";
-        g.strokeStyle = "#5a3e20";
-        g.lineCap = "round";
-        g.lineJoin = "round";
+      for (const c of cracks) {
+        g.lineWidth = c.width;
+        g.beginPath();
+        g.moveTo(base.x, base.y);
 
-        for (const c of cracks) {
-          g.lineWidth = c.width;
-          g.beginPath();
-          g.moveTo(base.x, base.y);
+        const shown = grow * (c.pts.length - 1);
 
-          const shown = grow * (c.pts.length - 1);
+        for (let i = 1; i <= Math.ceil(shown); i++) {
+          const prev = c.pts[i - 1];
 
-          for (let i = 1; i <= Math.ceil(shown); i++) {
-            const prev = c.pts[i - 1];
+          const cur = c.pts[i];
 
-            const cur = c.pts[i];
+          const f = Math.min(1, shown - (i - 1));
 
-            const f = Math.min(1, shown - (i - 1));
-
-            g.lineTo(base.x + prev.x + (cur.x - prev.x) * f, base.y + prev.y + (cur.y - prev.y) * f);
-          }
-
-          g.stroke();
+          g.lineTo(base.x + prev.x + (cur.x - prev.x) * f, base.y + prev.y + (cur.y - prev.y) * f);
         }
 
-        g.fillStyle = "#3a2814";
+        g.stroke();
+      }
 
-        for (const ch of chunks) {
-          if (k < 0.3) continue;
+      g.fillStyle = "#3a2814";
 
-          g.globalAlpha = Math.max(0, 1 - k) * 1.1;
-          g.beginPath();
+      for (const ch of chunks) {
+        if (k < 0.3) continue;
 
-          if (ch.round) g.arc(ch.x, ch.y, ch.size / 2 + 0.5, 0, Math.PI * 2);
-          else g.rect(ch.x - ch.size / 2, ch.y - ch.size / 2, ch.size, ch.size);
+        g.globalAlpha = Math.max(0, 1 - k) * 1.1;
+        g.beginPath();
 
-          g.fill();
-        }
+        if (ch.round) g.arc(ch.x, ch.y, ch.size / 2 + 0.5, 0, Math.PI * 2);
+        else g.rect(ch.x - ch.size / 2, ch.y - ch.size / 2, ch.size, ch.size);
 
-        g.globalAlpha = 1;
-      });
+        g.fill();
+      }
 
-      const dust = () => emit(stage, { x: base.x + rand(-26, 26), y: base.y - 2 }, { tints: palette.tints, speed: [20, 110], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.5, 1.5], gravity: -12, drag: 2, additive: false, alpha: 0.55 });
+      g.globalAlpha = 1;
+    });
 
-      await tween(stage, 1000, (v, dt) => {
-        k = v;
+    const dust = () => emit(stage, { x: base.x + rand(-26, 26), y: base.y - 2 }, { tints: palette.tints, speed: [20, 110], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.5, 1.5], gravity: -12, drag: 2, additive: false, alpha: 0.55 });
 
-        if (v < 0.6) for (let i = 0; i < 2; i++) dust();
+    await tween(stage, QUAKE_MS, (v, dt) => {
+      k = v;
 
-        for (const ch of chunks) {
-          if (v < 0.3) continue;
+      if (v < 0.6) for (let i = 0; i < 2; i++) dust();
 
-          ch.vy += 900 * dt;
-          ch.x += ch.vx * dt;
-          ch.y += ch.vy * dt;
-        }
-      });
-      hide();
-    }),
-  );
+      if (v >= 0.3) stepBodies(chunks, dt, 900);
+    });
+    hide();
+  });
 };

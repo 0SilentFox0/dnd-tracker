@@ -1,7 +1,10 @@
+import { fadeInOut } from "../../runtime/easing";
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { twinkle } from "./shapes";
-import { type AuraAnimation, type AuraParticle, fadeInOut } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { twinkle } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import { twinkleDraw } from "./kit";
+import type { AuraAnimation } from "./types";
 
 // [angle, radius × r] of the ice block outline, clockwise from the top.
 const SHELL: [number, number][] = [[-1.62, 1.3], [-0.95, 1.22], [-0.3, 1.3], [0.42, 1.2], [1.05, 1.28], [1.7, 1.24], [2.35, 1.3], [2.95, 1.2], [3.6, 1.28], [4.15, 1.22]];
@@ -10,6 +13,8 @@ const SHELL: [number, number][] = [[-1.62, 1.3], [-0.95, 1.22], [-0.3, 1.3], [0.
 const CORE: [number, number][] = [[-1.2, 0.62], [0.25, 0.7], [1.6, 0.6], [2.9, 0.68], [4.0, 0.58]];
 
 const MIST = ["#cfeaff", "#a9d6f2"];
+
+const sparkle = twinkleDraw("#ffffff");
 
 function pt(cx: number, cy: number, r: number, [a, d]: [number, number]) {
   return { x: cx + Math.cos(a) * r * d, y: cy + Math.sin(a) * r * d };
@@ -32,7 +37,7 @@ function nearestCore(a: number) {
 const LINKS = SHELL.map(([a]) => nearestCore(a));
 
 function drawMist(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
-  sprite(g, glow(p.tint), p.x, p.y, (p.size0 * (1 + k * 0.6)) / 64, (p.size0 * 0.55) / 64, p.alpha * fadeInOut(k, 0.35), false);
+  spritePx(g, glow(p.tint), p.x, p.y, p.size0 * (1 + k * 0.6), p.size0 * 0.55, p.alpha * fadeInOut(k, 0.35), false);
 }
 
 export const frozenAura: AuraAnimation = {
@@ -148,7 +153,7 @@ export const frozenAura: AuraAnimation = {
 
       const d = rand(0.3, 1.25);
 
-      return { x: cx + Math.cos(a) * r * d, y: cy + Math.sin(a) * r * d, life: rand(0.7, 1.2), size0: rand(2.5, 4) * s, draw: (gg, p, k) => twinkle(gg, p.x, p.y, p.size0 * Math.sin(k * Math.PI), "#ffffff", 1) };
+      return { x: cx + Math.cos(a) * r * d, y: cy + Math.sin(a) * r * d, life: rand(0.7, 1.2), size0: rand(2.5, 4) * s, draw: sparkle };
     });
     parts.step(g, dt);
   },

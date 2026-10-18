@@ -5,11 +5,13 @@ import type { FxElement } from "@/lib/utils/battle/fx";
 export interface FxPalette {
   core: string;
   tints: string[];
+  /** The second tint: rings, pillars and glyphs use it so they read lighter than the core. */
+  accent: string;
   sprite?: keyof typeof SHEETS;
   filter?: string;
 }
 
-export const PALETTE: Record<FxElement, FxPalette> = {
+const BASE: Record<FxElement, Omit<FxPalette, "accent">> = {
   fire: { core: "#ff7a1a", tints: ["#fff3b0", "#ffd25a", "#ff8a1f", "#ff4a00"], sprite: "explosion" },
   cold: { core: "#6fd3ff", tints: ["#ffffff", "#c8f1ff", "#6fd3ff", "#2a8bd6"], sprite: "rings", filter: "hue-rotate(0deg)" },
   lightning: { core: "#9fd8ff", tints: ["#ffffff", "#fff6a8", "#9fd8ff"], sprite: "lightning" },
@@ -23,3 +25,5 @@ export const PALETTE: Record<FxElement, FxPalette> = {
   wind: { core: "#d8f4ff", tints: ["#ffffff", "#e6fbff", "#b8e8f5", "#7cc8dc"] },
   fury: { core: "#ff3030", tints: ["#ffd0c0", "#ff6a4a", "#e01818", "#7a0808"] },
 };
+
+export const PALETTE = Object.fromEntries(Object.entries(BASE).map(([element, p]) => [element, { ...p, accent: p.tints[1] ?? p.core }])) as Record<FxElement, FxPalette>;

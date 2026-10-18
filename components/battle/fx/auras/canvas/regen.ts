@@ -1,6 +1,9 @@
+import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation, type AuraParticle, fadeInOut, rimGlow } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { glow, spritePx } from "../../runtime/texture";
+import { rimGlow } from "./kit";
+import type { AuraAnimation } from "./types";
 
 const MOTE = ["#c8ffb0", "#7fe88a", "#5fd27a"];
 
@@ -11,7 +14,7 @@ function drawPlus(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
 
   const w = h * 0.38;
 
-  sprite(g, glow("#6fe07a"), p.x, p.y, (p.size0 * 2.2) / 64, undefined, a * 0.7);
+  spritePx(g, glow("#6fe07a"), p.x, p.y, p.size0 * 2.2, undefined, a * 0.7);
   g.globalCompositeOperation = "lighter";
   g.globalAlpha = a;
   g.fillStyle = "#d8ffd0";

@@ -1,9 +1,10 @@
 export { auraOf, aurasOf, type FxAuraKind, MAX_AURAS } from "./aura";
 export { elementOf } from "./element";
+export { frameKindOf,type FxFrameKind } from "./frame-kind";
 export { type FxImpact, impactFor } from "./impact";
 export { mapAction } from "./map-action";
 export { takeNewActions } from "./new-events";
 export { SPELL_FX_OVERRIDES } from "./overrides";
 export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, MAX_FX_QUEUE, shiftFxQueue } from "./queue";
-export { IMPACT_MS, MAX_FX_BATCH } from "./timing";
+export { IMPACT_MS, MAX_FX_BATCH, MAX_FX_MS } from "./timing";
 export type { FxArchetype, FxElement, FxSpec } from "./types";

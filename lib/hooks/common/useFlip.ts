@@ -2,6 +2,8 @@
 
 import { type RefObject, useLayoutEffect, useRef } from "react";
 
+import { prefersReducedMotion } from "./media-query";
+
 const DURATION = 320;
 
 /** FLIP для дітей з `data-flip`: зсунуті плавно переїжджають на нове місце, нові — з'являються. */
@@ -13,7 +15,7 @@ export function useFlip(container: RefObject<HTMLElement | null>, version: unkno
 
     if (!root) return;
 
-    const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = prefersReducedMotion();
 
     const next = new Map<string, number>();
 

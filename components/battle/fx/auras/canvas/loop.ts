@@ -1,6 +1,7 @@
+import { AuraParticles } from "../../runtime/particles";
 import { subscribe } from "../../runtime/ticker";
 import { AURA_ANIMATIONS } from "./index";
-import { type AuraAnimation, type AuraCtx, AuraParticles } from "./types";
+import type { AuraAnimation, AuraCtx } from "./types";
 
 import type { FxAuraKind } from "@/lib/utils/battle/fx";
 

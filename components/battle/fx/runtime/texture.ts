@@ -33,3 +33,8 @@ export function sprite(g: CanvasRenderingContext2D, tex: HTMLCanvasElement, x: n
   g.globalCompositeOperation = additive ? "lighter" : "source-over";
   g.drawImage(tex, x - (TEX * sx) / 2, y - TEX * sy * anchorY, TEX * sx, TEX * sy);
 }
+
+/** `sprite` sized in CSS px instead of texture scale. */
+export function spritePx(g: CanvasRenderingContext2D, tex: HTMLCanvasElement, x: number, y: number, w: number, h = w, alpha = 1, additive = true) {
+  sprite(g, tex, x, y, w / TEX, h / TEX, alpha, additive);
+}

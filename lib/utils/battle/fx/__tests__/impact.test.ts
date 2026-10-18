@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
-import { IMPACT_MS, impactFor } from "@/lib/utils/battle/fx";
+import { IMPACT_MS, impactFor as impactForSpec, mapAction } from "@/lib/utils/battle/fx";
+import type { BattleAction } from "@/types/battle";
+
+const impactFor = (action: BattleAction | undefined, id: string) => impactForSpec(action ? mapAction(action)[0] : undefined, id);
 
 describe("impactFor", () => {
   it("fire bolt target → fire damage after the bolt", () => {

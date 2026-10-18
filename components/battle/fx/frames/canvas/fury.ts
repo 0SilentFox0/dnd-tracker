@@ -1,7 +1,7 @@
+import { edgeGlow, emitOnPerimeter, roundRect } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
-import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
-import { type FrameAnimation, perimeter, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 const WISP = ["#ff3a2a", "#c8101a", "#ff7a50"];
 
@@ -25,15 +25,8 @@ export const furyFrame: FrameAnimation = async (s, box) => {
 
     vignette.addColorStop(0, "rgba(120,0,10,0)");
     vignette.addColorStop(1, `rgba(170,10,20,${0.55 * beat})`);
-    roundRect(g, box);
-    g.fillStyle = vignette;
-    g.fill();
-    g.shadowColor = "#ff1a1a";
-    g.shadowBlur = 8 + 22 * beat;
-    g.strokeStyle = `rgba(215,25,35,${0.35 + 0.65 * beat})`;
-    g.lineWidth = 2 + 2 * beat;
-    roundRect(g, box);
-    g.stroke();
+    // The wave below keeps this glow.
+    edgeGlow(g, box, { fill: vignette, shadow: "#ff1a1a", blur: 8 + 22 * beat, stroke: `rgba(215,25,35,${0.35 + 0.65 * beat})`, width: 2 + 2 * beat });
 
     const out = wave * 12;
 
@@ -50,11 +43,7 @@ export const furyFrame: FrameAnimation = async (s, box) => {
       beat = Math.max(0, Math.sin(Math.min(1, v * 1.6) * Math.PI)) ** 0.6;
       wave = Math.min(1, v * 1.4);
 
-      if (Math.random() < 0.6) {
-        const p = perimeter(box, Math.random());
-
-        emit(s, { x: p.x, y: p.y }, { tints: WISP, speed: [10, 35], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [rand(0.18, 0.3), 0.04], gravity: -60, drag: 0.8 });
-      }
+      if (Math.random() < 0.6) emitOnPerimeter(s, box, { tints: WISP, speed: [10, 35], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [rand(0.18, 0.3), 0.04], gravity: -60, drag: 0.8 });
     });
   }
 

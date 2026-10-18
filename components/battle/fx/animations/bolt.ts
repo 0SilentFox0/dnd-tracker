@@ -1,23 +1,17 @@
-import { emit, flash, ring, shoot } from "../runtime/primitives";
-import { playSheet, SHEETS } from "../runtime/sprites";
-import { wait } from "../runtime/stage";
+import { ring, shoot } from "../runtime/primitives";
+import { burst, impactSplash } from "../runtime/recipes";
 import type { FxAnimation } from "./types";
+
+import { IMPACT_MS } from "@/lib/utils/battle/fx";
 
 export const bolt: FxAnimation = async ({ stage, from, to, palette, spec }) => {
   const target = to[0];
 
   if (!target) return;
 
-  await shoot(stage, from, target, 600, palette.core, palette.tints);
+  await shoot(stage, from, target, IMPACT_MS.bolt, palette.core, palette.tints);
 
-  const count = spec.critical ? 180 : 90;
+  burst(stage, target, palette.tints, spec.critical ? 180 : 90);
 
-  for (let i = 0; i < count; i++) emit(stage, target, { tints: palette.tints, speed: [60, 340], life: [0.4, 0.9], scale: [0.6, 0.05], drag: 3.5, gravity: 60 });
-
-  await Promise.all([
-    flash(stage, target, palette.core, spec.critical ? 180 : 130, 450),
-    ring(stage, target, palette.tints[1] ?? palette.core, 550, 60, 5),
-    palette.sprite ? playSheet(stage, SHEETS[palette.sprite], target, { scale: 2.6, ms: 560, filter: palette.filter }) : wait(stage, 0),
-    wait(stage, 700),
-  ]);
+  await Promise.all([impactSplash(stage, target, palette, { flash: spec.critical ? 180 : 130, sheetScale: 2.6, holdMs: 700 }), ring(stage, target, palette.accent, 550, 60, 5)]);
 };

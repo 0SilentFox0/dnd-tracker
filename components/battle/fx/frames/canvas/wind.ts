@@ -1,6 +1,9 @@
-import { rand } from "../../runtime/geometry";
+import { clamp01, envelope } from "../../runtime/easing";
+import { edgeGlow, type FrameBox, roundRect } from "../../runtime/frame-kit";
+import { pick, rand } from "../../runtime/geometry";
+import { leafPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
-import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 interface Gust {
   y: number;
@@ -41,12 +44,12 @@ function curlOffset(g: Gust, u: number) {
 export const windFrame: FrameAnimation = async (s, box) => {
   const gusts: Gust[] = Array.from({ length: 7 }, (_, i) => ({ y: box.y + box.h * ((i + 0.5) / 7) + rand(-4, 4), delay: rand(0, 0.25), len: rand(0.35, 0.6), width: rand(1.2, 2.6), amp: rand(1.5, 4), phase: rand(0, 6), curl: i % 3 === 1 }));
 
-  const specks: Speck[] = Array.from({ length: 9 }, () => ({ y: box.y + rand(6, box.h - 6), delay: rand(0, 0.3), size: rand(2.5, 4.5), spin: rand(8, 16), leaf: Math.random() < 0.5, color: SPECKS[Math.floor(Math.random() * SPECKS.length)] }));
+  const specks: Speck[] = Array.from({ length: 9 }, () => ({ y: box.y + rand(6, box.h - 6), delay: rand(0, 0.3), size: rand(2.5, 4.5), spin: rand(8, 16), leaf: Math.random() < 0.5, color: pick(SPECKS) }));
 
   let k = 0;
 
   const hide = show(s, (g) => {
-    const a = clamp01(k / 0.12) * clamp01((1 - k) / 0.3);
+    const a = envelope(k, 0.12, 0.3);
 
     g.save();
     roundRect(g, box);
@@ -112,13 +115,12 @@ export const windFrame: FrameAnimation = async (s, box) => {
       g.rotate(u * sp.spin);
       g.globalAlpha = Math.sin(u * Math.PI);
       g.fillStyle = sp.color;
-      g.beginPath();
 
-      if (sp.leaf) {
-        g.moveTo(-sp.size * 1.3, 0);
-        g.quadraticCurveTo(0, -sp.size, sp.size * 1.3, 0);
-        g.quadraticCurveTo(0, sp.size, -sp.size * 1.3, 0);
-      } else g.arc(0, 0, sp.size * 0.45, 0, Math.PI * 2);
+      if (sp.leaf) leafPath(g, -sp.size * 1.3, sp.size * 1.3, sp.size);
+      else {
+        g.beginPath();
+        g.arc(0, 0, sp.size * 0.45, 0, Math.PI * 2);
+      }
 
       g.fill();
       g.restore();
@@ -126,12 +128,7 @@ export const windFrame: FrameAnimation = async (s, box) => {
 
     g.restore();
     g.globalAlpha = 1;
-    g.shadowColor = "#cff4ff";
-    g.shadowBlur = 8 * a;
-    g.strokeStyle = `rgba(215,245,255,${0.75 * a})`;
-    g.lineWidth = 1.6;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, { shadow: "#cff4ff", blur: 8 * a, stroke: `rgba(215,245,255,${0.75 * a})`, width: 1.6 });
     g.shadowBlur = 0;
   });
 

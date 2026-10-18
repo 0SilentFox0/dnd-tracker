@@ -1,8 +1,22 @@
+import { easeOutCubic } from "./easing";
 import { arcControl, bezier, type FxPoint, pick, rand } from "./geometry";
 import { show, type Stage, tween, wake } from "./stage";
 import { glow, sprite } from "./texture";
 
-export function emit(s: Stage, at: FxPoint, opts: { tints: string[]; speed: [number, number]; life: [number, number]; scale: [number, number]; angle?: [number, number]; gravity?: number; drag?: number; spread?: number; additive?: boolean; alpha?: number }) {
+export interface EmitOptions {
+  tints: string[];
+  speed: [number, number];
+  life: [number, number];
+  scale: [number, number];
+  angle?: [number, number];
+  gravity?: number;
+  drag?: number;
+  spread?: number;
+  additive?: boolean;
+  alpha?: number;
+}
+
+export function emit(s: Stage, at: FxPoint, opts: EmitOptions) {
   if (s.stopped) return;
 
   const angle = rand(...(opts.angle ?? [0, Math.PI * 2]));
@@ -57,7 +71,7 @@ export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: numbe
   let k = 0;
 
   const hide = show(s, (g) => {
-    const e = 1 - (1 - k) ** 3;
+    const e = easeOutCubic(k);
 
     g.globalAlpha = 1 - k;
     g.globalCompositeOperation = "lighter";

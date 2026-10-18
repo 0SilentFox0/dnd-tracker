@@ -1,19 +1,16 @@
-import type { FxPoint } from "../../runtime/geometry";
-import { rand } from "../../runtime/geometry";
+import { clamp01 } from "../../runtime/easing";
+import { bottomPoint, edgeGlow, type FrameBox, verticalFill } from "../../runtime/frame-kit";
+import { type Debris, type FxPoint, pick, rand, stepBodies } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
+import { jaggedShape, polyline, polyPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
-import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
-interface Chunk {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+interface Chunk extends Debris {
   rot: number;
   spin: number;
   shape: FxPoint[];
   color: string;
-  rest: boolean;
 }
 
 const DUST = ["#b08a5a", "#c9a272", "#8a6a45"];
@@ -47,28 +44,7 @@ function crack(b: FrameBox): FxPoint[][] {
 }
 
 function chunk(b: FrameBox): Chunk {
-  const r = rand(3.5, 7);
-
-  const shape = Array.from({ length: 5 }, (_, i) => {
-    const a = (i / 5) * Math.PI * 2 + rand(-0.3, 0.3);
-
-    const d = r * rand(0.6, 1);
-
-    return { x: Math.cos(a) * d, y: Math.sin(a) * d };
-  });
-
-  return { x: b.x + rand(10, b.w - 10), y: b.y + b.h - 2, vx: rand(-60, 60), vy: rand(-260, -140), rot: rand(0, 6), spin: rand(-10, 10), shape, color: ROCK[Math.floor(Math.random() * ROCK.length)], rest: false };
-}
-
-function polyline(g: CanvasRenderingContext2D, pts: FxPoint[], upTo: number) {
-  const n = Math.max(1, Math.floor(upTo * (pts.length - 1)));
-
-  g.beginPath();
-  g.moveTo(pts[0].x, pts[0].y);
-
-  for (let i = 1; i <= n; i++) g.lineTo(pts[i].x, pts[i].y);
-
-  g.stroke();
+  return { x: b.x + rand(10, b.w - 10), y: b.y + b.h - 2, vx: rand(-60, 60), vy: rand(-260, -140), rot: rand(0, 6), spin: rand(-10, 10), shape: jaggedShape(5, rand(3.5, 7), 0.3, 0.6), color: pick(ROCK), rest: false };
 }
 
 export const earthFrame: FrameAnimation = async (s, box) => {
@@ -89,18 +65,7 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
     g.save();
 
-    const dust = g.createLinearGradient(0, box.y + box.h, 0, box.y);
-
-    dust.addColorStop(0, `rgba(120,85,45,${0.5 * tone})`);
-    dust.addColorStop(0.5, `rgba(120,85,45,${0.12 * tone})`);
-    dust.addColorStop(1, "rgba(120,85,45,0)");
-    roundRect(g, box);
-    g.fillStyle = dust;
-    g.fill();
-    g.strokeStyle = `rgba(215,170,105,${0.9 * tone})`;
-    g.lineWidth = 2;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, { fill: verticalFill(g, box, [[0, `rgba(120,85,45,${0.5 * tone})`], [0.5, `rgba(120,85,45,${0.12 * tone})`], [1, "rgba(120,85,45,0)"]]), stroke: `rgba(215,170,105,${0.9 * tone})`, width: 2 });
     g.lineCap = "round";
     g.lineJoin = "round";
     g.globalAlpha = fade;
@@ -122,11 +87,7 @@ export const earthFrame: FrameAnimation = async (s, box) => {
       g.save();
       g.translate(c.x, c.y);
       g.rotate(c.rot);
-      g.beginPath();
-
-      for (const p of c.shape) g.lineTo(p.x, p.y);
-
-      g.closePath();
+      polyPath(g, c.shape);
       g.fillStyle = c.color;
       g.fill();
       g.strokeStyle = "rgba(220,185,130,0.85)";
@@ -138,35 +99,15 @@ export const earthFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  const physics = (dt: number) => {
-    for (const c of chunks) {
-      if (c.rest) continue;
+  const physics = (dt: number) => stepBodies(chunks, dt, GRAVITY, floor);
 
-      c.vy += GRAVITY * dt;
-      c.x += c.vx * dt;
-      c.y += c.vy * dt;
-      c.rot += c.spin * dt;
-
-      if (c.y < floor || c.vy < 0) continue;
-
-      c.y = floor;
-
-      if (Math.abs(c.vy) < 80) c.rest = true;
-      else {
-        c.vy *= -0.35;
-        c.vx *= 0.5;
-        c.spin *= 0.5;
-      }
-    }
-  };
-
-  for (let i = 0; i < 36; i++) emit(s, { x: box.x + rand(0, box.w), y: box.y + box.h }, { tints: DUST, speed: [15, 55], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.7, 1.2], scale: [0.5, 1.1], drag: 2, additive: false, alpha: 0.8 });
+  for (let i = 0; i < 36; i++) emit(s, bottomPoint(box), { tints: DUST, speed: [15, 55], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.7, 1.2], scale: [0.5, 1.1], drag: 2, additive: false, alpha: 0.8 });
 
   await tween(s, QUAKE_MS, (v, dt) => {
     k = v;
     physics(dt);
 
-    if (v < 0.5 && Math.random() < 0.35) emit(s, { x: box.x + rand(0, box.w), y: box.y + box.h }, { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: 0.5 });
+    if (v < 0.5 && Math.random() < 0.35) emit(s, bottomPoint(box), { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: 0.5 });
   });
   await tween(s, FADE_MS, (v, dt) => {
     fade = 1 - v;

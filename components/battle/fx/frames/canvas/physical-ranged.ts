@@ -1,7 +1,9 @@
+import { clamp01, fadeOut, pulse } from "../../runtime/easing";
+import { bloodFlash } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
 import { emit, ring } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
-import { clamp01, type FrameAnimation, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 const SPLINTERS = ["#c89a5a", "#8a5a2b", "#e8d2a8"];
 
@@ -156,21 +158,11 @@ export const physicalRangedFrame: FrameAnimation = async (s, box) => {
       return;
     }
 
-    const red = k < 0.04 ? k / 0.04 : clamp01(1 - (k - 0.04) / 0.3);
-
     g.save();
-    roundRect(g, box);
-    g.fillStyle = `rgba(200,20,15,${0.3 * red})`;
-    g.fill();
-    g.shadowColor = "#ff2a1a";
-    g.shadowBlur = 12 * red;
-    g.strokeStyle = `rgba(255,70,50,${0.85 * red})`;
-    g.lineWidth = 2;
-    roundRect(g, box);
-    g.stroke();
+    bloodFlash(g, box, pulse(k, 0.04, 0.3), { fill: 0.3, blur: 12, stroke: 0.85 });
     g.restore();
 
-    const fade = 1 - clamp01((k - FADE_FROM) / (1 - FADE_FROM));
+    const fade = fadeOut(k, FADE_FROM);
 
     const hole = g.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 9);
 

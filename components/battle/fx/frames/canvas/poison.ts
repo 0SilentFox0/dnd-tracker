@@ -1,7 +1,8 @@
+import { bottomPoint, edgeGlow, verticalFill } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
-import { type FrameAnimation, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 interface Bubble {
   x: number;
@@ -27,20 +28,13 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
   const hide = show(s, (g) => {
     g.save();
 
-    const fill = g.createLinearGradient(0, box.y + box.h, 0, box.y);
-
-    fill.addColorStop(0, `rgba(110,200,30,${0.5 * glow})`);
-    fill.addColorStop(0.55, `rgba(90,160,20,${0.16 * glow})`);
-    fill.addColorStop(1, `rgba(90,160,20,${0.06 * glow})`);
-    roundRect(g, box);
-    g.fillStyle = fill;
-    g.fill();
-    g.shadowColor = "#8be02a";
-    g.shadowBlur = 14 * glow;
-    g.strokeStyle = `rgba(170,240,70,${0.85 * glow})`;
-    g.lineWidth = 2;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, {
+      fill: verticalFill(g, box, [[0, `rgba(110,200,30,${0.5 * glow})`], [0.55, `rgba(90,160,20,${0.16 * glow})`], [1, `rgba(90,160,20,${0.06 * glow})`]]),
+      shadow: "#8be02a",
+      blur: 14 * glow,
+      stroke: `rgba(170,240,70,${0.85 * glow})`,
+      width: 2,
+    });
     g.shadowBlur = 0;
 
     for (const b of bubbles) {
@@ -66,7 +60,7 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
   const step = (dt: number, spawn: boolean) => {
     if (spawn && bubbles.length < 40) {
       for (let i = 0; i < 2; i++) {
-        if (Math.random() < 0.55) bubbles.push({ x: box.x + rand(6, box.w - 6), y: box.y + box.h - rand(0, 6), r: rand(2.5, 6.5), vy: rand(-55, -25), phase: rand(0, Math.PI * 2), age: 0, life: rand(0.5, 1.1) });
+        if (Math.random() < 0.55) bubbles.push({ ...bottomPoint(box, 6, 6), r: rand(2.5, 6.5), vy: rand(-55, -25), phase: rand(0, Math.PI * 2), age: 0, life: rand(0.5, 1.1) });
       }
     }
 

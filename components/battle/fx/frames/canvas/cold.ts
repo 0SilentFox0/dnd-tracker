@@ -1,7 +1,9 @@
+import { clamp01 } from "../../runtime/easing";
+import { bottomPoint, edgeGlow, type FrameBox, roundRect } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
-import { type FrameAnimation, type FrameBox, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 interface Branch {
   x: number;
@@ -79,7 +81,7 @@ export const coldFrame: FrameAnimation = async (s, box) => {
     g.beginPath();
 
     for (const br of branches) {
-      const p = Math.max(0, Math.min(1, (grow - br.delay) / 0.55));
+      const p = clamp01((grow - br.delay) / 0.55);
 
       if (p <= 0) continue;
 
@@ -88,11 +90,7 @@ export const coldFrame: FrameAnimation = async (s, box) => {
     }
 
     g.stroke();
-    g.lineWidth = 2;
-    g.strokeStyle = `rgba(170,225,255,${0.9 * a})`;
-    g.shadowBlur = 12 * a;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, { shadow: "#8fdcff", blur: 12 * a, stroke: `rgba(170,225,255,${0.9 * a})`, width: 2 });
     g.shadowBlur = 0;
     g.globalAlpha = 1;
   });
@@ -106,7 +104,7 @@ export const coldFrame: FrameAnimation = async (s, box) => {
   await tween(s, THAW_MS, (v) => {
     fade = 1 - v;
 
-    if (Math.random() < 0.3) emit(s, { x: box.x + rand(4, box.w - 4), y: box.y + box.h }, { tints: ["#cfeeff", "#8fd3ff"], speed: [5, 15], angle: [Math.PI * 0.45, Math.PI * 0.55], life: [0.5, 0.8], scale: [0.1, 0.06], gravity: 260 });
+    if (Math.random() < 0.3) emit(s, bottomPoint(box, 4), { tints: ["#cfeeff", "#8fd3ff"], speed: [5, 15], angle: [Math.PI * 0.45, Math.PI * 0.55], life: [0.5, 0.8], scale: [0.1, 0.06], gravity: 260 });
   });
   hide();
 };

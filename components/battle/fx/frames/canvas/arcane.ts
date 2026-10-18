@@ -1,8 +1,10 @@
-import { rand } from "../../runtime/geometry";
+import { clamp01 } from "../../runtime/easing";
+import { perimeter } from "../../runtime/frame-kit";
+import { pick, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import { glow, sprite } from "../../runtime/texture";
-import { clamp01, type FrameAnimation, perimeter } from "./types";
+import type { FrameAnimation } from "./types";
 
 const SPARK = ["#f0d8ff", "#c38bff", "#9b5cff"];
 
@@ -32,7 +34,7 @@ export const arcaneFrame: FrameAnimation = async (s, box) => {
 
   const len = 2 * (box.w + box.h);
 
-  const runes = Array.from({ length: Math.max(6, Math.round(len / 55)) }, (_, i) => ({ t: (i + rand(0.2, 0.8)) / Math.max(6, Math.round(len / 55)), glyph: RUNES[Math.floor(Math.random() * RUNES.length)] }));
+  const runes = Array.from({ length: Math.max(6, Math.round(len / 55)) }, (_, i) => ({ t: (i + rand(0.2, 0.8)) / Math.max(6, Math.round(len / 55)), glyph: pick(RUNES) }));
 
   // Two fuses leave the start point in opposite directions and meet halfway round.
   const reached = (t: number) => {

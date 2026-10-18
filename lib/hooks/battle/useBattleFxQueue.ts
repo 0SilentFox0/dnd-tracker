@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 
 import { useBattleSceneData } from "./useBattleScene";
-import { usePageHidden } from "./usePageHidden";
 
+import { usePageHidden } from "@/lib/hooks/common";
 import { advanceFxQueue, INITIAL_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
 
 /** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */

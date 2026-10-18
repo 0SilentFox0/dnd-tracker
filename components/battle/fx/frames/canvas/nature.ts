@@ -1,7 +1,9 @@
+import { envelope } from "../../runtime/easing";
+import { edgeGlow, emitOnPerimeter, perimeter, verticalFill } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
-import { emit } from "../../runtime/primitives";
+import { leafPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
-import { clamp01, type FrameAnimation, perimeter, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 interface Leaf {
   t: number;
@@ -20,10 +22,7 @@ const SPECK = ["#f2ff8a", "#c6f25a", "#ffe26a"];
 const SWIRL_MS = 1500;
 
 function drawLeaf(g: CanvasRenderingContext2D, size: number) {
-  g.beginPath();
-  g.moveTo(-size, 0);
-  g.quadraticCurveTo(0, -size * 0.75, size, 0);
-  g.quadraticCurveTo(0, size * 0.75, -size, 0);
+  leafPath(g, -size, size, size * 0.75);
   g.fill();
   g.beginPath();
   g.moveTo(-size * 0.9, 0);
@@ -37,23 +36,10 @@ export const natureFrame: FrameAnimation = async (s, box) => {
   const leaves: Leaf[] = Array.from({ length: 22 }, () => ({ t: Math.random(), speed: rand(0.18, 0.32), lift: rand(2, 10), phase: rand(0, Math.PI * 2), size: rand(4.5, 7.5), color: LEAF[Math.floor(Math.random() * LEAF.length)], spin: rand(-3, 3) }));
 
   const hide = show(s, (g) => {
-    const a = clamp01(k / 0.15) * clamp01((1 - k) / 0.3);
+    const a = envelope(k, 0.15, 0.3);
 
     g.save();
-
-    const fill = g.createLinearGradient(0, box.y + box.h, 0, box.y);
-
-    fill.addColorStop(0, `rgba(120,190,40,${0.3 * a})`);
-    fill.addColorStop(1, `rgba(120,190,40,${0.05 * a})`);
-    roundRect(g, box);
-    g.fillStyle = fill;
-    g.fill();
-    g.shadowColor = "#9be03a";
-    g.shadowBlur = 10 * a;
-    g.strokeStyle = `rgba(170,225,80,${0.7 * a})`;
-    g.lineWidth = 1.8;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, { fill: verticalFill(g, box, [[0, `rgba(120,190,40,${0.3 * a})`], [1, `rgba(120,190,40,${0.05 * a})`]]), shadow: "#9be03a", blur: 10 * a, stroke: `rgba(170,225,80,${0.7 * a})`, width: 1.8 });
     g.shadowBlur = 0;
     g.globalAlpha = a;
     g.strokeStyle = "rgba(40,70,15,0.8)";
@@ -78,11 +64,7 @@ export const natureFrame: FrameAnimation = async (s, box) => {
   await tween(s, SWIRL_MS, (v) => {
     k = v;
 
-    if (v < 0.8 && Math.random() < 0.6) {
-      const p = perimeter(box, Math.random());
-
-      emit(s, { x: p.x + p.nx * rand(0, 12), y: p.y + p.ny * rand(0, 12) }, { tints: SPECK, speed: [15, 45], life: [0.4, 0.8], scale: [0.09, 0.03], drag: 1 });
-    }
+    if (v < 0.8 && Math.random() < 0.6) emitOnPerimeter(s, box, { tints: SPECK, speed: [15, 45], life: [0.4, 0.8], scale: [0.09, 0.03], drag: 1 }, { offset: [0, 12] });
   });
   hide();
 };

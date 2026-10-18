@@ -1,5 +1,7 @@
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation } from "./types";
+import { cubicBezier, type FxPoint } from "../../runtime/geometry";
+import { leafPath, taperedStroke } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import type { AuraAnimation } from "./types";
 
 type P = [number, number];
 
@@ -12,20 +14,11 @@ const ROOTS: { pts: [P, P, P, P]; width: number; leaves: number[] }[] = [
   { pts: [[-1.1, 1.5], [-1.6, 1.0], [-1.55, 0.35], [-1.15, 0.05]], width: 1.8, leaves: [0.8] },
 ];
 
-function cubic(p: [P, P, P, P], k: number): P {
-  const u = 1 - k;
-
-  return [0, 1].map((i) => u * u * u * p[0][i] + 3 * u * u * k * p[1][i] + 3 * u * k * k * p[2][i] + k * k * k * p[3][i]) as P;
-}
-
 function leaf(g: CanvasRenderingContext2D, x: number, y: number, angle: number, size: number) {
   g.save();
   g.translate(x, y);
   g.rotate(angle);
-  g.beginPath();
-  g.moveTo(0, 0);
-  g.quadraticCurveTo(size * 0.5, -size * 0.5, size, 0);
-  g.quadraticCurveTo(size * 0.5, size * 0.5, 0, 0);
+  leafPath(g, 0, size, size * 0.5);
   g.fillStyle = "#5fae3a";
   g.fill();
   g.strokeStyle = "#2c5a18";
@@ -44,43 +37,30 @@ export const rootsAura: AuraAnimation = {
     g.lineCap = "round";
     g.lineJoin = "round";
 
-    sprite(g, glow("#4a3218"), cx, cy + r * 1.5, (r * 2.8) / 64, (r * 0.6) / 64, 0.9, false);
+    spritePx(g, glow("#4a3218"), cx, cy + r * 1.5, r * 2.8, r * 0.6, 0.9, false);
     g.globalAlpha = 1;
 
     ROOTS.forEach((root, ri) => {
       const sway = Math.sin(t * 1.3 + ri * 1.7) * 0.06;
 
-      const pts = root.pts.map(([x, y], i) => [cx + (x + (i >= 2 ? sway : 0)) * r, cy + (y + (i === 3 ? sway * 0.5 : 0)) * r] as P) as [P, P, P, P];
+      const pts = root.pts.map(([x, y], i) => ({ x: cx + (x + (i >= 2 ? sway : 0)) * r, y: cy + (y + (i === 3 ? sway * 0.5 : 0)) * r })) as [FxPoint, FxPoint, FxPoint, FxPoint];
 
       const steps = Math.max(2, Math.round(24 * grow));
 
-      const line: P[] = Array.from({ length: steps + 1 }, (_, i) => cubic(pts, (i / steps) * grow));
+      const line = Array.from({ length: steps + 1 }, (_, i) => cubicBezier(pts, (i / steps) * grow));
 
-      // Tapered: thick where the root leaves the ground, thin at the curling tip.
-      const stroke = (width: number, color: string) => {
-        g.strokeStyle = color;
-
-        for (let i = 1; i < line.length; i++) {
-          g.lineWidth = Math.max(0.6 * s, width * (1 - (i / line.length) * 0.7));
-          g.beginPath();
-          g.moveTo(line[i - 1][0], line[i - 1][1]);
-          g.lineTo(line[i][0], line[i][1]);
-          g.stroke();
-        }
-      };
-
-      stroke((root.width + 1.8) * s, "#1f1408");
-      stroke(root.width * s, "#7a5530");
-      stroke(root.width * 0.3 * s, "#b88e58");
+      taperedStroke(g, line, "#1f1408", (root.width + 1.8) * s, 0.7, 0.6 * s);
+      taperedStroke(g, line, "#7a5530", root.width * s, 0.7, 0.6 * s);
+      taperedStroke(g, line, "#b88e58", root.width * 0.3 * s, 0.7, 0.6 * s);
 
       for (const at of root.leaves) {
         if (at > grow) continue;
 
-        const [x, y] = cubic(pts, at);
+        const { x, y } = cubicBezier(pts, at);
 
-        const [x2, y2] = cubic(pts, Math.min(1, at + 0.05));
+        const next = cubicBezier(pts, Math.min(1, at + 0.05));
 
-        const dir = Math.atan2(y2 - y, x2 - x);
+        const dir = Math.atan2(next.y - y, next.x - x);
 
         leaf(g, x, y, dir + (ri % 2 ? -1 : 1) * (0.9 + Math.sin(t * 2 + at * 9) * 0.15), 6.5 * s);
       }
@@ -89,7 +69,7 @@ export const rootsAura: AuraAnimation = {
 
       g.fillStyle = "#8fd04a";
       g.beginPath();
-      g.arc(tip[0], tip[1], 1.1 * s, 0, Math.PI * 2);
+      g.arc(tip.x, tip.y, 1.1 * s, 0, Math.PI * 2);
       g.fill();
     });
   },

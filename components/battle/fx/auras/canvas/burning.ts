@@ -1,15 +1,19 @@
+import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation, type AuraParticle, fadeInOut, onRim, outside } from "./types";
+import { PALETTE } from "../../runtime/palette";
+import type { AuraParticle } from "../../runtime/particles";
+import { glow, spritePx } from "../../runtime/texture";
+import { onRim, outside } from "./kit";
+import type { AuraAnimation } from "./types";
 
-const FLAME = ["#fff3b0", "#ffd25a", "#ff8a1f", "#ff4a00"];
+const FLAME = PALETTE.fire.tints;
 
-const EMBER = ["#fff3b0", "#ffd25a"];
+const EMBER = FLAME.slice(0, 2);
 
 function tongue(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
   const w = p.size0 + (p.size1 - p.size0) * k;
 
-  sprite(g, glow(p.tint), p.x, p.y, w / 64, (w * 1.9) / 64, p.alpha * fadeInOut(k, 0.15));
+  spritePx(g, glow(p.tint), p.x, p.y, w, w * 1.9, p.alpha * fadeInOut(k, 0.15));
 }
 
 export const burningAura: AuraAnimation = {
@@ -18,8 +22,8 @@ export const burningAura: AuraAnimation = {
 
     const flicker = 0.75 + Math.sin(t * 13) * 0.1 + Math.sin(t * 7.3) * 0.1;
 
-    outside(g, ctx, () => sprite(g, glow("#ff6a10"), cx, cy + r * 0.85, (r * 3) / 64, (r * 1.8) / 64, 0.75 * flicker));
-    sprite(g, glow("#ff7a1a"), cx, cy + r * 0.95, (r * 2) / 64, (r * 0.9) / 64, 0.55 * flicker);
+    outside(g, ctx, () => spritePx(g, glow("#ff6a10"), cx, cy + r * 0.85, r * 3, r * 1.8, 0.75 * flicker));
+    spritePx(g, glow("#ff7a1a"), cx, cy + r * 0.95, r * 2, r * 0.9, 0.55 * flicker);
 
     parts.emit(46, dt, () => {
       const at = onRim(ctx, rand(Math.PI * 0.02, Math.PI * 0.98), rand(0.92, 1.05));

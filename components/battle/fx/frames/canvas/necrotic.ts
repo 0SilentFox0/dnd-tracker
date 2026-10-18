@@ -1,7 +1,6 @@
-import { rand } from "../../runtime/geometry";
-import { emit } from "../../runtime/primitives";
+import { edgeGlow, emitOnPerimeter, roundRect } from "../../runtime/frame-kit";
 import { show, tween } from "../../runtime/stage";
-import { type FrameAnimation, perimeter, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 const SMOKE = ["#240c34", "#36124f", "#4a1c6a"];
 
@@ -37,30 +36,16 @@ export const necroticFrame: FrameAnimation = async (s, box) => {
     vignette.addColorStop(0, "rgba(40,10,60,0)");
     vignette.addColorStop(0.6, `rgba(55,15,85,${0.5 * a})`);
     vignette.addColorStop(1, `rgba(20,5,30,${0.72 * a})`);
-    roundRect(g, box);
-    g.fillStyle = vignette;
-    g.fill();
-    g.shadowColor = "#7a3cff";
-    g.shadowBlur = 12 * a;
-    g.strokeStyle = `rgba(140,80,220,${0.8 * a})`;
-    g.lineWidth = 2;
-    roundRect(g, box);
-    g.stroke();
+    edgeGlow(g, box, { fill: vignette, shadow: "#7a3cff", blur: 12 * a, stroke: `rgba(140,80,220,${0.8 * a})`, width: 2 });
     g.restore();
   });
 
   await tween(s, CLOSE_MS, (v) => {
     k = Math.min(1, v / 0.6);
 
-    const p = perimeter(box, Math.random());
+    emitOnPerimeter(s, box, { tints: SMOKE, speed: [12, 30], life: [0.7, 1.1], scale: [0.7, 1.3], drag: 1.2, additive: false, alpha: 0.5 }, { count: 3, inward: 0.6 });
 
-    for (let i = 0; i < 3; i++) emit(s, { x: p.x, y: p.y }, { tints: SMOKE, speed: [12, 30], angle: [Math.atan2(p.ny, p.nx) - 0.6, Math.atan2(p.ny, p.nx) + 0.6], life: [0.7, 1.1], scale: [0.7, 1.3], drag: 1.2, additive: false, alpha: 0.5 });
-
-    if (Math.random() < 0.45) {
-      const q = perimeter(box, Math.random());
-
-      emit(s, { x: q.x + q.nx * rand(4, 14), y: q.y + q.ny * rand(4, 14) }, { tints: WISP, speed: [8, 22], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1], scale: [0.16, 0.03], gravity: -25 });
-    }
+    if (Math.random() < 0.45) emitOnPerimeter(s, box, { tints: WISP, speed: [8, 22], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1], scale: [0.16, 0.03], gravity: -25 }, { offset: [4, 14] });
   });
   await tween(s, FADE_MS, (v) => {
     fade = 1 - v;

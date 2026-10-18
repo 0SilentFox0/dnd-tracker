@@ -10,7 +10,7 @@ import "@/components/battle/fx/fx.css";
 import "./fx-lab.css";
 import { ANIMATIONS } from "@/components/battle/fx/animations";
 import { AuraCanvas } from "@/components/battle/fx/auras/canvas/AuraCanvas";
-import { FRAME_ANIMATIONS, HEAL_FRAME, PHYSICAL_MELEE_FRAME, PHYSICAL_RANGED_FRAME } from "@/components/battle/fx/frames/canvas";
+import { FRAMES } from "@/components/battle/fx/frames/canvas";
 import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
 import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
@@ -84,10 +84,10 @@ export function FxLab() {
         <section aria-label="Рамки" className="mt-8">
           <h2 className="hud-sc mb-4 text-lg font-bold text-[var(--ink)]">Рамки</h2>
           <div className="grid gap-6 sm:grid-cols-2">
-            <CanvasFrameTile label="Ближня атака" frame={PHYSICAL_MELEE_FRAME} />
-            <CanvasFrameTile label="Стріла" frame={PHYSICAL_RANGED_FRAME} />
-            {ELEMENTS.filter((e) => e !== "physical").map((e) => <CanvasFrameTile key={e} label={ELEMENT_LABEL[e]} frame={FRAME_ANIMATIONS[e]} />)}
-            <CanvasFrameTile label="Лікування" frame={HEAL_FRAME} />
+            <CanvasFrameTile label="Ближня атака" frame={FRAMES["physical-melee"]} />
+            <CanvasFrameTile label="Стріла" frame={FRAMES["physical-ranged"]} />
+            {ELEMENTS.flatMap((e) => (e === "physical" ? [] : [<CanvasFrameTile key={e} label={ELEMENT_LABEL[e]} frame={FRAMES[e]} />]))}
+            <CanvasFrameTile label="Лікування" frame={FRAMES.heal} />
           </div>
         </section>
         <section aria-label="Аури" className="mt-8">

@@ -1,7 +1,9 @@
+import { clamp01, pulse } from "../../runtime/easing";
+import { bloodFlash, type FrameBox } from "../../runtime/frame-kit";
 import { rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
-import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
+import type { FrameAnimation } from "./types";
 
 const SPARKS = ["#ffffff", "#fff1c4", "#ffd27a", "#cfe3ff"];
 
@@ -102,18 +104,8 @@ export const physicalMeleeFrame: FrameAnimation = async (s, box) => {
   if (Math.random() < 0.6) slashes.push(slashAcross(box, !flip, 0.36, SECOND_AT));
 
   const hide = show(s, (g) => {
-    const red = k < 0.05 ? k / 0.05 : clamp01(1 - (k - 0.05) / 0.4);
-
     g.save();
-    roundRect(g, box);
-    g.fillStyle = `rgba(200,20,15,${0.38 * red})`;
-    g.fill();
-    g.shadowColor = "#ff2a1a";
-    g.shadowBlur = 14 * red;
-    g.strokeStyle = `rgba(255,70,50,${0.9 * red})`;
-    g.lineWidth = 2;
-    roundRect(g, box);
-    g.stroke();
+    bloodFlash(g, box, pulse(k, 0.05, 0.4), { fill: 0.38, blur: 14, stroke: 0.9 });
     g.shadowBlur = 0;
 
     for (const sl of slashes) {

@@ -1,6 +1,9 @@
+import { fadeInOut } from "../../runtime/easing";
 import { pick, rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation, type AuraParticle, fadeInOut } from "./types";
+import type { AuraParticle } from "../../runtime/particles";
+import { glow, spritePx } from "../../runtime/texture";
+import { outside } from "./kit";
+import type { AuraAnimation } from "./types";
 
 const DUST = ["#b08a58", "#9a7444", "#c8a46e"];
 
@@ -15,26 +18,27 @@ const CRACKS = [
   [[0.48, 0.04], [0.6, 0.17]],
 ];
 
-function drawDust(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
-  const [, , , , cx, cy, r] = p.pts ?? [];
-
-  const paint = () => sprite(g, glow(p.tint), p.x, p.y, (p.size0 * (1 + k * 0.5)) / 64, (p.size0 * 0.6) / 64, p.alpha * fadeInOut(k, 0.3), false);
-
-  // Puffs on the far side of the swirl pass behind the portrait.
-  if (Math.sin(p.phase) >= 0 || cx === undefined) return paint();
-
-  g.save();
-  g.beginPath();
-  g.rect(cx - r * 3, cy - r * 3, r * 6, r * 6);
-  g.arc(cx, cy, r, 0, Math.PI * 2);
-  g.clip("evenodd");
-  paint();
-  g.restore();
+// The puff orbits (ox, oy) on a low, flat ellipse; cx/cy/r is the portrait disc it passes behind.
+interface Swirl {
+  ox: number;
+  oy: number;
+  rad: number;
+  speed: number;
+  cx: number;
+  cy: number;
+  r: number;
 }
 
-// pts = [orbit x, orbit y, radius, angular speed, portrait cx, cy, r]: the puff orbits on a low, flat ellipse.
-function swirl(p: AuraParticle, dt: number) {
-  const [ox, oy, rad, speed] = p.pts ?? [p.x, p.y, 0, 0];
+function drawDust(g: CanvasRenderingContext2D, p: AuraParticle<Swirl>, k: number) {
+  const paint = () => spritePx(g, glow(p.tint), p.x, p.y, p.size0 * (1 + k * 0.5), p.size0 * 0.6, p.alpha * fadeInOut(k, 0.3), false);
+
+  // Puffs on the far side of the swirl pass behind the portrait.
+  if (Math.sin(p.phase) >= 0) paint();
+  else outside(g, p.data, paint, 3);
+}
+
+function swirl(p: AuraParticle<Swirl>, dt: number) {
+  const { ox, oy, rad, speed } = p.data;
 
   p.phase += speed * dt;
   p.x = ox + Math.cos(p.phase) * rad;
@@ -58,7 +62,7 @@ export const dustAura: AuraAnimation = {
     const ground = cy + r * 1.08;
 
     g.globalCompositeOperation = "source-over";
-    sprite(g, glow("#7a5a32"), cx, ground, (r * 3.2) / 64, (r * 0.8) / 64, 0.8, false);
+    spritePx(g, glow("#7a5a32"), cx, ground, r * 3.2, r * 0.8, 0.8, false);
 
     g.lineCap = "round";
     g.lineJoin = "round";
@@ -76,7 +80,7 @@ export const dustAura: AuraAnimation = {
       g.stroke();
     }
 
-    parts.emit(14, dt, () => ({ x: cx, y: ground, pts: [cx, cy + r * rand(0.78, 1.0), r * rand(0.95, 1.35), rand(2.4, 3.6), cx, cy, r], life: rand(1, 1.8), size0: rand(13, 19) * s, tint: pick(DUST), alpha: 0.75, move: swirl, draw: drawDust }));
+    parts.emit(14, dt, () => ({ x: cx, y: ground, data: { ox: cx, oy: cy + r * rand(0.78, 1.0), rad: r * rand(0.95, 1.35), speed: rand(2.4, 3.6), cx, cy, r }, life: rand(1, 1.8), size0: rand(13, 19) * s, tint: pick(DUST), alpha: 0.75, move: swirl, draw: drawDust }));
     parts.step(g, dt);
 
     for (const [x, h, period, phase, size] of PEBBLES) {

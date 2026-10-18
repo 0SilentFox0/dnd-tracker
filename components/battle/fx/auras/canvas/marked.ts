@@ -1,13 +1,6 @@
-import { glow, sprite } from "../../runtime/texture";
-import { type AuraAnimation } from "./types";
-
-function leaf(g: CanvasRenderingContext2D, x: number, y: number, len: number) {
-  g.beginPath();
-  g.moveTo(x, y + len / 2);
-  g.quadraticCurveTo(x - len * 0.55, y, x, y - len / 2);
-  g.quadraticCurveTo(x + len * 0.55, y, x, y + len / 2);
-  g.closePath();
-}
+import { leafPath } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import type { AuraAnimation } from "./types";
 
 export const markedAura: AuraAnimation = {
   frame(g, ctx, t) {
@@ -19,26 +12,27 @@ export const markedAura: AuraAnimation = {
 
     const len = r * (0.78 + pulse * 0.08);
 
-    sprite(g, glow("#2fe08a"), cx, ly, (r * (1.6 + pulse * 0.5)) / 64, undefined, 0.55 + pulse * 0.35);
+    spritePx(g, glow("#2fe08a"), cx, ly, r * (1.6 + pulse * 0.5), undefined, 0.55 + pulse * 0.35);
 
     g.save();
     g.translate(cx, ly);
-    g.rotate(Math.PI / 4);
+    // The leaf points up and to the right, stem at the bottom left.
+    g.rotate(-Math.PI / 4);
     g.globalCompositeOperation = "source-over";
     g.fillStyle = "#0f8a52";
-    leaf(g, 0, 0, len);
+    leafPath(g, -len / 2, len / 2, len * 0.55);
     g.fill();
     g.globalCompositeOperation = "lighter";
     g.globalAlpha = 0.6 + pulse * 0.4;
     g.fillStyle = "#3dffa0";
-    leaf(g, 0, 0, len * 0.82);
+    leafPath(g, -len * 0.41, len * 0.41, len * 0.82 * 0.55);
     g.fill();
     g.globalAlpha = 1;
     g.strokeStyle = "#e6fff2";
     g.lineWidth = 1 * s;
     g.beginPath();
-    g.moveTo(0, len * 0.45);
-    g.lineTo(0, -len * 0.38);
+    g.moveTo(-len * 0.45, 0);
+    g.lineTo(len * 0.38, 0);
     g.stroke();
     g.restore();
 

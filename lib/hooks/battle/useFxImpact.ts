@@ -21,9 +21,9 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
   const impacts = useMemo(() => {
     const last = enabled ? lastLogged(log) : undefined;
 
-    const ids = last ? (mapAction(last)[0]?.targetIds ?? []) : [];
+    const spec = last ? mapAction(last)[0] : undefined;
 
-    return new Map(ids.map((id) => [id, impactFor(last, id)] as const));
+    return new Map((spec?.targetIds ?? []).map((id) => [id, impactFor(spec, id)] as const));
   }, [log, enabled]);
 
   return useCallback((participantId: string) => impacts.get(participantId) ?? null, [impacts]);

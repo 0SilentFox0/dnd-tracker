@@ -1,7 +1,10 @@
 import { rand } from "../../runtime/geometry";
-import { glow, sprite } from "../../runtime/texture";
-import { twinkle } from "./shapes";
-import { type AuraAnimation, rimGlow } from "./types";
+import { twinkle } from "../../runtime/shapes";
+import { glow, spritePx } from "../../runtime/texture";
+import { rimGlow, twinkleDraw } from "./kit";
+import type { AuraAnimation } from "./types";
+
+const sparkle = twinkleDraw("#cfe0ff", 0.9);
 
 function crescent(g: CanvasRenderingContext2D, x: number, y: number, R: number) {
   g.save();
@@ -29,7 +32,7 @@ export const moonmarkAura: AuraAnimation = {
     const R = r * 0.5;
 
     rimGlow(g, ctx, "190,215,255", 0.45 + pulse * 0.35, 0.28);
-    sprite(g, glow("#9fc2ff"), mx, my, (r * (1.7 + pulse * 0.5)) / 64, undefined, 0.3 + pulse * 0.35);
+    spritePx(g, glow("#9fc2ff"), mx, my, r * (1.7 + pulse * 0.5), undefined, 0.3 + pulse * 0.35);
 
     g.save();
     g.translate(mx, my);
@@ -62,7 +65,7 @@ export const moonmarkAura: AuraAnimation = {
     parts.emit(5, dt, () => {
       const a = rand(-Math.PI, Math.PI);
 
-      return { x: cx + Math.cos(a) * r * rand(1.05, 1.5), y: cy + Math.sin(a) * r * rand(1.05, 1.4), vy: -rand(2, 6) * s, life: rand(0.8, 1.5), size0: rand(1.8, 3) * s, draw: (gg, p, k) => twinkle(gg, p.x, p.y, p.size0 * Math.sin(k * Math.PI), "#cfe0ff", 0.9) };
+      return { x: cx + Math.cos(a) * r * rand(1.05, 1.5), y: cy + Math.sin(a) * r * rand(1.05, 1.4), vy: -rand(2, 6) * s, life: rand(0.8, 1.5), size0: rand(1.8, 3) * s, draw: sparkle };
     });
     parts.step(g, dt);
   },
