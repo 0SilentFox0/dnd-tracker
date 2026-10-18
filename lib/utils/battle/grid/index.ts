@@ -1,5 +1,7 @@
 export * from "./attack-reach";
 export * from "./geometry";
+export * from "./layout";
+export * from "./map-view";
 export * from "./occupancy";
 export * from "./path";
 export * from "./placement";
