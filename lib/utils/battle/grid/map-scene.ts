@@ -3,11 +3,7 @@ import { type CellMark, moveMarks, reachingAttack, targetMarks } from "./map-vie
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
-import type { ActiveEffect, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
-
-export function mapHudEffects(effects: ActiveEffect[] | undefined): ActiveEffect[] {
-  return (effects ?? []).filter((e) => !e.permanent);
-}
+import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface MapSceneInput {
   map: BattleMapConfig;
@@ -19,7 +15,6 @@ export interface MapSceneInput {
   placing: boolean;
   placingId: string | null;
   selectedId: string | null;
-  effects: Map<string, ActiveEffect[]>;
 }
 
 export type MapClick =
@@ -42,7 +37,7 @@ export function deriveTrajectory(marks: BattleMapView["marks"], currentId: strin
 }
 
 export function deriveMapScene(input: MapSceneInput): MapScene {
-  const { map, current, viewer, canAct, isDM, selectedId, placingId, effects } = input;
+  const { map, current, viewer, canAct, isDM, selectedId, placingId } = input;
 
   const placing = input.placing && isDM;
 
@@ -62,7 +57,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
   const hud: NonNullable<BattleMapView["hud"]> = new Map();
 
-  for (const p of participants) hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer), effects: mapHudEffects(effects.get(p.basicInfo.id)) });
+  for (const p of participants) hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer) });
 
   const view: BattleMapView = {
     selectedId: placing ? placingId : selectedId,

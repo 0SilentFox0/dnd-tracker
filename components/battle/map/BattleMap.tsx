@@ -9,7 +9,7 @@ import { MapTokenHud } from "./MapTokenHud";
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
-import type { ActiveEffect, BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
 
@@ -28,8 +28,6 @@ function markFill(mark: CellMark | number | undefined): string {
 
   return mark === "target" ? "rgba(230,80,60,.35)" : "rgba(120,120,120,.25)";
 }
-
-const NO_EFFECTS: ActiveEffect[] = [];
 
 interface GridLayerProps {
   map: BattleMapConfig;
@@ -173,7 +171,6 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
               mapSize={size}
               pxPerUnit={pxPerUnit}
               exact={hud?.exact ?? true}
-              effects={hud?.effects ?? NO_EFFECTS}
               raised={view?.selectedId === id || view?.currentId === id}
             />
           );

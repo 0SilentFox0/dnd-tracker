@@ -5,8 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { useDisplayEffectMap } from "@/lib/hooks/battle";
-import { cellKey, cellsOf, mapHudEffects, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
+import { cellKey, cellsOf, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack";
@@ -43,9 +42,7 @@ export function useBattleMapPlayground() {
 
   const trajectory = mode === "attack" && hover && marks.get(cellKey(hover)) === "target" ? { fromId: activeId, to: hover } : null;
 
-  const effects = useDisplayEffectMap(participants);
-
-  const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true, effects: mapHudEffects(effects.get(p.basicInfo.id)) }])), [participants, effects]);
+  const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true }])), [participants]);
 
   const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks, trajectory, hud };
 

@@ -172,8 +172,8 @@ export interface BattleMapView {
   marks?: Map<string, BattleMapMark | number>;
   /** Лінія траєкторії від учасника до клітинки/учасника */
   trajectory?: { fromId: string; to: GridPoint } | null;
-  /** Плашка над токеном: без запису — exact і без ефектів */
-  hud?: Map<string, { exact: boolean; effects: ActiveEffect[] }>;
+  /** Плашка під токеном: без запису — exact */
+  hud?: Map<string, { exact: boolean }>;
 }
 
 export interface BattleMapActions {

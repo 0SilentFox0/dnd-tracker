@@ -4,7 +4,7 @@ import { deriveMapScene, deriveTrajectory, type MapSceneInput } from "../map-sce
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { ActiveEffect, BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -37,7 +37,6 @@ function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
     viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false },
     canAct: true,
     isDM: false,
-    effects: new Map(),
     placing: false,
     placingId: null,
     selectedId: null,
@@ -46,14 +45,6 @@ function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
 }
 
 describe("deriveMapScene", () => {
-  it("худ карти: постійні ефекти відфільтровані, тимчасові залишаються", () => {
-    const eff = (id: string, permanent?: boolean) => ({ id, name: id, permanent }) as unknown as ActiveEffect;
-
-    const s = deriveMapScene(input({ effects: new Map([["h", [eff("personal:x", true), eff("bless")]]]) }));
-
-    expect(s.view.hud?.get("h")?.effects.map((e) => e.id)).toEqual(["bless"]);
-  });
-
   it("не свій хід: без позначок, клітинка нічого не робить, токен лише вибирається", () => {
     const s = deriveMapScene(input({ canAct: false }));
 

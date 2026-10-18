@@ -20,7 +20,7 @@ const NO_ORDER: BattleParticipant[] = [];
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
-  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, effects, actions, anyPending, requestAttack, toast } = useBattleScene();
+  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, requestAttack, toast } = useBattleScene();
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
@@ -37,8 +37,8 @@ export function useBattleMapScene(): BattleMapScene | null {
   const canAct = isMyTurn && !anyPending && !!current;
 
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, placingId, selectedId, effects }) : null),
-    [map, order, current, viewer, canAct, isDM, placing, placingId, selectedId, effects],
+    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, placingId, selectedId }) : null),
+    [map, order, current, viewer, canAct, isDM, placing, placingId, selectedId],
   );
 
   const view = useMemo(

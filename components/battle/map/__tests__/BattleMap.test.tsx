@@ -65,11 +65,11 @@ describe("BattleMap", () => {
 
   describe("hud placement", () => {
     it("card sits below the token, and flips above at the bottom edge", () => {
-      const fx = { id: "fx", name: "fx", type: "buff", duration: 1, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
+      avail = { width: 400, height: 300 };
 
       const { container } = render(
         <TooltipProvider>
-          <BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} view={{ hud: new Map([["e", { exact: true, effects: [fx, fx] }]]) }} />
+          <BattleMap map={square} participants={[at("h", 0, 0), at("e", 3, 2)]} view={{ hud: new Map([["e", { exact: true }]]) }} />
         </TooltipProvider>,
       );
 
@@ -107,7 +107,7 @@ describe("BattleMap", () => {
   describe("hud", () => {
     const effect = { id: "e1", name: "Благословення", type: "buff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
 
-    const renderHud = (hud: Map<string, { exact: boolean; effects: ActiveEffect[] }> | undefined) =>
+    const renderHud = (hud: Map<string, { exact: boolean }> | undefined) =>
       render(
         <TooltipProvider>
           <BattleMap map={square} participants={[at("h", 1, 1)]} view={{ hud }} />
@@ -123,16 +123,21 @@ describe("BattleMap", () => {
     });
 
     it("not exact: no HP numbers", () => {
-      const { container } = renderHud(new Map([["h", { exact: false, effects: [] }]]));
+      const { container } = renderHud(new Map([["h", { exact: false }]]));
 
       expect(container.textContent).not.toMatch(/\d+\/\d+/);
     });
 
-    it("shows the effect", () => {
-      const { getByLabelText, container } = renderHud(new Map([["h", { exact: true, effects: [effect] }]]));
+    it("never renders effect icons, even when the participant has effects", () => {
+      const withEffect = { ...at("h", 1, 1), battleData: { ...base.battleData, position: { x: 1, y: 1 }, activeEffects: [effect] } };
 
-      expect(getByLabelText("Благословення")).not.toBeNull();
-      expect(container.textContent).not.toContain("Благословення");
+      const { queryByLabelText } = render(
+        <TooltipProvider>
+          <BattleMap map={square} participants={[withEffect]} />
+        </TooltipProvider>,
+      );
+
+      expect(queryByLabelText("Благословення")).toBeNull();
     });
   });
 

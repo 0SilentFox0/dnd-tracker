@@ -2,14 +2,14 @@
 
 import { memo } from "react";
 
-import { EffectIcon, HealthBar, HealthLabel } from "@/components/battle/hud";
+import { HealthBar, HealthLabel } from "@/components/battle/hud";
 import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import { signedDelta } from "@/lib/utils/common/format";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { BattleParticipant } from "@/types/battle";
 
 export interface MapTokenHudProps {
   participant: BattleParticipant;
@@ -17,7 +17,6 @@ export interface MapTokenHudProps {
   mapSize: { width: number; height: number };
   pxPerUnit: number;
   exact: boolean;
-  effects: ActiveEffect[];
   raised: boolean;
 }
 
@@ -25,7 +24,7 @@ const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, effects, raised }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }: MapTokenHudProps) {
   const { currentHp, maxHp } = participant.combatStats;
 
   const change = useHpChange(currentHp);
@@ -46,8 +45,6 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, effects,
 
   const cardPx = cells * cellPx;
 
-  const maxIcons = small ? 3 : 5;
-
   const gap = Math.round(boxPx * 0.1);
 
   const nameFont = small ? clamp(7, cellPx * 0.17, 11) : clamp(9, cellPx * 0.2 / Math.sqrt(cells), 14);
@@ -60,9 +57,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, effects,
 
   const relLeft = clamp(-wrapperLeft, (boxPx - cardPx) / 2, mapPx - cardPx - wrapperLeft);
 
-  const iconPx = Math.round(small ? clamp(8, cellPx * 0.2, 12) : clamp(12, cellPx * 0.22, 16));
-
-  const cardHeight = nameFont * 1.3 + 12 + (showText && effects.length > 0 ? iconPx + 2 : 0);
+  const cardHeight = nameFont * 1.3 + 12;
 
   const below = (box.cy + box.size / 2) * pxPerUnit - gap + 4 + cardHeight <= mapSize.height * pxPerUnit;
 
@@ -123,16 +118,6 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, effects,
           </div>
         )}
         <HealthBar participant={participant} exact={exact} className={showText ? "mt-0.5" : "mt-0"} />
-        {showText && effects.length > 0 && (
-          <div className="mt-0.5 flex items-center gap-0.5 overflow-hidden text-[#cdb87e]" style={{ height: iconPx }}>
-            {effects.slice(0, maxIcons).map((e) => (
-              <span key={e.id} role="img" aria-label={e.name} title={e.name} className={e.type === "buff" ? undefined : "text-hud-danger"}>
-                <EffectIcon effect={e} size={iconPx} />
-              </span>
-            ))}
-            {effects.length > maxIcons && <span className="text-[var(--hud-muted)]" style={{ fontSize: hpFont }}>+{effects.length - maxIcons}</span>}
-          </div>
-        )}
       </div>
     </div>
   );
