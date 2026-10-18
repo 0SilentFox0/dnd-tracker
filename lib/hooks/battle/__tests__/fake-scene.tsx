@@ -107,6 +107,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
     allies: [me, ally],
     enemies: [gob],
+    reserve: [],
+    awaiting: null,
     effects: buildDisplayEffects(order),
     connection: "connected",
     dmControlledId: null,

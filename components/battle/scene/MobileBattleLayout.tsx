@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { Settings2 } from "lucide-react";
 
+import { AwaitingDmBanner } from "./AwaitingDmBanner";
 import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
@@ -24,7 +25,7 @@ import { cn } from "@/lib/utils";
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 export function MobileBattleLayout() {
-  const { battle, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
+  const { battle, awaiting, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
   const [tab, setTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
 
@@ -48,6 +49,8 @@ export function MobileBattleLayout() {
       <LastActionTicker onOpenLog={openLatestLog} />
       {battle.status === BattleStatus.COMPLETED ? (
         <BattleOverBanner />
+      ) : awaiting && !isDM ? (
+        <AwaitingDmBanner />
       ) : isMyTurn ? (
         <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
       ) : (

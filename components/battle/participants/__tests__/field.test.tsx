@@ -41,7 +41,7 @@ function scene(isDM = false) {
 
   return {
     battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, hero, myParticipants: [hero],
-    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], effects: buildDisplayEffects([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
+    queue: turnQueue([gob, hero], 0, 3), allies: [hero], enemies: [gob], reserve: [], awaiting: null, effects: buildDisplayEffects([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
     logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
   } as unknown as BattleSceneValue;
 }
