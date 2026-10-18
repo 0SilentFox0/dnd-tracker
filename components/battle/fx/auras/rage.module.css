@@ -1,5 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.glow { position: absolute; inset: -14%; border-radius: 50%; background: radial-gradient(circle, transparent 50%, rgba(190, 20, 20, .55) 68%, transparent 82%); box-shadow: 0 0 10px 2px rgba(200, 20, 20, .6); animation: rage-pulse .9s ease-in-out infinite; }
-.wisp { position: absolute; bottom: 10%; width: 4px; height: 12px; border-radius: 50% 50% 20% 20%; background: linear-gradient(#ff5a4d, rgba(160, 10, 10, 0)); opacity: 0; animation: rage-rise 1.3s ease-out infinite; }
-@keyframes rage-pulse { 50% { opacity: .55; transform: scale(1.08); } }
-@keyframes rage-rise { 15% { opacity: .95; } to { opacity: 0; transform: translateY(calc(var(--s, 48px) * -0.8)); } }

@@ -1,3 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.halo { position: absolute; left: 22%; right: 22%; top: -20%; height: 16%; border-radius: 50%; border: 2px solid #ffe08a; box-shadow: 0 0 8px 1px rgba(255, 215, 100, .85), inset 0 0 4px rgba(255, 235, 160, .8); animation: blessing-bob 2.6s ease-in-out infinite; }
-@keyframes blessing-bob { 50% { transform: translateY(-3px); opacity: .75; } }

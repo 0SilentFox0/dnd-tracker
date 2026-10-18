@@ -1,4 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.orbit { --r: calc(var(--s, 48px) * .3); position: absolute; left: 50%; top: -10%; width: 0; height: 0; animation: stun-spin 1.8s linear infinite; }
-.star { position: absolute; left: -3px; top: -3px; width: 7px; height: 7px; background: #ffe45c; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); filter: drop-shadow(0 0 3px #ffd000); }
-@keyframes stun-spin { to { transform: rotate(360deg); } }

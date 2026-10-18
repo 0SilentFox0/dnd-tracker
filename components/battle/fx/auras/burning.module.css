@@ -1,5 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.glow { position: absolute; left: -15%; right: -15%; bottom: -22%; height: 65%; border-radius: 50%; background: radial-gradient(ellipse at 50% 100%, rgba(255, 150, 40, .6), rgba(255, 80, 20, .22) 45%, transparent 70%); mix-blend-mode: screen; animation: burning-flicker .9s ease-in-out infinite alternate; }
-.ember { position: absolute; bottom: 5%; width: 3px; height: 3px; border-radius: 50%; background: #ffd27a; box-shadow: 0 0 5px #ff7a1a; opacity: 0; animation: burning-rise 1.6s ease-out infinite; }
-@keyframes burning-flicker { from { opacity: .6; transform: scaleY(.9); } to { opacity: 1; transform: scaleY(1.05); } }
-@keyframes burning-rise { 10% { opacity: 1; } 50% { transform: translate(5px, calc(var(--s, 48px) * -0.5)); } to { opacity: 0; transform: translate(-4px, calc(var(--s, 48px) * -1)); } }

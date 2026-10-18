@@ -1,3 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.glow { position: absolute; left: -20%; right: -20%; top: -25%; height: 70%; border-radius: 50%; background: radial-gradient(ellipse at 50% 0%, rgba(160, 70, 230, .55), rgba(110, 40, 170, .2) 45%, transparent 70%); mix-blend-mode: screen; animation: curse-sink 2.8s ease-in-out infinite; }
-@keyframes curse-sink { 50% { transform: translateY(6px); opacity: .6; } }

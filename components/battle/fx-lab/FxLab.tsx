@@ -9,7 +9,7 @@ import "@/components/battle/hud/battle-hud.css";
 import "@/components/battle/fx/fx.css";
 import "./fx-lab.css";
 import { ANIMATIONS } from "@/components/battle/fx/animations";
-import { AuraLayer } from "@/components/battle/fx/auras/StatusAuras";
+import { AuraCanvas } from "@/components/battle/fx/auras/canvas/AuraCanvas";
 import { FRAME_ANIMATIONS, HEAL_FRAME } from "@/components/battle/fx/frames/canvas";
 import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
 import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types";
@@ -94,7 +94,7 @@ export function FxLab() {
             {AURA_KINDS.map((kind) => (
               <div key={kind} className="flex flex-col items-center gap-3">
                 <span className="relative size-12 shrink-0 rounded-full bg-[#3a3326] ring-1 ring-white/20">
-                  <AuraLayer kinds={[kind]} size={48} />
+                  <AuraCanvas kinds={[kind]} size={48} />
                 </span>
                 <span className="text-xs text-[#d6cbb7]">{AURA_LABEL[kind]}</span>
               </div>

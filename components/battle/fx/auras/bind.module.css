@@ -1,3 +1,0 @@
-.root { position: absolute; inset: 0; pointer-events: none; }
-.chain { position: absolute; inset: -4%; border-radius: 50%; border: 3px dashed rgba(190, 190, 200, .85); box-shadow: 0 0 4px rgba(0, 0, 0, .6); animation: bind-tighten 2.2s ease-in-out infinite; }
-@keyframes bind-tighten { 50% { transform: scale(.9); opacity: .65; } }
