@@ -107,6 +107,8 @@ export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
 export const CELL_FEET = 5;
 
+export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
+
 export const DEFAULT_BATTLE_MAP = {
   cols: 20,
   rows: 12,

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
+import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
@@ -82,7 +83,9 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
 export function BattleMap({ map, participants, view, actions, className }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
-  const size = mapSize(map);
+  const { cols, rows } = map;
+
+  const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
 
   const outerRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +139,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
       {...bind}
     >
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
-        <Image src={map.background ?? "/screen-bg/battle-bg.webp"} alt="" fill sizes="100vw" className="object-cover" priority />
+        <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
           <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} />
           {from && end && (
