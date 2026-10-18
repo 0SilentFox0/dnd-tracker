@@ -11,19 +11,20 @@ import { hpRatio } from "@/lib/utils/battle/view";
 import { signedDelta } from "@/lib/utils/common/format";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, delay, onSelect }: {
   participant: BattleParticipant;
   effects: ActiveEffect[];
   exact: boolean;
   acText: string;
   current: boolean;
+  delay: number;
   onSelect: (id: string) => void;
 }) {
   const { currentHp, maxHp } = participant.combatStats;
 
   const change = useHpChange(currentHp);
 
-  const shake = useDamageShake<HTMLDivElement>(change);
+  const shake = useDamageShake<HTMLDivElement>(change, delay);
 
   const down = isDown(participant);
 
@@ -31,11 +32,11 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
     <div ref={shake} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
       {change && (
-        <span key={`float:${change.id}`} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
+        <span key={`float:${change.id}`} style={{ animationDelay: `${delay}ms` }} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
           {signedDelta(change.delta)}
         </span>
       )}
-      <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+      <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fxId={participant.basicInfo.id} size={48} current={current} flashDelayMs={delay} className={cn("pointer-events-none", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>

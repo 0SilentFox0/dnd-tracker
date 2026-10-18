@@ -34,7 +34,7 @@ function scene(isDM = false) {
   const gob = p("gob", "Гоблін", ParticipantSide.ENEMY, 9);
 
   const log = [
-    { actionIndex: 1, round: 1, actorName: "Годрік", actionType: "attack", targets: [{ participantId: "gob", participantName: "Гоблін" }], resultText: "Годрік завдав 6", actionDetails: { totalAttackValue: 15, isHit: true, targetAC: 15, damageBreakdown: "секрет" } },
+    { actionIndex: 1, round: 1, actorName: "Годрік", actionType: "attack", hpChanges: [], targets: [{ participantId: "gob", participantName: "Гоблін" }], resultText: "Годрік завдав 6", actionDetails: { totalAttackValue: 15, isHit: true, targetAC: 15, damageBreakdown: "секрет" } },
   ] as unknown as BattleAction[];
 
   const battle = { initiativeOrder: [gob, hero], currentTurnIndex: 0, currentRound: 3, battleLog: log } as unknown as BattleScene;
@@ -170,7 +170,7 @@ describe("поле бою", () => {
     const renderRow = () => {
       const onSelect = vi.fn();
 
-      render(<TooltipProvider><ParticipantRow participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
+      render(<TooltipProvider><ParticipantRow delay={0} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
 
       return onSelect;
     };

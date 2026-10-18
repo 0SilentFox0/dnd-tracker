@@ -14,6 +14,7 @@ export {
 } from "./useBattleScene";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useFxEnabled } from "./useFxEnabled";
+export { useFxImpactDelay, useFxImpactDelays } from "./useFxImpactDelay";
 export { useDamageShake, useHpChange } from "./useHpChange";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";

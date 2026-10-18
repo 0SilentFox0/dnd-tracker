@@ -18,14 +18,18 @@ export function useHpChange(hp: number): { delta: number; id: number } | null {
 const SHAKE = [{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(-3px)" }, { transform: "none" }];
 
 /** Тремтіння без перемонтування піддерева: Web Animations перезапускається на кожну втрату HP. */
-export function useDamageShake<T extends HTMLElement>(change: { delta: number; id: number } | null) {
+export function useDamageShake<T extends HTMLElement>(change: { delta: number; id: number } | null, delayMs = 0) {
   const ref = useRef<T>(null);
 
   const id = change && change.delta < 0 ? change.id : null;
 
   useEffect(() => {
-    if (id !== null) ref.current?.animate?.(SHAKE, { duration: 350 });
-  }, [id]);
+    if (id === null) return;
+
+    const timer = setTimeout(() => ref.current?.animate?.(SHAKE, { duration: 350 }), delayMs);
+
+    return () => clearTimeout(timer);
+  }, [id, delayMs]);
 
   return ref;
 }
