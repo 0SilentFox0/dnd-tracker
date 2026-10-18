@@ -14,6 +14,9 @@ export const SPELL_FX_OVERRIDES: Record<string, { archetype?: FxArchetype; eleme
   "Кам'яні шипи": { element: "earth" },
   "Метеоритний дощ": { archetype: "meteor", element: "fire" },
   "Вампіризм": { element: "fury" },
-  "Поспіх": { element: "wind" },
+  "Поспіх": { archetype: "haste", element: "wind" },
+  "Потойбічна стріла": { archetype: "eldritch", element: "fire" },
+  "Сповільнення": { archetype: "slow", element: "arcane" },
+  "Кам'яна шкіра": { archetype: "stoneskin", element: "earth" },
   "Телепортація": { archetype: "teleport", element: "arcane" },
 };

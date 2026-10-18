@@ -11,6 +11,7 @@ import { dustAura } from "./dust";
 import { frostAura } from "./frost";
 import { frozenAura } from "./frozen";
 import { hasteAura } from "./haste";
+import { hourglassAura } from "./hourglass";
 import { markedAura } from "./marked";
 import { moonmarkAura } from "./moonmark";
 import { plagueAura } from "./plague";
@@ -20,6 +21,7 @@ import { rootsAura } from "./roots";
 import { shieldAura } from "./shield";
 import { staticAura } from "./static";
 import { stingsAura } from "./stings";
+import { stoneskinAura } from "./stoneskin";
 import { stunAura } from "./stun";
 import type { AuraAnimation } from "./types";
 
@@ -49,4 +51,6 @@ export const AURA_ANIMATIONS: Record<FxAuraKind, AuraAnimation> = {
   blind: blindAura,
   bloodlust: bloodlustAura,
   haste: hasteAura,
+  hourglass: hourglassAura,
+  stoneskin: stoneskinAura,
 };

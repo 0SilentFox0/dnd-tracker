@@ -8,8 +8,8 @@ export interface FxImpact {
   attack?: "melee" | "ranged";
 }
 
-// buff/debuff never deal damage themselves, so they must not borrow a damage frame
-const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff"]);
+// these never deal damage themselves, so they must not borrow a damage frame
+const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin"]);
 
 /** `spec` is the first FX of the last action (`mapAction(action)[0]`), mapped once for all rows. */
 export function impactFor(spec: FxSpec | undefined, participantId: string): FxImpact | null {

@@ -29,7 +29,7 @@ interface Props {
 }
 
 function targetsFor(archetype: FxArchetype) {
-  if (archetype === "heal" || archetype === "buff") return ["a1"];
+  if (archetype === "heal" || archetype === "buff" || archetype === "haste" || archetype === "stoneskin") return ["a1"];
 
   return archetype === "area" || archetype === "meteor" || archetype === "entangle" ? ["e1", "e2"] : ["e1"];
 }

@@ -107,3 +107,113 @@ export function taperedStroke(g: CanvasRenderingContext2D, pts: FxPoint[], color
     g.stroke();
   }
 }
+
+/**
+ * An hourglass `h` px tall centred on (x, y): `sand` ∈ [0, 1] is the share still in the top bulb, `stream` how strongly it pours.
+ * Strokes in `glass`, fills the sand in `sandColor`; the caller sets alpha, rotation and glow.
+ */
+export function hourglass(g: CanvasRenderingContext2D, x: number, y: number, h: number, sand: number, stream: number, glass: string, sandColor: string) {
+  const w = h * 0.62;
+
+  const neck = h * 0.05;
+
+  const half = h / 2 - h * 0.08;
+
+  const bulb = (dir: 1 | -1) => {
+    g.moveTo(x - w / 2, y + dir * half);
+    g.bezierCurveTo(x - w / 2, y + dir * half * 0.35, x - neck, y + dir * half * 0.25, x - neck, y);
+    g.lineTo(x + neck, y);
+    g.bezierCurveTo(x + neck, y + dir * half * 0.25, x + w / 2, y + dir * half * 0.35, x + w / 2, y + dir * half);
+  };
+
+  g.save();
+  g.beginPath();
+  bulb(-1);
+  bulb(1);
+  g.clip();
+  g.fillStyle = sandColor;
+
+  // Top sand sinks to the neck; the bottom mound grows from the floor.
+  const topLevel = y - half * 0.92 * Math.max(0, sand) * 0.85;
+
+  if (sand > 0.02) g.fillRect(x - w / 2, topLevel, w, y - topLevel);
+
+  const mound = half * 0.9 * (1 - sand) * 0.85;
+
+  g.beginPath();
+  g.moveTo(x - w / 2, y + half);
+  g.lineTo(x - w / 2, y + half - mound * 0.55);
+  g.quadraticCurveTo(x, y + half - mound * 1.5, x + w / 2, y + half - mound * 0.55);
+  g.lineTo(x + w / 2, y + half);
+  g.fill();
+
+  if (stream > 0 && sand > 0.02) {
+    g.globalAlpha *= stream;
+    g.fillRect(x - neck * 0.45, y - neck, neck * 0.9, half - mound * 0.9 + neck);
+  }
+
+  g.restore();
+
+  g.strokeStyle = glass;
+  g.lineWidth = Math.max(1, h * 0.045);
+  g.beginPath();
+  bulb(-1);
+  bulb(1);
+  g.stroke();
+
+  g.lineWidth = Math.max(1.4, h * 0.09);
+  g.lineCap = "round";
+  g.beginPath();
+  g.moveTo(x - w * 0.62, y - h / 2);
+  g.lineTo(x + w * 0.62, y - h / 2);
+  g.moveTo(x - w * 0.62, y + h / 2);
+  g.lineTo(x + w * 0.62, y + h / 2);
+  g.stroke();
+
+  g.lineWidth = Math.max(0.8, h * 0.035);
+  g.beginPath();
+  g.moveTo(x - w * 0.55, y - h / 2);
+  g.lineTo(x - w * 0.55, y + h / 2);
+  g.moveTo(x + w * 0.55, y - h / 2);
+  g.lineTo(x + w * 0.55, y + h / 2);
+  g.stroke();
+}
+
+/** A feather along the x axis from its quill at the origin to its tip at `len`. */
+export function feather(g: CanvasRenderingContext2D, len: number, fill: string, shaft: string) {
+  const w = len * 0.2;
+
+  g.beginPath();
+  g.moveTo(len * 0.12, 0);
+  g.bezierCurveTo(len * 0.3, -w * 1.2, len * 0.85, -w, len, 0);
+  g.bezierCurveTo(len * 0.8, w * 0.7, len * 0.3, w * 1.1, len * 0.12, 0);
+  g.fillStyle = fill;
+  g.fill();
+  g.strokeStyle = shaft;
+  g.lineWidth = Math.max(0.6, len * 0.05);
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.lineTo(len * 0.95, 0);
+  g.stroke();
+}
+
+/** A granite plate: grey body lit from the top-left, a pale chipped edge and one marble vein. */
+export function stonePlate(g: CanvasRenderingContext2D, pts: FxPoint[], size: number) {
+  const grad = g.createLinearGradient(-size, -size, size, size);
+
+  grad.addColorStop(0, "#b4aea4");
+  grad.addColorStop(0.5, "#7c7770");
+  grad.addColorStop(1, "#4a4640");
+  polyPath(g, pts);
+  g.fillStyle = grad;
+  g.fill();
+  g.strokeStyle = "#2a2622";
+  g.lineWidth = Math.max(0.8, size * 0.12);
+  g.stroke();
+  g.strokeStyle = "rgba(236,230,218,0.55)";
+  g.lineWidth = Math.max(0.6, size * 0.08);
+  g.beginPath();
+  g.moveTo(pts[0].x * 0.7, pts[0].y * 0.7);
+  g.quadraticCurveTo(0, size * 0.15, pts[Math.floor(pts.length / 2)].x * 0.6, pts[Math.floor(pts.length / 2)].y * 0.6);
+  g.stroke();
+}

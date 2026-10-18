@@ -22,20 +22,18 @@ export function centerOf(el: HTMLElement): FxPoint {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
-export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; actorEl: HTMLElement | null } | null {
-  const to = spec.targetIds.flatMap((id) => {
-    const el = findAnchor(id, root);
+export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; targetEls: HTMLElement[]; actorEl: HTMLElement | null } | null {
+  const targetEls = spec.targetIds.flatMap((id) => findAnchor(id, root) ?? []);
 
-    return el ? [centerOf(el)] : [];
-  });
+  const to = targetEls.map(centerOf);
 
   if (to.length === 0) return null;
 
-  if (spec.archetype === "death") return { from: to[0], to, actorEl: null };
+  if (spec.archetype === "death") return { from: to[0], to, targetEls, actorEl: null };
 
   const actorEl = findAnchor(spec.actorId, root);
 
   const from = actorEl ? centerOf(actorEl) : { x: to[0].x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
 
-  return { from, to, actorEl };
+  return { from, to, targetEls, actorEl };
 }

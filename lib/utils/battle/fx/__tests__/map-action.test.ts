@@ -110,8 +110,17 @@ describe("mapAction", () => {
     expect(spell("Метеоритний дощ", { spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toMatchObject({ archetype: "meteor", element: "fire" });
   });
 
-  it("«Поспіх» → buff/wind, «Вампіризм» → fury", () => {
-    expect(spell("Поспіх", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "buff", element: "wind" });
+  it("«Поспіх» → haste/wind, «Вампіризм» → fury", () => {
+    expect(spell("Поспіх", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "haste", element: "wind" });
     expect(spell("Вампіризм", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ element: "fury" });
+  });
+
+  it("«Потойбічна стріла» → eldritch, keeping the fire element for the hit frame", () => {
+    expect(spell("Потойбічна стріла", { spellDamageType: "fire", spellTargeting: "enemy", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toMatchObject({ archetype: "eldritch", element: "fire" });
+  });
+
+  it("«Сповільнення» → slow, «Кам'яна шкіра» → stoneskin/earth", () => {
+    expect(spell("Сповільнення", { spellTargeting: "enemy", spellEffectKinds: ["modifyStat"], appliedEffects: [{ id: "s", name: "Сповільнення", duration: 3, type: "debuff", targetId: "t" }] })).toMatchObject({ archetype: "slow", element: "arcane" });
+    expect(spell("Кам'яна шкіра", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "stoneskin", element: "earth" });
   });
 });

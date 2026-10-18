@@ -57,6 +57,8 @@ describe("spell-check aura rules", () => {
     expect(named("Поспіх")).toBe("haste");
     expect(named("Землетрус")).toBe("dust");
     expect(named("Рій ос")).toBe("stings");
+    expect(named("Сповільнення")).toBe("hourglass");
+    expect(auraOf(fx({ name: "Кам'яна шкіра", type: "buff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: 3 }] as ActiveEffect["abilityEffects"] }))).toBe("stoneskin");
   });
 
   it("fxElement maps debuffs and conditions", () => {

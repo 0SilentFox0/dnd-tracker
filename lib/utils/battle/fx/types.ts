@@ -1,4 +1,4 @@
-export type FxArchetype = "melee" | "ranged" | "bolt" | "area" | "heal" | "buff" | "debuff" | "summon" | "death" | "swarm" | "quake" | "teleport" | "entangle" | "meteor";
+export type FxArchetype = "melee" | "ranged" | "bolt" | "area" | "heal" | "buff" | "debuff" | "summon" | "death" | "swarm" | "quake" | "teleport" | "entangle" | "meteor" | "eldritch" | "slow" | "haste" | "stoneskin";
 
 export type FxElement = "fire" | "cold" | "lightning" | "poison" | "necrotic" | "radiant" | "arcane" | "physical" | "nature" | "earth" | "fury" | "wind";
 

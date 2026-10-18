@@ -16,5 +16,5 @@ export function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = docu
 
   const local = (p: FxPoint) => ({ x: p.x - box.left, y: p.y - box.top });
 
-  return ANIMATIONS[spec.archetype]({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), actorEl: points.actorEl, palette: PALETTE[spec.element] });
+  return ANIMATIONS[spec.archetype]({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
 }

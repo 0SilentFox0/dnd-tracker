@@ -9,6 +9,8 @@ export interface FxRun {
   stage: Stage;
   from: FxPoint;
   to: FxPoint[];
+  /** The anchors behind `to`, index for index. */
+  targetEls: HTMLElement[];
   actorEl: HTMLElement | null;
   palette: FxPalette;
 }

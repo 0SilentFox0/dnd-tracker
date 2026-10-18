@@ -86,13 +86,13 @@ export function stopStage(s: Stage) {
   if (stages.get(s.layer) === s) stages.delete(s.layer);
 }
 
-/** `stopStage` for the layer's stage plus the DOM sprite sheets playing in it. */
+/** `stopStage` for the layer's stage plus the DOM sprite sheets and ghosts playing in it. */
 export function cancelLayer(layer: HTMLElement) {
   const s = stages.get(layer);
 
   if (s) stopStage(s);
 
-  for (const el of layer.querySelectorAll(".fxs-sheet")) el.remove();
+  for (const el of layer.querySelectorAll(".fxs-sheet, .fx-ghost")) el.remove();
 }
 
 function tick(s: Stage, dt: number) {

@@ -55,4 +55,13 @@ describe("impactFor", () => {
     expect(impactFor(action({ actionType: "spell", actionDetails: { spellEffectKinds: ["modifyStat"] } }), "t")).toBeNull();
     expect(impactFor(action({ actionType: "spell", actionDetails: { spellEffectKinds: ["applyCondition"] } }), "t")).toBeNull();
   });
+
+  it("eldritch borrows the fire frame at its own impact time; slow, haste and stoneskin have none", () => {
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+
+    expect(cast("Потойбічна стріла", { spellDamageType: "fire", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toEqual({ element: "fire", kind: "damage", delayMs: IMPACT_MS.eldritch });
+    expect(cast("Сповільнення", { spellEffectKinds: ["modifyStat"] })).toBeNull();
+    expect(cast("Поспіх", { spellEffectKinds: ["modifyStat"] })).toBeNull();
+    expect(cast("Кам'яна шкіра", { spellEffectKinds: ["modifyStat"] })).toBeNull();
+  });
 });
