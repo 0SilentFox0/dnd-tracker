@@ -26,11 +26,11 @@ describe("safe-fetch", () => {
   });
 
   it("isPrivateIp covers v4/v6 ranges", () => {
-    for (const ip of ["0.0.0.0", "10.1.1.1", "100.64.0.1", "127.0.0.1", "169.254.169.254", "172.16.0.1", "192.168.1.1", "224.0.0.1", "240.0.0.1", "::", "::1", "fc00::1", "fd12::1", "fe80::1", "ff02::1", "::ffff:10.0.0.1", "::ffff:7f00:1"]) {
+    for (const ip of ["0.0.0.0", "10.1.1.1", "100.64.0.1", "127.0.0.1", "169.254.169.254", "172.16.0.1", "192.168.1.1", "224.0.0.1", "240.0.0.1", "::", "::1", "fc00::1", "fd12::1", "fe80::1", "ff02::1", "::ffff:10.0.0.1", "::ffff:7f00:1", "::7f00:1", "::a9fe:a9fe", "::ffff:0:7f00:1", "0:0:0:0:0:ffff:7f00:1", "64:ff9b::a9fe:a9fe", "64:ff9b::7f00:1", "2002:7f00:1::", "2002:a9fe:a9fe::1", "fec0::1", "192.0.0.1", "198.18.0.1", "203.0.113.5"]) {
       expect(isPrivateIp(ip), ip).toBe(true);
     }
 
-    for (const ip of ["8.8.8.8", "172.32.0.1", "93.184.216.34", "2606:4700::1111", "::ffff:8.8.8.8"]) {
+    for (const ip of ["8.8.8.8", "172.32.0.1", "93.184.216.34", "2606:4700::1111", "::ffff:8.8.8.8", "64:ff9b::808:808", "2002:808:808::1"]) {
       expect(isPrivateIp(ip), ip).toBe(false);
     }
   });
@@ -88,6 +88,17 @@ describe("safe-fetch", () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation((_u: unknown, init: RequestInit) => new Promise((_res, rej) => init.signal?.addEventListener("abort", () => rej(new Error("aborted"))))));
 
     const assertion = expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("Час очікування");
+
+    await vi.advanceTimersByTimeAsync(10_001);
+    await assertion;
+  });
+
+  it("DNS lookup is bounded by the timeout", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn());
+    lookupMock.mockImplementation(() => new Promise(() => {}));
+
+    const assertion = expect(safeFetchBuffer("https://slow.example/a.png", OPTS)).rejects.toThrow("Час очікування");
 
     await vi.advanceTimersByTimeAsync(10_001);
     await assertion;

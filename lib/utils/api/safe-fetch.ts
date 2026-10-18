@@ -1,5 +1,5 @@
 import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import { BlockList, isIP } from "node:net";
 
 export class SafeFetchError extends Error {}
 
@@ -7,19 +7,68 @@ const MAX_REDIRECTS = 3;
 
 const TIMEOUT_MS = 10_000;
 
-function isPrivateIPv4(ip: string): boolean {
-  const [a, b] = ip.split(".").map(Number);
+const blocked = new BlockList();
 
-  return (
-    a === 0 ||
-    a === 10 ||
-    a === 127 ||
-    (a === 100 && b >= 64 && b <= 127) ||
-    (a === 169 && b === 254) ||
-    (a === 172 && b >= 16 && b <= 31) ||
-    (a === 192 && b === 168) ||
-    a >= 224
-  );
+for (const [net, prefix] of [
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10],
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16],
+  ["172.16.0.0", 12],
+  ["192.0.0.0", 24],
+  ["192.0.2.0", 24],
+  ["192.168.0.0", 16],
+  ["198.18.0.0", 15],
+  ["198.51.100.0", 24],
+  ["203.0.113.0", 24],
+  ["224.0.0.0", 4],
+  ["240.0.0.0", 4],
+] as const) {
+  blocked.addSubnet(net, prefix, "ipv4");
+}
+
+for (const [net, prefix] of [
+  ["::", 96],
+  ["::ffff:0:0:0", 96],
+  ["fc00::", 7],
+  ["fe80::", 10],
+  ["fec0::", 10],
+  ["ff00::", 8],
+] as const) {
+  blocked.addSubnet(net, prefix, "ipv6");
+}
+
+function expandIPv6(ip: string): number[] | null {
+  let s = ip;
+
+  const v4 = s.match(/(\d+\.\d+\.\d+\.\d+)$/);
+
+  if (v4) {
+    const [a, b, c, d] = v4[1].split(".").map(Number);
+
+    s = s.slice(0, -v4[1].length) + `${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+
+  const [head, tail, extra] = s.split("::");
+
+  if (extra !== undefined) return null;
+
+  const h = head ? head.split(":") : [];
+
+  const t = tail ? tail.split(":") : [];
+
+  const missing = 8 - h.length - t.length;
+
+  if (tail === undefined ? missing !== 0 : missing < 1) return null;
+
+  const groups = [...h, ...Array(tail === undefined ? 0 : missing).fill("0"), ...t].map((g) => parseInt(g, 16));
+
+  return groups.length === 8 && groups.every((g) => g >= 0 && g <= 0xffff) ? groups : null;
+}
+
+function groupsToIPv4(hi: number, lo: number): string {
+  return `${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`;
 }
 
 export function isPrivateIp(raw: string): boolean {
@@ -27,32 +76,39 @@ export function isPrivateIp(raw: string): boolean {
 
   const family = isIP(ip);
 
-  if (family === 4) return isPrivateIPv4(ip);
+  if (family === 4) return blocked.check(ip, "ipv4");
 
   if (family !== 6) return true;
 
-  const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  const g = expandIPv6(ip);
 
-  if (mapped) return isPrivateIPv4(mapped[1]);
+  if (!g) return true;
 
-  const hex = ip.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  const zeroPrefix = (n: number) => g.slice(0, n).every((x) => x === 0);
 
-  if (hex) {
-    const hi = parseInt(hex[1], 16);
+  if (zeroPrefix(5) && g[5] === 0xffff) return blocked.check(groupsToIPv4(g[6], g[7]), "ipv4");
 
-    const lo = parseInt(hex[2], 16);
+  if (g[0] === 0x64 && g[1] === 0xff9b && g.slice(2, 6).every((x) => x === 0)) return blocked.check(groupsToIPv4(g[6], g[7]), "ipv4");
 
-    return isPrivateIPv4(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
-  }
+  if (g[0] === 0x2002) return blocked.check(groupsToIPv4(g[1], g[2]), "ipv4");
 
-  if (ip === "::" || ip === "::1") return true;
-
-  const first = parseInt(ip.split(":")[0] || "0", 16);
-
-  return (first & 0xfe00) === 0xfc00 || (first & 0xffc0) === 0xfe80 || (first & 0xff00) === 0xff00;
+  return blocked.check(g.map((x) => x.toString(16)).join(":"), "ipv6");
 }
 
-export async function assertPublicHttpsUrl(rawUrl: string): Promise<URL> {
+function withSignal<T>(p: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return p;
+
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(new Error("aborted"));
+
+    if (signal.aborted) return onAbort();
+
+    signal.addEventListener("abort", onAbort, { once: true });
+    p.then(resolve, reject).finally(() => signal.removeEventListener("abort", onAbort));
+  });
+}
+
+export async function assertPublicHttpsUrl(rawUrl: string, signal?: AbortSignal): Promise<URL> {
   let url: URL;
 
   try {
@@ -80,8 +136,10 @@ export async function assertPublicHttpsUrl(rawUrl: string): Promise<URL> {
   let addrs: { address: string }[];
 
   try {
-    addrs = await lookup(host, { all: true });
+    addrs = await withSignal(lookup(host, { all: true }), signal);
   } catch {
+    if (signal?.aborted) throw new SafeFetchError("Час очікування завантаження вичерпано");
+
     throw new SafeFetchError("Не вдалося визначити адресу сервера");
   }
 
@@ -107,7 +165,7 @@ export async function safeFetchBuffer(
     let current = rawUrl.trim();
 
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-      const url = await assertPublicHttpsUrl(current);
+      const url = await assertPublicHttpsUrl(current, controller.signal);
 
       const res = await fetch(url, { headers: opts.headers, redirect: "manual", signal: controller.signal });
 

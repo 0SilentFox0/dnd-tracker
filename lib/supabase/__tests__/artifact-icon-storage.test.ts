@@ -32,6 +32,13 @@ describe("artifact icon storage hardening", () => {
     expect(upload).toHaveBeenCalledOnce();
   });
 
+  it("accepts a png served with another allowed raster content-type, stores the sniffed type", async () => {
+    vi.mocked(safeFetchBuffer).mockResolvedValue({ status: 200, contentType: "image/jpeg", body: PNG });
+
+    expect(await mirrorArtifactIconToSupabase("https://ok.example/a.jpg", opts)).toEqual({ ok: true, publicUrl: "https://s/c/a.png" });
+    expect(upload).toHaveBeenCalledWith("c/a.png", PNG, expect.objectContaining({ contentType: "image/png" }));
+  });
+
   it("rejects SVG from a URL, even if disguised as png", async () => {
     vi.mocked(safeFetchBuffer).mockResolvedValue({ status: 200, contentType: "image/svg+xml", body: Buffer.from("<svg/>") });
     expect((await mirrorArtifactIconToSupabase("https://ok.example/a.svg", opts)).ok).toBe(false);

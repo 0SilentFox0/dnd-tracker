@@ -314,15 +314,15 @@ export async function mirrorArtifactIconToSupabase(
 
   const buffer = fetched.body;
 
-  let mime = fetched.contentType?.split(";")[0].trim().toLowerCase() ?? "";
+  const declared = fetched.contentType?.split(";")[0].trim().toLowerCase() ?? "";
 
-  if (mime === "image/jpg") mime = "image/jpeg";
-
-  if (!mime.startsWith("image/")) {
+  if (!declared.startsWith("image/")) {
     return { ok: false, message: "URL не вказує на зображення" };
   }
 
-  if (!ALLOWED_DATA_URL_MIME.has(mime) || sniffImageMime(buffer) !== mime) {
+  const mime = sniffImageMime(buffer);
+
+  if (!ALLOWED_DATA_URL_MIME.has(declared) || !mime) {
     return { ok: false, message: "Дозволені формати: PNG, JPEG, GIF, WebP" };
   }
 
