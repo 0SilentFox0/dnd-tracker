@@ -45,12 +45,7 @@ export function runAdvanceTurnLoop(
 
   const reserve = reserveOf(pendingSummons);
 
-  // очікування рішення ДМ щодо резерву зупиняє бій так само, як перемога
-  const battleOver = (order: BattleParticipant[]) => {
-    const v = checkVictoryConditions(order, reserve);
-
-    return v.result !== null || v.awaiting !== null;
-  };
+  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve);
 
   let activeParticipantFound = false;
 
@@ -238,6 +233,17 @@ export function runAdvanceTurnLoop(
       });
     }
 
+    const beforeAuto = verdict(updatedInitiativeOrder);
+
+    if (beforeAuto.result) break;
+
+    // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
+    if (beforeAuto.awaiting) {
+      if (isActive(turnResult.participant)) activeParticipantFound = true;
+
+      continue;
+    }
+
     const berserkBonus = berserkBonusOf(nextParticipant);
 
     if (berserkBonus !== undefined && isActive(turnResult.participant)) {
@@ -255,14 +261,14 @@ export function runAdvanceTurnLoop(
       updatedInitiativeOrder = berserk.participants;
       newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
 
-      if (battleOver(updatedInitiativeOrder)) break;
+      if (verdict(updatedInitiativeOrder).result) break;
 
       continue;
     }
 
     if (isActive(turnResult.participant)) activeParticipantFound = true;
 
-    if (battleOver(updatedInitiativeOrder)) break;
+    if (verdict(updatedInitiativeOrder).result) break;
   }
 
   return {

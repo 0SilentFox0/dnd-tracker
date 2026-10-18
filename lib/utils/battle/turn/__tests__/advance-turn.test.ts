@@ -210,4 +210,37 @@ describe("резерв", () => {
     expect(out.scene.round).toBe(scene.round + 1);
     expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
   });
+
+  describe("очікування рішення ДМ (awaiting)", () => {
+    const withInit = (p: typeof hero, n: number) => ({ ...p, abilities: { ...p.abilities, initiative: n, baseInitiative: n } });
+
+    const deadGob = { ...withInit(goblin, 30), combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
+
+    it("новий раунд не починається з мертвого учасника", () => {
+      const ally2 = withInit(createMockParticipant({ basicInfo: { ...base.basicInfo, id: "ally2" } }), 5);
+
+      const out = advanceTurn({ participants: [deadGob, withInit(hero, 10), ally2], pending: [imp], scene: { ...scene, turnIndex: 2 } });
+
+      expect(out.scene.round).toBe(2);
+      expect(out.scene.status).toBe("active");
+      expect(out.participants[out.scene.turnIndex ?? -1]?.basicInfo.id).toBe("hero");
+    });
+
+    it("берсерк у наступному слоті не діє автоматично", () => {
+      const berserk = makeEffect("b", { effects: [{ type: "berserk", value: 50 }] as never });
+
+      const rager = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "rager" }, battleData: { ...base.battleData, activeEffects: [berserk] } });
+
+      const out = advanceTurn({ participants: [withInit(hero, 20), withInit(rager, 10), deadGob], pending: [imp], scene });
+
+      expect(out.scene.turnIndex).toBe(1);
+      expect(out.actions.filter((a) => a.id.startsWith("berserk"))).toEqual([]);
+    });
+
+    it("перемога під час циклу зупиняє бій", () => {
+      const out = advanceTurn({ participants: [hero, deadGob], pending: [], scene });
+
+      expect(out.scene.status).toBe("completed");
+    });
+  });
 });
