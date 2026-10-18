@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Play } from "lucide-react";
 
 import { FxLabPanel } from "./FxLabPanel";
@@ -63,10 +64,15 @@ export function FxLab() {
           title="Лабораторія анімацій"
           subtitle="Оберіть архетип і стихію та програйте анімацію з бібліотеки."
           actions={
-            <button type="button" onClick={() => setToken((t) => t + 1)} aria-label="Програти" className="flex h-9 items-center gap-2 rounded-full px-4 text-sm text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
+            <>
+              <Link href="/dev/fx-spells" className="flex h-9 items-center rounded-full px-4 text-sm text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]">
+                Заклинання та ефекти
+              </Link>
+              <button type="button" onClick={() => setToken((t) => t + 1)} aria-label="Програти" className="flex h-9 items-center gap-2 rounded-full px-4 text-sm text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
               <Play className="size-4" />
               Програти
             </button>
+            </>
           }
         >
           <HudChipTabs ariaLabel="Архетип" items={ARCHETYPES.map((a) => ({ key: a, label: ARCHETYPE_LABEL[a], active: a === archetype, onSelect: () => setArchetype(a) }))} />
