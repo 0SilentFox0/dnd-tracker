@@ -7,6 +7,7 @@ export const battleMapSchema = z.object({
   rows: z.number().int().min(4).max(60),
   background: z.string().url().refine((u) => u.startsWith("https://"), "Лише https-посилання").nullable(),
   opacity: z.number().min(0).max(1),
+  blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
 });
 
 export const createBattleSchema = z.object({

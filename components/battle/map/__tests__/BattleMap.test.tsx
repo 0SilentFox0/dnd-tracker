@@ -44,6 +44,24 @@ describe("BattleMap", () => {
     expect(container.querySelector('[data-fx-participant="e"]')).not.toBeNull();
   });
 
+  it("draws blocked cells dark, without stroke, and ignores clicks on them", () => {
+    const onCellClick = vi.fn();
+
+    const { container } = render(<BattleMap map={{ ...square, blocked: ["1:1"] }} participants={people} actions={{ onCellClick }} />);
+
+    const blocked = container.querySelector('polygon[data-fx-cell="1:1"]') as SVGPolygonElement;
+
+    expect(blocked.getAttribute("stroke")).toBe("none");
+    expect(blocked.getAttribute("fill")).toBe("rgba(0,0,0,.55)");
+    expect(blocked.getAttribute("pointer-events")).toBe("none");
+
+    fireEvent.click(blocked);
+    expect(onCellClick).not.toHaveBeenCalled();
+
+    fireEvent.click(container.querySelector('polygon[data-fx-cell="2:1"]') as SVGPolygonElement);
+    expect(onCellClick).toHaveBeenCalledTimes(1);
+  });
+
   it("exposes FX hooks: anchor, cell, clip", () => {
     const { container } = render(<BattleMap map={square} participants={people} />);
 

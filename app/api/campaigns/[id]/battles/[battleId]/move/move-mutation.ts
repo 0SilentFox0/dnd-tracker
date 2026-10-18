@@ -53,7 +53,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
     movementUsed = (movementUsed ?? 0) + cost;
   } else if (!canStand(map, participants, mover, data.to)) {
-    throw new BattleRuleError("action_rejected", "Клітинка зайнята або поза картою");
+    throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
   }
 
   const moved = { ...mover, battleData: { ...mover.battleData, position: data.to, ...(movementUsed !== undefined && { movementUsed }) } };

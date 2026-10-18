@@ -9,7 +9,7 @@ import { MapTokenHud } from "./MapTokenHud";
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
+import { blockedSet, cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
@@ -46,9 +46,14 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
     return list;
   }, [map.cols, map.rows]);
 
+  const blocked = useMemo(() => blockedSet({ blocked: map.blocked }), [map.blocked]);
+
   return (
     <>
-      {cells.map((p) => (
+      {cells.map((p) =>
+        blocked.has(cellKey(p)) ? (
+          <polygon key={cellKey(p)} data-fx-cell={cellKey(p)} data-blocked="" points={cellPolygon(p)} fill="rgba(0,0,0,.55)" stroke="none" pointerEvents="none" />
+        ) : (
         <polygon
           key={cellKey(p)}
           data-fx-cell={cellKey(p)}
@@ -62,11 +67,12 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged }: G
           onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
           onPointerEnter={() => actions?.onCellHover?.(p)}
         />
-      ))}
+        ),
+      )}
       {cells.map((p) => {
         const mark = marks?.get(cellKey(p));
 
-        if (typeof mark !== "number") return null;
+        if (typeof mark !== "number" || blocked.has(cellKey(p))) return null;
 
         const c = cellCenter(p);
 

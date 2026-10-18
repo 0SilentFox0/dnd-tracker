@@ -97,4 +97,16 @@ describe("useBattleMapPlayground", () => {
     expect(result.current.participants.find((p) => p.basicInfo.id === targetId)!.combatStats.currentHp).toBe(hpBefore - 7);
     expect(result.current.log[0]).toContain("-7");
   });
+
+  it("margin blocks the edge cells and keeps everyone on playable cells", () => {
+    const { result } = renderHook(() => useBattleMapPlayground());
+
+    act(() => result.current.setMargin(3));
+
+    const blocked = new Set(result.current.map.blocked);
+
+    expect(blocked.has("0:0")).toBe(true);
+    expect(blocked.has("3:3")).toBe(false);
+    expect(result.current.participants.every((p) => p.battleData.position && !blocked.has(`${p.battleData.position.x}:${p.battleData.position.y}`))).toBe(true);
+  });
 });

@@ -22,6 +22,41 @@ export function inBounds(map: Pick<BattleMapConfig, "cols" | "rows">, p: GridPoi
   return p.x >= 0 && p.y >= 0 && p.x < map.cols && p.y < map.rows;
 }
 
+const EMPTY_SET: ReadonlySet<string> = new Set();
+
+const blockedCache = new WeakMap<string[], Set<string>>();
+
+export function blockedSet(map: Pick<BattleMapConfig, "blocked">): ReadonlySet<string> {
+  const list = map.blocked;
+
+  if (!list?.length) return EMPTY_SET;
+
+  let set = blockedCache.get(list);
+
+  if (!set) {
+    set = new Set(list);
+    blockedCache.set(list, set);
+  }
+
+  return set;
+}
+
+export function isPlayable(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked">, p: GridPoint): boolean {
+  return inBounds(map, p) && !blockedSet(map).has(cellKey(p));
+}
+
+export function marginCells(map: Pick<BattleMapConfig, "cols" | "rows">, n: number): string[] {
+  const keys: string[] = [];
+
+  for (let y = 0; y < map.rows; y++) {
+    for (let x = 0; x < map.cols; x++) {
+      if (x < n || y < n || x >= map.cols - n || y >= map.rows - n) keys.push(cellKey({ x, y }));
+    }
+  }
+
+  return keys;
+}
+
 export function footprint(anchor: GridPoint, size: number): GridPoint[] {
   if (size <= 1) return [anchor];
 

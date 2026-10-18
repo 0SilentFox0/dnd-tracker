@@ -1,4 +1,4 @@
-import { cellKey, footprint, inBounds } from "./geometry";
+import { cellKey, footprint, isPlayable } from "./geometry";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -24,7 +24,7 @@ export function occupiedBy(participants: BattleParticipant[], filter: (p: Battle
 }
 
 export function fits(map: BattleMapConfig, anchor: GridPoint, size: number, blocked: Set<string>): boolean {
-  return footprint(anchor, size).every((c) => inBounds(map, c) && !blocked.has(cellKey(c)));
+  return footprint(anchor, size).every((c) => isPlayable(map, c) && !blocked.has(cellKey(c)));
 }
 
 export function canStand(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, anchor: GridPoint): boolean {

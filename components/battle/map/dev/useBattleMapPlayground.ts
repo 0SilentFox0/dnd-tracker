@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { cellKey, cellsOf, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
+import { cellKey, cellsOf, marginCells, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack";
@@ -48,13 +48,33 @@ export function useBattleMapPlayground() {
 
   const pushLog = useCallback((line: string) => setLog((prev) => [line, ...prev].slice(0, LOG_LIMIT)), []);
 
-  const setMap = useCallback((next: BattleMapConfig) => {
-    setMapState((prev) => {
-      if (next.cols !== prev.cols || next.rows !== prev.rows) setParticipants(initial(next));
+  const [margin, setMarginState] = useState(0);
 
-      return next;
-    });
-  }, []);
+  const setMap = useCallback(
+    (raw: BattleMapConfig) => {
+      const next = { ...raw, blocked: marginCells(raw, margin) };
+
+      setMapState((prev) => {
+        if (next.cols !== prev.cols || next.rows !== prev.rows) setParticipants(initial(next));
+
+        return next;
+      });
+    },
+    [margin],
+  );
+
+  const setMargin = useCallback(
+    (n: number) => {
+      const value = Math.min(5, Math.max(0, Math.round(n) || 0));
+
+      const next = { ...map, blocked: marginCells(map, value) };
+
+      setMarginState(value);
+      setMapState(next);
+      setParticipants((prev) => placeParticipants(next, prev));
+    },
+    [map],
+  );
 
   const onCellClick = useCallback(
     (p: GridPoint) => {
@@ -124,5 +144,5 @@ export function useBattleMapPlayground() {
     onTokenClick: setActiveId,
   };
 
-  return { map, setMap, participants, activeId, active, mode, view, actions, log, controls: { nextTurn, setMode, reset } };
+  return { map, setMap, margin, setMargin, participants, activeId, active, mode, view, actions, log, controls: { nextTurn, setMode, reset } };
 }

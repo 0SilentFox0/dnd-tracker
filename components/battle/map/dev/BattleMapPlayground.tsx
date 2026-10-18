@@ -20,7 +20,7 @@ function clampSize(value: string, fallback: number): number {
 }
 
 export function BattleMapPlayground() {
-  const { map, setMap, participants, active, mode, view, actions, log, controls } = useBattleMapPlayground();
+  const { map, setMap, margin, setMargin, participants, active, mode, view, actions, log, controls } = useBattleMapPlayground();
 
   const attack = active.battleData.attacks[0];
 
@@ -64,6 +64,10 @@ export function BattleMapPlayground() {
                 <input className={FIELD} type="number" min={4} max={40} value={map.rows} onChange={(e) => setMap({ ...map, rows: clampSize(e.target.value, map.rows) })} />
               </label>
             </div>
+            <label className="flex flex-col gap-1 text-sm">
+              Поля (клітинок)
+              <input className={FIELD} type="number" min={0} max={5} value={margin} onChange={(e) => setMargin(Number(e.target.value))} />
+            </label>
             {modeTabs}
             <div className="flex gap-2">
               <button type="button" className={BUTTON} onClick={controls.nextTurn}>

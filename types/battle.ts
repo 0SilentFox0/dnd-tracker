@@ -161,6 +161,8 @@ export interface BattleMapConfig {
   background: string | null;
   /** Прозорість ліній сітки, 0..1 */
   opacity: number;
+  /** Неігрові клітинки (ключі "x:y") */
+  blocked?: string[];
 }
 
 export type BattleMapMark = "move" | "target" | "invalid-target";

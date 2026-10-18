@@ -64,6 +64,17 @@ describe("move mutation", () => {
     expect(out.participants[0].battleData.movementUsed).toBeGreaterThan(0);
   });
 
+  it("неігрова клітинка — відмова і для звичайного, і для вільного руху", () => {
+    const base = ctx();
+
+    const walled = { ...base, meta: { ...base.meta, map: { ...map, blocked: ["2:0"] } } };
+
+    expect(() => moveMutation(walled, { participantId: "hero", to: { x: 2, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+    expect(() => moveMutation({ ...walled, isDM: true }, { participantId: "hero", to: { x: 2, y: 0 }, free: true })).toThrow(
+      expect.objectContaining({ code: "action_rejected" }),
+    );
+  });
+
   it("без карти — відмова", () => {
     expect(() => moveMutation(context(), { participantId: "hero", to: { x: 1, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
