@@ -1,5 +1,5 @@
-import { glow, sprite } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { dropPath } from "./shapes";
 import { type AuraAnimation, type AuraParticle, outside, rimGlow } from "./types";
 

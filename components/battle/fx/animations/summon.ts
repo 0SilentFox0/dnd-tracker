@@ -1,5 +1,6 @@
-import { emit, glow, ring, show, sprite, tween } from "../runtime/canvas";
-import { wait } from "../runtime/geometry";
+import { emit, ring } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 const LIGHT = ["#ffffff", "#fff1b8", "#ffd86b"];
@@ -19,7 +20,7 @@ export const summon: FxAnimation = async ({ stage, to }) => {
         if (v < 0.6) emit(stage, { x: target.x, y: target.y + 30 }, { tints: LIGHT, speed: [30, 90], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.5, 0.9], scale: [0.35, 0.05], spread: 18 });
       }).then(hide);
 
-      await Promise.all([pillar, ring(stage, target, "#ffd86b", 600, 55, 4), wait(1000)]);
+      await Promise.all([pillar, ring(stage, target, "#ffd86b", 600, 55, 4), wait(stage, 1000)]);
     }),
   );
 };

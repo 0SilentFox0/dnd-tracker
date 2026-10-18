@@ -1,4 +1,4 @@
-import type { Stage } from "../../runtime/canvas";
+import type { Stage } from "../../runtime/stage";
 
 export interface FrameBox {
   x: number;

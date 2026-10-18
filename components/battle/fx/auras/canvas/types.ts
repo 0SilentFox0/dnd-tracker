@@ -1,15 +1,8 @@
-import { glow, sprite } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { type Body, ParticlePool } from "../../runtime/particles";
+import { glow, sprite } from "../../runtime/texture";
 
-export interface AuraParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  gravity: number;
-  drag: number;
-  life: number;
-  age: number;
+export interface AuraParticle extends Body {
   size0: number;
   size1: number;
   alpha: number;
@@ -19,19 +12,18 @@ export interface AuraParticle {
   move?: (p: AuraParticle, dt: number) => void;
   draw?: (g: CanvasRenderingContext2D, p: AuraParticle, k: number) => void;
   pts?: number[];
+  tex?: HTMLCanvasElement;
 }
 
 export type AuraParticleInit = Partial<AuraParticle> & Pick<AuraParticle, "x" | "y" | "life" | "size0">;
 
 const MAX_PARTICLES = 70;
 
-export class AuraParticles {
-  list: AuraParticle[] = [];
-
+export class AuraParticles extends ParticlePool<AuraParticle> {
   spawn(init: AuraParticleInit) {
-    if (this.list.length >= MAX_PARTICLES) return;
+    if (this.count >= MAX_PARTICLES) return;
 
-    this.list.push({ vx: 0, vy: 0, gravity: 0, drag: 0, age: 0, size1: init.size0, alpha: 1, tint: "#ffffff", additive: true, phase: rand(0, Math.PI * 2), ...init });
+    this.add({ vx: 0, vy: 0, gravity: 0, drag: 0, age: 0, size1: init.size0, alpha: 1, tint: "#ffffff", additive: true, phase: rand(0, Math.PI * 2), ...init });
   }
 
   // Spawns ~rate per second regardless of the frame rate.
@@ -41,29 +33,14 @@ export class AuraParticles {
     for (let i = 0; i < n; i++) this.spawn(make());
   }
 
-  step(g: CanvasRenderingContext2D, dt: number) {
-    this.list = this.list.filter((p) => {
-      p.age += dt;
+  protected move(p: AuraParticle, dt: number) {
+    if (p.move) p.move(p, dt);
+    else super.move(p, dt);
+  }
 
-      if (p.age >= p.life) return false;
-
-      const k = p.age / p.life;
-
-      if (p.move) p.move(p, dt);
-      else {
-        p.vx *= 1 - p.drag * dt;
-        p.vy = p.vy * (1 - p.drag * dt) + p.gravity * dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-      }
-
-      if (p.draw) p.draw(g, p, k);
-      else sprite(g, glow(p.tint), p.x, p.y, (p.size0 + (p.size1 - p.size0) * k) / 64, undefined, p.alpha * fadeInOut(k), p.additive);
-
-      return true;
-    });
-    g.globalAlpha = 1;
-    g.globalCompositeOperation = "source-over";
+  protected draw(g: CanvasRenderingContext2D, p: AuraParticle, k: number) {
+    if (p.draw) p.draw(g, p, k);
+    else sprite(g, (p.tex ??= glow(p.tint)), p.x, p.y, (p.size0 + (p.size1 - p.size0) * k) / 64, undefined, p.alpha * fadeInOut(k), p.additive);
   }
 }
 

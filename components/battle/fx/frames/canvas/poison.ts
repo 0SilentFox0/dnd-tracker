@@ -1,5 +1,6 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { type FrameAnimation, roundRect } from "./types";
 
 interface Bubble {
@@ -62,13 +63,7 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  let last = 0;
-
-  const step = (v: number, total: number, spawn: boolean) => {
-    const dt = (v * total - last) / 1000;
-
-    last = v * total;
-
+  const step = (dt: number, spawn: boolean) => {
     if (spawn && bubbles.length < 40) {
       for (let i = 0; i < 2; i++) {
         if (Math.random() < 0.55) bubbles.push({ x: box.x + rand(6, box.w - 6), y: box.y + box.h - rand(0, 6), r: rand(2.5, 6.5), vy: rand(-55, -25), phase: rand(0, Math.PI * 2), age: 0, life: rand(0.5, 1.1) });
@@ -88,14 +83,13 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
     });
   };
 
-  await tween(s, BUBBLE_MS, (v) => {
+  await tween(s, BUBBLE_MS, (v, dt) => {
     glow = Math.min(1, v / 0.15);
-    step(v, BUBBLE_MS, true);
+    step(dt, true);
   });
-  last = 0;
-  await tween(s, FADE_MS, (v) => {
+  await tween(s, FADE_MS, (v, dt) => {
     glow = 1 - v;
-    step(v, FADE_MS, false);
+    step(dt, false);
   });
   hide();
 };

@@ -1,5 +1,6 @@
-import { emit, show, tween } from "../runtime/canvas";
-import { type FxPoint, rand, wait } from "../runtime/geometry";
+import { type FxPoint, rand } from "../runtime/geometry";
+import { emit } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 interface Crack {
@@ -38,7 +39,7 @@ function makeCrack(angle: number): Crack {
 export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
   await Promise.all(
     to.map(async (target, ti) => {
-      await wait(ti * 50);
+      await wait(stage, ti * 50);
 
       const base = { x: target.x, y: target.y + 20 };
 
@@ -49,8 +50,6 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
       const chunks: Chunk[] = Array.from({ length: spec.critical ? 10 : 6 + (ti % 5) }, () => ({ x: base.x + rand(-30, 30), y: base.y, vx: rand(-70, 70), vy: rand(-320, -180), size: rand(2.5, 5), round: Math.random() > 0.5 }));
 
       let k = 0;
-
-      let last = 0;
 
       const hide = show(stage, (g) => {
         const grow = Math.min(1, k / 0.4);
@@ -100,10 +99,7 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
 
       const dust = () => emit(stage, { x: base.x + rand(-26, 26), y: base.y - 2 }, { tints: palette.tints, speed: [20, 110], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.5, 1.5], gravity: -12, drag: 2, additive: false, alpha: 0.55 });
 
-      await tween(stage, 1000, (v) => {
-        const dt = v - last;
-
-        last = v;
+      await tween(stage, 1000, (v, dt) => {
         k = v;
 
         if (v < 0.6) for (let i = 0; i < 2; i++) dust();

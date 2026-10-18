@@ -1,5 +1,5 @@
-import { glow, sprite } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation, type AuraParticle, outside, rimGlow } from "./types";
 
 // pts = [y offset × r, length × r, bend]: a streak whips left to right, hugging the portrait when it passes it.

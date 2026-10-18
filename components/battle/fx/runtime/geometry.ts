@@ -3,12 +3,12 @@ export interface FxPoint {
   y: number;
 }
 
-export function wait(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
-}
-
 export function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
+}
+
+export function pick<T>(list: T[]) {
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 export function arcControl(from: FxPoint, to: FxPoint, lift: number): FxPoint {

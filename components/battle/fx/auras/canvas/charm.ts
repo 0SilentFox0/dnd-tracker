@@ -1,5 +1,5 @@
-import { glow, pick, sprite } from "../../runtime/canvas";
-import { rand } from "../../runtime/geometry";
+import { pick, rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { heartPath } from "./shapes";
 import { type AuraAnimation, type AuraParticle, fadeInOut, rimGlow } from "./types";
 

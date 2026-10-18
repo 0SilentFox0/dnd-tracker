@@ -2,10 +2,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
-import { ANIMATIONS } from "@/components/battle/fx/animations";
-import { stageFor } from "@/components/battle/fx/runtime/canvas";
-import type { FxPoint } from "@/components/battle/fx/runtime/geometry";
-import { PALETTE } from "@/components/battle/fx/runtime/palette";
+import { playFx } from "@/components/battle/fx/runtime/play";
 import { cn } from "@/lib/utils";
 import { type FxArchetype, type FxElement, type FxSpec, IMPACT_MS } from "@/lib/utils/battle/fx";
 
@@ -28,14 +25,6 @@ interface Props {
   critical: boolean;
   hit: boolean;
   playToken: number;
-}
-
-function center(el: Element, layer: Element): FxPoint {
-  const r = el.getBoundingClientRect();
-
-  const l = layer.getBoundingClientRect();
-
-  return { x: r.left - l.left + r.width / 2, y: r.top - l.top + r.height / 2 };
 }
 
 function targetsFor(archetype: FxArchetype) {
@@ -66,27 +55,17 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
     setStatus("");
 
     try {
-      const find = (id: string) => {
-        const el = arena.querySelector<HTMLElement>(`[data-fx-participant="${id}"]`);
-
-        if (!el) throw new Error(`Немає елемента ${id}`);
-
-        return el;
-      };
-
       const actorId = archetype === "melee" ? "a1" : "a2";
 
       const targetIds = targetsFor(archetype);
 
       const spec: FxSpec = { key: `lab-${Date.now()}`, archetype, element, actorId, actorSide: "ally", targetIds, hit, critical };
 
-      const actorEl = find(actorId);
-
       const started = performance.now();
 
       const timer = setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), IMPACT_MS[archetype]);
 
-      await ANIMATIONS[archetype]({ spec, stage: stageFor(layer), layer, from: center(actorEl, layer), to: targetIds.map((id) => center(find(id), layer)), actorEl, palette: PALETTE[element] });
+      await playFx(layer, spec, arena);
       clearTimeout(timer);
       setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${IMPACT_MS[archetype]} мс)`);
     } catch (e) {

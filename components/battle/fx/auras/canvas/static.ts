@@ -1,5 +1,5 @@
-import { glow, sprite } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation, type AuraParticle, rimGlow } from "./types";
 
 function bolt(cx: number, cy: number, r: number, s: number) {

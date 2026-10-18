@@ -1,6 +1,7 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import type { FxPoint } from "../../runtime/geometry";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { type FrameAnimation, type FrameBox, perimeter, roundRect } from "./types";
 
 const SPARK = ["#ffffff", "#d6f0ff", "#7fd0ff"];

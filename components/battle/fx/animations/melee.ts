@@ -1,23 +1,24 @@
-import { emit, show, tween } from "../runtime/canvas";
-import { lungeOffset, wait } from "../runtime/geometry";
+import { lungeOffset } from "../runtime/geometry";
+import { emit } from "../runtime/primitives";
 import { playSheet, SHEETS } from "../runtime/sprites";
+import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-export const melee: FxAnimation = async ({ spec, stage, layer, from, to, actorEl, palette }) => {
+export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palette }) => {
   const target = to[0];
 
   if (!target) return;
 
   const move = actorEl
     ? actorEl.animate([{ transform: "none" }, { transform: `translateX(${lungeOffset(from, target)}px) scale(1.06)`, offset: 0.45 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.5,0,.2,1)" }).finished.catch(() => undefined)
-    : wait(0);
+    : wait(stage, 0);
 
   const at = spec.hit ? target : { x: target.x + 30, y: target.y };
 
-  await wait(190);
+  await wait(stage, 190);
 
   const cuts = (spec.critical ? [-0.6, 2.4] : [-0.6]).map(async (rot, i) => {
-    await wait(i * 90);
+    await wait(stage, i * 90);
 
     let k = 0;
 
@@ -38,15 +39,15 @@ export const melee: FxAnimation = async ({ spec, stage, layer, from, to, actorEl
     hide();
   });
 
-  await wait(40);
+  await wait(stage, 40);
 
   const sparks: Promise<void>[] = [];
 
   if (spec.hit) {
     for (let i = 0; i < 40; i++) emit(stage, target, { tints: palette.tints, speed: [120, 380], life: [0.3, 0.6], scale: [0.25, 0.02], drag: 2, gravity: 700 });
 
-    sparks.push(playSheet(layer, SHEETS.spark, target, { scale: 2.4, ms: 380, filter: palette.filter }));
+    sparks.push(playSheet(stage, SHEETS.spark, target, { scale: 2.4, ms: 380, filter: palette.filter }));
   }
 
-  await Promise.all([...cuts, ...sparks, move, wait(600)]);
+  await Promise.all([...cuts, ...sparks, move, wait(stage, 600)]);
 };

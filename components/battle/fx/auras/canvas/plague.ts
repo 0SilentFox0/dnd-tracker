@@ -1,5 +1,5 @@
-import { glow, pick, sprite } from "../../runtime/canvas";
-import { rand } from "../../runtime/geometry";
+import { pick, rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation, type AuraParticle, outside } from "./types";
 
 const SPORE = ["#d4ff7a", "#8be04a", "#5fcf3a"];

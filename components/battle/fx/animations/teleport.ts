@@ -1,5 +1,6 @@
-import { emit, flash, glow, show, sprite, tween } from "../runtime/canvas";
-import { wait } from "../runtime/geometry";
+import { emit, flash } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 const OUT_MS = 300;
@@ -36,7 +37,7 @@ export const teleport: FxAnimation = async ({ stage, to, palette }) => {
 
       for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [40, 190], life: [0.4, 0.8], scale: [0.4, 0.05], drag: 3 });
 
-      await wait(GAP_MS);
+      await wait(stage, GAP_MS);
 
       void flash(stage, target, "#bfe6ff", 70, 300);
 

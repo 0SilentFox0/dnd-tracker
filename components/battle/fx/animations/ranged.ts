@@ -1,5 +1,7 @@
-import { emit, glow, show, sprite, tween } from "../runtime/canvas";
-import { arcControl, bezier, type FxPoint, wait } from "../runtime/geometry";
+import { arcControl, bezier, type FxPoint } from "../runtime/geometry";
+import { emit } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) => {
@@ -41,5 +43,5 @@ export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) =>
 
   if (spec.hit) for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [60, 220], life: [0.3, 0.6], scale: [0.4, 0.03], drag: 3, gravity: 200 });
 
-  await wait(spec.hit ? 450 : 0);
+  await wait(stage, spec.hit ? 450 : 0);
 };

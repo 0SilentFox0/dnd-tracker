@@ -1,5 +1,6 @@
-import { emit, glow, ring, shoot, show, sprite, tween } from "../runtime/canvas";
-import { wait } from "../runtime/geometry";
+import { emit, ring, shoot } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 export const heal: FxAnimation = async ({ stage, from, to, palette }) => {
@@ -19,7 +20,7 @@ export const heal: FxAnimation = async ({ stage, from, to, palette }) => {
         if (v < 0.7) for (let i = 0; i < 2; i++) emit(stage, { x: target.x, y: target.y + 20 }, { tints: palette.tints, speed: [40, 110], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.6, 1], scale: [0.35, 0.05], spread: 28 });
       }).then(hide);
 
-      await Promise.all([rising, ring(stage, target, palette.tints[1] ?? palette.core, 700, 50), wait(800)]);
+      await Promise.all([rising, ring(stage, target, palette.tints[1] ?? palette.core, 700, 50), wait(stage, 800)]);
     }),
   );
 };

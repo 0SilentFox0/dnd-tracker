@@ -1,5 +1,5 @@
-import { glow, pick, sprite } from "../../runtime/canvas";
-import { rand } from "../../runtime/geometry";
+import { pick, rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation, type AuraParticle, fadeInOut, outside } from "./types";
 
 const WISP = ["#b04dff", "#8a2be2", "#d07aff"];

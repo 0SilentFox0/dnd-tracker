@@ -1,6 +1,7 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import type { FxPoint } from "../../runtime/geometry";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
 
 interface Chunk {
@@ -81,8 +82,6 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
   const floor = box.y + box.h - 3;
 
-  let last = 0;
-
   const hide = show(s, (g) => {
     const crackGrow = clamp01(k / 0.25);
 
@@ -139,11 +138,7 @@ export const earthFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  const physics = (now: number) => {
-    const dt = (now - last) / 1000;
-
-    last = now;
-
+  const physics = (dt: number) => {
     for (const c of chunks) {
       if (c.rest) continue;
 
@@ -167,16 +162,15 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
   for (let i = 0; i < 36; i++) emit(s, { x: box.x + rand(0, box.w), y: box.y + box.h }, { tints: DUST, speed: [15, 55], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.7, 1.2], scale: [0.5, 1.1], drag: 2, additive: false, alpha: 0.8 });
 
-  await tween(s, QUAKE_MS, (v) => {
+  await tween(s, QUAKE_MS, (v, dt) => {
     k = v;
-    physics(v * QUAKE_MS);
+    physics(dt);
 
     if (v < 0.5 && Math.random() < 0.35) emit(s, { x: box.x + rand(0, box.w), y: box.y + box.h }, { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: 0.5 });
   });
-  last = 0;
-  await tween(s, FADE_MS, (v) => {
+  await tween(s, FADE_MS, (v, dt) => {
     fade = 1 - v;
-    physics(v * FADE_MS);
+    physics(dt);
   });
   hide();
 };

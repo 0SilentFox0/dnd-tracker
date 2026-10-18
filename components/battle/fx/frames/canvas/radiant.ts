@@ -1,5 +1,7 @@
-import { emit, glow, show, sprite, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
+import { glow, sprite } from "../../runtime/texture";
 import { type FrameAnimation, roundRect } from "./types";
 
 interface Twinkle {

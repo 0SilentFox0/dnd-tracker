@@ -1,6 +1,8 @@
-import { emit, flash, glow, show, sprite, tween } from "../runtime/canvas";
-import { type FxPoint, rand, wait } from "../runtime/geometry";
+import { type FxPoint, rand } from "../runtime/geometry";
+import { emit, flash } from "../runtime/primitives";
 import { playSheet, SHEETS } from "../runtime/sprites";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 interface Rock {
@@ -39,7 +41,7 @@ function poly(g: CanvasRenderingContext2D, shape: FxPoint[]) {
   g.closePath();
 }
 
-async function strike({ stage, layer, palette, spec }: Parameters<FxAnimation>[0], target: FxPoint) {
+async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], target: FxPoint) {
   const start = { x: target.x - Math.max(140, (target.y + 80) * 0.42), y: -80 };
 
   const core = rockShape(spec.critical ? 13 : 10);
@@ -110,8 +112,6 @@ async function strike({ stage, layer, palette, spec }: Parameters<FxAnimation>[0
 
   let k = 0;
 
-  let last = 0;
-
   const hideBlast = show(stage, (g) => {
     const e = 1 - (1 - Math.min(1, k * 1.6)) ** 3;
 
@@ -153,11 +153,8 @@ async function strike({ stage, layer, palette, spec }: Parameters<FxAnimation>[0
 
   await Promise.all([
     flash(stage, target, palette.core, spec.critical ? 190 : 150, 420),
-    palette.sprite ? playSheet(layer, SHEETS[palette.sprite], target, { scale: spec.critical ? 2.8 : 2.3, ms: 560, filter: palette.filter }) : wait(0),
-    tween(stage, AFTER_MS, (v) => {
-      const dt = ((v - last) * AFTER_MS) / 1000;
-
-      last = v;
+    palette.sprite ? playSheet(stage, SHEETS[palette.sprite], target, { scale: spec.critical ? 2.8 : 2.3, ms: 560, filter: palette.filter }) : wait(stage, 0),
+    tween(stage, AFTER_MS, (v, dt) => {
       k = v;
 
       for (const r of rocks) {
@@ -174,7 +171,7 @@ async function strike({ stage, layer, palette, spec }: Parameters<FxAnimation>[0
 export const meteor: FxAnimation = async (run) => {
   await Promise.all(
     run.to.map(async (target, i) => {
-      await wait(i * STAGGER_MS);
+      await wait(run.stage, i * STAGGER_MS);
       await strike(run, target);
     }),
   );

@@ -1,5 +1,6 @@
-import { emit, ring, show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit, ring } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { clamp01, type FrameAnimation, roundRect } from "./types";
 
 const SPLINTERS = ["#c89a5a", "#8a5a2b", "#e8d2a8"];

@@ -1,9 +1,9 @@
-import { emit, flash, ring, shoot } from "../runtime/canvas";
-import { wait } from "../runtime/geometry";
+import { emit, flash, ring, shoot } from "../runtime/primitives";
 import { playSheet, SHEETS } from "../runtime/sprites";
+import { wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-export const bolt: FxAnimation = async ({ stage, layer, from, to, palette, spec }) => {
+export const bolt: FxAnimation = async ({ stage, from, to, palette, spec }) => {
   const target = to[0];
 
   if (!target) return;
@@ -17,7 +17,7 @@ export const bolt: FxAnimation = async ({ stage, layer, from, to, palette, spec 
   await Promise.all([
     flash(stage, target, palette.core, spec.critical ? 180 : 130, 450),
     ring(stage, target, palette.tints[1] ?? palette.core, 550, 60, 5),
-    palette.sprite ? playSheet(layer, SHEETS[palette.sprite], target, { scale: 2.6, ms: 560, filter: palette.filter }) : wait(0),
-    wait(700),
+    palette.sprite ? playSheet(stage, SHEETS[palette.sprite], target, { scale: 2.6, ms: 560, filter: palette.filter }) : wait(stage, 0),
+    wait(stage, 700),
   ]);
 };

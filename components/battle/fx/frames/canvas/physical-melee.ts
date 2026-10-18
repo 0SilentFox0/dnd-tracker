@@ -1,5 +1,6 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
 
 const SPARKS = ["#ffffff", "#fff1c4", "#ffd27a", "#cfe3ff"];

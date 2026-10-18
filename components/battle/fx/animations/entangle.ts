@@ -1,5 +1,6 @@
-import { emit, flash, show, tween } from "../runtime/canvas";
-import { type FxPoint, rand, wait } from "../runtime/geometry";
+import { type FxPoint, rand } from "../runtime/geometry";
+import { emit, flash } from "../runtime/primitives";
+import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 interface Vine {
@@ -104,11 +105,11 @@ export const entangle: FxAnimation = async ({ stage, from, to, palette, spec }) 
   void flash(stage, from, palette.core, 70, 300);
   for (let n = 0; n < 8; n++) emit(stage, from, { tints: palette.tints, speed: [20, 70], life: [0.3, 0.6], scale: [0.25, 0.03], drag: 2 });
 
-  await wait(120);
+  await wait(stage, 120);
 
   await Promise.all(
     to.map(async (target, ti) => {
-      await wait(ti * 60);
+      await wait(stage, ti * 60);
 
       const n = spec.critical ? 8 : 6;
 

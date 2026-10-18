@@ -1,5 +1,5 @@
-import { show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { show, tween } from "../../runtime/stage";
 import { clamp01, type FrameAnimation, type FrameBox, roundRect } from "./types";
 
 interface Gust {

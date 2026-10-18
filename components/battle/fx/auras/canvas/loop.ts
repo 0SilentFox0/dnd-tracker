@@ -1,9 +1,10 @@
+import { subscribe } from "../../runtime/ticker";
 import { AURA_ANIMATIONS } from "./index";
 import { type AuraAnimation, type AuraCtx, AuraParticles } from "./types";
 
 import type { FxAuraKind } from "@/lib/utils/battle/fx";
 
-const FRAME_MS = 1000 / 30;
+const FPS = 30;
 
 const WARMUP_FRAMES = 24;
 
@@ -25,9 +26,7 @@ interface Entry {
 
 const entries = new Map<HTMLCanvasElement, Entry>();
 
-let raf = 0;
-
-let last = 0;
+let unsubscribe: (() => void) | null = null;
 
 let observer: IntersectionObserver | null = null;
 
@@ -60,28 +59,13 @@ function paint(e: Entry, t: number, dt: number) {
   }
 }
 
-function tick(now: number) {
-  raf = 0;
-
-  if (!entries.size) return;
-
-  raf = requestAnimationFrame(tick);
-
-  // rAF fires at the display rate; auras only need ~30 fps.
-  if (now - last < FRAME_MS - 2) return;
-
-  const dt = Math.min(0.1, (now - last) / 1000);
-
-  last = now;
-
-  for (const e of entries.values()) if (e.visible) paint(e, (now - e.t0) / 1000, dt);
+function tick(now: number, dt: number) {
+  for (const e of entries.values()) if (e.visible) paint(e, (now - e.t0) / 1000, Math.min(0.1, dt));
 }
 
+// Auras only need ~30 fps, whatever the display rate.
 function wake() {
-  if (raf) return;
-
-  last = performance.now();
-  raf = requestAnimationFrame(tick);
+  unsubscribe ??= subscribe(tick, { fps: FPS });
 }
 
 function unregister(canvas: HTMLCanvasElement) {
@@ -89,9 +73,9 @@ function unregister(canvas: HTMLCanvasElement) {
 
   observer?.unobserve(canvas);
 
-  if (!entries.size && raf) {
-    cancelAnimationFrame(raf);
-    raf = 0;
+  if (!entries.size && unsubscribe) {
+    unsubscribe();
+    unsubscribe = null;
   }
 }
 
@@ -131,5 +115,5 @@ export function attachAura(canvas: HTMLCanvasElement, kinds: FxAuraKind[], size:
 }
 
 export function auraLoopState() {
-  return { registered: entries.size, running: raf !== 0 };
+  return { registered: entries.size, running: unsubscribe !== null };
 }

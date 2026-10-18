@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import "@/components/battle/fx/fx.css";
-import { ANIMATIONS } from "@/components/battle/fx/animations";
-import { resolvePoints } from "@/components/battle/fx/runtime/anchors";
-import { stageFor } from "@/components/battle/fx/runtime/canvas";
-import { PALETTE } from "@/components/battle/fx/runtime/palette";
+import { playFx } from "@/components/battle/fx/runtime/play";
+import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
 
 const MAX_FX_MS = 3000;
@@ -18,10 +16,14 @@ export function BattleFxLayer() {
 
   const { current, done, active } = useBattleFxQueue(enabled);
 
-  // Hidden tab or FX off: a fresh layer element detaches the running animation, so nothing stale resumes later.
-  const [stage, setStage] = useState({ active, n: 0 });
+  // Hidden tab, FX off or unmount: drop the running animation, so nothing stale resumes later.
+  useEffect(() => {
+    const el = layer.current;
 
-  if (stage.active !== active) setStage({ active, n: active ? stage.n : stage.n + 1 });
+    if (!active || !el) return;
+
+    return () => cancelLayer(el);
+  }, [active]);
 
   useEffect(() => {
     const el = layer.current;
@@ -42,11 +44,7 @@ export function BattleFxLayer() {
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()
-      .then(() => {
-        const points = resolvePoints(current);
-
-        return points ? ANIMATIONS[current.archetype]({ spec: current, stage: stageFor(el), layer: el, ...points, palette: PALETTE[current.element] }) : undefined;
-      })
+      .then(() => playFx(el, current))
       .catch((e: unknown) => console.warn("battle fx", e))
       .finally(() => {
         window.clearTimeout(guard);
@@ -54,5 +52,5 @@ export function BattleFxLayer() {
       });
   }, [current, done]);
 
-  return <div key={stage.n} ref={layer} className="fx-layer fixed" aria-hidden />;
+  return <div ref={layer} className="fx-layer fixed" aria-hidden />;
 }

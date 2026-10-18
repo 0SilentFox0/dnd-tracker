@@ -1,4 +1,4 @@
-import { glow, sprite } from "../../runtime/canvas";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation } from "./types";
 
 type P = [number, number];

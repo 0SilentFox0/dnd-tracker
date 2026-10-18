@@ -1,4 +1,4 @@
-import { glow, sprite } from "../../runtime/canvas";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation } from "./types";
 
 function leaf(g: CanvasRenderingContext2D, x: number, y: number, len: number) {

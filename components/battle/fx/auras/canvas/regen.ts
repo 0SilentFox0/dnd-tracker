@@ -1,5 +1,5 @@
-import { glow, pick, sprite } from "../../runtime/canvas";
-import { rand } from "../../runtime/geometry";
+import { pick, rand } from "../../runtime/geometry";
+import { glow, sprite } from "../../runtime/texture";
 import { type AuraAnimation, type AuraParticle, fadeInOut, rimGlow } from "./types";
 
 const MOTE = ["#c8ffb0", "#7fe88a", "#5fd27a"];

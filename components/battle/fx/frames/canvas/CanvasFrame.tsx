@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { type Stage, stageFor } from "../../runtime/canvas";
-import { wait } from "../../runtime/geometry";
+import { type Stage, stageFor, stopStage } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
 
 const PAD = 16;
@@ -14,31 +13,24 @@ export function CanvasFrame({ frame, delayMs }: { frame: FrameAnimation; delayMs
   useEffect(() => {
     const el = layer.current;
 
-    let cancelled = false;
-
     let stage: Stage | undefined;
 
     if (!el) return;
 
-    void wait(delayMs).then(() => {
+    const timer = window.setTimeout(() => {
       // a collapsed host would give the frames a negative gradient radius
-      if (cancelled || !el.isConnected || el.clientWidth <= PAD * 2 || el.clientHeight <= PAD * 2) return;
+      if (!el.isConnected || el.clientWidth <= PAD * 2 || el.clientHeight <= PAD * 2) return;
 
       stage = stageFor(el);
       stage.canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%";
+      void frame(stage, { x: PAD, y: PAD, w: el.clientWidth - PAD * 2, h: el.clientHeight - PAD * 2 });
+    }, delayMs);
 
-      return frame(stage, { x: PAD, y: PAD, w: el.clientWidth - PAD * 2, h: el.clientHeight - PAD * 2 });
-    });
-
-    // A replayed hit remounts the frame: stop the old one so its loop does not run on a detached canvas.
+    // A replayed hit remounts the frame: stop the old one so it never draws on a detached canvas.
     return () => {
-      cancelled = true;
+      window.clearTimeout(timer);
 
-      if (!stage) return;
-
-      stage.draws.clear();
-      stage.tweens.clear();
-      stage.particles = [];
+      if (stage) stopStage(stage);
     };
   }, [frame, delayMs]);
 

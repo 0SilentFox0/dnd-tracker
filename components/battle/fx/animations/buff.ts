@@ -1,5 +1,5 @@
-import { emit, show, tween } from "../runtime/canvas";
-import { wait } from "../runtime/geometry";
+import { emit } from "../runtime/primitives";
+import { schedule, show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 export const buff: FxAnimation = async ({ stage, to, palette }) => {
@@ -20,10 +20,10 @@ export const buff: FxAnimation = async ({ stage, to, palette }) => {
       const inward = tween(stage, 400, (v) => (k = v)).then(hide);
 
       for (let i = 0; i < 24; i++) {
-        setTimeout(() => emit(stage, target, { tints: palette.tints, speed: [20, 60], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.7, 1.2], scale: [0.4, 0.05], spread: 26, gravity: -40 }), 300 + (i / 24) * 500);
+        schedule(stage, 300 + (i / 24) * 500, () => emit(stage, target, { tints: palette.tints, speed: [20, 60], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.7, 1.2], scale: [0.4, 0.05], spread: 26, gravity: -40 }));
       }
 
-      await Promise.all([inward, wait(1500)]);
+      await Promise.all([inward, wait(stage, 1500)]);
     }),
   );
 };

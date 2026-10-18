@@ -1,5 +1,6 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { type FrameAnimation, perimeter, roundRect } from "./types";
 
 const SMOKE = ["#240c34", "#36124f", "#4a1c6a"];

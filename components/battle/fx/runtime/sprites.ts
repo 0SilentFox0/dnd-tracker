@@ -1,4 +1,5 @@
 import type { FxPoint } from "./geometry";
+import type { Stage } from "./stage";
 
 export interface Sheet {
   src: string;
@@ -16,7 +17,9 @@ export const SHEETS = {
   lightning: { src: "/fx/sprites/lightning.png", frames: 10, fw: 64, fh: 128 },
 } satisfies Record<string, Sheet>;
 
-export async function playSheet(layer: HTMLElement, sheet: Sheet, at: FxPoint, opts: { scale: number; ms: number; filter?: string; rotate?: number; delayMs?: number; anchorY?: number }) {
+export async function playSheet(s: Stage, sheet: Sheet, at: FxPoint, opts: { scale: number; ms: number; filter?: string; rotate?: number; delayMs?: number; anchorY?: number }) {
+  if (s.stopped) return;
+
   const el = document.createElement("div");
 
   const w = sheet.fw * opts.scale;
@@ -39,7 +42,7 @@ export async function playSheet(layer: HTMLElement, sheet: Sheet, at: FxPoint, o
 
   if (opts.delayMs) el.style.animationDelay = `${opts.delayMs}ms`;
 
-  layer.appendChild(el);
+  s.layer.appendChild(el);
   await Promise.all(el.getAnimations().map((a) => a.finished.catch(() => undefined)));
   el.remove();
 }

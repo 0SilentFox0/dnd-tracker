@@ -1,5 +1,6 @@
-import { emit, show, tween } from "../../runtime/canvas";
 import { rand } from "../../runtime/geometry";
+import { emit } from "../../runtime/primitives";
+import { show, tween } from "../../runtime/stage";
 import { clamp01, type FrameAnimation, perimeter, roundRect } from "./types";
 
 interface Leaf {

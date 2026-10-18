@@ -1,5 +1,6 @@
-import { glow, show, sprite, tween } from "../runtime/canvas";
-import { bezier, type FxPoint, rand, wait } from "../runtime/geometry";
+import { bezier, type FxPoint, rand } from "../runtime/geometry";
+import { show, tween, wait } from "../runtime/stage";
+import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 const DOTS = 40;
@@ -28,7 +29,7 @@ export const swarm: FxAnimation = async ({ stage, from, to }) => {
 
   await Promise.all(
     to.map(async (target, ti) => {
-      await wait(ti * 80);
+      await wait(stage, ti * 80);
 
       const bugs: Bug[] = Array.from({ length: DOTS }, (_, i) => ({
         ctrl: { x: (from.x + target.x) / 2 + rand(-90, 90), y: Math.min(from.y, target.y) - rand(10, 110) },
