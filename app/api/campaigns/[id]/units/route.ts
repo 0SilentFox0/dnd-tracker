@@ -51,6 +51,7 @@ export async function POST(
         armorClass: data.armorClass,
         initiative: data.initiative,
         speed: data.speed,
+        gridSize: data.gridSize,
         maxHp: data.maxHp,
         proficiencyBonus: data.proficiencyBonus || getProficiencyBonus(data.level),
         minTargets: data.minTargets,

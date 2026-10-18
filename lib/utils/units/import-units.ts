@@ -46,6 +46,7 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     armorClass: unit.armorClass,
     initiative: unit.initiative,
     speed: unit.speed,
+    gridSize: unit.gridSize,
     maxHp: unit.maxHp,
     proficiencyBonus: unit.proficiencyBonus,
     attacks: unit.attacks as Prisma.InputJsonValue,

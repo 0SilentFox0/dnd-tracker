@@ -125,6 +125,7 @@ export async function PATCH(
         armorClass: data.armorClass,
         initiative: data.initiative,
         speed: data.speed,
+        gridSize: data.gridSize,
         maxHp: data.maxHp,
         proficiencyBonus: data.proficiencyBonus,
         attacks: data.attacks !== undefined ? (data.attacks as Prisma.InputJsonValue) : undefined,

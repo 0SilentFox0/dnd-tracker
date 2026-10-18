@@ -38,6 +38,12 @@ describe("POST units/import", () => {
     expect(revalidateTag).toHaveBeenCalledWith("units-c1", { expire: 0 });
   });
 
+  it("gridSize імпортується", async () => {
+    await post({ units: [{ name: "Огр", gridSize: 2 }] });
+
+    expect(db.unit.createMany.mock.calls[0][0].data[0]).toMatchObject({ gridSize: 2 });
+  });
+
   it("невалідний avatar — 400, нічого не створено", async () => {
     const res = await post({ units: [{ name: "X", avatar: "data:image/png;base64,AAA" }] });
 

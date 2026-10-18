@@ -54,6 +54,14 @@ describe("units API", () => {
     expect(revalidateTag).toHaveBeenCalledWith("units-c1", { expire: 0 });
   });
 
+  it("gridSize зберігається в POST і PATCH", async () => {
+    await list.POST(req("POST", { name: "Огр", gridSize: 2 }), ctx);
+    await one.PATCH(req("PATCH", { gridSize: 3 }), ctxOne);
+
+    expect(db.unit.create.mock.calls[0][0].data.gridSize).toBe(2);
+    expect(db.unit.update.mock.calls[0][0].data.gridSize).toBe(3);
+  });
+
   it("POST з расою іншої кампанії — 400, нічого не створено", async () => {
     db.race.findFirst.mockResolvedValue(null);
 
