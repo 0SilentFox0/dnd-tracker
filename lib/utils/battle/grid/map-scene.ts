@@ -1,5 +1,5 @@
 import { cellKey } from "./geometry";
-import { type CellMark, moveMarks, reachingAttack, targetMarks } from "./map-view";
+import { type CellMark, isMoveMark, moveZoneMarks, reachingAttack, targetMarks } from "./map-view";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
@@ -50,7 +50,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
   const canAttack = !!current && attacks.length > 0 && (!current.actionFlags.hasUsedAction || (current.battleData.pendingExtraActions ?? 0) > 0);
 
   if (!placing && canAct && current?.battleData.position) {
-    for (const [key, cost] of moveMarks(map, participants, current)) marks.set(key, cost);
+    for (const [key, cost] of moveZoneMarks(map, participants, current)) marks.set(key, cost);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
   }
@@ -100,7 +100,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
     if (current && isOnMap(current) && cellKey(cellsOf(current)[0]) === key) return { kind: "select", id: current.basicInfo.id };
 
-    if (canAct && current && typeof mark === "number") return { kind: "move", participantId: current.basicInfo.id, to: p, free: false };
+    if (canAct && current && isMoveMark(mark)) return { kind: "move", participantId: current.basicInfo.id, to: p, free: false };
 
     if (mark === "target" || mark === "invalid-target") {
       const occupant = participants.find((x) => x.basicInfo.side !== current?.basicInfo.side && isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key));

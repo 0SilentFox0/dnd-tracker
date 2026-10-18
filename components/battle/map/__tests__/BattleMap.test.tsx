@@ -217,6 +217,52 @@ describe("BattleMap", () => {
     expect(container.querySelectorAll("polygon")[0].getAttribute("fill")).toBe("rgba(230,80,60,.35)");
   });
 
+  it("move zone: bright crisp outlines, no cost numbers; danger is red", () => {
+    const marks = new Map<string, "move-danger" | number>([
+      ["1:0", 2],
+      ["2:0", "move-danger"],
+    ]);
+
+    const { container } = render(<BattleMap map={square} participants={people} view={{ currentId: "h", marks }} />);
+
+    expect(container.querySelectorAll("text")).toHaveLength(0);
+
+    const ok = container.querySelector('[data-fx-zone="move"]') as SVGElement;
+
+    const bad = container.querySelector('[data-fx-zone="danger"]') as SVGElement;
+
+    expect(ok.getAttribute("stroke")).toBe("#7dff5a");
+    expect(ok.getAttribute("vector-effect")).toBe("non-scaling-stroke");
+    expect(bad.getAttribute("stroke")).toBe("#ff5a4a");
+    expect(container.querySelector('polygon[data-fx-cell="1:0"]')?.getAttribute("fill")).toBe("rgba(70,200,70,.16)");
+    expect(container.querySelector('polygon[data-fx-cell="2:0"]')?.getAttribute("fill")).toBe("rgba(220,60,50,.2)");
+  });
+
+  it("renders wall, barrier and hazard terrain under the grid", () => {
+    const map: BattleMapConfig = {
+      ...square,
+      terrain: { "1:1": { kind: "wall" }, "2:1": { kind: "barrier", untilRound: 3 }, "3:1": { kind: "hazard", label: "Вогняна стіна" } },
+    };
+
+    const { container } = render(<BattleMap map={map} participants={people} />);
+
+    const wall = container.querySelector('[data-terrain="wall"] polygon') as Element;
+
+    const barrier = container.querySelector('[data-terrain="barrier"]') as Element;
+
+    const hazard = container.querySelector('[data-terrain="hazard"] polygon') as Element;
+
+    expect(wall.getAttribute("fill")).toBe("rgba(0,0,0,.6)");
+    expect(barrier.querySelectorAll("polygon")[0].getAttribute("fill")).toBe("rgba(0,0,0,.75)");
+    expect(barrier.querySelectorAll("polygon")[1].getAttribute("fill")).toContain("url(#");
+    expect(hazard.getAttribute("fill")).toBe("rgba(200,40,30,.28)");
+    expect(hazard.getAttribute("stroke")).toBe("#ff5a4a");
+    expect(container.querySelector('polygon[data-fx-cell="1:1"]')?.getAttribute("stroke")).toBe("none");
+    expect(container.querySelector('polygon[data-fx-cell="2:1"] title')?.textContent).toBe("Барʼєр до кінця раунду 3");
+    expect(container.querySelector('polygon[data-fx-cell="3:1"] title')?.textContent).toBe("Вогняна стіна");
+    expect(container.querySelector('polygon[data-fx-cell="0:1"]')?.getAttribute("stroke")).toBe("rgba(255,255,255,1)");
+  });
+
   it("a drag does not produce a click", () => {
     const onCellClick = vi.fn();
 

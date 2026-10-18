@@ -176,12 +176,12 @@ export interface TerrainCell {
   untilRound?: number;
 }
 
-export type BattleMapMark = "move" | "target" | "invalid-target";
+export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target";
 
 export interface BattleMapView {
   selectedId?: string | null;
   currentId?: string | null;
-  /** cellKey → позначка; число — вартість руху (показується дрібно в клітинці) */
+  /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */
   marks?: Map<string, BattleMapMark | number>;
   /** Лінія траєкторії від учасника до клітинки/учасника */
   trajectory?: { fromId: string; to: GridPoint } | null;

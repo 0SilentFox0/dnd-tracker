@@ -44,6 +44,34 @@ function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
   };
 }
 
+describe("deriveMapScene: danger", () => {
+  const ranged = { id: "r", name: "Лук", type: AttackType.RANGED, range: "60 ft" } as BattleAttack;
+
+  it("клітинка біля ворога з ближнім боєм — move-danger, але клік ходить", () => {
+    const foe = at("e1", { x: 2, y: 1 }, ParticipantSide.ENEMY);
+
+    const s = deriveMapScene(input({ participants: [hero, foe] }));
+
+    expect(s.view.marks?.get("1:0")).toBe("move-danger");
+    expect(typeof s.view.marks?.get("0:1")).toBe("number");
+    expect(s.cellClick({ x: 1, y: 0 })).toMatchObject({ kind: "move" });
+  });
+
+  it("ворог лише з дальнім боєм не створює небезпеки", () => {
+    const archer = at("e1", { x: 2, y: 1 }, ParticipantSide.ENEMY, { attacks: [ranged] });
+
+    const s = deriveMapScene(input({ participants: [hero, archer] }));
+
+    expect(typeof s.view.marks?.get("1:0")).toBe("number");
+  });
+
+  it("hazard — move-danger", () => {
+    const s = deriveMapScene(input({ map: { ...map, terrain: { "1:1": { kind: "hazard", label: "Вогонь" } } }, participants: [hero] }));
+
+    expect(s.view.marks?.get("1:1")).toBe("move-danger");
+  });
+});
+
 describe("deriveMapScene", () => {
   it("клік по якірній клітинці ходячого вибирає його, інші клітинки ходять", () => {
     const s = deriveMapScene(input());

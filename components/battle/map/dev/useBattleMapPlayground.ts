@@ -5,12 +5,23 @@ import { useCallback, useMemo, useState } from "react";
 import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { cellKey, cellsOf, marginCells, moveMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
+import { cellKey, cellsOf, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack";
 
 const DEMO_DAMAGE = 7;
+
+const DEMO_TERRAIN: NonNullable<BattleMapConfig["terrain"]> = {
+  "9:3": { kind: "wall" },
+  "9:4": { kind: "wall" },
+  "9:5": { kind: "wall" },
+  "6:7": { kind: "barrier", untilRound: 3 },
+  "7:7": { kind: "barrier", untilRound: 3 },
+  "12:8": { kind: "hazard", label: "Вогняна стіна" },
+  "13:8": { kind: "hazard", label: "Вогняна стіна" },
+  "12:9": { kind: "hazard", label: "Вогняна стіна" },
+};
 
 const LOG_LIMIT = 6;
 
@@ -19,7 +30,7 @@ function initial(map: BattleMapConfig): BattleParticipant[] {
 }
 
 export function useBattleMapPlayground() {
-  const [map, setMapState] = useState<BattleMapConfig>({ ...DEFAULT_BATTLE_MAP });
+  const [map, setMapState] = useState<BattleMapConfig>({ ...DEFAULT_BATTLE_MAP, terrain: DEMO_TERRAIN });
 
   const [participants, setParticipants] = useState<BattleParticipant[]>(() => initial(map));
 
@@ -36,9 +47,11 @@ export function useBattleMapPlayground() {
   const attack = active.battleData.attacks[0];
 
   const marks = useMemo(
-    () => (mode === "move" ? moveMarks(map, participants, active) : attack ? targetMarks(map, participants, active, [attack]) : new Map()),
+    () => (mode === "move" ? moveZoneMarks(map, participants, active) : attack ? targetMarks(map, participants, active, [attack]) : new Map()),
     [mode, map, participants, active, attack],
   );
+
+  const costs = useMemo(() => moveMarks(map, participants, active), [map, participants, active]);
 
   const trajectory = mode === "attack" && hover && marks.get(cellKey(hover)) === "target" ? { fromId: activeId, to: hover } : null;
 
@@ -81,9 +94,9 @@ export function useBattleMapPlayground() {
       const key = cellKey(p);
 
       if (mode === "move") {
-        const cost = marks.get(key);
+        const cost = marks.has(key) ? costs.get(key) : undefined;
 
-        if (typeof cost !== "number" || cost <= 0) return;
+        if (cost === undefined || cost <= 0) return;
 
         setParticipants((prev) =>
           prev.map((q) =>
@@ -112,7 +125,7 @@ export function useBattleMapPlayground() {
       );
       pushLog(`${active.basicInfo.name} б'є ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
     },
-    [mode, marks, activeId, active, participants, pushLog],
+    [mode, marks, costs, activeId, active, participants, pushLog],
   );
 
   const nextTurn = useCallback(() => {

@@ -2,6 +2,7 @@ import { attackReachError } from "./attack-reach";
 import { cellKey } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 import { reachable, remainingMovement } from "./path";
+import { hazardCells, threatCells } from "./terrain";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant } from "@/types/battle";
@@ -10,6 +11,18 @@ export type CellMark = BattleMapMark;
 
 export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant): Map<string, number> {
   return reachable(map, participants, mover, remainingMovement(mover));
+}
+
+export const isMoveMark = (m: CellMark | number | undefined): boolean => typeof m === "number" || m === "move" || m === "move-danger";
+
+export function moveZoneMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant): Map<string, CellMark | number> {
+  const danger = new Set([...threatCells(map, participants, mover), ...hazardCells(map)]);
+
+  const marks = new Map<string, CellMark | number>();
+
+  for (const [key, cost] of moveMarks(map, participants, mover)) marks.set(key, danger.has(key) ? "move-danger" : cost);
+
+  return marks;
 }
 
 export function reachingAttack(

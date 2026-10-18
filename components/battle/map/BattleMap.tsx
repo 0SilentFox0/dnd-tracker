@@ -9,8 +9,8 @@ import { MapTokenHud } from "./MapTokenHud";
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { blockedSet, cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
-import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
+import { blockedSet, cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, isMoveMark, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
 
@@ -24,13 +24,38 @@ export interface BattleMapProps {
   showBlocked?: boolean;
 }
 
-function markFill(mark: CellMark | number | undefined): string {
-  if (mark === undefined) return "transparent";
+const HATCH_ID = "battle-map-barrier-hatch";
 
-  if (typeof mark === "number" || mark === "move") return "rgba(120,200,120,.28)";
+const ZONE = {
+  move: { fill: "rgba(70,200,70,.16)", stroke: "#7dff5a", glow: "rgba(125,255,90,.28)" },
+  danger: { fill: "rgba(220,60,50,.2)", stroke: "#ff5a4a", glow: "rgba(255,90,74,.3)" },
+} as const;
 
-  return mark === "target" ? "rgba(230,80,60,.35)" : "rgba(120,120,120,.25)";
+type MarkValue = CellMark | number | undefined;
+
+function zoneOf(mark: MarkValue) {
+  if (mark === "move-danger") return ZONE.danger;
+
+  return isMoveMark(mark) ? ZONE.move : null;
 }
+
+function markFill(mark: MarkValue): string {
+  const zone = zoneOf(mark);
+
+  if (zone) return zone.fill;
+
+  if (mark === "target") return "rgba(230,80,60,.35)";
+
+  return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
+}
+
+function terrainTitle(t: TerrainCell): string | null {
+  if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
+
+  return t.kind === "hazard" ? (t.label ?? "Небезпечна місцевість") : null;
+}
+
+const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: "rgba(200,40,30,.28)" } as const;
 
 interface GridLayerProps {
   map: BattleMapConfig;
@@ -52,50 +77,93 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
 
   const blocked = useMemo(() => blockedSet({ blocked: map.blocked }), [map.blocked]);
 
+  const terrain = map.terrain;
+
+  const terrainCells = useMemo(() => cells.flatMap((p) => (terrain?.[cellKey(p)] ? [{ p, cell: terrain[cellKey(p)] }] : [])), [cells, terrain]);
+
+  const zoneCells = cells.flatMap((p) => {
+    const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
+
+    return zone ? [{ p, zone }] : [];
+  });
+
   return (
     <>
-      {cells.map((p) =>
-        blocked.has(cellKey(p)) ? (
-          <polygon
-            key={cellKey(p)}
-            data-fx-cell={cellKey(p)}
-            data-blocked=""
-            points={cellPolygon(p)}
-            fill={showBlocked ? "rgba(20,0,0,.6)" : "transparent"}
-            stroke="none"
-            pointerEvents={clickableBlocked ? "all" : "none"}
-            style={{ cursor: clickableBlocked ? "pointer" : undefined }}
-            onClick={clickableBlocked ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
-          />
-        ) : (
-        <polygon
-          key={cellKey(p)}
-          data-fx-cell={cellKey(p)}
-          points={cellPolygon(p)}
-          fill={markFill(marks?.get(cellKey(p)))}
-          stroke="rgba(255,255,255,1)"
-          strokeOpacity={map.opacity}
-          strokeWidth={1.5}
-          vectorEffect="non-scaling-stroke"
-          style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
-          onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
-          onPointerEnter={() => actions?.onCellHover?.(p)}
-        />
-        ),
-      )}
-      {cells.map((p) => {
-        const mark = marks?.get(cellKey(p));
-
-        if (typeof mark !== "number" || blocked.has(cellKey(p))) return null;
-
-        const c = cellCenter(p);
-
+      <defs>
+        <pattern id={HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.14} height={UNIT * 0.14} patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2={UNIT * 0.14} stroke="rgba(255,255,255,.28)" strokeWidth={UNIT * 0.03} />
+        </pattern>
+      </defs>
+      {terrainCells.map(({ p, cell }) => {
         return (
-          <text key={`t${cellKey(p)}`} x={c.x} y={c.y} fontSize={UNIT * 0.22} textAnchor="middle" dominantBaseline="central" fill="#e8dcc4" opacity={0.8} pointerEvents="none">
-            {mark}
-          </text>
+          <g key={`t${cellKey(p)}`} data-terrain={cell.kind} pointerEvents="none">
+            <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={cell.kind === "hazard" ? "#ff5a4a" : "none"} strokeOpacity={0.7} strokeWidth={1.25} vectorEffect="non-scaling-stroke" />
+            {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
+          </g>
         );
       })}
+      {cells.map((p) => {
+        const key = cellKey(p);
+
+        if (blocked.has(key)) {
+          return (
+            <polygon
+              key={key}
+              data-fx-cell={key}
+              data-blocked=""
+              points={cellPolygon(p)}
+              fill={showBlocked ? "rgba(20,0,0,.6)" : "transparent"}
+              stroke="none"
+              pointerEvents={clickableBlocked ? "all" : "none"}
+              style={{ cursor: clickableBlocked ? "pointer" : undefined }}
+              onClick={clickableBlocked ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
+            />
+          );
+        }
+
+        const mark = marks?.get(key);
+
+        const cell = terrain?.[key];
+
+        const title = cell && terrainTitle(cell);
+
+        const gridless = zoneOf(mark) !== null || cell?.kind === "wall" || cell?.kind === "barrier";
+
+        return (
+          <polygon
+            key={key}
+            data-fx-cell={key}
+            points={cellPolygon(p)}
+            fill={markFill(mark)}
+            stroke={gridless ? "none" : "rgba(255,255,255,1)"}
+            strokeOpacity={map.opacity}
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+            style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
+            onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
+            onPointerEnter={() => actions?.onCellHover?.(p)}
+          >
+            {title && <title>{title}</title>}
+          </polygon>
+        );
+      })}
+      <g pointerEvents="none">
+        {zoneCells.map(({ p, zone }) => (
+          <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={7} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        ))}
+        {zoneCells.map(({ p, zone }) => (
+          <polygon
+            key={`z${cellKey(p)}`}
+            data-fx-zone={zone === ZONE.danger ? "danger" : "move"}
+            points={cellPolygon(p)}
+            fill="none"
+            stroke={zone.stroke}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
+      </g>
     </>
   );
 });
@@ -145,7 +213,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
-  const movingId = view?.currentId && view.marks && [...view.marks.values()].some((m) => typeof m === "number") ? view.currentId : null;
+  const movingId = view?.currentId && view.marks && [...view.marks.values()].some((m) => isMoveMark(m)) ? view.currentId : null;
 
   const from = view?.trajectory ? tokens.find((t) => t.p.basicInfo.id === view.trajectory?.fromId) : undefined;
 
