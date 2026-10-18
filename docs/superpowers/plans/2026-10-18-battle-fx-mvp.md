@@ -1645,6 +1645,70 @@ Commit: `feat(battle): separate melee and arrow hit frames for physical attacks`
 
 ---
 
+### Task 7e: Spell ↔ animation/aura fixes from the prod spell check — logic & data (user decisions 2026-10-18)
+
+The controller cast all 54 prod spells through `castSpell` and mapped them (`.superpowers/sdd/2026-10-18-battle-fx-mvp/fx-prod-check.md`, script `fx-prod-check.ts` next to it — run it again at the end against the local prod copy: `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm exec tsx --tsconfig tsconfig.scripts.json <copy the script into scripts/sim/ temporarily> <out.md>` and delete the temporary copy; do not commit it). The user approved ALL fixes below. This task does the **logic/data** (pure, tested); Task 7f draws the new visuals. Use placeholder visuals where 7f will add new kinds (see "Registries" below) so everything compiles and runs.
+
+**1. Server tags lasting effects with the spell's element (not by name).**
+- `types/battle.ts` `ActiveEffect`: add optional `fxElement?: string` (raw damage type of the spell that applied it).
+- `lib/utils/battle/spell/cast.ts`: after effects are applied, for every effect returned by `diffAppliedEffects(...)` set `fxElement = spellDamageType` on that effect in the target's `battleData.activeEffects` (only when `spellDamageType` is defined). Test in `lib/utils/battle/spell/__tests__/cast.test.ts`: a cold dealDamage + modifyStat spell → the applied debuff on the target has `fxElement: "cold"`.
+
+**2. Aura rules (`lib/utils/battle/fx/aura.ts`) — new kinds and rules.** `FxAuraKind` += `"frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste"` (8 new). Rules, in this order before the existing generic ones (keep existing behaviour otherwise; permanent/zone/expired still null):
+- By effect **name** (= the spell/ability name that applied it): `"Корені"`, `"Сплутування"` → `roots`; `"Сліпота"` → `blind`; `"Вампіризм"` → `bloodlust`; `"Поспіх"` → `haste`; `"Землетрус"` → `dust`; `"Рій ос"` → `stings`. Keep these in one map `AURA_BY_NAME` in aura.ts.
+- By `fxElement` for debuff/condition effects (after charm/berserk checks): map with `elementOf(fxElement, …)`: cold → `frozen` if the condition contains `skip_action`, else `frost`; lightning → `static`; fire → `burning`; poison → `plague`; necrotic → `decay`; radiant + `advantageForAttackers` flag → `moonmark`.
+- Priority list: insert `frozen` right after `stun`; `roots`, `blind` right after `bind`; `moonmark` right after `marked`; `dust`, `stings` right after `static`; `bloodlust`, `haste` right before `shield`.
+- Tests in `aura.test.ts` for every new rule (name map, each fxElement mapping, frozen vs frost, moonmark), and that an effect without `fxElement` still maps as before (regression).
+
+**3. Action mapping overrides (`lib/utils/battle/fx/overrides.ts` + `map-action.ts`).** `FxArchetype` += `"entangle" | "meteor"`; `FxElement` += `"wind"`. Add to `SPELL_FX_OVERRIDES`:
+- `"Корені"`, `"Сплутування"` → `{ archetype: "entangle", element: "nature" }`
+- `"Прикликання елементаля: Вогонь"` → `{ element: "fire" }`; `": Вода"` → `{ element: "cold" }`; `": Земля"` → `{ element: "earth" }`; `": Повітря"` → `{ element: "lightning" }` (use the exact full names from data/library/spells.ts)
+- `"Аватар"` → `{ element: "necrotic" }` (Маркел's Avatar of Death — user: «Аватар Маркела — некротична аура»)
+- `"Призив Фенікса"` → `{ element: "fire" }`
+- `"Кам'яні шипи"` → `{ element: "earth" }`
+- `"Метеоритний дощ"` → `{ archetype: "meteor", element: "fire" }`
+- `"Вампіризм"` → `{ element: "fury" }`; `"Поспіх"` → `{ element: "wind" }`
+- Make sure the `summon` archetype uses the spec's element (today it is hard-wired to radiant in `spellArchetype` — overrides must win).
+- `IMPACT_MS`: `entangle: 500`, `meteor: 700`.
+- Tests in `map-action.test.ts` for each override group (one per kind is enough: entangle, a summon element, Аватар necrotic, Кам'яні шипи earth, meteor, wind buff).
+
+**Registries (must stay exhaustive, compile now; 7f replaces placeholders with real art):**
+- `components/battle/fx/runtime/palette.ts`: add `wind` (core `#d8f4ff`, tints `#ffffff #e6fbff #b8e8f5 #7cc8dc`).
+- `components/battle/fx/animations/index.ts`: `entangle` and `meteor` → temporarily the existing `debuff` / `area` animations.
+- `components/battle/fx/frames/canvas/index.ts`: `wind` → temporarily `arcaneFrame`.
+- `components/battle/fx/auras/canvas` registry: the 8 new aura kinds → temporarily reuse the closest existing painters (frozen→frost, moonmark→marked, dust→decay, stings→plague, roots→bind, blind→curse, bloodlust→rage, haste→blessing).
+- `/dev/fx-lab` labels for new archetypes/elements/auras (Ukrainian).
+
+**Verify:** `pnpm test:run lib/utils/battle lib/hooks/battle components/battle`, tsc, eslint --fix; re-run the prod check script and save the new table to `.superpowers/sdd/2026-10-18-battle-fx-mvp/fx-prod-check-after.md` — every spell listed in the decisions now maps as specified.
+**Commit:** `feat(fx): spell element tags on lasting effects; aura and animation overrides from the prod spell check` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+---
+
+### Task 7f: Art for the new kinds from Task 7e (Canvas 2D)
+
+Task 7e added kinds wired to placeholder painters. Replace each placeholder with its own file (one animation = one file), in the approved Canvas style (see frames/canvas/fire.ts, cold.ts; auras/canvas/*):
+
+**Auras** (`components/battle/fx/auras/canvas/<kind>.ts`, endless painters in the shared loop):
+- `frozen`: the portrait encased in an ice block — translucent pale-blue faceted shell (a few polygon facets with highlights) + slow frost sparkles + faint cold mist at the bottom.
+- `moonmark`: a silver crescent-moon sigil above the head, soft silver-blue glow pulsing, tiny star motes.
+- `dust`: brown dust swirling low around the portrait + small pebbles bouncing, faint cracks under it.
+- `stings`: 3–5 tiny yellow-black wasps circling erratically around the portrait (jittery orbits).
+- `roots`: green-brown roots/vines climbing up from below and wrapping the lower half of the portrait, small leaves, slight sway.
+- `blind`: a dark band/veil across the eyes region (upper-middle of the portrait) with drifting black-violet haze.
+- `bloodlust`: dark-red pulse with blood droplets drawn inward to the portrait (vampiric drain), red rim.
+- `haste`: pale wind streaks whipping horizontally past the portrait + a light cyan rim, quick tempo.
+
+**Action animations** (`components/battle/fx/animations/<archetype>.ts`):
+- `entangle`: no projectile (or a small green spark from the caster); at each target, vines/roots erupt from the ground under the tile and curl upward around the portrait (bezier strokes growing, leaves), green dust; impact at ~500 ms (IMPACT_MS.entangle).
+- `meteor`: for each target (staggered 120 ms), a burning meteor falls from the top of the screen at a steep angle onto the target (fire trail particles), explodes with the fire palette + debris + a short ground shockwave ring; first impact at ~700 ms (IMPACT_MS.meteor).
+
+**Frame** (`components/battle/fx/frames/canvas/wind.ts`): gust lines sweeping across the tile + a few leaves/dust specks, ~1.2 s (used only if a wind-element hit ever happens).
+
+Keep particle counts moderate. Remove the placeholder mappings. Update the `/dev/fx-lab` galleries so every new kind can be previewed.
+**Verify:** `pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle` (render-count included), tsc, eslint --fix; headless screenshots (deviceScaleFactor 2) of every new aura, both new animations and the wind frame — each must read clearly as described; iterate until it does.
+**Commit:** `feat(fx): art for frozen, moonmark, dust, stings, roots, blind, bloodlust, haste auras; entangle and meteor animations; wind frame` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+---
+
 ### Task 8: Full verification
 
 - [ ] **Step 1: Static checks and tests**
