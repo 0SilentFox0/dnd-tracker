@@ -1,10 +1,12 @@
 "use client";
 
-import { AuraCanvas } from "./canvas/AuraCanvas";
+import dynamic from "next/dynamic";
 
 import { useFxEnabled } from "@/lib/hooks/battle";
 import { aurasOf } from "@/lib/utils/battle/fx";
 import type { ActiveEffect } from "@/types/battle";
+
+const AuraCanvas = dynamic(() => import("./canvas/AuraCanvas").then((m) => m.AuraCanvas), { ssr: false });
 
 export function StatusAuras({ effects, size }: { effects: ActiveEffect[]; size: number }) {
   const { userEnabled, motionAllowed } = useFxEnabled();

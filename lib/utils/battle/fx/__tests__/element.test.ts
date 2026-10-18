@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { elementOf } from "@/lib/utils/battle/fx";
+import { elementOf } from "@/lib/utils/battle/fx/element";
 
 describe("elementOf", () => {
   it.each([

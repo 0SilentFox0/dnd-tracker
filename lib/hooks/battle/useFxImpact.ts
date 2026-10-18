@@ -28,7 +28,3 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
 
   return useCallback((participantId: string) => impacts.get(participantId) ?? null, [impacts]);
 }
-
-export function useFxImpact(participantId: string): FxImpact | null {
-  return useFxImpacts()(participantId);
-}

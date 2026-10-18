@@ -13,7 +13,7 @@ export interface FxPalette {
 
 const BASE: Record<FxElement, Omit<FxPalette, "accent">> = {
   fire: { core: "#ff7a1a", tints: ["#fff3b0", "#ffd25a", "#ff8a1f", "#ff4a00"], sprite: "explosion" },
-  cold: { core: "#6fd3ff", tints: ["#ffffff", "#c8f1ff", "#6fd3ff", "#2a8bd6"], sprite: "rings", filter: "hue-rotate(0deg)" },
+  cold: { core: "#6fd3ff", tints: ["#ffffff", "#c8f1ff", "#6fd3ff", "#2a8bd6"], sprite: "rings" },
   lightning: { core: "#9fd8ff", tints: ["#ffffff", "#fff6a8", "#9fd8ff"], sprite: "lightning" },
   poison: { core: "#8fe04a", tints: ["#e8ffb0", "#8fe04a", "#4a9a1a"] },
   necrotic: { core: "#9b3dff", tints: ["#f3d0ff", "#b04dff", "#8a2be2"], sprite: "darkBolt" },

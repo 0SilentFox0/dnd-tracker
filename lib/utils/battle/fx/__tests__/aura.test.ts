@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { auraOf, aurasOf, MAX_AURAS } from "@/lib/utils/battle/fx";
+import { auraOf, aurasOf, MAX_AURAS } from "@/lib/utils/battle/fx/aura";
 import type { ActiveEffect } from "@/types/battle";
 import { ParticipantSide } from "@/types/battle";
 

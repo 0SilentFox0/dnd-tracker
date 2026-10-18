@@ -9,7 +9,6 @@ export interface Sheet {
 }
 
 export const SHEETS = {
-  fireball: { src: "/fx/sprites/fireball.png", frames: 9, fw: 64, fh: 32 },
   explosion: { src: "/fx/sprites/explosion.png", frames: 7, fw: 64, fh: 64 },
   rings: { src: "/fx/sprites/rings.png", frames: 7, fw: 64, fh: 64 },
   spark: { src: "/fx/sprites/spark.png", frames: 7, fw: 32, fh: 32 },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Play } from "lucide-react";
 
 import { FxLabPanel } from "./FxLabPanel";
+import { ARCHETYPE_LABEL, AURA_KINDS, AURA_LABEL, ELEMENT_LABEL } from "./labels";
 
 import "@/components/battle/hud/battle-hud.css";
 import "@/components/battle/fx/fx.css";
@@ -15,19 +16,11 @@ import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
 import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
-import type { FxArchetype, FxAuraKind, FxElement } from "@/lib/utils/battle/fx";
+import type { FxArchetype, FxElement } from "@/lib/utils/battle/fx";
 
 const ARCHETYPES = Object.keys(ANIMATIONS) as FxArchetype[];
 
 const ELEMENTS = Object.keys(PALETTE) as FxElement[];
-
-const ARCHETYPE_LABEL: Record<FxArchetype, string> = { melee: "Ближній", ranged: "Дальній", bolt: "Снаряд", area: "Область", heal: "Лікування", buff: "Бафф", debuff: "Дебафф", summon: "Прикликання", death: "Смерть", swarm: "Рій", quake: "Землетрус", teleport: "Телепорт", entangle: "Заплутування", meteor: "Метеорит" };
-
-const ELEMENT_LABEL: Record<FxElement, string> = { fire: "Вогонь", cold: "Холод", lightning: "Блискавка", poison: "Отрута", necrotic: "Некротика", radiant: "Сяйво", arcane: "Аркана", physical: "Фізичний", nature: "Природа", earth: "Земля", fury: "Шал", wind: "Вітер" };
-
-const AURA_LABEL: Record<FxAuraKind, string> = { stun: "Оглушення", charm: "Чарм", rage: "Шал", bind: "Пута", plague: "Мор", burning: "Горіння", frost: "Холод", decay: "Тлін", bleeding: "Кровотеча", static: "Розряд", marked: "Мітка", curse: "Прокляття", regen: "Регенерація", shield: "Захист", blessing: "Благословення", frozen: "Заморозка", moonmark: "Місячна мітка", dust: "Пил", stings: "Ужалення", roots: "Корені", blind: "Сліпота", bloodlust: "Кровожерність", haste: "Поспіх" };
-
-const AURA_KINDS = Object.keys(AURA_LABEL) as FxAuraKind[];
 
 function CanvasFrameTile({ label, frame }: { label: string; frame: FrameAnimation }) {
   const [token, setToken] = useState(0);

@@ -1,5 +1,1 @@
 .battle-hud .fx-layer { position: absolute; z-index: 20; }
-.fxs-sheet--loop { animation-iteration-count: infinite; animation-fill-mode: none; }
-
-.fx-react-flash-purple { animation: fx-flash-purple .7s; }
-@keyframes fx-flash-purple { 30% { box-shadow: 0 0 0 2px #c27aff, 0 0 24px 8px rgba(160, 60, 255, .7); filter: brightness(1.2) saturate(1.4); } }

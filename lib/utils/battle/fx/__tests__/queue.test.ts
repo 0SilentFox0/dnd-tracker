@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
-import { advanceFxQueue, INITIAL_FX_QUEUE, MAX_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
+import { advanceFxQueue, INITIAL_FX_QUEUE, MAX_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx/queue";
 
 describe("advanceFxQueue", () => {
   const melee = (i: number) => action({ actionIndex: i, id: `b-${i}`, actionType: "attack", actionDetails: { attackKind: "melee", isHit: true } });

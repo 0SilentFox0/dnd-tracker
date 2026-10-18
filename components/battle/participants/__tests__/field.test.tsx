@@ -201,12 +201,12 @@ describe("поле бою", () => {
 
       const portrait = (container: HTMLElement) => container.querySelector('[data-fx-participant="gob"]') as HTMLElement;
 
-      it("пізніша дія без цієї цілі не перезапускає спалах і рамку", () => {
+      it("пізніша дія без цієї цілі не перезапускає спалах і рамку", async () => {
         const { container, rerender } = render(row(20, null), { wrapper: wrap(scene()) });
 
         rerender(row(12, hit));
 
-        const frame = screen.getByTestId("impact-frame");
+        const frame = await screen.findByTestId("impact-frame");
 
         expect(portrait(container).className).not.toMatch(/hud-flash/);
 

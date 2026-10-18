@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
-import { MAX_FX_BATCH, takeNewActions } from "@/lib/utils/battle/fx";
+import { takeNewActions } from "@/lib/utils/battle/fx/new-events";
+import { MAX_FX_BATCH } from "@/lib/utils/battle/fx/timing";
 import type { BattleAction } from "@/types/battle";
 
 const at = (i: number, over: Partial<BattleAction> = {}) => ({ ...action({ actionIndex: i, id: `b-${i}` }), ...over });

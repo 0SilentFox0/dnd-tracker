@@ -63,6 +63,10 @@ export function BattleScreen() {
 
   useSpellBookPrefetch();
 
+  useEffect(() => {
+    void import("@/components/battle/fx/preload").then((m) => m.preloadFx());
+  }, []);
+
   if (battle.status === BattleStatus.PREPARED) {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
 

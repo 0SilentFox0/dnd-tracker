@@ -6,7 +6,7 @@ import { Heart, Shield } from "lucide-react";
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleSceneData, useFxImpact, useHitFx } from "@/lib/hooks/battle";
+import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -19,7 +19,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
-  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpact(hero.basicInfo.id));
+  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpacts()(hero.basicInfo.id));
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 

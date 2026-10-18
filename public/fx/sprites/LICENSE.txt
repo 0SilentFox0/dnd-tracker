@@ -1,3 +1,2 @@
 CC0 1.0 (public domain).
-- fireball.png: "Spell Effects" by StarsteelGaming — https://opengameart.org/content/spell-effects-by-starsteelgaming
 - explosion.png, rings.png, dark-bolt.png, spark.png, lightning.png: "Gothicvania Magic Pack 9" by Ansimuz — https://opengameart.org/content/gothicvania-magic-pack-9
