@@ -7,10 +7,11 @@ import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
+import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
-import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
+import { BattleAccessError, type NewBattleEvent } from "@/lib/utils/battle/store";
+import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
@@ -18,6 +19,7 @@ export const addParticipantSchema = z.object({
   type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
+  reserved: z.boolean().optional(),
 });
 
 export type AddParticipantBody = z.infer<typeof addParticipantSchema>;
@@ -91,36 +93,51 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       }
     }
 
-    const insertAt = ctx.scene.turnIndex + 1;
+    if (data.reserved) {
+      return {
+        participants: ctx.participants,
+        pending: [...ctx.pending, ...added.map(toReserve)],
+        events: [dmEvent(ctx, added, "DM додав у резерв")],
+      };
+    }
+
+    let order = ctx.participants;
+
+    let turnIndex = ctx.scene.turnIndex;
+
+    for (const fresh of added) {
+      const initiative = calculateInitiative(fresh, [...order, fresh]);
+
+      const p = { ...fresh, abilities: { ...fresh.abilities, initiative, baseInitiative: initiative } };
+
+      const found = order.findIndex((other) => compareInitiative(p, other) < 0);
+
+      const at = found === -1 ? order.length : found;
+
+      // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+      if (at <= turnIndex) turnIndex++;
+
+      order = [...order.slice(0, at), p, ...order.slice(at)];
+    }
 
     const addedIds = new Set(added.map((p) => p.basicInfo.id));
 
-    const participants = applyBakedAuras([
-      ...ctx.participants.slice(0, insertAt),
-      ...added,
-      ...ctx.participants.slice(insertAt),
-    ], addedIds);
-
-    for (const p of participants.filter((x) => addedIds.has(x.basicInfo.id))) {
-      const initiative = calculateInitiative(p);
-
-      p.abilities.initiative = initiative;
-      p.abilities.baseInitiative = initiative;
-    }
-
     return {
-      participants: assignUnitControl(participants, ctx.userId),
+      participants: assignUnitControl(applyBakedAuras(order, addedIds), ctx.userId),
       pending: ctx.pending,
-      events: [
-        {
-          type: "ability",
-          round: ctx.scene.round,
-          actorId: DM_ACTOR.actorId,
-          targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
-          resultText: `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`,
-          details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-        },
-      ],
+      ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
+      events: [dmEvent(ctx, added, "DM додав на поле")],
     };
+  };
+}
+
+function dmEvent(ctx: BattleMutationContext, added: BattleParticipant[], verb: string): NewBattleEvent {
+  return {
+    type: "ability",
+    round: ctx.scene.round,
+    actorId: DM_ACTOR.actorId,
+    targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
+    resultText: `${verb}: ${added.map((p) => p.basicInfo.name).join(", ")}`,
+    details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
   };
 }

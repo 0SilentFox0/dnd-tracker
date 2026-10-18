@@ -17,11 +17,37 @@ function deps(over = {}) {
 }
 
 describe("add-participant mutation", () => {
-  it("вставляє юнітів після поточного учасника і пише подію", async () => {
-    const out = await createAddParticipantMutation(deps())(context(), { sourceId: "u1", type: "unit", side: "enemy", quantity: 2 });
+  const withInit = (id: string, initiative: number) => {
+    const p = participant(id);
+
+    return { ...p, abilities: { ...p.abilities, initiative, baseInitiative: initiative } };
+  };
+
+  it("вставляє юнітів за ініціативою після поточного", async () => {
+    const d = deps({ fromUnit: vi.fn(async (_u: unknown, _b: string, _s: unknown, n: number) => withInit(`new-u${n}`, 12)) });
+
+    const out = await createAddParticipantMutation(d)(context({ participants: [withInit("hero", 20), withInit("gob", 5)] }), { sourceId: "u1", type: "unit", side: "enemy", quantity: 2 });
 
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "new-u1", "new-u2", "gob"]);
+    expect(out.scene?.turnIndex).toBeUndefined();
     expect(out.events[0].resultText).toContain("DM додав на поле");
+  });
+
+  it("місце вже минуло — поточний не змінюється, turnIndex зсувається", async () => {
+    const d = deps({ fromCharacter: vi.fn(async () => withInit("fast", 30)) });
+
+    const out = await createAddParticipantMutation(d)(context({ participants: [withInit("hero", 20), withInit("gob", 5)], scene: { ...context().scene, turnIndex: 1 } }), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
+
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["fast", "hero", "gob"]);
+    expect(out.scene?.turnIndex).toBe(2);
+  });
+
+  it("reserved — у резерв, черга не змінюється", async () => {
+    const out = await createAddParticipantMutation(deps())(context(), { sourceId: "u1", type: "unit", side: "enemy", quantity: 2, reserved: true });
+
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
+    expect(out.pending.map((p) => [p.basicInfo.id, p.battleData.reserved])).toEqual([["new-u1", true], ["new-u2", true]]);
+    expect(out.events[0].resultText).toContain("у резерв");
   });
 
   it("персонаж іншої кампанії — 404", async () => {
