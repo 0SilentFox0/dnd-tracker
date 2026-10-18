@@ -370,3 +370,29 @@ describe("runBattleMutation", () => {
     expect(loadKnowledge).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("резерв і рішення ДМ", () => {
+  const deadGob = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
+
+  const imp = createMockParticipant({ basicInfo: { ...goblin.basicInfo, id: "imp" }, battleData: { ...goblin.battleData, reserved: true } });
+
+  const awaiting = () => loaded({ participants: [hero, deadGob], pending: [imp], isDM: true });
+
+  it("у стані очікування бойова дія відхиляється 422", async () => {
+    const d = deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => awaiting()) });
+
+    const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    expect(res.status).toBe(422);
+    expect((await res.json()).code).toBe("awaiting_dm");
+  });
+
+  it("allowWhileAwaitingDm пропускає і не завершує бій", async () => {
+    const d = deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => awaiting()) });
+
+    const res = await runBattleMutation(req(), { params, access: "dm", allowWhileAwaitingDm: true, mutate: noop }, d);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(d.saveBattle).mock.calls[0][1].scene?.status).toBeUndefined();
+  });
+});

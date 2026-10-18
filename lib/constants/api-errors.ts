@@ -7,6 +7,7 @@ export const API_ERRORS = {
   RACE_NOT_FOUND: "Расу не знайдено",
   SKILL_NOT_FOUND: "Навик не знайдено",
   MEMBER_NOT_FOUND: "Учасника не знайдено",
+  BATTLE_AWAITING_DM: "Бій чекає рішення ДМ щодо резерву",
   INVALID_BODY: "Некоректні дані запиту",
   INVALID_QUERY: "Некоректні параметри запиту",
   INVALID_JSON: "Некоректний JSON у тілі запиту",

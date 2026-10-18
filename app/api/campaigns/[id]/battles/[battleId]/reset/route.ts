@@ -6,5 +6,5 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  return runBattleMutation(req, { params: await params, access: BattleAccess.DM, mutate: resetMutation });
+  return runBattleMutation(req, { params: await params, access: BattleAccess.DM, allowWhileAwaitingDm: true, mutate: resetMutation });
 }

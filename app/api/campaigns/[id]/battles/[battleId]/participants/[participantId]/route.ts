@@ -14,6 +14,7 @@ export async function PATCH(
     params: { id, battleId },
     access: BattleAccess.DM,
     requireStatus: BattleStatus.ACTIVE,
+    allowWhileAwaitingDm: true,
     rateLimitScope: "participantPatch",
     schema: patchParticipantSchema,
     mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body),

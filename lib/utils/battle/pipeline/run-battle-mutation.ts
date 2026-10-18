@@ -14,6 +14,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
+import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
   BattleMeta,
@@ -69,6 +70,7 @@ export interface RunBattleMutationOptions<TBody> {
   params: { id: string; battleId: string };
   access: BattleAccess;
   requireStatus?: BattleStatus | BattleStatus[];
+  allowWhileAwaitingDm?: boolean;
   schema?: ZodType<TBody>;
   rateLimitScope?: keyof typeof BATTLE_RATE_LIMITS;
   dryRun?: (body: TBody) => boolean;
@@ -107,7 +109,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
 
   if (status !== BattleStatus.ACTIVE) return result;
 
-  const victory = checkVictoryConditions(result.participants);
+  const victory = checkVictoryConditions(result.participants, reserveOf(result.pending));
 
   if (!victory.result) return result;
 
@@ -217,6 +219,14 @@ export async function runBattleMutation<TBody>(
 
     if (allowed && !allowed.includes(loaded.scene.status)) {
       throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
+    }
+
+    if (
+      loaded.scene.status === BattleStatus.ACTIVE &&
+      !options.allowWhileAwaitingDm &&
+      checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
+    ) {
+      throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
     }
 
     const expected = parsed.expectedVersion;
