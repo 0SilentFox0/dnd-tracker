@@ -17,10 +17,11 @@ export interface MapTokenProps {
   pxPerUnit: number;
   selected?: boolean;
   current?: boolean;
+  passThrough?: boolean;
   onClick?: (id: string) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, onClick }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, onClick }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
@@ -33,7 +34,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
 
   return (
     <div
-      className="absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
+      className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{
         left: `${((box.cx - box.size / 2) / width) * 100}%`,
         top: `${((box.cy - box.size / 2) / height) * 100}%`,
@@ -52,7 +53,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
           e.stopPropagation();
           onClick?.(id);
         }}
-        className={cn("absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center rounded-full", selected && "ring-2 ring-[var(--gold)]")}
+        className={cn("absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center rounded-full", passThrough ? "pointer-events-none" : "pointer-events-auto", selected && "ring-2 ring-[var(--gold)]")}
         style={{ width: `${PORTRAIT_SHARE * 100}%`, height: `${PORTRAIT_SHARE * 100}%` }}
       >
         <Portrait

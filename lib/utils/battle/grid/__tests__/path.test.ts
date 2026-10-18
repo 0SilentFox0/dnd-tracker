@@ -78,4 +78,15 @@ describe("рух по сітці", () => {
 
     expect(movementBudget(rooted)).toBe(0);
   });
+
+  it("2×2: власні клітинки не блокують і не зникають з позначок руху", () => {
+    const ogre = at("o", { x: 1, y: 0 }, ParticipantSide.ALLY, { gridSize: 2, speed: 30 });
+
+    const marks = reachable(map, [ogre], ogre, 1);
+
+    expect(marks.get("2:0")).toBe(1);
+    expect(marks.get("1:1")).toBe(1);
+    expect(marks.get("0:0")).toBe(1);
+    expect(marks.has("1:0")).toBe(false);
+  });
 });

@@ -21,6 +21,7 @@ export interface BattleMapProps {
   actions?: BattleMapActions;
   className?: string;
   clickableBlocked?: boolean;
+  showBlocked?: boolean;
 }
 
 function markFill(mark: CellMark | number | undefined): string {
@@ -37,9 +38,10 @@ interface GridLayerProps {
   actions?: BattleMapActions;
   wasDragged: () => boolean;
   clickableBlocked?: boolean;
+  showBlocked?: boolean;
 }
 
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked }: GridLayerProps) {
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked }: GridLayerProps) {
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -59,7 +61,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
             data-fx-cell={cellKey(p)}
             data-blocked=""
             points={cellPolygon(p)}
-            fill="transparent"
+            fill={showBlocked ? "rgba(20,0,0,.6)" : "transparent"}
             stroke="none"
             pointerEvents={clickableBlocked ? "all" : "none"}
             style={{ cursor: clickableBlocked ? "pointer" : undefined }}
@@ -98,7 +100,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
   );
 });
 
-export function BattleMap({ map, participants, view, actions, className, clickableBlocked }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, clickableBlocked, showBlocked }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
   const { cols, rows } = map;
@@ -143,6 +145,8 @@ export function BattleMap({ map, participants, view, actions, className, clickab
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
+  const movingId = view?.currentId && view.marks && [...view.marks.values()].some((m) => typeof m === "number") ? view.currentId : null;
+
   const from = view?.trajectory ? tokens.find((t) => t.p.basicInfo.id === view.trajectory?.fromId) : undefined;
 
   const end = view?.trajectory ? cellCenter(view.trajectory.to) : null;
@@ -159,7 +163,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} />
+          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} showBlocked={showBlocked} />
           {from && end && (
             <g pointerEvents="none">
               <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
@@ -177,6 +181,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
             selected={view?.selectedId === p.basicInfo.id}
             current={view?.currentId === p.basicInfo.id}
             onClick={onTokenClick}
+            passThrough={movingId === p.basicInfo.id}
           />
         ))}
         {tokens.map(({ p, box }) => {

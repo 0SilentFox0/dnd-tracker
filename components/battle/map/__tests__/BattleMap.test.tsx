@@ -241,4 +241,33 @@ describe("BattleMap", () => {
 
     expect(notPrevented).toBe(false);
   });
+
+  it("showBlocked tints blocked cells without a stroke; default stays transparent", () => {
+    const m = { ...square, blocked: ["1:1"] };
+
+    const shown = render(<BattleMap map={m} participants={[]} showBlocked />);
+
+    const cellEl = shown.container.querySelector('polygon[data-fx-cell="1:1"]') as SVGPolygonElement;
+
+    expect(cellEl.getAttribute("fill")).not.toBe("transparent");
+    expect(cellEl.getAttribute("stroke")).toBe("none");
+    cleanup();
+
+    const hidden = render(<BattleMap map={m} participants={[]} />);
+
+    expect(hidden.container.querySelector('polygon[data-fx-cell="1:1"]')?.getAttribute("fill")).toBe("transparent");
+  });
+
+  it("the mover's own token lets clicks through to its footprint cells while move marks show", () => {
+    const big = { ...at("g", 0, 0), combatStats: { ...base.combatStats, gridSize: 2 } };
+
+    const moving = render(<BattleMap map={square} participants={[big]} view={{ currentId: "g", marks: new Map([["1:0", 1]]) }} />);
+
+    expect(moving.container.querySelector('[data-fx-participant="g"]')?.className).toContain("pointer-events-none");
+    cleanup();
+
+    const idle = render(<BattleMap map={square} participants={[big]} view={{ currentId: "g" }} />);
+
+    expect(idle.container.querySelector('[data-fx-participant="g"]')?.className).toContain("pointer-events-auto");
+  });
 });
