@@ -1,7 +1,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { AttackType, type CombatStatusType,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { AttackType, type CombatStatusType, type GridShape,ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -154,6 +154,21 @@ export interface BattleParticipantAbilities {
  * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись
  * (наприклад, лікування -10% maxHP на час бою); після завершення бою стан не зберігається.
  */
+export interface GridPoint {
+  x: number;
+  y: number;
+}
+
+/** Карта бою: сітка поверх фону; клітинка = 5 футів */
+export interface BattleMapConfig {
+  grid: GridShape;
+  cols: number;
+  rows: number;
+  background: string | null;
+  /** Прозорість ліній сітки, 0..1 */
+  opacity: number;
+}
+
 export interface BattleParticipantCombatStats {
   maxHp: number;
   currentHp: number;
