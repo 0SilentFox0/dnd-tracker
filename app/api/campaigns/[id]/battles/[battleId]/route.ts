@@ -6,6 +6,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { battleMapSchema, createBattleSchema } from "@/lib/schemas";
+import { resolveMapBackgroundForPersistence } from "@/lib/supabase/battle-map-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -47,7 +48,17 @@ export async function PATCH(request: Request, { params }: Params) {
       return errorResponse(API_ERRORS.NOT_FOUND, 404);
     }
 
-    const { map, ...rest } = parsed;
+    const { map: rawMap, ...rest } = parsed;
+
+    let map = rawMap;
+
+    if (map) {
+      const bg = await resolveMapBackgroundForPersistence(map.background, { campaignId: id });
+
+      if (!bg.ok) return errorResponse(bg.message, 400);
+
+      map = { ...map, background: bg.background ?? null };
+    }
 
     await prisma.battleScene.update({
       where: { id: battleId },

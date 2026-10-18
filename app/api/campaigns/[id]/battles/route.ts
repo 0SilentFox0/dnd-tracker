@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
+import { resolveMapBackgroundForPersistence } from "@/lib/supabase/battle-map-storage";
 import {
   requireCampaignAccess,
   requireDM,
 } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
@@ -28,6 +30,16 @@ export async function POST(
 
     if (data instanceof NextResponse) return data;
 
+    let map = data.map;
+
+    if (map) {
+      const bg = await resolveMapBackgroundForPersistence(map.background, { campaignId: id });
+
+      if (!bg.ok) return errorResponse(bg.message, 400);
+
+      map = { ...map, background: bg.background ?? null };
+    }
+
     const battle = await prisma.battleScene.create({
       data: {
         campaignId: id,
@@ -37,7 +49,7 @@ export async function POST(
         participants: data.participants,
         currentRound: 1,
         currentTurnIndex: 0,
-        ...(data.map && { map: data.map }),
+        ...(map && { map }),
       },
     });
 

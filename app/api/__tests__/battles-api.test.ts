@@ -12,6 +12,10 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(),
 }));
 
+const resolveMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/supabase/battle-map-storage", () => ({ resolveMapBackgroundForPersistence: resolveMock }));
+
 vi.mock("@/lib/db", () => ({
   prisma: {
     battleScene: {
@@ -209,5 +213,61 @@ describe("POST /api/campaigns/[id]/battles", () => {
 
     expect(data.id).toBe("b-new");
     expect(data.name).toBe("New Battle");
+  });
+});
+
+describe("POST /api/campaigns/[id]/battles — map background", () => {
+  const dm = { userId: "dm-1", isDM: true, campaign: { id: "c1", maxLevel: 20, xpMultiplier: 2.5, members: [] } };
+
+  async function post(background: string | null) {
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
+
+    const { POST } = await import("@/app/api/campaigns/[id]/battles/route");
+
+    const request = createRequest("http://localhost/api/campaigns/c1/battles", {
+      method: "POST",
+      body: JSON.stringify({ name: "B", participants: [], map: { cols: 10, rows: 10, opacity: 1, background } }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return POST(request, { params: Promise.resolve({ id: "c1" }) });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.battleScene.create).mockResolvedValue({ id: "b" } as never);
+    resolveMock.mockReset();
+  });
+
+  it("зберігає нормалізований фон", async () => {
+    resolveMock.mockResolvedValue({ ok: true, background: "https://s/battle-maps/c1/x.webp" });
+
+    expect(await getResponseStatus(await post("data:image/webp;base64,AAAA"))).toBe(200);
+    expect(prisma.battleScene.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ map: expect.objectContaining({ background: "https://s/battle-maps/c1/x.webp" }) }),
+    });
+  });
+
+  it("помилка завантаження дає 400", async () => {
+    resolveMock.mockResolvedValue({ ok: false, message: "Файл завеликий" });
+
+    const res = await post("data:image/webp;base64,AAAA");
+
+    expect(await getResponseStatus(res)).toBe(400);
+    expect(await getResponseJson(res)).toEqual({ error: "Файл завеликий" });
+    expect(prisma.battleScene.create).not.toHaveBeenCalled();
+  });
+
+  it("невалідний рядок фону дає 400 від схеми", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(await getResponseStatus(await post("javascript:alert(1)"))).toBe(400);
+    expect(resolveMock).not.toHaveBeenCalled();
+  });
+
+  it("локальний фон проходить схему", async () => {
+    resolveMock.mockResolvedValue({ ok: true, background: "/battle-maps/nicolas-tomb.webp" });
+
+    expect(await getResponseStatus(await post("/battle-maps/nicolas-tomb.webp"))).toBe(200);
   });
 });
