@@ -200,14 +200,14 @@ describe("резерв", () => {
     expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
   });
 
-  it("розкритий під час додаткового ходу діє наступним, раунд не форситься", () => {
+  it("розкритий під час додаткового ходу ходить з наступного раунду, ніхто не ходить двічі в старому", () => {
     const extra = { ...hero, battleData: { ...hero.battleData, extraTurnActive: true } };
 
     const revealed = { ...imp, battleData: { ...base.battleData, revealPending: true } };
 
     const out = advanceTurn({ participants: [extra, revealed, goblin], pending: [], scene });
 
-    expect(out.scene).toMatchObject({ turnIndex: 1, round: 1 });
-    expect(out.participants[1].battleData.revealPending).toBeUndefined();
+    expect(out.scene.round).toBe(scene.round + 1);
+    expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
   });
 });
