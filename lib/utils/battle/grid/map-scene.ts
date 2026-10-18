@@ -98,6 +98,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
     const mark = marks.get(key);
 
+    if (current && isOnMap(current) && cellKey(cellsOf(current)[0]) === key) return { kind: "select", id: current.basicInfo.id };
+
     if (canAct && current && typeof mark === "number") return { kind: "move", participantId: current.basicInfo.id, to: p, free: false };
 
     if (mark === "target" || mark === "invalid-target") {

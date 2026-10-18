@@ -45,6 +45,13 @@ function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
 }
 
 describe("deriveMapScene", () => {
+  it("клік по якірній клітинці ходячого вибирає його, інші клітинки ходять", () => {
+    const s = deriveMapScene(input());
+
+    expect(s.cellClick({ x: 0, y: 0 })).toEqual({ kind: "select", id: "h" });
+    expect(s.cellClick({ x: 0, y: 1 })).toMatchObject({ kind: "move" });
+  });
+
   it("не свій хід: без позначок, клітинка нічого не робить, токен лише вибирається", () => {
     const s = deriveMapScene(input({ canAct: false }));
 
