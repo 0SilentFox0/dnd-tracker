@@ -16,7 +16,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
       <RacePassive />
       {personal && (
         <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-gold/40 bg-hud-field p-3">
-          <EntityIcon src={personal.icon} name={personal.name} size={48} className="hud-sc size-12 rounded-md border border-hud-line bg-[#2a2016] text-inherit" />
+          <EntityIcon src={sheet.identity.avatar ?? personal.icon} name={personal.name} alt={sheet.identity.name} size={48} className="hud-sc size-12 rounded-md border border-hud-line bg-[#2a2016] text-inherit" />
           <div className="min-w-0">
             <p className="text-[11px] uppercase text-hud-gold">Персональне вміння</p>
             <h3 className="hud-sc text-base text-hud-ink">{personal.name}</h3>
