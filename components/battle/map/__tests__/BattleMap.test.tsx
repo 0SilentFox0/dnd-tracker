@@ -71,4 +71,35 @@ describe("BattleMap", () => {
     expect(polygons).toHaveLength(12);
     expect(polygons[0].getAttribute("points")?.split(" ")).toHaveLength(6);
   });
+
+  it("a drag does not produce a click", () => {
+    const onCellClick = vi.fn();
+
+    const onTokenClick = vi.fn();
+
+    const { container } = render(<BattleMap map={square} participants={people} actions={{ onCellClick, onTokenClick }} />);
+
+    const root = container.firstElementChild as Element;
+
+    const cell = container.querySelectorAll("polygon")[5];
+
+    fireEvent.pointerDown(root, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerMove(root, { pointerId: 1, clientX: 30, clientY: 10 });
+    fireEvent.pointerUp(root, { pointerId: 1, clientX: 30, clientY: 10 });
+    fireEvent.click(cell);
+    expect(onCellClick).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(root, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(root, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.click(cell);
+    expect(onCellClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("wheel is non-passive and prevented", () => {
+    const { container } = render(<BattleMap map={square} participants={people} />);
+
+    const notPrevented = fireEvent.wheel(container.firstElementChild as Element, { deltaY: -100 });
+
+    expect(notPrevented).toBe(false);
+  });
 });

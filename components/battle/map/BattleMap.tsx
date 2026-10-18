@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { MapToken } from "./MapToken";
@@ -42,11 +42,9 @@ function markFill(mark: CellMark | number | undefined): string {
 }
 
 export function BattleMap({ map, participants, view, actions, className }: BattleMapProps) {
-  const { zoom, offset, bind } = useMapViewport();
+  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
   const size = mapSize(map);
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -62,7 +60,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
     observer.observe(el);
 
     return () => observer.disconnect();
-  }, []);
+  }, [containerRef]);
 
   const pxPerUnit = containerWidth / size.width;
 
@@ -105,7 +103,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
                 strokeWidth={1.5}
                 vectorEffect="non-scaling-stroke"
                 style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
-                onClick={() => actions?.onCellClick?.(p)}
+                onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
                 onPointerEnter={() => actions?.onCellHover?.(p)}
               />
             );
@@ -139,7 +137,7 @@ export function BattleMap({ map, participants, view, actions, className }: Battl
             pxPerUnit={pxPerUnit}
             selected={view?.selectedId === p.basicInfo.id}
             current={view?.currentId === p.basicInfo.id}
-            onClick={actions?.onTokenClick}
+            onClick={(id) => !wasDragged() && actions?.onTokenClick?.(id)}
           />
         ))}
       </div>

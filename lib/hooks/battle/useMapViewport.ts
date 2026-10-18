@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, useCallback, useRef, useState, type WheelEvent } from "react";
+import { type PointerEvent, useCallback, useEffect, useRef, useState } from "react";
 
 const MIN_ZOOM = 1;
 
@@ -45,16 +45,33 @@ export function useMapViewport() {
 
   const pinch = useRef<number | null>(null);
 
-  const onWheel = useCallback((e: WheelEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-    const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
+  const dragged = useRef(false);
 
-    setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height));
+  useEffect(() => {
+    const el = containerRef.current;
+
+    if (!el) return;
+
+    const onWheel = (e: globalThis.WheelEvent) => {
+      e.preventDefault();
+
+      const rect = el.getBoundingClientRect();
+
+      const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
+
+      setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height));
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+
+    return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
   const onPointerDown = useCallback((e: PointerEvent<HTMLElement>) => {
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    dragged.current = false;
     drag.current = pointers.current.size === 1 ? { startX: e.clientX, startY: e.clientY, active: false } : null;
     pinch.current = null;
   }, []);
@@ -78,6 +95,7 @@ export function useMapViewport() {
       const last = pinch.current;
 
       pinch.current = dist;
+      dragged.current = true;
 
       if (last && last > 0) {
         const mx = (a.x + b.x) / 2 - rect.left;
@@ -94,7 +112,10 @@ export function useMapViewport() {
 
     if (!d) return;
 
-    if (!d.active && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > DRAG_THRESHOLD) d.active = true;
+    if (!d.active && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > DRAG_THRESHOLD) {
+      d.active = true;
+      dragged.current = true;
+    }
 
     if (!d.active) return;
 
@@ -111,12 +132,16 @@ export function useMapViewport() {
     drag.current = null;
   }, []);
 
+  const wasDragged = useCallback(() => dragged.current, []);
+
   const reset = useCallback(() => setView(INITIAL), []);
 
   return {
     zoom: view.zoom,
     offset: { x: view.x, y: view.y },
-    bind: { onWheel, onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+    containerRef,
+    wasDragged,
+    bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
     reset,
   };
 }
