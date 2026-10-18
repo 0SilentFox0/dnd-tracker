@@ -7,7 +7,7 @@ import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
-import { toReserve } from "@/lib/utils/battle/participant/reserve";
+import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, type NewBattleEvent } from "@/lib/utils/battle/store";
@@ -46,7 +46,7 @@ const defaultDeps: AddParticipantDeps = {
   fromUnit: createBattleParticipantFromUnit,
 };
 
-/** A unit added mid-battle copies the multipliers of a same-source enemy already on the field; none there means ×1. */
+/** A unit added mid-battle copies the multipliers of a same-source enemy on the field or in the reserve; none there means ×1. */
 function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): BattleParticipant {
   const { hpMultiplier, damageMultiplier } = twin.battleData;
 
@@ -84,7 +84,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, "Юніта не знайдено");
       }
 
-      const twin = side === ParticipantSide.ENEMY ? ctx.participants.find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
+      const twin = side === ParticipantSide.ENEMY ? [...ctx.participants, ...reserveOf(ctx.pending)].find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
 
       for (let i = 0; i < (data.quantity ?? 1); i++) {
         const fresh = await deps.fromUnit(unit, battleId, side, i + 1);
@@ -101,42 +101,43 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       };
     }
 
-    let order = ctx.participants;
+    const addedIds = new Set(added.map((p) => p.basicInfo.id));
+
+    const baked = applyBakedAuras([...ctx.participants, ...added], addedIds);
+
+    let order = baked.slice(0, ctx.participants.length);
 
     let turnIndex = ctx.scene.turnIndex;
 
-    for (const fresh of added) {
-      const initiative = calculateInitiative(fresh, [...order, fresh]);
+    for (const newcomer of baked.slice(ctx.participants.length)) {
+      const initiative = calculateInitiative(newcomer, [...order, newcomer]);
 
-      const p = { ...fresh, abilities: { ...fresh.abilities, initiative, baseInitiative: initiative } };
+      const p = { ...newcomer, abilities: { ...newcomer.abilities, initiative } };
 
-      const found = order.findIndex((other) => compareInitiative(p, other) < 0);
+      const current = order[turnIndex];
 
-      let at = found === -1 ? order.length : found;
+      let at: number;
 
-      // ті, кого ДМ щойно ввів, ходять одразу після поточного — новачок не обганяє їх
-      if (at > turnIndex) {
+      if (current && compareInitiative(p, current) < 0) {
+        // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+        at = order.findIndex((other) => compareInitiative(p, other) < 0);
+        turnIndex++;
+      } else {
+        // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
         let afterRun = turnIndex + 1;
 
         while (order[afterRun]?.battleData.revealPending) afterRun++;
 
-        if (at < afterRun) {
-          const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
+        const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
 
-          at = next === -1 ? order.length : next;
-        }
+        at = next === -1 ? order.length : next;
       }
-
-      // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
-      if (at <= turnIndex) turnIndex++;
 
       order = [...order.slice(0, at), p, ...order.slice(at)];
     }
 
-    const addedIds = new Set(added.map((p) => p.basicInfo.id));
-
     return {
-      participants: assignUnitControl(applyBakedAuras(order, addedIds), ctx.userId),
+      participants: assignUnitControl(order, ctx.userId),
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
       events: [dmEvent(ctx, added, "DM додав на поле")],

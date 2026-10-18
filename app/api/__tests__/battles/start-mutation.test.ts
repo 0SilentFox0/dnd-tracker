@@ -38,6 +38,14 @@ describe("start mutation", () => {
     expect(out.pending).toEqual([imp]);
   });
 
+  it("увесь склад у резерві — 422, на полі нікого", async () => {
+    const imp = createMockParticipant({ battleData: { ...createMockParticipant().battleData, reserved: true } });
+
+    const build = vi.fn(async () => ({ order: [], reserve: [imp], triggerLogEntries: [] }));
+
+    await expect(createStartMutation(build)(ctx)).rejects.toMatchObject({ code: "invalid_target", message: "Хоча б один учасник має бути на полі" });
+  });
+
   it("порожнє лобі — 422 invalid_target", async () => {
     await expect(createStartMutation(vi.fn())({ ...ctx, meta: { ...ctx.meta, setup: [] } } as never)).rejects.toMatchObject({ code: "invalid_target" });
   });

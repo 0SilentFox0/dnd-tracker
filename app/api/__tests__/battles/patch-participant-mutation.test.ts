@@ -14,6 +14,16 @@ describe("patch-participant mutation", () => {
     expect(out.scene?.turnIndex).toBe(1);
   });
 
+  it("видалення учасника з резерву прибирає його з pending, черга не змінюється", () => {
+    const imp = { ...participant("imp", { controlledBy: "dm" }), battleData: { ...goblin.battleData, reserved: true } };
+
+    const out = patchParticipantMutation(context({ pending: [imp] }), "imp", { removeFromBattle: true });
+
+    expect(out.pending).toEqual([]);
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
+    expect(out.events[0].resultText).toContain("з резерву");
+  });
+
   it("HP до 0 — unconscious і подія зі зміною HP", () => {
     const out = patchParticipantMutation(context(), "gob", { currentHp: 0 });
 

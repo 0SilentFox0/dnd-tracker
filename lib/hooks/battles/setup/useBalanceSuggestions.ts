@@ -57,12 +57,17 @@ export function useBalanceSuggestions({
   const applySuggestedEnemies = useCallback(() => {
     const allies = participants.filter((p) => p.side === ParticipantSide.ALLY);
 
-    const newEnemies: BattlePreparationParticipant[] = suggestedEnemies.map((s) => ({
-      id: s.unitId,
-      type: ParticipantSourceType.UNIT,
-      side: ParticipantSide.ENEMY,
-      quantity: s.quantity,
-    }));
+    const newEnemies: BattlePreparationParticipant[] = suggestedEnemies.map((s) => {
+      const reserved = Math.min(participants.find((p) => p.side === ParticipantSide.ENEMY && p.id === s.unitId)?.reserved ?? 0, s.quantity);
+
+      return {
+        id: s.unitId,
+        type: ParticipantSourceType.UNIT,
+        side: ParticipantSide.ENEMY,
+        quantity: s.quantity,
+        ...(reserved > 0 && { reserved }),
+      };
+    });
 
     setParticipants([...allies, ...newEnemies]);
     setSuggestedEnemies([]);

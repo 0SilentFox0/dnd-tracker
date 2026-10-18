@@ -13,6 +13,10 @@ export function createStartMutation(build = buildStartOrder) {
 
     const { order, reserve, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup);
 
+    if (order.length === 0) {
+      throw new BattleRuleError("invalid_target", "Хоча б один учасник має бути на полі");
+    }
+
     return {
       participants: assignUnitControl(order, ctx.userId),
       pending: reserve,
