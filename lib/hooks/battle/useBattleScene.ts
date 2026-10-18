@@ -23,6 +23,7 @@ import {
   useMoraleCheck,
   useNextTurn,
   useResetBattle,
+  useRevealBattleParticipants,
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,
@@ -59,6 +60,7 @@ export interface BattleSceneActions {
   complete: ReturnType<typeof useCompleteBattle>;
   rollback: ReturnType<typeof useRollbackBattleAction>;
   addParticipant: ReturnType<typeof useAddBattleParticipant>;
+  reveal: ReturnType<typeof useRevealBattleParticipants>;
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
   scaleUnits: ReturnType<typeof useScaleBattleUnits>;
 }
@@ -226,6 +228,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     complete: useCompleteBattle(campaignId, battleId, o),
     rollback: useRollbackBattleAction(campaignId, battleId, o),
     addParticipant: useAddBattleParticipant(campaignId, battleId, o),
+    reveal: useRevealBattleParticipants(campaignId, battleId, o),
     updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
     scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
   };
