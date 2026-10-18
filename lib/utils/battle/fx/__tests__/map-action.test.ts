@@ -66,4 +66,24 @@ describe("mapAction", () => {
   it("ability events only produce deaths", () => {
     expect(mapAction(action({ actionType: "ability", hpChanges: [{ participantId: "t", participantName: "T", oldHp: 3, newHp: 0, change: 3 }] })).map((s) => s.archetype)).toEqual(["death"]);
   });
+
+  it("berserk spell → debuff/fury", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellTargeting: "enemy", spellEffectKinds: ["berserk"] } }))[0]).toMatchObject({ archetype: "debuff", element: "fury" });
+  });
+
+  it("«Рій ос» → swarm/nature even though it deals damage", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Рій ос", spellDamageType: "piercing", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "swarm", element: "nature" });
+  });
+
+  it("«Землетрус» → quake/earth", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Землетрус", spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "quake", element: "earth" });
+  });
+
+  it("«Телепортація» (note only) → teleport/arcane", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellTargeting: "ally", spellEffectKinds: ["note"] } }))[0]).toMatchObject({ archetype: "teleport", element: "arcane" });
+  });
+
+  it("damage + lasting condition on one target stays a bolt with the damage element", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Глибока заморозка", spellDamageType: "cold", spellTargeting: "enemy", spellEffectKinds: ["dealDamage", "applyCondition"], totalDamage: 6 } }))[0]).toMatchObject({ archetype: "bolt", element: "cold" });
+  });
 });

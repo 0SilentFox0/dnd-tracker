@@ -1,4 +1,5 @@
 import { elementOf } from "./element";
+import { SPELL_FX_OVERRIDES } from "./overrides";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
@@ -11,7 +12,7 @@ const HEAL_KINDS = new Set(["heal", "hot"]);
 
 const SUMMON_KINDS = new Set(["summon", "raiseDead"]);
 
-function spellArchetype(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
+function spellRules(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
   const d = action.actionDetails;
 
   const kinds = new Set(d.spellEffectKinds ?? []);
@@ -20,6 +21,8 @@ function spellArchetype(action: BattleAction): { archetype: FxArchetype; element
 
   if ([...kinds].some((k) => SUMMON_KINDS.has(k))) return { archetype: "summon", element: "radiant" };
 
+  if (kinds.has("berserk")) return { archetype: "debuff", element: "fury" };
+
   if ((d.totalDamage ?? 0) > 0 || [...kinds].some((k) => DAMAGE_KINDS.has(k))) return { archetype: many ? "area" : "bolt", element: elementOf(d.spellDamageType, "arcane") };
 
   if ((d.totalHealing ?? 0) > 0 || [...kinds].some((k) => HEAL_KINDS.has(k))) return { archetype: "heal", element: "nature" };
@@ -27,6 +30,14 @@ function spellArchetype(action: BattleAction): { archetype: FxArchetype; element
   if ((d.appliedEffects ?? []).some((e) => e.type === "debuff" || e.type === "condition") || kinds.has("applyCondition") || kinds.has("charm")) return { archetype: "debuff", element: "necrotic" };
 
   return { archetype: "buff", element: "radiant" };
+}
+
+function spellArchetype(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
+  const computed = spellRules(action);
+
+  const override = SPELL_FX_OVERRIDES[action.actionDetails.spellName ?? ""];
+
+  return { ...computed, ...override };
 }
 
 function primary(action: BattleAction): FxSpec | null {

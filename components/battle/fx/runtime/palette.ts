@@ -19,4 +19,6 @@ export const PALETTE: Record<FxElement, FxPalette> = {
   arcane: { core: "#c27aff", tints: ["#ffffff", "#e3c6ff", "#c27aff", "#7a3dff"] },
   physical: { core: "#ffe7a8", tints: ["#ffffff", "#e3eeff", "#ffe7a8"], sprite: "spark", filter: "hue-rotate(170deg) saturate(.5) brightness(1.7)" },
   nature: { core: "#6dff8a", tints: ["#ffffff", "#c8ffd0", "#7dff98", "#3fd46a"], sprite: "rings", filter: "hue-rotate(-75deg) brightness(1.2)" },
+  earth: { core: "#b08850", tints: ["#e8d3a8", "#c8a26a", "#8a6234", "#5a3e20"] },
+  fury: { core: "#ff3030", tints: ["#ffd0c0", "#ff6a4a", "#e01818", "#7a0808"] },
 };

@@ -17,9 +17,9 @@ const ARCHETYPES = Object.keys(ANIMATIONS) as FxArchetype[];
 
 const ELEMENTS = Object.keys(PALETTE) as FxElement[];
 
-const ARCHETYPE_LABEL: Record<FxArchetype, string> = { melee: "Ближній", ranged: "Дальній", bolt: "Снаряд", area: "Область", heal: "Лікування", buff: "Бафф", debuff: "Дебафф", summon: "Прикликання", death: "Смерть" };
+const ARCHETYPE_LABEL: Record<FxArchetype, string> = { melee: "Ближній", ranged: "Дальній", bolt: "Снаряд", area: "Область", heal: "Лікування", buff: "Бафф", debuff: "Дебафф", summon: "Прикликання", death: "Смерть", swarm: "Рій", quake: "Землетрус", teleport: "Телепорт" };
 
-const ELEMENT_LABEL: Record<FxElement, string> = { fire: "Вогонь", cold: "Холод", lightning: "Блискавка", poison: "Отрута", necrotic: "Некротика", radiant: "Сяйво", arcane: "Аркана", physical: "Фізичний", nature: "Природа" };
+const ELEMENT_LABEL: Record<FxElement, string> = { fire: "Вогонь", cold: "Холод", lightning: "Блискавка", poison: "Отрута", necrotic: "Некротика", radiant: "Сяйво", arcane: "Аркана", physical: "Фізичний", nature: "Природа", earth: "Земля", fury: "Шал" };
 
 export function FxLab() {
   const [archetype, setArchetype] = useState<FxArchetype>("bolt");
