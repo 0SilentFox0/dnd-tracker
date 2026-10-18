@@ -3,8 +3,9 @@ import { z } from "zod";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { attackReachError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { battleActionToEvent } from "@/lib/utils/battle/store";
+import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
@@ -49,6 +50,12 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
   assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+
+  const targets = targetIds.flatMap((id) => ctx.participants.find((p) => p.basicInfo.id === id) ?? []);
+
+  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
+
+  if (reach) throw new BattleRuleError("action_rejected", reach);
 }
 
 const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };

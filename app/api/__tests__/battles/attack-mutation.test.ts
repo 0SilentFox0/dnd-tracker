@@ -25,6 +25,7 @@ const ctx = {
   scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, startedAt: null, completedAt: null },
   participants: [hero, goblin],
   pending: [],
+  meta: { map: null },
   userId: "user-1",
   isDM: false,
 } as unknown as BattleMutationContext;
@@ -94,5 +95,26 @@ describe("attack mutation", () => {
     await expect(attackMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } } as BattleMutationContext, body())).rejects.toThrow(
       expect.objectContaining({ code: "action_used" }),
     );
+  });
+
+  describe("карта", () => {
+    const map = { grid: "square", cols: 10, rows: 5, background: null, opacity: 0.3 };
+
+    const placed = [
+      { ...hero, battleData: { ...hero.battleData, position: { x: 0, y: 0 } } },
+      { ...goblin, battleData: { ...goblin.battleData, position: { x: 5, y: 0 } } },
+    ];
+
+    it("на карті ближня атака по далекій цілі відхиляється", async () => {
+      const onMap = { ...ctx, participants: placed, meta: { map } } as unknown as BattleMutationContext;
+
+      expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
+    });
+
+    it("без карти та сама атака проходить як раніше", async () => {
+      const noMap = { ...ctx, participants: placed, meta: { map: null } } as unknown as BattleMutationContext;
+
+      expect(await errorCode(attackMutation(noMap, body()))).toBeUndefined();
+    });
   });
 });
