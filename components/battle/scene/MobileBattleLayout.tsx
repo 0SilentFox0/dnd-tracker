@@ -11,6 +11,7 @@ import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
 
 import { BattleLog } from "@/components/battle/log/BattleLog";
+import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
@@ -24,10 +25,18 @@ import { cn } from "@/lib/utils";
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
+const MAP_TAB = "map";
+
+type Tab = ParticipantSide | typeof MAP_TAB;
+
 export function MobileBattleLayout() {
   const { battle, awaiting, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog } = useBattleScene();
 
-  const [tab, setTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
+  const hasMap = !!battle.map;
+
+  const [pickedTab, setTab] = useState<Tab>(MAP_TAB);
+
+  const tab: Tab = pickedTab === MAP_TAB && !hasMap ? ParticipantSide.ENEMY : pickedTab;
 
   const [dmOpen, setDmOpen] = useState(false);
 
@@ -35,7 +44,7 @@ export function MobileBattleLayout() {
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
-  const tabBtn = (side: ParticipantSide, label: string, n: number) => (
+  const tabBtn = (side: Tab, label: string, n?: number) => (
     <button role="tab" aria-selected={tab === side} type="button" onClick={() => setTab(side)} className={cn("hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]", tab === side ? "text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]" : "text-[var(--hud-muted)]")}>
       {label} {n}
     </button>
@@ -58,6 +67,7 @@ export function MobileBattleLayout() {
       )}
       <div className="mx-4 flex h-11 border-b border-white/[.18]">
         <div role="tablist" className="flex flex-1">
+          {hasMap && tabBtn(MAP_TAB, "Карта")}
           {tabBtn(ParticipantSide.ALLY, "Союзники", allies.length)}
           {tabBtn(ParticipantSide.ENEMY, "Вороги", enemies.length)}
         </div>
@@ -67,9 +77,13 @@ export function MobileBattleLayout() {
           </button>
         )}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <ParticipantList side={tab} />
-      </div>
+      {tab === MAP_TAB ? (
+        <div className="min-h-0 flex-1 p-2"><BattleMapPanel /></div>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <ParticipantList side={tab} />
+        </div>
+      )}
       {hero && (
         <div className="border-t border-white/[.22] bg-black/70 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3">
           <MyHeroPanel hero={hero} compact={isMyTurn} />

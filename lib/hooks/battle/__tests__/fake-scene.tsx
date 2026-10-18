@@ -23,6 +23,7 @@ export interface FakeSceneOptions {
   isDM?: boolean;
   status?: BattleScene["status"];
   afterLog?: BattleAction[];
+  map?: BattleScene["map"];
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -60,7 +61,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
     initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
-    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null,
+    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, map: opts.map ?? null,
   } as BattleScene;
 
   const usedMe = { ...me, actionFlags: { ...me.actionFlags, hasUsedAction: true, hasUsedBonusAction: true } };
@@ -83,6 +84,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     addParticipant: mutation(),
     updateParticipant: mutation(),
     scaleUnits: mutation(),
+    move: mutation(),
   };
 
   const showResult = vi.fn();

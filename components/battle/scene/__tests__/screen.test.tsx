@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { renderToString } from "react-dom/server";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -12,8 +12,56 @@ vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => media.
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
+vi.stubGlobal("ResizeObserver", class {
+  observe() {}
+  disconnect() {}
+  unobserve() {}
+});
+
+const MAP = { cols: 4, rows: 3, background: null, opacity: 0.3 };
+
 describe("BattleScreen", () => {
   afterEach(cleanup);
+
+  it("десктоп з картою: карта замість списків, журнал праворуч", async () => {
+    media.wide = true;
+
+    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+
+    const { container } = render(<BattleScreen />, { wrapper });
+
+    expect(await screen.findByText("Журнал")).toBeTruthy();
+    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
+    expect(screen.queryByText(/Союзники ·/)).toBeNull();
+    expect(screen.queryByText(/Вороги ·/)).toBeNull();
+  });
+
+  it("телефон з картою: вкладка «Карта» за замовчуванням, є «Союзники» і «Вороги»", () => {
+    media.wide = false;
+
+    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+
+    const { container } = render(<BattleScreen />, { wrapper });
+
+    expect(screen.getByRole("tab", { name: /Карта/ }).getAttribute("aria-selected")).toBe("true");
+    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: /Вороги/ }));
+
+    expect(container.querySelector("[data-fx-clip]")).toBeNull();
+    expect(screen.getByRole("tab", { name: /Вороги/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("телефон без карти: вкладки Карта немає", () => {
+    media.wide = false;
+
+    const { wrapper } = fakeScene({ isMyTurn: false });
+
+    const { container } = render(<BattleScreen />, { wrapper });
+
+    expect(screen.queryByRole("tab", { name: /Карта/ })).toBeNull();
+    expect(container.querySelector("[data-fx-clip]")).toBeNull();
+  });
 
   it("серверний HTML не містить обчисленої висоти шапки", () => {
     media.wide = false;

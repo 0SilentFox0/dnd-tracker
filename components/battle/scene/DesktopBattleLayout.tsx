@@ -9,6 +9,7 @@ import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
 
 import { BattleLog } from "@/components/battle/log/BattleLog";
+import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
@@ -48,10 +49,14 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
           {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
           {isDM && <DmPanel />}
         </aside>
-        <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
-          <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
-          <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
-        </main>
+        {battle.map ? (
+          <main className="min-h-0 p-3"><BattleMapPanel /></main>
+        ) : (
+          <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
+            <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
+            <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
+          </main>
+        )}
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
             {selected ? "Учасник" : "Журнал"}
