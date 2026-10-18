@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { safeFetchBuffer, SafeFetchError, sniffImageMime } from "@/lib/utils/api/safe-fetch";
 
 export const ARTIFACT_ICONS_BUCKET = "artifact-icons" as const;
 
@@ -14,18 +15,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 /** Макс. довжина рядка data URL (base64 роздуває файл ~на 33%). */
 const MAX_DATA_URL_CHARS = 7 * 1024 * 1024;
 
-function getExtensionFromUrl(url: string): string {
-  try {
-    const pathname = new URL(url).pathname;
-
-    const match = pathname.match(/\.(png|jpg|jpeg|gif|webp|svg)(\?|$)/i);
-
-    return match ? `.${match[1].toLowerCase()}` : ".png";
-  } catch {
-    return ".png";
-  }
-}
-
 function getExtensionFromContentType(contentType: string | null): string {
   if (!contentType) return ".png";
 
@@ -35,7 +24,6 @@ function getExtensionFromContentType(contentType: string | null): string {
     "image/jpg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
-    "image/svg+xml": ".svg",
   };
 
   return map[contentType.split(";")[0].trim().toLowerCase()] ?? ".png";
@@ -170,6 +158,10 @@ export async function uploadArtifactIconDataUrlToSupabase(
     return { ok: false, message: "Файл завеликий (макс. 5 МБ)" };
   }
 
+  if (sniffImageMime(buffer) !== mime) {
+    return { ok: false, message: "Дозволені формати: PNG, JPEG, GIF, WebP" };
+  }
+
   let supabase: ReturnType<typeof createAdminClient>;
 
   try {
@@ -299,42 +291,44 @@ export async function mirrorArtifactIconToSupabase(
     return { ok: false, message: ensured.message };
   }
 
-  const res = await fetch(sourceUrl.trim(), {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; DnD-Combat-Tracker/1.0)",
-    },
-    redirect: "follow",
-  });
+  let fetched: Awaited<ReturnType<typeof safeFetchBuffer>>;
 
-  if (!res.ok) {
+  try {
+    fetched = await safeFetchBuffer(sourceUrl, {
+      maxBytes: MAX_BYTES,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; DnD-Combat-Tracker/1.0)" },
+    });
+  } catch (e) {
     return {
       ok: false,
-      message: `Не вдалося завантажити зображення (${res.status})`,
+      message: e instanceof SafeFetchError ? e.message : "Не вдалося завантажити зображення",
     };
   }
 
-  const len = res.headers.get("content-length");
-
-  if (len && parseInt(len, 10) > MAX_BYTES) {
-    return { ok: false, message: "Файл завеликий (макс. 5 МБ)" };
+  if (fetched.status < 200 || fetched.status >= 300) {
+    return {
+      ok: false,
+      message: `Не вдалося завантажити зображення (${fetched.status})`,
+    };
   }
 
-  const buffer = Buffer.from(await res.arrayBuffer());
+  const buffer = fetched.body;
 
-  if (buffer.length > MAX_BYTES) {
-    return { ok: false, message: "Файл завеликий (макс. 5 МБ)" };
-  }
+  let mime = fetched.contentType?.split(";")[0].trim().toLowerCase() ?? "";
 
-  const contentType = res.headers.get("content-type");
+  if (mime === "image/jpg") mime = "image/jpeg";
 
-  const ctBase = contentType?.split(";")[0].trim().toLowerCase() ?? "";
-
-  if (!ctBase.startsWith("image/")) {
+  if (!mime.startsWith("image/")) {
     return { ok: false, message: "URL не вказує на зображення" };
   }
 
-  const ext =
-    getExtensionFromContentType(contentType) || getExtensionFromUrl(sourceUrl);
+  if (!ALLOWED_DATA_URL_MIME.has(mime) || sniffImageMime(buffer) !== mime) {
+    return { ok: false, message: "Дозволені формати: PNG, JPEG, GIF, WebP" };
+  }
+
+  const contentType = mime;
+
+  const ext = getExtensionFromContentType(mime);
 
   const safeBase = options.objectBaseName.replace(/[^a-zA-Z0-9_-]/g, "");
 
@@ -349,7 +343,7 @@ export async function mirrorArtifactIconToSupabase(
   const { error: uploadError } = await supabase.storage
     .from(bucket)
     .upload(fullPath, buffer, {
-      contentType: contentType ?? "image/png",
+      contentType,
       upsert: true,
       cacheControl,
     });
