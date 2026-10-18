@@ -41,7 +41,7 @@ function center(el: Element, layer: Element): FxPoint {
 function targetsFor(archetype: FxArchetype) {
   if (archetype === "heal" || archetype === "buff") return ["a1"];
 
-  return archetype === "area" ? ["e1", "e2"] : ["e1"];
+  return archetype === "area" || archetype === "meteor" || archetype === "entangle" ? ["e1", "e2"] : ["e1"];
 }
 
 export function FxLabPanel({ archetype, element, critical, hit, playToken }: Props) {

@@ -12,6 +12,7 @@ import { physicalRangedFrame } from "./physical-ranged";
 import { poisonFrame } from "./poison";
 import { radiantFrame } from "./radiant";
 import type { FrameAnimation } from "./types";
+import { windFrame } from "./wind";
 
 import type { FxElement, FxImpact } from "@/lib/utils/battle/fx";
 
@@ -27,7 +28,7 @@ export const FRAME_ANIMATIONS: Record<FxElement, FrameAnimation> = {
   nature: natureFrame,
   earth: earthFrame,
   fury: furyFrame,
-  wind: arcaneFrame,
+  wind: windFrame,
 };
 
 export const HEAL_FRAME = healFrame;
