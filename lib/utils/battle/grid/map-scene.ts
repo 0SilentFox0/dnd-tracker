@@ -14,18 +14,28 @@ export interface MapAim {
   onAim(cell: GridPoint): void;
 }
 
-export interface MapSceneInput {
-  map: BattleMapConfig;
-  participants: BattleParticipant[];
+/** Хто дивиться на карту й чи може зараз ходити. */
+export interface MapSceneActor {
   current: BattleParticipant | null;
   viewer: Viewer;
   canAct: boolean;
   isDM: boolean;
+}
+
+/** Режим кліку по карті: розстановка DM, інструмент місцевості або наведення шаблону. */
+export interface MapSceneMode {
   placing: boolean;
-  toolActive?: boolean;
   placingId: string | null;
-  selectedId: string | null;
+  toolActive?: boolean;
   aim?: MapAim | null;
+}
+
+export interface MapSceneInput {
+  map: BattleMapConfig;
+  participants: BattleParticipant[];
+  selectedId: string | null;
+  actor: MapSceneActor;
+  mode: MapSceneMode;
 }
 
 export type MapClick =
@@ -65,18 +75,20 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
   return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: at };
 }
 
-export function deriveMapScene(input: MapSceneInput): MapScene {
-  const { map, current, viewer, canAct, isDM, selectedId, placingId } = input;
+export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSceneInput): MapScene {
+  const { current, viewer, canAct, isDM } = actor;
 
-  const placing = input.placing && isDM;
+  const { placingId } = mode;
 
-  const tool = Boolean(input.toolActive) && isDM;
+  const placing = mode.placing && isDM;
+
+  const tool = Boolean(mode.toolActive) && isDM;
 
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
-  const aimCaster = input.aim && !placing && !tool ? participants.find((p) => p.basicInfo.id === input.aim?.casterId) : undefined;
+  const aimCaster = mode.aim && !placing && !tool ? participants.find((p) => p.basicInfo.id === mode.aim?.casterId) : undefined;
 
-  const aim = aimCaster && isOnMap(aimCaster) ? input.aim : null;
+  const aim = aimCaster && isOnMap(aimCaster) ? mode.aim : null;
 
   const marks = new Map<string, CellMark | number>();
 

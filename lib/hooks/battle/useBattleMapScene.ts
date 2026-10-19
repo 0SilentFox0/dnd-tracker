@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
-import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick } from "@/lib/utils/battle/grid";
+import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -19,6 +19,12 @@ export interface BattleMapScene {
 }
 
 const NO_ORDER: BattleParticipant[] = [];
+
+type MapClickHandlers = { [K in MapClick["kind"]]: (click: Extract<MapClick, { kind: K }>) => void };
+
+function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, click: Extract<MapClick, { kind: K }>) {
+  (handlers[click.kind] as (c: typeof click) => void)(click);
+}
 
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
@@ -54,9 +60,13 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const canAct = isMyTurn && !anyPending && !!current;
 
+  const actor = useMemo<MapSceneActor>(() => ({ current, viewer, canAct, isDM }), [current, viewer, canAct, isDM]);
+
+  const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim }), [placing, placingId, toolActive, mapAim]);
+
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId, aim: mapAim }) : null),
-    [map, order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId, mapAim],
+    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode }) : null),
+    [map, order, selectedId, actor, mode],
   );
 
   const { pending: pendingStroke } = terrainTool;
@@ -78,34 +88,21 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { currentRound, currentTurnIndex } = battle;
 
-  const handle = useCallback(
-    (click: MapClick) => {
-      switch (click.kind) {
-        case "move":
-          move({ participantId: click.participantId, to: click.to, ...(click.free && { free: true }) });
-          break;
-        case "attack":
-          if (current) requestAttack({ targetId: click.targetId, ...(click.attackId && { attackId: click.attackId }), actorId: current.basicInfo.id, round: currentRound, turnIndex: currentTurnIndex });
+  const handle = useMemo(() => {
+    const handlers: MapClickHandlers = {
+      move: (c) => move({ participantId: c.participantId, to: c.to, ...(c.free && { free: true }) }),
+      attack: (c) => {
+        if (current) requestAttack({ targetId: c.targetId, ...(c.attackId && { attackId: c.attackId }), actorId: current.basicInfo.id, round: currentRound, turnIndex: currentTurnIndex });
+      },
+      reject: (c) => show(c.reason),
+      select: (c) => select(c.id),
+      arm: (c) => setPlacingId(c.id),
+      aim: (c) => mapAim?.onAim(c.cell),
+      none: () => undefined,
+    };
 
-          break;
-        case "reject":
-          show(click.reason);
-          break;
-        case "select":
-          select(click.id);
-          break;
-        case "arm":
-          setPlacingId(click.id);
-          break;
-        case "aim":
-          mapAim?.onAim(click.cell);
-          break;
-        case "none":
-          break;
-      }
-    },
-    [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim],
-  );
+    return (click: MapClick) => dispatchClick(handlers, click);
+  }, [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim]);
 
   const { commit } = terrainTool;
 

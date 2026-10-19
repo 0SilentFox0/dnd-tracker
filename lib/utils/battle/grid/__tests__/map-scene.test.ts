@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapSceneInput } from "../map-scene";
+import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapSceneActor, type MapSceneInput, type MapSceneMode } from "../map-scene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -29,17 +29,15 @@ const far = at("e2", { x: 5, y: 0 }, ParticipantSide.ENEMY);
 
 const reserved = at("r", { x: 8, y: 4 }, ParticipantSide.ENEMY, { reserved: true });
 
-function input(over: Partial<MapSceneInput> = {}): MapSceneInput {
+type InputOverride = Partial<Pick<MapSceneInput, "map" | "participants" | "selectedId">> & { actor?: Partial<MapSceneActor>; mode?: Partial<MapSceneMode> };
+
+function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
   return {
     map,
     participants: [hero, near, far, reserved],
-    current: hero,
-    viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false },
-    canAct: true,
-    isDM: false,
-    placing: false,
-    placingId: null,
     selectedId: null,
+    actor: { current: hero, viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false }, canAct: true, isDM: false, ...actor },
+    mode: { placing: false, placingId: null, ...mode },
     ...over,
   };
 }
@@ -81,7 +79,7 @@ describe("deriveMapScene", () => {
   });
 
   it("не свій хід: без позначок, клітинка нічого не робить, токен лише вибирається", () => {
-    const s = deriveMapScene(input({ canAct: false }));
+    const s = deriveMapScene(input({ actor: { canAct: false } }));
 
     expect(s.view.marks?.size ?? 0).toBe(0);
     expect(s.cellClick({ x: 0, y: 1 })).toEqual({ kind: "none" });
@@ -111,13 +109,13 @@ describe("deriveMapScene", () => {
   });
 
   it("ДМ поза режимом розстановки: вибраний токен не телепортується, клітинка нічого не робить", () => {
-    const s = deriveMapScene(input({ isDM: true, canAct: false, selectedId: "e2" }));
+    const s = deriveMapScene(input({ actor: { isDM: true, canAct: false }, selectedId: "e2" }));
 
     expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "none" });
   });
 
   it("розстановка: клік по токену (і союзнику під час ходу ДМ) озброює, а не атакує", () => {
-    const s = deriveMapScene(input({ isDM: true, placing: true }));
+    const s = deriveMapScene(input({ actor: { isDM: true }, mode: { placing: true } }));
 
     expect(s.tokenClick("e1")).toEqual({ kind: "arm", id: "e1" });
     expect(s.tokenClick("h")).toEqual({ kind: "arm", id: "h" });
@@ -125,7 +123,7 @@ describe("deriveMapScene", () => {
   });
 
   it("розстановка: клітинка — вільний рух озброєного токена, режим лишається", () => {
-    const s = deriveMapScene(input({ isDM: true, placing: true, placingId: "e2" }));
+    const s = deriveMapScene(input({ actor: { isDM: true }, mode: { placing: true, placingId: "e2" } }));
 
     expect(s.view.selectedId).toBe("e2");
     expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "move", participantId: "e2", to: { x: 9, y: 4 }, free: true });
@@ -133,11 +131,11 @@ describe("deriveMapScene", () => {
   });
 
   it("розстановка без озброєного токена: клітинка нічого не робить", () => {
-    expect(deriveMapScene(input({ isDM: true, placing: true })).cellClick({ x: 3, y: 3 })).toEqual({ kind: "none" });
+    expect(deriveMapScene(input({ actor: { isDM: true }, mode: { placing: true } })).cellClick({ x: 3, y: 3 })).toEqual({ kind: "none" });
   });
 
   it("не-ДМ ігнорує режим розстановки", () => {
-    const s = deriveMapScene(input({ isDM: false, placing: true, placingId: "e2" }));
+    const s = deriveMapScene(input({ actor: { isDM: false }, mode: { placing: true, placingId: "e2" } }));
 
     expect(s.cellClick({ x: 9, y: 4 })).toEqual({ kind: "none" });
     expect(s.tokenClick("e1")).toEqual({ kind: "attack", targetId: "e1", attackId: "s" });
@@ -146,7 +144,7 @@ describe("deriveMapScene", () => {
   it("ДМ поза режимом на ході ворога: союзник — атака", () => {
     const enemy = at("e1", { x: 1, y: 0 }, ParticipantSide.ENEMY);
 
-    const s = deriveMapScene(input({ isDM: true, current: enemy, participants: [hero, enemy, far] }));
+    const s = deriveMapScene(input({ actor: { isDM: true, current: enemy }, participants: [hero, enemy, far] }));
 
     expect(s.tokenClick("h")).toEqual({ kind: "attack", targetId: "h", attackId: "s" });
   });
@@ -156,7 +154,7 @@ describe("deriveMapScene", () => {
 
     const archer = { ...hero, battleData: { ...hero.battleData, attacks: [sword, bow] } };
 
-    const s = deriveMapScene(input({ current: archer, participants: [archer, far] }));
+    const s = deriveMapScene(input({ actor: { current: archer }, participants: [archer, far] }));
 
     expect(s.view.marks?.get("5:0")).toBe("target");
     expect(s.tokenClick("e2")).toEqual({ kind: "attack", targetId: "e2", attackId: "b" });
@@ -181,13 +179,13 @@ describe("deriveMapScene", () => {
   it("атака вже використана — цілей немає", () => {
     const used = { ...hero, actionFlags: { ...hero.actionFlags, hasUsedAction: true } };
 
-    const s = deriveMapScene(input({ current: used, participants: [used, near, far] }));
+    const s = deriveMapScene(input({ actor: { current: used }, participants: [used, near, far] }));
 
     expect(s.tokenClick("e1")).toEqual({ kind: "select", id: "e1" });
   });
 
   it("інструмент місцевості (ДМ): без зони ходу, клітинки й токени не діють", () => {
-    const s = deriveMapScene(input({ isDM: true, toolActive: true }));
+    const s = deriveMapScene(input({ actor: { isDM: true }, mode: { toolActive: true } }));
 
     expect(s.view.marks?.size).toBe(0);
     expect(s.cellClick({ x: 1, y: 1 })).toEqual({ kind: "none" });
@@ -199,7 +197,7 @@ describe("deriveMapScene: наведення шаблону", () => {
   const aim = (over: Partial<MapAim> = {}): MapAim => ({ template: { shape: "circle", size: 5 }, casterId: "h", range: 15, onAim: () => undefined, ...over });
 
   it("без зони ходу й цілей; клітинка в дальності — aim, поза — reject «Поза дальністю»", () => {
-    const s = deriveMapScene(input({ aim: aim() }));
+    const s = deriveMapScene(input({ mode: { aim: aim() } }));
 
     expect([...(s.view.marks?.values() ?? [])]).toEqual([]);
     expect(s.aiming).toBe(true);
@@ -208,13 +206,13 @@ describe("deriveMapScene: наведення шаблону", () => {
   });
 
   it("клік по токену цілиться в його клітинку, а не атакує", () => {
-    const s = deriveMapScene(input({ aim: aim() }));
+    const s = deriveMapScene(input({ mode: { aim: aim() } }));
 
     expect(s.tokenClick("e1")).toEqual({ kind: "aim", cell: { x: 1, y: 0 } });
   });
 
   it("обрана точка — клітинки шаблону й aim у view", () => {
-    const s = deriveMapScene(input({ aim: aim({ aim: { x: 2, y: 2 } }) }));
+    const s = deriveMapScene(input({ mode: { aim: aim({ aim: { x: 2, y: 2 } }) } }));
 
     expect(s.view.aim).toEqual({ x: 2, y: 2 });
     expect(s.view.marks?.get("2:2")).toBe("template");
