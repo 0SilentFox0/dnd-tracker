@@ -168,12 +168,34 @@ describe("deriveMapScene", () => {
     expect(s.participants.map((p) => p.basicInfo.id)).toEqual(["h", "e1", "e2"]);
   });
 
-  it("траєкторія: лише наведення на ціль", () => {
-    const { view } = deriveMapScene(input());
+  it("траєкторія: лише наведення на ціль, з видом атаки", () => {
+    const bow = { id: "b", name: "Лук", type: AttackType.RANGED, range: "60 ft" } as BattleAttack;
 
-    expect(deriveTrajectory(view.marks, "h", { x: 1, y: 0 })).toEqual({ fromId: "h", to: { x: 1, y: 0 } });
-    expect(deriveTrajectory(view.marks, "h", { x: 0, y: 1 })).toBeNull();
-    expect(deriveTrajectory(view.marks, "h", null)).toBeNull();
+    const archer = { ...hero, battleData: { ...hero.battleData, attacks: [bow, sword] } };
+
+    const participants = [archer, near, far];
+
+    const { view } = deriveMapScene(input({ actor: { current: archer }, participants }));
+
+    const scene = { map, participants, marks: view.marks, current: archer };
+
+    expect(deriveTrajectory(scene, { x: 1, y: 0 })).toEqual({ fromId: "h", targetId: "e1", to: { x: 1, y: 0 }, kind: "melee" });
+    expect(deriveTrajectory(scene, { x: 0, y: 1 })).toBeNull();
+    expect(deriveTrajectory(scene, null)).toBeNull();
+
+    const free = [archer, far];
+
+    const open = deriveMapScene(input({ actor: { current: archer }, participants: free }));
+
+    expect(deriveTrajectory({ map, participants: free, marks: open.view.marks, current: archer }, { x: 5, y: 0 })).toMatchObject({ targetId: "e2", kind: "ranged" });
+  });
+
+  it("клік по сусіду з луком першим у списку — ближня атака", () => {
+    const bow = { id: "b", name: "Лук", type: AttackType.RANGED, range: "60 ft" } as BattleAttack;
+
+    const archer = { ...hero, battleData: { ...hero.battleData, attacks: [bow, sword] } };
+
+    expect(deriveMapScene(input({ actor: { current: archer }, participants: [archer, near] })).tokenClick("e1")).toEqual({ kind: "attack", targetId: "e1", attackId: "s" });
   });
 
   it("атака вже використана — цілей немає", () => {

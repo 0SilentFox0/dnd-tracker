@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { aimView, cellKey, cellsOf, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks, templateArea } from "@/lib/utils/battle/grid";
+import { aimView, cellKey, cellsOf, deriveTrajectory, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks, templateArea } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack" | "template";
@@ -63,7 +63,7 @@ export function useBattleMapPlayground() {
 
   const costs = useMemo(() => moveMarks(map, participants, active), [map, participants, active]);
 
-  const trajectory = mode === "attack" && hover && marks.get(cellKey(hover)) === "target" ? { fromId: activeId, to: hover } : null;
+  const trajectory = mode === "attack" ? deriveTrajectory({ map, participants, marks, current: active }, hover) : null;
 
   const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true }])), [participants]);
 

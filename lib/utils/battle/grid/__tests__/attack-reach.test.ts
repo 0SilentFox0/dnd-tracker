@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { attackRangeCells, attackReachError, enemiesInReach } from "../attack-reach";
+import { attackRangeCells, attackReachError, enemiesInReach, pickAttack } from "../attack-reach";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -107,5 +107,36 @@ describe("правила атак на карті", () => {
     const loose = at("e3", undefined, ParticipantSide.ENEMY);
 
     expect(attackReachError(map, [hero, loose], hero, sword, [loose])).toBeNull();
+  });
+});
+
+describe("pickAttack: спершу ближня", () => {
+  const hero = at("h", { x: 5, y: 5 }, ParticipantSide.ALLY);
+
+  const adjacent = at("e1", { x: 6, y: 5 }, ParticipantSide.ENEMY);
+
+  const distant = at("e2", { x: 15, y: 5 }, ParticipantSide.ENEMY);
+
+  it("лук першим у списку, ворог поруч — ближня", () => {
+    expect(pickAttack(map, [hero, adjacent], hero, [bow, sword], adjacent)).toEqual({ attack: sword, error: null });
+  });
+
+  it("далекий ворог, ніхто не поруч — дальня", () => {
+    expect(pickAttack(map, [hero, distant], hero, [sword, bow], distant).attack).toBe(bow);
+  });
+
+  it("без карти — перша ближня, без ближньої — перша", () => {
+    expect(pickAttack(null, [hero, distant], hero, [bow, sword], distant).attack).toBe(sword);
+    expect(pickAttack(null, [hero, distant], hero, [sling, bow], distant).attack).toBe(sling);
+  });
+
+  it("без позиції атакувальника — перша ближня", () => {
+    const loose = at("h2", undefined, ParticipantSide.ALLY);
+
+    expect(pickAttack(map, [loose, distant], loose, [bow, sword], distant).attack).toBe(sword);
+  });
+
+  it("ніщо не дістає — помилка", () => {
+    expect(pickAttack(map, [hero, distant], hero, [sword], distant)).toEqual({ attack: null, error: "Ціль не поруч — спершу підійдіть" });
   });
 });

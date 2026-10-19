@@ -19,9 +19,10 @@ export interface MapTokenProps {
   current?: boolean;
   passThrough?: boolean;
   onClick?: (id: string) => void;
+  onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, onClick }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
@@ -53,6 +54,8 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
           e.stopPropagation();
           onClick?.(id);
         }}
+        onPointerEnter={onHover && (() => onHover(id))}
+        onPointerLeave={onHover && (() => onHover(null))}
         className={cn("absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center rounded-full", passThrough ? "pointer-events-none" : "pointer-events-auto", selected && "ring-2 ring-[var(--gold)]")}
         style={{ width: `${PORTRAIT_SHARE * 100}%`, height: `${PORTRAIT_SHARE * 100}%` }}
       >

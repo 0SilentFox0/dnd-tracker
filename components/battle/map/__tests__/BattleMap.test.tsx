@@ -211,6 +211,33 @@ describe("BattleMap", () => {
     expect(onCellClick).not.toHaveBeenCalled();
   });
 
+  it("наведення на портрет повідомляє клітинку токена, вихід — null", () => {
+    const onCellHover = vi.fn();
+
+    const { container } = render(<BattleMap map={square} participants={people} actions={{ onCellHover }} />);
+
+    const token = container.querySelector('[data-fx-participant="e"]') as Element;
+
+    fireEvent.pointerEnter(token);
+    expect(onCellHover).toHaveBeenLastCalledWith({ x: 3, y: 2 });
+
+    fireEvent.pointerLeave(token);
+    expect(onCellHover).toHaveBeenLastCalledWith(null);
+  });
+
+  it("підказка атаки: дальня — лінія, ближня — меч у шарі токенів без лінії", () => {
+    const ranged = render(<BattleMap map={square} participants={people} view={{ trajectory: { fromId: "h", targetId: "e", to: { x: 3, y: 2 }, kind: "ranged" } }} />);
+
+    expect(ranged.container.querySelector('line[data-map-attack-hint="ranged"]')).not.toBeNull();
+    expect(ranged.container.querySelector('[data-map-attack-hint="melee"]')).toBeNull();
+    cleanup();
+
+    const melee = render(<BattleMap map={square} participants={people} view={{ trajectory: { fromId: "h", targetId: "e", to: { x: 3, y: 2 }, kind: "melee" } }} />);
+
+    expect(melee.container.querySelector('[data-map-tokens] > [data-map-attack-hint="melee"]')).not.toBeNull();
+    expect(melee.container.querySelector('line[data-map-attack-hint="ranged"]')).toBeNull();
+  });
+
   it("colors marked cells", () => {
     const { container } = render(<BattleMap map={square} participants={people} view={{ marks: new Map([["0:0", "target"]]) }} />);
 

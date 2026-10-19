@@ -47,3 +47,26 @@ export function enemiesInReach(map: BattleMapConfig | null, participants: Battle
     (p) => p.basicInfo.side !== attacker.basicInfo.side && isActive(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
   );
 }
+
+/** Ближня атака, якщо дістає; інакше перша досяжна. Без карти чи позиції — перша ближня, інакше перша. */
+export function pickAttack(
+  map: BattleMapConfig | null,
+  participants: BattleParticipant[],
+  attacker: BattleParticipant,
+  attacks: BattleAttack[],
+  target: BattleParticipant,
+): { attack: BattleAttack | null; error: string | null } {
+  const isMelee = (a: BattleAttack) => attackKindOf(a.type) === AttackType.MELEE;
+
+  let error: string | null = null;
+
+  for (const attack of [...attacks.filter(isMelee), ...attacks.filter((a) => !isMelee(a))]) {
+    const e = attackReachError(map, participants, attacker, attack, [target]);
+
+    if (e === null) return { attack, error: null };
+
+    error ??= e;
+  }
+
+  return { attack: null, error };
+}

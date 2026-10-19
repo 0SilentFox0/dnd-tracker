@@ -2,6 +2,7 @@
 
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { Sword } from "lucide-react";
 
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
@@ -17,6 +18,7 @@ import {
   cellLine,
   type CellMark,
   cellPolygon,
+  centreCell,
   fitMapView,
   isMoveMark,
   mapSize,
@@ -233,6 +235,30 @@ const TemplateLayer = memo(function TemplateLayer({ marks, aim }: { marks: Battl
 
 const NO_CELLS: ReadonlySet<string> = new Set();
 
+interface MeleeHintProps {
+  box: { cx: number; cy: number; size: number };
+  mapSize: { width: number; height: number };
+  pxPerUnit: number;
+}
+
+// HTML поверх токенів, а не в SVG: шар токенів контр-повертається на телефоні, тож меч стоїть рівно
+function MeleeHint({ box, mapSize, pxPerUnit }: MeleeHintProps) {
+  return (
+    <div
+      data-map-attack-hint="melee"
+      className="pointer-events-none absolute z-30 flex items-center justify-center"
+      style={{
+        left: `${((box.cx - box.size / 2) / mapSize.width) * 100}%`,
+        top: `${((box.cy - box.size / 2) / mapSize.height) * 100}%`,
+        width: `${(box.size / mapSize.width) * 100}%`,
+        height: `${(box.size / mapSize.height) * 100}%`,
+      }}
+    >
+      <Sword className="text-[#f2c14e] drop-shadow-[0_2px_3px_rgba(0,0,0,.9)]" style={{ width: Math.max(14, box.size * pxPerUnit * 0.45), height: Math.max(14, box.size * pxPerUnit * 0.45) }} strokeWidth={2.5} />
+    </div>
+  );
+}
+
 interface Stroke {
   pointerId: number;
   x: number;
@@ -374,11 +400,27 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
+  const onCellHover = actions?.onCellHover;
+
+  // портрет перехоплює вказівник, тож клітинка під ним не отримує pointerenter
+  const onTokenHover = useCallback(
+    (id: string | null) => {
+      const token = id ? tokens.find((t) => t.p.basicInfo.id === id) : undefined;
+
+      onCellHover?.(token ? centreCell(token.p) : null);
+    },
+    [tokens, onCellHover],
+  );
+
   const movingId = view?.currentId && view.marks && [...view.marks.values()].some((m) => isMoveMark(m)) ? view.currentId : null;
 
-  const from = view?.trajectory ? tokens.find((t) => t.p.basicInfo.id === view.trajectory?.fromId) : undefined;
+  const trajectory = view?.trajectory ?? null;
 
-  const end = view?.trajectory ? cellCenter(view.trajectory.to) : null;
+  const from = trajectory?.kind === "ranged" ? tokens.find((t) => t.p.basicInfo.id === trajectory.fromId) : undefined;
+
+  const end = trajectory?.kind === "ranged" ? cellCenter(trajectory.to) : null;
+
+  const meleeTarget = trajectory?.kind === "melee" ? tokens.find((t) => t.p.basicInfo.id === trajectory.targetId) : undefined;
 
   return (
     // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки
@@ -416,7 +458,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">
-              <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
+              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
               <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill="#f2c14e" />
             </g>
           )}
@@ -433,6 +475,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             selected={view?.selectedId === p.basicInfo.id}
             current={view?.currentId === p.basicInfo.id}
             onClick={onTokenClick}
+            onHover={painting || !onCellHover ? undefined : onTokenHover}
             passThrough={painting || movingId === p.basicInfo.id}
           />
         ))}
@@ -453,6 +496,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             />
           );
         })}
+        {meleeTarget && <MeleeHint box={meleeTarget.box} mapSize={size} pxPerUnit={pxPerUnit} />}
         </div>
       </div>
       </div>

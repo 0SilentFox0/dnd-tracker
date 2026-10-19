@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { moveMarks, reachingAttack, targetMarks } from "../map-view";
+import { moveMarks, targetMarks } from "../map-view";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -51,17 +51,5 @@ describe("підсвітка карти", () => {
 
     expect(targetMarks(map, [hero, far], hero, [sword]).get("5:0")).toBe("invalid-target");
     expect(targetMarks(map, [hero, far], hero, [sword, bow]).get("5:0")).toBe("target");
-    expect(reachingAttack(map, [hero, far], hero, [sword, bow], far).attack).toBe(bow);
-  });
-
-  it("жодна не дістає — помилка першої атаки", () => {
-    const hero = at("h", { x: 0, y: 0 }, ParticipantSide.ALLY);
-
-    const far = at("e2", { x: 5, y: 0 }, ParticipantSide.ENEMY);
-
-    const r = reachingAttack(map, [hero, far], hero, [sword], far);
-
-    expect(r.attack).toBeNull();
-    expect(r.error).toBe("Ціль не поруч — спершу підійдіть");
   });
 });

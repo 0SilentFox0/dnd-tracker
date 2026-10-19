@@ -85,7 +85,7 @@ describe("useBattleMapScene", () => {
     expect(current().view.trajectory).toBeNull();
 
     act(() => current().actions.onCellHover?.({ x: 1, y: 0 }));
-    expect(current().view.trajectory).toEqual({ fromId: "me", to: { x: 1, y: 0 } });
+    expect(current().view.trajectory).toEqual({ fromId: "me", targetId: "gob", to: { x: 1, y: 0 }, kind: "melee" });
 
     act(() => current().actions.onCellHover?.({ x: 5, y: 3 }));
     expect(current().view.trajectory).toBeNull();

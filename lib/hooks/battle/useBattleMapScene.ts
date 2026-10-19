@@ -83,10 +83,10 @@ export function useBattleMapScene(): BattleMapScene | null {
     return {
       ...scene.view,
       ...hovered,
-      trajectory: deriveTrajectory(scene.view.marks, scene.view.currentId ?? null, hoverCell),
+      trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
       ...(pendingStroke.size > 0 && { pendingStroke }),
     };
-  }, [scene, map, mapAim, hoverCell, pendingStroke]);
+  }, [scene, map, mapAim, hoverCell, pendingStroke, current]);
 
   const { mutate: move } = actions.move;
 

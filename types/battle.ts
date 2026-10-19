@@ -209,8 +209,8 @@ export interface BattleMapView {
   currentId?: string | null;
   /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */
   marks?: Map<string, BattleMapMark | number>;
-  /** Лінія траєкторії від учасника до клітинки/учасника */
-  trajectory?: { fromId: string; to: GridPoint } | null;
+  /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі */
+  trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged" } | null;
   /** Точка наведення шаблону заклинання */
   aim?: GridPoint | null;
   /** Плашка під токеном: без запису — exact */
