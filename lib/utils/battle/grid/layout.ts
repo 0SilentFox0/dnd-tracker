@@ -11,6 +11,22 @@ export function mapSize(map: Pick<BattleMapConfig, "cols" | "rows">): { width: n
   return { width: map.cols * UNIT, height: map.rows * UNIT };
 }
 
+/** клітинка під точкою екрана; rect — прямокутник SVG сітки з урахуванням зуму */
+export function cellAtPoint(
+  map: Pick<BattleMapConfig, "cols" | "rows">,
+  rect: { left: number; top: number; width: number; height: number },
+  clientX: number,
+  clientY: number,
+): GridPoint | null {
+  if (rect.width <= 0 || rect.height <= 0) return null;
+
+  const x = Math.floor(((clientX - rect.left) / rect.width) * map.cols);
+
+  const y = Math.floor(((clientY - rect.top) / rect.height) * map.rows);
+
+  return x >= 0 && y >= 0 && x < map.cols && y < map.rows ? { x, y } : null;
+}
+
 export function cellCenter(p: GridPoint): { x: number; y: number } {
   return { x: (p.x + 0.5) * UNIT, y: (p.y + 0.5) * UNIT };
 }

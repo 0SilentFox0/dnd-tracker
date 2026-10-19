@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
-import type { MapTerrainTool, TerrainBrush } from "@/lib/hooks/battle";
+import { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 const BRUSHES: { value: TerrainBrush; label: string }[] = [
@@ -32,7 +32,14 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
       {tool.brush === "barrier" && (
         <label className="flex items-center gap-1 text-hud-muted">
           Раундів
-          <NumberInput aria-label="Раундів" className="h-7 w-14 px-2 text-xs" value={tool.rounds} onChange={(v) => tool.setRounds(v ?? 1)} />
+          <NumberInput
+            aria-label="Раундів"
+            className="h-7 w-14 px-2 text-xs"
+            min={1}
+            max={MAX_BARRIER_ROUNDS}
+            value={tool.rounds}
+            onChange={(v) => tool.setRounds(Math.min(MAX_BARRIER_ROUNDS, Math.max(1, v ?? 1)))}
+          />
         </label>
       )}
       {tool.brush === "hazard" && (

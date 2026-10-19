@@ -8,7 +8,7 @@ const MAX_ZOOM = 3;
 
 const WHEEL_STEP = 1.1;
 
-const DRAG_THRESHOLD = 4;
+export const DRAG_THRESHOLD = 4;
 
 interface Viewport {
   zoom: number;
@@ -36,8 +36,15 @@ function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h:
   return { zoom: next, x: clampOffset(px - cx * next, next, w), y: clampOffset(py - cy * next, next, h) };
 }
 
-export function useMapViewport() {
+/** panLocked — один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
+export function useMapViewport({ panLocked = false }: { panLocked?: boolean } = {}) {
   const [view, setView] = useState<Viewport>(INITIAL);
+
+  const locked = useRef(panLocked);
+
+  useEffect(() => {
+    locked.current = panLocked;
+  }, [panLocked]);
 
   const pointers = useRef(new Map<number, { x: number; y: number }>());
 
@@ -110,7 +117,7 @@ export function useMapViewport() {
 
     const d = drag.current;
 
-    if (!d) return;
+    if (!d || locked.current) return;
 
     if (!d.active && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > DRAG_THRESHOLD) {
       d.active = true;

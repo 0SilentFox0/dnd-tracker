@@ -14,8 +14,8 @@ export {
 } from "./useBattleScene";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useDamageShake, useHpChange } from "./useHpChange";
-export { type MapTerrainTool, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
-export { useMapViewport } from "./useMapViewport";
+export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
+export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";

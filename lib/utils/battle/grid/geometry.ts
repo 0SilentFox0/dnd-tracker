@@ -18,6 +18,41 @@ export function cellDistance(a: GridPoint, b: GridPoint): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
+/** клітинки на відрізку a→b (Брезенгем), з обома кінцями */
+export function cellLine(a: GridPoint, b: GridPoint): GridPoint[] {
+  const dx = Math.abs(b.x - a.x);
+
+  const dy = -Math.abs(b.y - a.y);
+
+  const sx = a.x < b.x ? 1 : -1;
+
+  const sy = a.y < b.y ? 1 : -1;
+
+  const out: GridPoint[] = [];
+
+  let { x, y } = a;
+
+  let err = dx + dy;
+
+  for (;;) {
+    out.push({ x, y });
+
+    if (x === b.x && y === b.y) return out;
+
+    const e2 = 2 * err;
+
+    if (e2 >= dy) {
+      err += dy;
+      x += sx;
+    }
+
+    if (e2 <= dx) {
+      err += dx;
+      y += sy;
+    }
+  }
+}
+
 export function inBounds(map: Pick<BattleMapConfig, "cols" | "rows">, p: GridPoint): boolean {
   return p.x >= 0 && p.y >= 0 && p.x < map.cols && p.y < map.rows;
 }

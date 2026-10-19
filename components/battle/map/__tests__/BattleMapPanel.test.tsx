@@ -72,6 +72,9 @@ describe("BattleMapPanel", () => {
     fireEvent.click(getByRole("button", { name: "Барʼєр" }));
     expect((getByRole("textbox", { name: "Раундів" }) as HTMLInputElement).value).toBe("1");
 
+    fireEvent.change(getByRole("textbox", { name: "Раундів" }), { target: { value: "35" } });
+    expect((getByRole("textbox", { name: "Раундів" }) as HTMLInputElement).value).toBe("20");
+
     fireEvent.click(getByRole("button", { name: "Небезпека" }));
     expect((getByRole("textbox", { name: "Підпис небезпеки" }) as HTMLInputElement).value).toBe("Небезпечна зона");
   });

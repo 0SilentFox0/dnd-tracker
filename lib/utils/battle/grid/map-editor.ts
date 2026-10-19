@@ -1,5 +1,5 @@
 import { cellKey, inBounds, isPlayable, marginCells, type Margins } from "./geometry";
-import { applyTerrain } from "./terrain";
+import { applyTerrain, replaceTerrain } from "./terrain";
 
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
@@ -11,6 +11,12 @@ function withBlocked(map: BattleMapConfig, keys: Iterable<string>): BattleMapCon
   const { blocked: _old, ...rest } = map;
 
   return blocked.length ? { ...rest, blocked } : rest;
+}
+
+function keepTerrain(map: BattleMapConfig, keep: (key: string) => boolean): BattleMapConfig {
+  if (!map.terrain) return map;
+
+  return replaceTerrain(map, Object.fromEntries(Object.entries(map.terrain).filter(([k]) => keep(k))));
 }
 
 export function marginsBlocked(cols: number, rows: number, m: Margins): string[] {
@@ -74,14 +80,13 @@ export function paintCells(map: BattleMapConfig, cells: GridPoint[], tool: Setup
 export function resizeMap(map: BattleMapConfig, cols: number, rows: number): BattleMapConfig {
   const next = { ...map, cols, rows };
 
-  return withBlocked(
-    next,
-    (map.blocked ?? []).filter((k) => {
-      const [x, y] = k.split(":").map(Number);
+  const inside = (k: string) => {
+    const [x, y] = k.split(":").map(Number);
 
-      return inBounds(next, { x, y });
-    }),
-  );
+    return inBounds(next, { x, y });
+  };
+
+  return keepTerrain(withBlocked(next, (map.blocked ?? []).filter(inside)), inside);
 }
 
 export function applyMargins(map: BattleMapConfig, m: Margins, prev: Margins = inferMargins(map)): BattleMapConfig {
@@ -89,7 +94,9 @@ export function applyMargins(map: BattleMapConfig, m: Margins, prev: Margins = i
 
   const drawn = (map.blocked ?? []).filter((k) => !old.has(k));
 
-  return withBlocked(map, [...marginsBlocked(map.cols, map.rows, m), ...drawn]);
+  const margin = new Set(marginsBlocked(map.cols, map.rows, m));
+
+  return keepTerrain(withBlocked(map, [...margin, ...drawn]), (k) => !margin.has(k));
 }
 
 export const MIN_SIDE = 4;

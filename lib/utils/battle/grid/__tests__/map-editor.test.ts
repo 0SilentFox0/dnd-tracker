@@ -38,6 +38,17 @@ describe("map-editor", () => {
     expect(resizeMap(painted, 10, 10).blocked).toEqual(["2:2"]);
   });
 
+  it("resizeMap і applyMargins знімають місцевість поза сіткою та на полях", () => {
+    const map = { ...base, terrain: { "15:2": { kind: "wall" as const }, "2:2": { kind: "hazard" as const }, "0:5": { kind: "wall" as const } } };
+
+    expect(resizeMap(map, 10, 10).terrain).toEqual({ "2:2": { kind: "hazard" }, "0:5": { kind: "wall" } });
+    expect(applyMargins(map, { top: 0, right: 0, bottom: 0, left: 1 }, { top: 0, right: 0, bottom: 0, left: 0 }).terrain).toEqual({
+      "15:2": { kind: "wall" },
+      "2:2": { kind: "hazard" },
+    });
+    expect(resizeMap({ ...base, terrain: { "15:2": { kind: "wall" } } }, 10, 10)).not.toHaveProperty("terrain");
+  });
+
   it("applyMargins зберігає намальовані клітинки поза полями", () => {
     const painted = toggleBlocked(applyMargins(base, m3, { top: 0, right: 0, bottom: 0, left: 0 }), { x: 10, y: 6 });
 

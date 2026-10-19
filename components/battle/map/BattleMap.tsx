@@ -7,9 +7,22 @@ import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
-import { useMapViewport } from "@/lib/hooks/battle";
+import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { blockedSet, cellCenter, cellKey, type CellMark, cellPolygon, fitMapBox, isMoveMark, mapSize, tokenBox, UNIT } from "@/lib/utils/battle/grid";
+import {
+  blockedSet,
+  cellAtPoint,
+  cellCenter,
+  cellKey,
+  cellLine,
+  type CellMark,
+  cellPolygon,
+  fitMapBox,
+  isMoveMark,
+  mapSize,
+  tokenBox,
+  UNIT,
+} from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
@@ -65,10 +78,10 @@ interface GridLayerProps {
   wasDragged: () => boolean;
   clickableBlocked?: boolean;
   showBlocked?: boolean;
-  stroke?: { preview: Set<string>; start(p: GridPoint, e: PointerEvent): void; enter(p: GridPoint): void };
+  onStrokeStart?: (p: GridPoint, e: PointerEvent) => void;
 }
 
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, stroke }: GridLayerProps) {
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, onStrokeStart }: GridLayerProps) {
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -81,7 +94,10 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
 
   const terrain = map.terrain;
 
-  const terrainCells = useMemo(() => cells.flatMap((p) => (terrain?.[cellKey(p)] ? [{ p, cell: terrain[cellKey(p)] }] : [])), [cells, terrain]);
+  const terrainCells = useMemo(
+    () => cells.flatMap((p) => (terrain?.[cellKey(p)] && !blocked.has(cellKey(p)) ? [{ p, cell: terrain[cellKey(p)] }] : [])),
+    [cells, terrain, blocked],
+  );
 
   const zoneCells = cells.flatMap((p) => {
     const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
@@ -118,9 +134,8 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
               stroke="none"
               pointerEvents={clickableBlocked ? "all" : "none"}
               style={{ cursor: clickableBlocked ? "pointer" : undefined }}
-              onClick={clickableBlocked && !stroke ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
-              onPointerDown={stroke ? (e) => stroke.start(p, e) : undefined}
-              onPointerEnter={stroke ? () => stroke.enter(p) : undefined}
+              onClick={clickableBlocked && !onStrokeStart ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
+              onPointerDown={onStrokeStart ? (e) => onStrokeStart(p, e) : undefined}
             />
           );
         }
@@ -143,22 +158,15 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
             strokeOpacity={map.opacity}
             strokeWidth={1.5}
             vectorEffect="non-scaling-stroke"
-            style={{ cursor: stroke ? "crosshair" : actions?.onCellClick ? "pointer" : undefined }}
-            onClick={stroke ? undefined : () => !wasDragged() && actions?.onCellClick?.(p)}
-            onPointerDown={stroke ? (e) => stroke.start(p, e) : undefined}
-            onPointerEnter={() => (stroke ? stroke.enter(p) : actions?.onCellHover?.(p))}
+            style={{ cursor: onStrokeStart ? "crosshair" : actions?.onCellClick ? "pointer" : undefined }}
+            onClick={onStrokeStart ? undefined : () => !wasDragged() && actions?.onCellClick?.(p)}
+            onPointerDown={onStrokeStart ? (e) => onStrokeStart(p, e) : undefined}
+            onPointerEnter={onStrokeStart ? undefined : () => actions?.onCellHover?.(p)}
           >
             {title && <title>{title}</title>}
           </polygon>
         );
       })}
-      {stroke && (
-        <g pointerEvents="none">
-          {cells.filter((p) => stroke.preview.has(cellKey(p))).map((p) => (
-            <polygon key={`s${cellKey(p)}`} data-stroke={cellKey(p)} points={cellPolygon(p)} fill="rgba(242,193,78,.35)" stroke="#f2c14e" strokeWidth={2} vectorEffect="non-scaling-stroke" />
-          ))}
-        </g>
-      )}
       <g pointerEvents="none">
         {zoneCells.map(({ p, zone }) => (
           <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={7} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
@@ -180,8 +188,42 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
   );
 });
 
+const parseKey = (key: string): GridPoint => {
+  const [x, y] = key.split(":").map(Number);
+
+  return { x, y };
+};
+
+const StrokeLayer = memo(function StrokeLayer({ preview, pending }: { preview: ReadonlySet<string>; pending?: ReadonlySet<string> }) {
+  const sent = pending ? [...pending].filter((k) => !preview.has(k)) : [];
+
+  return (
+    <g pointerEvents="none">
+      {sent.map((k) => (
+        <polygon key={`p${k}`} data-stroke-pending={k} points={cellPolygon(parseKey(k))} fill="rgba(242,193,78,.22)" stroke="#f2c14e" strokeOpacity={0.6} strokeWidth={1.5} strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />
+      ))}
+      {[...preview].map((k) => (
+        <polygon key={`s${k}`} data-stroke={k} points={cellPolygon(parseKey(k))} fill="rgba(242,193,78,.35)" stroke="#f2c14e" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+      ))}
+    </g>
+  );
+});
+
+const NO_CELLS: ReadonlySet<string> = new Set();
+
+interface Stroke {
+  pointerId: number;
+  x: number;
+  y: number;
+  moved: boolean;
+  last: GridPoint;
+  cells: Map<string, GridPoint>;
+}
+
 export function BattleMap({ map, participants, view, actions, className, clickableBlocked, showBlocked, strokeTool }: BattleMapProps) {
-  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
+  const painting = Boolean(strokeTool && actions?.onStroke);
+
+  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting });
 
   const { cols, rows } = map;
 
@@ -207,32 +249,17 @@ export function BattleMap({ map, participants, view, actions, className, clickab
     return () => observer.disconnect();
   }, []);
 
-  const painting = Boolean(strokeTool && actions?.onStroke);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-  const strokeRef = useRef<GridPoint[] | null>(null);
+  const strokeRef = useRef<Stroke | null>(null);
 
-  const [preview, setPreview] = useState<Set<string>>(() => new Set());
+  const [preview, setPreview] = useState<ReadonlySet<string>>(NO_CELLS);
 
   const onStrokeStart = useCallback((p: GridPoint, e: PointerEvent) => {
-    e.stopPropagation();
+    if (!e.isPrimary || e.button !== 0) return;
 
-    try {
-      (e.target as Element).releasePointerCapture?.(e.pointerId);
-    } catch {
-      // not captured
-    }
-
-    strokeRef.current = [p];
+    strokeRef.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, moved: false, last: p, cells: new Map([[cellKey(p), p]]) };
     setPreview(new Set([cellKey(p)]));
-  }, []);
-
-  const onStrokeEnter = useCallback((p: GridPoint) => {
-    const list = strokeRef.current;
-
-    if (!list || list.some((c) => c.x === p.x && c.y === p.y)) return;
-
-    list.push(p);
-    setPreview(new Set(list.map(cellKey)));
   }, []);
 
   const onStroke = actions?.onStroke;
@@ -240,32 +267,64 @@ export function BattleMap({ map, participants, view, actions, className, clickab
   useEffect(() => {
     if (!painting) return;
 
-    const finish = (commit: boolean) => () => {
-      const list = strokeRef.current;
-
-      if (!list) return;
-
+    const drop = () => {
       strokeRef.current = null;
-      setPreview(new Set());
-
-      if (commit) onStroke?.(list);
+      setPreview(NO_CELLS);
     };
 
-    const up = finish(true);
+    const onMove = (e: globalThis.PointerEvent) => {
+      const s = strokeRef.current;
 
-    const cancel = finish(false);
+      const svg = svgRef.current;
 
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", cancel);
+      if (!s || !svg || e.pointerId !== s.pointerId) return;
+
+      // дрібне тремтіння клацання не має зачіпати сусідню клітинку
+      if (!s.moved && Math.hypot(e.clientX - s.x, e.clientY - s.y) <= DRAG_THRESHOLD) return;
+
+      s.moved = true;
+
+      const cell = cellAtPoint({ cols, rows }, svg.getBoundingClientRect(), e.clientX, e.clientY);
+
+      if (!cell || (cell.x === s.last.x && cell.y === s.last.y)) return;
+
+      for (const c of cellLine(s.last, cell)) s.cells.set(cellKey(c), c);
+
+      s.last = cell;
+      setPreview(new Set(s.cells.keys()));
+    };
+
+    // другий палець — це щипок, а не штрих
+    const onDown = (e: globalThis.PointerEvent) => {
+      if (strokeRef.current && e.pointerId !== strokeRef.current.pointerId) drop();
+    };
+
+    const onUp = (e: globalThis.PointerEvent) => {
+      const s = strokeRef.current;
+
+      if (!s || e.pointerId !== s.pointerId) return;
+
+      drop();
+      onStroke?.([...s.cells.values()]);
+    };
+
+    const onCancel = (e: globalThis.PointerEvent) => {
+      if (strokeRef.current?.pointerId === e.pointerId) drop();
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
 
     return () => {
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", cancel);
-      strokeRef.current = null;
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+      drop();
     };
-  }, [painting, onStroke]);
-
-  const stroke = useMemo(() => (painting ? { preview, start: onStrokeStart, enter: onStrokeEnter } : undefined), [painting, preview, onStrokeStart, onStrokeEnter]);
+  }, [painting, onStroke, cols, rows]);
 
   const fit = fitMapBox(avail, map);
 
@@ -302,8 +361,17 @@ export function BattleMap({ map, participants, view, actions, className, clickab
     >
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
-        <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} showBlocked={showBlocked} stroke={stroke} />
+        <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
+          <GridLayer
+            map={map}
+            marks={view?.marks}
+            actions={actions}
+            wasDragged={wasDragged}
+            clickableBlocked={clickableBlocked}
+            showBlocked={showBlocked}
+            onStrokeStart={painting ? onStrokeStart : undefined}
+          />
+          {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">
               <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
@@ -311,6 +379,8 @@ export function BattleMap({ map, participants, view, actions, className, clickab
             </g>
           )}
         </svg>
+        {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
+        <div data-map-tokens style={painting ? { opacity: 0.35 } : undefined}>
         {tokens.map(({ p, box }) => (
           <MapToken
             key={p.basicInfo.id}
@@ -341,6 +411,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
             />
           );
         })}
+        </div>
       </div>
     </div>
     </div>

@@ -323,3 +323,107 @@ describe("BattleMap", () => {
     expect(idle.container.querySelector('[data-fx-participant="g"]')?.className).toContain("pointer-events-auto");
   });
 });
+
+describe("BattleMap — terrain stroke", () => {
+  function setup(props: Partial<Parameters<typeof BattleMap>[0]> = {}) {
+    const onStroke = vi.fn();
+
+    const utils = render(<BattleMap map={square} participants={people} actions={{ onStroke }} strokeTool {...props} />);
+
+    const svg = (utils.container.querySelector("polygon") as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
+
+    svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 400, height: 300, right: 400, bottom: 300, x: 0, y: 0, toJSON: () => ({}) });
+
+    const cell = (key: string) => utils.container.querySelector(`polygon[data-fx-cell="${key}"]`) as Element;
+
+    const down = (key: string, x: number, y: number, init: Record<string, unknown> = {}) =>
+      fireEvent.pointerDown(cell(key), { pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY: y, ...init });
+
+    const move = (x: number, y: number) => fireEvent.pointerMove(window, { pointerId: 1, clientX: x, clientY: y });
+
+    const up = () => fireEvent.pointerUp(window, { pointerId: 1 });
+
+    const committed = () => (onStroke.mock.calls.at(-1)?.[0] as { x: number; y: number }[]).map((p) => `${p.x}:${p.y}`);
+
+    return { ...utils, onStroke, down, move, up, committed };
+  }
+
+  it("клацання — одна клітинка; тремтіння до 4 px через межу не додає сусіда", () => {
+    const { down, move, up, committed, onStroke } = setup();
+
+    down("0:0", 98, 50);
+    move(101, 51);
+    up();
+
+    expect(onStroke).toHaveBeenCalledTimes(1);
+    expect(committed()).toEqual(["0:0"]);
+  });
+
+  it("швидкий протяг заповнює клітинки на лінії між вибірками", () => {
+    const { down, move, up, committed, container } = setup();
+
+    down("0:0", 50, 50);
+    move(350, 250);
+
+    expect(container.querySelectorAll("[data-stroke]")).toHaveLength(4);
+
+    up();
+
+    expect(committed()).toEqual(["0:0", "1:1", "2:1", "3:2"]);
+  });
+
+  it("права кнопка й непервинний вказівник штрих не починають", () => {
+    const { down, up, onStroke } = setup();
+
+    down("1:1", 150, 150, { button: 2 });
+    up();
+    down("1:1", 150, 150, { isPrimary: false });
+    up();
+
+    expect(onStroke).not.toHaveBeenCalled();
+  });
+
+  it("другий палець скасовує штрих (щипок)", () => {
+    const { down, move, up, onStroke, container } = setup();
+
+    down("0:0", 50, 50);
+    move(250, 50);
+    fireEvent.pointerDown(window, { pointerId: 2, isPrimary: false, clientX: 300, clientY: 200 });
+
+    expect(container.querySelectorAll("[data-stroke]")).toHaveLength(0);
+
+    up();
+
+    expect(onStroke).not.toHaveBeenCalled();
+  });
+
+  it("вимкнення інструмента посеред штриха прибирає превʼю", () => {
+    const { down, move, rerender, container, onStroke } = setup();
+
+    down("0:0", 50, 50);
+    move(250, 50);
+    rerender(<BattleMap map={square} participants={people} actions={{ onStroke }} />);
+    rerender(<BattleMap map={square} participants={people} actions={{ onStroke }} strokeTool />);
+
+    expect(container.querySelectorAll("[data-stroke]")).toHaveLength(0);
+  });
+
+  it("токени притушені лише в режимі інструмента; надіслані клітинки видно до відповіді", () => {
+    const { container } = setup({ view: { pendingStroke: new Set(["2:2"]) } });
+
+    expect((container.querySelector("[data-map-tokens]") as HTMLElement).style.opacity).toBe("0.35");
+    expect(container.querySelector('[data-stroke-pending="2:2"]')).not.toBeNull();
+    cleanup();
+
+    const idle = render(<BattleMap map={square} participants={people} view={{ pendingStroke: new Set(["2:2"]) }} />);
+
+    expect((idle.container.querySelector("[data-map-tokens]") as HTMLElement).style.opacity).toBe("");
+    expect(idle.container.querySelector("[data-stroke-pending]")).toBeNull();
+  });
+
+  it("місцевість на неігровій клітинці не малюється", () => {
+    const { container } = render(<BattleMap map={{ ...square, blocked: ["1:1"], terrain: { "1:1": { kind: "wall" }, "2:1": { kind: "wall" } } }} participants={[]} />);
+
+    expect(container.querySelectorAll("[data-terrain]")).toHaveLength(1);
+  });
+});

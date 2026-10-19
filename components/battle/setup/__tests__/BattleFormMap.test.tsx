@@ -38,6 +38,29 @@ function Harness() {
 
 const cell = (c: HTMLElement, key: string) => c.querySelector(`polygon[data-fx-cell="${key}"]`) as Element;
 
+const CELL_PX = 10;
+
+// сітка в тестах 10 px на клітинку: штрих рахує клітинки з координат вказівника
+function press(c: HTMLElement, key: string) {
+  const svg = (cell(c, key) as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
+
+  const { cols, rows } = seen.editor.map;
+
+  svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: cols * CELL_PX, height: rows * CELL_PX, right: 0, bottom: 0, x: 0, y: 0, toJSON: () => ({}) });
+
+  const [x, y] = key.split(":").map(Number);
+
+  fireEvent.pointerDown(cell(c, key), { pointerId: 1, isPrimary: true, button: 0, clientX: x * CELL_PX + 5, clientY: y * CELL_PX + 5 });
+}
+
+function dragTo(key: string) {
+  const [x, y] = key.split(":").map(Number);
+
+  fireEvent.pointerMove(window, { pointerId: 1, clientX: x * CELL_PX + 5, clientY: y * CELL_PX + 5 });
+}
+
+const release = () => fireEvent.pointerUp(window, { pointerId: 1 });
+
 const blocked = (c: HTMLElement) => c.querySelectorAll("polygon[data-blocked]");
 
 const enable = () => fireEvent.click(screen.getByRole("switch", { name: "Бій на карті" }));
@@ -67,20 +90,20 @@ describe("BattleFormMap", () => {
     const { container } = render(<Harness />);
 
     enable();
-    fireEvent.pointerDown(cell(container, "3:3"));
-    fireEvent.pointerEnter(cell(container, "4:3"));
-    fireEvent.pointerUp(window);
+    press(container, "3:3");
+    dragTo("4:3");
+    release();
     expect(blocked(container)).toHaveLength(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Неігрова" }));
-    fireEvent.pointerDown(cell(container, "3:3"));
-    fireEvent.pointerEnter(cell(container, "4:3"));
-    fireEvent.pointerUp(window);
+    press(container, "3:3");
+    dragTo("4:3");
+    release();
     expect(blocked(container)).toHaveLength(2);
 
     fireEvent.click(screen.getByRole("button", { name: "Стерти" }));
-    fireEvent.pointerDown(container.querySelector('polygon[data-fx-cell="3:3"]') as Element);
-    fireEvent.pointerUp(window);
+    press(container, "3:3");
+    release();
     expect(blocked(container)).toHaveLength(1);
   });
 
@@ -91,13 +114,13 @@ describe("BattleFormMap", () => {
     expect(screen.queryByRole("button", { name: "Барʼєр" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Непрохідне" }));
-    fireEvent.pointerDown(cell(container, "1:1"));
-    fireEvent.pointerUp(window);
+    press(container, "1:1");
+    release();
 
     fireEvent.click(screen.getByRole("button", { name: "Небезпека" }));
     fireEvent.change(screen.getByLabelText("Підпис небезпеки"), { target: { value: "Лава" } });
-    fireEvent.pointerDown(cell(container, "2:1"));
-    fireEvent.pointerUp(window);
+    press(container, "2:1");
+    release();
 
     expect(seen.editor.map.terrain).toEqual({ "1:1": { kind: "wall" }, "2:1": { kind: "hazard", label: "Лава" } });
     expect(container.querySelector('[data-terrain="wall"]')).not.toBeNull();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellCenter, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "../layout";
+import { cellAtPoint, cellCenter, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "../layout";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
@@ -39,5 +39,23 @@ describe("fitMapBox", () => {
 
   it("висока карта 20×40 у широкому контейнері", () => {
     expect(fitMapBox({ width: 1000, height: 500 }, { cols: 20, rows: 40 })).toEqual({ width: 250, height: 500 });
+  });
+});
+
+describe("cellAtPoint", () => {
+  const map = { cols: 4, rows: 2 };
+
+  it("переводить точку екрана в клітинку з урахуванням зсуву й масштабу", () => {
+    const rect = { left: 100, top: 50, width: 400, height: 200 };
+
+    expect(cellAtPoint(map, rect, 100, 50)).toEqual({ x: 0, y: 0 });
+    expect(cellAtPoint(map, rect, 499, 249)).toEqual({ x: 3, y: 1 });
+    expect(cellAtPoint(map, rect, 260, 160)).toEqual({ x: 1, y: 1 });
+  });
+
+  it("поза сіткою або нульовий розмір — null", () => {
+    expect(cellAtPoint(map, { left: 0, top: 0, width: 400, height: 200 }, 400, 10)).toBeNull();
+    expect(cellAtPoint(map, { left: 0, top: 0, width: 400, height: 200 }, -1, 10)).toBeNull();
+    expect(cellAtPoint(map, { left: 0, top: 0, width: 0, height: 0 }, 0, 0)).toBeNull();
   });
 });
