@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { useFxImpacts } from "./useFxImpact";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
+import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -17,6 +18,7 @@ export interface BattleMapScene {
   actions: BattleMapActions;
   placement: { active: boolean; toggle(): void } | null;
   terrainTool: MapTerrainTool | null;
+  weatherTool: MapWeatherTool | null;
 }
 
 const NO_ORDER: BattleParticipant[] = [];
@@ -195,7 +197,9 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
+  const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
+
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, weatherTool };
 }
