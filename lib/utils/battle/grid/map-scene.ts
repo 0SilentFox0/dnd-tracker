@@ -1,6 +1,6 @@
 import { pickAttack } from "./attack-reach";
 import { cellKey } from "./geometry";
-import { type CellMark, isMoveMark, moveZoneMarks, targetMarks } from "./map-view";
+import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
@@ -144,8 +144,12 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
-  if (!aim && !placing && !tool && canAct && current?.battleData.position) {
-    for (const [key, cost] of moveZoneMarks(map, participants, current, { dmUserId: isDM ? viewer.userId : null })) marks.set(key, cost);
+  const moveOpts = { dmUserId: isDM ? viewer.userId : null };
+
+  const steps = !aim && !placing && !tool && canAct && current?.battleData.position ? moveSteps(map, participants, current, moveOpts) : null;
+
+  if (steps && current) {
+    for (const [key, cost] of moveZoneMarks(map, participants, current, { ...moveOpts, steps })) marks.set(key, cost);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
   }
@@ -208,9 +212,9 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
     const mark = marks.get(key);
 
-    if (current && isOnMap(current) && cellKey(cellsOf(current)[0]) === key) return { kind: "select", id: current.basicInfo.id };
+    if (current && isOnMap(current) && cellsOf(current).some((c) => cellKey(c) === key)) return { kind: "select", id: current.basicInfo.id };
 
-    if (canAct && current && isMoveMark(mark)) return { kind: "move", participantId: current.basicInfo.id, to: p, free: false };
+    if (canAct && current && isMoveMark(mark)) return { kind: "move", participantId: current.basicInfo.id, to: steps?.get(key)?.anchor ?? p, free: false };
 
     if (mark === "target" || mark === "invalid-target") {
       const occupant = enemyAt(participants, current, key);

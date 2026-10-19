@@ -320,3 +320,37 @@ describe("deriveMapScene: DM без ліміту руху", () => {
     expect(player.view.marks?.get("2:0")).toBe(2);
   });
 });
+
+describe("deriveMapScene: велика істота", () => {
+  const wide: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3 };
+
+  const big = (() => {
+    const p = at("big", { x: 4, y: 4 }, ParticipantSide.ALLY);
+
+    return { ...p, combatStats: { ...p.combatStats, gridSize: 2 } };
+  })();
+
+  const scene = () => deriveMapScene(input({ map: wide, participants: [big], actor: { current: big } }));
+
+  it("клік під токеном на одну клітинку нижче — якір зсувається на одну клітинку вниз", () => {
+    expect(scene().cellClick({ x: 4, y: 6 })).toEqual({ kind: "move", participantId: "big", to: { x: 4, y: 5 }, free: false });
+  });
+
+  it("клік праворуч від токена — якір на одну клітинку вправо", () => {
+    expect(scene().cellClick({ x: 6, y: 4 })).toEqual({ kind: "move", participantId: "big", to: { x: 5, y: 4 }, free: false });
+  });
+
+  it("зона руху вкриває клітинки footprint'ів, а не лише якорі; власні клітинки не позначені й вибирають істоту", () => {
+    const s = scene();
+
+    expect(typeof s.view.marks?.get("6:6")).toBe("number");
+    expect(s.view.marks?.has("5:5")).toBe(false);
+    expect(s.cellClick({ x: 5, y: 5 })).toEqual({ kind: "select", id: "big" });
+  });
+
+  it("1×1 — без змін: клітинка і є якорем", () => {
+    const s = deriveMapScene(input({ participants: [hero] }));
+
+    expect(s.cellClick({ x: 1, y: 1 })).toEqual({ kind: "move", participantId: "h", to: { x: 1, y: 1 }, free: false });
+  });
+});
