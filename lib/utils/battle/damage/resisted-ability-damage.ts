@@ -1,16 +1,45 @@
-import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import type { Downed } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
 
-export function dealResistedDamage(ps: BattleParticipant[], targetId: string, amount: number, damageType: string, sourceName: string): { participants: BattleParticipant[]; message: string } {
+export interface ResistedHit {
+  targetId: string;
+  amount: number;
+}
+
+export interface ResistedHitsResult {
+  participants: BattleParticipant[];
+  results: { targetId: string; dealt: number }[];
+  downed: Downed[];
+}
+
+export function dealResistedDamage(ps: BattleParticipant[], targetId: string, amount: number, damageType: string): { participants: BattleParticipant[]; dealt: number; downed: boolean } | null {
   const target = findParticipant(ps, targetId);
 
-  if (!target) return { participants: ps, message: "" };
+  if (!target) return null;
 
   const { finalDamage } = applyResistance(target, amount, damageType);
 
   const updated = finalDamage > 0 ? applyRawDamage(target, finalDamage) : target;
 
-  return { participants: replaceParticipant(ps, updated), message: `💥 ${sourceName}: ${target.basicInfo.name} −${finalDamage} HP` };
+  return { participants: replaceParticipant(ps, updated), dealt: finalDamage, downed: isActive(target) && !isActive(updated) };
+}
+
+export function dealResistedHits(ps: BattleParticipant[], hits: ResistedHit[], opts: { actorId: string; damageType: string }): ResistedHitsResult {
+  return hits.reduce<ResistedHitsResult>(
+    (acc, { targetId, amount }) => {
+      const r = dealResistedDamage(acc.participants, targetId, amount, opts.damageType);
+
+      if (!r) return acc;
+
+      return {
+        participants: r.participants,
+        results: [...acc.results, { targetId, dealt: r.dealt }],
+        downed: r.downed ? [...acc.downed, { victimId: targetId, actorId: opts.actorId }] : acc.downed,
+      };
+    },
+    { participants: ps, results: [], downed: [] },
+  );
 }

@@ -11,7 +11,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { dealResistedDamage } from "@/lib/utils/battle/damage/resisted-ability-damage";
+import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
 
@@ -111,15 +111,13 @@ function applyFireWave(flow: AttackFlow, attackerId: string, targetId: string, h
 
     const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
 
-    const parts: string[] = [];
+    const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire" });
 
-    for (const id of victims) {
-      const before = getP(flow, id).combatStats.currentHp;
+    flow.ps = r.participants;
 
-      flow.ps = dealResistedDamage(flow.ps, id, amount, "fire", "Вогняна хвиля").participants;
-      parts.push(`${getP(flow, id).basicInfo.name} (−${before - getP(flow, id).combatStats.currentHp})`);
-      settleDowned(flow, id, attackerId);
-    }
+    const parts = r.results.map(({ targetId: id, dealt }) => `${getP(flow, id).basicInfo.name} (−${dealt})`);
+
+    for (const d of r.downed) settleDowned(flow, d.victimId, attackerId);
 
     if (parts.length > 0) flow.messages.push(`🔥 Вогняна хвиля: ${parts.join(", ")}`);
   }

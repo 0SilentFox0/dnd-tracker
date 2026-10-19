@@ -1,4 +1,4 @@
-import { attackShare, isEnemyOf, pickedEnemies, strikeAll, unchanged } from "./strike";
+import { attackShare, isEnemyOf, maneuverResult,pickedEnemies, strikeAll } from "./strike";
 import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -12,13 +12,13 @@ const NO_MAP_TARGETS = 3;
 export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
   const actor = findParticipant(ps, input.actorId);
 
-  if (!actor) return unchanged(ps);
+  if (!actor) return maneuverResult(ps);
 
   const targets = input.map && isOnMap(actor)
     ? ps.filter((p) => isEnemyOf(actor)(p) && isOnMap(p) && footprintDistance(cellsOf(actor), cellsOf(p)) <= 1)
     : pickedEnemies(ps, actor, input.targetIds, NO_MAP_TARGETS);
 
-  if (!targets.length) return { ...unchanged(ps), messages: [`🔥 ${input.name}: ${actor.basicInfo.name} — поруч нікого`] };
+  if (!targets.length) return { ...maneuverResult(ps), messages: [`🔥 ${input.name}: ${actor.basicInfo.name} — поруч нікого`] };
 
   const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
 
@@ -38,5 +38,5 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
     return { targetId: t.basicInfo.id, amount: saved ? Math.floor(full / 2) : full };
   });
 
-  return strikeAll(unchanged(ps), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, note: (id) => notes.get(id) ?? "" });
+  return strikeAll(maneuverResult(ps), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, note: (id) => notes.get(id) ?? "" });
 }

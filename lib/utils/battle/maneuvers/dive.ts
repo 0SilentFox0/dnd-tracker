@@ -1,4 +1,4 @@
-import { attackShare, isEnemyOf, primaryDamageType, strikeAll, unchanged } from "./strike";
+import { attackShare, isEnemyOf, maneuverResult,primaryDamageType, strikeAll } from "./strike";
 import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
@@ -11,7 +11,7 @@ const DEFAULT_PERCENT = 200;
 export function startDive(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
   const actor = findParticipant(ps, input.actorId);
 
-  if (!actor) return unchanged(ps);
+  if (!actor) return maneuverResult(ps);
 
   const onMap = !!input.map && !!actor.battleData.position && !!input.targetCell;
 
@@ -19,7 +19,7 @@ export function startDive(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const flying: BattleParticipant = { ...actor, battleData: { ...actor.battleData, position: undefined, airborne }, actionFlags: { ...actor.actionFlags, hasUsedAction: true } };
 
-  return unchanged(replaceParticipant(ps, flying), [`🦅 ${actor.basicInfo.name} злітає в небо (${input.name})`]);
+  return maneuverResult(replaceParticipant(ps, flying), [`🦅 ${actor.basicInfo.name} злітає в небо (${input.name})`]);
 }
 
 function diveAbility(p: BattleParticipant): { name: string; percent: number } {
@@ -50,7 +50,7 @@ export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: 
 
   const airborne = actor?.battleData.airborne;
 
-  if (!actor || !airborne) return unchanged(ps);
+  if (!actor || !airborne) return maneuverResult(ps);
 
   const { name, percent } = diveAbility(actor);
 
@@ -66,7 +66,7 @@ export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: 
 
   const victim = isActive(actor) ? victimOf(next, actor, ctx.map) : undefined;
 
-  if (!victim) return unchanged(next, [`🦅 ${name}: удар у порожнечу`]);
+  if (!victim) return maneuverResult(next, [`🦅 ${name}: удар у порожнечу`]);
 
-  return strikeAll(unchanged(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name });
+  return strikeAll(maneuverResult(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name });
 }

@@ -1,4 +1,4 @@
-import { attackShare, isEnemyOf, pickedEnemies, primaryDamageType, strikeAll, unchanged } from "./strike";
+import { attackShare, isEnemyOf, maneuverResult,pickedEnemies, primaryDamageType, strikeAll } from "./strike";
 import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -20,7 +20,7 @@ function flightPath(start: GridPoint, aim: GridPoint, rangeFeet: number | undefi
 export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
   const actor = findParticipant(ps, input.actorId);
 
-  if (!actor) return unchanged(ps);
+  if (!actor) return maneuverResult(ps);
 
   const hit = { actorId: actor.basicInfo.id, damageType: primaryDamageType(actor), name: input.name };
 
@@ -31,7 +31,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
   if (!input.map || !start || !input.targetCell) {
     const targets = pickedEnemies(ps, actor, input.targetIds, NO_MAP_TARGETS);
 
-    return strikeAll(unchanged(ps), targets.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
+    return strikeAll(maneuverResult(ps), targets.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
   }
 
   const map = input.map;
@@ -46,5 +46,5 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
 
   const moved = landing ? replaceParticipant(ps, { ...actor, battleData: { ...actor.battleData, position: landing } }) : ps;
 
-  return strikeAll(unchanged(moved), victims.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
+  return strikeAll(maneuverResult(moved), victims.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
 }
