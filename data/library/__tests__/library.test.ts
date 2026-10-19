@@ -552,7 +552,7 @@ describe("spell map templates and ranges", () => {
     ["wasp-swarm", "circle", 5, 60],
     ["stone-spikes", "line", 30, undefined],
     ["entangle", "cube", 15, 60],
-    ["meteor-shower", "circle", 15, 120],
+    ["meteor-shower", "circle", 20, 120],
     ["earthquake", "circle", 20, 60],
   ] as const)("%s is a %s template of %i ft", (key, shape, size, range) => {
     expect(byKey(key)).toMatchObject({ kind: "template", shape, size, ...(range ? { range } : {}) });
