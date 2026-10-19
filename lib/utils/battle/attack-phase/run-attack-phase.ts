@@ -1,19 +1,18 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
+import { resolveAttackTargets } from "./targets";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, isTargetable, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
-import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
@@ -136,59 +135,13 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
   }
 
-  const isAoe = attack.targetType === "aoe";
-
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const hitsAllEnemies = flags.attackHitsAllEnemies.length > 0;
-
-  const piercing = !hitsAllEnemies && !isAoe && attack.type === AttackType.RANGED && !!input.map && flags.piercingShot.length > 0;
-
-  const pierced = piercing
-    ? [...new Set([...piercingTargets(input.map ?? undefined, initiativeOrder, attacker, chosenTargets[0].basicInfo.id), ...targetIds])].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? [])
-    : chosenTargets;
-
-  const expanded = hitsAllEnemies || piercing;
-
-  const targets = hitsAllEnemies
-    ? [
-        ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t)),
-        ...(input.map && attacker.battleData.position
-          ? enemiesInReach(input.map, initiativeOrder, attacker, attack)
-          : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t))
-        ).filter((t) => !targetIds.includes(t.basicInfo.id)),
-      ]
-    : pierced;
-
-  if (targets.length === 0) {
-    throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
-  }
-
-  const isMultiTargetRanged =
-    expanded ||
-    (!isAoe &&
-      attack.type === AttackType.RANGED &&
-      (attacker.combatStats.maxTargets ?? 1) > 1);
-
-  const maxPossibleTargets = expanded
-    ? targets.length
-    : isAoe
-      ? attack.maxTargets || attacker.combatStats.maxTargets || 1
-      : isMultiTargetRanged
-        ? attacker.combatStats.maxTargets || 1
-        : 1;
+  const { targets, expanded, isMultiTargetRanged, falloff } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
   const chosenIndex = (id: string) => chosenTargets.findIndex((t) => t.basicInfo.id === id);
 
-  if (targets.length > maxPossibleTargets) {
-    throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${maxPossibleTargets}`);
-  }
-
   const dist = attack.damageDistribution;
-
-  const falloffPercents = expanded ? [] : flags.multiTargetFalloff.map((f) => f.percent);
-
-  const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 
   // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
