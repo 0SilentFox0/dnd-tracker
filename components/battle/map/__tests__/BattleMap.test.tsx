@@ -667,7 +667,8 @@ describe("BattleMap — terrain stroke", () => {
     const cells = container.querySelectorAll("[data-template-cell]");
 
     expect([...cells].map((c) => c.getAttribute("data-template-cell"))).toEqual(["1:1", "2:1"]);
-    expect(cells[0].getAttribute("stroke")).toBe("#ffb04a");
+    // аркановий фіолет, щоб прев'ю не зливалося з помаранчевими клітинками небезпеки
+    expect(cells[0].getAttribute("stroke")).toBe("#c4a6ff");
     expect(container.querySelector('[data-template-aim="1:1"]')).not.toBeNull();
   });
 
@@ -682,5 +683,22 @@ describe("BattleMap — terrain stroke", () => {
     expect(cells.every((c) => c.classList.contains("battle-map-pulse"))).toBe(true);
     expect(cells.map((c) => c.style.animationDelay)).toEqual(["0ms", "130ms", "260ms"]);
     expect(container.querySelector('[data-template-aim="1:1"]')?.getAttribute("data-pulse-step")).toBe("0");
+  });
+
+  it("зміна точки наведення перемонтовує шар шаблону, тож хвиля стартує разом для всіх клітинок", () => {
+    const marks = new Map([["1:1", "template" as const], ["2:1", "template" as const]]);
+
+    const { container, rerender } = render(<BattleMap map={square} participants={people} view={{ marks, aim: { x: 1, y: 1 }, pulseFrom: { x: 1, y: 1 } }} />);
+
+    const before = container.querySelector('[data-template-cell="2:1"]');
+
+    rerender(<BattleMap map={square} participants={people} view={{ marks: new Map(marks), aim: { x: 1, y: 1 }, pulseFrom: { x: 1, y: 1 } }} />);
+
+    expect(container.querySelector('[data-template-cell="2:1"]')).toBe(before);
+
+    rerender(<BattleMap map={square} participants={people} view={{ marks: new Map([["2:1", "template" as const], ["3:1", "template" as const]]), aim: { x: 2, y: 1 }, pulseFrom: { x: 2, y: 1 } }} />);
+
+    expect(container.querySelector('[data-template-cell="2:1"]')).not.toBe(before);
+    expect(container.querySelector("[data-template-layer]")?.getAttribute("data-template-layer")).toBe("2:1/2:1");
   });
 });

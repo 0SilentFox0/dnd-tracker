@@ -286,12 +286,15 @@ const TemplateLayer = memo(function TemplateLayer({ marks, aim, pulseFrom }: Pic
     return { "data-pulse-step": step, className: "battle-map-pulse", style: { animationDelay: `${step * PULSE_STEP_MS}ms` } };
   };
 
+  const wave = `${pulseFrom ? cellKey(pulseFrom) : ""}/${aim ? cellKey(aim) : ""}`;
+
+  // новий ключ при зміні точки перезапускає анімацію всіх клітинок разом, а не лише нових
   return (
-    <g pointerEvents="none">
+    <g key={wave} data-template-layer={wave} pointerEvents="none">
       {cells.map((k) => (
-        <polygon key={`tp${k}`} data-template-cell={k} {...pulse(parseKey(k))} points={cellPolygon(parseKey(k))} fill="rgba(255,140,40,.28)" stroke="#ffb04a" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+        <polygon key={`tp${k}`} data-template-cell={k} {...pulse(parseKey(k))} points={cellPolygon(parseKey(k))} fill="rgba(168,120,255,.3)" stroke="#c4a6ff" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
       ))}
-      {aim && <polygon data-template-aim={cellKey(aim)} {...pulse(aim)} points={cellPolygon(aim)} fill="rgba(255,176,74,.5)" stroke="#ffd27a" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
+      {aim && <polygon data-template-aim={cellKey(aim)} {...pulse(aim)} points={cellPolygon(aim)} fill="rgba(200,176,255,.5)" stroke="#efe6ff" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
     </g>
   );
 });
