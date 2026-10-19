@@ -33,4 +33,13 @@ export const API_ERRORS = {
   ARTIFACT_UNKNOWN_SLOT: "Невідомий слот",
   ARTIFACT_ALREADY_EQUIPPED: "Цей артефакт уже вдягнено в інший слот",
   ARTIFACT_HELD_BY_OTHER: "Артефакт уже носить інший герой",
+  TRACK_NOT_FOUND: "Трек не знайдено",
+  TRACK_LIMIT: "У бібліотеці вже 40 треків — видаліть зайві",
+  TRACK_FILE_INVALID: "Потрібен файл MP3 або M4A до 10 МБ",
+  TRACK_UPLOAD_MISSING: "Файл не завантажено — спробуйте ще раз",
+  TRACK_ORDER_MISMATCH: "Порядок має містити всі треки кампанії",
+  YOUTUBE_URL_INVALID: "Не вдалося розпізнати посилання YouTube",
+  BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",
+  BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",
+  BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
 } as const;
