@@ -4,7 +4,7 @@
  * скілами, артефактами й сетом, а потім проганяє бій через ті самі mutation-функції, що й API
  * (runBattleMutation + loadBattle/saveBattle). Підмінено лише авторизацію, rate-limit і Pusher.
  *
- *   pnpm simulate-battle            # лише локальна БД (localhost)
+ *   pnpm simulate-battle [--keep-battles]   # лише локальна БД (localhost); без прапорця SIM-кампанії видаляються після прогону
  */
 import type { Prisma } from "@prisma/client";
 
@@ -372,7 +372,9 @@ async function main() {
 
   console.info(`\n${failed.length === 0 ? "✅" : "❌"} Перевірок: ${results.length}, провалено: ${failed.length}`);
   for (const f of failed) console.info(`   ❌ ${f.name} — ${f.detail}`);
-  console.info(`\nБій лишився в локальній БД: /campaigns/${ctx.campaignId}/battles/${ctx.battleId}`);
+
+  if (process.argv.includes("--keep-battles")) console.info(`\nБій лишився в локальній БД: /campaigns/${ctx.campaignId}/battles/${ctx.battleId}`);
+  else await removeSimCampaigns();
 
   await prisma.$disconnect();
   process.exit(failed.length === 0 ? 0 : 1);
@@ -777,7 +779,7 @@ async function newMechanics() {
   const setup: Array<Record<string, unknown>> = [];
 
   for (const { side, ...u } of MECHANICS_UNITS(group.id)) {
-    const row = await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+    const row = await prisma.unit.create({ data: { campaignId, ...u, knownSpells: [light.id] } as Prisma.UnitUncheckedCreateInput });
 
     setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
   }
@@ -851,7 +853,7 @@ async function newMechanics() {
 
   const hpBefore = new Map(allies.map((p) => [p.basicInfo.id, hp(by(p.basicInfo.name))]));
 
-  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], diceRolls: [3] }, SIM_USER.id);
+  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], diceRolls: Array.from({ length: casterSpellDice(by(u("Жрець")), light).count }, () => 3) }, SIM_USER.id);
 
   quiet = false;
   check(
@@ -1010,8 +1012,16 @@ async function racialMechanics() {
   check("Рунна броня: опір до всієї шкоди видно в кроках урону", bash.details?.isHit === true && steps.includes("Рунна броня"), steps.slice(0, 160));
 }
 
+/** Усі кампанії тестового DM — лише цього скрипта; бої, юніти й закляття йдуть каскадом. */
+async function removeSimCampaigns() {
+  await prisma.campaign.deleteMany({ where: { dmUserId: SIM_USER.id } });
+}
+
 main().catch(async (e) => {
   console.error(e);
+
+  if (!process.argv.includes("--keep-battles")) await removeSimCampaigns().catch(() => undefined);
+
   await prisma.$disconnect();
   process.exit(1);
 });
@@ -1051,8 +1061,10 @@ async function spellModel() {
 
   const setup: Array<Record<string, unknown>> = [];
 
+  const knownSpells = Object.values(spells).map((s) => s.id);
+
   for (const { side, ...u } of SPELL_MODEL_UNITS(human.id)) {
-    const row = await prisma.unit.create({ data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput });
+    const row = await prisma.unit.create({ data: { campaignId, ...u, knownSpells } as Prisma.UnitUncheckedCreateInput });
 
     setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
   }
@@ -1089,7 +1101,7 @@ async function spellModel() {
 
   const wrongCount = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], [3, 3]);
 
-  const wrongSides = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], Array.from({ length: fireDice.count }, () => 7));
+  const wrongSides = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], Array.from({ length: fireDice.count }, () => fireDice.sides + 1));
 
   quiet = false;
   check("Кубики заклинання: неправильна кількість відхиляється (422 invalid_dice)", wrongCount.status === 422 && wrongCount.body.code === "invalid_dice", JSON.stringify(wrongCount.body));
@@ -1101,29 +1113,36 @@ async function spellModel() {
 
   const before = new Map(goblins.map((g) => [g, hpOf(g)]));
 
-  const fire = await cast("Архімаг", spells.fireball.id, goblins, [4, 4, 4, 4], { saveRolls: [{ participantId: P("Гоблін А").basicInfo.id, roll: 1 }, { participantId: P("Гоблін Б").basicInfo.id, roll: 20 }, { participantId: P("Гоблін В").basicInfo.id, roll: 1 }] });
+  const fire = await cast("Архімаг", spells.fireball.id, goblins, Array.from({ length: fireDice.count }, () => 4), { saveRolls: [{ participantId: P("Гоблін А").basicInfo.id, roll: 1 }, { participantId: P("Гоблін Б").basicInfo.id, roll: 20 }, { participantId: P("Гоблін В").basicInfo.id, roll: 1 }] });
 
   const dealt = (g: string) => (before.get(g) ?? 0) - hpOf(g);
 
   quiet = false;
-  check("Вогняна куля: два провалені збереження — повна шкода 16, успішне — половина", fire.status === 200 && dealt("Гоблін А") === 16 && dealt("Гоблін В") === 16 && dealt("Гоблін Б") === 8, `${goblins.map((g) => `${g} −${dealt(g)}`).join(", ")}`);
+
+  const full = 4 * fireDice.count;
+
+  check(`Вогняна куля: два провалені збереження — повна шкода ${full}, успішне — половина`, fire.status === 200 && dealt("Гоблін А") === full && dealt("Гоблін В") === full && dealt("Гоблін Б") === Math.floor(full / 2), `${goblins.map((g) => `${g} −${dealt(g)}`).join(", ")}`);
   quiet = true;
 
   const enemyHp = new Map(["Гоблін А", "Гоблін Б", "Воїн"].map((g) => [g, hpOf(g)]));
 
-  const word = await cast("Жрець", spells.wordOfLight.id, [], [3, 3, 3]);
+  const wordDice = dice("Жрець", spells.wordOfLight.id).count;
+
+  const word = await cast("Жрець", spells.wordOfLight.id, [], Array.from({ length: wordDice }, () => 3));
 
   quiet = false;
-  check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 9, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
+  check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 3 * wordDice, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
   check("Слово світла: у логу видно імунітет раси", log.some((e) => /імунітет раси/.test(e.resultText)), log.find((e) => e.actionType === "spell" && /Слово світла/.test(e.resultText))?.resultText ?? "");
   quiet = true;
 
   const sides = ["Хаотик", "Паладин", "Гоблін А"].map((n) => [n, hpOf(n)] as const);
 
-  const armageddon = await cast("Хаотик", spells.armageddon.id, [], [3, 3, 3, 3, 3]);
+  const armDice = dice("Хаотик", spells.armageddon.id).count;
+
+  const armageddon = await cast("Хаотик", spells.armageddon.id, [], Array.from({ length: armDice }, () => 3));
 
   quiet = false;
-  check("Армагеддон б'є всіх учасників, включно із заклинателем і його стороною", armageddon.status === 200 && sides.every(([n, h]) => hpOf(n) === h - 15), sides.map(([n, h]) => `${n} ${h} → ${hpOf(n)}`).join(", "));
+  check("Армагеддон б'є всіх учасників, включно із заклинателем і його стороною", armageddon.status === 200 && sides.every(([n, h]) => hpOf(n) === h - 3 * armDice), sides.map(([n, h]) => `${n} ${h} → ${hpOf(n)}`).join(", "));
   quiet = true;
 
   await setHp("Паладин #1", 10);

@@ -143,7 +143,7 @@ export function completeBattle(
         participantName: p.basicInfo.name,
         oldHp: p.combatStats.currentHp,
         newHp: p.combatStats.maxHp,
-        change: p.combatStats.maxHp - p.combatStats.currentHp,
+        change: p.combatStats.currentHp - p.combatStats.maxHp,
       })),
     isCancelled: false,
   };
@@ -191,7 +191,7 @@ export function calculateAllyHpChangesOnVictory(
           participantName: p.basicInfo.name,
           oldHp,
           newHp,
-          change: newHp - oldHp,
+          change: oldHp - newHp,
         };
       }
 

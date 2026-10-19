@@ -160,6 +160,13 @@ describe("pickEnemyRoster", () => {
     expect(pickEnemyRoster(party(4), LIBRARY, "none")).toBeNull();
   });
 
+  it("не пропонує юнітів, яких лише прикликають", () => {
+    const lib: UnitStats[] = [...LIBRARY.map((u) => ({ ...u, summon: true })), unit("spawn", 2, 30, 12)];
+
+    expect(pickEnemyRoster(party(4), lib)?.roster.map((r) => r.unitId)).toEqual(["spawn"]);
+    expect(pickEnemyRoster(party(4), LIBRARY.map((u) => ({ ...u, summon: true })))).toBeNull();
+  });
+
   it("працює без вищого тіру в бібліотеці", () => {
     expect(pickEnemyRoster(party(4), [unit("only", 1, 40, 8)])).not.toBeNull();
   });

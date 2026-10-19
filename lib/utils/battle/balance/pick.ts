@@ -47,7 +47,7 @@ function* combinations<T>(items: T[], size: number, start = 0): Generator<T[]> {
 export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], raceId?: string | null): PickResult | null {
   const library = rawLibrary.map((u) => effectiveUnit(u, party));
 
-  const pool = (raceId ? library.filter((u) => u.raceId === raceId) : library).filter((u) => u.hp > 0 && u.dpr > 0);
+  const pool = (raceId ? library.filter((u) => u.raceId === raceId) : library).filter((u) => u.hp > 0 && u.dpr > 0 && !u.summon);
 
   const heroes = Math.max(1, party.heroCount);
 

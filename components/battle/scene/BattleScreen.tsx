@@ -4,6 +4,7 @@ import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { BattleToast } from "./BattleToast";
+import { NoticeStackContext } from "./MapStrip";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { hudFontClassName } from "@/components/hud";
@@ -63,6 +64,8 @@ export function BattleScreen() {
 
   const [completeOpen, setCompleteOpen] = useState(false);
 
+  const [notices, setNotices] = useState<HTMLElement | null>(null);
+
   useSpellBookPrefetch();
 
   const { userEnabled: fxOn } = useFxEnabled();
@@ -87,11 +90,13 @@ export function BattleScreen() {
 
   return (
     <div className={cn("battle-hud", hudFontClassName)}>
-      {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout />}
+      {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
       <ResultOverlay />
       {Desktop && <ActionResultCard />}
       {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
-      <BattleToast />
+      <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
+        <BattleToast />
+      </div>
       {isDM && <DmRevivePrompt />}
       {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
       <BattleFxLayer />

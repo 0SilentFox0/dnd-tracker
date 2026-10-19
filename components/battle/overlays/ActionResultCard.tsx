@@ -3,7 +3,7 @@
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-import { useMapStripSlot } from "@/components/battle/scene/MapStrip";
+import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
 import { type ActionResultFx, useActionResult } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -79,6 +79,8 @@ export function ActionResultCard() {
 
   const slot = useMapStripSlot();
 
+  const stack = useNoticeStack();
+
   if (!fx) return null;
 
   const card = (
@@ -89,7 +91,7 @@ export function ActionResultCard() {
       className={cn(
         HUD_SURFACE,
         "relative cursor-pointer border border-white/25 bg-[#15110e]/95 py-2 pl-3 pr-9 text-[var(--ink)] animate-[hud-fade_.2s]",
-        slot ? "mb-1" : "fixed inset-x-4 top-14 z-50 mx-auto max-w-md lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-auto lg:mx-0 lg:w-[300px]",
+        slot ? "mb-1" : stack ? "" : "fixed inset-x-4 top-14 z-50 mx-auto max-w-md lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-auto lg:mx-0 lg:w-[300px]",
       )}
     >
       {fx.kind === "spell" ? <SpellBody fx={fx} /> : <AttackBody fx={fx} />}
@@ -99,5 +101,7 @@ export function ActionResultCard() {
     </div>
   );
 
-  return slot ? createPortal(card, slot) : card;
+  const target = slot ?? stack;
+
+  return target ? createPortal(card, target) : card;
 }

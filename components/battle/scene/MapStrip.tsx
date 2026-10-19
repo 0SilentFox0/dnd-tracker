@@ -8,6 +8,11 @@ export const MapStripSlotContext = createContext<HTMLElement | null>(null);
 
 export const useMapStripSlot = () => useContext(MapStripSlotContext);
 
+/** Стовпчик повідомлень угорі телефона: тост і картка результату стають одне під одним, а не одне на одному. */
+export const NoticeStackContext = createContext<HTMLElement | null>(null);
+
+export const useNoticeStack = () => useContext(NoticeStackContext);
+
 export function MapStripRow({ children, onExpand }: { children: ReactNode; onExpand: () => void }) {
   return (
     <button type="button" onClick={onExpand} className="flex h-10 w-full items-center gap-2 text-left text-[15px] text-[var(--ink)]">

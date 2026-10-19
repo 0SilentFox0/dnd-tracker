@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
-import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
+import { calculateAllyHpChangesOnVictory, checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleAction } from "@/types/battle";
 
 describe("completeBattle", () => {
@@ -15,8 +15,18 @@ describe("completeBattle", () => {
     const { battleAction, updatedParticipants } = completeBattle([downed], "victory", 3);
 
     expect(updatedParticipants[0].combatStats.status).toBe("active");
-    expect(battleAction.hpChanges).toEqual([expect.objectContaining({ participantId: "hero", oldHp: 0, newHp: downed.combatStats.maxHp })]);
+    expect(battleAction.hpChanges).toEqual([expect.objectContaining({ participantId: "hero", oldHp: 0, newHp: downed.combatStats.maxHp, change: -downed.combatStats.maxHp })]);
     expect(battleAction.actionDetails.battleResult).toBe("victory");
+  });
+
+  it("лікування при перемозі пишеться від'ємною зміною, як в інших hpChanges", () => {
+    const base = createMockParticipant();
+
+    const before = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero", side: ParticipantSide.ALLY }, combatStats: { ...base.combatStats, currentHp: 10 } });
+
+    const after = { ...before, combatStats: { ...before.combatStats, currentHp: 30 } };
+
+    expect(calculateAllyHpChangesOnVictory([before], [after], { result: "victory" } as never)).toEqual([expect.objectContaining({ oldHp: 10, newHp: 30, change: -20 })]);
   });
 
   it("поразка: battleResult у actionDetails", () => {

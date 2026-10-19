@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
-import { MapStripSlotContext } from "@/components/battle/scene/MapStrip";
+import { MapStripSlotContext, NoticeStackContext } from "@/components/battle/scene/MapStrip";
 import { ACTION_RESULT_MS, type ActionResultFx } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
@@ -63,6 +63,19 @@ describe("ActionResultCard", () => {
     render(<MapStripSlotContext value={slot}><ActionResultCard /></MapStripSlotContext>, { wrapper });
 
     expect(slot.querySelector("[role=status]")).toBeTruthy();
+  });
+
+  it("на телефоні поза картою — у стовпчику повідомлень разом із тостом, а не поверх нього", () => {
+    const stack = document.createElement("div");
+
+    const { wrapper } = fakeScene({ result: { kind: "hit", targetName: "Циклоп", damage: 10, downed: false, d20: 14 } });
+
+    render(<NoticeStackContext value={stack}><ActionResultCard /></NoticeStackContext>, { wrapper });
+
+    const placed = stack.querySelector<HTMLElement>("[role=status]");
+
+    expect(placed).toBeTruthy();
+    expect(placed?.className).not.toContain("fixed");
   });
 
   it("зникає сама за ~4 с, кліком чи кнопкою «Закрити»", () => {

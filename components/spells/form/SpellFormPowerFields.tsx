@@ -46,7 +46,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
       <div className="col-span-2">
         <Label htmlFor="dice">Базові кубики N</Label>
         <Input id="dice" type="number" min={0} max={20} value={formData.dice} onChange={(e) => setFormData({ ...formData, dice: Math.max(0, Math.min(20, parseInt(e.target.value) || 0)) })} className="w-24" />
-        <p className="mt-1 text-xs text-muted-foreground">Кидається (N + ⌊рівень героя / 3⌋) кубиків; грані — від майстерності школи (к6 / к8 / к10); 0 — без кубиків.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Герой: N + ⌊рівень / 3⌋ кубиків, грані — від майстерності школи (к6 / к8 / к10). Юніт: N + ⌊рівень / 2⌋ кубиків, грані — від рівня (1–4 к6, 5–9 к8, 10+ к10). 0 — без кубиків.</p>
       </div>
       <div className="col-span-2">
         <Label htmlFor="targeting">Цілі</Label>
