@@ -130,7 +130,9 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
     case "guaranteedHit":
       return "гарантоване влучання";
     case "resistance":
-      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : e.percent < 0 ? `вразливість ${e.damageType} ${-e.percent}%` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}`;
+      return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : e.percent < 0 ? `вразливість ${e.damageType} ${-e.percent}%` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}${e.school ? ` (заклинання школи ${e.school})` : ""}`;
+    case "spellAbsorb":
+      return `лікується на ${e.percent}% шкоди від заклинань школи ${e.school}`;
     case "spellImmunity":
       return e.spellIds ? `імунітет до заклинань (${e.spellIds.length})` : "імунітет до всіх заклинань";
     case "spellTargeting": {
@@ -178,6 +180,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   advantageForAttackers: "Перевага для атакувальників",
   guaranteedHit: "Гарантоване влучання",
   resistance: "Опір / імунітет до шкоди",
+  spellAbsorb: "Поглинання шкоди заклинань",
   spellImmunity: "Імунітет до заклинань",
   spellTargeting: "Режим цілей заклять",
   counterAttack: "Контратака",
@@ -218,6 +221,11 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
     { name: "damageType", label: "Тип шкоди (all, physical, spell, fire…)", input: "text" },
     { name: "percent", label: "%, 100 = імунітет, від'ємне = вразливість", input: "number" },
     { name: "attackKind", label: "Лише проти атак", input: "select", options: [{ value: "melee", label: "ближніх" }, { value: "ranged", label: "дальніх" }], optional: true },
+    { name: "school", label: "Лише від заклинань школи", input: "text", optional: true },
+  ],
+  spellAbsorb: [
+    { name: "school", label: "Школа заклинань", input: "text" },
+    { name: "percent", label: "% шкоди, що лікує", input: "number" },
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання (порожньо = усі)", input: "spells", optional: true }],
   spellTargeting: [

@@ -66,6 +66,8 @@ const SAMPLES: Record<string, Ability[]> = {
   ],
   wheelOfFortune: [catalog.wheelOfFortune()],
   critRange: [catalog.critRange(19)],
+  chaosVulnerabilityAura: [catalog.chaosVulnerabilityAura()],
+  chaosAbsorb: [catalog.chaosAbsorb()],
   flavor: [catalog.flavor("Літає")],
 };
 

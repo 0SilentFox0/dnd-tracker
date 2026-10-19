@@ -36,6 +36,9 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
     expect(abilityNames("necromancers-skeleton-warrior")).toContain("Великий щит");
     expect(abilityNames("humans-defender-of-faith")).toEqual(["Подвійна відсіч"]);
     expect(abilityNames("mages-rakshasa-kshatriya")).toContain("Натиск");
+    expect(abilityNames("mages-elemental-gargoyle")).toEqual(["Механізм", "Аура стихій"]);
+    expect(abilityNames("mages-magnetic-golem")).toContain("Магнітне поле");
+    for (const key of ["mages-elemental-gargoyle", "mages-magnetic-golem"]) for (const a of unit(key).abilities) expect(AbilitySchema.safeParse(a).success).toBe(true);
     expect(AbilitySchema.safeParse(onslaught).success).toBe(true);
   });
 });

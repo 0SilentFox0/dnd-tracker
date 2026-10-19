@@ -268,6 +268,22 @@ export const retaliateAura = (name: string, percent = 25, damageType = "fire"): 
   effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: percent }, damageType, target: "eventActor" }],
 });
 
+export const chaosVulnerabilityAura = (): Ability => ({
+  id: "unit-chaos-vulnerability-aura",
+  name: "Аура стихій",
+  description: "Аура: вороги поруч отримують на 25 % більше шкоди від заклинань Хаосу.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: -25, school: "Хаос", target: "nearbyEnemies" }],
+});
+
+export const chaosAbsorb = (): Ability => ({
+  id: "unit-chaos-absorb",
+  name: "Магнітне поле",
+  description: "Лікується на 50 % шкоди, яку по ньому завдають заклинання Хаосу.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "spellAbsorb", school: "Хаос", percent: 50 }],
+});
+
 export const guardian = (percent = 30): Ability => ({
   id: "unit-guardian",
   name: "Захисник",

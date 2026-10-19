@@ -9,6 +9,7 @@ import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
@@ -161,6 +162,21 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     summons.push(...(r.summons ?? []));
   };
 
+  const absorbSpellDamage = (id: string, damage: number) => {
+    if (damage <= 0 || !spell.groupId) return;
+
+    for (const f of findFlags(flow.ps, id, "spellAbsorb", actionModifiers[id]).filter((x) => x.school === spell.groupId)) {
+      const target = getP(flow, id);
+
+      const healed = Math.min(Math.floor((damage * f.percent) / 100), target.combatStats.maxHp - target.combatStats.currentHp);
+
+      if (healed <= 0 || target.combatStats.currentHp <= 0) continue;
+
+      put(flow, { ...target, combatStats: { ...target.combatStats, currentHp: target.combatStats.currentHp + healed } });
+      flow.messages.push(`💚 ${target.basicInfo.name}: поглинає ${healed} HP (${spell.name})`);
+    }
+  };
+
   const dealDamage = (effect: Extract<Effect, { kind: "dealDamage" }>, id: string, roll: number, index: number) => {
     const target = getP(flow, id);
 
@@ -172,9 +188,10 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     if (planned <= 0) return;
 
-    const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, extra: actionModifiers[id] });
+    const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: actionModifiers[id] });
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
+    absorbSpellDamage(id, resisted.finalDamage);
     damageSteps[id] = [...(damageSteps[id] ?? []), ...resisted.steps];
 
     if (resisted.finalDamage === 0 && resisted.immunityApplied) flow.messages.push(immunityNote(target.basicInfo.name, resisted.steps));
