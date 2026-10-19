@@ -10,7 +10,7 @@ const map: BattleMapConfig = { cols: 12, rows: 12, background: null, opacity: 0.
 
 const k = (x: number, y: number) => `${x}:${y}`;
 
-function at(id: string, pos: GridPoint | undefined, extra: { size?: number; status?: CombatStatus; reserved?: boolean } = {}): BattleParticipant {
+function at(id: string, pos: GridPoint | undefined, extra: { size?: number; status?: BattleParticipant["combatStats"]["status"]; reserved?: boolean } = {}): BattleParticipant {
   const b = createMockParticipant();
 
   return {
