@@ -46,6 +46,7 @@ model Campaign {
   skills          Skill[]
   spellGroups     SpellGroup[]
   spells          Spell[]
+  tracks          CampaignTrack[]
   units           Unit[]
 
   @@index([dmUserId])
@@ -310,6 +311,7 @@ model BattleScene {
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
   map                Json?
+  audio              Json?
   createdAt          DateTime            @default(now())
   startedAt          DateTime?
   completedAt        DateTime?
@@ -322,6 +324,22 @@ model BattleScene {
 
   @@index([campaignId])
   @@map("battle_scenes")
+}
+
+model CampaignTrack {
+  id          String   @id @default(cuid())
+  campaignId  String
+  title       String
+  kind        String
+  url         String?
+  youtubeId   String?
+  durationSec Int?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, sortOrder])
+  @@map("campaign_tracks")
 }
 
 model BattleParticipant {
