@@ -9,7 +9,7 @@ const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   if (trigger.event === "passive") return STATIC_KINDS;
 
-  return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon");
+  return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon" && k !== "maneuver");
 }
 
 function baseEffect(kind: EffectKind): Effect {
@@ -55,6 +55,8 @@ function baseEffect(kind: EffectKind): Effect {
       return { kind, percent: 50, duration: { rounds: 2 }, target: "eventTarget" };
     case "mark":
       return { kind, markId: "mark", duration: { rounds: 2 }, target: "eventTarget" };
+    case "maneuver":
+      return { kind, maneuver: "fireBurst", percentOfAttack: 50 };
     case "randomOf":
       return { kind, options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] };
   }

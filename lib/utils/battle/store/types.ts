@@ -46,6 +46,7 @@ export interface ParticipantState {
   movementUsed?: number;
   turnStartPosition?: GridPoint;
   returnedThisTurn?: boolean;
+  airborne?: { landAt?: GridPoint; targetId?: string; since: number };
   hazardHitRound?: number;
   retaliationsUsed?: number;
   spellSlotsCurrent: Record<string, number>;

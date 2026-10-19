@@ -46,4 +46,13 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
     expect(unit("dark-elves-shadow-mistress").spellKeys).toEqual(["suffering"]);
     expect(AbilitySchema.safeParse(onslaught).success).toBe(true);
   });
+
+  it("грифони й вогняний демон", () => {
+    expect(abilityNames("humans-royal-griffin")).toEqual(["Безмежна відсіч", "Пікірування"]);
+    expect(abilityNames("humans-battle-griffin")).toEqual(["Безмежна відсіч", "Шквал"]);
+    expect(unit("humans-battle-griffin").attacks).toEqual([{ name: "Пазурі", type: "melee", dice: "2d8+4", damageType: "slashing" }]);
+    expect(abilityNames("demons-fire-demon")).toContain("Вогняний вибух");
+
+    for (const key of ["humans-royal-griffin", "humans-battle-griffin", "demons-fire-demon"]) for (const a of unit(key).abilities) expect(AbilitySchema.safeParse(a).success).toBe(true);
+  });
 });

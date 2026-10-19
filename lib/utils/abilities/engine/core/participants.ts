@@ -28,6 +28,10 @@ export function isActive(p: BattleParticipant): boolean {
   return p.combatStats.status === CombatStatus.ACTIVE;
 }
 
+export function isTargetable(p: BattleParticipant): boolean {
+  return isActive(p) && !p.battleData.airborne;
+}
+
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {
   return p.battleData.resolvedAbilities ?? [];
 }

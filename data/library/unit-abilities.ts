@@ -505,3 +505,34 @@ export const flavor = (text: string): Ability => ({
   trigger: passive,
   effects: [{ kind: "note", text }],
 });
+
+export const dive = (): Ability => ({
+  id: "unit-dive",
+  name: "Пікірування",
+  description: "Дія, перезарядка 2 раунди: злітає з поля на раунд (його не можна атакувати) і на початку свого наступного ходу падає на обрану клітинку — ×2 шкоди тому, хто там стоїть.",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  aim: { kind: "cell", range: 120 },
+  effects: [{ kind: "maneuver", maneuver: "dive", percentOfAttack: 200 }],
+});
+
+export const squall = (): Ability => ({
+  id: "unit-squall",
+  name: "Шквал",
+  description: "Дія, перезарядка 2 раунди: пролітає по прямій і завдає звичайної шкоди кожному ворогу на шляху.",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  maxTargets: 3,
+  aim: { kind: "direction", range: 60 },
+  effects: [{ kind: "maneuver", maneuver: "squall", percentOfAttack: 100 }],
+});
+
+export const fireBurst = (): Ability => ({
+  id: "unit-fire-burst",
+  name: "Вогняний вибух",
+  description: "Дія, перезарядка 2 раунди: вороги на сусідніх клітинках отримують 50 % шкоди атаки вогнем (рятівний кидок Спритності — половина).",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  maxTargets: 3,
+  effects: [{ kind: "maneuver", maneuver: "fireBurst", percentOfAttack: 50 }],
+});

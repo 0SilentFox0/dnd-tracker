@@ -2,7 +2,7 @@ import { cellDistance, cellKey, cellLine, footprintDistance, inBounds, isPlayabl
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
 const CONE_TAN = 0.5;
@@ -112,7 +112,7 @@ export function participantsInCells(participants: BattleParticipant[], cells: st
   const set = new Set(cells);
 
   return participants
-    .filter((p) => isActive(p) && isOnMap(p) && cellsOf(p).some((c) => set.has(cellKey(c))))
+    .filter((p) => isTargetable(p) && isOnMap(p) && cellsOf(p).some((c) => set.has(cellKey(c))))
     .map((p, i) => ({ p, i, d: footprintDistance([from], cellsOf(p)) }))
     .sort((a, b) => a.d - b.d || a.i - b.i)
     .map((x) => x.p);

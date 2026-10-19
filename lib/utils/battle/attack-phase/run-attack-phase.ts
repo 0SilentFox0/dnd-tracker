@@ -3,7 +3,7 @@ import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isActive, isTargetable, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
@@ -100,6 +100,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleAccessError(404, "Цілей немає в бою");
   }
 
+  if (chosenTargets.some((t) => t.battleData.airborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+
   if (
     !currentParticipant ||
     currentParticipant.basicInfo.id !== attacker.basicInfo.id
@@ -139,10 +141,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const targets = hitsAllEnemies
     ? [
-        ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t)),
+        ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t)),
         ...(input.map && attacker.battleData.position
           ? enemiesInReach(input.map, initiativeOrder, attacker, attack)
-          : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t))
+          : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t))
         ).filter((t) => !targetIds.includes(t.basicInfo.id)),
       ]
     : chosenTargets;

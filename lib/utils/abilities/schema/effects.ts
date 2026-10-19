@@ -188,6 +188,12 @@ const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...ta
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
 
+export const MANEUVERS = ["dive", "squall", "fireBurst"] as const;
+
+export type Maneuver = (typeof MANEUVERS)[number];
+
+const ManeuverSchema = z.object({ kind: z.literal("maneuver"), maneuver: z.enum(MANEUVERS), percentOfAttack: z.number().int().min(1).max(500) });
+
 const BASE_EFFECTS = [
   ModifyStatSchema,
   DamageBonusSchema,
@@ -210,6 +216,7 @@ const BASE_EFFECTS = [
   GuardSchema,
   SummonSchema,
   RaiseDeadSchema,
+  ManeuverSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

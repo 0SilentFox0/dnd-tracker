@@ -47,7 +47,7 @@ export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
 
     const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, data.targetCell);
 
-    const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []), participant);
+    const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []), { owner: participant, onMap: !!ctx.meta.map && !!participant.battleData.position });
 
     const run = runAbilities(
       ctx.participants,

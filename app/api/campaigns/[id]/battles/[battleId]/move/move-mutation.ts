@@ -34,6 +34,8 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   if (!isActive(mover) || mover.battleData.reserved) throw new BattleRuleError("participant_dead", "Учасник не може рухатися");
 
+  if (mover.battleData.airborne) throw new BattleRuleError("action_rejected", "Учасник у повітрі — приземлиться на початку свого ходу");
+
   const current = ctx.participants[ctx.scene.turnIndex];
 
   const ownTurn = current?.basicInfo.id === mover.basicInfo.id;

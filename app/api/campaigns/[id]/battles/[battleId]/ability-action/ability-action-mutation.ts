@@ -47,7 +47,7 @@ export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
 
     const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, data.targetCell);
 
-    const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? [], participant);
+    const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? [], { owner: participant, onMap: !!ctx.meta.map && !!participant.battleData.position });
 
     // дія витрачається до ефектів, щоб «оновлення дії» від них не перезаписалось
     const run = runAbilities(

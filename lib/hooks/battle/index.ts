@@ -1,3 +1,4 @@
+export { useAbilityMapAim } from "./useAbilityMapAim";
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattleFxQueue } from "./useBattleFxQueue";

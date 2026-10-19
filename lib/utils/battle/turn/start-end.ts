@@ -8,6 +8,7 @@ import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/r
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
+import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -154,6 +155,20 @@ export function processStartOfTurn(
     : [updatedParticipant];
 
   const abilityMessages: string[] = [...healMessages];
+
+  if (updatedParticipant.battleData.airborne) {
+    const landed = landDive(participants, id, { map, rng });
+
+    participants = landed.participants;
+    abilityMessages.push(...landed.messages);
+
+    for (const d of landed.downed) {
+      const r = resolveDowned(participants, d, ctx);
+
+      participants = r.participants;
+      abilityMessages.push(...r.messages);
+    }
+  }
 
   if (skippedBy) abilityMessages.push(`💫 ${participant.basicInfo.name} втрачає дію (${skippedBy.name})`);
 

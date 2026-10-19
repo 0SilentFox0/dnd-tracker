@@ -35,7 +35,7 @@ describe("editor helpers", () => {
 
   it("пасивка не пропонує нестатичні ефекти", () => {
     expect(allowedEffectKinds({ event: "passive" })).toEqual(["modifyStat", "damageBonus", "flag", "note"]);
-    expect(allowedEffectKinds({ event: "turnStart" })).toEqual(KINDS.filter((k) => k !== "summon"));
+    expect(allowedEffectKinds({ event: "turnStart" })).toEqual(KINDS.filter((k) => k !== "summon" && k !== "maneuver"));
     expect(allowedEffectKinds({ event: "action" })).toEqual(KINDS);
   });
 

@@ -31,7 +31,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
   const targets = order.filter(
-    (p) => isUp(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
+    (p) => isUp(p) && !p.battleData.airborne && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
 
   const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);

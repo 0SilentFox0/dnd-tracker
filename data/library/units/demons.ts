@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, charmOnHit, critRange, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, firstStrike, magicResist, noRetaliation, rage, rangedRetaliation, stun, summonGroupOnce } from "../unit-abilities";
+import { alliesAura, charmOnHit, critRange, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, fireBurst, firstStrike, magicResist, noRetaliation, rage, rangedRetaliation, stun, summonGroupOnce } from "../unit-abilities";
 
 const base = { raceKey: "demons" } as const;
 
@@ -12,7 +12,7 @@ export const DEMON_UNITS: LibraryUnit[] = [
   { ...base, key: "demons-familiar", name: "Чортеня", tier: 1, role: "upgrade", hp: 32, ac: 13, attackBonus: 6, initiative: 13, attacks: [{ name: "Кігті", type: "melee", dice: "1d6+1", damageType: "slashing" }], abilities: [drainMana()] },
   { ...base, key: "demons-devilkin", name: "Дияволя", tier: 1, role: "alt", hp: 32, ac: 13, attackBonus: 6, initiative: 13, attacks: [{ name: "Кігті", type: "melee", dice: "1d6+1", damageType: "slashing" }], abilities: [magicResist(25)] },
   { ...base, key: "demons-demon", name: "Демон", tier: 2, role: "base", hp: 41, ac: 13, attackBonus: 5, initiative: 7, attacks: [{ name: "Пекельний клинок", type: "melee", dice: "1d6+1", damageType: "slashing" }], abilities: [extraDamage("Пекельне полум'я", "1d4", "fire")] },
-  { ...base, key: "demons-fire-demon", name: "Вогняний демон", tier: 2, role: "upgrade", hp: 47, ac: 14, attackBonus: 6, initiative: 8, attacks: [{ name: "Пекельний клинок", type: "melee", dice: "1d6+2", damageType: "slashing" }], abilities: [extraDamage("Пекельне полум'я", "1d6", "fire"), fireImmunity()] },
+  { ...base, key: "demons-fire-demon", name: "Вогняний демон", tier: 2, role: "upgrade", hp: 47, ac: 14, attackBonus: 6, initiative: 8, attacks: [{ name: "Пекельний клинок", type: "melee", dice: "1d6+2", damageType: "slashing" }], abilities: [extraDamage("Пекельне полум'я", "1d6", "fire"), fireImmunity(), fireBurst()] },
   { ...base, key: "demons-elder-demon", name: "Старший демон", tier: 2, role: "alt", hp: 44, ac: 14, attackBonus: 6, initiative: 9, attacks: [{ name: "Пекельний клинок", type: "melee", dice: "1d8+2", damageType: "slashing" }], abilities: [extraDamage("Пекельне полум'я", "1d4", "fire"), rage()] },
   { ...base, key: "demons-hound", name: "Гонча", tier: 3, role: "base", hp: 56, ac: 13, attackBonus: 6, initiative: 13, attacks: [{ name: "Укус", type: "melee", dice: "2d6+2", damageType: "piercing" }], abilities: [firstStrike("Таран")] },
   { ...base, key: "demons-cerberus", name: "Цербер", tier: 3, role: "upgrade", hp: 62, ac: 14, attackBonus: 7, initiative: 13, attacks: [{ name: "Три голови", type: "melee", dice: "2d6+2", damageType: "piercing", targets: 3 }], abilities: cerberus() },

@@ -4,11 +4,12 @@ import { useState } from "react";
 import { Zap } from "lucide-react";
 
 import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { AbilityAimPanel } from "@/components/battle/wizards/AbilityAimPanel";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useAbilityMapAim, useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
@@ -17,7 +18,7 @@ import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone, trigger = "bonusAction" }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void; trigger?: "bonusAction" | "action" }) {
-  const { roster: { allies, enemies }, actions, battle, intents } = useBattleScene();
+  const { roster: { allies, enemies }, actions, battle } = useBattleScene();
 
   const [aiming, setAiming] = useState<ResolvedAbility | null>(null);
 
@@ -46,19 +47,15 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
     onDone();
   };
 
+  const mapAim = useAbilityMapAim(participant, (a, cell) => void fire(a, [], cell));
+
+  const onMap = !!battle.map && !!participant.battleData.position;
+
   const pick = (a: ResolvedAbility) => {
-    if (a.aim && battle.map) {
-      intents.setMapAim({
-        template: { shape: "circle", size: 5 },
-        casterId: participant.basicInfo.id,
-        range: a.aim.range,
-        onAim: (cell) => {
-          intents.setMapAim(null);
-          void fire(a, [], cell);
-        },
-      });
+    if (a.aim && onMap) {
+      mapAim.start(a);
       onOpenChange(false);
-    } else if (needsBonusTarget(a)) setAiming(a);
+    } else if (needsBonusTarget(a, onMap)) setAiming(a);
     else void fire(a);
   };
 
@@ -69,6 +66,8 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
   const candidates = aiming ? bonusTargetCandidates(aiming, allies, enemies, participant) : [];
 
   return (
+    <>
+    {mapAim.ability && <AbilityAimPanel name={mapAim.ability.name} onCancel={mapAim.cancel} />}
     <ResponsiveDialog open={open} onOpenChange={(o) => { if (!o) {
       setAiming(null);
       setPicked([]);
@@ -99,5 +98,6 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
         )}
       </div>
     </ResponsiveDialog>
+    </>
   );
 }

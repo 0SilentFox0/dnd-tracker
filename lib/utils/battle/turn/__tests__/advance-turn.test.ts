@@ -150,6 +150,18 @@ describe("advanceTurn", () => {
       expect(out.participants[0].battleData.movementUsed).toBe(0);
     });
 
+    it("додатковий хід у повітрі — спершу приземлення", () => {
+      const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1 } } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
+
+      expect(out.participants[0].battleData).toMatchObject({ position: { x: 4, y: 4 } });
+      expect(out.participants[0].battleData.airborne).toBeUndefined();
+      expect(out.actions.map((a) => a.resultText).join(" ")).toContain("удар у порожнечу");
+    });
+
     it("додатковий хід без руху не додає movementUsed", () => {
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true } };
 

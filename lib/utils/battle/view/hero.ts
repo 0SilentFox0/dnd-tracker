@@ -75,6 +75,8 @@ const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 const HOSTILE_FLAGS = new Set(["advantageForAttackers", "disadvantage"]);
 
 export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
+  if (a.effects.some((e) => e.kind === "maneuver")) return ParticipantSide.ENEMY;
+
   const aimed = a.effects.filter((e) => "target" in e && e.target === "eventTarget");
 
   if (aimed.length === 0) return null;
@@ -103,7 +105,10 @@ export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "
   return abilityOptions(p, trigger, round).filter((o) => o.cooldownLeft === 0).map((o) => o.ability);
 }
 
-export function needsBonusTarget(a: ResolvedAbility): boolean {
+/** Маневри на карті цілять клітинкою або власним оточенням, тож ціль-учасник потрібна лише без карти. */
+export function needsBonusTarget(a: ResolvedAbility, onMap = false): boolean {
+  if (onMap && a.effects.some((e) => e.kind === "maneuver")) return false;
+
   return bonusTargetSide(a) !== null || deadTargetRules(a).requiresDead;
 }
 
@@ -114,7 +119,7 @@ export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticip
 
   const selfId = owner?.basicInfo.id;
 
-  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter(isUp);
+  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter((p) => isUp(p) && !p.battleData.airborne);
 
   return a.effects.some((e) => e.kind === "guard") ? pool.filter((p) => p.basicInfo.id !== selfId) : pool;
 }

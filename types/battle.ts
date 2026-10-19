@@ -293,6 +293,8 @@ export interface BattleParticipantBattleData {
   turnStartPosition?: GridPoint;
   /** Вже поверталася на стартову клітинку цього ходу */
   returnedThisTurn?: boolean;
+  /** Злетів «Пікіруванням»: поза картою й поза досяжністю до початку свого наступного ходу */
+  airborne?: { landAt?: GridPoint; targetId?: string; since: number };
   /** Відсічей, уже даних з початку власного ходу; немає = за hasUsedReaction */
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */

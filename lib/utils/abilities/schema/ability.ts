@@ -46,6 +46,10 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     issues.push(`${effect.stat} змінюється лише пасивкою`);
   }
 
+  if (effect.kind === "maneuver" && trigger.event !== "bonusAction" && trigger.event !== "action") {
+    issues.push("Маневр доступний лише для бонусної дії та дії");
+  }
+
   if (effect.kind === "summon" && trigger.event !== "bonusAction" && trigger.event !== "action" && trigger.event !== "kill") {
     issues.push("Прикликання доступне лише для бонусної дії, дії та вбивства");
   }
