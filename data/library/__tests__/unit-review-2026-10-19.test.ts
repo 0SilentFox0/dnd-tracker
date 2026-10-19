@@ -31,6 +31,7 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
   it("здібності", () => {
     expect(abilityNames("elves-forest-ranger")).toEqual(["Приголомшливий постріл"]);
     for (const key of ["dark-elves-blood-maiden", "dark-elves-blood-fury", "dark-elves-blood-sister"]) expect(abilityNames(key)).toContain("Удар і повернення");
+    expect(abilityNames("elves-wind-dancer")).toEqual(["Танець вітру"]);
     expect(abilityNames("elves-light-unicorn")).toEqual(["Аура опору магії", "Світле відлуння"]);
     expect(abilityNames("elves-wild-ent")).toContain("Сплутування");
     expect(abilityNames("mages-archmage")).toContain("Енергетичний канал");

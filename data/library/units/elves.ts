@@ -20,6 +20,14 @@ const waspSwarm = (): Ability => ({
   effects: [{ kind: "dot", damagePerRound: "1d6", damageType: "poison", duration: { rounds: 3 }, target: "eventTarget" }],
 });
 
+const windStep = (): Ability => ({
+  id: "unit-wind-step",
+  name: "Танець вітру",
+  description: "+2 до шкоди за кожну клітинку, пройдену цього ходу до удару.",
+  trigger: { event: "passive" },
+  effects: [{ kind: "damageBonus", filter: { kind: "melee" }, flat: { formula: "cells_moved * 2" } }],
+});
+
 const lightEcho = (): Ability => ({
   id: "unit-light-echo",
   name: "Світле відлуння",
@@ -34,7 +42,7 @@ export const ELF_UNITS: LibraryUnit[] = [
   { ...base, key: "elves-nymph", name: "Німфа", tier: 1, role: "alt", hp: 31, ac: 13, attackBonus: 6, initiative: 14, flying: true, attacks: [{ name: "Колючки", type: "melee", dice: "1d6+1", damageType: "piercing", targets: 2 }], abilities: [thorns(), healAlly("Симбіоз", "1d8", { bonus: true })] },
   { ...base, key: "elves-blade-dancer", name: "Танцюючий з клинками", tier: 2, role: "base", hp: 41, ac: 14, attackBonus: 5, initiative: 11, attacks: [{ name: "Клинки", type: "melee", dice: "1d8+2", damageType: "slashing" }], abilities: [] },
   { ...base, key: "elves-death-dancer", name: "Танцюючий зі смертю", tier: 2, role: "upgrade", hp: 44, ac: 14, attackBonus: 6, initiative: 15, attacks: [{ name: "Клинки", type: "melee", dice: "1d8+3", damageType: "slashing", targets: 3 }], abilities: [falloff("Танок смерті")] },
-  { ...base, key: "elves-wind-dancer", name: "Танцюючий із вітром", tier: 2, role: "alt", hp: 44, ac: 16, attackBonus: 6, initiative: 15, attacks: [{ name: "Клинки", type: "melee", dice: "1d8+3", damageType: "slashing" }], abilities: [] },
+  { ...base, key: "elves-wind-dancer", name: "Танцюючий із вітром", tier: 2, role: "alt", hp: 44, ac: 16, attackBonus: 6, initiative: 15, attacks: [{ name: "Клинки", type: "melee", dice: "1d8+3", damageType: "slashing" }], abilities: [windStep()] },
   { ...base, key: "elves-archer", name: "Ельф-лучник", tier: 3, role: "base", hp: 47, ac: 13, attackBonus: 6, initiative: 10, attacks: [{ name: "Довгий лук", type: "ranged", dice: "1d10+2", damageType: "piercing" }], abilities: [] },
   { ...base, key: "elves-bow-master", name: "Майстер лука", tier: 3, role: "upgrade", hp: 52, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Довгий лук", type: "ranged", dice: "1d10+3", damageType: "piercing" }], abilities: [doubleStrike("Подвійний постріл", 30)] },
   { ...base, key: "elves-forest-ranger", name: "Лісовий стрілок", tier: 3, role: "alt", hp: 50, ac: 14, attackBonus: 7, initiative: 11, attacks: [{ name: "Довгий лук", type: "ranged", dice: "1d10+3", damageType: "piercing" }], abilities: [stun("Приголомшливий постріл", 40)] },
