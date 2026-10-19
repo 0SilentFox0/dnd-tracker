@@ -3,6 +3,7 @@
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Flame } from "lucide-react";
 
+import { WeatherLayer } from "./weather/WeatherLayer";
 import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
@@ -581,6 +582,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
       </div>
       </div>
       </div>
+      <WeatherLayer weather={map.weather} phone={phone} />
     </div>
     </div>
   );
