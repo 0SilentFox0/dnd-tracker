@@ -3,6 +3,7 @@ import { finishTurnEffects } from "./end-turn-cleanup";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
+import { resetTurnState } from "./turn-state";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -85,13 +86,9 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
             battleData: {
-              ...p.battleData,
+              ...resetTurnState(p),
               extraTurnActive: true,
-              retaliationsUsed: 0,
               pendingExtraActions: actionsPerTurnPool(p, order),
-              ...(p.battleData.movementUsed && { movementUsed: 0 }),
-              turnStartPosition: p.battleData.position,
-              returnedThisTurn: undefined,
             },
           }
         : p,

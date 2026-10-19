@@ -1,5 +1,6 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
+import { resetTurnState } from "./turn-state";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -131,16 +132,7 @@ export function processStartOfTurn(
       hasUsedBonusAction: hasNoBonusAction,
       hasUsedReaction: hasNoReaction,
     },
-    battleData: { ...updatedParticipant.battleData, retaliationsUsed: 0 },
-  };
-
-  if (updatedParticipant.battleData.movementUsed) {
-    updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, movementUsed: 0 } };
-  }
-
-  updatedParticipant = {
-    ...updatedParticipant,
-    battleData: { ...updatedParticipant.battleData, turnStartPosition: updatedParticipant.battleData.position, returnedThisTurn: undefined },
+    battleData: resetTurnState(updatedParticipant),
   };
 
   const id = participant.basicInfo.id;
