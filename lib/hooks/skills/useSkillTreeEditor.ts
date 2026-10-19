@@ -99,26 +99,31 @@ export function useSkillTreeEditor(campaignId: string) {
     !!current &&
     (draft?.key === seedKey ? JSON.stringify(current.raw) !== baseline : baseline === null && current.raw.mainSkills.some((b) => b.id !== RACIAL_BRANCH_ID));
 
+  const setRaceSafely = async (next: string) => {
+    if (next === activeRace) return;
+
+    if (dirty && !(await confirm({ title: "Перейти до іншої раси?", description: "Незбережені зміни дерева буде втрачено.", confirmLabel: "Перейти", destructive: true }))) return;
+
+    setRace(next);
+    setDraft(null);
+  };
+
   return {
-    races: races.map((r) => ({ id: r.id, name: r.name })),
-    race: activeRace,
-    setRace: async (next: string) => {
-      if (next === activeRace) return;
-
-      if (dirty && !(await confirm({ title: "Перейти до іншої раси?", description: "Незбережені зміни дерева буде втрачено.", confirmLabel: "Перейти", destructive: true }))) return;
-
-      setRace(next);
-      setDraft(null);
+    state: {
+      races: races.map((r) => ({ id: r.id, name: r.name })),
+      race: activeRace,
+      isLoading: racesPending || trees.isPending,
+      dirty,
+      isSaving: saving,
     },
-    raw,
-    tree,
-    errors,
-    loading: racesPending || trees.isPending,
-    dirty,
-    saving,
-    locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
-    librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: skillIcon(s), mainSkillId: getSkillMainSkillId(s) ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
-    availableBranches: mainSkills.filter((m) => !tree?.branches.some((b) => b.id === m.id)).map((m) => ({ id: m.id, name: m.name, color: m.color, icon: m.icon ?? null })),
+    view: {
+      raw,
+      tree,
+      errors,
+      locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
+      librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: skillIcon(s), mainSkillId: getSkillMainSkillId(s) ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
+      availableBranches: mainSkills.filter((m) => !tree?.branches.some((b) => b.id === m.id)).map((m) => ({ id: m.id, name: m.name, color: m.color, icon: m.icon ?? null })),
+    },
     actions: {
       setCell: (ref: CellRef, skillId: string | null) => {
         const skill = skillId ? skills.find((s) => s.id === skillId) : null;
@@ -148,6 +153,7 @@ export function useSkillTreeEditor(campaignId: string) {
       moveBranch: (branchId: string, dir: -1 | 1) => update((r) => edit.moveBranch(r, branchId, dir)),
       save,
       cancel: () => setDraft(null),
+      setRace: setRaceSafely,
     },
   };
 }

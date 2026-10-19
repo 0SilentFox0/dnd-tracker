@@ -36,9 +36,9 @@ const NO_SPELLS: string[] = [];
 
 /** Відомі закляття одним набором: DM бачить усіх учасників, гравець лише своїх (без витоку ворожих і без рефетчу при кожному призові). */
 function useBattleSpellIds(): string[] {
-  const { battle, isDM, myParticipants } = useBattleScene();
+  const { battle, viewer, roster } = useBattleScene();
 
-  const source = isDM ? battle.initiativeOrder : myParticipants;
+  const source = viewer.isDM ? battle.initiativeOrder : roster.myParticipants;
 
   const key = useMemo(() => [...new Set(source.flatMap((p) => p.spellcasting?.knownSpells ?? []))].sort().join(","), [source]);
 
@@ -170,7 +170,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
 
-  const saveTargets = spellSaveTargets(targets, state, scene);
+  const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
   const universalSlot = casterUsesUniversalSlot(caster);
 

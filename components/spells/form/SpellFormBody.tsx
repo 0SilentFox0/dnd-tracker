@@ -14,29 +14,26 @@ import type { IdName } from "@/types/common";
 
 export interface SpellFormBodyProps {
   campaignId: string;
-  formData: SpellFormData;
-  setFormData: (data: SpellFormData) => void;
+  form: { data: SpellFormData; set: (data: SpellFormData) => void };
   spellGroups: IdName[];
-  onSubmit: (e: React.FormEvent) => void;
-  isSubmitting: boolean;
-  submitLabel: string;
-  error?: string | null;
-  onDelete?: () => void;
-  isDeleting?: boolean;
+  submit: {
+    onSubmit: (e: React.FormEvent) => void;
+    isPending: boolean;
+    label: string;
+    error?: string | null;
+  };
+  remove?: { onDelete: () => void; isDeleting: boolean };
 }
 
 export function SpellFormBody({
   campaignId,
-  formData,
-  setFormData,
+  form,
   spellGroups,
-  onSubmit,
-  isSubmitting,
-  submitLabel,
-  error,
-  onDelete,
-  isDeleting,
+  submit,
+  remove,
 }: SpellFormBodyProps) {
+  const { data: formData, set: setFormData } = form;
+
   const tabs: HudTab<SpellFormTabId>[] = [
     {
       id: SPELL_FORM_TAB.basic,
@@ -61,23 +58,23 @@ export function SpellFormBody({
 
   return (
     <>
-      {error && (
+      {submit.error && (
         <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          <strong>Помилка:</strong> {error}
+          <strong>Помилка:</strong> {submit.error}
         </p>
       )}
       <HudForm
         id="spell-form"
-        onSubmit={onSubmit}
+        onSubmit={submit.onSubmit}
         tabs={tabs}
         actions={
           <>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Збереження..." : submitLabel}
+            <Button type="submit" disabled={submit.isPending}>
+              {submit.isPending ? "Збереження..." : submit.label}
             </Button>
-            {onDelete != null && (
-              <Button type="button" variant="destructive" onClick={onDelete} disabled={isDeleting}>
-                {isDeleting ? "Видалення..." : "Видалити"}
+            {remove && (
+              <Button type="button" variant="destructive" onClick={remove.onDelete} disabled={remove.isDeleting}>
+                {remove.isDeleting ? "Видалення..." : "Видалити"}
               </Button>
             )}
             <Button type="button" variant="outline" asChild>

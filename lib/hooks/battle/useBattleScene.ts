@@ -90,44 +90,62 @@ export interface BattleSceneActions {
   refreshSources: ReturnType<typeof useRefreshBattleSources>;
 }
 
+export interface BattleSceneTurn {
+  current: BattleParticipant | null;
+  isMyTurn: boolean;
+  queue: QueueEntry[];
+}
+
+export interface BattleSceneRoster {
+  allies: BattleParticipant[];
+  enemies: BattleParticipant[];
+  reserve: BattleParticipant[];
+  myParticipants: BattleParticipant[];
+  hero: BattleParticipant | null;
+}
+
+export interface DmControl {
+  id: string | null;
+  set(id: string | null): void;
+}
+
 /** Змінюється лише разом з даними бою — список учасників, черга, герой. */
 export interface BattleSceneData {
   campaignId: string;
   battleId: string;
   battle: BattleScene;
-  userId: string | null;
-  isDM: boolean;
   viewer: Viewer;
-  current: BattleParticipant | null;
-  myParticipants: BattleParticipant[];
-  hero: BattleParticipant | null;
-  isMyTurn: boolean;
-  queue: QueueEntry[];
-  allies: BattleParticipant[];
-  enemies: BattleParticipant[];
-  reserve: BattleParticipant[];
+  turn: BattleSceneTurn;
+  roster: BattleSceneRoster;
   awaiting: "victory" | "defeat" | null;
   effects: Map<string, ActiveEffect[]>;
-  dmControlledId: string | null;
-  setDmControlledId(id: string | null): void;
+  dmControl: DmControl;
   select(id: string | null): void;
   readBattle(): BattleScene | undefined;
 }
 
-export interface AwaitingDialogState {
+export interface DialogState {
   open: boolean;
   setOpen(open: boolean): void;
 }
 
+export interface BattleSceneDialogs {
+  awaitingDm: DialogState;
+  resultScreen: DialogState;
+}
+
+export interface BattleSceneResult {
+  fx: ResultFx | null;
+  show(fx: ResultFx | null): void;
+}
+
 export interface BattleSceneValue extends BattleSceneData {
-  awaitingDialog: AwaitingDialogState;
-  resultScreen: AwaitingDialogState;
+  dialogs: BattleSceneDialogs;
   connection: PusherConnectionState;
   selectedId: string | null;
   intents: BattleSceneIntents;
   toast: BattleToastApi;
-  result: ResultFx | null;
-  showResult(fx: ResultFx | null): void;
+  result: BattleSceneResult;
   log: BattleLogPanel;
   logHistory: BattleLogHistory;
   actions: BattleSceneActions;
@@ -156,11 +174,11 @@ export function useBattleSceneData(): BattleSceneData {
 }
 
 export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneData {
-  const { campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, reserve, awaiting, effects, dmControlledId, setDmControlledId, select, readBattle } = value;
+  const { campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle } = value;
 
   return useMemo(
-    () => ({ campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, reserve, awaiting, effects, dmControlledId, setDmControlledId, select, readBattle }),
-    [campaignId, battleId, battle, userId, isDM, viewer, current, myParticipants, hero, isMyTurn, queue, allies, enemies, reserve, awaiting, effects, dmControlledId, setDmControlledId, select, readBattle],
+    () => ({ campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle }),
+    [campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle],
   );
 }
 
@@ -173,16 +191,18 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
 
   const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null;
 
-  const turn = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
+  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
 
   return {
-    isDM,
-    ...turn,
-    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(turn.hero, order) },
-    queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound),
-    allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
-    enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
-    reserve: isDM ? reserveAll : NO_ORDER,
+    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
+    turn: { current, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
+    roster: {
+      allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
+      enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
+      reserve: isDM ? reserveAll : NO_ORDER,
+      myParticipants,
+      hero,
+    },
     awaiting,
   };
 }
@@ -229,8 +249,6 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
 
   const [mapAim, setMapAim] = useState<MapAim | null>(null);
-
-  const [result, showResult] = useState<ResultFx | null>(null);
 
   const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
 
@@ -296,14 +314,14 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   if (!awaitingNow && dismissedAwaiting) setDismissedAwaiting(null);
 
-  const awaitingDialog: AwaitingDialogState = {
-    open: !!derived?.isDM && !!awaitingNow && dismissedAwaiting !== awaitingNow,
+  const awaitingDm: DialogState = {
+    open: !!derived?.viewer.isDM && !!awaitingNow && dismissedAwaiting !== awaitingNow,
     setOpen: (open) => setDismissedAwaiting(open ? null : awaitingNow),
   };
 
   const [resultDismissed, setResultDismissed] = useState(false);
 
-  const resultScreen: AwaitingDialogState = {
+  const resultScreen: DialogState = {
     open: battle?.status === BattleStatus.COMPLETED && !resultDismissed,
     setOpen: (open) => setResultDismissed(!open),
   };
@@ -311,6 +329,10 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const order = battle?.initiativeOrder;
 
   const effects = useDisplayEffectMap(order ?? NO_ORDER);
+
+  const dmControl = useMemo<DmControl>(() => ({ id: dmControlledId, set: setDmControlledId }), [dmControlledId]);
+
+  const [resultFx, showResult] = useState<ResultFx | null>(null);
 
   if (attackIntent && battle && isIntentStale(attackIntent, { round: battle.currentRound, turnIndex: battle.currentTurnIndex })) setAttackIntent(null);
 
@@ -320,20 +342,16 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     campaignId,
     battleId,
     battle,
-    userId,
     ...derived,
     effects,
-    awaitingDialog,
-    resultScreen,
+    dialogs: { awaitingDm, resultScreen },
     connection: connectionState,
-    dmControlledId,
-    setDmControlledId,
+    dmControl,
     selectedId,
     select,
     intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim },
     toast,
-    result,
-    showResult,
+    result: { fx: resultFx, show: showResult },
     log: { ...log, show: openLog, close: closeLog },
     readBattle,
     logHistory,

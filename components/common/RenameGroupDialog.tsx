@@ -6,39 +6,33 @@ import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 interface RenameGroupDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   groupName: string;
-  newGroupName: string;
-  onNewGroupNameChange: (name: string) => void;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isRenaming: boolean;
+  dialog: { open: boolean; onOpenChange: (open: boolean) => void };
+  rename: {
+    value: string;
+    onChange: (name: string) => void;
+    onConfirm: () => void;
+    onCancel: () => void;
+    isPending: boolean;
+  };
 }
 
-export function RenameGroupDialog({
-  open,
-  onOpenChange,
-  groupName,
-  newGroupName,
-  onNewGroupNameChange,
-  onConfirm,
-  onCancel,
-  isRenaming,
-}: RenameGroupDialogProps) {
+export function RenameGroupDialog({ groupName, dialog, rename }: RenameGroupDialogProps) {
+  const { value, onChange, onConfirm, onCancel, isPending } = rename;
+
   return (
     <ResponsiveDialog
       hud
-      open={open}
-      onOpenChange={onOpenChange}
+      open={dialog.open}
+      onOpenChange={dialog.onOpenChange}
       title="Перейменувати групу"
       description={<>Введіть нову назву для групи &quot;{groupName}&quot;</>}
       footer={
         <>
-          <Button variant="outline" onClick={onCancel} disabled={isRenaming}>
+          <Button variant="outline" onClick={onCancel} disabled={isPending}>
             Скасувати
           </Button>
-          <Button onClick={onConfirm} disabled={isRenaming}>
+          <Button onClick={onConfirm} disabled={isPending}>
             Зберегти
           </Button>
         </>
@@ -49,8 +43,8 @@ export function RenameGroupDialog({
           <Label htmlFor="groupName">Назва групи</Label>
           <Input
             id="groupName"
-            value={newGroupName}
-            onChange={(e) => onNewGroupNameChange(e.target.value)}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
             placeholder="Назва групи"
             onKeyDown={(e) => {
               if (e.key === "Enter") {

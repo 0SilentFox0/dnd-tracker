@@ -155,7 +155,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       if (first.kind === "miss" || crit?.type === "fail") {
         const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
 
-        scene.showResult({
+        scene.result.show({
           kind: "miss",
           targetName,
           d20,
@@ -164,7 +164,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
           ...(crit?.type === "fail" && { critFail: crit }),
         });
       } else {
-        scene.showResult({
+        scene.result.show({
           kind: first.kind,
           targetName,
           damage: results.reduce((s, r) => s + r.damage, 0),

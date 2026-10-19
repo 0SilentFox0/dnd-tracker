@@ -26,14 +26,13 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
   const { data: races = [] } = useRaces(id);
 
   const {
-    loading,
-    error,
+    status: { isLoading, error },
     basicInfo,
     abilityScores,
     combatStats,
     skills,
     abilities,
-    handleSubmit,
+    actions: { handleSubmit },
   } = useCharacterForm({
     type: characterType,
     onSubmit: async (data) => {
@@ -89,8 +88,8 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
         tabs={tabs}
         actions={
           <>
-            <Button type="submit" disabled={loading || membersLoading}>
-              {loading ? "Створення..." : "Створити персонажа"}
+            <Button type="submit" disabled={isLoading || membersLoading}>
+              {isLoading ? "Створення..." : "Створити персонажа"}
             </Button>
             <Button type="button" variant="outline" asChild>
               <Link href={`/campaigns/${id}/dm/characters`}>Скасувати</Link>

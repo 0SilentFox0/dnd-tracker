@@ -22,13 +22,10 @@ describe("ArtifactForm", () => {
           campaignId="c1"
           artifactSets={[]}
           mode="create"
-          title="Новий артефакт"
-          submitLabel="Створити"
-          submitLabelSaving="..."
+          labels={{ title: "Новий артефакт", submit: "Створити", saving: "...", iconHint: "" }}
           cancelHref="/x"
-          iconHint=""
           initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [{ id: "a1", name: "Гострота", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, flat: 2 }] }], abilityIssues: [] }}
-          onSubmit={onSubmit}
+          actions={{ onSubmit }}
         />
         </ConfirmProvider>
       </QueryClientProvider>,
@@ -56,13 +53,10 @@ describe("ArtifactForm", () => {
           campaignId="c1"
           artifactSets={[]}
           mode="edit"
-          title="Меч"
-          submitLabel="Зберегти"
-          submitLabelSaving="..."
+          labels={{ title: "Меч", submit: "Зберегти", saving: "...", iconHint: "" }}
           cancelHref="/x"
-          iconHint=""
           initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [], abilityIssues: [], weapon: { damageDice: "1d8" } }}
-          onSubmit={onSubmit}
+          actions={{ onSubmit }}
         />
         </ConfirmProvider>
       </QueryClientProvider>,
@@ -85,13 +79,10 @@ describe("ArtifactForm", () => {
           campaignId="c1"
           artifactSets={[]}
           mode="create"
-          title="Новий"
-          submitLabel="Створити"
-          submitLabelSaving="..."
+          labels={{ title: "Новий", submit: "Створити", saving: "...", iconHint: "" }}
           cancelHref="/x"
-          iconHint=""
           initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [{ id: "a1", name: "", trigger: { event: "passive" }, effects: [] }], abilityIssues: [] }}
-          onSubmit={vi.fn(async () => {})}
+          actions={{ onSubmit: vi.fn(async () => {}) }}
         />
         </ConfirmProvider>
       </QueryClientProvider>,
@@ -106,7 +97,7 @@ describe("ArtifactForm", () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <ConfirmProvider>
-          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" title="Новий" submitLabel="Створити" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} />
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" labels={{ title: "Новий", submit: "Створити", saving: "...", iconHint: "" }} cancelHref="/x" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} actions={{ onSubmit: vi.fn(async () => {}) }} />
         </ConfirmProvider>
       </QueryClientProvider>,
     );
@@ -125,7 +116,7 @@ describe("ArtifactForm", () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <ConfirmProvider>
-          <ArtifactForm campaignId="c1" artifactSets={[]} mode="edit" title="Ред." submitLabel="Зберегти" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} onDelete={onDelete} />
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="edit" labels={{ title: "Ред.", submit: "Зберегти", saving: "...", iconHint: "" }} cancelHref="/x" initial={{ name: "Меч", description: "", rarity: "", slot: "ring", icon: "", setId: "", abilities: [], abilityIssues: [] }} actions={{ onSubmit: vi.fn(async () => {}), onDelete }} />
         </ConfirmProvider>
       </QueryClientProvider>,
     );
@@ -144,7 +135,7 @@ describe("ArtifactForm", () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <ConfirmProvider>
-          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" title="Новий" submitLabel="Створити" submitLabelSaving="..." cancelHref="/x" iconHint="" initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [], abilityIssues: [] }} onSubmit={vi.fn(async () => {})} />
+          <ArtifactForm campaignId="c1" artifactSets={[]} mode="create" labels={{ title: "Новий", submit: "Створити", saving: "...", iconHint: "" }} cancelHref="/x" initial={{ name: "Меч", description: "", rarity: "", slot: "weapon", icon: "", setId: "", abilities: [], abilityIssues: [] }} actions={{ onSubmit: vi.fn(async () => {}) }} />
         </ConfirmProvider>
       </QueryClientProvider>,
     );

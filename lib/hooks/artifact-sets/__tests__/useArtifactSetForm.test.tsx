@@ -39,7 +39,7 @@ describe("useArtifactSetForm", () => {
   it("offers only free artifacts or ones already in this set", async () => {
     const { result } = renderHook(() => useArtifactSetForm({ campaignId: "c1", setId: "s1", initial: { name: "Дракон", artifactIds: ["a3"] } }), { wrapper });
 
-    await waitFor(() => expect(result.current.selectableArtifacts.map((a) => a.id)).toEqual(["a1", "a3"]));
+    await waitFor(() => expect(result.current.members.selectable.map((a) => a.id)).toEqual(["a1", "a3"]));
   });
 
   it("saves the selected members and trimmed bonus, then returns to the list", async () => {
@@ -47,8 +47,8 @@ describe("useArtifactSetForm", () => {
 
     const { result } = renderHook(() => useArtifactSetForm({ campaignId: "c1", setId: "s1", initial: { name: "Дракон", artifactIds: ["a3"], setBonus: { name: " Кров " } } }), { wrapper });
 
-    act(() => result.current.toggleArtifact("a1"));
-    await act(() => result.current.submit({ preventDefault: () => {} } as React.FormEvent));
+    act(() => result.current.members.toggle("a1"));
+    await act(() => result.current.actions.submit({ preventDefault: () => {} } as React.FormEvent));
 
     expect(updateArtifactSet).toHaveBeenCalledWith("c1", "s1", expect.objectContaining({ name: "Дракон", description: null, artifactIds: ["a3", "a1"], setBonus: { name: "Кров", description: undefined }, icon: null }));
     expect(nav).toEqual(["push /campaigns/c1/dm/artifact-sets", "refresh"]);

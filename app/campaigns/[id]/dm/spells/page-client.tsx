@@ -105,8 +105,10 @@ export function DMSpellsPageClient({
               levels={levels}
               campaignId={campaignId}
               spellGroups={spellGroups}
-              onRemoveSpellFromGroup={handleRemoveSpellFromGroup}
-              onMoveSpellToGroup={handleMoveSpellToGroup}
+              spellActions={{
+                onRemoveFromGroup: handleRemoveSpellFromGroup,
+                onMoveToGroup: handleMoveSpellToGroup,
+              }}
             />
           ))}
         </Accordion>

@@ -5,15 +5,12 @@ import { useRouter } from "next/navigation";
 
 import { useUpdateRace } from "./useRaces";
 
-import { useMainSkills } from "@/lib/hooks/skills";
 import type { RaceFormData } from "@/types/races";
 
 export function useRaceForm(campaignId: string, raceId: string, initial: RaceFormData) {
   const router = useRouter();
 
   const update = useUpdateRace(campaignId);
-
-  const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   const [formData, setFormData] = useState<RaceFormData>(initial);
 
@@ -48,14 +45,9 @@ export function useRaceForm(campaignId: string, raceId: string, initial: RaceFor
   };
 
   return {
-    formData,
-    setFormData,
-    mainSkills,
-    abilityErrors,
-    setAbilityErrors,
-    abilitiesValid: abilityErrors === 0,
+    form: { data: formData, set: setFormData },
+    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilityErrors === 0 },
     isSaving: update.isPending,
-    submit,
-    cancel: () => router.push(listHref),
+    actions: { submit, cancel: () => router.push(listHref) },
   };
 }

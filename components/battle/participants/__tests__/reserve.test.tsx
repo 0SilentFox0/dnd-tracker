@@ -28,8 +28,7 @@ function renderList(isDM: boolean) {
   const battle = { initiativeOrder: [gob], pendingSummons: [imp], currentTurnIndex: 0, currentRound: 1, battleLog: [], knowledge: undefined } as unknown as BattleScene;
 
   const value = {
-    battle, isDM, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, current: gob, allies: [], enemies: [gob],
-    reserve: isDM ? [imp] : [], awaiting: null, effects: new Map(), select: vi.fn(),
+    battle, viewer: { userId: "u", isDM, canSeeEnemyHp: false }, turn: { current: gob }, roster: { allies: [], enemies: [gob], reserve: isDM ? [imp] : [] }, awaiting: null, effects: new Map(), select: vi.fn(),
     actions: { reveal, updateParticipant },
   } as unknown as BattleSceneValue;
 

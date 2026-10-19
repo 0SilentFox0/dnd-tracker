@@ -18,7 +18,7 @@ import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone, trigger = "bonusAction" }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void; trigger?: "bonusAction" | "action" }) {
-  const { allies, enemies, actions } = useBattleScene();
+  const { roster: { allies, enemies }, actions } = useBattleScene();
 
   const [aiming, setAiming] = useState<ResolvedAbility | null>(null);
 

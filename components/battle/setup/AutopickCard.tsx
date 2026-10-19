@@ -3,24 +3,18 @@
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { SuggestedEnemy } from "@/types/battle-setup";
+import type { BalanceSuggestions } from "@/lib/hooks/battles";
 import type { IdName } from "@/types/common";
 
 interface AutopickCardProps {
   hasAllies: boolean;
-  balanceLoading: boolean;
-  balanceRace: string;
   races: IdName[];
-  suggestedEnemies: SuggestedEnemy[];
-  suggestDone: boolean;
-  actions: {
-    onBalanceRaceChange: (value: string) => void;
-    onSuggestEnemies: () => void;
-    onApplySuggestedEnemies: () => void;
-  };
+  balance: BalanceSuggestions;
 }
 
-export function AutopickCard({ hasAllies, balanceLoading, balanceRace, races, suggestedEnemies, suggestDone, actions }: AutopickCardProps) {
+export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
+  const { loading, race, suggested, done, actions } = balance;
+
   return (
     <HudSection title="Підбір ворогів" className="space-y-4">
       <p className="text-xs text-muted-foreground">
@@ -33,8 +27,8 @@ export function AutopickCard({ hasAllies, balanceLoading, balanceRace, races, su
             <select
               id="balanceRace"
               className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-              value={balanceRace}
-              onChange={(e) => actions.onBalanceRaceChange(e.target.value)}
+              value={race}
+              onChange={(e) => actions.setRace(e.target.value)}
             >
               <option value="">Будь-яка</option>
               {races.map((r) => (
@@ -45,20 +39,20 @@ export function AutopickCard({ hasAllies, balanceLoading, balanceRace, races, su
             </select>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" onClick={actions.onSuggestEnemies} disabled={balanceLoading}>
-              {balanceLoading ? "Підбір…" : "Підібрати"}
+            <Button type="button" onClick={actions.suggest} disabled={loading}>
+              {loading ? "Підбір…" : "Підібрати"}
             </Button>
-            {suggestedEnemies.length > 0 && (
-              <Button type="button" variant="secondary" onClick={actions.onApplySuggestedEnemies}>
+            {suggested.length > 0 && (
+              <Button type="button" variant="secondary" onClick={actions.apply}>
                 Застосувати рекомендацію
               </Button>
             )}
           </div>
-          {suggestedEnemies.length > 0 && (
+          {suggested.length > 0 && (
             <div className="rounded-md border p-3 text-sm">
               <p className="mb-2 font-medium">Рекомендовані вороги</p>
               <ul className="space-y-1">
-                {suggestedEnemies.map((s) => (
+                {suggested.map((s) => (
                   <li key={s.unitId}>
                     {s.name} ×{s.quantity}
                     {s.hpMult != null && s.dmgMult != null && (
@@ -71,7 +65,7 @@ export function AutopickCard({ hasAllies, balanceLoading, balanceRace, races, su
               </ul>
             </div>
           )}
-          {suggestDone && suggestedEnemies.length === 0 && <p className="text-sm text-muted-foreground">Немає підходящих юнітів для цієї раси.</p>}
+          {done && suggested.length === 0 && <p className="text-sm text-muted-foreground">Немає підходящих юнітів для цієї раси.</p>}
         </>
       ) : (
         <p className="text-sm text-muted-foreground">Додайте союзників зліва, щоб підібрати ворогів.</p>

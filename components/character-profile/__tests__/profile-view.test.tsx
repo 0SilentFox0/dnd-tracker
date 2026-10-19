@@ -19,7 +19,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({
   useDmCharacterEditor: () => {
     h.editorMounts += 1;
 
-    return { ready: true, form: { formData: { basicInfo: {}, spellcasting: {} }, basicInfo: { level: 30 }, abilityScores: { strength: 10, setters: {} }, combatStats: {}, skills: {}, abilities: {}, spellcasting: { knownSpells: [], setters: {} }, handleSubmit: vi.fn(), setFormData: vi.fn(), loading: false, error: null }, equipped: {}, setEquipped: vi.fn(), artifacts: [], members: [], races: [], membersLoading: false, levelUp: vi.fn(), remove: vi.fn() };
+    return { ready: true, form: { formData: { basicInfo: {}, spellcasting: {} }, basicInfo: { level: 30 }, abilityScores: { strength: 10, setters: {} }, combatStats: {}, skills: {}, abilities: {}, spellcasting: { knownSpells: [], setters: {} }, status: { isLoading: false, error: null }, actions: { handleSubmit: vi.fn(), setFormData: vi.fn() } }, equipped: {}, setEquipped: vi.fn(), artifacts: [], options: { members: [], races: [], membersLoading: false }, dmActions: { levelUp: vi.fn(), remove: vi.fn() } };
   },
 }));
 vi.mock("@/components/character-profile/BasicEditTab", () => ({ BasicEditTab: () => <div>основне</div> }));

@@ -12,42 +12,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
 import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
 interface UnitsListCardProps {
   units: SetupUnit[];
   entityStats: Record<string, EntityStats> | null;
-  isParticipantSelected: (id: string) => boolean;
-  getParticipantSide: (id: string) => ParticipantSide | null;
-  getParticipantQuantity: (id: string) => number;
-  onParticipantToggle: (id: string, type: typeof ParticipantSourceType.UNIT, checked: boolean) => void;
-  /** Додати юніта до ворогів (або перемістити з союзників). */
-  onAddToEnemies: (id: string, quantity: number) => void;
-  /** Перемістити в союзники (якщо зараз у ворогах). */
-  onMoveToAllies: (id: string) => void;
-  onQuantityChange: (id: string, quantity: number) => void;
+  selection: ParticipantSelection;
+  actions: Pick<ParticipantActions, "toggle" | "addToSide" | "setQuantity">;
 }
 
-function UnitRow({
-  unit,
-  stats,
-  isSelected,
-  side,
-  quantity,
-  onToggle,
-  onAddToEnemies,
-  onQuantityChange,
-}: {
+interface UnitRowProps {
   unit: SetupUnit;
   stats: EntityStats | undefined;
-  isSelected: boolean;
-  side: ParticipantSide | null;
-  quantity: number;
-  onToggle: () => void;
-  onAddToEnemies: () => void;
-  onQuantityChange: (value: number) => void;
-}) {
+  state: { isSelected: boolean; side: ParticipantSide | null; quantity: number };
+  actions: { onToggle: () => void; onAddToEnemies: () => void; onQuantityChange: (value: number) => void };
+}
+
+function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
+  const { isSelected, side, quantity } = state;
+
   const isAlly = side === ParticipantSide.ALLY;
 
   const isEnemy = side === ParticipantSide.ENEMY;
@@ -64,7 +49,7 @@ function UnitRow({
     >
       <button
         type="button"
-        onClick={onToggle}
+        onClick={actions.onToggle}
         className="w-full text-left flex items-center gap-4 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-xl"
       >
         <EntityIcon src={unit.avatar} name={unit.name} alt={unit.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">⚔️</span>} />
@@ -129,7 +114,7 @@ function UnitRow({
               max={20}
               value={quantity}
               onChange={(e) =>
-                onQuantityChange(
+                actions.onQuantityChange(
                   Math.max(1, parseInt(e.target.value, 10) || 1),
                 )
               }
@@ -140,7 +125,7 @@ function UnitRow({
             type="button"
             variant={isEnemy ? "secondary" : "outline"}
             size="sm"
-            onClick={onAddToEnemies}
+            onClick={actions.onAddToEnemies}
             disabled={isEnemy}
           >
             {isEnemy ? "Вже ворог" : "До ворогів"}
@@ -151,17 +136,7 @@ function UnitRow({
   );
 }
 
-export function UnitsListCard({
-  units,
-  entityStats,
-  isParticipantSelected,
-  getParticipantSide,
-  getParticipantQuantity,
-  onParticipantToggle,
-  onAddToEnemies,
-  onMoveToAllies,
-  onQuantityChange,
-}: UnitsListCardProps) {
+export function UnitsListCard({ units, entityStats, selection, actions }: UnitsListCardProps) {
   if (units.length === 0) {
     return (
       <HudSection title="Юніти">
@@ -203,37 +178,33 @@ export function UnitsListCard({
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   {raceUnits.map((unit) => {
-                    const isSelected = isParticipantSelected(unit.id);
+                    const isSelected = selection.isSelected(unit.id);
 
-                    const side = getParticipantSide(unit.id);
+                    const side = selection.sideOf(unit.id);
 
-                    const quantity = getParticipantQuantity(unit.id);
-
-                    const unitStats = entityStats?.[unit.id];
+                    const quantity = selection.quantityOf(unit.id);
 
                     return (
                       <UnitRow
                         key={unit.id}
                         unit={unit}
-                        stats={unitStats}
-                        isSelected={isSelected}
-                        side={side}
-                        quantity={quantity}
-                        onToggle={() => {
-                          if (!isSelected) {
-                            onParticipantToggle(unit.id, ParticipantSourceType.UNIT, true);
-                          } else if (side === ParticipantSide.ALLY) {
-                            onParticipantToggle(unit.id, ParticipantSourceType.UNIT, false);
-                          } else {
-                            onMoveToAllies(unit.id);
-                          }
+                        stats={entityStats?.[unit.id]}
+                        state={{ isSelected, side, quantity }}
+                        actions={{
+                          onToggle: () => {
+                            if (!isSelected) {
+                              actions.toggle(unit.id, ParticipantSourceType.UNIT, true);
+                            } else if (side === ParticipantSide.ALLY) {
+                              actions.toggle(unit.id, ParticipantSourceType.UNIT, false);
+                            } else {
+                              actions.addToSide(unit.id, ParticipantSourceType.UNIT, ParticipantSide.ALLY);
+                            }
+                          },
+                          onAddToEnemies: () => {
+                            if (side !== ParticipantSide.ENEMY) actions.addToSide(unit.id, ParticipantSourceType.UNIT, ParticipantSide.ENEMY, quantity);
+                          },
+                          onQuantityChange: (value) => actions.setQuantity(unit.id, value),
                         }}
-                        onAddToEnemies={() => {
-                          if (side !== ParticipantSide.ENEMY) onAddToEnemies(unit.id, quantity);
-                        }}
-                        onQuantityChange={(value) =>
-                          onQuantityChange(unit.id, value)
-                        }
                       />
                     );
                   })}

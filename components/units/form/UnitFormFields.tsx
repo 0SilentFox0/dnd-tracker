@@ -15,7 +15,7 @@ import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 
 interface UnitFormFieldsProps {
   campaignId: string;
-  form: UnitFormFieldsState & { error: Error | null };
+  editor: UnitFormFieldsState;
   abilityIssues?: ConversionIssue[];
 }
 
@@ -29,8 +29,10 @@ export function UnitFormError({ error }: { error: Error | null }) {
   );
 }
 
-export function unitFormTabs({ campaignId, form, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
-  const { formData, change } = form;
+export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
+  const { data: formData, change } = editor.form;
+
+  const { races, race, spells } = editor.options;
 
   return [
     {
@@ -38,7 +40,7 @@ export function unitFormTabs({ campaignId, form, abilityIssues }: UnitFormFields
       label: "Основне",
       content: (
         <div className="space-y-4">
-          <UnitBasicInfo formData={formData} races={form.races} onChange={change} />
+          <UnitBasicInfo formData={formData} races={races} onChange={change} />
           <IconUrlField
             id="avatar"
             label="Аватар (посилання на картинку)"
@@ -58,28 +60,28 @@ export function unitFormTabs({ campaignId, form, abilityIssues }: UnitFormFields
       content: (
         <>
           <UnitAttacks formData={formData} onChange={change} />
-          <UnitImmunities formData={formData} race={form.race} onChange={change} />
+          <UnitImmunities formData={formData} race={race} onChange={change} />
         </>
       ),
     },
     {
       id: UNIT_FORM_TAB.abilities,
       label: "Вміння",
-      invalid: form.abilityErrors > 0 || (abilityIssues?.length ?? 0) > 0,
+      invalid: editor.abilities.errors > 0 || (abilityIssues?.length ?? 0) > 0,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
           value={formData.abilities ?? []}
           onChange={(abilities) => change({ abilities })}
           issues={abilityIssues}
-          onValidityChange={(_, n) => form.setAbilityErrors(n)}
+          onValidityChange={(_, n) => editor.abilities.setErrors(n)}
         />
       ),
     },
     {
       id: UNIT_FORM_TAB.magic,
       label: "Магія",
-      content: <UnitKnownSpells formData={formData} spells={form.spells} onChange={change} />,
+      content: <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
     },
   ];
 }

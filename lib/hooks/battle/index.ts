@@ -2,7 +2,7 @@ export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattleFxQueue } from "./useBattleFxQueue";
 export { type BattleMapScene, useBattleMapScene } from "./useBattleMapScene";
-export { useBattlePageDialogs } from "./useBattlePageDialogs";
+export { type BattlePageDialogs, useBattlePageDialogs } from "./useBattlePageDialogs";
 export {
   BattleSceneContext,
   BattleSceneDataContext,

@@ -1,4 +1,7 @@
 export { battleQueryKey } from "./keys";
+export { type BalanceSuggestions } from "./setup/useBalanceSuggestions";
+export { type BattleMapEditor } from "./setup/useBattleMapEditor";
+export { type ParticipantActions, type ParticipantSelection } from "./setup/useBattleParticipants";
 export { type BattleSetup, type BattleSetupInitial, useBattleSetup, useBattleSetupInitial } from "./setup/useBattleSetup";
 export { type BattleActionOptions, useBattleAction } from "./useBattleAction";
 export {

@@ -26,15 +26,11 @@ export function ImportDialog({
   onOpenChange,
   open,
 }: ImportDialogProps) {
-  const {
-    file,
-    error,
-    success,
-    isLoading,
-    handleFileChange,
-    handleImport,
-    reset,
-  } = importHook;
+  const { file, status, actions } = importHook;
+
+  const { error, success, isLoading } = status;
+
+  const { handleFileChange, handleImport, reset } = actions;
 
   const [innerOpen, setInnerOpen] = useState(false);
 

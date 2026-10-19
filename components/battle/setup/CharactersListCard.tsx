@@ -9,18 +9,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
 import type { EntityStats, SetupCharacter } from "@/types/battle-setup";
 
 interface CharactersListCardProps {
   playerCharacters: SetupCharacter[];
   npcCharacters: SetupCharacter[];
   entityStats: Record<string, EntityStats> | null;
-  isParticipantSelected: (id: string) => boolean;
-  onParticipantToggle: (
-    id: string,
-    type: typeof ParticipantSourceType.CHARACTER,
-    checked: boolean,
-  ) => void;
+  selection: ParticipantSelection;
+  actions: Pick<ParticipantActions, "toggle">;
 }
 
 function CharacterRow({
@@ -122,8 +119,8 @@ export function CharactersListCard({
   playerCharacters,
   npcCharacters,
   entityStats,
-  isParticipantSelected,
-  onParticipantToggle,
+  selection,
+  actions,
 }: CharactersListCardProps) {
   return (
     <HudSection title="Персонажі" className="max-h-[600px] space-y-4 overflow-y-auto">
@@ -139,9 +136,9 @@ export function CharactersListCard({
                   key={character.id}
                   character={character}
                   stats={entityStats?.[character.id]}
-                  isSelected={isParticipantSelected(character.id)}
+                  isSelected={selection.isSelected(character.id)}
                   onToggle={(checked) =>
-                    onParticipantToggle(character.id, ParticipantSourceType.CHARACTER, checked)
+                    actions.toggle(character.id, ParticipantSourceType.CHARACTER, checked)
                   }
                 />
               ))}
@@ -159,9 +156,9 @@ export function CharactersListCard({
                   key={character.id}
                   character={character}
                   stats={entityStats?.[character.id]}
-                  isSelected={isParticipantSelected(character.id)}
+                  isSelected={selection.isSelected(character.id)}
                   onToggle={(checked) =>
-                    onParticipantToggle(character.id, ParticipantSourceType.CHARACTER, checked)
+                    actions.toggle(character.id, ParticipantSourceType.CHARACTER, checked)
                   }
                 />
               ))}

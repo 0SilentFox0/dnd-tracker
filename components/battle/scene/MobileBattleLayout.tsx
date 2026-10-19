@@ -30,7 +30,7 @@ const MAP_TAB = "map";
 type Tab = ParticipantSide | typeof MAP_TAB;
 
 export function MobileBattleLayout() {
-  const { battle, awaiting, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, intents } = useBattleScene();
+  const { battle, awaiting, viewer: { isDM }, turn: { current, isMyTurn }, roster: { hero, allies, enemies }, selectedId, select, log, intents } = useBattleScene();
 
   const hasMap = !!battle.map;
 

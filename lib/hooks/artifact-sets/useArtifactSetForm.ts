@@ -105,17 +105,10 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
   };
 
   return {
-    fields,
-    setField,
-    selectedIds,
-    toggleArtifact,
-    selectableArtifacts,
-    abilityErrors,
-    setAbilityErrors,
-    abilitiesValid,
-    isBusy: save.isPending || del.isPending,
-    error,
-    submit,
-    remove,
+    form: { data: fields, set: setField },
+    members: { selectedIds, selectable: selectableArtifacts, toggle: toggleArtifact },
+    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilitiesValid },
+    status: { isBusy: save.isPending || del.isPending, error },
+    actions: { submit, remove },
   };
 }

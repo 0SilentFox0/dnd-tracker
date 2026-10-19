@@ -44,7 +44,7 @@ const CELL_PX = 10;
 function press(c: HTMLElement, key: string) {
   const svg = (cell(c, key) as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
 
-  const { cols, rows } = seen.editor.map;
+  const { cols, rows } = seen.editor.state.map;
 
   svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: cols * CELL_PX, height: rows * CELL_PX, right: 0, bottom: 0, x: 0, y: 0, toJSON: () => ({}) });
 
@@ -72,7 +72,7 @@ describe("BattleFormMap", () => {
     const { container } = render(<Harness />);
 
     expect(container.querySelectorAll("polygon")).toHaveLength(0);
-    expect(seen.editor.value).toBeNull();
+    expect(seen.editor.state.value).toBeNull();
   });
 
   it("on: preview with 240 cells; top margin 2 blocks 40 without stroke", () => {
@@ -126,7 +126,7 @@ describe("BattleFormMap", () => {
     press(container, "3:1");
     release();
 
-    expect(seen.editor.map.terrain).toEqual({
+    expect(seen.editor.state.map.terrain).toEqual({
       "1:1": { kind: "wall" },
       "2:1": { kind: "hazard", label: "Лава", damage: { dice: "1d6", type: "fire" } },
       "3:1": { kind: "hazard", label: "Лава" },
@@ -139,33 +139,33 @@ describe("BattleFormMap", () => {
     render(<Harness />);
     enable();
     fireEvent.change(screen.getByLabelText("Зверху"), { target: { value: "99" } });
-    expect(seen.editor.margins.top).toBe(10);
+    expect(seen.editor.state.margins.top).toBe(10);
 
     fireEvent.change(screen.getByLabelText("Знизу"), { target: { value: "5" } });
-    expect(seen.editor.margins.bottom).toBe(0);
+    expect(seen.editor.state.margins.bottom).toBe(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Однакові" }));
-    expect(seen.editor.margins).toEqual({ top: 5, right: 5, bottom: 5, left: 5 });
+    expect(seen.editor.state.margins).toEqual({ top: 5, right: 5, bottom: 5, left: 5 });
   });
 
   it("default background button resets to null", () => {
     render(<Harness />);
     enable();
     fireEvent.click(screen.getByRole("button", { name: "Стандартний фон" }));
-    expect(seen.editor.map.background).toBeNull();
+    expect(seen.editor.state.map.background).toBeNull();
   });
 
   it("typed foreign url does not reach next/image; default background shown until saved", () => {
     const { container } = render(<Harness />);
 
     enable();
-    act(() => seen.editor.setBackground("h"));
+    act(() => seen.editor.actions.setBackground("h"));
     expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
 
-    act(() => seen.editor.setBackground("https://evil.example/a.png"));
+    act(() => seen.editor.actions.setBackground("https://evil.example/a.png"));
     expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
 
-    act(() => seen.editor.setBackground("data:image/webp;base64,AAAA"));
+    act(() => seen.editor.actions.setBackground("data:image/webp;base64,AAAA"));
     expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("data:image/webp;base64,AAAA");
   });
 

@@ -87,25 +87,16 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   );
 
   return {
-    enabled,
-    setEnabled,
-    map,
-    setSize,
-    setOpacity,
-    margins,
-    setMargins,
-    tool,
-    setTool,
-    hazardLabel,
-    setHazardLabel,
-    hazardDice,
-    setHazardDice,
-    hazardDamageType,
-    setHazardDamageType,
-    onStroke,
-    notice,
-    setBackground,
-    value: enabled ? map : null,
+    state: { enabled, map, margins, tool, notice, value: enabled ? map : null },
+    hazard: {
+      label: hazardLabel,
+      dice: hazardDice,
+      damageType: hazardDamageType,
+      setLabel: setHazardLabel,
+      setDice: setHazardDice,
+      setDamageType: setHazardDamageType,
+    },
+    actions: { setEnabled, setSize, setOpacity, setMargins, setTool, setBackground, onStroke },
   };
 }
 

@@ -12,7 +12,7 @@ import { useBattleSceneValue } from "@/lib/hooks/battle";
 export function BattlePageClient({ campaignId, battleId, userId }: { campaignId: string; battleId: string; userId: string | null }) {
   const { value, loading } = useBattleSceneValue(campaignId, battleId, userId);
 
-  const myTurn = value?.isMyTurn ?? false;
+  const myTurn = value?.turn.isMyTurn ?? false;
 
   const name = value?.battle.name;
 

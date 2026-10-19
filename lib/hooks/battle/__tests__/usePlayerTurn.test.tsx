@@ -13,7 +13,7 @@ describe("usePlayerTurn", () => {
 
     expect(result.current.phase).toBe("morale");
 
-    await act(async () => result.current.rollMorale(9));
+    await act(async () => result.current.actions.rollMorale(9));
 
     expect(moraleCheck).toHaveBeenCalledWith({ participantId: me.basicInfo.id, d10Roll: 9 });
     expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "morale-extra", d10: 9 }));
@@ -25,10 +25,10 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
 
-    act(() => result.current.afterAction());
+    act(() => result.current.actions.afterAction());
     expect(result.current.phase).toBe("countdown");
 
-    act(() => result.current.stay());
+    act(() => result.current.actions.stay());
     expect(result.current.phase).toBe("acting");
   });
 
@@ -37,7 +37,7 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
 
-    await act(async () => result.current.endTurn());
+    await act(async () => result.current.actions.endTurn());
 
     expect(confirm).toHaveBeenCalled();
     expect(nextTurn).not.toHaveBeenCalled();
@@ -51,7 +51,7 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(used), { wrapper: scene.wrapper });
 
-    await act(async () => result.current.endTurn());
+    await act(async () => result.current.actions.endTurn());
 
     expect(scene.confirm).not.toHaveBeenCalled();
     expect(scene.nextTurn).toHaveBeenCalledWith({});
@@ -68,7 +68,7 @@ describe("usePlayerTurn", () => {
 
     const { result, unmount } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
 
-    await act(async () => result.current.rollMorale(2));
+    await act(async () => result.current.actions.rollMorale(2));
     act(() => vi.advanceTimersByTime(4_100));
 
     expect(nextMutate).toHaveBeenCalledWith({ expectedVersion: 5 }, expect.anything());
@@ -77,7 +77,7 @@ describe("usePlayerTurn", () => {
 
     const second = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
 
-    await act(async () => second.result.current.rollMorale(2));
+    await act(async () => second.result.current.actions.rollMorale(2));
     second.unmount();
     act(() => vi.advanceTimersByTime(4_100));
 
@@ -96,8 +96,8 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(used), { wrapper: scene.wrapper });
 
-    act(() => result.current.afterAction());
-    await act(async () => result.current.endTurn().catch(() => undefined));
+    act(() => result.current.actions.afterAction());
+    await act(async () => result.current.actions.endTurn().catch(() => undefined));
 
     expect(result.current.phase).not.toBe("ended");
   });
@@ -111,7 +111,7 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
 
-    act(() => result.current.afterAction());
+    act(() => result.current.actions.afterAction());
 
     expect(result.current.phase).toBe("acting");
   });
@@ -127,12 +127,12 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
 
-    await act(async () => result.current.rollMorale(2));
+    await act(async () => result.current.actions.rollMorale(2));
     expect(result.current.phase).toBe("ended");
 
     act(() => vi.advanceTimersByTime(4_100));
     expect(result.current.phase).toBe("acting");
-    expect(result.current.skipped).toBe(true);
+    expect(result.current.status.skipped).toBe(true);
 
     vi.useRealTimers();
   });
@@ -148,11 +148,11 @@ describe("usePlayerTurn", () => {
 
     const { result } = renderHook(() => usePlayerTurn(scene.me), { wrapper: scene.wrapper });
 
-    await act(async () => result.current.rollMorale(2));
+    await act(async () => result.current.actions.rollMorale(2));
     act(() => vi.advanceTimersByTime(4_100));
     vi.useRealTimers();
 
-    await act(async () => result.current.endTurn());
+    await act(async () => result.current.actions.endTurn());
 
     expect(scene.confirm).not.toHaveBeenCalled();
     expect(scene.nextTurn).toHaveBeenCalledWith({});

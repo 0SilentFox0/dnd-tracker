@@ -19,14 +19,18 @@ import { pluralUk } from "@/lib/utils/common/plural";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 
+export interface SpellGroupItemActions {
+  onRemoveFromGroup: (spellId: string) => void;
+  onMoveToGroup: (spellId: string, groupId: string | null) => void;
+}
+
 interface SpellLevelAccordionProps {
   levelName: string;
   level: number;
   spells: Spell[];
   campaignId: string;
   spellGroups: SpellGroup[];
-  onRemoveSpellFromGroup: (spellId: string) => void;
-  onMoveSpellToGroup: (spellId: string, groupId: string | null) => void;
+  actions: SpellGroupItemActions;
 }
 
 export function SpellLevelAccordion({
@@ -35,8 +39,7 @@ export function SpellLevelAccordion({
   spells,
   campaignId,
   spellGroups,
-  onRemoveSpellFromGroup,
-  onMoveSpellToGroup,
+  actions,
 }: SpellLevelAccordionProps) {
   const confirm = useConfirm();
 
@@ -94,8 +97,8 @@ export function SpellLevelAccordion({
                 spell={spell}
                 campaignId={campaignId}
                 spellGroups={spellGroups}
-                onRemoveFromGroup={onRemoveSpellFromGroup}
-                onMoveToGroup={onMoveSpellToGroup}
+                onRemoveFromGroup={actions.onRemoveFromGroup}
+                onMoveToGroup={actions.onMoveToGroup}
               />
             ))}
           </div>

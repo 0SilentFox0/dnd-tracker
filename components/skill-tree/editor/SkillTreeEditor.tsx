@@ -28,7 +28,7 @@ const refLabel = (ref: CellRef, branchName: (id: string) => string) => {
 };
 
 export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
-  const editor = useSkillTreeEditor(campaignId);
+  const { state, view, actions } = useSkillTreeEditor(campaignId);
 
   const confirm = useConfirm();
 
@@ -36,13 +36,13 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
 
   const [adding, setAdding] = useState(false);
 
-  const skillsById = useMemo(() => new Map(editor.librarySkills.map((s) => [s.id, s])), [editor.librarySkills]);
+  const skillsById = useMemo(() => new Map(view.librarySkills.map((s) => [s.id, s])), [view.librarySkills]);
 
-  const errorIds = useMemo(() => new Set(editor.errors.map((e) => e.ref)), [editor.errors]);
+  const errorIds = useMemo(() => new Set(view.errors.map((e) => e.ref)), [view.errors]);
 
-  const { raw, tree } = editor;
+  const { raw, tree } = view;
 
-  if (editor.loading) return <LoadingState />;
+  if (state.isLoading) return <LoadingState />;
 
   if (!raw || !tree) return <EmptyState title="Додайте расу, щоб налаштувати дерево" />;
 
@@ -52,17 +52,17 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
     <div className={`${HUD_SURFACE} skill-tree-editor rounded-xl p-4`}>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <span className="hud-sc text-xl text-hud-ink">Дерево прокачки</span>
-        <SelectField value={editor.race ?? ""} onValueChange={(v) => void editor.setRace(v)} triggerClassName="w-40">
-          {editor.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
+        <SelectField value={state.race ?? ""} onValueChange={(v) => void actions.setRace(v)} triggerClassName="w-40">
+          {state.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
         </SelectField>
-        {editor.dirty && <span className="text-xs italic text-hud-gold">Незбережені зміни</span>}
+        {state.dirty && <span className="text-xs italic text-hud-gold">Незбережені зміни</span>}
         <span className="flex-1" />
-        <Button variant="outline" onClick={editor.actions.cancel} disabled={!editor.dirty}>Скасувати</Button>
-        <Button onClick={() => void editor.actions.save()} disabled={!editor.dirty || editor.saving || editor.errors.length > 0}>Зберегти</Button>
+        <Button variant="outline" onClick={actions.cancel} disabled={!state.dirty}>Скасувати</Button>
+        <Button onClick={() => void actions.save()} disabled={!state.dirty || state.isSaving || view.errors.length > 0}>Зберегти</Button>
       </div>
-      {editor.errors.length > 0 && (
+      {view.errors.length > 0 && (
         <ul className="mb-3 text-sm text-hud-danger">
-          {editor.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{TREE_ERROR_TEXT[e.code]}: {e.label ?? skillsById.get(e.ref)?.name ?? e.ref}</li>)}
+          {view.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{TREE_ERROR_TEXT[e.code]}: {e.label ?? skillsById.get(e.ref)?.name ?? e.ref}</li>)}
         </ul>
       )}
       <EditorTable
@@ -72,9 +72,9 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
         errorIds={errorIds}
         actions={{
           onCell: (ref, label) => setPicking({ ref, label }),
-          onMove: editor.actions.moveBranch,
+          onMove: actions.moveBranch,
           onRemove: async (branchId, name) => {
-            if (await confirm({ title: `Прибрати гілку «${name}»?`, description: "Вивчені вузли цієї гілки в персонажів перестануть діяти.", confirmLabel: "Прибрати", destructive: true })) editor.actions.removeBranch(branchId);
+            if (await confirm({ title: `Прибрати гілку «${name}»?`, description: "Вивчені вузли цієї гілки в персонажів перестануть діяти.", confirmLabel: "Прибрати", destructive: true })) actions.removeBranch(branchId);
           },
           onAddBranch: () => setAdding(true),
         }}
@@ -83,14 +83,14 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
         key={picking ? JSON.stringify(picking.ref) : "none"}
         target={picking}
         current={picking ? cellSkillId(raw, picking.ref) : null}
-        skills={editor.librarySkills}
+        skills={view.librarySkills}
         usedAt={(id) => {
-          const at = editor.locations.get(id)?.[0];
+          const at = view.locations.get(id)?.[0];
 
           return at ? refLabel(at, branchName) : null;
         }}
         onPick={(skillId) => {
-          if (picking) editor.actions.setCell(picking.ref, skillId);
+          if (picking) actions.setCell(picking.ref, skillId);
 
           setPicking(null);
         }}
@@ -98,15 +98,15 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
       />
       <AddBranchSheet
         open={adding}
-        branches={editor.availableBranches}
+        branches={view.availableBranches}
         actions={{
           onClose: () => setAdding(false),
           onAdd: (id) => {
-            editor.actions.addBranch(id);
+            actions.addBranch(id);
             setAdding(false);
           },
           onCreate: async (input) => {
-            const ok = await editor.actions.createBranch(input);
+            const ok = await actions.createBranch(input);
 
             if (ok) setAdding(false);
 

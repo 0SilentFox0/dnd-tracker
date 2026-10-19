@@ -16,7 +16,7 @@ export interface DownedHeroPrompt {
 }
 
 export function useDownedHeroPrompt(): DownedHeroPrompt {
-  const { battle, isDM, actions } = useBattleScene();
+  const { battle, viewer: { isDM }, actions } = useBattleScene();
 
   const [dismissed, setDismissed] = useState<string[]>([]);
 

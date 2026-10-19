@@ -29,9 +29,9 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
-  const attack = useAttackWizard(hero, turn.afterAction);
+  const attack = useAttackWizard(hero, turn.actions.afterAction);
 
-  const book = useSpellBook(hero, { onDone: turn.afterAction });
+  const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
 
   const zone = useAuraZones(hero);
 
@@ -47,7 +47,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
 
   const hasMagic = Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 
-  const { phase, actionUsed, skipped } = turn;
+  const { phase, status: { actionUsed, skipped } } = turn;
 
   const { open: openAttack } = attack.actions;
 
@@ -71,8 +71,8 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
               {morale.kind === "extra" ? `Додатковий хід на ${morale.rolls.join(", ")}` : `Пропуск ходу на ${morale.rolls.join(", ")}`}
             </div>
           )}
-          <DiceGrid sides={10} onPick={(v) => void turn.rollMorale(v)} highlight={morale.kind ? { rolls: morale.rolls, tone: morale.kind === "extra" ? "gold" : "danger" } : undefined} />
-          <div className="mt-2"><AiRollButton onClick={() => void turn.rollMorale(rollDie(10, cryptoRandom))} /></div>
+          <DiceGrid sides={10} onPick={(v) => void turn.actions.rollMorale(v)} highlight={morale.kind ? { rolls: morale.rolls, tone: morale.kind === "extra" ? "gold" : "danger" } : undefined} />
+          <div className="mt-2"><AiRollButton onClick={() => void turn.actions.rollMorale(rollDie(10, cryptoRandom))} /></div>
         </div>
       )}
       {turn.phase === "acting" && zone && <div className="pt-3"><AuraZonePicker step={zone} /></div>}
@@ -84,11 +84,11 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
           actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
         />
       )}
-      {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.endTurn()} onStay={turn.stay} />}
+      {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
-      <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.afterAction} />
-      <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.afterAction} />
+      <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} />
+      <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />
     </>
   );
 }

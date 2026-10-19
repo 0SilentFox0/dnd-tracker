@@ -33,7 +33,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
     },
   });
 
-  const { setFormData } = form;
+  const { setFormData } = form.actions;
 
   // Seed once from data fetched on this mount: a cached snapshot may predate saves made elsewhere,
   // and later refetches must not overwrite what the user is typing.
@@ -49,7 +49,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
     setSeededFor(characterId);
   }, [freshData, characterId, seededFor, setFormData]); // eslint-disable-line react-hooks/exhaustive-deps -- races only inform the default of an empty slot table
 
-  return { query, ready: seededFor === characterId, form, equipped, setEquipped, members, membersLoading, races };
+  return { query, ready: seededFor === characterId, form, equipped, setEquipped, options: { members, membersLoading, races } };
 }
 
 export type CharacterEditor = ReturnType<typeof useCharacterEditor>;

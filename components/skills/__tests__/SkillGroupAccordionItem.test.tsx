@@ -61,17 +61,10 @@ describe("SkillGroupAccordionItem", () => {
   afterEach(cleanup);
 
   it("рендерить назву групи та кількість скілів", () => {
-    const onRenameClick = vi.fn();
-
-    const onRemoveAllClick = vi.fn();
-
     renderItem({
       groupName: "Бойові скіли",
       totalSkills: 2,
-      isUngrouped: false,
-      groupId: "g1",
-      onRenameClick,
-      onRemoveAllClick,
+      groupMenu: { onRename: vi.fn(), onRemoveAll: vi.fn() },
       skills: [
         minimalGroupedSkill({ id: "s1", basicInfo: { name: "Удар", description: undefined, icon: undefined } }),
         minimalGroupedSkill({ id: "s2", basicInfo: { name: "Блок", description: undefined, icon: undefined } }),
@@ -86,10 +79,7 @@ describe("SkillGroupAccordionItem", () => {
     renderItem({
       groupName: "Група",
       totalSkills: 1,
-      isUngrouped: true,
-      groupId: undefined,
-      onRenameClick: vi.fn(),
-      onRemoveAllClick: vi.fn(),
+      groupMenu: undefined,
       skills: [minimalGroupedSkill({ basicInfo: { name: "Єдиний скіл", description: undefined, icon: undefined } })],
       campaignId: "c1",
     });
@@ -99,29 +89,23 @@ describe("SkillGroupAccordionItem", () => {
 
   it("не показує меню групи для isUngrouped або без groupId", () => {
     renderItem({
-        groupName: "Без групи",
-        totalSkills: 0,
-        isUngrouped: true,
-        groupId: undefined,
-        onRenameClick: vi.fn(),
-        onRemoveAllClick: vi.fn(),
-        skills: [],
-        campaignId: "c1",
-      });
+      groupName: "Без групи",
+      totalSkills: 0,
+      groupMenu: undefined,
+      skills: [],
+      campaignId: "c1",
+    });
     expect(screen.queryByRole("button", { name: /more|меню/i })).not.toBeInTheDocument();
   });
 
   it("показує кнопку меню для групи з groupId", () => {
     renderItem({
-        groupName: "Група з меню",
-        totalSkills: 0,
-        isUngrouped: false,
-        groupId: "g1",
-        onRenameClick: vi.fn(),
-        onRemoveAllClick: vi.fn(),
-        skills: [],
-        campaignId: "c1",
-      });
+      groupName: "Група з меню",
+      totalSkills: 0,
+      groupMenu: { onRename: vi.fn(), onRemoveAll: vi.fn() },
+      skills: [],
+      campaignId: "c1",
+    });
 
     const buttons = screen.getAllByRole("button");
 

@@ -8,16 +8,17 @@ import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { getSkillId } from "@/lib/utils/skills/skill-helpers";
 import type { GroupedSkill, Skill } from "@/types/skills";
 
+export interface SkillCardActions {
+  onDelete?: (skillId: string) => Promise<unknown> | void;
+  onDuplicate?: (skillId: string) => void;
+}
+
 export interface SkillGroupAccordionItemProps {
   groupName: string;
   accent?: string;
   totalSkills: number;
-  isUngrouped: boolean;
-  groupId: string | undefined;
-  onRenameClick: () => void;
-  onRemoveAllClick: () => void;
-  onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
-  onDuplicateSkill?: (skillId: string) => void;
+  groupMenu?: { onRename: () => void; onRemoveAll: () => void };
+  actions?: SkillCardActions;
   skills: (Skill | GroupedSkill)[];
   campaignId: string;
 }
@@ -26,22 +27,17 @@ export function SkillGroupAccordionItem({
   groupName,
   accent,
   totalSkills,
-  isUngrouped,
-  groupId,
-  onRenameClick,
-  onRemoveAllClick,
-  onDeleteSkill,
-  onDuplicateSkill,
+  groupMenu,
+  actions,
   skills,
   campaignId,
 }: SkillGroupAccordionItemProps) {
-  const menuActions =
-    !isUngrouped && groupId
-      ? [
-          { label: "Перейменувати групу", icon: Edit, onSelect: onRenameClick },
-          { label: "Видалити всі скіли з групи", icon: X, onSelect: onRemoveAllClick },
-        ]
-      : undefined;
+  const menuActions = groupMenu
+    ? [
+        { label: "Перейменувати групу", icon: Edit, onSelect: groupMenu.onRename },
+        { label: "Видалити всі скіли з групи", icon: X, onSelect: groupMenu.onRemoveAll },
+      ]
+    : undefined;
 
   return (
     <GroupAccordionItem
@@ -58,8 +54,8 @@ export function SkillGroupAccordionItem({
             key={getSkillId(skill)}
             skill={skill}
             campaignId={campaignId}
-            onRemove={onDeleteSkill}
-            onDuplicate={onDuplicateSkill}
+            onRemove={actions?.onDelete}
+            onDuplicate={actions?.onDuplicate}
           />
         ))}
       </div>

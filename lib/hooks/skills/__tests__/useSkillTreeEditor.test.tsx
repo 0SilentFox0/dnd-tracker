@@ -45,7 +45,7 @@ describe("useSkillTreeEditor", () => {
 
     const { qc, result } = setup();
 
-    await waitFor(() => expect(result.current.tree?.grid.get("attack")?.outer[0]).toBe("o1"));
+    await waitFor(() => expect(result.current.view.tree?.grid.get("attack")?.outer[0]).toBe("o1"));
 
     act(() => result.current.actions.setCell({ kind: "slot", branchId: "attack", circle: "outer", index: 1 }, "o2"));
 
@@ -53,8 +53,8 @@ describe("useSkillTreeEditor", () => {
     await act(() => qc.invalidateQueries({ queryKey: ["skill-trees", "c"] }));
     await waitFor(() => expect(vi.mocked(treesApi.getSkillTrees)).toHaveBeenCalledTimes(2));
 
-    expect(result.current.tree?.grid.get("attack")?.outer).toEqual(["o1", "o2", null]);
-    expect(result.current.dirty).toBe(true);
+    expect(result.current.view.tree?.grid.get("attack")?.outer).toEqual(["o1", "o2", null]);
+    expect(result.current.state.dirty).toBe(true);
   });
 
   it("без дерева — стартові гілки з race.availableSkills, збереження з id \"new\"", async () => {
@@ -63,7 +63,7 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree?.branches.map((b) => b.id)).toEqual(["attack"]));
+    await waitFor(() => expect(result.current.view.tree?.branches.map((b) => b.id)).toEqual(["attack"]));
 
     await act(() => result.current.actions.save());
 
@@ -75,11 +75,11 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree).not.toBeNull());
+    await waitFor(() => expect(result.current.view.tree).not.toBeNull());
 
     act(() => result.current.actions.setCell({ kind: "level", branchId: "attack", level: "basic" }, "o1"));
 
-    expect(result.current.errors).toContainEqual({ code: "duplicateSkill", ref: "o1" });
+    expect(result.current.view.errors).toContainEqual({ code: "duplicateSkill", ref: "o1" });
 
     await act(() => result.current.actions.save());
     expect(treesApi.updateSkillTree).not.toHaveBeenCalled();
@@ -90,14 +90,14 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.availableBranches.map((b) => b.id)).toEqual(["defense"]));
+    await waitFor(() => expect(result.current.view.availableBranches.map((b) => b.id)).toEqual(["defense"]));
 
     act(() => result.current.actions.addBranch("defense"));
     act(() => result.current.actions.moveBranch("defense", -1));
-    expect(result.current.tree?.branches.map((b) => b.id)).toEqual(["defense", "attack"]);
+    expect(result.current.view.tree?.branches.map((b) => b.id)).toEqual(["defense", "attack"]);
 
     act(() => result.current.actions.removeBranch("attack"));
-    expect(result.current.tree?.branches.map((b) => b.id)).toEqual(["defense"]);
+    expect(result.current.view.tree?.branches.map((b) => b.id)).toEqual(["defense"]);
   });
 
   it("нове дерево без гілок не позначене як незбережене; зі стартовими гілками — позначене", async () => {
@@ -106,15 +106,15 @@ describe("useSkillTreeEditor", () => {
 
     const empty = setup();
 
-    await waitFor(() => expect(empty.result.current.tree).not.toBeNull());
-    expect(empty.result.current.dirty).toBe(false);
+    await waitFor(() => expect(empty.result.current.view.tree).not.toBeNull());
+    expect(empty.result.current.state.dirty).toBe(false);
 
     races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
 
     const seeded = setup();
 
-    await waitFor(() => expect(seeded.result.current.tree).not.toBeNull());
-    expect(seeded.result.current.dirty).toBe(true);
+    await waitFor(() => expect(seeded.result.current.view.tree).not.toBeNull());
+    expect(seeded.result.current.state.dirty).toBe(true);
   });
 
   it("гілка й іконка скіла з формату API (mainSkillData, basicInfo)", async () => {
@@ -122,9 +122,9 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.librarySkills.length).toBe(3));
+    await waitFor(() => expect(result.current.view.librarySkills.length).toBe(3));
 
-    expect(result.current.librarySkills.find((s) => s.id === "api")).toMatchObject({ name: "З API", icon: "/i.png", mainSkillId: "attack" });
+    expect(result.current.view.librarySkills.find((s) => s.id === "api")).toMatchObject({ name: "З API", icon: "/i.png", mainSkillId: "attack" });
   });
 
   it("помилка створення гілки — повідомлення, без необробленого відхилення", async () => {
@@ -132,7 +132,7 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree).not.toBeNull());
+    await waitFor(() => expect(result.current.view.tree).not.toBeNull());
 
     let ok = true;
 
@@ -150,7 +150,7 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree).not.toBeNull());
+    await waitFor(() => expect(result.current.view.tree).not.toBeNull());
 
     let ok = false;
 
@@ -159,7 +159,7 @@ describe("useSkillTreeEditor", () => {
     });
 
     expect(ok).toBe(true);
-    expect(result.current.tree?.branches.map((b) => b.id)).toContain("shadow");
+    expect(result.current.view.tree?.branches.map((b) => b.id)).toContain("shadow");
   });
 
   it("зміна раси з незбереженими правками питає; «ні» — лишаємося з правками", async () => {
@@ -168,20 +168,20 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree).not.toBeNull());
+    await waitFor(() => expect(result.current.view.tree).not.toBeNull());
 
     act(() => result.current.actions.setCell({ kind: "slot", branchId: "attack", circle: "outer", index: 1 }, "o2"));
 
     confirm.mockResolvedValueOnce(false);
-    await act(() => result.current.setRace("Орк"));
+    await act(() => result.current.actions.setRace("Орк"));
 
     expect(confirm).toHaveBeenCalledTimes(1);
-    expect(result.current.race).toBe("Ельф");
-    expect(result.current.dirty).toBe(true);
+    expect(result.current.state.race).toBe("Ельф");
+    expect(result.current.state.dirty).toBe(true);
 
-    await act(() => result.current.setRace("Орк"));
+    await act(() => result.current.actions.setRace("Орк"));
 
-    expect(result.current.race).toBe("Орк");
+    expect(result.current.state.race).toBe("Орк");
     races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
   });
 
@@ -191,11 +191,11 @@ describe("useSkillTreeEditor", () => {
 
     const { result } = setup();
 
-    await waitFor(() => expect(result.current.tree).not.toBeNull());
-    await act(() => result.current.setRace("Орк"));
+    await waitFor(() => expect(result.current.view.tree).not.toBeNull());
+    await act(() => result.current.actions.setRace("Орк"));
 
     expect(confirm).not.toHaveBeenCalled();
-    expect(result.current.race).toBe("Орк");
+    expect(result.current.state.race).toBe("Орк");
     races = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
   });
 });

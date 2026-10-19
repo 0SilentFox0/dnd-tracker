@@ -52,7 +52,7 @@ const BattleFxLayer = dynamic(() => import("@/components/battle/fx/BattleFxLayer
 const BattlePreparationView = dynamic(() => import("@/components/battle/overlays/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
-  const { battle, isDM, actions } = useBattleScene();
+  const { battle, viewer: { isDM }, actions } = useBattleScene();
 
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
   const wide = useMediaQuery("(min-width: 1024px)");

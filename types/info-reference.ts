@@ -57,3 +57,29 @@ export interface ArtifactSetForReference {
 }
 
 export type SectionTab = "all" | "skills" | "spells" | "artifacts";
+
+export interface FilterField<T, O = T[]> {
+  value: T | null;
+  set: (value: T | null) => void;
+  options: O;
+}
+
+export interface ReferenceFilters {
+  search: { value: string; set: (value: string) => void };
+  section: { value: SectionTab; set: (value: SectionTab) => void };
+  panel: { open: boolean; setOpen: (value: boolean | ((prev: boolean) => boolean)) => void };
+  hasActive: boolean;
+  clearAll: () => void;
+  visible: { skills: boolean; spells: boolean; artifacts: boolean };
+  skill: { mainSkill: FilterField<string> };
+  spell: {
+    level: FilterField<number>;
+    group: FilterField<string>;
+    type: FilterField<string>;
+  };
+  artifact: {
+    rarity: FilterField<string>;
+    slot: FilterField<string, { value: string; label: string }[]>;
+    artifactSet: FilterField<string>;
+  };
+}

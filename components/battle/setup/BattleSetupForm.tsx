@@ -14,7 +14,7 @@ import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/setup
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { type BattleSetupInitial, useBattleSetup, useBattleSetupInitial } from "@/lib/hooks/battles";
 
 interface BattleSetupFormProps {
@@ -41,19 +41,17 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
 
   const title = isEdit ? "Редагувати сцену бою" : "Створити сцену бою";
 
-  if (setup.loadingData) return <SetupLoading title={title} />;
+  if (setup.loading) return <SetupLoading title={title} />;
 
-  const { participants, formData, entityStats } = setup;
+  const { participants, details, data, balance, form } = setup;
 
   const sidePanel = (side: ParticipantSide) => (
     <SidePanelCard
       side={side}
-      participants={participants}
-      characters={setup.characters}
-      units={setup.units}
-      onSideChange={setup.handleSideChange}
-      onRemove={setup.handleRemoveParticipant}
-      onReserveChange={setup.handleReserveChange}
+      participants={participants.list}
+      characters={data.characters}
+      units={data.units}
+      actions={participants.actions}
     />
   );
 
@@ -63,10 +61,10 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: "Основне",
       content: (
         <BattleFormBasicInfo
-          name={formData.name}
-          description={formData.description}
-          onNameChange={(value) => setup.setFormData((prev) => ({ ...prev, name: value }))}
-          onDescriptionChange={(value) => setup.setFormData((prev) => ({ ...prev, description: value }))}
+          name={details.value.name}
+          description={details.value.description}
+          onNameChange={(value) => details.setValue((prev) => ({ ...prev, name: value }))}
+          onDescriptionChange={(value) => details.setValue((prev) => ({ ...prev, description: value }))}
         />
       ),
     },
@@ -76,11 +74,11 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: "Герої",
       content: (
         <CharactersListCard
-          playerCharacters={setup.playerCharacters}
-          npcCharacters={setup.npcCharacters}
-          entityStats={entityStats?.characterStats ?? null}
-          isParticipantSelected={setup.isParticipantSelected}
-          onParticipantToggle={setup.handleParticipantToggle}
+          playerCharacters={data.playerCharacters}
+          npcCharacters={data.npcCharacters}
+          entityStats={data.entityStats?.characterStats ?? null}
+          selection={participants.selection}
+          actions={participants.actions}
         />
       ),
     },
@@ -90,33 +88,15 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       content: (
         <div className="space-y-4">
           {!isEdit && (
-            <AutopickCard
-              hasAllies={setup.hasAllies}
-              balanceLoading={setup.balanceLoading}
-              balanceRace={setup.balanceRace}
-              races={setup.races}
-              suggestedEnemies={setup.suggestedEnemies}
-              suggestDone={setup.suggestDone}
-              actions={{ onBalanceRaceChange: setup.setBalanceRace, onSuggestEnemies: setup.suggestEnemies, onApplySuggestedEnemies: setup.applySuggestedEnemies }}
-            />
+            <AutopickCard hasAllies={participants.allies.exists} races={data.races} balance={balance} />
           )}
-          <UnitsListCard
-            units={setup.units}
-            entityStats={entityStats?.unitStats ?? null}
-            isParticipantSelected={setup.isParticipantSelected}
-            getParticipantSide={setup.getParticipantSide}
-            getParticipantQuantity={setup.getParticipantQuantity}
-            onParticipantToggle={setup.handleParticipantToggle}
-            onAddToEnemies={(id, quantity) => setup.handleAddToSide(id, ParticipantSourceType.UNIT, ParticipantSide.ENEMY, quantity)}
-            onMoveToAllies={(id) => setup.handleAddToSide(id, ParticipantSourceType.UNIT, ParticipantSide.ALLY)}
-            onQuantityChange={setup.handleQuantityChange}
-          />
+          <UnitsListCard units={data.units} entityStats={data.entityStats?.unitStats ?? null} selection={participants.selection} actions={participants.actions} />
         </div>
       ),
     },
     {
       id: BATTLE_FORM_TAB.roster,
-      label: `Склад · ${participants.length}`,
+      label: `Склад · ${participants.list.length}`,
       content: (
         <div>
           <BalanceSummary fair={setup.fair} />
@@ -137,20 +117,20 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
     >
       <HudForm
         id={isEdit ? "battle-edit-form" : "battle-form"}
-        onSubmit={setup.handleSubmit}
+        onSubmit={form.actions.submit}
         tabs={tabs}
         actions={
           <>
             {isEdit && (
-              <Button type="button" variant="destructive" onClick={setup.handleDelete} disabled={setup.deleting}>
-                {setup.deleting ? "Видалення..." : "Видалити"}
+              <Button type="button" variant="destructive" onClick={form.actions.remove} disabled={form.status.isDeleting}>
+                {form.status.isDeleting ? "Видалення..." : "Видалити"}
               </Button>
             )}
             <Button type="button" variant="outline" asChild>
               <Link href={`/campaigns/${campaignId}/dm/battles`}>Скасувати</Link>
             </Button>
-            <Button type="submit" disabled={setup.saving}>
-              {isEdit ? (setup.saving ? "Збереження..." : "Зберегти зміни") : setup.saving ? "Створення..." : "Створити сцену бою"}
+            <Button type="submit" disabled={form.status.isSaving}>
+              {isEdit ? (form.status.isSaving ? "Збереження..." : "Зберегти зміни") : form.status.isSaving ? "Створення..." : "Створити сцену бою"}
             </Button>
           </>
         }

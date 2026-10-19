@@ -78,9 +78,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
   }, [battleId, confirm, remove, router, listHref, notify]);
 
   return {
-    saving: battleId ? update.isPending : create.isPending,
-    deleting: remove.isPending,
-    handleSubmit,
-    handleDelete,
+    status: { isSaving: battleId ? update.isPending : create.isPending, isDeleting: remove.isPending },
+    actions: { submit: handleSubmit, remove: handleDelete },
   };
 }

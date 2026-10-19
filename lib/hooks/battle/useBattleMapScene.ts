@@ -29,7 +29,7 @@ function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, c
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
-  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, toast, intents } = useBattleScene();
+  const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents } = useBattleScene();
 
   const { requestAttack, mapAim } = intents;
 
@@ -49,6 +49,8 @@ export function useBattleMapScene(): BattleMapScene | null {
   const { show } = toast;
 
   const onSkipped = useCallback((n: number) => show(`Пропущено ${n} ${pluralUk(n, ["клітинку", "клітинки", "клітинок"])} (зайняті або поза полем)`), [show]);
+
+  const { isDM } = viewer;
 
   const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onSkipped, onActivate: stopPlacing });
 

@@ -4,6 +4,7 @@ import { SetupParticipantRow } from "./SetupParticipantRow";
 
 import { HudSection } from "@/components/hud/form";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import type { ParticipantActions } from "@/lib/hooks/battles";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { SetupCharacter, SetupUnit } from "@/types/battle-setup";
 
@@ -12,9 +13,7 @@ interface SidePanelCardProps {
   participants: BattlePreparationParticipant[];
   characters: SetupCharacter[];
   units: SetupUnit[];
-  onSideChange: (participantId: string, newSide: ParticipantSide) => void;
-  onRemove: (participantId: string) => void;
-  onReserveChange: (participantId: string, reserved: number) => void;
+  actions: Pick<ParticipantActions, "setSide" | "remove" | "setReserve">;
 }
 
 const SIDE_CONFIG = {
@@ -33,9 +32,7 @@ export function SidePanelCard({
   participants,
   characters,
   units,
-  onSideChange,
-  onRemove,
-  onReserveChange,
+  actions,
 }: SidePanelCardProps) {
   const config = SIDE_CONFIG[side];
 
@@ -73,9 +70,9 @@ export function SidePanelCard({
                     side={side}
                     reserved={participant.reserved ?? 0}
                     actions={{
-                      onMoveToOtherSide: () => onSideChange(participant.id, otherSide),
-                      onRemove: () => onRemove(participant.id),
-                      onReserveChange: (n) => onReserveChange(participant.id, n),
+                      onMoveToOtherSide: () => actions.setSide(participant.id, otherSide),
+                      onRemove: () => actions.remove(participant.id),
+                      onReserveChange: (n) => actions.setReserve(participant.id, n),
                     }}
                   />
                 );
@@ -103,9 +100,9 @@ export function SidePanelCard({
                     side={side}
                     reserved={participant.reserved ?? 0}
                     actions={{
-                      onMoveToOtherSide: () => onSideChange(participant.id, otherSide),
-                      onRemove: () => onRemove(participant.id),
-                      onReserveChange: (n) => onReserveChange(participant.id, n),
+                      onMoveToOtherSide: () => actions.setSide(participant.id, otherSide),
+                      onRemove: () => actions.remove(participant.id),
+                      onReserveChange: (n) => actions.setReserve(participant.id, n),
                     }}
                   />
                 );

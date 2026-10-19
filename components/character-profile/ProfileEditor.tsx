@@ -55,16 +55,16 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const { form, equipped, setEquipped, artifacts } = editor;
 
-  const { formData, setFormData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
+  const { formData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
   return (
-    <form id="profile-edit" className="hud-form" onSubmit={form.handleSubmit}>
+    <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
-        actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.levelUp()} />}
+        actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.dmActions.levelUp()} />}
       />
-      {form.error && (
+      {form.status.error && (
         <p role="alert" className="mx-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {form.error}
+          {form.status.error}
         </p>
       )}
       <ProfileTabs
@@ -141,7 +141,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-6">
                 <GoalList />
-                <BiographyEditor value={formData.basicInfo.background ?? ""} onChange={(v) => setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, background: v } }))} />
+                <BiographyEditor value={formData.basicInfo.background ?? ""} onChange={(v) => form.actions.setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, background: v } }))} />
               </div>
             ),
           },
@@ -151,8 +151,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
         <Button type="button" variant="outline" onClick={onDone}>
           Скасувати
         </Button>
-        <Button type="submit" form="profile-edit" disabled={form.loading || editor.membersLoading}>
-          {form.loading ? "Збереження…" : "Зберегти"}
+        <Button type="submit" form="profile-edit" disabled={form.status.isLoading || editor.options.membersLoading}>
+          {form.status.isLoading ? "Збереження…" : "Зберегти"}
         </Button>
       </ActionBar>
     </form>

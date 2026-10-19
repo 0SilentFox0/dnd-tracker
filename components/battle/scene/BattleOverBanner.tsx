@@ -7,7 +7,7 @@ import { useBattleScene } from "@/lib/hooks/battle";
 import { lastAction } from "@/lib/utils/battle/view";
 
 export const BattleOverBanner = memo(function BattleOverBanner() {
-  const { battle, resultScreen } = useBattleScene();
+  const { battle, dialogs: { resultScreen } } = useBattleScene();
 
   const last = lastAction(battle.battleLog ?? []);
 

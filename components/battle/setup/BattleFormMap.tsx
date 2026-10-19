@@ -11,7 +11,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import type { BattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
+import type { BattleMapEditor } from "@/lib/hooks/battles";
 import { cn } from "@/lib/utils";
 import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
 
@@ -41,9 +41,11 @@ function ToggleRow({ id, label, checked, onChange }: { id: string; label: string
 }
 
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
-  const { enabled, map, margins } = editor;
+  const { enabled, map, margins, tool, notice } = editor.state;
 
-  const setMargin = (key: keyof Margins, raw: number | undefined) => editor.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, marginLimit(map, margins, key)) });
+  const { hazard, actions } = editor;
+
+  const setMargin = (key: keyof Margins, raw: number | undefined) => actions.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, marginLimit(map, margins, key)) });
 
   const previewMap = isPreviewSafeBackground(map.background) || map.background === null ? map : { ...map, background: null };
 
@@ -52,23 +54,23 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
 
     const n = clamp(margins.top, 0, cap);
 
-    editor.setMargins({ top: n, right: n, bottom: n, left: n });
+    actions.setMargins({ top: n, right: n, bottom: n, left: n });
   };
 
   return (
     <HudSection title="Карта бою" className="space-y-4">
-      <ToggleRow id="map-enabled" label="Бій на карті" checked={enabled} onChange={editor.setEnabled} />
+      <ToggleRow id="map-enabled" label="Бій на карті" checked={enabled} onChange={actions.setEnabled} />
       {enabled && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="map-cols">Колонки</Label>
-                <NumberInput id="map-cols" value={map.cols} onChange={(v) => editor.setSize(clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE), map.rows)} />
+                <NumberInput id="map-cols" value={map.cols} onChange={(v) => actions.setSize(clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE), map.rows)} />
               </div>
               <div>
                 <Label htmlFor="map-rows">Рядки</Label>
-                <NumberInput id="map-rows" value={map.rows} onChange={(v) => editor.setSize(map.cols, clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE))} />
+                <NumberInput id="map-rows" value={map.rows} onChange={(v) => actions.setSize(map.cols, clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE))} />
               </div>
             </div>
             <div>
@@ -80,7 +82,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 max={1}
                 step={0.05}
                 value={map.opacity}
-                onChange={(e) => editor.setOpacity(Number(e.target.value))}
+                onChange={(e) => actions.setOpacity(Number(e.target.value))}
                 className="w-full accent-[var(--hud-gold,#f2c14e)]"
               />
             </div>
@@ -109,55 +111,55 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                   <button
                     key={value}
                     type="button"
-                    aria-pressed={editor.tool === value}
-                    onClick={() => editor.setTool(editor.tool === value ? null : value)}
+                    aria-pressed={tool === value}
+                    onClick={() => actions.setTool(tool === value ? null : value)}
                     className={cn(
                       "h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50",
-                      editor.tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
+                      tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
                     )}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              {editor.tool === "hazard" && (
+              {tool === "hazard" && (
                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
-                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={editor.hazardLabel} onChange={(e) => editor.setHazardLabel(e.target.value)} />
+                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={hazard.label} onChange={(e) => hazard.setLabel(e.target.value)} />
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-dice" className="text-xs">
                       Шкода (кубики)
                     </Label>
                     <Input
                       id="map-hazard-dice"
-                      aria-invalid={editor.hazardDice.trim() !== "" && !HAZARD_DICE_PATTERN.test(editor.hazardDice.trim())}
+                      aria-invalid={hazard.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(hazard.dice.trim())}
                       maxLength={12}
                       placeholder="без шкоди"
-                      value={editor.hazardDice}
-                      onChange={(e) => editor.setHazardDice(e.target.value)}
+                      value={hazard.dice}
+                      onChange={(e) => hazard.setDice(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-type" className="text-xs">
                       Тип
                     </Label>
-                    <SelectField id="map-hazard-type" value={editor.hazardDamageType} onValueChange={editor.setHazardDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} />
+                    <SelectField id="map-hazard-type" value={hazard.damageType} onValueChange={hazard.setDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} />
                   </div>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <ImageUpload value={map.background ?? ""} onChange={(v) => editor.setBackground(v || null)} label="Фон карти" maxSide={2400} allowFile />
-              <Button type="button" variant="outline" size="sm" onClick={() => editor.setBackground(null)} disabled={map.background === null}>
+              <ImageUpload value={map.background ?? ""} onChange={(v) => actions.setBackground(v || null)} label="Фон карти" maxSide={2400} allowFile />
+              <Button type="button" variant="outline" size="sm" onClick={() => actions.setBackground(null)} disabled={map.background === null}>
                 Стандартний фон
               </Button>
             </div>
           </div>
           <div className="min-w-0 space-y-2">
             <p aria-live="polite" role="status" className="min-h-5 text-sm text-hud-gold-bright">
-              {editor.notice}
+              {notice}
             </p>
             <div className="h-[55vh] lg:h-[60vh]">
-              <BattleMap map={previewMap} participants={[]} actions={{ onStroke: editor.onStroke }} className="h-full" clickableBlocked={editor.tool !== null} strokeTool={editor.tool !== null} showBlocked />
+              <BattleMap map={previewMap} participants={[]} actions={{ onStroke: actions.onStroke }} className="h-full" editing={{ clickableBlocked: tool !== null, strokeTool: tool !== null, showBlocked: true }} />
             </div>
           </div>
         </div>

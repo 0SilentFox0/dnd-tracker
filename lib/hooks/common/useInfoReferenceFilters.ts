@@ -8,7 +8,7 @@ import {
   skillSearchText,
   spellSearchText,
 } from "@/lib/utils/campaigns/info-reference";
-import type { ArtifactForReference, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ReferenceFilters, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = []) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -176,49 +176,41 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
 
   const nothingFound = skillsEmpty && spellsEmpty && artifactsEmpty;
 
+  const filters: ReferenceFilters = {
+    search: { value: searchQuery, set: setSearchQuery },
+    section: { value: section, set: setSection },
+    panel: { open: filtersOpen, setOpen: setFiltersOpen },
+    hasActive: hasActiveFilters,
+    clearAll: clearAllFilters,
+    visible: { skills: showSkills, spells: showSpells, artifacts: showArtifacts },
+    skill: {
+      mainSkill: { value: mainSkillFilter, set: setMainSkillFilter, options: mainSkillOptions },
+    },
+    spell: {
+      level: { value: spellLevelFilter, set: setSpellLevelFilter, options: spellLevelOptions },
+      group: { value: spellGroupFilter, set: setSpellGroupFilter, options: spellGroupOptions },
+      type: { value: spellTypeFilter, set: setSpellTypeFilter, options: spellTypeOptions },
+    },
+    artifact: {
+      rarity: { value: artifactRarityFilter, set: setArtifactRarityFilter, options: artifactRarityOptions },
+      slot: { value: artifactSlotFilter, set: setArtifactSlotFilter, options: artifactSlotOptions },
+      artifactSet: { value: artifactSetFilter, set: setArtifactSetFilter, options: artifactSetOptions },
+    },
+  };
+
   return {
-    filters: {
-      searchQuery,
-      setSearchQuery,
-      section,
-      setSection,
-      mainSkillFilter,
-      setMainSkillFilter,
-      spellLevelFilter,
-      setSpellLevelFilter,
-      spellGroupFilter,
-      setSpellGroupFilter,
-      spellTypeFilter,
-      setSpellTypeFilter,
-      artifactRarityFilter,
-      setArtifactRarityFilter,
-      artifactSlotFilter,
-      setArtifactSlotFilter,
-      artifactSetFilter,
-      setArtifactSetFilter,
-      open: filtersOpen,
-      setOpen: setFiltersOpen,
-    },
-    options: {
-      mainSkill: mainSkillOptions,
-      spellLevel: spellLevelOptions,
-      spellGroup: spellGroupOptions,
-      spellType: spellTypeOptions,
-      artifactRarity: artifactRarityOptions,
-      artifactSlot: artifactSlotOptions,
-      artifactSet: artifactSetOptions,
-    },
+    filters,
     results: {
       filteredSkills,
       filteredSpells,
       filteredArtifacts,
-      hasActiveFilters,
-      clearAllFilters,
     },
     ui: {
-      showSkills,
-      showSpells,
-      showArtifacts,
+      shown: {
+        skills: showSkills && !skillsEmpty,
+        spells: showSpells && !spellsEmpty,
+        artifacts: showArtifacts && !artifactsEmpty,
+      },
       skillsEmpty,
       spellsEmpty,
       artifactsEmpty,

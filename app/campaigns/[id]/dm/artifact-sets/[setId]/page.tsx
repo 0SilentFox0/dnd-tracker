@@ -37,16 +37,18 @@ export default async function EditArtifactSetPage({
       <ArtifactSetForm
         campaignId={id}
         setId={setRow.id}
-        initialName={setRow.name}
-        initialDescription={setRow.description}
-        initialIcon={setRow.icon}
-        initialSetBonus={{
-          name: typeof bonus.name === "string" ? bonus.name : undefined,
-          description: typeof bonus.description === "string" ? bonus.description : undefined,
+        initial={{
+          name: setRow.name,
+          description: setRow.description,
+          icon: setRow.icon,
+          setBonus: {
+            name: typeof bonus.name === "string" ? bonus.name : undefined,
+            description: typeof bonus.description === "string" ? bonus.description : undefined,
+          },
+          abilities,
+          abilityIssues: issues,
+          artifactIds: initialArtifactIds,
         }}
-        initialAbilities={abilities}
-        initialAbilityIssues={issues}
-        initialArtifactIds={initialArtifactIds}
       />
     </HudFormPage>
   );

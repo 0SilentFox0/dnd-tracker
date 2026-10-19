@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronsDown, ChevronsUp, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
-import { DmParticipantRow } from "./DmParticipantRow";
+import { type DmParticipantActions, DmParticipantRow } from "./DmParticipantRow";
 
 import { BattleLogPanel } from "@/components/battle/log/BattleLogPanel";
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
+import { type BattlePageDialogs, useBattleScene } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { isLiveScalable, type LiveScaleDirection } from "@/lib/utils/battle/balance/live-scale";
-import type { BattleScene } from "@/types/api";
+import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleParticipant } from "@/types/battle";
 
 const PANEL_WIDTH = 320;
@@ -19,51 +19,16 @@ const PANEL_WIDTH = 320;
 const ACTION = "hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]";
 
 export interface DmQuickActionsPanelProps {
-  battle: BattleScene;
-  isDM: boolean;
-  onOpenLog: () => void;
-  onAddParticipant: () => void;
-  onChangeHp: (participant: BattleParticipant) => void;
-  onRemoveFromBattle: (participant: BattleParticipant) => void;
-  onKill?: (participant: BattleParticipant) => void;
-  /** Живе підсилення/послаблення ворожих юнітів лише в цьому бою (стакається) */
-  onScaleUnits?: (direction: LiveScaleDirection) => void;
-  /** Оновити здібності, атаки й закляття учасників з бібліотеки кампанії */
-  onRefreshSources?: () => void;
-  refreshPending?: boolean;
-  onCompleteBattle: (result?: "victory" | "defeat") => void;
-  onTakeControl: (participant: BattleParticipant | null) => void;
-  dmControlledParticipantId: string | null;
-  /** Лог бою в сайдбарі: показувати вміст логу тут */
-  logPanelOpen?: boolean;
-  setLogPanelOpen?: (open: boolean) => void;
-  onRollback?: (actionIndex: number) => void;
+  dialogs: BattlePageDialogs;
   /** Відкрити діалог накладання заклинання (будь-яке заклинання на будь-кого) */
-  onOpenCastSpell?: () => void;
+  onOpenCastSpell: () => void;
   /** Керований режим (мобільний): панель відкривається ззовні, бічної вкладки немає */
   panel?: { open: boolean; onOpenChange: (open: boolean) => void };
 }
 
-export function DmQuickActionsPanel({
-  battle,
-  isDM,
-  onOpenLog,
-  onAddParticipant,
-  onChangeHp,
-  onRemoveFromBattle,
-  onKill,
-  onScaleUnits,
-  onRefreshSources,
-  refreshPending,
-  onCompleteBattle,
-  onTakeControl,
-  dmControlledParticipantId,
-  logPanelOpen,
-  setLogPanelOpen,
-  onRollback,
-  onOpenCastSpell,
-  panel,
-}: DmQuickActionsPanelProps) {
+export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuickActionsPanelProps) {
+  const { battle, viewer, dmControl, actions } = useBattleScene();
+
   const [ownOpen, setOwnOpen] = useState(false);
 
   const confirm = useConfirm();
@@ -72,7 +37,7 @@ export function DmQuickActionsPanel({
 
   const setOpen = panel ? panel.onOpenChange : setOwnOpen;
 
-  if (!isDM || battle.status === BattleStatus.PREPARED) return null;
+  if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
   const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
@@ -85,10 +50,18 @@ export function DmQuickActionsPanel({
       confirmLabel: "Оновити",
     });
 
-    if (ok) onRefreshSources?.();
+    if (ok) actions.refreshSources.mutate({});
   };
 
-  const canScale = onScaleUnits && battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
+  const rowActions: DmParticipantActions = {
+    onChangeHp: dialogs.hp.show,
+    onTakeControl: (p) => dmControl.set(p?.basicInfo.id ?? null),
+    onRemove: (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } }),
+    onKill: battle.status === BattleStatus.ACTIVE ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } }) : undefined,
+    onDone: closePanel,
+  };
+
+  const canScale = battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
 
   return (
     <>
@@ -133,18 +106,18 @@ export function DmQuickActionsPanel({
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
-          <button type="button" className={ACTION} onClick={() => onOpenLog()}>
+          <button type="button" className={ACTION} onClick={dialogs.log.show}>
             <ScrollText className="size-4 shrink-0 text-[var(--gold)]" />
-            {logPanelOpen ? "Лог битви відкрито нижче" : "Відкрити лог битви"}
+            {dialogs.log.open ? "Лог битви відкрито нижче" : "Відкрити лог битви"}
           </button>
 
-          {logPanelOpen && setLogPanelOpen && (
+          {dialogs.log.open && (
             <BattleLogPanel
               battle={battle}
-              isDM={isDM}
-              onRollback={onRollback}
+              isDM={viewer.isDM}
+              onRollback={(actionIndex) => actions.rollback.mutate({ actionIndex })}
               open={true}
-              onOpenChange={setLogPanelOpen}
+              onOpenChange={dialogs.log.setOpen}
               embedInSidebar
             />
           )}
@@ -153,7 +126,7 @@ export function DmQuickActionsPanel({
             type="button"
             className={ACTION}
             onClick={() => {
-              onAddParticipant();
+              dialogs.addParticipant.show();
               closePanel();
             }}
           >
@@ -161,22 +134,20 @@ export function DmQuickActionsPanel({
             Додати героя / юніта
           </button>
 
-          {onOpenCastSpell && (
-            <button
-              type="button"
-              className={ACTION}
-              onClick={() => {
-                onOpenCastSpell();
-                closePanel();
-              }}
-            >
-              <Sparkles className="size-4 shrink-0 text-[#8fd0e8]" />
-              Накласти заклинання
-            </button>
-          )}
+          <button
+            type="button"
+            className={ACTION}
+            onClick={() => {
+              onOpenCastSpell();
+              closePanel();
+            }}
+          >
+            <Sparkles className="size-4 shrink-0 text-[#8fd0e8]" />
+            Накласти заклинання
+          </button>
 
-          {onRefreshSources && battle.status === BattleStatus.ACTIVE && (
-            <button type="button" className={ACTION} disabled={refreshPending} onClick={refreshSources}>
+          {battle.status === BattleStatus.ACTIVE && (
+            <button type="button" className={ACTION} disabled={actions.refreshSources.isPending} onClick={refreshSources}>
               <RefreshCw className="size-4 shrink-0 text-[var(--gold)]" />
               Оновити з бібліотеки
             </button>
@@ -188,11 +159,11 @@ export function DmQuickActionsPanel({
                 Ворожі юніти (лише цей бій)
               </h4>
               <div className="grid grid-cols-2 gap-2 pt-2">
-                <button type="button" className={ACTION} title="HP і шкода ×1.1, стакається" onClick={() => onScaleUnits("buff")}>
+                <button type="button" className={ACTION} title="HP і шкода ×1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "buff" })}>
                   <ChevronsUp className="size-4 shrink-0 text-hud-danger" />
                   Підсилити
                 </button>
-                <button type="button" className={ACTION} title="HP і шкода ÷1.1, стакається" onClick={() => onScaleUnits("debuff")}>
+                <button type="button" className={ACTION} title="HP і шкода ÷1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })}>
                   <ChevronsDown className="size-4 shrink-0 text-hud-good" />
                   Послабити
                 </button>
@@ -214,12 +185,8 @@ export function DmQuickActionsPanel({
                   <DmParticipantRow
                     key={p.basicInfo.id}
                     participant={p}
-                    dmControlledParticipantId={dmControlledParticipantId}
-                    onChangeHp={onChangeHp}
-                    onTakeControl={onTakeControl}
-                    onRemove={onRemoveFromBattle}
-                    onKill={battle.status === BattleStatus.ACTIVE ? onKill : undefined}
-                    onActionDone={closePanel}
+                    controlled={dmControl.id === p.basicInfo.id}
+                    actions={rowActions}
                   />
                 ))
               )}
@@ -231,7 +198,7 @@ export function DmQuickActionsPanel({
               type="button"
               className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-[15px] font-bold tracking-[.08em]"
               onClick={() => {
-                onCompleteBattle();
+                actions.complete.mutate({});
                 closePanel();
               }}
             >
