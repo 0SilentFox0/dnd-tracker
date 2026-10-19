@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { mapAction } from "@/lib/utils/battle/fx/map-action";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
-import type { BattleMapConfig } from "@/types/battle";
+import type { BattleAction, BattleMapConfig } from "@/types/battle";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
@@ -312,7 +313,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
 
     const entry = out.actions.find((a) => a.resultText.includes("«Вогонь»"));
 
-    expect(entry?.hpChanges).toEqual([expect.objectContaining({ participantId: "gob", oldHp: 20, newHp: 15, change: -5 })]);
+    expect(entry?.hpChanges).toEqual([expect.objectContaining({ participantId: "gob", oldHp: 20, newHp: 15, change: 5 })]);
     expect(out.participants[1].combatStats.currentHp).toBe(15);
   });
 
@@ -332,14 +333,39 @@ describe("небезпека на початку ходу в advanceTurn", () =>
 
     const hazard = out.actions.find((a) => a.actionDetails.hazard);
 
-    expect(dot?.hpChanges).toEqual([expect.objectContaining({ oldHp: 20, newHp: 17, change: -3 })]);
-    expect(hazard?.hpChanges).toEqual([expect.objectContaining({ oldHp: 17, newHp: 12, change: -5 })]);
+    expect(dot?.hpChanges).toEqual([expect.objectContaining({ oldHp: 20, newHp: 17, change: 3 })]);
+    expect(hazard?.hpChanges).toEqual([expect.objectContaining({ oldHp: 17, newHp: 12, change: 5 })]);
 
     const dotIndex = out.actions.findIndex((a) => a === dot);
 
     expect(dotIndex).toBeGreaterThanOrEqual(0);
     expect(dotIndex).toBeLessThan(out.actions.findIndex((a) => a === hazard));
-    expect(-((dot?.hpChanges[0].change ?? 0) + (hazard?.hpChanges[0].change ?? 0))).toBe(20 - out.participants[1].combatStats.currentHp);
+    expect((dot?.hpChanges[0].change ?? 0) + (hazard?.hpChanges[0].change ?? 0)).toBe(20 - out.participants[1].combatStats.currentHp);
+  });
+
+  it("HoT після небезпеки входить у запис небезпеки", () => {
+    const healing = { ...placed(goblin), battleData: { ...placed(goblin).battleData, activeEffects: [makeEffect("regen", { name: "Регенерація", hotHeal: { healPerRound: 2 } })] } };
+
+    const out = advanceTurn({ participants: [hero, healing], pending: [], scene, map, rng: () => 0 });
+
+    const hazard = out.actions.find((a) => a.actionDetails.hazard);
+
+    expect(hazard?.hpChanges).toEqual([expect.objectContaining({ oldHp: 20, newHp: 17, change: 3 })]);
+    expect(out.participants[1].combatStats.currentHp).toBe(17);
+  });
+
+  it("виживання після смертельної небезпеки — запис показує живого, без FX смерті", () => {
+    const survive = resolved({ trigger: { event: "lethalDamage" }, limits: { perBattle: 1 }, effects: [{ kind: "heal", amount: 1, revive: true }] });
+
+    const tough = { ...placed(goblin, 3), battleData: { ...placed(goblin, 3).battleData, resolvedAbilities: [survive] } };
+
+    const out = advanceTurn({ participants: [hero, tough], pending: [], scene, map, rng: () => 0 });
+
+    const hazard = out.actions.find((a) => a.actionDetails.hazard);
+
+    expect(out.participants[1].combatStats).toMatchObject({ currentHp: 1, status: "active" });
+    expect(hazard?.hpChanges).toEqual([expect.objectContaining({ oldHp: 3, newHp: 1, change: 2 })]);
+    expect(mapAction(hazard as BattleAction).some((f) => f.archetype === "death")).toBe(false);
   });
 
   it("смертельна шкода валить учасника", () => {

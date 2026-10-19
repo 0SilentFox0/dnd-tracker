@@ -1,7 +1,7 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
 
-import { CombatStatus } from "@/lib/constants/battle";
+import { CombatStatus, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -31,7 +31,6 @@ export interface StartOfTurnHazard {
   message: string;
   damage: number;
   hpBefore: number;
-  hpAfter: number;
   label: string;
   damageType: string;
 }
@@ -95,8 +94,7 @@ export function processStartOfTurn(
         message: hit.message,
         damage: hit.damage,
         hpBefore: updatedParticipant.combatStats.currentHp,
-        hpAfter: hit.participant.combatStats.currentHp,
-        label: hazard.label ?? "Небезпечна місцевість",
+        label: hazard.label ?? DEFAULT_HAZARD_LABEL,
         damageType: hazard.damage?.type ?? "",
       };
       updatedParticipant = hit.participant;

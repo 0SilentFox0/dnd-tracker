@@ -7,7 +7,7 @@ import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
-import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import {
@@ -75,7 +75,7 @@ function markFill(mark: MarkValue): string {
 function terrainTitle(t: TerrainCell): string | null {
   if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
 
-  return t.kind === "hazard" ? (t.label ?? "Небезпечна місцевість") : null;
+  return t.kind === "hazard" ? (t.label ?? DEFAULT_HAZARD_LABEL) : null;
 }
 
 const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: "rgba(200,40,30,.28)" } as const;

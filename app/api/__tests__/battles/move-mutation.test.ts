@@ -123,7 +123,7 @@ describe("move mutation", () => {
           type: "ability",
           actorId: "hero",
           resultText: "Тест: 5 fire шкоди від «Вогонь»",
-          hpChanges: [expect.objectContaining({ participantId: "hero", change: -5 })],
+          hpChanges: [expect.objectContaining({ participantId: "hero", change: 5 })],
         }),
       ]);
       expect(out.events[0]).toMatchObject({ details: { actionDetails: { hazard: { label: "Вогонь", damageType: "fire", damage: 5 } } } });

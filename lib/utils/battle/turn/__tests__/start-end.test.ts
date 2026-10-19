@@ -119,7 +119,7 @@ describe("небезпека на початку ходу", () => {
     const out = processStartOfTurn(p, 2, [p], () => 0, map);
 
     expect(out.damageMessages).toEqual([]);
-    expect(out.hazard).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, hpAfter: 15, label: "Вогонь", damageType: "fire" });
+    expect(out.hazard).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, label: "Вогонь", damageType: "fire" });
     expect(out.participant.combatStats.currentHp).toBe(15);
     expect(out.participant.battleData.hazardHitRound).toBe(2);
   });
@@ -130,7 +130,7 @@ describe("небезпека на початку ходу", () => {
     const out = processStartOfTurn(p, 2, [p], () => 0, map);
 
     expect(out.damageMessages).toEqual(["Тест: 3 fire шкоди від Опік"]);
-    expect(out.hazard).toMatchObject({ hpBefore: 17, hpAfter: 12, damage: 5 });
+    expect(out.hazard).toMatchObject({ hpBefore: 17, damage: 5 });
     expect(out.participant.combatStats.currentHp).toBe(12);
   });
 

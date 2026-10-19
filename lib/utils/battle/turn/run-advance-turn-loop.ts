@@ -187,7 +187,7 @@ export function runAdvanceTurnLoop(
             participantName: turnResult.participant.basicInfo.name,
             oldHp: nextParticipant.combatStats.currentHp,
             newHp: dotHpAfter,
-            change: dotHpAfter - nextParticipant.combatStats.currentHp,
+            change: nextParticipant.combatStats.currentHp - dotHpAfter,
           },
         ],
         isCancelled: false,
@@ -196,6 +196,9 @@ export function runAdvanceTurnLoop(
     }
 
     const hazard = turnResult.hazard;
+
+    // кінцеве HP: після HoT і вмінь на кшталт lethalDamage → survive
+    const hazardHpAfter = turnResult.participant.combatStats.currentHp;
 
     if (hazard) {
       newLogEntries.push({
@@ -219,8 +222,8 @@ export function runAdvanceTurnLoop(
             participantId: turnResult.participant.basicInfo.id,
             participantName: turnResult.participant.basicInfo.name,
             oldHp: hazard.hpBefore,
-            newHp: hazard.hpAfter,
-            change: hazard.hpAfter - hazard.hpBefore,
+            newHp: hazardHpAfter,
+            change: hazard.hpBefore - hazardHpAfter,
           },
         ],
         isCancelled: false,

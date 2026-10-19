@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canActNow } from "@/lib/utils/battle/common/control";
@@ -101,13 +102,13 @@ function resolveHazardHit(
     round: ctx.scene.round,
     actorId: id,
     targets: [],
-    hpChanges: [{ participantId: id, participantName: before.basicInfo.name, oldHp, newHp: hp, change: hp - oldHp }],
+    hpChanges: [{ participantId: id, participantName: before.basicInfo.name, oldHp, newHp: hp, change: oldHp - hp }],
     resultText: messages.join("; "),
     details: {
       actorName: before.basicInfo.name,
       actorSide: before.basicInfo.side,
       actionDetails: {
-        hazard: { label: cell.label ?? "Небезпечна місцевість", damageType: cell.damage?.type ?? "", damage: hit.damage },
+        hazard: { label: cell.label ?? DEFAULT_HAZARD_LABEL, damageType: cell.damage?.type ?? "", damage: hit.damage },
         damageRolls: [{ dice: cell.damage?.dice ?? String(cell.damage?.amount ?? 0), results: [], total: hit.damage, damageType: cell.damage?.type ?? "" }],
       },
     },
