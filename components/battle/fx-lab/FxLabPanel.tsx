@@ -30,7 +30,7 @@ interface Props {
 
 const ON_ALLY = new Set<FxArchetype>(["heal", "buff", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "sunbeam", "resurrect"]);
 
-const ON_ALL_ENEMIES = new Set<FxArchetype>(["area", "meteor", "entangle", "holyword"]);
+const ON_ALL_ENEMIES = new Set<FxArchetype>(["area", "meteor", "entangle", "holyword", "netherhands"]);
 
 function targetsFor(archetype: FxArchetype) {
   if (ON_ALLY.has(archetype)) return ["a1"];

@@ -30,10 +30,10 @@ describe("previewSpellFx", () => {
     ]);
   });
 
-  it("plague is a poison bolt that leaves the plague aura without a hit frame", () => {
+  it("plague is a fly swarm that leaves the plague aura without a hit frame", () => {
     const p = preview("Чума");
 
-    expect(p.spec).toMatchObject({ archetype: "bolt", element: "poison" });
+    expect(p.spec).toMatchObject({ archetype: "pestilence", element: "poison" });
     expect(p.targets).toEqual([{ id: "e1", frame: null, auras: ["plague"] }]);
   });
 

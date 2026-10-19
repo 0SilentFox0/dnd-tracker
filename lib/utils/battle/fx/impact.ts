@@ -9,7 +9,7 @@ export interface FxImpact {
 }
 
 // these never deal damage themselves, so they must not borrow a damage frame
-const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward"]);
+const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "siphon", "rust", "whispers", "thorns", "raincloud", "blindfold", "puppet"]);
 
 const HEALS = new Set<FxArchetype>(["heal", "sunbeam", "resurrect"]);
 

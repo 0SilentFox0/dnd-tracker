@@ -2,11 +2,11 @@ import { elementOf } from "./element";
 
 import type { ActiveEffect } from "@/types/battle";
 
-export type FxAuraKind = "stun" | "charm" | "rage" | "bind" | "plague" | "burning" | "frost" | "decay" | "bleeding" | "static" | "marked" | "curse" | "regen" | "shield" | "blessing" | "frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste" | "hourglass" | "stoneskin" | "lifedome" | "sunglow" | "spellward" | "deflect" | "might" | "holyweapon";
+export type FxAuraKind = "stun" | "charm" | "rage" | "bind" | "plague" | "burning" | "frost" | "decay" | "bleeding" | "static" | "marked" | "curse" | "regen" | "shield" | "blessing" | "frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste" | "shackles" | "stoneskin" | "lifedome" | "sunglow" | "spellward" | "deflect" | "might" | "holyweapon" | "sapped" | "rust" | "dizzy" | "thorncrown" | "raincloud" | "strings";
 
 export const MAX_AURAS = 2;
 
-const AURA_PRIORITY: readonly FxAuraKind[] = ["stun", "frozen", "charm", "rage", "bind", "roots", "blind", "plague", "burning", "frost", "decay", "bleeding", "static", "dust", "stings", "marked", "moonmark", "hourglass", "curse", "lifedome", "sunglow", "regen", "bloodlust", "haste", "spellward", "deflect", "might", "holyweapon", "stoneskin", "shield", "blessing"];
+const AURA_PRIORITY: readonly FxAuraKind[] = ["stun", "dizzy", "frozen", "strings", "charm", "rage", "bind", "roots", "blind", "plague", "burning", "frost", "decay", "bleeding", "static", "dust", "stings", "marked", "moonmark", "shackles", "rust", "thorncrown", "raincloud", "sapped", "curse", "lifedome", "sunglow", "regen", "bloodlust", "haste", "spellward", "deflect", "might", "holyweapon", "stoneskin", "shield", "blessing"];
 
 const DOT_AURA: Record<string, FxAuraKind> = {
   poison: "plague",
@@ -29,7 +29,13 @@ const AURA_BY_NAME: Record<string, FxAuraKind> = {
   "Сліпота": "blind",
   "Вампіризм": "bloodlust",
   "Поспіх": "haste",
-  "Сповільнення": "hourglass",
+  "Сповільнення": "shackles",
+  "Ослаблення": "sapped",
+  "Немічність": "rust",
+  "Розсіяність": "dizzy",
+  "Страждання": "thorncrown",
+  "Смуток": "raincloud",
+  "Ляльковод": "strings",
   "Кам'яна шкіра": "stoneskin",
   "Землетрус": "dust",
   "Рій ос": "stings",

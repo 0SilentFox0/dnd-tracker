@@ -1,69 +1,72 @@
+import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, type FxPoint, rand } from "../runtime/geometry";
-import { playGhost } from "../runtime/ghosts";
-import { emit } from "../runtime/primitives";
+import { arcControl, bezier, farSide, type FxPoint, rand } from "../runtime/geometry";
+import { motionPath } from "../runtime/motion";
+import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { hourglass } from "../runtime/shapes";
-import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
+import { chainLink, shackle, taperedStroke } from "../runtime/shapes";
+import { animateEl, schedule, show, type Stage, tween, wait } from "../runtime/stage";
+import { streakBurst } from "../runtime/streaks";
+import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
 import { IMPACT_MS } from "@/lib/utils/battle/fx";
 
-const HOLD_MS = 1900;
+const TOTAL_MS = 2600;
 
-const MIST = ["#8ea4c4", "#6f86a8", "#b4c6de"];
+const CHAIN_MS = 760;
 
-const SAND = ["#f2dfa8", "#e0c47c"];
+const CLAMP_MS = 980;
 
-const GHOST_FILTER = "grayscale(1) sepia(.4) hue-rotate(180deg) brightness(1.3)";
+const FADE_MS = 2150;
 
-// The target sways once, sluggishly; its ghosts replay the sway later, so they trail behind it.
-const SWAY: Keyframe[] = [{ transform: "none" }, { transform: "translateX(-16px)", offset: 0.45 }, { transform: "translateX(6px)", offset: 0.8 }, { transform: "none" }];
+const SMOKE = ["#1a1226", "#2a1e3a", "#120c1a"];
 
-const SWAY_MS = 1500;
+const SPARKS = ["#ffffff", "#d8d4e4", "#9a94aa"];
+
+interface Tendril {
+  x: number;
+  len: number;
+  phase: number;
+  curl: number;
+  born: number;
+}
 
 async function drift(stage: Stage, from: FxPoint, to: FxPoint) {
-  const ctrl = arcControl(from, to, 40);
+  const ctrl = arcControl(from, to, 30);
 
-  const tex = glow("#7f9cc8");
-
-  const core = glow("#ffffff");
+  const halo = glow("#5a3a80");
 
   let pos = from;
 
   const hide = show(stage, (g) => {
-    sprite(g, tex, pos.x, pos.y, 0.8);
-    sprite(g, core, pos.x, pos.y, 0.18);
+    sprite(g, halo, pos.x, pos.y, 0.9, undefined, 0.8);
+    sprite(g, glow("#0c0812"), pos.x, pos.y, 0.6, undefined, 0.95, false);
   });
 
   await tween(stage, IMPACT_MS.slow, (k) => {
     pos = bezier(from, ctrl, to, easeOutCubic(k));
-    emit(stage, pos, { tints: MIST, speed: [4, 18], life: [0.5, 0.9], scale: [0.3, 0.06], spread: 4, alpha: 0.5 });
+    emit(stage, pos, { tints: SMOKE, speed: [4, 16], life: [0.6, 1], scale: [0.5, 0.9], spread: 5, additive: false, alpha: 0.55, gravity: 20 });
   });
   hide();
 }
 
-function ripple(g: CanvasRenderingContext2D, at: FxPoint, k: number, phase: number) {
-  // A heavy ease: the ring leaps out, then all but stops — time thickening around the target.
-  const e = 1 - (1 - k) ** 5;
+function chainPoints(a: FxPoint, b: FxPoint, sag: number, upTo: number) {
+  const ctrl = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 + sag };
 
-  const rx = 34 + e * 66;
+  const n = Math.max(2, Math.floor(Math.hypot(b.x - a.x, b.y - a.y) / 9));
 
-  g.globalAlpha = (1 - k) * 0.7;
-  g.strokeStyle = "#c4d4ea";
-  g.lineWidth = 1.6 * (1 - k) + 0.6;
-  g.beginPath();
+  const shown = Math.floor(n * upTo);
 
-  for (let i = 0; i <= 48; i++) {
-    const a = (i / 48) * Math.PI * 2;
+  return Array.from({ length: shown }, (_, i) => {
+    const u = (i + 0.5) / n;
 
-    const wob = 1 + Math.sin(a * 5 + phase * (1 - e)) * 0.025 * (1 - e);
+    const p = bezier(a, ctrl, b, u);
 
-    g.lineTo(at.x + Math.cos(a) * rx * wob, at.y + Math.sin(a) * rx * 0.48 * wob);
-  }
+    const q = bezier(a, ctrl, b, Math.min(1, u + 0.02));
 
-  g.stroke();
+    return { x: p.x, y: p.y, angle: Math.atan2(q.y - p.y, q.x - p.x), flat: i % 2 === 0 };
+  });
 }
 
 export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
@@ -72,83 +75,139 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const el = targetEls[i];
 
-    const glass = { x: target.x, y: target.y - 4 };
+    const { w, h } = halfSize(el);
 
-    const haze = glow("#5a6e90");
+    const dir = farSide(target, from, stage.layer.clientWidth);
 
-    const halo = glow("#9fb8e0");
+    // The row is hauled back towards the darkness in heavy jerks and only then let go.
+    const drag = motionPath([
+      { at: 0, x: 0, y: 0 },
+      { at: CLAMP_MS - IMPACT_MS.slow + 160, x: 0, y: 0 },
+      { at: CLAMP_MS - IMPACT_MS.slow + 300, x: dir * 8, y: 2, rot: dir * -2 },
+      { at: CLAMP_MS - IMPACT_MS.slow + 520, x: dir * 5, y: 1, rot: dir * 1 },
+      { at: CLAMP_MS - IMPACT_MS.slow + 820, x: dir * 13, y: 3, rot: dir * -1.5 },
+      { at: FADE_MS - IMPACT_MS.slow, x: dir * 14, y: 3 },
+      { at: TOTAL_MS - IMPACT_MS.slow, x: 0, y: 0 },
+    ]);
 
-    const grains: (FxPoint & { vy: number })[] = [];
+    const cuffs = [
+      { x: -dir * w * 0.3, y: -h * 0.15, r: Math.max(7, h * 0.32) },
+      { x: -dir * w * 0.02, y: h * 0.5, r: Math.max(7, h * 0.3) },
+    ];
 
-    let t = 0;
+    // A shadow rift on the far side, kept inside the layer so the chains never run off it.
+    const rift = { x: Math.max(16, Math.min(stage.layer.clientWidth - 16, target.x + dir * (w + 26))), y: target.y };
+
+    const tendrils: Tendril[] = Array.from({ length: 5 }, (_, n) => ({ x: (-0.8 + (1.6 * n) / 4) * w + rand(-5, 5), len: h * 1.7 + rand(0, 8), phase: rand(0, 6), curl: w * rand(0.25, 0.4), born: n * 70 }));
+
+    const pool = glow("#100a18");
+
+        let t = 0;
 
     const hide = show(stage, (g) => {
-      const k = t / HOLD_MS;
+      const m = drag.sample(t);
 
-      const fade = envelope(k, 0.12, 0.25);
+      const fade = 1 - clamp01((t - (FADE_MS - IMPACT_MS.slow)) / 400);
 
-      sprite(g, haze, target.x, target.y, 3.4, 1.7, fade * 0.55, false);
+      const rise = envelope(clamp01(t / (TOTAL_MS - IMPACT_MS.slow)), 0.12, 0.2);
 
-      g.globalCompositeOperation = "lighter";
-      g.lineWidth = 1;
+      spritePx(g, pool, target.x + m.x, target.y + h, w * 2.8, h * 1.3, rise * 0.9, false);
 
-      // Slow underwater shimmer: horizontal waves crawling through the thickened air.
-      for (let w = 0; w < 5; w++) {
-        const y = target.y - 26 + w * 13;
+      // Shadow tendrils coil up out of the pool and around the row.
+      for (const td of tendrils) {
+        const grow = easeOutCubic(clamp01((t - td.born) / 450));
 
-        g.globalAlpha = fade * 0.22;
-        g.strokeStyle = "#b4c6de";
-        g.beginPath();
+        if (grow <= 0) continue;
 
-        for (let x = -70; x <= 70; x += 7) g.lineTo(target.x + x, y + Math.sin(x * 0.07 + t * 0.0016 + w) * 3 * (1 - Math.abs(x) / 90));
+        const base = { x: target.x + m.x + td.x, y: target.y + h * 0.95 };
 
-        g.stroke();
+        // Each one rises and hooks over towards the rift, as if hauling the row in.
+        const pts = Array.from({ length: 13 }, (_, n) => {
+          const u = (n / 12) * grow;
+
+          return { x: base.x + dir * (1 - Math.cos((u * Math.PI) / 2)) * td.curl + Math.sin(u * 4 + t / 420 + td.phase) * 3, y: base.y - Math.sin((u * Math.PI) / 2) * td.len };
+        });
+
+        g.globalAlpha = fade;
+        g.globalCompositeOperation = "source-over";
+        g.lineCap = "round";
+        taperedStroke(g, pts, "rgba(120,80,175,0.6)", 12, 0.85, 1.8);
+        taperedStroke(g, pts, "#0c0712", 8.5, 0.9, 1);
       }
 
-      for (let r = 0; r < 4; r++) {
-        const rk = (t - r * 260) / 1300;
+      // Chains lash out of two shadow rifts on the far side and lock iron cuffs onto the row.
+      const reach = clamp01((t - (CHAIN_MS - IMPACT_MS.slow)) / (CLAMP_MS - CHAIN_MS));
 
-        if (rk > 0 && rk < 1) ripple(g, target, rk, 10 + r);
+      const open = envelope(clamp01((t - (CHAIN_MS - IMPACT_MS.slow) + 200) / (TOTAL_MS - CHAIN_MS)), 0.12, 0.25);
+
+      if (open > 0) {
+        spritePx(g, pool, rift.x, rift.y, 44, 64, open, false);
+        g.globalCompositeOperation = "lighter";
+        g.strokeStyle = "#7a4ab0";
+        g.lineWidth = 1.6;
+
+        for (let n = 0; n < 3; n++) {
+          const a = -t / 260 + (n * Math.PI * 2) / 3;
+
+          g.globalAlpha = open * 0.8;
+          g.beginPath();
+          g.ellipse(rift.x, rift.y, 9 + n * 4, 18 + n * 6, 0, a, a + 2);
+          g.stroke();
+        }
       }
 
-      const appear = clamp01(k / 0.15);
+      if (reach > 0) {
+        cuffs.forEach((cuff, n) => {
+          const end = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
 
-      const size = 46 * (1.4 - 0.4 * easeOutCubic(appear));
+          const tight = clamp01((t - (CLAMP_MS - IMPACT_MS.slow) - 120) / 200);
 
-      sprite(g, halo, glass.x, glass.y, 1.5, 1.8, fade * 0.5);
-      g.save();
-      g.translate(glass.x, glass.y);
-      g.rotate(Math.sin(t * 0.002) * 0.08);
-      g.globalAlpha = fade;
-      g.globalCompositeOperation = "source-over";
-      g.shadowColor = "#9fc4ff";
-      g.shadowBlur = 8;
-      hourglass(g, 0, 0, size, 1 - clamp01((k - 0.1) / 0.8) * 0.8, appear, "#dce8ff", "#f2dfa8");
-      g.restore();
+          const start = { x: rift.x, y: rift.y + (n ? 8 : -8) };
 
-      g.globalCompositeOperation = "lighter";
-      g.fillStyle = "#f2dfa8";
+          g.globalAlpha = fade;
 
-      for (const p of grains) {
-        g.globalAlpha = fade * 0.9;
-        g.fillRect(p.x - 0.8, p.y - 0.8, 1.6, 1.6);
+          for (const l of chainPoints(start, end, 18 * (1 - tight) + 2, easeOutCubic(reach))) chainLink(g, l.x, l.y, l.angle, l.flat, 0.9, "#9a96aa");
+
+          if (reach >= 1) {
+            const snap = clamp01((t - (CLAMP_MS - IMPACT_MS.slow)) / 120);
+
+            g.globalAlpha = fade;
+            shackle(g, end.x, end.y, cuff.r * (1.5 - 0.5 * snap), Math.PI / 2 + dir * 0.25);
+          }
+        });
       }
+
+      g.globalAlpha = 1;
     });
 
-    const sway = el ? Promise.all([animateEl(stage, el, SWAY, { duration: SWAY_MS, delay: 150, easing: "ease-in-out" }), ...[1, 2, 3].map((n) => playGhost(stage, el, GHOST_FILTER, SWAY.map((f) => ({ ...f, opacity: 0.7 - n * 0.15 })), { duration: SWAY_MS, delay: 150 + n * 140, easing: "ease-in-out" }))]) : wait(stage, 0);
+    for (const [n, cuff] of cuffs.entries()) {
+      schedule(stage, CLAMP_MS - IMPACT_MS.slow + n * 40, () => {
+        const m = drag.sample(t);
 
-    const run = tween(stage, HOLD_MS, (k, dt) => {
-      t = k * HOLD_MS;
+        const at = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
 
-      // Grains slip out of the hourglass and sink slowly, as through water.
-      if (k > 0.15 && k < 0.8 && Math.random() < 0.5) grains.push({ x: glass.x + rand(-4, 4), y: glass.y + 26, vy: rand(10, 20) });
+        void flash(stage, at, "#e8e4f4", 26, 220);
+        void streakBurst(stage, at, { colors: SPARKS, count: 12, speed: [120, 260], life: [0.2, 0.4], gravity: 400 });
+      });
+    }
 
-      for (const p of grains) p.y += p.vy * dt;
+    const heavy = el
+      ? Promise.all([
+          animateEl(stage, el, drag.keyframes, { duration: drag.duration, easing: "ease-in-out" }),
+          animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.65) brightness(.72)", offset: 0.25 }, { filter: "grayscale(.65) brightness(.72)", offset: 0.8 }, { filter: "none" }], { duration: drag.duration }),
+        ])
+      : wait(stage, 0);
 
-      while (grains.length && grains[0].y > target.y + 40) grains.shift();
+    const run = tween(stage, TOTAL_MS - IMPACT_MS.slow, (k) => {
+      t = k * (TOTAL_MS - IMPACT_MS.slow);
 
-      if (k > 0.1 && k < 0.7 && Math.random() < 0.3) emit(stage, { x: target.x + rand(-60, 60), y: target.y + rand(-20, 20) }, { tints: SAND, speed: [2, 8], life: [0.6, 1], scale: [0.12, 0.04], alpha: 0.7 });
+      const m = drag.sample(t);
+
+      // Heavy smoke sinking off the row, and dust where its feet scrape as it is hauled back.
+      if (t < FADE_MS - IMPACT_MS.slow && Math.random() < 0.5) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
+
+      if (t > CLAMP_MS - IMPACT_MS.slow + 140 && t < 1400 && Math.random() < 0.5) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
     }).then(hide);
 
-    await Promise.all([run, sway]);
+    await Promise.all([run, heavy]);
   });

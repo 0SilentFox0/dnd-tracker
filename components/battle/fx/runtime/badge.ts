@@ -41,3 +41,16 @@ export function shieldBadge(g: CanvasRenderingContext2D, x: number, y: number, a
   g.fillText(text, 0, 0);
   g.restore();
 }
+
+/** A stat-penalty badge over `top` that fades in and sags downwards over `k` ∈ [0, 1]; kept below the layer's top edge. */
+export function sinkingBadge(g: CanvasRenderingContext2D, x: number, top: number, k: number, text: string, look: BadgeLook) {
+  if (k <= 0 || k >= 1) return;
+
+  const ease = 1 - (1 - k) ** 3;
+
+  const half = Math.max(19, text.length * 4.2) * 1.3 + 4;
+
+  const right = g.canvas.clientWidth || Infinity;
+
+  shieldBadge(g, Math.max(half, Math.min(right - half, x)), Math.max(24, top) + ease * 12, Math.min(1, k / 0.15, (1 - k) / 0.35), text, look);
+}

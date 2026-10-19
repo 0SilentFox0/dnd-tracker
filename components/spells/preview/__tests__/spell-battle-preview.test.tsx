@@ -41,7 +41,7 @@ describe("SpellBattlePreviewPanel", () => {
     render(<SpellBattlePreviewPanel spell={plague} />);
 
     expect(screen.queryByTestId("spell-preview-arena")).toBeNull();
-    expect(screen.getByText("Снаряд")).toBeTruthy();
+    expect(screen.getByText("Чума")).toBeTruthy();
     expect(screen.getByText("Отрута")).toBeTruthy();
     expect(screen.getByText("Мор")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Показати ще раз/ })).toBeNull();

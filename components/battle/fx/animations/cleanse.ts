@@ -4,7 +4,7 @@ import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { jaggedShape, polyPath, twinkle } from "../runtime/shapes";
+import { chainLink, jaggedShape, polyPath, twinkle } from "../runtime/shapes";
 import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -50,24 +50,6 @@ function chainLinks(a: FxPoint, b: FxPoint) {
   const n = Math.floor(len / 11);
 
   return Array.from({ length: n }, (_, i) => ({ x: a.x + ((b.x - a.x) * (i + 0.5)) / n, y: a.y + ((b.y - a.y) * (i + 0.5)) / n, flat: i % 2 === 0 }));
-}
-
-function drawLink(g: CanvasRenderingContext2D, x: number, y: number, angle: number, flat: boolean) {
-  g.save();
-  g.translate(x, y);
-  g.rotate(angle);
-  g.beginPath();
-
-  if (flat) g.ellipse(0, 0, 7, 3.6, 0, 0, Math.PI * 2);
-  else g.ellipse(0, 0, 7, 1.4, 0, 0, Math.PI * 2);
-
-  g.strokeStyle = "#1c1822";
-  g.lineWidth = 3.4;
-  g.stroke();
-  g.strokeStyle = "#6e6480";
-  g.lineWidth = 1.3;
-  g.stroke();
-  g.restore();
 }
 
 function sigil(g: CanvasRenderingContext2D, x: number, y: number, r: number, spin: number, alpha: number) {
@@ -171,7 +153,7 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
         chains.forEach((links, c) => {
           const n = Math.floor(links.length * wrap);
 
-          for (let l = 0; l < n; l++) drawLink(g, target.x + links[l].x, target.y + links[l].y, angles[c], links[l].flat);
+          for (let l = 0; l < n; l++) chainLink(g, target.x + links[l].x, target.y + links[l].y, angles[c], links[l].flat);
         });
       }
 

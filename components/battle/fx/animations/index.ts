@@ -1,4 +1,5 @@
 import { area } from "./area";
+import { blindfold } from "./blindfold";
 import { bolt } from "./bolt";
 import { buff } from "./buff";
 import { cleanse } from "./cleanse";
@@ -14,11 +15,17 @@ import { holyword } from "./holyword";
 import { melee } from "./melee";
 import { meteor } from "./meteor";
 import { might } from "./might";
+import { netherhands } from "./netherhands";
+import { pestilence } from "./pestilence";
+import { puppet } from "./puppet";
 import { quake } from "./quake";
+import { raincloud } from "./raincloud";
 import { ranged } from "./ranged";
 import { regenerate } from "./regenerate";
 import { resurrect } from "./resurrect";
 import { retribution } from "./retribution";
+import { rust } from "./rust";
+import { siphon } from "./siphon";
 import { slow } from "./slow";
 import { spellward } from "./spellward";
 import { stoneskin } from "./stoneskin";
@@ -26,8 +33,10 @@ import { summon } from "./summon";
 import { sunbeam } from "./sunbeam";
 import { swarm } from "./swarm";
 import { teleport } from "./teleport";
+import { thorns } from "./thorns";
 import type { FxAnimation } from "./types";
+import { whispers } from "./whispers";
 
 import type { FxArchetype } from "@/lib/utils/battle/fx";
 
-export const ANIMATIONS: Record<FxArchetype, FxAnimation> = { melee, ranged, bolt, area, heal, buff, debuff, summon, death, swarm, quake, teleport, entangle, meteor, eldritch, slow, haste, stoneskin, cleanse, regenerate, might, deflect, holyword, empower, spellward, sunbeam, retribution, resurrect };
+export const ANIMATIONS: Record<FxArchetype, FxAnimation> = { melee, ranged, bolt, area, heal, buff, debuff, summon, death, swarm, quake, teleport, entangle, meteor, eldritch, slow, haste, stoneskin, cleanse, regenerate, might, deflect, holyword, empower, spellward, sunbeam, retribution, resurrect, siphon, rust, pestilence, whispers, thorns, raincloud, blindfold, puppet, netherhands };

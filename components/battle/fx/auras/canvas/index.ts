@@ -8,27 +8,33 @@ import { charmAura } from "./charm";
 import { curseAura } from "./curse";
 import { decayAura } from "./decay";
 import { deflectAura } from "./deflect";
+import { dizzyAura } from "./dizzy";
 import { dustAura } from "./dust";
 import { frostAura } from "./frost";
 import { frozenAura } from "./frozen";
 import { hasteAura } from "./haste";
 import { holyweaponAura } from "./holyweapon";
-import { hourglassAura } from "./hourglass";
 import { lifedomeAura } from "./lifedome";
 import { markedAura } from "./marked";
 import { mightAura } from "./might";
 import { moonmarkAura } from "./moonmark";
 import { plagueAura } from "./plague";
 import { rageAura } from "./rage";
+import { raincloudAura } from "./raincloud";
 import { regenAura } from "./regen";
 import { rootsAura } from "./roots";
+import { rustAura } from "./rust";
+import { sappedAura } from "./sapped";
+import { shacklesAura } from "./shackles";
 import { shieldAura } from "./shield";
 import { spellwardAura } from "./spellward";
 import { staticAura } from "./static";
 import { stingsAura } from "./stings";
 import { stoneskinAura } from "./stoneskin";
+import { stringsAura } from "./strings";
 import { stunAura } from "./stun";
 import { sunglowAura } from "./sunglow";
+import { thorncrownAura } from "./thorncrown";
 import type { AuraAnimation } from "./types";
 
 import type { FxAuraKind } from "@/lib/utils/battle/fx";
@@ -57,7 +63,7 @@ export const AURA_ANIMATIONS: Record<FxAuraKind, AuraAnimation> = {
   blind: blindAura,
   bloodlust: bloodlustAura,
   haste: hasteAura,
-  hourglass: hourglassAura,
+  shackles: shacklesAura,
   stoneskin: stoneskinAura,
   lifedome: lifedomeAura,
   sunglow: sunglowAura,
@@ -65,4 +71,10 @@ export const AURA_ANIMATIONS: Record<FxAuraKind, AuraAnimation> = {
   deflect: deflectAura,
   might: mightAura,
   holyweapon: holyweaponAura,
+  sapped: sappedAura,
+  rust: rustAura,
+  dizzy: dizzyAura,
+  thorncrown: thorncrownAura,
+  raincloud: raincloudAura,
+  strings: stringsAura,
 };

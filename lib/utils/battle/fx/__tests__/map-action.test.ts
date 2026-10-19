@@ -120,8 +120,22 @@ describe("mapAction", () => {
   });
 
   it("«Сповільнення» → slow, «Кам'яна шкіра» → stoneskin/earth", () => {
-    expect(spell("Сповільнення", { spellTargeting: "enemy", spellEffectKinds: ["modifyStat"], appliedEffects: [{ id: "s", name: "Сповільнення", duration: 3, type: "debuff", targetId: "t" }] })).toMatchObject({ archetype: "slow", element: "arcane" });
+    expect(spell("Сповільнення", { spellTargeting: "enemy", spellEffectKinds: ["modifyStat"], appliedEffects: [{ id: "s", name: "Сповільнення", duration: 3, type: "debuff", targetId: "t" }] })).toMatchObject({ archetype: "slow", element: "necrotic" });
     expect(spell("Кам'яна шкіра", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "stoneskin", element: "earth" });
+  });
+
+  it("Dark signatures override the computed debuff/bolt/area", () => {
+    const curse = { spellTargeting: "enemy", spellEffectKinds: ["modifyStat"], appliedEffects: [{ id: "d", name: "x", duration: 3, type: "debuff", targetId: "t" }] };
+
+    expect(spell("Ослаблення", curse)).toMatchObject({ archetype: "siphon", element: "necrotic" });
+    expect(spell("Немічність", curse)).toMatchObject({ archetype: "rust", element: "necrotic" });
+    expect(spell("Страждання", curse)).toMatchObject({ archetype: "thorns" });
+    expect(spell("Смуток", curse)).toMatchObject({ archetype: "raincloud" });
+    expect(spell("Розсіяність", { spellTargeting: "enemy", spellEffectKinds: ["applyCondition"] })).toMatchObject({ archetype: "whispers" });
+    expect(spell("Сліпота", { spellTargeting: "enemy", spellEffectKinds: ["applyCondition"] })).toMatchObject({ archetype: "blindfold" });
+    expect(spell("Ляльковод", { spellTargeting: "enemy", spellEffectKinds: ["charm"] })).toMatchObject({ archetype: "puppet" });
+    expect(spell("Чума", { spellDamageType: "poison", spellTargeting: "enemy", spellEffectKinds: ["dot"] })).toMatchObject({ archetype: "pestilence", element: "poison" });
+    expect(spell("Прокляття Потойбіччя", { spellDamageType: "necrotic", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage", "changeMorale"], totalDamage: 30 })).toMatchObject({ archetype: "netherhands", element: "necrotic" });
   });
 
   it("Light signatures override the computed archetype", () => {

@@ -108,75 +108,110 @@ export function taperedStroke(g: CanvasRenderingContext2D, pts: FxPoint[], color
   }
 }
 
-/**
- * An hourglass `h` px tall centred on (x, y): `sand` ∈ [0, 1] is the share still in the top bulb, `stream` how strongly it pours.
- * Strokes in `glass`, fills the sand in `sandColor`; the caller sets alpha, rotation and glow.
- */
-export function hourglass(g: CanvasRenderingContext2D, x: number, y: number, h: number, sand: number, stream: number, glass: string, sandColor: string) {
-  const w = h * 0.62;
-
-  const neck = h * 0.05;
-
-  const half = h / 2 - h * 0.08;
-
-  const bulb = (dir: 1 | -1) => {
-    g.moveTo(x - w / 2, y + dir * half);
-    g.bezierCurveTo(x - w / 2, y + dir * half * 0.35, x - neck, y + dir * half * 0.25, x - neck, y);
-    g.lineTo(x + neck, y);
-    g.bezierCurveTo(x + neck, y + dir * half * 0.25, x + w / 2, y + dir * half * 0.35, x + w / 2, y + dir * half);
-  };
-
+/** An iron cuff seen from the front, `r` px across its long axis, tilted by `angle`. */
+export function shackle(g: CanvasRenderingContext2D, x: number, y: number, r: number, angle: number) {
   g.save();
+  g.translate(x, y);
+  g.rotate(angle);
+  g.lineCap = "round";
+  g.strokeStyle = "#141018";
+  g.lineWidth = r * 0.5;
   g.beginPath();
-  bulb(-1);
-  bulb(1);
-  g.clip();
-  g.fillStyle = sandColor;
+  g.ellipse(0, 0, r, r * 0.42, 0, 0, Math.PI * 2);
+  g.stroke();
 
-  // Top sand sinks to the neck; the bottom mound grows from the floor.
-  const topLevel = y - half * 0.92 * Math.max(0, sand) * 0.85;
+  const steel = g.createLinearGradient(0, -r * 0.6, 0, r * 0.6);
 
-  if (sand > 0.02) g.fillRect(x - w / 2, topLevel, w, y - topLevel);
-
-  const mound = half * 0.9 * (1 - sand) * 0.85;
-
+  steel.addColorStop(0, "#c4c0cc");
+  steel.addColorStop(0.45, "#6c6876");
+  steel.addColorStop(1, "#2c2834");
+  g.strokeStyle = steel;
+  g.lineWidth = r * 0.3;
+  g.stroke();
+  g.strokeStyle = "rgba(255,255,255,0.55)";
+  g.lineWidth = Math.max(0.8, r * 0.07);
   g.beginPath();
-  g.moveTo(x - w / 2, y + half);
-  g.lineTo(x - w / 2, y + half - mound * 0.55);
-  g.quadraticCurveTo(x, y + half - mound * 1.5, x + w / 2, y + half - mound * 0.55);
-  g.lineTo(x + w / 2, y + half);
+  g.ellipse(0, 0, r, r * 0.42, 0, Math.PI * 1.1, Math.PI * 1.55);
+  g.stroke();
+  g.fillStyle = "#2c2834";
+  g.strokeStyle = "#8a8696";
+  g.lineWidth = Math.max(0.6, r * 0.06);
+  g.beginPath();
+  g.rect(-r * 0.2, r * 0.22, r * 0.4, r * 0.38);
   g.fill();
+  g.stroke();
+  g.restore();
+}
 
-  if (stream > 0 && sand > 0.02) {
-    g.globalAlpha *= stream;
-    g.fillRect(x - neck * 0.45, y - neck, neck * 0.9, half - mound * 0.9 + neck);
+/** One chain link at (x, y) along `angle`: `flat` links face the viewer, the others are seen edge on. */
+export function chainLink(g: CanvasRenderingContext2D, x: number, y: number, angle: number, flat: boolean, scale = 1, light = "#6e6480") {
+  g.save();
+  g.translate(x, y);
+  g.rotate(angle);
+  g.beginPath();
+  g.ellipse(0, 0, 7 * scale, (flat ? 3.6 : 1.4) * scale, 0, 0, Math.PI * 2);
+  g.strokeStyle = "#1c1822";
+  g.lineWidth = 3.4 * scale;
+  g.stroke();
+  g.strokeStyle = light;
+  g.lineWidth = 1.3 * scale;
+  g.stroke();
+  g.restore();
+}
+
+/** A curved thorn standing on the origin, its tip `len` px up and bent `bend` px sideways. */
+export function thornPath(g: CanvasRenderingContext2D, len: number, width: number, bend: number) {
+  g.beginPath();
+  g.moveTo(-width, 0);
+  g.quadraticCurveTo(-width * 0.25, -len * 0.55, bend, -len);
+  g.quadraticCurveTo(width * 0.55, -len * 0.45, width, 0);
+  g.closePath();
+}
+
+const RUST = ["#5a2a10", "#8a3e14", "#a8521c", "#3a1a0a", "#c0682a"];
+
+export interface RustPatch {
+  scabs: { x: number; y: number; pts: FxPoint[]; color: string }[];
+  pits: FxPoint[];
+}
+
+/** A corroded patch about `r` px across: mottled jagged scabs of rust with black pits, drawn by `drawRustPatch`. */
+export function rustPatch(r: number): RustPatch {
+  return {
+    scabs: Array.from({ length: 7 }, (_, n) => ({ x: rand(-r, r) * 0.55, y: rand(-r, r) * 0.45, pts: jaggedShape(7, r * rand(0.35, 0.6), 0.4, 0.45), color: RUST[n % RUST.length] })),
+    pits: Array.from({ length: 6 }, () => ({ x: rand(-r, r) * 0.6, y: rand(-r, r) * 0.45 })),
+  };
+}
+
+export function drawRustPatch(g: CanvasRenderingContext2D, patch: RustPatch, pit = 1.3) {
+  for (const sc of patch.scabs) {
+    g.save();
+    g.translate(sc.x, sc.y);
+    polyPath(g, sc.pts);
+    g.fillStyle = sc.color;
+    g.fill();
+    g.restore();
   }
 
-  g.restore();
+  g.fillStyle = "#0c0604";
 
-  g.strokeStyle = glass;
-  g.lineWidth = Math.max(1, h * 0.045);
-  g.beginPath();
-  bulb(-1);
-  bulb(1);
-  g.stroke();
+  for (const p of patch.pits) {
+    g.beginPath();
+    g.arc(p.x, p.y, pit, 0, Math.PI * 2);
+    g.fill();
+  }
+}
 
-  g.lineWidth = Math.max(1.4, h * 0.09);
-  g.lineCap = "round";
-  g.beginPath();
-  g.moveTo(x - w * 0.62, y - h / 2);
-  g.lineTo(x + w * 0.62, y - h / 2);
-  g.moveTo(x - w * 0.62, y + h / 2);
-  g.lineTo(x + w * 0.62, y + h / 2);
-  g.stroke();
+/** A small puffy cloud centred on (x, y), `w` px wide: overlapping puffs filled as one shape. */
+export function cloudPath(g: CanvasRenderingContext2D, x: number, y: number, w: number) {
+  const puffs: [number, number, number][] = [[-0.32, 0.08, 0.2], [-0.12, -0.1, 0.26], [0.14, -0.14, 0.24], [0.34, 0.04, 0.19], [0.02, 0.1, 0.26]];
 
-  g.lineWidth = Math.max(0.8, h * 0.035);
   g.beginPath();
-  g.moveTo(x - w * 0.55, y - h / 2);
-  g.lineTo(x - w * 0.55, y + h / 2);
-  g.moveTo(x + w * 0.55, y - h / 2);
-  g.lineTo(x + w * 0.55, y + h / 2);
-  g.stroke();
+
+  for (const [px, py, pr] of puffs) {
+    g.moveTo(x + px * w + pr * w, y + py * w);
+    g.arc(x + px * w, y + py * w, pr * w, 0, Math.PI * 2);
+  }
 }
 
 /** A feather along the x axis from its quill at the origin to its tip at `len`. */

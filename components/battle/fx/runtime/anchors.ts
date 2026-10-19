@@ -44,3 +44,14 @@ export function halfSize(el: HTMLElement | null | undefined, fallback = { w: 88,
 
   return r && r.width > 0 ? { w: r.width / 2, h: r.height / 2 } : fallback;
 }
+
+/** The portrait of a target at `at` (its centre, in layer coordinates): a wide row keeps it at its left end, a portrait anchor is the face itself. */
+export function faceOf(el: HTMLElement | null | undefined, at: FxPoint) {
+  const r = el?.getBoundingClientRect();
+
+  if (!r || r.width <= 0) return { x: at.x, y: at.y, r: 22 };
+
+  if (r.width > r.height * 1.6) return { x: at.x - r.width / 2 + r.height * 0.55, y: at.y, r: r.height * 0.34 };
+
+  return { x: at.x, y: at.y, r: Math.min(r.width, r.height) / 2 };
+}

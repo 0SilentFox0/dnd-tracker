@@ -84,3 +84,24 @@ export function farSide(target: FxPoint, from: FxPoint, fieldWidth: number) {
 
   return target.x < fieldWidth / 2 ? 1 : -1;
 }
+
+/** `n` + 1 points from `a` to `b` bowed sideways by a travelling sine; the ends stay put. */
+export function wavePoints(a: FxPoint, b: FxPoint, n: number, amp: number, phase: number, waves = 1.5): FxPoint[] {
+  const dx = b.x - a.x;
+
+  const dy = b.y - a.y;
+
+  const len = Math.hypot(dx, dy) || 1;
+
+  const nx = -dy / len;
+
+  const ny = dx / len;
+
+  return Array.from({ length: n + 1 }, (_, i) => {
+    const u = i / n;
+
+    const off = Math.sin(u * Math.PI * 2 * waves + phase) * amp * Math.sin(u * Math.PI);
+
+    return { x: a.x + dx * u + nx * off, y: a.y + dy * u + ny * off };
+  });
+}

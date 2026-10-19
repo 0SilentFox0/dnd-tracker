@@ -57,7 +57,7 @@ describe("spell-check aura rules", () => {
     expect(named("Поспіх")).toBe("haste");
     expect(named("Землетрус")).toBe("dust");
     expect(named("Рій ос")).toBe("stings");
-    expect(named("Сповільнення")).toBe("hourglass");
+    expect(named("Сповільнення")).toBe("shackles");
     expect(auraOf(fx({ name: "Кам'яна шкіра", type: "buff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: 3 }] as ActiveEffect["abilityEffects"] }))).toBe("stoneskin");
   });
 
@@ -71,6 +71,18 @@ describe("spell-check aura rules", () => {
     expect(buff("Праведна міць")).toBe("might");
     expect(buff("Божественна сила")).toBe("holyweapon");
     expect(aurasOf([fx({ id: "a", name: "Божественна сила", type: "buff" }), fx({ id: "b", name: "Магічний імунітет", type: "buff" }), fx({ id: "c", name: "Регенерація", type: "buff" })])).toEqual(["lifedome", "spellward"]);
+  });
+
+  it("Dark curses get their own auras by name instead of the shared curse/charm/stun", () => {
+    const debuff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ name, type: "debuff", ...over }));
+
+    expect(debuff("Ослаблення")).toBe("sapped");
+    expect(debuff("Немічність")).toBe("rust");
+    expect(debuff("Страждання")).toBe("thorncrown");
+    expect(debuff("Смуток")).toBe("raincloud");
+    expect(debuff("Розсіяність", { type: "condition", effects: [{ type: "skip_action", value: 50 }] })).toBe("dizzy");
+    expect(debuff("Ляльковод", { charmOrigin: { side: "enemy" } } as Partial<ActiveEffect>)).toBe("strings");
+    expect(aurasOf([fx({ id: "a", name: "Смуток", type: "debuff" }), fx({ id: "b", name: "Ослаблення", type: "debuff" }), fx({ id: "c", name: "Ляльковод", type: "debuff" })])).toEqual(["strings", "raincloud"]);
   });
 
   it("fxElement maps debuffs and conditions", () => {

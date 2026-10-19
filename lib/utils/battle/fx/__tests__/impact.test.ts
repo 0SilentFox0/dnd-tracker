@@ -65,6 +65,15 @@ describe("impactFor", () => {
     expect(cast("Кам'яна шкіра", { spellEffectKinds: ["modifyStat"] })).toBeNull();
   });
 
+  it("Dark: plague and the netherworld curse keep their damage frames, the other curses have none", () => {
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+
+    expect(cast("Чума", { spellDamageType: "poison", spellEffectKinds: ["dot"] })).toEqual({ element: "poison", kind: "damage", delayMs: IMPACT_MS.pestilence });
+    expect(cast("Прокляття Потойбіччя", { spellDamageType: "necrotic", spellEffectKinds: ["dealDamage"], totalDamage: 20 })).toEqual({ element: "necrotic", kind: "damage", delayMs: IMPACT_MS.netherhands });
+
+    for (const name of ["Ослаблення", "Немічність", "Розсіяність", "Страждання", "Смуток", "Сліпота", "Ляльковод"]) expect(cast(name, { spellEffectKinds: ["modifyStat"] })).toBeNull();
+  });
+
   it("Light: the smites hit with radiant damage, sunbeam and resurrection heal, the wards and blessings have no frame", () => {
     const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
 
