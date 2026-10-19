@@ -304,7 +304,7 @@ describe("Землетрус (earthquake)", () => {
   it("усі вороги: провал — повна шкода + недолік, успіх — половина без недоліку", () => {
     const o = [mage(), unit("e1"), unit("e2")];
 
-    const r = cast("earthquake", o, [], { diceRolls: [5, 4], saves: { e1: FAIL, e2: PASS } });
+    const r = cast("earthquake", o, ["e1", "e2"], { diceRolls: [5, 4], saves: { e1: FAIL, e2: PASS } });
 
     const ps = r.allParticipantsUpdated;
 
@@ -315,7 +315,7 @@ describe("Землетрус (earthquake)", () => {
   });
 
   it("Землетрус: недолік ще діє на наступному ході ворога", () => {
-    const r = cast("earthquake", [mage(), unit("e1")], [], { diceRolls: [5, 4], saves: { e1: FAIL } });
+    const r = cast("earthquake", [mage(), unit("e1")], ["e1"], { diceRolls: [5, 4], saves: { e1: FAIL } });
 
     const { order: o } = toTurnOf("e1", r.allParticipantsUpdated);
 

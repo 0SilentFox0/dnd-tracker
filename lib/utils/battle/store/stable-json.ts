@@ -19,6 +19,8 @@ export function stableStringify(value: unknown): string {
   return JSON.stringify(normalize(value));
 }
 
+export const jsonEqual = (a: unknown, b: unknown): boolean => stableStringify(a) === stableStringify(b);
+
 export function hashJson(value: unknown): string {
   return createHash("sha1").update(stableStringify(value)).digest("hex");
 }

@@ -222,51 +222,31 @@ describe("Хаос: заклинання", () => {
     expect(r.battleAction.actionDetails.savingThrows).toHaveLength(3);
   });
 
-  it("Вогняна стіна: один кидок на всіх ворогів, тікає на початку ходу кожного ворога 3 рази", () => {
+  it("Вогняна стіна без карти: один кидок — миттєва шкода вогнем усім обраним", () => {
     const c = hero("c", 20);
 
-    const order = [c, enemy("e1", 10), enemy("e2", 9)];
+    const r = cast("fire-wall", c, [c, enemy("e1", 10), enemy("e2", 9)], ["e1", "e2"], { rolls: [4] });
 
-    const r = cast("fire-wall", c, order, ["e1"], { rolls: [4] });
-
-    expect(hp(r.allParticipantsUpdated, "e1")).toBe(200);
-
-    let ps = r.allParticipantsUpdated;
-
-    let sc = scene(0);
-
-    for (let i = 0; i < 12; i++) {
-      const step = advanceTurn({ participants: ps, pending: [], scene: sc, rng: seq(0.99) });
-
-      ps = step.participants;
-      sc = { ...sc, ...step.scene } as BattleSceneState;
-    }
-
-    expect([hp(ps, "e1"), hp(ps, "e2")]).toEqual([188, 188]);
-    expect(P(ps, "e1").battleData.activeEffects).toHaveLength(0);
+    expect([hp(r.allParticipantsUpdated, "e1"), hp(r.allParticipantsUpdated, "e2")]).toEqual([196, 196]);
+    expect(P(r.allParticipantsUpdated, "e1").battleData.activeEffects).toHaveLength(0);
   });
 
-  it("Вогняна стіна: опір вогню зменшує тіки DoT", () => {
+  it("Вогняна стіна: опір вогню зменшує шкоду", () => {
     const c = hero("c", 20);
 
     const res = grantPassive(enemy("e", 10), [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 50 }]);
 
     const r = cast("fire-wall", c, [c, res], ["e"], { rolls: [4] });
 
-    const { ps } = advanceTo(r.allParticipantsUpdated, scene(0), "e");
-
-    expect(hp(ps, "e")).toBe(198);
+    expect(hp(r.allParticipantsUpdated, "e")).toBe(198);
   });
 
-  it("Вогняна стіна: тік DoT, що добиває останнього ворога, дає перемогу", () => {
+  it("Вогняна стіна: шкода, що добиває ворога, виводить його з бою", () => {
     const c = hero("c", 20);
 
     const r = cast("fire-wall", c, [c, enemy("e", 10, 3)], ["e"], { rolls: [4] });
 
-    const step = advanceTurn({ participants: r.allParticipantsUpdated, pending: [], scene: scene(0), rng: seq(0.99) });
-
-    expect(isActive(P(step.participants, "e"))).toBe(false);
-    expect(step.scene.status).toBe("completed");
+    expect(isActive(P(r.allParticipantsUpdated, "e"))).toBe(false);
   });
 
   it("Коло зими: провал — повна шкода і −2 ініціативи; успіх — половина без штрафу", () => {
@@ -323,7 +303,7 @@ describe("Хаос: заклинання", () => {
   it("Метеоритний дощ: усі вороги кидають Спритність, успіх — половина", () => {
     const c = hero();
 
-    const r = cast("meteor-shower", c, [c, enemy("e1"), enemy("e2")], [], { rolls: [5, 5], saves: [{ participantId: "e1", roll: 20 }, { participantId: "e2", roll: 1 }] });
+    const r = cast("meteor-shower", c, [c, enemy("e1"), enemy("e2")], ["e1", "e2"], { rolls: [5, 5], saves: [{ participantId: "e1", roll: 20 }, { participantId: "e2", roll: 1 }] });
 
     expect([hp(r.allParticipantsUpdated, "e1"), hp(r.allParticipantsUpdated, "e2")]).toEqual([195, 190]);
   });

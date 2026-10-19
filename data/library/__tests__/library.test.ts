@@ -516,3 +516,57 @@ describe("library content", () => {
     for (const e of [...BRANCHES, ...RACES]) expect(`${e.description} ${[...e.levels].map((l) => l.description).join(" ")}`, e.key).not.toMatch(/разом із|ще \+/);
   });
 });
+
+describe("spell map templates and ranges", () => {
+  const byKey = (key: string) => SPELLS.find((s) => s.key === key)?.definition.targeting;
+
+  it("every template has a size up to 120 ft and zone only on templates", () => {
+    for (const s of SPELLS) {
+      const t = s.definition.targeting;
+
+      if (t.kind === "template") expect(t.size, s.key).toBeLessThanOrEqual(120);
+      else expect("zone" in t, s.key).toBe(false);
+    }
+  });
+
+  it.each([
+    ["fireball", "circle", 10, 120],
+    ["circle-of-winter", "circle", 10, 60],
+    ["wasp-swarm", "circle", 5, 60],
+    ["stone-spikes", "line", 30, undefined],
+    ["entangle", "cube", 15, 60],
+    ["meteor-shower", "circle", 15, 120],
+    ["earthquake", "circle", 20, 60],
+  ] as const)("%s is a %s template of %i ft", (key, shape, size, range) => {
+    expect(byKey(key)).toMatchObject({ kind: "template", shape, size, ...(range ? { range } : {}) });
+  });
+
+  it("fire wall is a 30 ft line with a 3-round hazard and immediate fire damage", () => {
+    const spell = SPELLS.find((s) => s.key === "fire-wall");
+
+    expect(spell?.definition.targeting).toMatchObject({ kind: "template", shape: "line", size: 30, zone: { rounds: 3 } });
+    expect(spell?.definition.effects).toEqual([expect.objectContaining({ kind: "dealDamage", damageType: "fire" })]);
+  });
+
+  it("chain lightning stays a manual pick with range 60", () => {
+    expect(byKey("chain-lightning")).toMatchObject({ kind: "area", maxTargets: 4, range: 60 });
+  });
+
+  it.each([
+    ["eldritch-arrow", 120],
+    ["lightning-bolt", 120],
+    ["divine-retribution", 120],
+    ["weakness", 60],
+    ["blindness", 60],
+    ["thorny-vines", 60],
+    ["haste", 60],
+    ["resurrection", 60],
+  ] as const)("%s has range %i", (key, range) => {
+    expect(byKey(key)).toMatchObject({ range });
+  });
+
+  it.each(["word-of-light", "curse-of-the-netherworld", "nature-storm", "armageddon", "healing-wave", "forest-rebirth"])("%s stays global", (key) => {
+    expect(byKey(key)).not.toHaveProperty("range");
+    expect(["allEnemies", "everyone", "allAllies", "allAlliesDead"]).toContain(byKey(key)?.kind);
+  });
+});

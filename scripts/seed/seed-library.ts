@@ -32,6 +32,7 @@ import { branchSkills, buildLibrary, summonUnitKeys } from "@/data/library/build
 import type { LibraryBranch, LibraryRace, LibrarySkill } from "@/data/library/types";
 import { iconPublicUrl } from "@/data/skill-icons";
 import { prisma } from "@/lib/db";
+import { jsonEqual } from "@/lib/utils/battle/store/stable-json";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 const RACE_BRANCH = { name: "Раса", color: "#c9a227" };
@@ -138,7 +139,7 @@ async function main() {
     }));
   }
 
-  const spellRows = await prisma.spell.findMany({ where: { campaignId }, select: { id: true, name: true, spellEffects: true } });
+  const spellRows = await prisma.spell.findMany({ where: { campaignId }, select: { id: true, name: true, spellEffects: true, targeting: true, resolution: true, dice: true, description: true } });
 
   const spells = new Map<string, string>();
 
@@ -169,6 +170,16 @@ async function main() {
     const existing = findByNames(spellRows, spell.name, spell.formerNames);
 
     const deferEffects = hasLibrarySummon(d.effects);
+
+    if (dryRun && existing) {
+      const changed = (["targeting", "resolution", "spellEffects", "dice", "description"] as const).filter((field) => {
+        if (field === "spellEffects" && (deferEffects || hasSummon(existing.spellEffects))) return false;
+
+        return !jsonEqual(existing[field], data[field]);
+      });
+
+      if (changed.length > 0) console.info(`  ${spell.name}: ${changed.join(", ")}`);
+    }
 
     const keepEffects = deferEffects || hasSummon(existing?.spellEffects);
 

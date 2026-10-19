@@ -278,12 +278,11 @@ describe("Магічний імунітет (2 раунди: шкода закл
     expect(after.battleData.activeEffects.filter((e) => e.type === "condition")).toHaveLength(0);
   });
 
-  it("Магічний імунітет: DoT-заклинання (Чума, Колючі лози, Вогняна стіна) не шкодять", () => {
+  it("Магічний імунітет: DoT-заклинання (Чума, Колючі лози) не шкодять", () => {
     let order = ps;
 
     order = cast("plague", get(order, "x"), ["a"], order, { dice: [6] }).allParticipantsUpdated;
     order = cast("thorny-vines", get(order, "x"), ["a"], order, { dice: [6] }).allParticipantsUpdated;
-    order = cast("fire-wall", get(order, "x"), [], order, { dice: [6] }).allParticipantsUpdated;
 
     const { seen } = turnsOf(order, "a", 1);
 

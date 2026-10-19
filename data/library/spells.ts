@@ -21,15 +21,25 @@ const AUTO: Resolution = { kind: "auto" };
 
 const save = (ability: Extract<Resolution, { kind: "save" }>["ability"], onSuccess: "half" | "none"): Resolution => ({ kind: "save", ability, onSuccess });
 
-const ALLY: Targeting = { kind: "ally" };
+const ALLY: Targeting = { kind: "ally", range: 60 };
 
-const ENEMY: Targeting = { kind: "enemy" };
+const ENEMY_FAR: Targeting = { kind: "enemy", range: 120 };
+
+const ENEMY_NEAR: Targeting = { kind: "enemy", range: 60 };
 
 const SELF: Targeting = { kind: "self" };
 
 const ALL_ENEMIES: Targeting = { kind: "allEnemies" };
 
-const enemies = (maxTargets: number): Targeting => ({ kind: "area", side: "enemy", maxTargets });
+const enemies = (maxTargets: number, range?: number): Targeting => ({ kind: "area", side: "enemy", maxTargets, range });
+
+const template = (
+  shape: "circle" | "cube" | "cone" | "line",
+  size: number,
+  side: "ally" | "enemy",
+  maxTargets: number,
+  extra: { range?: number; zone?: { rounds: number; label?: string } } = {},
+): Targeting => ({ kind: "template", shape, size, side, maxTargets, ...extra });
 
 const rounds = (n: number) => ({ rounds: n });
 
@@ -198,7 +208,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(6, "шкоди світлом")}. Що більше поранений заклинатель, то сильніша відплата: шкода зростає на 1 % за кожен 1 % втраченого HP заклинателя (на половині HP — ×1,5).`,
     appearanceDescription:
       "Кров заклинателя, що стікає на землю, спалахує білим полум'ям. Із неба б'є стовп сліпучого світла, і що глибші рани праведника, то нещадніше палає кара, що падає на кривдника.",
-    definition: def(6, ENEMY, [damage("radiant", { amount: { spellRoll: { formula: "100 + lost_hp_percent" } } })]),
+    definition: def(6, ENEMY_FAR, [damage("radiant", { amount: { spellRoll: { formula: "100 + lost_hp_percent" } } })]),
     raceModifiers: [],
   },
   {
@@ -227,7 +237,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Повертає до бою полеглого союзника з 50 % максимального HP.",
     appearanceDescription:
       "Над тілом полеглого опускається колона м'якого світла, і в ній кружляють пелюстки білих лілій. Груди здіймаються в першому подиху, а очі відкриваються, сповнені тихого подиву.",
-    definition: def(0, { kind: "allyDead" }, [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true }]),
+    definition: def(0, { kind: "allyDead", range: 60 }, [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true }]),
     raceModifiers: [],
   },
   {
@@ -253,7 +263,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог робить рятівний кидок Мудрості; при провалі завдає на 25 % менше шкоди протягом 3 раундів. Успіх — без ефекту.",
     appearanceDescription:
       "Сірий туман заповзає ворогові в рукави, і зброя раптом важчає в його руках. Пальці слабнуть, плечі опускаються, а удари стають кволими, як у хворого.",
-    definition: def(0, ENEMY, [damagePercent(-25, 3)], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [damagePercent(-25, 3)], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {
@@ -265,7 +275,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог робить рятівний кидок Мудрості; при провалі отримує −3 до ініціативи на 3 раунди. Успіх — без ефекту.",
     appearanceDescription:
       "Довкола ворога густішає повітря, наче він опинився під водою. Кожен рух розтягується, звуки глухнуть, а кліпання очей триває ціле століття.",
-    definition: def(0, ENEMY, [stat("initiative", -3, 3)], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [stat("initiative", -3, 3)], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {
@@ -277,7 +287,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог отримує −2 до AC на 3 раунди. Повторні накладання складаються, до трьох разів (−6 AC); кожне накладання триває 3 раунди окремо, а четверте оновлює тривалість найстарішого.",
     appearanceDescription:
       "По обладунках ворога розповзається чорна іржа, а шкіра під ними сіріє й тріскається, мов старий пергамент. Сталь, що вчора тримала удар сокири, тепер м'якне під пальцями.",
-    definition: def(0, ENEMY, [stat("armor", -2, 3)], { stackable: true, maxStacks: 3 }),
+    definition: def(0, ENEMY_NEAR, [stat("armor", -2, 3)], { stackable: true, maxStacks: 3 }),
     raceModifiers: [],
   },
   {
@@ -289,7 +299,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Отруює ворога: кидок — ${power(1, "отрутою")} — визначає шкоду, яку ворог отримує на початку кожного свого ходу протягом 2 раундів.`,
     appearanceDescription:
       "З долоні заклинателя зривається хмарка зеленкуватих мух і впивається ворогові в обличчя. Шкіра вкривається чорними пухирями, а від подиху тхне гниллю склепу.",
-    definition: def(1, ENEMY, [{ kind: "dot", damagePerRound: { spellRoll: 100 }, damageType: "poison", duration: rounds(2) }]),
+    definition: def(1, ENEMY_NEAR, [{ kind: "dot", damagePerRound: { spellRoll: 100 }, damageType: "poison", duration: rounds(2) }]),
     raceModifiers: [],
   },
   {
@@ -301,7 +311,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог робить рятівний кидок Мудрості; при провалі 2 раунди на початку кожного свого ходу з шансом 50 % втрачає дію. Успіх — без ефекту.",
     appearanceDescription:
       "У голові ворога зринають сотні шепотів, і кожен кличе в інший бік. Він застигає з піднятою зброєю, озирається, не впізнаючи ні друзів, ні ворогів.",
-    definition: def(0, ENEMY, [condition("skip_action", 2, { percent: 50 })], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [condition("skip_action", 2, { percent: 50 })], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {
@@ -313,7 +323,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог отримує −3 до кидків атаки на 3 раунди.",
     appearanceDescription:
       "Невидимі гаки впиваються ворогові в жили, і кожен замах відгукується пекучим болем. Він кривиться, руки тремтять, а клинок раз у раз проходить повз ціль.",
-    definition: def(0, ENEMY, [stat("attackBonus", -3, 3)]),
+    definition: def(0, ENEMY_NEAR, [stat("attackBonus", -3, 3)]),
     raceModifiers: [],
   },
   {
@@ -325,7 +335,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Мораль ворога знижується на 2 на 3 раунди.",
     appearanceDescription:
       "Над ворогом збирається крихітна дощова хмара, і з неї сіється холодна мряка. В очах гасне вогонь, а в серці оселяється туга за домом, якого він, можливо, вже ніколи не побачить.",
-    definition: def(0, ENEMY, [stat("morale", -2, 3)]),
+    definition: def(0, ENEMY_NEAR, [stat("morale", -2, 3)]),
     raceModifiers: [],
   },
   {
@@ -340,7 +350,7 @@ export const SPELLS: LibrarySpell[] = [
       "Чорна пелена затягує ворогові очі, наче хтось накинув на них оксамитову хустку. Він махає руками в порожнечі, а довкола лунає лише тихий сміх темряви.",
     definition: def(
       0,
-      ENEMY,
+      ENEMY_NEAR,
       [
         condition("disable_melee_attacks", 2, { breakOnDamage: true }),
         condition("disable_ranged_attacks", 2, { breakOnDamage: true }),
@@ -359,7 +369,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд впадає в шал: на свій хід автоматично атакує випадкову іншу істоту (зокрема своїх) з +50 % шкоди. ${NOT_HEROES}`,
     appearanceDescription:
       "Очі ворога наливаються кров'ю, а з горла виривається звіриний рев. Він більше не бачить облич — лише цілі, і кидається на першого, хто трапиться, хай то навіть його брат по зброї.",
-    definition: def(0, ENEMY, [{ kind: "berserk", damageBonusPercent: 50, duration: rounds(1) }], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [{ kind: "berserk", damageBonusPercent: 50, duration: rounds(1) }], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {
@@ -371,7 +381,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд переходить на бік заклинателя і діє під контролем його гравця, потім повертається. ${NOT_HEROES}`,
     appearanceDescription:
       "З пальців заклинателя тягнуться тонкі срібні нитки й чіпляються за зап'ястя та шию ворога. Той смикається, як лялька на ярмарку, і слухняно розвертає зброю проти своїх.",
-    definition: def(0, ENEMY, [{ kind: "charm", duration: rounds(1) }], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [{ kind: "charm", duration: rounds(1) }], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {
@@ -409,7 +419,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(3, "шкоди вогнем")}.`,
     appearanceDescription:
       "З долоні заклинателя зривається стріла фіолетового полум'я, що лишає по собі запах сірки. Вона ніколи не промахується — лише впивається в ціль і вибухає снопом іскор.",
-    definition: def(3, ENEMY, [damage("fire")]),
+    definition: def(3, ENEMY_FAR, [damage("fire")]),
     raceModifiers: [],
   },
   {
@@ -421,7 +431,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `До 2 ворогів отримують по ${power(2, "дробильної шкоди")}.`,
     appearanceDescription:
       "Земля під ворогами здригається, і з неї вистрибують гострі кам'яні шпилі, мов зуби величезного звіра. Уламки скель розлітаються, лишаючи по собі хмари пилу.",
-    definition: def(2, enemies(2), [damage("bludgeoning")]),
+    definition: def(2, template("line", 30, "enemy", 2), [damage("bludgeoning")]),
     raceModifiers: [],
   },
   {
@@ -433,7 +443,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(3, "шкоди холодом")}; ворог 1 раунд атакує з невигідністю.`,
     appearanceDescription:
       "Повітря тріщить від морозу, і в руці заклинателя виростає синій крижаний спис. Він летить зі свистом і розбивається об ціль, вкриваючи її інеєм і скуваючи суглоби.",
-    definition: def(3, ENEMY, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
+    definition: def(3, ENEMY_FAR, [damage("cold"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }]),
     raceModifiers: [],
   },
   {
@@ -445,7 +455,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(3, "шкоди блискавкою")}; ворог отримує −2 до ініціативи на 2 раунди.`,
     appearanceDescription:
       "Небо розколюється сліпучою гілкою, і грім б'є просто у ворога. Від нього валить дим, волосся стоїть дибки, а м'язи ще довго сіпаються в судомах.",
-    definition: def(3, ENEMY, [damage("lightning"), stat("initiative", -2, 2)]),
+    definition: def(3, ENEMY_FAR, [damage("lightning"), stat("initiative", -2, 2)]),
     raceModifiers: [],
   },
   {
@@ -457,7 +467,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `До 3 ворогів роблять рятівний кидок Спритності; кожен отримує ${power(3, "шкоди вогнем")}, при успіху — половину.`,
     appearanceDescription:
       "Між долонями заклинателя набухає гаряча помаранчева куля, що гуде, мов розпечена кузня. Вона вибухає посеред ворогів, і полум'я розкочується колом, пожираючи траву й плащі.",
-    definition: def(3, enemies(3), [damage("fire")], { resolution: save("dexterity", "half") }),
+    definition: def(3, template("circle", 10, "enemy", 3, { range: 120 }), [damage("fire")], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
@@ -466,10 +476,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Вогняна стіна",
     school: CHAOS,
     level: 3,
-    description: `Усі вороги горять: кидок — ${power(1, "шкоди вогнем")} — визначає шкоду, яку кожен отримує на початку свого ходу протягом 3 раундів.`,
+    description: `Лінія вогню завдовжки 30 фт: усі в ній отримують ${power(1, "шкоди вогнем")}. Вогонь горить 3 раунди — той, хто входить у лінію або починає в ній свій хід, знову отримує шкоду цього кидка.`,
     appearanceDescription:
-      "Перед ворожим строєм із землі здіймається ревуча стіна вогню, вища за людський зріст. Жар обпікає обличчя, дим виїдає очі, і кожен, хто стоїть поряд, починає тліти.",
-    definition: def(1, ALL_ENEMIES, [{ kind: "dot", damagePerRound: { spellRoll: 100 }, damageType: "fire", duration: rounds(3) }]),
+      "Перед ворожим строєм із землі здіймається ревуча стіна вогню, вища за людський зріст. Жар обпікає обличчя, дим виїдає очі, а смуга полум'я ще кілька раундів лишається на землі й пече всіх, хто в неї ступить.",
+    definition: def(1, template("line", 30, "enemy", 6, { zone: { rounds: 3 } }), [damage("fire")]),
     raceModifiers: [],
   },
   {
@@ -481,7 +491,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `До 3 ворогів роблять рятівний кидок Статури; кожен отримує ${power(3, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи.`,
     appearanceDescription:
       "Від заклинателя розходиться крижане кільце, і трава на його шляху вкривається памороззю. Вороги застигають у хрусткому інеї, видихаючи хмарки білої пари.",
-    definition: def(3, enemies(3), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
+    definition: def(3, template("circle", 10, "enemy", 3, { range: 60 }), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
     raceModifiers: [],
   },
   {
@@ -493,7 +503,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %).`,
     appearanceDescription:
       "Сліпучий розряд вистрибує з пальців заклинателя і, вдаривши першого ворога, перескакує на наступного, і далі, і далі. Повітря тріщить і пахне грозою, а кожен стрибок трохи тьмяніший за попередній.",
-    definition: def(2, enemies(4), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
+    definition: def(2, enemies(4, 60), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
     raceModifiers: [],
   },
   {
@@ -505,7 +515,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Усі вороги роблять рятівний кидок Спритності; кожен отримує ${power(2, "дробильної шкоди")}, при успіху — половину.`,
     appearanceDescription:
       "Небо темніє, і з нього падають розпечені брили, лишаючи по собі вогняні хвости. Земля здригається від ударів, вирви димлять, а уламки каміння свистять над головами.",
-    definition: def(2, ALL_ENEMIES, [damage("bludgeoning")], { resolution: save("dexterity", "half") }),
+    definition: def(2, template("circle", 15, "enemy", 6, { range: 120 }), [damage("bludgeoning")], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
@@ -517,7 +527,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Ворог робить рятівний кидок Статури; отримує ${power(6, "шкоди холодом")} і 1 раунд не може діяти. При успіху — половина шкоди без заморозки.`,
     appearanceDescription:
       "Ворога за мить охоплює товща блакитного льоду, і він застигає, мов статуя в зимовому саду. Крізь кригу видно його розширені очі, а тиша навколо стає дзвінкою, як у морозну ніч.",
-    definition: def(6, ENEMY, [damage("cold"), condition("skip_action", 1)], { resolution: save("constitution", "half") }),
+    definition: def(6, ENEMY_FAR, [damage("cold"), condition("skip_action", 1)], { resolution: save("constitution", "half") }),
     raceModifiers: [],
   },
   {
@@ -541,7 +551,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(8, "силової шкоди")}.`,
     appearanceDescription:
       "Простір довкола ворога стискається в точку, і світло гне свої промені, падаючи всередину. Обладунки зминаються, мов пергамент, а потім усе розривається глухим, нищівним вибухом.",
-    definition: def(8, ENEMY, [damage("force")]),
+    definition: def(8, ENEMY_FAR, [damage("force")]),
     raceModifiers: [],
   },
 
@@ -555,7 +565,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "Ворог робить рятівний кидок Сили; при провалі 1 раунд не може рухатися й атакувати (ні в ближньому, ні в дальньому бою) і отримує −2 до ініціативи. Успіх — без ефекту.",
     appearanceDescription:
       "Земля під ногами ворога розверзається, і з неї вириваються вузлуваті корені, обплітаючи щиколотки й коліна. Від них пахне вологою глиною і старим лісом.",
-    definition: def(0, ENEMY, [condition("disable_melee_attacks", 1), condition("disable_ranged_attacks", 1), stat("initiative", -2, 1)], { resolution: save("strength", "none") }),
+    definition: def(0, ENEMY_NEAR, [condition("disable_melee_attacks", 1), condition("disable_ranged_attacks", 1), stat("initiative", -2, 1)], { resolution: save("strength", "none") }),
     raceModifiers: [],
   },
   {
@@ -579,7 +589,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Отруйні лози обвивають ворога: кидок — ${power(1, "отрутою")} — визначає шкоду, яку ворог отримує на початку кожного свого ходу протягом 3 раундів.`,
     appearanceDescription:
       "Із землі здіймаються темно-зелені пагони, вкриті шипами, з яких сочиться жовтий сік. Вони обплітають ворога і щільнішають з кожним його рухом.",
-    definition: def(1, ENEMY, [{ kind: "dot", damagePerRound: { spellRoll: 100 }, damageType: "poison", duration: rounds(3) }]),
+    definition: def(1, ENEMY_NEAR, [{ kind: "dot", damagePerRound: { spellRoll: 100 }, damageType: "poison", duration: rounds(3) }]),
     raceModifiers: [],
   },
   {
@@ -591,7 +601,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Завдає ворогу ${power(3, "променевої шкоди")}, а місячне світло підсвічує його: наступні 2 його ходи всі атаки по ньому мають перевагу.`,
     appearanceDescription:
       "Навіть серед білого дня з неба падає срібний місячний стовп і пришпилює ворога до землі. Холодне сяйво не гасне й після удару: ворог світиться, мов мішень, і жодна тінь не може його сховати.",
-    definition: def(3, ENEMY, [damage("radiant"), { kind: "flag", flag: "advantageForAttackers", duration: rounds(2) }]),
+    definition: def(3, ENEMY_FAR, [damage("radiant"), { kind: "flag", flag: "advantageForAttackers", duration: rounds(2) }]),
     raceModifiers: [],
   },
   {
@@ -603,7 +613,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `До 3 ворогів отримують по ${power(2, "колючої шкоди")} і −2 до ініціативи на 2 раунди.`,
     appearanceDescription:
       "З рукава друїда вилітає гудуча хмара ос завбільшки з палець. Вони облітають ворогів, жалять в обличчя й шию, і ті відмахуються, забувши про бій.",
-    definition: def(2, enemies(3), [damage("piercing"), stat("initiative", -2, 2)]),
+    definition: def(2, template("circle", 5, "enemy", 3, { range: 60 }), [damage("piercing"), stat("initiative", -2, 2)]),
     raceModifiers: [],
   },
   {
@@ -627,7 +637,7 @@ export const SPELLS: LibrarySpell[] = [
     description: "До 3 ворогів роблять рятівний кидок Сили; хто провалить — 1 раунд не може атакувати в ближньому бою. Успіх — без ефекту.",
     appearanceDescription:
       "Трава довкола ворогів раптом оживає і стає жорсткою, як дріт. Стебла сплітаються в густу сітку, і кожен крок вперед обертається падінням.",
-    definition: def(0, enemies(3), [condition("disable_melee_attacks", 1)], { resolution: save("strength", "none") }),
+    definition: def(0, template("cube", 15, "enemy", 3, { range: 60 }), [condition("disable_melee_attacks", 1)], { resolution: save("strength", "none") }),
     raceModifiers: [],
   },
   {
@@ -639,7 +649,7 @@ export const SPELLS: LibrarySpell[] = [
     description: `Усі вороги роблять рятівний кидок Спритності; кожен отримує ${power(2, "дробильної шкоди")} і 1 раунд атакує з невигідністю. При успіху — половина шкоди без невигідності.`,
     appearanceDescription:
       "Друїд б'є посохом об землю, і поле бою здригається від глибокого гулу. Ґрунт тріскається, вороги падають навколішки, а з розломів здіймається пил і запах сирої глини.",
-    definition: def(2, ALL_ENEMIES, [damage("bludgeoning"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }], { resolution: save("dexterity", "half") }),
+    definition: def(2, template("circle", 20, "enemy", 6, { range: 60 }), [damage("bludgeoning"), { kind: "flag", flag: "disadvantage", duration: rounds(1) }], { resolution: save("dexterity", "half") }),
     raceModifiers: [],
   },
   {
