@@ -177,7 +177,7 @@ describe("приземлення після піке", () => {
   const flying = (since: number) => {
     const base = createMockParticipant();
 
-    return createMockParticipant({ battleData: { ...base.battleData, airborne: { landAt: { x: 4, y: 4 }, since } } });
+    return createMockParticipant({ battleData: { ...base.battleData, airborne: { landAt: { x: 4, y: 4 }, since, percent: 200, name: "Пікірування" } } });
   };
 
   it("у раунд піке лишається в повітрі", () => {

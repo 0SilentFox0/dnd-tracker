@@ -153,7 +153,7 @@ describe("advanceTurn", () => {
     it("у повітрі додаткового ходу немає, приземлення лише в черговому ході наступного раунду", () => {
       const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
 
-      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1 } } };
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1, percent: 200, name: "Пікірування" } } };
 
       const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
 
@@ -167,7 +167,7 @@ describe("advanceTurn", () => {
     it("у раунд піке мораль не дає ходу і грифон лишається в повітрі", () => {
       const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
 
-      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 2 } } };
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 2, percent: 200, name: "Пікірування" } } };
 
       const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, round: 2, turnIndex: 0 }, map });
 

@@ -26,10 +26,23 @@ describe("Пікірування", () => {
     const g = byId(ps, "g");
 
     expect(g.battleData.position).toBeUndefined();
-    expect(g.battleData.airborne).toEqual({ landAt: { x: 10, y: 2 }, since: 1 });
+    expect(g.battleData.airborne).toEqual({ landAt: { x: 10, y: 2 }, since: 1, percent: 200, name: "Пікірування" });
     expect(isTargetable(g)).toBe(false);
     expect(resolveTargetIds("allEnemies", "e", { type: "turnStart", actorId: "e" }, ps)).not.toContain("g");
     expect(() => assertAbilityTargets({ ...ABILITIES.dive, effects: [{ kind: "dealDamage", amount: 1, target: "eventTarget" }] }, ps, ["g"], { owner: byId(ps, "e") })).toThrow();
+  });
+
+  it("посадка бере назву й відсоток зі збереженого стану, а не з умінь", () => {
+    const enemy = unit("e", { at: { x: 10, y: 2 } });
+
+    const { participants: up } = perform([griffin({ x: 2, y: 2 }), enemy], "dive", { map: MAP, targetCell: { x: 10, y: 2 } });
+
+    const stripped = up.map((p) => (p.basicInfo.id === "g" ? { ...p, battleData: { ...p.battleData, resolvedAbilities: [] } } : p));
+
+    const r = land(stripped);
+
+    expect(hp(r.participants, "e")).toBeLessThan(200);
+    expect(r.abilityMessages.join(" ")).toContain("Пікірування");
   });
 
   it("на початку наступного ходу падає на ціль: ×2 середньої шкоди з урахуванням опору", () => {
@@ -81,7 +94,7 @@ describe("Пікірування", () => {
   it("без карти бʼє обрану ціль", () => {
     const { participants: up } = perform([griffin(), unit("e")], "dive", { targetIds: ["e"] });
 
-    expect(byId(up, "g").battleData.airborne).toEqual({ targetId: "e", since: 1 });
+    expect(byId(up, "g").battleData.airborne).toEqual({ targetId: "e", since: 1, percent: 200, name: "Пікірування" });
 
     const r = land(up, undefined);
 

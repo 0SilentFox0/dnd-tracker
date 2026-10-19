@@ -1,12 +1,10 @@
 import { attackShare, isEnemyOf, maneuverResult,primaryDamageType, strikeAll } from "./strike";
 import type { ManeuverInput, ManeuverResult } from "./types";
 
-import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { cellKey, nearestStandable, participantsInCells } from "@/lib/utils/battle/grid";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
-
-const DEFAULT_PERCENT = 200;
+import type { AirborneState, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function startDive(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
   const actor = findParticipant(ps, input.actorId);
@@ -15,21 +13,13 @@ export function startDive(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const onMap = !!input.map && !!actor.battleData.position && !!input.targetCell;
 
-  const airborne = onMap ? { landAt: input.targetCell, since: input.round } : { ...(input.targetIds[0] && { targetId: input.targetIds[0] }), since: input.round };
+  const target = onMap ? { landAt: input.targetCell } : { ...(input.targetIds[0] && { targetId: input.targetIds[0] }) };
+
+  const airborne: AirborneState = { ...target, since: input.round, percent: input.percentOfAttack, name: input.name };
 
   const flying: BattleParticipant = { ...actor, battleData: { ...actor.battleData, position: undefined, airborne }, actionFlags: { ...actor.actionFlags, hasUsedAction: true } };
 
   return maneuverResult(replaceParticipant(ps, flying), [`🦅 ${actor.basicInfo.name} злітає в небо (${input.name})`]);
-}
-
-function diveAbility(p: BattleParticipant): { name: string; percent: number } {
-  for (const a of resolvedAbilitiesOf(p)) {
-    const e = a.effects.find((x) => x.kind === "maneuver" && x.maneuver === "dive");
-
-    if (e?.kind === "maneuver") return { name: a.name, percent: e.percentOfAttack };
-  }
-
-  return { name: "Пікірування", percent: DEFAULT_PERCENT };
 }
 
 function victimOf(ps: BattleParticipant[], actor: BattleParticipant, map: BattleMapConfig | null | undefined): BattleParticipant | undefined {
@@ -52,9 +42,7 @@ export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: 
 
   if (!actor || !airborne) return maneuverResult(ps);
 
-  const { name, percent } = diveAbility(actor);
-
-  const battleData = { ...actor.battleData, airborne: undefined };
+    const battleData = { ...actor.battleData, airborne: undefined };
 
   const grounded: BattleParticipant = { ...actor, battleData, actionFlags: { ...actor.actionFlags, hasUsedAction: true } };
 
@@ -66,7 +54,7 @@ export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: 
 
   const victim = isActive(actor) ? victimOf(next, actor, ctx.map) : undefined;
 
-  if (!victim) return maneuverResult(next, [`🦅 ${name}: удар у порожнечу`]);
+  if (!victim) return maneuverResult(next, [`🦅 ${airborne.name}: удар у порожнечу`]);
 
-  return strikeAll(maneuverResult(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name });
+  return strikeAll(maneuverResult(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, airborne.percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name: airborne.name });
 }

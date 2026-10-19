@@ -44,7 +44,7 @@ describe("piercingTargets", () => {
   it("пропускає ворога в повітрі", () => {
     const flying = at("fly", { x: 5, y: 5 });
 
-    const ps = [attacker, at("t", { x: 3, y: 5 }), { ...flying, battleData: { ...flying.battleData, airborne: { since: 1 } } }];
+    const ps = [attacker, at("t", { x: 3, y: 5 }), { ...flying, battleData: { ...flying.battleData, airborne: { since: 1, percent: 200, name: "Пікірування" } } }];
 
     expect(piercingTargets(MAP, ps, attacker, "t")).toEqual(["t"]);
   });

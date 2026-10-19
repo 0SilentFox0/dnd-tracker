@@ -34,7 +34,7 @@ describe("applyPendingMoraleCheck", () => {
   });
 
   it("у польоті додатковий хід за мораль не видається", () => {
-    const flying = { ...p, battleData: { ...p.battleData, airborne: { since: 1 } } };
+    const flying = { ...p, battleData: { ...p.battleData, airborne: { since: 1, percent: 200, name: "Пікірування" } } };
 
     const extra = { ...payload(false), moraleResult: { ...payload(false).moraleResult, hasExtraTurn: true } };
 

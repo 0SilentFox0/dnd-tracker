@@ -262,6 +262,14 @@ export interface BattleParticipantSpellcasting {
 /**
  * Бойові дані учасника
  */
+export interface AirborneState {
+  landAt?: GridPoint;
+  targetId?: string;
+  since: number;
+  percent: number;
+  name: string;
+}
+
 export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
@@ -294,7 +302,7 @@ export interface BattleParticipantBattleData {
   /** Вже поверталася на стартову клітинку цього ходу */
   returnedThisTurn?: boolean;
   /** Злетів «Пікіруванням»: поза картою й поза досяжністю до початку свого наступного ходу */
-  airborne?: { landAt?: GridPoint; targetId?: string; since: number };
+  airborne?: AirborneState;
   /** Відсічей, уже даних з початку власного ходу; немає = за hasUsedReaction */
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
