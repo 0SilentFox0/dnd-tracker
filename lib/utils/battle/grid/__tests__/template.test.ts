@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aimInRange, areaCentre, feetToCells, participantsInCells, templateCells, templateCentre } from "../template";
+import { aimInRange, areaCentre, areaRadiusCells, feetToCells, participantsInCells, templateCells, templateCentre } from "../template";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -30,19 +30,37 @@ describe("feetToCells", () => {
   });
 });
 
+describe("areaRadiusCells", () => {
+  it("до 15 фт — 1 клітинка (3×3), 20 фт — 2 (5×5); дальність лишається 5 фт на клітинку", () => {
+    expect([5, 10, 15, 20, 30].map(areaRadiusCells)).toEqual([1, 1, 1, 2, 3]);
+    expect(feetToCells(20)).toBe(4);
+  });
+});
+
 describe("templateCells", () => {
-  it("коло 10 фт: 21 клітинка, без кутів 5×5", () => {
-    const cells = templateCells(map, { shape: "circle", size: 10 }, [{ x: 0, y: 0 }], { x: 6, y: 6 });
+  it("Вогняна куля (коло 10 фт) у (5,5): рівно 3×3 — x і y від 4 до 6", () => {
+    const cells = templateCells(map, { shape: "circle", size: 10 }, [{ x: 0, y: 0 }], { x: 5, y: 5 });
 
     const expected: string[] = [];
 
-    for (let dy = -2; dy <= 2; dy++) {
-      for (let dx = -2; dx <= 2; dx++) if (dx * dx + dy * dy <= 6.25) expected.push(k(6 + dx, 6 + dy));
+    for (let y = 4; y <= 6; y++) {
+      for (let x = 4; x <= 6; x++) expected.push(k(x, y));
     }
 
-    expect(cells).toHaveLength(21);
     expect([...cells].sort()).toEqual(expected.sort());
-    expect(cells).not.toContain(k(4, 4));
+  });
+
+  it("коло 5 і 15 фт — 3×3, Землетрус (20 фт) — 5×5", () => {
+    const aim = { x: 6, y: 6 };
+
+    expect(templateCells(map, { shape: "circle", size: 5 }, [{ x: 0, y: 0 }], aim)).toHaveLength(9);
+    expect(templateCells(map, { shape: "circle", size: 15 }, [{ x: 0, y: 0 }], aim)).toHaveLength(9);
+
+    const quake = templateCells(map, { shape: "circle", size: 20 }, [{ x: 0, y: 0 }], aim);
+
+    expect(quake).toHaveLength(25);
+    expect(quake).toEqual(expect.arrayContaining([k(4, 4), k(8, 8), k(4, 8), k(8, 4)]));
+    expect(quake).not.toContain(k(9, 6));
   });
 
   it("куб 10 фт: 4 клітинки від aim; 15 фт: 9 з центром aim", () => {
@@ -93,10 +111,12 @@ describe("templateCells", () => {
 
     const cells = templateCells(m, { shape: "circle", size: 10 }, [{ x: 5, y: 5 }], { x: 0, y: 0 });
 
-    expect(cells).not.toContain(k(-1, 0));
-    expect(cells).not.toContain(k(1, 0));
-    expect(cells).toContain(k(0, 0));
-    expect(cells).toContain(k(2, 0));
+    expect([...cells].sort()).toEqual([k(0, 0), k(0, 1), k(1, 1)].sort());
+
+    const quake = templateCells(map, { shape: "circle", size: 20 }, [{ x: 5, y: 5 }], { x: 11, y: 11 });
+
+    expect(quake).toHaveLength(9);
+    expect(quake).not.toContain(k(12, 11));
   });
 });
 

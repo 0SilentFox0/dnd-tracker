@@ -13,20 +13,23 @@ export function feetToCells(feet: number): number {
   return Math.max(1, Math.floor(feet / CELL_FEET));
 }
 
+/** Коло на карті — квадрат 3×3 до 15 фт і 5×5 від 20 фт, щоб площа читалася на сітці. */
+export function areaRadiusCells(feet: number): number {
+  return Math.max(1, Math.floor(feet / 10));
+}
+
 export function apexOf(origin: GridPoint[], aim: GridPoint): GridPoint {
   return origin.reduce((best, c) => (cellDistance(c, aim) < cellDistance(best, aim) ? c : best), origin[0]);
 }
 
-function circleCells(map: BattleMapConfig, r: number, aim: GridPoint): GridPoint[] {
+function circleCells(r: number, aim: GridPoint): GridPoint[] {
   const out: GridPoint[] = [];
 
   for (let dy = -r; dy <= r; dy++) {
-    for (let dx = -r; dx <= r; dx++) {
-      if (dx * dx + dy * dy <= (r + 0.5) ** 2) out.push({ x: aim.x + dx, y: aim.y + dy });
-    }
+    for (let dx = -r; dx <= r; dx++) out.push({ x: aim.x + dx, y: aim.y + dy });
   }
 
-  return out.filter((c) => isPlayable(map, c));
+  return out;
 }
 
 function cubeCells(r: number, aim: GridPoint): GridPoint[] {
@@ -94,7 +97,7 @@ export function templateCells(map: BattleMapConfig, template: SpellTemplate, ori
 
   let raw: GridPoint[];
 
-  if (template.shape === "circle") raw = circleCells(map, r, aim);
+  if (template.shape === "circle") raw = circleCells(areaRadiusCells(template.size), aim);
   else if (template.shape === "cube") raw = cubeCells(r, aim);
   else if (origin.length === 0) raw = [];
   else {

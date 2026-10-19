@@ -43,9 +43,11 @@ describe("resolveSpellTargets на карті", () => {
   });
 
   it("коло біля заклинателя зачіпає й заклинателя", () => {
-    const r = resolve(fireball, [], { map, targetCell: { x: 3, y: 2 } });
+    expect(resolve(fireball, [], { map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c"] });
 
-    expect(r.ok && r.targetIds).toEqual(["c", "a"]);
+    const quake: SpellTargeting = { ...fireball, size: 20 };
+
+    expect(resolve(quake, [], { map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c", "a"] });
   });
 
   it("лінія: falloff іде за відстанню від вершини", () => {
@@ -134,11 +136,13 @@ describe("заклинання, розширене вмінням, на карт
     const r = resolve(bolt, [], { map, targetCell: { x: 7, y: 3 } }, scene(c), c);
 
     expect(r).toMatchObject({ ok: true, targetIds: ["n1", "n2", "n3"] });
-    expect(r.ok && r.cells).toContain("7:7");
+    expect(r.ok && r.cells).toHaveLength(25);
+    expect(r.ok && r.cells).toContain("9:5");
+    expect(r.ok && r.cells).not.toContain("7:6");
   });
 
   it("союзне заклинання зачіпає союзників разом із заклинателем, не ворогів", () => {
-    const c = widened("area");
+    const c = widened("all");
 
     expect(resolve({ kind: "ally" }, [], { map, targetCell: { x: 4, y: 2 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["c", "a"] });
   });
