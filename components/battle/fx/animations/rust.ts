@@ -4,7 +4,7 @@ import { clamp01, easeOutCubic } from "../runtime/easing";
 import { arcControl, bezier, chance, type Debris, type FxPoint, pick, rand, stepBodies } from "../runtime/geometry";
 import { perTarget } from "../runtime/recipes";
 import { drawRustPatch, polyline, type RustPatch,rustPatch } from "../runtime/shapes";
-import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
+import { animateEl, show, type Stage, timeline, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -91,85 +91,83 @@ export const rust: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const halo = glow("#7a3410");
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS - HIT_MS,
+      (g, t) => {
+        const fade = 1 - clamp01((t - FADE_MS + HIT_MS) / 450);
 
-    const hide = show(stage, (g) => {
-      const fade = 1 - clamp01((t - FADE_MS + HIT_MS) / 450);
+        // Black rust blooms from the splash and spreads over armour and skin.
+        for (const b of blots) {
+          const grow = easeOutCubic(clamp01((t - b.born) / 600));
 
-      // Black rust blooms from the splash and spreads over armour and skin.
-      for (const b of blots) {
-        const grow = easeOutCubic(clamp01((t - b.born) / 600));
+          if (grow <= 0) continue;
 
-        if (grow <= 0) continue;
-
-        sprite(g, halo, b.x, b.y, (b.r * 2.8 * grow) / 64, (b.r * 2.2 * grow) / 64, 0.7 * fade, false);
-        g.save();
-        g.translate(b.x, b.y);
-        g.scale(grow, grow * 0.8);
-        g.globalAlpha = fade;
-        g.globalCompositeOperation = "source-over";
-        drawRustPatch(g, b.patch);
-        g.restore();
-      }
-
-      // Then the skin cracks like old parchment.
-      const split = clamp01((t - 250) / 700);
-
-      if (split > 0) {
-        g.globalCompositeOperation = "source-over";
-        g.lineCap = "round";
-        g.lineJoin = "round";
-
-        for (const c of cracks) {
+          sprite(g, halo, b.x, b.y, (b.r * 2.8 * grow) / 64, (b.r * 2.2 * grow) / 64, 0.7 * fade, false);
+          g.save();
+          g.translate(b.x, b.y);
+          g.scale(grow, grow * 0.8);
           g.globalAlpha = fade;
-          g.strokeStyle = "rgba(10,6,4,0.85)";
-          g.lineWidth = 2.6;
-          polyline(g, c, split);
-          g.strokeStyle = "rgba(226,214,196,0.75)";
-          g.lineWidth = 0.9;
-          polyline(g, c, split);
+          g.globalCompositeOperation = "source-over";
+          drawRustPatch(g, b.patch);
+          g.restore();
         }
-      }
 
-      g.globalCompositeOperation = "source-over";
+        // Then the skin cracks like old parchment.
+        const split = clamp01((t - 250) / 700);
 
-      for (const f of flakes) {
-        const k = clamp01((t - f.born) / 900);
+        if (split > 0) {
+          g.globalCompositeOperation = "source-over";
+          g.lineCap = "round";
+          g.lineJoin = "round";
 
-        g.save();
-        g.translate(f.x, f.y);
-        g.rotate(f.rot);
-        g.scale(1, Math.cos(f.rot * 2));
-        g.globalAlpha = 1 - k;
-        g.fillStyle = f.color;
-        g.fillRect(-f.size / 2, -f.size / 3, f.size, f.size * 0.66);
-        g.restore();
-      }
+          for (const c of cracks) {
+            g.globalAlpha = fade;
+            g.strokeStyle = "rgba(10,6,4,0.85)";
+            g.lineWidth = 2.6;
+            polyline(g, c, split);
+            g.strokeStyle = "rgba(226,214,196,0.75)";
+            g.lineWidth = 0.9;
+            polyline(g, c, split);
+          }
+        }
 
-      sinkingBadge(g, target.x, target.y - h - 12, clamp01((t - 700) / 1300), "−2 КБ", BADGE);
-      g.globalAlpha = 1;
-    });
+        g.globalCompositeOperation = "source-over";
 
-    const corrode = el
-      ? animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.3 }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - HIT_MS })
-      : wait(stage, 0);
+        for (const f of flakes) {
+          const k = clamp01((t - f.born) / 900);
 
-    const run = tween(stage, TOTAL_MS - HIT_MS, (k, dt) => {
-      t = k * (TOTAL_MS - HIT_MS);
+          g.save();
+          g.translate(f.x, f.y);
+          g.rotate(f.rot);
+          g.scale(1, Math.cos(f.rot * 2));
+          g.globalAlpha = 1 - k;
+          g.fillStyle = f.color;
+          g.fillRect(-f.size / 2, -f.size / 3, f.size, f.size * 0.66);
+          g.restore();
+        }
 
-      // Rust flakes peel off and flutter down.
-      if (t > 350 && t < FADE_MS - HIT_MS && chance(0.55, dt)) {
-        const b = pick(blots);
+        sinkingBadge(g, target.x, target.y - h - 12, clamp01((t - 700) / 1300), "−2 КБ", BADGE);
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        // Rust flakes peel off and flutter down.
+        if (t > 350 && t < FADE_MS - HIT_MS && chance(0.55, dt)) {
+          const b = pick(blots);
 
-        flakes.push({ x: b.x + rand(-b.r, b.r), y: b.y + rand(-b.r, b.r) * 0.5, vx: rand(-25, 25), vy: rand(-30, 0), rot: rand(0, 6), spin: rand(-6, 6), size: rand(2.5, 4.5), color: pick(FLAKES), born: t });
-      }
+          flakes.push({ x: b.x + rand(-b.r, b.r), y: b.y + rand(-b.r, b.r) * 0.5, vx: rand(-25, 25), vy: rand(-30, 0), rot: rand(0, 6), spin: rand(-6, 6), size: rand(2.5, 4.5), color: pick(FLAKES), born: t });
+        }
 
-      stepBodies(flakes, dt, 160);
+        stepBodies(flakes, dt, 160);
 
-      for (const f of flakes) f.vx *= 1 - 2 * dt;
+        for (const f of flakes) f.vx *= 1 - 2 * dt;
 
-      while (flakes.length && t - flakes[0].born > 900) flakes.shift();
-    }).then(hide);
+        while (flakes.length && t - flakes[0].born > 900) flakes.shift();
+      },
+    );
+
+    const corrode = animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.3 }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - HIT_MS });
+
 
     await Promise.all([run, corrode]);
   });

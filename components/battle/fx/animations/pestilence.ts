@@ -3,7 +3,7 @@ import { clamp01, easeOutCubic } from "../runtime/easing";
 import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { animateEl, show, tween, wait } from "../runtime/stage";
+import { animateEl, timeline } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -90,8 +90,6 @@ export const pestilence: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const sick = glow("#7ac040");
 
-    let t = 0;
-
     const posOf = (f: Fly, time: number): FxPoint => {
       const local = time - f.delay;
 
@@ -116,70 +114,68 @@ export const pestilence: FxAnimation = ({ stage, from, to, targetEls }) =>
       return { x: buzz.x + Math.cos(f.out) * gone, y: buzz.y + Math.sin(f.out) * gone * 0.7 };
     };
 
-    const hide = show(stage, (g) => {
-      const there = clamp01((t - ARRIVE_MS + 200) / 300) * (1 - clamp01((t - SCATTER_MS) / 500));
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const there = clamp01((t - ARRIVE_MS + 200) / 300) * (1 - clamp01((t - SCATTER_MS) / 500));
 
-      // The rot of a crypt hanging round the face.
-      spritePx(g, glow("#1e2c0c"), face.x, face.y, fr * 4.2, fr * 3.2, there * 0.7, false);
-      sprite(g, sick, face.x, face.y, (fr * 3.4) / 64, undefined, there * 0.35);
+        // The rot of a crypt hanging round the face.
+        spritePx(g, glow("#1e2c0c"), face.x, face.y, fr * 4.2, fr * 3.2, there * 0.7, false);
+        sprite(g, sick, face.x, face.y, (fr * 3.4) / 64, undefined, there * 0.35);
 
-      g.globalCompositeOperation = "source-over";
+        g.globalCompositeOperation = "source-over";
 
-      for (const b of blisters) {
-        const k = clamp01((t - b.born) / 220);
+        for (const b of blisters) {
+          const k = clamp01((t - b.born) / 220);
 
-        if (k <= 0) continue;
+          if (k <= 0) continue;
 
-        const r = b.r * (k < 1 ? 1.3 * easeOutCubic(k) : 1) * (1 - clamp01((t - TOTAL_MS + 400) / 400));
+          const r = b.r * (k < 1 ? 1.3 * easeOutCubic(k) : 1) * (1 - clamp01((t - TOTAL_MS + 400) / 400));
+
+          g.globalAlpha = 1;
+          g.fillStyle = "#4a6418";
+          g.beginPath();
+          g.arc(b.x, b.y, r + 1.4, 0, Math.PI * 2);
+          g.fill();
+          g.fillStyle = "#0e0a06";
+          g.beginPath();
+          g.arc(b.x, b.y, r, 0, Math.PI * 2);
+          g.fill();
+          g.fillStyle = "rgba(220,240,180,0.7)";
+          g.fillRect(b.x - r * 0.45, b.y - r * 0.55, 1, 1);
+        }
+
+        g.strokeStyle = "#9acd50";
+        g.lineWidth = 1.6;
+        g.lineCap = "round";
+
+        for (const f of fumes) {
+          const k = clamp01((t - f.born) / 1100);
+
+          if (k > 0 && k < 1) stench(g, f.x, target.y - h * 0.3, k, f.phase);
+        }
 
         g.globalAlpha = 1;
-        g.fillStyle = "#4a6418";
-        g.beginPath();
-        g.arc(b.x, b.y, r + 1.4, 0, Math.PI * 2);
-        g.fill();
-        g.fillStyle = "#0e0a06";
-        g.beginPath();
-        g.arc(b.x, b.y, r, 0, Math.PI * 2);
-        g.fill();
-        g.fillStyle = "rgba(220,240,180,0.7)";
-        g.fillRect(b.x - r * 0.45, b.y - r * 0.55, 1, 1);
-      }
 
-      g.strokeStyle = "#9acd50";
-      g.lineWidth = 1.6;
-      g.lineCap = "round";
+        for (const f of swarm) {
+          if (t < f.delay) continue;
 
-      for (const f of fumes) {
-        const k = clamp01((t - f.born) / 1100);
+          const now = posOf(f, t);
 
-        if (k > 0 && k < 1) stench(g, f.x, target.y - h * 0.3, k, f.phase);
-      }
+          const prev = posOf(f, t - 16);
 
-      g.globalAlpha = 1;
+          sprite(g, sick, now.x, now.y, 0.14, undefined, 0.3);
+          fly(g, now.x, now.y, Math.atan2(now.y - prev.y, now.x - prev.x), 0.5 + Math.sin(t * 1.3 + f.phase * 10) * 0.5);
+        }
+      },
+      (t, dt) => {
+        if (t > ARRIVE_MS && t < SCATTER_MS && chance(0.5, dt)) emit(stage, { x: face.x + rand(-fr, fr), y: face.y + rand(-fr * 0.6, fr * 0.6) }, { tints: MIASMA, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.8, 1.2], scale: [0.4, 0.9], additive: false, alpha: 0.4, gravity: -12 });
+      },
+    );
 
-      for (const f of swarm) {
-        if (t < f.delay) continue;
+    const sicken = animateEl(stage, el, [{ filter: "none" }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.25 }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.75 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS, delay: ARRIVE_MS });
 
-        const now = posOf(f, t);
-
-        const prev = posOf(f, t - 16);
-
-        sprite(g, sick, now.x, now.y, 0.14, undefined, 0.3);
-        fly(g, now.x, now.y, Math.atan2(now.y - prev.y, now.x - prev.x), 0.5 + Math.sin(t * 1.3 + f.phase * 10) * 0.5);
-      }
-    });
-
-    const sicken = el
-      ? wait(stage, ARRIVE_MS).then(() =>
-          animateEl(stage, el, [{ filter: "none" }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.25 }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.75 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS }),
-        )
-      : wait(stage, 0);
-
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      if (t > ARRIVE_MS && t < SCATTER_MS && chance(0.5, dt)) emit(stage, { x: face.x + rand(-fr, fr), y: face.y + rand(-fr * 0.6, fr * 0.6) }, { tints: MIASMA, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.8, 1.2], scale: [0.4, 0.9], additive: false, alpha: 0.4, gravity: -12 });
-    }).then(hide);
 
     await Promise.all([run, sicken]);
   });

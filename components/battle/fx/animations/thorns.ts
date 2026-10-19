@@ -1,12 +1,12 @@
 import { halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, perTick, rand } from "../runtime/geometry";
 import { motionPath } from "../runtime/motion";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { polyline, thornPath } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, tween, wait } from "../runtime/stage";
+import { animateEl, schedule, show, type Stage, timeline, tween } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -48,11 +48,11 @@ async function hook(stage: Stage, from: FxPoint, to: FxPoint) {
   // It dives into the ground under the foe: the thorns come from below.
   const ground = { x: to.x, y: to.y + 30 };
 
-  await tween(stage, ERUPT_MS, (k) => {
+  await tween(stage, ERUPT_MS, (k, dt) => {
     const e = k ** 1.6;
 
     pos = { x: from.x + (ground.x - from.x) * e, y: from.y + (ground.y - from.y) * e - Math.sin(k * Math.PI) * 50 };
-    emit(stage, pos, { tints: CRIMSON, speed: [5, 25], life: [0.25, 0.45], scale: [0.3, 0.05], spread: 3 });
+    perTick(1, dt, () => emit(stage, pos, { tints: CRIMSON, speed: [5, 25], life: [0.25, 0.45], scale: [0.3, 0.05], spread: 3 }));
   });
   hide();
 }
@@ -97,79 +97,84 @@ export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const throb = glow("#c0104a");
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS - ERUPT_MS,
+      (g, t) => {
+        const wither = clamp01((t - WITHER_MS + ERUPT_MS) / 400);
 
-    const hide = show(stage, (g) => {
-      const wither = clamp01((t - WITHER_MS + ERUPT_MS) / 400);
+        // Each pain pulse lights the veins and the thorns' edges crimson.
+        const beat = Math.max(0, ...PULSES.map((p) => Math.exp(-(((t + ERUPT_MS - p) / 110) ** 2))));
 
-      // Each pain pulse lights the veins and the thorns' edges crimson.
-      const beat = Math.max(0, ...PULSES.map((p) => Math.exp(-(((t + ERUPT_MS - p) / 110) ** 2))));
+        sprite(g, throb, target.x, target.y, (w * 2.4) / 64, (h * 2.6) / 64, beat * 0.6);
 
-      sprite(g, throb, target.x, target.y, (w * 2.4) / 64, (h * 2.6) / 64, beat * 0.6);
+        if (beat > 0.05) {
+          g.globalCompositeOperation = "lighter";
+          g.lineCap = "round";
 
-      if (beat > 0.05) {
-        g.globalCompositeOperation = "lighter";
-        g.lineCap = "round";
-
-        for (const v of veins) {
-          g.globalAlpha = beat * 0.8 * (1 - wither);
-          g.strokeStyle = "#c0104a";
-          g.lineWidth = 2.2;
-          polyline(g, v);
-          g.strokeStyle = "#ff7a9a";
-          g.lineWidth = 0.8;
-          polyline(g, v);
+          for (const v of veins) {
+            g.globalAlpha = beat * 0.8 * (1 - wither);
+            g.strokeStyle = "#c0104a";
+            g.lineWidth = 2.2;
+            polyline(g, v);
+            g.strokeStyle = "#ff7a9a";
+            g.lineWidth = 0.8;
+            polyline(g, v);
+          }
         }
-      }
 
-      // The bramble the thorns grow from, snaking along under the foe.
-      const vine = clamp01(t / 180) * (1 - wither);
+        // The bramble the thorns grow from, snaking along under the foe.
+        const vine = clamp01(t / 180) * (1 - wither);
 
-      if (vine > 0) {
-        g.globalCompositeOperation = "source-over";
-        g.globalAlpha = vine;
-        g.lineCap = "round";
+        if (vine > 0) {
+          g.globalCompositeOperation = "source-over";
+          g.globalAlpha = vine;
+          g.lineCap = "round";
 
-        for (const [color, width] of [["#3a0a1a", 6], ["#0a0306", 4]] as const) {
-          g.strokeStyle = color;
-          g.lineWidth = width;
-          g.beginPath();
-          spikes.forEach((sp, n) => {
-            const y = sp.y - 2 + (n % 2 ? 3 : -3);
+          for (const [color, width] of [["#3a0a1a", 6], ["#0a0306", 4]] as const) {
+            g.strokeStyle = color;
+            g.lineWidth = width;
+            g.beginPath();
+            spikes.forEach((sp, n) => {
+              const y = sp.y - 2 + (n % 2 ? 3 : -3);
 
-            if (n === 0) g.moveTo(sp.x, y);
-            else g.quadraticCurveTo((sp.x + spikes[n - 1].x) / 2, y + (n % 2 ? 6 : -6), sp.x, y);
-          });
+              if (n === 0) g.moveTo(sp.x, y);
+              else g.quadraticCurveTo((sp.x + spikes[n - 1].x) / 2, y + (n % 2 ? 6 : -6), sp.x, y);
+            });
+            g.stroke();
+          }
+        }
+
+        for (const sp of spikes) {
+          const k = clamp01((t - sp.born) / 160);
+
+          if (k <= 0) continue;
+
+          // Overshoot on the way up: they stab, then settle.
+          const grow = (k < 1 ? easeOutCubic(k) * 1.15 : 1) * (1 - wither * 0.9);
+
+          g.save();
+          g.translate(sp.x, sp.y);
+          g.rotate(sp.lean);
+          g.scale(1, (grow * sp.len) / 40);
+          g.globalAlpha = 1 - wither;
+          g.globalCompositeOperation = "source-over";
+          thornPath(g, 40, sp.width, sp.bend);
+          g.fillStyle = fill;
+          g.fill();
+          g.strokeStyle = `rgba(210,30,75,${0.2 + beat * 0.75})`;
+          g.lineWidth = 1;
           g.stroke();
+          g.restore();
         }
-      }
 
-      for (const sp of spikes) {
-        const k = clamp01((t - sp.born) / 160);
-
-        if (k <= 0) continue;
-
-        // Overshoot on the way up: they stab, then settle.
-        const grow = (k < 1 ? easeOutCubic(k) * 1.15 : 1) * (1 - wither * 0.9);
-
-        g.save();
-        g.translate(sp.x, sp.y);
-        g.rotate(sp.lean);
-        g.scale(1, (grow * sp.len) / 40);
-        g.globalAlpha = 1 - wither;
-        g.globalCompositeOperation = "source-over";
-        thornPath(g, 40, sp.width, sp.bend);
-        g.fillStyle = fill;
-        g.fill();
-        g.strokeStyle = `rgba(210,30,75,${0.2 + beat * 0.75})`;
-        g.lineWidth = 1;
-        g.stroke();
-        g.restore();
-      }
-
-      sinkingBadge(g, target.x + w * 0.35, target.y - h - 10, clamp01((t - 900) / 1300), "−3 атака", BADGE);
-      g.globalAlpha = 1;
-    });
+        sinkingBadge(g, target.x + w * 0.35, target.y - h - 10, clamp01((t - 900) / 1300), "−3 атака", BADGE);
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        if (t > WITHER_MS - ERUPT_MS && t < WITHER_MS - ERUPT_MS + 300 && chance(0.6, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + h }, { tints: ["#1a0610", "#2a0a18"], speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.4, 0.8], additive: false, alpha: 0.5 });
+      },
+    );
 
     const jolt = motionPath([
       { at: 0, x: 0, y: 0 },
@@ -195,12 +200,10 @@ export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
       { offset: 1, filter: "none" },
     ];
 
-    const writhe = el
-      ? Promise.all([
-          animateEl(stage, el, jolt.keyframes, { duration: jolt.duration }),
-          animateEl(stage, el, flushes, { duration: span }),
-        ])
-      : wait(stage, 0);
+    const writhe = Promise.all([
+      animateEl(stage, el, jolt.keyframes, { duration: jolt.duration }),
+      animateEl(stage, el, flushes, { duration: span }),
+    ]);
 
     for (const p of PULSES) {
       schedule(stage, p - ERUPT_MS, () => {
@@ -209,12 +212,6 @@ export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
     }
 
     schedule(stage, 0, () => void streakBurst(stage, { x: target.x, y: target.y + h }, { colors: ["#3a0a1a", "#6a0a2a", "#ff3a5a"], count: 18, angle: -Math.PI / 2, cone: 1.3, speed: [120, 260], life: [0.25, 0.5], gravity: 500 }));
-
-    const run = tween(stage, TOTAL_MS - ERUPT_MS, (k, dt) => {
-      t = k * (TOTAL_MS - ERUPT_MS);
-
-      if (t > WITHER_MS - ERUPT_MS && t < WITHER_MS - ERUPT_MS + 300 && chance(0.6, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + h }, { tints: ["#1a0610", "#2a0a18"], speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.4, 0.8], additive: false, alpha: 0.5 });
-    }).then(hide);
 
     await Promise.all([run, writhe]);
   });

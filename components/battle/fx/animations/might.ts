@@ -1,11 +1,11 @@
 import { halfSize } from "../runtime/anchors";
-import { type BadgeLook, shieldBadge } from "../runtime/badge";
+import { type BadgeLook, risingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { sword } from "../runtime/shapes";
-import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
+import { goldBlade } from "../runtime/shapes";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -66,9 +66,7 @@ export const might: FxAnimation = ({ stage, to, targetEls }) =>
 
     const hot = glow("#ffffff");
 
-    let t = 0;
-
-    const hide = show(stage, (g) => {
+    const run = timeline(stage, TOTAL_MS, (g, t) => {
       const open = easeOutCubic(clamp01((t - 250) / 700));
 
       const wingsAlpha = envelope(clamp01((t - 250) / 1900), 0.2, 0.35);
@@ -115,13 +113,7 @@ export const might: FxAnimation = ({ stage, to, targetEls }) =>
         g.translate(-len / 2, 0);
         g.shadowColor = "#ffd86b";
         g.shadowBlur = 10 + flare * 14;
-
-        const blade = g.createLinearGradient(0, -4, 0, 4);
-
-        blade.addColorStop(0, "#fffbe8");
-        blade.addColorStop(0.5, "#ffe39a");
-        blade.addColorStop(1, "#d8a030");
-        sword(g, len, blade, "#c8901e");
+        goldBlade(g, len, "#c8901e", { half: 4 });
         g.shadowBlur = 0;
         g.strokeStyle = "#fff8e0";
         g.lineWidth = 1;
@@ -170,9 +162,7 @@ export const might: FxAnimation = ({ stage, to, targetEls }) =>
 
       g.globalAlpha = 1;
 
-      const b = clamp01((t - FLARE_MS - 450) / 1250);
-
-      if (b > 0 && b < 1) shieldBadge(g, target.x, target.y - h - 8 - easeOutCubic(b) * 26, envelope(b, 0.12, 0.3), "+атака", GOLD_BADGE);
+      risingBadge(g, target.x, target.y - h - 8, clamp01((t - FLARE_MS - 450) / 1250), "+атака", GOLD_BADGE, 26);
     });
 
     for (let n = 0; n < 26; n++) {
@@ -192,9 +182,5 @@ export const might: FxAnimation = ({ stage, to, targetEls }) =>
 
     schedule(stage, FLARE_MS + SWING_MS * 0.7, () => void streakBurst(stage, { x: target.x + w * 0.55, y: target.y + h * 0.2 }, { colors: GOLD, count: 16, angle: -0.6, cone: 0.9, speed: [140, 300], life: [0.25, 0.5], gravity: 120 }));
 
-    const grow = el ? wait(stage, FLARE_MS).then(() => animateEl(stage, el, GROW, { duration: 900, easing: "ease-out" })) : wait(stage, 0);
-
-    const run = tween(stage, TOTAL_MS, (k) => (t = k * TOTAL_MS)).then(hide);
-
-    await Promise.all([run, grow]);
+    await Promise.all([run, animateEl(stage, el, GROW, { duration: 900, delay: FLARE_MS, easing: "ease-out" })]);
   });

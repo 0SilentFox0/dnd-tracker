@@ -36,3 +36,10 @@ export function motionPath(steps: MotionStep[]) {
 
   return { keyframes, duration, sample };
 }
+
+/** A row flaring up once: brighter, optionally more saturated, with a coloured glow, peaking at `peak` of the run. */
+export function glowPulse(color: string, { brightness, saturate, peak, blur = 6 }: { brightness: number; saturate?: number; peak: number; blur?: number }): Keyframe[] {
+  const filter = `brightness(${brightness})${saturate === undefined ? "" : ` saturate(${saturate})`} drop-shadow(0 0 ${blur}px ${color})`;
+
+  return [{ filter: "none" }, { filter, offset: peak }, { filter: "none" }];
+}

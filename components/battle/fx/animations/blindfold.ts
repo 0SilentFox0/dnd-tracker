@@ -4,7 +4,7 @@ import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geome
 import { motionPath } from "../runtime/motion";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { animateEl, show, tween, wait } from "../runtime/stage";
+import { animateEl, timeline } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -58,127 +58,145 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const band = velvet(stage.g, -fr * 0.3, fr * 0.3);
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const lift = clamp01((t - LIFT_MS) / 400);
 
-    const hide = show(stage, (g) => {
-      const lift = clamp01((t - LIFT_MS) / 400);
+        spritePx(g, glow("#120818"), eyes.x, eyes.y, fr * 4, fr * 3, 0.75 * clamp01((t - ARRIVE_MS) / 300) * (1 - lift), false);
+        g.globalAlpha = 1;
 
-      spritePx(g, glow("#120818"), eyes.x, eyes.y, fr * 4, fr * 3, 0.75 * clamp01((t - ARRIVE_MS) / 300) * (1 - lift), false);
-      g.globalAlpha = 1;
+        // The ribbon in flight: a rippling black strip trailing behind its head.
+        if (t < ARRIVE_MS && trail.length > 1) {
+          g.globalCompositeOperation = "source-over";
+          g.lineCap = "round";
 
-      // The ribbon in flight: a rippling black strip trailing behind its head.
-      if (t < ARRIVE_MS && trail.length > 1) {
-        g.globalCompositeOperation = "source-over";
-        g.lineCap = "round";
-
-        for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8]] as const) {
-          g.strokeStyle = color;
-          g.lineWidth = width;
-          g.beginPath();
-          trail.forEach((p, n) => g.lineTo(p.x, p.y + Math.sin(n * 0.9 + t / 40) * 4));
-          g.stroke();
-        }
-      }
-
-      // It whips round the head, then settles tight over the eyes.
-      const wrap = clamp01((t - ARRIVE_MS) / WRAP_MS);
-
-      if (wrap > 0 && wrap < 1) {
-        const sweep = easeOutCubic(wrap) * Math.PI * 3;
-
-        const rx = fr * (1.5 - wrap * 0.35);
-
-        const ry = fr * 0.4;
-
-        g.globalCompositeOperation = "source-over";
-        g.lineCap = "round";
-
-        for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8.5]] as const) {
-          g.strokeStyle = color;
-          g.lineWidth = width;
-          g.beginPath();
-
-          for (let n = 0; n <= 30; n++) {
-            const a = sweep - (n / 30) * Math.min(sweep, Math.PI * 1.4);
-
-            g.lineTo(eyes.x + Math.cos(a) * rx, eyes.y + Math.sin(a) * ry);
+          for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8]] as const) {
+            g.strokeStyle = color;
+            g.lineWidth = width;
+            g.beginPath();
+            trail.forEach((p, n) => g.lineTo(p.x, p.y + Math.sin(n * 0.9 + t / 40) * 4));
+            g.stroke();
           }
-
-          g.stroke();
         }
-      }
 
-      if (wrap >= 1 && lift < 1) {
-        const tight = easeOutCubic(clamp01((t - ARRIVE_MS - WRAP_MS) / 160));
+        // It whips round the head, then settles tight over the eyes.
+        const wrap = clamp01((t - ARRIVE_MS) / WRAP_MS);
 
-        const hw = fr * 1.12;
+        if (wrap > 0 && wrap < 1) {
+          const sweep = easeOutCubic(wrap) * Math.PI * 3;
 
-        const hh = fr * (0.5 - tight * 0.12);
+          const rx = fr * (1.5 - wrap * 0.35);
 
-        g.save();
-        g.translate(eyes.x, eyes.y);
-        g.globalAlpha = 1 - lift;
-        g.globalCompositeOperation = "source-over";
-        g.fillStyle = band;
-        g.beginPath();
-        g.moveTo(-hw, -hh);
-        g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
-        g.lineTo(hw, hh);
-        g.quadraticCurveTo(0, hh + fr * 0.08, -hw, hh);
-        g.closePath();
-        g.fill();
-        g.strokeStyle = "#8a5ac8";
-        g.lineWidth = 1.5;
-        g.beginPath();
-        g.moveTo(-hw, -hh);
-        g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
-        g.moveTo(-hw, hh);
-        g.quadraticCurveTo(0, hh + fr * 0.08, hw, hh);
-        g.stroke();
+          const ry = fr * 0.4;
 
-        // The knot and two tails fluttering off the side of the head.
-        g.fillStyle = "#0c0612";
+          g.globalCompositeOperation = "source-over";
+          g.lineCap = "round";
 
-        for (const [dy, len, ph] of [[-0.05, 0.85, 0], [0.12, 0.7, 1.4]] as const) {
-          const flap = Math.sin(t / 110 + ph) * fr * 0.15;
+          for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8.5]] as const) {
+            g.strokeStyle = color;
+            g.lineWidth = width;
+            g.beginPath();
 
+            for (let n = 0; n <= 30; n++) {
+              const a = sweep - (n / 30) * Math.min(sweep, Math.PI * 1.4);
+
+              g.lineTo(eyes.x + Math.cos(a) * rx, eyes.y + Math.sin(a) * ry);
+            }
+
+            g.stroke();
+          }
+        }
+
+        if (wrap >= 1 && lift < 1) {
+          const tight = easeOutCubic(clamp01((t - ARRIVE_MS - WRAP_MS) / 160));
+
+          const hw = fr * 1.12;
+
+          const hh = fr * (0.5 - tight * 0.12);
+
+          g.save();
+          g.translate(eyes.x, eyes.y);
+          g.globalAlpha = 1 - lift;
+          g.globalCompositeOperation = "source-over";
+          g.fillStyle = band;
           g.beginPath();
-          g.moveTo(hw * 0.95, dy * fr - fr * 0.1);
-          g.quadraticCurveTo(hw + fr * len * 0.5, dy * fr + flap, hw + fr * len, dy * fr + fr * 0.25 + flap * 1.4);
-          g.lineTo(hw + fr * len * 0.85, dy * fr + fr * 0.4 + flap);
-          g.quadraticCurveTo(hw + fr * len * 0.45, dy * fr + fr * 0.15 + flap * 0.6, hw * 0.95, dy * fr + fr * 0.12);
+          g.moveTo(-hw, -hh);
+          g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
+          g.lineTo(hw, hh);
+          g.quadraticCurveTo(0, hh + fr * 0.08, -hw, hh);
           g.closePath();
           g.fill();
+          g.strokeStyle = "#8a5ac8";
+          g.lineWidth = 1.5;
+          g.beginPath();
+          g.moveTo(-hw, -hh);
+          g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
+          g.moveTo(-hw, hh);
+          g.quadraticCurveTo(0, hh + fr * 0.08, hw, hh);
+          g.stroke();
+
+          // The knot and two tails fluttering off the side of the head.
+          g.fillStyle = "#0c0612";
+
+          for (const [dy, len, ph] of [[-0.05, 0.85, 0], [0.12, 0.7, 1.4]] as const) {
+            const flap = Math.sin(t / 110 + ph) * fr * 0.15;
+
+            g.beginPath();
+            g.moveTo(hw * 0.95, dy * fr - fr * 0.1);
+            g.quadraticCurveTo(hw + fr * len * 0.5, dy * fr + flap, hw + fr * len, dy * fr + fr * 0.25 + flap * 1.4);
+            g.lineTo(hw + fr * len * 0.85, dy * fr + fr * 0.4 + flap);
+            g.quadraticCurveTo(hw + fr * len * 0.45, dy * fr + fr * 0.15 + flap * 0.6, hw * 0.95, dy * fr + fr * 0.12);
+            g.closePath();
+            g.fill();
+          }
+
+          g.beginPath();
+          g.ellipse(hw * 0.98, 0, fr * 0.16, fr * 0.2, 0, 0, Math.PI * 2);
+          g.fill();
+          g.restore();
+
+          // A velvet sheen sliding along the band.
+          sprite(g, sheen, eyes.x + Math.sin(t / 300) * hw * 0.7, eyes.y, (fr * 1.1) / 64, (fr * 0.35) / 64, 0.5 * (1 - lift));
         }
 
-        g.beginPath();
-        g.ellipse(hw * 0.98, 0, fr * 0.16, fr * 0.2, 0, 0, Math.PI * 2);
-        g.fill();
-        g.restore();
+        // The quiet laughter of the dark: thin violet grins drifting up round the head.
+        g.globalCompositeOperation = "lighter";
+        g.lineCap = "round";
+        g.strokeStyle = "#a070e0";
 
-        // A velvet sheen sliding along the band.
-        sprite(g, sheen, eyes.x + Math.sin(t / 300) * hw * 0.7, eyes.y, (fr * 1.1) / 64, (fr * 0.35) / 64, 0.5 * (1 - lift));
-      }
+        for (const l of laughs) {
+          const k = clamp01((t - l.born) / 800);
 
-      // The quiet laughter of the dark: thin violet grins drifting up round the head.
-      g.globalCompositeOperation = "lighter";
-      g.lineCap = "round";
-      g.strokeStyle = "#a070e0";
+          if (k >= 1) continue;
 
-      for (const l of laughs) {
-        const k = clamp01((t - l.born) / 800);
+          g.globalAlpha = Math.sin(k * Math.PI) * 0.8;
+          g.lineWidth = 1.6;
+          g.beginPath();
+          g.arc(l.x, l.y - k * 14, l.size, Math.PI * 0.15, Math.PI * 0.85);
+          g.stroke();
+        }
 
-        if (k >= 1) continue;
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        if (t < ARRIVE_MS) {
+          trail.unshift(bezier(from, ctrl, eyes, (t / ARRIVE_MS) ** 1.2));
 
-        g.globalAlpha = Math.sin(k * Math.PI) * 0.8;
-        g.lineWidth = 1.6;
-        g.beginPath();
-        g.arc(l.x, l.y - k * 14, l.size, Math.PI * 0.15, Math.PI * 0.85);
-        g.stroke();
-      }
+          if (trail.length > 22) trail.pop();
+        }
 
-      g.globalAlpha = 1;
-    });
+        if (t > next && t < LIFT_MS - 200) {
+          const a = rand(-Math.PI, 0);
+
+          laughs.push({ x: eyes.x + Math.cos(a) * fr * rand(1.4, 2), y: eyes.y + Math.sin(a) * fr * rand(0.8, 1.3), born: t, size: rand(4, 6) });
+          next = t + 260;
+        }
+
+        if (t > ARRIVE_MS && t < LIFT_MS && chance(0.4, dt)) emit(stage, { x: eyes.x + rand(-fr * 1.4, fr * 1.4), y: eyes.y + rand(-fr * 0.5, fr * 0.5) }, { tints: HAZE, speed: [5, 18], life: [0.7, 1.1], scale: [0.4, 0.9], additive: false, alpha: 0.5, gravity: -10 });
+      },
+    );
 
     // Blind, it flails at nothing.
     const flail = motionPath([
@@ -192,35 +210,12 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
       { at: 1350, x: 0, y: 0 },
     ]);
 
-    const darkened = el
-      ? wait(stage, ARRIVE_MS + WRAP_MS).then(() =>
-          Promise.all([
-            animateEl(stage, el, flail.keyframes, { duration: flail.duration, easing: "ease-in-out" }),
-            animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(.55) contrast(1.1)", offset: 0.15 }, { filter: "brightness(.55) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS - WRAP_MS }),
-          ]),
-        )
-      : wait(stage, 0);
+    const darkened = Promise.all([
+      animateEl(stage, el, flail.keyframes, { duration: flail.duration, delay: ARRIVE_MS + WRAP_MS, easing: "ease-in-out" }),
+      animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(.55) contrast(1.1)", offset: 0.15 }, { filter: "brightness(.55) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS - WRAP_MS, delay: ARRIVE_MS + WRAP_MS }),
+    ]);
 
     let next = ARRIVE_MS + WRAP_MS;
-
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      if (t < ARRIVE_MS) {
-        trail.unshift(bezier(from, ctrl, eyes, (t / ARRIVE_MS) ** 1.2));
-
-        if (trail.length > 22) trail.pop();
-      }
-
-      if (t > next && t < LIFT_MS - 200) {
-        const a = rand(-Math.PI, 0);
-
-        laughs.push({ x: eyes.x + Math.cos(a) * fr * rand(1.4, 2), y: eyes.y + Math.sin(a) * fr * rand(0.8, 1.3), born: t, size: rand(4, 6) });
-        next = t + 260;
-      }
-
-      if (t > ARRIVE_MS && t < LIFT_MS && chance(0.4, dt)) emit(stage, { x: eyes.x + rand(-fr * 1.4, fr * 1.4), y: eyes.y + rand(-fr * 0.5, fr * 0.5) }, { tints: HAZE, speed: [5, 18], life: [0.7, 1.1], scale: [0.4, 0.9], additive: false, alpha: 0.5, gravity: -10 });
-    }).then(hide);
 
     await Promise.all([run, darkened]);
   });

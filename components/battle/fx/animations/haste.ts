@@ -186,7 +186,7 @@ export const haste: FxAnimation = ({ stage, from, to, targetEls }) =>
 
           return Promise.all([animateEl(stage, el, surge, opts), ...[1, 2, 3].map((n) => playGhost(stage, el, GHOST_FILTER, surge.map((f) => ({ ...f, opacity: 0.6 - n * 0.14 })), { ...opts, delay: n * 70 }))]);
         })
-      : wait(stage, 0);
+      : undefined;
 
     const run = tween(stage, WHIRL_MS, (k, dt) => {
       t = k * WHIRL_MS;

@@ -5,7 +5,7 @@ import { motionPath } from "../runtime/motion";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { twinkle } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, tween, wait } from "../runtime/stage";
+import { animateEl, schedule, show, type Stage, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -151,7 +151,7 @@ export const puppet: FxAnimation = ({ stage, from, to, targetEls }) =>
       g.globalAlpha = 1;
     });
 
-    const dance = el ? wait(stage, DROP_MS).then(() => animateEl(stage, el, jerk.keyframes, { duration: jerk.duration })) : wait(stage, 0);
+    const dance = animateEl(stage, el, jerk.keyframes, { duration: jerk.duration, delay: DROP_MS });
 
     for (const [at] of POSES.filter((_, n) => n % 2 === 1)) {
       schedule(stage, DROP_MS + at, () => {

@@ -4,7 +4,7 @@ import { clamp01, easeOutCubic } from "../runtime/easing";
 import { chance, farSide, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { burst } from "../runtime/recipes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -134,77 +134,82 @@ export const retribution: FxAnimation = async ({ stage, from, to, targetEls }) =
 
   const halo = glow("#ffd86b");
 
-  let t = 0;
+  const run = timeline(
+    stage,
+    TOTAL_MS,
+    (g, t) => {
+      // The hammer: forms out of sparks, draws back and comes down.
+      const form = clamp01((t - FORM_AT) / 260);
 
-  const hide = show(stage, (g) => {
-    // The hammer: forms out of sparks, draws back and comes down.
-    const form = clamp01((t - FORM_AT) / 260);
+      const wind = easeOutCubic(clamp01((t - WIND_AT) / (SMITE_MS - WIND_AT - 150)));
 
-    const wind = easeOutCubic(clamp01((t - WIND_AT) / (SMITE_MS - WIND_AT - 150)));
+      const fall = clamp01((t - SMITE_MS + 150) / 150) ** 2;
 
-    const fall = clamp01((t - SMITE_MS + 150) / 150) ** 2;
+      const after = clamp01((t - SMITE_MS - 150) / 600);
 
-    const after = clamp01((t - SMITE_MS - 150) / 600);
+      if (form > 0 && after < 1) {
+        const angle = fall > 0 ? drawn + (struck - drawn) * fall : raised + (drawn - raised) * wind;
 
-    if (form > 0 && after < 1) {
-      const angle = fall > 0 ? drawn + (struck - drawn) * fall : raised + (drawn - raised) * wind;
+        const head = { x: pivot.x + Math.cos(angle) * reach, y: pivot.y + Math.sin(angle) * reach };
 
-      const head = { x: pivot.x + Math.cos(angle) * reach, y: pivot.y + Math.sin(angle) * reach };
+        sprite(g, halo, head.x, head.y, 1.8, 1.4, form * (1 - after) * 0.7);
 
-      sprite(g, halo, head.x, head.y, 1.8, 1.4, form * (1 - after) * 0.7);
+        // A smear of light behind the falling head.
+        if (fall > 0 && fall < 1) {
+          g.globalCompositeOperation = "lighter";
 
-      // A smear of light behind the falling head.
-      if (fall > 0 && fall < 1) {
+          for (const [color, width, alpha] of [["#ffd86b", HEAD_H, 0.45], ["#ffffff", 4, 0.8]] as const) {
+            g.globalAlpha = alpha;
+            g.strokeStyle = color;
+            g.lineWidth = width;
+            g.beginPath();
+            g.arc(pivot.x, pivot.y, reach, side > 0 ? angle : drawn, side > 0 ? drawn : angle);
+            g.stroke();
+          }
+        }
+
+        g.save();
+        g.translate(pivot.x, pivot.y);
+        g.rotate(angle - Math.PI / 2);
+        g.scale(0.7 + form * 0.3, 0.7 + form * 0.3);
+        hammer(g, form * (1 - after), fall);
+        g.restore();
+      }
+
+      // A shaft of blinding light comes down with the blow.
+      const shaft = clamp01((t - SMITE_MS + 120) / 120) * (1 - clamp01((t - SMITE_MS - 250) / 650));
+
+      if (shaft > 0) lightBeam(g, strike.x, sky, target.y + h, w * 0.4, shaft * 0.7, "255,240,190", 0.3);
+
+      const glowing = clamp01((t - SMITE_MS) / 80) * (1 - clamp01((t - SMITE_MS - 400) / 1000));
+
+      if (glowing > 0) {
         g.globalCompositeOperation = "lighter";
+        g.lineCap = "round";
+        g.lineJoin = "round";
 
-        for (const [color, width, alpha] of [["#ffd86b", HEAD_H, 0.45], ["#ffffff", 4, 0.8]] as const) {
-          g.globalAlpha = alpha;
+        for (const [color, width] of [["rgba(255,200,90,0.6)", 4], ["#fffbe8", 1.4]] as const) {
+          g.globalAlpha = glowing;
           g.strokeStyle = color;
           g.lineWidth = width;
-          g.beginPath();
-          g.arc(pivot.x, pivot.y, reach, side > 0 ? angle : drawn, side > 0 ? drawn : angle);
-          g.stroke();
+
+          for (const line of lines) {
+            g.beginPath();
+            g.moveTo(strike.x, strike.y);
+
+            for (const p of line) g.lineTo(strike.x + p.x, strike.y + p.y);
+
+            g.stroke();
+          }
         }
       }
 
-      g.save();
-      g.translate(pivot.x, pivot.y);
-      g.rotate(angle - Math.PI / 2);
-      g.scale(0.7 + form * 0.3, 0.7 + form * 0.3);
-      hammer(g, form * (1 - after), fall);
-      g.restore();
-    }
-
-    // A shaft of blinding light comes down with the blow.
-    const shaft = clamp01((t - SMITE_MS + 120) / 120) * (1 - clamp01((t - SMITE_MS - 250) / 650));
-
-    if (shaft > 0) lightBeam(g, strike.x, sky, target.y + h, w * 0.4, shaft * 0.7, "255,240,190", 0.3);
-
-    const glowing = clamp01((t - SMITE_MS) / 80) * (1 - clamp01((t - SMITE_MS - 400) / 1000));
-
-    if (glowing > 0) {
-      g.globalCompositeOperation = "lighter";
-      g.lineCap = "round";
-      g.lineJoin = "round";
-
-      for (const [color, width] of [["rgba(255,200,90,0.6)", 4], ["#fffbe8", 1.4]] as const) {
-        g.globalAlpha = glowing;
-        g.strokeStyle = color;
-        g.lineWidth = width;
-
-        for (const line of lines) {
-          g.beginPath();
-          g.moveTo(strike.x, strike.y);
-
-          for (const p of line) g.lineTo(strike.x + p.x, strike.y + p.y);
-
-          g.stroke();
-        }
-      }
-    }
-
-    g.globalAlpha = 1;
-  });
+      g.globalAlpha = 1;
+    },
+    (t, dt) => {
+      if (t > SMITE_MS && t < TOTAL_MS - 500 && chance(0.5, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(-h * 0.4, h * 0.6) }, { tints: GOLD, speed: [15, 50], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.2, 0.04], gravity: -40 });
+    },
+  );
 
   // The caster's own blood flares with white flame, the price of the vengeance.
   for (let n = 0; n < 30; n++) {
@@ -232,12 +237,8 @@ export const retribution: FxAnimation = async ({ stage, from, to, targetEls }) =
     burst(stage, strike, GOLD, 50, { speed: [100, 380], gravity: 260, scale: [0.5, 0.05] });
     void streakBurst(stage, strike, { colors: GOLD, count: 22, angle: -Math.PI / 2, cone: 1.4, speed: [180, 380], life: [0.3, 0.6], gravity: 500 });
 
-    if (el) void animateEl(stage, el, SLAM, { duration: 600, easing: "ease-out" });
+    void animateEl(stage, el, SLAM, { duration: 600, easing: "ease-out" });
   });
 
-  await tween(stage, TOTAL_MS, (k, dt) => {
-    t = k * TOTAL_MS;
-
-    if (t > SMITE_MS && t < TOTAL_MS - 500 && chance(0.5, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(-h * 0.4, h * 0.6) }, { tints: GOLD, speed: [15, 50], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.2, 0.04], gravity: -40 });
-  }).then(hide);
+  await run;
 };

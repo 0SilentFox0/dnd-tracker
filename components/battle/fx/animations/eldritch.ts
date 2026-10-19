@@ -1,5 +1,5 @@
 import { easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, type FxPoint, perTick, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { show, tween, wait } from "../runtime/stage";
@@ -107,9 +107,9 @@ export const eldritch: FxAnimation = ({ stage, from, to, spec }) => {
 
       const back = { x: pos.x - Math.cos(angle) * length * 0.55, y: pos.y - Math.sin(angle) * length * 0.55 };
 
-      emit(stage, back, { tints: VIOLET, speed: [10, 40], angle: [angle + Math.PI - 0.5, angle + Math.PI + 0.5], life: [0.2, 0.4], scale: [0.45, 0.05], spread: 3 });
+      perTick(1, dt, () => emit(stage, back, { tints: VIOLET, speed: [10, 40], angle: [angle + Math.PI - 0.5, angle + Math.PI + 0.5], life: [0.2, 0.4], scale: [0.45, 0.05], spread: 3 }));
 
-      for (let i = 0; i < 3; i++) emit(stage, back, { tints: SULFUR, speed: [20, 90], life: [0.4, 0.8], scale: [0.26, 0.04], spread: 7, gravity: 140, drag: 1.5 });
+      perTick(3, dt, () => emit(stage, back, { tints: SULFUR, speed: [20, 90], life: [0.4, 0.8], scale: [0.26, 0.04], spread: 7, gravity: 140, drag: 1.5 }));
 
       if (chance(0.35, dt)) emit(stage, back, { tints: SMOKE, speed: [4, 14], life: [0.6, 1], scale: [0.4, 0.9], spread: 3, additive: false, alpha: 0.35, gravity: -12 });
     });

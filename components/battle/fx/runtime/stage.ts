@@ -163,6 +163,18 @@ export function show(s: Stage, draw: Draw) {
   return () => s.draws.delete(draw);
 }
 
+/** `draw` every frame for `ms`, given the elapsed ms; `onTick` runs first on each frame with the same time and dt (s). */
+export function timeline(s: Stage, ms: number, draw: (g: CanvasRenderingContext2D, t: number) => void, onTick?: (t: number, dt: number) => void) {
+  let t = 0;
+
+  const hide = show(s, (g) => draw(g, t));
+
+  return tween(s, ms, (k, dt) => {
+    t = k * ms;
+    onTick?.(t, dt);
+  }).then(() => void hide());
+}
+
 /** A timer owned by the stage: `stopStage` drops it without running `fn`. */
 export function schedule(s: Stage, ms: number, fn: () => void) {
   if (s.stopped) return;
@@ -190,9 +202,12 @@ export function wait(s: Stage, ms: number) {
   });
 }
 
-/** A WAAPI animation on a DOM element, owned by the stage so `stopStage` cancels it; resolves when it ends either way. */
-export function animateEl(s: Stage, el: Element, keyframes: Keyframe[], opts: KeyframeAnimationOptions) {
-  if (s.stopped) return Promise.resolve();
+/**
+ * A WAAPI animation on a DOM element, owned by the stage so `stopStage` cancels it; resolves when it ends either way.
+ * No element resolves at once. A start later is `opts.delay`: without `fill` the element is untouched until then.
+ */
+export function animateEl(s: Stage, el: Element | null | undefined, keyframes: Keyframe[], opts: KeyframeAnimationOptions) {
+  if (s.stopped || !el) return Promise.resolve();
 
   const anim = el.animate(keyframes, opts);
 

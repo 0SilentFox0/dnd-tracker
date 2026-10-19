@@ -1,3 +1,4 @@
+import { perTick } from "../runtime/geometry";
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { playSheet, SHEETS } from "../runtime/sprites";
@@ -35,10 +36,10 @@ export const debuff: FxAnimation = ({ stage, from, to, palette }) => {
       g.stroke();
     });
 
-    const draw = tween(stage, 1000, (v) => {
+    const draw = tween(stage, 1000, (v, dt) => {
       k = v;
 
-      if (v < 0.8) emit(stage, { x: target.x, y: target.y - 20 }, { tints: smoke, speed: [10, 40], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.2], scale: [0.6, 1.4], spread: 30, additive: false, alpha: 0.6 });
+      if (v < 0.8) perTick(1, dt, () => emit(stage, { x: target.x, y: target.y - 20 }, { tints: smoke, speed: [10, 40], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.2], scale: [0.6, 1.4], spread: 30, additive: false, alpha: 0.6 }));
     }).then(hide);
 
     await Promise.all([draw, palette.sprite === "darkBolt" ? playSheet(stage, SHEETS.darkBolt, target, { scale: 2, ms: 900, anchorY: 0.8 }) : wait(stage, 0), wait(stage, 900)]);

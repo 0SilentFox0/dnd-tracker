@@ -74,10 +74,10 @@ export const lightningFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  await tween(s, CRACKLE_MS, (v) => {
+  await tween(s, CRACKLE_MS, (v, dt) => {
     const t = v * CRACKLE_MS;
 
-    flicker *= 0.82;
+    flicker *= 0.82 ** (60 * dt);
 
     if (t < next) return;
 
@@ -101,9 +101,9 @@ export const lightningFrame: FrameAnimation = async (s, box) => {
     flicker = Math.max(flicker, v < 0.2 ? 1 : rand(0.3, 0.8));
   });
   bolts = [];
-  await tween(s, FADE_MS, (v) => {
+  await tween(s, FADE_MS, (v, dt) => {
     fade = 1 - v;
-    flicker *= 0.8;
+    flicker *= 0.8 ** (60 * dt);
   });
   hide();
 };

@@ -1,9 +1,10 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
 import { chance, type FxPoint, rand } from "../runtime/geometry";
+import { glowPulse } from "../runtime/motion";
 import { emit, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -19,7 +20,7 @@ const BREATH = ["#e8fff0", "#b8f0c8", "#8fe0a8"];
 
 const FIREFLY = "#e8ff7a";
 
-const SOOTHE: Keyframe[] = [{ filter: "none" }, { filter: "brightness(1.25) saturate(1.2) drop-shadow(0 0 6px #8fe0a8)", offset: 0.35 }, { filter: "none" }];
+const SOOTHE = glowPulse("#8fe0a8", { brightness: 1.25, saturate: 1.2, peak: 0.35 });
 
 interface Firefly {
   orbit: number;
@@ -144,78 +145,79 @@ export const forestspirit: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const flies: Firefly[] = Array.from({ length: 8 }, () => ({ orbit: rand(10, 26), speed: rand(1.5, 3) * (Math.random() < 0.5 ? -1 : 1), phase: rand(0, 6) }));
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const time = t / 1000;
 
-    const hide = show(stage, (g) => {
-      const time = t / 1000;
+        const appear = easeOutCubic(clamp01((t - FORM_MS) / 600)) * (1 - clamp01((t - TOTAL_MS + 600) / 600));
 
-      const appear = easeOutCubic(clamp01((t - FORM_MS) / 600)) * (1 - clamp01((t - TOTAL_MS + 600) / 600));
+        const bow = 0.6 * clamp01((t - BREATH_MS + 250) / 250) * (1 - clamp01((t - BREATH_MS - 700) / 400));
 
-      const bow = 0.6 * clamp01((t - BREATH_MS + 250) / 250) * (1 - clamp01((t - BREATH_MS - 700) / 400));
+        if (appear > 0) {
+          g.save();
+          g.translate(sx, ground);
+          spritePx(g, glow("#5fd27a"), 0, -S * 0.6, S * 1.3, S * 1.1, 0.45 * appear);
+          spritePx(g, glow("#c8ffd8"), 0, -S * 0.55, S * 0.8, S * 0.35, 0.35 * appear);
 
-      if (appear > 0) {
-        g.save();
-        g.translate(sx, ground);
-        spritePx(g, glow("#5fd27a"), 0, -S * 0.6, S * 1.3, S * 1.1, 0.45 * appear);
-        spritePx(g, glow("#c8ffd8"), 0, -S * 0.55, S * 0.8, S * 0.35, 0.35 * appear);
+          const shimmer = 0.85 + Math.sin(time * 5) * 0.15;
 
-        const shimmer = 0.85 + Math.sin(time * 5) * 0.15;
+          const drawn = stag(g, S, bow, appear * shimmer);
 
-        const drawn = stag(g, S, bow, appear * shimmer);
+          g.restore();
+          tips = drawn.tips.map((p) => ({ x: sx + p.x, y: ground + p.y }));
+          muzzle = { x: sx + drawn.muzzle.x, y: ground + drawn.muzzle.y };
+        }
 
-        g.restore();
-        tips = drawn.tips.map((p) => ({ x: sx + p.x, y: ground + p.y }));
-        muzzle = { x: sx + drawn.muzzle.x, y: ground + drawn.muzzle.y };
-      }
+        // Fireflies asleep in the antlers wake and drift round the hero.
+        const wake = clamp01((t - BREATH_MS) / 700);
 
-      // Fireflies asleep in the antlers wake and drift round the hero.
-      const wake = clamp01((t - BREATH_MS) / 700);
+        flies.forEach((f, n) => {
+          const tip = tips[n % Math.max(1, tips.length)] ?? muzzle;
 
-      flies.forEach((f, n) => {
-        const tip = tips[n % Math.max(1, tips.length)] ?? muzzle;
+          const ox = target.x + Math.cos(time * f.speed + f.phase) * (f.orbit + halfSize(el).w * 0.6);
 
-        const ox = target.x + Math.cos(time * f.speed + f.phase) * (f.orbit + halfSize(el).w * 0.6);
+          const oy = target.y + Math.sin(time * f.speed * 1.3 + f.phase) * f.orbit * 0.6;
 
-        const oy = target.y + Math.sin(time * f.speed * 1.3 + f.phase) * f.orbit * 0.6;
+          const e = wake * wake * (3 - 2 * wake);
 
-        const e = wake * wake * (3 - 2 * wake);
+          const x = tip.x + (ox - tip.x) * e;
 
-        const x = tip.x + (ox - tip.x) * e;
+          const y = tip.y + (oy - tip.y) * e;
 
-        const y = tip.y + (oy - tip.y) * e;
+          const blink = 0.55 + 0.45 * Math.sin(time * 7 + n * 1.7);
 
-        const blink = 0.55 + 0.45 * Math.sin(time * 7 + n * 1.7);
+          const alpha = Math.max(appear, wake * (1 - clamp01((t - TOTAL_MS + 400) / 400))) * blink;
 
-        const alpha = Math.max(appear, wake * (1 - clamp01((t - TOTAL_MS + 400) / 400))) * blink;
+          spritePx(g, glow("#c8ff5a"), x, y, 9, undefined, alpha * 0.8);
+          spritePx(g, glow(FIREFLY), x, y, 3, undefined, alpha);
+        });
 
-        spritePx(g, glow("#c8ff5a"), x, y, 9, undefined, alpha * 0.8);
-        spritePx(g, glow(FIREFLY), x, y, 3, undefined, alpha);
-      });
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        // Green motes drift from the caster to call the spirit.
+        if (t < FORM_MS + 200 && chance(0.6, dt)) emit(stage, { x: from.x + rand(-8, 8), y: from.y + rand(-8, 8) }, { tints: BREATH, speed: [20, 50], angle: [Math.atan2(target.y - from.y, sx - from.x) - 0.3, Math.atan2(target.y - from.y, sx - from.x) + 0.3], life: [0.5, 0.8], scale: [0.2, 0.04] });
 
-      g.globalAlpha = 1;
-    });
+        // The breath: a soft resin-scented plume rolling over the hero.
+        if (t > BREATH_MS - 50 && t < BREATH_MS + 650) {
+          const dx = face.x - muzzle.x;
+
+          const dy = target.y - muzzle.y;
+
+          const a = Math.atan2(dy, dx);
+
+          if (chance(0.8, dt)) emit(stage, muzzle, { tints: ["#8fe0a8", "#6fd090", "#b8f0c8"], speed: [40, 80], angle: [a - 0.3, a + 0.3], life: [0.6, 0.9], scale: [0.25, 0.55], drag: 1.5, alpha: 0.35 });
+        }
+      },
+    );
 
     schedule(stage, FORM_MS, () => void ring(stage, { x: sx, y: ground }, "#9ff0a0", 700, S * 0.5, 2, 0.25));
 
     schedule(stage, BREATH_MS, () => {
-      if (el) void animateEl(stage, el, SOOTHE, { duration: 1200, easing: "ease-out" });
+      void animateEl(stage, el, SOOTHE, { duration: 1200, easing: "ease-out" });
     });
 
-    await tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      // Green motes drift from the caster to call the spirit.
-      if (t < FORM_MS + 200 && chance(0.6, dt)) emit(stage, { x: from.x + rand(-8, 8), y: from.y + rand(-8, 8) }, { tints: BREATH, speed: [20, 50], angle: [Math.atan2(target.y - from.y, sx - from.x) - 0.3, Math.atan2(target.y - from.y, sx - from.x) + 0.3], life: [0.5, 0.8], scale: [0.2, 0.04] });
-
-      // The breath: a soft resin-scented plume rolling over the hero.
-      if (t > BREATH_MS - 50 && t < BREATH_MS + 650) {
-        const dx = face.x - muzzle.x;
-
-        const dy = target.y - muzzle.y;
-
-        const a = Math.atan2(dy, dx);
-
-        if (chance(0.8, dt)) emit(stage, muzzle, { tints: ["#8fe0a8", "#6fd090", "#b8f0c8"], speed: [40, 80], angle: [a - 0.3, a + 0.3], life: [0.6, 0.9], scale: [0.25, 0.55], drag: 1.5, alpha: 0.35 });
-      }
-    }).then(() => void hide());
+    await run;
   });

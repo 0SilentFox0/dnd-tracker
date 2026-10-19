@@ -1,6 +1,6 @@
 import { clamp01 } from "../../runtime/easing";
 import { perimeter } from "../../runtime/frame-kit";
-import { pick, rand } from "../../runtime/geometry";
+import { perTick, pick, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import { glow, sprite } from "../../runtime/texture";
@@ -103,13 +103,13 @@ export const arcaneFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  await tween(s, RUN_MS, (v) => {
+  await tween(s, RUN_MS, (v, dt) => {
     k = v;
 
     for (const dir of [1, -1]) {
       const p = perimeter(box, start + (dir * v) / 2);
 
-      for (let i = 0; i < 2; i++) emit(s, { x: p.x, y: p.y }, { tints: SPARK, speed: [20, 70], life: [0.25, 0.5], scale: [0.12, 0.02], drag: 2 });
+      perTick(2, dt, () => emit(s, { x: p.x, y: p.y }, { tints: SPARK, speed: [20, 70], life: [0.25, 0.5], scale: [0.12, 0.02], drag: 2 }));
     }
   });
 

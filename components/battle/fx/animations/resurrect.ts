@@ -5,7 +5,7 @@ import { rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { leafPath } from "../runtime/shapes";
-import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -69,49 +69,69 @@ export const resurrect: FxAnimation = ({ stage, to, targetEls }) =>
 
     let soul = { x: target.x, y: sky };
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const column = clamp01(t / 480);
 
-    const hide = show(stage, (g) => {
-      const column = clamp01(t / 480);
+        const fade = 1 - clamp01((t - SOUL_MS - 500) / 1000);
 
-      const fade = 1 - clamp01((t - SOUL_MS - 500) / 1000);
+        const breath = 0.85 + Math.sin(t / 260) * 0.15;
 
-      const breath = 0.85 + Math.sin(t / 260) * 0.15;
+        lightBeam(g, target.x, sky, sky + (floor - sky) * easeOutCubic(column), w * 0.6, fade * 0.55 * breath, "255,246,214", 0.4);
 
-      lightBeam(g, target.x, sky, sky + (floor - sky) * easeOutCubic(column), w * 0.6, fade * 0.55 * breath, "255,246,214", 0.4);
+        // Lily petals circling slowly down inside the column; the near ones are drawn brighter.
+        g.globalCompositeOperation = "source-over";
 
-      // Lily petals circling slowly down inside the column; the near ones are drawn brighter.
-      g.globalCompositeOperation = "source-over";
+        for (const p of petals) {
+          const k = clamp01((t - 250) / 400);
 
-      for (const p of petals) {
-        const k = clamp01((t - 250) / 400);
+          const x = target.x + Math.cos(p.a) * p.r;
 
-        const x = target.x + Math.cos(p.a) * p.r;
+          const near = Math.sin(p.a) > 0;
 
-        const near = Math.sin(p.a) > 0;
+          g.save();
+          g.translate(x, p.y);
+          g.rotate(p.rot);
+          g.scale(Math.abs(Math.cos(p.rot * 0.7)) * 0.5 + 0.5, 1);
+          g.globalAlpha = k * fade * (near ? 0.95 : 0.5);
+          petal(g, p.size);
+          g.restore();
+        }
 
-        g.save();
-        g.translate(x, p.y);
-        g.rotate(p.rot);
-        g.scale(Math.abs(Math.cos(p.rot * 0.7)) * 0.5 + 0.5, 1);
-        g.globalAlpha = k * fade * (near ? 0.95 : 0.5);
-        petal(g, p.size);
-        g.restore();
-      }
+        // The soul: a pale wisp coming home down the column.
+        const s = clamp01((t - DESCEND_AT) / (SOUL_MS - DESCEND_AT));
 
-      // The soul: a pale wisp coming home down the column.
-      const s = clamp01((t - DESCEND_AT) / (SOUL_MS - DESCEND_AT));
+        if (s > 0 && s < 1) {
+          g.globalCompositeOperation = "lighter";
 
-      if (s > 0 && s < 1) {
-        g.globalCompositeOperation = "lighter";
+          trail.forEach((p, n) => sprite(g, soulTex, p.x, p.y, 0.25 + (n / trail.length) * 0.4, undefined, (n / trail.length) * 0.6));
+          sprite(g, soulTex, soul.x, soul.y, 1.1, undefined, envelope(s, 0.15, 0.05));
+          sprite(g, core, soul.x, soul.y, 0.45, undefined, 1);
+        }
 
-        trail.forEach((p, n) => sprite(g, soulTex, p.x, p.y, 0.25 + (n / trail.length) * 0.4, undefined, (n / trail.length) * 0.6));
-        sprite(g, soulTex, soul.x, soul.y, 1.1, undefined, envelope(s, 0.15, 0.05));
-        sprite(g, core, soul.x, soul.y, 0.45, undefined, 1);
-      }
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        for (const p of petals) {
+          p.a += p.spin * dt;
+          p.rot += p.spin * 0.8 * dt;
+          p.y += p.fall * dt;
 
-      g.globalAlpha = 1;
-    });
+          if (p.y > floor) p.y = sky + 30;
+        }
+
+        const s = clamp01((t - DESCEND_AT) / (SOUL_MS - DESCEND_AT));
+
+        const e = s * s * (3 - 2 * s);
+
+        soul = { x: target.x + Math.sin(e * Math.PI * 3) * 18 * (1 - e), y: sky + 20 + (target.y - sky - 20) * e };
+        trail.push(soul);
+
+        if (trail.length > 10) trail.shift();
+      },
+    );
 
     schedule(stage, SOUL_MS, () => {
       void flash(stage, target, "#ffffff", 150, 500);
@@ -120,28 +140,8 @@ export const resurrect: FxAnimation = ({ stage, to, targetEls }) =>
       for (let n = 0; n < 30; n++) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(-h * 0.5, h * 0.5) }, { tints: SOFT, speed: [20, 70], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
     });
 
-    const breathe = el ? wait(stage, SOUL_MS).then(() => animateEl(stage, el, BREATH, { duration: 1000, easing: "ease-out" })) : wait(stage, 0);
+    const breathe = animateEl(stage, el, BREATH, { duration: 1000, easing: "ease-out", delay: SOUL_MS });
 
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      for (const p of petals) {
-        p.a += p.spin * dt;
-        p.rot += p.spin * 0.8 * dt;
-        p.y += p.fall * dt;
-
-        if (p.y > floor) p.y = sky + 30;
-      }
-
-      const s = clamp01((t - DESCEND_AT) / (SOUL_MS - DESCEND_AT));
-
-      const e = s * s * (3 - 2 * s);
-
-      soul = { x: target.x + Math.sin(e * Math.PI * 3) * 18 * (1 - e), y: sky + 20 + (target.y - sky - 20) * e };
-      trail.push(soul);
-
-      if (trail.length > 10) trail.shift();
-    }).then(hide);
 
     await Promise.all([run, breathe]);
   });

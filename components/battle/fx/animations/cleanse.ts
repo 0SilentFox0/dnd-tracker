@@ -1,11 +1,11 @@
 import { halfSize } from "../runtime/anchors";
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { chance, type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { chainLink, jaggedShape, polyPath, twinkle } from "../runtime/shapes";
-import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -111,96 +111,107 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
 
     const taint = glow("#8a2be2");
 
-    let t = 0;
-
     let broken = false;
 
-    const hide = show(stage, (g) => {
-      const wash = envelope(clamp01((t - WASH_AT + 220) / 1100), 0.18, 0.4);
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const wash = envelope(clamp01((t - WASH_AT + 220) / 1100), 0.18, 0.4);
 
-      // The dark first: blots, then the chains wrapping on, then the sigils.
-      g.globalCompositeOperation = "source-over";
-
-      for (const s of blots) {
-        const grow = easeOutCubic(clamp01((t - s.born) / 260));
-
-        const melt = clamp01((t - s.gone) / 420);
-
-        const k = grow * (1 - melt);
-
-        if (k <= 0) continue;
-
-        g.save();
-        g.translate(target.x + s.x, target.y + s.y + melt * 4);
-        g.scale(k, k * (1 - melt * 0.4));
-        sprite(g, taint, 0, 0, (s.r * 3) / 64, undefined, 0.8);
+        // The dark first: blots, then the chains wrapping on, then the sigils.
         g.globalCompositeOperation = "source-over";
-        g.globalAlpha = 1;
 
-        for (const p of s.blob) {
-          g.fillStyle = ink;
-          g.beginPath();
-          g.arc(p.x * 0.55, p.y * 0.55, s.r * 0.7, 0, Math.PI * 2);
+        for (const s of blots) {
+          const grow = easeOutCubic(clamp01((t - s.born) / 260));
+
+          const melt = clamp01((t - s.gone) / 420);
+
+          const k = grow * (1 - melt);
+
+          if (k <= 0) continue;
+
+          g.save();
+          g.translate(target.x + s.x, target.y + s.y + melt * 4);
+          g.scale(k, k * (1 - melt * 0.4));
+          sprite(g, taint, 0, 0, (s.r * 3) / 64, undefined, 0.8);
+          g.globalCompositeOperation = "source-over";
+          g.globalAlpha = 1;
+
+          for (const p of s.blob) {
+            g.fillStyle = ink;
+            g.beginPath();
+            g.arc(p.x * 0.55, p.y * 0.55, s.r * 0.7, 0, Math.PI * 2);
+            g.fill();
+          }
+
+          g.restore();
+        }
+
+        if (!broken) {
+          const wrap = clamp01((t - 150) / 380);
+
+          chains.forEach((links, c) => {
+            const n = Math.floor(links.length * wrap);
+
+            for (let l = 0; l < n; l++) chainLink(g, target.x + links[l].x, target.y + links[l].y, angles[c], links[l].flat);
+          });
+        }
+
+        for (const s of sigils) {
+          const k = clamp01((t - 280) / 300);
+
+          if (k <= 0 || t > WASH_AT + 260) continue;
+
+          sigil(g, s.x, s.y + Math.sin(t / 220 + s.spin) * 2, s.r * easeOutCubic(k), s.spin + t / 900, k);
+        }
+
+        // White water pouring out of a clear sky, wider where it lands.
+        if (wash > 0) {
+          const top = sky;
+
+          const land = target.y + h * 0.4;
+
+          const fall = clamp01((t - WASH_AT + 220) / 220);
+
+          lightBeam(g, target.x, top, top + (land - top) * fall, w * 0.55, wash * 0.85, "220,240,255");
+          sprite(g, halo, target.x, target.y, (w * 2.6) / 64, (h * 3) / 64, wash * 0.55);
+        }
+
+        // Shattered links and sigil shards tumble away.
+        g.globalCompositeOperation = "source-over";
+
+        for (const d of shards) {
+          g.save();
+          g.translate(d.x, d.y);
+          g.rotate(d.rot);
+          g.globalAlpha = clamp01(1 - (t - WASH_AT - 200) / 900);
+          polyPath(g, d.shape);
+          g.fillStyle = d.color;
           g.fill();
+          g.restore();
         }
 
-        g.restore();
-      }
+        const clean = clamp01((t - WASH_AT - 700) / 900);
 
-      if (!broken) {
-        const wrap = clamp01((t - 150) / 380);
+        if (clean > 0 && clean < 1) {
+          for (let n = 0; n < 7; n++) {
+            const a = n * 2.4 + t / 1200;
 
-        chains.forEach((links, c) => {
-          const n = Math.floor(links.length * wrap);
-
-          for (let l = 0; l < n; l++) chainLink(g, target.x + links[l].x, target.y + links[l].y, angles[c], links[l].flat);
-        });
-      }
-
-      for (const s of sigils) {
-        const k = clamp01((t - 280) / 300);
-
-        if (k <= 0 || t > WASH_AT + 260) continue;
-
-        sigil(g, s.x, s.y + Math.sin(t / 220 + s.spin) * 2, s.r * easeOutCubic(k), s.spin + t / 900, k);
-      }
-
-      // White water pouring out of a clear sky, wider where it lands.
-      if (wash > 0) {
-        const top = sky;
-
-        const land = target.y + h * 0.4;
-
-        const fall = clamp01((t - WASH_AT + 220) / 220);
-
-        lightBeam(g, target.x, top, top + (land - top) * fall, w * 0.55, wash * 0.85, "220,240,255");
-        sprite(g, halo, target.x, target.y, (w * 2.6) / 64, (h * 3) / 64, wash * 0.55);
-      }
-
-      // Shattered links and sigil shards tumble away.
-      g.globalCompositeOperation = "source-over";
-
-      for (const d of shards) {
-        g.save();
-        g.translate(d.x, d.y);
-        g.rotate(d.rot);
-        g.globalAlpha = clamp01(1 - (t - WASH_AT - 200) / 900);
-        polyPath(g, d.shape);
-        g.fillStyle = d.color;
-        g.fill();
-        g.restore();
-      }
-
-      const clean = clamp01((t - WASH_AT - 700) / 900);
-
-      if (clean > 0 && clean < 1) {
-        for (let n = 0; n < 7; n++) {
-          const a = n * 2.4 + t / 1200;
-
-          twinkle(g, target.x + Math.cos(a) * w * (0.4 + (n % 3) * 0.25), target.y + Math.sin(a * 1.3) * h * 0.8, 5 + (n % 2) * 3, "#ffffff", Math.sin(clean * Math.PI) * (0.5 + 0.5 * Math.sin(t / 90 + n)));
+            twinkle(g, target.x + Math.cos(a) * w * (0.4 + (n % 3) * 0.25), target.y + Math.sin(a * 1.3) * h * 0.8, 5 + (n % 2) * 3, "#ffffff", Math.sin(clean * Math.PI) * (0.5 + 0.5 * Math.sin(t / 90 + n)));
+          }
         }
-      }
-    });
+      },
+      (t, dt) => {
+        stepBodies(shards, dt, 380);
+
+        if (t > WASH_AT - 100 && t < WASH_AT + 800) {
+          perTick(3, dt, () => emit(stage, { x: target.x + rand(-w * 0.5, w * 0.5), y: sky + rand(0, target.y - sky) }, { tints: WATER, speed: [260, 360], angle: [Math.PI / 2 - 0.05, Math.PI / 2 + 0.05], life: [0.12, 0.25], scale: [0.16, 0.08] }));
+
+          if (chance(0.6, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + h * 0.5 }, { tints: WATER, speed: [40, 120], angle: [-Math.PI * 0.85, -Math.PI * 0.15], life: [0.3, 0.5], scale: [0.18, 0.04], gravity: 300 });
+        }
+      },
+    );
 
     const shatter = () => {
       broken = true;
@@ -235,24 +246,12 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
     }
 
     // The hero looks sick under the curses until the water hits.
-    const sickly = el ? animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.35 }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.85 }, { filter: "none" }], { duration: WASH_AT + 300 }) : wait(stage, 0);
+    const sickly = animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.35 }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.85 }, { filter: "none" }], { duration: WASH_AT + 300 });
 
-    const glowUp = el
-      ? wait(stage, WASH_AT + 500).then(() => animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(1.6) saturate(1.15)", offset: 0.35 }, { filter: "none" }], { duration: 1100, easing: "ease-out" }))
-      : wait(stage, 0);
+    const glowUp = animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(1.6) saturate(1.15)", offset: 0.35 }, { filter: "none" }], { duration: 1100, delay: WASH_AT + 500, easing: "ease-out" });
 
     schedule(stage, WASH_AT + 650, () => void ring(stage, target, "#ffffff", 700, w * 0.9, 3, 0.45));
 
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-      stepBodies(shards, dt, 380);
-
-      if (t > WASH_AT - 100 && t < WASH_AT + 800) {
-        for (let n = 0; n < 3; n++) emit(stage, { x: target.x + rand(-w * 0.5, w * 0.5), y: sky + rand(0, target.y - sky) }, { tints: WATER, speed: [260, 360], angle: [Math.PI / 2 - 0.05, Math.PI / 2 + 0.05], life: [0.12, 0.25], scale: [0.16, 0.08] });
-
-        if (chance(0.6, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + h * 0.5 }, { tints: WATER, speed: [40, 120], angle: [-Math.PI * 0.85, -Math.PI * 0.15], life: [0.3, 0.5], scale: [0.18, 0.04], gravity: 300 });
-      }
-    }).then(hide);
 
     await Promise.all([run, sickly, glowUp]);
   });

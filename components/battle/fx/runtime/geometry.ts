@@ -12,6 +12,13 @@ export function chance(p: number, dt: number) {
   return Math.random() < p * 60 * dt;
 }
 
+/** Runs `fn` as many times this frame as `n` per 60 Hz tick; a fractional remainder runs with that probability. */
+export function perTick(n: number, dt: number, fn: () => void) {
+  const x = n * 60 * dt;
+
+  for (let i = Math.floor(x) + (Math.random() < x % 1 ? 1 : 0); i > 0; i--) fn();
+}
+
 export function pick<T>(list: T[]) {
   return list[Math.floor(Math.random() * list.length)];
 }
@@ -124,4 +131,13 @@ export function zigzag(a: FxPoint, b: FxPoint, n: number, amp: number): FxPoint[
 
     return { x: a.x + (dx * i) / n - (dy / len) * off, y: a.y + (dy * i) / n + (dx / len) * off };
   });
+}
+
+/** Drops, in place and in order, the items `keep` rejects. */
+export function prune<T>(list: T[], keep: (item: T) => boolean) {
+  let n = 0;
+
+  for (const item of list) if (keep(item)) list[n++] = item;
+
+  list.length = n;
 }

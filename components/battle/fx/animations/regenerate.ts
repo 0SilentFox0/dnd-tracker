@@ -1,10 +1,11 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, fadeOut } from "../runtime/easing";
 import { pick, rand } from "../runtime/geometry";
+import { glowPulse } from "../runtime/motion";
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { plusSign } from "../runtime/shapes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -19,7 +20,7 @@ const BEATS = [600, 1200, 1800];
 
 const MOTES = ["#e8ffd8", "#9ff0a0", "#5fd27a", "#ffd98a"];
 
-const BEAT: Keyframe[] = [{ filter: "none" }, { filter: "brightness(1.3) drop-shadow(0 0 6px #6fe07a)", offset: 0.25 }, { filter: "none" }];
+const BEAT = glowPulse("#6fe07a", { brightness: 1.3, peak: 0.25 });
 
 interface Plus {
   x: number;
@@ -63,9 +64,7 @@ export const regenerate: FxAnimation = ({ stage, from, to, targetEls, palette })
 
     const green = glow("#6fe07a");
 
-    let t = 0;
-
-    const hide = show(stage, (g) => {
+    const run = timeline(stage, DOME_MS, (g, t) => {
       const rise = easeOutCubic(clamp01(t / RISE_MS));
 
       const fade = fadeOut(t / DOME_MS, 0.86);
@@ -166,9 +165,9 @@ export const regenerate: FxAnimation = ({ stage, from, to, targetEls, palette })
 
         for (let n = 0; n < 10; n++) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(0, h) }, { tints: [pick(MOTES)], speed: [20, 50], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.6, 1], scale: [0.3, 0.05], gravity: -30 });
 
-        if (el) void animateEl(stage, el, BEAT, { duration: 420, easing: "ease-out" });
+        void animateEl(stage, el, BEAT, { duration: 420, easing: "ease-out" });
       });
     }
 
-    await tween(stage, DOME_MS, (k) => (t = k * DOME_MS)).then(hide);
+    await run;
   });

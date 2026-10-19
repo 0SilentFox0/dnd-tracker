@@ -1,5 +1,5 @@
 import { easeOutCubic } from "./easing";
-import { arcControl, bezier, type FxPoint, pick, rand } from "./geometry";
+import { arcControl, bezier, type FxPoint, perTick, pick, rand } from "./geometry";
 import { show, type Stage, tween, wake } from "./stage";
 import { glow, sprite } from "./texture";
 
@@ -57,12 +57,12 @@ export async function shoot(s: Stage, from: FxPoint, to: FxPoint, ms: number, ti
     sprite(g, core, pos.x, pos.y, 30 / 90);
   });
 
-  await tween(s, ms, (k) => {
+  await tween(s, ms, (k, dt) => {
     const p = bezier(from, ctrl, to, wobble ? k : k ** 1.4);
 
     pos = { x: p.x, y: p.y + Math.sin(k * Math.PI * 4) * wobble };
 
-    for (let i = 0; i < 3; i++) emit(s, pos, { tints, speed: [10, 50], life: [0.25, 0.5], scale: [0.45, 0.05], spread: 4 });
+    perTick(3, dt, () => emit(s, pos, { tints, speed: [10, 50], life: [0.25, 0.5], scale: [0.45, 0.05], spread: 4 }));
   });
   hide();
 }

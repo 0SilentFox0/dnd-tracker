@@ -1,5 +1,5 @@
 import { fadeOut } from "../runtime/easing";
-import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { show, tween } from "../runtime/stage";
@@ -102,7 +102,7 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
     await tween(stage, QUAKE_MS, (v, dt) => {
       k = v;
 
-      if (v < 0.6) for (let i = 0; i < 2; i++) dust();
+      if (v < 0.6) perTick(2, dt, () => dust());
 
       if (v >= 0.3) stepBodies(chunks, dt, 900);
     });

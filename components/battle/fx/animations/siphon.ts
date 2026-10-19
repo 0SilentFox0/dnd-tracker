@@ -1,11 +1,11 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, type FxPoint, pick, rand, wavePoints } from "../runtime/geometry";
+import { chance, type FxPoint, pick, prune, rand, wavePoints } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { taperedStroke } from "../runtime/shapes";
-import { animateEl, show, tween, wait } from "../runtime/stage";
+import { animateEl, timeline } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -56,88 +56,81 @@ export const siphon: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const caster = glow("#ffcf6a");
 
-    let t = 0;
-
     let lanes: FxPoint[][] = [];
 
-    const hide = show(stage, (g) => {
-      const reach = easeOutCubic(clamp01((t - 200) / (LATCH_MS - 200)));
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const reach = easeOutCubic(clamp01((t - 200) / (LATCH_MS - 200)));
 
-      const retract = clamp01((t - LET_GO_MS) / 450);
+        const retract = clamp01((t - LET_GO_MS) / 450);
 
-      // Three shadow tendrils reach from the caster, latch on and later slither back.
-      lanes = ends.map((end, n) => {
-        const k = reach * (1 - retract);
+        // Three shadow tendrils reach from the caster, latch on and later slither back.
+        lanes = ends.map((end, n) => {
+          const k = reach * (1 - retract);
 
-        const bow = (1 - n) * 24;
+          const bow = (1 - n) * 24;
 
-        // Bowed apart into a fan, so they read as three limbs rather than one beam.
-        return wavePoints(from, { x: from.x + (end.x - from.x) * k, y: from.y + (end.y - from.y) * k }, 16, 7, t / 160 + n * 2, 1.5 + n * 0.3).map((p, j) => ({ x: p.x, y: p.y - Math.sin((j / 16) * Math.PI) * bow * k }));
-      });
+          // Bowed apart into a fan, so they read as three limbs rather than one beam.
+          return wavePoints(from, { x: from.x + (end.x - from.x) * k, y: from.y + (end.y - from.y) * k }, 16, 7, t / 160 + n * 2, 1.5 + n * 0.3).map((p, j) => ({ x: p.x, y: p.y - Math.sin((j / 16) * Math.PI) * bow * k }));
+        });
 
-      if (retract < 1) {
-        g.globalCompositeOperation = "source-over";
-        g.lineCap = "round";
-        g.globalAlpha = 1 - retract;
+        if (retract < 1) {
+          g.globalCompositeOperation = "source-over";
+          g.lineCap = "round";
+          g.globalAlpha = 1 - retract;
 
-        for (const pts of lanes) {
-          taperedStroke(g, pts, "rgba(130,90,180,0.55)", 10, 0.6, 2);
-          taperedStroke(g, pts, "#0d0814", 6.5, 0.65, 1.2);
+          for (const pts of lanes) {
+            taperedStroke(g, pts, "rgba(130,90,180,0.55)", 10, 0.6, 2);
+            taperedStroke(g, pts, "#0d0814", 6.5, 0.65, 1.2);
+          }
+
+          // Where a tendril bites in, a dark sucker mark with a violet rim.
+          if (reach >= 1) for (const end of ends) sprite(g, glow("#6a3aa0"), end.x, end.y, 0.4, undefined, 0.8 * (1 - retract));
         }
 
-        // Where a tendril bites in, a dark sucker mark with a violet rim.
-        if (reach >= 1) for (const end of ends) sprite(g, glow("#6a3aa0"), end.x, end.y, 0.4, undefined, 0.8 * (1 - retract));
-      }
+        // The stolen strength: warm motes drawn out of the target and up the tendrils.
+        for (const m of motes) {
+          const p = along(lanes[m.lane], m.u);
 
-      // The stolen strength: warm motes drawn out of the target and up the tendrils.
-      for (const m of motes) {
-        const p = along(lanes[m.lane], m.u);
+          sprite(g, glow(m.tint), p.x, p.y, 0.24, undefined, 0.9);
+          sprite(g, bright, p.x, p.y, 0.08, undefined, 1);
+        }
 
-        sprite(g, glow(m.tint), p.x, p.y, 0.24, undefined, 0.9);
-        sprite(g, bright, p.x, p.y, 0.08, undefined, 1);
-      }
+        const fed = envelope(clamp01((t - LATCH_MS - 300) / 1500), 0.2, 0.4);
 
-      const fed = envelope(clamp01((t - LATCH_MS - 300) / 1500), 0.2, 0.4);
+        if (fed > 0) sprite(g, caster, from.x, from.y, 0.9 + fed * 0.3, undefined, fed * 0.4);
 
-      if (fed > 0) sprite(g, caster, from.x, from.y, 0.9 + fed * 0.3, undefined, fed * 0.4);
+        // The foe's own warmth, draining away as the motes leave it.
+        const left = 1 - clamp01((t - LATCH_MS) / (LET_GO_MS - LATCH_MS));
 
-      // The foe's own warmth, draining away as the motes leave it.
-      const left = 1 - clamp01((t - LATCH_MS) / (LET_GO_MS - LATCH_MS));
+        if (t > LATCH_MS - 150 && left > 0) sprite(g, bright, target.x, target.y, (w * 1.6) / 64, (h * 1.8) / 64, 0.4 * left * clamp01((t - LATCH_MS + 150) / 150));
 
-      if (t > LATCH_MS - 150 && left > 0) sprite(g, bright, target.x, target.y, (w * 1.6) / 64, (h * 1.8) / 64, 0.4 * left * clamp01((t - LATCH_MS + 150) / 150));
+        // A grey badge sags off the weakened foe.
+        const sag = clamp01((t - 1500) / 1000);
 
-      // A grey badge sags off the weakened foe.
-      const sag = clamp01((t - 1500) / 1000);
+        sinkingBadge(g, target.x + (target.x - face.x) * 0.2, target.y - h - 12, sag, "−25% шкоди", BADGE);
 
-      sinkingBadge(g, target.x + (target.x - face.x) * 0.2, target.y - h - 12, sag, "−25% шкоди", BADGE);
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        // Grey fog creeps in round the foe first, curling into its sleeves.
+        if (t < 1600 && chance(0.7, dt)) {
+          const side = Math.random() < 0.5 ? -1 : 1;
 
-      g.globalAlpha = 1;
-    });
+          emit(stage, { x: target.x + side * (w + rand(10, 30)), y: target.y + rand(-h * 0.3, h) }, { tints: FOG, speed: [20, 45], angle: side > 0 ? [Math.PI * 0.9, Math.PI * 1.1] : [-0.1, 0.1], life: [0.9, 1.4], scale: [0.3, 0.7], additive: false, alpha: 0.2, drag: 1 });
+        }
 
-    const droop = el
-      ? Promise.all([
-          wait(stage, LATCH_MS).then(() =>
-            animateEl(stage, el, [{ transform: "none", filter: "none" }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.35 }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.85 }, { transform: "none", filter: "none" }], { duration: TOTAL_MS - LATCH_MS, easing: "ease-in-out" }),
-          ),
-        ])
-      : wait(stage, 0);
+        if (t > LATCH_MS && t < LET_GO_MS - 150 && chance(0.4, dt)) motes.push({ lane: Math.floor(rand(0, 3)), u: 1, speed: rand(0.7, 1.1), tint: pick(LIGHT) });
 
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
+        for (const m of motes) m.u -= m.speed * dt;
 
-      // Grey fog creeps in round the foe first, curling into its sleeves.
-      if (t < 1600 && chance(0.7, dt)) {
-        const side = Math.random() < 0.5 ? -1 : 1;
+        prune(motes, (m) => m.u > 0);
+      },
+    );
 
-        emit(stage, { x: target.x + side * (w + rand(10, 30)), y: target.y + rand(-h * 0.3, h) }, { tints: FOG, speed: [20, 45], angle: side > 0 ? [Math.PI * 0.9, Math.PI * 1.1] : [-0.1, 0.1], life: [0.9, 1.4], scale: [0.3, 0.7], additive: false, alpha: 0.2, drag: 1 });
-      }
-
-      if (t > LATCH_MS && t < LET_GO_MS - 150 && chance(0.4, dt)) motes.push({ lane: Math.floor(rand(0, 3)), u: 1, speed: rand(0.7, 1.1), tint: pick(LIGHT) });
-
-      for (const m of motes) m.u -= m.speed * dt;
-
-      motes.splice(0, motes.length, ...motes.filter((m) => m.u > 0));
-    }).then(hide);
+    const droop = animateEl(stage, el, [{ transform: "none", filter: "none" }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.35 }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.85 }, { transform: "none", filter: "none" }], { duration: TOTAL_MS - LATCH_MS, delay: LATCH_MS, easing: "ease-in-out" });
 
     await Promise.all([run, droop]);
   });

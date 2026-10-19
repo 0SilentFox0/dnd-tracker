@@ -4,7 +4,7 @@ import { chance, cubicBezier, type FxPoint, pick, rand } from "../runtime/geomet
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { leafPath, taperedStroke } from "../runtime/shapes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
@@ -105,100 +105,101 @@ export const rebirth: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const colors = stems.map(() => pick(BLOSSOM));
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const wither = clamp01((t - RISE_MS - 250) / 600);
 
-    const hide = show(stage, (g) => {
-      const wither = clamp01((t - RISE_MS - 250) / 600);
+        g.globalCompositeOperation = "source-over";
 
-      g.globalCompositeOperation = "source-over";
+        for (const [k, s] of stems.entries()) {
+          const grow = easeOutCubic(clamp01((t - s.born) / 520)) * (1 - wither);
 
-      for (const [k, s] of stems.entries()) {
-        const grow = easeOutCubic(clamp01((t - s.born) / 520)) * (1 - wither);
+          if (grow <= 0) continue;
 
-        if (grow <= 0) continue;
+          const steps = Math.max(2, Math.round(16 * grow));
 
-        const steps = Math.max(2, Math.round(16 * grow));
+          const line = Array.from({ length: steps + 1 }, (_, j) => cubicBezier(s.pts, (j / steps) * grow));
 
-        const line = Array.from({ length: steps + 1 }, (_, j) => cubicBezier(s.pts, (j / steps) * grow));
+          g.globalAlpha = 1;
+          taperedStroke(g, line, "#1e4a14", 4.4, 0.6, 1.2, 16);
+          taperedStroke(g, line, "#5ca03a", 2.8, 0.6, 0.8, 16);
+
+          for (const at of [0.35, 0.55, 0.75]) {
+            if (at > grow) continue;
+
+            const p = cubicBezier(s.pts, at);
+
+            const open = clamp01((grow - at) / 0.25);
+
+            leaf(g, p, (at * 10 + k) % 2 ? -0.5 : Math.PI + 0.5, 9 * open);
+          }
+
+          // The bush flowers.
+          const bloom = easeOutCubic(clamp01((t - BLOOM_MS - k * 50) / 280)) * (1 - wither);
+
+          if (bloom > 0) {
+            s.blossoms.forEach((b, j) => {
+              g.globalAlpha = 1;
+              blossom(g, b, (j ? 4 : 5.5) * bloom, colors[(k + j) % colors.length]);
+            });
+          }
+        }
+
+        // Petals falling once the bushes have flowered.
+        for (const p of petals) {
+          const k = clamp01((t - p.born) / 1100);
+
+          if (k >= 1) continue;
+
+          g.save();
+          g.translate(p.x, p.y);
+          g.rotate(p.rot);
+          g.scale(Math.abs(Math.cos(p.rot * 1.3)) * 0.6 + 0.4, 1);
+          g.globalAlpha = 1 - k;
+          g.fillStyle = p.color;
+          g.beginPath();
+          g.ellipse(0, 0, 2.6, 1.7, 0, 0, Math.PI * 2);
+          g.fill();
+          g.restore();
+        }
+
+        // The risen warrior has leaves caught in their hair.
+        const caught = clamp01((t - RISE_MS - 200) / 300) * (1 - clamp01((t - TOTAL_MS + 400) / 400));
+
+        if (caught > 0) {
+          g.globalAlpha = caught;
+
+          for (const [dx, a] of [[-0.6, -2.2], [0.1, -1.4], [0.6, -0.9]] as const) leaf(g, { x: face.x + dx * face.r, y: face.y - face.r * 0.85 }, a, 7);
+        }
 
         g.globalAlpha = 1;
-        taperedStroke(g, line, "#1e4a14", 4.4, 0.6, 1.2, 16);
-        taperedStroke(g, line, "#5ca03a", 2.8, 0.6, 0.8, 16);
+      },
+      (t, dt) => {
+        if (t > BLOOM_MS + 350 && t < RISE_MS + 500 && chance(0.7, dt)) {
+          const s = pick(stems);
 
-        for (const at of [0.35, 0.55, 0.75]) {
-          if (at > grow) continue;
+          const b = pick(s.blossoms);
 
-          const p = cubicBezier(s.pts, at);
-
-          const open = clamp01((grow - at) / 0.25);
-
-          leaf(g, p, (at * 10 + k) % 2 ? -0.5 : Math.PI + 0.5, 9 * open);
+          petals.push({ x: b.x, y: b.y, vx: rand(-15, 15), vy: rand(10, 25), rot: rand(0, 6), spin: rand(-4, 4), color: pick(BLOSSOM), born: t });
         }
 
-        // The bush flowers.
-        const bloom = easeOutCubic(clamp01((t - BLOOM_MS - k * 50) / 280)) * (1 - wither);
-
-        if (bloom > 0) {
-          s.blossoms.forEach((b, j) => {
-            g.globalAlpha = 1;
-            blossom(g, b, (j ? 4 : 5.5) * bloom, colors[(k + j) % colors.length]);
-          });
+        for (const p of petals) {
+          p.x += (p.vx + Math.sin(t / 200 + p.spin) * 12) * dt;
+          p.y += p.vy * dt;
+          p.rot += p.spin * dt;
         }
-      }
-
-      // Petals falling once the bushes have flowered.
-      for (const p of petals) {
-        const k = clamp01((t - p.born) / 1100);
-
-        if (k >= 1) continue;
-
-        g.save();
-        g.translate(p.x, p.y);
-        g.rotate(p.rot);
-        g.scale(Math.abs(Math.cos(p.rot * 1.3)) * 0.6 + 0.4, 1);
-        g.globalAlpha = 1 - k;
-        g.fillStyle = p.color;
-        g.beginPath();
-        g.ellipse(0, 0, 2.6, 1.7, 0, 0, Math.PI * 2);
-        g.fill();
-        g.restore();
-      }
-
-      // The risen warrior has leaves caught in their hair.
-      const caught = clamp01((t - RISE_MS - 200) / 300) * (1 - clamp01((t - TOTAL_MS + 400) / 400));
-
-      if (caught > 0) {
-        g.globalAlpha = caught;
-
-        for (const [dx, a] of [[-0.6, -2.2], [0.1, -1.4], [0.6, -0.9]] as const) leaf(g, { x: face.x + dx * face.r, y: face.y - face.r * 0.85 }, a, 7);
-      }
-
-      g.globalAlpha = 1;
-    });
+      },
+    );
 
     void shoot(stage, from, { x: target.x, y: ground - 4 }, SEED_MS, "#7fe88a", MOTES, 6);
 
     schedule(stage, RISE_MS, () => {
-      if (el) void animateEl(stage, el, RISE, { duration: 900, easing: "ease-out" });
+      void animateEl(stage, el, RISE, { duration: 900, easing: "ease-out" });
 
       for (let k = 0; k < 18; k++) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h * 0.4, h) }, { tints: MOTES, speed: [20, 60], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
     });
 
-    await tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      if (t > BLOOM_MS + 350 && t < RISE_MS + 500 && chance(0.7, dt)) {
-        const s = pick(stems);
-
-        const b = pick(s.blossoms);
-
-        petals.push({ x: b.x, y: b.y, vx: rand(-15, 15), vy: rand(10, 25), rot: rand(0, 6), spin: rand(-4, 4), color: pick(BLOSSOM), born: t });
-      }
-
-      for (const p of petals) {
-        p.x += (p.vx + Math.sin(t / 200 + p.spin) * 12) * dt;
-        p.y += p.vy * dt;
-        p.rot += p.spin * dt;
-      }
-    }).then(() => void hide());
+    await run;
   });

@@ -1,10 +1,10 @@
-import { type BadgeLook, shieldBadge } from "../runtime/badge";
+import { type BadgeLook, risingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { jaggedShape, stonePlate } from "../runtime/shapes";
-import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
+import { animateEl, type Stage, timeline, wait } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -135,7 +135,7 @@ async function thud(stage: Stage, target: FxPoint, el: HTMLElement | undefined) 
 
   for (let n = 0; n < 14; n++) emit(stage, { x: feet.x + rand(-40, 40), y: feet.y }, { tints: DUST, speed: [30, 120], angle: n % 2 ? [-0.5, 0.15] : [Math.PI - 0.15, Math.PI + 0.5], life: [0.6, 1.1], scale: [0.4, 1.1], drag: 2.5, additive: false, alpha: 0.5, gravity: -15 });
 
-  await Promise.all([el ? animateEl(stage, el, THUD, { duration: 300, easing: "ease-out" }) : wait(stage, 0), streakBurst(stage, { x: target.x, y: target.y - RY + 4 }, { colors: SPARKS, count: 10, angle: -Math.PI / 2, cone: 1.2, speed: [120, 260], life: [0.2, 0.4], gravity: 400, width: [1, 1.6] })]);
+  await Promise.all([animateEl(stage, el, THUD, { duration: 300, easing: "ease-out" }), streakBurst(stage, { x: target.x, y: target.y - RY + 4 }, { colors: SPARKS, count: 10, angle: -Math.PI / 2, cone: 1.2, speed: [120, 260], life: [0.2, 0.4], gravity: 400, width: [1, 1.6] })]);
 }
 
 export const stoneskin: FxAnimation = ({ stage, to, targetEls }) =>
@@ -146,65 +146,64 @@ export const stoneskin: FxAnimation = ({ stage, to, targetEls }) =>
 
     const glowTex = glow("#c8b89a");
 
-    let t = 0;
-
     let shake = 0;
 
-    const hide = show(stage, (g) => {
-      const k = t / TOTAL_MS;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const k = t / TOTAL_MS;
 
-      const snap = t / SNAP_MS;
+        const snap = t / SNAP_MS;
 
-      const after = clamp01((t - SNAP_MS) / (TOTAL_MS - SNAP_MS));
+        const after = clamp01((t - SNAP_MS) / (TOTAL_MS - SNAP_MS));
 
-      const fade = 1 - clamp01((k - 0.8) / 0.2);
+        const fade = 1 - clamp01((k - 0.8) / 0.2);
 
-      const at = { x: target.x + Math.sin(t * 0.09) * shake * 3, y: target.y + Math.cos(t * 0.11) * shake * 1.5 };
+        const at = { x: target.x + Math.sin(t * 0.09) * shake * 3, y: target.y + Math.cos(t * 0.11) * shake * 1.5 };
 
-      sprite(g, glowTex, at.x, at.y, 3, 1.6, envelope(k, 0.2, 0.3) * 0.2);
+        sprite(g, glowTex, at.x, at.y, 3, 1.6, envelope(k, 0.2, 0.3) * 0.2);
 
-      if (snap >= 1) shell(g, at, easeOutCubic(clamp01(after * 4)) * fade, clamp01(after * 1.6), cracks);
+        if (snap >= 1) shell(g, at, easeOutCubic(clamp01(after * 4)) * fade, clamp01(after * 1.6), cracks);
 
-      g.globalCompositeOperation = "source-over";
+        g.globalCompositeOperation = "source-over";
 
-      for (const p of list) {
-        const u = clamp01((snap - p.delay) / FLY);
+        for (const p of list) {
+          const u = clamp01((snap - p.delay) / FLY);
 
-        if (u <= 0) continue;
+          if (u <= 0) continue;
 
-        const e = u * u;
+          const e = u * u;
 
-        const x = p.start.x + (p.end.x - p.start.x) * e + (at.x - target.x);
+          const x = p.start.x + (p.end.x - p.start.x) * e + (at.x - target.x);
 
-        const y = p.start.y + (p.end.y - p.start.y) * e + (at.y - target.y);
+          const y = p.start.y + (p.end.y - p.start.y) * e + (at.y - target.y);
 
-        g.save();
-        g.translate(x, y);
-        g.rotate(p.rot0 + (p.rot1 - p.rot0) * easeOutCubic(u));
-        g.globalAlpha = Math.min(clamp01(u * 4), fade);
-        stonePlate(g, p.shape, p.size);
-        g.restore();
-      }
+          g.save();
+          g.translate(x, y);
+          g.rotate(p.rot0 + (p.rot1 - p.rot0) * easeOutCubic(u));
+          g.globalAlpha = Math.min(clamp01(u * 4), fade);
+          stonePlate(g, p.shape, p.size);
+          g.restore();
+        }
 
-      const b = clamp01((t - SNAP_MS - 80) / 1300);
+        risingBadge(g, target.x, target.y - RY - 14, clamp01((t - SNAP_MS - 80) / 1300), "+КБ", STONE_BADGE, 24);
+      },
+      (t) => {
+        shake = t > SNAP_MS ? Math.max(0, 1 - (t - SNAP_MS) / 350) : 0;
 
-      if (b > 0 && b < 1) shieldBadge(g, target.x, target.y - RY - 14 - easeOutCubic(b) * 24, envelope(b, 0.12, 0.3), "+КБ", STONE_BADGE);
-    });
+        for (const p of list) {
+          if (p.snapped || (t / SNAP_MS - p.delay) / FLY < 1) continue;
+
+          p.snapped = true;
+          void streakBurst(stage, { x: p.end.x, y: p.end.y }, { colors: SPARKS, count: 4, speed: [60, 160], life: [0.15, 0.3], gravity: 300, width: [0.8, 1.3] });
+          emit(stage, p.end, { tints: DUST, speed: [10, 30], life: [0.3, 0.6], scale: [0.3, 0.6], additive: false, alpha: 0.35 });
+        }
+      },
+    );
 
     const landed = wait(stage, SNAP_MS).then(() => thud(stage, target, targetEls[i]));
 
-    const run = tween(stage, TOTAL_MS, (k) => {
-      t = k * TOTAL_MS;
-      shake = t > SNAP_MS ? Math.max(0, 1 - (t - SNAP_MS) / 350) : 0;
-
-      for (const p of list) {
-        if (p.snapped || (t / SNAP_MS - p.delay) / FLY < 1) continue;
-
-        p.snapped = true;
-        void streakBurst(stage, { x: p.end.x, y: p.end.y }, { colors: SPARKS, count: 4, speed: [60, 160], life: [0.15, 0.3], gravity: 300, width: [0.8, 1.3] });
-        emit(stage, p.end, { tints: DUST, speed: [10, 30], life: [0.3, 0.6], scale: [0.3, 0.6], additive: false, alpha: 0.35 });
-      }
-    }).then(hide);
 
     await Promise.all([run, landed]);
   });

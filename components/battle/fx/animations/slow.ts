@@ -1,11 +1,11 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, chance, farSide, type FxPoint, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, farSide, type FxPoint, perTick, rand } from "../runtime/geometry";
 import { motionPath } from "../runtime/motion";
 import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { chainLink, shackle, taperedStroke } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, tween, wait } from "../runtime/stage";
+import { animateEl, schedule, show, type Stage, timeline, tween } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -44,9 +44,9 @@ async function drift(stage: Stage, from: FxPoint, to: FxPoint) {
     sprite(g, glow("#0c0812"), pos.x, pos.y, 0.6, undefined, 0.95, false);
   });
 
-  await tween(stage, ARCHETYPE_FX.slow.impactMs, (k) => {
+  await tween(stage, ARCHETYPE_FX.slow.impactMs, (k, dt) => {
     pos = bezier(from, ctrl, to, easeOutCubic(k));
-    emit(stage, pos, { tints: SMOKE, speed: [4, 16], life: [0.6, 1], scale: [0.5, 0.9], spread: 5, additive: false, alpha: 0.55, gravity: 20 });
+    perTick(1, dt, () => emit(stage, pos, { tints: SMOKE, speed: [4, 16], life: [0.6, 1], scale: [0.5, 0.9], spread: 5, additive: false, alpha: 0.55, gravity: 20 }));
   });
   hide();
 }
@@ -102,87 +102,99 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const pool = glow("#100a18");
 
-        let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS - ARCHETYPE_FX.slow.impactMs,
+      (g, t) => {
+        const m = drag.sample(t);
 
-    const hide = show(stage, (g) => {
-      const m = drag.sample(t);
+        const fade = 1 - clamp01((t - (FADE_MS - ARCHETYPE_FX.slow.impactMs)) / 400);
 
-      const fade = 1 - clamp01((t - (FADE_MS - ARCHETYPE_FX.slow.impactMs)) / 400);
+        const rise = envelope(clamp01(t / (TOTAL_MS - ARCHETYPE_FX.slow.impactMs)), 0.12, 0.2);
 
-      const rise = envelope(clamp01(t / (TOTAL_MS - ARCHETYPE_FX.slow.impactMs)), 0.12, 0.2);
+        spritePx(g, pool, target.x + m.x, target.y + h, w * 2.8, h * 1.3, rise * 0.9, false);
 
-      spritePx(g, pool, target.x + m.x, target.y + h, w * 2.8, h * 1.3, rise * 0.9, false);
+        // Shadow tendrils coil up out of the pool and around the row.
+        for (const td of tendrils) {
+          const grow = easeOutCubic(clamp01((t - td.born) / 450));
 
-      // Shadow tendrils coil up out of the pool and around the row.
-      for (const td of tendrils) {
-        const grow = easeOutCubic(clamp01((t - td.born) / 450));
+          if (grow <= 0) continue;
 
-        if (grow <= 0) continue;
+          const base = { x: target.x + m.x + td.x, y: target.y + h * 0.95 };
 
-        const base = { x: target.x + m.x + td.x, y: target.y + h * 0.95 };
+          // Each one rises and hooks over towards the rift, as if hauling the row in.
+          const pts = Array.from({ length: 13 }, (_, n) => {
+            const u = (n / 12) * grow;
 
-        // Each one rises and hooks over towards the rift, as if hauling the row in.
-        const pts = Array.from({ length: 13 }, (_, n) => {
-          const u = (n / 12) * grow;
-
-          return { x: base.x + dir * (1 - Math.cos((u * Math.PI) / 2)) * td.curl + Math.sin(u * 4 + t / 420 + td.phase) * 3, y: base.y - Math.sin((u * Math.PI) / 2) * td.len };
-        });
-
-        g.globalAlpha = fade;
-        g.globalCompositeOperation = "source-over";
-        g.lineCap = "round";
-        taperedStroke(g, pts, "rgba(120,80,175,0.6)", 12, 0.85, 1.8);
-        taperedStroke(g, pts, "#0c0712", 8.5, 0.9, 1);
-      }
-
-      // Chains lash out of two shadow rifts on the far side and lock iron cuffs onto the row.
-      const reach = clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs)) / (CLAMP_MS - CHAIN_MS));
-
-      const open = envelope(clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs) + 200) / (TOTAL_MS - CHAIN_MS)), 0.12, 0.25);
-
-      if (open > 0) {
-        spritePx(g, pool, rift.x, rift.y, 44, 64, open, false);
-        g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "#7a4ab0";
-        g.lineWidth = 1.6;
-
-        for (let n = 0; n < 3; n++) {
-          const a = -t / 260 + (n * Math.PI * 2) / 3;
-
-          g.globalAlpha = open * 0.8;
-          g.beginPath();
-          g.ellipse(rift.x, rift.y, 9 + n * 4, 18 + n * 6, 0, a, a + 2);
-          g.stroke();
-        }
-      }
-
-      if (reach > 0) {
-        cuffs.forEach((cuff, n) => {
-          const end = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
-
-          const tight = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs) - 120) / 200);
-
-          const start = { x: rift.x, y: rift.y + (n ? 8 : -8) };
+            return { x: base.x + dir * (1 - Math.cos((u * Math.PI) / 2)) * td.curl + Math.sin(u * 4 + t / 420 + td.phase) * 3, y: base.y - Math.sin((u * Math.PI) / 2) * td.len };
+          });
 
           g.globalAlpha = fade;
+          g.globalCompositeOperation = "source-over";
+          g.lineCap = "round";
+          taperedStroke(g, pts, "rgba(120,80,175,0.6)", 12, 0.85, 1.8);
+          taperedStroke(g, pts, "#0c0712", 8.5, 0.9, 1);
+        }
 
-          for (const l of chainPoints(start, end, 18 * (1 - tight) + 2, easeOutCubic(reach))) chainLink(g, l.x, l.y, l.angle, l.flat, 0.9, "#9a96aa");
+        // Chains lash out of two shadow rifts on the far side and lock iron cuffs onto the row.
+        const reach = clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs)) / (CLAMP_MS - CHAIN_MS));
 
-          if (reach >= 1) {
-            const snap = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs)) / 120);
+        const open = envelope(clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs) + 200) / (TOTAL_MS - CHAIN_MS)), 0.12, 0.25);
+
+        if (open > 0) {
+          spritePx(g, pool, rift.x, rift.y, 44, 64, open, false);
+          g.globalCompositeOperation = "lighter";
+          g.strokeStyle = "#7a4ab0";
+          g.lineWidth = 1.6;
+
+          for (let n = 0; n < 3; n++) {
+            const a = -t / 260 + (n * Math.PI * 2) / 3;
+
+            g.globalAlpha = open * 0.8;
+            g.beginPath();
+            g.ellipse(rift.x, rift.y, 9 + n * 4, 18 + n * 6, 0, a, a + 2);
+            g.stroke();
+          }
+        }
+
+        if (reach > 0) {
+          cuffs.forEach((cuff, n) => {
+            const end = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
+
+            const tight = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs) - 120) / 200);
+
+            const start = { x: rift.x, y: rift.y + (n ? 8 : -8) };
 
             g.globalAlpha = fade;
-            shackle(g, end.x, end.y, cuff.r * (1.5 - 0.5 * snap), Math.PI / 2 + dir * 0.25);
-          }
-        });
-      }
 
-      g.globalAlpha = 1;
-    });
+            for (const l of chainPoints(start, end, 18 * (1 - tight) + 2, easeOutCubic(reach))) chainLink(g, l.x, l.y, l.angle, l.flat, 0.9, "#9a96aa");
+
+            if (reach >= 1) {
+              const snap = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs)) / 120);
+
+              g.globalAlpha = fade;
+              shackle(g, end.x, end.y, cuff.r * (1.5 - 0.5 * snap), Math.PI / 2 + dir * 0.25);
+            }
+          });
+        }
+
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        const m = drag.sample(t);
+
+        // Heavy smoke sinking off the row, and dust where its feet scrape as it is hauled back.
+        if (t < FADE_MS - ARCHETYPE_FX.slow.impactMs && chance(0.5, dt)) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
+
+        if (t > CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 140 && t < 1400 && chance(0.5, dt)) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
+      },
+    );
 
     for (const [n, cuff] of cuffs.entries()) {
-      schedule(stage, CLAMP_MS - ARCHETYPE_FX.slow.impactMs + n * 40, () => {
-        const m = drag.sample(t);
+      const when = CLAMP_MS - ARCHETYPE_FX.slow.impactMs + n * 40;
+
+      schedule(stage, when, () => {
+        const m = drag.sample(when);
 
         const at = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
 
@@ -191,23 +203,10 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
       });
     }
 
-    const heavy = el
-      ? Promise.all([
-          animateEl(stage, el, drag.keyframes, { duration: drag.duration, easing: "ease-in-out" }),
-          animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.65) brightness(.72)", offset: 0.25 }, { filter: "grayscale(.65) brightness(.72)", offset: 0.8 }, { filter: "none" }], { duration: drag.duration }),
-        ])
-      : wait(stage, 0);
-
-    const run = tween(stage, TOTAL_MS - ARCHETYPE_FX.slow.impactMs, (k, dt) => {
-      t = k * (TOTAL_MS - ARCHETYPE_FX.slow.impactMs);
-
-      const m = drag.sample(t);
-
-      // Heavy smoke sinking off the row, and dust where its feet scrape as it is hauled back.
-      if (t < FADE_MS - ARCHETYPE_FX.slow.impactMs && chance(0.5, dt)) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
-
-      if (t > CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 140 && t < 1400 && chance(0.5, dt)) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
-    }).then(hide);
+    const heavy = Promise.all([
+      animateEl(stage, el, drag.keyframes, { duration: drag.duration, easing: "ease-in-out" }),
+      animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.65) brightness(.72)", offset: 0.25 }, { filter: "grayscale(.65) brightness(.72)", offset: 0.8 }, { filter: "none" }], { duration: drag.duration }),
+    ]);
 
     await Promise.all([run, heavy]);
   });

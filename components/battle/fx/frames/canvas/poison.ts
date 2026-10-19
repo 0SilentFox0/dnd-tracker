@@ -70,7 +70,7 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
     bubbles = bubbles.filter((b) => {
       b.age += dt;
       b.y += b.vy * dt;
-      b.x += Math.sin(b.age * 9 + b.phase) * 0.5;
+      b.x += Math.sin(b.age * 9 + b.phase) * 30 * dt;
 
       if (b.age < b.life && b.y > box.y + b.r) return true;
 

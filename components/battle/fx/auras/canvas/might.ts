@@ -1,4 +1,4 @@
-import { sword } from "../../runtime/shapes";
+import { goldBlade } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
 import { centredSprite, drawCentred, outside } from "./kit";
 import type { AuraAnimation, AuraCtx } from "./types";
@@ -6,6 +6,8 @@ import type { AuraAnimation, AuraCtx } from "./types";
 const GLINT_S = 3;
 
 const LEN = 3.8;
+
+const GHOST_GOLD = ["rgba(255,248,220,0.85)", "rgba(255,220,120,0.7)", "rgba(200,140,40,0.6)"];
 
 // The blade is the same every frame: painted once and blitted.
 function blade(ctx: AuraCtx) {
@@ -16,13 +18,7 @@ function blade(ctx: AuraCtx) {
     g.translate(-len / 2, 0);
     g.shadowColor = "#ffd86b";
     g.shadowBlur = 8 * ctx.s;
-
-    const grad = g.createLinearGradient(0, -len * 0.06, 0, len * 0.06);
-
-    grad.addColorStop(0, "rgba(255,248,220,0.85)");
-    grad.addColorStop(0.5, "rgba(255,220,120,0.7)");
-    grad.addColorStop(1, "rgba(200,140,40,0.6)");
-    sword(g, len, grad, "rgba(200,144,30,0.75)");
+    goldBlade(g, len, "rgba(200,144,30,0.75)", { stops: GHOST_GOLD });
   });
 }
 

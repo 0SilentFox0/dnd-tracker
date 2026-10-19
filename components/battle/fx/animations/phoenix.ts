@@ -1,11 +1,11 @@
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic } from "../runtime/easing";
 import { summonSpot } from "../runtime/figure";
-import { bezier, chance, type FxPoint, rand } from "../runtime/geometry";
+import { bezier, chance, type FxPoint, perTick, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { dropPath, feather } from "../runtime/shapes";
-import { schedule, show, tween } from "../runtime/stage";
+import { schedule, timeline } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
@@ -133,53 +133,73 @@ export const phoenix: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const embers: FxPoint[] = Array.from({ length: 6 }, () => ({ x: rand(-10, 10), y: rand(-8, 8) }));
 
-    let t = 0;
-
     let pos = start;
 
     let tilt = 0;
 
-    const hide = show(stage, (g) => {
-      const time = t / 1000;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const time = t / 1000;
 
-      // A handful of embers thrown down at the caster's feet.
-      const thrown = clamp01(t / THROW_MS);
+        // A handful of embers thrown down at the caster's feet.
+        const thrown = clamp01(t / THROW_MS);
 
-      if (thrown < 1) {
-        for (const e of embers) {
-          const p = bezier(from, { x: (from.x + x) / 2, y: Math.min(from.y, ground) - 30 }, { x: x + e.x, y: ground }, thrown);
+        if (thrown < 1) {
+          for (const e of embers) {
+            const p = bezier(from, { x: (from.x + x) / 2, y: Math.min(from.y, ground) - 30 }, { x: x + e.x, y: ground }, thrown);
 
-          spritePx(g, glow("#ff8a1f"), p.x + e.x * thrown, p.y + e.y * (1 - thrown), 10, undefined, 0.9);
+            spritePx(g, glow("#ff8a1f"), p.x + e.x * thrown, p.y + e.y * (1 - thrown), 10, undefined, 0.9);
+          }
         }
-      }
 
-      // The column of flame over the battlefield.
-      const pillar = clamp01((t - THROW_MS) / 220) * (1 - clamp01((t - RISE_MS - 400) / 500));
+        // The column of flame over the battlefield.
+        const pillar = clamp01((t - THROW_MS) / 220) * (1 - clamp01((t - RISE_MS - 400) / 500));
 
-      if (pillar > 0) {
-        lightBeam(g, x, Math.max(-20, ground - H * 1.9), ground + 4, H * 0.3, pillar * 0.8, "255,110,25", 0.3);
-        lightBeam(g, x, Math.max(-20, ground - H * 1.5), ground, H * 0.1, pillar * 0.7, "255,235,160", 0.3);
-        spritePx(g, glow("#ff5a10"), x, ground, H * 1.2, H * 0.25, pillar * 0.8);
-      }
+        if (pillar > 0) {
+          lightBeam(g, x, Math.max(-20, ground - H * 1.9), ground + 4, H * 0.3, pillar * 0.8, "255,110,25", 0.3);
+          lightBeam(g, x, Math.max(-20, ground - H * 1.5), ground, H * 0.1, pillar * 0.7, "255,235,160", 0.3);
+          spritePx(g, glow("#ff5a10"), x, ground, H * 1.2, H * 0.25, pillar * 0.8);
+        }
 
-      const fly = clamp01((t - RISE_MS) / (TOTAL_MS - RISE_MS - 250));
+        const fly = clamp01((t - RISE_MS) / (TOTAL_MS - RISE_MS - 250));
 
-      if (fly <= 0 || fly >= 1) return;
+        if (fly <= 0 || fly >= 1) return;
 
-      const open = easeOutCubic(clamp01((t - RISE_MS - 150) / 450));
+        const open = easeOutCubic(clamp01((t - RISE_MS - 150) / 450));
 
-      const flap = Math.sin(time * 13) * 0.45 * open;
+        const flap = Math.sin(time * 13) * 0.45 * open;
 
-      const fade = 1 - clamp01((fly - 0.82) / 0.18);
+        const fade = 1 - clamp01((fly - 0.82) / 0.18);
 
-      g.save();
-      g.translate(pos.x, pos.y);
-      g.rotate(tilt);
-      g.globalAlpha = fade;
-      bird(g, S * (0.6 + 0.4 * clamp01(fly / 0.3)), open, flap, time);
-      g.restore();
-      g.globalAlpha = 1;
-    });
+        g.save();
+        g.translate(pos.x, pos.y);
+        g.rotate(tilt);
+        g.globalAlpha = fade;
+        bird(g, S * (0.6 + 0.4 * clamp01(fly / 0.3)), open, flap, time);
+        g.restore();
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        const fly = clamp01((t - RISE_MS) / (TOTAL_MS - RISE_MS - 250));
+
+        if (t > THROW_MS && t < RISE_MS + 300) perTick(2, dt, () => emit(stage, { x: x + rand(-H * 0.2, H * 0.2), y: ground - rand(0, H * 0.6) }, { tints: FLAME, speed: [80, 200], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.4, 0.8], scale: [0.6, 0.08], gravity: -140 }));
+
+        if (fly <= 0 || fly >= 1) return;
+
+        // Up out of the fire, hovering for its cry, then away over the field.
+        const glide = clamp01((fly - 0.62) / 0.38);
+
+        pos = glide > 0 ? bezier(peak, { x: peak.x + dir * H * 0.3, y: peak.y }, away, glide * glide) : { x, y: start.y + (peak.y - start.y) * easeOutCubic(clamp01(fly / 0.4)) + Math.sin(fly * 30) * 2 };
+        tilt = dir * glide * 0.5;
+
+        if (chance(0.7, dt)) emit(stage, { x: pos.x + rand(-S * 0.3, S * 0.3), y: pos.y + S * rand(0.6, 1.1) }, { tints: FLAME, speed: [10, 40], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.3, 0.6], scale: [0.22, 0.04], gravity: -60 });
+
+        // Its fire burns down to ash at the end: even death only sends it back for a moment.
+        if (fly > 0.8) perTick(2, dt, () => emit(stage, { x: pos.x + rand(-S * 0.4, S * 0.4), y: pos.y + rand(-S * 0.2, S * 0.2) }, { tints: ASH, speed: [10, 30], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.6, 1], scale: [0.2, 0.08], gravity: 40, additive: false, alpha: 0.8 }));
+      },
+    );
 
     schedule(stage, THROW_MS, () => {
       void flash(stage, { x, y: ground - H * 0.4 }, "#ff8a1f", H * 1.8, 520);
@@ -194,24 +214,5 @@ export const phoenix: FxAnimation = ({ stage, from, to, targetEls }) =>
       for (let n = 0; n < 3; n++) schedule(stage, n * 110, () => void ring(stage, { x: pos.x, y: pos.y - S * 0.4 }, "#ffe08a", 520, S * (0.9 + n * 0.3), 2));
     });
 
-    await tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      const fly = clamp01((t - RISE_MS) / (TOTAL_MS - RISE_MS - 250));
-
-      if (t > THROW_MS && t < RISE_MS + 300) for (let n = 0; n < 2; n++) emit(stage, { x: x + rand(-H * 0.2, H * 0.2), y: ground - rand(0, H * 0.6) }, { tints: FLAME, speed: [80, 200], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.4, 0.8], scale: [0.6, 0.08], gravity: -140 });
-
-      if (fly <= 0 || fly >= 1) return;
-
-      // Up out of the fire, hovering for its cry, then away over the field.
-      const glide = clamp01((fly - 0.62) / 0.38);
-
-      pos = glide > 0 ? bezier(peak, { x: peak.x + dir * H * 0.3, y: peak.y }, away, glide * glide) : { x, y: start.y + (peak.y - start.y) * easeOutCubic(clamp01(fly / 0.4)) + Math.sin(fly * 30) * 2 };
-      tilt = dir * glide * 0.5;
-
-      if (chance(0.7, dt)) emit(stage, { x: pos.x + rand(-S * 0.3, S * 0.3), y: pos.y + S * rand(0.6, 1.1) }, { tints: FLAME, speed: [10, 40], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.3, 0.6], scale: [0.22, 0.04], gravity: -60 });
-
-      // Its fire burns down to ash at the end: even death only sends it back for a moment.
-      if (fly > 0.8) for (let n = 0; n < 2; n++) emit(stage, { x: pos.x + rand(-S * 0.4, S * 0.4), y: pos.y + rand(-S * 0.2, S * 0.2) }, { tints: ASH, speed: [10, 30], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.6, 1], scale: [0.2, 0.08], gravity: 40, additive: false, alpha: 0.8 });
-    }).then(() => void hide());
+    await run;
   });

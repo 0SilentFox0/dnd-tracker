@@ -1,5 +1,5 @@
 import { pick, rand } from "../../runtime/geometry";
-import { sword } from "../../runtime/shapes";
+import { goldBlade } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
 import { centredSprite } from "./kit";
 import type { AuraAnimation } from "./types";
@@ -18,13 +18,7 @@ function bladePaint(g: CanvasRenderingContext2D, len: number, s: number, ring: n
   g.translate(-len / 2, 0);
   g.shadowColor = "#ffd86b";
   g.shadowBlur = (6 + ring * 8) * s;
-
-  const blade = g.createLinearGradient(0, -len * 0.06, 0, len * 0.06);
-
-  blade.addColorStop(0, "#fffbe8");
-  blade.addColorStop(0.5, "#ffe39a");
-  blade.addColorStop(1, "#d8a030");
-  sword(g, len, blade, "#8a6a2a");
+  goldBlade(g, len, "#8a6a2a");
 }
 
 export const holyweaponAura: AuraAnimation = {

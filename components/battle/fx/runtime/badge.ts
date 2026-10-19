@@ -1,3 +1,5 @@
+import { easeOutCubic, envelope } from "./easing";
+
 export interface BadgeLook {
   top: string;
   bottom: string;
@@ -40,6 +42,13 @@ export function shieldBadge(g: CanvasRenderingContext2D, x: number, y: number, a
   g.textBaseline = "middle";
   g.fillText(text, 0, 0);
   g.restore();
+}
+
+/** A stat-bonus badge at `y` that fades in and rises by `rise` px over `k` ∈ [0, 1]. */
+export function risingBadge(g: CanvasRenderingContext2D, x: number, y: number, k: number, text: string, look: BadgeLook, rise: number) {
+  if (k <= 0 || k >= 1) return;
+
+  shieldBadge(g, x, y - easeOutCubic(k) * rise, envelope(k, 0.12, 0.3), text, look);
 }
 
 /** A stat-penalty badge over `top` that fades in and sags downwards over `k` ∈ [0, 1]; kept below the layer's top edge. */

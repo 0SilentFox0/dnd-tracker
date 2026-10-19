@@ -287,6 +287,16 @@ export function sword(g: CanvasRenderingContext2D, len: number, blade: string | 
   g.fill();
 }
 
+export const GOLD_BLADE = ["#fffbe8", "#ffe39a", "#d8a030"];
+
+/** `sword` with a blade shaded across its width by `stops` (top to bottom), ±`half` px. */
+export function goldBlade(g: CanvasRenderingContext2D, len: number, hilt: string, { half = len * 0.06, stops = GOLD_BLADE }: { half?: number; stops?: readonly string[] } = {}) {
+  const grad = g.createLinearGradient(0, -half, 0, half);
+
+  stops.forEach((c, i) => grad.addColorStop(i / (stops.length - 1), c));
+  sword(g, len, grad, hilt);
+}
+
 export function hexPath(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
   g.beginPath();
 

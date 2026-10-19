@@ -202,4 +202,35 @@ describe("stage", () => {
     expect(anim.cancel).toHaveBeenCalledTimes(1);
     expect(s.animations.size).toBe(0);
   });
+
+  it("timeline draws with the elapsed ms, ticks before each draw and removes its draw at the end", async () => {
+    const { stageFor, timeline } = await load();
+
+    const s = stageFor(document.createElement("div"));
+
+    const drawn: number[] = [];
+
+    const ticks: number[] = [];
+
+    let done = false;
+
+    void timeline(s, 100, (_, t) => drawn.push(t), (t) => ticks.push(t)).then(() => (done = true));
+
+    flushFrames(8, 20);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(done).toBe(true);
+    expect(drawn.slice(0, 3)).toEqual(ticks.slice(0, 3));
+    expect(drawn.every((t, i) => !i || t >= drawn[i - 1])).toBe(true);
+    expect(s.draws.size).toBe(0);
+  });
+
+  it("animateEl without an element resolves at once and owns nothing", async () => {
+    const { animateEl, stageFor } = await load();
+
+    const s = stageFor(document.createElement("div"));
+
+    await expect(animateEl(s, null, [], { duration: 100 })).resolves.toBeUndefined();
+    expect(s.animations.size).toBe(0);
+  });
 });

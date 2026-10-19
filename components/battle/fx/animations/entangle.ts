@@ -138,8 +138,8 @@ export const entangle: FxAnimation = async ({ stage, from, to, palette, spec }) 
 
     for (let i = 0; i < 12; i++) emit(stage, { x: target.x + rand(-30, 30), y: target.y + rand(-20, 20) }, { tints: ["#e8ffb0", "#a8e060", "#ffffff"], speed: [20, 80], life: [0.3, 0.6], scale: [0.18, 0.02], drag: 2 });
 
-    await tween(stage, HOLD_MS, (k) => {
-      for (const v of vines) v.pts[3].x += Math.sin(k * 30 + v.side) * 0.08;
+    await tween(stage, HOLD_MS, (k, dt) => {
+      for (const v of vines) v.pts[3].x += Math.sin(k * 30 + v.side) * 4.8 * dt;
     });
     await tween(stage, FADE_MS, (k) => (fade = 1 - k));
     hide();

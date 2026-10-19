@@ -1,5 +1,5 @@
 import { easeOutCubic } from "../runtime/easing";
-import { chance, type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { chance, type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { burst, impactSplash, perTarget } from "../runtime/recipes";
 import { jaggedShape, polyPath } from "../runtime/shapes";
@@ -76,7 +76,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
     pos = { x: start.x + (target.x - start.x) * e, y: start.y + (target.y - start.y) * e };
     spin = k * 6;
 
-    for (let i = 0; i < 3; i++) emit(stage, pos, { tints: palette.tints, speed: [10, 60], life: [0.25, 0.55], scale: [0.6, 0.06], spread: 6, drag: 1.5 });
+    perTick(3, dt, () => emit(stage, pos, { tints: palette.tints, speed: [10, 60], life: [0.25, 0.55], scale: [0.6, 0.06], spread: 6, drag: 1.5 }));
 
     if (chance(0.5, dt)) emit(stage, pos, { tints: SMOKE, speed: [5, 20], life: [0.5, 0.9], scale: [0.5, 1.3], spread: 4, additive: false, alpha: 0.5, gravity: -20 });
   });

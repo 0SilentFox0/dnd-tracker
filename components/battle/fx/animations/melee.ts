@@ -14,9 +14,7 @@ export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palet
 
   if (!target) return;
 
-  const move = actorEl
-    ? animateEl(stage, actorEl, [{ transform: "none" }, { transform: `translateX(${lungeOffset(from, target)}px) scale(1.06)`, offset: 0.45 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.5,0,.2,1)" })
-    : wait(stage, 0);
+  const move = animateEl(stage, actorEl, [{ transform: "none" }, { transform: `translateX(${lungeOffset(from, target)}px) scale(1.06)`, offset: 0.45 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.5,0,.2,1)" });
 
   const at = spec.hit ? target : { x: target.x + 30, y: target.y };
 

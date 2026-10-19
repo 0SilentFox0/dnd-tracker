@@ -37,15 +37,15 @@ export function impactSplash(s: Stage, at: FxPoint, palette: FxPalette, opts: { 
  * A column of light rising from `base` for 1 s: it grows to `height` at `rise` × speed and fades after `holdUntil`.
  * `onTick` gets the progress, for the particles that rise with it.
  */
-export function pillar(s: Stage, base: FxPoint, opts: { tint: string; width: number; height: number; rise: number; holdUntil: number }, onTick: (k: number) => void) {
+export function pillar(s: Stage, base: FxPoint, opts: { tint: string; width: number; height: number; rise: number; holdUntil: number }, onTick: (k: number, dt: number) => void) {
   let k = 0;
 
   const tex = glow(opts.tint);
 
   const hide = show(s, (g) => sprite(g, tex, base.x, base.y, opts.width, opts.height * Math.min(1, k * opts.rise), fadeOut(k, opts.holdUntil), true, 0.9));
 
-  return tween(s, 1000, (v) => {
+  return tween(s, 1000, (v, dt) => {
     k = v;
-    onTick(v);
+    onTick(v, dt);
   }).then(hide);
 }

@@ -4,7 +4,7 @@ import { farSide, type FxPoint, rand } from "../runtime/geometry";
 import { flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { arrow } from "../runtime/shapes";
-import { show, tween } from "../runtime/stage";
+import { timeline } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import type { FxAnimation } from "./types";
 
@@ -47,135 +47,135 @@ export const deflect: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const ripples: { at: number; angle: number }[] = [];
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const life = envelope(t / TOTAL_MS, 0.12, 0.2);
 
-    const hide = show(stage, (g) => {
-      const life = envelope(t / TOTAL_MS, 0.12, 0.2);
+        const spin = t / 260;
 
-      const spin = t / 260;
-
-      // The swirling veil: thin sheets of light chasing each other round the hero.
-      g.save();
-      g.translate(target.x, target.y);
-      g.globalCompositeOperation = "lighter";
-      g.lineCap = "round";
-
-      const fill = g.createRadialGradient(0, 0, ry * 0.4, 0, 0, rx);
-
-      fill.addColorStop(0, "rgba(255,240,200,0)");
-      fill.addColorStop(1, "rgba(255,226,150,0.12)");
-      g.globalAlpha = life;
-      g.fillStyle = fill;
-      g.beginPath();
-      g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-      g.fill();
-
-      for (let s = 0; s < 4; s++) {
-        const head = spin * (s % 2 ? -0.7 : 1) + (s * Math.PI) / 2;
-
-        const span = 0.9 + 0.5 * Math.sin(t / 300 + s);
-
-        const k = 1 + (s % 2) * 0.08;
-
-        for (let b = 0; b < 2; b++) {
-          g.globalAlpha = life * (b ? 0.95 : 0.3);
-          g.strokeStyle = b ? "#fffbe8" : "#ffd86b";
-          g.lineWidth = b ? 1.6 : 8;
-          g.beginPath();
-          g.ellipse(0, 0, rx * k, ry * k, 0, head, head + span * life);
-          g.stroke();
-        }
-      }
-
-      // Where an arrow glanced, the veil flares in a short bright arc.
-      for (const r of ripples) {
-        const k = (t - r.at) / 450;
-
-        if (k <= 0 || k >= 1) continue;
-
-        g.globalAlpha = 1 - k;
-        g.strokeStyle = "#ffffff";
-        g.lineWidth = 3 * (1 - k) + 1;
-        g.beginPath();
-        g.ellipse(0, 0, rx * (1 + k * 0.12), ry * (1 + k * 0.12), 0, r.angle - 0.5 - k * 0.4, r.angle + 0.5 + k * 0.4);
-        g.stroke();
-      }
-
-      g.restore();
-
-      g.globalCompositeOperation = "source-over";
-
-      for (const a of arrows) {
-        const k = (t - a.at) / FLIGHT_MS;
-
-        if (k <= 0) continue;
-
-        let x: number, y: number, rot: number, alpha: number;
-
-        if (a.free) {
-          const age = (t - a.free.t0) / 1000;
-
-          ({ x, y, rot } = a.free);
-          alpha = clamp01(1 - (age - 0.55) / 0.35);
-        } else {
-          const e = Math.min(1, k);
-
-          x = a.start.x + (a.hit.x - a.start.x) * e;
-          y = a.start.y + (a.hit.y - a.start.y) * e;
-          rot = Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x);
-          alpha = Math.min(1, k * 4);
-        }
-
-        if (alpha <= 0) continue;
-
+        // The swirling veil: thin sheets of light chasing each other round the hero.
         g.save();
-        g.translate(x, y);
-        g.rotate(rot);
-        g.globalAlpha = alpha;
+        g.translate(target.x, target.y);
+        g.globalCompositeOperation = "lighter";
+        g.lineCap = "round";
 
-        if (!a.free) {
-          const trail = g.createLinearGradient(-70, 0, 0, 0);
+        const fill = g.createRadialGradient(0, 0, ry * 0.4, 0, 0, rx);
 
-          trail.addColorStop(0, "rgba(255,255,255,0)");
-          trail.addColorStop(1, "rgba(255,255,255,0.55)");
-          g.strokeStyle = trail;
-          g.lineWidth = 2;
+        fill.addColorStop(0, "rgba(255,240,200,0)");
+        fill.addColorStop(1, "rgba(255,226,150,0.12)");
+        g.globalAlpha = life;
+        g.fillStyle = fill;
+        g.beginPath();
+        g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        g.fill();
+
+        for (let s = 0; s < 4; s++) {
+          const head = spin * (s % 2 ? -0.7 : 1) + (s * Math.PI) / 2;
+
+          const span = 0.9 + 0.5 * Math.sin(t / 300 + s);
+
+          const k = 1 + (s % 2) * 0.08;
+
+          for (let b = 0; b < 2; b++) {
+            g.globalAlpha = life * (b ? 0.95 : 0.3);
+            g.strokeStyle = b ? "#fffbe8" : "#ffd86b";
+            g.lineWidth = b ? 1.6 : 8;
+            g.beginPath();
+            g.ellipse(0, 0, rx * k, ry * k, 0, head, head + span * life);
+            g.stroke();
+          }
+        }
+
+        // Where an arrow glanced, the veil flares in a short bright arc.
+        for (const r of ripples) {
+          const k = (t - r.at) / 450;
+
+          if (k <= 0 || k >= 1) continue;
+
+          g.globalAlpha = 1 - k;
+          g.strokeStyle = "#ffffff";
+          g.lineWidth = 3 * (1 - k) + 1;
           g.beginPath();
-          g.moveTo(-70, 0);
-          g.lineTo(-38, 0);
+          g.ellipse(0, 0, rx * (1 + k * 0.12), ry * (1 + k * 0.12), 0, r.angle - 0.5 - k * 0.4, r.angle + 0.5 + k * 0.4);
           g.stroke();
         }
 
-        g.shadowColor = "rgba(0,0,0,0.7)";
-        g.shadowBlur = 3;
-        arrow(g, 40);
         g.restore();
-      }
-    });
 
-    const run = tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
+        g.globalCompositeOperation = "source-over";
 
-      for (const a of arrows) {
-        if (a.free) {
-          a.free.vy += 600 * dt;
-          a.free.x += a.free.vx * dt;
-          a.free.y += a.free.vy * dt;
-          a.free.rot += a.free.spin * dt;
-          continue;
+        for (const a of arrows) {
+          const k = (t - a.at) / FLIGHT_MS;
+
+          if (k <= 0) continue;
+
+          let x: number, y: number, rot: number, alpha: number;
+
+          if (a.free) {
+            const age = (t - a.free.t0) / 1000;
+
+            ({ x, y, rot } = a.free);
+            alpha = clamp01(1 - (age - 0.55) / 0.35);
+          } else {
+            const e = Math.min(1, k);
+
+            x = a.start.x + (a.hit.x - a.start.x) * e;
+            y = a.start.y + (a.hit.y - a.start.y) * e;
+            rot = Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x);
+            alpha = Math.min(1, k * 4);
+          }
+
+          if (alpha <= 0) continue;
+
+          g.save();
+          g.translate(x, y);
+          g.rotate(rot);
+          g.globalAlpha = alpha;
+
+          if (!a.free) {
+            const trail = g.createLinearGradient(-70, 0, 0, 0);
+
+            trail.addColorStop(0, "rgba(255,255,255,0)");
+            trail.addColorStop(1, "rgba(255,255,255,0.55)");
+            g.strokeStyle = trail;
+            g.lineWidth = 2;
+            g.beginPath();
+            g.moveTo(-70, 0);
+            g.lineTo(-38, 0);
+            g.stroke();
+          }
+
+          g.shadowColor = "rgba(0,0,0,0.7)";
+          g.shadowBlur = 3;
+          arrow(g, 40);
+          g.restore();
         }
+      },
+      (t, dt) => {
+        for (const a of arrows) {
+          if (a.free) {
+            a.free.vy += 600 * dt;
+            a.free.x += a.free.vx * dt;
+            a.free.y += a.free.vy * dt;
+            a.free.rot += a.free.spin * dt;
+            continue;
+          }
 
-        if (t < a.at + FLIGHT_MS) continue;
+          if (t < a.at + FLIGHT_MS) continue;
 
-        // Glances off: knocked back the way it came and up (or down), then drops spinning.
-        const angle = Math.atan2((a.hit.y - target.y) / ry, (a.hit.x - target.x) / rx);
+          // Glances off: knocked back the way it came and up (or down), then drops spinning.
+          const angle = Math.atan2((a.hit.y - target.y) / ry, (a.hit.x - target.x) / rx);
 
-        a.free = { x: a.hit.x, y: a.hit.y, vx: dir * rand(50, 110), vy: (a.hit.y < target.y ? -1 : 0.4) * rand(90, 170) - 60, rot: Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x), spin: dir * rand(9, 15) * (a.hit.y < target.y ? -1 : 1), t0: t };
-        ripples.push({ at: t, angle });
-        void flash(stage, a.hit, "#fff1b8", 46, 260);
-        void streakBurst(stage, a.hit, { colors: SPARKS, count: 8, angle: Math.atan2(a.start.y - a.hit.y, a.start.x - a.hit.x), cone: 0.9, speed: [100, 220], life: [0.15, 0.3], gravity: 300, width: [0.9, 1.5] });
-      }
-    }).then(hide);
+          a.free = { x: a.hit.x, y: a.hit.y, vx: dir * rand(50, 110), vy: (a.hit.y < target.y ? -1 : 0.4) * rand(90, 170) - 60, rot: Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x), spin: dir * rand(9, 15) * (a.hit.y < target.y ? -1 : 1), t0: t };
+          ripples.push({ at: t, angle });
+          void flash(stage, a.hit, "#fff1b8", 46, 260);
+          void streakBurst(stage, a.hit, { colors: SPARKS, count: 8, angle: Math.atan2(a.start.y - a.hit.y, a.start.x - a.hit.x), cone: 0.9, speed: [100, 220], life: [0.15, 0.3], gravity: 300, width: [0.9, 1.5] });
+        }
+      },
+    );
+
 
     await run;
   });

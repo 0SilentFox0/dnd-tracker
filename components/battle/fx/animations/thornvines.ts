@@ -4,7 +4,7 @@ import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { dropPath } from "../runtime/shapes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
@@ -57,8 +57,6 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const drops: Drop[] = [];
 
-    let t = 0;
-
     let amp = 0;
 
     // A point on a vine at u ∈ [0, 1] of its length; `depth` > 0 is the front of the row.
@@ -100,55 +98,83 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
       }
     };
 
-    const hide = show(stage, (g) => {
-      const grown = easeOutCubic(clamp01((t - SEED_MS) / (BIND_MS - SEED_MS)));
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const grown = easeOutCubic(clamp01((t - SEED_MS) / (BIND_MS - SEED_MS)));
 
-      const wither = clamp01((t - TOTAL_MS + 500) / 500);
+        const wither = clamp01((t - TOTAL_MS + 500) / 500);
 
-      if (grown <= 0) return;
+        if (grown <= 0) return;
 
-      g.globalCompositeOperation = "source-over";
-      g.lineCap = "round";
-      g.globalAlpha = 1 - wither;
+        g.globalCompositeOperation = "source-over";
+        g.lineCap = "round";
+        g.globalAlpha = 1 - wither;
 
-      for (const v of vines) drawVine(g, v, grown, false);
+        for (const v of vines) drawVine(g, v, grown, false);
 
-      for (const v of vines) drawVine(g, v, grown, true);
+        for (const v of vines) drawVine(g, v, grown, true);
 
-      // Thorns along the front turns, beaded with yellow sap.
-      for (const th of thorns) {
-        if (th.u > grown) continue;
+        // Thorns along the front turns, beaded with yellow sap.
+        for (const th of thorns) {
+          if (th.u > grown) continue;
 
-        const p = at(vines[th.vine], th.u);
+          const p = at(vines[th.vine], th.u);
 
-        if (p.depth <= 0) continue;
+          if (p.depth <= 0) continue;
 
-        const len = (th.vine === 2 ? 4.5 : 7) * clamp01((grown - th.u) / 0.08);
+          const len = (th.vine === 2 ? 4.5 : 7) * clamp01((grown - th.u) / 0.08);
 
-        g.fillStyle = "#16260c";
-        g.beginPath();
-        g.moveTo(p.x - 2.4, p.y);
-        g.lineTo(p.x + th.side * 2, p.y - th.side * len);
-        g.lineTo(p.x + 2.4, p.y);
-        g.closePath();
-        g.fill();
-
-        if (t > BIND_MS) {
-          g.fillStyle = "#f2e24a";
+          g.fillStyle = "#16260c";
           g.beginPath();
-          g.arc(p.x + th.side * 0.8, p.y - th.side * len * 0.75, 1.3, 0, Math.PI * 2);
+          g.moveTo(p.x - 2.4, p.y);
+          g.lineTo(p.x + th.side * 2, p.y - th.side * len);
+          g.lineTo(p.x + 2.4, p.y);
+          g.closePath();
+          g.fill();
+
+          if (t > BIND_MS) {
+            g.fillStyle = "#f2e24a";
+            g.beginPath();
+            g.arc(p.x + th.side * 0.8, p.y - th.side * len * 0.75, 1.3, 0, Math.PI * 2);
+            g.fill();
+          }
+        }
+
+        for (const d of drops) {
+          g.fillStyle = "#e8d030";
+          dropPath(g, d.x, d.y, d.size, 2.2);
           g.fill();
         }
-      }
 
-      for (const d of drops) {
-        g.fillStyle = "#e8d030";
-        dropPath(g, d.x, d.y, d.size, 2.2);
-        g.fill();
-      }
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        // The coils close in at the bind and pulse tighter with every struggle.
+        const tight = clamp01((t - BIND_MS) / 160);
 
-      g.globalAlpha = 1;
-    });
+        amp = 1.2 - 0.35 * tight + Math.max(0, Math.sin(((t - BIND_MS) / 650) * Math.PI * 2)) * 0.06 * tight;
+
+        // Yellow sap oozing from the thorns and dripping.
+        if (t > BIND_MS + 100 && t < TOTAL_MS - 600 && chance(0.25, dt)) {
+          const th = thorns[Math.floor(rand(0, thorns.length))];
+
+          const p = at(vines[th.vine], th.u);
+
+          if (p.depth > 0) drops.push({ x: p.x, y: p.y + 2, vy: 0, size: rand(1.4, 2.2) });
+        }
+
+        for (const d of drops) {
+          d.vy += 260 * dt;
+          d.y += d.vy * dt;
+        }
+
+        for (let n = drops.length - 1; n >= 0; n--) if (drops[n].y > ground + 14) drops.splice(n, 1);
+
+        if (t > BIND_MS && t < TOTAL_MS - 500 && chance(0.3, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SAP, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.18, 0.05], gravity: -15 });
+      },
+    );
 
     void shoot(stage, from, { x: target.x - w * 0.6, y: ground }, SEED_MS, "#6a9a20", SPIT, 4);
 
@@ -157,33 +183,8 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
     });
 
     schedule(stage, BIND_MS, () => {
-      if (el) void animateEl(stage, el, SQUEEZE, { duration: 1300, easing: "ease-out" });
+      void animateEl(stage, el, SQUEEZE, { duration: 1300, easing: "ease-out" });
     });
 
-    await tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      // The coils close in at the bind and pulse tighter with every struggle.
-      const tight = clamp01((t - BIND_MS) / 160);
-
-      amp = 1.2 - 0.35 * tight + Math.max(0, Math.sin(((t - BIND_MS) / 650) * Math.PI * 2)) * 0.06 * tight;
-
-      // Yellow sap oozing from the thorns and dripping.
-      if (t > BIND_MS + 100 && t < TOTAL_MS - 600 && chance(0.25, dt)) {
-        const th = thorns[Math.floor(rand(0, thorns.length))];
-
-        const p = at(vines[th.vine], th.u);
-
-        if (p.depth > 0) drops.push({ x: p.x, y: p.y + 2, vy: 0, size: rand(1.4, 2.2) });
-      }
-
-      for (const d of drops) {
-        d.vy += 260 * dt;
-        d.y += d.vy * dt;
-      }
-
-      for (let n = drops.length - 1; n >= 0; n--) if (drops[n].y > ground + 14) drops.splice(n, 1);
-
-      if (t > BIND_MS && t < TOTAL_MS - 500 && chance(0.3, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SAP, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.18, 0.05], gravity: -15 });
-    }).then(() => void hide());
+    await run;
   });

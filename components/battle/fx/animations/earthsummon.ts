@@ -4,7 +4,7 @@ import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { jaggedShape, polyPath } from "../runtime/shapes";
-import { animateEl, schedule, show, tween } from "../runtime/stage";
+import { animateEl, schedule, timeline } from "../runtime/stage";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
@@ -95,94 +95,100 @@ export const earthsummon: FxAnimation = ({ stage, to, targetEls }) =>
       size: size * H,
     }));
 
-    let t = 0;
+    const run = timeline(
+      stage,
+      TOTAL_MS,
+      (g, t) => {
+        const fade = 1 - clamp01((t - TOTAL_MS + 450) / 450);
 
-    const hide = show(stage, (g) => {
-      const fade = 1 - clamp01((t - TOTAL_MS + 450) / 450);
+        // The ground splits open with a glow of magma deep below.
+        const open = easeOutCubic(clamp01(t / BURST_MS)) * (1 - clamp01((t - LOCKED_MS) / 600));
 
-      // The ground splits open with a glow of magma deep below.
-      const open = easeOutCubic(clamp01(t / BURST_MS)) * (1 - clamp01((t - LOCKED_MS) / 600));
-
-      if (open > 0) {
-        spritePx(g, glow("#ff6a10"), x, ground, H * 1.1, 18 * open, 0.7 * open);
-        g.globalCompositeOperation = "source-over";
-        g.globalAlpha = 1;
-        g.fillStyle = "#120a04";
-        g.beginPath();
-        crack.forEach((c, n) => g.lineTo(c.x, c.y - Math.sin((n / 8) * Math.PI) * 4 * open));
-        [...crack].reverse().forEach((c, n) => g.lineTo(c.x, c.y + Math.sin(((8 - n) / 8) * Math.PI) * 3 * open));
-        g.closePath();
-        g.fill();
-      }
-
-      const locked = clamp01((t - LOCKED_MS) / 250);
-
-      g.save();
-      g.translate(x, ground);
-
-      // Magma glowing through the seams of the assembled giant.
-      if (locked > 0) {
-        const heat = locked * fade * (0.8 + Math.sin(t / 140) * 0.2);
-
-        spritePx(g, glow("#ff5a10"), 0, -H * 0.5, H * 1.3, H * 1.3, 0.5 * heat);
-        g.globalCompositeOperation = "source-over";
-        g.globalAlpha = heat;
-        g.fillStyle = "#e0480c";
-        g.save();
-        g.scale(0.92, 0.98);
-        figurePath(g, H, { bulk: BULK, armLift: 0.1 });
-        g.restore();
-        g.fill();
-      }
-
-      g.globalCompositeOperation = "source-over";
-
-      for (const b of boulders) {
-        // Thrown up by the burst, hanging, then pulled into its place.
-        const up = easeOutCubic(clamp01((t - BURST_MS) / 380));
-
-        if (up <= 0) continue;
-
-        const pull = clamp01((t - (b.arrive - 260)) / 260);
-
-        const e = pull * pull * (3 - 2 * pull);
-
-        const airX = b.air.x * up;
-
-        const airY = b.air.y * up + Math.sin(t / 200 + b.spin) * 3 * (1 - pull);
-
-        const px = airX + (b.slot.x - airX) * e;
-
-        const py = airY + (b.slot.y - airY) * e;
-
-        g.save();
-        g.translate(px, py);
-        g.rotate(b.spin * (1 - e) * 0.4 + (t / 1000) * b.spin * (1 - e));
-        g.globalAlpha = fade;
-        boulder(g, b);
-        g.restore();
-      }
-
-      // Eyes of red-hot stone.
-      if (locked > 0) {
-        const head = boulders[HEAD].slot;
-
-        for (const side of [-1, 1]) {
-          spritePx(g, glow("#ff8a1f"), head.x + side * H * 0.035, head.y + H * 0.01, H * 0.09, undefined, locked * fade);
-          spritePx(g, glow("#fff0a0"), head.x + side * H * 0.035, head.y + H * 0.01, H * 0.035, undefined, locked * fade);
+        if (open > 0) {
+          spritePx(g, glow("#ff6a10"), x, ground, H * 1.1, 18 * open, 0.7 * open);
+          g.globalCompositeOperation = "source-over";
+          g.globalAlpha = 1;
+          g.fillStyle = "#120a04";
+          g.beginPath();
+          crack.forEach((c, n) => g.lineTo(c.x, c.y - Math.sin((n / 8) * Math.PI) * 4 * open));
+          [...crack].reverse().forEach((c, n) => g.lineTo(c.x, c.y + Math.sin(((8 - n) / 8) * Math.PI) * 3 * open));
+          g.closePath();
+          g.fill();
         }
-      }
 
-      g.restore();
-      g.globalAlpha = 1;
-    });
+        const locked = clamp01((t - LOCKED_MS) / 250);
+
+        g.save();
+        g.translate(x, ground);
+
+        // Magma glowing through the seams of the assembled giant.
+        if (locked > 0) {
+          const heat = locked * fade * (0.8 + Math.sin(t / 140) * 0.2);
+
+          spritePx(g, glow("#ff5a10"), 0, -H * 0.5, H * 1.3, H * 1.3, 0.5 * heat);
+          g.globalCompositeOperation = "source-over";
+          g.globalAlpha = heat;
+          g.fillStyle = "#e0480c";
+          g.save();
+          g.scale(0.92, 0.98);
+          figurePath(g, H, { bulk: BULK, armLift: 0.1 });
+          g.restore();
+          g.fill();
+        }
+
+        g.globalCompositeOperation = "source-over";
+
+        for (const b of boulders) {
+          // Thrown up by the burst, hanging, then pulled into its place.
+          const up = easeOutCubic(clamp01((t - BURST_MS) / 380));
+
+          if (up <= 0) continue;
+
+          const pull = clamp01((t - (b.arrive - 260)) / 260);
+
+          const e = pull * pull * (3 - 2 * pull);
+
+          const airX = b.air.x * up;
+
+          const airY = b.air.y * up + Math.sin(t / 200 + b.spin) * 3 * (1 - pull);
+
+          const px = airX + (b.slot.x - airX) * e;
+
+          const py = airY + (b.slot.y - airY) * e;
+
+          g.save();
+          g.translate(px, py);
+          g.rotate(b.spin * (1 - e) * 0.4 + (t / 1000) * b.spin * (1 - e));
+          g.globalAlpha = fade;
+          boulder(g, b);
+          g.restore();
+        }
+
+        // Eyes of red-hot stone.
+        if (locked > 0) {
+          const head = boulders[HEAD].slot;
+
+          for (const side of [-1, 1]) {
+            spritePx(g, glow("#ff8a1f"), head.x + side * H * 0.035, head.y + H * 0.01, H * 0.09, undefined, locked * fade);
+            spritePx(g, glow("#fff0a0"), head.x + side * H * 0.035, head.y + H * 0.01, H * 0.035, undefined, locked * fade);
+          }
+        }
+
+        g.restore();
+        g.globalAlpha = 1;
+      },
+      (t, dt) => {
+        // Grit trickling off the stone body.
+        if (t > LOCKED_MS && t < TOTAL_MS - 300 && chance(0.35, dt)) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(H * 0.3, H * 0.8) }, { tints: DUST, speed: [5, 20], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.5, 0.8], scale: [0.18, 0.08], gravity: 220, additive: false, alpha: 0.8 });
+      },
+    );
 
     schedule(stage, BURST_MS, () => {
       void flash(stage, { x, y: ground }, "#ff8a1f", H, 380);
 
       for (let n = 0; n < 20; n++) emit(stage, { x: x + rand(-H * 0.4, H * 0.4), y: ground }, { tints: DUST, speed: [20, 90], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.45, 0.9], drag: 2, additive: false, alpha: 0.45 });
 
-      if (el) void animateEl(stage, el, SHAKE, { duration: 380 });
+      void animateEl(stage, el, SHAKE, { duration: 380 });
     });
 
     // The last boulder slams home: the giant stands, the ground shudders.
@@ -193,13 +199,8 @@ export const earthsummon: FxAnimation = ({ stage, to, targetEls }) =>
 
       for (let n = 0; n < 12; n++) emit(stage, { x: x + rand(-H * 0.2, H * 0.2), y: ground - rand(H * 0.2, H * 0.8) }, { tints: MAGMA, speed: [30, 90], life: [0.3, 0.6], scale: [0.25, 0.04], gravity: 200 });
 
-      if (el) void animateEl(stage, el, SHAKE, { duration: 420 });
+      void animateEl(stage, el, SHAKE, { duration: 420 });
     });
 
-    await tween(stage, TOTAL_MS, (k, dt) => {
-      t = k * TOTAL_MS;
-
-      // Grit trickling off the stone body.
-      if (t > LOCKED_MS && t < TOTAL_MS - 300 && chance(0.35, dt)) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(H * 0.3, H * 0.8) }, { tints: DUST, speed: [5, 20], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.5, 0.8], scale: [0.18, 0.08], gravity: 220, additive: false, alpha: 0.8 });
-    }).then(() => void hide());
+    await run;
   });
