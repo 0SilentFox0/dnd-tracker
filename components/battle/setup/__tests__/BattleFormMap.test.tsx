@@ -63,19 +63,45 @@ describe("BattleFormMap", () => {
     expect(blocked(container)[0].getAttribute("stroke")).toBe("none");
   });
 
-  it("paint mode toggles a cell on click and back", () => {
+  it("palette: drag-paints blocked cells, erase clears them", () => {
     const { container } = render(<Harness />);
 
     enable();
-    fireEvent.click(cell(container, "3:3"));
+    fireEvent.pointerDown(cell(container, "3:3"));
+    fireEvent.pointerEnter(cell(container, "4:3"));
+    fireEvent.pointerUp(window);
     expect(blocked(container)).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("switch", { name: "Малювати неігрові клітинки" }));
-    fireEvent.click(cell(container, "3:3"));
+    fireEvent.click(screen.getByRole("button", { name: "Неігрова" }));
+    fireEvent.pointerDown(cell(container, "3:3"));
+    fireEvent.pointerEnter(cell(container, "4:3"));
+    fireEvent.pointerUp(window);
+    expect(blocked(container)).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "Стерти" }));
+    fireEvent.pointerDown(container.querySelector('polygon[data-fx-cell="3:3"]') as Element);
+    fireEvent.pointerUp(window);
     expect(blocked(container)).toHaveLength(1);
+  });
 
-    fireEvent.click(cell(container, "3:3"));
-    expect(blocked(container)).toHaveLength(0);
+  it("palette: wall and hazard with label; no barrier option", () => {
+    const { container } = render(<Harness />);
+
+    enable();
+    expect(screen.queryByRole("button", { name: "Барʼєр" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Непрохідне" }));
+    fireEvent.pointerDown(cell(container, "1:1"));
+    fireEvent.pointerUp(window);
+
+    fireEvent.click(screen.getByRole("button", { name: "Небезпека" }));
+    fireEvent.change(screen.getByLabelText("Підпис небезпеки"), { target: { value: "Лава" } });
+    fireEvent.pointerDown(cell(container, "2:1"));
+    fireEvent.pointerUp(window);
+
+    expect(seen.editor.map.terrain).toEqual({ "1:1": { kind: "wall" }, "2:1": { kind: "hazard", label: "Лава" } });
+    expect(container.querySelector('[data-terrain="wall"]')).not.toBeNull();
+    expect(container.querySelector('[data-terrain="hazard"]')).not.toBeNull();
   });
 
   it("margins keep a 2x2 playable area; Однакові copies the first within limits", () => {

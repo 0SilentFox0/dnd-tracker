@@ -15,15 +15,41 @@ describe("useBattleMapEditor", () => {
     expect(result.current.value).toEqual(DEFAULT_BATTLE_MAP);
   });
 
-  it("малювання тільки в режимі paint", () => {
+  it("штрих працює тільки з активним інструментом", () => {
     const { result } = renderHook(() => useBattleMapEditor(null));
 
-    act(() => result.current.onCellClick({ x: 1, y: 1 }));
+    act(() => result.current.onStroke([{ x: 1, y: 1 }]));
     expect(result.current.map.blocked).toBeUndefined();
 
-    act(() => result.current.setPaint(true));
-    act(() => result.current.onCellClick({ x: 1, y: 1 }));
-    expect(result.current.map.blocked).toEqual(["1:1"]);
+    act(() => result.current.setTool("blocked"));
+    act(() => result.current.onStroke([{ x: 1, y: 1 }, { x: 2, y: 1 }]));
+    expect(result.current.map.blocked).toEqual(["1:1", "2:1"]);
+  });
+
+  it("палітра: непрохідне, небезпека з підписом, стерти", () => {
+    const { result } = renderHook(() => useBattleMapEditor(null));
+
+    act(() => result.current.setTool("wall"));
+    act(() => result.current.onStroke([{ x: 3, y: 3 }]));
+    expect(result.current.map.terrain).toEqual({ "3:3": { kind: "wall" } });
+
+    act(() => result.current.setHazardLabel("Вогняна стіна"));
+    act(() => result.current.setTool("hazard"));
+    act(() => result.current.onStroke([{ x: 4, y: 3 }]));
+    expect(result.current.map.terrain?.["4:3"]).toEqual({ kind: "hazard", label: "Вогняна стіна" });
+
+    act(() => result.current.setTool("erase"));
+    act(() => result.current.onStroke([{ x: 3, y: 3 }, { x: 4, y: 3 }]));
+    expect(result.current.map.terrain).toBeUndefined();
+  });
+
+  it("непрохідні клітинки рахуються в правилі 2×2", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1 }));
+
+    act(() => result.current.setTool("wall"));
+    act(() => result.current.onStroke([{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 1, y: 1 }]));
+    expect(result.current.notice).toBe(NO_PLAYABLE_NOTICE);
+    expect(result.current.map.terrain).toBeUndefined();
   });
 
   it("збережена карта відкривається з полями, фон не змінюється", () => {
@@ -57,11 +83,12 @@ describe("useBattleMapEditor", () => {
   it("малювання не залишає менше 2×2 вільних клітинок", () => {
     const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1, blocked: ["0:0", "1:0", "2:0", "3:0", "0:1", "1:1", "2:1", "3:1", "2:2"] }));
 
-    act(() => result.current.setPaint(true));
-    act(() => result.current.onCellClick({ x: 1, y: 2 }));
+    act(() => result.current.setTool("blocked"));
+    act(() => result.current.onStroke([{ x: 1, y: 2 }]));
     expect(result.current.map.blocked).toHaveLength(9);
     expect(result.current.notice).toBe("Має лишитися хоча б одна вільна ділянка 2×2");
-    act(() => result.current.onCellClick({ x: 2, y: 2 }));
+    act(() => result.current.setTool("erase"));
+    act(() => result.current.onStroke([{ x: 2, y: 2 }]));
     expect(result.current.map.blocked).toHaveLength(8);
     expect(result.current.notice).toBeNull();
   });
@@ -86,12 +113,12 @@ describe("useBattleMapEditor", () => {
     expect(result.current.map.rows).toBe(4);
   });
 
-  it("notice зникає, коли вимикають paint або карту", () => {
+  it("notice зникає, коли вимикають інструмент або карту", () => {
     const { result } = renderHook(() => useBattleMapEditor({ cols: 4, rows: 4, background: null, opacity: 1 }));
 
     act(() => result.current.setMargins({ top: 2, right: 0, bottom: 2, left: 0 }));
     expect(result.current.notice).toBeTruthy();
-    act(() => result.current.setPaint(false));
+    act(() => result.current.setTool(null));
     expect(result.current.notice).toBeNull();
 
     act(() => result.current.setMargins({ top: 2, right: 0, bottom: 2, left: 0 }));

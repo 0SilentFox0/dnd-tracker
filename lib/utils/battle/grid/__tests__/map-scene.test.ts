@@ -185,4 +185,12 @@ describe("deriveMapScene", () => {
 
     expect(s.tokenClick("e1")).toEqual({ kind: "select", id: "e1" });
   });
+
+  it("інструмент місцевості (ДМ): без зони ходу, клітинки й токени не діють", () => {
+    const s = deriveMapScene(input({ isDM: true, toolActive: true }));
+
+    expect(s.view.marks?.size).toBe(0);
+    expect(s.cellClick({ x: 1, y: 1 })).toEqual({ kind: "none" });
+    expect(s.tokenClick("e1")).toEqual({ kind: "none" });
+  });
 });

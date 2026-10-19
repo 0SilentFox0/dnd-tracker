@@ -13,6 +13,7 @@ export interface MapSceneInput {
   canAct: boolean;
   isDM: boolean;
   placing: boolean;
+  toolActive?: boolean;
   placingId: string | null;
   selectedId: string | null;
 }
@@ -41,6 +42,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
   const placing = input.placing && isDM;
 
+  const tool = Boolean(input.toolActive) && isDM;
+
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
   const marks = new Map<string, CellMark | number>();
@@ -49,7 +52,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
   const canAttack = !!current && attacks.length > 0 && (!current.actionFlags.hasUsedAction || (current.battleData.pendingExtraActions ?? 0) > 0);
 
-  if (!placing && canAct && current?.battleData.position) {
+  if (!placing && !tool && canAct && current?.battleData.position) {
     for (const [key, cost] of moveZoneMarks(map, participants, current)) marks.set(key, cost);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
@@ -68,6 +71,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
   };
 
   function tokenClick(id: string): MapClick {
+    if (tool) return { kind: "none" };
+
     const target = participants.find((p) => p.basicInfo.id === id);
 
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
@@ -88,6 +93,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
   }
 
   function cellClick(p: GridPoint): MapClick {
+    if (tool) return { kind: "none" };
+
     if (placing) {
       const placed = placingId ? participants.find((x) => x.basicInfo.id === placingId) : undefined;
 

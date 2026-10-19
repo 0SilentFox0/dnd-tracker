@@ -14,6 +14,7 @@ export {
 } from "./useBattleScene";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useDamageShake, useHpChange } from "./useHpChange";
+export { type MapTerrainTool, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { useMapViewport } from "./useMapViewport";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";

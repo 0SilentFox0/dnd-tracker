@@ -1,4 +1,5 @@
 import { cellKey, inBounds, isPlayable, marginCells, type Margins } from "./geometry";
+import { applyTerrain } from "./terrain";
 
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
@@ -51,6 +52,23 @@ export function toggleBlocked(map: BattleMapConfig, p: GridPoint): BattleMapConf
   if (!set.delete(key)) set.add(key);
 
   return withBlocked(map, set);
+}
+
+export type SetupTool = "blocked" | "wall" | "hazard" | "erase";
+
+export function paintCells(map: BattleMapConfig, cells: GridPoint[], tool: SetupTool, label?: string): BattleMapConfig {
+  const keys = cells.filter((p) => inBounds(map, p)).map(cellKey);
+
+  const blocked = new Set(map.blocked ?? []);
+
+  for (const key of keys) {
+    if (tool === "blocked") blocked.add(key);
+    else blocked.delete(key);
+  }
+
+  const value = tool === "wall" ? { kind: "wall" as const } : tool === "hazard" ? { kind: "hazard" as const, ...(label && { label }) } : null;
+
+  return applyTerrain(withBlocked(map, blocked), keys, value);
 }
 
 export function resizeMap(map: BattleMapConfig, cols: number, rows: number): BattleMapConfig {

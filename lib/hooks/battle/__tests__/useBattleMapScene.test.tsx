@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { useBattleMapScene } from "../useBattleMapScene";
 import { fakeScene } from "./fake-scene";
@@ -101,5 +101,71 @@ describe("useBattleMapScene", () => {
     act(() => current().actions.onCellHover?.({ x: 6, y: 3 }));
 
     expect(current().view).toBe(view);
+  });
+
+  it("не-ДМ не має інструмента місцевості", () => {
+    expect(setup(false).current().terrainTool).toBeNull();
+  });
+
+  it("ДМ: інструмент і розстановка взаємовиключні", () => {
+    const { current } = setup(true);
+
+    act(() => current().placement?.toggle());
+    expect(current().placement?.active).toBe(true);
+
+    act(() => current().terrainTool?.toggle());
+    expect(current().terrainTool?.active).toBe(true);
+    expect(current().placement?.active).toBe(false);
+
+    act(() => current().placement?.toggle());
+    expect(current().placement?.active).toBe(true);
+    expect(current().terrainTool?.active).toBe(false);
+  });
+
+  it("з інструментом клітинки й токени не рухають і не б'ють; штрих — один запит", () => {
+    const { current, value } = setup(true);
+
+    act(() => current().terrainTool?.toggle());
+    act(() => current().terrainTool?.setBrush("hazard"));
+    act(() => current().terrainTool?.setLabel("Вогонь"));
+    act(() => current().actions.onTokenClick?.("gob"));
+    act(() => current().actions.onCellClick?.({ x: 3, y: 0 }));
+
+    expect(value.requestAttack).not.toHaveBeenCalled();
+    expect(value.actions.move.mutate).not.toHaveBeenCalled();
+
+    act(() => current().actions.onStroke?.([{ x: 3, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }]));
+
+    expect(value.actions.mapTerrain.mutate).toHaveBeenCalledTimes(1);
+    expect(value.actions.mapTerrain.mutate).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь" } });
+  });
+
+  it("щітка: барʼєр з раундами, непрохідне, стерти", () => {
+    const { current, value } = setup(true);
+
+    const stroke = () => act(() => current().actions.onStroke?.([{ x: 2, y: 2 }]));
+
+    act(() => current().terrainTool?.toggle());
+    stroke();
+    act(() => current().terrainTool?.setBrush("barrier"));
+    act(() => current().terrainTool?.setRounds(3));
+    stroke();
+    act(() => current().terrainTool?.setBrush("erase"));
+    stroke();
+
+    const calls = vi.mocked(value.actions.mapTerrain.mutate).mock.calls.map((c) => c[0].terrain);
+
+    expect(calls).toEqual([{ kind: "wall" }, { kind: "barrier", rounds: 3 }, null]);
+  });
+
+  it("Esc виходить з інструмента", () => {
+    const { current } = setup(true);
+
+    act(() => current().terrainTool?.toggle());
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+
+    expect(current().terrainTool?.active).toBe(false);
   });
 });

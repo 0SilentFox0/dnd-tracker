@@ -56,4 +56,27 @@ describe("BattleMapPanel", () => {
 
     expect(queryByRole("button", { name: "Розставити" })).toBeNull();
   });
+
+  it("ДМ відкриває палітру «Місцевість», вона вимикає «Розставити»", () => {
+    const { getByRole, queryByRole } = panel(true);
+
+    expect(queryByRole("button", { name: "Непрохідне" })).toBeNull();
+
+    fireEvent.click(getByRole("button", { name: "Розставити" }));
+    fireEvent.click(getByRole("button", { name: "Місцевість" }));
+
+    expect(getByRole("button", { name: "Місцевість" }).getAttribute("aria-pressed")).toBe("true");
+    expect(getByRole("button", { name: "Розставити" }).getAttribute("aria-pressed")).toBe("false");
+    expect(getByRole("button", { name: "Непрохідне" }).getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(getByRole("button", { name: "Барʼєр" }));
+    expect((getByRole("textbox", { name: "Раундів" }) as HTMLInputElement).value).toBe("1");
+
+    fireEvent.click(getByRole("button", { name: "Небезпека" }));
+    expect((getByRole("textbox", { name: "Підпис небезпеки" }) as HTMLInputElement).value).toBe("Небезпечна зона");
+  });
+
+  it("гравець не бачить «Місцевість»", () => {
+    expect(panel(false).queryByRole("button", { name: "Місцевість" })).toBeNull();
+  });
 });

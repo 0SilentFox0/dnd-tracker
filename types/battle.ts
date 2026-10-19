@@ -193,6 +193,7 @@ export interface BattleMapActions {
   onCellClick?: (p: GridPoint) => void;
   onCellHover?: (p: GridPoint | null) => void;
   onTokenClick?: (id: string) => void;
+  onStroke?: (cells: GridPoint[]) => void;
 }
 
 /**

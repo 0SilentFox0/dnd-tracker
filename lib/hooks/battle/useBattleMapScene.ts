@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
+import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
 import { cellKey, deriveMapScene, deriveTrajectory, type MapClick } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
@@ -13,6 +14,7 @@ export interface BattleMapScene {
   view: BattleMapView;
   actions: BattleMapActions;
   placement: { active: boolean; toggle(): void } | null;
+  terrainTool: MapTerrainTool | null;
 }
 
 const NO_ORDER: BattleParticipant[] = [];
@@ -28,7 +30,18 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const [placingId, setPlacingId] = useState<string | null>(null);
 
+  const stopPlacing = useCallback(() => {
+    setPlacingOn(false);
+    setPlacingId(null);
+  }, []);
+
+  const { mutate: mapTerrain } = actions.mapTerrain;
+
+  const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onActivate: stopPlacing });
+
   const placing = placingOn && isDM;
+
+  const toolActive = terrainTool.active;
 
   const map = battle.map ?? null;
 
@@ -37,8 +50,8 @@ export function useBattleMapScene(): BattleMapScene | null {
   const canAct = isMyTurn && !anyPending && !!current;
 
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, placingId, selectedId }) : null),
-    [map, order, current, viewer, canAct, isDM, placing, placingId, selectedId],
+    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId }) : null),
+    [map, order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId],
   );
 
   const view = useMemo(
@@ -78,10 +91,12 @@ export function useBattleMapScene(): BattleMapScene | null {
     [move, requestAttack, show, select, current, currentRound, currentTurnIndex],
   );
 
-  const latest = useRef({ scene, handle, anyPending });
+  const { commit } = terrainTool;
+
+  const latest = useRef({ scene, handle, anyPending, stroke: commit });
 
   useEffect(() => {
-    latest.current = { scene, handle, anyPending };
+    latest.current = { scene, handle, anyPending, stroke: commit };
   });
 
   const mapActions = useMemo<BattleMapActions>(
@@ -97,6 +112,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
           return sameCell(prev, next) ? prev : next;
         }),
+      onStroke: (cells) => latest.current.stroke(cells),
       onTokenClick: (id) => {
         const l = latest.current;
 
@@ -106,10 +122,13 @@ export function useBattleMapScene(): BattleMapScene | null {
     [],
   );
 
+  const { close: closeTerrain } = terrainTool;
+
   const togglePlacing = useCallback(() => {
     setPlacingOn((on) => !on);
     setPlacingId(null);
-  }, []);
+    closeTerrain();
+  }, [closeTerrain]);
 
   useEffect(() => {
     if (!placing) return;
@@ -117,18 +136,17 @@ export function useBattleMapScene(): BattleMapScene | null {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
 
-      setPlacingOn(false);
-      setPlacingId(null);
+      stopPlacing();
     };
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [placing]);
+  }, [placing, stopPlacing]);
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null };
 }

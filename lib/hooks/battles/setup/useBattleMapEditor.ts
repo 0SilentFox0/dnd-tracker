@@ -3,10 +3,12 @@
 import { useCallback, useState } from "react";
 
 import { DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { applyMargins, clampMargins, hasPlayableArea, inBounds, inferMargins, type Margins, resizeMap, toggleBlocked } from "@/lib/utils/battle/grid";
+import { applyMargins, clampMargins, hasPlayableArea, inferMargins, type Margins, paintCells, resizeMap, type SetupTool } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
+
+export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
 
 export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
 
@@ -17,7 +19,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const [margins, setMarginsState] = useState<Margins>(() => (initial ? inferMargins(initial) : NO_MARGINS));
 
-  const [paint, setPaintState] = useState(false);
+  const [tool, setToolState] = useState<SetupTool | null>(null);
+
+  const [hazardLabel, setHazardLabel] = useState(DEFAULT_HAZARD_LABEL);
 
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -27,10 +31,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     if (!value) setNotice(null);
   }, []);
 
-  const setPaint = useCallback((value: boolean) => {
-    setPaintState(value);
-
-    if (!value) setNotice(null);
+  const setTool = useCallback((value: SetupTool | null) => {
+    setToolState(value);
+    setNotice(null);
   }, []);
 
   const setSize = useCallback(
@@ -65,18 +68,18 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const setBackground = useCallback((background: string | null) => setMap((m) => ({ ...m, background })), []);
 
-  const onCellClick = useCallback(
-    (p: GridPoint) => {
-      if (!paint || !inBounds(map, p)) return;
+  const onStroke = useCallback(
+    (cells: GridPoint[]) => {
+      if (!tool || cells.length === 0) return;
 
-      const next = toggleBlocked(map, p);
+      const next = paintCells(map, cells, tool, tool === "hazard" ? hazardLabel.trim() || DEFAULT_HAZARD_LABEL : undefined);
 
       if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
       setNotice(null);
       setMap(next);
     },
-    [paint, map],
+    [tool, map, hazardLabel],
   );
 
   return {
@@ -87,9 +90,11 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     setOpacity,
     margins,
     setMargins,
-    paint,
-    setPaint,
-    onCellClick,
+    tool,
+    setTool,
+    hazardLabel,
+    setHazardLabel,
+    onStroke,
     notice,
     setBackground,
     value: enabled ? map : null,

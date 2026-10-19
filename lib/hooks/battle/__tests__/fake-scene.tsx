@@ -85,6 +85,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     updateParticipant: mutation(),
     scaleUnits: mutation(),
     move: mutation(),
+    mapTerrain: mutation(),
   };
 
   const showResult = vi.fn();

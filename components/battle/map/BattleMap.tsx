@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 import { MapToken } from "./MapToken";
@@ -22,6 +22,7 @@ export interface BattleMapProps {
   className?: string;
   clickableBlocked?: boolean;
   showBlocked?: boolean;
+  strokeTool?: boolean;
 }
 
 const HATCH_ID = "battle-map-barrier-hatch";
@@ -64,9 +65,10 @@ interface GridLayerProps {
   wasDragged: () => boolean;
   clickableBlocked?: boolean;
   showBlocked?: boolean;
+  stroke?: { preview: Set<string>; start(p: GridPoint, e: PointerEvent): void; enter(p: GridPoint): void };
 }
 
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked }: GridLayerProps) {
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, stroke }: GridLayerProps) {
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -116,7 +118,9 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
               stroke="none"
               pointerEvents={clickableBlocked ? "all" : "none"}
               style={{ cursor: clickableBlocked ? "pointer" : undefined }}
-              onClick={clickableBlocked ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
+              onClick={clickableBlocked && !stroke ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
+              onPointerDown={stroke ? (e) => stroke.start(p, e) : undefined}
+              onPointerEnter={stroke ? () => stroke.enter(p) : undefined}
             />
           );
         }
@@ -139,14 +143,22 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
             strokeOpacity={map.opacity}
             strokeWidth={1.5}
             vectorEffect="non-scaling-stroke"
-            style={{ cursor: actions?.onCellClick ? "pointer" : undefined }}
-            onClick={() => !wasDragged() && actions?.onCellClick?.(p)}
-            onPointerEnter={() => actions?.onCellHover?.(p)}
+            style={{ cursor: stroke ? "crosshair" : actions?.onCellClick ? "pointer" : undefined }}
+            onClick={stroke ? undefined : () => !wasDragged() && actions?.onCellClick?.(p)}
+            onPointerDown={stroke ? (e) => stroke.start(p, e) : undefined}
+            onPointerEnter={() => (stroke ? stroke.enter(p) : actions?.onCellHover?.(p))}
           >
             {title && <title>{title}</title>}
           </polygon>
         );
       })}
+      {stroke && (
+        <g pointerEvents="none">
+          {cells.filter((p) => stroke.preview.has(cellKey(p))).map((p) => (
+            <polygon key={`s${cellKey(p)}`} data-stroke={cellKey(p)} points={cellPolygon(p)} fill="rgba(242,193,78,.35)" stroke="#f2c14e" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+          ))}
+        </g>
+      )}
       <g pointerEvents="none">
         {zoneCells.map(({ p, zone }) => (
           <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={7} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
@@ -168,7 +180,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
   );
 });
 
-export function BattleMap({ map, participants, view, actions, className, clickableBlocked, showBlocked }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, clickableBlocked, showBlocked, strokeTool }: BattleMapProps) {
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport();
 
   const { cols, rows } = map;
@@ -194,6 +206,66 @@ export function BattleMap({ map, participants, view, actions, className, clickab
 
     return () => observer.disconnect();
   }, []);
+
+  const painting = Boolean(strokeTool && actions?.onStroke);
+
+  const strokeRef = useRef<GridPoint[] | null>(null);
+
+  const [preview, setPreview] = useState<Set<string>>(() => new Set());
+
+  const onStrokeStart = useCallback((p: GridPoint, e: PointerEvent) => {
+    e.stopPropagation();
+
+    try {
+      (e.target as Element).releasePointerCapture?.(e.pointerId);
+    } catch {
+      // not captured
+    }
+
+    strokeRef.current = [p];
+    setPreview(new Set([cellKey(p)]));
+  }, []);
+
+  const onStrokeEnter = useCallback((p: GridPoint) => {
+    const list = strokeRef.current;
+
+    if (!list || list.some((c) => c.x === p.x && c.y === p.y)) return;
+
+    list.push(p);
+    setPreview(new Set(list.map(cellKey)));
+  }, []);
+
+  const onStroke = actions?.onStroke;
+
+  useEffect(() => {
+    if (!painting) return;
+
+    const finish = (commit: boolean) => () => {
+      const list = strokeRef.current;
+
+      if (!list) return;
+
+      strokeRef.current = null;
+      setPreview(new Set());
+
+      if (commit) onStroke?.(list);
+    };
+
+    const up = finish(true);
+
+    const cancel = finish(false);
+
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", cancel);
+
+    return () => {
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", cancel);
+      strokeRef.current = null;
+    };
+  }, [painting, onStroke]);
+
+  const stroke = useMemo(() => (painting ? { preview, start: onStrokeStart, enter: onStrokeEnter } : undefined), [painting, preview, onStrokeStart, onStrokeEnter]);
 
   const fit = fitMapBox(avail, map);
 
@@ -231,7 +303,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} showBlocked={showBlocked} />
+          <GridLayer map={map} marks={view?.marks} actions={actions} wasDragged={wasDragged} clickableBlocked={clickableBlocked} showBlocked={showBlocked} stroke={stroke} />
           {from && end && (
             <g pointerEvents="none">
               <line x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
@@ -249,7 +321,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
             selected={view?.selectedId === p.basicInfo.id}
             current={view?.currentId === p.basicInfo.id}
             onClick={onTokenClick}
-            passThrough={movingId === p.basicInfo.id}
+            passThrough={painting || movingId === p.basicInfo.id}
           />
         ))}
         {tokens.map(({ p, box }) => {

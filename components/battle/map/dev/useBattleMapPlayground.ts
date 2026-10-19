@@ -151,7 +151,7 @@ export function useBattleMapPlayground() {
     setLog([]);
   }, [map]);
 
-  const actions: Required<BattleMapActions> = {
+  const actions: Omit<Required<BattleMapActions>, "onStroke"> = {
     onCellClick,
     onCellHover: setHover,
     onTokenClick: setActiveId,

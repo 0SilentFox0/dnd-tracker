@@ -4,17 +4,26 @@ import { BattleMap } from "@/components/battle/map";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { Switch } from "@/components/ui/switch";
 import type { BattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
-import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE } from "@/lib/utils/battle/grid";
+import { cn } from "@/lib/utils";
+import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
 
 const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
   { key: "top", label: "Зверху" },
   { key: "right", label: "Справа" },
   { key: "bottom", label: "Знизу" },
   { key: "left", label: "Зліва" },
+];
+
+const TOOLS: { value: SetupTool; label: string }[] = [
+  { value: "blocked", label: "Неігрова" },
+  { value: "wall", label: "Непрохідне" },
+  { value: "hazard", label: "Небезпека" },
+  { value: "erase", label: "Стерти" },
 ];
 
 function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
@@ -88,7 +97,28 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 ))}
               </div>
             </div>
-            <ToggleRow id="map-paint" label="Малювати неігрові клітинки" checked={editor.paint} onChange={editor.setPaint} />
+            <div className="space-y-2">
+              <Label>Малювання клітинок</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {TOOLS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={editor.tool === value}
+                    onClick={() => editor.setTool(editor.tool === value ? null : value)}
+                    className={cn(
+                      "h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50",
+                      editor.tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {editor.tool === "hazard" && (
+                <Input aria-label="Підпис небезпеки" maxLength={60} value={editor.hazardLabel} onChange={(e) => editor.setHazardLabel(e.target.value)} />
+              )}
+            </div>
             <div className="space-y-2">
               <ImageUpload value={map.background ?? ""} onChange={(v) => editor.setBackground(v || null)} label="Фон карти" maxSide={2400} allowFile />
               <Button type="button" variant="outline" size="sm" onClick={() => editor.setBackground(null)} disabled={map.background === null}>
@@ -101,7 +131,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
               {editor.notice}
             </p>
             <div className="h-[55vh] lg:h-[60vh]">
-              <BattleMap map={previewMap} participants={[]} actions={{ onCellClick: editor.onCellClick }} className="h-full" clickableBlocked={editor.paint} showBlocked />
+              <BattleMap map={previewMap} participants={[]} actions={{ onStroke: editor.onStroke }} className="h-full" clickableBlocked={editor.tool !== null} strokeTool={editor.tool !== null} showBlocked />
             </div>
           </div>
         </div>
