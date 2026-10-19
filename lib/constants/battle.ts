@@ -107,6 +107,8 @@ export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
 export const CELL_FEET = 5;
 
+export const AURA_RADIUS_CELLS = 2;
+
 export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
 
 export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";

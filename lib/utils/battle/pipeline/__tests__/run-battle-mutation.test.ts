@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleDelta, LoadedBattle } from "@/lib/utils/battle/store";
 import { BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
+import type { BattleParticipant } from "@/types/battle";
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
@@ -372,6 +374,32 @@ describe("runBattleMutation", () => {
     const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
 
     expect((await res.json()).delta.scene).not.toHaveProperty("map");
+  });
+
+  it("аури за радіусом синхронізуються на карті (зберігання і dryRun), без карти - ні", async () => {
+    const fear = resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: -2, target: "nearbyEnemies" }] });
+
+    const place = (p: BattleParticipant, x: number, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position: { x, y: 0 }, ...extra } });
+
+    const ps = [place(hero, 1), place(goblin, 2, { resolvedAbilities: [fear] })];
+
+    const zoned = (list: BattleParticipant[]) => list[0].battleData.activeEffects.some((e) => e.zone);
+
+    const d = deps({ loadBattle: vi.fn(async () => ({ ...withMap(), participants: ps })) });
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, d);
+
+    expect(zoned(vi.mocked(d.saveBattle).mock.calls[0][1].participants)).toBe(true);
+
+    const res = await runBattleMutation(req(), { params, access: "member", dryRun: () => true, mutate: noop }, d);
+
+    expect(JSON.stringify(await res.json())).toContain("zone:");
+
+    const plain = deps({ loadBattle: vi.fn(async () => ({ ...loaded(), participants: ps })) });
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, plain);
+
+    expect(zoned(vi.mocked(plain.saveBattle).mock.calls[0][1].participants)).toBe(false);
   });
 
   it("бій без карти позицій не додає", async () => {

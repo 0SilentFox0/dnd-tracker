@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 
 import { type AreaAura, pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
+import { isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface AuraZoneStep {
@@ -16,13 +17,15 @@ export interface AuraZoneStep {
   pending: boolean;
 }
 
-/** Перша аура в області, зону якої власник ще не вказав у цьому раунді; попередній склад — як підказка. */
+/** На карті склад зони рахується за радіусом, тож вибір не потрібен. Перша аура в області, зону якої власник ще не вказав у цьому раунді; попередній склад — як підказка. */
 export function useAuraZones(owner: BattleParticipant): AuraZoneStep | null {
   const { battle, actions } = useBattleScene();
 
   const ps = battle.initiativeOrder;
 
-  const aura = pendingAreaAuras(ps, owner.basicInfo.id, battle.currentRound)[0] ?? null;
+  const onMap = Boolean(battle.map) && isOnMap(owner);
+
+  const aura = onMap ? null : (pendingAreaAuras(ps, owner.basicInfo.id, battle.currentRound)[0] ?? null);
 
   const candidates = aura ? zoneCandidates(ps, owner, aura.target) : [];
 

@@ -11,6 +11,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
@@ -126,10 +127,14 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
   };
 }
 
-function withPlacement(map: BattleMapConfig | null, status: BattleStatus, result: MutationResult): MutationResult {
+function withPlacement(map: BattleMapConfig | null, status: BattleStatus, result: MutationResult, place: boolean): MutationResult {
   if (!map || (result.scene?.status ?? status) !== BattleStatus.ACTIVE) return result;
 
-  return { ...result, participants: placeParticipants(map, result.participants) };
+  const placed = place ? placeParticipants(map, result.participants) : result.participants;
+
+  const participants = syncMapAuras(placed, map);
+
+  return participants === result.participants ? result : { ...result, participants };
 }
 
 function respondWith(
@@ -251,7 +256,7 @@ export async function runBattleMutation<TBody>(
 
     const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-    const result = withVictory(loaded.scene, isDryRun ? mutated : withPlacement(map, loaded.scene.status, mutated));
+    const result = withVictory(loaded.scene, withPlacement(map, loaded.scene.status, mutated, !isDryRun));
 
     if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);

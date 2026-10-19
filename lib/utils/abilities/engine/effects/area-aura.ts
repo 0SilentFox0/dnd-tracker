@@ -74,15 +74,12 @@ function resolvedEffect(e: StaticEffect, owner: BattleParticipant): StaticEffect
   };
 }
 
-/** Нова зона аури: знімає попередню цього власника, накладає ефект на обраних і записує раунд вибору на власнику. */
-export function applyAuraZone(ps: BattleParticipant[], owner: BattleParticipant, aura: AreaAura, targetIds: string[], round: number): BattleParticipant[] {
+export function auraZoneEffect(owner: BattleParticipant, aura: AreaAura, round: number): ActiveEffect {
   const ownerId = owner.basicInfo.id;
 
   const id = zoneEffectId(ownerId, aura.id);
 
-  const chosen = new Set(targetIds);
-
-  const effect: ActiveEffect = {
+  return {
     id,
     name: aura.ability.name,
     type: aura.target === "nearbyEnemies" ? "debuff" : "buff",
@@ -95,6 +92,17 @@ export function applyAuraZone(ps: BattleParticipant[], owner: BattleParticipant,
     source: effectSource(owner, aura.ability),
     zone: { ownerId, key: `${auraKey(aura.ability)}:${aura.target}` },
   };
+}
+
+/** Нова зона аури: знімає попередню цього власника, накладає ефект на обраних і записує раунд вибору на власнику. */
+export function applyAuraZone(ps: BattleParticipant[], owner: BattleParticipant, aura: AreaAura, targetIds: string[], round: number): BattleParticipant[] {
+  const ownerId = owner.basicInfo.id;
+
+  const effect = auraZoneEffect(owner, aura, round);
+
+  const id = effect.id;
+
+  const chosen = new Set(targetIds);
 
   return ps.map((p) => {
     const rest = p.battleData.activeEffects.filter((e) => e.id !== id);
