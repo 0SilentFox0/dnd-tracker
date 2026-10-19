@@ -2,11 +2,11 @@
 
 import { BattleMap } from "@/components/battle/map";
 import { HudSection } from "@/components/hud/form";
+import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
@@ -45,8 +45,6 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
 
   const { brush, actions } = editor;
 
-  const setMargin = (key: keyof Margins, raw: number | undefined) => actions.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, marginLimit(map, margins, key)) });
-
   const previewMap = isPreviewSafeBackground(map.background) || map.background === null ? map : { ...map, background: null };
 
   const setEqual = () => {
@@ -66,11 +64,11 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="map-cols">Колонки</Label>
-                <NumberInput id="map-cols" value={map.cols} onChange={(v) => actions.setSize(clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE), map.rows)} />
+                <BoundedNumberInput id="map-cols" value={map.cols} min={MIN_SIDE} max={MAX_SIDE} onCommit={(v) => actions.setSize(v, map.rows)} />
               </div>
               <div>
                 <Label htmlFor="map-rows">Рядки</Label>
-                <NumberInput id="map-rows" value={map.rows} onChange={(v) => actions.setSize(map.cols, clamp(v ?? MIN_SIDE, MIN_SIDE, MAX_SIDE))} />
+                <BoundedNumberInput id="map-rows" value={map.rows} min={MIN_SIDE} max={MAX_SIDE} onCommit={(v) => actions.setSize(map.cols, v)} />
               </div>
             </div>
             <div>
@@ -99,7 +97,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                     <Label htmlFor={`map-margin-${key}`} className="text-xs">
                       {label}
                     </Label>
-                    <NumberInput id={`map-margin-${key}`} value={margins[key]} onChange={(v) => setMargin(key, v)} />
+                    <BoundedNumberInput id={`map-margin-${key}`} value={margins[key]} min={0} max={marginLimit(map, margins, key)} onCommit={(v) => actions.setMargins({ ...margins, [key]: v })} />
                   </div>
                 ))}
               </div>

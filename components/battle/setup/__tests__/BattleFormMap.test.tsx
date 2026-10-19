@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BattleFormMap } from "@/components/battle/setup/BattleFormMap";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
-import { UNIT } from "@/lib/utils/battle/grid";
+import { MAX_SIDE, UNIT } from "@/lib/utils/battle/grid";
 
 vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
 vi.stubGlobal(
@@ -64,6 +64,13 @@ const blocked = (c: HTMLElement) => c.querySelectorAll("polygon[data-blocked]");
 
 const enable = () => fireEvent.click(screen.getByRole("switch", { name: "Бій на карті" }));
 
+const typeIn = (label: string, value: string) => {
+  const input = screen.getByLabelText(label);
+
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+};
+
 afterEach(cleanup);
 
 describe("BattleFormMap", () => {
@@ -80,7 +87,7 @@ describe("BattleFormMap", () => {
     enable();
     expect(container.querySelectorAll("polygon")).toHaveLength(240);
 
-    fireEvent.change(screen.getByLabelText("Зверху"), { target: { value: "2" } });
+    typeIn("Зверху", "2");
     expect(blocked(container)).toHaveLength(40);
     expect(blocked(container)[0].getAttribute("stroke")).toBe("none");
   });
@@ -137,14 +144,41 @@ describe("BattleFormMap", () => {
   it("margins keep a 2x2 playable area; Однакові copies the first within limits", () => {
     render(<Harness />);
     enable();
-    fireEvent.change(screen.getByLabelText("Зверху"), { target: { value: "99" } });
+    typeIn("Зверху", "99");
     expect(seen.editor.state.margins.top).toBe(10);
 
-    fireEvent.change(screen.getByLabelText("Знизу"), { target: { value: "5" } });
+    typeIn("Знизу", "5");
     expect(seen.editor.state.margins.bottom).toBe(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Однакові" }));
     expect(seen.editor.state.margins).toEqual({ top: 5, right: 5, bottom: 5, left: 5 });
+  });
+
+  it("колонки: стерти й набрати 24 — 24 після blur; стерти й blur — попереднє значення; Enter теж записує", () => {
+    render(<Harness />);
+    enable();
+
+    const cols = screen.getByLabelText("Колонки") as HTMLInputElement;
+
+    fireEvent.change(cols, { target: { value: "" } });
+    expect(cols.value).toBe("");
+    expect(seen.editor.state.map.cols).toBe(20);
+
+    fireEvent.change(cols, { target: { value: "2" } });
+    fireEvent.change(cols, { target: { value: "24" } });
+    expect(seen.editor.state.map.cols).toBe(20);
+    fireEvent.blur(cols);
+    expect(seen.editor.state.map.cols).toBe(24);
+
+    fireEvent.change(cols, { target: { value: "" } });
+    fireEvent.blur(cols);
+    expect(seen.editor.state.map.cols).toBe(24);
+    expect(cols.value).toBe("24");
+
+    fireEvent.change(cols, { target: { value: "999" } });
+    fireEvent.keyDown(cols, { key: "Enter" });
+    expect(seen.editor.state.map.cols).toBe(MAX_SIDE);
+    expect(cols.value).toBe(String(MAX_SIDE));
   });
 
   it("default background button resets to null", () => {
@@ -172,7 +206,7 @@ describe("BattleFormMap", () => {
     const { container } = render(<Harness />);
 
     enable();
-    fireEvent.change(screen.getByLabelText("Зверху"), { target: { value: "1" } });
+    typeIn("Зверху", "1");
     expect(blocked(container)[0].getAttribute("fill")).not.toBe("transparent");
   });
 });
