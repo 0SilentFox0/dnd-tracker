@@ -1,11 +1,19 @@
+import type { PredictedAttack } from "@/lib/utils/battle/attack/bonus";
 import type { AttackData } from "@/types/api";
 
 export type AttackMode = "normal" | "advantage" | "disadvantage";
 
 export type RollOutcome = "hit" | "crit" | "miss" | "critFail";
 
+/** Режим, який задають навички/ефекти (зокрема взаємне скасування) — гравець його не змінює */
+export interface ForcedMode {
+  mode: AttackMode;
+  reason: string;
+}
+
 export interface Strike {
   targetId: string;
+  forced?: ForcedMode;
   d20?: number;
   second?: number;
   outcome?: RollOutcome;
@@ -39,7 +47,7 @@ export type AttackFlowAction =
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "TOGGLE_TARGET"; id: string }
   | { type: "SET_TARGETS"; ids: string[] }
-  | { type: "CONFIRM_TARGETS" }
+  | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "TOGGLE_OBSTACLE" }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
@@ -82,9 +90,9 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s
-        : { ...s, step: "roll", index: 0, error: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [] })) };
+        : { ...s, step: "roll", index: 0, error: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [], ...(a.forced?.[targetId] && { forced: a.forced[targetId] }) })) };
     case "SET_MODE":
-      return { ...s, mode: a.mode };
+      return s.step === "roll" && s.strikes[s.index]?.forced ? s : { ...s, mode: a.mode };
     case "TOGGLE_OBSTACLE":
       return { ...s, obstacle: !s.obstacle };
     case "ROLL": {
@@ -129,6 +137,22 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
   }
 }
 
+export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reasons">): ForcedMode | undefined {
+  if (!p.forced) return undefined;
+
+  const { advantage, disadvantage } = p.reasons;
+
+  if (p.mode === "advantage") return { mode: p.mode, reason: `Перевага: ${advantage.join(", ")}` };
+
+  if (p.mode === "disadvantage") return { mode: p.mode, reason: `Недолік: ${disadvantage.join(", ")}` };
+
+  return { mode: "normal", reason: `Перевага (${advantage.join(", ")}) і недолік (${disadvantage.join(", ")}) скасовуються` };
+}
+
+export function strikeMode(s: Pick<AttackFlowState, "mode">, strike: Strike | undefined): AttackMode {
+  return strike?.forced?.mode ?? s.mode;
+}
+
 export function effectiveD20(strike: Strike, mode: AttackMode): number {
   const d = strike.d20 ?? 0;
 
@@ -138,17 +162,21 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 }
 
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
-  const base = { attackerId, attackId: s.attackId, ...(s.obstacle && { obstacle: true }), endTurn: false };
+  const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
+
+  const base = { attackerId, attackId: s.attackId, ...(s.obstacle && { obstacle: true }), ...(manual && { rollMode: s.mode }), endTurn: false };
 
   if (s.strikes.length === 1) {
     const [st] = s.strikes;
+
+    const mode = strikeMode(s, st);
 
     return {
       ...base,
       targetIds: [st.targetId],
       attackRoll: st.d20,
-      ...(st.second !== undefined && s.mode === "advantage" && { advantageRoll: st.second }),
-      ...(st.second !== undefined && s.mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(st.second !== undefined && mode === "advantage" && { advantageRoll: st.second }),
+      ...(st.second !== undefined && mode === "disadvantage" && { disadvantageRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
     } as AttackData & { endTurn: boolean };
   }
@@ -160,7 +188,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
     ...base,
     targetIds: s.strikes.map((st) => st.targetId),
     attackRolls: s.strikes.map((st) => st.d20 ?? 0),
-    ...(s.mode !== "normal" && s.strikes.every((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second as number) }),
+    ...(s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

@@ -7,6 +7,7 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleParticipant } from "@/types/battle";
@@ -87,18 +88,19 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
 
   return each(
     input,
-    (p) => ({
-      ...p,
-      actionFlags: {
-        ...p.actionFlags,
-        ...((effect.refreshAction || effect.extraActions) && { hasUsedAction: false }),
-        ...(effect.refreshBonusAction && { hasUsedBonusAction: false }),
-        ...(effect.refreshReaction && { hasUsedReaction: false }),
-      },
-      battleData: effect.extraActions
-        ? { ...p.battleData, pendingExtraActions: (p.battleData.pendingExtraActions ?? 0) + effect.extraActions }
-        : p.battleData,
-    }),
+    (p) => {
+      const granted = grantExtraActions(p, effect.extraActions ?? 0);
+
+      return {
+        ...granted,
+        actionFlags: {
+          ...granted.actionFlags,
+          ...(effect.refreshAction && { hasUsedAction: false }),
+          ...(effect.refreshBonusAction && { hasUsedBonusAction: false }),
+          ...(effect.refreshReaction && { hasUsedReaction: false }),
+        },
+      };
+    },
     (names) => `⚔️ ${ability.name}: ${names} — ${describeGrantAction(effect)}`,
   );
 }

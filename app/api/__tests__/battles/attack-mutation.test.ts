@@ -56,6 +56,14 @@ describe("attack mutation", () => {
     expect(await change(true)).toBe(Math.max(1, Math.floor(full / 2)));
   });
 
+  it("ручна перевага без навичок — сервер бере більший із двох d20", async () => {
+    expect(attackBodySchema.safeParse({ attackerId: "hero", targetId: "gob", d20Roll: 15, rollMode: "краще" }).success).toBe(false);
+
+    const out = await attackMutation(ctx, body({ d20Roll: 2, advantageRoll: 16, rollMode: "advantage" }));
+
+    expect(out.events[0].details).toMatchObject({ actionDetails: { chosenD20: 16, secondRoll: { mode: "advantage", manual: true } } });
+  });
+
   it("атака з endTurn — хід передається тим самим збереженням", async () => {
     const out = await attackMutation(ctx, body({ endTurn: true }));
 

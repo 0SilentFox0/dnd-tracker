@@ -1,4 +1,4 @@
-import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { BattleParticipant } from "@/types/battle";
@@ -10,7 +10,7 @@ export function getEffectiveArmorClass(p: BattleParticipant, participants: Battl
 /**
  * Застосовує використання основної дії: якщо є пул додаткових дій (pendingExtraActions),
  * споживає одну й залишає hasUsedAction = false; інакше виставляє hasUsedAction = true.
- * Ефект «Додаткова дія» накопичувальний до кінця бою.
+ * Пул живе лише в межах ходу: на початку ходу він дорівнює actionsPerTurn, наприкінці згорає.
  */
 export function applyMainActionUsed(
   participant: BattleParticipant,
@@ -32,4 +32,30 @@ export function applyMainActionUsed(
     ...participant,
     actionFlags: { ...participant.actionFlags, hasUsedAction: true },
   };
+}
+
+/** +n основних дій: перша повертає вже витрачену дію, решта йде в пул цього ходу. */
+export function grantExtraActions(participant: BattleParticipant, n: number): BattleParticipant {
+  if (n <= 0) return participant;
+
+  const used = participant.actionFlags.hasUsedAction;
+
+  const toPool = used ? n - 1 : n;
+
+  return {
+    ...participant,
+    actionFlags: { ...participant.actionFlags, hasUsedAction: false },
+    battleData: toPool > 0 ? { ...participant.battleData, pendingExtraActions: (participant.battleData.pendingExtraActions ?? 0) + toPool } : participant.battleData,
+  };
+}
+
+export function setExtraActionPool(participant: BattleParticipant, n: number): BattleParticipant {
+  if ((participant.battleData.pendingExtraActions ?? 0) === n) return participant;
+
+  return { ...participant, battleData: { ...participant.battleData, pendingExtraActions: n } };
+}
+
+/** Додаткові дії на хід від actionsPerTurn («Жага крові» тощо). */
+export function actionsPerTurnPool(participant: BattleParticipant, participants: BattleParticipant[]): number {
+  return Math.max(0, Math.floor(collectModifiers(withSelf(participants, participant), participant.basicInfo.id, { stat: "actionsPerTurn" }).flat));
 }
