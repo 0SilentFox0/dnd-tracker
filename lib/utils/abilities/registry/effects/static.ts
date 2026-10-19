@@ -6,6 +6,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { dropOpposingSpellEffects } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
@@ -35,16 +36,24 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   let ps = input.participants;
 
+  const timedKey = `${ability.key}#${input.effectIndex}`;
+
+  const cancelled: string[] = [];
+
   const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
 
   const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
 
   for (const id of targetIds.filter((t) => !blocked.includes(t))) {
-    ps = updateParticipant(ps, id, (p) =>
-      upsertTimedEffect(
+    ps = updateParticipant(ps, id, (target) => {
+      const { participant: p, removed } = dropOpposingSpellEffects(target, ability.key, stripped);
+
+      for (const e of removed) cancelled.push(`⚖️ ${ability.name} знімає «${e.name}» → ${p.basicInfo.name}`);
+
+      return upsertTimedEffect(
         p,
         {
-          timedKey: `${ability.key}#${input.effectIndex}`,
+          timedKey,
           source: effectSource(owner, ability),
           name: ability.name,
           type: p.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
@@ -54,13 +63,13 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
           abilityEffects: [stripped],
         },
         ctx.round,
-      ),
-    );
+      );
+    });
   }
 
   const applied = targetIds.filter((t) => !blocked.includes(t));
 
-  const messages = applied.length ? [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, applied)} (${rounds} р.)`] : [];
+  const messages = [...new Set(cancelled), ...(applied.length ? [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, applied)} (${rounds} р.)`] : [])];
 
   if (blocked.length) messages.push(`⛔ ${ability.name}: ${participantNames(ps, blocked)} — імунітет`);
 

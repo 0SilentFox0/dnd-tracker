@@ -52,7 +52,7 @@ const damage = (damageType: string, extra: { falloff?: number[]; amount?: Extrac
 
 const heal = (): Effect => ({ kind: "heal", amount: { spellRoll: 100 } });
 
-const stat = (s: "initiative" | "armor" | "attackBonus" | "morale", flat: number, n: number): Effect => ({
+const stat = (s: "initiative" | "speed" | "armor" | "attackBonus" | "morale", flat: number, n: number): Effect => ({
   kind: "modifyStat",
   stat: s,
   flat,
@@ -106,10 +106,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Поспіх",
     school: LIGHT,
     level: 1,
-    description: "Союзник отримує +3 до ініціативи на 3 раунди.",
+    description: "Союзник отримує +3 до ініціативи та +10 фт (2 клітинки) до швидкості на 3 раунди.",
     appearanceDescription:
       "Довкола ніг союзника закручується вихор білого пір'я, і світ навколо ніби сповільнюється. Його кроки стають легкими, а плащ тріпоче, хоча вітру немає.",
-    definition: def(0, ALLY, [stat("initiative", 3, 3)]),
+    definition: def(0, ALLY, [stat("initiative", 3, 3), stat("speed", 10, 3)]),
     raceModifiers: [],
   },
   {
@@ -272,10 +272,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Сповільнення",
     school: DARK,
     level: 1,
-    description: "Ворог робить рятівний кидок Мудрості; при провалі отримує −3 до ініціативи на 3 раунди. Успіх — без ефекту.",
+    description: "Ворог робить рятівний кидок Мудрості; при провалі отримує −3 до ініціативи та −10 фт (2 клітинки) до швидкості на 3 раунди. Успіх — без ефекту.",
     appearanceDescription:
       "Довкола ворога густішає повітря, наче він опинився під водою. Кожен рух розтягується, звуки глухнуть, а кліпання очей триває ціле століття.",
-    definition: def(0, ENEMY_NEAR, [stat("initiative", -3, 3)], { resolution: save("wisdom", "none") }),
+    definition: def(0, ENEMY_NEAR, [stat("initiative", -3, 3), stat("speed", -10, 3)], { resolution: save("wisdom", "none") }),
     raceModifiers: [],
   },
   {

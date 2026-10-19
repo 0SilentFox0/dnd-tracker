@@ -6,6 +6,7 @@ import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { movementBudget } from "@/lib/utils/battle/grid";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
@@ -118,7 +119,7 @@ describe("Божественна сила (+25 % шкоди, 3 раунди)", (
   });
 });
 
-describe("Поспіх (+3 ініціативи, 3 раунди)", () => {
+describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 раунди)", () => {
   it("змінює чергу з наступного раунду", () => {
     const c = unit("c", ParticipantSide.ALLY, { init: 20 });
 
@@ -133,6 +134,18 @@ describe("Поспіх (+3 ініціативи, 3 раунди)", () => {
     expect(out.scene.round).toBe(2);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["c", "a", "e"]);
     expect(get(out.participants, "a").abilities.initiative).toBe(11);
+  });
+
+  it("додає 2 клітинки руху", () => {
+    const c = unit("c");
+
+    const a = unit("a");
+
+    const before = movementBudget(a);
+
+    const ps = cast("haste", c, ["a"], [c, a]).allParticipantsUpdated;
+
+    expect(movementBudget(get(ps, "a"))).toBe(before + 2);
   });
 });
 
