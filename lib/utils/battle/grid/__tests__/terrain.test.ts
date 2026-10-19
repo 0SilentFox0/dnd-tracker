@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isPlayable } from "../geometry";
 import { canStand } from "../occupancy";
 import { reachable } from "../path";
-import { applyTerrain, hazardCells, pruneExpiredBarriers, terrainAt, threatCells } from "../terrain";
+import { applyTerrain, applyTerrainDiff, diffTerrain, hazardCells, pruneExpiredBarriers, terrainAt, threatCells } from "../terrain";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -154,6 +154,10 @@ describe("pruneExpiredBarriers", () => {
     expect(pruneExpiredBarriers(only, 2)).toEqual(base);
   });
 
+  it("барʼєр без строку прибирається", () => {
+    expect(pruneExpiredBarriers({ ...base, terrain: { "1:1": { kind: "barrier" } } }, 1)).toEqual(base);
+  });
+
   it("без місцевості — null", () => {
     expect(pruneExpiredBarriers(base, 5)).toBeNull();
   });
@@ -170,5 +174,44 @@ describe("applyTerrain", () => {
 
     expect(erased.terrain).toEqual({ "2:2": { kind: "hazard", label: "Вогонь" } });
     expect(applyTerrain(erased, ["2:2"], null)).toEqual(base);
+  });
+});
+
+describe("diffTerrain / applyTerrainDiff", () => {
+  const base: BattleMapConfig = { cols: 6, rows: 6, background: null, opacity: 0.3 };
+
+  it("групує однакові значення, рахує зміни й зняття; без змін — null", () => {
+    const before = { "1:1": { kind: "wall" as const }, "2:2": { kind: "barrier" as const, untilRound: 2 } };
+
+    const after = {
+      "1:1": { kind: "wall" as const },
+      "2:2": { kind: "barrier" as const, untilRound: 3 },
+      "3:3": { kind: "hazard" as const, label: "Лава" },
+      "4:4": { kind: "hazard" as const, label: "Лава" },
+    };
+
+    expect(diffTerrain(before, after)).toEqual({
+      set: [
+        { cell: { kind: "barrier", untilRound: 3 }, keys: ["2:2"] },
+        { cell: { kind: "hazard", label: "Лава" }, keys: ["3:3", "4:4"] },
+      ],
+    });
+    expect(diffTerrain(after, { "1:1": { kind: "wall" } })).toEqual({ removed: ["2:2", "3:3", "4:4"] });
+    expect(diffTerrain(before, { ...before })).toBeNull();
+    expect(diffTerrain(undefined, undefined)).toBeNull();
+  });
+
+  it("застосування диффу дає ту саму місцевість і новий запис", () => {
+    const before = { ...base, terrain: { "1:1": { kind: "wall" as const }, "5:5": { kind: "hazard" as const } } };
+
+    const after = applyTerrain(applyTerrain(before, ["1:1"], null), ["2:2", "3:3"], { kind: "hazard", label: "Отрута" });
+
+    const diff = diffTerrain(before.terrain, after.terrain);
+
+    const applied = applyTerrainDiff(before, diff ?? {});
+
+    expect(applied).toEqual(after);
+    expect(applied.terrain).not.toBe(before.terrain);
+    expect(applyTerrainDiff(before, { removed: ["1:1", "5:5"] })).not.toHaveProperty("terrain");
   });
 });

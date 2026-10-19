@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
+import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -42,7 +43,7 @@ describe("buildClientDelta", () => {
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
   });
 
-  it("карта в scene лише тоді, коли вона змінилась", () => {
+  it("карта чи зміни місцевості в scene лише тоді, коли вона змінилась", () => {
     const a = p("a");
 
     const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
@@ -61,8 +62,60 @@ describe("buildClientDelta", () => {
 
     expect(buildClientDelta(args).scene).not.toHaveProperty("map");
     expect(buildClientDelta({ ...args, map: { ...map } }).scene).not.toHaveProperty("map");
-    expect(buildClientDelta({ ...args, map: withTerrain }).scene.map).toEqual(withTerrain);
+    expect(buildClientDelta({ ...args, map: withTerrain }).scene).not.toHaveProperty("map");
+    expect(buildClientDelta({ ...args, map: withTerrain }).scene.terrain).toEqual({ set: [{ cell: { kind: "wall" }, keys: ["1:1"] }] });
     expect(buildClientDelta({ ...args, map: null }).scene.map).toBeNull();
+
+    const resized = { ...withTerrain, cols: 10 };
+
+    expect(buildClientDelta({ ...args, map: resized }).scene).toMatchObject({ map: resized });
+    expect(buildClientDelta({ ...args, map: resized }).scene).not.toHaveProperty("terrain");
+  });
+
+  it("зняття місцевості — removed; без змін місцевості — нічого", () => {
+    const a = p("a");
+
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3, terrain: { "1:1": { kind: "wall" as const }, "2:2": { kind: "hazard" as const } } };
+
+    const args = {
+      before: { scene, meta: { ...meta, map }, participants: [a], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [a],
+      pending: [],
+      stored: [],
+      fullIds: [],
+      log: [],
+    };
+
+    const { terrain: _t, ...bare } = map;
+
+    expect(buildClientDelta({ ...args, map: { ...bare, terrain: { "2:2": { kind: "hazard" } } } }).scene.terrain).toEqual({ removed: ["1:1"] });
+    expect(buildClientDelta({ ...args, map: bare }).scene.terrain).toEqual({ removed: ["1:1", "2:2"] });
+    expect(buildClientDelta({ ...args, map: { ...map, terrain: { ...map.terrain } } }).scene).not.toHaveProperty("terrain");
+  });
+
+  it("великий штрих небезпеки з підписом на 150 клітинок тримає дельту далеко під лімітом Pusher", () => {
+    const a = p("a");
+
+    const map = { cols: 40, rows: 40, background: "https://example.com/bg.webp", opacity: 0.3 };
+
+    const terrain = Object.fromEntries(
+      Array.from({ length: 150 }, (_, i) => [`${i % 40}:${Math.floor(i / 40)}`, { kind: "hazard" as const, label: "Небезпечна зона" }]),
+    );
+
+    const d = buildClientDelta({
+      before: { scene, meta: { ...meta, map }, participants: [a], pending: [] },
+      after: { ...scene, version: 8 },
+      participants: [a],
+      pending: [],
+      stored: [],
+      fullIds: [],
+      log: [],
+      map: { ...map, terrain },
+    });
+
+    expect(d.scene.terrain?.set).toHaveLength(1);
+    expect(Buffer.byteLength(JSON.stringify(d), "utf8")).toBeLessThan(PUSHER_DELTA_LIMIT_BYTES / 4);
   });
 
   it("видалення і зміна порядку → removed + order", () => {

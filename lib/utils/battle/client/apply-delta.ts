@@ -1,4 +1,5 @@
 import { BattleStatus } from "@/lib/constants/battle";
+import { applyTerrainDiff } from "@/lib/utils/battle/grid/terrain";
 import type { BattleParticipantPatch, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -52,6 +53,10 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
 
   const { scene } = delta;
 
+  if (scene.terrain && !cached.map) return "refetch";
+
+  const map = scene.map !== undefined ? scene.map : scene.terrain && cached.map ? applyTerrainDiff(cached.map, scene.terrain) : cached.map;
+
   // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
   const { knowledge: _knowledge, ...withoutKnowledge } = cached;
 
@@ -63,7 +68,7 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
     pendingMoraleCheck: scene.pendingMoraleCheck,
-    ...(scene.map !== undefined && { map: scene.map }),
+    ...(map !== cached.map && { map }),
     startedAt: scene.startedAt === null ? undefined : (scene.startedAt ?? cached.startedAt),
     completedAt: scene.completedAt === null ? undefined : (scene.completedAt ?? cached.completedAt),
     initiativeOrder,

@@ -176,6 +176,12 @@ export interface TerrainCell {
   untilRound?: number;
 }
 
+/** зміни місцевості в дельті: однакові значення згруповані, щоб підпис не повторювався на кожній клітинці */
+export interface TerrainDiff {
+  set?: { cell: TerrainCell; keys: string[] }[];
+  removed?: string[];
+}
+
 export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target";
 
 export interface BattleMapView {
@@ -187,6 +193,8 @@ export interface BattleMapView {
   trajectory?: { fromId: string; to: GridPoint } | null;
   /** Плашка під токеном: без запису — exact */
   hud?: Map<string, { exact: boolean }>;
+  /** Клітинки надісланих штрихів місцевості до відповіді сервера */
+  pendingStroke?: ReadonlySet<string>;
 }
 
 export interface BattleMapActions {

@@ -2,7 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { BattleMapConfig, GridPoint, TerrainKind } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, TerrainDiff, TerrainKind } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -77,8 +77,10 @@ export interface ClientBattleDelta {
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
     completedAt?: string | null;
-    /** лише коли карта змінилась (місцевість) */
+    /** лише коли змінилось щось, крім місцевості */
     map?: BattleMapConfig | null;
+    /** зміни місцевості, коли решта карти та сама */
+    terrain?: TerrainDiff;
   };
   upserted: BattleParticipant[];
   patched?: BattleParticipantPatch[];
@@ -175,6 +177,11 @@ export interface MapTerrainData {
   cells: string[];
   /** null — стерти */
   terrain: { kind: TerrainKind; label?: string; rounds?: number } | null;
+}
+
+export interface MapTerrainResponse {
+  /** зайняті або поза полем клітинки, які сервер пропустив */
+  skipped: string[];
 }
 
 export interface AbilityActionData {

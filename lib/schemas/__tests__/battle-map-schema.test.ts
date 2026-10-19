@@ -31,6 +31,7 @@ describe("battleMapSchema.terrain", () => {
     expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "lava" } } }).success).toBe(false);
     expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", label: "x".repeat(61) } } }).success).toBe(false);
     expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "barrier", untilRound: 0 } } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "barrier" } } }).success).toBe(false);
 
     const many = Object.fromEntries(Array.from({ length: 3601 }, (_, i) => [`${i}:0`, { kind: "wall" }]));
 

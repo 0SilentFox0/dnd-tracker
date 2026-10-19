@@ -55,15 +55,36 @@ describe("map-terrain mutation", () => {
     expect(longer.scene?.map?.terrain?.["4:4"].untilRound).toBe(5);
   });
 
-  it("непрохідне чи барʼєр на клітинку живого учасника (і великої істоти) — відмова", () => {
-    const reject = expect.objectContaining({ code: "action_rejected", message: "Клітинка зайнята або поза полем" });
+  it("непрохідне чи барʼєр пропускає клітинки живих учасників (і великої істоти), решту ставить", () => {
+    const out = mapTerrainMutation(ctx(), { cells: ["0:0", "1:0", "5:2"], terrain: { kind: "wall" } });
 
-    expect(() => mapTerrainMutation(ctx(), { cells: ["0:0"], terrain: { kind: "wall" } })).toThrow(reject);
-    expect(() => mapTerrainMutation(ctx(), { cells: ["5:2"], terrain: { kind: "barrier", rounds: 1 } })).toThrow(reject);
+    expect(out.scene?.map?.terrain).toEqual({ "1:0": { kind: "wall" } });
+    expect(out.response).toEqual({ skipped: ["0:0", "5:2"] });
 
     const ogre = { ...at(goblin, { x: 5, y: 2 }), combatStats: { ...goblin.combatStats, gridSize: 2 } };
 
-    expect(() => mapTerrainMutation(ctx({ participants: [at(hero, { x: 0, y: 0 }), ogre] }), { cells: ["6:3"], terrain: { kind: "wall" } })).toThrow(reject);
+    const big = mapTerrainMutation(ctx({ participants: [at(hero, { x: 0, y: 0 }), ogre] }), { cells: ["6:3", "7:3"], terrain: { kind: "barrier", rounds: 1 } });
+
+    expect(big.scene?.map?.terrain).toEqual({ "7:3": { kind: "barrier", untilRound: 3 } });
+    expect(big.response).toEqual({ skipped: ["6:3"] });
+  });
+
+  it("відмова лише коли не лишилось жодної клітинки", () => {
+    const reject = expect.objectContaining({ code: "action_rejected", message: "Клітинка зайнята або поза полем" });
+
+    expect(() => mapTerrainMutation(ctx(), { cells: ["0:0"], terrain: { kind: "wall" } })).toThrow(reject);
+    expect(() => mapTerrainMutation(ctx(), { cells: ["0:0", "5:2", "9:0"], terrain: { kind: "barrier", rounds: 1 } })).toThrow(reject);
+  });
+
+  it("без пропусків відповіді немає", () => {
+    expect(mapTerrainMutation(ctx(), { cells: ["2:2"], terrain: { kind: "wall" } }).response).toBeUndefined();
+  });
+
+  it("неканонічний ключ нормалізується", () => {
+    const out = mapTerrainMutation(ctx(), { cells: ["02:002", "2:2"], terrain: { kind: "wall" } });
+
+    expect(out.scene?.map?.terrain).toEqual({ "2:2": { kind: "wall" } });
+    expect(() => mapTerrainMutation(ctx(), { cells: ["00:00"], terrain: { kind: "wall" } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
 
   it("мертвий учасник клітинку не займає", () => {
@@ -74,9 +95,14 @@ describe("map-terrain mutation", () => {
     expect(out.scene?.map?.terrain?.["5:2"]).toEqual({ kind: "wall" });
   });
 
-  it("поза картою або неігрова клітинка — відмова", () => {
+  it("поза картою або неігрова клітинка пропускається; лише такі — відмова", () => {
     expect(() => mapTerrainMutation(ctx(), { cells: ["10:0"], terrain: { kind: "wall" } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
     expect(() => mapTerrainMutation(ctx(), { cells: ["9:0"], terrain: { kind: "hazard" } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+
+    const out = mapTerrainMutation(ctx(), { cells: ["9:0", "8:0", "10:0"], terrain: { kind: "hazard", label: "Лава" } });
+
+    expect(out.scene?.map?.terrain).toEqual({ "8:0": { kind: "hazard", label: "Лава" } });
+    expect(out.response).toEqual({ skipped: ["9:0", "10:0"] });
   });
 
   it("небезпека на клітинці учасника дозволена", () => {

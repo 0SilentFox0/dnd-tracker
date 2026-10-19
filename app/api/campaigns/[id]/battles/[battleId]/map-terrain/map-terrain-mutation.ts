@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-import { applyTerrain, blockedSet, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
+import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
+import type { MapTerrainResponse } from "@/types/api";
 import type { TerrainCell } from "@/types/battle";
 
 export const mapTerrainSchema = z.object({
@@ -32,29 +33,34 @@ export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainB
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
 
-  const cells = [...new Set(body.cells)];
+  // "05:6" проходить regex, але рушій і рендер шукають лише канонічні ключі
+  const cells = [...new Set(body.cells.map((k) => cellKey(parseKey(k))))];
 
   const { terrain } = body;
 
-  let value: TerrainCell | null = null;
+  const base = { participants: ctx.participants, pending: ctx.pending, events: [] };
 
-  if (terrain) {
-    const blocked = blockedSet(map);
+  if (!terrain) return { ...base, scene: { map: applyTerrain(map, cells, null) } };
 
-    if (cells.some((k) => !inBounds(map, parseKey(k)) || blocked.has(k))) throw new BattleRuleError("action_rejected", REJECTED);
+  const blocked = blockedSet(map);
 
-    if (terrain.kind !== "hazard") {
-      const occupied = occupiedBy(ctx.participants, () => true);
+  const occupied = terrain.kind === "hazard" ? new Set<string>() : occupiedBy(ctx.participants, () => true);
 
-      if (cells.some((k) => occupied.has(k))) throw new BattleRuleError("action_rejected", REJECTED);
-    }
+  const usable = (k: string) => inBounds(map, parseKey(k)) && !blocked.has(k) && !occupied.has(k);
 
-    value = {
-      kind: terrain.kind,
-      ...(terrain.label && { label: terrain.label }),
-      ...(terrain.kind === "barrier" && terrain.rounds !== undefined && { untilRound: ctx.scene.round + terrain.rounds - 1 }),
-    };
-  }
+  const kept = cells.filter(usable);
 
-  return { participants: ctx.participants, pending: ctx.pending, events: [], scene: { map: applyTerrain(map, cells, value) } };
+  if (kept.length === 0) throw new BattleRuleError("action_rejected", REJECTED);
+
+  const value: TerrainCell = {
+    kind: terrain.kind,
+    ...(terrain.label && { label: terrain.label }),
+    ...(terrain.kind === "barrier" && terrain.rounds !== undefined && { untilRound: ctx.scene.round + terrain.rounds - 1 }),
+  };
+
+  const skipped = cells.filter((k) => !usable(k));
+
+  const response: MapTerrainResponse = { skipped };
+
+  return { ...base, scene: { map: applyTerrain(map, kept, value) }, ...(skipped.length > 0 && { response: { ...response } }) };
 }

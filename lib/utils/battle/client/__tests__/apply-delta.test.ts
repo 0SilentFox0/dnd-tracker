@@ -66,6 +66,23 @@ describe("applyBattleDelta", () => {
     expect((applyBattleDelta(withMap, delta({ scene })) as BattleScene).map).toEqual(terrain);
   });
 
+  it("scene.terrain домерджується в кешовану карту новим записом; без карти в кеші — refetch", () => {
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3, terrain: { "1:1": { kind: "wall" as const }, "2:2": { kind: "wall" as const } } };
+
+    const withMap = { ...cached, map };
+
+    const terrain = { set: [{ cell: { kind: "hazard" as const, label: "Лава" }, keys: ["3:3", "4:4"] }], removed: ["1:1"] };
+
+    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, terrain };
+
+    const next = applyBattleDelta(withMap, delta({ scene })) as BattleScene;
+
+    expect(next.map?.terrain).toEqual({ "2:2": { kind: "wall" }, "3:3": { kind: "hazard", label: "Лава" }, "4:4": { kind: "hazard", label: "Лава" } });
+    expect(next.map?.terrain).not.toBe(map.terrain);
+    expect(map.terrain).toEqual({ "1:1": { kind: "wall" }, "2:2": { kind: "wall" } });
+    expect(applyBattleDelta(cached, delta({ scene }))).toBe("refetch");
+  });
+
   it("patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання", () => {
     const effects = [{ id: "e1", name: "Кровотеча" }] as unknown as BattleParticipant["battleData"]["activeEffects"];
 

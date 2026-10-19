@@ -1,4 +1,5 @@
 import { BattleStatus } from "@/lib/constants/battle";
+import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
@@ -9,13 +10,17 @@ const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 
 const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id, i) => id === b[i]);
 
-// фон може бути великим data-URL: порівнюємо його рядком окремо від решти
-function sameMap(a: BattleMapConfig | null, b: BattleMapConfig | null): boolean {
-  if (a === b) return true;
+const withoutTerrain = ({ terrain: _terrain, ...rest }: BattleMapConfig) => JSON.stringify(rest);
 
-  if (!a || !b || a.background !== b.background) return false;
+// повну карту шлемо лише коли змінилось щось, крім місцевості: інакше великі штрихи переповнюють Pusher
+function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain"> {
+  if (after === undefined || before === after) return {};
 
-  return JSON.stringify({ ...a, background: null }) === JSON.stringify({ ...b, background: null });
+  if (!before || !after || withoutTerrain(before) !== withoutTerrain(after)) return { map: after };
+
+  const terrain = diffTerrain(before.terrain, after.terrain);
+
+  return terrain ? { terrain } : {};
 }
 
 export function buildClientDelta(args: {
@@ -84,7 +89,7 @@ export function buildClientDelta(args: {
       ...(after.completedAt
         ? { completedAt: after.completedAt.toISOString() }
         : before.scene.completedAt && { completedAt: null }),
-      ...(map !== undefined && !sameMap(before.meta.map, map) && { map }),
+      ...mapChange(before.meta.map, map),
     },
     upserted,
     ...(patched.length > 0 && { patched }),
