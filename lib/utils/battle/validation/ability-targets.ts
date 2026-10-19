@@ -1,7 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";

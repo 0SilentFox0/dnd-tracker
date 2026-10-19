@@ -14,7 +14,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";

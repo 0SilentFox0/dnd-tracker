@@ -1,4 +1,4 @@
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { diceCount, parseDice } from "@/lib/utils/common/dice";
 
 function invalid(message: string): never {

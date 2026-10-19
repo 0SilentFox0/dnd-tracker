@@ -1,6 +1,6 @@
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange } from "@/lib/utils/battle/grid/template";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
