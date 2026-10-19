@@ -218,6 +218,8 @@ export interface BattleMapView {
   hud?: Map<string, { exact: boolean }>;
   /** Клітинки надісланих штрихів місцевості до відповіді сервера */
   pendingStroke?: ReadonlySet<string>;
+  /** Поточний раунд — для «ще N р.» на тимчасовій небезпеці */
+  round?: number;
   /** Удар останньої дії по учаснику: рамка, спалах і тремтіння токена в момент влучання */
   impactFor?: (participantId: string) => FxImpact | null;
 }

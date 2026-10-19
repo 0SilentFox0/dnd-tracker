@@ -290,12 +290,38 @@ describe("BattleMap", () => {
     expect(wall.getAttribute("fill")).toBe("rgba(0,0,0,.6)");
     expect(barrier.querySelectorAll("polygon")[0].getAttribute("fill")).toBe("rgba(0,0,0,.75)");
     expect(barrier.querySelectorAll("polygon")[1].getAttribute("fill")).toContain("url(#");
-    expect(hazard.getAttribute("fill")).toBe("rgba(200,40,30,.28)");
-    expect(hazard.getAttribute("stroke")).toBe("#ff5a4a");
+    expect(hazard.getAttribute("fill")).toBe("url(#battle-map-hazard-fire)");
+    expect(hazard.getAttribute("stroke")).toBe("#ff9a2a");
     expect(container.querySelector('polygon[data-fx-cell="1:1"]')?.getAttribute("stroke")).toBe("none");
     expect(container.querySelector('polygon[data-fx-cell="2:1"] title')?.textContent).toBe("Барʼєр до кінця раунду 3");
     expect(container.querySelector('polygon[data-fx-cell="3:1"] title')?.textContent).toBe("Вогняна стіна");
     expect(container.querySelector('polygon[data-fx-cell="0:1"]')?.getAttribute("stroke")).toBe("rgba(255,255,255,1)");
+  });
+
+  it("тимчасова небезпека: вогняна заливка, жар, полум'я й «ще N р.»; червона зона руху — ні", () => {
+    const map: BattleMapConfig = {
+      ...square,
+      terrain: { "1:1": { kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 5, type: "fire" } }, "3:2": { kind: "hazard", label: "Лава" } },
+    };
+
+    const marks = new Map([["2:0", "move-danger" as const]]);
+
+    const { container } = render(<BattleMap map={map} participants={[]} view={{ marks, round: 3 }} />);
+
+    const timed = container.querySelectorAll("[data-hazard-timed]");
+
+    expect(timed).toHaveLength(1);
+    expect(timed[0].querySelector("polygon")?.getAttribute("fill")).toBe("url(#battle-map-hazard-fire)");
+    expect(container.querySelector('[data-hazard-flame="1:1"]')).not.toBeNull();
+    expect(container.querySelector(".battle-map-ember")?.children).toHaveLength(2);
+    expect(container.querySelector('polygon[data-fx-cell="1:1"] title')?.textContent).toBe("Вогняна стіна · ще 2 р.");
+    expect(container.querySelector('polygon[data-fx-cell="3:2"] title')?.textContent).toBe("Лава");
+
+    const danger = container.querySelector('polygon[data-fx-cell="2:0"]') as Element;
+
+    expect(danger.getAttribute("fill")).toBe("rgba(220,60,50,.2)");
+    expect(danger.querySelector("title")).toBeNull();
+    expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
   });
 
   it("a drag does not produce a click", () => {
@@ -379,6 +405,23 @@ describe("BattleMap — поворот у портреті", () => {
     expect(layer.style.transform).toBe("translateX(300px) rotate(90deg)");
     expect(container.querySelector("[data-map-tokens]")?.className).toContain("*:-rotate-90");
     expect(layer.querySelector('[data-fx-participant="h"]')).not.toBeNull();
+  });
+
+  it("phone: полум'я небезпеки на повернутій карті стоїть прямо, на десктопі — без повороту", () => {
+    avail = { width: 300, height: 600 };
+
+    const map: BattleMapConfig = { ...wide, terrain: { "1:1": { kind: "hazard", untilRound: 2 } } };
+
+    const phone = render(<BattleMap map={map} participants={[]} view={{ round: 2 }} phone />);
+
+    expect(phone.container.querySelector('polygon[data-fx-cell="1:1"] title')?.textContent).toBe("Небезпечна зона · ще 1 р.");
+    expect(phone.container.querySelector('[data-hazard-flame="1:1"]')?.getAttribute("transform")).toBe("rotate(-90 150 150)");
+    phone.unmount();
+
+    const desktop = render(<BattleMap map={map} participants={[]} />);
+
+    expect(desktop.container.querySelector('[data-hazard-flame="1:1"]')?.getAttribute("transform")).toBeNull();
+    expect(desktop.container.querySelector('polygon[data-fx-cell="1:1"] title')?.textContent).toBe("Небезпечна зона · до кінця раунду 2");
   });
 
   it("без phone (десктоп) карта не повертається", () => {

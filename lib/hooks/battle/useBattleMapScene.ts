@@ -78,6 +78,8 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const impactFor = useFxImpacts();
 
+  const { currentRound, currentTurnIndex } = battle;
+
   const view = useMemo(() => {
     if (!scene || !map) return null;
 
@@ -89,12 +91,11 @@ export function useBattleMapScene(): BattleMapScene | null {
       trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
       ...(pendingStroke.size > 0 && { pendingStroke }),
       impactFor,
+      round: currentRound,
     };
-  }, [scene, map, mapAim, hoverCell, pendingStroke, current, impactFor]);
+  }, [scene, map, mapAim, hoverCell, pendingStroke, current, impactFor, currentRound]);
 
   const { mutate: move } = actions.move;
-
-  const { currentRound, currentTurnIndex } = battle;
 
   const handle = useMemo(() => {
     const handlers: MapClickHandlers = {

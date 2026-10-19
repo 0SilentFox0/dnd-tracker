@@ -2,11 +2,13 @@
 
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { Flame } from "lucide-react";
 
 import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
+import "./battle-map.css";
 import { DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -49,6 +51,8 @@ export interface BattleMapEditing {
 
 const HATCH_ID = "battle-map-barrier-hatch";
 
+const HAZARD_GRADIENT_ID = "battle-map-hazard-fire";
+
 const ZONE = {
   move: { fill: "rgba(70,200,70,.16)", stroke: "#7dff5a", glow: "rgba(125,255,90,.28)" },
   danger: { fill: "rgba(220,60,50,.2)", stroke: "#ff5a4a", glow: "rgba(255,90,74,.3)" },
@@ -72,13 +76,49 @@ function markFill(mark: MarkValue): string {
   return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
 }
 
-function terrainTitle(t: TerrainCell): string | null {
-  if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
+function hazardTitle(t: TerrainCell, round: number | undefined): string {
+  const label = t.label ?? DEFAULT_HAZARD_LABEL;
 
-  return t.kind === "hazard" ? (t.label ?? DEFAULT_HAZARD_LABEL) : null;
+  if (t.untilRound === undefined) return label;
+
+  return round === undefined ? `${label} · до кінця раунду ${t.untilRound}` : `${label} · ще ${Math.max(1, t.untilRound - round + 1)} р.`;
 }
 
-const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: "rgba(200,40,30,.28)" } as const;
+function terrainTitle(t: TerrainCell, round: number | undefined): string | null {
+  if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
+
+  return t.kind === "hazard" ? hazardTitle(t, round) : null;
+}
+
+const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
+
+const FLAME = UNIT * 0.42;
+
+/** Жар і полум'я поверх небезпечних клітинок; на повернутій телефонній карті гліфи стоять прямо. */
+const HazardLayer = memo(function HazardLayer({ cells, rotated }: { cells: GridPoint[]; rotated: boolean }) {
+  if (cells.length === 0) return null;
+
+  return (
+    <g pointerEvents="none" data-hazard-layer="">
+      <g className="battle-map-ember">
+        {cells.map((p) => (
+          <polygon key={`e${cellKey(p)}`} points={cellPolygon(p)} fill="rgba(255,190,70,.3)" stroke="#ffc35a" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </g>
+      <g className="battle-map-flame">
+        {cells.map((p) => {
+          const c = cellCenter(p);
+
+          return (
+            <g key={`f${cellKey(p)}`} data-hazard-flame={cellKey(p)} transform={rotated ? `rotate(-90 ${c.x} ${c.y})` : undefined}>
+              <Flame x={c.x - FLAME / 2} y={c.y - FLAME / 2} width={FLAME} height={FLAME} color="#ffe08a" fill="rgba(255,120,30,.85)" strokeWidth={1.6} />
+            </g>
+          );
+        })}
+      </g>
+    </g>
+  );
+});
 
 interface GridLayerProps {
   map: BattleMapConfig;
@@ -88,9 +128,10 @@ interface GridLayerProps {
   clickableBlocked?: boolean;
   showBlocked?: boolean;
   onStrokeStart?: (p: GridPoint, e: PointerEvent) => void;
+  scene: { round?: number; rotated: boolean };
 }
 
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, onStrokeStart }: GridLayerProps) {
+const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, onStrokeStart, scene }: GridLayerProps) {
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -108,6 +149,8 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
     [cells, terrain, blocked],
   );
 
+  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (cell.kind === "hazard" ? [p] : [])), [terrainCells]);
+
   const zoneCells = cells.flatMap((p) => {
     const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
 
@@ -120,15 +163,23 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
         <pattern id={HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.14} height={UNIT * 0.14} patternTransform="rotate(45)">
           <line x1="0" y1="0" x2="0" y2={UNIT * 0.14} stroke="rgba(255,255,255,.28)" strokeWidth={UNIT * 0.03} />
         </pattern>
+        <radialGradient id={HAZARD_GRADIENT_ID}>
+          <stop offset="0%" stopColor="#ffd36b" stopOpacity={0.75} />
+          <stop offset="55%" stopColor="#ff7a1a" stopOpacity={0.62} />
+          <stop offset="100%" stopColor="#b8200f" stopOpacity={0.7} />
+        </radialGradient>
       </defs>
       {terrainCells.map(({ p, cell }) => {
+        const hazard = cell.kind === "hazard";
+
         return (
-          <g key={`t${cellKey(p)}`} data-terrain={cell.kind} pointerEvents="none">
-            <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={cell.kind === "hazard" ? "#ff5a4a" : "none"} strokeOpacity={0.7} strokeWidth={1.25} vectorEffect="non-scaling-stroke" />
+          <g key={`t${cellKey(p)}`} data-terrain={cell.kind} data-hazard-timed={hazard && cell.untilRound !== undefined ? "" : undefined} pointerEvents="none">
+            <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
             {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
           </g>
         );
       })}
+      <HazardLayer cells={hazardCells} rotated={scene.rotated} />
       {cells.map((p) => {
         const key = cellKey(p);
 
@@ -153,7 +204,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
 
         const cell = terrain?.[key];
 
-        const title = cell && terrainTitle(cell);
+        const title = cell && terrainTitle(cell, scene.round);
 
         const gridless = zoneOf(mark) !== null || cell?.kind === "wall" || cell?.kind === "barrier";
 
@@ -362,6 +413,10 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
+  const round = view?.round;
+
+  const gridScene = useMemo(() => ({ round, rotated: fit.rotated }), [round, fit.rotated]);
+
   const tokens = useMemo(
     () =>
       participants
@@ -460,6 +515,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             clickableBlocked={clickableBlocked}
             showBlocked={showBlocked}
             onStrokeStart={painting ? onStrokeStart : undefined}
+            scene={gridScene}
           />
           <TemplateLayer marks={view?.marks} aim={view?.aim} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
