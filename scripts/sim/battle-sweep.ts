@@ -507,7 +507,8 @@ function spellTargets(actor: any, spell: any): string[] | "needDead" {
 
       return [(spell.spellEffects ?? []).some((e: any) => e.kind === "heal" || e.kind === "hot") ? hurt[0].basicInfo.id : pick(friends).basicInfo.id];
     }
-    case "area": return (t.side === "ally" ? friends : foes).slice(0, t.maxTargets ?? 3).map((x: any) => x.basicInfo.id);
+    case "area":
+    case "template": return (t.side === "ally" ? friends : foes).slice(0, t.maxTargets ?? 3).map((x: any) => x.basicInfo.id);
     case "allyDead": {
       const d = P().find((x) => x.basicInfo.side === actor.basicInfo.side && !alive(x) && x.basicInfo.sourceType === ParticipantSourceType.CHARACTER);
 

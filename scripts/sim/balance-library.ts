@@ -215,7 +215,7 @@ function pickSpell(actor: BattleParticipant, foes: BattleParticipant[]): { spell
     let targets: BattleParticipant[];
 
     if (targeting.kind === "enemy") targets = sorted.slice(0, spellTargetingFor(state.initiativeOrder, actor.basicInfo.id, spell).maxTargets);
-    else if (targeting.kind === "area" && targeting.side === "enemy") targets = sorted.slice(0, targeting.maxTargets ?? 1);
+    else if ((targeting.kind === "area" || targeting.kind === "template") && targeting.side === "enemy") targets = sorted.slice(0, targeting.maxTargets ?? 1);
     else if (targeting.kind === "allEnemies") targets = sorted;
     else continue;
 
