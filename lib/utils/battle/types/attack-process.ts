@@ -3,7 +3,7 @@ import type { CastableSpell } from "./spell-process";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
-import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface ProcessAttackParams {
   attacker: BattleParticipant;
@@ -26,6 +26,7 @@ export interface ProcessAttackParams {
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;
+  map?: BattleMapConfig | null;
   /** закляття для прапорців castSpellOnHit, за id */
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 }

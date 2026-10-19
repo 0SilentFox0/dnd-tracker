@@ -55,4 +55,11 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
 
     for (const key of ["humans-royal-griffin", "humans-battle-griffin", "demons-fire-demon"]) for (const a of unit(key).abilities) expect(AbilitySchema.safeParse(a).success).toBe(true);
   });
+
+  it("наскрізний постріл і вогняна хвиля", () => {
+    expect(abilityNames("mages-battle-mage")).toEqual(["Аура пригнічення магії", "Наскрізний постріл"]);
+    expect(abilityNames("dwarves-jarl")).toEqual(["Вогонь", "Імунітет до вогню", "Вогняна хвиля"]);
+
+    for (const key of ["mages-battle-mage", "dwarves-jarl"]) for (const a of unit(key).abilities) expect(AbilitySchema.safeParse(a).success).toBe(true);
+  });
 });

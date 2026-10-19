@@ -170,6 +170,10 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `мораль не нижче ${signed(e.value)}`;
     case "extraSummons":
       return `прикликання${e.spellIds ? ` заклять (${e.spellIds.length})` : ""} дають +${e.count} істот`;
+    case "piercingShot":
+      return "дальня атака влучає в усіх ворогів на лінії за ціллю";
+    case "fireWave":
+      return `влучання обпікає ворогів позаду цілі (конус ${e.size} фт): ${e.percent}% шкоди вогнем`;
     case "banishSummons":
       return `прикликані ворогом істоти втрачають ${e.percent}% HP`;
     case "conditionImmunity":
@@ -202,6 +206,8 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
   extraSummons: "Додаткові прикликані істоти",
+  piercingShot: "Наскрізний постріл",
+  fireWave: "Вогняна хвиля",
   banishSummons: "Вигнання прикликаних ворогом",
   conditionImmunity: "Імунітет до станів",
 };
@@ -264,6 +270,11 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   extraSummons: [
     { name: "count", label: "Додаткових істот", input: "number" },
     { name: "spellIds", label: "Заклинання (порожньо = усі прикликання заклять)", input: "spells", optional: true },
+  ],
+  piercingShot: [],
+  fireWave: [
+    { name: "percent", label: "% шкоди удару", input: "number" },
+    { name: "size", label: "Конус, фт", input: "number" },
   ],
   banishSummons: [{ name: "percent", label: "% HP, які втрачають", input: "number" }],
   conditionImmunity: [

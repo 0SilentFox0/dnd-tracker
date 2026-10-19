@@ -32,6 +32,8 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   ignoreMorale: {},
   minMorale: { value: 1 },
   extraSummons: { count: 1 },
+  piercingShot: {},
+  fireWave: { percent: 50, size: 15 },
   banishSummons: { percent: 50 },
   conditionImmunity: { conditions: "all" },
 };

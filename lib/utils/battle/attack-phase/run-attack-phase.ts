@@ -8,6 +8,7 @@ import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
+import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { canActNow } from "@/lib/utils/battle/common/control";
@@ -139,6 +140,19 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const hitsAllEnemies = findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
+  const piercing =
+    !hitsAllEnemies &&
+    !isAoe &&
+    attack.type === AttackType.RANGED &&
+    !!input.map &&
+    findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "piercingShot").length > 0;
+
+  const pierced = piercing
+    ? [...new Set([...piercingTargets(input.map ?? undefined, initiativeOrder, attacker, chosenTargets[0].basicInfo.id), ...targetIds])].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? [])
+    : chosenTargets;
+
+  const expanded = hitsAllEnemies || piercing;
+
   const targets = hitsAllEnemies
     ? [
         ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t)),
@@ -147,19 +161,19 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
           : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t))
         ).filter((t) => !targetIds.includes(t.basicInfo.id)),
       ]
-    : chosenTargets;
+    : pierced;
 
   if (targets.length === 0) {
     throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
   }
 
   const isMultiTargetRanged =
-    hitsAllEnemies ||
+    expanded ||
     (!isAoe &&
       attack.type === AttackType.RANGED &&
       (attacker.combatStats.maxTargets ?? 1) > 1);
 
-  const maxPossibleTargets = hitsAllEnemies
+  const maxPossibleTargets = expanded
     ? targets.length
     : isAoe
       ? attack.maxTargets || attacker.combatStats.maxTargets || 1
@@ -175,7 +189,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dist = attack.damageDistribution;
 
-  const falloffPercents = hitsAllEnemies ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
+  const falloffPercents = expanded ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
 
   const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 
@@ -204,7 +218,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const summons: SummonRequest[] = [];
 
   // кожне влучання мультицільової атаки — свій блок кубиків повної формули (зброя + рівень героя), по черзі влучань
-  const damageFormula = isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies) ? heroAttackDamageParts(attacker, attack).formula : null;
+  const damageFormula = isMultiTargetRanged && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
 
   const dicePerTarget = damageFormula ? diceCount(damageFormula) : 0;
 
@@ -217,9 +231,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
-    const chosenAt = hitsAllEnemies ? chosenIndex(target.basicInfo.id) : i;
+    const chosenAt = expanded ? chosenIndex(target.basicInfo.id) : i;
 
-    const d20Roll = hitsAllEnemies
+    const d20Roll = expanded
       ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? rollDie(20, rng))
       : usePerTargetRolls && data.attackRolls
         ? data.attackRolls[i]
@@ -263,6 +277,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       battleId,
       damageMultiplier,
       obstacle: data.obstacle,
+      map: input.map,
       hitSpells: input.hitSpells,
       rng,
     });

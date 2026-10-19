@@ -2,13 +2,16 @@ import type { AttackRollResult } from "../../types/attack";
 import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
+import { fireWaveVictims } from "./fire-wave";
 import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
 import { castHitSpell } from "./hit-spell";
 
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { dealResistedDamage } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
 
@@ -75,6 +78,8 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
   });
 
+  applyFireWave(flow, attackerId, targetId, hitDamage.totalFinalDamage);
+
   if (p.hitSpells && p.hitSpells.size > 0 && isActive(getP(flow, targetId))) {
     const cast = castHitSpell({
       attacker: getP(flow, attackerId),
@@ -96,4 +101,26 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
   if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 
   return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
+}
+
+function applyFireWave(flow: AttackFlow, attackerId: string, targetId: string, hitDamage: number): void {
+  for (const f of findFlags(flow.ps, attackerId, "fireWave")) {
+    const amount = Math.floor((hitDamage * f.percent) / 100);
+
+    if (amount <= 0) continue;
+
+    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
+
+    const parts: string[] = [];
+
+    for (const id of victims) {
+      const before = getP(flow, id).combatStats.currentHp;
+
+      flow.ps = dealResistedDamage(flow.ps, id, amount, "fire", "Вогняна хвиля").participants;
+      parts.push(`${getP(flow, id).basicInfo.name} (−${before - getP(flow, id).combatStats.currentHp})`);
+      settleDowned(flow, id, attackerId);
+    }
+
+    if (parts.length > 0) flow.messages.push(`🔥 Вогняна хвиля: ${parts.join(", ")}`);
+  }
 }

@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, bigShield, bravery, debuff, dot, elementResist, extraDamage, falloff, finisher, guardian, oncePerBattleAoe, rage, retaliateAura, stun } from "../unit-abilities";
+import { alliesAura, bigShield, bravery, debuff, dot, elementResist, extraDamage, falloff, finisher, fireWave, guardian, oncePerBattleAoe, rage, retaliateAura, stun } from "../unit-abilities";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -51,7 +51,7 @@ export const DWARF_UNITS: LibraryUnit[] = [
   { ...base, key: "dwarves-arkat-priest", name: "Жрець Аркату", tier: 5, role: "alt", hp: 98, ac: 15, attackBonus: 8, initiative: 9, attacks: [{ name: "Рунний жезл", type: "ranged", dice: "3d6+7", damageType: "fire" }], abilities: flameMark(), spellKeys: ["ice-bolt", "fireball", "lightning-bolt", "evasion"] },
   { ...base, key: "dwarves-thane", gridSize: 2, name: "Тан", tier: 6, role: "base", hp: 154, ac: 16, attackBonus: 7, initiative: 11, attacks: [{ name: "Громовий молот", type: "melee", dice: "3d8+9", damageType: "bludgeoning" }], abilities: thane() },
   { ...base, key: "dwarves-earl", gridSize: 2, name: "Ерл", tier: 6, role: "upgrade", hp: 171, ac: 17, attackBonus: 8, initiative: 11, attacks: [{ name: "Громовий молот", type: "melee", dice: "3d8+11", damageType: "bludgeoning" }], abilities: [...thane(), oncePerBattleAoe("Буря", { percentOfAttack: 100, targets: 3, damageType: "lightning" })] },
-  { ...base, key: "dwarves-jarl", gridSize: 2, name: "Ярл", tier: 6, role: "alt", hp: 165, ac: 17, attackBonus: 8, initiative: 10, attacks: [{ name: "Вогняний молот", type: "melee", dice: "3d8+11", damageType: "bludgeoning" }], abilities: [extraDamage("Вогонь", "1d10", "fire"), fireImmunity(), oncePerBattleAoe("Вогняна куля", { percentOfAttack: 50, targets: "all", damageType: "fire" })] },
+  { ...base, key: "dwarves-jarl", gridSize: 2, name: "Ярл", tier: 6, role: "alt", hp: 165, ac: 17, attackBonus: 8, initiative: 10, attacks: [{ name: "Вогняний молот", type: "melee", dice: "3d8+11", damageType: "bludgeoning" }], abilities: [extraDamage("Вогонь", "1d10", "fire"), fireImmunity(), fireWave()] },
   { ...base, key: "dwarves-fire-dragon", gridSize: 2, name: "Вогняний дракон", tier: 7, role: "base", hp: 220, ac: 16, attackBonus: 8, initiative: 9, attacks: [{ name: "Вогняні пазурі", type: "melee", dice: "4d10+16", damageType: "fire" }], abilities: [fireImmunity(), retaliateAura("Вогняна аура", 25, "fire")] },
   { ...base, key: "dwarves-lava-dragon", gridSize: 2, name: "Лавовий дракон", tier: 7, role: "upgrade", hp: 245, ac: 18, attackBonus: 9, initiative: 9, attacks: [{ name: "Лавовий подих", type: "melee", dice: "4d10+18", damageType: "fire", targets: 2 }], abilities: [fireImmunity(), retaliateAura("Вогняна аура", 25, "fire"), falloff("Подих")] },
   { ...base, key: "dwarves-arkat-dragon", gridSize: 2, name: "Дракон Аркату", tier: 7, role: "alt", hp: 240, ac: 16, attackBonus: 9, initiative: 9, attacks: [{ name: "Подих Аркату", type: "melee", dice: "4d10+20", damageType: "fire", targets: 2 }], abilities: [fireImmunity(), falloff("Подих"), dot("Опік", "2d6", "fire", 2)] },

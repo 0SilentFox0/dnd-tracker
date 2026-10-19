@@ -71,6 +71,8 @@ const SAMPLES: Record<string, Ability[]> = {
   chaosAbsorb: [catalog.chaosAbsorb()],
   hitSpell: [catalog.hitSpell("Тіньове прокляття", ["slow"])],
   dive: [catalog.dive()],
+  piercingShot: [catalog.piercingShot()],
+  fireWave: [catalog.fireWave()],
   squall: [catalog.squall()],
   fireBurst: [catalog.fireBurst()],
   flavor: [catalog.flavor("Літає")],

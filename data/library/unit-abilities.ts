@@ -536,3 +536,19 @@ export const fireBurst = (): Ability => ({
   maxTargets: 3,
   effects: [{ kind: "maneuver", maneuver: "fireBurst", percentOfAttack: 50 }],
 });
+
+export const piercingShot = (): Ability => ({
+  id: "unit-piercing-shot",
+  name: "Наскрізний постріл",
+  description: "Дальня атака влучає в усіх ворогів на одній лінії за ціллю.",
+  trigger: { event: "passive" },
+  effects: [{ kind: "flag", flag: "piercingShot" }],
+});
+
+export const fireWave = (): Ability => ({
+  id: "unit-fire-wave",
+  name: "Вогняна хвиля",
+  description: "Влучання обпікає ворогів позаду цілі (конус 15 фт): 50 % шкоди удару вогнем.",
+  trigger: { event: "passive" },
+  effects: [{ kind: "flag", flag: "fireWave", percent: 50, size: 15 }],
+});
