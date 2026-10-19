@@ -27,7 +27,7 @@ export interface ProcessAttackParams {
   obstacle?: boolean;
   rng?: () => number;
   map?: BattleMapConfig | null;
-  /** закляття для прапорців castSpellOnHit, за id */
+  /** Лише текст і зміни учасників: summons і зона закляття на влучання не застосовуються (зараз це Dark 1-3) */
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 }
 

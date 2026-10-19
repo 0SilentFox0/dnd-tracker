@@ -137,6 +137,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
       allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
       battleAction: actionOf(updatedCaster, spell, targetsBefore, battleId, currentRound, `${updatedCaster.basicInfo.name}: ${spell.name} недоступне — немає spell slots`),
       summons: [],
+      messages: [],
     };
   }
 
@@ -365,6 +366,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
     battleAction: action,
     summons: [...summons, ...flow.summons],
+    messages: flow.messages,
     ...(spellDamage && { spellDamage }),
   };
 }

@@ -37,7 +37,5 @@ export function castHitSpell(input: HitSpellInput): { participants: BattlePartic
 
   const result = castSpell({ caster: attacker, spell, targetIds: [targetId], allParticipants: participants, currentRound: input.round, battleId: input.battleId, diceRolls, rng, isDMCast: true });
 
-  const details = result.battleAction.resultText.split(" | ").slice(1);
-
-  return { participants: result.allParticipantsUpdated, messages: [`🌑 ${attacker.basicInfo.name}: ${spell.name} → ${target.basicInfo.name}`, ...details] };
+  return { participants: result.allParticipantsUpdated, messages: [`🌑 ${attacker.basicInfo.name}: ${spell.name} → ${target.basicInfo.name}`, ...result.messages] };
 }
