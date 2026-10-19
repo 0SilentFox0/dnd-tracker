@@ -51,7 +51,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   if (!placement) {
     assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 
-    const cost = reachable(map, participants, mover, moveBudget({ map, isDM: ctx.isDM }, mover)).get(cellKey(data.to));
+    const cost = reachable(map, participants, mover, moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover)).get(cellKey(data.to));
 
     if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
 

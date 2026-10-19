@@ -148,6 +148,24 @@ describe("attack mutation", () => {
       expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
     });
 
+    it("attackHitsAllEnemies на карті без ворогів у досяжності — action_rejected, а не 404", async () => {
+      const sweeper = {
+        ...placed[0],
+        battleData: {
+          ...placed[0].battleData,
+          resolvedAbilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "attackHitsAllEnemies" }] })],
+        },
+      };
+
+      const fallen = { ...placed[1], combatStats: { ...placed[1].combatStats, currentHp: 0, status: "unconscious" as const }, battleData: { ...placed[1].battleData, position: { x: 1, y: 0 } } };
+
+      const far = { ...goblin, basicInfo: { ...goblin.basicInfo, id: "gob-far" }, battleData: { ...goblin.battleData, position: { x: 9, y: 4 } } };
+
+      const onMap = { ...ctx, participants: [sweeper, fallen, far], meta: { map } } as unknown as BattleMutationContext;
+
+      await expect(attackMutation(onMap, body())).rejects.toMatchObject({ code: "action_rejected", message: "Жоден ворог не в досяжності" });
+    });
+
     it("без карти та сама атака проходить як раніше", async () => {
       const noMap = { ...ctx, participants: placed, meta: { map: null } } as unknown as BattleMutationContext;
 

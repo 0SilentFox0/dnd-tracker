@@ -254,7 +254,7 @@ describe("deriveMapScene: DM без ліміту руху", () => {
 
     expect(dm.view.marks?.get("9:4")).toBe(9);
 
-    const player = deriveMapScene(input({ participants: [own], actor: { current: own, isDM: true } }));
+    const player = deriveMapScene(input({ participants: [own], actor: { current: own, isDM: true, viewer: { userId: "dm", isDM: true, canSeeEnemyHp: true } } }));
 
     expect(player.view.marks?.get("9:4")).toBeUndefined();
     expect(player.view.marks?.get("2:0")).toBe(2);

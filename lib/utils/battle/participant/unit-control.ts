@@ -2,8 +2,10 @@ import { ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import type { BattleParticipant } from "@/types/battle";
 
-const isRealPlayer = (p: BattleParticipant, dmUserId: string) =>
-  p.basicInfo.sourceType === ParticipantSourceType.CHARACTER && p.basicInfo.controlledBy !== CONTROLLED_BY_DM && p.basicInfo.controlledBy !== dmUserId;
+export const controlledByDm = (p: BattleParticipant, dmUserId: string | null) =>
+  p.basicInfo.controlledBy === CONTROLLED_BY_DM || (dmUserId !== null && p.basicInfo.controlledBy === dmUserId);
+
+const isRealPlayer = (p: BattleParticipant, dmUserId: string) => p.basicInfo.sourceType === ParticipantSourceType.CHARACTER && !controlledByDm(p, dmUserId);
 
 // прикликаний належить тому, хто прикликав; зачарований — тому, хто зачарував
 const isSideUnit = (p: BattleParticipant) =>

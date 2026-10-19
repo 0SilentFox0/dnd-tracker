@@ -109,7 +109,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
   if (!aim && !placing && !tool && canAct && current?.battleData.position) {
-    for (const [key, cost] of moveZoneMarks(map, participants, current, { isDM })) marks.set(key, cost);
+    for (const [key, cost] of moveZoneMarks(map, participants, current, { dmUserId: isDM ? viewer.userId : null })) marks.set(key, cost);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
   }

@@ -146,7 +146,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     : chosenTargets;
 
   if (targets.length === 0) {
-    throw new BattleAccessError(404, "Цілей немає в бою");
+    throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
   }
 
   const isMultiTargetRanged =

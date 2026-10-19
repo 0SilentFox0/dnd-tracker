@@ -9,8 +9,8 @@ import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant } 
 
 export type CellMark = BattleMapMark;
 
-export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { isDM?: boolean } = {}): Map<string, number> {
-  return reachable(map, participants, mover, moveBudget({ map, isDM: !!opts.isDM }, mover));
+export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { dmUserId?: string | null } = {}): Map<string, number> {
+  return reachable(map, participants, mover, moveBudget({ map, dmUserId: opts.dmUserId ?? null }, mover));
 }
 
 export const isMoveMark = (m: CellMark | number | undefined): boolean => typeof m === "number" || m === "move" || m === "move-danger";
@@ -19,7 +19,7 @@ export function moveZoneMarks(
   map: BattleMapConfig,
   participants: BattleParticipant[],
   mover: BattleParticipant,
-  opts: { isDM?: boolean } = {},
+  opts: { dmUserId?: string | null } = {},
 ): Map<string, CellMark | number> {
   const danger = new Set([...threatCells(map, participants, mover), ...hazardCells(map)]);
 
