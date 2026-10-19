@@ -1,8 +1,9 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SKILL_ALL_RADIUS_FEET, SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
@@ -20,21 +21,34 @@ export interface SkillSpellTargeting {
   maxTargets: number;
 }
 
-export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting {
-  const flags = findFlags(ps, casterId, "spellTargeting").filter(
-    (f) =>
-      (f.maxLevel === undefined || spell.level <= f.maxLevel) &&
-      (!f.spellIds || f.spellIds.includes(spell.id)) &&
-      (!f.school || f.school === spell.groupId),
+type TargetingFlag = Extract<FlagEffect, { flag: "spellTargeting" }>;
+
+const fitsSpell = (f: TargetingFlag, spell: SpellRef) =>
+  (f.maxLevel === undefined || spell.level <= f.maxLevel) && (!f.spellIds || f.spellIds.includes(spell.id)) && (!f.school || f.school === spell.groupId);
+
+/** Найсильніше розширення заклинання разом із назвою вміння/артефакту, що його дало. */
+export function spellWideningOf(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting & { source?: string } {
+  const found = collectModifiers(ps, casterId, { flag: "spellTargeting" }).entries.flatMap((e) =>
+    e.flag?.flag === "spellTargeting" && fitsSpell(e.flag, spell) ? [{ flag: e.flag, source: e.source ?? e.label }] : [],
   );
 
-  if (flags.some((f) => f.mode === "all")) return { mode: "all", maxTargets: Infinity };
+  const all = found.find((f) => f.flag.mode === "all");
 
-  const areas = flags.filter((f) => f.mode === "area");
+  if (all) return { mode: "all", maxTargets: Infinity, source: all.source };
+
+  const areas = found.map((f) => ({ maxTargets: f.flag.maxTargets ?? DEFAULT_AREA_TARGETS, source: f.source }));
 
   if (areas.length === 0) return { mode: "single", maxTargets: 1 };
 
-  return { mode: "area", maxTargets: Math.max(...areas.map((f) => f.maxTargets ?? DEFAULT_AREA_TARGETS)) };
+  const best = areas.reduce((a, b) => (b.maxTargets > a.maxTargets ? b : a));
+
+  return { mode: "area", ...best };
+}
+
+export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting {
+  const { mode, maxTargets } = spellWideningOf(ps, casterId, spell);
+
+  return { mode, maxTargets };
 }
 
 export function expandSpellTargets(ps: BattleParticipant[], casterId: string, spell: SpellRef, chosenIds: string[]): string[] {

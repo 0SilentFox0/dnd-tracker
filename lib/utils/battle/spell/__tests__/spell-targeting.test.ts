@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { expandSpellTargets, spellTargetingFor, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
+import { expandSpellTargets, spellTargetingFor, spellWideningOf, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleParticipant } from "@/types/battle";
 
 const spell = { id: "bless", groupId: "light", level: 2 };
@@ -30,6 +30,19 @@ describe("spell targeting", () => {
     const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "area", school: "light" }]);
 
     expect(spellTargetingFor([c], "c", spell)).toEqual({ mode: "area", maxTargets: 3 });
+  });
+
+  it("spellWideningOf names the source of the winning flag", () => {
+    const c = makeParticipant({
+      id: "c",
+      abilities: [
+        resolved({ id: "a1", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 2 }] }, { id: "s1", name: "Розщеплення" }),
+        resolved({ id: "a2", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 4 }] }, { id: "s2", name: "Подвоєння" }),
+      ],
+    });
+
+    expect(spellWideningOf([c], "c", spell)).toEqual({ mode: "area", maxTargets: 4, source: "Подвоєння" });
+    expect(spellWideningOf([caster()], "c", spell)).toEqual({ mode: "single", maxTargets: 1 });
   });
 
   it("flag for another school is ignored", () => {

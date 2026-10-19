@@ -1,11 +1,11 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
+import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, type SpellChain, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -302,4 +302,30 @@ export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; univ
   if (opts.free) return "Вільний каст DM — слот не витрачається.";
 
   return opts.universal ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(spell.level)} кола.`;
+}
+
+export interface SpellWidening {
+  /** коротко для рядка списку */
+  badge: string;
+  /** повністю для деталей заклинання */
+  note: string;
+}
+
+const ALL_OF_SIDE = { enemy: "усі вороги", ally: "усі союзники" } as const;
+
+/** Одиночне заклинання, яке вміння заклинателя б'є по кількох цілях, — з назвою вміння. */
+export function spellWidening(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, onMap: boolean): SpellWidening | null {
+  const { targeting } = spellDefinition(s);
+
+  if (!caster || (targeting.kind !== "ally" && targeting.kind !== "enemy")) return null;
+
+  const w = spellWideningOf(order, caster.basicInfo.id, spellSpec(s));
+
+  if (w.mode === "single") return null;
+
+  const badge = w.mode === "all" ? ALL_OF_SIDE[targeting.kind] : `до ${w.maxTargets} цілей`;
+
+  const side = 2 * areaRadiusCells(skillRadiusTemplate(w.mode).size) + 1;
+
+  return { badge, note: `${w.source ?? "Вміння"}: ${badge}${onMap ? ` (на карті — зона ${side}×${side})` : ""}` };
 }

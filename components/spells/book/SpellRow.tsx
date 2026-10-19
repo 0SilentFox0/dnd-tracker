@@ -11,7 +11,15 @@ const SIZES = {
   narrow: { row: "h-[72px]", frame: "size-11", icon: "size-[30px]", px: 30 },
 };
 
-export function SpellRow({ spell, school, wide, picked, formula, onPick }: { spell: BookSpell; school: string; wide: boolean; picked: boolean; formula?: string; onPick: (spell: BookSpell) => void }) {
+interface SpellRowExtras {
+  formula?: string;
+  /** вміння заклинателя розширює ціль заклинання */
+  badge?: string;
+}
+
+export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: string; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
+  const { formula, badge } = extras;
+
   const size = wide ? SIZES.wide : SIZES.narrow;
 
   const hints = [spell.resolution?.kind === "save" && "рятівний кидок", spell.targeting && targetingLabel(spell.targeting), spell.cost === "bonusAction" && "бонусна дія"].filter(Boolean).join(" · ");
@@ -22,7 +30,10 @@ export function SpellRow({ spell, school, wide, picked, formula, onPick }: { spe
         {spell.icon ? <OptimizedImage src={spell.icon} alt="" width={size.px} height={size.px} className={cn("object-contain", size.icon)} /> : <Sparkles className="size-5" />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="hud-sc block truncate text-[17px] font-bold">{spell.name}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="hud-sc truncate text-[17px] font-bold">{spell.name}</span>
+          {badge && <span data-spell-widening className="shrink-0 border border-[#7a2a1f]/50 bg-[#7a2a1f]/10 px-1.5 text-xs leading-5 text-[#7a2a1f]">{badge}</span>}
+        </span>
         <span className="block truncate text-sm italic text-[#6b5a45]">{hints}</span>
       </span>
       {formula && spell.dice ? <span className="w-20 text-right text-[15px] text-[#7a2a1f]">{formula}</span> : null}

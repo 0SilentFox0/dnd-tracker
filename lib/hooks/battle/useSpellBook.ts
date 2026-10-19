@@ -21,10 +21,11 @@ import {
   spellSpec,
   spellTargetCandidates,
   spellTargetInRange,
+  spellWidening,
   withChainTargets,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
-import type { MapAim } from "@/lib/utils/battle/grid";
+import { isOnMap, type MapAim } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { expandSpellTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
@@ -189,6 +190,10 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const universalSlot = casterUsesUniversalSlot(caster);
 
+  const onMap = !!map && !!caster && isOnMap(caster);
+
+  const wideningOf = (s: BookSpell) => spellWidening(order, caster, s, onMap);
+
   const formulaOf = (s: BookSpell): string => (caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null }) : "");
 
   const send = useEffectEvent(async () => {
@@ -210,7 +215,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, aimPreview, chain, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, aimPreview, chain, inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,

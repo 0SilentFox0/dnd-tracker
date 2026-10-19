@@ -24,7 +24,11 @@ export interface ModifierEntry {
   percent: number;
   flag?: FlagEffect;
   icon?: string | null;
+  /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
+  source?: string;
 }
+
+type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source">;
 
 export interface ModifierResult {
   flat: number;
@@ -101,16 +105,10 @@ export function collectModifiers(
     result.entries.push(entry);
   };
 
-  const entryOf = (
-    effect: StaticEffect,
-    owner: BattleParticipant,
-    label: string,
-    sourceType: ModifierEntry["sourceType"],
-    icon?: string | null,
-  ): ModifierEntry | null => {
+  const entryOf = (effect: StaticEffect, owner: BattleParticipant, meta: EntryMeta): ModifierEntry | null => {
     if (!matchesQuery(effect, query)) return null;
 
-    if (effect.kind === "flag") return { label, sourceType, flat: 0, percent: 0, flag: effect, icon };
+    if (effect.kind === "flag") return { ...meta, flat: 0, percent: 0, flag: effect };
 
     let multiplier = 1;
 
@@ -126,11 +124,11 @@ export function collectModifiers(
 
     const percent = (effect.percent !== undefined ? resolveFlat(effect.percent, owner) : 0) * multiplier;
 
-    return { label, sourceType, flat, percent, icon };
+    return { ...meta, flat, percent };
   };
 
-  const add = (effect: StaticEffect, owner: BattleParticipant, label: string, sourceType: ModifierEntry["sourceType"], icon?: string | null) => {
-    const entry = entryOf(effect, owner, label, sourceType, icon);
+  const add = (effect: StaticEffect, owner: BattleParticipant, meta: EntryMeta) => {
+    const entry = entryOf(effect, owner, meta);
 
     if (entry) push(entry);
   };
@@ -155,7 +153,7 @@ export function collectModifiers(
         for (const effect of ability.effects) {
           if (!isStaticEffect(effect) || !appliesTo(effect.target, source, subject)) continue;
 
-          const entry = entryOf(effect, source, ability.name, ability.source.type, ability.source.icon);
+          const entry = entryOf(effect, source, { label: ability.name, sourceType: ability.source.type, icon: ability.source.icon, source: ability.source.name });
 
           if (!entry) continue;
 
@@ -183,10 +181,10 @@ export function collectModifiers(
   for (const ae of liveActiveEffects(subject, participants)) {
     const owner = (ae.zone && findParticipant(participants, ae.zone.ownerId)) || subject;
 
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, ae.name, "effect", ae.icon ?? ae.source?.icon);
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name });
   }
 
-  for (const effect of extra) add(effect, subject, "Ця дія", "action");
+  for (const effect of extra) add(effect, subject, { label: "Ця дія", sourceType: "action" });
 
   return result;
 }

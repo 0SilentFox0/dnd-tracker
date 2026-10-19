@@ -20,7 +20,7 @@ const PAPER = "hud-book relative bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_
 export interface SpellBookPagesProps {
   byLevel: Record<number, BookSpell[]>;
   page: { level: number; slotOf: (level: number) => number; onLevel: (level: number) => void };
-  pick: { pickedId: string | null; onPick: (spell: BookSpell) => void; formulaOf?: (spell: BookSpell) => string };
+  pick: { pickedId: string | null; onPick: (spell: BookSpell) => void; formulaOf?: (spell: BookSpell) => string; badgeOf?: (spell: BookSpell) => string | undefined };
   layout: { wide: boolean; showDetail: boolean };
   detail: ReactNode;
 }
@@ -28,7 +28,7 @@ export interface SpellBookPagesProps {
 export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBookPagesProps) {
   const { level, slotOf, onLevel } = page;
 
-  const { pickedId, onPick, formulaOf } = pick;
+  const { pickedId, onPick, formulaOf, badgeOf } = pick;
 
   const { wide, showDetail } = layout;
 
@@ -51,7 +51,7 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
               <section key={g.name} className="mt-3 first:mt-1">
                 {filter.isAll && <SchoolHeading name={g.name} />}
                 {g.spells.map((s) => (
-                  <SpellRow key={s.id} spell={s} school={g.name} wide={wide} picked={pickedId === s.id} formula={formulaOf?.(s)} onPick={onPick} />
+                  <SpellRow key={s.id} spell={s} school={g.name} wide={wide} picked={pickedId === s.id} extras={{ formula: formulaOf?.(s), badge: badgeOf?.(s) }} onPick={onPick} />
                 ))}
               </section>
             ))}

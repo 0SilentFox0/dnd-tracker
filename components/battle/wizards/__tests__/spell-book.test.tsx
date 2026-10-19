@@ -392,6 +392,34 @@ describe("SpellBook", () => {
       expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
     });
 
+    it("розширення від вміння: бейдж у рядку й примітка з назвою вміння і зоною на карті", async () => {
+      const wrath = [resolved({ name: "Гнів природи", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all", maxLevel: 4 }] })];
+
+      const { wrapper, caster } = onMap(["ray"], false, wrath);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+
+      expect(screen.getByText("усі вороги", { selector: "[data-spell-widening]" })).toBeTruthy();
+      expect(screen.getByRole("note").textContent).toBe("Гнів природи: усі вороги (на карті — зона 5×5)");
+    });
+
+    it("розширення «area» без карти — «до N цілей», без зони; без вміння — без примітки", async () => {
+      const split = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 3 }] }, { type: "artifact", name: "Посох розщеплення" })];
+
+      const { wrapper, caster } = fakeScene({ knownSpells: ["ray", "ball"], abilities: split, slots: { "2": { max: 3, current: 3 } } });
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      expect(screen.getByRole("note").textContent).toBe("Посох розщеплення: до 3 цілей");
+      expect(screen.getAllByText("до 3 цілей", { selector: "[data-spell-widening]" })).toHaveLength(1);
+
+      fireEvent.click(screen.getByText("Вогняна куля"));
+      expect(screen.queryByRole("note")).toBeNull();
+    });
+
     it("ланцюг: обрана перша ціль, превʼю порядку ланцюга, каст лише з першою", async () => {
       const { wrapper, caster, value, castSpell, me, gob, ally } = onMap(["chain"]);
 
