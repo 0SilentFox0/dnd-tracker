@@ -45,6 +45,10 @@ describe("ActionGrid", () => {
     expect(screen.getByRole("button", { name: "Паніка" })).toBeTruthy();
     cleanup();
 
+    render(<ActionGrid turn={turn(false, "none")} {...props} />);
+    expect(screen.getByRole("button", { name: "Мораль" })).toBeTruthy();
+    cleanup();
+
     render(<ActionGrid turn={turn(false)} {...props} />);
     expect(screen.queryByRole("button", { name: /Мораль|Паніка|Бойовий/ })).toBeNull();
   });
