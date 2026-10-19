@@ -6,7 +6,7 @@ import { applyVictoryCompletion } from "./turn-helpers";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { pruneExpiredBarriers } from "@/lib/utils/battle/grid/terrain";
+import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
@@ -133,7 +133,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
     p.battleData.revealPending && (newRound || (i >= scene.turnIndex && i <= loop.nextTurnIndex)) ? dropBattleFlag(p, "revealPending") : p,
   );
 
-  const prunedMap = newRound && map ? pruneExpiredBarriers(map, loop.nextRound) : null;
+  const prunedMap = newRound && map ? pruneExpiredTerrain(map, loop.nextRound) : null;
 
   return {
     participants: participantsAfter,

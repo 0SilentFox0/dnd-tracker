@@ -8,9 +8,10 @@ import { createSpellMutation, type SpellMutationDeps } from "@/app/api/campaigns
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const spellRow = {
   id: "s1",
@@ -284,5 +285,66 @@ describe("spell mutation", () => {
       await expect(mutation()(ctx, body({ targetIds: ["gob", "gob2", "gob3"] }) as never)).rejects.toMatchObject({ code: "invalid_target" });
     });
   });
-});
 
+  describe("карта", () => {
+    const map: BattleMapConfig = { cols: 20, rows: 20, background: null, opacity: 0.3 };
+
+    const placed = (p: BattleParticipant, position: GridPoint): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position } });
+
+    const onMap = (over: Partial<Parameters<typeof context>[0]> = {}) => {
+      const base = context({ participants: [placed(caster, { x: 2, y: 2 }), placed(goblin, { x: 5, y: 2 }), placed(gob2, { x: 15, y: 15 })] });
+
+      return { ...base, meta: { ...base.meta, map }, ...over };
+    };
+
+    const withTargeting = (targeting: unknown, name = spellRow.name) => ({ ...spellRow, name, targeting }) as unknown as Spell;
+
+    it("шаблон: цілі визначає сервер за точкою, обрані ігноруються", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 30 });
+
+      const out = await mutation(row)(onMap(), body({ targetIds: ["gob2"], targetCell: { x: 5, y: 2 } }) as never);
+
+      expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp - 4);
+      expect(hpOf(out, "gob2")).toBe(gob2.combatStats.currentHp);
+      expect(out.scene?.map).toBeUndefined();
+    });
+
+    it("точка поза дальністю — invalid_target", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 30 });
+
+      await expect(mutation(row)(onMap(), body({ targetCell: { x: 15, y: 15 } }) as never)).rejects.toMatchObject({ code: "invalid_target" });
+    });
+
+    it("одиночна ціль поза дальністю — invalid_target", async () => {
+      await expect(mutation(withTargeting({ kind: "enemy", range: 30 }))(onMap(), body({ targetIds: ["gob2"] }) as never)).rejects.toMatchObject({ code: "invalid_target" });
+    });
+
+    it("zone: клітинки лінії стають небезпекою зі строком і шкодою, дельта несе місцевість", async () => {
+      const row = withTargeting({ kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } }, "Вогняна стіна");
+
+      const ctx = onMap();
+
+      const out = await mutation(row)({ ...ctx, scene: { ...ctx.scene, round: 3 } }, body({ targetIds: [], targetCell: { x: 2, y: 10 } }) as never);
+
+      const terrain = out.scene?.map?.terrain ?? {};
+
+      expect(Object.keys(terrain).sort()).toEqual(["2:3", "2:4", "2:5", "2:6", "2:7", "2:8"]);
+      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire" } });
+      expect(out.events).toHaveLength(1);
+      expect(diffTerrain(map.terrain, out.scene?.map?.terrain)?.set?.[0].keys).toHaveLength(6);
+    });
+
+    it("zone з власним підписом; preview не ставить небезпеку, але повертає клітинки", async () => {
+      const row = withTargeting({ kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 1, label: "Полумʼя" } });
+
+      const out = await mutation(row)(onMap(), body({ targetIds: [], targetCell: { x: 2, y: 10 } }) as never);
+
+      expect(out.scene?.map?.terrain?.["2:3"]).toMatchObject({ label: "Полумʼя", untilRound: 1 });
+
+      const preview = await mutation(row)(onMap(), body({ targetIds: [], targetCell: { x: 2, y: 10 }, preview: true, diceRolls: [] }) as never);
+
+      expect(preview.scene).toBeUndefined();
+      expect(preview.response).toMatchObject({ preview: true, cells: expect.arrayContaining(["2:3"]) });
+    });
+  });
+});

@@ -1,8 +1,11 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
+import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { aimInRange, apexOf, feetToCells, participantsInCells, templateCells } from "@/lib/utils/battle/grid/template";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface SpellRef {
   id: string;
@@ -48,9 +51,42 @@ export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: 
   return targeting.mode === "all" || count <= targeting.maxTargets;
 }
 
-export type SpellTargetResolution = { ok: true; targetIds: string[] } | { ok: false; error: string };
+export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[] } | { ok: false; error: string };
+
+export interface SpellMapContext {
+  map: BattleMapConfig | null;
+  targetCell?: GridPoint;
+}
 
 const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
+
+type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
+
+function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
+  if (!aim) return fail("Оберіть точку на карті");
+
+  const origin = cellsOf(caster);
+
+  const centered = targeting.shape === "circle" || targeting.shape === "cube";
+
+  if (centered && !aimInRange(origin, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
+
+  const cells = templateCells(map, targeting, origin, aim);
+
+  const targetIds = participantsInCells(ps, cells, centered ? aim : apexOf(origin, aim)).map((p) => p.basicInfo.id);
+
+  if (cells.length === 0 || (targetIds.length === 0 && !targeting.zone)) return fail("У шаблоні немає цілей");
+
+  return { ok: true, targetIds, cells };
+}
+
+function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined): boolean {
+  if (range === undefined) return false;
+
+  const max = feetToCells(range);
+
+  return picked.some((p) => p.battleData.position !== undefined && footprintDistance(cellsOf(caster), cellsOf(p)) > max);
+}
 
 export function resolveSpellTargets(
   ps: BattleParticipant[],
@@ -58,8 +94,13 @@ export function resolveSpellTargets(
   spell: SpellRef,
   targeting: SpellTargetingDef,
   chosenIds: string[],
+  mapCtx?: SpellMapContext,
 ): SpellTargetResolution {
   const side = caster.basicInfo.side;
+
+  const map = mapCtx?.map && isOnMap(caster) ? mapCtx.map : null;
+
+  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell);
 
   const ids = (filter: (p: BattleParticipant) => boolean) => ps.filter(filter).map((p) => p.basicInfo.id);
 
@@ -68,6 +109,8 @@ export function resolveSpellTargets(
   if (chosen.some((p) => !p)) return fail("Ціль заклинання відсутня в бою");
 
   const picked = chosen as BattleParticipant[];
+
+  if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail("Ціль поза дальністю заклинання");
 
   switch (targeting.kind) {
     case "self":

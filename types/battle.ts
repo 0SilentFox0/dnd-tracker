@@ -179,11 +179,19 @@ export interface BattleMapConfig {
 
 export type TerrainKind = "wall" | "barrier" | "hazard";
 
+/** type — тип шкоди (fire, cold…) */
+export interface TerrainDamage {
+  dice?: string;
+  amount?: number;
+  type: string;
+}
+
 export interface TerrainCell {
   kind: TerrainKind;
   label?: string;
-  /** Барʼєр діє до кінця цього раунду */
+  /** Барʼєр або небезпека діє до кінця цього раунду */
   untilRound?: number;
+  damage?: TerrainDamage;
 }
 
 /** зміни місцевості в дельті: однакові значення згруповані, щоб підпис не повторювався на кожній клітинці */

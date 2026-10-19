@@ -53,10 +53,14 @@ export function replaceTerrain(map: BattleMapConfig, terrain: Record<string, Ter
   return terrain && Object.keys(terrain).length > 0 ? { ...rest, terrain } : rest;
 }
 
-// барʼєр без строку не має жити вічно: прибирається на першому ж переході раунду
-const isExpired = (c: TerrainCell, round: number) => c.kind === "barrier" && (c.untilRound === undefined || c.untilRound < round);
+// барʼєр без строку не має жити вічно: прибирається на першому ж переході раунду; небезпека без строку — постійна
+function isExpired(c: TerrainCell, round: number): boolean {
+  if (c.kind === "barrier") return c.untilRound === undefined || c.untilRound < round;
 
-export function pruneExpiredBarriers(map: BattleMapConfig, round: number): BattleMapConfig | null {
+  return c.kind === "hazard" && c.untilRound !== undefined && c.untilRound < round;
+}
+
+export function pruneExpiredTerrain(map: BattleMapConfig, round: number): BattleMapConfig | null {
   const terrain = map.terrain;
 
   if (!terrain || !Object.values(terrain).some((c) => isExpired(c, round))) return null;
@@ -75,7 +79,7 @@ export function applyTerrain(map: BattleMapConfig, cells: string[], value: Terra
   return replaceTerrain(map, terrain);
 }
 
-const terrainId = (c: TerrainCell) => `${c.kind}|${c.label ?? ""}|${c.untilRound ?? ""}`;
+const terrainId = (c: TerrainCell) => `${c.kind}|${c.label ?? ""}|${c.untilRound ?? ""}|${c.damage ? JSON.stringify(c.damage) : ""}`;
 
 export function diffTerrain(before: BattleMapConfig["terrain"], after: BattleMapConfig["terrain"]): TerrainDiff | null {
   const prev = before ?? {};

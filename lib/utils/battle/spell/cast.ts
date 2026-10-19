@@ -337,6 +337,17 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   });
   appendHpChanges(action, before, flow.ps);
 
+  const spellDamage = flatEffects(def.effects).some(isDamageEffect)
+    ? { amount: applyBalanceDamageMultiplier(caster, power.damage).damage, type: meta.spellDamageType ?? "magic" }
+    : undefined;
+
   // withSelf ставить кастера першим — повертаємо вихідний порядок ініціативи
-  return { success: true, casterUpdated: getP(flow, casterId), allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps), battleAction: action, summons: [...summons, ...flow.summons] };
+  return {
+    success: true,
+    casterUpdated: getP(flow, casterId),
+    allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
+    battleAction: action,
+    summons: [...summons, ...flow.summons],
+    ...(spellDamage && { spellDamage }),
+  };
 }

@@ -13,7 +13,7 @@ export function feetToCells(feet: number): number {
   return Math.max(1, Math.floor(feet / CELL_FEET));
 }
 
-function apexOf(origin: GridPoint[], aim: GridPoint): GridPoint {
+export function apexOf(origin: GridPoint[], aim: GridPoint): GridPoint {
   return origin.reduce((best, c) => (cellDistance(c, aim) < cellDistance(best, aim) ? c : best), origin[0]);
 }
 

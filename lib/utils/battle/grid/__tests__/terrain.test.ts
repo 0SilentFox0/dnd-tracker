@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isPlayable } from "../geometry";
 import { canStand } from "../occupancy";
 import { reachable } from "../path";
-import { applyTerrain, applyTerrainDiff, diffTerrain, hazardCells, pruneExpiredBarriers, terrainAt, threatCells } from "../terrain";
+import { applyTerrain, applyTerrainDiff, diffTerrain, hazardCells, pruneExpiredTerrain, terrainAt, threatCells } from "../terrain";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -133,16 +133,16 @@ describe("threatCells", () => {
   });
 });
 
-describe("pruneExpiredBarriers", () => {
+describe("pruneExpiredTerrain", () => {
   const map: BattleMapConfig = {
     ...base,
     terrain: { "1:1": { kind: "barrier", untilRound: 3 }, "2:2": { kind: "barrier", untilRound: 4 }, "3:3": { kind: "wall" } },
   };
 
   it("барʼєр до кінця раунду 3 лишається в раунді 3 й зникає в раунді 4", () => {
-    expect(pruneExpiredBarriers(map, 3)).toBeNull();
+    expect(pruneExpiredTerrain(map, 3)).toBeNull();
 
-    const next = pruneExpiredBarriers(map, 4);
+    const next = pruneExpiredTerrain(map, 4);
 
     expect(next?.terrain).toEqual({ "2:2": { kind: "barrier", untilRound: 4 }, "3:3": { kind: "wall" } });
     expect(map.terrain?.["1:1"]).toBeDefined();
@@ -151,15 +151,24 @@ describe("pruneExpiredBarriers", () => {
   it("порожня місцевість після прибирання зникає з карти", () => {
     const only: BattleMapConfig = { ...base, terrain: { "1:1": { kind: "barrier", untilRound: 1 } } };
 
-    expect(pruneExpiredBarriers(only, 2)).toEqual(base);
+    expect(pruneExpiredTerrain(only, 2)).toEqual(base);
   });
 
   it("барʼєр без строку прибирається", () => {
-    expect(pruneExpiredBarriers({ ...base, terrain: { "1:1": { kind: "barrier" } } }, 1)).toEqual(base);
+    expect(pruneExpiredTerrain({ ...base, terrain: { "1:1": { kind: "barrier" } } }, 1)).toEqual(base);
   });
 
   it("без місцевості — null", () => {
-    expect(pruneExpiredBarriers(base, 5)).toBeNull();
+    expect(pruneExpiredTerrain(base, 5)).toBeNull();
+  });
+
+  it("небезпека зі строком прибирається після нього, без строку — лишається", () => {
+    const fire = { kind: "hazard" as const, label: "Вогняна стіна", untilRound: 2, damage: { amount: 9, type: "fire" } };
+
+    const hazards: BattleMapConfig = { ...base, terrain: { "1:1": fire, "2:2": { kind: "hazard", label: "Лава" } } };
+
+    expect(pruneExpiredTerrain(hazards, 2)).toBeNull();
+    expect(pruneExpiredTerrain(hazards, 3)?.terrain).toEqual({ "2:2": { kind: "hazard", label: "Лава" } });
   });
 });
 
@@ -178,6 +187,14 @@ describe("applyTerrain", () => {
 });
 
 describe("diffTerrain / applyTerrainDiff", () => {
+  it("зміна лише шкоди небезпеки потрапляє в diff", () => {
+    const a = { "1:1": { kind: "hazard" as const, damage: { amount: 4, type: "fire" } } };
+
+    const b = { "1:1": { kind: "hazard" as const, damage: { amount: 7, type: "fire" } } };
+
+    expect(diffTerrain(a, b)).toEqual({ set: [{ cell: b["1:1"], keys: ["1:1"] }] });
+  });
+
   const base: BattleMapConfig = { cols: 6, rows: 6, background: null, opacity: 0.3 };
 
   it("групує однакові значення, рахує зміни й зняття; без змін — null", () => {

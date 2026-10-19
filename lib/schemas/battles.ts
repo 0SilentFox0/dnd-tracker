@@ -22,6 +22,9 @@ export const battleMapSchema = z.object({
         kind: z.enum(["wall", "barrier", "hazard"]),
         label: z.string().max(60).optional(),
         untilRound: z.number().int().min(1).optional(),
+        damage: z
+          .object({ dice: z.string().regex(/^\d+d\d+([+-]\d+)?$/).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30) })
+          .optional(),
       }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
     )
     .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")

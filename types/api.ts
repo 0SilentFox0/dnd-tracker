@@ -198,6 +198,8 @@ export interface SpellCastData {
   casterId: string;
   spellId: string;
   targetIds: string[];
+  /** точка шаблону на карті */
+  targetCell?: GridPoint;
   diceRolls: number[];
   saveRolls?: Array<{ participantId: string; roll: number }>;
   free?: boolean;

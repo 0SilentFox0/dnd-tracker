@@ -1,6 +1,6 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant, TerrainDamage } from "@/types/battle";
 
 export interface CastableSpell {
   id: string;
@@ -31,4 +31,6 @@ export interface CastSpellResult {
   allParticipantsUpdated: BattleParticipant[];
   battleAction: BattleAction;
   summons: SummonRequest[];
+  /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
+  spellDamage?: TerrainDamage;
 }

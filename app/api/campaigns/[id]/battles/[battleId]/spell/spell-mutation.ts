@@ -7,6 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { canActNow, controls } from "@/lib/utils/battle/common/control";
+import { applyTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
@@ -71,7 +72,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
     }
 
-    const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds);
+    const { targeting } = definition;
+
+    const resolution = resolveSpellTargets(order, caster, spell, targeting, data.targetIds, { map: ctx.meta.map, targetCell: data.targetCell });
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
@@ -115,7 +118,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
         participants: order,
         pending: ctx.pending,
         events: [],
-        response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined } },
+        response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined }, ...(resolution.cells && { cells: resolution.cells }) },
       };
     }
 
@@ -123,6 +126,19 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 
-    return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)] };
+    const zone = targeting.kind === "template" ? targeting.zone : undefined;
+
+    const map = ctx.meta.map;
+
+    const hazard = zone && map && resolution.cells
+      ? applyTerrain(map, resolution.cells, {
+          kind: "hazard",
+          label: zone.label ?? spell.name,
+          untilRound: ctx.scene.round + zone.rounds - 1,
+          ...(result.spellDamage && { damage: result.spellDamage }),
+        })
+      : null;
+
+    return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
   };
 }
