@@ -50,6 +50,16 @@ describe("resolveSpellTargets на карті", () => {
     expect(resolve(quake, [], { map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c", "a"] });
   });
 
+  it("кільце: учасник у центральній клітинці не ціль, сусіди — цілі", () => {
+    const ring: SpellTargeting = { ...fireball, hollow: true };
+
+    const r = resolve(ring, [], { map, targetCell: { x: 6, y: 3 } });
+
+    expect(r.ok && r.targetIds).toEqual(["a", "e1"]);
+    expect(r.ok && r.cells).not.toContain("6:3");
+    expect(r.ok && r.centre).toEqual({ x: 6, y: 3 });
+  });
+
   it("лінія: falloff іде за відстанню від вершини", () => {
     const line: SpellTargeting = { kind: "template", shape: "line", size: 60, side: "enemy", maxTargets: 3 };
 

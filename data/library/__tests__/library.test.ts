@@ -558,6 +558,11 @@ describe("spell map templates and ranges", () => {
     expect(byKey(key)).toMatchObject({ kind: "template", shape, size, ...(range ? { range } : {}) });
   });
 
+  it("circle of winter is a ring: hollow circle, its description says so", () => {
+    expect(byKey("circle-of-winter")).toMatchObject({ hollow: true });
+    expect(SPELLS.find((s) => s.key === "circle-of-winter")?.description).toContain("центральна клітинка не вражається");
+  });
+
   it("fire wall is a 30 ft line with a 3-round hazard and immediate fire damage", () => {
     const spell = SPELLS.find((s) => s.key === "fire-wall");
 

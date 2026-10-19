@@ -163,6 +163,8 @@ export type TemplateShape = "circle" | "cube" | "cone" | "line";
 export interface SpellTemplate {
   shape: TemplateShape;
   size: number;
+  /** Кільце: клітинка прицілу кола не вражається */
+  hollow?: boolean;
 }
 
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */

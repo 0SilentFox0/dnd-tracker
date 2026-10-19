@@ -38,7 +38,7 @@ const template = (
   size: number,
   side: "ally" | "enemy",
   maxTargets: number,
-  extra: { range?: number; zone?: { rounds: number; label?: string } } = {},
+  extra: { range?: number; zone?: { rounds: number; label?: string }; hollow?: boolean } = {},
 ): Targeting => ({ kind: "template", shape, size, side, maxTargets, ...extra });
 
 const rounds = (n: number) => ({ rounds: n });
@@ -488,10 +488,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Коло зими",
     school: CHAOS,
     level: 3,
-    description: `Коло радіусом 10 фт у межах 60 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, робить рятівний кидок Статури; кожен отримує ${power(3, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи. Без карти — до 3 ворогів на вибір.`,
+    description: `Кільце радіусом 10 фт (3×3 навколо точки) у межах 60 фт, центральна клітинка не вражається: кожна істота в кільці, включно із союзниками й самим заклинателем, робить рятівний кидок Статури; кожен отримує ${power(3, "шкоди холодом")} і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи. Без карти — до 3 ворогів на вибір.`,
     appearanceDescription:
       "Від заклинателя розходиться крижане кільце, і трава на його шляху вкривається памороззю. Вороги застигають у хрусткому інеї, видихаючи хмарки білої пари.",
-    definition: def(3, template("circle", 10, "enemy", 3, { range: 60 }), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
+    definition: def(3, template("circle", 10, "enemy", 3, { range: 60, hollow: true }), [damage("cold"), stat("initiative", -2, 1)], { resolution: save("constitution", "half") }),
     raceModifiers: [],
   },
   {

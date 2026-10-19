@@ -50,6 +50,16 @@ describe("templateCells", () => {
     expect([...cells].sort()).toEqual(expected.sort());
   });
 
+  it("кільце (hollow) у (5,5): 8 клітинок без центру; центр лишається точкою FX", () => {
+    const ring = { shape: "circle" as const, size: 10, hollow: true };
+
+    const cells = templateCells(map, ring, [{ x: 0, y: 0 }], { x: 5, y: 5 });
+
+    expect(cells).toHaveLength(8);
+    expect(cells).not.toContain(k(5, 5));
+    expect(templateCentre(ring, { x: 5, y: 5 }, cells)).toEqual({ x: 5, y: 5 });
+  });
+
   it("коло 5 і 15 фт — 3×3, Землетрус (20 фт) — 5×5", () => {
     const aim = { x: 6, y: 6 };
 

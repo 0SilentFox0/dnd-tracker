@@ -28,6 +28,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     maxTargets: z.number().int().min(1).max(20),
     range: rangeField,
     zone: SpellZoneSchema.optional(),
+    hollow: z.boolean().optional(),
   }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),

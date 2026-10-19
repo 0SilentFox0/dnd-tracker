@@ -216,7 +216,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets } : undefined;
 
-  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size } : skillRadius && skillRadiusTemplate(skillRadius.mode);
+  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && skillRadiusTemplate(skillRadius.mode);
 
   const isMulti = !chain && (targeting.kind === "area" || targeting.kind === "template");
 

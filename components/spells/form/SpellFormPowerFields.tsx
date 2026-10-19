@@ -31,7 +31,7 @@ function targetingOf(kind: string, previous: SpellTargeting): SpellTargeting {
 
   if (kind === "area") return { kind, side, maxTargets, ...range, ...(previous.kind === "area" && previous.chain ? { chain: true } : {}) };
 
-  if (kind === "template") return { kind, shape: previous.kind === "template" ? previous.shape : "circle", size: previous.kind === "template" ? previous.size : 20, side, maxTargets, ...range, ...(previous.kind === "template" && previous.zone ? { zone: previous.zone } : {}) };
+  if (kind === "template") return { kind, shape: previous.kind === "template" ? previous.shape : "circle", size: previous.kind === "template" ? previous.size : 20, side, maxTargets, ...range, ...(previous.kind === "template" && previous.zone ? { zone: previous.zone } : {}), ...(previous.kind === "template" && previous.hollow ? { hollow: true } : {}) };
 
   return { kind, ...range } as SpellTargeting;
 }
@@ -56,13 +56,19 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
         <>
           <div>
             <Label htmlFor="template-shape">Форма</Label>
-            <SelectField id="template-shape" value={targeting.shape} onValueChange={(shape) => setFormData({ ...formData, targeting: { ...targeting, shape: shape as TemplateShape } })} placeholder="Форма" options={SHAPE_OPTIONS} />
+            <SelectField id="template-shape" value={targeting.shape} onValueChange={(shape) => setFormData({ ...formData, targeting: { ...targeting, shape: shape as TemplateShape, hollow: shape === "circle" ? targeting.hollow : undefined } })} placeholder="Форма" options={SHAPE_OPTIONS} />
           </div>
           <div>
             <Label htmlFor="template-size">Розмір, фути</Label>
             <Input id="template-size" type="number" min={5} max={120} step={5} value={targeting.size} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, size: clamp(e.target.value, 5, 120, 5) } })} className="w-24" />
           </div>
         </>
+      )}
+      {targeting.kind === "template" && targeting.shape === "circle" && (
+        <div className="col-span-2 flex items-center gap-2">
+          <Switch id="template-hollow" checked={!!targeting.hollow} onCheckedChange={(on) => setFormData({ ...formData, targeting: { ...targeting, hollow: on || undefined } })} />
+          <Label htmlFor="template-hollow">Кільце: центральна клітинка не вражається</Label>
+        </div>
       )}
       {(targeting.kind === "area" || targeting.kind === "template") && (
         <>

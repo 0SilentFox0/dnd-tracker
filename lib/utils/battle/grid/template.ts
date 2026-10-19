@@ -97,7 +97,7 @@ export function templateCells(map: BattleMapConfig, template: SpellTemplate, ori
 
   let raw: GridPoint[];
 
-  if (template.shape === "circle") raw = circleCells(areaRadiusCells(template.size), aim);
+  if (template.shape === "circle") raw = circleCells(areaRadiusCells(template.size), aim).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
   else if (template.shape === "cube") raw = cubeCells(r, aim);
   else if (origin.length === 0) raw = [];
   else {

@@ -8,7 +8,7 @@ const inline = (label: string) => label.replace(/^Один /, "").toLowerCase();
 export function targetingLabel(t: SpellTargeting): string {
   if (t.kind === "area") return `до ${t.maxTargets} ${t.side === "enemy" ? "ворогів" : "союзників"}`;
 
-  if (t.kind === "template") return `${TEMPLATE_SHAPE_LABELS[t.shape]} ${t.size} фт`;
+  if (t.kind === "template") return `${t.hollow && t.shape === "circle" ? "Кільце" : TEMPLATE_SHAPE_LABELS[t.shape]} ${t.size} фт`;
 
   return inline(SPELL_TARGETING_LABELS[t.kind]);
 }
