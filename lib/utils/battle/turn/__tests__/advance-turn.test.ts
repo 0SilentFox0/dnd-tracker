@@ -150,16 +150,29 @@ describe("advanceTurn", () => {
       expect(out.participants[0].battleData.movementUsed).toBe(0);
     });
 
-    it("додатковий хід у повітрі — спершу приземлення", () => {
+    it("у повітрі додаткового ходу немає, приземлення лише в черговому ході наступного раунду", () => {
       const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
 
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1 } } };
 
       const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
 
-      expect(out.participants[0].battleData).toMatchObject({ position: { x: 4, y: 4 } });
+      expect(out.scene).toMatchObject({ turnIndex: 0, round: 2 });
+      expect(out.participants[0].actionFlags.hasExtraTurn).toBe(false);
+      expect(out.participants[0].battleData.extraTurnActive).toBeFalsy();
       expect(out.participants[0].battleData.airborne).toBeUndefined();
-      expect(out.actions.map((a) => a.resultText).join(" ")).toContain("удар у порожнечу");
+      expect(out.participants[0].battleData.position).toEqual({ x: 4, y: 4 });
+    });
+
+    it("у раунд піке мораль не дає ходу і грифон лишається в повітрі", () => {
+      const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 2 } } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, round: 2, turnIndex: 0 }, map });
+
+      expect(out.scene).toMatchObject({ turnIndex: 1, round: 2 });
+      expect(out.participants[0].battleData.airborne).toBeDefined();
     });
 
     it("додатковий хід без руху не додає movementUsed", () => {

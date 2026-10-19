@@ -60,4 +60,10 @@ describe("Вогняний вибух", () => {
 
     expect(withinLimits(byId(ps, "g"), ABILITIES.fireBurst, 2)).toBe(false);
   });
+
+  it("нікого поруч — повідомлення в лог", () => {
+    const { messages } = perform([unit("g", { side: ParticipantSide.ALLY, at: { x: 1, y: 1 }, abilities: [ABILITIES.fireBurst] }), unit("e1", { at: { x: 15, y: 15 } })], "fireBurst", { map: MAP, rng: FAIL });
+
+    expect(messages.join(" ")).toContain("поруч нікого");
+  });
 });

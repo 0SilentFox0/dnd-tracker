@@ -34,7 +34,7 @@ const unicorn = (side: ParticipantSide = ParticipantSide.ALLY): BattleParticipan
   return makeParticipant({ id: "u", side, abilities: [resolved(echo, { type: "unit", id: "u" })] });
 };
 
-function cast(key: string, order: BattleParticipant[], targetId: string, groupId?: string) {
+function cast(key: string, order: BattleParticipant[], targetId: string, groupId?: string, rng = seq(0.5)) {
   return castSpell({
     caster: order[0],
     spell: spell(key, groupId),
@@ -44,7 +44,7 @@ function cast(key: string, order: BattleParticipant[], targetId: string, groupId
     battleId: "b1",
     diceRolls: [],
     saveRolls: [],
-    rng: seq(0.5),
+    rng,
   }).allParticipantsUpdated;
 }
 
@@ -87,5 +87,16 @@ describe("Світле відлуння — копіювання бафів Св
     const ps = cast("stoneskin", [caster(), makeParticipant({ id: "a" }), unicorn(ParticipantSide.ENEMY)], "a");
 
     expect(byId(ps, "u").battleData.activeEffects).toHaveLength(0);
+  });
+
+  it("скопований Поспіх знімає Сповільнення єдинорога", () => {
+    const slowed = cast("slow", order(), "u", "Темрява", seq(0.01));
+
+    expect(named(byId(slowed, "u"), "Сповільнення").length).toBeGreaterThan(0);
+
+    const ps = cast("haste", [slowed[0], ...slowed.slice(1)], "a");
+
+    expect(named(byId(ps, "u"), "Сповільнення")).toHaveLength(0);
+    expect(named(byId(ps, "u"), "Поспіх").length).toBeGreaterThan(0);
   });
 });

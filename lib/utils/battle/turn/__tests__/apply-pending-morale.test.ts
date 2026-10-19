@@ -32,4 +32,13 @@ describe("applyPendingMoraleCheck", () => {
 
     expect(moraleLogEntry.actionDetails?.morale).toBe(1);
   });
+
+  it("у польоті додатковий хід за мораль не видається", () => {
+    const flying = { ...p, battleData: { ...p.battleData, airborne: { since: 1 } } };
+
+    const extra = { ...payload(false), moraleResult: { ...payload(false).moraleResult, hasExtraTurn: true } };
+
+    expect(applyPendingMoraleCheck([flying], extra, 1, "b1", 0, seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(false);
+    expect(applyPendingMoraleCheck([p], extra, 1, "b1", 0, seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(true);
+  });
 });

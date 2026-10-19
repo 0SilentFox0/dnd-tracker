@@ -156,7 +156,7 @@ export function processStartOfTurn(
 
   const abilityMessages: string[] = [...healMessages];
 
-  if (updatedParticipant.battleData.airborne) {
+  if (updatedParticipant.battleData.airborne && updatedParticipant.battleData.airborne.since < currentRound) {
     const landed = landDive(participants, id, { map, rng });
 
     participants = landed.participants;

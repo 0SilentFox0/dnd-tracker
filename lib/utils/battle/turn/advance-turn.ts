@@ -5,9 +5,8 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
-import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
@@ -72,6 +71,8 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
 
   const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isActive);
 
+  if (roundIsOver) order = order.map((p) => (p.battleData.airborne && p.actionFlags.hasExtraTurn ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: false } } : p));
+
   const extraIndex = roundIsOver ? order.findIndex((p) => isActive(p) && p.actionFlags.hasExtraTurn) : -1;
 
   if (extraIndex >= 0) {
@@ -96,23 +97,11 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
         : p,
     );
 
-    const extraActions = [extraTurnAction(taker, scene)];
-
-    if (taker.battleData.airborne) {
-      const landed = landDive(order, taker.basicInfo.id, { map, rng: rng ?? Math.random });
-
-      order = landed.participants;
-
-      for (const d of landed.downed) order = resolveDowned(order, d, { round: scene.round, rng: rng ?? Math.random }).participants;
-
-      extraActions.push({ ...turnEndAction(taker, scene, landed.messages, "Приземлення"), id: `landing-${taker.basicInfo.id}-${Date.now()}` });
-    }
-
     return {
       participants: order,
       pending,
       scene: { turnIndex: extraIndex, round: scene.round, status: scene.status, pendingMoraleCheck: null },
-      actions: [...actions, ...extraActions],
+      actions: [...actions, extraTurnAction(taker, scene)],
     };
   }
 
@@ -186,7 +175,7 @@ function extraTurnAction(p: BattleParticipant, scene: BattleSceneState): BattleA
   };
 }
 
-function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], messages: string[], title = "Кінець ходу"): BattleAction {
+function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], messages: string[]): BattleAction {
   return {
     id: `triggers-turn-end-${p.basicInfo.id}-${Date.now()}`,
     battleId: scene.id,
@@ -199,7 +188,7 @@ function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], m
     actionType: "ability",
     targets: [],
     actionDetails: {},
-    resultText: `${title}: ${messages.join("; ")}`,
+    resultText: `Кінець ходу: ${messages.join("; ")}`,
     hpChanges: [],
     isCancelled: false,
   };

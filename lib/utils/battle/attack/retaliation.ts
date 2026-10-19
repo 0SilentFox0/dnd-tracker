@@ -18,7 +18,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
-import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
 
@@ -35,6 +35,7 @@ export interface RetaliationInput {
   round: number;
   battleId: string;
   rng: Rng;
+  map?: BattleMapConfig | null;
 }
 
 export interface RetaliationResult {
@@ -78,7 +79,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const used = defender.battleData.retaliationsUsed ?? (defender.actionFlags.hasUsedReaction ? 1 : 0);
 
-  if (provoked ? hasEffectMarker(defender, "no_reaction") : used >= allowed && !unlimited) return null;
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : !unlimited && (defender.actionFlags.hasUsedReaction || used >= allowed)) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
@@ -86,7 +87,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng } };
+  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, ...(input.map && { map: input.map }) } };
 
   if (!provoked && !unlimited) {
     put(flow, {

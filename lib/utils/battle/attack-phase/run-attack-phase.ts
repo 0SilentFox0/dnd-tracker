@@ -313,6 +313,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         round: battle.currentRound,
         battleId,
         rng,
+        map: input.map,
       });
 
       if (retaliation) {

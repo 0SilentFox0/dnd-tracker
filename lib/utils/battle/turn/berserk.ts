@@ -1,5 +1,5 @@
 import { AttackType } from "@/lib/constants/battle";
-import { isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { isActive, isTargetable, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
@@ -7,7 +7,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
   return p.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "berserk").map((d) => d.value)).at(0);
@@ -23,6 +23,7 @@ interface BerserkTurnParams {
   battleId: string;
   actionIndex: number;
   rng: () => number;
+  map?: BattleMapConfig | null;
 }
 
 function note(p: BattleParticipant, params: BerserkTurnParams, text: string): BattleAction {
@@ -70,7 +71,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
 
   const cannotAct = berserker.actionFlags.hasUsedAction;
 
-  const victims = participants.filter((p) => p.basicInfo.id !== participantId && isActive(p));
+  const victims = participants.filter((p) => p.basicInfo.id !== participantId && isTargetable(p));
 
   const attack = berserker.battleData.attacks[0];
 
@@ -94,6 +95,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     bonusPercent: params.bonusPercent,
     bonusLabel: "Шал",
     rng,
+    map: params.map,
   });
 
   const updated = new Map((result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));

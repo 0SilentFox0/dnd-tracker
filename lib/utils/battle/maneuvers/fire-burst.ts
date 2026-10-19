@@ -18,6 +18,8 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
     ? ps.filter((p) => isEnemyOf(actor)(p) && isOnMap(p) && footprintDistance(cellsOf(actor), cellsOf(p)) <= 1)
     : pickedEnemies(ps, actor, input.targetIds, NO_MAP_TARGETS);
 
+  if (!targets.length) return { ...unchanged(ps), messages: [`🔥 ${input.name}: ${actor.basicInfo.name} — поруч нікого`] };
+
   const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
 
   const dc = spellSaveDc(actor);

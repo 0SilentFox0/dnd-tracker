@@ -170,3 +170,28 @@ describe("небезпека на початку ходу", () => {
     expect(out.participant.combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
   });
 });
+
+describe("приземлення після піке", () => {
+  const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+
+  const flying = (since: number) => {
+    const base = createMockParticipant();
+
+    return createMockParticipant({ battleData: { ...base.battleData, airborne: { landAt: { x: 4, y: 4 }, since } } });
+  };
+
+  it("у раунд піке лишається в повітрі", () => {
+    const g = flying(2);
+
+    expect(processStartOfTurn(g, 2, [g], () => 0.5, map).participant.battleData.airborne).toBeDefined();
+  });
+
+  it("у наступний раунд приземляється", () => {
+    const g = flying(1);
+
+    const out = processStartOfTurn(g, 2, [g], () => 0.5, map).participant;
+
+    expect(out.battleData.airborne).toBeUndefined();
+    expect(out.battleData.position).toEqual({ x: 4, y: 4 });
+  });
+});

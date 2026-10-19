@@ -2,7 +2,6 @@
 
 import { useBattleScene } from "./useBattleScene";
 
-import type { SelectOption } from "@/components/ui/select-field";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { allyOwners, controlledByDm, freeUnits, isAssignableUnit, ownerHeroNames } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleParticipant } from "@/types/battle";
@@ -16,7 +15,7 @@ export function useUnitControlPanel() {
 
   const owners = dmId ? allyOwners(order, dmId) : [];
 
-  const options: SelectOption[] = [{ value: CONTROLLED_BY_DM, label: "ДМ" }, ...owners.map((o) => ({ value: o, label: ownerHeroNames(order, o) }))];
+  const options: { value: string; label: string }[] = [{ value: CONTROLLED_BY_DM, label: "ДМ" }, ...owners.map((o) => ({ value: o, label: ownerHeroNames(order, o) }))];
 
   return {
     options,
