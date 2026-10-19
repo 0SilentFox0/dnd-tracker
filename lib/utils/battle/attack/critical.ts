@@ -1,5 +1,6 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { addActiveEffect } from "@/lib/utils/battle/turn/effects";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -93,14 +94,14 @@ export function applyCriticalEffect(
     case "lose_reaction":
       return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedReaction: true } };
     case "free_attack":
-      return opts.offTurn ? updated : withExtraAction(updated);
+      return opts.offTurn ? updated : grantExtraActions(updated, 1);
   }
 
   const spec = specFor(effect);
 
   if (!spec) return updated;
 
-  const base = effect.effect.type === "combo_attack" && !opts.offTurn ? withExtraAction(updated) : updated;
+  const base = effect.effect.type === "combo_attack" && !opts.offTurn ? grantExtraActions(updated, 1) : updated;
 
   const duration = spec.duration ?? effect.effect.duration ?? 1;
 
@@ -125,8 +126,4 @@ export function applyCriticalEffect(
       ),
     },
   };
-}
-
-function withExtraAction(p: BattleParticipant): BattleParticipant {
-  return { ...p, battleData: { ...p.battleData, pendingExtraActions: (p.battleData.pendingExtraActions ?? 0) + 1 } };
 }

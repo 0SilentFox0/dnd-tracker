@@ -33,3 +33,18 @@ export function applyMainActionUsed(
     actionFlags: { ...participant.actionFlags, hasUsedAction: true },
   };
 }
+
+/** +n основних дій: перша повертає вже витрачену дію, решта йде в пул цього ходу. */
+export function grantExtraActions(participant: BattleParticipant, n: number): BattleParticipant {
+  if (n <= 0) return participant;
+
+  const used = participant.actionFlags.hasUsedAction;
+
+  const toPool = used ? n - 1 : n;
+
+  return {
+    ...participant,
+    actionFlags: { ...participant.actionFlags, hasUsedAction: false },
+    battleData: toPool > 0 ? { ...participant.battleData, pendingExtraActions: (participant.battleData.pendingExtraActions ?? 0) + toPool } : participant.battleData,
+  };
+}
