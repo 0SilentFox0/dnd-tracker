@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
 import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { useDisplayEffectMap } from "./useDisplayEffectMap";
+import { useParticipantClick } from "./useParticipantClick";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
 import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
@@ -121,6 +122,8 @@ export interface BattleSceneData {
   effects: Map<string, ActiveEffect[]>;
   dmControl: DmControl;
   select(id: string | null): void;
+  /** Клік по учаснику в списку: ворог у свій хід — атака, інакше — вибір */
+  clickParticipant(id: string): void;
   readBattle(): BattleScene | undefined;
 }
 
@@ -174,11 +177,11 @@ export function useBattleSceneData(): BattleSceneData {
 }
 
 export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneData {
-  const { campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle } = value;
+  const { campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, clickParticipant, readBattle } = value;
 
   return useMemo(
-    () => ({ campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle }),
-    [campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, readBattle],
+    () => ({ campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, clickParticipant, readBattle }),
+    [campaignId, battleId, battle, viewer, turn, roster, awaiting, effects, dmControl, select, clickParticipant, readBattle],
   );
 }
 
@@ -334,6 +337,10 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const [resultFx, showResult] = useState<ResultFx | null>(null);
 
+  const anyPending = Object.values(actions).some((m) => m.isPending);
+
+  const clickParticipant = useParticipantClick(battle && derived ? { battle, turn: derived.turn, anyPending, select, requestAttack: setAttackIntent } : null);
+
   if (attackIntent && battle && isIntentStale(attackIntent, { round: battle.currentRound, turnIndex: battle.currentTurnIndex })) setAttackIntent(null);
 
   if (!battle || !derived) return { value: null, loading: isLoading };
@@ -349,6 +356,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     dmControl,
     selectedId,
     select,
+    clickParticipant,
     intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim },
     toast,
     result: { fx: resultFx, show: showResult },
@@ -356,7 +364,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     readBattle,
     logHistory,
     actions,
-    anyPending: Object.values(actions).some((m) => m.isPending),
+    anyPending,
   };
 
   return { value, loading: isLoading };

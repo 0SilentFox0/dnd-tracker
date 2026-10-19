@@ -1,3 +1,8 @@
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { canStartAttack, pickAttack } from "@/lib/utils/battle/grid";
+import type { BattleScene } from "@/types/api";
+import type { BattleParticipant } from "@/types/battle";
+
 export interface AttackIntent {
   targetId: string;
   attackId?: string;
@@ -20,4 +25,25 @@ export function canConsumeIntent(
   turn: TurnPoint & { heroId: string; phase: string; actionUsed: boolean; skipped: boolean },
 ): boolean {
   return !isIntentStale(intent, turn) && intent.actorId === turn.heroId && turn.phase === "acting" && !turn.actionUsed && !turn.skipped;
+}
+
+export interface ParticipantClickScene {
+  battle: Pick<BattleScene, "map" | "initiativeOrder" | "currentRound" | "currentTurnIndex">;
+  turn: { current: BattleParticipant | null; isMyTurn: boolean };
+  anyPending: boolean;
+}
+
+/** Клік по ворогу в списку — атака тією ж зброєю, що й на карті; null — лише вибір. */
+export function participantAttackIntent({ battle, turn: { current, isMyTurn }, anyPending }: ParticipantClickScene, targetId: string): AttackIntent | null {
+  if (!isMyTurn || anyPending || !canStartAttack(current)) return null;
+
+  const order = (battle.initiativeOrder ?? []).filter((p) => !p.battleData.reserved);
+
+  const target = order.find((p) => p.basicInfo.id === targetId);
+
+  if (!target || target.basicInfo.side === current.basicInfo.side || !isActive(target)) return null;
+
+  const { attack } = pickAttack(battle.map ?? null, order, current, current.battleData.attacks, target);
+
+  return attack ? { targetId, attackId: attack.id ?? attack.name, actorId: current.basicInfo.id, round: battle.currentRound, turnIndex: battle.currentTurnIndex } : null;
 }

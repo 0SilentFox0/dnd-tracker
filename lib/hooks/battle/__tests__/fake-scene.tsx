@@ -112,6 +112,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     dmControl: { id: null, set: vi.fn() },
     selectedId: null,
     select: vi.fn(),
+    clickParticipant: vi.fn(),
     intents: { attack: null, requestAttack: vi.fn(), clearAttack: vi.fn(), mapAim: opts.mapAim ?? null, setMapAim: vi.fn() },
     toast,
     result: { fx: opts.result ?? null, show: showResult },

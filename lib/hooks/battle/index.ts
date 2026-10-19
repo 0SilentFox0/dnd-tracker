@@ -22,6 +22,7 @@ export { useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
+export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
