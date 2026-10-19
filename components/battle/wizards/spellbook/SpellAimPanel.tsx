@@ -11,7 +11,7 @@ type Book = ReturnType<typeof useSpellBook>;
 export function SpellAimPanel({ book, spellName }: { book: Book; spellName: string }) {
   const { state, view, actions } = book;
 
-  const { aimTargets } = view;
+  const { aimTargets, aimConfirmable } = view;
 
   return (
     <div
@@ -42,7 +42,7 @@ export function SpellAimPanel({ book, spellName }: { book: Book; spellName: stri
       <div className="mt-3 grid grid-cols-[auto_auto_1fr] gap-2">
         <button type="button" onClick={actions.back} className="hud-sc h-10 border border-white/20 px-3 text-sm">← Назад</button>
         <button type="button" onClick={actions.close} className="hud-sc h-10 border border-white/20 px-3 text-sm">Скасувати</button>
-        <button type="button" disabled={!state.aim} onClick={actions.confirmTargets} className="hud-sc h-10 bg-[#7a2a1f] text-sm text-[#f3e7cc] disabled:opacity-50">Підтвердити</button>
+        <button type="button" disabled={!aimConfirmable} onClick={actions.confirmTargets} className="hud-sc h-10 bg-[#7a2a1f] text-sm text-[#f3e7cc] disabled:opacity-50">Підтвердити</button>
       </div>
     </div>
   );

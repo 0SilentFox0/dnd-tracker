@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { buildSpellPick, initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide } from "@/lib/utils/battle/flows";
+import { buildSpellPick, initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withLiveAimTargets } from "@/lib/utils/battle/flows";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -247,14 +247,36 @@ describe("шаблон і дальність", () => {
     expect(spellPayload(done)).toEqual({ casterId: "h", spellId: "fb", targetIds: ["f"], targetCell: { x: 6, y: 1 }, diceRolls: [3] });
   });
 
-  it("порожній шаблон теж можна підтвердити; SET_AIM поза template-режимом ігнорується", () => {
+  it("порожній шаблон підтверджується лише для заклинання із зоною; SET_AIM поза template-режимом ігнорується", () => {
     const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
 
-    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
+    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("targets");
+
+    const wall = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: { ...ball, zone: true } }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
+
+    expect(spellFlow(wall, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
 
     const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" });
 
     expect(spellFlow(single, { type: "SET_AIM", aim: { x: 1, y: 1 }, targetIds: ["f"] })).toBe(single);
+  });
+
+  it("buildSpellPick: zone шаблону переходить у pick", () => {
+    const wallSpell = { ...fireball, targeting: { kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } } } as unknown as BookSpell;
+
+    expect(buildSpellPick(order, hero, wallSpell, map).zone).toBe(true);
+    expect(buildSpellPick(order, hero, fireball, map).zone).toBeUndefined();
+  });
+
+  it("withLiveAimTargets: цілі шаблону — ті, кого точка зачіпає зараз; рятунки тих, хто вийшов, відкидаються", () => {
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 0 }, targetIds: ["f", "g"] }, { type: "SET_SAVE", id: "f", value: 10 }, { type: "SET_SAVE", id: "g", value: 4 });
+
+    expect(withLiveAimTargets(s, ["g", "k"])).toMatchObject({ targetIds: ["g", "k"], saves: { g: 4 } });
+    expect(withLiveAimTargets(s, ["f", "g"])).toBe(s);
+
+    const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a" });
+
+    expect(withLiveAimTargets(single, [])).toBe(single);
   });
 
   it("SET_AIM прибирає рятунки тих, хто випав із шаблону", () => {

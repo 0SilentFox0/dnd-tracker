@@ -14,6 +14,7 @@ export {
   useBattleSceneValue,
 } from "./useBattleScene";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
+export { useDmCaster } from "./useDmCaster";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useFxEnabled } from "./useFxEnabled";
 export { useFxImpacts } from "./useFxImpact";

@@ -43,7 +43,7 @@ function ToggleRow({ id, label, checked, onChange }: { id: string; label: string
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
   const { enabled, map, margins, tool, notice } = editor.state;
 
-  const { hazard, actions } = editor;
+  const { brush, actions } = editor;
 
   const setMargin = (key: keyof Margins, raw: number | undefined) => actions.setMargins({ ...margins, [key]: clamp(raw ?? 0, 0, marginLimit(map, margins, key)) });
 
@@ -124,25 +124,25 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
               </div>
               {tool === "hazard" && (
                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
-                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={hazard.label} onChange={(e) => hazard.setLabel(e.target.value)} />
+                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={brush.label} onChange={(e) => actions.setBrush({ label: e.target.value })} />
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-dice" className="text-xs">
                       Шкода (кубики)
                     </Label>
                     <Input
                       id="map-hazard-dice"
-                      aria-invalid={hazard.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(hazard.dice.trim())}
+                      aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
                       maxLength={12}
                       placeholder="без шкоди"
-                      value={hazard.dice}
-                      onChange={(e) => hazard.setDice(e.target.value)}
+                      value={brush.dice}
+                      onChange={(e) => actions.setBrush({ dice: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-type" className="text-xs">
                       Тип
                     </Label>
-                    <SelectField id="map-hazard-type" value={hazard.damageType} onValueChange={hazard.setDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} />
+                    <SelectField id="map-hazard-type" value={brush.damageType} onValueChange={(damageType) => actions.setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} />
                   </div>
                 </div>
               )}

@@ -279,6 +279,48 @@ describe("SpellBook", () => {
       expect(screen.getByText("Годрік")).toBeTruthy();
     });
 
+    it("шаблон: рятівні кидки й каст беруть живі цілі шаблону, а не ті, що були в момент кліку", async () => {
+      const { wrapper, caster, value, castSpell, me, gob, ally } = onMap(["meteor"], true);
+
+      const { rerender } = render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      act(() => (vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim).onAim({ x: 4, y: 0 }));
+
+      value.battle = { ...value.battle, initiativeOrder: [me, { ...gob, battleData: { ...gob.battleData, position: { x: 9, y: 5 } } }, ally] };
+      rerender(<Harness caster={caster} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
+
+      expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
+      expect(screen.queryByLabelText("Рятівний кидок: Гоблін")).toBeNull();
+
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+
+      expect(screen.queryByText(/Цілі:.*Гоблін/)).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ targetIds: [ally.basicInfo.id] })));
+    });
+
+    it("шаблон без зони: порожнє наведення не можна підтвердити", async () => {
+      const { wrapper, caster, value } = onMap(["meteor"], true);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      act(() => (vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim).onAim({ x: 1, y: 4 }));
+
+      expect(screen.getByText("Нікого не зачеплено")).toBeTruthy();
+      expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
+    });
+
     it("шаблон без карти — звичайний вибір цілей", async () => {
       const { wrapper, caster } = fakeScene({ knownSpells: ["meteor"], slots: { "2": { max: 3, current: 3 } } });
 

@@ -20,6 +20,7 @@ import {
   spellSpec,
   spellTargetCandidates,
   spellTargetInRange,
+  withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
 import { type MapAim, templateArea } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
@@ -130,9 +131,9 @@ function useSpellMapAim(
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
   const scene = useBattleScene();
 
-  const [state, dispatch] = useReducer(spellFlow, initialSpellFlow);
+  const [flow, dispatch] = useReducer(spellFlow, initialSpellFlow);
 
-  const isOpen = state.step !== "closed" && !!caster;
+  const isOpen = flow.step !== "closed" && !!caster;
 
   const free = !!options.allSpells;
 
@@ -146,28 +147,30 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const levels = useMemo(() => levelsWithSpells(byLevel), [byLevel]);
 
-  if (state.step === "book" && !state.levelPinned && levels.length > 0 && !levels.includes(state.level)) {
+  if (flow.step === "book" && !flow.levelPinned && levels.length > 0 && !levels.includes(flow.level)) {
     dispatch({ type: "SPELLS_LOADED", levels });
   }
 
-  const selected = spells.find((s) => s.id === state.pick?.spellId) ?? null;
+  const selected = spells.find((s) => s.id === flow.pick?.spellId) ?? null;
 
   const order = scene.battle.initiativeOrder;
 
   const map = scene.battle.map ?? null;
 
-  const targets = spellTargetCandidates(order, caster, state.pick?.targetMode === "template" ? undefined : state.pick?.targetSide);
+  const targets = spellTargetCandidates(order, caster, flow.pick?.targetMode === "template" ? undefined : flow.pick?.targetSide);
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, state.pick?.range);
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
 
-  const aimTemplate = state.pick?.targetMode === "template" ? state.pick.template : undefined;
+  const aimTemplate = flow.pick?.targetMode === "template" ? flow.pick.template : undefined;
 
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
-  const aimTargets = map && caster && aimTemplate && state.aim
-    ? templateArea(map, order, caster, aimTemplate, state.aim).targets.map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
+  const aimTargets = map && caster && aimTemplate && flow.aim
+    ? templateArea(map, order, caster, aimTemplate, flow.aim).targets.map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
     : [];
 
-  useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
+  const state = withLiveAimTargets(flow, aimTargets.map((t) => t.participant.basicInfo.id));
+
+  useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
 
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
@@ -195,6 +198,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const view = {
     spells, byLevel, selected, targets, saveTargets, aimTargets, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    aimConfirmable: !!state.aim && (aimTargets.length > 0 || !!state.pick?.zone),
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,
@@ -224,7 +228,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
       dispatch({ type: "TOGGLE_TARGET", id, expanded });
     },
-    confirmTargets: () => dispatch({ type: "CONFIRM_TARGETS" }),
+    confirmTargets: () => {
+      if (state !== flow && state.aim) dispatch({ type: "SET_AIM", aim: state.aim, targetIds: state.targetIds });
+
+      dispatch({ type: "CONFIRM_TARGETS" });
+    },
     setSave: (id: string, v: number | undefined) => dispatch({ type: "SET_SAVE", id, value: v }),
     setDamage: (i: number, v: number | undefined) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
     aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides, cryptoRandom) })),

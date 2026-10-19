@@ -8,8 +8,7 @@ import { ChangeHpDialog } from "@/components/battle/dm/dialogs/ChangeHpDialog";
 import { DmCasterPickerDialog } from "@/components/battle/dm/dialogs/DmCasterPickerDialog";
 import { DmQuickActionsPanel } from "@/components/battle/dm/DmQuickActionsPanel";
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
-import { useBattlePageDialogs, useBattleScene, useSpellBook } from "@/lib/hooks/battle";
-import type { BattleParticipant } from "@/types/battle";
+import { useBattlePageDialogs, useBattleScene, useDmCaster, useSpellBook } from "@/lib/hooks/battle";
 
 export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (open: boolean) => void } }) {
   const { battle, campaignId, actions } = useBattleScene();
@@ -18,7 +17,7 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
 
   const [pickCaster, setPickCaster] = useState(false);
 
-  const [caster, setCaster] = useState<BattleParticipant | null>(null);
+  const { caster, select } = useDmCaster();
 
   const book = useSpellBook(caster, { allSpells: true });
 
@@ -30,7 +29,7 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
       <ChangeHpDialog participant={dialogs.hp.target} onClose={dialogs.hp.close} isPending={actions.updateParticipant.isPending}
         onConfirm={(participantId, newHp) => actions.updateParticipant.mutate({ participantId, data: { currentHp: newHp } }, { onSuccess: dialogs.hp.close })} />
       <DmCasterPickerDialog open={pickCaster} onOpenChange={setPickCaster} participants={battle.initiativeOrder}
-        onSelectCaster={(p) => { setCaster(p); setPickCaster(false); book.actions.open(undefined, p); }} />
+        onSelectCaster={(p) => { select(p); setPickCaster(false); book.actions.open(undefined, p); }} />
       <AwaitingDmDialog />
       <SpellBook book={book} />
     </>

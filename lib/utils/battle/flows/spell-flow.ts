@@ -22,6 +22,8 @@ export interface SpellPick {
   template?: SpellTemplate;
   /** дальність у футах */
   range?: number;
+  /** шаблон лишає зону: його можна поставити й без цілей */
+  zone?: boolean;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -110,7 +112,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
     }
     case "CONFIRM_TARGETS":
-      if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
+      if (s.pick?.targetMode === "template") return s.aim && (s.targetIds.length > 0 || s.pick.zone) ? afterTargets(s) : s;
 
       return s.targetIds.length === 0 ? s : afterTargets(s);
     case "SET_SAVE": {
@@ -142,6 +144,15 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "CLOSE":
       return initialSpellFlow;
   }
+}
+
+/** Шаблон: цілі — ті, кого точка зачіпає зараз; рух після наведення змінює список, тож підказки й каст беруть живий. */
+export function withLiveAimTargets(s: SpellFlowState, liveIds: string[]): SpellFlowState {
+  if (s.pick?.targetMode !== "template" || !s.aim) return s;
+
+  if (liveIds.length === s.targetIds.length && liveIds.every((id, i) => id === s.targetIds[i])) return s;
+
+  return { ...s, targetIds: liveIds, saves: Object.fromEntries(Object.entries(s.saves).filter(([id]) => liveIds.includes(id))) };
 }
 
 export function spellPayload(s: SpellFlowState): SpellCastData {
@@ -210,6 +221,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     targetSide: spellTargetSide(s),
     maxTargets,
     ...(template && { template }),
+    ...(template && targeting.kind === "template" && targeting.zone && { zone: true }),
     ...(range !== undefined && { range }),
     needsSaves: def.resolution.kind === "save" && !auto,
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),

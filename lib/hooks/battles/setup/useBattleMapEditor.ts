@@ -8,6 +8,15 @@ import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
+/** Пензель небезпеки; порожні кубики — небезпека без шкоди */
+export interface HazardBrush {
+  label: string;
+  dice: string;
+  damageType: string;
+}
+
+const DEFAULT_BRUSH: HazardBrush = { label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
+
 export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
 
 export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) {
@@ -19,11 +28,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const [tool, setToolState] = useState<SetupTool | null>(null);
 
-  const [hazardLabel, setHazardLabel] = useState(DEFAULT_HAZARD_LABEL);
+  const [brush, setBrushState] = useState<HazardBrush>(DEFAULT_BRUSH);
 
-  const [hazardDice, setHazardDice] = useState(DEFAULT_HAZARD_DICE);
-
-  const [hazardDamageType, setHazardDamageType] = useState(DEFAULT_HAZARD_DAMAGE_TYPE);
+  const setBrush = useCallback((patch: Partial<HazardBrush>) => setBrushState((b) => ({ ...b, ...patch })), []);
 
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -74,7 +81,7 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     (cells: GridPoint[]) => {
       if (!tool || cells.length === 0) return;
 
-      const hazard = tool === "hazard" ? { label: hazardLabel.trim() || DEFAULT_HAZARD_LABEL, damage: hazardDamage(hazardDice, hazardDamageType) } : undefined;
+      const hazard = tool === "hazard" ? { label: brush.label.trim() || DEFAULT_HAZARD_LABEL, damage: hazardDamage(brush.dice, brush.damageType) } : undefined;
 
       const next = paintCells(map, cells, tool, hazard);
 
@@ -83,20 +90,13 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
       setNotice(null);
       setMap(next);
     },
-    [tool, map, hazardLabel, hazardDice, hazardDamageType],
+    [tool, map, brush],
   );
 
   return {
     state: { enabled, map, margins, tool, notice, value: enabled ? map : null },
-    hazard: {
-      label: hazardLabel,
-      dice: hazardDice,
-      damageType: hazardDamageType,
-      setLabel: setHazardLabel,
-      setDice: setHazardDice,
-      setDamageType: setHazardDamageType,
-    },
-    actions: { setEnabled, setSize, setOpacity, setMargins, setTool, setBackground, onStroke },
+    brush,
+    actions: { setEnabled, setSize, setOpacity, setMargins, setTool, setBackground, setBrush, onStroke },
   };
 }
 

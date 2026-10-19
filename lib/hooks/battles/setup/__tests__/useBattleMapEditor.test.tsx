@@ -33,13 +33,13 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.actions.onStroke([{ x: 3, y: 3 }]));
     expect(result.current.state.map.terrain).toEqual({ "3:3": { kind: "wall" } });
 
-    act(() => result.current.hazard.setLabel("Вогняна стіна"));
+    act(() => result.current.actions.setBrush({ label: "Вогняна стіна" }));
     act(() => result.current.actions.setTool("hazard"));
     act(() => result.current.actions.onStroke([{ x: 4, y: 3 }]));
     expect(result.current.state.map.terrain?.["4:3"]).toEqual({ kind: "hazard", label: "Вогняна стіна", damage: { dice: "1d6", type: "fire" } });
 
-    act(() => result.current.hazard.setDice("2d4+1"));
-    act(() => result.current.hazard.setDamageType("acid"));
+    act(() => result.current.actions.setBrush({ dice: "2d4+1", damageType: "acid" }));
+    expect(result.current.brush).toEqual({ label: "Вогняна стіна", dice: "2d4+1", damageType: "acid" });
     act(() => result.current.actions.onStroke([{ x: 5, y: 3 }]));
     expect(result.current.state.map.terrain?.["5:3"]?.damage).toEqual({ dice: "2d4+1", type: "acid" });
 
