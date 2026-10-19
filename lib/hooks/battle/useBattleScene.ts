@@ -68,6 +68,10 @@ export interface BattleSceneIntents {
   /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
   mapAim: MapAim | null;
   setMapAim(aim: MapAim | null): void;
+  /** Фаза ходу поточного героя дозволяє атаку — лише тоді клік по ворогу стає наміром, а не вибором */
+  attackReady: boolean;
+  /** MyTurnControls повідомляє id героя, чия фаза дозволяє атаку; null — не дозволяє */
+  setAttackReady(heroId: string | null): void;
 }
 
 export interface BattleSceneActions {
@@ -253,6 +257,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const [mapAim, setMapAim] = useState<MapAim | null>(null);
 
+  const [attackReadyId, setAttackReady] = useState<string | null>(null);
+
   const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
 
   const openLog = useCallback((focus: number | null = null) => {
@@ -339,7 +345,9 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const anyPending = Object.values(actions).some((m) => m.isPending);
 
-  const clickParticipant = useParticipantClick(battle && derived ? { battle, turn: derived.turn, anyPending, select, requestAttack: setAttackIntent } : null);
+  const attackReady = !!attackReadyId && attackReadyId === derived?.turn.current?.basicInfo.id;
+
+  const clickParticipant = useParticipantClick(battle && derived ? { battle, turn: derived.turn, anyPending, attackReady, select, requestAttack: setAttackIntent } : null);
 
   if (attackIntent && battle && isIntentStale(attackIntent, { round: battle.currentRound, turnIndex: battle.currentTurnIndex })) setAttackIntent(null);
 
@@ -357,7 +365,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     selectedId,
     select,
     clickParticipant,
-    intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim },
+    intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim, attackReady, setAttackReady },
     toast,
     result: { fx: resultFx, show: showResult },
     log: { ...log, show: openLog, close: closeLog },

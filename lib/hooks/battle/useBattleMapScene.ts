@@ -31,7 +31,7 @@ const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a &
 export function useBattleMapScene(): BattleMapScene | null {
   const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents } = useBattleScene();
 
-  const { requestAttack, mapAim } = intents;
+  const { requestAttack, mapAim, attackReady } = intents;
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
@@ -64,7 +64,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const canAct = isMyTurn && !anyPending && !!current;
 
-  const actor = useMemo<MapSceneActor>(() => ({ current, viewer, canAct, isDM }), [current, viewer, canAct, isDM]);
+  const actor = useMemo<MapSceneActor>(() => ({ current, viewer, canAct, isDM, attackReady }), [current, viewer, canAct, isDM, attackReady]);
 
   const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim }), [placing, placingId, toolActive, mapAim]);
 

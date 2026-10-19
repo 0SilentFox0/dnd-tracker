@@ -23,6 +23,8 @@ export interface MapSceneActor {
   viewer: Viewer;
   canAct: boolean;
   isDM: boolean;
+  /** Фаза ходу дозволяє атаку; інакше клік по ворогу — вибір, а цілі не підсвічуються */
+  attackReady: boolean;
 }
 
 /** Режим кліку по карті: розстановка DM, інструмент місцевості або наведення шаблону. */
@@ -110,7 +112,7 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
 }
 
 export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSceneInput): MapScene {
-  const { current, viewer, canAct, isDM } = actor;
+  const { current, viewer, canAct, isDM, attackReady } = actor;
 
   const { placingId } = mode;
 
@@ -128,7 +130,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
   const attacks = current?.battleData.attacks ?? [];
 
-  const canAttack = canStartAttack(current);
+  const canAttack = attackReady && canStartAttack(current);
 
   const aimed = aim?.aim ? aimView({ map, participants }, aim, aim.aim) : null;
 

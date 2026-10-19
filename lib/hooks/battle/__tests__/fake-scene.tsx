@@ -26,6 +26,7 @@ export interface FakeSceneOptions {
   afterLog?: BattleAction[];
   map?: BattleScene["map"];
   mapAim?: MapAim | null;
+  attackReady?: boolean;
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -113,7 +114,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     selectedId: null,
     select: vi.fn(),
     clickParticipant: vi.fn(),
-    intents: { attack: null, requestAttack: vi.fn(), clearAttack: vi.fn(), mapAim: opts.mapAim ?? null, setMapAim: vi.fn() },
+    intents: { attack: null, requestAttack: vi.fn(), clearAttack: vi.fn(), mapAim: opts.mapAim ?? null, setMapAim: vi.fn(), attackReady: opts.attackReady ?? true, setAttackReady: vi.fn() },
     toast,
     result: { fx: opts.result ?? null, show: showResult },
     log: { open: false, focus: null, show: openLog, close: vi.fn() },

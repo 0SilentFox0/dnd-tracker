@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { canConsumeIntent, isIntentStale } from "../attack-intent";
+import { canConsumeIntent, isIntentStale, participantAttackIntent, type ParticipantClickScene } from "../attack-intent";
+
+import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const intent = { targetId: "e", actorId: "h1", round: 2, turnIndex: 3 };
 
@@ -27,5 +31,57 @@ describe("намір атаки з карти", () => {
     expect(isIntentStale(intent, { round: 2, turnIndex: 3 })).toBe(false);
     expect(isIntentStale(intent, { round: 2, turnIndex: 4 })).toBe(true);
     expect(isIntentStale(intent, { round: 3, turnIndex: 3 })).toBe(true);
+  });
+});
+
+const sword = { id: "sword", name: "Меч", type: AttackType.MELEE } as BattleAttack;
+
+function unit(id: string, side: ParticipantSide, over: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant {
+  const p = createMockParticipant();
+
+  return { ...p, basicInfo: { ...p.basicInfo, id, side }, battleData: { ...p.battleData, attacks: [sword], ...over } };
+}
+
+function clickScene(over: Partial<ParticipantClickScene> = {}, order = [unit("h", ParticipantSide.ALLY), unit("e", ParticipantSide.ENEMY), unit("a", ParticipantSide.ALLY)]): ParticipantClickScene {
+  return {
+    battle: { map: null, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 },
+    turn: { current: order[0], isMyTurn: true },
+    anyPending: false,
+    attackReady: true,
+    ...over,
+  };
+}
+
+describe("participantAttackIntent", () => {
+  it("ворог без карти — намір першою ближньою зброєю", () => {
+    expect(participantAttackIntent(clickScene(), "e")).toEqual({ targetId: "e", attackId: "sword", actorId: "h", round: 2, turnIndex: 0 });
+  });
+
+  it("своя сторона чи сам герой — лише вибір", () => {
+    expect(participantAttackIntent(clickScene(), "a")).toBeNull();
+    expect(participantAttackIntent(clickScene(), "h")).toBeNull();
+  });
+
+  it("ворог у резерві — лише вибір", () => {
+    const order = [unit("h", ParticipantSide.ALLY), unit("e", ParticipantSide.ENEMY, { reserved: true })];
+
+    expect(participantAttackIntent(clickScene({}, order), "e")).toBeNull();
+  });
+
+  it("мутація в дорозі чи не мій хід — лише вибір", () => {
+    expect(participantAttackIntent(clickScene({ anyPending: true }), "e")).toBeNull();
+    expect(participantAttackIntent(clickScene({ turn: { current: null, isMyTurn: false } }), "e")).toBeNull();
+  });
+
+  it("фаза ходу не дозволяє атаку (мораль, кінець ходу) — лише вибір", () => {
+    expect(participantAttackIntent(clickScene({ attackReady: false }), "e")).toBeNull();
+  });
+
+  it("на карті ціль недосяжна — лише вибір", () => {
+    const order = [unit("h", ParticipantSide.ALLY, { position: { x: 0, y: 0 } }), unit("e", ParticipantSide.ENEMY, { position: { x: 5, y: 0 } })];
+
+    const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
+
+    expect(participantAttackIntent(clickScene({ battle: { map, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 } }, order), "e")).toBeNull();
   });
 });

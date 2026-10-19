@@ -11,7 +11,7 @@ import { MapStripRow } from "@/components/battle/scene/MapStrip";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { canConsumeIntent, COUNTDOWN_SECONDS, type TurnFlowState } from "@/lib/utils/battle/flows";
+import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack, type TurnFlowState } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -30,11 +30,13 @@ const STRIP_LABEL: Record<Exclude<TurnFlowState["phase"], "countdown">, string> 
   ended: "Твій хід",
 };
 
+const AURA_STRIP_LABEL = "Оберіть зону аури";
+
 /** strip — вкладка «Карта» на телефоні: замість панелі дій один рядок, а майстри лишаються змонтованими (наведення заклинання живе в них) */
 export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip?: { onExpand: () => void } }) {
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim } = intents;
+  const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, setAttackReady } = intents;
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
@@ -62,13 +64,23 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const { currentRound: round, currentTurnIndex: turnIndex } = battle;
 
+  const heroId = hero.basicInfo.id;
+
+  const attackReady = turnAllowsAttack({ phase, actionUsed, skipped });
+
+  useEffect(() => {
+    setAttackReady(attackReady ? heroId : null);
+
+    return () => setAttackReady(null);
+  }, [attackReady, heroId, setAttackReady]);
+
   useEffect(() => {
     if (attackIntent === null) return;
 
-    if (canConsumeIntent(attackIntent, { heroId: hero.basicInfo.id, round, turnIndex, phase, actionUsed, skipped })) openAttack(attackIntent.targetId, attackIntent.attackId);
+    if (canConsumeIntent(attackIntent, { heroId, round, turnIndex, phase, actionUsed, skipped })) openAttack(attackIntent.targetId, attackIntent.attackId);
 
     clearAttackIntent();
-  }, [attackIntent, hero.basicInfo.id, round, turnIndex, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
+  }, [attackIntent, heroId, round, turnIndex, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
 
   const full = (
     <>
@@ -98,7 +110,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const stripRow = strip && phase !== "countdown" && !mapAim && (
     <MapStripRow onExpand={strip.onExpand}>
-      <span className="hud-sc tracking-[.12em]">{STRIP_LABEL[phase]}</span>
+      <span className="hud-sc tracking-[.12em]">{phase === "acting" && zone ? AURA_STRIP_LABEL : STRIP_LABEL[phase]}</span>
     </MapStripRow>
   );
 

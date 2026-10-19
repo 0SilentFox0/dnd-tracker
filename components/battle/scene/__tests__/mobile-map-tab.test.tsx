@@ -5,6 +5,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => false }));
 
+const aura = vi.hoisted(() => ({ step: null as unknown }));
+
+vi.mock("@/lib/hooks/battle", async (importOriginal) => ({ ...(await importOriginal<object>()), useAuraZones: () => aura.step }));
+
 import { MapStripSlotContext } from "@/components/battle/scene/MapStrip";
 import { MobileBattleLayout } from "@/components/battle/scene/MobileBattleLayout";
 import { SpellAimPanel } from "@/components/battle/wizards/spellbook/SpellAimPanel";
@@ -22,7 +26,10 @@ const tab = (name: RegExp) => screen.getByRole("tab", { name });
 
 const topBar = () => screen.queryByRole("button", { name: /Анімації дій/ });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  aura.step = null;
+});
 
 describe("MobileBattleLayout — вкладка «Карта» на весь екран", () => {
   it("на карті немає шапки, ініціативи й банера; на списках усе як було", () => {
@@ -67,6 +74,31 @@ describe("MobileBattleLayout — вкладка «Карта» на весь е�
     expect(screen.queryByText(/Перевірка моралі · d10/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /Перевірка моралі/ }));
     expect(screen.getByText(/Перевірка моралі · d10/)).toBeTruthy();
+  });
+
+  it("чекає вибору зони аури — рядок про аури замість «Дії»", () => {
+    aura.step = { aura: { id: "a", name: "Аура" }, candidates: [], selected: [], toggle: vi.fn(), confirm: vi.fn(), pending: false };
+
+    const { wrapper } = fakeScene({ isMyTurn: true, map: MAP });
+
+    render(<MobileBattleLayout />, { wrapper });
+
+    expect(screen.getByRole("button", { name: /Оберіть зону аури/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Твій хід · Дії/ })).toBeNull();
+  });
+
+  it("фаза дії повідомляє сцені, що клік по ворогу — атака; мораль — ні", () => {
+    const acting = fakeScene({ isMyTurn: true, map: MAP });
+
+    render(<MobileBattleLayout />, { wrapper: acting.wrapper });
+    expect(acting.value.intents.setAttackReady).toHaveBeenLastCalledWith("me");
+    cleanup();
+
+    const morale = fakeScene({ isMyTurn: true, map: MAP, morale: 2 });
+
+    render(<MobileBattleLayout />, { wrapper: morale.wrapper });
+    expect(morale.value.intents.setAttackReady).toHaveBeenLastCalledWith(null);
+    expect(morale.value.intents.setAttackReady).not.toHaveBeenCalledWith("me");
   });
 
   it("не мій хід: рядок «ходить …» і карта", () => {

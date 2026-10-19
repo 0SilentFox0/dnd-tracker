@@ -12,7 +12,7 @@ const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3
 
 const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "60 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
 
-function setup(opts: { isMyTurn?: boolean; anyPending?: boolean } = {}) {
+function setup(opts: { isMyTurn?: boolean; anyPending?: boolean; attackReady?: boolean } = {}) {
   const scene = fakeScene({ map, isMyTurn: opts.isMyTurn });
 
   const { value, me, gob, ally } = scene;
@@ -26,7 +26,7 @@ function setup(opts: { isMyTurn?: boolean; anyPending?: boolean } = {}) {
 
   const requestAttack = vi.fn();
 
-  const { result } = renderHook(() => useParticipantClick({ battle: value.battle, turn: value.turn, anyPending: opts.anyPending ?? false, select, requestAttack }));
+  const { result } = renderHook(() => useParticipantClick({ battle: value.battle, turn: value.turn, anyPending: opts.anyPending ?? false, attackReady: opts.attackReady ?? true, select, requestAttack }));
 
   return { click: (id: string) => act(() => result.current(id)), select, requestAttack };
 }
@@ -50,8 +50,8 @@ describe("useParticipantClick", () => {
     expect(requestAttack).not.toHaveBeenCalled();
   });
 
-  it("не мій хід або мутація в дорозі — лише вибір", () => {
-    for (const opts of [{ isMyTurn: false }, { anyPending: true }]) {
+  it("не мій хід, мутація в дорозі чи фаза без атаки — лише вибір", () => {
+    for (const opts of [{ isMyTurn: false }, { anyPending: true }, { attackReady: false }]) {
       const { click, select, requestAttack } = setup(opts);
 
       click("gob");

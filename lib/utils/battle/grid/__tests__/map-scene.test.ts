@@ -36,7 +36,7 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
     map,
     participants: [hero, near, far, reserved],
     selectedId: null,
-    actor: { current: hero, viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false }, canAct: true, isDM: false, ...actor },
+    actor: { current: hero, viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false }, canAct: true, isDM: false, attackReady: true, ...actor },
     mode: { placing: false, placingId: null, ...mode },
     ...over,
   };
@@ -203,6 +203,13 @@ describe("deriveMapScene", () => {
 
     const s = deriveMapScene(input({ actor: { current: used }, participants: [used, near, far] }));
 
+    expect(s.tokenClick("e1")).toEqual({ kind: "select", id: "e1" });
+  });
+
+  it("фаза ходу без атаки (мораль) — цілей немає, клік по ворогу лише вибирає", () => {
+    const s = deriveMapScene(input({ actor: { attackReady: false }, participants: [hero, near, far] }));
+
+    expect([...(s.view.marks?.values() ?? [])]).not.toContain("target");
     expect(s.tokenClick("e1")).toEqual({ kind: "select", id: "e1" });
   });
 
