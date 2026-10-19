@@ -6,6 +6,7 @@ import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
@@ -29,7 +30,6 @@ export function hazardUnder(map: BattleMapConfig, p: BattleParticipant, at?: Gri
   return strongest(footprint(anchor, sizeOf(p)).map((c) => hazards.get(cellKey(c))));
 }
 
-/** Небезпека, що зачіпає крок `to` за `cost` клітинок, або null. */
 export function hazardOnMove(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, to: GridPoint, cost: number): TerrainCell | null {
   const hazards = damagingHazards(map);
 
@@ -60,9 +60,11 @@ export function hazardHit(
 
   if (!hazard || p.battleData.hazardHitRound === round) return null;
 
+  if (hazard.spellId && participantImmuneToSpell(p, hazard.spellId, participants)) return null;
+
   const raw = hazard.dice ? rollDice(hazard.dice, rng) : (hazard.amount ?? 0);
 
-  const damage = applyResistance(p, raw, hazard.type, { participants }).finalDamage;
+  const damage = applyResistance(p, raw, hazard.type, { participants, fromSpell: !!hazard.spellId }).finalDamage;
 
   const hurt = applyRawDamage(p, damage);
 

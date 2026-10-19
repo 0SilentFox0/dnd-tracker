@@ -63,6 +63,27 @@ describe("hazardHit", () => {
     expect(hit?.damage).toBe(5);
   });
 
+  it("небезпека від заклинання не шкодить тому, хто має імунітет до цього заклинання", () => {
+    const wall: TerrainCell = { ...fire, damage: { amount: 10, type: "fire", spellId: "wall-of-fire" } };
+
+    const immune = grantPassive(at({ x: 1, y: 1 }), [{ kind: "flag", flag: "spellImmunity", spellIds: ["wall-of-fire"] }]);
+
+    expect(hazardHit(immune, wall, 1, [immune], () => 0)).toBeNull();
+
+    const other = grantPassive(at({ x: 1, y: 1 }), [{ kind: "flag", flag: "spellImmunity", spellIds: ["fireball"] }]);
+
+    expect(hazardHit(other, wall, 1, [other], () => 0)?.damage).toBe(10);
+  });
+
+  it("опір до заклинань діє на небезпеку від заклинання, але не на звичайну", () => {
+    const warded = grantPassive(at({ x: 1, y: 1 }), [{ kind: "flag", flag: "resistance", damageType: "spell", percent: 50 }]);
+
+    const fromSpell: TerrainCell = { ...fire, damage: { amount: 10, type: "fire", spellId: "wall-of-fire" } };
+
+    expect(hazardHit(warded, fromSpell, 1, [warded], () => 0)?.damage).toBe(5);
+    expect(hazardHit(warded, { ...fire, damage: { amount: 10, type: "fire" } }, 1, [warded], () => 0)?.damage).toBe(10);
+  });
+
   it("смертельна шкода переводить у непритомність", () => {
     const weak = { ...at({ x: 1, y: 1 }), combatStats: { ...at({ x: 1, y: 1 }).combatStats, currentHp: 3 } };
 

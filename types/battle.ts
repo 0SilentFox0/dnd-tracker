@@ -184,6 +184,8 @@ export interface TerrainDamage {
   dice?: string;
   amount?: number;
   type: string;
+  /** Небезпека від заклинання: імунітет і опори до заклинань діють, як при касті */
+  spellId?: string;
 }
 
 export interface TerrainCell {

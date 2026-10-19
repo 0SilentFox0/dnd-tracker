@@ -117,7 +117,7 @@ export const DEFAULT_HAZARD_DICE = "1d6";
 
 export const DEFAULT_HAZARD_DAMAGE_TYPE = "fire";
 
-export const HAZARD_DICE_PATTERN = /^\d+d\d+([+-]\d+)?$/;
+export const HAZARD_DICE_PATTERN = /^\d{1,2}d\d{1,3}([+-]\d{1,3})?$/;
 
 export const DEFAULT_BATTLE_MAP = {
   cols: 20,

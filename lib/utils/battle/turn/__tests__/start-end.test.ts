@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
@@ -131,6 +131,17 @@ describe("небезпека на початку ходу", () => {
     const p = standing();
 
     expect(processStartOfTurn(p, 2, [p], () => 0).damageMessages).toEqual([]);
+  });
+
+  it("імунітет до заклинання, що створило зону, — шкоди немає", () => {
+    const wall: BattleMapConfig = { ...map, terrain: { "1:1": { kind: "hazard", label: "Вогняна стіна", damage: { amount: 5, type: "fire", spellId: "wall-of-fire" } } } };
+
+    const p = grantPassive(standing(), [{ kind: "flag", flag: "spellImmunity" }]);
+
+    const out = processStartOfTurn(p, 2, [p], () => 0, wall);
+
+    expect(out.damageMessages).toEqual([]);
+    expect(out.participant.combatStats.currentHp).toBe(20);
   });
 
   it("смерть від небезпеки обробляється як від DoT", () => {

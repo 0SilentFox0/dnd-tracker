@@ -110,6 +110,10 @@ describe("map-terrain mutation", () => {
 
     expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage } }).success).toBe(true);
     expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "2к6", type: "fire" } } }).success).toBe(false);
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "99999999d6", type: "fire" } } }).success).toBe(false);
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "2d6+9999", type: "fire" } } }).success).toBe(false);
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "20d100+100", type: "fire" } } }).success).toBe(true);
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "2d6", type: "banana" } } }).success).toBe(false);
 
     const out = mapTerrainMutation(ctx(), { cells: ["3:3"], terrain: { kind: "hazard", label: "Лава", damage } });
 

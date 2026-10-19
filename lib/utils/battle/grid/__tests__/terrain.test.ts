@@ -195,6 +195,14 @@ describe("diffTerrain / applyTerrainDiff", () => {
     expect(diffTerrain(a, b)).toEqual({ set: [{ cell: b["1:1"], keys: ["1:1"] }] });
   });
 
+  it("зміна лише spellId небезпеки потрапляє в diff", () => {
+    const a = { "1:1": { kind: "hazard" as const, damage: { amount: 4, type: "fire" } } };
+
+    const b = { "1:1": { kind: "hazard" as const, damage: { amount: 4, type: "fire", spellId: "s1" } } };
+
+    expect(diffTerrain(a, b)).toEqual({ set: [{ cell: b["1:1"], keys: ["1:1"] }] });
+  });
+
   const base: BattleMapConfig = { cols: 6, rows: 6, background: null, opacity: 0.3 };
 
   it("групує однакові значення, рахує зміни й зняття; без змін — null", () => {

@@ -38,3 +38,14 @@ describe("battleMapSchema.terrain", () => {
     expect(battleMapSchema.safeParse({ ...map, terrain: many }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.terrain.damage", () => {
+  it("зберігає spellId небезпеки від заклинання і відхиляє надто великі кубики", () => {
+    const terrain = { "1:1": { kind: "hazard", damage: { amount: 4, type: "fire", spellId: "s1" } } };
+
+    const parsed = battleMapSchema.safeParse({ ...map, terrain });
+
+    expect(parsed.success && parsed.data.terrain?.["1:1"].damage?.spellId).toBe("s1");
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", damage: { dice: "99999999d6", type: "fire" } } } }).success).toBe(false);
+  });
+});

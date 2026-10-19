@@ -130,12 +130,15 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const map = ctx.meta.map;
 
-    const hazard = zone && map && resolution.cells
-      ? applyTerrain(map, resolution.cells, {
+    // постійну небезпеку, яку намалював ДМ, зона не перезаписує: інакше вона зникла б разом із зоною
+    const zoneCells = map && resolution.cells?.filter((k) => !(map.terrain?.[k]?.kind === "hazard" && map.terrain[k].untilRound === undefined));
+
+    const hazard = zone && map && zoneCells?.length
+      ? applyTerrain(map, zoneCells, {
           kind: "hazard",
           label: zone.label ?? spell.name,
           untilRound: ctx.scene.round + zone.rounds - 1,
-          ...(result.spellDamage && { damage: result.spellDamage }),
+          ...(result.spellDamage && { damage: { ...result.spellDamage, spellId: spell.id } }),
         })
       : null;
 

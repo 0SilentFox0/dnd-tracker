@@ -329,9 +329,36 @@ describe("spell mutation", () => {
       const terrain = out.scene?.map?.terrain ?? {};
 
       expect(Object.keys(terrain).sort()).toEqual(["2:3", "2:4", "2:5", "2:6", "2:7", "2:8"]);
-      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire" } });
+      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire", spellId: "s1" } });
       expect(out.events).toHaveLength(1);
       expect(diffTerrain(map.terrain, out.scene?.map?.terrain)?.set?.[0].keys).toHaveLength(6);
+    });
+
+    it("точка за межами карти — invalid_target, навіть якщо коло зачепило б крайній стовпчик", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3 });
+
+      const ctx = onMap({ participants: [placed(caster, { x: 17, y: 2 }), placed(goblin, { x: 19, y: 2 })] });
+
+      await expect(mutation(row)(ctx, body({ targetCell: { x: 20, y: 2 } }) as never)).rejects.toMatchObject({ code: "invalid_target" });
+    });
+
+    it("zone не перезаписує постійну небезпеку ДМ, а тимчасову — перезаписує", async () => {
+      const row = withTargeting({ kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } }, "Вогняна стіна");
+
+      const lava = { kind: "hazard" as const, label: "Лава", damage: { dice: "2d6", type: "fire" } };
+
+      const old = { kind: "hazard" as const, label: "Старе", untilRound: 2, damage: { amount: 1, type: "acid" } };
+
+      const ctx = onMap();
+
+      const withTerrain = { ...ctx, meta: { ...ctx.meta, map: { ...map, terrain: { "2:4": lava, "2:5": old } } } };
+
+      const out = await mutation(row)(withTerrain, body({ targetIds: [], targetCell: { x: 2, y: 10 } }) as never);
+
+      const terrain = out.scene?.map?.terrain ?? {};
+
+      expect(terrain["2:4"]).toEqual(lava);
+      expect(terrain["2:5"]).toMatchObject({ label: "Вогняна стіна" });
     });
 
     it("zone з власним підписом; preview не ставить небезпеку, але повертає клітинки", async () => {

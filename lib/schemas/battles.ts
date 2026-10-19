@@ -23,7 +23,7 @@ export const battleMapSchema = z.object({
         label: z.string().max(60).optional(),
         untilRound: z.number().int().min(1).optional(),
         damage: z
-          .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30) })
+          .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(64).optional() })
           .optional(),
       }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
     )

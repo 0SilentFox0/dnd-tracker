@@ -1,7 +1,7 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
+import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { feetToCells, templateAimAllowed, templateArea } from "@/lib/utils/battle/grid/template";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
@@ -64,6 +64,8 @@ type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
 function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
   if (!aim) return fail("Оберіть точку на карті");
+
+  if (!inBounds(map, aim)) return fail("Точка поза картою");
 
   if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
 

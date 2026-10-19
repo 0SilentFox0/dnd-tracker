@@ -1,11 +1,14 @@
 import { z } from "zod";
 
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { MapTerrainResponse } from "@/types/api";
 import type { TerrainCell } from "@/types/battle";
+
+const HAZARD_DAMAGE_TYPES = DAMAGE_ELEMENT_OPTIONS.map((o) => o.value) as [string, ...string[]];
 
 export const mapTerrainSchema = z.object({
   cells: z.array(z.string().regex(/^\d+:\d+$/)).min(1).max(400),
@@ -14,7 +17,7 @@ export const mapTerrainSchema = z.object({
       kind: z.enum(["wall", "barrier", "hazard"]),
       label: z.string().max(60).optional(),
       rounds: z.number().int().min(1).max(20).optional(),
-      damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.string().min(1).max(30) }).optional(),
+      damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
     })
     .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: "Барʼєру потрібна тривалість у раундах", path: ["rounds"] })
     .nullable(),
