@@ -61,6 +61,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
     onRemove: (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } }),
     onKill: battle.status === BattleStatus.ACTIVE ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } }) : undefined,
     onDone: closePanel,
+    unitControl: unitControl.row,
   };
 
   const canScale = battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
@@ -156,7 +157,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
           )}
 
           {battle.status === BattleStatus.ACTIVE && (
-            <button type="button" className={ACTION} disabled={!unitControl.canRandomize || actions.unitControl.isPending} title="Вільні союзні юніти (під ДМ) розподіляються між гравцями" onClick={unitControl.randomize}>
+            <button type="button" className={ACTION} disabled={!unitControl.random.can || unitControl.random.isPending} title="Вільні союзні юніти (під ДМ) розподіляються між гравцями" onClick={unitControl.random.run}>
               <Dices className="size-4 shrink-0 text-[var(--gold)]" />
               Роздати юнітів випадково
             </button>

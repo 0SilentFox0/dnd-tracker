@@ -28,4 +28,4 @@ export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue }
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
-export { useUnitControlPanel } from "./useUnitControlPanel";
+export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

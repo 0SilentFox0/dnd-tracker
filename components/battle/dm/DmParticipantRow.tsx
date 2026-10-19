@@ -4,7 +4,7 @@ import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
 
 import { SelectField } from "@/components/ui/select-field";
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { useUnitControlPanel } from "@/lib/hooks/battle";
+import type { UnitControlRow } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
@@ -27,6 +27,7 @@ export interface DmParticipantActions {
   onRemove: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
   onDone?: () => void;
+  unitControl?: UnitControlRow;
 }
 
 interface DmParticipantRowProps {
@@ -36,11 +37,9 @@ interface DmParticipantRowProps {
 }
 
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
-  const { onChangeHp, onTakeControl, onRemove, onKill, onDone } = actions;
+  const { onChangeHp, onTakeControl, onRemove, onKill, onDone, unitControl } = actions;
 
   const confirm = useConfirm();
-
-  const unitControl = useUnitControlPanel();
 
   const close = () => onDone?.();
 
@@ -54,7 +53,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
         {label && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
-        {unitControl.isAssignable(participant) && (
+        {unitControl?.isAssignable(participant) && (
           <label className="flex items-center gap-1.5 pt-1 text-xs text-[var(--hud-muted)]">
             Керує:
             <SelectField value={unitControl.valueOf(participant)} options={unitControl.options} onValueChange={(v) => unitControl.assign(participant, v)} triggerClassName="h-7 text-xs" />
