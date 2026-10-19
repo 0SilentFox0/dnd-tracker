@@ -1,10 +1,10 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { dropOpposingSpellEffects } from "@/lib/utils/abilities/engine/effects/opposing-spells";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
+import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { kind: "copySpellBuffs" }>>): EffectApplyResult {
   const { ability, ownerId, event, ctx } = input;
@@ -17,7 +17,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
 
   const owner = findParticipant(input.participants, ownerId);
 
-  const buffsOf = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.type === "buff" && e.abilityKey?.startsWith(prefix));
+  const buffsOf = (p: BattleParticipant) => p.battleData.activeEffects.filter((e): e is ActiveEffect & { abilityKey: string } => e.type === "buff" && !!e.abilityKey?.startsWith(prefix));
 
   const donor = event.targetIds
     .map((id) => findParticipant(input.participants, id))
@@ -31,15 +31,15 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
 
   const participants = updateParticipant(input.participants, ownerId, (p) =>
     buffs.reduce((acc, e) => {
-      messages.push(`✨ ${p.basicInfo.name}: отримує «${e.name}» (${ability.name})`);
-
-      const cleared = (e.abilityEffects ?? []).reduce((q, se) => dropOpposingSpellEffects(q, e.abilityKey as string, se).participant, acc);
-
-      return upsertTimedEffect(
-        cleared,
-        { timedKey: e.abilityKey as string, source: effectSource(owner, ability), name: e.name, type: "buff", rounds: e.duration, stackable: false, abilityEffects: e.abilityEffects },
+      const { participant, removed } = applySpellTimedEffect(
+        acc,
+        { timedKey: e.abilityKey, source: effectSource(owner, ability), name: e.name, type: "buff", rounds: e.duration, stackable: false, abilityEffects: e.abilityEffects },
         ctx.round,
       );
+
+      messages.push(...removed.map((r) => `⚖️ ${e.name} знімає «${r.name}» → ${p.basicInfo.name}`), `✨ ${p.basicInfo.name}: отримує «${e.name}» (${ability.name})`);
+
+      return participant;
     }, p),
   );
 

@@ -6,8 +6,8 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { dropOpposingSpellEffects } from "@/lib/utils/abilities/engine/effects/opposing-spells";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
+import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, FlagKey, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 
@@ -46,17 +46,13 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   for (const id of targetIds.filter((t) => !blocked.includes(t))) {
     ps = updateParticipant(ps, id, (target) => {
-      const { participant: p, removed } = dropOpposingSpellEffects(target, ability.key, stripped);
-
-      for (const e of removed) cancelled.push(`⚖️ ${ability.name} знімає «${e.name}» → ${p.basicInfo.name}`);
-
-      return upsertTimedEffect(
-        p,
+      const { participant, removed } = applySpellTimedEffect(
+        target,
         {
           timedKey,
           source: effectSource(owner, ability),
           name: ability.name,
-          type: p.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
+          type: target.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
           rounds,
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
@@ -64,6 +60,10 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
         },
         ctx.round,
       );
+
+      for (const e of removed) cancelled.push(`⚖️ ${ability.name} знімає «${e.name}» → ${target.basicInfo.name}`);
+
+      return participant;
     });
   }
 
