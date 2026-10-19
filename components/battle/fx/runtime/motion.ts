@@ -1,4 +1,4 @@
-export interface MotionStep {
+interface MotionStep {
   at: number;
   x: number;
   y: number;

@@ -1,7 +1,7 @@
 import { halfSize } from "./anchors";
 import type { FxPoint } from "./geometry";
 
-export interface FigurePose {
+interface FigurePose {
   /** Width multiplier: 1 is a man, 1.5 a hulking giant. */
   bulk?: number;
   /** 0 — arms hang, 1 — raised to the shoulders and spread. */
@@ -28,7 +28,7 @@ const HANDS = new Set([6, 7]);
 const ELBOW = 8;
 
 /** A standing humanoid `h` tall with its feet at the origin (y grows down), clockwise from the crotch; the head is `figureHead`. */
-export function figureOutline(h: number, pose: FigurePose = {}): FxPoint[] {
+function figureOutline(h: number, pose: FigurePose = {}): FxPoint[] {
   const bulk = pose.bulk ?? 1;
 
   const lift = pose.armLift ?? 0;
@@ -62,7 +62,7 @@ export function figurePath(g: CanvasRenderingContext2D, h: number, pose: FigureP
 }
 
 /** Height of a summoned figure standing on `ground`: tall where there is room, never past the layer's top edge. */
-export function figureHeight(ground: number, halfHeight: number, max = 92) {
+function figureHeight(ground: number, halfHeight: number, max = 92) {
   return Math.max(36, Math.min(max, halfHeight * 2.8, ground - 8));
 }
 

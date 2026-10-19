@@ -10,13 +10,13 @@ function visible(el: HTMLElement) {
 
 const escape = (id: string) => (typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id.replace(/"/g, '\\"'));
 
-export function findAnchor(id: string, root: ParentNode = document): HTMLElement | null {
+function findAnchor(id: string, root: ParentNode = document): HTMLElement | null {
   const all = [...root.querySelectorAll<HTMLElement>(`[data-fx-participant="${escape(id)}"]`)].filter(visible);
 
   return all.find((el) => el.dataset.fxAnchor !== "track") ?? all[0] ?? null;
 }
 
-export function centerOf(el: HTMLElement): FxPoint {
+function centerOf(el: HTMLElement): FxPoint {
   const r = el.getBoundingClientRect();
 
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };

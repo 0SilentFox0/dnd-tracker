@@ -11,7 +11,7 @@ interface Streak {
   color: string;
 }
 
-export interface StreakOptions {
+interface StreakOptions {
   colors: string[];
   count: number;
   /** Centre of the cone and its half-width; a full circle when omitted. */

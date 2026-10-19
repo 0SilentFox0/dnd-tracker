@@ -23,7 +23,7 @@ const DOT_AURA: Record<string, FxAuraKind> = {
   thunder: "static",
 };
 
-const AURA_BY_NAME: Record<string, FxAuraKind> = {
+export const AURA_BY_NAME: Record<string, FxAuraKind> = {
   "Корені": "roots",
   "Сплутування": "roots",
   "Сліпота": "blind",
