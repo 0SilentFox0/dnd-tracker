@@ -192,7 +192,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     attack, attacks, targets, steps, estimate, unknownDefense, previews,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
-    reachChecked: !!scene.battle.map && !!attacker?.battleData.position,
+    reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
     rollMode: currentMode,
     forcedMode: currentStrike?.forced,
     canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,

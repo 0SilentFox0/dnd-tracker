@@ -414,7 +414,8 @@ export function BattleMap({ map, participants, view, actions, className, editing
     const dy = t.top < o.top ? t.top - o.top : t.bottom > o.bottom ? t.bottom - o.bottom : 0;
 
     if (dy !== 0) outer.scrollBy({ top: dy, behavior: "smooth" });
-  }, [phone, currentId, containerRef]);
+    // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
+  }, [phone, currentId, containerRef, scrolls]);
 
   // свайп угору-вниз віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
   const touch = phone && scrolls && zoom === 1 && !painting ? "touch-pan-y" : "touch-none";
