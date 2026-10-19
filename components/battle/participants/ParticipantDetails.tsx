@@ -20,7 +20,16 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function ParticipantDetails({ participant }: { participant: BattleParticipant }) {
+interface ParticipantDetailsProps {
+  participant: BattleParticipant;
+}
+
+/** Ключ за id: при виборі іншого учасника стан FX не переноситься, і зміна HP не спливає чужою цифрою. */
+export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
+  return <ParticipantDetailsBody key={participant.basicInfo.id} participant={participant} />;
+}
+
+function ParticipantDetailsBody({ participant }: ParticipantDetailsProps) {
   const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
   const impactFor = useFxImpacts();
@@ -46,7 +55,7 @@ export function ParticipantDetails({ participant }: { participant: BattlePartici
             {signedDelta(change.delta)}
           </span>
         )}
-        <ZoomablePortrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(change && !change.impact && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+        <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(change && !change.impact && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
           {exact ? <div className="text-sm text-[#d6cbb7]">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}

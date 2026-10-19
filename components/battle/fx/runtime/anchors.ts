@@ -57,9 +57,10 @@ function centerOf(el: HTMLElement): FxPoint {
 }
 
 function cellPoint(at: { x: number; y: number }, root: ParentNode): FxPoint | undefined {
-  const el = root.querySelector<HTMLElement>(`[data-fx-cell="${at.x}:${at.y}"]`);
+  // карта може бути змонтована двічі (телефон/десктоп) — беремо видиму копію
+  const el = [...root.querySelectorAll<HTMLElement>(`[data-fx-cell="${at.x}:${at.y}"]`)].find(visible);
 
-  return el && visible(el) ? centerOf(el) : undefined;
+  return el && centerOf(el);
 }
 
 export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; at?: FxPoint; targetEls: HTMLElement[]; actorEl: HTMLElement | null } | null {

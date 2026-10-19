@@ -201,6 +201,14 @@ describe("точка шаблону", () => {
     expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toEqual({ x: 115, y: 115 });
   });
 
+  it("перша копія клітинки прихована — at береться з видимої", () => {
+    anchor("t", { x: 10, y: 10, w: 20, h: 20 });
+    cell("4:2", { x: 0, y: 0, w: 0, h: 0 });
+    cell("4:2", { x: 100, y: 100, w: 30, h: 30 });
+
+    expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toEqual({ x: 115, y: 115 });
+  });
+
   it("клітинка прокручена за край телефонної карти — at відсутнє (відкат до центроїда)", () => {
     const clip = mapClip({ x: 0, y: 0, w: 300, h: 200 }, true);
 

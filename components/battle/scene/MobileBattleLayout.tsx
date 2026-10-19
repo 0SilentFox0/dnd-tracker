@@ -125,7 +125,7 @@ export function MobileBattleLayout() {
       )}
       {isDM && <DmPanel panel={{ open: dmOpen, onOpenChange: setDmOpen }} />}
       <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
-        {selected && <ParticipantDetails key={selected.basicInfo.id} participant={selected} />}
+        {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
       <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title="Журнал" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         <BattleLog key={log.focus ?? "latest"} />
