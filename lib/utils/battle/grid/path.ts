@@ -2,6 +2,7 @@ import { cellKey, footprint, neighbors } from "./geometry";
 import { fits, occupiedBy, sizeOf } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
+import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -65,4 +66,11 @@ export function reachable(
   }
 
   return result;
+}
+
+/** Юніт під керуванням ДМ у його хід ходить без ліміту швидкості (як фігура на столі); решта — залишок руху. */
+export function moveBudget({ map, isDM }: { map: BattleMapConfig; isDM: boolean }, p: BattleParticipant): number {
+  if (!isDM || p.basicInfo.controlledBy !== CONTROLLED_BY_DM || hasEffectMarker(p, "immobilized")) return remainingMovement(p);
+
+  return map.cols * map.rows;
 }

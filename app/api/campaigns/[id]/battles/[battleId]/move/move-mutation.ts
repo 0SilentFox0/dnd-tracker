@@ -4,7 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canActNow } from "@/lib/utils/battle/common/control";
-import { canStand, cellKey, hazardHit, hazardOnMove, placeParticipants, reachable, remainingMovement } from "@/lib/utils/battle/grid";
+import { canStand, cellKey, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -51,7 +51,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   if (!placement) {
     assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 
-    const cost = reachable(map, participants, mover, remainingMovement(mover)).get(cellKey(data.to));
+    const cost = reachable(map, participants, mover, moveBudget({ map, isDM: ctx.isDM }, mover)).get(cellKey(data.to));
 
     if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
 

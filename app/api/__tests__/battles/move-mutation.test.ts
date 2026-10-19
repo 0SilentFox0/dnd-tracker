@@ -55,6 +55,23 @@ describe("move mutation", () => {
     expect(() => moveMutation(ctx(), far)).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
 
+  it("ДМ рухає свого юніта у його хід без ліміту швидкості; героя — з лімітом; стіни й зайняте діють", () => {
+    const dm = { ...ctx({ participants: [at(goblin, { x: 9, y: 4 }), at(hero, { x: 0, y: 0 })] }), isDM: true };
+
+    const out = moveMutation(dm, { participantId: "gob", to: { x: 0, y: 4 } });
+
+    expect(out.participants[0].battleData).toMatchObject({ position: { x: 0, y: 4 }, movementUsed: 9 });
+    expect(() => moveMutation(dm, { participantId: "gob", to: { x: 0, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+
+    const walled = { ...dm, meta: { ...dm.meta, map: { ...map, blocked: ["8:0", "8:1", "8:2", "8:3", "8:4"] } } };
+
+    expect(() => moveMutation(walled, { participantId: "gob", to: { x: 0, y: 4 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+
+    const heroTurn = { ...ctx(), isDM: true };
+
+    expect(() => moveMutation(heroTurn, { participantId: "hero", to: { x: 8, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+
   it("учасник без позиції спершу розставляється, потім рухається", () => {
     const loose = { ...hero, combatStats: { ...hero.combatStats, speed: 30 } };
 
@@ -101,6 +118,14 @@ describe("move mutation", () => {
           hpChanges: [expect.objectContaining({ participantId: "hero", change: -5 })],
         }),
       ]);
+    });
+
+    it("юніт ДМ без ліміту руху все одно отримує шкоду від небезпеки", () => {
+      const dm = { ...withTerrain({ "0:4": fire }, { participants: [at(goblin, { x: 9, y: 4 }), at(hero, { x: 0, y: 0 })] }), isDM: true };
+
+      const out = moveMutation(dm, { participantId: "gob", to: { x: 0, y: 4 } });
+
+      expect(out.participants[0].combatStats.currentHp).toBe(goblin.combatStats.currentHp - 5);
     });
 
     it("вихід і повторний вхід у тому самому раунді — без шкоди", () => {
