@@ -8,6 +8,7 @@ vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => false 
 const aura = vi.hoisted(() => ({ step: null as unknown }));
 
 vi.mock("@/lib/hooks/battle", async (importOriginal) => ({ ...(await importOriginal<object>()), useAuraZones: () => aura.step }));
+vi.mock("@/components/battle/audio/BattleAudioDock", () => ({ BattleAudioDock: () => null }));
 
 import { MapStripSlotContext } from "@/components/battle/scene/MapStrip";
 import { MobileBattleLayout } from "@/components/battle/scene/MobileBattleLayout";

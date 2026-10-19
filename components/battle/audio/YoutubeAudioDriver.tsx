@@ -1,0 +1,19 @@
+"use client";
+
+import { YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
+import { useBattleAudio, useYoutubeSync } from "@/lib/hooks/battle";
+
+/** Видимий плеєр не менше 200×200 — вимога YouTube; приховане аудіо заборонене. */
+export function YoutubeAudioDriver({ videoId }: { videoId: string }) {
+  const { state, clockOffsetMs, prefs } = useBattleAudio();
+
+  const { ref, needsTap, failed } = useYoutubeSync({ videoId, state, clockOffsetMs, volume: prefs.volume, muted: prefs.muted });
+
+  return (
+    <div className="mt-2 flex flex-col items-center gap-1">
+      <div data-youtube-player ref={ref} className="overflow-hidden rounded bg-black" style={{ width: YOUTUBE_PLAYER_PX, height: YOUTUBE_PLAYER_PX }} />
+      {needsTap && <p className="text-hud-muted">Торкніться ▶ у плеєрі</p>}
+      {failed && <p role="alert" className="text-[var(--enemy)]">Відео недоступне для вбудовування</p>}
+    </div>
+  );
+}

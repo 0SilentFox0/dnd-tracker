@@ -7,6 +7,8 @@ import { BattleToast } from "./BattleToast";
 import { NoticeStackContext } from "./MapStrip";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
+import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
+import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useSpellBookPrefetch } from "@/lib/hooks/battle";
@@ -82,13 +84,17 @@ export function BattleScreen() {
     const onField = battle.participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
     return (
-      <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
-        <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onField > 0} />
-      </div>
+      <BattleAudioProvider>
+        <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
+          <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onField > 0} />
+          <BattleAudioDock placement="corner" />
+        </div>
+      </BattleAudioProvider>
     );
   }
 
   return (
+    <BattleAudioProvider>
     <div className={cn("battle-hud", hudFontClassName)}>
       {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
       <ResultOverlay />
@@ -97,9 +103,11 @@ export function BattleScreen() {
       <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
         <BattleToast />
       </div>
+      {Desktop && <BattleAudioDock placement="corner" />}
       {isDM && <DmRevivePrompt />}
       {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
       <BattleFxLayer />
     </div>
+    </BattleAudioProvider>
   );
 }
