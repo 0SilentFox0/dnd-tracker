@@ -7,11 +7,11 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const PIERCE_MS = 110;
 
-const FLY_MS = IMPACT_MS.eldritch - PIERCE_MS;
+const FLY_MS = ARCHETYPE_FX.eldritch.impactMs - PIERCE_MS;
 
 const VIOLET = ["#c77dff", "#9b3dff", "#6a1fd0"];
 

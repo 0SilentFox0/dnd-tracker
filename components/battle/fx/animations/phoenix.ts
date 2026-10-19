@@ -10,13 +10,13 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const THROW_MS = 320;
 
 const RISE_MS = 650;
 
-const CRY_MS = IMPACT_MS.phoenix + 250;
+const CRY_MS = ARCHETYPE_FX.phoenix.impactMs + 250;
 
 const TOTAL_MS = 2700;
 

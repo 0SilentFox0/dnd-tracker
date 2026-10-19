@@ -9,7 +9,6 @@ import { FxLabPanel } from "./FxLabPanel";
 import "@/components/battle/hud/battle-hud.css";
 import "@/components/battle/fx/fx.css";
 import "./fx-lab.css";
-import { ANIMATIONS } from "@/components/battle/fx/animations";
 import { AuraCanvas } from "@/components/battle/fx/auras/canvas/AuraCanvas";
 import { FRAMES } from "@/components/battle/fx/frames/canvas";
 import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
@@ -17,9 +16,7 @@ import type { FrameAnimation } from "@/components/battle/fx/frames/canvas/types"
 import { ARCHETYPE_LABEL, AURA_KINDS, AURA_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
-import type { FxArchetype, FxElement } from "@/lib/utils/battle/fx";
-
-const ARCHETYPES = Object.keys(ANIMATIONS) as FxArchetype[];
+import { FX_ARCHETYPES, type FxArchetype, type FxElement } from "@/lib/utils/battle/fx";
 
 const ELEMENTS = Object.keys(PALETTE) as FxElement[];
 
@@ -75,7 +72,7 @@ export function FxLab() {
             </>
           }
         >
-          <HudChipTabs ariaLabel="Архетип" items={ARCHETYPES.map((a) => ({ key: a, label: ARCHETYPE_LABEL[a], active: a === archetype, onSelect: () => setArchetype(a) }))} />
+          <HudChipTabs ariaLabel="Архетип" items={FX_ARCHETYPES.map((a) => ({ key: a, label: ARCHETYPE_LABEL[a], active: a === archetype, onSelect: () => setArchetype(a) }))} />
           <HudChipTabs ariaLabel="Стихія" items={ELEMENTS.map((e) => ({ key: e, label: ELEMENT_LABEL[e], active: e === element, onSelect: () => setElement(e) }))} />
           <HudChipTabs ariaLabel="Параметри" items={[toggle("Крит", critical, setCritical), toggle("Промах", miss, setMiss)]} />
         </HudPageHeader>

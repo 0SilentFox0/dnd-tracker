@@ -8,9 +8,9 @@ import { schedule, show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const FILL_MS = IMPACT_MS.empower;
+const FILL_MS = ARCHETYPE_FX.empower.impactMs;
 
 const TOTAL_MS = 2400;
 

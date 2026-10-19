@@ -4,11 +4,11 @@ import { show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const DOTS = 40;
 
-const FLY_MS = IMPACT_MS.swarm;
+const FLY_MS = ARCHETYPE_FX.swarm.impactMs;
 
 const BUZZ_MS = 500;
 
@@ -30,7 +30,7 @@ export const swarm: FxAnimation = async ({ stage, from, to }) => {
 
   const gold = glow("#ffd23a");
 
-  await perTarget(stage, to, 80, async (target) => {
+  await perTarget(stage, to, ARCHETYPE_FX.swarm.staggerMs, async (target) => {
     const bugs: Bug[] = Array.from({ length: DOTS }, (_, i) => ({
       ctrl: { x: (from.x + target.x) / 2 + rand(-90, 90), y: Math.min(from.y, target.y) - rand(10, 110) },
       amp: rand(6, 18),

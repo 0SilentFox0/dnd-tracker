@@ -9,9 +9,9 @@ import { animateEl, show, tween, wait } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const RAIN_MS = IMPACT_MS.raincloud;
+const RAIN_MS = ARCHETYPE_FX.raincloud.impactMs;
 
 const TOTAL_MS = 2700;
 

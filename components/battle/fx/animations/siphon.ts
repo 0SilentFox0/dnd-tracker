@@ -9,9 +9,9 @@ import { animateEl, show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const LATCH_MS = IMPACT_MS.siphon;
+const LATCH_MS = ARCHETYPE_FX.siphon.impactMs;
 
 const TOTAL_MS = 2600;
 

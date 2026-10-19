@@ -7,7 +7,7 @@ import { show, type Stage, tween, wait } from "./stage";
 import { glow, sprite } from "./texture";
 
 /** Runs `fn` for every target, the i-th one `i × staggerMs` later. */
-export function perTarget(s: Stage, to: FxPoint[], staggerMs: number, fn: (target: FxPoint, i: number) => Promise<void>) {
+export function perTarget(s: Stage, to: FxPoint[], staggerMs: number | undefined, fn: (target: FxPoint, i: number) => Promise<void>) {
   return Promise.all(
     to.map(async (target, i) => {
       if (staggerMs) await wait(s, i * staggerMs);

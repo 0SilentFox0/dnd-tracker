@@ -9,9 +9,9 @@ import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const SOUL_MS = IMPACT_MS.resurrect;
+const SOUL_MS = ARCHETYPE_FX.resurrect.impactMs;
 
 const DESCEND_AT = 520;
 

@@ -8,9 +8,9 @@ import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const HIT_MS = IMPACT_MS.rust;
+const HIT_MS = ARCHETYPE_FX.rust.impactMs;
 
 const TOTAL_MS = 2600;
 

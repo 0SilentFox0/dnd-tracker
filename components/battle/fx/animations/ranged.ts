@@ -4,7 +4,7 @@ import { show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) => {
   const target = to[0];
@@ -40,7 +40,7 @@ export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) =>
     sprite(g, head, p.x, p.y, 0.45, undefined, g.globalAlpha);
   });
 
-  await tween(stage, IMPACT_MS.ranged, (v) => (k = v));
+  await tween(stage, ARCHETYPE_FX.ranged.impactMs, (v) => (k = v));
   hide();
 
   if (spec.hit) for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [60, 220], life: [0.3, 0.6], scale: [0.4, 0.03], drag: 3, gravity: 200 });

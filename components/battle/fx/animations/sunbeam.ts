@@ -8,9 +8,9 @@ import { schedule, show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const BEAM_MS = IMPACT_MS.sunbeam;
+const BEAM_MS = ARCHETYPE_FX.sunbeam.impactMs;
 
 const TOTAL_MS = 2600;
 

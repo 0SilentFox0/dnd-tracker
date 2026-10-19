@@ -7,7 +7,7 @@ import { show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Rock extends Debris {
   rot: number;
@@ -15,11 +15,9 @@ interface Rock extends Debris {
   shape: FxPoint[];
 }
 
-const FALL_MS = IMPACT_MS.meteor;
+const FALL_MS = ARCHETYPE_FX.meteor.impactMs;
 
 const AFTER_MS = 800;
-
-const STAGGER_MS = 120;
 
 const SMOKE = ["#3a2a22", "#4a3a30", "#2a201a"];
 
@@ -145,4 +143,4 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
   hideBlast();
 }
 
-export const meteor: FxAnimation = (run) => perTarget(run.stage, run.to, STAGGER_MS, (target) => strike(run, target));
+export const meteor: FxAnimation = (run) => perTarget(run.stage, run.to, ARCHETYPE_FX.meteor.staggerMs, (target) => strike(run, target));

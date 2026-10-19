@@ -11,7 +11,7 @@ import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { type FxRunner, useFxEnabled, useSpellFxPlayback } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
 import { castableOf, previewCastFx, type PreviewSpell } from "@/lib/utils/battle/fx/spell-preview";
 
@@ -54,7 +54,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
       book={book}
       unit={unit}
       target={targets.find((t) => t.id === unit.id)}
-      hit={fx.enabled && spec ? { token, delayMs: IMPACT_MS[spec.archetype] } : null}
+      hit={fx.enabled && spec ? { token, delayMs: ARCHETYPE_FX[spec.archetype].impactMs } : null}
       aurasOn={settled}
       still={!fx.motionAllowed}
     />

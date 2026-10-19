@@ -6,7 +6,7 @@ import { leafPath, taperedStroke } from "../runtime/shapes";
 import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Vine {
   pts: [FxPoint, FxPoint, FxPoint, FxPoint];
@@ -21,7 +21,7 @@ const DUST = ["#a8c070", "#7a9a48", "#8a7a4a", "#c8d890"];
 const LEAD_MS = 120;
 
 // The vines close on the target at the impact moment.
-const GROW_MS = IMPACT_MS.entangle - LEAD_MS;
+const GROW_MS = ARCHETYPE_FX.entangle.impactMs - LEAD_MS;
 
 const HOLD_MS = 650;
 
@@ -96,7 +96,7 @@ export const entangle: FxAnimation = async ({ stage, from, to, palette, spec }) 
 
   await wait(stage, LEAD_MS);
 
-  await perTarget(stage, to, 60, async (target) => {
+  await perTarget(stage, to, ARCHETYPE_FX.entangle.staggerMs, async (target) => {
     const n = spec.critical ? 8 : 6;
 
     const vines = Array.from({ length: n }, (_, i) => makeVine(target, i, n));

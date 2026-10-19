@@ -5,7 +5,7 @@ import { emit } from "../runtime/primitives";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const START_MS = 120;
 
@@ -56,7 +56,7 @@ export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
   const far = Math.max(...to.map((p) => Math.hypot(p.x - from.x, p.y - from.y)));
 
   // The wave reaches the farthest ally at the impact, then rolls on across the field.
-  const speed = Math.max(far + 30, 80) / (IMPACT_MS.healwave - START_MS);
+  const speed = Math.max(far + 30, 80) / (ARCHETYPE_FX.healwave.impactMs - START_MS);
 
   const reach = Math.max(Math.hypot(W, Hf), far + 60);
 
@@ -145,7 +145,7 @@ export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
     t = k * TOTAL_MS;
 
     // A few petals lifted off by the wave's breath.
-    if (t > IMPACT_MS.healwave && t < TOTAL_MS - 500 && chance(0.35, dt)) {
+    if (t > ARCHETYPE_FX.healwave.impactMs && t < TOTAL_MS - 500 && chance(0.35, dt)) {
       const f = pick(flowers);
 
       if (radius() > f.dist) emit(stage, f, { tints: PETALS.slice(0, 3), speed: [10, 30], angle: [-Math.PI * 0.8, -Math.PI * 0.2], life: [0.6, 1], scale: [0.14, 0.05], gravity: -10, additive: false, alpha: 0.9 });

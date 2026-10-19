@@ -4,7 +4,7 @@ import { playSheet, SHEETS } from "../runtime/sprites";
 import { animateEl, show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 // The swing lands this long after the cut starts.
 const CUT_LEAD_MS = 40;
@@ -20,7 +20,7 @@ export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palet
 
   const at = spec.hit ? target : { x: target.x + 30, y: target.y };
 
-  await wait(stage, IMPACT_MS.melee - CUT_LEAD_MS);
+  await wait(stage, ARCHETYPE_FX.melee.impactMs - CUT_LEAD_MS);
 
   const cuts = (spec.critical ? [-0.6, 2.4] : [-0.6]).map(async (rot, i) => {
     await wait(stage, i * 90);

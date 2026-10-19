@@ -8,9 +8,9 @@ import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const ARRIVE_MS = IMPACT_MS.healword - 120;
+const ARRIVE_MS = ARCHETYPE_FX.healword.impactMs - 120;
 
 const TOTAL_MS = 2300;
 
@@ -47,7 +47,7 @@ export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const blades: Blade[] = Array.from({ length: Math.round(w / 5) }, (_, n) => ({ x: target.x - w + ((n + 0.5) / Math.round(w / 5)) * w * 2 + rand(-2, 2), len: rand(9, 17), lean: rand(-0.3, 0.3), born: ARRIVE_MS + rand(0, 260) }));
 
-    const grain: Grain[] = Array.from({ length: 5 }, (_, n) => ({ y: target.y - h * 0.6 + (n / 4) * h * 1.2, amp: rand(1.5, 3), phase: rand(0, 6), born: IMPACT_MS.healword + n * 60 }));
+    const grain: Grain[] = Array.from({ length: 5 }, (_, n) => ({ y: target.y - h * 0.6 + (n / 4) * h * 1.2, amp: rand(1.5, 3), phase: rand(0, 6), born: ARCHETYPE_FX.healword.impactMs + n * 60 }));
 
     let t = 0;
 
@@ -147,7 +147,7 @@ export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
       for (let n = 0; n < 16; n++) emit(stage, { x: target.x + rand(-w, w), y: target.y - h - rand(4, 18) }, { tints: ["#d8fff0", "#a8f0c8"], speed: [70, 110], angle: [Math.PI * 0.48, Math.PI * 0.52], life: [0.3, 0.45], scale: [0.14, 0.08], gravity: 200 });
     });
 
-    schedule(stage, IMPACT_MS.healword, () => {
+    schedule(stage, ARCHETYPE_FX.healword.impactMs, () => {
       if (el) void animateEl(stage, el, SOOTHE, { duration: 1100, easing: "ease-out" });
     });
 
@@ -160,6 +160,6 @@ export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
         emit(stage, p, { tints: MOTES, speed: [5, 20], life: [0.3, 0.5], scale: [0.18, 0.03] });
       }
 
-      if (t > IMPACT_MS.healword && t < TOTAL_MS - 600 && chance(0.4, dt)) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
+      if (t > ARCHETYPE_FX.healword.impactMs && t < TOTAL_MS - 600 && chance(0.4, dt)) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
     }).then(() => void hide());
   });

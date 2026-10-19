@@ -7,11 +7,11 @@ import { dropPath } from "../runtime/shapes";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SEED_MS = 300;
 
-const BIND_MS = IMPACT_MS.thornvines;
+const BIND_MS = ARCHETYPE_FX.thornvines.impactMs;
 
 const TOTAL_MS = 2600;
 

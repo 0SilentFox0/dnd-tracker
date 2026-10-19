@@ -8,7 +8,7 @@ import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const WHIRL_MS = 1300;
 
@@ -64,7 +64,7 @@ async function gust(stage: Stage, from: FxPoint, to: FxPoint) {
     }
   });
 
-  await tween(stage, IMPACT_MS.haste, (v) => (k = v));
+  await tween(stage, ARCHETYPE_FX.haste.impactMs, (v) => (k = v));
   hide();
 }
 

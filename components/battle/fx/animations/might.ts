@@ -10,9 +10,9 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const FLARE_MS = IMPACT_MS.might;
+const FLARE_MS = ARCHETYPE_FX.might.impactMs;
 
 const SWING_MS = 360;
 

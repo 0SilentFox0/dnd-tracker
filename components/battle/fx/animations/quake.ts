@@ -5,7 +5,7 @@ import { perTarget } from "../runtime/recipes";
 import { show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Crack {
   pts: FxPoint[];
@@ -39,7 +39,7 @@ function makeCrack(angle: number): Crack {
 }
 
 export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
-  await perTarget(stage, to, 50, async (target, ti) => {
+  await perTarget(stage, to, ARCHETYPE_FX.quake.staggerMs, async (target, ti) => {
     const base = { x: target.x, y: target.y + 20 };
 
     const n = spec.critical ? 4 : 3 + (ti % 2);
@@ -52,7 +52,7 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
 
     const hide = show(stage, (g) => {
       // The cracks finish growing at the impact moment.
-      const grow = Math.min(1, (k * QUAKE_MS) / IMPACT_MS.quake);
+      const grow = Math.min(1, (k * QUAKE_MS) / ARCHETYPE_FX.quake.impactMs);
 
       g.globalAlpha = fadeOut(k, 0.75);
       g.globalCompositeOperation = "source-over";

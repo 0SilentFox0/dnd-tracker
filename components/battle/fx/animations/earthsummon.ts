@@ -8,11 +8,11 @@ import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const BURST_MS = 300;
 
-const ASSEMBLE_MS = IMPACT_MS.earthsummon;
+const ASSEMBLE_MS = ARCHETYPE_FX.earthsummon.impactMs;
 
 const LOCKED_MS = 1350;
 

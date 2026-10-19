@@ -1,4 +1,3 @@
-import type { FxAuraKind } from "./aura";
 import { aurasOf } from "./aura";
 import { frameKindOf, type FxFrameKind } from "./frame-kind";
 import { impactFor } from "./impact";
@@ -6,7 +5,7 @@ import { mapAction } from "./map-action";
 import { previewParticipant } from "./preview-participant";
 import { PREVIEW_UNITS, type PreviewUnitId } from "./preview-units";
 import { effectLabel, targetingLabel } from "./spell-labels";
-import type { FxSpec } from "./types";
+import type { FxAuraKind, FxSpec } from "./types";
 
 import type { LibrarySpell } from "@/data/library/types";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";

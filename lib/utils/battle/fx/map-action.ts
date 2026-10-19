@@ -1,5 +1,5 @@
 import { elementOf } from "./element";
-import { SPELL_FX_OVERRIDES } from "./overrides";
+import { spellFx } from "./spells";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
@@ -35,9 +35,9 @@ function spellRules(action: BattleAction): { archetype: FxArchetype; element: Fx
 function spellArchetype(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
   const computed = spellRules(action);
 
-  const override = SPELL_FX_OVERRIDES[action.actionDetails.spellName ?? ""];
+  const signature = spellFx(action.actionDetails.spellName);
 
-  return { ...computed, ...override };
+  return { archetype: signature?.archetype ?? computed.archetype, element: signature?.element ?? computed.element };
 }
 
 function primary(action: BattleAction): FxSpec | null {

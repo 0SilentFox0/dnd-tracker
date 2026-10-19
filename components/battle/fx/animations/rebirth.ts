@@ -7,13 +7,13 @@ import { leafPath, taperedStroke } from "../runtime/shapes";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SEED_MS = 300;
 
 const BLOOM_MS = 850;
 
-const RISE_MS = IMPACT_MS.rebirth;
+const RISE_MS = ARCHETYPE_FX.rebirth.impactMs;
 
 const TOTAL_MS = 2700;
 
@@ -73,7 +73,7 @@ function blossom(g: CanvasRenderingContext2D, at: FxPoint, size: number, color: 
 }
 
 export const rebirth: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 120, async (target, i) => {
+  perTarget(stage, to, ARCHETYPE_FX.rebirth.staggerMs, async (target, i) => {
     const el = targetEls[i];
 
     const { w, h } = halfSize(el);

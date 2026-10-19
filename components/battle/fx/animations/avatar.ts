@@ -7,9 +7,9 @@ import { schedule, show, tween } from "../runtime/stage";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const FORM_MS = IMPACT_MS.avatar;
+const FORM_MS = ARCHETYPE_FX.avatar.impactMs;
 
 const TOTAL_MS = 2700;
 

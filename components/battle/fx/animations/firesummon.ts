@@ -10,11 +10,11 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ERUPT_MS = 320;
 
-const FORM_MS = IMPACT_MS.firesummon;
+const FORM_MS = ARCHETYPE_FX.firesummon.impactMs;
 
 const TOTAL_MS = 2600;
 

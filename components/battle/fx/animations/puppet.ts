@@ -9,9 +9,9 @@ import { animateEl, schedule, show, type Stage, tween, wait } from "../runtime/s
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const BAR_MS = IMPACT_MS.puppet;
+const BAR_MS = ARCHETYPE_FX.puppet.impactMs;
 
 const DROP_MS = 260;
 

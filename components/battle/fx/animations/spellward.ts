@@ -8,9 +8,9 @@ import { show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const FORM_MS = IMPACT_MS.spellward;
+const FORM_MS = ARCHETYPE_FX.spellward.impactMs;
 
 const TOTAL_MS = 2500;
 

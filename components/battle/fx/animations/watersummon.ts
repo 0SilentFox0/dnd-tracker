@@ -10,11 +10,11 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SPOUT_MS = 280;
 
-const FREEZE_MS = IMPACT_MS.watersummon;
+const FREEZE_MS = ARCHETYPE_FX.watersummon.impactMs;
 
 const TOTAL_MS = 2600;
 

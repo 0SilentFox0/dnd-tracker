@@ -8,13 +8,13 @@ import { show, tween } from "../runtime/stage";
 import { streakBurst } from "../runtime/streaks";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const TOTAL_MS = 2500;
 
 const FLIGHT_MS = 230;
 
-const VOLLEY = [IMPACT_MS.deflect - FLIGHT_MS, 780, 960, 1180, 1420];
+const VOLLEY = [ARCHETYPE_FX.deflect.impactMs - FLIGHT_MS, 780, 960, 1180, 1420];
 
 const SPARKS = ["#ffffff", "#fff3c0", "#ffe39a"];
 

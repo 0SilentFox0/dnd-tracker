@@ -3,7 +3,7 @@ import { perTarget } from "../runtime/recipes";
 import { schedule, show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 export const buff: FxAnimation = ({ stage, to, palette }) =>
   perTarget(stage, to, 0, async (target) => {
@@ -19,7 +19,7 @@ export const buff: FxAnimation = ({ stage, to, palette }) =>
       g.stroke();
     });
 
-    const inward = tween(stage, IMPACT_MS.buff, (v) => (k = v)).then(hide);
+    const inward = tween(stage, ARCHETYPE_FX.buff.impactMs, (v) => (k = v)).then(hide);
 
     for (let i = 0; i < 24; i++) {
       schedule(stage, 300 + (i / 24) * 500, () => emit(stage, target, { tints: palette.tints, speed: [20, 60], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.7, 1.2], scale: [0.4, 0.05], spread: 26, gravity: -40 }));

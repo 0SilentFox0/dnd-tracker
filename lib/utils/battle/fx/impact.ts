@@ -1,5 +1,5 @@
-import { IMPACT_MS } from "./timing";
-import type { FxArchetype, FxElement, FxSpec } from "./types";
+import { ARCHETYPE_FX } from "./archetypes";
+import type { FxElement, FxSpec } from "./types";
 
 export interface FxImpact {
   element: FxElement;
@@ -8,16 +8,15 @@ export interface FxImpact {
   attack?: "melee" | "ranged";
 }
 
-// these never deal damage themselves, so they must not borrow a damage frame
-const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "siphon", "rust", "whispers", "thorns", "raincloud", "blindfold", "puppet", "summon", "firesummon", "watersummon", "earthsummon", "airsummon", "phoenix", "avatar", "forestspirit", "vampire"]);
-
-const HEALS = new Set<FxArchetype>(["heal", "sunbeam", "resurrect", "healword", "healwave", "rebirth"]);
-
 /** `spec` is the first FX of the last action (`mapAction(action)[0]`), mapped once for all rows. */
 export function impactFor(spec: FxSpec | undefined, participantId: string): FxImpact | null {
-  if (!spec || !spec.hit || !spec.targetIds.includes(participantId) || NO_IMPACT.has(spec.archetype)) return null;
+  if (!spec || !spec.hit || !spec.targetIds.includes(participantId)) return null;
 
-  const impact: FxImpact = { element: spec.element, kind: HEALS.has(spec.archetype) ? "heal" : "damage", delayMs: IMPACT_MS[spec.archetype] };
+  const { impact: kind, impactMs } = ARCHETYPE_FX[spec.archetype];
+
+  if (kind === "none") return null;
+
+  const impact: FxImpact = { element: spec.element, kind, delayMs: impactMs };
 
   if (spec.archetype === "melee" || spec.archetype === "ranged") impact.attack = spec.archetype;
 

@@ -5,7 +5,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { cn } from "@/lib/utils";
-import { type FxArchetype, type FxElement, type FxSpec, IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX,type FxArchetype, type FxElement, type FxSpec } from "@/lib/utils/battle/fx";
 
 interface LabUnit {
   id: string;
@@ -76,11 +76,11 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
 
       const started = performance.now();
 
-      hitTimer.current = window.setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), IMPACT_MS[archetype]);
+      hitTimer.current = window.setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), ARCHETYPE_FX[archetype].impactMs);
 
       await playFx(layer, spec, arena);
       window.clearTimeout(hitTimer.current);
-      setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${IMPACT_MS[archetype]} мс)`);
+      setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${ARCHETYPE_FX[archetype].impactMs} мс)`);
     } catch (e) {
       setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`);
     } finally {

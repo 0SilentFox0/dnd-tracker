@@ -8,7 +8,7 @@ import { ARCHETYPE_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
 import { PreviewUnitRow } from "@/components/battle/fx/preview/PreviewUnitRow";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
 import type { SpellFxPreview } from "@/lib/utils/battle/fx/spell-preview";
 
@@ -101,7 +101,7 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
           key={u.id}
           unit={u}
           target={shown?.spell.targets.find((t) => t.id === u.id)}
-          hit={shown?.spell.spec ? { token: shown.token, delayMs: IMPACT_MS[shown.spell.spec.archetype] } : null}
+          hit={shown?.spell.spec ? { token: shown.token, delayMs: ARCHETYPE_FX[shown.spell.spec.archetype].impactMs } : null}
           aurasOn={aurasOn}
         />
       ))}

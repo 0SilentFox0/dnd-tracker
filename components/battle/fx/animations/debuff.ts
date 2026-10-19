@@ -4,13 +4,13 @@ import { playSheet, SHEETS } from "../runtime/sprites";
 import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 export const debuff: FxAnimation = ({ stage, from, to, palette }) => {
   const smoke = palette.sprite === "darkBolt" ? ["#3a0a5c", "#5a1a8a"] : palette.tints.slice(-2);
 
   return perTarget(stage, to, 0, async (target) => {
-    await shoot(stage, from, target, IMPACT_MS.debuff, palette.core, palette.tints, 18);
+    await shoot(stage, from, target, ARCHETYPE_FX.debuff.impactMs, palette.core, palette.tints, 18);
 
     let k = 0;
 

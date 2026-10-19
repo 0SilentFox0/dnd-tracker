@@ -9,9 +9,9 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const CRASH_MS = IMPACT_MS.holyword;
+const CRASH_MS = ARCHETYPE_FX.holyword.impactMs;
 
 const TOTAL_MS = 2700;
 

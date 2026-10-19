@@ -9,9 +9,9 @@ import { animateEl, schedule, show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const WASH_AT = IMPACT_MS.cleanse;
+const WASH_AT = ARCHETYPE_FX.cleanse.impactMs;
 
 const TOTAL_MS = 2700;
 

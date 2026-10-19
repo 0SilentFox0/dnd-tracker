@@ -9,9 +9,9 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const SMITE_MS = IMPACT_MS.retribution;
+const SMITE_MS = ARCHETYPE_FX.retribution.impactMs;
 
 const FORM_AT = 320;
 

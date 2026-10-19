@@ -9,9 +9,9 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const STRIKE_MS = IMPACT_MS.airsummon;
+const STRIKE_MS = ARCHETYPE_FX.airsummon.impactMs;
 
 const CALM_MS = 1500;
 

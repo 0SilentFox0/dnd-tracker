@@ -1,8 +1,8 @@
 import { elementOf } from "./element";
+import { spellFx } from "./spells";
+import type { FxAuraKind } from "./types";
 
 import type { ActiveEffect } from "@/types/battle";
-
-export type FxAuraKind = "stun" | "charm" | "rage" | "bind" | "plague" | "burning" | "frost" | "decay" | "bleeding" | "static" | "marked" | "curse" | "regen" | "shield" | "blessing" | "frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste" | "shackles" | "stoneskin" | "lifedome" | "sunglow" | "spellward" | "deflect" | "might" | "holyweapon" | "sapped" | "rust" | "dizzy" | "thorncrown" | "raincloud" | "strings" | "vines" | "stag";
 
 export const MAX_AURAS = 2;
 
@@ -21,32 +21,6 @@ const DOT_AURA: Record<string, FxAuraKind> = {
   physical: "bleeding",
   lightning: "static",
   thunder: "static",
-};
-
-export const AURA_BY_NAME: Record<string, FxAuraKind> = {
-  "Корені": "roots",
-  "Сплутування": "roots",
-  "Сліпота": "blind",
-  "Вампіризм": "bloodlust",
-  "Поспіх": "haste",
-  "Сповільнення": "shackles",
-  "Ослаблення": "sapped",
-  "Немічність": "rust",
-  "Розсіяність": "dizzy",
-  "Страждання": "thorncrown",
-  "Смуток": "raincloud",
-  "Ляльковод": "strings",
-  "Кам'яна шкіра": "stoneskin",
-  "Землетрус": "dust",
-  "Рій ос": "stings",
-  "Регенерація": "lifedome",
-  "Вічне світло": "sunglow",
-  "Магічний імунітет": "spellward",
-  "Ухилення": "deflect",
-  "Праведна міць": "might",
-  "Божественна сила": "holyweapon",
-  "Колючі лози": "vines",
-  "Дух лісу": "stag",
 };
 
 const SHIELD_EFFECTS = new Set(["armor", "ac", "guard"]);
@@ -78,7 +52,7 @@ const isShield = (effect: ActiveEffect) =>
 export function auraOf(effect: ActiveEffect): FxAuraKind | null {
   if (effect.permanent || effect.zone || effect.duration < 1) return null;
 
-  const named = AURA_BY_NAME[effect.name];
+  const named = spellFx(effect.name)?.aura;
 
   if (named) return named;
 

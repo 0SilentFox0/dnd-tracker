@@ -9,9 +9,9 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const SNAP_MS = IMPACT_MS.stoneskin;
+const SNAP_MS = ARCHETYPE_FX.stoneskin.impactMs;
 
 const TOTAL_MS = 2300;
 

@@ -10,7 +10,7 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const TOTAL_MS = 2600;
 
@@ -44,7 +44,7 @@ async function drift(stage: Stage, from: FxPoint, to: FxPoint) {
     sprite(g, glow("#0c0812"), pos.x, pos.y, 0.6, undefined, 0.95, false);
   });
 
-  await tween(stage, IMPACT_MS.slow, (k) => {
+  await tween(stage, ARCHETYPE_FX.slow.impactMs, (k) => {
     pos = bezier(from, ctrl, to, easeOutCubic(k));
     emit(stage, pos, { tints: SMOKE, speed: [4, 16], life: [0.6, 1], scale: [0.5, 0.9], spread: 5, additive: false, alpha: 0.55, gravity: 20 });
   });
@@ -82,12 +82,12 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
     // The row is hauled back towards the darkness in heavy jerks and only then let go.
     const drag = motionPath([
       { at: 0, x: 0, y: 0 },
-      { at: CLAMP_MS - IMPACT_MS.slow + 160, x: 0, y: 0 },
-      { at: CLAMP_MS - IMPACT_MS.slow + 300, x: dir * 8, y: 2, rot: dir * -2 },
-      { at: CLAMP_MS - IMPACT_MS.slow + 520, x: dir * 5, y: 1, rot: dir * 1 },
-      { at: CLAMP_MS - IMPACT_MS.slow + 820, x: dir * 13, y: 3, rot: dir * -1.5 },
-      { at: FADE_MS - IMPACT_MS.slow, x: dir * 14, y: 3 },
-      { at: TOTAL_MS - IMPACT_MS.slow, x: 0, y: 0 },
+      { at: CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 160, x: 0, y: 0 },
+      { at: CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 300, x: dir * 8, y: 2, rot: dir * -2 },
+      { at: CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 520, x: dir * 5, y: 1, rot: dir * 1 },
+      { at: CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 820, x: dir * 13, y: 3, rot: dir * -1.5 },
+      { at: FADE_MS - ARCHETYPE_FX.slow.impactMs, x: dir * 14, y: 3 },
+      { at: TOTAL_MS - ARCHETYPE_FX.slow.impactMs, x: 0, y: 0 },
     ]);
 
     const cuffs = [
@@ -107,9 +107,9 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
     const hide = show(stage, (g) => {
       const m = drag.sample(t);
 
-      const fade = 1 - clamp01((t - (FADE_MS - IMPACT_MS.slow)) / 400);
+      const fade = 1 - clamp01((t - (FADE_MS - ARCHETYPE_FX.slow.impactMs)) / 400);
 
-      const rise = envelope(clamp01(t / (TOTAL_MS - IMPACT_MS.slow)), 0.12, 0.2);
+      const rise = envelope(clamp01(t / (TOTAL_MS - ARCHETYPE_FX.slow.impactMs)), 0.12, 0.2);
 
       spritePx(g, pool, target.x + m.x, target.y + h, w * 2.8, h * 1.3, rise * 0.9, false);
 
@@ -136,9 +136,9 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
       }
 
       // Chains lash out of two shadow rifts on the far side and lock iron cuffs onto the row.
-      const reach = clamp01((t - (CHAIN_MS - IMPACT_MS.slow)) / (CLAMP_MS - CHAIN_MS));
+      const reach = clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs)) / (CLAMP_MS - CHAIN_MS));
 
-      const open = envelope(clamp01((t - (CHAIN_MS - IMPACT_MS.slow) + 200) / (TOTAL_MS - CHAIN_MS)), 0.12, 0.25);
+      const open = envelope(clamp01((t - (CHAIN_MS - ARCHETYPE_FX.slow.impactMs) + 200) / (TOTAL_MS - CHAIN_MS)), 0.12, 0.25);
 
       if (open > 0) {
         spritePx(g, pool, rift.x, rift.y, 44, 64, open, false);
@@ -160,7 +160,7 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
         cuffs.forEach((cuff, n) => {
           const end = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
 
-          const tight = clamp01((t - (CLAMP_MS - IMPACT_MS.slow) - 120) / 200);
+          const tight = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs) - 120) / 200);
 
           const start = { x: rift.x, y: rift.y + (n ? 8 : -8) };
 
@@ -169,7 +169,7 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
           for (const l of chainPoints(start, end, 18 * (1 - tight) + 2, easeOutCubic(reach))) chainLink(g, l.x, l.y, l.angle, l.flat, 0.9, "#9a96aa");
 
           if (reach >= 1) {
-            const snap = clamp01((t - (CLAMP_MS - IMPACT_MS.slow)) / 120);
+            const snap = clamp01((t - (CLAMP_MS - ARCHETYPE_FX.slow.impactMs)) / 120);
 
             g.globalAlpha = fade;
             shackle(g, end.x, end.y, cuff.r * (1.5 - 0.5 * snap), Math.PI / 2 + dir * 0.25);
@@ -181,7 +181,7 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
     });
 
     for (const [n, cuff] of cuffs.entries()) {
-      schedule(stage, CLAMP_MS - IMPACT_MS.slow + n * 40, () => {
+      schedule(stage, CLAMP_MS - ARCHETYPE_FX.slow.impactMs + n * 40, () => {
         const m = drag.sample(t);
 
         const at = { x: target.x + m.x + cuff.x, y: target.y + m.y + cuff.y };
@@ -198,15 +198,15 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
         ])
       : wait(stage, 0);
 
-    const run = tween(stage, TOTAL_MS - IMPACT_MS.slow, (k, dt) => {
-      t = k * (TOTAL_MS - IMPACT_MS.slow);
+    const run = tween(stage, TOTAL_MS - ARCHETYPE_FX.slow.impactMs, (k, dt) => {
+      t = k * (TOTAL_MS - ARCHETYPE_FX.slow.impactMs);
 
       const m = drag.sample(t);
 
       // Heavy smoke sinking off the row, and dust where its feet scrape as it is hauled back.
-      if (t < FADE_MS - IMPACT_MS.slow && chance(0.5, dt)) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
+      if (t < FADE_MS - ARCHETYPE_FX.slow.impactMs && chance(0.5, dt)) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
 
-      if (t > CLAMP_MS - IMPACT_MS.slow + 140 && t < 1400 && chance(0.5, dt)) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
+      if (t > CLAMP_MS - ARCHETYPE_FX.slow.impactMs + 140 && t < 1400 && chance(0.5, dt)) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
     }).then(hide);
 
     await Promise.all([run, heavy]);

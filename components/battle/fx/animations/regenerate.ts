@@ -8,7 +8,7 @@ import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const DOME_MS = 2350;
 
@@ -47,7 +47,7 @@ function beatAt(t: number) {
 
 export const regenerate: FxAnimation = ({ stage, from, to, targetEls, palette }) =>
   perTarget(stage, to, 0, async (target, i) => {
-    await shoot(stage, from, target, IMPACT_MS.regenerate, palette.core, palette.tints);
+    await shoot(stage, from, target, ARCHETYPE_FX.regenerate.impactMs, palette.core, palette.tints);
 
     const el = targetEls[i];
 

@@ -7,9 +7,9 @@ import { animateEl, show, tween, wait } from "../runtime/stage";
 import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const ARRIVE_MS = IMPACT_MS.whispers;
+const ARRIVE_MS = ARCHETYPE_FX.whispers.impactMs;
 
 const TOTAL_MS = 2500;
 

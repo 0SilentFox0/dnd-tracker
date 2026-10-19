@@ -10,11 +10,11 @@ import { streakBurst } from "../runtime/streaks";
 import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const MOON_MS = 420;
 
-const STRIKE_MS = IMPACT_MS.moonbeam;
+const STRIKE_MS = ARCHETYPE_FX.moonbeam.impactMs;
 
 const TOTAL_MS = 2500;
 

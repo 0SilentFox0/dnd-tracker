@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
-import { AURA_BY_NAME } from "@/lib/utils/battle/fx/aura";
-import { SPELL_FX_OVERRIDES } from "@/lib/utils/battle/fx/overrides";
+import { SPELL_FX, spellFx } from "@/lib/utils/battle/fx/spells";
 
 // Signatures are keyed by name, so a renamed library spell would silently fall back to the generic look.
-describe("FX maps keyed by spell name", () => {
-  const names = new Set(SPELLS.map((s) => s.name));
+describe("SPELL_FX keyed by spell name", () => {
+  it("every key is a library spell", () => {
+    const names = new Set(SPELLS.map((s) => s.name));
 
-  it("every SPELL_FX_OVERRIDES key is a library spell", () => {
-    expect(Object.keys(SPELL_FX_OVERRIDES).filter((n) => !names.has(n))).toEqual([]);
+    expect(Object.keys(SPELL_FX).filter((n) => !names.has(n))).toEqual([]);
   });
 
-  it("every AURA_BY_NAME key is a library spell", () => {
-    expect(Object.keys(AURA_BY_NAME).filter((n) => !names.has(n))).toEqual([]);
+  it("names of Object.prototype members are not signatures", () => {
+    expect(spellFx("constructor")).toBeUndefined();
+    expect(spellFx(undefined)).toBeUndefined();
   });
 });

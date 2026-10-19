@@ -6,9 +6,9 @@ import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const GRAB_MS = IMPACT_MS.netherhands;
+const GRAB_MS = ARCHETYPE_FX.netherhands.impactMs;
 
 const TOTAL_MS = 2700;
 

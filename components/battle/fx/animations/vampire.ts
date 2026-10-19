@@ -8,13 +8,13 @@ import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FLY_MS = 480;
 
 const FANGS_MS = 620;
 
-const DRINK_MS = IMPACT_MS.vampire;
+const DRINK_MS = ARCHETYPE_FX.vampire.impactMs;
 
 const GULPS = [1250, 1750];
 

@@ -8,9 +8,9 @@ import { animateEl, show, tween, wait } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
-import { IMPACT_MS } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-const ARRIVE_MS = IMPACT_MS.blindfold;
+const ARRIVE_MS = ARCHETYPE_FX.blindfold.impactMs;
 
 const WRAP_MS = 420;
 
