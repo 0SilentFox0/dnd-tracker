@@ -1,6 +1,20 @@
 import type { LibraryUnit } from "../types";
 import { alliesAura, armorBreak, bravery, buffAlly, construct, debuff, disable, elementResist, falloff, fearAura, healAlly, magicResist, noRetaliation, oncePerBattleAoe, restoreSlotOnce, retaliateAura, unlimitedRetaliation, wheelOfFortune } from "../unit-abilities";
 
+import type { Ability } from "@/lib/utils/abilities/schema";
+
+export const onslaught: Ability = {
+  id: "unit-onslaught",
+  name: "Натиск",
+  description: "Бонусна дія: +3 до ініціативи і +2 до атаки на 2 раунди. Перезарядка 3 раунди.",
+  trigger: { event: "bonusAction" },
+  limits: { cooldownRounds: 3 },
+  effects: [
+    { kind: "modifyStat", stat: "initiative", flat: 3, duration: { rounds: 2 }, target: "self" },
+    { kind: "modifyStat", stat: "attackBonus", flat: 2, duration: { rounds: 2 }, target: "self" },
+  ],
+};
+
 const base = { raceKey: "mages" } as const;
 
 const spellSuppression = () => alliesAura("Аура пригнічення магії", { kind: "flag", flag: "resistance", damageType: "spell", percent: 20 });
@@ -23,7 +37,7 @@ export const MAGE_UNITS: LibraryUnit[] = [
   { ...base, key: "mages-genie-vizier", gridSize: 2, name: "Джин-візир", tier: 5, role: "alt", hp: 117, ac: 16, attackBonus: 8, initiative: 12, flying: true, attacks: [{ name: "Магічний удар", type: "melee", dice: "2d10+9", damageType: "force" }], abilities: [wheelOfFortune()] },
   { ...base, key: "mages-rakshasa-princess", gridSize: 2, name: "Принцеса ракшасів", tier: 6, role: "base", hp: 148, ac: 16, attackBonus: 7, initiative: 9, attacks: [{ name: "Закривлені клинки", type: "melee", dice: "3d8+13", damageType: "slashing", targets: 2 }], abilities: [falloff("Закривлені клинки"), fearAura()] },
   { ...base, key: "mages-rakshasa-raja", gridSize: 2, name: "Раджа ракшасів", tier: 6, role: "upgrade", hp: 165, ac: 17, attackBonus: 8, initiative: 8, attacks: [{ name: "Закривлені клинки", type: "melee", dice: "3d8+15", damageType: "slashing", targets: 2 }], abilities: [falloff("Закривлені клинки"), fearAura(), noRetaliation()] },
-  { ...base, key: "mages-rakshasa-kshatriya", gridSize: 2, name: "Ракшас-кшатрій", tier: 6, role: "alt", hp: 165, ac: 17, attackBonus: 8, initiative: 8, attacks: [{ name: "Вихор клинків", type: "melee", dice: "3d8+15", damageType: "slashing", targets: 3 }], abilities: [falloff("Вихор клинків")] },
+  { ...base, key: "mages-rakshasa-kshatriya", gridSize: 2, name: "Ракшас-кшатрій", tier: 6, role: "alt", hp: 165, ac: 17, attackBonus: 8, initiative: 8, attacks: [{ name: "Вихор клинків", type: "melee", dice: "3d8+15", damageType: "slashing", targets: 3 }], abilities: [falloff("Вихор клинків"), onslaught] },
   { ...base, key: "mages-colossus", gridSize: 2, name: "Колос", tier: 7, role: "base", hp: 220, ac: 16, attackBonus: 8, initiative: 10, attacks: [{ name: "Кулак", type: "melee", dice: "4d10+16", damageType: "bludgeoning" }], abilities: [bravery(), oncePerBattleAoe("Землетрус", { percentOfAttack: 50, targets: "all", stunChance: 25 })] },
   { ...base, key: "mages-titan", gridSize: 2, name: "Титан", tier: 7, role: "upgrade", hp: 250, ac: 17, attackBonus: 9, initiative: 10, attacks: [{ name: "Блискавка", type: "ranged", dice: "4d10+20", damageType: "lightning" }], abilities: [bravery()] },
   { ...base, key: "mages-storm-lord", gridSize: 2, name: "Повелитель бурі", tier: 7, role: "alt", hp: 240, ac: 16, attackBonus: 9, initiative: 10, attacks: [{ name: "Блискавка", type: "ranged", dice: "4d10+18", damageType: "lightning" }], abilities: [oncePerBattleAoe("Виклик блискавки", { percentOfAttack: 50, targets: 3, stunChance: 25, damageType: "lightning" })] },

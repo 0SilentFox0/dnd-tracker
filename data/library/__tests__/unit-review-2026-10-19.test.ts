@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { UNITS } from "@/data/library/units";
+import { onslaught } from "@/data/library/units/mages";
+import { AbilitySchema } from "@/lib/utils/abilities/schema";
 
 const unit = (key: string) => {
   const u = UNITS.find((x) => x.key === key);
@@ -33,5 +35,7 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
     for (const key of ["necromancers-skeleton", "necromancers-skeleton-archer", "necromancers-skeleton-warrior"]) expect(abilityNames(key)).not.toContain("Кістяне тіло");
     expect(abilityNames("necromancers-skeleton-warrior")).toContain("Великий щит");
     expect(abilityNames("humans-defender-of-faith")).toEqual(["Подвійна відсіч"]);
+    expect(abilityNames("mages-rakshasa-kshatriya")).toContain("Натиск");
+    expect(AbilitySchema.safeParse(onslaught).success).toBe(true);
   });
 });
