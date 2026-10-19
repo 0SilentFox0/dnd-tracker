@@ -40,7 +40,7 @@ export const BAKED_STATS = [
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
 
-export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "morale", "actionsPerTurn"] as const;
+export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "speed", "morale", "actionsPerTurn"] as const;
 
 export const CONDITION_KEYS = [
   "no_bonus_action",

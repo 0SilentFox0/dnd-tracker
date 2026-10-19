@@ -1,4 +1,4 @@
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { canStartAttack, pickAttack } from "@/lib/utils/battle/grid";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -50,7 +50,7 @@ export function participantAttackIntent({ battle, turn: { current, isMyTurn }, a
 
   const target = order.find((p) => p.basicInfo.id === targetId);
 
-  if (!target || target.basicInfo.side === current.basicInfo.side || !isActive(target)) return null;
+  if (!target || target.basicInfo.side === current.basicInfo.side || !isTargetable(target)) return null;
 
   const { attack } = pickAttack(battle.map ?? null, order, current, current.battleData.attacks, target);
 

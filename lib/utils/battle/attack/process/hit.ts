@@ -2,11 +2,17 @@ import type { AttackRollResult } from "../../types/attack";
 import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
+import { fireWaveVictims } from "./fire-wave";
 import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
+import { castHitSpell } from "./hit-spell";
 
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
 
 export interface ResolveHitParams {
@@ -23,6 +29,8 @@ export interface ResolveHitParams {
   bonusLabel?: string;
   offTurn?: boolean;
   obstacle?: boolean;
+  hitSpells?: ReadonlyMap<string, CastableSpell>;
+  battleId: string;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -70,9 +78,47 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
   });
 
+  applyFireWave(flow, attackerId, targetId, hitDamage.totalFinalDamage);
+
+  if (p.hitSpells && p.hitSpells.size > 0 && isActive(getP(flow, targetId))) {
+    const cast = castHitSpell({
+      attacker: getP(flow, attackerId),
+      targetId,
+      participants: flow.ps,
+      spells: p.hitSpells,
+      round: p.currentRound,
+      battleId: p.battleId,
+      attackKind: attackKindOf(attack.type),
+      rng: flow.ctx.rng,
+    });
+
+    flow.ps = cast.participants;
+    flow.messages.push(...cast.messages);
+  }
+
   const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
 
   if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 
   return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
+}
+
+function applyFireWave(flow: AttackFlow, attackerId: string, targetId: string, hitDamage: number): void {
+  for (const f of findFlags(flow.ps, attackerId, "fireWave")) {
+    const amount = Math.floor((hitDamage * f.percent) / 100);
+
+    if (amount <= 0) continue;
+
+    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
+
+    const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire" });
+
+    flow.ps = r.participants;
+
+    const parts = r.results.map(({ targetId: id, dealt }) => `${getP(flow, id).basicInfo.name} (−${dealt})`);
+
+    for (const d of r.downed) settleDowned(flow, d.victimId, attackerId);
+
+    if (parts.length > 0) flow.messages.push(`🔥 Вогняна хвиля: ${parts.join(", ")}`);
+  }
 }

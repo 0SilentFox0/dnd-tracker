@@ -2,6 +2,7 @@ import { cellKey, footprint, neighbors } from "./geometry";
 import { fits, occupiedBy, sizeOf } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
+import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { controlledByDm } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -9,7 +10,7 @@ import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/batt
 export function movementBudget(p: BattleParticipant): number {
   if (hasEffectMarker(p, "immobilized")) return 0;
 
-  return Math.max(0, Math.floor(p.combatStats.speed / CELL_FEET));
+  return Math.max(0, Math.floor(statWithModifiers([p], p.basicInfo.id, "speed", p.combatStats.speed) / CELL_FEET));
 }
 
 export function remainingMovement(p: BattleParticipant): number {

@@ -3,6 +3,7 @@ import { finishTurnEffects } from "./end-turn-cleanup";
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
+import { resetTurnState } from "./turn-state";
 
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -71,6 +72,8 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
 
   const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isActive);
 
+  if (roundIsOver) order = order.map((p) => (p.battleData.airborne && p.actionFlags.hasExtraTurn ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: false } } : p));
+
   const extraIndex = roundIsOver ? order.findIndex((p) => isActive(p) && p.actionFlags.hasExtraTurn) : -1;
 
   if (extraIndex >= 0) {
@@ -83,10 +86,9 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
             battleData: {
-              ...p.battleData,
+              ...resetTurnState(p),
               extraTurnActive: true,
               pendingExtraActions: actionsPerTurnPool(p, order),
-              ...(p.battleData.movementUsed && { movementUsed: 0 }),
             },
           }
         : p,

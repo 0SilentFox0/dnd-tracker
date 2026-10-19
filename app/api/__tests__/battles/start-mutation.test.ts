@@ -49,4 +49,14 @@ describe("start mutation", () => {
   it("порожнє лобі — 422 invalid_target", async () => {
     await expect(createStartMutation(vi.fn())({ ...ctx, meta: { ...ctx.meta, setup: [] } } as never)).rejects.toMatchObject({ code: "invalid_target" });
   });
+
+  it("не перепризначає керування юнітами: союзний юніт під DM лишається під DM", async () => {
+    const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "h", sourceType: "character", side: "ally", controlledBy: "p1" } });
+
+    const unit = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "u", sourceType: "unit", side: "ally", controlledBy: "dm" } });
+
+    const out = await createStartMutation(vi.fn(async () => ({ order: [hero, unit], reserve: [], triggerLogEntries: [] })))(ctx);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "u")?.basicInfo.controlledBy).toBe("dm");
+  });
 });

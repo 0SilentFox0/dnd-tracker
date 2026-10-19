@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, participant } from "./fixtures";
 
 import { abilityActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
+import { dive, fireBurst } from "@/data/library/unit-abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleParticipant } from "@/types/battle";
 
 const angel = resolved({
@@ -63,6 +65,14 @@ describe("abilityActionMutation", () => {
     await expect(run([spent, goblin], strike.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit" }));
   });
 
+  it("a cooling-down ability reports the rounds left, not an exhausted limit", async () => {
+    const slow = resolved({ id: "cd", name: "Ривок", trigger: { event: "action" }, limits: { cooldownRounds: 2 }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const cooling = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [slow], abilityUsage: { [slow.key]: { battle: 1, round: 0, turn: 0, lastRound: 1 } } } };
+
+    await expect(run([cooling, goblin], slow.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit", message: expect.stringContaining("Перезарядка") }));
+  });
+
   it("Ангел Хранитель revives a fallen ally at 50 %, a living target is rejected", async () => {
     const out = await run([hero, fallen()], angel.key, ["ally"]);
 
@@ -106,5 +116,37 @@ describe("abilityActionMutation", () => {
 
     await expect(abilityActionMutation(offTurn, body)).rejects.toThrow(expect.objectContaining({ status: 403 }));
     await expect(abilityActionMutation({ ...offTurn, isDM: true }, body)).resolves.toBeDefined();
+  });
+
+  describe("маневри", () => {
+    const map = testMap();
+
+    const unit = (abilities: ReturnType<typeof resolved>[]): BattleParticipant => ({ ...hero, battleData: { ...hero.battleData, resolvedAbilities: abilities, position: { x: 1, y: 1 } } });
+
+    const onMap = (ps: BattleParticipant[]) => {
+      const ctx = context({ participants: ps });
+
+      return { ...ctx, meta: { ...ctx.meta, map } };
+    };
+
+    it("вогняний вибух на карті не потребує цілі", async () => {
+      const burst = resolved(fireBurst(), { type: "unit", id: "u" });
+
+      const out = await abilityActionMutation(onMap([unit([burst]), goblin]), { participantId: "hero", abilityKey: burst.key });
+
+      expect(find(out.participants, "hero").battleData.abilityUsage?.[burst.key].battle).toBe(1);
+    });
+
+    it("пікірування на карті — потрібна клітинка; без карти — ціль", async () => {
+      const d = resolved(dive(), { type: "unit", id: "u" });
+
+      await expect(abilityActionMutation(onMap([unit([d]), goblin]), { participantId: "hero", abilityKey: d.key })).rejects.toThrow("Оберіть клітинку на карті");
+
+      const out = await abilityActionMutation(onMap([unit([d]), goblin]), { participantId: "hero", abilityKey: d.key, targetCell: { x: 6, y: 6 } });
+
+      expect(find(out.participants, "hero").battleData.airborne).toMatchObject({ landAt: { x: 6, y: 6 } });
+
+      await expect(run([{ ...hero, battleData: { ...hero.battleData, resolvedAbilities: [d] } }, goblin], d.key)).rejects.toThrow();
+    });
   });
 });

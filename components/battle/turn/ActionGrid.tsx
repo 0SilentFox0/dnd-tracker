@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Hourglass, Sparkles, Swords, Zap } from "lucide-react";
+import { BookOpen, Hourglass, Sparkles, Swords, Undo2, Zap } from "lucide-react";
 
 import type { usePlayerTurn } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,7 @@ const MORALE_LABEL: Record<MoraleOutcome, string> = { none: "Мораль: бе�
 const Tile = ({ icon: Icon, label, used, primary, onClick }: { icon: typeof Swords; label: string; used?: boolean; primary?: boolean; onClick?: () => void }) => (
   <button type="button" disabled={used} onClick={onClick} className={cn("flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40", primary ? "border-[var(--enemy)] bg-[var(--enemy)]/25" : "border-white/25 bg-black/55")}>
     <Icon className={cn("size-7 shrink-0", primary ? "text-[var(--bone)]" : "text-[var(--gold)]")} />
-    <span className="hud-sc text-[17px] leading-5">{label}</span>
+    <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">{label}</span>
   </button>
 );
 
@@ -30,6 +30,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
         <Tile icon={BookOpen} label="Магія" used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label="Вміння" used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}
         <Tile icon={Sparkles} label="Бонус" used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />
+        {turn.strikeAndReturn.available && <Tile icon={Undo2} label="Повернутися" used={pending} onClick={turn.strikeAndReturn.run} />}
         {turn.moraleResult && <Tile icon={Hourglass} label={MORALE_LABEL[turn.moraleResult]} used />}
       </div>
       {turn.phase !== "countdown" && (

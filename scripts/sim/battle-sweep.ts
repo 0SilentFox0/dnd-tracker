@@ -29,6 +29,7 @@ import { revealParticipantMutation, revealParticipantSchema } from "@/app/api/ca
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
+import { unitControlMutation, unitControlSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/unit-control/unit-control-mutation";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
@@ -40,6 +41,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -231,13 +233,15 @@ const START = { access: "dm", requireStatus: "prepared", mutate: createStartMuta
 
 const NEXT = { access: "currentController", requireStatus: "active", mutate: nextTurnMutation };
 
-const ATTACK = { access: "member", requireStatus: "active", schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
+const ATTACK = { access: "member", requireStatus: "active", schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
 const BONUS = { access: "member", requireStatus: "active", schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
 const ABILITY = { access: "member", requireStatus: "active", schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
 const SPELL = { access: "member", requireStatus: "active", schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
+
+const UNIT_CONTROL = { access: "dm", requireStatus: "active", schema: unitControlSchema, mutate: unitControlMutation };
 
 const AURA_ZONE = { access: "member", requireStatus: "active", schema: auraZoneSchema, mutate: auraZoneMutation };
 
@@ -972,7 +976,13 @@ async function controlCheck(spells: Map<string, any>) {
 
   const enemyUnits = P().filter((p) => p.basicInfo.side === "enemy");
 
-  tcheck("Союзні юніти отримує гравець із найвищим рівнем", allyUnits.length === 2 && allyUnits.every((u) => u.basicInfo.controlledBy === top.controlledBy), `${top.name} (L${HERO_LEVEL + 1}, ${top.controlledBy.slice(0, 8)}): ${allyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy.slice(0, 8)}`).join(", ")}`);
+  tcheck("Союзні юніти за замовчуванням під DM (без автопризначення)", allyUnits.length === 2 && allyUnits.every((u) => u.basicInfo.controlledBy === "dm"), allyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy}`).join(", "));
+
+  for (const x of allyUnits) await call("unit-control", UNIT_CONTROL, { mode: "assign", participantId: x.basicInfo.id, controlledBy: top.controlledBy });
+
+  const assigned = P().filter((p) => p.basicInfo.side === "ally" && p.basicInfo.sourceType === "unit");
+
+  tcheck("DM передає союзних юнітів гравцю (unit-control)", assigned.length === 2 && assigned.every((u) => u.basicInfo.controlledBy === top.controlledBy), `${top.name} (${top.controlledBy.slice(0, 8)}): ${assigned.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy.slice(0, 8)}`).join(", ")}`);
   tcheck("Ворожі юніти без гравців — під DM", enemyUnits.every((u) => u.basicInfo.controlledBy === "dm"), enemyUnits.map((u) => `${u.basicInfo.name}→${u.basicInfo.controlledBy}`).join(", "));
 
   // хід союзного юніта: інший гравець — 403, власник — 200
@@ -1025,6 +1035,9 @@ async function controlCheck(spells: Map<string, any>) {
 
   const au = P().filter((p) => p.basicInfo.side === "ally" && p.basicInfo.sourceType === "unit");
 
+  const rr = await call("unit-control", UNIT_CONTROL, { mode: "random" });
+
+  tcheck("Без гравців «роздати випадково» відхиляється", rr.status >= 400, `${rr.status}`);
   tcheck("Сторона лише з героями DM: союзні юніти під DM", au.length > 0 && au.every((x) => x.basicInfo.controlledBy === "dm"), au.map((x) => `${x.basicInfo.name}→${x.basicInfo.controlledBy}`).join(", "));
   await prisma.character.update({ where: { id: top.id }, data: { level: HERO_LEVEL } });
 }

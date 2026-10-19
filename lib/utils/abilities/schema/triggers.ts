@@ -23,6 +23,7 @@ export const TriggerSchema = z.discriminatedUnion("event", [
     event: z.literal("spellCast"),
     phase,
     role: z.enum(["caster", "target"]),
+    whose: z.enum(["self", "ally"]).optional(),
     spellIds: z.array(z.string().min(1)).min(1).optional(),
     school: z.string().min(1).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),

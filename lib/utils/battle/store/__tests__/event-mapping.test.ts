@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { battleActionToEvent, eventToBattleAction, systemEvent } from "@/lib/utils/battle/store/event-mapping";
+import { battleActionToEvent, dmEvent, eventToBattleAction, systemEvent } from "@/lib/utils/battle/store/event-mapping";
 import type { BattleAction } from "@/types/battle";
 
 const action: BattleAction = {
@@ -54,5 +54,12 @@ describe("event mapping", () => {
     const back = eventToBattleAction({ ...e, seq: 2, actorId: e.actorId ?? null, targets: [], details: e.details ?? {}, hpChanges: [] }, "b1");
 
     expect(back).toMatchObject({ actorId: "system", actorName: "Система", actionType: "ability", round: 3 });
+  });
+
+  it("подія ДМ — від імені ДМ, з цілями", () => {
+    const e = dmEvent(2, "ДМ щось зробив", [{ participantId: "p", participantName: "П" }]);
+
+    expect(e).toMatchObject({ type: "ability", round: 2, targets: [{ participantId: "p", participantName: "П" }], resultText: "ДМ щось зробив" });
+    expect(dmEvent(2, "x")).not.toHaveProperty("targets");
   });
 });

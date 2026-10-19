@@ -31,6 +31,7 @@ export interface CastSpellResult {
   allParticipantsUpdated: BattleParticipant[];
   battleAction: BattleAction;
   summons: SummonRequest[];
+  messages: string[];
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;
 }

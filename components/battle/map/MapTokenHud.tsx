@@ -20,6 +20,7 @@ export interface MapTokenHudProps {
   raised: boolean;
   impact?: FxImpact | null;
   effects?: readonly ActiveEffect[];
+  onReturn?: () => void;
 }
 
 const TEXT_MIN_CELL = 28;
@@ -40,7 +41,7 @@ function hpView(participant: BattleParticipant, exact: boolean) {
   return { ratio: healthSegments(state) / 4, text: HEALTH_LABEL[state] };
 }
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
   const { change, shakeRef: shake, delayStyle } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impact);
 
   const { userEnabled, motionAllowed } = useFxEnabled();
@@ -86,6 +87,20 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
         >
           {signedDelta(change.delta)}
         </span>
+      )}
+      {onReturn && (
+        <button
+          type="button"
+          data-map-return
+          className="hud-sc pointer-events-auto absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/20 bg-black/80 px-2 py-0.5 text-[11px] font-bold text-[var(--ink)] hover:bg-black"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReturn();
+          }}
+        >
+          Повернутися
+        </button>
       )}
       <div
         ref={shake}

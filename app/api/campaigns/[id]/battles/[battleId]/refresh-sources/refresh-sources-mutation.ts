@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DM_ACTOR, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import {
   createBattleParticipantFromCharacter,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/utils/battle/participant";
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { dmEvent } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
 
 export const refreshSourcesSchema = z.object({});
@@ -82,15 +83,7 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
     return {
       participants,
       pending,
-      events: [
-        {
-          type: "ability",
-          round: ctx.scene.round,
-          actorId: DM_ACTOR.actorId,
-          resultText: `Оновлено з бібліотеки: ${refreshed} учасників`,
-          details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-        },
-      ],
+      events: [dmEvent(ctx.scene.round, `Оновлено з бібліотеки: ${refreshed} учасників`)],
     };
   };
 }

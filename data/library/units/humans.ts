@@ -1,18 +1,7 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, armorBreak, bigShield, bravery, buffAlly, deathBlow, falloff, firstStrike, guardian, hatred, healAlly, resurrect, stun, unlimitedRetaliation } from "../unit-abilities";
-
-import type { Ability } from "@/lib/utils/abilities/schema";
+import { alliesAura, armorBreak, bigShield, bravery, buffAlly, deathBlow, dive, extraRetaliations, falloff, firstStrike, guardian, hatred, healAlly, resurrect, squall, stun, unlimitedRetaliation } from "../unit-abilities";
 
 const HOLY_TARGETS = ["Некроманти", "Демони"];
-
-const cleave: Ability = {
-  id: "unit-cleave",
-  name: "Розсікаючий удар",
-  description: "Вбивство дає ще одну атаку, раз за хід.",
-  trigger: { event: "kill", role: "killer" },
-  limits: { perTurn: 1 },
-  effects: [{ kind: "grantAction", extraActions: 1, target: "self" }],
-};
 
 const base = { raceKey: "humans" } as const;
 
@@ -25,10 +14,10 @@ export const HUMAN_UNITS: LibraryUnit[] = [
   { ...base, key: "humans-marksman", name: "Стрілець", tier: 2, role: "alt", hp: 37, ac: 13, attackBonus: 6, initiative: 8, attacks: [{ name: "Залп", type: "ranged", dice: "1d8+1", damageType: "piercing", targets: 3 }], abilities: [falloff("Залп")] },
   { ...base, key: "humans-swordsman", name: "Мечник", tier: 3, role: "base", hp: 59, ac: 15, attackBonus: 6, initiative: 8, attacks: [{ name: "Меч", type: "melee", dice: "1d8+3", damageType: "slashing" }], abilities: [bigShield()] },
   { ...base, key: "humans-squire", name: "Зброєносець", tier: 3, role: "upgrade", hp: 64, ac: 16, attackBonus: 7, initiative: 8, attacks: [{ name: "Меч", type: "melee", dice: "1d8+4", damageType: "slashing" }], abilities: [bigShield(), guardian(30)] },
-  { ...base, key: "humans-defender-of-faith", name: "Захисник віри", tier: 3, role: "alt", hp: 62, ac: 14, attackBonus: 7, initiative: 8, attacks: [{ name: "Бойова сокира", type: "melee", dice: "1d10+4", damageType: "slashing" }], abilities: [cleave] },
+  { ...base, key: "humans-defender-of-faith", name: "Захисник віри", tier: 3, role: "alt", hp: 62, ac: 14, attackBonus: 7, initiative: 8, attacks: [{ name: "Бойова сокира", type: "melee", dice: "1d10+4", damageType: "slashing" }], abilities: [extraRetaliations()] },
   { ...base, key: "humans-griffin", gridSize: 2, name: "Грифон", tier: 4, role: "base", hp: 74, ac: 14, attackBonus: 7, initiative: 15, flying: true, attacks: [{ name: "Пазурі", type: "melee", dice: "2d6+5", damageType: "slashing" }], abilities: [unlimitedRetaliation()] },
-  { ...base, key: "humans-royal-griffin", gridSize: 2, name: "Королівський грифон", tier: 4, role: "upgrade", hp: 85, ac: 15, attackBonus: 8, initiative: 15, flying: true, attacks: [{ name: "Пазурі", type: "melee", dice: "2d6+6", damageType: "slashing" }], abilities: [unlimitedRetaliation(), firstStrike("Пікірування")] },
-  { ...base, key: "humans-battle-griffin", gridSize: 2, name: "Бойовий грифон", tier: 4, role: "alt", hp: 81, ac: 15, attackBonus: 8, initiative: 10, flying: true, attacks: [{ name: "Шквал", type: "melee", dice: "2d8+4", damageType: "slashing", targets: 2 }], abilities: [unlimitedRetaliation(), falloff("Шквал")] },
+  { ...base, key: "humans-royal-griffin", gridSize: 2, name: "Королівський грифон", tier: 4, role: "upgrade", hp: 85, ac: 15, attackBonus: 8, initiative: 15, flying: true, attacks: [{ name: "Пазурі", type: "melee", dice: "2d6+6", damageType: "slashing" }], abilities: [unlimitedRetaliation(), dive()] },
+  { ...base, key: "humans-battle-griffin", gridSize: 2, name: "Бойовий грифон", tier: 4, role: "alt", hp: 81, ac: 15, attackBonus: 8, initiative: 10, flying: true, attacks: [{ name: "Пазурі", type: "melee", dice: "2d8+4", damageType: "slashing" }], abilities: [unlimitedRetaliation(), squall()] },
   { ...base, key: "humans-monk", name: "Монах", tier: 5, role: "base", hp: 90, ac: 14, attackBonus: 7, initiative: 10, attacks: [{ name: "Священний промінь", type: "ranged", dice: "3d6+5", damageType: "radiant" }], abilities: [hatred("Свята кара", HOLY_TARGETS)] },
   { ...base, key: "humans-inquisitor", name: "Інквізитор", tier: 5, role: "upgrade", hp: 100, ac: 15, attackBonus: 8, initiative: 10, attacks: [{ name: "Священний промінь", type: "ranged", dice: "3d6+7", damageType: "radiant" }], abilities: [hatred("Свята кара", HOLY_TARGETS), buffAlly("Божественна сила", [{ stat: "attackBonus", flat: 2 }], 2)] },
   { ...base, key: "humans-zealot", name: "Фанатик", tier: 5, role: "alt", hp: 98, ac: 15, attackBonus: 8, initiative: 10, attacks: [{ name: "Священний промінь", type: "ranged", dice: "3d6+7", damageType: "radiant" }], abilities: [hatred("Свята кара", HOLY_TARGETS), alliesAura("Аура опору магії", { kind: "flag", flag: "resistance", damageType: "spell", percent: 20 })] },

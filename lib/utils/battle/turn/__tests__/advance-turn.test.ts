@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { mapAction } from "@/lib/utils/battle/fx/map-action";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
@@ -149,6 +150,31 @@ describe("advanceTurn", () => {
       const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
       expect(out.participants[0].battleData.movementUsed).toBe(0);
+    });
+
+    it("у повітрі додаткового ходу немає, приземлення лише в черговому ході наступного раунду", () => {
+      const map: BattleMapConfig = testMap();
+
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1, percent: 200, name: "Пікірування" } } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
+
+      expect(out.scene).toMatchObject({ turnIndex: 0, round: 2 });
+      expect(out.participants[0].actionFlags.hasExtraTurn).toBe(false);
+      expect(out.participants[0].battleData.extraTurnActive).toBeFalsy();
+      expect(out.participants[0].battleData.airborne).toBeUndefined();
+      expect(out.participants[0].battleData.position).toEqual({ x: 4, y: 4 });
+    });
+
+    it("у раунд піке мораль не дає ходу і грифон лишається в повітрі", () => {
+      const map: BattleMapConfig = testMap();
+
+      const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 2, percent: 200, name: "Пікірування" } } };
+
+      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, round: 2, turnIndex: 0 }, map });
+
+      expect(out.scene).toMatchObject({ turnIndex: 1, round: 2 });
+      expect(out.participants[0].battleData.airborne).toBeDefined();
     });
 
     it("додатковий хід без руху не додає movementUsed", () => {

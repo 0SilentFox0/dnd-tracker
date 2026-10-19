@@ -2,7 +2,10 @@ import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { limitsLabel } from "../labels";
 import { describeTrigger } from "../triggers";
 import { applyBerserk, applyCharm, describeBerserk, describeCharm } from "./control";
+import { applyCopySpellBuffs } from "./copy-buffs";
+import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
+import { applyManeuver, describeManeuver, MANEUVER_LABELS } from "./maneuver";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -19,10 +22,7 @@ import {
   applyStatic,
   damageBonusFields,
   describeDamageBonus,
-  describeFlag,
   describeModifyStat,
-  FLAG_FIELDS,
-  FLAG_LABELS,
   modifyStatFields,
 } from "./static";
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
@@ -99,6 +99,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   drainSpellSlot: { kind: "drainSpellSlot", label: "Крадіжка слоту заклинань", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `−${e.count} слот заклинань`, apply: applyDrainSpellSlot },
   changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
   mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка × ${e.duration.rounds} р.`, apply: applyMark },
+  copySpellBuffs: { kind: "copySpellBuffs", label: "Копіювати бафи закляття союзника", static: false, fields: [TARGET_FIELD], describe: () => "копіює бафи закляття, накладені на союзника", apply: applyCopySpellBuffs },
   guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`, apply: applyGuard },
   summon: {
     kind: "summon",
@@ -110,6 +111,17 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   },
   raiseDead: { kind: "raiseDead", label: "Підняти мертвих", static: false, fields: [{ name: "hpPercent", label: "HP, %", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
   cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => (e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
+  maneuver: {
+    kind: "maneuver",
+    label: "Маневр",
+    static: false,
+    fields: [
+      { name: "maneuver", label: "Маневр", input: "select", options: Object.entries(MANEUVER_LABELS).map(([value, label]) => ({ value, label })) },
+      { name: "percentOfAttack", label: "% шкоди атаки", input: "number" },
+    ],
+    describe: describeManeuver,
+    apply: applyManeuver,
+  },
   randomOf: {
     kind: "randomOf",
     label: "Випадковий з варіантів",

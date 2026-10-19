@@ -54,7 +54,7 @@ export function applyPendingMoraleCheck(
   let updatedInitiativeOrder = [...initiativeOrder];
 
   // без клона: учасник ходить ще раз наприкінці раунду (advanceTurn); з додаткового ходу — не ланцюжком
-  if (moraleResult.hasExtraTurn && !participant.battleData.extraTurnActive) {
+  if (moraleResult.hasExtraTurn && !participant.battleData.extraTurnActive && !participant.battleData.airborne) {
     updatedInitiativeOrder = updatedInitiativeOrder.map((p) =>
       p.basicInfo.id === participant.basicInfo.id
         ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: true } }

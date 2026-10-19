@@ -1,13 +1,11 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { DM_ACTOR } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
-import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
+import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -54,17 +52,14 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
   const names = revealed.map((p) => p.basicInfo.name).join(", ");
 
   return {
-    participants: assignUnitControl(participants, ctx.userId),
+    participants,
     pending,
     events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: DM_ACTOR.actorId,
-        targets: revealed.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
-        resultText: `ДМ ввів у бій: ${names}${joined.messages.length > 0 ? `. ${joined.messages.join("; ")}` : ""}`,
-        details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-      },
+      dmEvent(
+        ctx.scene.round,
+        `ДМ ввів у бій: ${names}${joined.messages.length > 0 ? `. ${joined.messages.join("; ")}` : ""}`,
+        revealed.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
+      ),
     ],
   };
 }

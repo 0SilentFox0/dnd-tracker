@@ -1,3 +1,5 @@
+export { useAbilityMapAim } from "./useAbilityMapAim";
+export { useAbilityPicker } from "./useAbilityPicker";
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattleFxQueue } from "./useBattleFxQueue";
@@ -27,3 +29,4 @@ export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue }
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
+export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

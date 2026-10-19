@@ -24,6 +24,7 @@ export {
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,
+  useUnitControl,
   useUpdateBattleParticipant,
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";

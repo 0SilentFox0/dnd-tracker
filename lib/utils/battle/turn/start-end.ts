@@ -1,5 +1,6 @@
-import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./effects";
+import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownRoundEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
+import { resetTurnState } from "./turn-state";
 
 import { CombatStatus, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -8,6 +9,7 @@ import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/r
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
+import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -147,11 +149,8 @@ export function processStartOfTurn(
       hasUsedBonusAction: hasNoBonusAction,
       hasUsedReaction: hasNoReaction,
     },
+    battleData: resetTurnState(updatedParticipant),
   };
-
-  if (updatedParticipant.battleData.movementUsed) {
-    updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, movementUsed: 0 } };
-  }
 
   const id = participant.basicInfo.id;
 
@@ -165,6 +164,20 @@ export function processStartOfTurn(
     : [updatedParticipant];
 
   const abilityMessages: string[] = [...healMessages];
+
+  if (updatedParticipant.battleData.airborne && updatedParticipant.battleData.airborne.since < currentRound) {
+    const landed = landDive(participants, id, { map, rng });
+
+    participants = landed.participants;
+    abilityMessages.push(...landed.messages);
+
+    for (const d of landed.downed) {
+      const r = resolveDowned(participants, d, ctx);
+
+      participants = r.participants;
+      abilityMessages.push(...r.messages);
+    }
+  }
 
   if (skippedBy) abilityMessages.push(`💫 ${participant.basicInfo.name} втрачає дію (${skippedBy.name})`);
 
@@ -290,7 +303,7 @@ export function processStartOfRound(
   );
 
   return {
-    updatedInitiativeOrder: sortedOrder.map(countDownInitiativeEffects),
+    updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
     message: `🔁 Початок Раунду ${currentRound}`,
     triggerMessages: messages,
   };

@@ -11,6 +11,7 @@ const LIMIT_FIELDS: readonly FieldMeta[] = [
   { name: "perBattle", label: "Разів за бій", input: "number", optional: true },
   { name: "perRound", label: "Разів за раунд", input: "number", optional: true },
   { name: "perTurn", label: "Разів за хід", input: "number", optional: true },
+  { name: "cooldownRounds", label: "Перезарядка (раунди)", input: "number", optional: true },
   { name: "chance", label: "Шанс, %", input: "number", optional: true },
 ];
 

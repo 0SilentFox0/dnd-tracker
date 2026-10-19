@@ -104,6 +104,47 @@ describe("move mutation", () => {
     expect(() => moveMutation(context(), { participantId: "hero", to: { x: 1, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
 
+  describe("удар і повернення", () => {
+    const maiden = (over: { attacked?: boolean; returned?: boolean } = {}): BattleParticipant => {
+      const p = at(hero, { x: 4, y: 0 }, 4);
+
+      return {
+        ...p,
+        actionFlags: { ...p.actionFlags, hasUsedAction: over.attacked ?? true },
+        battleData: {
+          ...p.battleData,
+          turnStartPosition: { x: 0, y: 0 },
+          ...(over.returned && { returnedThisTurn: true }),
+          resolvedAbilities: [
+            { id: "sr", name: "Удар і повернення", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "strikeAndReturn" }], key: "unit:t:sr", source: { type: "unit", id: "t", name: "x" } },
+          ],
+        },
+      };
+    };
+
+    const back = (m: BattleParticipant) => moveMutation(ctx({ participants: [m, at(goblin, { x: 9, y: 4 })] }), { participantId: "hero", to: { x: 0, y: 0 }, returnToStart: true });
+
+    it("після атаки повертає на стартову клітинку без витрати руху", () => {
+      const out = back(maiden());
+
+      expect(out.participants[0].battleData).toMatchObject({ position: { x: 0, y: 0 }, movementUsed: 4, returnedThisTurn: true });
+    });
+
+    it("до атаки, вдруге або без вміння — відмова", () => {
+      expect(() => back(maiden({ attacked: false }))).toThrow(expect.objectContaining({ code: "action_rejected", message: "Повернення доступне лише після атаки" }));
+      expect(() => back(maiden({ returned: true }))).toThrow(expect.objectContaining({ code: "action_rejected" }));
+      expect(() => back(at(hero, { x: 4, y: 0 }))).toThrow(expect.objectContaining({ code: "action_rejected" }));
+    });
+
+    it("зайняту стартову клітинку не віддає", () => {
+      const taken = ctx({ participants: [maiden(), at(goblin, { x: 0, y: 0 })] });
+
+      expect(() => moveMutation(taken, { participantId: "hero", to: { x: 0, y: 0 }, returnToStart: true })).toThrow(
+        expect.objectContaining({ code: "action_rejected", message: "Повернутися неможливо: клітинка зайнята" }),
+      );
+    });
+  });
+
   describe("небезпека", () => {
     const fire: TerrainCell = { kind: "hazard", label: "Вогонь", damage: { amount: 5, type: "fire" } };
 

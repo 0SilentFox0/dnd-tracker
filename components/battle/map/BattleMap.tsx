@@ -575,6 +575,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
               raised={view?.selectedId === id || view?.currentId === id}
               impact={view?.impactFor?.(id)}
               effects={view?.effects?.get(id)}
+              onReturn={view?.returnId === id ? actions?.onReturn : undefined}
             />
           );
         })}

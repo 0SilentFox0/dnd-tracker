@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
@@ -42,6 +43,23 @@ describe("рух на початку ходу", () => {
     const p = createMockParticipant({ battleData: { ...base.battleData, movementUsed: 4 } });
 
     expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBe(0);
+  });
+
+  it("запамʼятовує стартову клітинку ходу і скидає прапорець повернення", () => {
+    const base = createMockParticipant();
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 3, y: 1 }, returnedThisTurn: true } });
+
+    const { battleData } = processStartOfTurn(p, 2, [p]).participant;
+
+    expect(battleData.turnStartPosition).toEqual({ x: 3, y: 1 });
+    expect(battleData.returnedThisTurn).toBeUndefined();
+  });
+
+  it("без позиції на карті стартової клітинки немає", () => {
+    const p = createMockParticipant();
+
+    expect(processStartOfTurn(p, 2, [p]).participant.battleData.turnStartPosition).toBeUndefined();
   });
 
   it("без пройденого руху поле не зʼявляється", () => {
@@ -162,5 +180,30 @@ describe("небезпека на початку ходу", () => {
 
     expect(out.statusChanged).toBe(true);
     expect(out.participant.combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
+  });
+});
+
+describe("приземлення після піке", () => {
+  const map: BattleMapConfig = testMap();
+
+  const flying = (since: number) => {
+    const base = createMockParticipant();
+
+    return createMockParticipant({ battleData: { ...base.battleData, airborne: { landAt: { x: 4, y: 4 }, since, percent: 200, name: "Пікірування" } } });
+  };
+
+  it("у раунд піке лишається в повітрі", () => {
+    const g = flying(2);
+
+    expect(processStartOfTurn(g, 2, [g], () => 0.5, map).participant.battleData.airborne).toBeDefined();
+  });
+
+  it("у наступний раунд приземляється", () => {
+    const g = flying(1);
+
+    const out = processStartOfTurn(g, 2, [g], () => 0.5, map).participant;
+
+    expect(out.battleData.airborne).toBeUndefined();
+    expect(out.battleData.position).toEqual({ x: 4, y: 4 });
   });
 });

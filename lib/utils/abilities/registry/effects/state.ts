@@ -93,6 +93,7 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
 
       return {
         ...granted,
+        ...(effect.refreshReaction && { battleData: { ...granted.battleData, retaliationsUsed: 0 } }),
         actionFlags: {
           ...granted.actionFlags,
           ...(effect.refreshAction && { hasUsedAction: false }),

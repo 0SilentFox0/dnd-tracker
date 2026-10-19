@@ -14,6 +14,7 @@ export function formulaContext(p: BattleParticipant): Record<string, number> {
     hero_level: p.abilities.level,
     lost_hp_percent: maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0,
     morale: ownMorale(p),
+    cells_moved: p.battleData.movementUsed ?? 0,
   };
 }
 

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronsDown, ChevronsUp, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { type DmParticipantActions, DmParticipantRow } from "./DmParticipantRow";
 
 import { BattleLogPanel } from "@/components/battle/log/BattleLogPanel";
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { type BattlePageDialogs, useBattleScene } from "@/lib/hooks/battle";
+import { type BattlePageDialogs, useBattleScene, useUnitControlPanel } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
@@ -32,6 +32,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
   const [ownOpen, setOwnOpen] = useState(false);
 
   const confirm = useConfirm();
+
+  const unitControl = useUnitControlPanel();
 
   const open = panel ? panel.open : ownOpen;
 
@@ -59,6 +61,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
     onRemove: (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } }),
     onKill: battle.status === BattleStatus.ACTIVE ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } }) : undefined,
     onDone: closePanel,
+    unitControl: unitControl.row,
   };
 
   const canScale = battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
@@ -150,6 +153,13 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
             <button type="button" className={ACTION} disabled={actions.refreshSources.isPending} onClick={refreshSources}>
               <RefreshCw className="size-4 shrink-0 text-[var(--gold)]" />
               Оновити з бібліотеки
+            </button>
+          )}
+
+          {battle.status === BattleStatus.ACTIVE && (
+            <button type="button" className={ACTION} disabled={!unitControl.random.can || unitControl.random.isPending} title="Вільні союзні юніти (під ДМ) розподіляються між гравцями" onClick={unitControl.random.run}>
+              <Dices className="size-4 shrink-0 text-[var(--gold)]" />
+              Роздати юнітів випадково
             </button>
           )}
 

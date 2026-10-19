@@ -8,5 +8,6 @@ export * from "./map-view";
 export * from "./occupancy";
 export * from "./path";
 export * from "./placement";
+export * from "./return-to-start";
 export * from "./template";
 export * from "./terrain";

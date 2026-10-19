@@ -16,6 +16,7 @@ export const API_ERRORS = {
   ABILITY_TOO_MANY_TARGETS: "Забагато цілей для цього вміння",
   ABILITY_TARGET_REQUIRED: "Оберіть ціль для цього вміння",
   ABILITY_TARGET_INVALID: "Недопустима ціль для цього вміння",
+  TARGET_AIRBORNE: "Ціль у повітрі — її не можна обрати",
   BONUS_TARGET_MUST_BE_DEAD: "Ціль має бути мертвою",
   SPELL_TOO_MANY_TARGETS: "Забагато цілей для цього закляття",
   ACTION_USED: "Дію цього ходу вже використано",

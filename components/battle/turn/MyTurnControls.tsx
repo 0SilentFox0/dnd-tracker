@@ -52,9 +52,9 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const [abilityOpen, setAbilityOpen] = useState(false);
 
-  const bonusAbilities = usableAbilities(hero, "bonusAction");
+  const bonusAbilities = usableAbilities(hero, "bonusAction", battle.currentRound);
 
-  const actionAbilities = usableAbilities(hero, "action");
+  const actionAbilities = usableAbilities(hero, "action", battle.currentRound);
 
   const hasMagic = Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 

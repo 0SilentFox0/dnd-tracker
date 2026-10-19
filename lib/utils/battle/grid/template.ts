@@ -1,8 +1,8 @@
-import { cellDistance, cellKey, cellLine, footprintDistance, inBounds, isPlayable, parseCellKey } from "./geometry";
+import { cellKey, cellLine, closestCell, footprintDistance, isPlayable, parseCellKey } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
 const CONE_TAN = 0.5;
@@ -19,7 +19,7 @@ export function areaRadiusCells(feet: number): number {
 }
 
 export function apexOf(origin: GridPoint[], aim: GridPoint): GridPoint {
-  return origin.reduce((best, c) => (cellDistance(c, aim) < cellDistance(best, aim) ? c : best), origin[0]);
+  return closestCell(origin, [aim]);
 }
 
 function circleCells(r: number, aim: GridPoint): GridPoint[] {
@@ -68,23 +68,23 @@ function coneCells(r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
   return out;
 }
 
-function lineCells(map: BattleMapConfig, r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
-  const vx = aim.x - apex.x;
+export function rayCells(map: BattleMapConfig, from: GridPoint, through: GridPoint, opts: { maxCells: number; stopAtTarget?: boolean }): GridPoint[] {
+  const vx = through.x - from.x;
 
-  const vy = aim.y - apex.y;
+  const vy = through.y - from.y;
 
   const len = Math.max(Math.abs(vx), Math.abs(vy));
 
   if (len === 0) return [];
 
-  const end = { x: apex.x + Math.round((vx * r) / len), y: apex.y + Math.round((vy * r) / len) };
+  const end = opts.stopAtTarget ? through : { x: from.x + Math.round((vx * opts.maxCells) / len), y: from.y + Math.round((vy * opts.maxCells) / len) };
 
   const out: GridPoint[] = [];
 
-  for (const c of cellLine(apex, end).slice(1)) {
-    if (!inBounds(map, c)) break;
+  for (const c of cellLine(from, end).slice(1, opts.maxCells + 1)) {
+    if (!isPlayable(map, c)) break;
 
-    if (isPlayable(map, c)) out.push(c);
+    out.push(c);
   }
 
   return out;
@@ -103,7 +103,7 @@ export function templateCells(map: BattleMapConfig, template: SpellTemplate, ori
   else {
     const apex = apexOf(origin, aim);
 
-    raw = template.shape === "cone" ? coneCells(r, apex, aim) : lineCells(map, r, apex, aim);
+    raw = template.shape === "cone" ? coneCells(r, apex, aim) : rayCells(map, apex, aim, { maxCells: r });
 
     raw = raw.filter((c) => !own.has(cellKey(c)));
   }
@@ -115,7 +115,7 @@ export function participantsInCells(participants: BattleParticipant[], cells: st
   const set = new Set(cells);
 
   return participants
-    .filter((p) => isActive(p) && isOnMap(p) && cellsOf(p).some((c) => set.has(cellKey(c))))
+    .filter((p) => isTargetable(p) && isOnMap(p) && cellsOf(p).some((c) => set.has(cellKey(c))))
     .map((p, i) => ({ p, i, d: footprintDistance([from], cellsOf(p)) }))
     .sort((a, b) => a.d - b.d || a.i - b.i)
     .map((x) => x.p);

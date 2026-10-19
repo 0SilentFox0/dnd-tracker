@@ -4,18 +4,18 @@ import { applyMainActionUsed } from "../participant";
 import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
 import { diffAppliedEffects } from "./applied-effects";
-import { computeSpellPower, spellSaveDc } from "./power";
+import { computeSpellPower, rollSavingThrow, spellSaveDc } from "./power";
 import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
-import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Amount, Effect } from "@/lib/utils/abilities/schema";
-import { rollDie } from "@/lib/utils/common/dice";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { AbilityEvent, ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
@@ -136,6 +136,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
       allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
       battleAction: actionOf(updatedCaster, spell, targetsBefore, battleId, currentRound, `${updatedCaster.basicInfo.name}: ${spell.name} недоступне — немає spell slots`),
       summons: [],
+      messages: [],
     };
   }
 
@@ -161,6 +162,23 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     summons.push(...(r.summons ?? []));
   };
 
+  const absorbSpellDamage = (id: string, damage: number) => {
+    if (damage <= 0 || !spell.groupId) return;
+
+    for (const f of findFlags(flow.ps, id, "spellAbsorb", actionModifiers[id]).filter((x) => x.school === spell.groupId)) {
+      const target = getP(flow, id);
+
+      if (target.combatStats.currentHp <= 0) continue;
+
+      const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100));
+
+      if (healed <= 0) continue;
+
+      put(flow, participant);
+      flow.messages.push(`💚 ${target.basicInfo.name}: поглинає ${healed} HP (${spell.name})`);
+    }
+  };
+
   const dealDamage = (effect: Extract<Effect, { kind: "dealDamage" }>, id: string, roll: number, index: number) => {
     const target = getP(flow, id);
 
@@ -172,9 +190,10 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     if (planned <= 0) return;
 
-    const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, extra: actionModifiers[id] });
+    const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: actionModifiers[id] });
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
+    absorbSpellDamage(id, resisted.finalDamage);
     damageSteps[id] = [...(damageSteps[id] ?? []), ...resisted.steps];
 
     if (resisted.finalDamage === 0 && resisted.immunityApplied) flow.messages.push(immunityNote(target.basicInfo.name, resisted.steps));
@@ -212,15 +231,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     if (withSave && def.resolution.kind === "save") {
       const { ability: saveAbility, onSuccess } = def.resolution;
 
-      const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? rollDie(20, rng);
-
       const dc = spellSaveDc(updatedCaster);
 
-      const mod = target.abilities.modifiers[saveAbility];
-
-      const total = roll + mod;
-
-      const success = total >= dc;
+      const { roll, mod, total, success } = rollSavingThrow(target, saveAbility, dc, rng, saveRolls.find((s) => s.participantId === id)?.roll);
 
       saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 
@@ -348,6 +361,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
     battleAction: action,
     summons: [...summons, ...flow.summons],
+    messages: flow.messages,
     ...(spellDamage && { spellDamage }),
   };
 }

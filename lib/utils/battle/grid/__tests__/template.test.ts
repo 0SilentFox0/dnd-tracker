@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aimInRange, areaCentre, areaRadiusCells, feetToCells, participantsInCells, templateCells, templateCentre } from "../template";
+import { aimInRange, areaCentre, areaRadiusCells, feetToCells, participantsInCells, rayCells, templateCells, templateCentre } from "../template";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -104,7 +104,7 @@ describe("templateCells", () => {
     expect(cells).toEqual([k(1, 3), k(2, 3), k(3, 3), k(4, 3), k(5, 3), k(6, 3)]);
   });
 
-  it("лінія обривається на краю карти, неігрові клітинки пропускає але йде далі", () => {
+  it("лінія обривається на краю карти й на першій неігровій клітинці", () => {
     const edge = templateCells(map, { shape: "line", size: 30 }, [{ x: 9, y: 3 }], { x: 10, y: 3 });
 
     expect(edge).toEqual([k(10, 3), k(11, 3)]);
@@ -113,7 +113,7 @@ describe("templateCells", () => {
 
     const cells = templateCells(blockedMap, { shape: "line", size: 15 }, [{ x: 0, y: 3 }], { x: 3, y: 3 });
 
-    expect(cells).toEqual([k(1, 3), k(3, 3)]);
+    expect(cells).toEqual([k(1, 3)]);
   });
 
   it("коло біля краю й через неігрові клітинки відкидає їх", () => {
@@ -165,5 +165,24 @@ describe("templateCentre", () => {
     expect(templateCentre({ shape: "circle", size: 10 }, { x: 4, y: 4 }, [k(4, 4)])).toEqual({ x: 4, y: 4 });
     expect(templateCentre({ shape: "line", size: 25 }, { x: 11, y: 1 }, line)).toEqual({ x: 4, y: 1 });
     expect(areaCentre([])).toBeUndefined();
+  });
+});
+
+describe("rayCells", () => {
+  it("тягнеться на maxCells від початку, не включаючи його", () => {
+    expect(rayCells(map, { x: 0, y: 3 }, { x: 1, y: 3 }, { maxCells: 3 })).toEqual([{ x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }]);
+  });
+
+  it("stopAtTarget зупиняється на цілі", () => {
+    expect(rayCells(map, { x: 0, y: 0 }, { x: 2, y: 2 }, { maxCells: 9, stopAtTarget: true })).toEqual([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
+  });
+
+  it("обривається на краю карти й на стіні", () => {
+    expect(rayCells(map, { x: 10, y: 3 }, { x: 11, y: 3 }, { maxCells: 5 })).toEqual([{ x: 11, y: 3 }]);
+    expect(rayCells({ ...map, blocked: [k(2, 3)] }, { x: 0, y: 3 }, { x: 1, y: 3 }, { maxCells: 5 })).toEqual([{ x: 1, y: 3 }]);
+  });
+
+  it("порожній без напрямку", () => {
+    expect(rayCells(map, { x: 1, y: 1 }, { x: 1, y: 1 }, { maxCells: 3 })).toEqual([]);
   });
 });

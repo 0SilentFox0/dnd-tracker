@@ -10,7 +10,7 @@ import { calculateAttackRoll } from "./roll";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findFlags, findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -18,7 +18,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
-import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
 
@@ -35,6 +35,7 @@ export interface RetaliationInput {
   round: number;
   battleId: string;
   rng: Rng;
+  map?: BattleMapConfig | null;
 }
 
 export interface RetaliationResult {
@@ -70,9 +71,15 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (findFlags(withSelf(participants, attacker), attackerId, "noRetaliation").length > 0) return null;
 
-  const unlimited = findFlags(withSelf(participants, defender), defenderId, "unlimitedRetaliation").length > 0;
+  const defenderFlags = findFlagsMany(withSelf(participants, defender), defenderId, ["unlimitedRetaliation", "extraRetaliations"]);
 
-  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction && !unlimited) return null;
+  const unlimited = defenderFlags.unlimitedRetaliation.length > 0;
+
+  const allowed = 1 + defenderFlags.extraRetaliations.reduce((n, f) => n + f.count, 0);
+
+  const used = defender.battleData.retaliationsUsed ?? (defender.actionFlags.hasUsedReaction ? 1 : 0);
+
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : !unlimited && (defender.actionFlags.hasUsedReaction || used >= allowed)) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
@@ -80,9 +87,15 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng } };
+  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
 
-  if (!provoked && !unlimited) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
+  if (!provoked && !unlimited) {
+    put(flow, {
+      ...defender,
+      battleData: { ...defender.battleData, retaliationsUsed: used + 1 },
+      actionFlags: { ...defender.actionFlags, hasUsedReaction: used + 1 >= allowed },
+    });
+  }
 
   const first = rollDie(20, rng);
 
@@ -113,6 +126,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
       damageRolls,
       attackRoll: roll,
       currentRound: round,
+      battleId,
       bonusPercent: weapon.bonusPercent,
       offTurn: true,
     });

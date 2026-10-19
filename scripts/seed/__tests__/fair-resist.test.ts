@@ -31,22 +31,22 @@ const heroes = (damageKey: string) => buildPartyPower([1, 2, 3].map(() => ({ sta
 const size = (roster: Array<{ quantity: number }> | undefined) => (roster ?? []).reduce((a, r) => a + r.quantity, 0);
 
 describe("опори в чесному балансі", () => {
-  it("Скелет-воїн: опори читаються з учасника бою (Кістяне тіло + Великий щит)", async () => {
+  it("Скелет-воїн: опори читаються з учасника бою (Великий щит)", async () => {
     const { resist } = await libraryUnit("necromancers-skeleton-warrior");
 
-    expect(resist["ranged:piercing"]).toBe(80);
-    expect(resist["melee:piercing"]).toBe(50);
-    expect(resist["melee:bludgeoning"]).toBeLessThan(0);
+    expect(resist["ranged:piercing"]).toBe(30);
+    expect(resist["melee:piercing"] ?? 0).toBe(0);
+    expect(resist["melee:bludgeoning"] ?? 0).toBe(0);
   });
 
-  it("Скелет-воїн проти лучників — менший склад, ніж проти булав", async () => {
+  it("Скелет-воїн проти лучників — не більший склад, ніж проти булав", async () => {
     const { stats } = await libraryUnit("necromancers-skeleton-warrior");
 
     const bows = pickEnemyRoster(heroes("ranged:piercing"), [stats]);
 
     const maces = pickEnemyRoster(heroes("melee:bludgeoning"), [stats]);
 
-    expect(size(bows?.roster)).toBeLessThan(size(maces?.roster));
+    expect(size(bows?.roster)).toBeLessThanOrEqual(size(maces?.roster));
   });
 
   it("імунітет до магії з поля immunities доходить до опору `spell`", async () => {

@@ -9,6 +9,7 @@ export const LimitsSchema = z.object({
   perBattle: z.number().int().min(1).optional(),
   perRound: z.number().int().min(1).optional(),
   perTurn: z.number().int().min(1).optional(),
+  cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
 });
 
@@ -45,6 +46,10 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
     issues.push(`${effect.stat} змінюється лише пасивкою`);
   }
 
+  if (effect.kind === "maneuver" && trigger.event !== "bonusAction" && trigger.event !== "action") {
+    issues.push("Маневр доступний лише для бонусної дії та дії");
+  }
+
   if (effect.kind === "summon" && trigger.event !== "bonusAction" && trigger.event !== "action" && trigger.event !== "kill") {
     issues.push("Прикликання доступне лише для бонусної дії, дії та вбивства");
   }
@@ -76,6 +81,7 @@ export const AbilitySchema = z
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
     maxTargets: z.number().int().min(1).optional(),
+    aim: z.object({ kind: z.enum(["cell", "direction"]), range: z.number().int().min(5) }).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
@@ -88,6 +94,10 @@ export const AbilitySchema = z
 
     if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
       ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
+    }
+
+    if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
+      ctx.addIssue({ code: "custom", path: ["aim"], message: "aim доступний лише для бонусної дії та дії" });
     }
 
     a.effects.forEach((effect, i) => {

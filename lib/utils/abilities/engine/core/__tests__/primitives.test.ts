@@ -67,13 +67,13 @@ describe("usage", () => {
   it("рахує й скидає лічильники", () => {
     let p = makeParticipant({ id: "p" });
 
-    expect(withinLimits(p, ab)).toBe(true);
-    p = recordUse(p, ab.key);
-    expect(withinLimits(p, ab)).toBe(false);
+    expect(withinLimits(p, ab, 1)).toBe(true);
+    p = recordUse(p, ab.key, 1);
+    expect(withinLimits(p, ab, 1)).toBe(false);
     p = resetUsage(p, "round");
-    expect(withinLimits(p, ab)).toBe(true);
-    p = resetUsage(recordUse(p, ab.key), "round");
-    expect(withinLimits(p, ab)).toBe(false);
+    expect(withinLimits(p, ab, 1)).toBe(true);
+    p = resetUsage(recordUse(p, ab.key, 1), "round");
+    expect(withinLimits(p, ab, 1)).toBe(false);
   });
 });
 

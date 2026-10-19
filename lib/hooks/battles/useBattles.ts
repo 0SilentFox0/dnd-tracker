@@ -5,7 +5,7 @@ import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
-import type { AddParticipantData, CreateBattleData } from "@/lib/api/battles";
+import type { AddParticipantData, CreateBattleData, UnitControlData } from "@/lib/api/battles";
 import {
   abilityAction,
   addBattleParticipant,
@@ -26,6 +26,7 @@ import {
   rollbackBattleAction,
   scaleBattleUnits,
   setAuraZone,
+  setBattleUnitControl,
   setMapTerrain,
   startBattle,
   updateBattle,
@@ -208,6 +209,9 @@ export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts =
 
 export const useScaleBattleUnits = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<{ direction: "buff" | "debuff" }>(c, b, (body) => scaleBattleUnits(c, b, body), o);
+
+export const useUnitControl = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<UnitControlData>(c, b, (body) => setBattleUnitControl(c, b, body), o);
 
 export const useRefreshBattleSources = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<Record<string, never>>(c, b, (body) => refreshBattleSources(c, b, body), o);

@@ -23,7 +23,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
-  const charges = abilityCharges(hero);
+  const charges = abilityCharges(hero, battle.currentRound);
 
   const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
@@ -57,7 +57,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
       {!compact && <SlotGrid participant={hero} />}
       {!compact && charges.length > 0 && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-[#d6cbb7]">
-          {charges.map((c) => <span key={c.key}>{c.name} {c.left}/{c.limit}</span>)}
+          {charges.map((c) => <span key={c.key}>{c.name}{c.limit !== null && ` ${c.left}/${c.limit}`}{c.cooldownLeft > 0 && ` · перезарядка: ${c.cooldownLeft} р.`}</span>)}
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}

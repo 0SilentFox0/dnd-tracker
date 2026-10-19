@@ -7,7 +7,9 @@ import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
 
 const SAMPLES: Record<string, Ability[]> = {
   noRetaliation: [catalog.noRetaliation()],
+  strikeAndReturn: [catalog.strikeAndReturn()],
   unlimitedRetaliation: [catalog.unlimitedRetaliation()],
+  extraRetaliations: [catalog.extraRetaliations(), catalog.extraRetaliations(2)],
   falloff: [catalog.falloff("Залп")],
   doubleStrike: [catalog.doubleStrike("Подвійний удар", 30)],
   firstStrike: [catalog.firstStrike("Таран"), catalog.firstStrike("Засідка", 75)],
@@ -65,6 +67,14 @@ const SAMPLES: Record<string, Ability[]> = {
   ],
   wheelOfFortune: [catalog.wheelOfFortune()],
   critRange: [catalog.critRange(19)],
+  chaosVulnerabilityAura: [catalog.chaosVulnerabilityAura()],
+  chaosAbsorb: [catalog.chaosAbsorb()],
+  hitSpell: [catalog.hitSpell("Тіньове прокляття", ["slow"])],
+  dive: [catalog.dive()],
+  piercingShot: [catalog.piercingShot()],
+  fireWave: [catalog.fireWave()],
+  squall: [catalog.squall()],
+  fireBurst: [catalog.fireBurst()],
   flavor: [catalog.flavor("Літає")],
 };
 

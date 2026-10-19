@@ -11,6 +11,14 @@ export function dropBreakOnDamage(p: BattleParticipant, damage: number): BattleP
   return { ...p, battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !e.breakOnDamage) } };
 }
 
+export function applyRawHeal(p: BattleParticipant, amount: number): { participant: BattleParticipant; healed: number } {
+  const healed = Math.max(0, Math.min(amount, p.combatStats.maxHp - p.combatStats.currentHp));
+
+  if (healed === 0) return { participant: p, healed };
+
+  return { participant: { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.currentHp + healed } }, healed };
+}
+
 export function applyRawDamage(p: BattleParticipant, amount: number): BattleParticipant {
   const fromTemp = Math.min(p.combatStats.tempHp, amount);
 

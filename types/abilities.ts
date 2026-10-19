@@ -1,5 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import type { Ability, DamageKind, StaticEffect } from "@/lib/utils/abilities/schema";
+import type { GridPoint } from "@/types/battle";
 
 export type { Ability, StaticEffect };
 
@@ -19,6 +20,7 @@ export interface AbilityUsageCounter {
   battle: number;
   round: number;
   turn: number;
+  lastRound?: number;
 }
 
 export type AbilityEvent =
@@ -33,8 +35,8 @@ export type AbilityEvent =
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
   | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; roll?: number }
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
-  | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[] }
-  | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[] };
+  | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint }
+  | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint };
 
 export type AbilityDamageKind = DamageKind;
 

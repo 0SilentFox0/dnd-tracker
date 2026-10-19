@@ -1,7 +1,8 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SKILL_ALL_RADIUS_FEET, SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
@@ -179,17 +180,19 @@ export function resolveSpellTargets(
 
   const picked = chosen as BattleParticipant[];
 
+  if (picked.some(isAirborne)) return fail(API_ERRORS.TARGET_AIRBORNE);
+
   if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail("Ціль поза дальністю заклинання");
 
   switch (targeting.kind) {
     case "self":
       return { ok: true, targetIds: [caster.basicInfo.id] };
     case "allAllies":
-      return { ok: true, targetIds: ids((p) => isActive(p) && p.basicInfo.side === side) };
+      return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
     case "allEnemies":
-      return { ok: true, targetIds: ids((p) => isActive(p) && p.basicInfo.side !== side) };
+      return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side !== side) };
     case "everyone":
-      return { ok: true, targetIds: ids(isActive) };
+      return { ok: true, targetIds: ids(isTargetable) };
     case "allAlliesDead": {
       const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
 

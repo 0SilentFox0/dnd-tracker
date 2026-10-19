@@ -39,12 +39,28 @@ export const noRetaliation = (): Ability => ({
   effects: [{ kind: "flag", flag: "noRetaliation" }],
 });
 
+export const strikeAndReturn = (): Ability => ({
+  id: "unit-strike-and-return",
+  name: "Удар і повернення",
+  description: "Після атаки може безкоштовно повернутися на клітинку, з якої почав хід.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "strikeAndReturn" }],
+});
+
 export const unlimitedRetaliation = (): Ability => ({
   id: "unit-unlimited-retaliation",
   name: "Безмежна відсіч",
   description: "Відповідає на кожну атаку, а не раз за раунд.",
   trigger: passive,
   effects: [{ kind: "flag", flag: "unlimitedRetaliation" }],
+});
+
+export const extraRetaliations = (count = 1): Ability => ({
+  id: "unit-extra-retaliations",
+  name: "Подвійна відсіч",
+  description: count === 1 ? "Відповідає на атаки двічі за раунд." : `Відповідає на атаки ${count + 1} рази за раунд.`,
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "extraRetaliations", count }],
 });
 
 export const falloff = (name: string): Ability => ({
@@ -260,6 +276,30 @@ export const retaliateAura = (name: string, percent = 25, damageType = "fire"): 
   effects: [{ kind: "dealDamage", amount: { percentOf: "eventDamage", value: percent }, damageType, target: "eventActor" }],
 });
 
+export const chaosVulnerabilityAura = (): Ability => ({
+  id: "unit-chaos-vulnerability-aura",
+  name: "Аура стихій",
+  description: "Аура: вороги поруч отримують на 25 % більше шкоди від заклинань Хаосу.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "resistance", damageType: "spell", percent: -25, school: "Хаос", target: "nearbyEnemies" }],
+});
+
+export const chaosAbsorb = (): Ability => ({
+  id: "unit-chaos-absorb",
+  name: "Магнітне поле",
+  description: "Лікується на 50 % шкоди, яку по ньому завдають заклинання Хаосу.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "spellAbsorb", school: "Хаос", percent: 50 }],
+});
+
+export const hitSpell = (name: string, spellIds: string[]): Ability => ({
+  id: "unit-hit-spell",
+  name,
+  description: "Влучання накладає на ціль випадкове закляття Темряви 1–3 рівня (рятівні кидки — як у закляття).",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "castSpellOnHit", spellIds }],
+});
+
 export const guardian = (percent = 30): Ability => ({
   id: "unit-guardian",
   name: "Захисник",
@@ -464,4 +504,51 @@ export const flavor = (text: string): Ability => ({
   description: "Особливість для антуражу, без ігрового ефекту.",
   trigger: passive,
   effects: [{ kind: "note", text }],
+});
+
+export const dive = (): Ability => ({
+  id: "unit-dive",
+  name: "Пікірування",
+  description: "Дія, перезарядка 2 раунди: злітає з поля на раунд (його не можна атакувати) і на початку свого наступного ходу падає на обрану клітинку — ×2 шкоди тому, хто там стоїть.",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  aim: { kind: "cell", range: 120 },
+  effects: [{ kind: "maneuver", maneuver: "dive", percentOfAttack: 200 }],
+});
+
+export const squall = (): Ability => ({
+  id: "unit-squall",
+  name: "Шквал",
+  description: "Дія, перезарядка 2 раунди: пролітає по прямій і завдає звичайної шкоди кожному ворогу на шляху.",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  maxTargets: 3,
+  aim: { kind: "direction", range: 60 },
+  effects: [{ kind: "maneuver", maneuver: "squall", percentOfAttack: 100 }],
+});
+
+export const fireBurst = (): Ability => ({
+  id: "unit-fire-burst",
+  name: "Вогняний вибух",
+  description: "Дія, перезарядка 2 раунди: вороги на сусідніх клітинках отримують 50 % шкоди атаки вогнем (рятівний кидок Спритності — половина).",
+  trigger: { event: "action" },
+  limits: { cooldownRounds: 2 },
+  maxTargets: 3,
+  effects: [{ kind: "maneuver", maneuver: "fireBurst", percentOfAttack: 50 }],
+});
+
+export const piercingShot = (): Ability => ({
+  id: "unit-piercing-shot",
+  name: "Наскрізний постріл",
+  description: "Дальня атака влучає в усіх ворогів на одній лінії за ціллю.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "piercingShot" }],
+});
+
+export const fireWave = (): Ability => ({
+  id: "unit-fire-wave",
+  name: "Вогняна хвиля",
+  description: "Влучання обпікає ворогів позаду цілі (конус 15 фт): 50 % шкоди удару вогнем.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "fireWave", percent: 50, size: 15 }],
 });

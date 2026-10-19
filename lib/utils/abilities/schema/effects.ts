@@ -58,7 +58,10 @@ const FlagSchema = z.discriminatedUnion("flag", [
     damageType: z.string().min(1),
     percent: z.number().min(-100).max(100).refine((n) => n !== 0),
     attackKind: z.enum(ATTACK_KINDS).optional(),
+    school: z.string().min(1).optional(),
   }),
+  z.object({ ...flagBase, flag: z.literal("spellAbsorb"), school: z.string().min(1), percent: z.number().int().min(1).max(100) }),
+  z.object({ ...flagBase, flag: z.literal("castSpellOnHit"), spellIds: z.array(z.string().min(1)).min(1), attackKind: z.enum(ATTACK_KINDS).optional() }),
   z.object({ ...flagBase, flag: z.literal("spellImmunity"), spellIds: z.array(z.string().min(1)).min(1).optional() }),
   z.object({
     ...flagBase,
@@ -82,11 +85,15 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("lifesteal"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("multiTargetFalloff"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("noRetaliation") }),
+  z.object({ ...flagBase, flag: z.literal("strikeAndReturn") }),
   z.object({ ...flagBase, flag: z.literal("unlimitedRetaliation") }),
+  z.object({ ...flagBase, flag: z.literal("extraRetaliations"), count: z.number().int().min(1).max(5) }),
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
   z.object({ ...flagBase, flag: z.literal("extraSummons"), count: z.number().int().min(1).max(5), spellIds: z.array(z.string().min(1)).min(1).optional() }),
+  z.object({ ...flagBase, flag: z.literal("piercingShot") }),
+  z.object({ ...flagBase, flag: z.literal("fireWave"), percent: z.number().int().min(1).max(100), size: z.number().int().min(5).max(120) }),
   z.object({ ...flagBase, flag: z.literal("banishSummons"), percent: z.number().int().min(1).max(100) }),
   z.object({
     ...flagBase,
@@ -179,7 +186,15 @@ const SummonSchema = z
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 
+const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
+
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
+
+export const MANEUVERS = ["dive", "squall", "fireBurst"] as const;
+
+export type Maneuver = (typeof MANEUVERS)[number];
+
+const ManeuverSchema = z.object({ kind: z.literal("maneuver"), maneuver: z.enum(MANEUVERS), percentOfAttack: z.number().int().min(1).max(500) });
 
 const BASE_EFFECTS = [
   ModifyStatSchema,
@@ -199,9 +214,11 @@ const BASE_EFFECTS = [
   ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,
+  CopySpellBuffsSchema,
   GuardSchema,
   SummonSchema,
   RaiseDeadSchema,
+  ManeuverSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

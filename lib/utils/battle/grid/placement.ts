@@ -1,4 +1,4 @@
-import { cellDistance, cellKey, footprint } from "./geometry";
+import { cellKey, cellsByDistance, footprint } from "./geometry";
 import { fits, occupiesCells, sizeOf } from "./occupancy";
 
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -22,16 +22,6 @@ function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
   const rest = cols.flatMap((x) => byMid.map((y) => ({ x, y }))).filter((a) => !taken.has(cellKey(a)));
 
   return [...primary, ...rest];
-}
-
-function nearAnchors(map: BattleMapConfig, center: GridPoint): GridPoint[] {
-  const all: GridPoint[] = [];
-
-  for (let y = 0; y < map.rows; y++) {
-    for (let x = 0; x < map.cols; x++) all.push({ x, y });
-  }
-
-  return all.sort((a, b) => cellDistance(a, center) - cellDistance(b, center));
 }
 
 export function placeParticipants(map: BattleMapConfig, participants: BattleParticipant[]): BattleParticipant[] {
@@ -60,7 +50,7 @@ export function placeParticipants(map: BattleMapConfig, participants: BattlePart
 
     const near = p.battleData.position ?? summoner;
 
-    const candidates = near ? nearAnchors(map, near) : sideAnchors(map, p.basicInfo.side).map(shift);
+    const candidates = near ? cellsByDistance(map, near) : sideAnchors(map, p.basicInfo.side).map(shift);
 
     const anchor = candidates.find((a) => fits(map, a, size, blocked));
 

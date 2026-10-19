@@ -34,6 +34,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { loadEquippedArtifactRows, toEquippedArtifacts } from "@/lib/utils/battle/participant/extract-artifacts";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { bonusTargetCandidates, needsBonusTarget, needsMoraleCheck, usableAbilities } from "@/lib/utils/battle/view";
@@ -178,7 +179,7 @@ const NEXT = { access: "currentController" as const, requireStatus: "active" as 
 
 const summonDeps = { loadPool: async (id: string) => ({ units: await prisma.unit.findMany({ where: { campaignId: id } }), races: await prisma.race.findMany({ where: { campaignId: id } }) }) };
 
-const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
+const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
 const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
@@ -249,13 +250,13 @@ function abilityTargets(actor: BattleParticipant, ability: ResolvedAbility, foes
 
 // Автоплей юнітів: бонусні дії щоходу, дії здібностей лише «раз за бій» (замість атаки), коли є ціль.
 async function playUnitAbilities(actor: BattleParticipant, foes: BattleParticipant[]): Promise<boolean> {
-  for (const ability of usableAbilities(actor, "bonusAction")) {
+  for (const ability of usableAbilities(actor, "bonusAction", state.currentRound)) {
     const targets = abilityTargets(actor, ability, foes);
 
     if (targets) await call("bonus-action", BONUS, { participantId: actor.basicInfo.id, abilityKey: ability.key, targetParticipantIds: targets });
   }
 
-  for (const ability of usableAbilities(actor, "action").filter((a) => a.limits?.perBattle)) {
+  for (const ability of usableAbilities(actor, "action", state.currentRound).filter((a) => a.limits?.perBattle)) {
     const targets = abilityTargets(actor, ability, foes.filter(alive));
 
     if (!targets) continue;

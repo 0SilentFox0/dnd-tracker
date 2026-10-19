@@ -107,6 +107,8 @@ export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
 export const CELL_FEET = 5;
 
+export const FIRE_WAVE_NO_MAP_VICTIMS = 2;
+
 export const AURA_RADIUS_CELLS = 2;
 
 // одиночні заклинання, розширені вмінням (spellTargeting area/all), на карті наводяться колом

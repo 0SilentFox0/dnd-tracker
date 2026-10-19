@@ -302,6 +302,7 @@ export function runAdvanceTurnLoop(
         battleId,
         actionIndex: currentBattleLogLength + newLogEntries.length,
         rng,
+        map,
       });
 
       updatedInitiativeOrder = berserk.participants;

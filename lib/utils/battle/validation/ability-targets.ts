@@ -1,14 +1,16 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 export const abilityMaxTargets = (a: ResolvedAbility): number => a.maxTargets ?? 1;
 
-export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[], owner?: BattleParticipant): string[] {
+export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[], ctx: { owner?: BattleParticipant; onMap?: boolean } = {}): string[] {
+  const { owner, onMap = false } = ctx;
+
   const targetIds = [...new Set(rawTargetIds)];
 
   if (targetIds.length > abilityMaxTargets(ability)) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TOO_MANY_TARGETS);
@@ -17,7 +19,9 @@ export function assertAbilityTargets(ability: ResolvedAbility, ps: BattlePartici
 
   if (targets.some((t) => !t)) throw new BattleRuleError("invalid_target", API_ERRORS.NOT_FOUND);
 
-  if (targets.length === 0 && needsBonusTarget(ability)) {
+  if (targets.some((t) => t && isAirborne(t))) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+
+  if (targets.length === 0 && needsBonusTarget(ability, onMap)) {
     throw new BattleRuleError("invalid_target", deadTargetRules(ability).requiresDead ? API_ERRORS.BONUS_TARGET_MUST_BE_DEAD : API_ERRORS.ABILITY_TARGET_REQUIRED);
   }
 

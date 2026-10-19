@@ -1,5 +1,6 @@
 import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
-import { describeDamageBonus, describeFlag, describeModifyStat } from "@/lib/utils/abilities/registry/effects/static";
+import { describeFlag } from "@/lib/utils/abilities/registry/effects/flags";
+import { describeDamageBonus, describeModifyStat } from "@/lib/utils/abilities/registry/effects/static";
 import { CONDITION_LABELS } from "@/lib/utils/abilities/registry/labels";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";

@@ -1,5 +1,5 @@
 import { eventActorId, eventTargetIds } from "./events";
-import { findParticipant, isActive } from "./participants";
+import { findParticipant, isTargetable } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
@@ -31,18 +31,18 @@ export function resolveTargetIds(
       // без сітки поля «ворог за ціллю» — перший за ініціативою живий ворог, окрім цілі події
       const taken = new Set(eventTargetIds(event));
 
-      const other = ps.find((p) => isActive(p) && p.basicInfo.side !== side && !taken.has(p.basicInfo.id));
+      const other = ps.find((p) => isTargetable(p) && p.basicInfo.side !== side && !taken.has(p.basicInfo.id));
 
       return other ? [other.basicInfo.id] : [];
     }
     // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
     case "allAllies":
     case "nearbyAllies":
-      return ps.filter((p) => isActive(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => isTargetable(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":
     case "nearbyEnemies":
-      return ps.filter((p) => isActive(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => isTargetable(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
     case "everyone":
-      return ps.filter(isActive).map((p) => p.basicInfo.id);
+      return ps.filter(isTargetable).map((p) => p.basicInfo.id);
   }
 }

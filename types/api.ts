@@ -160,6 +160,7 @@ export interface MoraleCheckData {
 export interface BonusActionData {
   participantId: string;
   abilityKey: string;
+  targetCell?: GridPoint;
   targetParticipantId?: string;
   targetParticipantIds?: string[];
 }
@@ -174,6 +175,7 @@ export interface MoveParticipantData {
   participantId: string;
   to: GridPoint;
   free?: boolean;
+  returnToStart?: true;
 }
 
 export interface MapTerrainData {
@@ -191,6 +193,7 @@ export interface MapTerrainResponse {
 export interface AbilityActionData {
   participantId: string;
   abilityKey: string;
+  targetCell?: GridPoint;
   targetParticipantIds?: string[];
 }
 

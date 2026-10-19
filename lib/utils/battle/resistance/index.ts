@@ -12,6 +12,8 @@ export interface ResistanceOptions {
   attackKind?: AttackKind;
   /** модифікатори поточної дії для цілі (фаза before) */
   extra?: StaticEffect[];
+  /** школа заклинання; опір зі school діє лише на нього */
+  school?: string | null;
 }
 
 /**
@@ -48,6 +50,7 @@ function matchingResistances(target: BattleParticipant, damageType: string, opts
   return entries.flatMap((e) =>
     e.flag?.flag === "resistance" &&
     (!e.flag.attackKind || e.flag.attackKind === opts.attackKind) &&
+    (!e.flag.school || (opts.fromSpell === true && e.flag.school === opts.school)) &&
     matchesDamageType(e.flag.damageType, damageType, opts.fromSpell === true)
       ? [{ label: e.label, percent: e.flag.percent, icon: e.icon }]
       : [],

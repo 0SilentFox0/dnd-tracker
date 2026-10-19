@@ -6,7 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
@@ -31,7 +31,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
   const targets = order.filter(
-    (p) => isUp(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
+    (p) => isUp(p) && !isAirborne(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
 
   const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);

@@ -9,6 +9,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
+import { movementBudget } from "@/lib/utils/battle/grid";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -148,6 +149,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     const ps = cast("slow", ["orc"], [hero(), fast, slowGob]).allParticipantsUpdated;
 
     expect(calculateInitiative(find(ps, "orc"), ps)).toBe(9);
+    expect(movementBudget(find(ps, "orc"))).toBe(movementBudget(fast) - 2);
 
     const loop = runAdvanceTurnLoop({ initiativeOrder: ps, currentTurnIndex: 2, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99) });
 

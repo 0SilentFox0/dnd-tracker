@@ -145,6 +145,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     bonusAction: actions.bonusAction.mutateAsync,
     abilityAction: actions.abilityAction.mutateAsync,
     nextTurn: actions.nextTurn.mutateAsync,
+    move: actions.move.mutate,
     moraleCheck: actions.moraleCheck.mutateAsync,
   };
 }

@@ -1,9 +1,10 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
+import { resolveAttackTargets } from "./targets";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, isAirborne, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
@@ -12,8 +13,8 @@ import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { enemiesInReach } from "@/lib/utils/battle/grid";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -47,6 +48,7 @@ export type AttackPhaseInput = {
   isDM: boolean;
   rng?: Rng;
   map?: BattleMapConfig | null;
+  hitSpells?: ReadonlyMap<string, CastableSpell>;
 };
 
 export type AttackPhaseResult = {
@@ -98,6 +100,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleAccessError(404, "Цілей немає в бою");
   }
 
+  if (chosenTargets.some(isAirborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+
   if (
     !currentParticipant ||
     currentParticipant.basicInfo.id !== attacker.basicInfo.id
@@ -131,49 +135,13 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
   }
 
-  const isAoe = attack.targetType === "aoe";
+  const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const hitsAllEnemies = findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
-
-  const targets = hitsAllEnemies
-    ? [
-        ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t)),
-        ...(input.map && attacker.battleData.position
-          ? enemiesInReach(input.map, initiativeOrder, attacker, attack)
-          : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t))
-        ).filter((t) => !targetIds.includes(t.basicInfo.id)),
-      ]
-    : chosenTargets;
-
-  if (targets.length === 0) {
-    throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
-  }
-
-  const isMultiTargetRanged =
-    hitsAllEnemies ||
-    (!isAoe &&
-      attack.type === AttackType.RANGED &&
-      (attacker.combatStats.maxTargets ?? 1) > 1);
-
-  const maxPossibleTargets = hitsAllEnemies
-    ? targets.length
-    : isAoe
-      ? attack.maxTargets || attacker.combatStats.maxTargets || 1
-      : isMultiTargetRanged
-        ? attacker.combatStats.maxTargets || 1
-        : 1;
+  const { targets, expanded, isMultiTargetRanged, falloff } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
   const chosenIndex = (id: string) => chosenTargets.findIndex((t) => t.basicInfo.id === id);
 
-  if (targets.length > maxPossibleTargets) {
-    throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${maxPossibleTargets}`);
-  }
-
   const dist = attack.damageDistribution;
-
-  const falloffPercents = hitsAllEnemies ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
-
-  const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 
   // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
   const damageFractions: number[] =
@@ -200,7 +168,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const summons: SummonRequest[] = [];
 
   // кожне влучання мультицільової атаки — свій блок кубиків повної формули (зброя + рівень героя), по черзі влучань
-  const damageFormula = isMultiTargetRanged && (targets.length > 1 || hitsAllEnemies) ? heroAttackDamageParts(attacker, attack).formula : null;
+  const damageFormula = isMultiTargetRanged && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
 
   const dicePerTarget = damageFormula ? diceCount(damageFormula) : 0;
 
@@ -213,9 +181,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
-    const chosenAt = hitsAllEnemies ? chosenIndex(target.basicInfo.id) : i;
+    const chosenAt = expanded ? chosenIndex(target.basicInfo.id) : i;
 
-    const d20Roll = hitsAllEnemies
+    const d20Roll = expanded
       ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? rollDie(20, rng))
       : usePerTargetRolls && data.attackRolls
         ? data.attackRolls[i]
@@ -259,6 +227,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       battleId,
       damageMultiplier,
       obstacle: data.obstacle,
+      map: input.map,
+      hitSpells: input.hitSpells,
       rng,
     });
 
@@ -293,6 +263,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         round: battle.currentRound,
         battleId,
         rng,
+        map: input.map,
       });
 
       if (retaliation) {

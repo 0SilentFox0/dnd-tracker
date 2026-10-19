@@ -2,6 +2,7 @@
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import type { BattleParticipant } from "@/types/battle";
 
 export function applyVampirism(
@@ -20,9 +21,9 @@ export function applyVampirism(
 
   const heal = Math.floor((totalFinalDamage * percent) / 100);
 
-  const healed = Math.min(attacker.combatStats.maxHp, attacker.combatStats.currentHp + heal);
+  const { participant, healed } = applyRawHeal(attacker, heal);
 
-  if (heal <= 0 || healed <= attacker.combatStats.currentHp) return { updatedAttacker: null, vampirismHeal: 0 };
+  if (healed <= 0) return { updatedAttacker: null, vampirismHeal: 0 };
 
-  return { updatedAttacker: { ...attacker, combatStats: { ...attacker.combatStats, currentHp: healed } }, vampirismHeal: healed - attacker.combatStats.currentHp };
+  return { updatedAttacker: participant, vampirismHeal: healed };
 }
