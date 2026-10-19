@@ -4,7 +4,7 @@ import { applyMainActionUsed } from "../participant";
 import { applyResistance, immunityNote } from "../resistance";
 import type { CastableSpell, CastSpellParams, CastSpellResult } from "../types/spell-process";
 import { diffAppliedEffects } from "./applied-effects";
-import { computeSpellPower, spellSaveDc } from "./power";
+import { computeSpellPower, rollSavingThrow, spellSaveDc } from "./power";
 import { spellNeedsSlot, spellSlotKey } from "./slot";
 import { participantImmuneToSpell } from "./spell-immunity";
 
@@ -16,7 +16,6 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Amount, Effect } from "@/lib/utils/abilities/schema";
-import { rollDie } from "@/lib/utils/common/dice";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { AbilityEvent, ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
@@ -230,15 +229,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     if (withSave && def.resolution.kind === "save") {
       const { ability: saveAbility, onSuccess } = def.resolution;
 
-      const roll = saveRolls.find((s) => s.participantId === id)?.roll ?? rollDie(20, rng);
-
       const dc = spellSaveDc(updatedCaster);
 
-      const mod = target.abilities.modifiers[saveAbility];
-
-      const total = roll + mod;
-
-      const success = total >= dc;
+      const { roll, mod, total, success } = rollSavingThrow(target, saveAbility, dc, rng, saveRolls.find((s) => s.participantId === id)?.roll);
 
       saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 

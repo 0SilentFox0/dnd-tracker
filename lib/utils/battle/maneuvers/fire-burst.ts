@@ -3,8 +3,7 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
-import { rollDie } from "@/lib/utils/common/dice";
+import { rollSavingThrow, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { BattleParticipant } from "@/types/battle";
 
 const NO_MAP_TARGETS = 3;
@@ -27,11 +26,7 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
   const notes = new Map<string, string>();
 
   const hits = targets.map((t) => {
-    const roll = rollDie(20, input.rng);
-
-    const total = roll + t.abilities.modifiers.dexterity;
-
-    const saved = total >= dc;
+    const { total, success: saved } = rollSavingThrow(t, "dexterity", dc, input.rng);
 
     notes.set(t.basicInfo.id, ` (Спритність ${total} проти СК ${dc}${saved ? " — половина" : ""})`);
 
