@@ -5,17 +5,6 @@ import type { Ability } from "@/lib/utils/abilities/schema";
 
 const base = { raceKey: "necromancers" } as const;
 
-const boneBody = (): Ability => ({
-  id: "unit-bone-body",
-  name: "Кістяне тіло",
-  description: "Опір колючій шкоді 50 %, вразливість до дробильної +25 %.",
-  trigger: { event: "passive" },
-  effects: [
-    { kind: "flag", flag: "resistance", damageType: "piercing", percent: 50 },
-    { kind: "flag", flag: "resistance", damageType: "bludgeoning", percent: -25 },
-  ],
-});
-
 const rotAura = (): Ability => ({
   id: "unit-rot-aura",
   name: "Аура гнилі",
@@ -54,8 +43,6 @@ const deathGaze = (): Ability => ({
   effects: [{ kind: "dealDamage", amount: { percentOf: "maxHp", value: 20 }, damageType: "necrotic", target: "eventTarget" }],
 });
 
-const skeleton = () => [undead(), boneBody()];
-
 const zombie = () => [undead(), undyingOnce()];
 
 const ghost = () => [undead(), incorporeal()];
@@ -65,9 +52,9 @@ const vampire = () => [undead(), noRetaliation()];
 const lich = () => [undead(), falloff("Хмара смерті")];
 
 export const NECROMANCER_UNITS: LibraryUnit[] = [
-  { ...base, key: "necromancers-skeleton", name: "Скелет", tier: 1, role: "base", hp: 28, ac: 14, attackBonus: 5, initiative: 10, attacks: [{ name: "Іржавий меч", type: "melee", dice: "1d6", damageType: "slashing" }], abilities: skeleton() },
-  { ...base, key: "necromancers-skeleton-archer", name: "Скелет-лучник", tier: 1, role: "upgrade", hp: 28, ac: 13, attackBonus: 6, initiative: 10, attacks: [{ name: "Кістяний лук", type: "ranged", dice: "1d6+1", damageType: "piercing" }], abilities: skeleton() },
-  { ...base, key: "necromancers-skeleton-warrior", name: "Скелет-воїн", tier: 1, role: "alt", hp: 36, ac: 16, attackBonus: 6, initiative: 10, attacks: [{ name: "Старий меч", type: "melee", dice: "1d6+1", damageType: "slashing" }], abilities: [...skeleton(), bigShield(30)] },
+  { ...base, key: "necromancers-skeleton", name: "Скелет", tier: 1, role: "base", hp: 28, ac: 14, attackBonus: 5, initiative: 10, attacks: [{ name: "Іржавий меч", type: "melee", dice: "1d6", damageType: "slashing" }], abilities: [undead()] },
+  { ...base, key: "necromancers-skeleton-archer", name: "Скелет-лучник", tier: 1, role: "upgrade", hp: 28, ac: 13, attackBonus: 6, initiative: 10, attacks: [{ name: "Кістяний лук", type: "ranged", dice: "1d6+1", damageType: "piercing" }], abilities: [undead()] },
+  { ...base, key: "necromancers-skeleton-warrior", name: "Скелет-воїн", tier: 1, role: "alt", hp: 36, ac: 16, attackBonus: 6, initiative: 10, attacks: [{ name: "Старий меч", type: "melee", dice: "1d6+1", damageType: "slashing" }], abilities: [undead(), bigShield(30)] },
   { ...base, key: "necromancers-zombie", name: "Зомбі", tier: 2, role: "base", hp: 48, ac: 10, attackBonus: 5, initiative: 6, attacks: [{ name: "Удар кулаками", type: "melee", dice: "1d6+1", damageType: "bludgeoning" }], abilities: zombie() },
   { ...base, key: "necromancers-plague-zombie", name: "Чумний зомбі", tier: 2, role: "upgrade", hp: 55, ac: 10, attackBonus: 6, initiative: 7, attacks: [{ name: "Заразні кігті", type: "melee", dice: "1d6+2", damageType: "slashing" }], abilities: [...zombie(), debuff("Чума", "attackBonus", 2, 2, 25)] },
   { ...base, key: "necromancers-rotting-zombie", name: "Гниючий зомбі", tier: 2, role: "alt", hp: 55, ac: 10, attackBonus: 6, initiative: 7, attacks: [{ name: "Гнилі кулаки", type: "melee", dice: "1d8+1", damageType: "bludgeoning" }], abilities: [...zombie(), rotAura()] },
