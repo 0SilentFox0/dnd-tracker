@@ -1,13 +1,16 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
+import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
+import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { feetToCells } from "@/lib/utils/battle/grid/template";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
-export type SpellTargetMode = "none" | "single" | "multi" | "all";
+export type SpellTargetMode = "none" | "single" | "multi" | "all" | "template";
 
 export interface SpellPick {
   spellId: string;
@@ -16,6 +19,9 @@ export interface SpellPick {
   /** кого можна обирати: союзник, ворог або полеглий союзник */
   targetSide?: "ally" | "enemy" | "dead";
   maxTargets?: number;
+  template?: SpellTemplate;
+  /** дальність у футах */
+  range?: number;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -27,6 +33,7 @@ export interface SpellFlowState {
   levelPinned?: boolean;
   pick?: SpellPick;
   targetIds: string[];
+  aim?: GridPoint;
   saves: Record<string, number>;
   damage: (number | undefined)[];
   error?: string;
@@ -39,6 +46,7 @@ export type SpellFlowAction =
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
+  | { type: "SET_AIM"; aim: GridPoint; targetIds: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_SAVE"; id: string; value: number | undefined }
   | { type: "SET_DAMAGE"; index: number; value: number | undefined }
@@ -74,7 +82,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_LEVEL":
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
-      return { ...s, step: "spell", pick: a.pick, targetIds: [], saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, targetIds: [], aim: undefined, saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "TO_TARGETS":
       if (!s.pick) return s;
 
@@ -94,7 +102,16 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
 
       return { ...s, targetIds: [...s.targetIds, a.id] };
     }
+    case "SET_AIM": {
+      if (s.pick?.targetMode !== "template") return s;
+
+      const saves = Object.fromEntries(Object.entries(s.saves).filter(([id]) => a.targetIds.includes(id)));
+
+      return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
+    }
     case "CONFIRM_TARGETS":
+      if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
+
       return s.targetIds.length === 0 ? s : afterTargets(s);
     case "SET_SAVE": {
       const { [a.id]: _cleared, ...rest } = s.saves;
@@ -134,6 +151,7 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     casterId: s.casterId as string,
     spellId: s.pick?.spellId as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.targetIds,
+    ...(s.pick?.targetMode === "template" && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
   };
@@ -162,10 +180,14 @@ export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
 
 const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
 
-export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell): SpellPick {
+export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null): SpellPick {
   const def = spellDefinition(s);
 
   const { targeting } = def;
+
+  const onMap = !!map && !!caster && isOnMap(caster);
+
+  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size } : undefined;
 
   const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
 
@@ -173,9 +195,11 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const auto = AUTO_TARGETING.includes(targeting.kind);
 
-  const targetMode: SpellPick["targetMode"] = auto ? "none" : isMulti ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
+  const targetMode: SpellPick["targetMode"] = template ? "template" : auto ? "none" : isMulti ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
 
-  const maxTargets = isMulti ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+  const maxTargets = template ? undefined : isMulti ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+
+  const range = "range" in targeting ? targeting.range : undefined;
 
   const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
 
@@ -185,6 +209,8 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     targetMode,
     targetSide: spellTargetSide(s),
     maxTargets,
+    ...(template && { template }),
+    ...(range !== undefined && { range }),
     needsSaves: def.resolution.kind === "save" && !auto,
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),
   };
@@ -198,6 +224,13 @@ export function spellTargetCandidates(order: BattleParticipant[], caster: Battle
 
     return side === "dead" ? mine && !isUp(p) : isUp(p) && (side === "ally" ? mine : !mine);
   });
+}
+
+/** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає. */
+export function spellTargetInRange(map: BattleMapConfig | null, caster: BattleParticipant | null, target: BattleParticipant, range: number | undefined): boolean {
+  if (!map || range === undefined || !caster || !isOnMap(caster) || target.battleData.position === undefined) return true;
+
+  return footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
 }
 
 export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState, viewer: { isDM: boolean; userId: string | null }): BattleParticipant[] {

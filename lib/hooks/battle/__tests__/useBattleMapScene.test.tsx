@@ -5,13 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { useBattleMapScene } from "../useBattleMapScene";
 import { fakeScene } from "./fake-scene";
 
+import type { MapAim } from "@/lib/utils/battle/grid";
 import type { MapTerrainData } from "@/types/api";
 import type { BattleMapConfig } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
-function setup(isDM: boolean) {
-  const scene = fakeScene({ isDM, map });
+function setup(isDM: boolean, mapAim: MapAim | null = null) {
+  const scene = fakeScene({ isDM, map, mapAim });
 
   scene.me.battleData.position = { x: 0, y: 0 };
   scene.gob.battleData.position = { x: 1, y: 0 };
@@ -235,5 +236,56 @@ describe("useBattleMapScene", () => {
     });
 
     expect(current().terrainTool?.active).toBe(false);
+  });
+
+  describe("наведення шаблону", () => {
+    const aim = (over: Partial<MapAim> = {}): MapAim => ({ template: { shape: "circle", size: 5 }, casterId: "me", range: 15, onAim: vi.fn(), ...over });
+
+    it("клік по клітинці й токену — onAim, без руху й атаки", () => {
+      const mapAim = aim();
+
+      const { current, value } = setup(false, mapAim);
+
+      act(() => current().actions.onCellClick?.({ x: 2, y: 1 }));
+      act(() => current().actions.onTokenClick?.("gob"));
+
+      expect(mapAim.onAim).toHaveBeenNthCalledWith(1, { x: 2, y: 1 });
+      expect(mapAim.onAim).toHaveBeenNthCalledWith(2, { x: 1, y: 0 });
+      expect(value.actions.move.mutate).not.toHaveBeenCalled();
+      expect(value.requestAttack).not.toHaveBeenCalled();
+    });
+
+    it("поза дальністю — підказка замість onAim", () => {
+      const mapAim = aim();
+
+      const { current, value } = setup(false, mapAim);
+
+      act(() => current().actions.onCellClick?.({ x: 8, y: 1 }));
+
+      expect(mapAim.onAim).not.toHaveBeenCalled();
+      expect(value.toast.show).toHaveBeenCalledWith("Поза дальністю");
+    });
+
+    it("ховер показує превʼю шаблону, а без ховера — обрану точку", () => {
+      const { current } = setup(false, aim({ aim: { x: 0, y: 3 } }));
+
+      expect(current().view.aim).toEqual({ x: 0, y: 3 });
+      expect(current().view.marks?.get("0:4")).toBe("template");
+
+      act(() => current().actions.onCellHover?.({ x: 3, y: 1 }));
+      expect(current().view.aim).toEqual({ x: 3, y: 1 });
+      expect(current().view.marks?.get("2:0")).toBe("template");
+      expect(current().view.marks?.has("0:4")).toBe(false);
+
+      act(() => current().actions.onCellHover?.(null));
+      expect(current().view.aim).toEqual({ x: 0, y: 3 });
+    });
+
+    it("ховер поза дальністю превʼю не змінює", () => {
+      const { current } = setup(false, aim({ aim: { x: 0, y: 3 } }));
+
+      act(() => current().actions.onCellHover?.({ x: 9, y: 4 }));
+      expect(current().view.aim).toEqual({ x: 0, y: 3 });
+    });
   });
 });

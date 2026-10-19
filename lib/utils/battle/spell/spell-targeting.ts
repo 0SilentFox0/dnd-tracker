@@ -3,7 +3,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { aimInRange, apexOf, feetToCells, participantsInCells, templateCells } from "@/lib/utils/battle/grid/template";
+import { feetToCells, templateAimAllowed, templateArea } from "@/lib/utils/battle/grid/template";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -65,15 +65,11 @@ type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
   if (!aim) return fail("Оберіть точку на карті");
 
-  const origin = cellsOf(caster);
+  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
 
-  const centered = targeting.shape === "circle" || targeting.shape === "cube";
+  const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
-  if (centered && !aimInRange(origin, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
-
-  const cells = templateCells(map, targeting, origin, aim);
-
-  const targetIds = participantsInCells(ps, cells, centered ? aim : apexOf(origin, aim)).map((p) => p.basicInfo.id);
+  const targetIds = targets.map((p) => p.basicInfo.id);
 
   if (cells.length === 0 || (targetIds.length === 0 && !targeting.zone)) return fail("У шаблоні немає цілей");
 

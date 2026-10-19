@@ -209,6 +209,21 @@ const StrokeLayer = memo(function StrokeLayer({ preview, pending }: { preview: R
   );
 });
 
+const TemplateLayer = memo(function TemplateLayer({ marks, aim }: { marks: BattleMapView["marks"]; aim?: GridPoint | null }) {
+  const cells = marks ? [...marks].flatMap(([k, m]) => (m === "template" ? [k] : [])) : [];
+
+  if (cells.length === 0 && !aim) return null;
+
+  return (
+    <g pointerEvents="none">
+      {cells.map((k) => (
+        <polygon key={`tp${k}`} data-template-cell={k} points={cellPolygon(parseKey(k))} fill="rgba(255,140,40,.28)" stroke="#ffb04a" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+      ))}
+      {aim && <polygon data-template-aim={cellKey(aim)} points={cellPolygon(aim)} fill="rgba(255,176,74,.5)" stroke="#ffd27a" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
+    </g>
+  );
+});
+
 const NO_CELLS: ReadonlySet<string> = new Set();
 
 interface Stroke {
@@ -371,6 +386,7 @@ export function BattleMap({ map, participants, view, actions, className, clickab
             showBlocked={showBlocked}
             onStrokeStart={painting ? onStrokeStart : undefined}
           />
+          <TemplateLayer marks={view?.marks} aim={view?.aim} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">

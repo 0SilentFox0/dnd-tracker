@@ -200,7 +200,7 @@ export interface TerrainDiff {
   removed?: string[];
 }
 
-export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target";
+export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template";
 
 export interface BattleMapView {
   selectedId?: string | null;
@@ -209,6 +209,8 @@ export interface BattleMapView {
   marks?: Map<string, BattleMapMark | number>;
   /** Лінія траєкторії від учасника до клітинки/учасника */
   trajectory?: { fromId: string; to: GridPoint } | null;
+  /** Точка наведення шаблону заклинання */
+  aim?: GridPoint | null;
   /** Плашка під токеном: без запису — exact */
   hud?: Map<string, { exact: boolean }>;
   /** Клітинки надісланих штрихів місцевості до відповіді сервера */

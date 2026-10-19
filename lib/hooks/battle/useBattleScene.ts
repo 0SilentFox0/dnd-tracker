@@ -33,6 +33,7 @@ import {
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
+import type { MapAim } from "@/lib/utils/battle/grid";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
@@ -111,6 +112,9 @@ export interface BattleSceneValue extends BattleSceneData {
   attackIntent: AttackIntent | null;
   requestAttack(intent: AttackIntent): void;
   clearAttackIntent(): void;
+  /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
+  mapAim: MapAim | null;
+  setMapAim(aim: MapAim | null): void;
   toast: BattleToastApi;
   result: ResultFx | null;
   showResult(fx: ResultFx | null): void;
@@ -216,6 +220,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
 
+  const [mapAim, setMapAim] = useState<MapAim | null>(null);
+
   const [result, showResult] = useState<ResultFx | null>(null);
 
   const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
@@ -319,6 +325,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     attackIntent,
     requestAttack: setAttackIntent,
     clearAttackIntent,
+    mapAim,
+    setMapAim,
     toast,
     result,
     showResult,

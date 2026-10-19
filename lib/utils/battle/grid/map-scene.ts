@@ -1,9 +1,18 @@
 import { cellKey } from "./geometry";
 import { type CellMark, isMoveMark, moveZoneMarks, reachingAttack, targetMarks } from "./map-view";
 import { cellsOf, isOnMap } from "./occupancy";
+import { templateAimAllowed, templateArea } from "./template";
 
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
-import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
+
+export interface MapAim {
+  template: SpellTemplate;
+  casterId: string;
+  range?: number;
+  aim?: GridPoint;
+  onAim(cell: GridPoint): void;
+}
 
 export interface MapSceneInput {
   map: BattleMapConfig;
@@ -16,6 +25,7 @@ export interface MapSceneInput {
   toolActive?: boolean;
   placingId: string | null;
   selectedId: string | null;
+  aim?: MapAim | null;
 }
 
 export type MapClick =
@@ -24,17 +34,35 @@ export type MapClick =
   | { kind: "attack"; targetId: string; attackId?: string }
   | { kind: "reject"; reason: string }
   | { kind: "select"; id: string }
-  | { kind: "arm"; id: string };
+  | { kind: "arm"; id: string }
+  | { kind: "aim"; cell: GridPoint };
 
 export interface MapScene {
   participants: BattleParticipant[];
   view: BattleMapView;
+  aiming: boolean;
   cellClick(p: GridPoint): MapClick;
   tokenClick(id: string): MapClick;
 }
 
 export function deriveTrajectory(marks: BattleMapView["marks"], currentId: string | null, hoverCell: GridPoint | null): BattleMapView["trajectory"] {
   return currentId && hoverCell && marks?.get(cellKey(hoverCell)) === "target" ? { fromId: currentId, to: hoverCell } : null;
+}
+
+export interface AimScene {
+  map: BattleMapConfig;
+  participants: BattleParticipant[];
+}
+
+/** Клітинки шаблону в точці `at`; null — заклинатель поза картою або точка поза дальністю. */
+export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint } | null {
+  const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
+
+  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range)) return null;
+
+  const { cells } = templateArea(map, participants, caster, aim.template, at);
+
+  return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: at };
 }
 
 export function deriveMapScene(input: MapSceneInput): MapScene {
@@ -46,13 +74,21 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
 
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
+  const aimCaster = input.aim && !placing && !tool ? participants.find((p) => p.basicInfo.id === input.aim?.casterId) : undefined;
+
+  const aim = aimCaster && isOnMap(aimCaster) ? input.aim : null;
+
   const marks = new Map<string, CellMark | number>();
 
   const attacks = current?.battleData.attacks ?? [];
 
   const canAttack = !!current && attacks.length > 0 && (!current.actionFlags.hasUsedAction || (current.battleData.pendingExtraActions ?? 0) > 0);
 
-  if (!placing && !tool && canAct && current?.battleData.position) {
+  const aimed = aim?.aim ? aimView({ map, participants }, aim, aim.aim) : null;
+
+  if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
+
+  if (!aim && !placing && !tool && canAct && current?.battleData.position) {
     for (const [key, cost] of moveZoneMarks(map, participants, current)) marks.set(key, cost);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
@@ -68,7 +104,12 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
     marks,
     trajectory: null,
     hud,
+    ...(aimed && { aim: aimed.aim }),
   };
+
+  function aimAt(p: GridPoint): MapClick {
+    return aim && aimCaster && templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Поза дальністю" };
+  }
 
   function tokenClick(id: string): MapClick {
     if (tool) return { kind: "none" };
@@ -76,6 +117,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
     const target = participants.find((p) => p.basicInfo.id === id);
 
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
+
+    if (aim) return target && isOnMap(target) ? aimAt(cellsOf(target)[0]) : { kind: "none" };
 
     if (canAct && canAttack && current && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
       const mark = marks.get(cellKey(cellsOf(target)[0]));
@@ -101,6 +144,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
       return placed && isOnMap(placed) ? { kind: "move", participantId: placed.basicInfo.id, to: p, free: true } : { kind: "none" };
     }
 
+    if (aim) return aimAt(p);
+
     const key = cellKey(p);
 
     const mark = marks.get(key);
@@ -118,5 +163,5 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
     return { kind: "none" };
   }
 
-  return { participants, view, cellClick, tokenClick };
+  return { participants, view, aiming: !!aim, cellClick, tokenClick };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
+import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
@@ -11,19 +11,23 @@ import {
   initialSpellFlow,
   spellDefinition,
   spellFlow,
+  type SpellFlowAction,
+  type SpellFlowState,
   spellPayload,
   spellSaveTargets,
   spellSlotCostLabel,
   spellSlotsLeft,
   spellSpec,
   spellTargetCandidates,
+  spellTargetInRange,
 } from "@/lib/utils/battle/flows";
+import { type MapAim, templateArea } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 export type { BookSpell };
@@ -72,6 +76,57 @@ export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
 const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
   Object.keys(byLevel).map(Number).filter((l) => byLevel[l].length > 0);
 
+/** Поки майстер на кроці цілей шаблону, карта приймає точку наведення замість руху чи атаки. */
+function useSpellMapAim(
+  state: SpellFlowState,
+  dispatch: Dispatch<SpellFlowAction>,
+  ctx: { caster: BattleParticipant | null; order: BattleParticipant[]; map: BattleMapConfig | null; setMapAim(aim: MapAim | null): void },
+) {
+  const { caster, order, map, setMapAim } = ctx;
+
+  const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
+
+  useEffect(() => {
+    aimAt.current = (cell) => {
+      const template = state.pick?.template;
+
+      if (!map || !caster || !template) return;
+
+      const ids = templateArea(map, order, caster, template, cell).targets.map((p) => p.basicInfo.id);
+
+      dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
+    };
+  });
+
+  const onAim = useCallback((cell: GridPoint) => aimAt.current(cell), []);
+
+  const template = state.step === "targets" && state.pick?.targetMode === "template" ? state.pick.template : undefined;
+
+  const range = state.pick?.range;
+
+  const casterId = caster?.basicInfo.id;
+
+  useEffect(() => {
+    if (!template || !casterId) return;
+
+    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim });
+
+    return () => setMapAim(null);
+  }, [template, casterId, range, state.aim, onAim, setMapAim]);
+
+  useEffect(() => {
+    if (!template) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dispatch({ type: "CLOSE" });
+    };
+
+    window.addEventListener("keydown", onKey);
+
+    return () => window.removeEventListener("keydown", onKey);
+  }, [template, dispatch]);
+}
+
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
   const scene = useBattleScene();
 
@@ -99,7 +154,21 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const order = scene.battle.initiativeOrder;
 
-  const targets = spellTargetCandidates(order, caster, state.pick?.targetSide);
+  const map = scene.battle.map ?? null;
+
+  const targets = spellTargetCandidates(order, caster, state.pick?.targetMode === "template" ? undefined : state.pick?.targetSide);
+
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, state.pick?.range);
+
+  const aimTargets = state.pick?.targetMode === "template"
+    ? state.targetIds.flatMap((id) => {
+        const p = order.find((x) => x.basicInfo.id === id);
+
+        return p ? [{ participant: p, ally: !!caster && p.basicInfo.side === caster.basicInfo.side }] : [];
+      })
+    : [];
+
+  useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.setMapAim });
 
   const saveTargets = spellSaveTargets(targets, state, scene);
 
@@ -126,7 +195,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   return {
-    state, spells, byLevel, selected, targets, saveTargets, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    state, spells, byLevel, selected, targets, saveTargets, aimTargets, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,
@@ -139,9 +208,13 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
       if (who) dispatch({ type: "OPEN", casterId: who.basicInfo.id, level: level ?? firstUsable(who), levels });
     },
     setLevel: (level: number) => dispatch({ type: "SET_LEVEL", level }),
-    pick: (s: BookSpell) => dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s) }),
+    pick: (s: BookSpell) => dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map) }),
     toTargets: () => dispatch({ type: "TO_TARGETS" }),
     toggleTarget: (id: string) => {
+      const target = order.find((p) => p.basicInfo.id === id);
+
+      if (target && !inRange(target)) return;
+
       const expanded =
         state.pick?.targetMode === "all" && caster && selected
           ? expandSpellTargets(order, caster.basicInfo.id, spellSpec(selected), [id])

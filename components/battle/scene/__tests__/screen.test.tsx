@@ -85,6 +85,27 @@ describe("BattleScreen", () => {
     expect(screen.getByRole("tab", { name: /Вороги/ }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("наведення шаблону показує карту: десктоп у «Колонках» і телефон на вкладці «Вороги»", () => {
+    const mapAim = { template: { shape: "circle" as const, size: 10 }, casterId: "me", onAim: vi.fn() };
+
+    media.wide = true;
+    window.localStorage.setItem("battle-view-mode:b1", "columns");
+
+    const desk = render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper });
+
+    expect(desk.container.querySelector("[data-fx-clip]")).not.toBeNull();
+    expect(window.localStorage.getItem("battle-view-mode:b1")).toBe("columns");
+    desk.unmount();
+    window.localStorage.clear();
+
+    media.wide = false;
+
+    render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper });
+
+    fireEvent.click(screen.getByRole("tab", { name: /Вороги/ }));
+    expect(screen.getByRole("tab", { name: /Карта/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
   it("телефон без карти: вкладки Карта немає", () => {
     media.wide = false;
 

@@ -426,4 +426,16 @@ describe("BattleMap — terrain stroke", () => {
 
     expect(container.querySelectorAll("[data-terrain]")).toHaveLength(1);
   });
+
+  it("шар шаблону: клітинки шаблону підсвічені, точка наведення яскравіша", () => {
+    const marks = new Map([["1:1", "template" as const], ["2:1", "template" as const]]);
+
+    const { container } = render(<BattleMap map={square} participants={people} view={{ marks, aim: { x: 1, y: 1 } }} />);
+
+    const cells = container.querySelectorAll("[data-template-cell]");
+
+    expect([...cells].map((c) => c.getAttribute("data-template-cell"))).toEqual(["1:1", "2:1"]);
+    expect(cells[0].getAttribute("stroke")).toBe("#ffb04a");
+    expect(container.querySelector('[data-template-aim="1:1"]')).not.toBeNull();
+  });
 });

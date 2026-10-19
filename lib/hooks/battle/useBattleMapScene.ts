@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
-import { cellKey, deriveMapScene, deriveTrajectory, type MapClick } from "@/lib/utils/battle/grid";
+import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -23,7 +23,7 @@ const NO_ORDER: BattleParticipant[] = [];
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
-  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, requestAttack, toast } = useBattleScene();
+  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, requestAttack, toast, mapAim } = useBattleScene();
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
@@ -55,23 +55,24 @@ export function useBattleMapScene(): BattleMapScene | null {
   const canAct = isMyTurn && !anyPending && !!current;
 
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId }) : null),
-    [map, order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId],
+    () => (map ? deriveMapScene({ map, participants: order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId, aim: mapAim }) : null),
+    [map, order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId, mapAim],
   );
 
   const { pending: pendingStroke } = terrainTool;
 
-  const view = useMemo(
-    () =>
-      scene
-        ? {
-            ...scene.view,
-            trajectory: deriveTrajectory(scene.view.marks, scene.view.currentId ?? null, hoverCell),
-            ...(pendingStroke.size > 0 && { pendingStroke }),
-          }
-        : null,
-    [scene, hoverCell, pendingStroke],
-  );
+  const view = useMemo(() => {
+    if (!scene || !map) return null;
+
+    const hovered = scene.aiming && mapAim && hoverCell ? aimView({ map, participants: scene.participants }, mapAim, hoverCell) : null;
+
+    return {
+      ...scene.view,
+      ...hovered,
+      trajectory: deriveTrajectory(scene.view.marks, scene.view.currentId ?? null, hoverCell),
+      ...(pendingStroke.size > 0 && { pendingStroke }),
+    };
+  }, [scene, map, mapAim, hoverCell, pendingStroke]);
 
   const { mutate: move } = actions.move;
 
@@ -96,11 +97,14 @@ export function useBattleMapScene(): BattleMapScene | null {
         case "arm":
           setPlacingId(click.id);
           break;
+        case "aim":
+          mapAim?.onAim(click.cell);
+          break;
         case "none":
           break;
       }
     },
-    [move, requestAttack, show, select, current, currentRound, currentTurnIndex],
+    [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim],
   );
 
   const { commit } = terrainTool;
@@ -120,7 +124,9 @@ export function useBattleMapScene(): BattleMapScene | null {
       },
       onCellHover: (p) =>
         setHoverCell((prev) => {
-          const next = p && latest.current.scene?.view.marks?.get(cellKey(p)) === "target" ? p : null;
+          const l = latest.current.scene;
+
+          const next = p && (l?.aiming || l?.view.marks?.get(cellKey(p)) === "target") ? p : null;
 
           return sameCell(prev, next) ? prev : next;
         }),

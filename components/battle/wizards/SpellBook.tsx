@@ -3,6 +3,7 @@
 import { Loader2, Sparkles, Swords } from "lucide-react";
 
 import { SaveRolls } from "./spellbook/SaveRolls";
+import { SpellAimPanel } from "./spellbook/SpellAimPanel";
 import { SpellSummary } from "./spellbook/SpellSummary";
 
 import { Portrait } from "@/components/battle/hud";
@@ -24,7 +25,9 @@ export function SpellBook({ book }: { book: Book }) {
 
   const wide = useMediaQuery("(min-width: 1024px)");
 
-  const open = state.step !== "closed" && state.step !== "result";
+  const aiming = state.step === "targets" && state.pick?.targetMode === "template";
+
+  const open = state.step !== "closed" && state.step !== "result" && !aiming;
 
   const detailPage = selected && (
     <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6">
@@ -39,12 +42,17 @@ export function SpellBook({ book }: { book: Book }) {
         <>
           <div className="hud-sc text-xl font-bold">Цілі · {selected.name}</div>
           <div className="mt-3 space-y-2">
-            {targets.map((t) => (
-              <button key={t.basicInfo.id} type="button" onClick={() => book.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", state.targetIds.includes(t.basicInfo.id) ? "border-[#7a2a1f] bg-[#7a2a1f]/10" : "border-[#2a2018]/20")}>
-                <Portrait participant={t} size={32} />
-                <span className="hud-sc font-bold">{t.basicInfo.name}</span>
-              </button>
-            ))}
+            {targets.map((t) => {
+              const reachable = book.inRange(t);
+
+              return (
+                <button key={t.basicInfo.id} type="button" disabled={!reachable} onClick={() => book.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left disabled:opacity-50", state.targetIds.includes(t.basicInfo.id) ? "border-[#7a2a1f] bg-[#7a2a1f]/10" : "border-[#2a2018]/20")}>
+                  <Portrait participant={t} size={32} />
+                  <span className="hud-sc font-bold">{t.basicInfo.name}</span>
+                  {!reachable && <span className="ml-auto text-sm italic">Поза дальністю</span>}
+                </button>
+              );
+            })}
           </div>
           {book.allCount > 0 && <div className="hud-sc mt-3 text-sm">на всіх: {book.allCount}</div>}
           <button type="button" disabled={state.targetIds.length === 0} onClick={book.confirmTargets} className={cn(seal, "mt-auto")}>Далі · кидки</button>
@@ -79,9 +87,12 @@ export function SpellBook({ book }: { book: Book }) {
   const showDetail = state.step !== "book";
 
   return (
+    <>
+    {aiming && selected && <SpellAimPanel book={book} spellName={selected.name} />}
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && book.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
       <SpellBookPages byLevel={byLevel} slotOf={book.slotLeft} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={book.setLevel} onPick={book.pick} detail={detailPage || null} formulaOf={book.formulaOf} />
       {showDetail && !wide && <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
+    </>
   );
 }

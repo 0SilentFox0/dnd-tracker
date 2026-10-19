@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveMapScene, deriveTrajectory, type MapSceneInput } from "../map-scene";
+import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapSceneInput } from "../map-scene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -192,5 +192,44 @@ describe("deriveMapScene", () => {
     expect(s.view.marks?.size).toBe(0);
     expect(s.cellClick({ x: 1, y: 1 })).toEqual({ kind: "none" });
     expect(s.tokenClick("e1")).toEqual({ kind: "none" });
+  });
+});
+
+describe("deriveMapScene: наведення шаблону", () => {
+  const aim = (over: Partial<MapAim> = {}): MapAim => ({ template: { shape: "circle", size: 5 }, casterId: "h", range: 15, onAim: () => undefined, ...over });
+
+  it("без зони ходу й цілей; клітинка в дальності — aim, поза — reject «Поза дальністю»", () => {
+    const s = deriveMapScene(input({ aim: aim() }));
+
+    expect([...(s.view.marks?.values() ?? [])]).toEqual([]);
+    expect(s.aiming).toBe(true);
+    expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
+    expect(s.cellClick({ x: 4, y: 0 })).toEqual({ kind: "reject", reason: "Поза дальністю" });
+  });
+
+  it("клік по токену цілиться в його клітинку, а не атакує", () => {
+    const s = deriveMapScene(input({ aim: aim() }));
+
+    expect(s.tokenClick("e1")).toEqual({ kind: "aim", cell: { x: 1, y: 0 } });
+  });
+
+  it("обрана точка — клітинки шаблону й aim у view", () => {
+    const s = deriveMapScene(input({ aim: aim({ aim: { x: 2, y: 2 } }) }));
+
+    expect(s.view.aim).toEqual({ x: 2, y: 2 });
+    expect(s.view.marks?.get("2:2")).toBe("template");
+    expect(s.view.marks?.get("3:2")).toBe("template");
+    expect(s.view.marks?.has("4:2")).toBe(false);
+  });
+
+  it("aimView: поза дальністю — null; конус без дальності — від заклинателя", () => {
+    const scene = { map, participants: [hero, near, far] };
+
+    expect(aimView(scene, aim(), { x: 5, y: 0 })).toBeNull();
+
+    const cone = aimView(scene, aim({ template: { shape: "cone", size: 15 }, range: undefined }), { x: 5, y: 0 });
+
+    expect(cone?.marks.get("1:0")).toBe("template");
+    expect(cone?.marks.has("0:0")).toBe(false);
   });
 });

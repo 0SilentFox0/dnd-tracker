@@ -7,6 +7,7 @@ import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import type { MapAim } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
@@ -24,6 +25,7 @@ export interface FakeSceneOptions {
   status?: BattleScene["status"];
   afterLog?: BattleAction[];
   map?: BattleScene["map"];
+  mapAim?: MapAim | null;
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -122,6 +124,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     attackIntent: null,
     requestAttack: vi.fn(),
     clearAttackIntent: vi.fn(),
+    mapAim: opts.mapAim ?? null,
+    setMapAim: vi.fn(),
     toast,
     result: opts.result ?? null,
     showResult,

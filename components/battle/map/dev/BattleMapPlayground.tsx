@@ -30,6 +30,7 @@ export function BattleMapPlayground() {
       items={[
         { key: "move", label: "Рух", active: mode === "move", onSelect: () => controls.setMode("move") },
         { key: "attack", label: "Атака", active: mode === "attack", onSelect: () => controls.setMode("attack") },
+        { key: "template", label: "Шаблон", active: mode === "template", onSelect: () => controls.setMode("template") },
       ]}
     />
   );

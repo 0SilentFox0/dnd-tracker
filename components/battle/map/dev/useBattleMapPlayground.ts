@@ -5,10 +5,10 @@ import { useCallback, useMemo, useState } from "react";
 import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
-import { cellKey, cellsOf, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks } from "@/lib/utils/battle/grid";
-import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
+import { aimView, cellKey, cellsOf, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks, templateArea } from "@/lib/utils/battle/grid";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
-export type BattleMapPlaygroundMode = "move" | "attack";
+export type BattleMapPlaygroundMode = "move" | "attack" | "template";
 
 const DEMO_DAMAGE = 7;
 
@@ -24,6 +24,10 @@ const DEMO_TERRAIN: NonNullable<BattleMapConfig["terrain"]> = {
 };
 
 const LOG_LIMIT = 6;
+
+const DEMO_TEMPLATE: SpellTemplate = { shape: "circle", size: 20 };
+
+const DEMO_RANGE = 60;
 
 function initial(map: BattleMapConfig): BattleParticipant[] {
   return placeParticipants(map, buildMockParticipants());
@@ -46,8 +50,14 @@ export function useBattleMapPlayground() {
 
   const attack = active.battleData.attacks[0];
 
+  const [aim, setAim] = useState<GridPoint | null>(null);
+
+  const mapAim = useMemo<MapAim>(() => ({ template: DEMO_TEMPLATE, casterId: active.basicInfo.id, range: DEMO_RANGE, onAim: () => undefined }), [active.basicInfo.id]);
+
+  const aimed = mode === "template" ? ((hover && aimView({ map, participants }, mapAim, hover)) || (aim && aimView({ map, participants }, mapAim, aim))) : null;
+
   const marks = useMemo(
-    () => (mode === "move" ? moveZoneMarks(map, participants, active) : attack ? targetMarks(map, participants, active, [attack]) : new Map()),
+    () => (mode === "move" ? moveZoneMarks(map, participants, active) : mode === "attack" && attack ? targetMarks(map, participants, active, [attack]) : new Map()),
     [mode, map, participants, active, attack],
   );
 
@@ -57,7 +67,7 @@ export function useBattleMapPlayground() {
 
   const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true }])), [participants]);
 
-  const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks, trajectory, hud };
+  const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks: aimed?.marks ?? marks, aim: aimed?.aim ?? null, trajectory, hud };
 
   const pushLog = useCallback((line: string) => setLog((prev) => [line, ...prev].slice(0, LOG_LIMIT)), []);
 
@@ -93,6 +103,17 @@ export function useBattleMapPlayground() {
     (p: GridPoint) => {
       const key = cellKey(p);
 
+      if (mode === "template") {
+        if (!aimView({ map, participants }, mapAim, p)) return pushLog("Поза дальністю");
+
+        const hit = templateArea(map, participants, active, DEMO_TEMPLATE, p).targets;
+
+        setAim(p);
+        pushLog(`Шаблон у ${key}: ${hit.map((q) => q.basicInfo.name).join(", ") || "нікого"}`);
+
+        return;
+      }
+
       if (mode === "move") {
         const cost = marks.has(key) ? costs.get(key) : undefined;
 
@@ -125,7 +146,7 @@ export function useBattleMapPlayground() {
       );
       pushLog(`${active.basicInfo.name} б'є ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
     },
-    [mode, marks, costs, activeId, active, participants, pushLog],
+    [mode, marks, costs, activeId, active, participants, pushLog, map, mapAim],
   );
 
   const nextTurn = useCallback(() => {
@@ -148,6 +169,7 @@ export function useBattleMapPlayground() {
     setParticipants(fresh);
     setActiveId(fresh[0].basicInfo.id);
     setMode("move");
+    setAim(null);
     setLog([]);
   }, [map]);
 

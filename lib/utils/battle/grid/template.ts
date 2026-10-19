@@ -118,6 +118,21 @@ export function participantsInCells(participants: BattleParticipant[], cells: st
     .map((x) => x.p);
 }
 
+const centered = (t: SpellTemplate) => t.shape === "circle" || t.shape === "cube";
+
+/** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола й куба. */
+export function templateAimAllowed(origin: GridPoint[], template: SpellTemplate, aim: GridPoint, rangeFeet: number | undefined): boolean {
+  return !centered(template) || aimInRange(origin, aim, rangeFeet);
+}
+
+export function templateArea(map: BattleMapConfig, participants: BattleParticipant[], caster: BattleParticipant, template: SpellTemplate, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
+  const origin = cellsOf(caster);
+
+  const cells = templateCells(map, template, origin, aim);
+
+  return { cells, targets: participantsInCells(participants, cells, centered(template) || origin.length === 0 ? aim : apexOf(origin, aim)) };
+}
+
 export function aimInRange(origin: GridPoint[], aim: GridPoint, rangeFeet: number | undefined): boolean {
   if (rangeFeet === undefined) return true;
 

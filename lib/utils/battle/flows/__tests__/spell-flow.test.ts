@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { buildSpellPick, initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetSide } from "@/lib/utils/battle/flows";
+import { buildSpellPick, initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide } from "@/lib/utils/battle/flows";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 const run = (...a: SpellFlowAction[]) => a.reduce<SpellFlowState>(spellFlow, initialSpellFlow);
@@ -194,5 +195,79 @@ describe("цілі й слоти закляття", () => {
     expect(spellSlotCostLabel(s, { free: false, universal: true })).toMatch(/універсальний/);
     expect(spellSlotCostLabel(s, { free: false, universal: false })).toBe("Витратить слот I кола.");
     expect(spellSlotCostLabel({ ...s, level: 0 }, { free: false, universal: false })).toBeNull();
+  });
+});
+
+describe("шаблон і дальність", () => {
+  const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
+
+  const placed = (id: string, side: ParticipantSide, position?: GridPoint) => {
+    const p = makeParticipant({ id, side });
+
+    return { ...p, battleData: { ...p.battleData, ...(position && { position }) } };
+  };
+
+  const hero = placed("h", ParticipantSide.ALLY, { x: 0, y: 0 });
+
+  const foe = placed("f", ParticipantSide.ENEMY, { x: 6, y: 0 });
+
+  const order = [hero, foe];
+
+  const fireball = { id: "fb", name: "Вогняна куля", level: 3, dice: 8, targeting: { kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 4, range: 150 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } } as unknown as BookSpell;
+
+  const ball: SpellPick = { spellId: "fb", level: 3, targetMode: "template", template: { shape: "circle", size: 20 }, range: 150, needsSaves: true, diceSlots: [6] };
+
+  it("buildSpellPick: template на карті з позицією заклинателя; без карти чи позиції — multi", () => {
+    expect(buildSpellPick(order, hero, fireball, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 20 }, range: 150 });
+    expect(buildSpellPick(order, hero, fireball, null)).toMatchObject({ targetMode: "multi", maxTargets: 4, targetSide: "enemy" });
+    expect(buildSpellPick(order, placed("h", ParticipantSide.ALLY), fireball, map).targetMode).toBe("multi");
+  });
+
+  it("buildSpellPick: дальність одиночного заклинання з targeting.range", () => {
+    const bolt = { id: "b", name: "B", level: 1, dice: 1, targeting: { kind: "enemy", range: 30 } } as unknown as BookSpell;
+
+    expect(buildSpellPick(order, hero, bolt, map)).toMatchObject({ targetMode: "single", range: 30 });
+  });
+
+  it("SET_AIM ставить точку й превʼю цілей; підтвердження лише з точкою; payload з targetCell", () => {
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" });
+
+    expect(s.step).toBe("targets");
+    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("targets");
+
+    const aimed = spellFlow(s, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: ["f"] });
+
+    expect(aimed).toMatchObject({ aim: { x: 6, y: 1 }, targetIds: ["f"] });
+
+    const rolled = [{ type: "CONFIRM_TARGETS" }, { type: "SET_DAMAGE", index: 0, value: 3 }, { type: "TO_SUMMARY" }] as SpellFlowAction[];
+
+    const done = rolled.reduce(spellFlow, aimed);
+
+    expect(done.step).toBe("summary");
+    expect(spellPayload(done)).toEqual({ casterId: "h", spellId: "fb", targetIds: ["f"], targetCell: { x: 6, y: 1 }, diceRolls: [3] });
+  });
+
+  it("порожній шаблон теж можна підтвердити; SET_AIM поза template-режимом ігнорується", () => {
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
+
+    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
+
+    const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" });
+
+    expect(spellFlow(single, { type: "SET_AIM", aim: { x: 1, y: 1 }, targetIds: ["f"] })).toBe(single);
+  });
+
+  it("SET_AIM прибирає рятунки тих, хто випав із шаблону", () => {
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 0 }, targetIds: ["f", "g"] }, { type: "SET_SAVE", id: "f", value: 10 }, { type: "SET_SAVE", id: "g", value: 4 });
+
+    expect(spellFlow(s, { type: "SET_AIM", aim: { x: 7, y: 0 }, targetIds: ["f"] }).saves).toEqual({ f: 10 });
+  });
+
+  it("spellTargetInRange: без карти, дальності чи позиції — у дальності", () => {
+    expect(spellTargetInRange(map, hero, foe, 30)).toBe(true);
+    expect(spellTargetInRange(map, hero, foe, 25)).toBe(false);
+    expect(spellTargetInRange(null, hero, foe, 5)).toBe(true);
+    expect(spellTargetInRange(map, hero, foe, undefined)).toBe(true);
+    expect(spellTargetInRange(map, hero, placed("x", ParticipantSide.ENEMY), 5)).toBe(true);
   });
 });

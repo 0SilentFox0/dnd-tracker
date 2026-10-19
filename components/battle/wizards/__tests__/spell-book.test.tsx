@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -12,6 +12,8 @@ const lib = vi.hoisted(() => ({
     { id: "ball", name: "Вогняна куля", level: 2, dice: 4, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellGroup: { id: "chaos", name: "Хаос" } },
     { id: "light", name: "Слово світла", level: 2, dice: 2, cost: "action", targeting: { kind: "allEnemies" }, resolution: { kind: "auto" } },
     { id: "rebirth", name: "Відродження лісу", level: 2, dice: 0, cost: "action", targeting: { kind: "allAlliesDead" }, resolution: { kind: "auto" } },
+    { id: "meteor", name: "Метеор", level: 2, dice: 1, cost: "action", targeting: { kind: "template", shape: "circle", size: 5, side: "enemy", maxTargets: 4, range: 30 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } },
+    { id: "dart", name: "Дротик", level: 2, dice: 1, cost: "action", targeting: { kind: "enemy", range: 5 }, resolution: { kind: "auto" } },
     { id: "revive", name: "Воскресіння", level: 2, dice: 0, cost: "action", targeting: { kind: "allyDead" }, resolution: { kind: "auto" } },
   ],
 }));
@@ -26,6 +28,7 @@ import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import type { MapAim } from "@/lib/utils/battle/grid";
 
 const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
 
@@ -195,5 +198,91 @@ describe("SpellBook", () => {
     fireEvent.click(await screen.findByText("Палаючий промінь"));
 
     expect((screen.getByRole("button", { name: /Обрати цілі/ }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  describe("на карті", () => {
+    const onMap = (knownSpells: string[], isDM = false) => {
+      const scene = fakeScene({ knownSpells, isDM, slots: { "2": { max: 3, current: 3 } }, map: { cols: 10, rows: 6, background: null, opacity: 0.3 } });
+
+      scene.me.battleData.position = { x: 0, y: 0 };
+      scene.gob.battleData.position = { x: 4, y: 0 };
+      scene.ally.battleData.position = { x: 4, y: 1 };
+
+      return scene;
+    };
+
+    it("одиночне: ціль поза дальністю вимкнена з підписом", async () => {
+      const { wrapper, caster } = onMap(["dart"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Дротик"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      const gob = screen.getByRole("button", { name: /Гоблін/ }) as HTMLButtonElement;
+
+      expect(gob.disabled).toBe(true);
+      expect(gob.textContent).toContain("Поза дальністю");
+    });
+
+    it("шаблон: наведення на карті, зачеплені з позначкою союзника, підтвердження → кидки, каст з targetCell", async () => {
+      const { wrapper, caster, value, castSpell } = onMap(["meteor"], true);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.getByText("Оберіть точку на карті")).toBeTruthy();
+      expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
+
+      const aim = vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      expect(aim).toMatchObject({ template: { shape: "circle", size: 5 }, casterId: "me", range: 30 });
+
+      act(() => aim.onAim({ x: 4, y: 0 }));
+
+      expect(screen.getByText("Гоблін")).toBeTruthy();
+      expect(screen.getByText("⚠ союзник")).toBeTruthy();
+      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toMatchObject({ aim: { x: 4, y: 0 } });
+
+      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
+
+      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
+      expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
+
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetCell: { x: 4, y: 0 } })));
+    });
+
+    it("шаблон без карти — звичайний вибір цілей", async () => {
+      const { wrapper, caster } = fakeScene({ knownSpells: ["meteor"], slots: { "2": { max: 3, current: 3 } } });
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
+      expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
+    });
+
+    it("Esc під час наведення закриває майстер", async () => {
+      const { wrapper, caster, value } = onMap(["meteor"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      });
+
+      expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
+      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
+    });
   });
 });
