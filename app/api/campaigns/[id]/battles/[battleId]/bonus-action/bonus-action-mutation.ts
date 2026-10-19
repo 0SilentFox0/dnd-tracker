@@ -41,7 +41,7 @@ export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (participant.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано цього ходу");
 
-    if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+    if (!withinLimits(participant, ability, ctx.scene.round)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
     const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? (data.targetParticipantId ? [data.targetParticipantId] : []), participant);
 

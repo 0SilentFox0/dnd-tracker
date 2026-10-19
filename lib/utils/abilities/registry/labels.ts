@@ -75,6 +75,7 @@ export function limitsLabel(l: Limits | undefined): string[] {
     l.perBattle ? `${l.perBattle} ${pluralUk(l.perBattle, ["раз", "рази", "разів"])} за бій` : null,
     l.perRound ? `${l.perRound}/раунд` : null,
     l.perTurn ? `${l.perTurn}/хід` : null,
+    l.cooldownRounds ? `перезарядка ${l.cooldownRounds} р.` : null,
     l.chance ? `${l.chance}%` : null,
   ].filter((x): x is string => !!x);
 }

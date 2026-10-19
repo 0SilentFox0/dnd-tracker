@@ -36,9 +36,20 @@ describe("мій герой", () => {
     const charges = abilityCharges({
       ...p,
       battleData: { ...p.battleData, resolvedAbilities: [limited, ability({ key: "free" })], abilityUsage: { sw: { battle: 1, round: 1, turn: 1 } } },
-    });
+    }, 1);
 
-    expect(charges).toEqual([{ key: "sw", name: "Друге дихання", icon: undefined, left: 0, limit: 1, per: "battle" }]);
+    expect(charges).toEqual([{ key: "sw", name: "Друге дихання", icon: undefined, left: 0, limit: 1, per: "battle", cooldownLeft: 0 }]);
+  });
+
+  it("abilityCharges — перезарядка без лічильника", () => {
+    const p = createMockParticipant();
+
+    const cd = ability({ key: "dv", limits: { cooldownRounds: 2 } });
+
+    const used = { ...p, battleData: { ...p.battleData, resolvedAbilities: [cd], abilityUsage: { dv: { battle: 1, round: 1, turn: 1, lastRound: 3 } } } };
+
+    expect(abilityCharges(used, 4)[0]).toMatchObject({ limit: null, left: 0, cooldownLeft: 2 });
+    expect(abilityCharges(used, 6)[0]).toMatchObject({ left: 1, cooldownLeft: 0 });
   });
 
   it("getEffectiveArmorClass враховує ауру союзника", () => {

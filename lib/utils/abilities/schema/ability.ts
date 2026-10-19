@@ -9,6 +9,7 @@ export const LimitsSchema = z.object({
   perBattle: z.number().int().min(1).optional(),
   perRound: z.number().int().min(1).optional(),
   perTurn: z.number().int().min(1).optional(),
+  cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
 });
 

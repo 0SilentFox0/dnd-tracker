@@ -19,6 +19,7 @@ export interface AbilityUsageCounter {
   battle: number;
   round: number;
   turn: number;
+  lastRound?: number;
 }
 
 export type AbilityEvent =

@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -42,23 +42,30 @@ export interface AbilityCharge {
   name: string;
   icon?: string | null;
   left: number;
-  limit: number;
-  per: "battle" | "round" | "turn";
+  limit: number | null;
+  per: "battle" | "round" | "turn" | null;
+  cooldownLeft: number;
 }
 
-export function abilityCharges(p: BattleParticipant, triggers: readonly string[] = ["bonusAction", "action"]): AbilityCharge[] {
-  return (p.battleData.resolvedAbilities ?? []).flatMap((a) => {
+export function abilityCharges(p: BattleParticipant, round: number, triggers: readonly string[] = ["bonusAction", "action"]): AbilityCharge[] {
+  return (p.battleData.resolvedAbilities ?? []).flatMap((a): AbilityCharge[] => {
     if (!triggers.includes(a.trigger.event) || !a.limits) return [];
 
     const per = a.limits.perBattle ? "battle" : a.limits.perRound ? "round" : a.limits.perTurn ? "turn" : null;
 
-    if (!per) return [];
+    const cooldown = cooldownLeft(p, a, round);
+
+    if (!per && !a.limits.cooldownRounds) return [];
+
+    const base = { key: a.key, name: a.name, icon: a.source.icon ?? undefined, cooldownLeft: cooldown };
+
+    if (!per) return [{ ...base, left: cooldown > 0 ? 0 : 1, limit: null, per: null }];
 
     const limit = (per === "battle" ? a.limits.perBattle : per === "round" ? a.limits.perRound : a.limits.perTurn) as number;
 
     const used = p.battleData.abilityUsage?.[a.key]?.[per] ?? 0;
 
-    return [{ key: a.key, name: a.name, icon: a.source.icon ?? undefined, left: Math.max(0, limit - used), limit, per }];
+    return [{ ...base, left: Math.max(0, limit - used), limit, per }];
   });
 }
 
@@ -81,8 +88,19 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 }
 
-export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "action"): ResolvedAbility[] {
-  return (p.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === trigger && withinLimits(p, a));
+export interface AbilityOption {
+  ability: ResolvedAbility;
+  cooldownLeft: number;
+}
+
+export function abilityOptions(p: BattleParticipant, trigger: "bonusAction" | "action", round: number): AbilityOption[] {
+  return (p.battleData.resolvedAbilities ?? [])
+    .filter((a) => a.trigger.event === trigger && withinCountLimits(p, a))
+    .map((ability) => ({ ability, cooldownLeft: cooldownLeft(p, ability, round) }));
+}
+
+export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "action", round: number): ResolvedAbility[] {
+  return abilityOptions(p, trigger, round).filter((o) => o.cooldownLeft === 0).map((o) => o.ability);
 }
 
 export function needsBonusTarget(a: ResolvedAbility): boolean {

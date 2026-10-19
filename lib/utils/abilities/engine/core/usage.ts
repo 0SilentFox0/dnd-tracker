@@ -7,7 +7,17 @@ export function usageOf(p: BattleParticipant, key: string): AbilityUsageCounter 
   return p.battleData.abilityUsage?.[key] ?? EMPTY;
 }
 
-export function withinLimits(p: BattleParticipant, ability: ResolvedAbility): boolean {
+export function cooldownLeft(p: BattleParticipant, ability: ResolvedAbility, round: number): number {
+  const cooldown = ability.limits?.cooldownRounds;
+
+  const { lastRound } = usageOf(p, ability.key);
+
+  if (!cooldown || lastRound === undefined) return 0;
+
+  return Math.max(0, lastRound + cooldown + 1 - round);
+}
+
+export function withinCountLimits(p: BattleParticipant, ability: ResolvedAbility): boolean {
   const l = ability.limits;
 
   if (!l) return true;
@@ -21,14 +31,18 @@ export function withinLimits(p: BattleParticipant, ability: ResolvedAbility): bo
   );
 }
 
-export function recordUse(p: BattleParticipant, key: string): BattleParticipant {
+export function withinLimits(p: BattleParticipant, ability: ResolvedAbility, round: number): boolean {
+  return withinCountLimits(p, ability) && cooldownLeft(p, ability, round) === 0;
+}
+
+export function recordUse(p: BattleParticipant, key: string, round: number): BattleParticipant {
   const u = usageOf(p, key);
 
   return {
     ...p,
     battleData: {
       ...p.battleData,
-      abilityUsage: { ...p.battleData.abilityUsage, [key]: { battle: u.battle + 1, round: u.round + 1, turn: u.turn + 1 } },
+      abilityUsage: { ...p.battleData.abilityUsage, [key]: { battle: u.battle + 1, round: u.round + 1, turn: u.turn + 1, lastRound: round } },
     },
   };
 }

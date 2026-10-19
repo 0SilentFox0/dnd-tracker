@@ -41,7 +41,7 @@ export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (participant.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
 
-    if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+    if (!withinLimits(participant, ability, ctx.scene.round)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
     const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? [], participant);
 

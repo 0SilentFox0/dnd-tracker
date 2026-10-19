@@ -10,19 +10,18 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
-import { bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
+import { abilityOptions, bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone, trigger = "bonusAction" }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void; trigger?: "bonusAction" | "action" }) {
-  const { roster: { allies, enemies }, actions } = useBattleScene();
+  const { roster: { allies, enemies }, actions, battle } = useBattleScene();
 
   const [aiming, setAiming] = useState<ResolvedAbility | null>(null);
 
-  const abilities = (participant.battleData.resolvedAbilities ?? []).filter((a) => a.trigger.event === trigger && withinLimits(participant, a));
+  const abilities = abilityOptions(participant, trigger, battle.currentRound);
 
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -59,11 +58,11 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
  onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : trigger === "action" ? "Вміння" : "Бонусна дія"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       <div className="space-y-2">
-        {!aiming && abilities.map((a) => (
-          <button key={a.key} type="button" disabled={actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => (needsBonusTarget(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left">
+        {!aiming && abilities.map(({ ability: a, cooldownLeft }) => (
+          <button key={a.key} type="button" disabled={cooldownLeft > 0 || actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => (needsBonusTarget(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
             {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
             <span className="min-w-0">
-              <span className="hud-sc block font-bold">{a.name}</span>
+              <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">ще {cooldownLeft} р.</span>}</span>
               <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(describeEffect).join(", ")}</span>
             </span>
           </button>

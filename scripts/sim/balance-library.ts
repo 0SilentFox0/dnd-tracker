@@ -249,13 +249,13 @@ function abilityTargets(actor: BattleParticipant, ability: ResolvedAbility, foes
 
 // Автоплей юнітів: бонусні дії щоходу, дії здібностей лише «раз за бій» (замість атаки), коли є ціль.
 async function playUnitAbilities(actor: BattleParticipant, foes: BattleParticipant[]): Promise<boolean> {
-  for (const ability of usableAbilities(actor, "bonusAction")) {
+  for (const ability of usableAbilities(actor, "bonusAction", state.currentRound)) {
     const targets = abilityTargets(actor, ability, foes);
 
     if (targets) await call("bonus-action", BONUS, { participantId: actor.basicInfo.id, abilityKey: ability.key, targetParticipantIds: targets });
   }
 
-  for (const ability of usableAbilities(actor, "action").filter((a) => a.limits?.perBattle)) {
+  for (const ability of usableAbilities(actor, "action", state.currentRound).filter((a) => a.limits?.perBattle)) {
     const targets = abilityTargets(actor, ability, foes.filter(alive));
 
     if (!targets) continue;

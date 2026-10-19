@@ -50,7 +50,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (ability.condition && !evaluateCondition(ability.condition, { owner, event, participants: ps })) continue;
 
-      if (!withinLimits(owner, ability)) continue;
+      if (!withinLimits(owner, ability, ctx.round)) continue;
 
       if (ability.limits?.chance !== undefined && ctx.rng() * 100 >= ability.limits.chance) {
         // лише вміння самого діяча: чужі шансові тригери на кожну подію засмітили б журнал
@@ -59,7 +59,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         continue;
       }
 
-      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key));
+      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key, ctx.round));
       fired.push(ability.key);
 
       for (const [effectIndex, effect] of ability.effects.entries()) {
