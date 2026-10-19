@@ -40,11 +40,14 @@ export interface AttackFlowState {
   index: number;
   error?: string;
   results: AttackOutcomeSummary[];
+  /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
+  picked?: boolean;
 }
 
 export type AttackFlowAction =
-  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[] }
+  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[]; picked?: boolean }
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
+  | { type: "CHANGE_WEAPON" }
   | { type: "TOGGLE_TARGET"; id: string }
   | { type: "SET_TARGETS"; ids: string[] }
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
@@ -75,9 +78,11 @@ const prevHit = (strikes: Strike[], before: number) => {
 export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
   switch (a.type) {
     case "OPEN":
-      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets) };
+      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets), ...(a.picked && { picked: true }) };
     case "SELECT_WEAPON":
       return { ...s, step: "target", attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: s.targetIds.slice(0, a.maxTargets) };
+    case "CHANGE_WEAPON":
+      return s.weaponCount > 1 && s.step === "roll" ? { ...s, step: "weapon", strikes: [], index: 0, error: undefined, picked: false } : s;
     case "TOGGLE_TARGET": {
       if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
 
@@ -120,7 +125,7 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
         return prev === -1 ? { ...s, step: "roll", index: s.strikes.length - 1 } : { ...s, index: prev };
       }
 
-      if (s.step === "roll") return s.index > 0 ? { ...s, index: s.index - 1 } : { ...s, step: "target" };
+      if (s.step === "roll") return s.index > 0 ? { ...s, index: s.index - 1 } : { ...s, step: "target", picked: false };
 
       if (s.step === "target" && s.weaponCount > 1) return { ...s, step: "weapon" };
 

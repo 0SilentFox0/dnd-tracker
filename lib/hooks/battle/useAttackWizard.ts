@@ -4,9 +4,11 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
+import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
@@ -188,6 +190,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const view = {
     attack, attacks, targets, steps, estimate, unknownDefense, previews,
+    attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     rollMode: currentMode,
     forcedMode: currentStrike?.forced,
     canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
@@ -210,9 +213,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const chosen = (attackId && attacks.find((a) => (a.id ?? a.name) === attackId)) || first;
 
-      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(chosen), targetIds: [target.basicInfo.id] });
+      const picked = attacks.length === 1 || !!attackId;
 
-      if (attacks.length === 1 || attackId) {
+      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(chosen), targetIds: [target.basicInfo.id], picked });
+
+      if (picked) {
         if (attacks.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
 
         const forced = attacker ? forcedModeOf(predictAttack(attacker, target, chosen, order, scene.battle.currentRound)) : undefined;
@@ -220,6 +225,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         dispatch({ type: "CONFIRM_TARGETS", forced: { [target.basicInfo.id]: forced } });
       }
     },
+    changeWeapon: () => dispatch({ type: "CHANGE_WEAPON" }),
     selectWeapon: (a: BattleAttack) => {
       dispatch({ type: "SELECT_WEAPON", ...describe(a) });
       preselectAll(a);

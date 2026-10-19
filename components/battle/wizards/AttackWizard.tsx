@@ -23,6 +23,10 @@ const STEP_INDEX = { weapon: 0, target: 1, roll: 2, damage: 3, summary: 4, submi
 
 const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advantage", "Перевага"], ["disadvantage", "Недолік"]];
 
+const PICKED_LABEL = { melee: "Ближня атака · ціль поруч", ranged: "Дальня атака" } as const;
+
+const PICKED_STEPS = new Set(["roll", "damage", "summary", "submitting"]);
+
 const btn = "hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em]";
 
 export function AttackWizard({ wizard }: { wizard: Wizard }) {
@@ -59,6 +63,17 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       {header}
+      {state.picked && view.attackKind && PICKED_STEPS.has(state.step) && (
+        <div data-attack-picked={view.attackKind} className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-[#cdb87e]">
+          <span className="flex items-center gap-1.5">
+            {view.attackKind === "ranged" ? <Crosshair className="size-4" /> : <Swords className="size-4" />}
+            {PICKED_LABEL[view.attackKind]}
+          </span>
+          {state.step === "roll" && state.weaponCount > 1 && state.index === 0 && (
+            <button type="button" onClick={actions.changeWeapon} className="h-8 border border-white/25 px-2.5 text-xs text-[var(--ink)]">Змінити зброю</button>
+          )}
+        </div>
+      )}
       {state.step === "weapon" && (
         <div className="space-y-2">
           {attacks.map((a) => (

@@ -22,6 +22,33 @@ describe("attackFlow", () => {
     expect(run(withTargets(2, 2, ["e1", "e2"]), { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 1, diceSlots: [8] }).targetIds).toEqual(["e1"]);
   });
 
+  describe("CHANGE_WEAPON", () => {
+    const picked: AttackFlowAction[] = [
+      { type: "OPEN", weaponCount: 2, attackId: "rapier", maxTargets: 1, diceSlots: [8], targetIds: ["e1"], picked: true },
+      { type: "SELECT_WEAPON", attackId: "rapier", maxTargets: 1, diceSlots: [8] },
+      { type: "CONFIRM_TARGETS" },
+    ];
+
+    it("з кидка — назад до зброї з тією ж ціллю, удари скинуті, позначка вибору знята", () => {
+      expect(run(...picked)).toMatchObject({ step: "roll", picked: true });
+
+      const s = run(...picked, { type: "CHANGE_WEAPON" });
+
+      expect(s).toMatchObject({ step: "weapon", targetIds: ["e1"], strikes: [], index: 0, picked: false });
+      expect(attackFlow(s, { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 1, diceSlots: [6] })).toMatchObject({ step: "target", attackId: "bow", targetIds: ["e1"] });
+    });
+
+    it("одна зброя або не крок кидка — без змін", () => {
+      const single = run({ type: "OPEN", weaponCount: 1, attackId: "rapier", maxTargets: 1, diceSlots: [8], targetIds: ["e1"], picked: true }, { type: "CONFIRM_TARGETS" });
+
+      expect(attackFlow(single, { type: "CHANGE_WEAPON" })).toBe(single);
+
+      const atWeapon = run(picked[0]);
+
+      expect(attackFlow(atWeapon, { type: "CHANGE_WEAPON" })).toBe(atWeapon);
+    });
+  });
+
   it("одна ціль — заміна; кілька — перемикання до максимуму", () => {
     expect(run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }).targetIds).toEqual(["b"]);
 
