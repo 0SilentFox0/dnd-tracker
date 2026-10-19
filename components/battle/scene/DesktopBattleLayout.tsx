@@ -91,7 +91,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
             {selected ? "Учасник" : "Журнал"}
             {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">← журнал</button>}
           </h3>
-          {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
+          {selected ? <div className="pt-3"><ParticipantDetails key={selected.basicInfo.id} participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
         </aside>
       </div>
     </div>
