@@ -39,6 +39,7 @@ import type {
   AbilityActionData,
   AttackData,
   AuraZoneData,
+  BattleMutationResponse,
   BattleScene,
   BonusActionData,
   MapTerrainData,
@@ -145,17 +146,10 @@ export interface AttackResponse {
   hpChanges: BattleAction["hpChanges"];
 }
 
-export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<AttackData & { endTurn?: boolean }, AttackResponse>(
-    c,
-    b,
-    async (data) => {
-      const res = await attack(c, b, data);
+const withHpChanges = (res: BattleMutationResponse) => ({ ...res, response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []) } });
 
-      return { ...res, response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []) } };
-    },
-    { ...o, invalidate: ["battles"] },
-  );
+export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<AttackData & { endTurn?: boolean }, AttackResponse>(c, b, async (data) => withHpChanges(await attack(c, b, data)), { ...o, invalidate: ["battles"] });
 
 export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoraleCheckData, { moraleResult: MoraleCheckResult }>(c, b, (data) => moraleCheck(c, b, data), o);
@@ -176,7 +170,7 @@ export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);
 
 export const useCastSpell = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<SpellCastData>(c, b, (data) => castSpell(c, b, data), o);
+  useBattleAction<SpellCastData, AttackResponse>(c, b, async (data) => withHpChanges(await castSpell(c, b, data)), o);
 
 export const useStartBattle = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<object>(c, b, (body) => startBattle(c, b, body), { ...o, invalidate: ["battles", "active-battles"] });

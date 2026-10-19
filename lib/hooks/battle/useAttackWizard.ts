@@ -154,6 +154,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const d20 = effectiveD20(strike, strikeMode(state, strike));
 
+      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed })) : undefined;
+
       if (first.kind === "miss" || crit?.type === "fail") {
         const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
 
@@ -162,6 +164,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
           targetName,
           d20,
           known,
+          ...(strikes && { strikes }),
           ...(retaliation && { retaliation }),
           ...(crit?.type === "fail" && { critFail: crit }),
         });
@@ -173,6 +176,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
           downed: first.downed,
           d20,
           weapon: attack?.name,
+          ...(strikes && { strikes }),
           ...(retaliation && { retaliation }),
           ...(crit?.type === "success" && { critEffect: crit }),
         });

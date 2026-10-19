@@ -24,6 +24,8 @@ import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
+const ActionResultCard = dynamic(() => import("@/components/battle/overlays/ActionResultCard").then((m) => m.ActionResultCard), { ssr: false });
+
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 const MAP_TAB = "map";
@@ -123,6 +125,7 @@ export function MobileBattleLayout() {
           )}
         </div>
       )}
+      <ActionResultCard />
       {isDM && <DmPanel panel={{ open: dmOpen, onOpenChange: setDmOpen }} />}
       <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         {selected && <ParticipantDetails participant={selected} />}

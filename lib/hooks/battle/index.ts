@@ -1,11 +1,13 @@
 export { useAbilityMapAim } from "./useAbilityMapAim";
 export { useAbilityPicker } from "./useAbilityPicker";
+export { ACTION_RESULT_MS, useActionResult } from "./useActionResult";
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattleFxQueue } from "./useBattleFxQueue";
 export { type BattleMapScene, useBattleMapScene } from "./useBattleMapScene";
 export { type BattlePageDialogs, useBattlePageDialogs } from "./useBattlePageDialogs";
 export {
+  type ActionResultFx,
   BattleSceneContext,
   BattleSceneDataContext,
   type BattleSceneValue,

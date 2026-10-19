@@ -2,37 +2,16 @@
 
 import { useEffect } from "react";
 
-import { type CritEffectFx, useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { MORALE_SKIP_MS } from "@/lib/utils/battle/flows";
-import type { RetaliationOutcome } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/common/format";
 
 const die = "hud-sc flex items-center justify-center font-extrabold [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)] animate-[hud-dropin_.7s_cubic-bezier(.16,1,.3,1)_both]";
 
 const cta = "hud-sc mt-8 flex h-[52px] w-full max-w-xs items-center justify-center text-[17px] font-bold tracking-[.06em]";
 
-function RetaliationLine({ retaliation }: { retaliation?: RetaliationOutcome }) {
-  if (!retaliation) return null;
-
-  return (
-    <div className="relative mt-1.5 text-sm text-[#e9a08f]">
-      Відповідь цілі: {retaliation.name} {retaliation.damage > 0 ? `−${retaliation.damage}` : "промах"}
-    </div>
-  );
-}
-
-function CritEffectLine({ effect, tone = "text-[#ffd9a8]" }: { effect?: CritEffectFx; tone?: string }) {
-  if (!effect) return null;
-
-  return (
-    <div className="relative mt-3 max-w-xs">
-      <div className={cn("hud-sc text-base font-bold", tone)}>{effect.name}</div>
-      {effect.flavor && <div className="mt-1 text-sm italic text-[#a89c88] animate-[hud-fade_.6s_.5s_both]">{effect.flavor}</div>}
-    </div>
-  );
-}
-
+/** Мораль — на весь екран: вона визначає хід. Підсумки атак і заклинань — у кутовій картці (ActionResultCard). */
 export function ResultOverlay() {
   const { result: { fx, show } } = useBattleScene();
 
@@ -78,53 +57,5 @@ export function ResultOverlay() {
     );
   }
 
-  if (fx.kind === "miss" && fx.critFail) {
-    return (
-      <div className={cn(shell, "bg-[radial-gradient(circle_at_50%_42%,rgba(110,24,20,.45),rgba(10,5,5,.94)_60%)]")}>
-        <svg className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 390 812" preserveAspectRatio="none" aria-hidden>
-          <path d="M210 0 L190 120 L225 190 L180 300 L205 360 L170 470" fill="none" stroke="rgba(190,70,60,.45)" strokeWidth="2" className="[stroke-dasharray:400] [stroke-dashoffset:400] animate-[hud-crack_.35s_.45s_forwards]" />
-        </svg>
-        <div className={cn(die, "relative mb-5 size-[88px] bg-[#4a1a17] text-[40px] text-[#d9a39c]")}>1</div>
-        <div className="hud-sc relative text-[34px] font-extrabold tracking-[.12em] text-[#c0564a] animate-[hud-shake-title_.5s_.45s_both]">Критична невдача</div>
-        <CritEffectLine effect={fx.critFail} tone="text-[#e0a39b]" />
-        <div className="relative mt-3 text-base">Ціль: {fx.targetName}</div>
-        <RetaliationLine retaliation={fx.retaliation} />
-        <button type="button" onClick={close} className={cn(cta, "relative border border-[#7a3a33] text-[#e0a39b]")}>Далі</button>
-      </div>
-    );
-  }
-
-  if (fx.kind === "miss") {
-    return (
-      <div className={cn(shell, "bg-[rgba(8,8,10,.86)]")}>
-        <div className="relative mb-6 h-10 w-56" aria-hidden>
-          {[180, 220, 150].map((w, i) => <i key={i} className="absolute left-0 h-0.5 rounded bg-gradient-to-r from-transparent to-[#9a9aa2] animate-[hud-whoosh_.45s_ease-out_both]" style={{ top: 8 + i * 12, width: w, animationDelay: `${i * 60}ms` }} />)}
-        </div>
-        <div className="hud-sc text-[40px] font-extrabold tracking-[.2em] text-[#8f8f96]">Промах</div>
-        <div className="mt-3 text-base">Ціль: {fx.targetName}</div>
-        <div className="mt-1.5 text-sm text-[#a89c88]">ваш результат {fx.d20} · тепер відомо: AC {fx.known}</div>
-        <RetaliationLine retaliation={fx.retaliation} />
-        <button type="button" onClick={close} className={cn(cta, "border border-[#555] text-[#c9c9cf]")}>Далі</button>
-      </div>
-    );
-  }
-
-  if (fx.kind !== "hit" && fx.kind !== "crit") return null;
-
-  const crit = fx.kind === "crit";
-
-  return (
-    <div onClick={close} className={cn(shell, crit ? "bg-[radial-gradient(circle_at_50%_40%,rgba(92,70,30,.9),rgba(10,8,6,.95)_60%)]" : "bg-[radial-gradient(circle_at_50%_42%,rgba(62,20,14,.9),rgba(8,6,5,.95)_58%)]")}>
-      {crit && <div className="pointer-events-none absolute left-1/2 top-[40%] size-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[repeating-conic-gradient(rgba(232,199,122,.18)_0_6deg,transparent_6deg_20deg)] [mask:radial-gradient(circle,#000_20%,transparent_65%)] animate-[hud-spin_8s_linear_infinite]" />}
-      {crit && <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,236,190,.6),transparent_60%)] animate-[hud-fade_.6s_.6s_reverse_both]" />}
-      {crit && <div className={cn(die, "relative mb-4 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05] shadow-[0_0_28px_rgba(232,199,122,.7)]")}>{fx.d20}</div>}
-      <div className={cn("absolute left-1/2 top-[40%] w-[min(120%,560px)] -translate-x-1/2 animate-[hud-slash_.3s_ease-out_both]", crit ? "[animation-delay:.6s] h-1.5 rotate-[-24deg] bg-gradient-to-r from-transparent via-[#fff6dc] to-transparent shadow-[0_0_24px_#e8c77a]" : "h-[3px] rotate-[-18deg] bg-gradient-to-r from-transparent via-hud-bone to-transparent opacity-80")} />
-      <div className={cn("hud-sc relative font-extrabold tracking-[.12em] animate-[hud-rise_.5s_both]", crit ? "text-[34px] leading-10 text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)]" : "text-[34px] text-[var(--ink)]")}>{crit ? "Критичне влучання" : "Влучання"}</div>
-      <div className={cn("hud-sc relative mt-4 font-extrabold animate-[hud-pop_.45s_.65s_cubic-bezier(.16,1,.3,1)_both]", crit ? "text-[64px] text-[#ffd36a] [text-shadow:0_0_30px_rgba(232,199,122,.8)]" : "text-[52px] text-[#e9705a]")}>−{fx.damage}</div>
-      {crit && <CritEffectLine effect={fx.critEffect} tone="text-[#f3dc9a]" />}
-      <div className="relative mt-3 text-[15px] text-[#d9cfbd]">{fx.targetName}{fx.downed ? " · повалений" : ""}</div>
-      <RetaliationLine retaliation={fx.retaliation} />
-      <button type="button" onClick={close} className={cn(cta, "relative", crit ? "border border-hud-gold-strong bg-[#8a6414] text-[#fff3d1]" : "border border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>Далі</button>
-    </div>
-  );
+  return null;
 }

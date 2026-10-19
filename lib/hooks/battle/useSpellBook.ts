@@ -38,6 +38,19 @@ export type { BookSpell };
 
 const NO_SPELLS: string[] = [];
 
+/** Сумарна зміна HP на учасника: шкода > 0, лікування < 0. */
+function hpTotals(changes: { participantId: string; participantName: string; change: number }[]): { name: string; change: number }[] {
+  const byId = new Map<string, { name: string; change: number }>();
+
+  for (const c of changes) {
+    const kept = byId.get(c.participantId);
+
+    byId.set(c.participantId, { name: c.participantName, change: (kept?.change ?? 0) + c.change });
+  }
+
+  return [...byId.values()].filter((c) => c.change !== 0);
+}
+
 /** Відомі закляття одним набором: DM бачить усіх учасників, гравець лише своїх (без витоку ворожих і без рефетчу при кожному призові). */
 function useBattleSpellIds(): string[] {
   const { battle, viewer, roster } = useBattleScene();
@@ -200,8 +213,10 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     if (!caster) return;
 
     try {
-      await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }) });
+      const res = await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }) });
+
       dispatch({ type: "SUCCESS" });
+      scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(res?.hpChanges ?? []), targetCount: state.targetIds.length });
       options.onDone?.();
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося застосувати заклинання" });

@@ -41,6 +41,8 @@ function useDesktopLayout(wide: boolean): DesktopLayout | null {
 
 const CompleteBattleDialog = dynamic(() => import("@/components/battle/dm/CompleteBattleDialog").then((m) => m.CompleteBattleDialog), { ssr: false });
 
+const ActionResultCard = dynamic(() => import("@/components/battle/overlays/ActionResultCard").then((m) => m.ActionResultCard), { ssr: false });
+
 const ResultOverlay = dynamic(() => import("@/components/battle/overlays/ResultOverlay").then((m) => m.ResultOverlay), { ssr: false });
 
 const BattleResultScreen = dynamic(() => import("@/components/battle/overlays/BattleResultScreen").then((m) => m.BattleResultScreen), { ssr: false });
@@ -87,6 +89,7 @@ export function BattleScreen() {
     <div className={cn("battle-hud", hudFontClassName)}>
       {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <MobileBattleLayout />}
       <ResultOverlay />
+      {Desktop && <ActionResultCard />}
       {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
       <BattleToast />
       {isDM && <DmRevivePrompt />}
