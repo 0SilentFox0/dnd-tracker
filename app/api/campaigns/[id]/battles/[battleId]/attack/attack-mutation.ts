@@ -1,8 +1,7 @@
 import type { Spell } from "@prisma/client";
 import { z } from "zod";
 
-import { getCachedSummonPool } from "@/lib/cache/reference-data";
-import { prisma } from "@/lib/db";
+import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
@@ -67,12 +66,13 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 }
 
 export interface AttackMutationDeps extends SummonDeps {
-  loadSpells?(ids: string[]): Promise<Spell[]>;
+  loadSpells(campaignId: string, ids: string[]): Promise<Spell[]>;
 }
 
-const loadSpellsById = (ids: string[]) => prisma.spell.findMany({ where: { id: { in: ids } } });
-
-const defaultDeps: AttackMutationDeps = { loadPool: getCachedSummonPool, loadSpells: loadSpellsById };
+const defaultDeps: AttackMutationDeps = {
+  loadPool: getCachedSummonPool,
+  loadSpells: async (campaignId, ids) => (await getCachedSpells(campaignId)).filter((s) => ids.includes(s.id)),
+};
 
 async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, deps: AttackMutationDeps): Promise<Map<string, CastableSpell>> {
   const attacker = ctx.participants.find((p) => p.basicInfo.id === attackerId);
@@ -83,9 +83,9 @@ async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, dep
 
   if (ids.length === 0) return new Map();
 
-  const rows = await (deps.loadSpells ?? loadSpellsById)(ids);
+  const rows = await deps.loadSpells(ctx.scene.campaignId, ids);
 
-  return new Map(rows.filter((r) => r.campaignId === ctx.scene.campaignId).map((r) => [r.id, toCastableSpell(r)]));
+  return new Map(rows.map((r) => [r.id, toCastableSpell(r)]));
 }
 
 export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {

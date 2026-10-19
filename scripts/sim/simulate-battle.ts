@@ -38,6 +38,7 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";
@@ -287,7 +288,7 @@ const NEXT = { access: "currentController" as const, requireStatus: "active" as 
 
 const summonDeps = { loadPool: async (campaignId: string) => ({ units: await prisma.unit.findMany({ where: { campaignId } }), races: await prisma.race.findMany({ where: { campaignId } }) }) };
 
-const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
+const ATTACK = { access: "member" as const, requireStatus: "active" as const, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
 const BONUS = { access: "member" as const, requireStatus: "active" as const, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 

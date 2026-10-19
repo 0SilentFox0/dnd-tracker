@@ -38,6 +38,7 @@ import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -229,7 +230,7 @@ const START = { access: "dm", requireStatus: "prepared", mutate: createStartMuta
 
 const NEXT = { access: "currentController", requireStatus: "active", mutate: nextTurnMutation };
 
-const ATTACK = { access: "member", requireStatus: "active", schema: attackBodySchema, mutate: createAttackMutation(summonDeps) };
+const ATTACK = { access: "member", requireStatus: "active", schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
 const BONUS = { access: "member", requireStatus: "active", schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
