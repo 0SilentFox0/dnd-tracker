@@ -520,6 +520,23 @@ describe("library content", () => {
 describe("spell map templates and ranges", () => {
   const byKey = (key: string) => SPELLS.find((s) => s.key === key)?.definition.targeting;
 
+  it("опис template-заклинання відповідає шаблону: розмір і дальність у футах, союзники в зоні, режим без карти", () => {
+    const templates = SPELLS.filter((s) => s.definition.targeting?.kind === "template");
+
+    expect(templates.length).toBeGreaterThanOrEqual(8);
+
+    for (const s of templates) {
+      const t = s.definition.targeting as Extract<NonNullable<LibrarySpell["definition"]["targeting"]>, { kind: "template" }>;
+
+      expect(s.description, s.key).not.toMatch(/^(До \d+ ворогів|Усі вороги)/);
+      expect(s.description, s.key).toContain(`${t.size} фт`);
+      expect(s.description, s.key).toContain("включно із союзниками");
+      expect(s.description, s.key).toContain(`Без карти — до ${t.maxTargets} ворогів на вибір`);
+
+      if (t.range) expect(s.description, s.key).toContain(`у межах ${t.range} фт`);
+    }
+  });
+
   it("every template has a size up to 120 ft and zone only on templates", () => {
     for (const s of SPELLS) {
       const t = s.definition.targeting;
