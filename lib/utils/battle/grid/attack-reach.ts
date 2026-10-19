@@ -58,15 +58,21 @@ export function pickAttack(
 ): { attack: BattleAttack | null; error: string | null } {
   const isMelee = (a: BattleAttack) => attackKindOf(a.type) === AttackType.MELEE;
 
-  let error: string | null = null;
+  let meleeError: string | null = null;
+
+  let rangedError: string | null = null;
 
   for (const attack of [...attacks.filter(isMelee), ...attacks.filter((a) => !isMelee(a))]) {
     const e = attackReachError(map, participants, attacker, attack, [target]);
 
     if (e === null) return { attack, error: null };
 
-    error ??= e;
+    if (isMelee(attack)) meleeError ??= e;
+    else rangedError ??= e;
   }
 
-  return { attack: null, error };
+  // до далекої цілі «підійдіть» менш корисне, ніж причина, чому не стріляє лук
+  const adjacent = !!target.battleData.position && footprintDistance(cellsOf(attacker), cellsOf(target)) <= 1;
+
+  return { attack: null, error: adjacent ? (meleeError ?? rangedError) : (rangedError ?? meleeError) };
 }

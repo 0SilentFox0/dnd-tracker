@@ -139,4 +139,15 @@ describe("pickAttack: спершу ближня", () => {
   it("ніщо не дістає — помилка", () => {
     expect(pickAttack(map, [hero, distant], hero, [sword], distant)).toEqual({ attack: null, error: "Ціль не поруч — спершу підійдіть" });
   });
+
+  it("далека ціль, ніщо не дістає — причина дальньої зброї, а не «підійдіть»", () => {
+    const close = at("e3", { x: 5, y: 6 }, ParticipantSide.ENEMY);
+
+    expect(pickAttack(map, [hero, close, distant], hero, [sword, bow], distant).error).toBe("Поруч ворог — стріляти не можна");
+    expect(pickAttack(map, [hero, distant], hero, [sword, sling], distant).error).toBe("Ціль поза дальністю атаки");
+  });
+
+  it("ціль поруч, ніщо не дістає — помилка першої зброї", () => {
+    expect(pickAttack(map, [hero, adjacent], hero, [bow], adjacent).error).toBe("Поруч ворог — стріляти не можна");
+  });
 });
