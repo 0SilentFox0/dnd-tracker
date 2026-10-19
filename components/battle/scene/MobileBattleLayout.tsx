@@ -9,6 +9,7 @@ import { BattleOverBanner } from "./BattleOverBanner";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
+import { MapStripRow, MapStripSlotContext } from "./MapStrip";
 
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
@@ -34,9 +35,23 @@ export function MobileBattleLayout() {
 
   const hasMap = !!battle.map;
 
-  const [pickedTab, setTab] = useState<Tab>(MAP_TAB);
+  const [pickedTab, setPickedTab] = useState<Tab>(MAP_TAB);
 
-  const tab: Tab = hasMap && intents.mapAim ? MAP_TAB : pickedTab === MAP_TAB && !hasMap ? ParticipantSide.ENEMY : pickedTab;
+  const [listTab, setListTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
+
+  const tab: Tab = hasMap && intents.mapAim ? MAP_TAB : pickedTab === MAP_TAB && !hasMap ? listTab : pickedTab;
+
+  const mapTab = tab === MAP_TAB;
+
+  const setTab = (next: Tab) => {
+    setPickedTab(next);
+
+    if (next !== MAP_TAB) setListTab(next);
+  };
+
+  const expand = useCallback(() => setPickedTab(listTab), [listTab]);
+
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null);
 
   const [dmOpen, setDmOpen] = useState(false);
 
@@ -52,20 +67,29 @@ export function MobileBattleLayout() {
     </button>
   );
 
+  const completed = battle.status === BattleStatus.COMPLETED;
+
+  const waitingFor = <span className="italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></span>;
+
   return (
+    <MapStripSlotContext value={slot}>
     <div className="below-header flex flex-col overflow-hidden">
       <ConnectionBanner />
-      <BattleTopBar />
-      <InitiativeTrack />
-      <LastActionTicker onOpenLog={openLatestLog} />
-      {battle.status === BattleStatus.COMPLETED ? (
-        <BattleOverBanner />
-      ) : awaiting ? (
-        <AwaitingDmBanner />
-      ) : isMyTurn ? (
-        <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
-      ) : (
-        <div className="flex h-8 items-center gap-2 px-4 text-[15px] italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></div>
+      {!mapTab && (
+        <>
+          <BattleTopBar />
+          <InitiativeTrack />
+          <LastActionTicker onOpenLog={openLatestLog} />
+          {completed ? (
+            <BattleOverBanner />
+          ) : awaiting ? (
+            <AwaitingDmBanner />
+          ) : isMyTurn ? (
+            <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
+          ) : (
+            <div className="flex h-8 items-center px-4 text-[15px]">{waitingFor}</div>
+          )}
+        </>
       )}
       <div className="mx-4 flex h-11 border-b border-white/[.18]">
         <div role="tablist" className="flex flex-1">
@@ -79,17 +103,24 @@ export function MobileBattleLayout() {
           </button>
         )}
       </div>
-      {tab === MAP_TAB ? (
-        <div className="min-h-0 flex-1 p-2"><BattleMapPanel /></div>
+      {mapTab ? (
+        <div className="min-h-0 flex-1 p-1"><BattleMapPanel rotatable /></div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ParticipantList side={tab} />
         </div>
       )}
-      {hero && (
-        <div className="border-t border-white/[.22] bg-black/70 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3">
-          <MyHeroPanel hero={hero} compact={isMyTurn} />
-          {isMyTurn && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
+      {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
+      {(hero || mapTab) && (
+        <div className={cn("border-t border-white/[.22] bg-black/70 px-4", mapTab ? "pb-[max(8px,env(safe-area-inset-bottom))] pt-1" : "pb-[max(12px,env(safe-area-inset-bottom))] pt-3")}>
+          {mapTab && <div ref={setSlot} data-map-strip-slot />}
+          {hero && !mapTab && <MyHeroPanel hero={hero} compact={isMyTurn} />}
+          {hero && isMyTurn && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
+          {mapTab && !(hero && isMyTurn) && !intents.mapAim && (
+            <MapStripRow onExpand={expand}>
+              {completed ? <span className="hud-sc">Бій завершено</span> : awaiting ? <span className="hud-sc">{isDM ? "Бій чекає вашого рішення" : "Очікуємо рішення ДМ"}</span> : waitingFor}
+            </MapStripRow>
+          )}
         </div>
       )}
       {isDM && <DmPanel panel={{ open: dmOpen, onOpenChange: setDmOpen }} />}
@@ -100,5 +131,6 @@ export function MobileBattleLayout() {
         <BattleLog key={log.focus ?? "latest"} />
       </ResponsiveDialog>
     </div>
+    </MapStripSlotContext>
   );
 }

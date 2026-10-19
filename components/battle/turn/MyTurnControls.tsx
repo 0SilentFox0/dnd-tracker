@@ -7,10 +7,11 @@ import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
 
 import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
+import { MapStripRow } from "@/components/battle/scene/MapStrip";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { canConsumeIntent, COUNTDOWN_SECONDS } from "@/lib/utils/battle/flows";
+import { canConsumeIntent, COUNTDOWN_SECONDS, type TurnFlowState } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -22,10 +23,18 @@ const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").
 
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
-export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
+const STRIP_LABEL: Record<Exclude<TurnFlowState["phase"], "countdown">, string> = {
+  waiting: "Твій хід",
+  morale: "Перевірка моралі",
+  acting: "Твій хід · Дії",
+  ended: "Твій хід",
+};
+
+/** strip — вкладка «Карта» на телефоні: замість панелі дій один рядок, а майстри лишаються змонтованими (наведення заклинання живе в них) */
+export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip?: { onExpand: () => void } }) {
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { attack: attackIntent, clearAttack: clearAttackIntent } = intents;
+  const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim } = intents;
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
@@ -61,7 +70,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
     clearAttackIntent();
   }, [attackIntent, hero.basicInfo.id, round, turnIndex, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
 
-  return (
+  const full = (
     <>
       {turn.phase === "morale" && (
         <div className="pt-3">
@@ -84,6 +93,18 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
           actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
         />
       )}
+    </>
+  );
+
+  const stripRow = strip && phase !== "countdown" && !mapAim && (
+    <MapStripRow onExpand={strip.onExpand}>
+      <span className="hud-sc tracking-[.12em]">{STRIP_LABEL[phase]}</span>
+    </MapStripRow>
+  );
+
+  return (
+    <>
+      {strip ? stripRow : full}
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
