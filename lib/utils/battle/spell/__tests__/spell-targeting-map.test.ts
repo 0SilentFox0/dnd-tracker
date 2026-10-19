@@ -149,21 +149,25 @@ describe("заклинання, розширене вмінням, на карт
     expect(resolve(bolt, ["far"], { map, targetCell: { x: 7, y: 3 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["n1", "n2"] });
   });
 
-  it("all: коло 20 футів без ліміту, союзник у колі не зачеплений", () => {
+  it("all: уся ворожа сторона — без точки, дальності й зони; союзник не зачеплений", () => {
     const c = widened("all");
 
-    const r = resolve(bolt, [], { map, targetCell: { x: 7, y: 3 } }, scene(c), c);
+    const r = resolve(bolt, [], { map }, scene(c), c);
 
-    expect(r).toMatchObject({ ok: true, targetIds: ["n1", "n2", "n3"] });
-    expect(r.ok && r.cells).toHaveLength(25);
-    expect(r.ok && r.cells).toContain("9:5");
-    expect(r.ok && r.cells).not.toContain("7:6");
+    expect(r).toEqual({ ok: true, targetIds: ["n1", "n2", "n3", "far"] });
+    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 2, y: 2 } }, scene(c), c)).toEqual(r);
   });
 
-  it("союзне заклинання зачіпає союзників разом із заклинателем, не ворогів", () => {
+  it("all: союзне заклинання — усі союзники разом із заклинателем, не вороги", () => {
     const c = widened("all");
 
-    expect(resolve({ kind: "ally" }, [], { map, targetCell: { x: 4, y: 2 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["c", "a"] });
+    expect(resolve({ kind: "ally", range: 5 }, [], { map }, scene(c), c)).toEqual({ ok: true, targetIds: ["c", "a"] });
+  });
+
+  it("all: без карти — так само вся сторона", () => {
+    const c = widened("all");
+
+    expect(resolve(bolt, ["n1"], undefined, scene(c), c)).toEqual({ ok: true, targetIds: ["n1", "n2", "n3", "far"] });
   });
 
   it("точка поза дальністю, без точки — відмова; порожній радіус — каст у порожнечу", () => {

@@ -18,16 +18,16 @@ import {
   spellSaveTargets,
   spellSlotCostLabel,
   spellSlotsLeft,
-  spellSpec,
   spellTargetCandidates,
   spellTargetInRange,
   spellWidening,
+  withAllTargets,
   withChainTargets,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
 import { isOnMap, type MapAim } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
-import { expandSpellTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -196,8 +196,10 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const chain = caster && chainFirst && flow.pick?.chain ? spellChain({ participants: order, caster }, flow.pick.chain, chainFirst) : [];
 
+  const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? skillAllTargets(order, caster, flow.pick.targetSide) : [];
+
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
-  const state = withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id));
+  const state = withAllTargets(withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id)), allSide);
 
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
@@ -231,7 +233,6 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const view = {
     spells, byLevel, selected, targets, saveTargets, aimPreview, chain, inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
-    allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
@@ -253,12 +254,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
       if (target && !inRange(target)) return;
 
-      const expanded =
-        state.pick?.targetMode === "all" && caster && selected
-          ? expandSpellTargets(order, caster.basicInfo.id, spellSpec(selected), [id])
-          : undefined;
-
-      dispatch({ type: "TOGGLE_TARGET", id, expanded });
+      dispatch({ type: "TOGGLE_TARGET", id });
     },
     confirmTargets: () => {
       if (state !== flow && state.aim) dispatch({ type: "SET_AIM", aim: state.aim, targetIds: state.targetIds });

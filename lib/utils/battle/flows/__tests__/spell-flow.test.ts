@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
-import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withAllTargets, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -80,21 +79,15 @@ describe("spellFlow", () => {
     expect(turned.pick).toBeUndefined();
   });
 
-  it("all: перша ціль обирає сторону, мертві не потрапляють у цілі", () => {
-    const caster = makeParticipant({ id: "me", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all" }] })] });
-
-    const dead = { ...makeParticipant({ id: "a3" }), combatStats: { ...makeParticipant({ id: "a3" }).combatStats, status: "dead" } } as ReturnType<typeof makeParticipant>;
-
-    const ps = [caster, makeParticipant({ id: "a1" }), makeParticipant({ id: "a2" }), dead, makeParticipant({ id: "e1", side: ParticipantSide.ENEMY })];
-
-    const expanded = expandSpellTargets(ps, "me", { id: "bless", groupId: null, level: 1 }, ["a1"]);
-
+  it("all: без кроку цілей — одразу кидки; цілі — уся сторона наживо, назад веде на сторінку спела", () => {
     const pick: SpellPick = { ...cloud, targetMode: "all" };
 
-    const s = run({ type: "OPEN", casterId: "me", level: 1 }, { type: "PICK", pick }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a1", expanded });
+    const s = run({ type: "OPEN", casterId: "me", level: 1 }, { type: "PICK", pick }, { type: "TO_TARGETS" });
 
-    expect([...s.targetIds].sort()).toEqual(["a1", "a2", "me"]);
-    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
+    expect(s.step).toBe("rolls");
+    expect(withAllTargets(s, ["a1", "a2"]).targetIds).toEqual(["a1", "a2"]);
+    expect(withAllTargets({ ...s, pick: cloud }, ["a1"]).targetIds).toEqual([]);
+    expect(spellFlow(s, { type: "BACK" }).step).toBe("spell");
   });
 
   it("самі кубики без цілей: заклинання без цілей з кубиками йде на кидки", () => {
@@ -339,14 +332,18 @@ describe("шаблон і дальність", () => {
 
     const friend = placed("a", ParticipantSide.ALLY, { x: 6, y: 1 });
 
-    it("на карті area → коло 10 футів з лімітом, all → 20 футів; кнопки цілей — наведення", () => {
+    it("на карті area → коло 10 футів з лімітом; all → без наведення, уся сторона", () => {
       const area = widened("area");
 
-      expect(buildSpellPick([area, foe], area, bolt, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 10 }, targetSide: "enemy", range: 30, skillRadius: { mode: "area", side: "enemy", maxTargets: 1 } });
+      expect(buildSpellPick([area, foe], area, bolt, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 10 }, targetSide: "enemy", range: 30, skillRadius: { side: "enemy", maxTargets: 1 } });
 
       const all = widened("all");
 
-      expect(buildSpellPick([all, foe], all, bolt, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 20 }, skillRadius: { mode: "all", side: "enemy" } });
+      const pick = buildSpellPick([all, foe], all, bolt, map);
+
+      expect(pick).toMatchObject({ targetMode: "all", targetSide: "enemy" });
+      expect(pick.template).toBeUndefined();
+      expect(pick.skillRadius).toBeUndefined();
     });
 
     it("без карти чи позиції — список, як раніше", () => {

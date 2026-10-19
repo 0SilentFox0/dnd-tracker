@@ -42,6 +42,7 @@ import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
+import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -1334,6 +1335,35 @@ async function mapCheck(spells: Map<string, any>) {
   const signOk = !!change && change.change === change.oldHp - change.newHp && change.change > 0;
 
   tcheck(hazardName, tr?.status === 200 && !!entry && signOk && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${entry.resultText}; hpChanges ${JSON.stringify(change)}` : "запису hazard немає"}`);
+
+  await mapSkillAllCheck(spells);
+}
+
+/** Вміння «all» на карті: одиночне вороже заклинання б'є всю ворожу сторону без точки й дальності. */
+async function mapSkillAllCheck(spells: Map<string, any>) {
+  const name = "Карта: вміння «all» — уся ворожа сторона без наведення";
+
+  if (state.status !== "active") return tskip(name, `бій не активний (${state.status})`);
+
+  const widenedAll = (p: any, s: any) => s?.targeting?.kind === "enemy" && spellTargetingFor(P(), p.basicInfo.id, { id: s.id, groupId: s.groupId ?? null, level: s.level }).mode === "all";
+
+  const found = P().filter((p) => p.basicInfo.side === "ally" && alive(p)).flatMap((p) => (p.spellcasting?.knownSpells ?? []).map((id: string) => spells.get(id)).filter((s: any) => widenedAll(p, s)).map((s: any) => ({ p, s })))[0];
+
+  if (!found) return tskip(name, "жоден герой не має вміння «all» на відоме вороже заклинання");
+
+  const foes = foesOf(found.p).filter((f) => !f.battleData.airborne).map((f) => f.basicInfo.id as string);
+
+  const dice = casterSpellDice(found.p, { dice: found.s.dice ?? 0, groupId: found.s.groupId ?? null });
+
+  const r = await call("spell", SPELL, { casterId: found.p.basicInfo.id, spellId: found.s.id, targetIds: [], diceRolls: Array.from({ length: dice.count }, () => 1), free: true });
+
+  const cast = r.log.find((e: any) => e.actionType === "spell");
+
+  const hitIds: string[] = (cast?.targets ?? []).map((t: any) => t.participantId);
+
+  const ok = r.status === 200 && !cast?.actionDetails?.aimCell && hitIds.length === foes.length && foes.every((id) => hitIds.includes(id));
+
+  tcheck(name, ok, `${found.p.basicInfo.name} «${found.s.name}»: ${r.status}; цілей ${hitIds.length}/${foes.length}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ""}`);
 }
 
 /** Кільце «Коло зими» по зайнятому центру й «Вогняна куля» в порожню зону: обидва — каст з aimCell. */

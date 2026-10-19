@@ -1,12 +1,13 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { SKILL_ALL_RADIUS_FEET, SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
+import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
+import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -51,20 +52,14 @@ export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spe
   return { mode, maxTargets };
 }
 
-export function expandSpellTargets(ps: BattleParticipant[], casterId: string, spell: SpellRef, chosenIds: string[]): string[] {
-  if (spellTargetingFor(ps, casterId, spell).mode !== "all") return chosenIds;
+/** Режим «all»: уся сторона заклинання на полі — без вибору, наведення й дальності, з картою чи без. */
+export function skillAllTargets(ps: BattleParticipant[], caster: BattleParticipant, side: "ally" | "enemy"): string[] {
+  const mine = caster.basicInfo.side;
 
-  const first = findParticipant(ps, chosenIds[0]);
-
-  if (!first) return chosenIds;
-
-  const side = ps.filter((p) => isActive(p) && p.basicInfo.side === first.basicInfo.side).map((p) => p.basicInfo.id);
-
-  return [...new Set([...chosenIds, ...side])];
+  return ps.filter((p) => isTargetable(p) && !isReserved(p) && (p.basicInfo.side === mine) === (side === "ally")).map((p) => p.basicInfo.id);
 }
 
 export interface SkillRadius {
-  mode: "area" | "all";
   side: "ally" | "enemy";
   maxTargets: number;
 }
@@ -75,11 +70,11 @@ export interface AimScene {
   caster: BattleParticipant;
 }
 
-export const skillRadiusTemplate = (mode: SkillRadius["mode"]): SpellTemplate => ({ shape: "circle", size: mode === "all" ? SKILL_ALL_RADIUS_FEET : SKILL_AREA_RADIUS_FEET });
+export const SKILL_AREA_TEMPLATE: SpellTemplate = { shape: "circle", size: SKILL_AREA_RADIUS_FEET };
 
 /** Розширене вмінням одиночне заклинання не б'є своїх: лише сторона заклинання, найближчі до точки, до maxTargets. */
 export function skillRadiusArea({ map, participants, caster }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
-  const { cells, targets } = templateArea(map, participants, caster, skillRadiusTemplate(radius.mode), aim);
+  const { cells, targets } = templateArea(map, participants, caster, SKILL_AREA_TEMPLATE, aim);
 
   const mine = caster.basicInfo.side;
 
@@ -178,11 +173,17 @@ export function resolveSpellTargets(
 
   if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell);
 
-  if (map && (targeting.kind === "ally" || targeting.kind === "enemy")) {
+  if (targeting.kind === "ally" || targeting.kind === "enemy") {
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
 
-    if (skill.mode !== "single") {
-      return resolveSkillRadius({ map, participants: ps, caster }, { mode: skill.mode, side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
+    if (skill.mode === "all") {
+      const all = skillAllTargets(ps, caster, targeting.kind);
+
+      return all.length > 0 ? { ok: true, targetIds: all } : fail("Немає цілей заклинання");
+    }
+
+    if (map && skill.mode === "area") {
+      return resolveSkillRadius({ map, participants: ps, caster }, { side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
     }
   }
 
@@ -239,13 +240,9 @@ export function resolveSpellTargets(
 
       const skill = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
 
-      const max = multi ? targeting.maxTargets : skill.maxTargets;
+      if (!validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
 
-      if (multi ? picked.length > max : !validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
-
-      const expanded = multi ? picked.map((p) => p.basicInfo.id) : expandSpellTargets(ps, caster.basicInfo.id, spell, picked.map((p) => p.basicInfo.id));
-
-      return { ok: true, targetIds: expanded };
+      return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
     }
   }
 }

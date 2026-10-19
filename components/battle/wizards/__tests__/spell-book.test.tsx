@@ -392,7 +392,7 @@ describe("SpellBook", () => {
       expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
     });
 
-    it("розширення від вміння: бейдж у рядку й примітка з назвою вміння і зоною на карті", async () => {
+    it("розширення «all» на карті: бейдж і примітка без зони, «Далі» одразу до кидків без наведення", async () => {
       const wrath = [resolved({ name: "Гнів природи", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all", maxLevel: 4 }] })];
 
       const { wrapper, caster } = onMap(["ray"], false, wrath);
@@ -402,7 +402,12 @@ describe("SpellBook", () => {
       fireEvent.click(await screen.findByText("Палаючий промінь"));
 
       expect(screen.getByText("усі вороги", { selector: "[data-spell-widening]" })).toBeTruthy();
-      expect(screen.getByRole("note").textContent).toBe("Гнів природи: усі вороги (на карті — зона 5×5)");
+      expect(screen.getByRole("note").textContent).toBe("Гнів природи: усі вороги");
+      expect(screen.queryByRole("button", { name: /Навести на карті/ })).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: /Далі/ }));
+
+      expect(screen.getByText(/Кубики ·/)).toBeTruthy();
     });
 
     it("розширення «area» без карти — «до N цілей», без зони; без вміння — без примітки", async () => {

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { expandSpellTargets, spellTargetingFor, spellWideningOf, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
+import { resolveSpellTargets, spellTargetingFor, spellWideningOf, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleParticipant } from "@/types/battle";
 
 const spell = { id: "bless", groupId: "light", level: 2 };
@@ -61,25 +61,18 @@ describe("spell targeting", () => {
     expect(spellTargetingFor([c], "c", { ...spell, level: 5 }).mode).toBe("area");
   });
 
-  it("all expands to active units on the first target's side", () => {
+  it("all: уся сторона заклинання, полеглі не потрапляють; обрані ігноруються", () => {
     const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "all" }]);
 
     const ps = [c, ally("a1"), ally("a2"), downedAlly("a3"), enemy("e1")];
 
-    expect(expandSpellTargets(ps, "c", spell, ["a1"]).sort()).toEqual(["a1", "a2", "c"]);
+    expect(resolveSpellTargets(ps, c, spell, { kind: "ally" }, ["a3"])).toEqual({ ok: true, targetIds: ["c", "a1", "a2"] });
+    expect(resolveSpellTargets(ps, c, spell, { kind: "enemy" }, [])).toEqual({ ok: true, targetIds: ["e1"] });
   });
 
   it("rejects more targets than the skill allows", () => {
     expect(validateSpellTargetCount({ mode: "area", maxTargets: 3 }, 4)).toBe(false);
     expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 2)).toBe(false);
     expect(validateSpellTargetCount({ mode: "all", maxTargets: Infinity }, 5)).toBe(true);
-  });
-
-  it("all лишає обрану ціль, навіть якщо вона впала", () => {
-    const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "all" }]);
-
-    const ps = [c, ally("a1"), downedAlly("a3")];
-
-    expect(expandSpellTargets(ps, "c", spell, ["a3"]).sort()).toEqual(["a1", "a3", "c"]);
   });
 });

@@ -111,10 +111,8 @@ export const FIRE_WAVE_NO_MAP_VICTIMS = 2;
 
 export const AURA_RADIUS_CELLS = 2;
 
-// одиночні заклинання, розширені вмінням (spellTargeting area/all), на карті наводяться колом
+// одиночні заклинання, розширені вмінням (spellTargeting area), на карті наводяться колом; «all» б'є всю сторону
 export const SKILL_AREA_RADIUS_FEET = 10;
-
-export const SKILL_ALL_RADIUS_FEET = 20;
 
 export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
 

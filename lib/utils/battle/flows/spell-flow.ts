@@ -5,7 +5,7 @@ import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/g
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
+import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -24,7 +24,7 @@ export interface SpellPick {
   range?: number;
   /** шаблон лишає зону: його можна поставити й без цілей */
   zone?: boolean;
-  /** одиночне заклинання, розширене вмінням: на карті — коло лише по своїй стороні */
+  /** одиночне заклинання, розширене вмінням до кількох цілей: на карті — коло лише по своїй стороні */
   skillRadius?: SkillRadius;
   /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
   chain?: SpellChain;
@@ -51,7 +51,7 @@ export type SpellFlowAction =
   | { type: "SET_LEVEL"; level: number }
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
-  | { type: "TOGGLE_TARGET"; id: string; expanded?: string[] }
+  | { type: "TOGGLE_TARGET"; id: string }
   | { type: "SET_AIM"; aim: GridPoint; targetIds: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_SAVE"; id: string; value: number | undefined }
@@ -83,7 +83,7 @@ function previousStep(s: SpellFlowState): SpellFlowState["step"] | null {
 
   if (BACK_ORDER[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
 
-  if (BACK_ORDER[i] === "targets" && s.pick?.targetMode === "none") i -= 1;
+  if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all")) i -= 1;
 
   // клік по карті остаточний: після наведення назад до прицілу не вертаємось
   if (BACK_ORDER[i] === "targets" && s.pick?.targetMode === "template" && s.aim) return null;
@@ -109,11 +109,9 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "TO_TARGETS":
       if (!s.pick) return s;
 
-      return s.pick.targetMode === "none" ? afterTargets(s) : { ...s, step: "targets" };
+      return s.pick.targetMode === "none" || s.pick.targetMode === "all" ? afterTargets(s) : { ...s, step: "targets" };
     case "TOGGLE_TARGET": {
       if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
-
-      if (s.pick?.targetMode === "all") return { ...s, targetIds: a.expanded ?? [a.id], saves: {} };
 
       if (s.targetIds.includes(a.id)) {
         const { [a.id]: _gone, ...saves } = s.saves;
@@ -174,6 +172,11 @@ export function withLiveAimTargets(s: SpellFlowState, liveIds: string[]): SpellF
   return s.pick?.targetMode === "template" && s.aim ? withTargets(s, liveIds) : s;
 }
 
+/** «all»: цілі не обирають — уся сторона заклинання зараз, тож рятунки й підсумок бачать живий список. */
+export function withAllTargets(s: SpellFlowState, sideIds: string[]): SpellFlowState {
+  return s.pick?.targetMode === "all" ? withTargets(s, sideIds) : s;
+}
+
 /** Ланцюг: обрана лише перша ціль, а рятунки й підсумок бачать увесь ланцюг від неї. */
 export function withChainTargets(s: SpellFlowState, chainIds: string[]): SpellFlowState {
   return s.pick?.chain && s.targetIds.length > 0 ? withTargets(s, chainIds) : s;
@@ -225,11 +228,11 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
   const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
 
   const skillRadius: SkillRadius | undefined =
-    onMap && skill.mode !== "single" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { mode: skill.mode, side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
+    onMap && skill.mode === "area" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
 
   const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets } : undefined;
 
-  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && skillRadiusTemplate(skillRadius.mode);
+  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && SKILL_AREA_TEMPLATE;
 
   const isMulti = !chain && (targeting.kind === "area" || targeting.kind === "template");
 
@@ -325,7 +328,7 @@ export function spellWidening(order: BattleParticipant[], caster: BattleParticip
 
   const badge = w.mode === "all" ? ALL_OF_SIDE[targeting.kind] : `до ${w.maxTargets} цілей`;
 
-  const side = 2 * areaRadiusCells(skillRadiusTemplate(w.mode).size) + 1;
+  const side = 2 * areaRadiusCells(SKILL_AREA_TEMPLATE.size) + 1;
 
-  return { badge, note: `${w.source ?? "Вміння"}: ${badge}${onMap ? ` (на карті — зона ${side}×${side})` : ""}` };
+  return { badge, note: `${w.source ?? "Вміння"}: ${badge}${onMap && w.mode === "area" ? ` (на карті — зона ${side}×${side})` : ""}` };
 }

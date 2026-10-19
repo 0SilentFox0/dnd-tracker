@@ -20,7 +20,7 @@ type Book = ReturnType<typeof useSpellBook>;
 
 const seal = "hud-sc flex h-[52px] w-full items-center justify-center gap-3 bg-[#7a2a1f] text-lg tracking-[.08em] text-[#f3e7cc] shadow-[inset_0_0_0_1px_#a8473a,inset_0_0_0_3px_#7a2a1f,inset_0_0_0_4px_rgba(243,231,204,.35)] disabled:opacity-50";
 
-const TARGETS_LABEL: Partial<Record<SpellTargetMode, string>> = { none: "Далі", template: "Навести на карті" };
+const TARGETS_LABEL: Partial<Record<SpellTargetMode, string>> = { none: "Далі", all: "Далі", template: "Навести на карті" };
 
 const targetsLabel = (mode: SpellTargetMode | undefined) => (mode && TARGETS_LABEL[mode]) ?? "Обрати цілі";
 
@@ -63,7 +63,6 @@ export function SpellBook({ book }: { book: Book }) {
               );
             })}
           </div>
-          {view.allCount > 0 && <div className="hud-sc mt-3 text-sm">на всіх: {view.allCount}</div>}
           {view.chain.length > 0 && <div className="hud-sc mt-3 text-sm">Ланцюг: {view.chain.map((p, i) => `${i + 1}. ${p.basicInfo.name}`).join(", ")}</div>}
           <button type="button" disabled={state.targetIds.length === 0} onClick={actions.confirmTargets} className={cn(seal, "mt-auto")}>Далі · кидки</button>
         </>
