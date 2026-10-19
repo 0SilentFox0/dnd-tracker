@@ -2,15 +2,14 @@
 
 import { memo } from "react";
 
-import { HealthBar, HealthLabel } from "@/components/battle/hud";
-import { useHitFx } from "@/lib/hooks/battle";
+import { useFxEnabled, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import type { FxImpact } from "@/lib/utils/battle/fx";
+import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
-import { hpRatio } from "@/lib/utils/battle/view";
+import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
 import { signedDelta } from "@/lib/utils/common/format";
-import type { BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export interface MapTokenHudProps {
   participant: BattleParticipant;
@@ -20,35 +19,52 @@ export interface MapTokenHudProps {
   exact: boolean;
   raised: boolean;
   impact?: FxImpact | null;
+  effects?: readonly ActiveEffect[];
 }
 
 const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null }: MapTokenHudProps) {
+function hpView(participant: BattleParticipant, exact: boolean) {
   const { currentHp, maxHp } = participant.combatStats;
 
-  const { change, shakeRef: shake, delayStyle } = useHitFx<HTMLDivElement>(currentHp, impact);
+  if (exact) {
+    const ratio = hpRatio(participant);
+
+    return { ratio, text: `${currentHp}/${maxHp}` };
+  }
+
+  const state = healthState(participant);
+
+  return { ratio: healthSegments(state) / 4, text: HEALTH_LABEL[state] };
+}
+
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS }: MapTokenHudProps) {
+  const { change, shakeRef: shake, delayStyle } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impact);
+
+  const { userEnabled, motionAllowed } = useFxEnabled();
+
+  const motifs = userEnabled ? hudMotifsOf(effects) : [];
 
   const down = isDown(participant);
 
-  const cellPx = pxPerUnit * 100;
-
-  const showText = cellPx >= TEXT_MIN_CELL;
+  const showText = pxPerUnit * 100 >= TEXT_MIN_CELL;
 
   const boxPx = box.size * pxPerUnit;
 
   const small = sizeOf(participant) === 1;
 
-  const nameFont = clamp(6, boxPx * (small ? 0.11 : 0.075), small ? 11 : 14);
+  const hpFont = clamp(7, boxPx * (small ? 0.12 : 0.06), small ? 11 : 13);
 
-  const hpFont = small ? nameFont : clamp(6, nameFont * 0.9, 12);
+  const nameFont = clamp(7, boxPx * 0.075, 14);
 
-  // смуга HP удвічі товща за списочну й росте з токеном, але не тонша за 6 px на телефоні
-  const barPx = clamp(6, Math.round(boxPx * 0.08), 12);
+  // з текстом смуга вміщує число; без тексту — тонка, але не тонша за 4 px на телефоні
+  const barPx = showText ? Math.round(hpFont * 1.45) : clamp(4, Math.round(boxPx * 0.08), 8);
 
-  const minStripPx = Math.ceil(nameFont * 1.25 + barPx + 4);
+  const { ratio, text } = hpView(participant, exact);
+
+  const width = `${ratio * 100}%`;
 
   return (
     <div
@@ -74,37 +90,26 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
       <div
         ref={shake}
         data-map-hud-strip
-        className={cn("absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end overflow-hidden rounded-md border border-white/10 bg-black/70 px-1 py-0.5 backdrop-blur-[2px]", down && "opacity-40")}
-        style={showText && small ? { height: `max(28%, ${minStripPx}px)` } : undefined}
+        data-hud-rim={motifs[0]}
+        className={cn("map-hud-plaque absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end", showText ? "px-[3px] py-[2px]" : "p-px", motionAllowed && "map-hud-anim", down && "opacity-40")}
       >
-        {showText && small && (
-          <div className={cn("flex justify-center whitespace-nowrap font-sans font-medium leading-tight", down && "line-through")} style={{ fontSize: hpFont }}>
-            {exact ? (
-              <span className={cn("truncate", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>
-                {currentHp}/{maxHp}
-              </span>
-            ) : (
-              <span className="truncate [&>span]:ml-0 [&>span]:text-[length:inherit]">
-                <HealthLabel participant={participant} />
-              </span>
-            )}
-          </div>
-        )}
+        {motifs.map((m) => (
+          <i key={m} aria-hidden data-hud-fx={m} className="map-hud-fx" />
+        ))}
         {showText && !small && (
-          <div className={cn("hud-sc flex items-center whitespace-nowrap font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
-            <span className="truncate">{participant.basicInfo.name}</span>
-            {exact ? (
-              <span className={cn("ml-auto pl-1.5 font-sans font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")} style={{ fontSize: hpFont }}>
-                {currentHp} / {maxHp}
-              </span>
-            ) : (
-              <span className="ml-auto" style={{ fontSize: hpFont }}>
-                <HealthLabel participant={participant} />
-              </span>
-            )}
+          <div className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
+            {participant.basicInfo.name}
           </div>
         )}
-        <HealthBar participant={participant} exact={exact} thickness={barPx} className="mt-0.5 shrink-0" />
+        <div data-map-hud-bar data-hp-tone={down ? "down" : hpTone(ratio)} className={cn("map-hud-bar relative shrink-0", !small && showText && "mt-px")} style={{ height: barPx }}>
+          <i data-map-hud-trail className="map-hud-trail" style={{ width }} />
+          <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
+          {showText && (
+            <span className={cn("map-hud-text", exact ? "font-sans font-semibold" : "hud-sc italic", down && "line-through")} style={{ fontSize: hpFont, lineHeight: `${barPx}px` }}>
+              {text}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

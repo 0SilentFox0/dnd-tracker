@@ -24,3 +24,174 @@
 @media (prefers-reduced-motion: reduce) {
   .battle-map-ember, .battle-map-flame, .battle-map-pulse { animation: none; }
 }
+
+/* Плашка HP токена: лише transform/opacity в анімаціях — токенів багато, фільтри й перемальовування дорогі */
+.map-hud-plaque {
+  --hud-rim: rgba(201, 179, 122, 0.55);
+  border: 1px solid var(--hud-rim);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(36, 28, 20, 0.86), rgba(10, 8, 6, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 236, 200, 0.12), 0 2px 5px rgba(0, 0, 0, 0.55);
+}
+
+.map-hud-plaque[data-hud-rim="frost"] { --hud-rim: #8fd3ff; }
+.map-hud-plaque[data-hud-rim="fire"] { --hud-rim: #ff9a3c; }
+.map-hud-plaque[data-hud-rim="plague"] { --hud-rim: #86d65c; }
+.map-hud-plaque[data-hud-rim="blood"] { --hud-rim: #e0453a; }
+.map-hud-plaque[data-hud-rim="stun"] { --hud-rim: #ffd84a; }
+.map-hud-plaque[data-hud-rim="nature"] { --hud-rim: #74b04c; }
+.map-hud-plaque[data-hud-rim="curse"] { --hud-rim: #a86ee0; }
+.map-hud-plaque[data-hud-rim="storm"] { --hud-rim: #a8d0ff; }
+.map-hud-plaque[data-hud-rim="gold"] { --hud-rim: #f0c96a; }
+.map-hud-plaque[data-hud-rim="holy"] { --hud-rim: #fff3d0; }
+.map-hud-plaque[data-hud-rim="life"] { --hud-rim: #7fe08a; }
+
+.map-hud-bar {
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.62);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.map-hud-plaque[data-hud-rim] .map-hud-bar { box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 0 1px color-mix(in srgb, var(--hud-rim) 60%, transparent); }
+
+.map-hud-bar[data-hp-tone="high"] { --hp-hi: #9be87a; --hp-lo: #3c8a2c; }
+.map-hud-bar[data-hp-tone="mid"] { --hp-hi: #ffe27a; --hp-lo: #c4921a; }
+.map-hud-bar[data-hp-tone="low"] { --hp-hi: #ff8264; --hp-lo: #a32216; }
+.map-hud-bar[data-hp-tone="down"] { --hp-hi: #8a847a; --hp-lo: #45403a; }
+
+.map-hud-trail, .map-hud-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: inherit; }
+
+/* слід урону тримається мить і плавно сповзає; при лікуванні він під заливкою й непомітний */
+.map-hud-trail { background: linear-gradient(180deg, #fff3da, #e2b878); opacity: 0.7; transition: width 0.6s cubic-bezier(0.3, 0.7, 0.4, 1) 0.4s; }
+
+.map-hud-fill {
+  background: linear-gradient(180deg, var(--hp-hi), var(--hp-lo));
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  transition: width 0.35s ease-out;
+}
+
+.map-hud-fill::after { content: ""; position: absolute; inset: 0 0 52% 0; border-radius: inherit; background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.05)); }
+
+.map-hud-text {
+  position: relative;
+  display: block;
+  height: 100%;
+  padding: 0 3px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fffaf0;
+  text-shadow: 0 1px 1px #000, 0 0 3px rgba(0, 0, 0, 0.95);
+}
+
+.map-hud-fx { position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; }
+.map-hud-fx::before, .map-hud-fx::after { content: ""; position: absolute; pointer-events: none; }
+.map-hud-fx::before { inset: 0; border-radius: inherit; box-shadow: 0 0 6px var(--fx-glow), inset 0 0 4px var(--fx-glow); opacity: 0.85; }
+/* без руху лишається тільки статичний відтінок рамки — частинки ховаються */
+.map-hud-fx::after { opacity: 0; }
+
+.map-hud-fx[data-hud-fx="frost"] { --fx-glow: rgba(140, 210, 255, 0.6); --fx-c: #e4f6ff; }
+.map-hud-fx[data-hud-fx="fire"] { --fx-glow: rgba(255, 130, 40, 0.65); --fx-c: #ffd27a; }
+.map-hud-fx[data-hud-fx="plague"] { --fx-glow: rgba(120, 210, 80, 0.55); --fx-c: #b6f08e; }
+.map-hud-fx[data-hud-fx="blood"] { --fx-glow: rgba(220, 50, 40, 0.55); --fx-c: #d0261c; }
+.map-hud-fx[data-hud-fx="stun"] { --fx-glow: rgba(255, 215, 70, 0.6); --fx-c: #fff2a8; }
+.map-hud-fx[data-hud-fx="nature"] { --fx-glow: rgba(110, 180, 70, 0.5); --fx-c: #6fae44; }
+.map-hud-fx[data-hud-fx="curse"] { --fx-glow: rgba(160, 100, 220, 0.6); --fx-c: rgba(170, 120, 230, 0.55); }
+.map-hud-fx[data-hud-fx="storm"] { --fx-glow: rgba(160, 200, 255, 0.6); --fx-c: #eaf4ff; }
+.map-hud-fx[data-hud-fx="gold"] { --fx-glow: rgba(240, 200, 100, 0.5); --fx-c: #fff0b8; }
+.map-hud-fx[data-hud-fx="holy"] { --fx-glow: rgba(255, 245, 210, 0.5); --fx-c: #ffffff; }
+.map-hud-fx[data-hud-fx="life"] { --fx-glow: rgba(120, 225, 130, 0.5); --fx-c: #c8ffc8; }
+
+/* частинки над верхнім краєм: іскри, бульбашки, дим, мотеси */
+.map-hud-fx:is([data-hud-fx="fire"], [data-hud-fx="plague"], [data-hud-fx="curse"], [data-hud-fx="holy"], [data-hud-fx="life"])::after {
+  left: 8%;
+  right: 8%;
+  bottom: 70%;
+  height: 10px;
+  background:
+    radial-gradient(circle at 18% 100%, var(--fx-c) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 52% 75%, var(--fx-c) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 84% 100%, var(--fx-c) 0 1px, transparent 1.8px);
+}
+
+.map-hud-fx[data-hud-fx="plague"]::after {
+  background:
+    radial-gradient(circle at 22% 100%, transparent 0 1.2px, var(--fx-c) 1.5px 2.1px, transparent 2.5px),
+    radial-gradient(circle at 60% 80%, transparent 0 0.8px, var(--fx-c) 1.1px 1.6px, transparent 2px),
+    radial-gradient(circle at 86% 100%, transparent 0 1px, var(--fx-c) 1.3px 1.9px, transparent 2.3px);
+}
+
+.map-hud-fx[data-hud-fx="curse"]::after {
+  height: 12px;
+  background:
+    radial-gradient(circle at 25% 90%, var(--fx-c), transparent 4px),
+    radial-gradient(circle at 60% 70%, var(--fx-c), transparent 5px),
+    radial-gradient(circle at 85% 95%, var(--fx-c), transparent 3.5px);
+}
+
+.map-hud-fx[data-hud-fx="blood"]::after {
+  left: 12%;
+  right: 12%;
+  top: 1px;
+  height: 7px;
+  background:
+    radial-gradient(1px 2.6px at 20% 0, var(--fx-c) 85%, transparent),
+    radial-gradient(1px 2.2px at 58% 0, var(--fx-c) 85%, transparent),
+    radial-gradient(1.2px 3px at 82% 0, var(--fx-c) 85%, transparent);
+}
+
+/* іскорки на кутах: оглушення, блискавка, мороз (кристали), золоті відблиски */
+.map-hud-fx:is([data-hud-fx="stun"], [data-hud-fx="storm"], [data-hud-fx="gold"])::after {
+  inset: -3px;
+  background:
+    radial-gradient(circle at 6% 10%, var(--fx-c) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 50% 0, var(--fx-c) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 94% 12%, var(--fx-c) 0 1px, transparent 1.8px);
+}
+
+.map-hud-fx[data-hud-fx="frost"]::after {
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(45deg, transparent 46%, var(--fx-c) 49% 51%, transparent 54%) 0 0 / 7px 7px no-repeat,
+    linear-gradient(-45deg, transparent 46%, var(--fx-c) 49% 51%, transparent 54%) 0 0 / 7px 7px no-repeat,
+    linear-gradient(45deg, transparent 46%, var(--fx-c) 49% 51%, transparent 54%) 100% 100% / 7px 7px no-repeat,
+    linear-gradient(-45deg, transparent 46%, var(--fx-c) 49% 51%, transparent 54%) 100% 100% / 7px 7px no-repeat,
+    linear-gradient(100deg, transparent 30%, rgba(225, 245, 255, 0.35) 45% 55%, transparent 70%);
+}
+
+.map-hud-fx[data-hud-fx="nature"]::after {
+  inset: -45% -2px 0 -2px;
+  border: 2px solid transparent;
+  border-left-color: var(--fx-c);
+  border-right-color: var(--fx-c);
+  border-radius: 55% 55% 5px 5px / 70% 70% 5px 5px;
+  transform-origin: 50% 100%;
+}
+
+.map-hud-anim .map-hud-fx::before { animation: map-hud-glow 2.4s ease-in-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="fire"]::before, .map-hud-anim .map-hud-fx[data-hud-fx="storm"]::before { animation: map-hud-flicker 0.9s steps(4) infinite; }
+.map-hud-anim .map-hud-fx:is([data-hud-fx="fire"], [data-hud-fx="holy"], [data-hud-fx="life"])::after { animation: map-hud-rise 1.3s ease-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="plague"]::after { animation: map-hud-rise 1.9s ease-in-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="curse"]::after { animation: map-hud-smoke 2.6s ease-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="blood"]::after { animation: map-hud-drip 1.6s ease-in infinite; }
+.map-hud-anim .map-hud-fx:is([data-hud-fx="stun"], [data-hud-fx="gold"])::after { animation: map-hud-twinkle 1.2s ease-in-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="storm"]::after { animation: map-hud-twinkle 0.7s steps(3) infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="frost"]::after { animation: map-hud-shimmer 2.2s ease-in-out infinite; }
+.map-hud-anim .map-hud-fx[data-hud-fx="nature"]::after { animation: map-hud-sway 2.8s ease-in-out infinite; }
+
+@keyframes map-hud-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes map-hud-flicker { 0%, 100% { opacity: 0.7; } 35% { opacity: 1; } 65% { opacity: 0.5; } }
+@keyframes map-hud-rise { 0% { opacity: 0; transform: translateY(3px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-7px); } }
+@keyframes map-hud-smoke { 0% { opacity: 0; transform: translateY(2px) scale(0.8); } 35% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-8px) scale(1.25); } }
+@keyframes map-hud-drip { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(5px); } }
+@keyframes map-hud-twinkle { 0%, 100% { opacity: 0; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes map-hud-shimmer { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes map-hud-sway { 0%, 100% { opacity: 0.75; transform: scaleY(0.85) skewX(-3deg); } 50% { opacity: 1; transform: scaleY(1) skewX(3deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .map-hud-trail, .map-hud-fill { transition: none; }
+  .map-hud-anim .map-hud-fx::before, .map-hud-anim .map-hud-fx::after { animation: none; }
+}

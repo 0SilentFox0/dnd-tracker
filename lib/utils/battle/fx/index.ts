@@ -1,6 +1,7 @@
 export { ARCHETYPE_FX, type ArchetypeFx, FX_ARCHETYPES, type FxImpactKind } from "./archetypes";
 export { aurasOf } from "./aura";
 export { frameKindOf, type FxFrameKind } from "./frame-kind";
+export { type HudMotif, hudMotifsOf } from "./hud-motif";
 export { type FxImpact, impactFor } from "./impact";
 export { mapAction } from "./map-action";
 export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, shiftFxQueue } from "./queue";

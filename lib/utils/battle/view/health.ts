@@ -36,3 +36,11 @@ const SEGMENTS = { unhurt: 4, wounded: 3, bloodied: 2, dying: 1, down: 0 } as co
 export function healthSegments(s: HealthState): 0 | 1 | 2 | 3 | 4 {
   return SEGMENTS[s];
 }
+
+export type HpTone = "high" | "mid" | "low";
+
+export function hpTone(ratio: number): HpTone {
+  if (ratio > 0.5) return "high";
+
+  return ratio > 0.25 ? "mid" : "low";
+}
