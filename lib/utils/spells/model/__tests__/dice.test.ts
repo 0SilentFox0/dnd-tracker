@@ -24,8 +24,24 @@ describe("spellDice", () => {
     expect(spellDice({ kind: "hero", level: 3 }, { dice: 2, groupId: "light" }, mastery).sides).toBe(8);
   });
 
-  it("юніт L5: (4+1)к6, майстерність ігнорується", () => {
-    expect(spellDice({ kind: "unit", level: 5 }, fireball, mastery)).toEqual({ count: 5, sides: 6 });
+  it.each([
+    [1, { count: 4, sides: 6 }],
+    [4, { count: 6, sides: 6 }],
+    [5, { count: 6, sides: 8 }],
+    [9, { count: 8, sides: 8 }],
+    [10, { count: 9, sides: 10 }],
+    [12, { count: 10, sides: 10 }],
+  ])("юніт L%i: +рівень/2 кубиків, грані за рівнем, майстерність ігнорується", (level, dice) => {
+    expect(spellDice({ kind: "unit", level }, fireball, mastery)).toEqual(dice);
+  });
+
+  it("Печерний владика L6: Вогняна куля 6к8, Метеоритний дощ 5к8", () => {
+    expect(spellDice({ kind: "unit", level: 6 }, { dice: 3, groupId: null }, mastery)).toEqual({ count: 6, sides: 8 });
+    expect(spellDice({ kind: "unit", level: 6 }, { dice: 2, groupId: null }, mastery)).toEqual({ count: 5, sides: 8 });
+  });
+
+  it("герой не змінився: +рівень/3 кубиків, к6 без майстерності", () => {
+    expect(spellDice({ kind: "hero", level: 12 }, { dice: 4, groupId: "dark" }, mastery)).toEqual({ count: 8, sides: 6 });
   });
 });
 

@@ -101,10 +101,10 @@ describe("Хаос: кубики і множники", () => {
     expect(casterSpellDice(hero("c", 20, { level: 9, mastery: { [CHAOS]: "expert" } }), g)).toEqual({ count: 6, sides: 10 });
   });
 
-  it("опис «+1 кубик за кожні 3 рівні героя»: юніт теж отримує надбавку за свій рівень (не баг рушія, уточнення опису)", () => {
+  it("юніт має власне зростання: +1 кубик за кожні 2 рівні, к8 з 5 рівня", () => {
     const u = unit("u", ParticipantSide.ENEMY, 10);
 
-    expect(casterSpellDice({ ...u, abilities: { ...u.abilities, level: 6 } }, { dice: 3, groupId: CHAOS })).toEqual({ count: 5, sides: 6 });
+    expect(casterSpellDice({ ...u, abilities: { ...u.abilities, level: 6 } }, { dice: 3, groupId: CHAOS })).toEqual({ count: 6, sides: 8 });
   });
 
   it("heroMagicMultiplier множить шкоду героя", () => {
