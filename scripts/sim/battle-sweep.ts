@@ -37,6 +37,7 @@ import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engin
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
@@ -1288,6 +1289,8 @@ async function mapCheck(spells: Map<string, any>) {
 
   tcheck("Карта: шаблон «Вогняна куля» по клітинці", fr?.status === 200 && aim?.x === targetCell?.x && aim?.y === targetCell?.y && !!foe && hitIds.includes(foe.basicInfo.id), `${fr?.status ?? "немає закляття/цілі"} aimCell=${JSON.stringify(aim)} ціль ${foe?.basicInfo.name} у ${JSON.stringify(targetCell)}; цілей: ${hitIds.length}${fr && fr.status !== 200 ? ` ${JSON.stringify(fr.body).slice(0, 200)}` : ""}`);
 
+  await mapRingAndEmptyCheck(spells);
+
   const hazardName = "Карта: небезпека б'є на початку ходу й пишеться в журнал";
 
   if (state.status !== "active") return tskip(hazardName, `бій уже не активний (${state.status}) після «Вогняної кулі»`);
@@ -1318,6 +1321,78 @@ async function mapCheck(spells: Map<string, any>) {
   const signOk = !!change && change.change === change.oldHp - change.newHp && change.change > 0;
 
   tcheck(hazardName, tr?.status === 200 && !!entry && signOk && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${entry.resultText}; hpChanges ${JSON.stringify(change)}` : "запису hazard немає"}`);
+}
+
+/** Кільце «Коло зими» по зайнятому центру й «Вогняна куля» в порожню зону: обидва — каст з aimCell. */
+async function mapRingAndEmptyCheck(spells: Map<string, any>) {
+  const ringName = "Карта: кільце «Коло зими» — центр не ціль, кільце — цілі";
+
+  const emptyName = "Карта: каст у порожню зону — прийнято, aimCell є, цілей 0";
+
+  const cols = 12;
+
+  const rows = 8;
+
+  const footprint = (p: any) => new Set(cellsOf(p).map((c) => `${c.x}:${c.y}`));
+
+  const near = (c: { x: number; y: number }) => [-1, 0, 1].flatMap((dy) => [-1, 0, 1].map((dx) => ({ x: c.x + dx, y: c.y + dy }))).filter((n) => n.x >= 0 && n.y >= 0 && n.x < cols && n.y < rows);
+
+  const onCells = (cells: string[]) => P().filter((p) => alive(p) && p.battleData.position && cellsOf(p).some((c) => cells.includes(`${c.x}:${c.y}`)));
+
+  const castAt = async (spell: any, targetCell: { x: number; y: number }) => {
+    const caster = current();
+
+    const dice = casterSpellDice(caster, { dice: spell.dice ?? 0, groupId: spell.groupId ?? null });
+
+    const r = await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: spell.id, targetIds: [], targetCell, diceRolls: Array.from({ length: dice.count }, () => 1), free: true });
+
+    const cast = r.log.find((e: any) => e.actionType === "spell");
+
+    return { r, aim: cast?.actionDetails?.aimCell, hitIds: (cast?.targets ?? []).map((t: any) => t.participantId) as string[] };
+  };
+
+  const winter = [...spells.values()].find((s: any) => s.name === "Коло зими");
+
+  if (state.status !== "active") tskip(ringName, `бій не активний (${state.status})`);
+  else if (!winter) tskip(ringName, "закляття «Коло зими» немає в кампанії");
+  else {
+    const centreOf = P().filter((p) => alive(p) && p.battleData.position && cellsOf(p).length === 1).map((p) => {
+      const c = p.battleData.position;
+
+      const ring = near(c).filter((n) => n.x !== c.x || n.y !== c.y).map((n) => `${n.x}:${n.y}`);
+
+      return { p, c, ring: onCells(ring).filter((o) => !footprint(o).has(`${c.x}:${c.y}`)) };
+    });
+
+    const pick = centreOf.find((x) => x.ring.length > 0);
+
+    if (!pick) tskip(ringName, "немає учасника 1×1 із сусідом у кільці");
+    else {
+      const { r, aim, hitIds } = await castAt(winter, pick.c);
+
+      const ringIds = pick.ring.map((o) => o.basicInfo.id);
+
+      const ok = r.status === 200 && aim?.x === pick.c.x && aim?.y === pick.c.y && !hitIds.includes(pick.p.basicInfo.id) && ringIds.every((id) => hitIds.includes(id));
+
+      tcheck(ringName, ok, `${r.status} центр ${pick.p.basicInfo.name} у ${JSON.stringify(pick.c)}; кільце: ${pick.ring.map((o) => o.basicInfo.name).join(", ")}; цілі: ${hitIds.length}; aimCell=${JSON.stringify(aim)}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ""}`);
+    }
+  }
+
+  const fire = [...spells.values()].find((s: any) => s.name === "Вогняна куля");
+
+  if (state.status !== "active") return tskip(emptyName, `бій не активний (${state.status})`);
+
+  if (!fire) return tskip(emptyName, "закляття «Вогняна куля» немає в кампанії");
+
+  const all = Array.from({ length: rows }, (_, y) => Array.from({ length: cols }, (_, x) => ({ x, y }))).flat();
+
+  const empty = all.find((c) => onCells(near(c).map((n) => `${n.x}:${n.y}`)).length === 0);
+
+  if (!empty) return tskip(emptyName, "немає вільної зони 3×3");
+
+  const { r, aim, hitIds } = await castAt(fire, empty);
+
+  tcheck(emptyName, r.status === 200 && aim?.x === empty.x && aim?.y === empty.y && hitIds.length === 0, `${r.status} точка ${JSON.stringify(empty)}; aimCell=${JSON.stringify(aim)}; цілей ${hitIds.length}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ""}`);
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });
