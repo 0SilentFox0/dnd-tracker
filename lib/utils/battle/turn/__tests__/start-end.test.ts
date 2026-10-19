@@ -44,6 +44,23 @@ describe("рух на початку ходу", () => {
     expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBe(0);
   });
 
+  it("запамʼятовує стартову клітинку ходу і скидає прапорець повернення", () => {
+    const base = createMockParticipant();
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 3, y: 1 }, returnedThisTurn: true } });
+
+    const { battleData } = processStartOfTurn(p, 2, [p]).participant;
+
+    expect(battleData.turnStartPosition).toEqual({ x: 3, y: 1 });
+    expect(battleData.returnedThisTurn).toBeUndefined();
+  });
+
+  it("без позиції на карті стартової клітинки немає", () => {
+    const p = createMockParticipant();
+
+    expect(processStartOfTurn(p, 2, [p]).participant.battleData.turnStartPosition).toBeUndefined();
+  });
+
   it("без пройденого руху поле не зʼявляється", () => {
     const p = createMockParticipant();
 

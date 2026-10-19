@@ -137,6 +137,11 @@ export function processStartOfTurn(
     updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, movementUsed: 0 } };
   }
 
+  updatedParticipant = {
+    ...updatedParticipant,
+    battleData: { ...updatedParticipant.battleData, turnStartPosition: updatedParticipant.battleData.position, returnedThisTurn: undefined },
+  };
+
   const id = participant.basicInfo.id;
 
   // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn

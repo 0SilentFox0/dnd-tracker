@@ -18,13 +18,14 @@ export interface MapTokenHudProps {
   pxPerUnit: number;
   exact: boolean;
   raised: boolean;
+  onReturn?: () => void;
 }
 
 const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, onReturn }: MapTokenHudProps) {
   const { currentHp, maxHp } = participant.combatStats;
 
   const change = useHpChange(currentHp);
@@ -67,6 +68,20 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }
         >
           {signedDelta(change.delta)}
         </span>
+      )}
+      {onReturn && (
+        <button
+          type="button"
+          data-map-return
+          className="hud-sc pointer-events-auto absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/20 bg-black/80 px-2 py-0.5 text-[11px] font-bold text-[var(--ink)] hover:bg-black"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReturn();
+          }}
+        >
+          Повернутися
+        </button>
       )}
       <div
         ref={shake}

@@ -174,6 +174,7 @@ export interface MoveParticipantData {
   participantId: string;
   to: GridPoint;
   free?: boolean;
+  returnToStart?: true;
 }
 
 export interface MapTerrainData {

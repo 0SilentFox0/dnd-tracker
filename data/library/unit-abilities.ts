@@ -39,6 +39,14 @@ export const noRetaliation = (): Ability => ({
   effects: [{ kind: "flag", flag: "noRetaliation" }],
 });
 
+export const strikeAndReturn = (): Ability => ({
+  id: "unit-strike-and-return",
+  name: "Удар і повернення",
+  description: "Після атаки може безкоштовно повернутися на клітинку, з якої почав хід.",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "strikeAndReturn" }],
+});
+
 export const unlimitedRetaliation = (): Ability => ({
   id: "unit-unlimited-retaliation",
   name: "Безмежна відсіч",

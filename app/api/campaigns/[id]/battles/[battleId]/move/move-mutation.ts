@@ -4,7 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canActNow } from "@/lib/utils/battle/common/control";
-import { canStand, cellKey, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
+import { canStand, cellKey, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable, returnToStartError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -14,6 +14,7 @@ export const moveSchema = z.object({
   participantId: z.string(),
   to: z.object({ x: z.number().int().min(0), y: z.number().int().min(0) }),
   free: z.boolean().optional(),
+  returnToStart: z.literal(true).optional(),
 });
 
 export type MoveBody = z.infer<typeof moveSchema>;
@@ -40,6 +41,8 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   if (!ownTurn && !ctx.isDM) throw new BattleAccessError(403, "Рухатися можна лише у свій хід");
 
   if (ownTurn && !canActNow(ctx, mover, current)) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
+  if (data.returnToStart) return returnToStart(ctx, participants, mover, ownTurn);
 
   let movementUsed = mover.battleData.movementUsed;
 
@@ -70,6 +73,20 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   if (!hazard || !hit) return { participants: after, pending: ctx.pending, events: [] };
 
   return { ...resolveHazardHit(ctx, after, moved, hazard, hit), pending: ctx.pending };
+}
+
+function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {
+  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
+
+  const error = ownTurn ? returnToStartError(map, participants, mover) : "Повернутися можна лише у свій хід";
+
+  if (error || !mover.battleData.turnStartPosition) throw new BattleRuleError("action_rejected", error ?? "Повернутися неможливо");
+
+  assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
+
+  const moved = { ...mover, battleData: { ...mover.battleData, position: mover.battleData.turnStartPosition, returnedThisTurn: true } };
+
+  return { participants: replaceParticipant(participants, moved), pending: ctx.pending, events: [] };
 }
 
 function resolveHazardHit(

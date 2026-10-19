@@ -156,6 +156,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return "бачить HP ворогів";
     case "noRetaliation":
       return "атаки без відсічі";
+    case "strikeAndReturn":
+      return "після атаки повертається на стартову клітинку";
     case "unlimitedRetaliation":
       return "відповідає на кожну атаку";
     case "extraRetaliations":
@@ -193,6 +195,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   lifesteal: "Вампіризм (лікування від шкоди атак)",
   moraleChance: "Шанс додаткового ходу від моралі",
   noRetaliation: "Без відповіді",
+  strikeAndReturn: "Удар і повернення",
   unlimitedRetaliation: "Безмежна відсіч",
   extraRetaliations: "Додаткові відсічі за раунд",
   noNegativeMorale: "Мораль не нижче 0",
@@ -252,6 +255,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   lifesteal: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
   moraleChance: [{ name: "percent", label: "+% до шансу додаткового ходу", input: "number" }],
   noRetaliation: [],
+  strikeAndReturn: [],
   unlimitedRetaliation: [],
   extraRetaliations: [{ name: "count", label: "Додаткових відсічей", input: "number" }],
   noNegativeMorale: [],

@@ -85,6 +85,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("lifesteal"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("multiTargetFalloff"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("noRetaliation") }),
+  z.object({ ...flagBase, flag: z.literal("strikeAndReturn") }),
   z.object({ ...flagBase, flag: z.literal("unlimitedRetaliation") }),
   z.object({ ...flagBase, flag: z.literal("extraRetaliations"), count: z.number().int().min(1).max(5) }),
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),

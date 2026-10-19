@@ -44,6 +44,8 @@ export interface ParticipantState {
   pendingExtraActions?: number;
   position?: GridPoint;
   movementUsed?: number;
+  turnStartPosition?: GridPoint;
+  returnedThisTurn?: boolean;
   hazardHitRound?: number;
   retaliationsUsed?: number;
   spellSlotsCurrent: Record<string, number>;

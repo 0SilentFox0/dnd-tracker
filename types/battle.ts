@@ -215,6 +215,8 @@ export interface BattleMapView {
   aim?: GridPoint | null;
   /** Плашка під токеном: без запису — exact */
   hud?: Map<string, { exact: boolean }>;
+  /** Учасник, якому доступне «Повернутися» (удар і повернення) */
+  returnId?: string | null;
   /** Клітинки надісланих штрихів місцевості до відповіді сервера */
   pendingStroke?: ReadonlySet<string>;
 }
@@ -224,6 +226,7 @@ export interface BattleMapActions {
   onCellHover?: (p: GridPoint | null) => void;
   onTokenClick?: (id: string) => void;
   onStroke?: (cells: GridPoint[]) => void;
+  onReturn?: () => void;
 }
 
 /**
@@ -286,6 +289,10 @@ export interface BattleParticipantBattleData {
   position?: GridPoint;
   /** Клітинок пройдено в поточному ході */
   movementUsed?: number;
+  /** Якір на початок поточного ходу (для «Удару і повернення») */
+  turnStartPosition?: GridPoint;
+  /** Вже поверталася на стартову клітинку цього ходу */
+  returnedThisTurn?: boolean;
   /** Відсічей, уже даних з початку власного ходу; немає = за hasUsedReaction */
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */

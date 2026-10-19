@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
-import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
+import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode, returnToStartError } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -75,6 +75,8 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { pending: pendingStroke } = terrainTool;
 
+  const returnId = canAct && map && current && !current.battleData.reserved && returnToStartError(map, order, current) === null ? current.basicInfo.id : null;
+
   const view = useMemo(() => {
     if (!scene || !map) return null;
 
@@ -84,9 +86,10 @@ export function useBattleMapScene(): BattleMapScene | null {
       ...scene.view,
       ...hovered,
       trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
+      ...(returnId && { returnId }),
       ...(pendingStroke.size > 0 && { pendingStroke }),
     };
-  }, [scene, map, mapAim, hoverCell, pendingStroke, current]);
+  }, [scene, map, mapAim, hoverCell, pendingStroke, current, returnId]);
 
   const { mutate: move } = actions.move;
 
@@ -110,10 +113,16 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { commit } = terrainTool;
 
-  const latest = useRef({ scene, handle, anyPending, stroke: commit });
+  const returnToStart = useCallback(() => {
+    const to = current?.battleData.turnStartPosition;
+
+    if (current && to) move({ participantId: current.basicInfo.id, to, returnToStart: true });
+  }, [move, current]);
+
+  const latest = useRef({ scene, handle, anyPending, stroke: commit, returnToStart });
 
   useEffect(() => {
-    latest.current = { scene, handle, anyPending, stroke: commit };
+    latest.current = { scene, handle, anyPending, stroke: commit, returnToStart };
   });
 
   const mapActions = useMemo<BattleMapActions>(
@@ -132,6 +141,7 @@ export function useBattleMapScene(): BattleMapScene | null {
           return sameCell(prev, next) ? prev : next;
         }),
       onStroke: (cells) => latest.current.stroke(cells),
+      onReturn: () => latest.current.returnToStart(),
       onTokenClick: (id) => {
         const l = latest.current;
 

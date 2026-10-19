@@ -88,6 +88,8 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
               retaliationsUsed: 0,
               pendingExtraActions: actionsPerTurnPool(p, order),
               ...(p.battleData.movementUsed && { movementUsed: 0 }),
+              turnStartPosition: p.battleData.position,
+              returnedThisTurn: undefined,
             },
           }
         : p,

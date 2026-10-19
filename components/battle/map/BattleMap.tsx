@@ -500,6 +500,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
               pxPerUnit={pxPerUnit}
               exact={hud?.exact ?? false}
               raised={view?.selectedId === id || view?.currentId === id}
+              onReturn={view?.returnId === id ? actions?.onReturn : undefined}
             />
           );
         })}

@@ -147,6 +147,27 @@ describe("BattleMap", () => {
     });
   });
 
+  describe("повернення (удар і повернення)", () => {
+    it("кнопка лише в учасника з returnId і викликає onReturn", () => {
+      const onReturn = vi.fn();
+
+      const { container } = render(
+        <TooltipProvider>
+          <BattleMap map={square} participants={[at("h", 1, 1), at("g", 2, 2)]} view={{ returnId: "h" }} actions={{ onReturn }} />
+        </TooltipProvider>,
+      );
+
+      const buttons = container.querySelectorAll("[data-map-return]");
+
+      expect(buttons).toHaveLength(1);
+      expect(container.querySelector('[data-map-hud="h"] [data-map-return]')?.textContent).toBe("Повернутися");
+
+      fireEvent.click(buttons[0]);
+
+      expect(onReturn).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("hud", () => {
     const effect = { id: "e1", name: "Благословення", type: "buff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] } as unknown as ActiveEffect;
 
