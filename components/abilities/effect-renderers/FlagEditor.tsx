@@ -1,42 +1,10 @@
 "use client";
 
 import { FieldRenderer } from "@/components/abilities/fields/FieldRenderer";
-import { AttackType } from "@/lib/constants/battle";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
-import { FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects";
+import { FLAG_DEFAULTS, FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects/flags";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
 import type { Effect, FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
-
-const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
-  advantage: { attackKind: "all" },
-  disadvantage: {},
-  disadvantageForAttackers: {},
-  advantageForAttackers: {},
-  guaranteedHit: {},
-  resistance: { damageType: "physical", percent: 25 },
-  spellAbsorb: { percent: 50 },
-  castSpellOnHit: { spellIds: [] },
-  spellImmunity: {},
-  spellTargeting: { mode: "area" },
-  counterAttack: { attackKinds: [AttackType.MELEE], bonusPercent: 15 },
-  attackHitsAllEnemies: {},
-  seeEnemyHp: {},
-  multiTargetFalloff: { percent: 50 },
-  lifesteal: { percent: 50 },
-  moraleChance: { percent: 10 },
-  noRetaliation: {},
-  strikeAndReturn: {},
-  unlimitedRetaliation: {},
-  extraRetaliations: { count: 1 },
-  noNegativeMorale: {},
-  ignoreMorale: {},
-  minMorale: { value: 1 },
-  extraSummons: { count: 1 },
-  piercingShot: {},
-  fireWave: { percent: 50, size: 15 },
-  banishSummons: { percent: 50 },
-  conditionImmunity: { conditions: "all" },
-};
 
 const FLAG_META: FieldMeta = {
   name: "flag",
@@ -54,7 +22,7 @@ export function FlagEditor({ effect, path, onChange }: { effect: FlagEffect; pat
     onChange({
       kind: "flag",
       flag: next,
-      ...DEFAULTS[next],
+      ...FLAG_DEFAULTS[next],
       ...(effect.target && { target: effect.target }),
       ...(effect.duration && { duration: effect.duration }),
     } as Effect);

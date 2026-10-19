@@ -3,6 +3,7 @@ import { limitsLabel } from "../labels";
 import { describeTrigger } from "../triggers";
 import { applyBerserk, applyCharm, describeBerserk, describeCharm } from "./control";
 import { applyCopySpellBuffs } from "./copy-buffs";
+import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver, MANEUVER_LABELS } from "./maneuver";
 import {
@@ -21,10 +22,7 @@ import {
   applyStatic,
   damageBonusFields,
   describeDamageBonus,
-  describeFlag,
   describeModifyStat,
-  FLAG_FIELDS,
-  FLAG_LABELS,
   modifyStatFields,
 } from "./static";
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
