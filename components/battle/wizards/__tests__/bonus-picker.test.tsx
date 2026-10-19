@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -13,6 +13,8 @@ const heal = { key: "heal", name: "Лікувальний дотик", trigger: 
 const wind = { key: "wind", name: "Друге дихання", trigger: { event: "bonusAction" }, effects: [{ kind: "heal", amount: "1d10" }], source: { type: "skill", id: "s2", name: "S2" } } as ResolvedAbility;
 
 const dive = { key: "dive", name: "Пікірування", trigger: { event: "action" }, aim: { kind: "cell", range: 120 }, effects: [{ kind: "maneuver", maneuver: "dive", percentOfAttack: 200 }], source: { type: "unit", id: "g", name: "G" } } as ResolvedAbility;
+
+const squall = { key: "squall", name: "Шквал", trigger: { event: "action" }, aim: { kind: "direction", range: 15 }, effects: [{ kind: "maneuver", maneuver: "squall", percentOfAttack: 100 }], source: { type: "unit", id: "g", name: "G" } } as ResolvedAbility;
 
 const MAP = { cols: 10, rows: 10, background: null, opacity: 0.4 };
 
@@ -52,14 +54,14 @@ describe("BonusActionPicker", () => {
   });
 
   describe("наведення на карту", () => {
-    const setup = () => {
-      const scene = fakeScene({ abilities: [dive], map: MAP });
+    const setup = (ability: ResolvedAbility = dive) => {
+      const scene = fakeScene({ abilities: [ability], map: MAP });
 
       const me = { ...scene.me, battleData: { ...scene.me.battleData, position: { x: 1, y: 1 } } };
 
       render(<BonusActionPicker participant={me} trigger="action" open onOpenChange={() => {}} onDone={() => {}} />, { wrapper: scene.wrapper });
 
-      fireEvent.click(screen.getByRole("button", { name: /Пікірування/ }));
+      fireEvent.click(screen.getByRole("button", { name: new RegExp(ability.name) }));
 
       const setMapAim = scene.value.intents.setMapAim as unknown as ReturnType<typeof vi.fn>;
 
@@ -77,6 +79,23 @@ describe("BonusActionPicker", () => {
 
       await waitFor(() => expect(abilityAction).toHaveBeenCalledWith({ participantId: me.basicInfo.id, abilityKey: "dive", targetCell: { x: 5, y: 5 } }));
       expect(setMapAim).toHaveBeenLastCalledWith(null);
+    });
+
+    it("клітинкове вміння показує куб, напрямкове — лінію на дальність", async () => {
+      expect(setup().setMapAim.mock.calls[0][0].template).toMatchObject({ shape: "cube" });
+      cleanup();
+
+      const direction = setup(squall);
+
+      const aim = direction.setMapAim.mock.calls[0][0];
+
+      expect(aim.template).toEqual({ shape: "line", size: 15 });
+
+      act(() => aim.onAim({ x: 9, y: 9 }));
+      expect(direction.abilityAction).not.toHaveBeenCalled();
+
+      act(() => aim.onAim({ x: 3, y: 1 }));
+      await waitFor(() => expect(direction.abilityAction).toHaveBeenCalledWith({ participantId: direction.me.basicInfo.id, abilityKey: "squall", targetCell: { x: 3, y: 1 } }));
     });
 
     it("«Скасувати» прибирає наведення", () => {

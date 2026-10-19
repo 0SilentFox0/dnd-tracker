@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 
 import { CELL_FEET } from "@/lib/constants/battle";
-import { sizeOf } from "@/lib/utils/battle/grid";
+import { aimInRange, cellsOf, sizeOf } from "@/lib/utils/battle/grid";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -17,8 +17,11 @@ export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability
 
   const fire = useRef(onAim);
 
+  const origin = useRef(cellsOf(participant));
+
   useEffect(() => {
     fire.current = onAim;
+    origin.current = cellsOf(participant);
   });
 
   const casterId = participant.basicInfo.id;
@@ -28,11 +31,15 @@ export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability
   useEffect(() => {
     if (!ability?.aim) return;
 
+    const { kind, range } = ability.aim;
+
     setMapAim({
-      template: { shape: "cube", size },
+      template: kind === "direction" ? { shape: "line", size: range } : { shape: "cube", size },
       casterId,
-      range: ability.aim.range,
+      range,
       onAim: (cell) => {
+        if (kind === "direction" && !aimInRange(origin.current, cell, range)) return;
+
         setAbility(null);
         fire.current(ability, cell);
       },
