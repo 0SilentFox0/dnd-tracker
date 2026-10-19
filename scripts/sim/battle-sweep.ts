@@ -785,6 +785,11 @@ const tcheck = (name: string, ok: boolean, detail: string) => { targetedResults.
 
  if (!ok) issue("error", `ЦІЛЬОВИЙ: ${name} — ${detail}`); };
 
+/** Сценарій не склався (напр., бій уже завершився) — пропуск із поясненням замість хибного провалу. */
+const tskip = (name: string, detail: string) => { targetedResults.push(`⏭️ ${name} — пропущено: ${detail}`);
+
+  issue("warn", `ЦІЛЬОВИЙ пропущено: ${name} — ${detail}`); };
+
 const byName = (n: string) => P().find((p) => p.basicInfo.name === n);
 
 const nextOnly = async () => { if (state.status === "active") await call("next-turn", NEXT); };
@@ -1210,7 +1215,7 @@ async function mapCheck(spells: Map<string, any>) {
   await applyRotation(0);
   battleLabel = "Карта";
 
-  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, take: 2 });
+  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, take: 3 });
 
   const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...units.map((u) => ({ id: u.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
 
@@ -1272,13 +1277,20 @@ async function mapCheck(spells: Map<string, any>) {
 
   const fdice = fire && casterSpellDice(caster, { dice: fire.dice ?? 0, groupId: fire.groupId ?? null });
 
-  const fr = fire && fdice && foe && targetCell ? await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: fire.id, targetIds: [], targetCell, diceRolls: rollDiceList(`${fdice.count}d${fdice.sides}`, rng), free: true }) : null;
+  // мінімальні кубики — щоб куля не завершила бій до перевірки небезпеки
+  const fr = fire && fdice && foe && targetCell ? await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: fire.id, targetIds: [], targetCell, diceRolls: Array.from({ length: fdice.count }, () => 1), free: true }) : null;
 
-  const aim = fr?.log.at(-1)?.actionDetails?.aimCell;
+  const cast = fr?.log.find((e: any) => e.actionType === "spell");
 
-  const hitIds: string[] = (fr?.log.at(-1)?.targets ?? []).map((t: any) => t.participantId);
+  const aim = cast?.actionDetails?.aimCell;
+
+  const hitIds: string[] = (cast?.targets ?? []).map((t: any) => t.participantId);
 
   tcheck("Карта: шаблон «Вогняна куля» по клітинці", fr?.status === 200 && aim?.x === targetCell?.x && aim?.y === targetCell?.y && !!foe && hitIds.includes(foe.basicInfo.id), `${fr?.status ?? "немає закляття/цілі"} aimCell=${JSON.stringify(aim)} ціль ${foe?.basicInfo.name} у ${JSON.stringify(targetCell)}; цілей: ${hitIds.length}${fr && fr.status !== 200 ? ` ${JSON.stringify(fr.body).slice(0, 200)}` : ""}`);
+
+  const hazardName = "Карта: небезпека б'є на початку ходу й пишеться в журнал";
+
+  if (state.status !== "active") return tskip(hazardName, `бій уже не активний (${state.status}) після «Вогняної кулі»`);
 
   const victim = P().filter(isHero).find((p) => p.basicInfo.id !== current().basicInfo.id && posOf(p));
 
@@ -1300,7 +1312,12 @@ async function mapCheck(spells: Map<string, any>) {
 
   const after = victim && byId(victim.basicInfo.id);
 
-  tcheck("Карта: небезпека б'є на початку ходу й пишеться в журнал", tr?.status === 200 && !!entry && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? entry.resultText : "запису hazard немає"}`);
+  const change = entry?.hpChanges?.[0];
+
+  // change > 0 — шкода (oldHp − newHp), як у решти журналу
+  const signOk = !!change && change.change === change.oldHp - change.newHp && change.change > 0;
+
+  tcheck(hazardName, tr?.status === 200 && !!entry && signOk && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${entry.resultText}; hpChanges ${JSON.stringify(change)}` : "запису hazard немає"}`);
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });
