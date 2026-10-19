@@ -87,6 +87,15 @@ describe("resolveSpellTargets на карті", () => {
     expect(r.ok && r.cells?.length).toBe(6);
   });
 
+  it("конус чи лінія в клітинку заклинателя не мають клітинок — відмова «Оберіть напрямок»", () => {
+    const wall: SpellTargeting = { kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } };
+
+    const cone: SpellTargeting = { kind: "template", shape: "cone", size: 15, side: "enemy", maxTargets: 6 };
+
+    expect(resolve(wall, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: "Оберіть напрямок" });
+    expect(resolve(cone, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: "Оберіть напрямок" });
+  });
+
   it("без карти або без позиції заклинателя шаблон — ручний вибір як area", () => {
     expect(resolve(fireball, ["e1", "e2"])).toEqual({ ok: true, targetIds: ["e1", "e2"] });
     expect(resolve(fireball, ["e1", "e2"], { map: null, targetCell: { x: 6, y: 2 } })).toEqual({ ok: true, targetIds: ["e1", "e2"] });

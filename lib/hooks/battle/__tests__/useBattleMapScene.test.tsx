@@ -281,6 +281,31 @@ describe("useBattleMapScene", () => {
       expect(current().view.aim).toEqual({ x: 0, y: 3 });
     });
 
+    it("ховер кільцем (Коло зими): центр не підсвічений і без маркера точки, лише 8 клітинок довкола", () => {
+      const { current } = setup(false, aim({ template: { shape: "circle", size: 10, hollow: true }, range: 60 }));
+
+      act(() => current().actions.onCellHover?.({ x: 4, y: 2 }));
+
+      const template = [...(current().view.marks ?? [])].flatMap(([k, m]) => (m === "template" ? [k] : []));
+
+      expect(template).toHaveLength(8);
+      expect(template).not.toContain("4:2");
+      expect(current().view.aim).toBeNull();
+      expect(current().view.pulseFrom).toEqual({ x: 4, y: 2 });
+    });
+
+    it("ховер повідомляє майстру точку прев'ю; поза дальністю — null", () => {
+      const onHover = vi.fn();
+
+      const { current } = setup(false, aim({ onHover }));
+
+      act(() => current().actions.onCellHover?.({ x: 3, y: 1 }));
+      expect(onHover).toHaveBeenLastCalledWith({ x: 3, y: 1 });
+
+      act(() => current().actions.onCellHover?.({ x: 9, y: 4 }));
+      expect(onHover).toHaveBeenLastCalledWith(null);
+    });
+
     it("ховер поза дальністю превʼю не змінює", () => {
       const { current } = setup(false, aim({ aim: { x: 0, y: 3 } }));
 

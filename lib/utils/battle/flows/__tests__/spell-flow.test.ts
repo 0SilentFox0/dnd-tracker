@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { buildSpellPick, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
+import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -282,6 +282,40 @@ describe("шаблон і дальність", () => {
     const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a" });
 
     expect(withLiveAimTargets(single, [])).toBe(single);
+  });
+
+  it("клік по карті остаточний: «Назад» із кидків не повертає до наведення, з підсумку — лише до кидків", () => {
+    const rolls = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: ["f"] }, { type: "CONFIRM_TARGETS" });
+
+    expect(rolls.step).toBe("rolls");
+    expect(canGoBack(rolls)).toBe(false);
+    expect(spellFlow(rolls, { type: "BACK" })).toBe(rolls);
+
+    const summary = [{ type: "SET_DAMAGE", index: 0, value: 3 }, { type: "TO_SUMMARY" }].reduce<SpellFlowState>((s, a) => spellFlow(s, a as SpellFlowAction), rolls);
+
+    expect(canGoBack(summary)).toBe(true);
+    expect(spellFlow(summary, { type: "BACK" }).step).toBe("rolls");
+
+    const bare = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: { ...ball, needsSaves: false, diceSlots: [] } }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: [] }, { type: "CONFIRM_TARGETS" });
+
+    expect(bare.step).toBe("summary");
+    expect(spellFlow(bare, { type: "BACK" })).toBe(bare);
+
+    const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "f" }, { type: "CONFIRM_TARGETS" });
+
+    expect(canGoBack(single)).toBe(true);
+    expect(spellFlow(single, { type: "BACK" }).step).toBe("targets");
+  });
+
+  it("SET_AIM і CONFIRM_TARGETS діють лише на кроці цілей: застарілий onAim на кидках нічого не змінює", () => {
+    const rolls = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: ["f"] }, { type: "CONFIRM_TARGETS" }, { type: "SET_DAMAGE", index: 0, value: 3 });
+
+    expect(spellFlow(rolls, { type: "SET_AIM", aim: { x: 2, y: 2 }, targetIds: [] })).toBe(rolls);
+    expect(spellFlow(rolls, { type: "CONFIRM_TARGETS" })).toBe(rolls);
+
+    const spell = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball });
+
+    expect(spellFlow(spell, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: ["f"] })).toBe(spell);
   });
 
   it("SET_AIM прибирає рятунки тих, хто випав із шаблону", () => {

@@ -15,6 +15,8 @@ export interface MapAim {
   range?: number;
   aim?: GridPoint;
   onAim(cell: GridPoint): void;
+  /** точка прев'ю під курсором (null — поза дальністю чи поза картою) для живого списку зачеплених */
+  onHover?(cell: GridPoint | null): void;
 }
 
 /** Хто дивиться на карту й чи може зараз ходити. */
@@ -100,13 +102,15 @@ export interface AimScene {
   participants: BattleParticipant[];
 }
 
-/** Клітинки шаблону в точці `at`; null — заклинатель поза картою або точка поза дальністю. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
+/** Клітинки шаблону в точці `at`; null — заклинатель поза картою, точка поза дальністю або шаблон без клітинок. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
 export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
   const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
 
   if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range)) return null;
 
   const { cells } = templateArea(map, participants, caster, aim.template, at);
+
+  if (cells.length === 0) return null;
 
   const { shape, hollow } = aim.template;
 
@@ -160,7 +164,9 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
   };
 
   function aimAt(p: GridPoint): MapClick {
-    return aim && aimCaster && templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Поза дальністю" };
+    if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: "Поза дальністю" };
+
+    return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Оберіть напрямок" };
   }
 
   function tokenClick(id: string): MapClick {

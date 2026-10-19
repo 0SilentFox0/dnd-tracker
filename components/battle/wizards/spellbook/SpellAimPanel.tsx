@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 
 type Book = ReturnType<typeof useSpellBook>;
 
-/** Поки гравець цілиться шаблоном, книга закрита, а карта лишається клікабельною; на телефоні панель стоїть у смузі під картою, а не поверх неї. */
+/** Поки гравець цілиться шаблоном, книга закрита, а карта лишається клікабельною; список зачеплених іде за курсором; на телефоні панель стоїть у смузі під картою, а не поверх неї. */
 export function SpellAimPanel({ book, spellName }: { book: Book; spellName: string }) {
-  const { state, view, actions } = book;
+  const { view, actions } = book;
 
-  const { aimTargets } = view;
+  const { aimPreview } = view;
 
   const slot = useMapStripSlot();
 
@@ -36,10 +36,10 @@ export function SpellAimPanel({ book, spellName }: { book: Book; spellName: stri
           Оберіть точку на карті
         </div>
       </div>
-      {state.aim && (
-        <ul className={cn("mt-2 space-y-1 overflow-y-auto", slot ? "max-h-[76px]" : "max-h-40")}>
-          {aimTargets.length === 0 && <li className="text-sm italic text-[var(--hud-muted)]">Нікого не зачеплено</li>}
-          {aimTargets.map(({ participant, ally }) => (
+      {aimPreview && (
+        <ul aria-label="Зачеплені" className={cn("mt-2 space-y-1 overflow-y-auto", slot ? "max-h-[76px]" : "max-h-40")}>
+          {aimPreview.targets.length === 0 && <li className="text-sm italic text-[var(--hud-muted)]">Нікого не зачеплено</li>}
+          {aimPreview.targets.map(({ participant, ally }) => (
             <li key={participant.basicInfo.id} className="flex h-9 items-center gap-2">
               <Portrait participant={participant} size={24} />
               <span className="hud-sc text-sm font-bold">{participant.basicInfo.name}</span>

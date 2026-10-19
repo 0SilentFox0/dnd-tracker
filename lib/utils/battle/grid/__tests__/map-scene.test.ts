@@ -287,6 +287,19 @@ describe("deriveMapScene: наведення шаблону", () => {
     expect(ring?.aim).toBeNull();
     expect(ring?.pulseFrom).toEqual({ x: 2, y: 2 });
   });
+
+  it("конус чи лінія у власну клітинку: без клітинок — reject «Оберіть напрямок», без прев'ю", () => {
+    for (const template of [{ shape: "cone" as const, size: 15 }, { shape: "line" as const, size: 30 }]) {
+      const mapAim = aim({ template, range: undefined });
+
+      const s = deriveMapScene(input({ mode: { aim: mapAim } }));
+
+      expect(s.cellClick({ x: 0, y: 0 })).toEqual({ kind: "reject", reason: "Оберіть напрямок" });
+      expect(s.tokenClick("h")).toEqual({ kind: "reject", reason: "Оберіть напрямок" });
+      expect(aimView({ map, participants: [hero, near, far] }, mapAim, { x: 0, y: 0 })).toBeNull();
+      expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
+    }
+  });
 });
 
 describe("deriveMapScene: DM без ліміту руху", () => {

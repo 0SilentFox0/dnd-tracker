@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef } from "react";
+import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
@@ -79,7 +79,7 @@ export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
 const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
   Object.keys(byLevel).map(Number).filter((l) => byLevel[l].length > 0);
 
-/** Поки майстер на кроці цілей шаблону, карта приймає точку наведення замість руху чи атаки. */
+/** Поки майстер на кроці цілей шаблону, карта приймає точку наведення замість руху чи атаки; ховер віддає точку прев'ю. */
 function useSpellMapAim(
   state: SpellFlowState,
   dispatch: Dispatch<SpellFlowAction>,
@@ -88,6 +88,8 @@ function useSpellMapAim(
   const { caster, order, map, setMapAim } = ctx;
 
   const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
+
+  const [hover, setHover] = useState<GridPoint | null>(null);
 
   useEffect(() => {
     aimAt.current = (cell) => {
@@ -112,9 +114,12 @@ function useSpellMapAim(
   useEffect(() => {
     if (!template || !casterId) return;
 
-    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim });
+    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim, onHover: setHover });
 
-    return () => setMapAim(null);
+    return () => {
+      setMapAim(null);
+      setHover(null);
+    };
   }, [template, casterId, range, state.aim, onAim, setMapAim]);
 
   useEffect(() => {
@@ -128,6 +133,8 @@ function useSpellMapAim(
 
     return () => window.removeEventListener("keydown", onKey);
   }, [template, dispatch]);
+
+  return template ? hover : null;
 }
 
 export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
@@ -165,18 +172,18 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
-  // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
-  const aimTargets = map && caster && aimPick && flow.aim
-    ? spellAimTargets({ map, participants: order, caster }, aimPick, flow.aim).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
-    : [];
+  const touchedAt = (cell: GridPoint | null | undefined) => (map && caster && aimPick && cell ? spellAimTargets({ map, participants: order, caster }, aimPick, cell) : []);
+
+  const hover = useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
+
+  const aimPreview = hover && caster ? { targets: touchedAt(hover).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side })) } : null;
 
   const chainFirst = flow.pick?.chain ? order.find((p) => p.basicInfo.id === flow.targetIds[0]) : undefined;
 
   const chain = caster && chainFirst && flow.pick?.chain ? spellChain({ participants: order, caster }, flow.pick.chain, chainFirst) : [];
 
-  const state = withChainTargets(withLiveAimTargets(flow, aimTargets.map((t) => t.participant.basicInfo.id)), chain.map((p) => p.basicInfo.id));
-
-  useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
+  // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
+  const state = withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id));
 
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
@@ -203,7 +210,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, aimTargets, chain, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, aimPreview, chain, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,

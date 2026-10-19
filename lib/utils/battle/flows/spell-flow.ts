@@ -76,6 +76,23 @@ export function rollsComplete(s: SpellFlowState): boolean {
 const afterTargets = (s: SpellFlowState): SpellFlowState =>
   s.pick && needsRolls(s.pick) ? { ...s, step: "rolls" } : { ...s, step: "summary" };
 
+const BACK_ORDER: SpellFlowState["step"][] = ["book", "spell", "targets", "rolls", "summary"];
+
+function previousStep(s: SpellFlowState): SpellFlowState["step"] | null {
+  let i = BACK_ORDER.indexOf(s.step) - 1;
+
+  if (BACK_ORDER[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
+
+  if (BACK_ORDER[i] === "targets" && s.pick?.targetMode === "none") i -= 1;
+
+  // клік по карті остаточний: після наведення назад до прицілу не вертаємось
+  if (BACK_ORDER[i] === "targets" && s.pick?.targetMode === "template" && s.aim) return null;
+
+  return i >= 0 ? BACK_ORDER[i] : null;
+}
+
+export const canGoBack = (s: SpellFlowState): boolean => previousStep(s) !== null;
+
 const firstLevelWithSpells = (current: number, levels: number[]): number =>
   levels.length === 0 || levels.includes(current) ? current : Math.min(...levels);
 
@@ -109,13 +126,15 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, targetIds: [...s.targetIds, a.id] };
     }
     case "SET_AIM": {
-      if (s.pick?.targetMode !== "template") return s;
+      if (s.step !== "targets" || s.pick?.targetMode !== "template") return s;
 
       const saves = Object.fromEntries(Object.entries(s.saves).filter(([id]) => a.targetIds.includes(id)));
 
       return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
     }
     case "CONFIRM_TARGETS":
+      if (s.step !== "targets") return s;
+
       if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
 
       return s.targetIds.length === 0 ? s : afterTargets(s);
@@ -129,15 +148,9 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "TO_SUMMARY":
       return rollsComplete(s) ? { ...s, step: "summary", error: undefined } : s;
     case "BACK": {
-      const order: SpellFlowState["step"][] = ["book", "spell", "targets", "rolls", "summary"];
+      const prev = previousStep(s);
 
-      let i = order.indexOf(s.step) - 1;
-
-      if (order[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
-
-      if (order[i] === "targets" && s.pick?.targetMode === "none") i -= 1;
-
-      return i >= 0 ? { ...s, step: order[i], error: undefined } : s;
+      return prev ? { ...s, step: prev, error: undefined } : s;
     }
     case "SUBMIT":
       return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;

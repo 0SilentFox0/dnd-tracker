@@ -80,10 +80,21 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { currentRound, currentTurnIndex } = battle;
 
+  const hovered = useMemo(
+    () => (scene?.aiming && map && mapAim && hoverCell ? aimView({ map, participants: scene.participants }, mapAim, hoverCell) : null),
+    [scene, map, mapAim, hoverCell],
+  );
+
+  const previewCell = hovered ? hoverCell : null;
+
+  const onAimHover = mapAim?.onHover;
+
+  useEffect(() => {
+    onAimHover?.(previewCell);
+  }, [onAimHover, previewCell]);
+
   const view = useMemo(() => {
     if (!scene || !map) return null;
-
-    const hovered = scene.aiming && mapAim && hoverCell ? aimView({ map, participants: scene.participants }, mapAim, hoverCell) : null;
 
     return {
       ...scene.view,
@@ -93,7 +104,7 @@ export function useBattleMapScene(): BattleMapScene | null {
       impactFor,
       round: currentRound,
     };
-  }, [scene, map, mapAim, hoverCell, pendingStroke, current, impactFor, currentRound]);
+  }, [scene, map, hovered, hoverCell, pendingStroke, current, impactFor, currentRound]);
 
   const { mutate: move } = actions.move;
 

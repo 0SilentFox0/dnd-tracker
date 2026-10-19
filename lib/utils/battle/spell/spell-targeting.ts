@@ -122,6 +122,9 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
+  // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
+  if (cells.length === 0) return fail("Оберіть напрямок");
+
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
   return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
 }

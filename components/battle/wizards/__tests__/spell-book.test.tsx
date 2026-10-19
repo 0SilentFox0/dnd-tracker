@@ -258,6 +258,57 @@ describe("SpellBook", () => {
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetCell: { x: 4, y: 0 } })));
     });
 
+    it("шаблон: після кліку по карті «Назад» на кидках немає, а застарілий onAim не змінює точку", async () => {
+      const { wrapper, caster, value, castSpell } = onMap(["meteor"], true);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
+
+      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      act(() => aim.onAim({ x: 4, y: 0 }));
+
+      expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "← Назад" })).toBeNull();
+      expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
+
+      act(() => aim.onAim({ x: 1, y: 4 }));
+
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ targetCell: { x: 4, y: 0 } })));
+    });
+
+    it("шаблон: панель наведення показує живий список зачеплених під курсором", async () => {
+      const { wrapper, caster, value } = onMap(["meteor"], true);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
+
+      expect(screen.queryByRole("list", { name: "Зачеплені" })).toBeNull();
+
+      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      act(() => aim.onHover?.({ x: 4, y: 0 }));
+
+      const list = screen.getByRole("list", { name: "Зачеплені" });
+
+      expect(list.textContent).toContain("Гоблін");
+      expect(list.textContent).toContain("⚠ союзник");
+
+      act(() => aim.onHover?.({ x: 1, y: 4 }));
+      expect(screen.getByText("Нікого не зачеплено")).toBeTruthy();
+
+      act(() => aim.onHover?.(null));
+      expect(screen.queryByRole("list", { name: "Зачеплені" })).toBeNull();
+    });
+
     it("шаблон: рятівні кидки й каст беруть живі цілі шаблону, а не ті, що були в момент кліку", async () => {
       const { wrapper, caster, value, castSpell, me, gob, ally } = onMap(["meteor"], true);
 
