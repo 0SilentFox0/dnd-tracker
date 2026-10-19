@@ -13,6 +13,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   artifacts: "Артефакти",
   "artifact-sets": "Сети артефактів",
   battles: "Бої",
+  music: "Музика",
   character: "Персонаж",
   inventory: "Інвентар",
   new: "Створити",
