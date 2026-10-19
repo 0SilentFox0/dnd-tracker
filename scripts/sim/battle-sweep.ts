@@ -19,7 +19,9 @@ import { abilityActionSchema, createAbilityActionMutation } from "@/app/api/camp
 import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { auraZoneMutation, auraZoneSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/aura-zone/aura-zone-mutation";
 import { bonusActionSchema, createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
+import { mapTerrainMutation, mapTerrainSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/map-terrain/map-terrain-mutation";
 import { moraleCheckMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
+import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation";
 import { patchParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-schema";
@@ -243,6 +245,10 @@ const MORALE = { access: "member", requireStatus: "active", schema: moraleCheckS
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
 
 const REVEAL = { access: "dm", requireStatus: "active", allowWhileAwaitingDm: true, schema: revealParticipantSchema, mutate: revealParticipantMutation };
+
+const MOVE = { access: "member", requireStatus: "active", respond: "wrapped", schema: moveSchema, mutate: moveMutation };
+
+const MAP_TERRAIN = { access: "dm", requireStatus: "active", schema: mapTerrainSchema, mutate: mapTerrainMutation };
 
 const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 
@@ -750,6 +756,8 @@ async function main() {
 
   if (MODE === "all" || MODE === "targeted" || MODE === "reserve") await reserveCheck();
 
+  if (MODE === "all" || MODE === "targeted" || MODE === "map") await mapCheck(spells);
+
   if (targetedResults.length) report.push("\n## Цільові перевірки", ...targetedResults.map((t) => `- ${t}`));
 
   if (MODE === "all" || MODE === "sweep") report.push(...coverageReport());
@@ -1196,6 +1204,103 @@ async function reserveCheck() {
   const r2 = await call("reveal-participant", REVEAL, { participantIds: [reserve()[0].basicInfo.id] });
 
   tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
+}
+
+async function mapCheck(spells: Map<string, any>) {
+  await applyRotation(0);
+  battleLabel = "Карта";
+
+  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, take: 2 });
+
+  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...units.map((u) => ({ id: u.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
+
+  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Карта", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx.battleId = b.id; state = await readState(); await call("start", START);
+
+  const posOf = (p: any) => p.battleData.position as { x: number; y: number } | undefined;
+
+  const isHero = (p: any) => p.basicInfo.side === "ally" && alive(p);
+
+  const placed = P().filter(alive).every((p) => posOf(p));
+
+  tcheck("Карта: розстановка після старту", placed, `${P().filter((p) => posOf(p)).length}/${P().length} учасників мають позицію`);
+
+  await untilTurnOf(isHero);
+
+  const mover = current();
+
+  const from = posOf(mover);
+
+  const taken = new Set(P().filter(alive).map((p) => `${posOf(p)?.x}:${posOf(p)?.y}`));
+
+  const near = from ? [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => ({ x: from.x + dx, y: from.y + dy }))).filter((c) => (c.x !== from.x || c.y !== from.y) && c.x >= 0 && c.y >= 0 && c.x < 12 && c.y < 8 && !taken.has(`${c.x}:${c.y}`)) : [];
+
+  let mv: Awaited<ReturnType<typeof call>> | undefined;
+
+  for (const c of near) {
+    mv = await call("move", MOVE, { participantId: mover.basicInfo.id, to: c });
+
+    if (mv.status === 200) break;
+  }
+
+  const to = posOf(byId(mover.basicInfo.id));
+
+  tcheck("Карта: рух на сусідню клітинку", mv?.status === 200 && !!from && !!to && (to.x !== from.x || to.y !== from.y), `${mover.basicInfo.name} ${JSON.stringify(from)} → ${JSON.stringify(to)}, статус ${mv?.status ?? "немає вільної клітинки"}${mv && mv.status !== 200 ? ` ${JSON.stringify(mv.body).slice(0, 150)}` : ""}`);
+
+  const dist = (a: any, c: any) => Math.max(Math.abs(a.battleData.position.x - c.battleData.position.x), Math.abs(a.battleData.position.y - c.battleData.position.y));
+
+  const meleeOk = await untilTurnOf((p) => isHero(p) && !p.actionFlags.hasUsedAction && p.battleData.attacks?.some((a: any) => /melee|ближн/i.test(a.type ?? "")) && foesOf(p).some((f) => dist(p, f) > 1));
+
+  const att = current();
+
+  const w = att.battleData.attacks?.find((a: any) => /melee|ближн/i.test(a.type ?? ""));
+
+  const far = foesOf(att).find((f) => dist(att, f) > 1);
+
+  const rm = meleeOk && w && far ? await call("attack", ATTACK, { attackerId: att.basicInfo.id, targetId: far.basicInfo.id, attackId: w.id, d20Roll: 15, disadvantageRoll: 15, advantageRoll: 15, damageRolls: [], endTurn: false }) : null;
+
+  tcheck("Карта: ближня атака не дістає далекої цілі", rm?.status === 422 && /не поруч/.test(JSON.stringify(rm.body)), `${att.basicInfo.name} → ${far?.basicInfo.name}: ${rm?.status ?? "немає сценарію"} ${rm ? JSON.stringify(rm.body).slice(0, 150) : ""}`);
+
+  const fire = [...spells.values()].find((s: any) => s.name === "Вогняна куля");
+
+  const caster = current();
+
+  const foe = foesOf(caster)[0];
+
+  const targetCell = posOf(foe);
+
+  const fdice = fire && casterSpellDice(caster, { dice: fire.dice ?? 0, groupId: fire.groupId ?? null });
+
+  const fr = fire && fdice && foe && targetCell ? await call("spell", SPELL, { casterId: caster.basicInfo.id, spellId: fire.id, targetIds: [], targetCell, diceRolls: rollDiceList(`${fdice.count}d${fdice.sides}`, rng), free: true }) : null;
+
+  const aim = fr?.log.at(-1)?.actionDetails?.aimCell;
+
+  const hitIds: string[] = (fr?.log.at(-1)?.targets ?? []).map((t: any) => t.participantId);
+
+  tcheck("Карта: шаблон «Вогняна куля» по клітинці", fr?.status === 200 && aim?.x === targetCell?.x && aim?.y === targetCell?.y && !!foe && hitIds.includes(foe.basicInfo.id), `${fr?.status ?? "немає закляття/цілі"} aimCell=${JSON.stringify(aim)} ціль ${foe?.basicInfo.name} у ${JSON.stringify(targetCell)}; цілей: ${hitIds.length}${fr && fr.status !== 200 ? ` ${JSON.stringify(fr.body).slice(0, 200)}` : ""}`);
+
+  const victim = P().filter(isHero).find((p) => p.basicInfo.id !== current().basicInfo.id && posOf(p));
+
+  const cell = victim && posOf(victim);
+
+  const tr = cell ? await call("map-terrain", MAP_TERRAIN, { cells: [`${cell.x}:${cell.y}`], terrain: { kind: "hazard", label: "Жар", damage: { dice: "1d4", type: "fire" } } }) : null;
+
+  const hpBefore = victim?.combatStats.currentHp ?? 0;
+
+  const hazardLogs: any[] = [];
+
+  for (let i = 0; victim && i < 60 && state.status === "active" && current().basicInfo.id !== victim.basicInfo.id; i++) {
+    const r = await call("next-turn", NEXT);
+
+    hazardLogs.push(...r.log);
+  }
+
+  const entry = hazardLogs.find((e: any) => e.actionDetails?.hazard);
+
+  const after = victim && byId(victim.basicInfo.id);
+
+  tcheck("Карта: небезпека б'є на початку ходу й пишеться в журнал", tr?.status === 200 && !!entry && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? entry.resultText : "запису hazard немає"}`);
 }
 
 main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });
