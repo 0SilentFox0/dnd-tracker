@@ -3,24 +3,22 @@ import { describe, expect, it } from "vitest";
 import { fireWaveVictims } from "../fire-wave";
 import { resolveHit } from "../hit";
 
+import { fireWave } from "@/data/library/unit-abilities";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const MAP: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+const MAP = testMap();
 
 const SWORD: BattleAttack = { id: "s", name: "Молот", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "bludgeoning" };
 
-const wave = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "fireWave", percent: 50, size: 15 }] });
+const wave = resolved(fireWave());
 
 const fireProof = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 }] });
 
-const at = (id: string, pos: GridPoint | undefined, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 100, maxHp: 100, abilities });
-
-  return { ...p, battleData: { ...p.battleData, attacks: [SWORD], ...(pos && { position: pos }) } };
-};
+const at = (id: string, pos: GridPoint | undefined, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []) => placed(id, { side, at: pos, hp: 100, abilities, attacks: [SWORD] });
 
 const jarl = at("a", { x: 0, y: 5 }, ParticipantSide.ALLY, [wave]);
 

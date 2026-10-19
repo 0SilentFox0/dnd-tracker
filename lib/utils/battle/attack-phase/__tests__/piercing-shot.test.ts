@@ -2,21 +2,19 @@ import { describe, expect, it } from "vitest";
 
 import { runAttackPhase } from "../run-attack-phase";
 
+import { piercingShot } from "@/data/library/unit-abilities";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const MAP: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+const MAP = testMap();
 
 const bow: BattleAttack = { id: "b", name: "Посох", type: AttackType.RANGED, attackBonus: 20, damageDice: "1d6", damageType: "lightning" };
 
-const piercing = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "piercingShot" }] });
+const piercing = resolved(piercingShot());
 
-const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 50, maxHp: 50, abilities });
-
-  return { ...p, battleData: { ...p.battleData, attacks: [bow], position: pos } };
-};
+const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []) => placed(id, { side, at: pos, hp: 50, abilities, attacks: [bow] });
 
 const run = (order: BattleParticipant[], map: BattleMapConfig | null) =>
   runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", attackRoll: 15, damageRolls: [4, 4, 4, 4, 4, 4] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map });

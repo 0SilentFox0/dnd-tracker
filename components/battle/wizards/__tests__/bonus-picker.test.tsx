@@ -6,6 +6,7 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { BonusActionPicker } from "@/components/battle/wizards/BonusActionPicker";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { ResolvedAbility } from "@/types/abilities";
 
 const heal = { key: "heal", name: "Лікувальний дотик", trigger: { event: "bonusAction" }, effects: [{ kind: "heal", amount: "1d8", target: "eventTarget" }], source: { type: "skill", id: "s", name: "S" } } as ResolvedAbility;
@@ -16,7 +17,7 @@ const dive = { key: "dive", name: "Пікірування", trigger: { event: "a
 
 const squall = { key: "squall", name: "Шквал", trigger: { event: "action" }, aim: { kind: "direction", range: 15 }, effects: [{ kind: "maneuver", maneuver: "squall", percentOfAttack: 100 }], source: { type: "unit", id: "g", name: "G" } } as ResolvedAbility;
 
-const MAP = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+const MAP = testMap();
 
 describe("BonusActionPicker", () => {
   it("уміння без цілі — одразу відправка", async () => {

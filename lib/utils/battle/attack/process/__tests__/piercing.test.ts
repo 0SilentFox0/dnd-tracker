@@ -3,16 +3,12 @@ import { describe, expect, it } from "vitest";
 import { piercingTargets } from "../piercing";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import type { GridPoint } from "@/types/battle";
 
-const MAP: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+const MAP = testMap();
 
-const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY): BattleParticipant => {
-  const p = makeParticipant({ id, side });
-
-  return { ...p, battleData: { ...p.battleData, position: pos } };
-};
+const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY) => placed(id, { side, at: pos, hp: 20 });
 
 const attacker = at("a", { x: 0, y: 5 }, ParticipantSide.ALLY);
 

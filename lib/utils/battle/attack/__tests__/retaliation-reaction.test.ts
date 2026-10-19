@@ -1,31 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { extraRetaliations } from "@/data/library/unit-abilities";
-import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { retaliate, retaliateTimes, swordUnit } from "./helpers";
+
+import { extraRetaliations, fireWave } from "@/data/library/unit-abilities";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { CRITICAL_FAIL_EFFECTS } from "@/lib/constants/critical-effects";
-import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleParticipant } from "@/types/battle";
 
-const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
+const defender = (abilities?: ResolvedAbility[]) => swordUnit("d", ParticipantSide.ENEMY, abilities);
 
-function unit(id: string, side: ParticipantSide, abilities?: ResolvedAbility[]): BattleParticipant {
-  const p = makeParticipant({ id, side, hp: 300, maxHp: 300, abilities });
-
-  return { ...p, basicInfo: { ...p.basicInfo, sourceType: ParticipantSourceType.UNIT }, battleData: { ...p.battleData, attacks: [sword] } };
-}
-
-const defender = (abilities?: ResolvedAbility[]) => unit("d", ParticipantSide.ENEMY, abilities);
-
-const attacker = () => unit("a", ParticipantSide.ALLY);
-
-function retaliate(ps: BattleParticipant[]) {
-  return resolveRetaliation({ participants: ps, attackerId: "a", defenderId: "d", attack: sword, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
-}
+const attacker = () => swordUnit("a", ParticipantSide.ALLY);
 
 const startTurn = (d: BattleParticipant) => processStartOfTurn(d, 2, [attacker(), d]).participant;
 
@@ -79,24 +69,12 @@ describe("відсіч і втрачена реакція", () => {
   });
 
   it("Захисник віри після початку ходу відповідає двічі, не втретє", () => {
-    let ps = [attacker(), startTurn(defender([resolved(extraRetaliations(1))]))];
-
-    const results = [0, 1, 2].map(() => {
-      const r = retaliate(ps);
-
-      if (r) ps = r.participants;
-
-      return r !== null;
-    });
-
-    expect(results).toEqual([true, true, false]);
+    expect(retaliateTimes([attacker(), startTurn(defender([resolved(extraRetaliations(1))]))], 3)).toEqual([true, true, false]);
   });
 });
 
 describe("Вогняна хвиля у відсічі на карті", () => {
-  const MAP = { cols: 10, rows: 10, background: null, opacity: 0.4 };
-
-  const wave = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "fireWave", percent: 50, size: 15 }] });
+  const wave = resolved(fireWave());
 
   const place = (p: BattleParticipant, x: number, y: number) => ({ ...p, battleData: { ...p.battleData, position: { x, y } } });
 
@@ -109,7 +87,7 @@ describe("Вогняна хвиля у відсічі на карті", () => {
 
     const far = place({ ...attacker(), basicInfo: { ...attacker().basicInfo, id: "far", name: "far" } }, 5, 9);
 
-    const r = resolveRetaliation({ participants: [hero, jarl, near, far], attackerId: "a", defenderId: "d", attack: sword, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85), map: MAP });
+    const r = retaliate([hero, jarl, near, far], testMap());
 
     const hp = (id: string) => r?.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 

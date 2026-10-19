@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { runBerserkTurn } from "../berserk";
 
+import { fireWave } from "@/data/library/unit-abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { BattleParticipant } from "@/types/battle";
+import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 
 const lastTurnEffect = makeEffect("adv", { duration: 1, expireAtTurnEnd: true, armed: true });
 
@@ -21,20 +22,16 @@ describe("berserk turn end", () => {
 });
 
 describe("berserk with fire wave on a map", () => {
-  const wave = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "fireWave", percent: 50, size: 15 }] });
+  const wave = resolved(fireWave());
 
-  const at = (id: string, x: number, y: number, side: ParticipantSide, abilities = []): BattleParticipant => {
-    const p = makeParticipant({ id, side, hp: 300, maxHp: 300, abilities });
-
-    return { ...p, battleData: { ...p.battleData, position: { x, y }, attacks: [{ id: "sw", name: "Меч", type: "melee", attackBonus: 5, damageDice: "1d6", damageType: "slashing" }] } };
-  };
+  const at = (id: string, x: number, y: number, side: ParticipantSide, abilities: ReturnType<typeof resolved>[] = []) => placed(id, { side, at: { x, y }, hp: 300, abilities });
 
   it("burns only enemies in the cone behind the victim", () => {
-    const berserker = at("b", 4, 5, ParticipantSide.ALLY, [wave] as never);
+    const berserker = at("b", 4, 5, ParticipantSide.ALLY, [wave]);
 
     const ps = [berserker, at("v", 5, 5, ParticipantSide.ENEMY), at("near", 6, 5, ParticipantSide.ENEMY), at("far", 5, 9, ParticipantSide.ENEMY)];
 
-    const map = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+    const map = testMap();
 
     const r = runBerserkTurn({ participants: ps, restrictedBy: berserker, participantId: "b", bonusPercent: 0, round: 1, battleId: "x", actionIndex: 0, rng: seq(0, 0.95, 0.5), map });
 

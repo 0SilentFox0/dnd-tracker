@@ -6,6 +6,7 @@ import { abilityActionMutation } from "@/app/api/campaigns/[id]/battles/[battleI
 import { dive, fireBurst } from "@/data/library/unit-abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleParticipant } from "@/types/battle";
 
 const angel = resolved({
@@ -118,7 +119,7 @@ describe("abilityActionMutation", () => {
   });
 
   describe("маневри", () => {
-    const map = { cols: 10, rows: 10, background: null, opacity: 0.4 };
+    const map = testMap();
 
     const unit = (abilities: ReturnType<typeof resolved>[]): BattleParticipant => ({ ...hero, battleData: { ...hero.battleData, resolvedAbilities: abilities, position: { x: 1, y: 1 } } });
 
