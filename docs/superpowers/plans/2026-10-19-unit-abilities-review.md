@@ -502,3 +502,22 @@ export const fireWave = (): Ability => ({
 - [ ] **Step 2:** `./scripts/db/prodcopy-db.sh` then `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm seed-library <campaignId> --dry-run` against prodcopy, then real run on prodcopy, then `pnpm battle-sweep` on prodcopy — expect exit 0.
 - [ ] **Step 3:** Browser check on local dev (desktop + mobile): griffin dive/squall aim + landing, blood maiden return button, fire burst, opposing spells log line, Haste movement range.
 - [ ] **Step 4:** Commit; then ASK the user before: merge to `main`, push (prod deploy), and `pnpm seed-library <prodCampaignId> --allow-remote` (overwrites unit abilities/spells by name; also updates Haste/Slow spell definitions). Note: running battles keep old snapshots until the DM uses «refresh sources».
+
+---
+
+### Task 15: DM assigns allied unit control (manual + random)
+
+Spec section «Керування союзними юнітами в бою».
+
+**Files:**
+- Modify: `types/battle.ts` — `battleData.controlAssigned?: boolean`; add to `lib/utils/battle/store/split-participant.ts` state keys and `participant-patch.ts` patchable fields; make sure `basicInfo.controlledBy` changes reach clients (check `PATCHABLE_PARTICIPANT_FIELDS` / snapshot handling — if `controlledBy` lives in the snapshot, the changed participant must be sent as `upserted`; follow how `assignUnitControl` changes already propagate in `add-participant`/`reveal-participant`)
+- Modify: `lib/utils/battle/participant/unit-control.ts` — `assignUnitControl` skips participants with `controlAssigned`; new pure functions:
+  - `allyOwners(order, dmUserId): string[]` — unique `controlledBy` of real players' characters on the ally (players') side, in order
+  - `setUnitController(order, unitId, controlledBy: string /* user id or CONTROLLED_BY_DM */, dmUserId): BattleParticipant[]` — throws `BattleRuleError` («Цим юнітом не можна керувати гравцю» for summoned/charmed/enemy/non-unit; «Гравець не бере участі в бою» if `controlledBy` not in `allyOwners` and not DM); sets `controlAssigned: true`
+  - `randomizeUnitControl(order, dmUserId, rng): BattleParticipant[]` — for each side-unit on the ally side WITHOUT `controlAssigned`, pick a uniform random owner from `allyOwners` (no players → unchanged); does not set `controlAssigned`
+- Create: route `app/api/campaigns/[id]/battles/[battleId]/unit-control/route.ts` + `unit-control-mutation.ts` (`runBattleMutation`, DM access, ACTIVE battle). Body: `{ mode: "assign", participantId, controlledBy } | { mode: "random" }`. Log event text: `🎮 ДМ передає ${unit} під керування ${playerName}` / `🎲 ДМ роздає вільних юнітів: …`.
+- Modify: `lib/api/battles.ts` (`unitControl`), `lib/hooks/battles/useBattles.ts` (`useUnitControl` via `useBattleAction`), wire into the battle scene actions (`lib/hooks/battle/useBattleScene.ts`)
+- UI (DM only): in the participant details/row menu for an allied unit — a select «Керує:» with «ДМ» + allied players (hero name + player), hook provides options; in the DM controls panel a button «Роздати юнітів випадково». Use `ResponsiveDialog`/existing DM menus; no direct fetch.
+- Tests: `lib/utils/battle/participant/__tests__/unit-control-assign.test.ts` (setUnitController happy path + all three errors; assignUnitControl keeps a `controlAssigned` unit; randomizeUnitControl with seeded rng distributes only free ally units, skips summoned/charmed/enemies/assigned, no players → unchanged), mutation test following the pattern of an existing `*-mutation` test in `app/api/__tests__`.
+
+- [ ] Steps: failing tests → implement engine → route/mutation → client + UI → `pnpm test:run`, tsc, lint → commit `feat(battle): DM assigns allied unit control`.
