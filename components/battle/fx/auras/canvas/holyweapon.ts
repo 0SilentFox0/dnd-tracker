@@ -1,6 +1,7 @@
 import { pick, rand } from "../../runtime/geometry";
 import { sword } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
+import { centredSprite } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const CHIME_S = 1.8;
@@ -8,6 +9,23 @@ const CHIME_S = 1.8;
 const ANGLE = -Math.PI / 3;
 
 const INCENSE = ["#efe4c8", "#d8ccb0"];
+
+const BLADE_LEVELS = 8;
+
+// Painted around the blade's middle (the sprite centre) to keep the sprite small.
+function bladePaint(g: CanvasRenderingContext2D, len: number, s: number, ring: number) {
+  g.rotate(ANGLE);
+  g.translate(-len / 2, 0);
+  g.shadowColor = "#ffd86b";
+  g.shadowBlur = (6 + ring * 8) * s;
+
+  const blade = g.createLinearGradient(0, -len * 0.06, 0, len * 0.06);
+
+  blade.addColorStop(0, "#fffbe8");
+  blade.addColorStop(0.5, "#ffe39a");
+  blade.addColorStop(1, "#d8a030");
+  sword(g, len, blade, "#8a6a2a");
+}
 
 export const holyweaponAura: AuraAnimation = {
   frame(g, ctx, t, dt) {
@@ -36,20 +54,17 @@ export const holyweaponAura: AuraAnimation = {
     g.ellipse(mid.x, mid.y, len * (0.2 + u * 0.7), len * (0.12 + u * 0.4), ANGLE, 0, Math.PI * 2);
     g.stroke();
 
+    const level = Math.round(ring * BLADE_LEVELS);
+
+    const blade = centredSprite(ctx, `blade${level}`, len / 2 + 20 * s, (lg) => bladePaint(lg, len, s, level / BLADE_LEVELS));
+
     g.save();
     g.translate(hx, hy);
-    g.rotate(ANGLE + Math.sin(t * 60) * 0.02 * ring);
+    g.rotate(Math.sin(t * 60) * 0.02 * ring);
+    g.translate(Math.cos(ANGLE) * len / 2, Math.sin(ANGLE) * len / 2);
     g.globalAlpha = 1;
     g.globalCompositeOperation = "source-over";
-    g.shadowColor = "#ffd86b";
-    g.shadowBlur = (6 + ring * 8) * s;
-
-    const blade = g.createLinearGradient(0, -len * 0.06, 0, len * 0.06);
-
-    blade.addColorStop(0, "#fffbe8");
-    blade.addColorStop(0.5, "#ffe39a");
-    blade.addColorStop(1, "#d8a030");
-    sword(g, len, blade, "#8a6a2a");
+    g.drawImage(blade, -blade.width / 2 / ctx.dpr, -blade.height / 2 / ctx.dpr, blade.width / ctx.dpr, blade.height / ctx.dpr);
     g.restore();
 
     parts.emit(2.5, dt, () => {

@@ -3,8 +3,8 @@ import { rand } from "../../runtime/geometry";
 import type { AuraParticle } from "../../runtime/particles";
 import { plusSign } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
-import { outside } from "./kit";
-import type { AuraAnimation } from "./types";
+import { drawLayer, outside, staticLayer } from "./kit";
+import type { AuraAnimation, AuraCtx } from "./types";
 
 const BEAT_S = 2.4;
 
@@ -28,6 +28,24 @@ function beat(sec: number) {
   return Math.max(lub, dub);
 }
 
+// The beat only scales the stop alphas, and "lighter" adds up, so a resting layer plus a beat layer at alpha b equals the live gradient.
+function domeFill(g: CanvasRenderingContext2D, ctx: AuraCtx, inner: number, rim: number) {
+  const { cx, cy, r } = ctx;
+
+  const R = r * DOME;
+
+  outside(g, ctx, () => {
+    const fill = g.createRadialGradient(cx, cy, r, cx, cy, R);
+
+    fill.addColorStop(0, `rgba(90,220,120,${inner})`);
+    fill.addColorStop(1, `rgba(150,255,170,${rim})`);
+    g.fillStyle = fill;
+    g.beginPath();
+    g.arc(cx, cy, R, 0, Math.PI * 2);
+    g.fill();
+  }, DOME + 0.2);
+}
+
 export const lifedomeAura: AuraAnimation = {
   frame(g, ctx, t, dt) {
     const { cx, cy, r, s, parts } = ctx;
@@ -38,17 +56,12 @@ export const lifedomeAura: AuraAnimation = {
 
     const R = r * DOME;
 
+    drawLayer(g, staticLayer(ctx, "dome", (lg) => domeFill(lg, ctx, 0.12, 0.45)), 1, "lighter");
+
+    if (b > 0) drawLayer(g, staticLayer(ctx, "beat", (lg) => domeFill(lg, ctx, 0.18, 0.35)), b, "lighter");
+
     outside(g, ctx, () => {
-      const fill = g.createRadialGradient(cx, cy, r, cx, cy, R);
-
-      fill.addColorStop(0, `rgba(90,220,120,${0.12 + b * 0.18})`);
-      fill.addColorStop(1, `rgba(150,255,170,${0.45 + b * 0.35})`);
       g.globalCompositeOperation = "lighter";
-      g.fillStyle = fill;
-      g.beginPath();
-      g.arc(cx, cy, R, 0, Math.PI * 2);
-      g.fill();
-
       g.strokeStyle = "rgba(170,255,180,0.3)";
       g.lineWidth = Math.max(0.8, s);
       g.beginPath();

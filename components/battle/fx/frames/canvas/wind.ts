@@ -1,4 +1,4 @@
-import { clamp01, envelope } from "../../runtime/easing";
+import { envelope } from "../../runtime/easing";
 import { edgeGlow, type FrameBox, roundRect } from "../../runtime/frame-kit";
 import { pick, rand } from "../../runtime/geometry";
 import { leafPath } from "../../runtime/shapes";
@@ -52,10 +52,29 @@ function gustGradient(g: CanvasRenderingContext2D, length: number) {
   return grad;
 }
 
+const SWEEP_BACK = 0.25;
+
+const SWEEP_AHEAD = 0.2;
+
+// The pale band sweeping across, from its tail at x = 0; translated with the sweep, so it is built once.
+function sweepGradient(g: CanvasRenderingContext2D, w: number) {
+  const span = SWEEP_BACK + SWEEP_AHEAD;
+
+  const grad = g.createLinearGradient(0, 0, span * w, 0);
+
+  grad.addColorStop(0, "rgba(200,240,255,0)");
+  grad.addColorStop(SWEEP_BACK / span, "rgba(210,245,255,0.28)");
+  grad.addColorStop(1, "rgba(200,240,255,0)");
+
+  return grad;
+}
+
 export const windFrame: FrameAnimation = async (s, box) => {
   const gusts: Gust[] = Array.from({ length: 7 }, (_, i) => ({ y: box.y + box.h * ((i + 0.5) / 7) + rand(-4, 4), delay: rand(0, 0.25), len: rand(0.35, 0.6), width: rand(1.2, 2.6), amp: rand(1.5, 4), phase: rand(0, 6), curl: i % 3 === 1 }));
 
   const grads = gusts.map((gu) => gustGradient(s.g, box.w * gu.len));
+
+  const tint = sweepGradient(s.g, box.w);
 
   const specks: Speck[] = Array.from({ length: 9 }, () => ({ y: box.y + rand(6, box.h - 6), delay: rand(0, 0.3), size: rand(2.5, 4.5), spin: rand(8, 16), leaf: Math.random() < 0.5, color: pick(SPECKS) }));
 
@@ -68,15 +87,14 @@ export const windFrame: FrameAnimation = async (s, box) => {
     roundRect(g, box);
     g.clip();
 
-    const tint = g.createLinearGradient(box.x, 0, box.x + box.w, 0);
+    const tail = box.x + (k * 1.4 - 0.2 - SWEEP_BACK) * box.w;
 
-    const sweep = k * 1.4 - 0.2;
-
-    tint.addColorStop(clamp01(sweep - 0.25), "rgba(200,240,255,0)");
-    tint.addColorStop(clamp01(sweep), `rgba(210,245,255,${0.28 * a})`);
-    tint.addColorStop(clamp01(sweep + 0.2), "rgba(200,240,255,0)");
+    g.save();
+    g.translate(tail, 0);
+    g.globalAlpha = a;
     g.fillStyle = tint;
-    g.fillRect(box.x, box.y, box.w, box.h);
+    g.fillRect(box.x - tail, box.y, box.w, box.h);
+    g.restore();
 
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";

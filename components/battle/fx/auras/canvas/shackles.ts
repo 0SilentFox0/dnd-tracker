@@ -1,7 +1,7 @@
 import { bezier } from "../../runtime/geometry";
 import { chainLink, shackle } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
-import { onRim, outside } from "./kit";
+import { centredSprite, drawCentred, onRim, outside } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const TUG_S = 2.8;
@@ -47,7 +47,8 @@ export const shacklesAura: AuraAnimation = {
         chainLink(g, p.x, p.y, Math.atan2(q.y - p.y, q.x - p.x), i % 2 === 0, 0.5 * s, "#9a96aa");
       }
 
-      shackle(g, end.x, end.y, r * 0.3, side * 0.5);
+      // The cuff's steel gradient is painted once; the tug only moves it.
+      drawCentred(g, ctx, centredSprite(ctx, `cuff${side}`, r * 0.45 + 2 * s, (lg) => shackle(lg, 0, 0, r * 0.3, side * 0.5)), end.x, end.y);
     }
   },
 };

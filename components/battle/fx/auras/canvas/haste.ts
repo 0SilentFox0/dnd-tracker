@@ -2,8 +2,10 @@ import { rand } from "../../runtime/geometry";
 import type { AuraParticle } from "../../runtime/particles";
 import { feather } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
-import { outside, rimGlow } from "./kit";
+import { memo, outside, rimGlow } from "./kit";
 import type { AuraAnimation } from "./types";
+
+const STREAK_LEN: [number, number] = [1.1, 1.9];
 
 // A streak whips left to right at `dy` × r off centre and hugs the portrait (by `bend`) when it passes it.
 interface Streak {
@@ -14,7 +16,7 @@ interface Streak {
   dy: number;
   len: number;
   bend: number;
-  grad?: CanvasGradient;
+  grad: CanvasGradient;
 }
 
 function streakY({ cx, cy, r, dy, bend }: Streak, x: number) {
@@ -23,7 +25,7 @@ function streakY({ cx, cy, r, dy, bend }: Streak, x: number) {
   return cy + dy * r + Math.sign(dy || 1) * bend * r * near;
 }
 
-// The gradient spans the streak from its tail at x = 0, so one per particle serves its whole life (moved by translate).
+// The gradient spans the streak from its tail at x = 0, so one per length serves every streak (moved by translate).
 function streakGradient(g: CanvasRenderingContext2D, length: number) {
   const grad = g.createLinearGradient(0, 0, length, 0);
 
@@ -53,7 +55,6 @@ function drawStreak(g: CanvasRenderingContext2D, p: AuraParticle<Streak>, k: num
     g.lineTo(x, streakY(p.data, x));
   }
 
-  p.data.grad ??= streakGradient(g, len * r);
   g.save();
   g.translate(tail, 0);
   g.strokeStyle = p.data.grad;
@@ -81,12 +82,19 @@ export const hasteAura: AuraAnimation = {
     outside(g, ctx, () => spritePx(g, glow("#7ff0ff"), cx, cy, r * 3, undefined, 0.3 + flick * 0.2));
     rimGlow(g, ctx, "140,240,255", 0.75 * flick, 0.28);
 
+    const shortest = Math.floor(STREAK_LEN[0] * r);
+
+    // Lengths snap to whole px, one gradient each, all built on the first frame.
+    const grads = memo(ctx, "streaks", () => Array.from({ length: Math.ceil(STREAK_LEN[1] * r) - shortest + 1 }, (_, i) => streakGradient(g, shortest + i)));
+
     parts.emit(18, dt, () => {
       const dy = rand(-1.25, 1.25);
 
       const hugs = Math.abs(dy) > 0.75;
 
-      return { x: cx, y: cy, data: { cx, cy, r, s, dy: hugs ? dy : Math.sign(dy) * rand(1.05, 1.3), len: rand(1.1, 1.9), bend: rand(0.15, 0.35) }, life: rand(0.35, 0.55), size0: rand(1.3, 2.4), alpha: rand(0.7, 1), draw: drawStreak };
+      const px = Math.round(rand(...STREAK_LEN) * r);
+
+      return { x: cx, y: cy, data: { cx, cy, r, s, dy: hugs ? dy : Math.sign(dy) * rand(1.05, 1.3), len: px / r, bend: rand(0.15, 0.35), grad: grads[px - shortest] }, life: rand(0.35, 0.55), size0: rand(1.3, 2.4), alpha: rand(0.7, 1), draw: drawStreak };
     });
     parts.emit(2.2, dt, () => ({ x: cx - r * 1.6, y: cy + rand(-0.4, 1.1) * r, vx: rand(90, 140) * s, vy: rand(-20, 5) * s, life: rand(0.7, 1), size0: rand(11, 15) * s, data: { spin: rand(-6, 6) }, draw: drawFeather }));
     parts.step(g, dt);
