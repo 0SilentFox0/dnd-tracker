@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { HAZARD_DICE_PATTERN, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
@@ -33,6 +34,7 @@ export const battleMapSchema = z.object({
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
+  weather: z.enum(WEATHER_KINDS).nullable().optional(),
 }).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
 
 export const createBattleSchema = z.object({

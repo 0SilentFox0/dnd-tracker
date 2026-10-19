@@ -15,6 +15,7 @@ export {
   useCompleteBattle,
   useDeleteAllBattles,
   useMapTerrain,
+  useMapWeather,
   useMoraleCheck,
   useMoveParticipant,
   useNextTurn,

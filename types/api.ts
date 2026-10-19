@@ -2,7 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { BattleMapConfig, GridPoint, TerrainDiff, TerrainKind } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -188,6 +188,11 @@ export interface MapTerrainData {
 export interface MapTerrainResponse {
   /** зайняті або поза полем клітинки, які сервер пропустив */
   skipped: string[];
+}
+
+export interface MapWeatherData {
+  /** null — ясно */
+  weather: WeatherKind | null;
 }
 
 export interface AbilityActionData {

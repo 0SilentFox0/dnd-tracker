@@ -28,6 +28,7 @@ import {
   setAuraZone,
   setBattleUnitControl,
   setMapTerrain,
+  setMapWeather,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -44,6 +45,7 @@ import type {
   BonusActionData,
   MapTerrainData,
   MapTerrainResponse,
+  MapWeatherData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -165,6 +167,9 @@ export const useMoveParticipant = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useMapTerrain = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MapTerrainData, MapTerrainResponse>(c, b, (data) => setMapTerrain(c, b, data), { ...o, retryOnConflict: true });
+
+export const useMapWeather = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MapWeatherData>(c, b, (data) => setMapWeather(c, b, data), { ...o, retryOnConflict: true });
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

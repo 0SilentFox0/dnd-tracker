@@ -90,6 +90,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     scaleUnits: mutation(),
     move: mutation(),
     mapTerrain: mutation(),
+    mapWeather: mutation(),
     reveal: mutation(),
   };
 

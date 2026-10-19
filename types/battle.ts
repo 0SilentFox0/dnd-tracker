@@ -168,6 +168,8 @@ export interface SpellTemplate {
 }
 
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
+export type WeatherKind = "rain" | "storm" | "snow" | "blizzard" | "fog" | "embers";
+
 export interface BattleMapConfig {
   cols: number;
   rows: number;
@@ -182,6 +184,8 @@ export interface BattleMapConfig {
   backgroundCols?: number;
   /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
   gridOffset?: { x: number; y: number };
+  /** Атмосфера без механіки; відсутня або null — ясно */
+  weather?: WeatherKind | null;
 }
 
 export type TerrainKind = "wall" | "barrier" | "hazard";

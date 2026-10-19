@@ -147,6 +147,8 @@ export const BATTLE_RATE_LIMITS = {
   move: { limit: 60, windowSeconds: 10 },
   /** Місцевість на карті (ДМ) — штрих за штрихом. */
   mapTerrain: { limit: 60, windowSeconds: 10 },
+  /** Погода на карті (ДМ) — рідко. */
+  mapWeather: { limit: 10, windowSeconds: 10 },
   /** Next-turn — DM advance, рідше викликається. */
   nextTurn: { limit: 20, windowSeconds: 10 },
   /** PATCH HP / remove participant — DM-only, частіше OK. */

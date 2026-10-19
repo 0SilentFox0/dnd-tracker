@@ -22,6 +22,7 @@ import {
   useCastSpell,
   useCompleteBattle,
   useMapTerrain,
+  useMapWeather,
   useMoraleCheck,
   useMoveParticipant,
   useNextTurn,
@@ -94,6 +95,7 @@ export interface BattleSceneActions {
   moraleCheck: ReturnType<typeof useMoraleCheck>;
   move: ReturnType<typeof useMoveParticipant>;
   mapTerrain: ReturnType<typeof useMapTerrain>;
+  mapWeather: ReturnType<typeof useMapWeather>;
   bonusAction: ReturnType<typeof useBonusAction>;
   abilityAction: ReturnType<typeof useAbilityAction>;
   auraZone: ReturnType<typeof useAuraZone>;
@@ -308,6 +310,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     moraleCheck: useMoraleCheck(campaignId, battleId, o),
     move: useMoveParticipant(campaignId, battleId, o),
     mapTerrain: useMapTerrain(campaignId, battleId, o),
+    mapWeather: useMapWeather(campaignId, battleId, o),
     bonusAction: useBonusAction(campaignId, battleId, o),
     abilityAction: useAbilityAction(campaignId, battleId, o),
     auraZone: useAuraZone(campaignId, battleId, o),

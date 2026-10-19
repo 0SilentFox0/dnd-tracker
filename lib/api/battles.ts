@@ -19,6 +19,7 @@ import type {
   BonusActionData,
   MapTerrainData,
   MapTerrainResponse,
+  MapWeatherData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -127,6 +128,14 @@ export async function setMapTerrain(
   data: WithVersion<MapTerrainData>,
 ): Promise<BattleMutationResponse<MapTerrainResponse>> {
   return campaignPost<BattleMutationResponse<MapTerrainResponse>>(campaignId, `/battles/${battleId}/map-terrain`, data);
+}
+
+export async function setMapWeather(
+  campaignId: string,
+  battleId: string,
+  data: WithVersion<MapWeatherData>,
+): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/map-weather`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

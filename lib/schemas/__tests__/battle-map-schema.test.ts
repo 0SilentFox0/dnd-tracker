@@ -61,3 +61,16 @@ describe("battleMapSchema.gridOffset і backgroundCols", () => {
     expect(battleMapSchema.safeParse({ ...map, backgroundCols: 0 }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.weather", () => {
+  it("приймає 6 видів погоди, null і відсутність; відхиляє невідоме", () => {
+    expect(battleMapSchema.safeParse(map).success).toBe(true);
+    expect(battleMapSchema.safeParse({ ...map, weather: null }).success).toBe(true);
+
+    for (const weather of ["rain", "storm", "snow", "blizzard", "fog", "embers"]) {
+      expect(battleMapSchema.safeParse({ ...map, weather }).success).toBe(true);
+    }
+
+    expect(battleMapSchema.safeParse({ ...map, weather: "hail" }).success).toBe(false);
+  });
+});
