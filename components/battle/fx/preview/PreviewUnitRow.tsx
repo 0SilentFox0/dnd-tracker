@@ -34,7 +34,7 @@ export function PreviewUnitRow({ unit, target, hit, aurasOn, still = false, comp
         compact ? "min-h-[46px] px-2.5 py-1.5 text-xs" : "min-h-[60px] px-3 py-2 text-sm",
       )}
     >
-      {hit && target?.frame ? <CanvasFrame key={hit.token} frame={FRAMES[target.frame]} delayMs={hit.delayMs} /> : null}
+      {hit && target?.frame ? <CanvasFrame key={hit.token} frame={FRAMES[target.frame]} delayMs={hit.delayMs} light={book} /> : null}
       <span className="relative shrink-0">
         <span
           className={cn("flex items-center justify-center rounded-full text-xs", book ? "bg-[#3b2a1c] text-[#e6d9bf]" : "bg-[#241d16] text-[var(--bone,#e6dccb)]", fallen && "opacity-50 grayscale")}

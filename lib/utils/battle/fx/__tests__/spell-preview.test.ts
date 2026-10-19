@@ -53,10 +53,10 @@ describe("previewSpellFx", () => {
     expect(p.effects).toContain("стан: без ближніх атак");
   });
 
-  it("avatar is a necrotic summon on the caster", () => {
+  it("avatar is its own necrotic summon on the caster", () => {
     const p = preview("Аватар");
 
-    expect(p.spec).toMatchObject({ archetype: "summon", element: "necrotic", targetIds: ["caster"] });
+    expect(p.spec).toMatchObject({ archetype: "avatar", element: "necrotic", targetIds: ["caster"] });
     expect(p.targets).toEqual([]);
     expect(p.effects).toEqual(["призов"]);
   });

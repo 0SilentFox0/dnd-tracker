@@ -35,6 +35,17 @@ describe("CanvasFrame", () => {
     render(<CanvasFrame frame={frame} delayMs={0} />);
     await new Promise((r) => setTimeout(r, 5));
 
-    expect(frame).toHaveBeenCalledWith(expect.anything(), { x: 16, y: 16, w: 48, h: 48 });
+    expect(frame).toHaveBeenCalledWith(expect.anything(), { x: 16, y: 16, w: 48, h: 48 }, { light: false });
+  });
+
+  it("a parchment row asks the frame for its light look", async () => {
+    hostSize(80);
+
+    const frame = vi.fn();
+
+    render(<CanvasFrame frame={frame} delayMs={0} light />);
+    await new Promise((r) => setTimeout(r, 5));
+
+    expect(frame).toHaveBeenCalledWith(expect.anything(), expect.anything(), { light: true });
   });
 });

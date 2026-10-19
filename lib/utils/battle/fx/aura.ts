@@ -2,11 +2,11 @@ import { elementOf } from "./element";
 
 import type { ActiveEffect } from "@/types/battle";
 
-export type FxAuraKind = "stun" | "charm" | "rage" | "bind" | "plague" | "burning" | "frost" | "decay" | "bleeding" | "static" | "marked" | "curse" | "regen" | "shield" | "blessing" | "frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste" | "shackles" | "stoneskin" | "lifedome" | "sunglow" | "spellward" | "deflect" | "might" | "holyweapon" | "sapped" | "rust" | "dizzy" | "thorncrown" | "raincloud" | "strings";
+export type FxAuraKind = "stun" | "charm" | "rage" | "bind" | "plague" | "burning" | "frost" | "decay" | "bleeding" | "static" | "marked" | "curse" | "regen" | "shield" | "blessing" | "frozen" | "moonmark" | "dust" | "stings" | "roots" | "blind" | "bloodlust" | "haste" | "shackles" | "stoneskin" | "lifedome" | "sunglow" | "spellward" | "deflect" | "might" | "holyweapon" | "sapped" | "rust" | "dizzy" | "thorncrown" | "raincloud" | "strings" | "vines" | "stag";
 
 export const MAX_AURAS = 2;
 
-const AURA_PRIORITY: readonly FxAuraKind[] = ["stun", "dizzy", "frozen", "strings", "charm", "rage", "bind", "roots", "blind", "plague", "burning", "frost", "decay", "bleeding", "static", "dust", "stings", "marked", "moonmark", "shackles", "rust", "thorncrown", "raincloud", "sapped", "curse", "lifedome", "sunglow", "regen", "bloodlust", "haste", "spellward", "deflect", "might", "holyweapon", "stoneskin", "shield", "blessing"];
+const AURA_PRIORITY: readonly FxAuraKind[] = ["stun", "dizzy", "frozen", "strings", "charm", "rage", "bind", "roots", "blind", "plague", "burning", "frost", "decay", "vines", "bleeding", "static", "dust", "stings", "marked", "moonmark", "shackles", "rust", "thorncrown", "raincloud", "sapped", "curse", "lifedome", "sunglow", "stag", "regen", "bloodlust", "haste", "spellward", "deflect", "might", "holyweapon", "stoneskin", "shield", "blessing"];
 
 const DOT_AURA: Record<string, FxAuraKind> = {
   poison: "plague",
@@ -45,6 +45,8 @@ const AURA_BY_NAME: Record<string, FxAuraKind> = {
   "Ухилення": "deflect",
   "Праведна міць": "might",
   "Божественна сила": "holyweapon",
+  "Колючі лози": "vines",
+  "Дух лісу": "stag",
 };
 
 const SHIELD_EFFECTS = new Set(["armor", "ac", "guard"]);

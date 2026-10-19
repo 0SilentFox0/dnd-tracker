@@ -28,12 +28,18 @@ interface Props {
   playToken: number;
 }
 
-const ON_ALLY = new Set<FxArchetype>(["heal", "buff", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "sunbeam", "resurrect"]);
+const ON_ALLY = new Set<FxArchetype>(["heal", "buff", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "sunbeam", "resurrect", "healword", "rebirth", "forestspirit", "vampire"]);
 
 const ON_ALL_ENEMIES = new Set<FxArchetype>(["area", "meteor", "entangle", "holyword", "netherhands"]);
 
+const ON_CASTER = new Set<FxArchetype>(["summon", "firesummon", "watersummon", "earthsummon", "airsummon", "phoenix", "avatar"]);
+
 function targetsFor(archetype: FxArchetype) {
   if (ON_ALLY.has(archetype)) return ["a1"];
+
+  if (ON_CASTER.has(archetype)) return ["a2"];
+
+  if (archetype === "healwave") return ["a1", "a2"];
 
   return ON_ALL_ENEMIES.has(archetype) ? ["e1", "e2"] : ["e1"];
 }

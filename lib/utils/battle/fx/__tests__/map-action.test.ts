@@ -93,13 +93,25 @@ describe("mapAction", () => {
     expect(spell("Корені", { spellTargeting: "enemy", spellEffectKinds: ["applyCondition"] })).toMatchObject({ archetype: "entangle", element: "nature" });
   });
 
-  it("summon takes the override element", () => {
-    expect(spell("Прикликання елементаля: Вода", { spellTargeting: "self", spellEffectKinds: ["summon"] })).toMatchObject({ archetype: "summon", element: "cold" });
-    expect(spell("Призив Фенікса", { spellEffectKinds: ["summon"] })).toMatchObject({ archetype: "summon", element: "fire" });
+  it("every summon plays its own element's animation", () => {
+    const summon = { spellTargeting: "self", spellEffectKinds: ["summon"] };
+
+    expect(spell("Прикликання елементаля: Вогонь", summon)).toMatchObject({ archetype: "firesummon", element: "fire" });
+    expect(spell("Прикликання елементаля: Вода", summon)).toMatchObject({ archetype: "watersummon", element: "cold" });
+    expect(spell("Прикликання елементаля: Земля", summon)).toMatchObject({ archetype: "earthsummon", element: "earth" });
+    expect(spell("Прикликання елементаля: Повітря", summon)).toMatchObject({ archetype: "airsummon", element: "lightning" });
+    expect(spell("Призив Фенікса", summon)).toMatchObject({ archetype: "phoenix", element: "fire" });
+    expect(spell("Аватар", summon)).toMatchObject({ archetype: "avatar", element: "necrotic" });
+    expect(spell("Інший призов", summon)).toMatchObject({ archetype: "summon", element: "radiant" });
   });
 
-  it("«Аватар» → necrotic", () => {
-    expect(spell("Аватар", { spellTargeting: "self", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "buff", element: "necrotic" });
+  it("Nature signatures override the computed heal/bolt", () => {
+    expect(spell("Слово лікування", { spellTargeting: "ally", spellEffectKinds: ["heal"], totalHealing: 9 })).toMatchObject({ archetype: "healword", element: "nature" });
+    expect(spell("Хвиля зцілення", { spellTargeting: "allAllies", spellEffectKinds: ["heal"], totalHealing: 9 })).toMatchObject({ archetype: "healwave", element: "nature" });
+    expect(spell("Відродження лісу", { spellTargeting: "allAlliesDead", spellEffectKinds: ["heal"], totalHealing: 9 })).toMatchObject({ archetype: "rebirth", element: "nature" });
+    expect(spell("Дух лісу", { spellTargeting: "ally", spellEffectKinds: ["hot", "flag"] })).toMatchObject({ archetype: "forestspirit", element: "nature" });
+    expect(spell("Колючі лози", { spellDamageType: "poison", spellTargeting: "enemy", spellEffectKinds: ["dot"] })).toMatchObject({ archetype: "thornvines", element: "poison" });
+    expect(spell("Місячний промінь", { spellDamageType: "radiant", spellTargeting: "enemy", spellEffectKinds: ["dealDamage", "flag"], totalDamage: 9 })).toMatchObject({ archetype: "moonbeam", element: "radiant" });
   });
 
   it("«Кам'яні шипи» → earth element, computed archetype", () => {
@@ -110,9 +122,9 @@ describe("mapAction", () => {
     expect(spell("Метеоритний дощ", { spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toMatchObject({ archetype: "meteor", element: "fire" });
   });
 
-  it("«Поспіх» → haste/wind, «Вампіризм» → fury", () => {
+  it("«Поспіх» → haste/wind, «Вампіризм» → vampire/fury", () => {
     expect(spell("Поспіх", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ archetype: "haste", element: "wind" });
-    expect(spell("Вампіризм", { spellTargeting: "ally", spellEffectKinds: ["modifyStat"] })).toMatchObject({ element: "fury" });
+    expect(spell("Вампіризм", { spellTargeting: "ally", spellEffectKinds: ["flag"] })).toMatchObject({ archetype: "vampire", element: "fury" });
   });
 
   it("«Потойбічна стріла» → eldritch, keeping the fire element for the hit frame", () => {

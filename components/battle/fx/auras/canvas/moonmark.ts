@@ -1,23 +1,10 @@
 import { rand } from "../../runtime/geometry";
-import { twinkle } from "../../runtime/shapes";
+import { crescent, twinkle } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
 import { centredSprite, drawCentred, rimGlow, twinkleDraw } from "./kit";
 import type { AuraAnimation } from "./types";
 
 const sparkle = twinkleDraw("#cfe0ff", 0.9);
-
-function crescent(g: CanvasRenderingContext2D, x: number, y: number, R: number) {
-  g.save();
-  g.beginPath();
-  g.rect(x - R * 2, y - R * 2, R * 4, R * 4);
-  g.arc(x + R * 0.5, y - R * 0.2, R * 0.82, 0, Math.PI * 2);
-  g.clip("evenodd");
-  g.beginPath();
-  g.arc(x, y, R, 0, Math.PI * 2);
-  g.fill();
-  g.stroke();
-  g.restore();
-}
 
 const MOON_LEVELS = 12;
 

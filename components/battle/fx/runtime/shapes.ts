@@ -326,3 +326,17 @@ export function arrow(g: CanvasRenderingContext2D, len: number, shaft = "#8a5a2b
     g.fill();
   }
 }
+
+/** Fills and strokes a crescent moon of radius `R` centred on (x, y), its hollow towards the upper right. */
+export function crescent(g: CanvasRenderingContext2D, x: number, y: number, R: number) {
+  g.save();
+  g.beginPath();
+  g.rect(x - R * 2, y - R * 2, R * 4, R * 4);
+  g.arc(x + R * 0.5, y - R * 0.2, R * 0.82, 0, Math.PI * 2);
+  g.clip("evenodd");
+  g.beginPath();
+  g.arc(x, y, R, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.restore();
+}

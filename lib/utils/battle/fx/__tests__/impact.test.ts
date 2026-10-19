@@ -86,4 +86,24 @@ describe("impactFor", () => {
 
     for (const name of ["Очищення", "Регенерація", "Праведна міць", "Ухилення", "Божественна сила", "Магічний імунітет"]) expect(cast(name, { spellEffectKinds: ["modifyStat"] })).toBeNull();
   });
+
+  it("summons never play a hit frame on the caster", () => {
+    const cast = (spellName: string) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellEffectKinds: ["summon"] } }), "t");
+
+    for (const name of ["Прикликання елементаля: Вогонь", "Прикликання елементаля: Вода", "Прикликання елементаля: Земля", "Прикликання елементаля: Повітря", "Призив Фенікса", "Аватар", "Інший призов"]) expect(cast(name)).toBeNull();
+  });
+
+  it("Nature: the heals keep the heal frame, vines poison, moonbeam radiant; the spirit and vampirism have none", () => {
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+
+    const healing = { spellEffectKinds: ["heal"], totalHealing: 9 };
+
+    expect(cast("Слово лікування", healing)).toEqual({ element: "nature", kind: "heal", delayMs: IMPACT_MS.healword });
+    expect(cast("Хвиля зцілення", healing)).toMatchObject({ kind: "heal", delayMs: IMPACT_MS.healwave });
+    expect(cast("Відродження лісу", healing)).toMatchObject({ kind: "heal", delayMs: IMPACT_MS.rebirth });
+    expect(cast("Колючі лози", { spellDamageType: "poison", spellEffectKinds: ["dot"] })).toEqual({ element: "poison", kind: "damage", delayMs: IMPACT_MS.thornvines });
+    expect(cast("Місячний промінь", { spellDamageType: "radiant", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toEqual({ element: "radiant", kind: "damage", delayMs: IMPACT_MS.moonbeam });
+    expect(cast("Дух лісу", { spellEffectKinds: ["hot"] })).toBeNull();
+    expect(cast("Вампіризм", { spellEffectKinds: ["flag"] })).toBeNull();
+  });
 });

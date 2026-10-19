@@ -85,6 +85,13 @@ describe("spell-check aura rules", () => {
     expect(aurasOf([fx({ id: "a", name: "Смуток", type: "debuff" }), fx({ id: "b", name: "Ослаблення", type: "debuff" }), fx({ id: "c", name: "Ляльковод", type: "debuff" })])).toEqual(["strings", "raincloud"]);
   });
 
+  it("Nature: thorny vines and the forest spirit get their own auras ahead of plague and regen", () => {
+    expect(auraOf(fx({ name: "Колючі лози", dotDamage: { damagePerRound: 3, damageType: "poison" } }))).toBe("vines");
+    expect(auraOf(fx({ name: "Дух лісу", type: "buff", hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>))).toBe("stag");
+    expect(aurasOf([fx({ id: "a", name: "Регенерація", type: "buff" }), fx({ id: "b", name: "Дух лісу", type: "buff" })])).toEqual(["lifedome", "stag"]);
+    expect(aurasOf([fx({ id: "a", name: "Колючі лози" }), fx({ id: "b", dotDamage: { damagePerRound: 2, damageType: "slashing" } })])).toEqual(["vines", "bleeding"]);
+  });
+
   it("fxElement maps debuffs and conditions", () => {
     const el = (fxElement: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ fxElement, ...over }));
 

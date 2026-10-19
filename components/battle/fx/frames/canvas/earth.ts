@@ -47,7 +47,7 @@ function chunk(b: FrameBox): Chunk {
   return { x: b.x + rand(10, b.w - 10), y: b.y + b.h - 2, vx: rand(-60, 60), vy: rand(-260, -140), rot: rand(0, 6), spin: rand(-10, 10), shape: jaggedShape(5, rand(3.5, 7), 0.3, 0.6), color: pick(ROCK), rest: false };
 }
 
-export const earthFrame: FrameAnimation = async (s, box) => {
+export const earthFrame: FrameAnimation = async (s, box, { light }) => {
   let k = 0;
 
   let fade = 1;
@@ -103,13 +103,13 @@ export const earthFrame: FrameAnimation = async (s, box) => {
 
   const physics = (dt: number) => stepBodies(chunks, dt, GRAVITY, floor);
 
-  for (let i = 0; i < 36; i++) emit(s, bottomPoint(box), { tints: DUST, speed: [15, 55], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.7, 1.2], scale: [0.5, 1.1], drag: 2, additive: false, alpha: 0.8 });
+  for (let i = 0; i < 36; i++) emit(s, bottomPoint(box), { tints: DUST, speed: [15, 55], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.7, 1.2], scale: [0.5, 1.1], drag: 2, additive: false, alpha: light ? 0.3 : 0.8 });
 
   await tween(s, QUAKE_MS, (v, dt) => {
     k = v;
     physics(dt);
 
-    if (v < 0.5 && Math.random() < 0.35) emit(s, bottomPoint(box), { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: 0.5 });
+    if (v < 0.5 && Math.random() < 0.35) emit(s, bottomPoint(box), { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: light ? 0.2 : 0.5 });
   });
   await tween(s, FADE_MS, (v, dt) => {
     fade = 1 - v;

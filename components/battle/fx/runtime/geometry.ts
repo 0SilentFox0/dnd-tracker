@@ -105,3 +105,18 @@ export function wavePoints(a: FxPoint, b: FxPoint, n: number, amp: number, phase
     return { x: a.x + dx * u + nx * off, y: a.y + dy * u + ny * off };
   });
 }
+
+/** A lightning-like polyline from `a` to `b`: `n` segments, inner points knocked sideways by up to `amp`. */
+export function zigzag(a: FxPoint, b: FxPoint, n: number, amp: number): FxPoint[] {
+  const dx = b.x - a.x;
+
+  const dy = b.y - a.y;
+
+  const len = Math.hypot(dx, dy) || 1;
+
+  return Array.from({ length: n + 1 }, (_, i) => {
+    const off = i === 0 || i === n ? 0 : rand(-amp, amp);
+
+    return { x: a.x + (dx * i) / n - (dy / len) * off, y: a.y + (dy * i) / n + (dx / len) * off };
+  });
+}

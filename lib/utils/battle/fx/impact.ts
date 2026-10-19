@@ -9,9 +9,9 @@ export interface FxImpact {
 }
 
 // these never deal damage themselves, so they must not borrow a damage frame
-const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "siphon", "rust", "whispers", "thorns", "raincloud", "blindfold", "puppet"]);
+const NO_IMPACT = new Set<FxArchetype>(["buff", "debuff", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "empower", "spellward", "siphon", "rust", "whispers", "thorns", "raincloud", "blindfold", "puppet", "summon", "firesummon", "watersummon", "earthsummon", "airsummon", "phoenix", "avatar", "forestspirit", "vampire"]);
 
-const HEALS = new Set<FxArchetype>(["heal", "sunbeam", "resurrect"]);
+const HEALS = new Set<FxArchetype>(["heal", "sunbeam", "resurrect", "healword", "healwave", "rebirth"]);
 
 /** `spec` is the first FX of the last action (`mapAction(action)[0]`), mapped once for all rows. */
 export function impactFor(spec: FxSpec | undefined, participantId: string): FxImpact | null {

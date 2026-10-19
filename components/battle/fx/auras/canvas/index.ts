@@ -28,6 +28,7 @@ import { sappedAura } from "./sapped";
 import { shacklesAura } from "./shackles";
 import { shieldAura } from "./shield";
 import { spellwardAura } from "./spellward";
+import { stagAura } from "./stag";
 import { staticAura } from "./static";
 import { stingsAura } from "./stings";
 import { stoneskinAura } from "./stoneskin";
@@ -36,6 +37,7 @@ import { stunAura } from "./stun";
 import { sunglowAura } from "./sunglow";
 import { thorncrownAura } from "./thorncrown";
 import type { AuraAnimation } from "./types";
+import { vinesAura } from "./vines";
 
 import type { FxAuraKind } from "@/lib/utils/battle/fx";
 
@@ -77,4 +79,6 @@ export const AURA_ANIMATIONS: Record<FxAuraKind, AuraAnimation> = {
   thorncrown: thorncrownAura,
   raincloud: raincloudAura,
   strings: stringsAura,
+  vines: vinesAura,
+  stag: stagAura,
 };
