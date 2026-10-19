@@ -81,6 +81,25 @@ describe("multi-target advantage resolution", () => {
       expect(["t2", "t3"].every((id) => lost(r, id) > 0)).toBe(true);
     });
 
+    it("on a map the server expands only to enemies in reach", () => {
+      const at = (p: BattleParticipant, x: number) => ({ ...p, battleData: { ...p.battleData, position: { x, y: 0 } } });
+
+      const order = [at(sweeper(true), 0), at(foe("t1"), 1), at(foe("t2"), 1), at(foe("t3"), 9)];
+
+      const r = runAttackPhase({
+        battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        data: { attackerId: "a", targetIds: ["t1"], attackRolls: [17], damageRolls: Array(12).fill(4) },
+        battleId: "b",
+        userId: "u",
+        isDM: true,
+        rng: seq(0.5),
+        map: { cols: 20, rows: 5, background: null, opacity: 0.3 },
+      });
+
+      expect(lost(r, "t2")).toBeGreaterThan(0);
+      expect(lost(r, "t3")).toBe(0);
+    });
+
     it("missing damage dice are rolled by the server, never reduced damage", () => {
       const r = run([sweeper(true), ...enemies()], { targetIds: ["t1"], attackRolls: [17], damageRolls: [4, 4] });
 

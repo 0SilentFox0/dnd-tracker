@@ -134,7 +134,7 @@ describe("attack mutation", () => {
       expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
     });
 
-    it("атакер із attackHitsAllEnemies не підпадає під правило досяжності", async () => {
+    it("атакер із attackHitsAllEnemies теж підпадає під правило досяжності", async () => {
       const sweeper = {
         ...placed[0],
         battleData: {
@@ -145,7 +145,7 @@ describe("attack mutation", () => {
 
       const onMap = { ...ctx, participants: [sweeper, placed[1]], meta: { map } } as unknown as BattleMutationContext;
 
-      expect(await errorCode(attackMutation(onMap, body()))).not.toBe("action_rejected");
+      expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
     });
 
     it("без карти та сама атака проходить як раніше", async () => {

@@ -20,9 +20,8 @@ export function attackReachError(
   attacker: BattleParticipant,
   attack: BattleAttack,
   targets: BattleParticipant[],
-  options: { ignoreReach?: boolean } = {},
 ): string | null {
-  if (!map || !attacker.battleData.position || options.ignoreReach || attack.targetType === "aoe") return null;
+  if (!map || !attacker.battleData.position) return null;
 
   const mine = cellsOf(attacker);
 
@@ -41,4 +40,10 @@ export function attackReachError(
   const range = attackRangeCells(attack.range);
 
   return range !== null && placed.some((t) => distanceTo(t) > range) ? "Ціль поза дальністю атаки" : null;
+}
+
+export function enemiesInReach(map: BattleMapConfig | null, participants: BattleParticipant[], attacker: BattleParticipant, attack: BattleAttack): BattleParticipant[] {
+  return participants.filter(
+    (p) => p.basicInfo.side !== attacker.basicInfo.side && isActive(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
+  );
 }

@@ -11,6 +11,7 @@ import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
+import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -78,8 +79,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
   };
 
-  const preselectAll = () => {
-    if (hitsAll) dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) });
+  const preselectAll = (chosen: BattleAttack) => {
+    if (!hitsAll) return;
+
+    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen) : enemyTargets;
+
+    dispatch({ type: "SET_TARGETS", ids: inReach.map((p) => p.basicInfo.id) });
   };
 
   const currentStrike = state.strikes[state.index];
@@ -194,7 +199,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       if (!target) {
         dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
-        preselectAll();
+        preselectAll(first);
 
         return;
       }
@@ -213,7 +218,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     selectWeapon: (a: BattleAttack) => {
       dispatch({ type: "SELECT_WEAPON", ...describe(a) });
-      preselectAll();
+      preselectAll(a);
     },
     toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
     confirmTargets: () => {

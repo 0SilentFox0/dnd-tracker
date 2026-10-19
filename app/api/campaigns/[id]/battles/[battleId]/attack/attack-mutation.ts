@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
@@ -57,9 +55,7 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   const targets = targetIds.flatMap((id) => ctx.participants.find((p) => p.basicInfo.id === id) ?? []);
 
-  const ignoreReach = findFlags(withSelf(ctx.participants, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
-
-  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets, { ignoreReach });
+  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
 
   if (reach) throw new BattleRuleError("action_rejected", reach);
 }
@@ -80,6 +76,7 @@ export function createAttackMutation(deps: SummonDeps = defaultDeps) {
       userId: ctx.userId,
       isDM: ctx.isDM,
       rng: ctx.rng,
+      map: ctx.meta.map,
     });
 
     const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });

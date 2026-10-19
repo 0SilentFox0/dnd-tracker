@@ -12,10 +12,11 @@ import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
-import type { ActiveEffect, BattleAction, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
   battle: {
@@ -45,6 +46,7 @@ export type AttackPhaseInput = {
   userId: string;
   isDM: boolean;
   rng?: Rng;
+  map?: BattleMapConfig | null;
 };
 
 export type AttackPhaseResult = {
@@ -136,7 +138,10 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const targets = hitsAllEnemies
     ? [
         ...chosenTargets.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t)),
-        ...initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t) && !targetIds.includes(t.basicInfo.id)),
+        ...(input.map && attacker.battleData.position
+          ? enemiesInReach(input.map, initiativeOrder, attacker, attack)
+          : initiativeOrder.filter((t) => t.basicInfo.side !== attacker.basicInfo.side && isActive(t))
+        ).filter((t) => !targetIds.includes(t.basicInfo.id)),
       ]
     : chosenTargets;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { attackRangeCells, attackReachError } from "../attack-reach";
+import { attackRangeCells, attackReachError, enemiesInReach } from "../attack-reach";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -66,14 +66,31 @@ describe("правила атак на карті", () => {
     expect(attackReachError(map, [hero, adj, target], hero, bow, [target])).toBeNull();
   });
 
-  it("AoE-атака і ignoreReach не мають просторових правил", () => {
+  it("AoE-атака підлягає звичайному правилу reach", () => {
     const far = at("e2", { x: 25, y: 5 }, ParticipantSide.ENEMY);
+
+    const near = at("e3", { x: 6, y: 5 }, ParticipantSide.ENEMY);
 
     const breath = { id: "br", name: "Подих", type: AttackType.MELEE, targetType: "aoe" } as BattleAttack;
 
-    expect(attackReachError(map, [hero, far], hero, breath, [far])).toBeNull();
-    expect(attackReachError(map, [hero, far], hero, sword, [far], { ignoreReach: true })).toBeNull();
-    expect(attackReachError(map, [hero, far], hero, sword, [far])).toMatch(/поруч/);
+    expect(attackReachError(map, [hero, far], hero, breath, [far])).toMatch(/поруч/);
+    expect(attackReachError(map, [hero, near], hero, breath, [near])).toBeNull();
+  });
+
+  it("enemiesInReach: melee — лише сусіди, ranged — у дальності, без карти — усі", () => {
+    const near = at("e1", { x: 6, y: 5 }, ParticipantSide.ENEMY);
+
+    const mid = at("e2", { x: 9, y: 5 }, ParticipantSide.ENEMY);
+
+    const far = at("e3", { x: 25, y: 5 }, ParticipantSide.ENEMY);
+
+    const dead = at("e4", { x: 5, y: 6 }, ParticipantSide.ENEMY, true);
+
+    const all = [hero, near, mid, far, dead];
+
+    expect(enemiesInReach(map, all, hero, sword).map((p) => p.basicInfo.id)).toEqual(["e1"]);
+    expect(enemiesInReach(map, [hero, mid, far], hero, sling).map((p) => p.basicInfo.id)).toEqual(["e2"]);
+    expect(enemiesInReach(null, all, hero, sword).map((p) => p.basicInfo.id)).toEqual(["e1", "e2", "e3"]);
   });
 
   it("ціль поза дальністю", () => {
