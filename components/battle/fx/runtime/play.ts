@@ -1,20 +1,32 @@
-import { ANIMATIONS } from "../animations";
+import { animationFor } from "../animations";
 import { resolvePoints } from "./anchors";
 import type { FxPoint } from "./geometry";
 import { PALETTE } from "./palette";
-import { stageFor } from "./stage";
+import { layerEpoch, stageFor } from "./stage";
 
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
-/** Plays `spec` on `layer`, with anchors looked up under `root` and points taken relative to the layer. */
-export function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document): Promise<void> {
+/** How long a run waits for its signature chunk before playing the base fallback (battle queue only). */
+export const FX_LOAD_TIMEOUT_MS = 800;
+
+/**
+ * Plays `spec` on `layer`, with anchors looked up under `root` and points taken relative to the layer.
+ * A signature not loaded yet is awaited up to `loadTimeoutMs`; a `cancelLayer` meanwhile drops the run.
+ */
+export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document, loadTimeoutMs = FX_LOAD_TIMEOUT_MS): Promise<void> {
+  const epoch = layerEpoch(layer);
+
+  const animation = await animationFor(spec.archetype, loadTimeoutMs);
+
+  if (layerEpoch(layer) !== epoch || !layer.isConnected) return;
+
   const points = resolvePoints(spec, root);
 
-  if (!points) return Promise.resolve();
+  if (!points) return;
 
   const box = layer.getBoundingClientRect();
 
   const local = (p: FxPoint) => ({ x: p.x - box.left, y: p.y - box.top });
 
-  return ANIMATIONS[spec.archetype]({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
+  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
 }

@@ -27,6 +27,11 @@ export interface Stage {
 
 const stages = new WeakMap<HTMLElement, Stage>();
 
+const cancels = new WeakMap<HTMLElement, number>();
+
+/** Changes on every `cancelLayer`, so a run that waited (for its chunk) can tell it was cancelled meanwhile. */
+export const layerEpoch = (layer: HTMLElement) => cancels.get(layer) ?? 0;
+
 export function stageFor(layer: HTMLElement) {
   let s = stages.get(layer);
 
@@ -88,6 +93,8 @@ export function stopStage(s: Stage) {
 
 /** `stopStage` for the layer's stage plus the DOM sprite sheets and ghosts playing in it. */
 export function cancelLayer(layer: HTMLElement) {
+  cancels.set(layer, layerEpoch(layer) + 1);
+
   const s = stages.get(layer);
 
   if (s) stopStage(s);

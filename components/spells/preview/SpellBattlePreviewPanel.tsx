@@ -15,7 +15,8 @@ import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
 import { castableOf, previewCastFx, type PreviewSpell } from "@/lib/utils/battle/fx/spell-preview";
 
-const RUNNER: FxRunner = { play: playFx, cancel: cancelLayer };
+// a preview has no queue to hold up, so it waits for the signature however long its chunk takes
+const RUNNER: FxRunner = { play: (layer, spec, root) => playFx(layer, spec, root, Infinity), cancel: cancelLayer };
 
 const [CASTER] = PREVIEW_UNITS;
 

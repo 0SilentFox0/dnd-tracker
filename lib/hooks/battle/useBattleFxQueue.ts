@@ -21,5 +21,5 @@ export function useBattleFxQueue(enabled: boolean) {
 
   const done = useCallback((key: string) => setState((s) => shiftFxQueue(s, key)), []);
 
-  return { current: active ? (state.queue[0] ?? null) : null, done, active };
+  return { current: active ? (state.queue[0] ?? null) : null, queue: state.queue, done, active };
 }

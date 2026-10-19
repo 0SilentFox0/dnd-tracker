@@ -2,14 +2,15 @@
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const h = vi.hoisted(() => ({ current: { key: "k1" }, done: vi.fn(), cancelLayer: vi.fn(), playFx: vi.fn() }));
+const h = vi.hoisted(() => ({ current: { key: "k1", archetype: "haste" }, done: vi.fn(), cancelLayer: vi.fn(), playFx: vi.fn(), preloadAnimation: vi.fn() }));
 
 vi.mock("@/components/battle/fx/fx.css", () => ({}));
-vi.mock("@/components/battle/fx/runtime/play", () => ({ playFx: h.playFx }));
+vi.mock("@/components/battle/fx/runtime/play", () => ({ playFx: h.playFx, FX_LOAD_TIMEOUT_MS: 800 }));
+vi.mock("@/components/battle/fx/animations", () => ({ preloadAnimation: h.preloadAnimation }));
 vi.mock("@/components/battle/fx/runtime/stage", () => ({ cancelLayer: h.cancelLayer }));
 vi.mock("@/lib/hooks/battle", () => ({
   useFxEnabled: () => ({ enabled: true }),
-  useBattleFxQueue: () => ({ current: h.current, done: h.done, active: true }),
+  useBattleFxQueue: () => ({ current: h.current, queue: [h.current], done: h.done, active: true }),
 }));
 
 import { BattleFxLayer } from "@/components/battle/fx/BattleFxLayer";
@@ -33,7 +34,7 @@ describe("BattleFxLayer", () => {
     render(<BattleFxLayer />);
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(MAX_FX_MS - 1);
+      await vi.advanceTimersByTimeAsync(MAX_FX_MS + 800 - 1);
     });
     expect(h.cancelLayer).not.toHaveBeenCalled();
     expect(h.done).not.toHaveBeenCalled();
@@ -54,5 +55,6 @@ describe("BattleFxLayer", () => {
     });
     expect(h.done).toHaveBeenCalledTimes(1);
     expect(h.cancelLayer).not.toHaveBeenCalled();
+    expect(h.preloadAnimation).toHaveBeenCalledWith("haste");
   });
 });

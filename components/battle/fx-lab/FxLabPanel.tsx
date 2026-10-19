@@ -78,7 +78,7 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
 
       hitTimer.current = window.setTimeout(() => setHitId({ ids: hit ? targetIds : [], key: performance.now() }), ARCHETYPE_FX[archetype].impactMs);
 
-      await playFx(layer, spec, arena);
+      await playFx(layer, spec, arena, Infinity);
       window.clearTimeout(hitTimer.current);
       setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${ARCHETYPE_FX[archetype].impactMs} мс)`);
     } catch (e) {

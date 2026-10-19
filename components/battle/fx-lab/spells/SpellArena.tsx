@@ -69,7 +69,7 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
     setStatus(`${spell.name}: ${ARCHETYPE_LABEL[spell.spec.archetype]} · ${ELEMENT_LABEL[spell.spec.element]}`);
 
     try {
-      await playFx(layer, { ...spell.spec, key: `spells-${id}` }, arena);
+      await playFx(layer, { ...spell.spec, key: `spells-${id}` }, arena, Infinity);
     } catch (e) {
       setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`);
     }

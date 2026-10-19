@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 
 import "@/components/battle/fx/fx.css";
-import { playFx } from "@/components/battle/fx/runtime/play";
+import { preloadAnimation } from "@/components/battle/fx/animations";
+import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
 import { MAX_FX_MS } from "@/lib/utils/battle/fx";
@@ -13,7 +14,12 @@ export function BattleFxLayer() {
 
   const { enabled } = useFxEnabled();
 
-  const { current, done, active } = useBattleFxQueue(enabled);
+  const { current, queue, done, active } = useBattleFxQueue(enabled);
+
+  // Signatures load the moment they are queued, so they are ready by their turn.
+  useEffect(() => {
+    for (const spec of queue) preloadAnimation(spec.archetype);
+  }, [queue]);
 
   // Hidden tab, FX off or unmount: drop the running animation, so nothing stale resumes later.
   useEffect(() => {
@@ -42,7 +48,7 @@ export function BattleFxLayer() {
     const guard = window.setTimeout(() => {
       cancelLayer(el);
       finish();
-    }, MAX_FX_MS);
+    }, MAX_FX_MS + FX_LOAD_TIMEOUT_MS);
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()

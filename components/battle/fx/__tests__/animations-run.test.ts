@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { stubCanvasContexts } from "./recording-canvas";
 
-import type { FxArchetype } from "@/lib/utils/battle/fx";
+import { FX_ARCHETYPES,type FxArchetype } from "@/lib/utils/battle/fx";
 
 // Area spells rarely catch more; each extra target adds its stagger to the run.
 const MAX_TARGETS = 6;
@@ -79,7 +79,7 @@ function row(x: number, y: number) {
 async function setup() {
   vi.resetModules();
 
-  const { ANIMATIONS } = await import("../animations");
+  const { loadAnimation } = await import("../animations");
 
   const { PALETTE } = await import("../runtime/palette");
 
@@ -94,7 +94,9 @@ async function setup() {
   layer.getBoundingClientRect = () => rect(0, 0, 1000, 800);
   document.body.append(layer);
 
-  const play = (archetype: FxArchetype, targets: number) => {
+  const play = async (archetype: FxArchetype, targets: number) => {
+    const animation = await loadAnimation(archetype);
+
     const actorEl = row(40, 40);
 
     const targetEls = Array.from({ length: targets }, (_, i) => row(600, 60 + i * 110));
@@ -111,14 +113,14 @@ async function setup() {
 
     let done = false;
 
-    const run = ANIMATIONS[archetype]({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targetEls, actorEl, palette: PALETTE[spec.element] }).then(() => {
+    const run = animation({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targetEls, actorEl, palette: PALETTE[spec.element] }).then(() => {
       done = true;
     });
 
     return { stage, run, isDone: () => done };
   };
 
-  return { ANIMATIONS, MAX_FX_MS, layer, play, cancelLayer };
+  return { MAX_FX_MS, layer, play, cancelLayer };
 }
 
 // Advances the virtual clock one 60 Hz frame: timers first, then the rAF callbacks, then the promise chains.
@@ -153,13 +155,13 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const ARCHETYPES = Object.keys((await import("../animations")).ANIMATIONS) as FxArchetype[];
+const ARCHETYPES = FX_ARCHETYPES;
 
 describe("animation runs", () => {
   it.each(ARCHETYPES)(`%s: finishes well within MAX_FX_MS on ${MAX_TARGETS} targets and leaves nothing behind`, async (archetype) => {
     const { MAX_FX_MS, layer, play } = await setup();
 
-    const { stage, isDone } = play(archetype, MAX_TARGETS);
+    const { stage, isDone } = await play(archetype, MAX_TARGETS);
 
     let elapsed = 0;
 
@@ -186,7 +188,7 @@ describe("animation runs", () => {
   it.each(ARCHETYPES)("%s: cancelling mid-run resolves it and clears the stage, rows and ghosts", async (archetype) => {
     const { layer, play, cancelLayer } = await setup();
 
-    const { stage, isDone } = play(archetype, 3);
+    const { stage, isDone } = await play(archetype, 3);
 
     for (let i = 0; i < 40; i++) await frame();
 
