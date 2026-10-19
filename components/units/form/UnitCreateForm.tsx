@@ -9,22 +9,22 @@ import { UnitFormError, unitFormTabs } from "@/components/units/form/UnitFormFie
 import { useUnitCreateForm } from "@/lib/hooks/units";
 
 export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
-  const form = useUnitCreateForm(id);
+  const editor = useUnitCreateForm(id);
 
   return (
     <HudFormPage title="Новий юніт" aside="Заповніть характеристики, расу й атаки">
-      <UnitFormError error={form.error} />
+      <UnitFormError error={editor.status.error} />
       <HudForm
         id="unit-form"
-        onSubmit={form.submit}
-        tabs={unitFormTabs({ campaignId: id, form })}
+        onSubmit={editor.actions.submit}
+        tabs={unitFormTabs({ campaignId: id, editor })}
         actions={
           <>
             <Button type="button" variant="outline" asChild>
-              <Link href={form.listHref}>Скасувати</Link>
+              <Link href={editor.listHref}>Скасувати</Link>
             </Button>
-            <Button type="submit" disabled={form.isSaving || !form.abilitiesValid}>
-              {form.isSaving ? "Створення..." : withAbilityErrors("Створити юніта", form.abilityErrors)}
+            <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
+              {editor.status.isSaving ? "Створення..." : withAbilityErrors("Створити юніта", editor.abilities.errors)}
             </Button>
           </>
         }

@@ -8,7 +8,6 @@ import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
-import { useMainSkills } from "@/lib/hooks/skills";
 import type { RaceFormData } from "@/types/races";
 
 interface CreateRaceDialogProps {
@@ -38,8 +37,6 @@ export function CreateRaceDialog({
   campaignId,
   onCreateRace,
 }: CreateRaceDialogProps) {
-  const { data: mainSkills = [] } = useMainSkills(campaignId);
-
   const [formData, setFormData] = useState<RaceFormData>(EMPTY_FORM);
 
   const [abilityErrors, setAbilityErrors] = useState(0);
@@ -78,9 +75,7 @@ export function CreateRaceDialog({
       <form id="create-race-form" onSubmit={handleSubmit} className="space-y-4">
         <RaceFormFields
           campaignId={campaignId}
-          formData={formData}
-          setFormData={setFormData}
-          mainSkills={mainSkills}
+          form={{ data: formData, set: setFormData }}
           compact
           onAbilitiesValidityChange={(_, n) => setAbilityErrors(n)}
         />

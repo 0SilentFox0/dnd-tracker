@@ -15,20 +15,20 @@ interface RaceEditFormProps {
 }
 
 export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
-  const form = useRaceForm(campaignId, race.id, getInitialRaceFormData(race));
+  const editor = useRaceForm(campaignId, race.id, getInitialRaceFormData(race));
 
   return (
     <HudFormPage title="Редагувати расу" aside="Оновіть інформацію про расу">
       <HudForm
         id="race-form"
-        onSubmit={form.submit}
+        onSubmit={editor.actions.submit}
         actions={
           <>
-            <Button type="button" variant="outline" onClick={form.cancel}>
+            <Button type="button" variant="outline" onClick={editor.actions.cancel}>
               Скасувати
             </Button>
-            <Button type="submit" disabled={form.isSaving || !form.abilitiesValid}>
-              {form.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", form.abilityErrors)}
+            <Button type="submit" disabled={editor.isSaving || !editor.abilities.valid}>
+              {editor.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", editor.abilities.errors)}
             </Button>
           </>
         }
@@ -36,11 +36,9 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         <div className="space-y-6">
           <RaceFormFields
             campaignId={campaignId}
-            formData={form.formData}
-            setFormData={form.setFormData}
-            mainSkills={form.mainSkills}
+            form={editor.form}
             abilityIssues={race.abilityIssues}
-            onAbilitiesValidityChange={(_, n) => form.setAbilityErrors(n)}
+            onAbilitiesValidityChange={(_, n) => editor.abilities.setErrors(n)}
           />
         </div>
       </HudForm>

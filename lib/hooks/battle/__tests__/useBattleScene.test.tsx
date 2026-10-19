@@ -68,14 +68,14 @@ describe("резерв і очікування рішення ДМ", () => {
   it("DM бачить резерв і awaiting", () => {
     const out = deriveScene(scene(true), "dm-user", null);
 
-    expect(out.reserve.map((x) => x.basicInfo.id)).toEqual(["imp"]);
+    expect(out.roster.reserve.map((x) => x.basicInfo.id)).toEqual(["imp"]);
     expect(out.awaiting).toBe("victory");
   });
 
   it("гравець: резерв порожній, але awaiting відомий", () => {
     const out = deriveScene(scene(false), "u1", null);
 
-    expect(out.reserve).toEqual([]);
+    expect(out.roster.reserve).toEqual([]);
     expect(out.awaiting).toBe("victory");
   });
 
@@ -85,8 +85,8 @@ describe("резерв і очікування рішення ДМ", () => {
   });
 
   it("під час awaiting ні в кого немає свого ходу", () => {
-    expect(deriveScene(scene(false), "u1", null).isMyTurn).toBe(false);
-    expect(deriveScene(scene(true), "dm-user", null).isMyTurn).toBe(false);
+    expect(deriveScene(scene(false), "u1", null).turn.isMyTurn).toBe(false);
+    expect(deriveScene(scene(true), "dm-user", null).turn.isMyTurn).toBe(false);
     expect(deriveTurn(scene(false), "u1", false, null).isMyTurn).toBe(true);
     expect(deriveTurn(scene(false), "u1", false, null, true).isMyTurn).toBe(false);
   });

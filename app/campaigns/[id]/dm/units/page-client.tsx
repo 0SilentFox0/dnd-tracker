@@ -41,13 +41,19 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
               nouns={["юніт", "юніти", "юнітів"]}
               label="Видалити всі юніти"
               description={`Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${list.units.length} юнітів.`}
-              onConfirm={list.removeAll}
+              onConfirm={list.actions.removeAll}
             />
           </>
         }
       >
         {list.units.length > 0 && (
-          <UnitsToolbar query={list.query} onSearch={list.search} chips={list.chips} selected={list.raceFilter} onToggle={list.toggleRace} />
+          <UnitsToolbar
+            query={list.filter.query}
+            onSearch={list.filter.search}
+            chips={list.view.chips}
+            selected={list.filter.raceFilter}
+            onToggle={list.filter.toggleRace}
+          />
         )}
       </HudPageHeader>
 
@@ -55,12 +61,12 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
         <LoadingState rows={6} label="Завантаження юнітів…" />
       ) : list.units.length === 0 ? (
         <EmptyState icon={Skull} title="Ще немає юнітів" description="Створіть першого юніта або імпортуйте їх з файлу." />
-      ) : list.groups.length === 0 ? (
+      ) : list.view.groups.length === 0 ? (
         <p className="text-sm text-hud-muted">Нічого не знайдено</p>
       ) : (
-        <Accordion type="multiple" value={list.open} onValueChange={list.setOpen} className="space-y-2">
-          {list.groups.map((group) => (
-            <UnitGroupAccordion key={group.key} group={group} campaignId={campaignId} onDeleteUnit={list.deleteUnit} onDrop={list.drop} />
+        <Accordion type="multiple" value={list.view.open} onValueChange={list.view.setOpen} className="space-y-2">
+          {list.view.groups.map((group) => (
+            <UnitGroupAccordion key={group.key} group={group} campaignId={campaignId} onDeleteUnit={list.actions.deleteUnit} onDrop={list.actions.drop} />
           ))}
         </Accordion>
       )}

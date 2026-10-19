@@ -24,7 +24,7 @@ function renderDialog(over: Partial<BattleSceneValue> = {}) {
 
   const setOpen = vi.fn();
 
-  const value = { isDM: true, awaiting: "victory", reserve, awaitingDialog: { open: true, setOpen }, actions: { reveal, complete }, ...over } as unknown as BattleSceneValue;
+  const value = { viewer: { isDM: true }, awaiting: "victory", roster: { reserve }, dialogs: { awaitingDm: { open: true, setOpen } }, actions: { reveal, complete }, ...over } as unknown as BattleSceneValue;
 
   render(<BattleSceneContext.Provider value={value}><AwaitingDmDialog /></BattleSceneContext.Provider>);
 
@@ -42,12 +42,12 @@ describe("AwaitingDmDialog", () => {
   });
 
   it("гравцеві не показується", () => {
-    renderDialog({ isDM: false });
+    renderDialog({ viewer: { isDM: false } as BattleSceneValue["viewer"] });
     expect(screen.queryByText("У резерві ще є вороги")).toBeNull();
   });
 
   it("не показується, коли діалог закрито", () => {
-    renderDialog({ awaitingDialog: { open: false, setOpen: vi.fn() } });
+    renderDialog({ dialogs: { awaitingDm: { open: false, setOpen: vi.fn() }, resultScreen: { open: false, setOpen: vi.fn() } } });
     expect(screen.queryByText("У резерві ще є вороги")).toBeNull();
   });
 

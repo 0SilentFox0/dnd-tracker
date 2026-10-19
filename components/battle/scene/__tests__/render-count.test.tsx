@@ -161,12 +161,12 @@ describe("рендери на атаку", () => {
     });
 
     await act(async () => {
-      probe.scene?.showResult({ kind: "hit", targetName: "gob1", damage: 7, downed: false, d20: 15 });
+      probe.scene?.result.show({ kind: "hit", targetName: "gob1", damage: 7, downed: false, d20: 15 });
       await settle();
     });
 
     await act(async () => {
-      probe.scene?.showResult(null);
+      probe.scene?.result.show(null);
       await settle();
     });
 

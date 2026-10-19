@@ -16,34 +16,18 @@ import type { ArtifactForReference, ArtifactSetForReference, SkillForReference, 
 interface ReferenceSectionAccordionProps {
   campaignId: string;
   isDM: boolean;
-  showSkills: boolean;
-  showSpells: boolean;
-  showArtifacts: boolean;
-  skillsEmpty: boolean;
-  spellsEmpty: boolean;
-  artifactsEmpty: boolean;
-  nothingFound: boolean;
-  filteredSkills: SkillForReference[];
-  filteredSpells: SpellForReference[];
-  filteredArtifacts: ArtifactForReference[];
-  artifactSets: ArtifactSetForReference[];
+  shown: { skills: boolean; spells: boolean; artifacts: boolean };
+  items: {
+    skills: SkillForReference[];
+    spells: SpellForReference[];
+    artifacts: ArtifactForReference[];
+    artifactSets: ArtifactSetForReference[];
+  };
 }
 
-export function ReferenceSectionAccordion({
-  campaignId,
-  isDM,
-  showSkills,
-  showSpells,
-  showArtifacts,
-  skillsEmpty,
-  spellsEmpty,
-  artifactsEmpty,
-  nothingFound,
-  filteredSkills,
-  filteredSpells,
-  filteredArtifacts,
-  artifactSets,
-}: ReferenceSectionAccordionProps) {
+export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: ReferenceSectionAccordionProps) {
+  const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets } = items;
+
   const skillsByMain = useMemo(() => {
     const map = new Map<string, SkillForReference[]>();
 
@@ -89,15 +73,9 @@ export function ReferenceSectionAccordion({
     return map;
   }, [filteredArtifacts]);
 
-  const skillsVisible = showSkills && !skillsEmpty;
+  const { skills: skillsVisible, spells: spellsVisible, artifacts: artifactsVisible } = shown;
 
-  const spellsVisible = showSpells && !spellsEmpty;
-
-  const artifactsVisible = showArtifacts && !artifactsEmpty;
-
-  const hasContent = !nothingFound && (skillsVisible || spellsVisible || artifactsVisible);
-
-  if (!hasContent) return null;
+  if (!skillsVisible && !spellsVisible && !artifactsVisible) return null;
 
   const showBoth = [skillsVisible, spellsVisible, artifactsVisible].filter(Boolean).length > 1;
 
@@ -133,11 +111,13 @@ export function ReferenceSectionAccordion({
                 return (
                   <ReferenceGroupSection
                     key={mainName}
-                    accordionValue={mainName}
-                    title={groupDisplayName(mainName, UNGROUPED_LABELS.branch)}
-                    icon={first?.mainSkillIcon ?? null}
-                    accentColor={first?.mainSkillColor ?? null}
-                    count={list.length}
+                    group={{
+                      accordionValue: mainName,
+                      title: groupDisplayName(mainName, UNGROUPED_LABELS.branch),
+                      icon: first?.mainSkillIcon ?? null,
+                      accentColor: first?.mainSkillColor ?? null,
+                      count: list.length,
+                    }}
                   >
                     <Accordion
                       type="multiple"
@@ -186,9 +166,11 @@ export function ReferenceSectionAccordion({
               .map(([groupName, list]) => (
                 <ReferenceGroupSection
                   key={groupName}
-                  accordionValue={groupName}
-                  title={groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup)}
-                  count={list.length}
+                  group={{
+                    accordionValue: groupName,
+                    title: groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup),
+                    count: list.length,
+                  }}
                 >
                   <Accordion
                     type="multiple"
@@ -236,9 +218,11 @@ export function ReferenceSectionAccordion({
               .map(([setName, list]) => (
                 <ReferenceGroupSection
                   key={setName}
-                  accordionValue={setName}
-                  title={groupDisplayName(setName, UNGROUPED_LABELS.artifactSet)}
-                  count={list.length}
+                  group={{
+                    accordionValue: setName,
+                    title: groupDisplayName(setName, UNGROUPED_LABELS.artifactSet),
+                    count: list.length,
+                  }}
                 >
                   <Accordion
                     type="multiple"

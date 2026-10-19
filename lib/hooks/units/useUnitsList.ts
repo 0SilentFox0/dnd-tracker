@@ -43,17 +43,13 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   return {
     units,
-    groups,
-    chips: raceChips(allGroups),
     isLoading,
-    query,
-    search,
-    raceFilter,
-    toggleRace,
-    open,
-    setOpen,
-    deleteUnit: (unitId: string) => deleteOne.mutate(unitId),
-    removeAll,
-    drop: (unitId: string, data: Partial<Unit>) => update.mutate({ unitId, data }),
+    view: { groups, chips: raceChips(allGroups), open, setOpen },
+    filter: { query, search, raceFilter, toggleRace },
+    actions: {
+      deleteUnit: (unitId: string) => deleteOne.mutate(unitId),
+      removeAll,
+      drop: (unitId: string, data: Partial<Unit>) => update.mutate({ unitId, data }),
+    },
   };
 }

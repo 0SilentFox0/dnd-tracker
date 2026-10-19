@@ -9,9 +9,8 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { BattleParticipant } from "@/types/battle";
 
 interface ChangeHpDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   participant: BattleParticipant | null;
+  onClose: () => void;
   onConfirm: (participantId: string, newHp: number) => void;
   isPending?: boolean;
 }
@@ -19,12 +18,12 @@ interface ChangeHpDialogProps {
 function ChangeHpFormInner({
   participant,
   onConfirm,
-  onOpenChange,
+  onClose,
   isPending,
 }: {
   participant: BattleParticipant;
   onConfirm: (participantId: string, newHp: number) => void;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   isPending?: boolean;
 }) {
   const [value, setValue] = useState(() =>
@@ -46,7 +45,7 @@ function ChangeHpFormInner({
       participant.basicInfo.id,
       Math.min(num, participant.combatStats.maxHp),
     );
-    onOpenChange(false);
+    onClose();
   };
 
   return (
@@ -64,7 +63,7 @@ function ChangeHpFormInner({
         />
       </div>
       <ConfirmCancelFooter
-        onCancel={() => onOpenChange(false)}
+        onCancel={onClose}
         confirmLabel="Зберегти"
         onConfirm={handleSubmit}
         confirmDisabled={!isValid}
@@ -76,9 +75,8 @@ function ChangeHpFormInner({
 }
 
 export function ChangeHpDialog({
-  open,
-  onOpenChange,
   participant,
+  onClose,
   onConfirm,
   isPending,
 }: ChangeHpDialogProps) {
@@ -86,8 +84,8 @@ export function ChangeHpDialog({
 
   return (
     <ResponsiveDialog
-      open={open}
-      onOpenChange={onOpenChange}
+      open
+      onOpenChange={(open) => !open && onClose()}
       size="md"
       hud
       title="Змінити HP"
@@ -102,7 +100,7 @@ export function ChangeHpDialog({
         key={participant.basicInfo.id}
         participant={participant}
         onConfirm={onConfirm}
-        onOpenChange={onOpenChange}
+        onClose={onClose}
         isPending={isPending}
       />
     </ResponsiveDialog>

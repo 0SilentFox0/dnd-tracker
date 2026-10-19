@@ -12,47 +12,21 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useArtifactSetForm } from "@/lib/hooks/artifact-sets";
+import { type ArtifactSetFormInitial, useArtifactSetForm } from "@/lib/hooks/artifact-sets";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
-import type { Ability } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactSetFormProps {
   campaignId: string;
   setId?: string;
-  initialName?: string;
-  initialDescription?: string | null;
-  initialIcon?: string | null;
-  initialSetBonus?: { name?: string; description?: string };
-  initialAbilities?: Ability[];
-  initialAbilityIssues?: ConversionIssue[];
-  initialArtifactIds?: string[];
+  initial?: ArtifactSetFormInitial & { abilityIssues?: ConversionIssue[] };
 }
 
-export function ArtifactSetForm({
-  campaignId,
-  setId,
-  initialName = "",
-  initialDescription = "",
-  initialIcon = "",
-  initialSetBonus = {},
-  initialAbilities = [],
-  initialAbilityIssues = [],
-  initialArtifactIds = [],
-}: ArtifactSetFormProps) {
-  const form = useArtifactSetForm({
-    campaignId,
-    setId,
-    initial: {
-      name: initialName,
-      description: initialDescription,
-      icon: initialIcon,
-      setBonus: initialSetBonus,
-      abilities: initialAbilities,
-      artifactIds: initialArtifactIds,
-    },
-  });
+export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSetFormProps) {
+  const editor = useArtifactSetForm({ campaignId, setId, initial });
 
-  const { fields, setField } = form;
+  const abilityIssues = initial.abilityIssues ?? [];
+
+  const { data, set } = editor.form;
 
   const tabs: HudTab<ArtifactSetFormTabId>[] = [
     {
@@ -64,8 +38,8 @@ export function ArtifactSetForm({
             <Label htmlFor="set-name">Назва сету *</Label>
             <Input
               id="set-name"
-              value={fields.name}
-              onChange={(e) => setField("name", e.target.value)}
+              value={data.name}
+              onChange={(e) => set("name", e.target.value)}
               required
               maxLength={120}
               placeholder="Наприклад, Спадщина дракона"
@@ -76,15 +50,15 @@ export function ArtifactSetForm({
             <Label htmlFor="set-desc">Опис (для довідки)</Label>
             <Textarea
               id="set-desc"
-              value={fields.description}
-              onChange={(e) => setField("description", e.target.value)}
+              value={data.description}
+              onChange={(e) => set("description", e.target.value)}
               rows={2}
               placeholder="Коротко про призначення сету"
             />
           </div>
 
           <div className="space-y-2">
-            <ImageUpload value={fields.icon} onChange={(v) => setField("icon", v)} label="Іконка для бою" fallbackText={fields.name} />
+            <ImageUpload value={data.icon} onChange={(v) => set("icon", v)} label="Іконка для бою" fallbackText={data.name} />
             <p className="text-xs text-muted-foreground">
               Показується біля портрета в битві при повному сеті. Завантажений файл
               зберігається в сховищі кампанії (як іконки артефактів), у базі лишається
@@ -95,11 +69,11 @@ export function ArtifactSetForm({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="set-bonus-name">Назва бонусу</Label>
-              <Input id="set-bonus-name" value={fields.bonusName} onChange={(e) => setField("bonusName", e.target.value)} placeholder="Наприклад, Кров дракона" />
+              <Input id="set-bonus-name" value={data.bonusName} onChange={(e) => set("bonusName", e.target.value)} placeholder="Наприклад, Кров дракона" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="set-bonus-desc">Опис бонусу</Label>
-              <Textarea id="set-bonus-desc" value={fields.bonusDescription} onChange={(e) => setField("bonusDescription", e.target.value)} rows={2} />
+              <Textarea id="set-bonus-desc" value={data.bonusDescription} onChange={(e) => set("bonusDescription", e.target.value)} rows={2} />
             </div>
           </div>
         </div>
@@ -108,19 +82,19 @@ export function ArtifactSetForm({
     {
       id: ARTIFACT_SET_FORM_TAB.members,
       label: "Артефакти",
-      content: <ArtifactSetMembersPicker artifacts={form.selectableArtifacts} selectedIds={form.selectedIds} onToggle={form.toggleArtifact} />,
+      content: <ArtifactSetMembersPicker artifacts={editor.members.selectable} selectedIds={editor.members.selectedIds} onToggle={editor.members.toggle} />,
     },
     {
       id: ARTIFACT_SET_FORM_TAB.abilities,
       label: "Вміння",
-      invalid: form.abilityErrors > 0 || initialAbilityIssues.length > 0,
+      invalid: editor.abilities.errors > 0 || abilityIssues.length > 0,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
-          value={fields.abilities}
-          onChange={(a) => setField("abilities", a)}
-          issues={initialAbilityIssues}
-          onValidityChange={(_, n) => form.setAbilityErrors(n)}
+          value={data.abilities}
+          onChange={(a) => set("abilities", a)}
+          issues={abilityIssues}
+          onValidityChange={(_, n) => editor.abilities.setErrors(n)}
         />
       ),
     },
@@ -128,27 +102,27 @@ export function ArtifactSetForm({
 
   return (
     <>
-      {form.error && (
+      {editor.status.error && (
         <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {form.error}
+          {editor.status.error}
         </p>
       )}
       <HudForm
         id="artifact-set-form"
-        onSubmit={form.submit}
+        onSubmit={editor.actions.submit}
         tabs={tabs}
         actions={
           <>
             {setId && (
-              <Button type="button" variant="destructive" disabled={form.isBusy} onClick={() => void form.remove()}>
+              <Button type="button" variant="destructive" disabled={editor.status.isBusy} onClick={() => void editor.actions.remove()}>
                 Видалити сет
               </Button>
             )}
             <Button type="button" variant="outline" asChild>
               <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>Скасувати</Link>
             </Button>
-            <Button type="submit" disabled={form.isBusy || !fields.name.trim() || !form.abilitiesValid}>
-              {form.isBusy ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", form.abilityErrors)}
+            <Button type="submit" disabled={editor.status.isBusy || !data.name.trim() || !editor.abilities.valid}>
+              {editor.status.isBusy ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", editor.abilities.errors)}
             </Button>
           </>
         }

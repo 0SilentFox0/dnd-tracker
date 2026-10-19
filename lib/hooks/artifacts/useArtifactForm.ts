@@ -56,5 +56,10 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
       ? confirm({ title: "Ви впевнені, що хочете видалити цей артефакт?", confirmLabel: "Видалити", destructive: true, onConfirm: onDelete })
       : Promise.resolve(false);
 
-  return { fields, setField, abilityErrors, setAbilityErrors, abilitiesValid, isSaving, isBusy: isSaving, error, submit, remove };
+  return {
+    form: { data: fields, set: setField },
+    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilitiesValid },
+    status: { isSaving, isBusy: isSaving, error },
+    actions: { submit, remove },
+  };
 }

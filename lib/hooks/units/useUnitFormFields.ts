@@ -26,7 +26,11 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
     setFormData((prev) => ({ ...prev, ...updates }));
   };
 
-  return { races, race, spells, formData, setFormData, change, dirty, abilityErrors, setAbilityErrors, abilitiesValid: abilityErrors === 0 };
+  return {
+    form: { data: formData, set: setFormData, change, dirty },
+    options: { races, race, spells },
+    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilityErrors === 0 },
+  };
 }
 
 export type UnitFormFieldsState = ReturnType<typeof useUnitFormFields>;

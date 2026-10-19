@@ -13,7 +13,7 @@ function Harness() {
 
   return (
     <QueryClientProvider client={new QueryClient()}>
-      <RaceFormFields campaignId="c1" formData={data} setFormData={setData} mainSkills={[]} />
+      <RaceFormFields campaignId="c1" form={{ data, set: setData }} />
       <output data-testid="n">{data.abilities.length}</output>
       <output data-testid="icon">{data.icon}</output>
       <output data-testid="color">{data.color}</output>

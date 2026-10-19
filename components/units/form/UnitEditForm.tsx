@@ -10,29 +10,29 @@ import { UnitFormError, unitFormTabs } from "@/components/units/form/UnitFormFie
 import { useUnitEditForm } from "@/lib/hooks/units";
 
 export function UnitEditForm({ campaignId: id, unitId }: { campaignId: string; unitId: string }) {
-  const form = useUnitEditForm(id, unitId);
+  const editor = useUnitEditForm(id, unitId);
 
   return (
-    <HudFormPage title={`Редагувати юніта: ${form.formData.name ?? ""}`} aside="Оновіть інформацію про юніта">
-      <QueryState query={form.query} loading={<LoadingState rows={8} label="Завантаження юніта…" />}>
+    <HudFormPage title={`Редагувати юніта: ${editor.form.data.name ?? ""}`} aside="Оновіть інформацію про юніта">
+      <QueryState query={editor.query} loading={<LoadingState rows={8} label="Завантаження юніта…" />}>
         {(unit) => (
           <>
-            <UnitFormError error={form.error} />
+            <UnitFormError error={editor.status.error} />
             <HudForm
               key={unitId}
               id="unit-form"
-              onSubmit={form.submit}
-              tabs={unitFormTabs({ campaignId: id, form, abilityIssues: unit.abilityIssues })}
+              onSubmit={editor.actions.submit}
+              tabs={unitFormTabs({ campaignId: id, editor, abilityIssues: unit.abilityIssues })}
               actions={
                 <>
-                  <Button type="button" variant="destructive" onClick={() => void form.remove()} disabled={form.isDeleting}>
+                  <Button type="button" variant="destructive" onClick={() => void editor.actions.remove()} disabled={editor.status.isDeleting}>
                     Видалити
                   </Button>
                   <Button type="button" variant="outline" asChild>
-                    <Link href={form.listHref}>Скасувати</Link>
+                    <Link href={editor.listHref}>Скасувати</Link>
                   </Button>
-                  <Button type="submit" disabled={form.isSaving || !form.abilitiesValid}>
-                    {form.isSaving ? "Збереження..." : withAbilityErrors("Зберегти зміни", form.abilityErrors)}
+                  <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
+                    {editor.status.isSaving ? "Збереження..." : withAbilityErrors("Зберегти зміни", editor.abilities.errors)}
                   </Button>
                 </>
               }

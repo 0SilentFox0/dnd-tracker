@@ -92,7 +92,7 @@ export function SpellBook({ book }: { book: Book }) {
     <>
     {aiming && selected && <SpellAimPanel book={book} spellName={selected.name} />}
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
-      <SpellBookPages byLevel={byLevel} slotOf={view.slotLeft} level={state.level} pickedId={state.pick?.spellId ?? null} wide={wide} showDetail={showDetail} onLevel={actions.setLevel} onPick={actions.pick} detail={detailPage || null} formulaOf={view.formulaOf} />
+      <SpellBookPages byLevel={byLevel} page={{ level: state.level, slotOf: view.slotLeft, onLevel: actions.setLevel }} pick={{ pickedId: state.pick?.spellId ?? null, onPick: actions.pick, formulaOf: view.formulaOf }} layout={{ wide, showDetail }} detail={detailPage || null} />
       {showDetail && !wide && <button type="button" onClick={actions.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
     </>

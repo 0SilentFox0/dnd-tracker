@@ -29,7 +29,7 @@ const H3 = ({ color, children }: { color: string; children: React.ReactNode }) =
 );
 
 function BattleColumns() {
-  const { allies, enemies } = useBattleScene();
+  const { roster: { allies, enemies } } = useBattleScene();
 
   return (
     <>
@@ -40,7 +40,7 @@ function BattleColumns() {
 }
 
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const { battle, battleId, awaiting, hero, isMyTurn, isDM, selectedId, select, log, intents } = useBattleScene();
+  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, selectedId, select, log, intents } = useBattleScene();
 
   const [storedMode, setViewMode] = useBattleViewMode(battleId);
 

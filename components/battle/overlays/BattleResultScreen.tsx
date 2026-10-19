@@ -44,7 +44,7 @@ function HeroCard({ hero }: { hero: BattleSummaryHero }) {
 }
 
 export function BattleResultScreen() {
-  const { campaignId, battleId, battle, isDM, resultScreen } = useBattleScene();
+  const { campaignId, battleId, battle, viewer: { isDM }, dialogs: { resultScreen } } = useBattleScene();
 
   const summary = useBattleSummary(campaignId, battleId, resultScreen.open);
 

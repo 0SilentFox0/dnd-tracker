@@ -297,7 +297,7 @@ describe("BattleMap", () => {
   it("showBlocked tints blocked cells without a stroke; default stays transparent", () => {
     const m = { ...square, blocked: ["1:1"] };
 
-    const shown = render(<BattleMap map={m} participants={[]} showBlocked />);
+    const shown = render(<BattleMap map={m} participants={[]} editing={{ showBlocked: true }} />);
 
     const cellEl = shown.container.querySelector('polygon[data-fx-cell="1:1"]') as SVGPolygonElement;
 
@@ -328,7 +328,7 @@ describe("BattleMap — terrain stroke", () => {
   function setup(props: Partial<Parameters<typeof BattleMap>[0]> = {}) {
     const onStroke = vi.fn();
 
-    const utils = render(<BattleMap map={square} participants={people} actions={{ onStroke }} strokeTool {...props} />);
+    const utils = render(<BattleMap map={square} participants={people} actions={{ onStroke }} editing={{ strokeTool: true }} {...props} />);
 
     const svg = (utils.container.querySelector("polygon") as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
 
@@ -403,7 +403,7 @@ describe("BattleMap — terrain stroke", () => {
     down("0:0", 50, 50);
     move(250, 50);
     rerender(<BattleMap map={square} participants={people} actions={{ onStroke }} />);
-    rerender(<BattleMap map={square} participants={people} actions={{ onStroke }} strokeTool />);
+    rerender(<BattleMap map={square} participants={people} actions={{ onStroke }} editing={{ strokeTool: true }} />);
 
     expect(container.querySelectorAll("[data-stroke]")).toHaveLength(0);
   });

@@ -6,20 +6,20 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 
 export function AwaitingDmDialog() {
-  const { awaiting, reserve, actions, isDM, awaitingDialog } = useBattleScene();
+  const { awaiting, roster, actions, viewer, dialogs } = useBattleScene();
 
-  if (!isDM || !awaiting || !awaitingDialog.open) return null;
+  if (!viewer.isDM || !awaiting || !dialogs.awaitingDm.open) return null;
 
   const side = awaiting === "victory" ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 
-  const waiting = reserve.filter((p) => p.basicInfo.side === side);
+  const waiting = roster.reserve.filter((p) => p.basicInfo.side === side);
 
   const busy = actions.reveal.isPending || actions.complete.isPending;
 
   return (
     <ResponsiveDialog
       open
-      onOpenChange={() => awaitingDialog.setOpen(false)}
+      onOpenChange={() => dialogs.awaitingDm.setOpen(false)}
       size="sm"
       hud
       title={awaiting === "victory" ? "У резерві ще є вороги" : "У резерві ще є союзники"}

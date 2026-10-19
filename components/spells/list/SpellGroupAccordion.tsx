@@ -4,7 +4,7 @@ import { Edit, X } from "lucide-react";
 
 import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
 import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
-import { SpellLevelAccordion } from "@/components/spells/list/SpellLevelAccordion";
+import { type SpellGroupItemActions, SpellLevelAccordion } from "@/components/spells/list/SpellLevelAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { groupDisplayName, isUngroupedKey, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
@@ -17,8 +17,7 @@ interface SpellGroupAccordionProps {
   levels: [string, Spell[]][];
   campaignId: string;
   spellGroups: SpellGroup[];
-  onRemoveSpellFromGroup: (spellId: string) => void;
-  onMoveSpellToGroup: (spellId: string, groupId: string | null) => void;
+  spellActions: SpellGroupItemActions;
 }
 
 export function SpellGroupAccordion({
@@ -26,8 +25,7 @@ export function SpellGroupAccordion({
   levels,
   campaignId,
   spellGroups,
-  onRemoveSpellFromGroup,
-  onMoveSpellToGroup,
+  spellActions,
 }: SpellGroupAccordionProps) {
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
@@ -78,8 +76,7 @@ export function SpellGroupAccordion({
                 spells={levelSpells}
                 campaignId={campaignId}
                 spellGroups={spellGroups}
-                onRemoveSpellFromGroup={onRemoveSpellFromGroup}
-                onMoveSpellToGroup={onMoveSpellToGroup}
+                actions={spellActions}
               />
             );
           })}
@@ -87,14 +84,15 @@ export function SpellGroupAccordion({
       </GroupAccordionItem>
 
       <RenameGroupDialog
-        open={actions.dialogs.rename.open}
-        onOpenChange={actions.dialogs.rename.setOpen}
         groupName={groupName}
-        newGroupName={actions.state.newGroupName}
-        onNewGroupNameChange={actions.state.setNewGroupName}
-        onConfirm={actions.handlers.handleRenameGroup}
-        onCancel={actions.handlers.closeRenameDialog}
-        isRenaming={actions.pending.isRenaming}
+        dialog={{ open: actions.dialogs.rename.open, onOpenChange: actions.dialogs.rename.setOpen }}
+        rename={{
+          value: actions.state.newGroupName,
+          onChange: actions.state.setNewGroupName,
+          onConfirm: actions.handlers.handleRenameGroup,
+          onCancel: actions.handlers.closeRenameDialog,
+          isPending: actions.pending.isRenaming,
+        }}
       />
 
     </>

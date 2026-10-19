@@ -120,8 +120,7 @@ export function DMSkillsPageClient({
                 campaignId={campaignId}
                 spellGroups={[]}
                 mainSkillColor={mainSkill?.color}
-                onDeleteSkill={handleDeleteSkill}
-                onDuplicateSkill={handleDuplicateSkill}
+                actions={{ onDelete: handleDeleteSkill, onDuplicate: handleDuplicateSkill }}
               />
             );
           })}

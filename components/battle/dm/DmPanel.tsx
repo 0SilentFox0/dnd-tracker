@@ -12,7 +12,7 @@ import { useBattlePageDialogs, useBattleScene, useSpellBook } from "@/lib/hooks/
 import type { BattleParticipant } from "@/types/battle";
 
 export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (open: boolean) => void } }) {
-  const { battle, campaignId, dmControlledId, setDmControlledId, actions } = useBattleScene();
+  const { battle, campaignId, actions } = useBattleScene();
 
   const dialogs = useBattlePageDialogs();
 
@@ -24,30 +24,11 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
 
   return (
     <>
-      <DmQuickActionsPanel
-        battle={battle}
-        isDM
-        panel={panel}
-        onOpenLog={dialogs.openLog}
-        onAddParticipant={dialogs.openAddParticipant}
-        onChangeHp={dialogs.openHpDialog}
-        onRemoveFromBattle={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } })}
-        onKill={(p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } })}
-        onScaleUnits={(direction) => actions.scaleUnits.mutate({ direction })}
-        onRefreshSources={() => actions.refreshSources.mutate({})}
-        refreshPending={actions.refreshSources.isPending}
-        onCompleteBattle={(result) => actions.complete.mutate({ result })}
-        onTakeControl={(p) => setDmControlledId(p?.basicInfo.id ?? null)}
-        dmControlledParticipantId={dmControlledId}
-        logPanelOpen={dialogs.logPanelOpen}
-        setLogPanelOpen={dialogs.setLogPanelOpen}
-        onRollback={(actionIndex) => actions.rollback.mutate({ actionIndex })}
-        onOpenCastSpell={() => setPickCaster(true)}
-      />
-      <AddParticipantDialog open={dialogs.addParticipantDialogOpen} onOpenChange={dialogs.setAddParticipantDialogOpen} campaignId={campaignId} isPending={actions.addParticipant.isPending}
-        onAdd={(data) => actions.addParticipant.mutate(data, { onSuccess: () => dialogs.setAddParticipantDialogOpen(false) })} />
-      <ChangeHpDialog open={dialogs.hpDialogParticipant !== null} onOpenChange={(o) => !o && dialogs.closeHpDialog()} participant={dialogs.hpDialogParticipant} isPending={actions.updateParticipant.isPending}
-        onConfirm={(participantId, newHp) => actions.updateParticipant.mutate({ participantId, data: { currentHp: newHp } }, { onSuccess: dialogs.closeHpDialog })} />
+      <DmQuickActionsPanel dialogs={dialogs} panel={panel} onOpenCastSpell={() => setPickCaster(true)} />
+      <AddParticipantDialog open={dialogs.addParticipant.open} onOpenChange={dialogs.addParticipant.setOpen} campaignId={campaignId} isPending={actions.addParticipant.isPending}
+        onAdd={(data) => actions.addParticipant.mutate(data, { onSuccess: () => dialogs.addParticipant.setOpen(false) })} />
+      <ChangeHpDialog participant={dialogs.hp.target} onClose={dialogs.hp.close} isPending={actions.updateParticipant.isPending}
+        onConfirm={(participantId, newHp) => actions.updateParticipant.mutate({ participantId, data: { currentHp: newHp } }, { onSuccess: dialogs.hp.close })} />
       <DmCasterPickerDialog open={pickCaster} onOpenChange={setPickCaster} participants={battle.initiativeOrder}
         onSelectCaster={(p) => { setCaster(p); setPickCaster(false); book.actions.open(undefined, p); }} />
       <AwaitingDmDialog />

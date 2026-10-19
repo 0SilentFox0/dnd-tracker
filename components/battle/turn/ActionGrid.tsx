@@ -26,14 +26,14 @@ export function ActionGrid({ turn, pending, available, actions }: {
   return (
     <>
       <div className="grid grid-cols-2 gap-2 pt-3">
-        <Tile icon={Swords} label="Атака" used={turn.actionUsed || turn.skipped || pending} primary onClick={actions.attack} />
-        <Tile icon={BookOpen} label="Магія" used={(turn.actionUsed && !turn.bonusSpellReady) || turn.skipped || !available.magic || pending} onClick={actions.magic} />
-        {available.ability && <Tile icon={Zap} label="Вміння" used={turn.actionUsed || turn.skipped || pending} onClick={actions.ability} />}
-        <Tile icon={Sparkles} label="Бонус" used={!turn.bonusAvailable || turn.skipped || !available.bonus || pending} onClick={actions.bonus} />
+        <Tile icon={Swords} label="Атака" used={turn.status.actionUsed || turn.status.skipped || pending} primary onClick={actions.attack} />
+        <Tile icon={BookOpen} label="Магія" used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />
+        {available.ability && <Tile icon={Zap} label="Вміння" used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}
+        <Tile icon={Sparkles} label="Бонус" used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />
         {turn.moraleResult && <Tile icon={Hourglass} label={MORALE_LABEL[turn.moraleResult]} used />}
       </div>
       {turn.phase !== "countdown" && (
-        <button type="button" disabled={pending} onClick={() => void turn.endTurn()} className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-[#b8ab95] disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => void turn.actions.endTurn()} className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-[#b8ab95] disabled:opacity-50">
           Завершити хід
         </button>
       )}

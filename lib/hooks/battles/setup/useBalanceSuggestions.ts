@@ -3,29 +3,23 @@
 import { useCallback, useState } from "react";
 
 import { useBattleBalance } from "../useBattleSetupQueries";
+import type { AllyParticipants } from "./useBattleParticipants";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { SuggestedEnemy } from "@/types/battle-setup";
 
-interface AllyParticipants {
-  characterIds: string[];
-  units: { id: string; quantity: number }[];
-}
-
 interface UseBalanceSuggestionsParams {
   campaignId: string;
   participants: BattlePreparationParticipant[];
-  allyParticipants: AllyParticipants;
-  hasAllies: boolean;
+  allies: { value: AllyParticipants; exists: boolean };
   setParticipants: React.Dispatch<React.SetStateAction<BattlePreparationParticipant[]>>;
 }
 
 export function useBalanceSuggestions({
   participants,
   campaignId,
-  allyParticipants,
-  hasAllies,
+  allies,
   setParticipants,
 }: UseBalanceSuggestionsParams) {
   const balance = useBattleBalance(campaignId);
@@ -39,12 +33,12 @@ export function useBalanceSuggestions({
   const [balanceRace, setBalanceRace] = useState("");
 
   const suggestEnemies = useCallback(() => {
-    if (!hasAllies) return;
+    if (!allies.exists) return;
 
     setSuggestedEnemies([]);
     setSuggestDone(false);
     requestBalance(
-      { allyParticipants, suggest: true, raceId: balanceRace || undefined },
+      { allyParticipants: allies.value, suggest: true, raceId: balanceRace || undefined },
       {
         onSuccess: (data) => {
           setSuggestedEnemies((data.suggestedEnemies ?? []) as SuggestedEnemy[]);
@@ -52,7 +46,7 @@ export function useBalanceSuggestions({
         },
       },
     );
-  }, [requestBalance, allyParticipants, hasAllies, balanceRace]);
+  }, [requestBalance, allies, balanceRace]);
 
   const applySuggestedEnemies = useCallback(() => {
     const allies = participants.filter((p) => p.side === ParticipantSide.ALLY);
@@ -74,12 +68,12 @@ export function useBalanceSuggestions({
   }, [participants, suggestedEnemies, setParticipants]);
 
   return {
-    balanceLoading: balance.isPending,
-    suggestedEnemies,
-    suggestDone,
-    balanceRace,
-    setBalanceRace,
-    suggestEnemies,
-    applySuggestedEnemies,
+    loading: balance.isPending,
+    suggested: suggestedEnemies,
+    done: suggestDone,
+    race: balanceRace,
+    actions: { setRace: setBalanceRace, suggest: suggestEnemies, apply: applySuggestedEnemies },
   };
 }
+
+export type BalanceSuggestions = ReturnType<typeof useBalanceSuggestions>;

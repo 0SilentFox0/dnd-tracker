@@ -25,10 +25,10 @@ describe("useBalanceSuggestions", () => {
 
     const setParticipants = vi.fn();
 
-    const { result } = renderHook(() => useBalanceSuggestions({ campaignId: "c", participants, allyParticipants: { characterIds: ["h1"], units: [] }, hasAllies: true, setParticipants }));
+    const { result } = renderHook(() => useBalanceSuggestions({ campaignId: "c", participants, allies: { value: { characterIds: ["h1"], units: [] }, exists: true }, setParticipants }));
 
-    act(() => result.current.suggestEnemies());
-    act(() => result.current.applySuggestedEnemies());
+    act(() => result.current.actions.suggest());
+    act(() => result.current.actions.apply());
 
     expect(setParticipants).toHaveBeenCalledWith([
       participants[0],

@@ -43,13 +43,14 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     <HudFormPage title="Створити нове заклинання" aside="Додайте інформацію про нове заклинання">
       <SpellFormBody
         campaignId={id}
-        formData={formData}
-        setFormData={setFormData}
+        form={{ data: formData, set: setFormData }}
         spellGroups={spellGroups}
-        onSubmit={handleSubmit}
-        isSubmitting={createSpellMutation.isPending}
-        submitLabel="Створити заклинання"
-        error={(createSpellMutation.error as Error)?.message ?? null}
+        submit={{
+          onSubmit: handleSubmit,
+          isPending: createSpellMutation.isPending,
+          label: "Створити заклинання",
+          error: (createSpellMutation.error as Error)?.message ?? null,
+        }}
       />
     </HudFormPage>
   );

@@ -45,37 +45,19 @@ export interface ArtifactFormProps {
   artifactSets: ArtifactSetOption[];
   initial: ArtifactFormInitial;
   mode: "create" | "edit";
-  title: string;
-  description?: string;
-  submitLabel: string;
-  submitLabelSaving: string;
-  onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
-  onDelete?: () => Promise<void>;
+  labels: { title: string; description?: string; submit: string; saving: string; iconHint: React.ReactNode };
+  actions: { onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>; onDelete?: () => Promise<void> };
   cancelHref: string;
-  iconHint: React.ReactNode;
 }
 
-export function ArtifactForm({
-  campaignId,
-  artifactSets,
-  initial,
-  mode,
-  title,
-  description: cardDescription,
-  submitLabel,
-  submitLabelSaving,
-  onSubmit,
-  onDelete,
-  cancelHref,
-  iconHint,
-}: ArtifactFormProps) {
+export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, actions, cancelHref }: ArtifactFormProps) {
   const router = useRouter();
 
-  const form = useArtifactForm({ initial, mode, onSubmit, onDelete });
+  const editor = useArtifactForm({ initial, mode, ...actions });
 
-  const { fields, setField } = form;
+  const { data, set } = editor.form;
 
-  const hasWeapon = isWeaponSlot(fields.slot);
+  const hasWeapon = isWeaponSlot(data.slot);
 
   const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
 
@@ -93,8 +75,8 @@ export function ArtifactForm({
             <LabeledInput
               id="artifact-name"
               label="Назва"
-              value={fields.name}
-              onChange={(e) => setField("name", e.target.value)}
+              value={data.name}
+              onChange={(e) => set("name", e.target.value)}
               placeholder="Наприклад: Кільце Сар Ісси"
               required
             />
@@ -102,8 +84,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-rarity">Рідкість</Label>
               <SelectField
                 id="artifact-rarity"
-                value={fields.rarity}
-                onValueChange={(v) => setField("rarity", v)}
+                value={data.rarity}
+                onValueChange={(v) => set("rarity", v)}
                 placeholder="Виберіть рідкість"
                 options={ARTIFACT_RARITY_OPTIONS.map((opt) => ({
                   value: opt.value,
@@ -115,8 +97,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-slot">Слот</Label>
               <SelectField
                 id="artifact-slot"
-                value={fields.slot}
-                onValueChange={(v) => setField("slot", v)}
+                value={data.slot}
+                onValueChange={(v) => set("slot", v)}
                 placeholder="Виберіть слот"
                 options={ARTIFACT_SLOT_OPTIONS.map((opt) => ({
                   value: opt.value,
@@ -128,8 +110,8 @@ export function ArtifactForm({
               <Label htmlFor="artifact-set">Сет</Label>
               <SelectField
                 id="artifact-set"
-                value={fields.setId || ""}
-                onValueChange={(value) => setField("setId", value || null)}
+                value={data.setId || ""}
+                onValueChange={(value) => set("setId", value || null)}
                 placeholder="Без сету"
                 options={artifactSets.map((set) => ({
                   value: set.id,
@@ -145,16 +127,16 @@ export function ArtifactForm({
             <Label htmlFor="artifact-description">Опис</Label>
             <Textarea
               id="artifact-description"
-              value={fields.description}
-              onChange={(e) => setField("description", e.target.value)}
+              value={data.description}
+              onChange={(e) => set("description", e.target.value)}
               placeholder="Короткий опис артефакту"
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={fields.icon} onChange={(v) => setField("icon", v)} fallbackText={fields.name} />
-            <p className="text-xs text-muted-foreground">{iconHint}</p>
+            <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={data.icon} onChange={(v) => set("icon", v)} fallbackText={data.name} />
+            <p className="text-xs text-muted-foreground">{labels.iconHint}</p>
           </div>
         </div>
       ),
@@ -164,51 +146,51 @@ export function ArtifactForm({
           {
             id: ARTIFACT_FORM_TAB.weapon,
             label: "Зброя",
-            content: <ArtifactWeaponFields value={fields.weapon} onChange={(w) => setField("weapon", w)} />,
+            content: <ArtifactWeaponFields value={data.weapon} onChange={(w) => set("weapon", w)} />,
           },
         ]
       : []),
     {
       id: ARTIFACT_FORM_TAB.abilities,
       label: "Вміння",
-      invalid: form.abilityErrors > 0 || initial.abilityIssues.length > 0,
+      invalid: editor.abilities.errors > 0 || initial.abilityIssues.length > 0,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
-          value={fields.abilities}
-          onChange={(a) => setField("abilities", a)}
+          value={data.abilities}
+          onChange={(a) => set("abilities", a)}
           issues={initial.abilityIssues}
-          onValidityChange={(_, n) => form.setAbilityErrors(n)}
+          onValidityChange={(_, n) => editor.abilities.setErrors(n)}
         />
       ),
     },
   ];
 
   return (
-    <HudFormPage title={title} aside={cardDescription}>
-      {form.error && (
+    <HudFormPage title={labels.title} aside={labels.description}>
+      {editor.status.error && (
         <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {form.error}
+          {editor.status.error}
         </p>
       )}
       <HudForm
         id="artifact-form"
-        onSubmit={form.submit}
+        onSubmit={editor.actions.submit}
         tabs={tabs}
         tab={activeTab}
         onTabChange={setTab}
         actions={
           <>
-            {onDelete && (
-              <Button type="button" variant="destructive" onClick={() => void form.remove()} disabled={form.isBusy}>
+            {actions.onDelete && (
+              <Button type="button" variant="destructive" onClick={() => void editor.actions.remove()} disabled={editor.status.isBusy}>
                 Видалити
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={() => router.push(cancelHref)} disabled={form.isBusy}>
+            <Button type="button" variant="outline" onClick={() => router.push(cancelHref)} disabled={editor.status.isBusy}>
               Скасувати
             </Button>
-            <Button type="submit" disabled={form.isBusy || !form.abilitiesValid}>
-              {form.isSaving ? submitLabelSaving : withAbilityErrors(submitLabel, form.abilityErrors)}
+            <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
+              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors)}
             </Button>
           </>
         }

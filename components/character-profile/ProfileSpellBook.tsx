@@ -25,13 +25,9 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
     >
       <SpellBookPages
         byLevel={book.byLevel}
-        slotOf={book.slotOf}
-        level={book.level}
-        pickedId={book.selected?.id ?? null}
-        wide={wide}
-        showDetail={showDetail}
-        onLevel={book.setLevel}
-        onPick={book.pick}
+        page={{ level: book.level, slotOf: book.slotOf, onLevel: book.setLevel }}
+        pick={{ pickedId: book.selected?.id ?? null, onPick: book.pick }}
+        layout={{ wide, showDetail }}
         detail={book.selected && <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6"><SpellDetail spell={book.selected} /></div>}
       />
       {showDetail && !wide && (

@@ -33,6 +33,10 @@ export interface BattleMapProps {
   view?: BattleMapView;
   actions?: BattleMapActions;
   className?: string;
+  editing?: BattleMapEditing;
+}
+
+export interface BattleMapEditing {
   clickableBlocked?: boolean;
   showBlocked?: boolean;
   strokeTool?: boolean;
@@ -235,7 +239,9 @@ interface Stroke {
   cells: Map<string, GridPoint>;
 }
 
-export function BattleMap({ map, participants, view, actions, className, clickableBlocked, showBlocked, strokeTool }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, editing = {} }: BattleMapProps) {
+  const { clickableBlocked, showBlocked, strokeTool } = editing;
+
   const painting = Boolean(strokeTool && actions?.onStroke);
 
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting });

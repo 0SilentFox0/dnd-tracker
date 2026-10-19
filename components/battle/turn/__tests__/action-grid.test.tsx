@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ActionGrid } from "@/components/battle/turn/ActionGrid";
 
 const turn = (skipped: boolean, moraleResult?: "extra" | "skip" | "none") =>
-  ({ phase: "acting", actionUsed: false, bonusAvailable: true, skipped, moraleResult, endTurn: vi.fn(), afterAction: vi.fn(), rollMorale: vi.fn(), stay: vi.fn() }) as never;
+  ({ phase: "acting", moraleResult, status: { actionUsed: false, bonusAvailable: true, skipped }, actions: { endTurn: vi.fn(), afterAction: vi.fn(), rollMorale: vi.fn(), stay: vi.fn() } }) as never;
 
 const props = {
   pending: false,
@@ -24,7 +24,7 @@ describe("ActionGrid", () => {
   });
 
   it("після дії «Магія» лишається доступною, якщо є заклинання за бонусну дію", () => {
-    const used = (bonusSpellReady: boolean) => ({ ...(turn(false) as object), actionUsed: true, bonusSpellReady }) as never;
+    const used = (bonusSpellReady: boolean) => ({ ...(turn(false) as object), status: { actionUsed: true, bonusAvailable: true, skipped: false, bonusSpellReady } }) as never;
 
     render(<ActionGrid turn={used(true)} {...props} />);
     expect((screen.getByRole("button", { name: /Магія/ }) as HTMLButtonElement).disabled).toBe(false);

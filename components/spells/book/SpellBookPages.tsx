@@ -19,18 +19,19 @@ const PAPER = "hud-book relative bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_
 
 export interface SpellBookPagesProps {
   byLevel: Record<number, BookSpell[]>;
-  slotOf: (level: number) => number;
-  level: number;
-  pickedId: string | null;
-  wide: boolean;
-  showDetail: boolean;
-  onLevel: (level: number) => void;
-  onPick: (spell: BookSpell) => void;
+  page: { level: number; slotOf: (level: number) => number; onLevel: (level: number) => void };
+  pick: { pickedId: string | null; onPick: (spell: BookSpell) => void; formulaOf?: (spell: BookSpell) => string };
+  layout: { wide: boolean; showDetail: boolean };
   detail: ReactNode;
-  formulaOf?: (spell: BookSpell) => string;
 }
 
-export function SpellBookPages({ byLevel, slotOf, level, pickedId, wide, showDetail, onLevel, onPick, detail, formulaOf }: SpellBookPagesProps) {
+export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBookPagesProps) {
+  const { level, slotOf, onLevel } = page;
+
+  const { pickedId, onPick, formulaOf } = pick;
+
+  const { wide, showDetail } = layout;
+
   const filter = useSchoolFilter(byLevel, level);
 
   return (

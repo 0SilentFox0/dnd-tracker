@@ -25,56 +25,23 @@ import {
 } from "@/components/ui/select";
 import { artifactRarityLabel } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
-import type { SectionTab } from "@/types/info-reference";
+import type { ReferenceFilters, SectionTab } from "@/types/info-reference";
 
 interface ReferenceSearchBarProps {
-  searchQuery: string;
-  setSearchQuery: (v: string) => void;
-  section: SectionTab;
-  setSection: (v: SectionTab) => void;
-  filtersOpen: boolean;
-  setFiltersOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
-  hasActiveFilters: boolean;
-  clearAllFilters: () => void;
-  mainSkillFilter: string | null;
-  setMainSkillFilter: (v: string | null) => void;
-  spellLevelFilter: number | null;
-  setSpellLevelFilter: (v: number | null) => void;
-  spellGroupFilter: string | null;
-  setSpellGroupFilter: (v: string | null) => void;
-  spellTypeFilter: string | null;
-  setSpellTypeFilter: (v: string | null) => void;
-  mainSkillOptions: string[];
-  spellLevelOptions: number[];
-  spellGroupOptions: string[];
-  spellTypeOptions: string[];
-  artifactRarityFilter: string | null;
-  setArtifactRarityFilter: (v: string | null) => void;
-  artifactSlotFilter: string | null;
-  setArtifactSlotFilter: (v: string | null) => void;
-  artifactSetFilter: string | null;
-  setArtifactSetFilter: (v: string | null) => void;
-  artifactRarityOptions: string[];
-  artifactSlotOptions: { value: string; label: string }[];
-  artifactSetOptions: string[];
-  showSkillsFilter: boolean;
-  showSpellsFilter: boolean;
-  showArtifactsFilter: boolean;
+  filters: ReferenceFilters;
 }
 
-function FilterSelect({
-  label,
-  allLabel,
-  value,
-  onChange,
-  options,
-}: {
+interface FilterSelectProps {
   label: string;
   allLabel: string;
   value: string | null;
   onChange: (v: string | null) => void;
   options: { value: string; label: string }[];
-}) {
+}
+
+function FilterSelect({ label, allLabel, value, onChange, options }: FilterSelectProps) {
+  if (options.length === 0) return null;
+
   return (
     <div className="space-y-1.5 w-full min-w-0">
       <Label className="text-xs text-hud-muted">{label}</Label>
@@ -95,6 +62,81 @@ function FilterSelect({
   );
 }
 
+const asOptions = (values: (string | number)[]) =>
+  values.map((v) => ({ value: String(v), label: String(v) }));
+
+function SkillFilters({ filter }: { filter: ReferenceFilters["skill"] }) {
+  return (
+    <FilterSelect
+      label="Гілка скілу"
+      allLabel="Усі гілки"
+      value={filter.mainSkill.value}
+      onChange={filter.mainSkill.set}
+      options={asOptions(filter.mainSkill.options)}
+    />
+  );
+}
+
+function SpellFilters({ filter }: { filter: ReferenceFilters["spell"] }) {
+  const { level, group, type } = filter;
+
+  return (
+    <>
+      <FilterSelect
+        label="Рівень заклинання"
+        allLabel="Будь-який"
+        value={level.value != null ? String(level.value) : null}
+        onChange={(v) => level.set(v == null ? null : Number(v))}
+        options={asOptions(level.options)}
+      />
+      <FilterSelect
+        label="Група заклинань"
+        allLabel="Усі групи"
+        value={group.value}
+        onChange={group.set}
+        options={asOptions(group.options)}
+      />
+      <FilterSelect
+        label="Тип заклинання"
+        allLabel="Усі типи"
+        value={type.value}
+        onChange={type.set}
+        options={asOptions(type.options)}
+      />
+    </>
+  );
+}
+
+function ArtifactFilters({ filter }: { filter: ReferenceFilters["artifact"] }) {
+  const { rarity, slot, artifactSet } = filter;
+
+  return (
+    <>
+      <FilterSelect
+        label="Рідкість артефакту"
+        allLabel="Будь-яка"
+        value={rarity.value}
+        onChange={rarity.set}
+        options={rarity.options.map((r) => ({ value: r, label: artifactRarityLabel(r) }))}
+      />
+      <FilterSelect
+        label="Слот артефакту"
+        allLabel="Усі слоти"
+        value={slot.value}
+        onChange={slot.set}
+        options={slot.options}
+      />
+      <FilterSelect
+        label="Сет артефакту"
+        allLabel="Усі сети"
+        value={artifactSet.value}
+        onChange={artifactSet.set}
+        options={asOptions(artifactSet.options)}
+      />
+    </>
+  );
+}
+
 const SECTION_TABS: {
   value: SectionTab;
   label: string;
@@ -106,40 +148,9 @@ const SECTION_TABS: {
   { value: "artifacts", label: "Артефакти", icon: Gem },
 ];
 
-export function ReferenceSearchBar({
-  searchQuery,
-  setSearchQuery,
-  section,
-  setSection,
-  filtersOpen,
-  setFiltersOpen,
-  hasActiveFilters,
-  clearAllFilters,
-  mainSkillFilter,
-  setMainSkillFilter,
-  spellLevelFilter,
-  setSpellLevelFilter,
-  spellGroupFilter,
-  setSpellGroupFilter,
-  spellTypeFilter,
-  setSpellTypeFilter,
-  mainSkillOptions,
-  spellLevelOptions,
-  spellGroupOptions,
-  spellTypeOptions,
-  artifactRarityFilter,
-  setArtifactRarityFilter,
-  artifactSlotFilter,
-  setArtifactSlotFilter,
-  artifactSetFilter,
-  setArtifactSetFilter,
-  artifactRarityOptions,
-  artifactSlotOptions,
-  artifactSetOptions,
-  showSkillsFilter,
-  showSpellsFilter,
-  showArtifactsFilter,
-}: ReferenceSearchBarProps) {
+export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
+  const { search, section, panel, hasActive, clearAll, visible } = filters;
+
   return (
     <HudPanel as="div" className="sticky top-0 z-10 bg-[rgba(17,14,11,.97)]">
       <div className="space-y-3">
@@ -148,15 +159,15 @@ export function ReferenceSearchBar({
           <Input
             type="search"
             placeholder="Пошук за назвою, описом, механікою..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={search.value}
+            onChange={(e) => search.set(e.target.value)}
             className="pl-9 min-h-11 md:min-h-10"
             aria-label="Пошук по скілах, заклинаннях та артефактах"
           />
-          {searchQuery && (
+          {search.value && (
             <button
               type="button"
-              onClick={() => setSearchQuery("")}
+              onClick={() => search.set("")}
               className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
               aria-label="Очистити пошук"
             >
@@ -175,36 +186,36 @@ export function ReferenceSearchBar({
                 {label}
               </span>
             ),
-            active: section === value,
-            onSelect: () => setSection(value),
+            active: section.value === value,
+            onSelect: () => section.set(value),
           }))}
         />
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setFiltersOpen((o) => !o)}
+            onClick={() => panel.setOpen((o) => !o)}
             className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold)] md:hidden"
           >
             <Filter className="h-4 w-4" />
             Фільтри
-            {hasActiveFilters && (
+            {hasActive && (
               <Badge variant="secondary" className="text-xs">
                 увімкнено
               </Badge>
             )}
-            {filtersOpen ? (
+            {panel.open ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
               <ChevronDown className="h-4 w-4" />
             )}
           </button>
-          {hasActiveFilters && (
+          {hasActive && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={clearAllFilters}
+              onClick={clearAll}
               className="text-hud-muted hover:text-hud-ink"
             >
               <X className="h-4 w-4 mr-1" />
@@ -216,141 +227,15 @@ export function ReferenceSearchBar({
         <div
           className={cn(
             "grid gap-4 overflow-hidden transition-[grid-template-rows] duration-200 md:grid-rows-[1fr]",
-            filtersOpen
+            panel.open
               ? "grid-rows-[1fr]"
               : "grid-rows-[0fr] md:grid-rows-[1fr]",
           )}
         >
           <div className="min-h-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end">
-            {showSkillsFilter && mainSkillOptions.length > 0 && (
-              <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-hud-muted">
-                  Гілка скілу
-                </Label>
-                <Select
-                  value={mainSkillFilter ?? "all"}
-                  onValueChange={(v) =>
-                    setMainSkillFilter(v === "all" ? null : v)
-                  }
-                >
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue placeholder="Усі гілки" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Усі гілки</SelectItem>
-                    {mainSkillOptions.map((name) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {showSpellsFilter && spellLevelOptions.length > 0 && (
-              <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-hud-muted">
-                  Рівень заклинання
-                </Label>
-                <Select
-                  value={
-                    spellLevelFilter != null ? String(spellLevelFilter) : "all"
-                  }
-                  onValueChange={(v) =>
-                    setSpellLevelFilter(v === "all" ? null : Number(v))
-                  }
-                >
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue placeholder="Будь-який" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Будь-який</SelectItem>
-                    {spellLevelOptions.map((lvl) => (
-                      <SelectItem key={lvl} value={String(lvl)}>
-                        {lvl}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {showSpellsFilter && spellGroupOptions.length > 0 && (
-              <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-hud-muted">
-                  Група заклинань
-                </Label>
-                <Select
-                  value={spellGroupFilter ?? "all"}
-                  onValueChange={(v) =>
-                    setSpellGroupFilter(v === "all" ? null : v)
-                  }
-                >
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue placeholder="Усі групи" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Усі групи</SelectItem>
-                    {spellGroupOptions.map((name) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {showSpellsFilter && spellTypeOptions.length > 0 && (
-              <div className="space-y-1.5 w-full min-w-0">
-                <Label className="text-xs text-hud-muted">
-                  Тип заклинання
-                </Label>
-                <Select
-                  value={spellTypeFilter ?? "all"}
-                  onValueChange={(v) =>
-                    setSpellTypeFilter(v === "all" ? null : v)
-                  }
-                >
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue placeholder="Усі типи" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Усі типи</SelectItem>
-                    {spellTypeOptions.map((name) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {showArtifactsFilter && artifactRarityOptions.length > 0 && (
-              <FilterSelect
-                label="Рідкість артефакту"
-                allLabel="Будь-яка"
-                value={artifactRarityFilter}
-                onChange={setArtifactRarityFilter}
-                options={artifactRarityOptions.map((r) => ({ value: r, label: artifactRarityLabel(r) }))}
-              />
-            )}
-            {showArtifactsFilter && artifactSlotOptions.length > 0 && (
-              <FilterSelect
-                label="Слот артефакту"
-                allLabel="Усі слоти"
-                value={artifactSlotFilter}
-                onChange={setArtifactSlotFilter}
-                options={artifactSlotOptions}
-              />
-            )}
-            {showArtifactsFilter && artifactSetOptions.length > 0 && (
-              <FilterSelect
-                label="Сет артефакту"
-                allLabel="Усі сети"
-                value={artifactSetFilter}
-                onChange={setArtifactSetFilter}
-                options={artifactSetOptions.map((n) => ({ value: n, label: n }))}
-              />
-            )}
+            {visible.skills && <SkillFilters filter={filters.skill} />}
+            {visible.spells && <SpellFilters filter={filters.spell} />}
+            {visible.artifacts && <ArtifactFilters filter={filters.artifact} />}
           </div>
         </div>
       </div>

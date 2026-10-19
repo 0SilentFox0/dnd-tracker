@@ -26,23 +26,17 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const { characters, units, entityStats, loadingData, races } = useNewBattleData(campaignId);
 
-  const participantsBag = useBattleParticipants(initial?.participants);
+  const participants = useBattleParticipants(initial?.participants);
 
   const mapEditor = useBattleMapEditor(initial?.map);
 
-  const form = useBattleForm({ campaignId, battleId, formData, participants: participantsBag.participants, map: mapEditor.value });
+  const form = useBattleForm({ campaignId, battleId, formData, participants: participants.list, map: mapEditor.state.value });
 
-  const balanceBag = useBalanceSuggestions({
-    campaignId,
-    participants: participantsBag.participants,
-    allyParticipants: participantsBag.allyParticipants,
-    hasAllies: participantsBag.hasAllies,
-    setParticipants: participantsBag.setParticipants,
-  });
+  const balance = useBalanceSuggestions({ campaignId, participants: participants.list, allies: participants.allies, setParticipants: participants.setList });
 
-  const enemyRaceId = useMemo(() => sharedEnemyRace(participantsBag.participants, entityStats), [participantsBag.participants, entityStats]);
+  const enemyRaceId = useMemo(() => sharedEnemyRace(participants.list, entityStats), [participants.list, entityStats]);
 
-  const fair = useFairBalance(participantsBag.participants, entityStats, battleId ? enemyRaceId : balanceBag.balanceRace);
+  const fair = useFairBalance(participants.list, entityStats, battleId ? enemyRaceId : balance.race);
 
   const playerCharacters = characters.filter((c) => c.type === CharacterType.PLAYER && c.controlledBy !== null);
 
@@ -51,20 +45,14 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
   return {
     campaignId,
     battleId,
-    loadingData,
-    formData,
-    setFormData,
-    characters,
-    units,
-    races,
-    entityStats,
-    ...participantsBag,
-    ...balanceBag,
-    ...form,
+    loading: loadingData,
+    details: { value: formData, setValue: setFormData },
+    data: { characters, units, races, entityStats, playerCharacters, npcCharacters },
+    participants,
+    balance,
+    form,
     mapEditor,
     fair,
-    playerCharacters,
-    npcCharacters,
   };
 }
 

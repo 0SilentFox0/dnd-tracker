@@ -18,19 +18,16 @@ let loading = false;
 
 vi.mock("@/lib/hooks/skills", () => ({
   useSkillTreeEditor: () => ({
-    loading,
-    races: [{ id: "r", name: "Ельф" }],
-    race: "Ельф",
-    setRace: vi.fn(),
-    raw: loading ? null : raw,
-    tree: loading ? null : normalizeTree({ id: "row", skills: raw }),
-    errors,
-    dirty: true,
-    saving: false,
-    locations: new Map([["o1", [{ kind: "slot", branchId: "attack", circle: "outer", index: 0 }]]]),
-    librarySkills: [{ id: "o1", name: "Кровопуск", icon: null, mainSkillId: "attack", summary: [] }, { id: "o2", name: "Шквал", icon: null, mainSkillId: "attack", summary: ["1/бій"] }, { id: "x", name: "Чужий", icon: null, mainSkillId: "defense", summary: [] }],
-    availableBranches: [{ id: "defense", name: "Захист", color: "blue", icon: null }],
-    actions,
+    state: { isLoading: loading, races: [{ id: "r", name: "Ельф" }], race: "Ельф", dirty: true, isSaving: false },
+    view: {
+      raw: loading ? null : raw,
+      tree: loading ? null : normalizeTree({ id: "row", skills: raw }),
+      errors,
+      locations: new Map([["o1", [{ kind: "slot", branchId: "attack", circle: "outer", index: 0 }]]]),
+      librarySkills: [{ id: "o1", name: "Кровопуск", icon: null, mainSkillId: "attack", summary: [] }, { id: "o2", name: "Шквал", icon: null, mainSkillId: "attack", summary: ["1/бій"] }, { id: "x", name: "Чужий", icon: null, mainSkillId: "defense", summary: [] }],
+      availableBranches: [{ id: "defense", name: "Захист", color: "blue", icon: null }],
+    },
+    actions: { ...actions, setRace: vi.fn() },
   }),
 }));
 

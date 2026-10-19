@@ -10,15 +10,19 @@ export type FileImportSuccess = { imported: number; total: number; warnings?: st
 
 export interface UseFileImportReturn {
   file: File | null;
-  error: string | null;
-  success: FileImportSuccess | null;
-  isLoading: boolean;
-  setFile: (file: File | null) => void;
-  setError: (error: string | null) => void;
-  setSuccess: (success: FileImportSuccess | null) => void;
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleImport: () => Promise<void>;
-  reset: () => void;
+  status: {
+    error: string | null;
+    success: FileImportSuccess | null;
+    isLoading: boolean;
+  };
+  actions: {
+    setFile: (file: File | null) => void;
+    setError: (error: string | null) => void;
+    setSuccess: (success: FileImportSuccess | null) => void;
+    handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleImport: () => Promise<void>;
+    reset: () => void;
+  };
 }
 
 export function useFileImport<T>({
@@ -116,14 +120,7 @@ export function useFileImport<T>({
 
   return {
     file,
-    error,
-    success,
-    isLoading,
-    setFile,
-    setError,
-    setSuccess,
-    handleFileChange,
-    handleImport,
-    reset,
+    status: { error, success, isLoading },
+    actions: { setFile, setError, setSuccess, handleFileChange, handleImport, reset },
   };
 }

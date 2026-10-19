@@ -1,7 +1,7 @@
 "use client";
 
 import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
-import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
+import { type SkillCardActions, SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { isUngroupedKey } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
@@ -14,8 +14,7 @@ interface SkillGroupAccordionProps {
   campaignId: string;
   spellGroups: SpellGroup[];
   mainSkillColor?: string | null;
-  onDeleteSkill?: (skillId: string) => Promise<unknown> | void;
-  onDuplicateSkill?: (skillId: string) => void;
+  actions?: SkillCardActions;
 }
 
 export function SkillGroupAccordion({
@@ -24,8 +23,7 @@ export function SkillGroupAccordion({
   campaignId,
   spellGroups,
   mainSkillColor,
-  onDeleteSkill,
-  onDuplicateSkill,
+  actions: skillActions,
 }: SkillGroupAccordionProps) {
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
@@ -45,25 +43,29 @@ export function SkillGroupAccordion({
         groupName={groupName}
         accent={mainSkillColor || undefined}
         totalSkills={totalSkills}
-        isUngrouped={isUngrouped}
-        groupId={groupId}
-        onRenameClick={actions.handlers.openRenameDialog}
-        onRemoveAllClick={() => void actions.handlers.confirmRemoveAll()}
-        onDeleteSkill={onDeleteSkill}
-        onDuplicateSkill={onDuplicateSkill}
+        groupMenu={
+          !isUngrouped && groupId
+            ? {
+                onRename: actions.handlers.openRenameDialog,
+                onRemoveAll: () => void actions.handlers.confirmRemoveAll(),
+              }
+            : undefined
+        }
+        actions={skillActions}
         skills={skills}
         campaignId={campaignId}
       />
 
       <RenameGroupDialog
-        open={actions.dialogs.rename.open}
-        onOpenChange={actions.dialogs.rename.setOpen}
         groupName={groupName}
-        newGroupName={actions.state.newGroupName}
-        onNewGroupNameChange={actions.state.setNewGroupName}
-        onConfirm={actions.handlers.handleRenameGroup}
-        onCancel={actions.handlers.closeRenameDialog}
-        isRenaming={actions.pending.isRenaming}
+        dialog={{ open: actions.dialogs.rename.open, onOpenChange: actions.dialogs.rename.setOpen }}
+        rename={{
+          value: actions.state.newGroupName,
+          onChange: actions.state.setNewGroupName,
+          onConfirm: actions.handlers.handleRenameGroup,
+          onCancel: actions.handlers.closeRenameDialog,
+          isPending: actions.pending.isRenaming,
+        }}
       />
 
     </>

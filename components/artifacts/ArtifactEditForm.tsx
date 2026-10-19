@@ -30,18 +30,20 @@ export function ArtifactEditForm({
       campaignId={campaignId}
       artifactSets={artifactSets}
       mode="edit"
-      title="Редагувати артефакт"
-      description="Зміни зберігаються при натисканні кнопки"
-      submitLabel="Зберегти"
-      submitLabelSaving="Збереження..."
+      labels={{
+        title: "Редагувати артефакт",
+        description: "Зміни зберігаються при натисканні кнопки",
+        submit: "Зберегти",
+        saving: "Збереження...",
+        iconHint: (
+          <>
+            Нове зовнішнє посилання при збереженні завантажується в бакет{" "}
+            <code className="text-xs bg-muted px-1 rounded">artifact-icons</code>
+            . URL уже з Supabase залишається без змін.
+          </>
+        ),
+      }}
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
-      iconHint={
-        <>
-          Нове зовнішнє посилання при збереженні завантажується в бакет{" "}
-          <code className="text-xs bg-muted px-1 rounded">artifact-icons</code>
-          . URL уже з Supabase залишається без змін.
-        </>
-      }
       initial={{
         name: artifact.name,
         description: artifact.description || "",
@@ -53,15 +55,17 @@ export function ArtifactEditForm({
         abilityIssues: artifact.abilityIssues,
         weapon: artifact.weapon,
       }}
-      onSubmit={async (payload) => {
-        await update.mutateAsync({ artifactId: artifact.id, data: payload });
-        router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
-      }}
-      onDelete={async () => {
-        await remove.mutateAsync(artifact.id);
-        router.push(`/campaigns/${campaignId}/dm/artifacts`);
-        router.refresh();
+      actions={{
+        onSubmit: async (payload) => {
+          await update.mutateAsync({ artifactId: artifact.id, data: payload });
+          router.push(`/campaigns/${campaignId}/dm/artifacts`);
+          router.refresh();
+        },
+        onDelete: async () => {
+          await remove.mutateAsync(artifact.id);
+          router.push(`/campaigns/${campaignId}/dm/artifacts`);
+          router.refresh();
+        },
       }}
     />
   );

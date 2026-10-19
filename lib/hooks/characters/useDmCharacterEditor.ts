@@ -41,7 +41,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
       onConfirm: async () => {
         const updated = await levelUpMutation.mutateAsync(characterId);
 
-        editor.form.setFormData((prev) => mergeLevelUpIntoForm(prev, updated));
+        editor.form.actions.setFormData((prev) => mergeLevelUpIntoForm(prev, updated));
         details = updated.levelUpDetails as typeof details;
       },
     });
@@ -51,7 +51,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     }
   };
 
-  return { ...editor, campaignId, characterId, artifacts, levelUp, remove };
+  return { ...editor, artifacts, dmActions: { levelUp, remove } };
 }
 
 export type DmCharacterEditor = ReturnType<typeof useDmCharacterEditor>;

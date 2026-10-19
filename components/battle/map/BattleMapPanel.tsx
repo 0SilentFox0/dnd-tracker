@@ -31,7 +31,7 @@ export function BattleMapPanel() {
 
   return (
     <div className="relative h-full">
-      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} strokeTool={terrainTool?.active} className="h-full" />
+      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active }} className="h-full" />
       {placement && terrainTool && (
         <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5">
           <div className="flex gap-1.5">

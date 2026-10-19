@@ -12,7 +12,7 @@ import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, formatKnownArmorClass, NO_EFFECTS, resolveKnownArmorClass } from "@/lib/utils/battle/view";
 
 export const ParticipantList = memo(function ParticipantList({ side, className }: { side: ParticipantSide; className?: string }) {
-  const { allies, enemies, battle, viewer, current, select, effects, reserve } = useBattleSceneData();
+  const { roster: { allies, enemies, reserve }, battle, viewer, turn: { current }, select, effects } = useBattleSceneData();
 
   const impactFor = useFxImpacts();
 

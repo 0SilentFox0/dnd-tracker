@@ -28,9 +28,9 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
   const [syncedUnit, setSyncedUnit] = useState<Unit | undefined>(undefined);
 
   // Follow fresh server snapshots until the DM starts editing
-  if (unit && unit !== syncedUnit && !fields.dirty) {
+  if (unit && unit !== syncedUnit && !fields.form.dirty) {
     setSyncedUnit(unit);
-    fields.setFormData(buildUnitFormData(unit));
+    fields.form.set(buildUnitFormData(unit));
   }
 
   const listHref = `/campaigns/${campaignId}/dm/units`;
@@ -38,9 +38,9 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fields.abilitiesValid) return;
+    if (!fields.abilities.valid) return;
 
-    update.mutate({ unitId, data: buildUnitUpdatePayload(fields.formData, unit) }, { onSuccess: () => router.push(listHref) });
+    update.mutate({ unitId, data: buildUnitUpdatePayload(fields.form.data, unit) }, { onSuccess: () => router.push(listHref) });
   };
 
   const remove = async () => {
@@ -57,11 +57,8 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
   return {
     ...fields,
     query,
-    submit,
-    remove,
+    actions: { submit, remove },
+    status: { isSaving: update.isPending, isDeleting: del.isPending, error: update.error as Error | null },
     listHref,
-    isSaving: update.isPending,
-    isDeleting: del.isPending,
-    error: update.error as Error | null,
   };
 }

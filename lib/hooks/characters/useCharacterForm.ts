@@ -25,7 +25,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
 
   const [formData, setFormData] = useState<CharacterFormData>(initialFormData);
 
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -83,7 +83,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         return;
       }
 
-      setLoading(true);
+      setIsLoading(true);
       try {
         const next = await options.onSubmit(formData);
 
@@ -91,7 +91,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     [formData, options],
@@ -118,20 +118,13 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
 
   return {
     formData,
-    loading,
-    error,
+    status: { isLoading, error },
     basicInfo,
     abilityScores,
     combatStats,
     skills,
     spellcasting,
     abilities,
-    updateField,
-    updateFields,
-    toggleSavingThrow,
-    toggleSkill,
-    handleSubmit,
-    handleCancel,
-    setFormData,
+    actions: { updateField, updateFields, toggleSavingThrow, toggleSkill, handleSubmit, handleCancel, setFormData },
   };
 }

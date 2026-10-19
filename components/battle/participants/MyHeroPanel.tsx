@@ -15,7 +15,7 @@ import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
 export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
-  const { battle, queue, isMyTurn, effects } = useBattleSceneData();
+  const { battle, turn: { queue, isMyTurn }, effects } = useBattleSceneData();
 
   const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 

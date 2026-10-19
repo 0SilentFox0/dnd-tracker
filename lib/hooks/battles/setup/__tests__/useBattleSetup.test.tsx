@@ -44,11 +44,11 @@ describe("useBattleSetup balance", () => {
     const { result } = renderHook(() => useBattleSetup("c1"), { wrapper });
 
     act(() => {
-      for (const id of ["h1", "h2", "h3"]) result.current.handleParticipantToggle(id, ParticipantSourceType.CHARACTER, true);
-      result.current.handleAddToSide("golem", ParticipantSourceType.UNIT, ParticipantSide.ENEMY, 5);
+      for (const id of ["h1", "h2", "h3"]) result.current.participants.actions.toggle(id, ParticipantSourceType.CHARACTER, true);
+      result.current.participants.actions.addToSide("golem", ParticipantSourceType.UNIT, ParticipantSide.ENEMY, 5);
     });
 
-    await waitFor(() => expect(result.current.entityStats).not.toBeNull());
+    await waitFor(() => expect(result.current.data.entityStats).not.toBeNull());
     expect(result.current.fair?.party.dpr).toBe(42);
     expect(result.current.fair?.scaling.verdict).not.toBe("empty");
   });

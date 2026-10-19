@@ -28,16 +28,16 @@ describe("useInfoReferenceFilters: артефакти", () => {
   it("фільтрує за рідкістю", () => {
     const { result } = renderHook(() => useInfoReferenceFilters([], [], artifacts));
 
-    act(() => result.current.filters.setArtifactRarityFilter("epic"));
+    act(() => result.current.filters.artifact.rarity.set("epic"));
 
     expect(result.current.results.filteredArtifacts.map((a) => a.id)).toEqual(["2"]);
-    expect(result.current.results.hasActiveFilters).toBe(true);
+    expect(result.current.filters.hasActive).toBe(true);
   });
 
   it("шукає за власником", () => {
     const { result } = renderHook(() => useInfoReferenceFilters([], [], artifacts));
 
-    act(() => result.current.filters.setSearchQuery("боромир"));
+    act(() => result.current.filters.search.set("боромир"));
 
     expect(result.current.results.filteredArtifacts.map((a) => a.id)).toEqual(["1"]);
   });
@@ -45,10 +45,10 @@ describe("useInfoReferenceFilters: артефакти", () => {
   it("скидає фільтри артефактів", () => {
     const { result } = renderHook(() => useInfoReferenceFilters([], [], artifacts));
 
-    act(() => result.current.filters.setArtifactSetFilter("Набір"));
-    act(() => result.current.results.clearAllFilters());
+    act(() => result.current.filters.artifact.artifactSet.set("Набір"));
+    act(() => result.current.filters.clearAll());
 
     expect(result.current.results.filteredArtifacts).toHaveLength(2);
-    expect(result.current.results.hasActiveFilters).toBe(false);
+    expect(result.current.filters.hasActive).toBe(false);
   });
 });

@@ -69,13 +69,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     dispatch({ type: "END" });
   };
 
-  return {
-    phase: state.phase,
-    actionUsed: participant.actionFlags.hasUsedAction,
-    bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
-    bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
-    skipped: moraleResult === "skip",
-    moraleResult,
+  const actions = {
     afterAction: () => {
       if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
@@ -96,9 +90,9 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
 
       const base = { name: participant.basicInfo.name, d10, morale: effectiveMorale(participant, scene.readBattle()?.initiativeOrder ?? []).value };
 
-      if (result === "extra") scene.showResult({ kind: "morale-extra", ...base });
+      if (result === "extra") scene.result.show({ kind: "morale-extra", ...base });
       else if (result === "skip") {
-        scene.showResult({ kind: "morale-skip", ...base });
+        scene.result.show({ kind: "morale-skip", ...base });
 
         // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
         const expectedVersion = scene.readBattle()?.version;
@@ -112,5 +106,17 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     },
     stay: () => dispatch({ type: "STAY" }),
     endTurn,
+  };
+
+  return {
+    phase: state.phase,
+    moraleResult,
+    status: {
+      actionUsed: participant.actionFlags.hasUsedAction,
+      bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
+      bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
+      skipped: moraleResult === "skip",
+    },
+    actions,
   };
 }

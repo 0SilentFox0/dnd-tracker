@@ -6,14 +6,18 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
-interface ReferenceGroupSectionProps {
+interface ReferenceGroup {
   title: string;
   icon?: string | null;
   accentColor?: string | null;
   count?: number;
+  accordionValue?: string;
+}
+
+interface ReferenceGroupSectionProps {
+  group: ReferenceGroup;
   children: React.ReactNode;
   className?: string;
-  accordionValue?: string;
 }
 
 function GroupHeader({
@@ -40,15 +44,9 @@ function GroupHeader({
   );
 }
 
-export function ReferenceGroupSection({
-  title,
-  icon,
-  accentColor,
-  count,
-  children,
-  className,
-  accordionValue,
-}: ReferenceGroupSectionProps) {
+export function ReferenceGroupSection({ group, children, className }: ReferenceGroupSectionProps) {
+  const { title, icon, accentColor, count, accordionValue } = group;
+
   const accent =
     accentColor && /^#?[0-9A-Fa-f]{3,8}$/.test(accentColor)
       ? accentColor

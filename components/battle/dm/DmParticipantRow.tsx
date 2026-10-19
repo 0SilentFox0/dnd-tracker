@@ -19,30 +19,26 @@ function scaleLabel({ battleData }: BattleParticipant): string | null {
 
 const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
 
-interface DmParticipantRowProps {
-  participant: BattleParticipant;
-  dmControlledParticipantId: string | null;
+export interface DmParticipantActions {
   onChangeHp: (p: BattleParticipant) => void;
   onTakeControl: (p: BattleParticipant | null) => void;
   onRemove: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
-  onActionDone?: () => void;
+  onDone?: () => void;
 }
 
-export function DmParticipantRow({
-  participant,
-  dmControlledParticipantId,
-  onChangeHp,
-  onTakeControl,
-  onRemove,
-  onKill,
-  onActionDone,
-}: DmParticipantRowProps) {
+interface DmParticipantRowProps {
+  participant: BattleParticipant;
+  controlled: boolean;
+  actions: DmParticipantActions;
+}
+
+export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
+  const { onChangeHp, onTakeControl, onRemove, onKill, onDone } = actions;
+
   const confirm = useConfirm();
 
-  const close = () => onActionDone?.();
-
-  const controlled = dmControlledParticipantId === participant.basicInfo.id;
+  const close = () => onDone?.();
 
   const label = scaleLabel(participant);
 

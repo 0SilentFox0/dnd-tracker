@@ -8,7 +8,7 @@ import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
 export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
-  const { battle, isDM, isMyTurn, connection, actions } = useBattleScene();
+  const { battle, viewer: { isDM }, turn: { isMyTurn }, connection, actions } = useBattleScene();
 
   const confirm = useConfirm();
 

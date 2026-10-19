@@ -12,7 +12,7 @@ import { queueKeys } from "@/lib/utils/battle/view";
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack() {
-  const { queue, myParticipants, select } = useBattleSceneData();
+  const { turn: { queue }, roster: { myParticipants }, select } = useBattleSceneData();
 
   const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 

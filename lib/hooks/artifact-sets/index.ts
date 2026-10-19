@@ -1,1 +1,1 @@
-export { useArtifactSetForm } from "./useArtifactSetForm";
+export { type ArtifactSetFormInitial, useArtifactSetForm } from "./useArtifactSetForm";

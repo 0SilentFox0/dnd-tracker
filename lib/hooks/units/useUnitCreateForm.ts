@@ -19,10 +19,15 @@ export function useUnitCreateForm(campaignId: string) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fields.abilitiesValid) return;
+    if (!fields.abilities.valid) return;
 
-    create.mutate(buildUnitCreatePayload(fields.formData), { onSuccess: () => router.push(listHref) });
+    create.mutate(buildUnitCreatePayload(fields.form.data), { onSuccess: () => router.push(listHref) });
   };
 
-  return { ...fields, submit, listHref, isSaving: create.isPending, error: create.error as Error | null };
+  return {
+    ...fields,
+    actions: { submit },
+    status: { isSaving: create.isPending, error: create.error as Error | null },
+    listHref,
+  };
 }

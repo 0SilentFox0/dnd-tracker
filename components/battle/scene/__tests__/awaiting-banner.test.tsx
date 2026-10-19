@@ -10,7 +10,7 @@ afterEach(cleanup);
 function renderBanner(isDM: boolean, open: boolean) {
   const setOpen = vi.fn();
 
-  render(<BattleSceneContext.Provider value={{ isDM, awaitingDialog: { open, setOpen } } as unknown as BattleSceneValue}><AwaitingDmBanner /></BattleSceneContext.Provider>);
+  render(<BattleSceneContext.Provider value={{ viewer: { isDM }, dialogs: { awaitingDm: { open, setOpen } } } as unknown as BattleSceneValue}><AwaitingDmBanner /></BattleSceneContext.Provider>);
 
   return setOpen;
 }

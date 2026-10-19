@@ -83,19 +83,18 @@ export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string;
     <HudFormPage title={`Редагувати заклинання: ${formData.name ?? ""}`} aside="Оновіть інформацію про заклинання">
       <SpellFormBody
         campaignId={id}
-        formData={formData}
-        setFormData={setFormData}
+        form={{ data: formData, set: setFormData }}
         spellGroups={spellGroups}
-        onSubmit={handleSubmit}
-        isSubmitting={updateSpellMutation.isPending}
-        submitLabel="Зберегти зміни"
-        error={
-          (updateSpellMutation.error as Error)?.message ||
-          (deleteSpellMutation.error as Error)?.message ||
-          null
-        }
-        onDelete={handleDelete}
-        isDeleting={deleteSpellMutation.isPending}
+        submit={{
+          onSubmit: handleSubmit,
+          isPending: updateSpellMutation.isPending,
+          label: "Зберегти зміни",
+          error:
+            (updateSpellMutation.error as Error)?.message ||
+            (deleteSpellMutation.error as Error)?.message ||
+            null,
+        }}
+        remove={{ onDelete: handleDelete, isDeleting: deleteSpellMutation.isPending }}
       />
     </HudFormPage>
   );

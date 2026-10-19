@@ -25,8 +25,8 @@ describe("useUnitCreateForm", () => {
   it("POST з raceId, 0 у числових полях лишається, після успіху — до списку", async () => {
     const { result } = renderHook(() => useUnitCreateForm("c1"), { wrapper });
 
-    act(() => result.current.change({ name: "Шаман", raceId: "r1", armorClass: 0 }));
-    act(() => result.current.submit({ preventDefault: () => {} } as FormEvent));
+    act(() => result.current.form.change({ name: "Шаман", raceId: "r1", armorClass: 0 }));
+    act(() => result.current.actions.submit({ preventDefault: () => {} } as FormEvent));
 
     await waitFor(() =>
       expect(createUnit).toHaveBeenCalledWith("c1", expect.objectContaining({ name: "Шаман", raceId: "r1", armorClass: 0, avatar: null })),

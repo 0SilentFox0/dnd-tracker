@@ -35,7 +35,7 @@ describe("useCharacterEditor", () => {
     await waitFor(() => expect(result.current.form.formData.basicInfo.name).toBe("Арвен"));
     expect(result.current.equipped).toEqual({ ring1: "a1" });
 
-    act(() => result.current.form.setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, name: "Арвен II" } })));
+    act(() => result.current.form.actions.setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, name: "Арвен II" } })));
     await act(() => client.invalidateQueries({ queryKey: ["character", "c1", "ch1"] }));
     await waitFor(() => expect(result.current.query.data?.level).toBe(4));
 
@@ -77,7 +77,7 @@ describe("useCharacterEditor після збереження", () => {
 
     await waitFor(() => expect(result.current.ready).toBe(true));
 
-    await act(() => result.current.form.handleSubmit({ preventDefault: () => {} } as never));
+    await act(() => result.current.form.actions.handleSubmit({ preventDefault: () => {} } as never));
 
     expect(result.current.form.formData.basicInfo.level).toBe(4);
     expect(result.current.form.formData.abilityScores.strength).toBe(13);
