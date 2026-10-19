@@ -96,6 +96,8 @@ function useSpellMapAim(
       const ids = spellAimTargets({ map, participants: order, caster }, state.pick, cell).map((p) => p.basicInfo.id);
 
       dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
+      // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
+      dispatch({ type: "CONFIRM_TARGETS" });
     };
   });
 
@@ -202,7 +204,6 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const view = {
     spells, byLevel, selected, targets, saveTargets, aimTargets, chain, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
-    aimConfirmable: !!state.aim && (aimTargets.length > 0 || !!state.pick?.zone),
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,

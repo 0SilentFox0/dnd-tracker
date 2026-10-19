@@ -217,4 +217,14 @@ describe("точка шаблону", () => {
 
     expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toBeUndefined();
   });
+
+  it("каст у порожню зону: to — точка прицілу; точку не видно — FX немає", () => {
+    anchor("a", { x: 10, y: 10, w: 20, h: 20 });
+    cell("4:2", { x: 100, y: 100, w: 30, h: 30 });
+
+    const empty = spec({ archetype: "area", targetIds: [], at: { x: 4, y: 2 } });
+
+    expect(resolvePoints(empty)).toMatchObject({ from: { x: 20, y: 20 }, to: [{ x: 115, y: 115 }], at: { x: 115, y: 115 }, targetEls: [] });
+    expect(resolvePoints({ ...empty, at: { x: 9, y: 9 } })).toBeNull();
+  });
 });

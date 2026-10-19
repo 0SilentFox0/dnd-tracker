@@ -76,8 +76,8 @@ describe("resolveSpellTargets на карті", () => {
     expect(resolve(fireball, [], { map, targetCell: { x: 15, y: 2 } })).toEqual({ ok: false, error: "Точка поза дальністю заклинання" });
   });
 
-  it("порожній шаблон: відмова без zone, ок із zone", () => {
-    expect(resolve(fireball, [], { map, targetCell: { x: 2, y: 8 } })).toEqual({ ok: false, error: "У шаблоні немає цілей" });
+  it("порожній шаблон — каст у порожнечу з aimCell; із zone теж", () => {
+    expect(resolve(fireball, [], { map, targetCell: { x: 2, y: 8 } })).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
 
     const wall: SpellTargeting = { kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } };
 
@@ -157,12 +157,12 @@ describe("заклинання, розширене вмінням, на карт
     expect(resolve({ kind: "ally" }, [], { map, targetCell: { x: 4, y: 2 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["c", "a"] });
   });
 
-  it("точка поза дальністю, без точки, порожній радіус — відмова", () => {
+  it("точка поза дальністю, без точки — відмова; порожній радіус — каст у порожнечу", () => {
     const c = widened("area");
 
     expect(resolve(bolt, ["n1"], { map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: "Точка поза дальністю заклинання" });
     expect(resolve(bolt, ["n1"], { map }, scene(c), c)).toEqual({ ok: false, error: "Оберіть точку на карті" });
-    expect(resolve(bolt, [], { map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toEqual({ ok: false, error: "У радіусі немає цілей" });
+    expect(resolve(bolt, [], { map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
   });
 
   it("без карти чи без позиції заклинателя — ручний вибір як раніше", () => {

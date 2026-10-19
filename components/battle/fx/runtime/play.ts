@@ -16,7 +16,8 @@ export const FX_LOAD_TIMEOUT_MS = 800;
 export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document, loadTimeoutMs = FX_LOAD_TIMEOUT_MS): Promise<void> {
   const epoch = layerEpoch(layer);
 
-  const animation = await animationFor(spec.archetype, loadTimeoutMs);
+  // підписні анімації малюють по цілях, тож порожня зона грає базову «area»
+  const animation = await animationFor(spec.targetIds.length === 0 && spec.at ? "area" : spec.archetype, loadTimeoutMs);
 
   if (layerEpoch(layer) !== epoch || !layer.isConnected) return;
 

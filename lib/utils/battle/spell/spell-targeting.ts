@@ -122,11 +122,8 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
-  const targetIds = targets.map((p) => p.basicInfo.id);
-
-  if (cells.length === 0 || (targetIds.length === 0 && !targeting.zone)) return fail("У шаблоні немає цілей");
-
-  return { ok: true, targetIds, cells, centre: templateCentre(targeting, aim, cells) };
+  // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
+  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
 }
 
 function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
@@ -137,8 +134,6 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
   if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail("Точка поза дальністю заклинання");
 
   const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
-
-  if (targets.length === 0) return fail("У радіусі немає цілей");
 
   return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: aim.cell };
 }

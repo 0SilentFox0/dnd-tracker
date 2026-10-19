@@ -116,7 +116,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
     }
     case "CONFIRM_TARGETS":
-      if (s.pick?.targetMode === "template") return s.aim && (s.targetIds.length > 0 || s.pick.zone) ? afterTargets(s) : s;
+      if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
 
       return s.targetIds.length === 0 ? s : afterTargets(s);
     case "SET_SAVE": {

@@ -13,7 +13,7 @@ type Book = ReturnType<typeof useSpellBook>;
 export function SpellAimPanel({ book, spellName }: { book: Book; spellName: string }) {
   const { state, view, actions } = book;
 
-  const { aimTargets, aimConfirmable } = view;
+  const { aimTargets } = view;
 
   const slot = useMapStripSlot();
 
@@ -48,10 +48,9 @@ export function SpellAimPanel({ book, spellName }: { book: Book; spellName: stri
           ))}
         </ul>
       )}
-      <div className={cn("grid grid-cols-[auto_auto_1fr] gap-2", slot ? "mt-2" : "mt-3")}>
-        <button type="button" onClick={actions.back} className="hud-sc h-10 border border-white/20 px-3 text-sm">← Назад</button>
-        <button type="button" onClick={actions.close} className="hud-sc h-10 border border-white/20 px-3 text-sm">Скасувати</button>
-        <button type="button" disabled={!aimConfirmable} onClick={actions.confirmTargets} className="hud-sc h-10 bg-[#7a2a1f] text-sm text-[#f3e7cc] disabled:opacity-50">Підтвердити</button>
+      <div className={cn("grid grid-cols-2 gap-2", slot ? "mt-2" : "mt-3")}>
+        <button type="button" onClick={actions.back} className="hud-sc h-10 min-w-0 whitespace-nowrap border border-white/20 px-2 text-sm">← Назад</button>
+        <button type="button" onClick={actions.close} className="hud-sc h-10 min-w-0 whitespace-nowrap border border-white/20 px-2 text-sm">Скасувати</button>
       </div>
     </div>
   );

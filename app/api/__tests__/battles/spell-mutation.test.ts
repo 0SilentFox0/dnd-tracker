@@ -323,6 +323,18 @@ describe("spell mutation", () => {
       expect(aimOf(single)).toBeUndefined();
     });
 
+    it("шаблон у порожню зону: каст без цілей — слот витрачено, подія з aimCell, нікого не зачеплено", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 60 });
+
+      const out = await mutation(row)(onMap(), body({ targetIds: ["gob"], targetCell: { x: 9, y: 9 } }) as never);
+
+      expect(out.events).toHaveLength(1);
+      expect(aimOf(out)).toEqual({ x: 9, y: 9 });
+      expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp);
+      expect(hpOf(out, "gob2")).toBe(gob2.combatStats.currentHp);
+      expect(out.participants.find((p) => p.basicInfo.id === "hero")?.spellcasting.spellSlots["1"].current).toBe(1);
+    });
+
     it("конус: aimCell — клітинка шаблону біля його центру, а не точка напрямку", async () => {
       const row = withTargeting({ kind: "template", shape: "cone", size: 15, side: "enemy", maxTargets: 3 });
 

@@ -228,7 +228,7 @@ describe("SpellBook", () => {
       expect(gob.textContent).toContain("Поза дальністю");
     });
 
-    it("шаблон: наведення на карті, зачеплені з позначкою союзника, підтвердження → кидки, каст з targetCell", async () => {
+    it("шаблон: клік по точці з цілями одразу підтверджує → кидки, каст з targetCell; кнопки «Підтвердити» немає", async () => {
       const { wrapper, caster, value, castSpell } = onMap(["meteor"], true);
 
       render(<Harness caster={caster} />, { wrapper });
@@ -237,7 +237,9 @@ describe("SpellBook", () => {
       fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
 
       expect(screen.getByText("Оберіть точку на карті")).toBeTruthy();
-      expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.queryByRole("button", { name: "Підтвердити" })).toBeNull();
+      expect(screen.getByRole("button", { name: "← Назад" })).toBeTruthy();
+      expect(screen.getByRole("button", { name: "Скасувати" })).toBeTruthy();
 
       const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
 
@@ -245,12 +247,7 @@ describe("SpellBook", () => {
 
       act(() => aim.onAim({ x: 4, y: 0 }));
 
-      expect(screen.getByText("Гоблін")).toBeTruthy();
-      expect(screen.getByText("⚠ союзник")).toBeTruthy();
-      expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toMatchObject({ aim: { x: 4, y: 0 } });
-
-      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
-
+      expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
       expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
       expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
 
@@ -259,27 +256,6 @@ describe("SpellBook", () => {
       fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
 
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetCell: { x: 4, y: 0 } })));
-    });
-
-    it("шаблон: список зачеплених рахується від точки наведення на кожному рендері — рух після кліку його оновлює", async () => {
-      const { wrapper, caster, value, me, gob, ally } = onMap(["meteor"], true);
-
-      const { rerender } = render(<Harness caster={caster} />, { wrapper });
-
-      fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
-
-      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
-
-      act(() => aim.onAim({ x: 4, y: 0 }));
-
-      expect(screen.getByText("Гоблін")).toBeTruthy();
-
-      value.battle = { ...value.battle, initiativeOrder: [me, { ...gob, battleData: { ...gob.battleData, position: { x: 9, y: 5 } } }, ally] };
-      rerender(<Harness caster={caster} />);
-
-      expect(screen.queryByText("Гоблін")).toBeNull();
-      expect(screen.getByText("Годрік")).toBeTruthy();
     });
 
     it("шаблон: рятівні кидки й каст беруть живі цілі шаблону, а не ті, що були в момент кліку", async () => {
@@ -295,8 +271,6 @@ describe("SpellBook", () => {
       value.battle = { ...value.battle, initiativeOrder: [me, { ...gob, battleData: { ...gob.battleData, position: { x: 9, y: 5 } } }, ally] };
       rerender(<Harness caster={caster} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
-
       expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
       expect(screen.queryByLabelText("Рятівний кидок: Гоблін")).toBeNull();
 
@@ -310,8 +284,8 @@ describe("SpellBook", () => {
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ targetIds: [ally.basicInfo.id] })));
     });
 
-    it("шаблон без зони: порожнє наведення не можна підтвердити", async () => {
-      const { wrapper, caster, value } = onMap(["meteor"], true);
+    it("шаблон: клік у порожню зону теж каст — кидки, потім каст без цілей з targetCell", async () => {
+      const { wrapper, caster, value, castSpell } = onMap(["meteor"], true);
 
       render(<Harness caster={caster} />, { wrapper });
 
@@ -320,8 +294,14 @@ describe("SpellBook", () => {
 
       act(() => (vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim).onAim({ x: 1, y: 4 }));
 
-      expect(screen.getByText("Нікого не зачеплено")).toBeTruthy();
-      expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
+      expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
+
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetIds: [], targetCell: { x: 1, y: 4 } })));
     });
 
     it("одиночне, розширене вмінням: на карті — «Навести на карті», коло 10 футів лише по ворогах, каст з targetCell", async () => {
@@ -340,10 +320,6 @@ describe("SpellBook", () => {
 
       act(() => aim.onAim({ x: 4, y: 0 }));
 
-      expect(screen.getByText("Гоблін")).toBeTruthy();
-      expect(screen.queryByText("Годрік")).toBeNull();
-
-      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
       fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
       fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
       fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));

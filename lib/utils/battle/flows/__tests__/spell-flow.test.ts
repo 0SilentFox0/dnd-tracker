@@ -248,10 +248,14 @@ describe("шаблон і дальність", () => {
     expect(spellPayload(done)).toEqual({ casterId: "h", spellId: "fb", targetIds: ["f"], targetCell: { x: 6, y: 1 }, diceRolls: [3] });
   });
 
-  it("порожній шаблон підтверджується лише для заклинання із зоною; SET_AIM поза template-режимом ігнорується", () => {
-    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
+  it("порожній шаблон підтверджується (каст у порожнечу), без точки — ні; SET_AIM поза template-режимом ігнорується", () => {
+    const aiming = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" });
 
-    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("targets");
+    expect(spellFlow(aiming, { type: "CONFIRM_TARGETS" }).step).toBe("targets");
+
+    const s = spellFlow(aiming, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
+
+    expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
 
     const wall = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: { ...ball, zone: true } }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 1, y: 4 }, targetIds: [] });
 

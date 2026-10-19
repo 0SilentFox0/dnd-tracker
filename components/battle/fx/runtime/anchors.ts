@@ -70,15 +70,18 @@ export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from
 
   const cell = spec.at && cellPoint(spec.at, root);
 
-  if (to.length === 0) return null;
+  // заклинання в порожню зону летить у точку прицілу, якщо її видно
+  const aimed = spec.targetIds.length === 0 && cell ? [cell] : to;
 
-  if (spec.archetype === "death") return { from: to[0], to, targetEls, actorEl: null };
+  if (aimed.length === 0) return null;
+
+  if (spec.archetype === "death") return { from: aimed[0], to: aimed, targetEls, actorEl: null };
 
   const actorEl = findAnchor(spec.actorId, root);
 
-  const from = actorEl ? centerOf(actorEl) : { x: to[0].x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
+  const from = actorEl ? centerOf(actorEl) : { x: aimed[0].x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
 
-  return { from, to, ...(cell && { at: cell }), targetEls, actorEl };
+  return { from, to: aimed, ...(cell && { at: cell }), targetEls, actorEl };
 }
 
 /** Half the width and height of a target row, for effects that wrap it; `fallback` when it is gone. */
