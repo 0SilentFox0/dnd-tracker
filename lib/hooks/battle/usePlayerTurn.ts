@@ -7,18 +7,13 @@ import { useBattleScene } from "./useBattleScene";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
+import { checkReturnToStart } from "@/lib/utils/battle/grid";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
-import { canCastBonusSpell, needsMoraleCheck } from "@/lib/utils/battle/view";
+import { canCastBonusSpell, needsMoraleCheck, turnExhausted } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
-
-const exhausted = (p: BattleParticipant, bonusSpells: BonusSpell[]) => {
-  const bonusLeft = (p.battleData.resolvedAbilities ?? []).some((a) => a.trigger.event === "bonusAction") && !p.actionFlags.hasUsedBonusAction;
-
-  return p.actionFlags.hasUsedAction && !bonusLeft && !canCastBonusSpell(p, bonusSpells);
-};
 
 export function usePlayerTurn(participant: BattleParticipant, bonusSpells: BonusSpell[] = []) {
   const scene = useBattleScene();
@@ -51,7 +46,27 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     };
   }, []);
 
+  const { map, initiativeOrder } = scene.battle;
+
+  const canReturn = !!map && !participant.battleData.reserved && checkReturnToStart(map, initiativeOrder, participant).ok;
+
+  const canReturnNow = () => {
+    const latest = scene.readBattle();
+
+    const me = latest?.initiativeOrder.find((p) => p.basicInfo.id === id);
+
+    return !!latest?.map && !!me && !me.battleData.reserved && checkReturnToStart(latest.map, latest.initiativeOrder, me).ok;
+  };
+
   const fresh = () => scene.readBattle()?.initiativeOrder.find((p) => p.basicInfo.id === id) ?? participant;
+
+  const { mutate: move } = scene.actions.move;
+
+  const returnToStart = () => {
+    const to = participant.battleData.turnStartPosition;
+
+    if (to) move({ participantId: id, to, returnToStart: true });
+  };
 
   const endTurn = async () => {
     if (!participant.actionFlags.hasUsedAction && moraleResult !== "skip") {
@@ -73,7 +88,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     afterAction: () => {
       if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
-      if (exhausted(fresh(), bonusSpells)) dispatch({ type: "EXHAUSTED" });
+      if (turnExhausted(fresh(), bonusSpells, canReturnNow())) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {
       let res;
@@ -108,6 +123,18 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     endTurn,
   };
 
+  const wasReturnable = useRef(canReturn);
+
+  useEffect(() => {
+    const was = wasReturnable.current;
+
+    wasReturnable.current = canReturn;
+
+    if (was && !canReturn) actions.afterAction();
+  });
+
+  const strikeAndReturn = { available: canReturn, run: returnToStart };
+
   return {
     phase: state.phase,
     moraleResult,
@@ -118,5 +145,6 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
       skipped: moraleResult === "skip",
     },
     actions,
+    strikeAndReturn,
   };
 }

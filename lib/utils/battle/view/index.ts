@@ -11,4 +11,5 @@ export * from "./retaliation";
 export * from "./rollback";
 export * from "./scene-maps";
 export * from "./summary";
+export * from "./turn-exhausted";
 export * from "./visibility";

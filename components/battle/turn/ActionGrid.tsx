@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Hourglass, Sparkles, Swords, Zap } from "lucide-react";
+import { BookOpen, Hourglass, Sparkles, Swords, Undo2, Zap } from "lucide-react";
 
 import type { usePlayerTurn } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
         <Tile icon={BookOpen} label="Магія" used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label="Вміння" used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}
         <Tile icon={Sparkles} label="Бонус" used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />
+        {turn.strikeAndReturn.available && <Tile icon={Undo2} label="Повернутися" used={pending} onClick={turn.strikeAndReturn.run} />}
         {turn.moraleResult && <Tile icon={Hourglass} label={MORALE_LABEL[turn.moraleResult]} used />}
       </div>
       {turn.phase !== "countdown" && (
