@@ -160,12 +160,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, state.pick?.range);
 
-  const aimTargets = state.pick?.targetMode === "template"
-    ? state.targetIds.flatMap((id) => {
-        const p = order.find((x) => x.basicInfo.id === id);
+  const aimTemplate = state.pick?.targetMode === "template" ? state.pick.template : undefined;
 
-        return p ? [{ participant: p, ally: !!caster && p.basicInfo.side === caster.basicInfo.side }] : [];
-      })
+  // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
+  const aimTargets = map && caster && aimTemplate && state.aim
+    ? templateArea(map, order, caster, aimTemplate, state.aim).targets.map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
     : [];
 
   useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });

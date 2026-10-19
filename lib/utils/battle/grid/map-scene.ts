@@ -1,6 +1,6 @@
 import { cellKey } from "./geometry";
 import { type CellMark, isMoveMark, moveZoneMarks, reachingAttack, targetMarks } from "./map-view";
-import { cellsOf, isOnMap } from "./occupancy";
+import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { templateAimAllowed, templateArea } from "./template";
 
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
@@ -53,6 +53,14 @@ export interface MapScene {
   aiming: boolean;
   cellClick(p: GridPoint): MapClick;
   tokenClick(id: string): MapClick;
+}
+
+function centreCell(p: BattleParticipant): GridPoint {
+  const [anchor] = cellsOf(p);
+
+  const offset = Math.floor((sizeOf(p) - 1) / 2);
+
+  return { x: anchor.x + offset, y: anchor.y + offset };
 }
 
 export function deriveTrajectory(marks: BattleMapView["marks"], currentId: string | null, hoverCell: GridPoint | null): BattleMapView["trajectory"] {
@@ -130,7 +138,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
 
-    if (aim) return target && isOnMap(target) ? aimAt(cellsOf(target)[0]) : { kind: "none" };
+    if (aim) return target && isOnMap(target) ? aimAt(centreCell(target)) : { kind: "none" };
 
     if (canAct && canAttack && current && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
       const mark = marks.get(cellKey(cellsOf(target)[0]));

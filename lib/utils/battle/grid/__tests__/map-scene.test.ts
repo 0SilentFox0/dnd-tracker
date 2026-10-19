@@ -211,6 +211,16 @@ describe("deriveMapScene: наведення шаблону", () => {
     expect(s.tokenClick("e1")).toEqual({ kind: "aim", cell: { x: 1, y: 0 } });
   });
 
+  it("клік по великому токену цілиться в центральну клітинку його сліду", () => {
+    const big = at("big", { x: 1, y: 0 }, ParticipantSide.ENEMY);
+
+    const huge = { ...big, combatStats: { ...big.combatStats, gridSize: 3 } };
+
+    const s = deriveMapScene(input({ participants: [hero, huge], mode: { aim: aim() } }));
+
+    expect(s.tokenClick("big")).toEqual({ kind: "aim", cell: { x: 2, y: 1 } });
+  });
+
   it("обрана точка — клітинки шаблону й aim у view", () => {
     const s = deriveMapScene(input({ mode: { aim: aim({ aim: { x: 2, y: 2 } }) } }));
 

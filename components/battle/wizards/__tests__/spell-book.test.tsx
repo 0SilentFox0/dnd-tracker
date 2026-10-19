@@ -258,6 +258,27 @@ describe("SpellBook", () => {
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetCell: { x: 4, y: 0 } })));
     });
 
+    it("шаблон: список зачеплених рахується від точки наведення на кожному рендері — рух після кліку його оновлює", async () => {
+      const { wrapper, caster, value, me, gob, ally } = onMap(["meteor"], true);
+
+      const { rerender } = render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Метеор"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      act(() => aim.onAim({ x: 4, y: 0 }));
+
+      expect(screen.getByText("Гоблін")).toBeTruthy();
+
+      value.battle = { ...value.battle, initiativeOrder: [me, { ...gob, battleData: { ...gob.battleData, position: { x: 9, y: 5 } } }, ally] };
+      rerender(<Harness caster={caster} />);
+
+      expect(screen.queryByText("Гоблін")).toBeNull();
+      expect(screen.getByText("Годрік")).toBeTruthy();
+    });
+
     it("шаблон без карти — звичайний вибір цілей", async () => {
       const { wrapper, caster } = fakeScene({ knownSpells: ["meteor"], slots: { "2": { max: 3, current: 3 } } });
 
