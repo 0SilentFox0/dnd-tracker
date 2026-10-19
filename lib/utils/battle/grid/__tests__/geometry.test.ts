@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellDistance, cellKey, cellLine, footprint, footprintDistance, inBounds, neighbors } from "../geometry";
+import { cellDistance, cellKey, cellLine, closestCell, footprint, footprintDistance, inBounds, neighbors } from "../geometry";
 
 
 describe("квадратна сітка", () => {
@@ -49,5 +49,15 @@ describe("cellLine", () => {
     expect(line.at(-1)).toEqual({ x: 7, y: 3 });
 
     for (let i = 1; i < line.length; i++) expect(cellDistance(line[i - 1], line[i])).toBe(1);
+  });
+});
+
+describe("closestCell", () => {
+  it("бере клітинку набору, найближчу до іншого набору; при рівності — першу", () => {
+    const cells = footprint({ x: 4, y: 4 }, 2);
+
+    expect(closestCell(cells, [{ x: 0, y: 0 }])).toEqual({ x: 4, y: 4 });
+    expect(closestCell(cells, [{ x: 9, y: 9 }])).toEqual({ x: 5, y: 5 });
+    expect(closestCell(cells, [{ x: 4, y: 9 }])).toEqual({ x: 4, y: 5 });
   });
 });

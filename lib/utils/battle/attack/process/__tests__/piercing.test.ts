@@ -49,6 +49,15 @@ describe("piercingTargets", () => {
     expect(piercingTargets(MAP, ps, attacker, "t")).toEqual(["t"]);
   });
 
+  it("зупиняється на стіні", () => {
+    const walled = { ...MAP, blocked: ["4:5"] };
+
+    const ps = [attacker, at("t", { x: 3, y: 5 }), at("behind", { x: 6, y: 5 })];
+
+    expect(piercingTargets(walled, ps, attacker, "t")).toEqual(["t"]);
+    expect(piercingTargets(MAP, ps, attacker, "t")).toEqual(["t", "behind"]);
+  });
+
   it("без карти — лише перша ціль", () => {
     expect(piercingTargets(undefined, [attacker, at("t", { x: 3, y: 5 }), at("b", { x: 5, y: 5 })], attacker, "t")).toEqual(["t"]);
     expect(piercingTargets(MAP, [{ ...attacker, battleData: { ...attacker.battleData, position: undefined } }, at("t", { x: 3, y: 5 })], attacker, "t")).toEqual(["t"]);

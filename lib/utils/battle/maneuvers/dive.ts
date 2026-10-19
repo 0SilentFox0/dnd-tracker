@@ -3,7 +3,7 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
-import { cellKey, cellsOf, nearestStandable } from "@/lib/utils/battle/grid";
+import { cellKey, nearestStandable, participantsInCells } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const DEFAULT_PERCENT = 200;
@@ -37,7 +37,7 @@ function victimOf(ps: BattleParticipant[], actor: BattleParticipant, map: Battle
 
   const enemy = isEnemyOf(actor);
 
-  if (map && landAt) return ps.find((p) => enemy(p) && cellsOf(p).some((c) => cellKey(c) === cellKey(landAt)));
+  if (map && landAt) return participantsInCells(ps, [cellKey(landAt)], landAt).find(enemy);
 
   const target = targetId ? findParticipant(ps, targetId) : undefined;
 

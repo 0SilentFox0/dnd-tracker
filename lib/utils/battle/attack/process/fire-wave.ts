@@ -1,5 +1,5 @@
 import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
-import { apexOf, cellsOf, footprintDistance, isOnMap, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
+import { apexOf, cellsOf, closestCell, isOnMap, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const NO_MAP_VICTIMS = 2;
@@ -15,7 +15,7 @@ export function fireWaveVictims(map: BattleMapConfig | undefined, ps: BattlePart
 
   const from = cellsOf(attacker);
 
-  const vc = cellsOf(victim).reduce((best, c) => (footprintDistance(from, [c]) < footprintDistance(from, [best]) ? c : best));
+  const vc = closestCell(cellsOf(victim), from);
 
   const ac = apexOf(from, vc);
 

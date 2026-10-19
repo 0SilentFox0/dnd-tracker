@@ -2,19 +2,13 @@ import { attackShare, isEnemyOf, maneuverResult,pickedEnemies, primaryDamageType
 import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { canStand, cellKey, cellLine, cellsOf, feetToCells, footprint, inBounds, sizeOf } from "@/lib/utils/battle/grid";
-import type { BattleParticipant, GridPoint } from "@/types/battle";
+import { canStand, cellKey, feetToCells, footprint, participantsInCells, rayCells, sizeOf } from "@/lib/utils/battle/grid";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const NO_MAP_TARGETS = 3;
 
-function flightPath(start: GridPoint, aim: GridPoint, rangeFeet: number | undefined, bounds: { cols: number; rows: number }): GridPoint[] {
-  const path = cellLine(start, aim).slice(1);
-
-  const limited = rangeFeet === undefined ? path : path.slice(0, feetToCells(rangeFeet));
-
-  const inside = limited.findIndex((c) => !inBounds(bounds, c));
-
-  return inside < 0 ? limited : limited.slice(0, inside);
+function flightPath(map: BattleMapConfig, start: GridPoint, aim: GridPoint, rangeFeet: number | undefined): GridPoint[] {
+  return rayCells(map, start, aim, { maxCells: rangeFeet === undefined ? Math.max(map.cols, map.rows) : feetToCells(rangeFeet), stopAtTarget: true });
 }
 
 export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
@@ -36,11 +30,11 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
 
   const map = input.map;
 
-  const path = flightPath(start, input.targetCell, input.range, map);
+  const path = flightPath(map, start, input.targetCell, input.range);
 
   const swept = new Set(path.flatMap((c) => footprint(c, sizeOf(actor))).map(cellKey));
 
-  const victims = ps.filter((p) => isEnemyOf(actor)(p) && cellsOf(p).some((c) => swept.has(cellKey(c))));
+  const victims = participantsInCells(ps, [...swept], start).filter(isEnemyOf(actor));
 
   const landing = [...path].reverse().find((c) => canStand(map, ps, actor, c));
 
