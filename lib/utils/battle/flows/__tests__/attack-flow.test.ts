@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { attackFlow, type AttackFlowAction, type AttackFlowState, attackPayload, initialAttackFlow } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, initialAttackFlow, strikeMode } from "@/lib/utils/battle/flows";
 
 const run = (...actions: AttackFlowAction[]) => actions.reduce<AttackFlowState>(attackFlow, initialAttackFlow);
 
@@ -45,7 +45,7 @@ describe("attackFlow", () => {
 
     expect(s.step).toBe("summary");
     expect(attackPayload(s, "me")).toEqual({
-      attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 14, advantageRoll: 6, damageRolls: [6], endTurn: false,
+      attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 14, advantageRoll: 6, rollMode: "advantage", damageRolls: [6], endTurn: false,
     });
     expect(attackFlow(s, { type: "SUBMIT" }).step).toBe("submitting");
   });
@@ -142,5 +142,58 @@ describe("attackFlow", () => {
     );
 
     expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
+  });
+
+  describe("перевага/недолік: навички vs вибір гравця", () => {
+    const forced = { a: { mode: "advantage" as const, reason: "Перевага: Мітка мисливця" } };
+
+    it("навичка задає режим: удар заблоковано, SET_MODE не змінює його, payload без rollMode", () => {
+      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced }, { type: "SET_MODE", mode: "disadvantage" });
+
+      expect(s.strikes[0].forced).toEqual(forced.a);
+      expect(strikeMode(s, s.strikes[0])).toBe("advantage");
+      expect(s.mode).toBe("normal");
+
+      const done = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced }, { type: "ROLL", d20: 4, second: 16, outcome: "hit" }, { type: "DAMAGE", values: [6] });
+
+      expect(attackPayload(done, "me")).toMatchObject({ attackRoll: 4, advantageRoll: 16 });
+      expect(attackPayload(done, "me")).not.toHaveProperty("rollMode");
+      expect(effectiveD20(done.strikes[0], strikeMode(done, done.strikes[0]))).toBe(16);
+    });
+
+    it("без навичок — ручний вибір іде на сервер як rollMode", () => {
+      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced: {} }, { type: "SET_MODE", mode: "disadvantage" }, { type: "ROLL", d20: 14, second: 5, outcome: "hit" }, { type: "DAMAGE", values: [6] });
+
+      expect(attackPayload(s, "me")).toMatchObject({ rollMode: "disadvantage", disadvantageRoll: 5 });
+      expect(effectiveD20(s.strikes[0], strikeMode(s, s.strikes[0]))).toBe(5);
+    });
+
+    it("взаємне скасування теж блокує: режим «звичайний», ручний вибір ігнорується", () => {
+      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } }, { type: "SET_MODE", mode: "advantage" });
+
+      expect(strikeMode(s, s.strikes[0])).toBe("normal");
+    });
+
+    it("залп: режим на кожен удар свій; удар без другого кубика — null у secondRolls", () => {
+      const s = run(
+        open(1, 2),
+        { type: "TOGGLE_TARGET", id: "a" },
+        { type: "TOGGLE_TARGET", id: "b" },
+        { type: "SET_MODE", mode: "advantage" },
+        { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } },
+        { type: "ROLL", d20: 17, outcome: "hit" },
+      );
+
+      expect(strikeMode(s, s.strikes[1])).toBe("advantage");
+
+      const t = run(
+        open(1, 2), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" },
+        { type: "SET_MODE", mode: "advantage" },
+        { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } },
+        { type: "ROLL", d20: 17, outcome: "miss" }, { type: "ROLL", d20: 4, second: 15, outcome: "hit" }, { type: "DAMAGE", values: [5] },
+      );
+
+      expect(attackPayload(t, "me")).toMatchObject({ attackRolls: [17, 4], secondRolls: [null, 15], rollMode: "advantage" });
+    });
   });
 });

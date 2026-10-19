@@ -11,7 +11,7 @@ export interface AttackRollResult {
   /** d20, що пішов у розрахунок після переваги/недоліку */
   chosenD20: number;
   /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
-  secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
+  secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean; manual?: boolean };
 }
 
 export interface AttackResult {

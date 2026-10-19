@@ -10,7 +10,7 @@ import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
-import { attackFlow, type AttackMode, attackPayload, effectiveD20, initialAttackFlow, type RollOutcome } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackMode, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -82,6 +82,10 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     if (hitsAll) dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) });
   };
 
+  const currentStrike = state.strikes[state.index];
+
+  const currentMode = strikeMode(state, currentStrike);
+
   const outcomeOf = (d20: number, second?: number): RollOutcome => {
     const target = byId(state.strikes[state.index]?.targetId ?? "");
 
@@ -90,7 +94,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound);
 
     const r = resolveAttackRoll(
-      { attackRoll: d20, ...(state.mode === "advantage" && second !== undefined && { advantageRoll: second }), ...(state.mode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
+      { attackRoll: d20, ...(currentMode === "advantage" && second !== undefined && { advantageRoll: second }), ...(currentMode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
       targetAC,
       totalBonus,
     );
@@ -141,7 +145,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const targetName = target?.basicInfo.name ?? "";
 
-      const d20 = effectiveD20(strike, state.mode);
+      const d20 = effectiveD20(strike, strikeMode(state, strike));
 
       if (first.kind === "miss" || crit?.type === "fail") {
         const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
@@ -179,6 +183,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   return {
     state, attack, attacks, targets, steps, estimate, unknownDefense, previews,
+    rollMode: currentMode,
+    forcedMode: currentStrike?.forced,
     open: () => {
       const first = attacks[0];
 
@@ -193,11 +199,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
     confirmTargets: () => {
-      const first = byId(state.targetIds[0]);
+      const forced = Object.fromEntries(
+        state.targetIds.map((id) => {
+          const t = byId(id);
 
-      if (attacker && attack && first) dispatch({ type: "SET_MODE", mode: predictAttack(attacker, first, attack, order, scene.battle.currentRound).mode });
+          return [id, attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound)) : undefined];
+        }),
+      );
 
-      dispatch({ type: "CONFIRM_TARGETS" });
+      dispatch({ type: "CONFIRM_TARGETS", forced });
     },
     canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
@@ -207,7 +217,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     aiRoll: () => {
       const d20 = rollDie(20, cryptoRandom);
 
-      const second = state.mode === "normal" ? undefined : rollDie(20, cryptoRandom);
+      const second = currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
 
       dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
     },

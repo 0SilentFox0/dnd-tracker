@@ -66,7 +66,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -80,12 +80,13 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     targetId,
     targetExtra: actionModifiers[targetId],
     rng: flow.ctx.rng,
+    manualMode: params.rollMode,
   });
 
   const second = attackRoll.secondRoll;
 
   if (second) {
-    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
+    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
   }
 
   const withRollDetails = <T extends { actionDetails: object }>(action: T): T => {

@@ -33,10 +33,11 @@ export type AttackPhaseInput = {
     attackRoll?: number;
     /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
     attackRolls?: number[];
-    /** Сирі другі d20 на ціль; сервер вирішує перевагу/недолік сам */
-    secondRolls?: number[];
+    /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
+    secondRolls?: (number | null)[];
     advantageRoll?: number;
     disadvantageRoll?: number;
+    rollMode?: "normal" | "advantage" | "disadvantage";
     obstacle?: boolean;
     damageRolls: number[];
   };
@@ -238,13 +239,16 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
 
+    const second = data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
       target: freshTarget,
       attack,
       d20Roll,
-      advantageRoll: data.secondRolls?.[chosenAt] ?? data.advantageRoll,
-      disadvantageRoll: data.secondRolls?.[chosenAt] ?? data.disadvantageRoll,
+      advantageRoll: second,
+      disadvantageRoll: second,
+      rollMode: data.rollMode,
       damageRolls: damageRollsForTarget,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
