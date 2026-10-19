@@ -4,7 +4,7 @@ import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
 
-const AREA_TARGETING = new Set(["area", "allEnemies", "allAllies", "everyone"]);
+const AREA_TARGETING = new Set(["area", "template", "allEnemies", "allAllies", "everyone"]);
 
 const DAMAGE_KINDS = new Set(["dealDamage", "dot"]);
 

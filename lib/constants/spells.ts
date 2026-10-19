@@ -53,9 +53,17 @@ export const SPELL_TARGETING_LABELS = {
   allyDead: "Полеглий союзник",
   allAlliesDead: "Усі полеглі союзники",
   area: "Область (до N цілей)",
+  template: "Шаблон на карті",
   allAllies: "Усі союзники",
   allEnemies: "Усі вороги",
   everyone: "Усі учасники",
+} as const;
+
+export const TEMPLATE_SHAPE_LABELS = {
+  circle: "Коло",
+  cube: "Куб",
+  cone: "Конус",
+  line: "Лінія",
 } as const;
 
 export const SPELL_SAVE_ON_SUCCESS_LABELS = {

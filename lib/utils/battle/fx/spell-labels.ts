@@ -65,6 +65,8 @@ export function targetingLabel(targeting: SpellTargeting): string {
       return "усі полеглі союзники";
     case "area":
       return `область: до ${targeting.maxTargets} ${targeting.side === "ally" ? "союзників" : "ворогів"}`;
+    case "template":
+      return `шаблон: до ${targeting.maxTargets} ${targeting.side === "ally" ? "союзників" : "ворогів"}`;
     case "allAllies":
       return "усі союзники";
     case "allEnemies":

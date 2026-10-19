@@ -78,6 +78,7 @@ function targetIdsFor(t: SpellTargeting): PreviewUnitId[] {
     case "everyone":
       return ["caster", "ally", "e1", "e2"];
     case "area":
+    case "template":
       return (t.side === "ally" ? (["caster", "ally"] as const) : (["e1", "e2"] as const)).slice(0, t.maxTargets);
     case "allEnemies":
       return ["e1", "e2"];

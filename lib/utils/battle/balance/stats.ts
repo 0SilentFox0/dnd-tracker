@@ -74,6 +74,7 @@ function spellTargets(targeting: SpellTargeting): number {
     case "enemy":
       return 1;
     case "area":
+    case "template":
       return targeting.side === "enemy" ? Math.min(targeting.maxTargets, TYPICAL_TARGETS) : 0;
     case "allEnemies":
     case "everyone":

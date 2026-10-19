@@ -157,7 +157,7 @@ export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
 
   if (t.kind === "ally" || t.kind === "enemy") return t.kind;
 
-  return t.kind === "area" ? t.side : undefined;
+  return t.kind === "area" || t.kind === "template" ? t.side : undefined;
 }
 
 const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
@@ -169,11 +169,13 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
 
+  const isMulti = targeting.kind === "area" || targeting.kind === "template";
+
   const auto = AUTO_TARGETING.includes(targeting.kind);
 
-  const targetMode: SpellPick["targetMode"] = auto ? "none" : targeting.kind === "area" ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
+  const targetMode: SpellPick["targetMode"] = auto ? "none" : isMulti ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
 
-  const maxTargets = targeting.kind === "area" ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+  const maxTargets = isMulti ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
 
   const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
 

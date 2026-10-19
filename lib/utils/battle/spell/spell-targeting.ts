@@ -90,8 +90,11 @@ export function resolveSpellTargets(
     }
     case "ally":
     case "enemy":
-    case "area": {
-      const wanted = targeting.kind === "area" ? targeting.side : targeting.kind;
+    case "area":
+    case "template": {
+      const multi = targeting.kind === "area" || targeting.kind === "template";
+
+      const wanted = multi ? targeting.side : targeting.kind;
 
       if (picked.length === 0) return fail("Оберіть ціль заклинання");
 
@@ -99,13 +102,13 @@ export function resolveSpellTargets(
         return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
       }
 
-      const skill = targeting.kind === "area" ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
+      const skill = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
 
-      const max = targeting.kind === "area" ? targeting.maxTargets : skill.maxTargets;
+      const max = multi ? targeting.maxTargets : skill.maxTargets;
 
-      if (targeting.kind === "area" ? picked.length > max : !validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
+      if (multi ? picked.length > max : !validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
 
-      const expanded = targeting.kind === "area" ? picked.map((p) => p.basicInfo.id) : expandSpellTargets(ps, caster.basicInfo.id, spell, picked.map((p) => p.basicInfo.id));
+      const expanded = multi ? picked.map((p) => p.basicInfo.id) : expandSpellTargets(ps, caster.basicInfo.id, spell, picked.map((p) => p.basicInfo.id));
 
       return { ok: true, targetIds: expanded };
     }

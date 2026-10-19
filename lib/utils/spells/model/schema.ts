@@ -7,13 +7,28 @@ export const SPELL_COSTS = ["action", "bonusAction"] as const;
 
 export const SpellCostSchema = z.enum(SPELL_COSTS);
 
+export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line"] as const;
+
+const rangeField = z.number().int().min(5).max(600).optional();
+
+export const SpellZoneSchema = z.object({ rounds: z.number().int().min(1).max(10), label: z.string().max(60).optional() });
+
 export const SpellTargetingSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("self") }),
-  z.object({ kind: z.literal("ally") }),
-  z.object({ kind: z.literal("enemy") }),
-  z.object({ kind: z.literal("allyDead") }),
+  z.object({ kind: z.literal("ally"), range: rangeField }),
+  z.object({ kind: z.literal("enemy"), range: rangeField }),
+  z.object({ kind: z.literal("allyDead"), range: rangeField }),
   z.object({ kind: z.literal("allAlliesDead") }),
-  z.object({ kind: z.literal("area"), side: z.enum(["ally", "enemy"]), maxTargets: z.number().int().min(1).max(20) }),
+  z.object({ kind: z.literal("area"), side: z.enum(["ally", "enemy"]), maxTargets: z.number().int().min(1).max(20), range: rangeField }),
+  z.object({
+    kind: z.literal("template"),
+    shape: z.enum(TEMPLATE_SHAPES),
+    size: z.number().int().min(5).max(120),
+    side: z.enum(["ally", "enemy"]),
+    maxTargets: z.number().int().min(1).max(20),
+    range: rangeField,
+    zone: SpellZoneSchema.optional(),
+  }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
   z.object({ kind: z.literal("everyone") }),
