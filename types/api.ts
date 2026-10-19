@@ -2,6 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
+import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, GridPoint, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
 // Skills API
@@ -58,6 +59,8 @@ export interface BattleScene {
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
   map?: BattleMapConfig | null;
+  /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
+  audio?: BattleAudioState | null;
   /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
   knowledge?: BattleKnowledge;
 }

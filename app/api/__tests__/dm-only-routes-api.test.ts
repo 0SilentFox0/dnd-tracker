@@ -32,6 +32,7 @@ vi.mock("@/lib/db", () => ({
 import * as artifactSetOne from "@/app/api/campaigns/[id]/artifact-sets/[setId]/route";
 import * as artifactSets from "@/app/api/campaigns/[id]/artifact-sets/route";
 import * as artifacts from "@/app/api/campaigns/[id]/artifacts/route";
+import * as battleAudio from "@/app/api/campaigns/[id]/battles/[battleId]/audio/route";
 import * as inventory from "@/app/api/campaigns/[id]/characters/[characterId]/inventory/route";
 import * as levelUp from "@/app/api/campaigns/[id]/characters/[characterId]/level-up/route";
 import * as characters from "@/app/api/campaigns/[id]/characters/route";
@@ -52,7 +53,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 
 type Handler = (req: Request, ctx: never) => Promise<Response>;
 
-const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1" };
+const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1", battleId: "b1" };
 
 const cases: Array<[string, Handler]> = [
   ["DELETE members/:memberId", member.DELETE],
@@ -78,6 +79,7 @@ const cases: Array<[string, Handler]> = [
   ["PATCH tracks/:trackId", trackOne.PATCH],
   ["DELETE tracks/:trackId", trackOne.DELETE],
   ["PUT tracks/order", trackOrder.PUT],
+  ["POST battles/:battleId/audio", battleAudio.POST],
 ];
 
 const asRole = (role: string | null) => {
