@@ -4,7 +4,6 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { allyOwners, freeUnits, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
-import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
 
 const DM = "dm-user";
@@ -32,12 +31,20 @@ describe("allyOwners", () => {
 describe("setUnitController", () => {
   const order = () => [hero("a", "p1"), hero("b", "p2"), unit("u1"), unit("e1", ParticipantSide.ENEMY)];
 
+  const ok = (r: ReturnType<typeof setUnitController>) => ("participants" in r ? r.participants : []);
+
   it("передає юніта гравцю й назад ДМ (id ДМ або CONTROLLED_BY_DM)", () => {
-    const given = setUnitController(order(), "u1", "p2", DM);
+    const given = ok(setUnitController(order(), "u1", "p2", DM));
 
     expect(owners(given).u1).toBe("p2");
-    expect(owners(setUnitController(given, "u1", DM, DM)).u1).toBe(CONTROLLED_BY_DM);
-    expect(owners(setUnitController(given, "u1", CONTROLLED_BY_DM, DM)).u1).toBe(CONTROLLED_BY_DM);
+    expect(owners(ok(setUnitController(given, "u1", DM, DM))).u1).toBe(CONTROLLED_BY_DM);
+    expect(owners(ok(setUnitController(given, "u1", CONTROLLED_BY_DM, DM))).u1).toBe(CONTROLLED_BY_DM);
+  });
+
+  it("повертає змінений юніт", () => {
+    const r = setUnitController(order(), "u1", "p2", DM);
+
+    expect("unit" in r && r.unit.basicInfo.controlledBy).toBe("p2");
   });
 
   it("помилки: ворожий, не юніт, прикликаний, зачарований, чужий гравець", () => {
@@ -47,11 +54,9 @@ describe("setUnitController", () => {
 
     const ps = [...order(), summoned, charmed];
 
-    for (const id of ["e1", "a", "s", "ch"]) expect(() => setUnitController(ps, id, "p1", DM)).toThrow("Цим юнітом не можна керувати гравцю");
+    for (const id of ["e1", "a", "s", "ch", "missing"]) expect(setUnitController(ps, id, "p1", DM)).toEqual({ error: "Цим юнітом не можна керувати гравцю" });
 
-    expect(() => setUnitController(ps, "u1", "stranger", DM)).toThrow("Гравець не бере участі в бою");
-    expect(() => setUnitController(ps, "u1", "stranger", DM)).toThrow(BattleRuleError);
-    expect(() => setUnitController(ps, "missing", "p1", DM)).toThrow("Цим юнітом не можна керувати гравцю");
+    expect(setUnitController(ps, "u1", "stranger", DM)).toEqual({ error: "Гравець не бере участі в бою" });
   });
 });
 
@@ -65,15 +70,16 @@ describe("randomizeUnitControl", () => {
 
     const ps = [hero("a", "p1"), hero("b", "p2"), unit("u1"), unit("u2"), owned, summoned, charmed, unit("e1", ParticipantSide.ENEMY)];
 
-    const out = randomizeUnitControl(ps, DM, seq(0.1, 0.9));
+    const { participants: out, assigned } = randomizeUnitControl(ps, DM, seq(0.1, 0.9));
 
+    expect(assigned.map((x) => [x.unit.basicInfo.id, x.owner])).toEqual([["u1", "p1"], ["u2", "p2"]]);
     expect(owners(out)).toMatchObject({ u1: "p1", u2: "p2", owned: "p1", s: CONTROLLED_BY_DM, ch: CONTROLLED_BY_DM, e1: CONTROLLED_BY_DM, a: "p1", b: "p2" });
   });
 
   it("без гравців — без змін", () => {
     const ps = [hero("npc", DM), unit("u1")];
 
-    expect(randomizeUnitControl(ps, DM, seq(0.5))).toEqual(ps);
+    expect(randomizeUnitControl(ps, DM, seq(0.5))).toEqual({ participants: ps, assigned: [] });
   });
 
   it("freeUnits — союзні юніти під ДМ", () => {

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DM_ACTOR,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import {
@@ -9,7 +9,7 @@ import {
 } from "@/lib/utils/battle/participant";
 import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, type NewBattleEvent } from "@/lib/utils/battle/store";
+import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -139,18 +139,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       participants: order,
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
-      events: [dmEvent(ctx, added, "DM додав на поле")],
+      events: [dmEvent(ctx.scene.round, `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`, added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
     };
-  };
-}
-
-function dmEvent(ctx: BattleMutationContext, added: BattleParticipant[], verb: string): NewBattleEvent {
-  return {
-    type: "ability",
-    round: ctx.scene.round,
-    actorId: DM_ACTOR.actorId,
-    targets: added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
-    resultText: `${verb}: ${added.map((p) => p.basicInfo.name).join(", ")}`,
-    details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
   };
 }

@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-import { DM_ACTOR } from "@/lib/constants/battle";
-import { freeUnits, ownerHeroNames, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
+import { ownerHeroNames, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
 export const unitControlSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("assign"), participantId: z.string().min(1), controlledBy: z.string().min(1) }),
@@ -13,49 +12,33 @@ export const unitControlSchema = z.discriminatedUnion("mode", [
 export type UnitControlBody = z.infer<typeof unitControlSchema>;
 
 export function unitControlMutation(ctx: BattleMutationContext, body: UnitControlBody): MutationResult {
-  const dmUserId = ctx.userId;
-
-  const text = body.mode === "assign" ? assign(ctx, body, dmUserId) : random(ctx, dmUserId);
+  const outcome = body.mode === "assign" ? assign(ctx, body) : random(ctx);
 
   return {
-    participants: text.participants,
+    participants: outcome.participants,
     pending: ctx.pending,
-    events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: DM_ACTOR.actorId,
-        resultText: text.resultText,
-        details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-      },
-    ],
+    events: [dmEvent(ctx.scene.round, outcome.resultText)],
   };
 }
 
-function assign(ctx: BattleMutationContext, body: Extract<UnitControlBody, { mode: "assign" }>, dmUserId: string) {
-  const participants = setUnitController(ctx.participants, body.participantId, body.controlledBy, dmUserId);
+function assign(ctx: BattleMutationContext, body: Extract<UnitControlBody, { mode: "assign" }>) {
+  const result = setUnitController(ctx.participants, body.participantId, body.controlledBy, ctx.userId);
 
-  const unit = participants.find((p) => p.basicInfo.id === body.participantId);
+  if ("error" in result) throw new BattleRuleError("invalid_target", result.error);
 
-  const owner = unit?.basicInfo.controlledBy ?? body.controlledBy;
+  const owner = result.unit.basicInfo.controlledBy;
 
-  const who = ownerHeroNames(participants, owner) || "ДМ";
+  const who = ownerHeroNames(result.participants, owner) || "ДМ";
 
-  return { participants, resultText: `🎮 ДМ передає ${unit?.basicInfo.name} під керування ${who}` };
+  return { participants: result.participants, resultText: `🎮 ДМ передає ${result.unit.basicInfo.name} під керування ${who}` };
 }
 
-function random(ctx: BattleMutationContext, dmUserId: string) {
-  const free = freeUnits(ctx.participants, dmUserId);
+function random(ctx: BattleMutationContext) {
+  const { participants, assigned } = randomizeUnitControl(ctx.participants, ctx.userId, ctx.rng ?? Math.random);
 
-  const participants = randomizeUnitControl(ctx.participants, dmUserId, ctx.rng ?? Math.random);
+  if (assigned.length === 0) throw new BattleRuleError("action_rejected", "Немає вільних юнітів або гравців із героями на цій стороні");
 
-  const given = free.flatMap((u) => {
-    const after = participants.find((p) => p.basicInfo.id === u.basicInfo.id);
-
-    return after && after.basicInfo.controlledBy !== u.basicInfo.controlledBy ? [`${u.basicInfo.name} → ${ownerHeroNames(participants, after.basicInfo.controlledBy)}`] : [];
-  });
-
-  if (given.length === 0) throw new BattleRuleError("action_rejected", "Немає вільних юнітів або гравців із героями на цій стороні");
+  const given = assigned.map(({ unit, owner }) => `${unit.basicInfo.name} → ${ownerHeroNames(participants, owner)}`);
 
   return { participants, resultText: `🎲 ДМ роздає вільних юнітів: ${given.join(", ")}` };
 }

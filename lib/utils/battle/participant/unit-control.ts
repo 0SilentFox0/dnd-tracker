@@ -1,7 +1,6 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
-import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
 
 export const controlledByDm = (p: BattleParticipant, dmUserId: string | null) =>
@@ -30,22 +29,38 @@ export function ownerHeroNames(order: BattleParticipant[], owner: string): strin
 
 const withController = (p: BattleParticipant, controlledBy: string): BattleParticipant => (p.basicInfo.controlledBy === controlledBy ? p : { ...p, basicInfo: { ...p.basicInfo, controlledBy } });
 
-export function setUnitController(order: BattleParticipant[], unitId: string, controlledBy: string, dmUserId: string): BattleParticipant[] {
+export type SetControllerResult = { participants: BattleParticipant[]; unit: BattleParticipant } | { error: string };
+
+export function setUnitController(order: BattleParticipant[], unitId: string, controlledBy: string, dmUserId: string): SetControllerResult {
   const target = order.find((p) => p.basicInfo.id === unitId);
 
-  if (!target || !isAssignableUnit(target)) throw new BattleRuleError("invalid_target", "Цим юнітом не можна керувати гравцю");
+  if (!target || !isAssignableUnit(target)) return { error: "Цим юнітом не можна керувати гравцю" };
 
   const toDm = controlledBy === CONTROLLED_BY_DM || controlledBy === dmUserId;
 
-  if (!toDm && !allyOwners(order, dmUserId).includes(controlledBy)) throw new BattleRuleError("invalid_target", "Гравець не бере участі в бою");
+  if (!toDm && !allyOwners(order, dmUserId).includes(controlledBy)) return { error: "Гравець не бере участі в бою" };
 
-  return order.map((p) => (p === target ? withController(p, toDm ? CONTROLLED_BY_DM : controlledBy) : p));
+  const unit = withController(target, toDm ? CONTROLLED_BY_DM : controlledBy);
+
+  return { participants: order.map((p) => (p === target ? unit : p)), unit };
 }
 
-export function randomizeUnitControl(order: BattleParticipant[], dmUserId: string, rng: Rng): BattleParticipant[] {
+export function randomizeUnitControl(order: BattleParticipant[], dmUserId: string, rng: Rng): { participants: BattleParticipant[]; assigned: { unit: BattleParticipant; owner: string }[] } {
   const owners = allyOwners(order, dmUserId);
 
-  if (owners.length === 0) return order;
+  const assigned: { unit: BattleParticipant; owner: string }[] = [];
 
-  return order.map((p) => (isAssignableUnit(p) && controlledByDm(p, dmUserId) ? withController(p, owners[Math.floor(rng() * owners.length)]) : p));
+  if (owners.length === 0) return { participants: order, assigned };
+
+  const participants = order.map((p) => {
+    if (!isAssignableUnit(p) || !controlledByDm(p, dmUserId)) return p;
+
+    const unit = withController(p, owners[Math.floor(rng() * owners.length)]);
+
+    if (unit !== p) assigned.push({ unit, owner: unit.basicInfo.controlledBy });
+
+    return unit;
+  });
+
+  return { participants, assigned };
 }

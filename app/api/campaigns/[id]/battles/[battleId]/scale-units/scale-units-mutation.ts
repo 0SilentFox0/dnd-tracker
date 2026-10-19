@@ -1,10 +1,9 @@
 import { z } from "zod";
 
-import { DM_ACTOR } from "@/lib/constants/battle";
 import { LIVE_SCALE_STEP } from "@/lib/constants/battle-balance";
 import { liveScaleEnemyUnits } from "@/lib/utils/battle/balance";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
 export const scaleUnitsSchema = z.object({ direction: z.enum(["buff", "debuff"]) });
 
@@ -20,14 +19,6 @@ export function scaleUnitsMutation(ctx: BattleMutationContext, body: z.infer<typ
   return {
     participants,
     pending: ctx.pending,
-    events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: DM_ACTOR.actorId,
-        resultText: `${label} (~${pct}%) — ${scaled.join(", ")}`,
-        details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
-      },
-    ],
+    events: [dmEvent(ctx.scene.round, `${label} (~${pct}%) — ${scaled.join(", ")}`)],
   };
 }
