@@ -11,18 +11,28 @@ export function mapSize(map: Pick<BattleMapConfig, "cols" | "rows">): { width: n
   return { width: map.cols * UNIT, height: map.rows * UNIT };
 }
 
-/** клітинка під точкою екрана; rect — прямокутник SVG сітки з урахуванням зуму */
-export function cellAtPoint(
-  map: Pick<BattleMapConfig, "cols" | "rows">,
-  rect: { left: number; top: number; width: number; height: number },
-  clientX: number,
-  clientY: number,
-): GridPoint | null {
-  if (rect.width <= 0 || rect.height <= 0) return null;
+/** a…f екранної матриці SVG (`svg.getScreenCTM()`), яка вже містить зум, зсув і поворот карти */
+export interface ScreenMatrix {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+}
 
-  const x = Math.floor(((clientX - rect.left) / rect.width) * map.cols);
+export function cellAtScreenPoint(map: Pick<BattleMapConfig, "cols" | "rows">, ctm: ScreenMatrix, clientX: number, clientY: number): GridPoint | null {
+  const det = ctm.a * ctm.d - ctm.b * ctm.c;
 
-  const y = Math.floor(((clientY - rect.top) / rect.height) * map.rows);
+  if (!det) return null;
+
+  const dx = clientX - ctm.e;
+
+  const dy = clientY - ctm.f;
+
+  const x = Math.floor((ctm.d * dx - ctm.c * dy) / det / UNIT);
+
+  const y = Math.floor((ctm.a * dy - ctm.b * dx) / det / UNIT);
 
   return x >= 0 && y >= 0 && x < map.cols && y < map.rows ? { x, y } : null;
 }
@@ -59,4 +69,28 @@ export function fitMapBox(avail: { width: number; height: number }, map: Pick<Ba
   const ratio = map.cols / map.rows;
 
   return { width: Math.min(avail.width, avail.height * ratio), height: Math.min(avail.height, avail.width / ratio) };
+}
+
+export interface MapView {
+  width: number;
+  height: number;
+  rotated: boolean;
+}
+
+// поворот лише коли клітинка стає помітно більшою — інакше карта даремно «лягає на бік»
+const ROTATE_MIN_GAIN = 1.15;
+
+/** рамка карти на екрані; rotated — карта повернута на 90° за годинниковою, width/height уже переставлені */
+export function fitMapView(
+  avail: { width: number; height: number },
+  map: Pick<BattleMapConfig, "cols" | "rows">,
+  { rotatable = false }: { rotatable?: boolean } = {},
+): MapView {
+  const flat = fitMapBox(avail, map);
+
+  if (!rotatable) return { ...flat, rotated: false };
+
+  const turned = fitMapBox(avail, { cols: map.rows, rows: map.cols });
+
+  return turned.width / map.rows > (flat.width / map.cols) * ROTATE_MIN_GAIN ? { ...turned, rotated: true } : { ...flat, rotated: false };
 }

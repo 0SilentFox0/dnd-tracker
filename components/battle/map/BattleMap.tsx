@@ -11,13 +11,13 @@ import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import {
   blockedSet,
-  cellAtPoint,
+  cellAtScreenPoint,
   cellCenter,
   cellKey,
   cellLine,
   type CellMark,
   cellPolygon,
-  fitMapBox,
+  fitMapView,
   isMoveMark,
   mapSize,
   tokenBox,
@@ -34,6 +34,7 @@ export interface BattleMapProps {
   actions?: BattleMapActions;
   className?: string;
   editing?: BattleMapEditing;
+  rotatable?: boolean;
 }
 
 export interface BattleMapEditing {
@@ -239,7 +240,7 @@ interface Stroke {
   cells: Map<string, GridPoint>;
 }
 
-export function BattleMap({ map, participants, view, actions, className, editing = {} }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, editing = {}, rotatable = false }: BattleMapProps) {
   const { clickableBlocked, showBlocked, strokeTool } = editing;
 
   const painting = Boolean(strokeTool && actions?.onStroke);
@@ -305,7 +306,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
       s.moved = true;
 
-      const cell = cellAtPoint({ cols, rows }, svg.getBoundingClientRect(), e.clientX, e.clientY);
+      const ctm = svg.getScreenCTM();
+
+      const cell = ctm && cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY);
 
       if (!cell || (cell.x === s.last.x && cell.y === s.last.y)) return;
 
@@ -347,9 +350,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
     };
   }, [painting, onStroke, cols, rows]);
 
-  const fit = fitMapBox(avail, map);
+  const fit = fitMapView(avail, map, { rotatable });
 
-  const pxPerUnit = fit.width / size.width;
+  const pxPerUnit = (fit.rotated ? fit.height : fit.width) / size.width;
 
   const tokens = useMemo(
     () =>
@@ -381,6 +384,12 @@ export function BattleMap({ map, participants, view, actions, className, editing
       {...bind}
     >
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
+      {/* поворот усередині шару зуму, тож панорама й щипок лишаються в екранних координатах */}
+      <div
+        data-map-rotated={fit.rotated || undefined}
+        className={cn("absolute left-0 top-0 origin-top-left", !fit.rotated && "inset-0")}
+        style={fit.rotated ? { width: fit.height, height: fit.width, transform: `translateX(${fit.width}px) rotate(90deg)` } : undefined}
+      >
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
           <GridLayer
@@ -402,7 +411,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           )}
         </svg>
         {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
-        <div data-map-tokens style={painting ? { opacity: 0.35 } : undefined}>
+        <div data-map-tokens className={cn(fit.rotated && "*:-rotate-90")} style={painting ? { opacity: 0.35 } : undefined}>
         {tokens.map(({ p, box }) => (
           <MapToken
             key={p.basicInfo.id}
@@ -434,6 +443,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           );
         })}
         </div>
+      </div>
       </div>
     </div>
     </div>

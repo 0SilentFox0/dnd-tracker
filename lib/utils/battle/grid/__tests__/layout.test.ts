@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellAtPoint, cellCenter, cellPolygon, fitMapBox, mapSize, tokenBox, UNIT } from "../layout";
+import { cellAtScreenPoint, cellCenter, cellPolygon, fitMapBox, fitMapView, mapSize, tokenBox, UNIT } from "../layout";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
@@ -42,20 +42,59 @@ describe("fitMapBox", () => {
   });
 });
 
-describe("cellAtPoint", () => {
-  const map = { cols: 4, rows: 2 };
+describe("fitMapView", () => {
+  const wide = { cols: 20, rows: 12 };
 
-  it("переводить точку екрана в клітинку з урахуванням зсуву й масштабу", () => {
-    const rect = { left: 100, top: 50, width: 400, height: 200 };
-
-    expect(cellAtPoint(map, rect, 100, 50)).toEqual({ x: 0, y: 0 });
-    expect(cellAtPoint(map, rect, 499, 249)).toEqual({ x: 3, y: 1 });
-    expect(cellAtPoint(map, rect, 260, 160)).toEqual({ x: 1, y: 1 });
+  it("без rotatable не повертає навіть у портретному контейнері", () => {
+    expect(fitMapView({ width: 300, height: 600 }, wide)).toEqual({ width: 300, height: 180, rotated: false });
   });
 
-  it("поза сіткою або нульовий розмір — null", () => {
-    expect(cellAtPoint(map, { left: 0, top: 0, width: 400, height: 200 }, 400, 10)).toBeNull();
-    expect(cellAtPoint(map, { left: 0, top: 0, width: 400, height: 200 }, -1, 10)).toBeNull();
-    expect(cellAtPoint(map, { left: 0, top: 0, width: 0, height: 0 }, 0, 0)).toBeNull();
+  it("широка карта в портретному контейнері — повернута, рамка з переставленими сторонами", () => {
+    expect(fitMapView({ width: 300, height: 600 }, wide, { rotatable: true })).toEqual({ width: 300, height: 500, rotated: true });
+  });
+
+  it("широка карта в широкому контейнері — без повороту", () => {
+    expect(fitMapView({ width: 600, height: 300 }, wide, { rotatable: true })).toEqual({ width: 500, height: 300, rotated: false });
+  });
+
+  it("майже квадратна карта — поворот майже нічого не дає, лишається як є", () => {
+    expect(fitMapView({ width: 300, height: 600 }, { cols: 11, rows: 10 }, { rotatable: true }).rotated).toBe(false);
+  });
+
+  it("висока карта в портретному контейнері — без повороту", () => {
+    expect(fitMapView({ width: 300, height: 600 }, { cols: 10, rows: 20 }, { rotatable: true }).rotated).toBe(false);
+  });
+
+  it("порожній контейнер — без повороту", () => {
+    expect(fitMapView({ width: 0, height: 0 }, wide, { rotatable: true })).toEqual({ width: 0, height: 0, rotated: false });
+  });
+});
+
+describe("cellAtScreenPoint", () => {
+  const map = { cols: 4, rows: 2 };
+
+  it("зсув і масштаб: 100 px на клітинку, сітка з (100, 50)", () => {
+    const ctm = { a: 1, b: 0, c: 0, d: 1, e: 100, f: 50 };
+
+    expect(cellAtScreenPoint(map, ctm, 100, 50)).toEqual({ x: 0, y: 0 });
+    expect(cellAtScreenPoint(map, ctm, 499, 249)).toEqual({ x: 3, y: 1 });
+    expect(cellAtScreenPoint(map, { ...ctm, a: 0.5, d: 0.5 }, 260, 110)).toEqual({ x: 3, y: 1 });
+  });
+
+  it("поворот на 90° за годинниковою: верхній рядок карти — праворуч", () => {
+    // rotate(90deg) + translateX(висота сітки 200 px): (x, y) → (200 − y, x)
+    const ctm = { a: 0, b: 1, c: -1, d: 0, e: 200, f: 0 };
+
+    expect(cellAtScreenPoint(map, ctm, 190, 10)).toEqual({ x: 0, y: 0 });
+    expect(cellAtScreenPoint(map, ctm, 10, 10)).toEqual({ x: 0, y: 1 });
+    expect(cellAtScreenPoint(map, ctm, 190, 390)).toEqual({ x: 3, y: 0 });
+  });
+
+  it("поза сіткою або вироджена матриця — null", () => {
+    const ctm = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+
+    expect(cellAtScreenPoint(map, ctm, 400, 10)).toBeNull();
+    expect(cellAtScreenPoint(map, ctm, -1, 10)).toBeNull();
+    expect(cellAtScreenPoint(map, { ...ctm, a: 0, d: 0 }, 0, 0)).toBeNull();
   });
 });

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BattleFormMap } from "@/components/battle/setup/BattleFormMap";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
+import { UNIT } from "@/lib/utils/battle/grid";
 
 vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
 vi.stubGlobal(
@@ -44,9 +45,7 @@ const CELL_PX = 10;
 function press(c: HTMLElement, key: string) {
   const svg = (cell(c, key) as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
 
-  const { cols, rows } = seen.editor.state.map;
-
-  svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: cols * CELL_PX, height: rows * CELL_PX, right: 0, bottom: 0, x: 0, y: 0, toJSON: () => ({}) });
+  svg.getScreenCTM = () => ({ a: CELL_PX / UNIT, b: 0, c: 0, d: CELL_PX / UNIT, e: 0, f: 0 }) as DOMMatrix;
 
   const [x, y] = key.split(":").map(Number);
 

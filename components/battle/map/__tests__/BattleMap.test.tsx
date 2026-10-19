@@ -324,6 +324,38 @@ describe("BattleMap", () => {
   });
 });
 
+describe("BattleMap — поворот у портреті", () => {
+  const wide: BattleMapConfig = { ...square, cols: 8, rows: 4 };
+
+  const clip = (c: HTMLElement) => c.querySelector("[data-fx-clip]") as HTMLElement;
+
+  it("rotatable: широка карта у вузькому контейнері лягає вертикально, токени стоять рівно", () => {
+    avail = { width: 300, height: 600 };
+
+    const { container } = render(<BattleMap map={wide} participants={people} rotatable />);
+
+    expect(clip(container).style.width).toBe("300px");
+    expect(clip(container).style.height).toBe("600px");
+
+    const layer = container.querySelector("[data-map-rotated]") as HTMLElement;
+
+    expect(layer.style.width).toBe("600px");
+    expect(layer.style.height).toBe("300px");
+    expect(layer.style.transform).toBe("translateX(300px) rotate(90deg)");
+    expect(container.querySelector("[data-map-tokens]")?.className).toContain("*:-rotate-90");
+    expect(layer.querySelector('[data-fx-participant="h"]')).not.toBeNull();
+  });
+
+  it("без rotatable (десктоп) карта не повертається", () => {
+    avail = { width: 300, height: 600 };
+
+    const { container } = render(<BattleMap map={wide} participants={people} />);
+
+    expect(container.querySelector("[data-map-rotated]")).toBeNull();
+    expect(clip(container).style.height).toBe("150px");
+  });
+});
+
 describe("BattleMap — terrain stroke", () => {
   function setup(props: Partial<Parameters<typeof BattleMap>[0]> = {}) {
     const onStroke = vi.fn();
@@ -332,7 +364,8 @@ describe("BattleMap — terrain stroke", () => {
 
     const svg = (utils.container.querySelector("polygon") as SVGPolygonElement).ownerSVGElement as SVGSVGElement;
 
-    svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 400, height: 300, right: 400, bottom: 300, x: 0, y: 0, toJSON: () => ({}) });
+    // 100 px на клітинку: одиниця SVG = 1 px екрана
+    svg.getScreenCTM = () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) as DOMMatrix;
 
     const cell = (key: string) => utils.container.querySelector(`polygon[data-fx-cell="${key}"]`) as Element;
 
