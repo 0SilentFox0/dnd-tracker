@@ -1,4 +1,4 @@
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { starPath } from "../../runtime/shapes";
 import { glow, spritePx } from "../../runtime/texture";
 import type { AuraAnimation } from "./types";
@@ -37,7 +37,7 @@ export const stunAura: AuraAnimation = {
       starPath(g, st.x, st.y, size * 0.45, size * 0.2, 5, -Math.PI / 2 + st.a);
       g.fill();
 
-      if (Math.random() < 6 * dt) parts.spawn({ x: st.x, y: st.y, vx: rand(-6, 6) * s, vy: rand(-4, 6) * s, life: rand(0.3, 0.5), size0: 5 * s, size1: 1 * s, tint: "#ffe98a" });
+      if (chance(0.1, dt)) parts.spawn({ x: st.x, y: st.y, vx: rand(-6, 6) * s, vy: rand(-4, 6) * s, life: rand(0.3, 0.5), size0: 5 * s, size1: 1 * s, tint: "#ffe98a" });
     }
 
     g.globalAlpha = 1;

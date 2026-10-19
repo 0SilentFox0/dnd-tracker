@@ -1,6 +1,6 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, farSide, type FxPoint, rand, wavePoints } from "../runtime/geometry";
+import { arcControl, bezier, chance, farSide, type FxPoint, rand, wavePoints } from "../runtime/geometry";
 import { emit, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { taperedStroke, twinkle } from "../runtime/shapes";
@@ -187,10 +187,10 @@ export const vampire: FxAnimation = ({ stage, from, to, targetEls }) =>
       });
     }
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t > DRINK_MS && t < TOTAL_MS - 600 && Math.random() < 0.5) {
+      if (t > DRINK_MS && t < TOTAL_MS - 600 && chance(0.5, dt)) {
         const s = streams[Math.floor(rand(0, streams.length))].from;
 
         emit(stage, { x: s.x + rand(-6, 6), y: s.y + rand(-6, 6) }, { tints: MIST, speed: [5, 15], life: [0.5, 0.9], scale: [0.4, 0.7], drag: 1, additive: false, alpha: 0.3 });

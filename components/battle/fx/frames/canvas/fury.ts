@@ -1,5 +1,5 @@
 import { edgeGlow, emitOnPerimeter, roundRect } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
 
@@ -39,11 +39,11 @@ export const furyFrame: FrameAnimation = async (s, box) => {
   });
 
   for (let i = 0; i < PULSES; i++) {
-    await tween(s, PULSE_MS, (v) => {
+    await tween(s, PULSE_MS, (v, dt) => {
       beat = Math.max(0, Math.sin(Math.min(1, v * 1.6) * Math.PI)) ** 0.6;
       wave = Math.min(1, v * 1.4);
 
-      if (Math.random() < 0.6) emitOnPerimeter(s, box, { tints: WISP, speed: [10, 35], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [rand(0.18, 0.3), 0.04], gravity: -60, drag: 0.8 });
+      if (chance(0.6, dt)) emitOnPerimeter(s, box, { tints: WISP, speed: [10, 35], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [rand(0.18, 0.3), 0.04], gravity: -60, drag: 0.8 });
     });
   }
 

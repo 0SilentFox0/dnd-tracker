@@ -1,6 +1,6 @@
 import { envelope } from "../../runtime/easing";
 import { bottomPoint, edgeGlow, verticalFill } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
@@ -69,10 +69,10 @@ export const healFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  await tween(s, HEAL_MS, (v) => {
+  await tween(s, HEAL_MS, (v, dt) => {
     k = v;
 
-    if (v < 0.7 && Math.random() < 0.5) emit(s, bottomPoint(box, 4, 6), { tints: MOTE, speed: [15, 40], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.6, 1], scale: [0.12, 0.03], gravity: -20 });
+    if (v < 0.7 && chance(0.5, dt)) emit(s, bottomPoint(box, 4, 6), { tints: MOTE, speed: [15, 40], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.6, 1], scale: [0.12, 0.03], gravity: -20 });
   });
   hide();
 };

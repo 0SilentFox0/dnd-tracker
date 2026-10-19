@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { motionPath } from "../runtime/motion";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
@@ -210,10 +210,10 @@ export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     schedule(stage, 0, () => void streakBurst(stage, { x: target.x, y: target.y + h }, { colors: ["#3a0a1a", "#6a0a2a", "#ff3a5a"], count: 18, angle: -Math.PI / 2, cone: 1.3, speed: [120, 260], life: [0.25, 0.5], gravity: 500 }));
 
-    const run = tween(stage, TOTAL_MS - ERUPT_MS, (k) => {
+    const run = tween(stage, TOTAL_MS - ERUPT_MS, (k, dt) => {
       t = k * (TOTAL_MS - ERUPT_MS);
 
-      if (t > WITHER_MS - ERUPT_MS && t < WITHER_MS - ERUPT_MS + 300 && Math.random() < 0.6) emit(stage, { x: target.x + rand(-w, w), y: target.y + h }, { tints: ["#1a0610", "#2a0a18"], speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.4, 0.8], additive: false, alpha: 0.5 });
+      if (t > WITHER_MS - ERUPT_MS && t < WITHER_MS - ERUPT_MS + 300 && chance(0.6, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + h }, { tints: ["#1a0610", "#2a0a18"], speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.4, 0.8], additive: false, alpha: 0.5 });
     }).then(hide);
 
     await Promise.all([run, writhe]);

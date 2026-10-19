@@ -1,6 +1,6 @@
 import { clamp01, pulse } from "../../runtime/easing";
 import { bloodFlash, type FrameBox } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
@@ -139,7 +139,7 @@ export const physicalMeleeFrame: FrameAnimation = async (s, box) => {
 
   const emitted = slashes.map(() => 0);
 
-  await tween(s, SLASH_MS, (v) => {
+  await tween(s, SLASH_MS, (v, dt) => {
     k = v;
 
     slashes.forEach((sl, i) => {
@@ -156,7 +156,7 @@ export const physicalMeleeFrame: FrameAnimation = async (s, box) => {
 
         for (let j = 0; j < 4; j++) emit(s, at, { tints: SPARKS, speed: [130, 280], angle: [dir - 1.3, dir + 1.3], life: [0.22, 0.5], scale: [rand(0.07, 0.12), 0.015], gravity: 420, drag: 2 });
 
-        if (t > 0.2 && t < 0.8 && Math.random() < 0.6) emit(s, at, { tints: BLOOD, speed: [40, 110], angle: [dir - 0.8, dir + 0.8], life: [0.3, 0.55], scale: [rand(0.1, 0.16), 0.03], gravity: 300, drag: 1.5 });
+        if (t > 0.2 && t < 0.8 && chance(0.6, dt)) emit(s, at, { tints: BLOOD, speed: [40, 110], angle: [dir - 0.8, dir + 0.8], life: [0.3, 0.55], scale: [rand(0.1, 0.16), 0.03], gravity: 300, drag: 1.5 });
       }
     });
   });

@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, farSide, type FxPoint, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, farSide, type FxPoint, rand } from "../runtime/geometry";
 import { motionPath } from "../runtime/motion";
 import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
@@ -198,15 +198,15 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
         ])
       : wait(stage, 0);
 
-    const run = tween(stage, TOTAL_MS - IMPACT_MS.slow, (k) => {
+    const run = tween(stage, TOTAL_MS - IMPACT_MS.slow, (k, dt) => {
       t = k * (TOTAL_MS - IMPACT_MS.slow);
 
       const m = drag.sample(t);
 
       // Heavy smoke sinking off the row, and dust where its feet scrape as it is hauled back.
-      if (t < FADE_MS - IMPACT_MS.slow && Math.random() < 0.5) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
+      if (t < FADE_MS - IMPACT_MS.slow && chance(0.5, dt)) emit(stage, { x: target.x + m.x + rand(-w, w), y: target.y + rand(-h, 0) }, { tints: SMOKE, speed: [4, 12], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.8, 1.3], scale: [0.4, 0.9], additive: false, alpha: 0.45, gravity: 30 });
 
-      if (t > CLAMP_MS - IMPACT_MS.slow + 140 && t < 1400 && Math.random() < 0.5) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
+      if (t > CLAMP_MS - IMPACT_MS.slow + 140 && t < 1400 && chance(0.5, dt)) emit(stage, { x: target.x + m.x - dir * rand(0, w * 0.6), y: target.y + h }, { tints: ["#6a6058", "#4a423c"], speed: [10, 40], angle: dir > 0 ? [Math.PI * 1.05, Math.PI * 1.3] : [-Math.PI * 0.3, -Math.PI * 0.05], life: [0.5, 0.8], scale: [0.3, 0.7], additive: false, alpha: 0.4 });
     }).then(hide);
 
     await Promise.all([run, heavy]);

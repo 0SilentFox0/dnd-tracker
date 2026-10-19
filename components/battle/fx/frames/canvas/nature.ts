@@ -1,6 +1,6 @@
 import { envelope } from "../../runtime/easing";
 import { edgeGlow, emitOnPerimeter, perimeter, verticalFill } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { leafPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
@@ -63,10 +63,10 @@ export const natureFrame: FrameAnimation = async (s, box) => {
     g.restore();
   });
 
-  await tween(s, SWIRL_MS, (v) => {
+  await tween(s, SWIRL_MS, (v, dt) => {
     k = v;
 
-    if (v < 0.8 && Math.random() < 0.6) emitOnPerimeter(s, box, { tints: SPECK, speed: [15, 45], life: [0.4, 0.8], scale: [0.09, 0.03], drag: 1 }, { offset: [0, 12] });
+    if (v < 0.8 && chance(0.6, dt)) emitOnPerimeter(s, box, { tints: SPECK, speed: [15, 45], life: [0.4, 0.8], scale: [0.09, 0.03], drag: 1 }, { offset: [0, 12] });
   });
   hide();
 };

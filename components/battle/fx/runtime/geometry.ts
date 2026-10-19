@@ -7,6 +7,11 @@ export function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
+/** A per-frame `Math.random() < p` tuned at 60 Hz, scaled by `dt` so the emission rate is the same at any frame rate. */
+export function chance(p: number, dt: number) {
+  return Math.random() < p * 60 * dt;
+}
+
 export function pick<T>(list: T[]) {
   return list[Math.floor(Math.random() * list.length)];
 }

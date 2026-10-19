@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, pick, rand } from "../runtime/geometry";
+import { chance, type FxPoint, pick, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
@@ -141,11 +141,11 @@ export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
     });
   });
 
-  return tween(stage, TOTAL_MS, (k) => {
+  return tween(stage, TOTAL_MS, (k, dt) => {
     t = k * TOTAL_MS;
 
     // A few petals lifted off by the wave's breath.
-    if (t > IMPACT_MS.healwave && t < TOTAL_MS - 500 && Math.random() < 0.35) {
+    if (t > IMPACT_MS.healwave && t < TOTAL_MS - 500 && chance(0.35, dt)) {
       const f = pick(flowers);
 
       if (radius() > f.dist) emit(stage, f, { tints: PETALS.slice(0, 3), speed: [10, 30], angle: [-Math.PI * 0.8, -Math.PI * 0.2], life: [0.6, 1], scale: [0.14, 0.05], gravity: -10, additive: false, alpha: 0.9 });

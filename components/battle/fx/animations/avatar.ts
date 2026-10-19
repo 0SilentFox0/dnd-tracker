@@ -1,6 +1,6 @@
 import { clamp01, envelope } from "../runtime/easing";
 import { summonSpot } from "../runtime/figure";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { schedule, show, tween } from "../runtime/stage";
@@ -172,22 +172,22 @@ export const avatar: FxAnimation = ({ stage, to, targetEls }) =>
       void ring(stage, { x, y: ground }, "#b04dff", 750, H * 0.7, 3, 0.25);
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       if (t > 150 && t < FORM_MS + 100) {
         gather(SMOKE, false, 0.7, [1.1, 0.4]);
 
-        if (Math.random() < 0.6) gather(["#d8a8ff", "#b04dff", "#8a2be2"], true, 1, [0.22, 0.06]);
+        if (chance(0.6, dt)) gather(["#d8a8ff", "#b04dff", "#8a2be2"], true, 1, [0.22, 0.06]);
       }
 
       // Smoke curling off the hem, and the figure finally dissolving back into it.
-      if (t > FORM_MS && Math.random() < (t > TOTAL_MS - 500 ? 1 : 0.4)) {
+      if (t > FORM_MS && chance(t > TOTAL_MS - 500 ? 1 : 0.4, dt)) {
         const top = t > TOTAL_MS - 500 ? H : H * 0.15;
 
         emit(stage, { x: x + rand(-H * 0.28, H * 0.28), y: ground - rand(0, top) }, { tints: SMOKE, speed: [8, 25], angle: [-Math.PI * 0.8, -Math.PI * 0.2], life: [0.7, 1.1], scale: [0.5, 1], drag: 1, additive: false, alpha: 0.5, gravity: -15 });
       }
 
-      if (t > FORM_MS && t < TOTAL_MS - 400 && Math.random() < 0.25) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(0, H) }, { tints: VIOLET, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.18, 0.04], gravity: -20 });
+      if (t > FORM_MS && t < TOTAL_MS - 400 && chance(0.25, dt)) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(0, H) }, { tints: VIOLET, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.18, 0.04], gravity: -20 });
     }).then(() => void hide());
   });

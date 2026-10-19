@@ -1,6 +1,6 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
@@ -201,11 +201,11 @@ export const forestspirit: FxAnimation = ({ stage, from, to, targetEls }) =>
       if (el) void animateEl(stage, el, SOOTHE, { duration: 1200, easing: "ease-out" });
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       // Green motes drift from the caster to call the spirit.
-      if (t < FORM_MS + 200 && Math.random() < 0.6) emit(stage, { x: from.x + rand(-8, 8), y: from.y + rand(-8, 8) }, { tints: BREATH, speed: [20, 50], angle: [Math.atan2(target.y - from.y, sx - from.x) - 0.3, Math.atan2(target.y - from.y, sx - from.x) + 0.3], life: [0.5, 0.8], scale: [0.2, 0.04] });
+      if (t < FORM_MS + 200 && chance(0.6, dt)) emit(stage, { x: from.x + rand(-8, 8), y: from.y + rand(-8, 8) }, { tints: BREATH, speed: [20, 50], angle: [Math.atan2(target.y - from.y, sx - from.x) - 0.3, Math.atan2(target.y - from.y, sx - from.x) + 0.3], life: [0.5, 0.8], scale: [0.2, 0.04] });
 
       // The breath: a soft resin-scented plume rolling over the hero.
       if (t > BREATH_MS - 50 && t < BREATH_MS + 650) {
@@ -215,7 +215,7 @@ export const forestspirit: FxAnimation = ({ stage, from, to, targetEls }) =>
 
         const a = Math.atan2(dy, dx);
 
-        if (Math.random() < 0.8) emit(stage, muzzle, { tints: ["#8fe0a8", "#6fd090", "#b8f0c8"], speed: [40, 80], angle: [a - 0.3, a + 0.3], life: [0.6, 0.9], scale: [0.25, 0.55], drag: 1.5, alpha: 0.35 });
+        if (chance(0.8, dt)) emit(stage, muzzle, { tints: ["#8fe0a8", "#6fd090", "#b8f0c8"], speed: [40, 80], angle: [a - 0.3, a + 0.3], life: [0.6, 0.9], scale: [0.25, 0.55], drag: 1.5, alpha: 0.35 });
       }
     }).then(() => void hide());
   });

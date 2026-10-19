@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { chance, type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { chainLink, jaggedShape, polyPath, twinkle } from "../runtime/shapes";
@@ -250,7 +250,7 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
       if (t > WASH_AT - 100 && t < WASH_AT + 800) {
         for (let n = 0; n < 3; n++) emit(stage, { x: target.x + rand(-w * 0.5, w * 0.5), y: sky + rand(0, target.y - sky) }, { tints: WATER, speed: [260, 360], angle: [Math.PI / 2 - 0.05, Math.PI / 2 + 0.05], life: [0.12, 0.25], scale: [0.16, 0.08] });
 
-        if (Math.random() < 0.6) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + h * 0.5 }, { tints: WATER, speed: [40, 120], angle: [-Math.PI * 0.85, -Math.PI * 0.15], life: [0.3, 0.5], scale: [0.18, 0.04], gravity: 300 });
+        if (chance(0.6, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + h * 0.5 }, { tints: WATER, speed: [40, 120], angle: [-Math.PI * 0.85, -Math.PI * 0.15], life: [0.3, 0.5], scale: [0.18, 0.04], gravity: 300 });
       }
     }).then(hide);
 

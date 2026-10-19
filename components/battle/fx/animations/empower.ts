@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { bezier, farSide, type FxPoint, rand } from "../runtime/geometry";
+import { bezier, chance, farSide, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { sword, twinkle } from "../runtime/shapes";
@@ -148,17 +148,17 @@ export const empower: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     schedule(stage, FILL_MS, () => void flash(stage, tip, "#fff6d8", 90, 360));
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       // Incense: a pale trail curling up off the glowing blade.
-      if (t > FILL_MS && t < TOTAL_MS - 400 && Math.random() < 0.45) {
+      if (t > FILL_MS && t < TOTAL_MS - 400 && chance(0.45, dt)) {
         const p = along(rand(0.3, 1));
 
         emit(stage, p, { tints: INCENSE, speed: [8, 25], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.8, 1.3], scale: [0.2, 0.55], additive: false, alpha: 0.3, gravity: -20 });
       }
 
-      if (t > FILL_MS && Math.random() < 0.35) emit(stage, along(rand(0.2, 1)), { tints: ["#fff1b8", "#ffd86b"], speed: [10, 40], life: [0.3, 0.6], scale: [0.2, 0.03] });
+      if (t > FILL_MS && chance(0.35, dt)) emit(stage, along(rand(0.2, 1)), { tints: ["#fff1b8", "#ffd86b"], speed: [10, 40], life: [0.3, 0.6], scale: [0.2, 0.03] });
     }).then(hide);
 
     await run;

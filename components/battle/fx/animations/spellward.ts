@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01 } from "../runtime/easing";
-import { farSide, type FxPoint, pick, rand } from "../runtime/geometry";
+import { chance, farSide, type FxPoint, pick, rand } from "../runtime/geometry";
 import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { hexPath } from "../runtime/shapes";
@@ -141,7 +141,7 @@ export const spellward: FxAnimation = ({ stage, from, to, targetEls }) =>
       g.globalAlpha = 1;
     });
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       for (const o of orbs) {
@@ -157,7 +157,7 @@ export const spellward: FxAnimation = ({ stage, from, to, targetEls }) =>
         for (let n = 0; n < 22; n++) emit(stage, o.hit, { tints: [pick(DUST), o.tint], speed: [40, 150], angle: dir > 0 ? [-Math.PI * 0.4, Math.PI * 0.4] : [Math.PI * 0.6, Math.PI * 1.4], life: [0.5, 1], scale: [0.22, 0.04], gravity: 220, drag: 2 });
       }
 
-      if (t < FORM_MS && Math.random() < 0.6) {
+      if (t < FORM_MS && chance(0.6, dt)) {
         const c = pick(grid);
 
         if (t > c.born) emit(stage, { x: target.x + c.x, y: target.y + c.y }, { tints: DUST, speed: [5, 20], life: [0.3, 0.5], scale: [0.25, 0.04] });

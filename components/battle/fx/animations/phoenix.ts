@@ -1,7 +1,7 @@
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic } from "../runtime/easing";
 import { summonSpot } from "../runtime/figure";
-import { bezier, type FxPoint, rand } from "../runtime/geometry";
+import { bezier, chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { dropPath, feather } from "../runtime/shapes";
@@ -194,7 +194,7 @@ export const phoenix: FxAnimation = ({ stage, from, to, targetEls }) =>
       for (let n = 0; n < 3; n++) schedule(stage, n * 110, () => void ring(stage, { x: pos.x, y: pos.y - S * 0.4 }, "#ffe08a", 520, S * (0.9 + n * 0.3), 2));
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       const fly = clamp01((t - RISE_MS) / (TOTAL_MS - RISE_MS - 250));
@@ -209,7 +209,7 @@ export const phoenix: FxAnimation = ({ stage, from, to, targetEls }) =>
       pos = glide > 0 ? bezier(peak, { x: peak.x + dir * H * 0.3, y: peak.y }, away, glide * glide) : { x, y: start.y + (peak.y - start.y) * easeOutCubic(clamp01(fly / 0.4)) + Math.sin(fly * 30) * 2 };
       tilt = dir * glide * 0.5;
 
-      if (Math.random() < 0.7) emit(stage, { x: pos.x + rand(-S * 0.3, S * 0.3), y: pos.y + S * rand(0.6, 1.1) }, { tints: FLAME, speed: [10, 40], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.3, 0.6], scale: [0.22, 0.04], gravity: -60 });
+      if (chance(0.7, dt)) emit(stage, { x: pos.x + rand(-S * 0.3, S * 0.3), y: pos.y + S * rand(0.6, 1.1) }, { tints: FLAME, speed: [10, 40], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.3, 0.6], scale: [0.22, 0.04], gravity: -60 });
 
       // Its fire burns down to ash at the end: even death only sends it back for a moment.
       if (fly > 0.8) for (let n = 0; n < 2; n++) emit(stage, { x: pos.x + rand(-S * 0.4, S * 0.4), y: pos.y + rand(-S * 0.2, S * 0.2) }, { tints: ASH, speed: [10, 30], angle: [Math.PI * 0.3, Math.PI * 0.7], life: [0.6, 1], scale: [0.2, 0.08], gravity: 40, additive: false, alpha: 0.8 });

@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, rand } from "../runtime/geometry";
 import { emit, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { leafPath, twinkle } from "../runtime/shapes";
@@ -151,15 +151,15 @@ export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
       if (el) void animateEl(stage, el, SOOTHE, { duration: 1100, easing: "ease-out" });
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t < ARRIVE_MS && Math.random() < 0.5) {
+      if (t < ARRIVE_MS && chance(0.5, dt)) {
         const p = bezier(from, ctrl, target, easeOutCubic(clamp01(t / (ARRIVE_MS - 140))));
 
         emit(stage, p, { tints: MOTES, speed: [5, 20], life: [0.3, 0.5], scale: [0.18, 0.03] });
       }
 
-      if (t > IMPACT_MS.healword && t < TOTAL_MS - 600 && Math.random() < 0.4) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
+      if (t > IMPACT_MS.healword && t < TOTAL_MS - 600 && chance(0.4, dt)) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
     }).then(() => void hide());
   });

@@ -1,6 +1,6 @@
 import { clamp01 } from "../../runtime/easing";
 import { bottomPoint, edgeGlow, type FrameBox, roundRect } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
@@ -99,13 +99,13 @@ export const coldFrame: FrameAnimation = async (s, box) => {
   await tween(s, GROW_MS, (v) => {
     grow = v * 1.1;
   });
-  await tween(s, HOLD_MS, () => {
-    if (Math.random() < 0.08) emit(s, { x: box.x + rand(0, box.w), y: box.y + rand(0, box.h) }, { tints: ["#ffffff", "#d8f3ff"], speed: [0, 4], life: [0.3, 0.6], scale: [0.18, 0.02] });
+  await tween(s, HOLD_MS, (_, dt) => {
+    if (chance(0.08, dt)) emit(s, { x: box.x + rand(0, box.w), y: box.y + rand(0, box.h) }, { tints: ["#ffffff", "#d8f3ff"], speed: [0, 4], life: [0.3, 0.6], scale: [0.18, 0.02] });
   });
-  await tween(s, THAW_MS, (v) => {
+  await tween(s, THAW_MS, (v, dt) => {
     fade = 1 - v;
 
-    if (Math.random() < 0.3) emit(s, bottomPoint(box, 4), { tints: ["#cfeeff", "#8fd3ff"], speed: [5, 15], angle: [Math.PI * 0.45, Math.PI * 0.55], life: [0.5, 0.8], scale: [0.1, 0.06], gravity: 260 });
+    if (chance(0.3, dt)) emit(s, bottomPoint(box, 4), { tints: ["#cfeeff", "#8fd3ff"], speed: [5, 15], angle: [Math.PI * 0.45, Math.PI * 0.55], life: [0.5, 0.8], scale: [0.1, 0.06], gravity: 260 });
   });
   hide();
 };

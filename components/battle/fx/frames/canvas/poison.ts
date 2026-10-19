@@ -1,5 +1,5 @@
 import { bottomPoint, edgeGlow, verticalFill } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
@@ -63,7 +63,7 @@ export const poisonFrame: FrameAnimation = async (s, box) => {
   const step = (dt: number, spawn: boolean) => {
     if (spawn && bubbles.length < 40) {
       for (let i = 0; i < 2; i++) {
-        if (Math.random() < 0.55) bubbles.push({ ...bottomPoint(box, 6, 6), r: rand(2.5, 6.5), vy: rand(-55, -25), phase: rand(0, Math.PI * 2), age: 0, life: rand(0.5, 1.1) });
+        if (chance(0.55, dt)) bubbles.push({ ...bottomPoint(box, 6, 6), r: rand(2.5, 6.5), vy: rand(-55, -25), phase: rand(0, Math.PI * 2), age: 0, life: rand(0.5, 1.1) });
       }
     }
 

@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, type Debris, type FxPoint, pick, rand, stepBodies } from "../runtime/geometry";
+import { arcControl, bezier, chance, type Debris, type FxPoint, pick, rand, stepBodies } from "../runtime/geometry";
 import { perTarget } from "../runtime/recipes";
 import { drawRustPatch, polyline, type RustPatch,rustPatch } from "../runtime/shapes";
 import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
@@ -158,7 +158,7 @@ export const rust: FxAnimation = ({ stage, from, to, targetEls }) =>
       t = k * (TOTAL_MS - HIT_MS);
 
       // Rust flakes peel off and flutter down.
-      if (t > 350 && t < FADE_MS - HIT_MS && Math.random() < 0.55) {
+      if (t > 350 && t < FADE_MS - HIT_MS && chance(0.55, dt)) {
         const b = pick(blots);
 
         flakes.push({ x: b.x + rand(-b.r, b.r), y: b.y + rand(-b.r, b.r) * 0.5, vx: rand(-25, 25), vy: rand(-30, 0), rot: rand(0, 6), spin: rand(-6, 6), size: rand(2.5, 4.5), color: pick(FLAKES), born: t });

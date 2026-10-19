@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { rand } from "../runtime/geometry";
+import { chance, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { burst } from "../runtime/recipes";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
@@ -159,7 +159,7 @@ export const holyword: FxAnimation = async ({ stage, from, to, targetEls }) => {
     });
   });
 
-  const run = tween(stage, TOTAL_MS, (k) => {
+  const run = tween(stage, TOTAL_MS, (k, dt) => {
     t = k * TOTAL_MS;
 
     // The dark ones smoulder: black smoke and embers rising off them after the strike.
@@ -167,9 +167,9 @@ export const holyword: FxAnimation = async ({ stage, from, to, targetEls }) => {
       to.forEach((p, i) => {
         const { w, h } = sizes[i];
 
-        if (t > 1350 && Math.random() < 0.5) emit(stage, { x: p.x + rand(-w * 0.7, w * 0.7), y: p.y + rand(-h * 0.3, h * 0.6) }, { tints: SMOKE, speed: [15, 40], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.7, 1.2], scale: [0.4, 1.1], additive: false, alpha: 0.4, gravity: -30 });
+        if (t > 1350 && chance(0.5, dt)) emit(stage, { x: p.x + rand(-w * 0.7, w * 0.7), y: p.y + rand(-h * 0.3, h * 0.6) }, { tints: SMOKE, speed: [15, 40], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.7, 1.2], scale: [0.4, 1.1], additive: false, alpha: 0.4, gravity: -30 });
 
-        if (Math.random() < 0.6) emit(stage, { x: p.x + rand(-w * 0.8, w * 0.8), y: p.y + rand(-h * 0.5, h * 0.6) }, { tints: EMBERS, speed: [20, 60], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.18, 0.04], gravity: -50 });
+        if (chance(0.6, dt)) emit(stage, { x: p.x + rand(-w * 0.8, w * 0.8), y: p.y + rand(-h * 0.5, h * 0.6) }, { tints: EMBERS, speed: [20, 60], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.18, 0.04], gravity: -50 });
       });
     }
   }).then(hide);

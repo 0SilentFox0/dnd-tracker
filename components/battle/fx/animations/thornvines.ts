@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { dropPath } from "../runtime/shapes";
@@ -169,7 +169,7 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
       amp = 1.2 - 0.35 * tight + Math.max(0, Math.sin(((t - BIND_MS) / 650) * Math.PI * 2)) * 0.06 * tight;
 
       // Yellow sap oozing from the thorns and dripping.
-      if (t > BIND_MS + 100 && t < TOTAL_MS - 600 && Math.random() < 0.25) {
+      if (t > BIND_MS + 100 && t < TOTAL_MS - 600 && chance(0.25, dt)) {
         const th = thorns[Math.floor(rand(0, thorns.length))];
 
         const p = at(vines[th.vine], th.u);
@@ -184,6 +184,6 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
 
       for (let n = drops.length - 1; n >= 0; n--) if (drops[n].y > ground + 14) drops.splice(n, 1);
 
-      if (t > BIND_MS && t < TOTAL_MS - 500 && Math.random() < 0.3) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SAP, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.18, 0.05], gravity: -15 });
+      if (t > BIND_MS && t < TOTAL_MS - 500 && chance(0.3, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SAP, speed: [8, 20], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.8], scale: [0.18, 0.05], gravity: -15 });
     }).then(() => void hide());
   });

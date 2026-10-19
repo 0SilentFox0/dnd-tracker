@@ -1,6 +1,6 @@
 import { faceOf } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, type FxPoint, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geometry";
 import { motionPath } from "../runtime/motion";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
@@ -203,7 +203,7 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     let next = ARRIVE_MS + WRAP_MS;
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       if (t < ARRIVE_MS) {
@@ -219,7 +219,7 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
         next = t + 260;
       }
 
-      if (t > ARRIVE_MS && t < LIFT_MS && Math.random() < 0.4) emit(stage, { x: eyes.x + rand(-fr * 1.4, fr * 1.4), y: eyes.y + rand(-fr * 0.5, fr * 0.5) }, { tints: HAZE, speed: [5, 18], life: [0.7, 1.1], scale: [0.4, 0.9], additive: false, alpha: 0.5, gravity: -10 });
+      if (t > ARRIVE_MS && t < LIFT_MS && chance(0.4, dt)) emit(stage, { x: eyes.x + rand(-fr * 1.4, fr * 1.4), y: eyes.y + rand(-fr * 0.5, fr * 0.5) }, { tints: HAZE, speed: [5, 18], life: [0.7, 1.1], scale: [0.4, 0.9], additive: false, alpha: 0.5, gravity: -10 });
     }).then(hide);
 
     await Promise.all([run, darkened]);

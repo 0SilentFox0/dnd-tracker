@@ -1,6 +1,6 @@
 import { pulse } from "../../runtime/easing";
 import { bottomPoint, edgeGlow, verticalFill } from "../../runtime/frame-kit";
-import { rand } from "../../runtime/geometry";
+import { chance, rand } from "../../runtime/geometry";
 import { PALETTE } from "../../runtime/palette";
 import { emit } from "../../runtime/primitives";
 import { show, tween } from "../../runtime/stage";
@@ -33,7 +33,7 @@ export const fireFrame: FrameAnimation = async (s, box) => {
     g.shadowBlur = 0;
   });
 
-  const burning = tween(s, BURN_MS, (v) => {
+  const burning = tween(s, BURN_MS, (v, dt) => {
     k = v * 0.8;
 
     const strength = 1 - v * 0.6;
@@ -50,7 +50,7 @@ export const fireFrame: FrameAnimation = async (s, box) => {
       emit(s, at, { tints: FLAME, speed: [25, 75], angle: [-Math.PI * 0.62, -Math.PI * 0.38], life: [0.35, 0.75], scale: [rand(0.26, 0.48), 0.04], drag: 0.6, gravity: -40 });
     }
 
-    if (Math.random() < 0.45) emit(s, bottomPoint(box), { tints: EMBER, speed: [60, 130], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1.1], scale: [0.08, 0.02], gravity: -20 });
+    if (chance(0.45, dt)) emit(s, bottomPoint(box), { tints: EMBER, speed: [60, 130], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1.1], scale: [0.08, 0.02], gravity: -20 });
   });
 
   await burning;

@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { farSide, type FxPoint, rand } from "../runtime/geometry";
+import { chance, farSide, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { burst } from "../runtime/recipes";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
@@ -235,9 +235,9 @@ export const retribution: FxAnimation = async ({ stage, from, to, targetEls }) =
     if (el) void animateEl(stage, el, SLAM, { duration: 600, easing: "ease-out" });
   });
 
-  await tween(stage, TOTAL_MS, (k) => {
+  await tween(stage, TOTAL_MS, (k, dt) => {
     t = k * TOTAL_MS;
 
-    if (t > SMITE_MS && t < TOTAL_MS - 500 && Math.random() < 0.5) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(-h * 0.4, h * 0.6) }, { tints: GOLD, speed: [15, 50], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.2, 0.04], gravity: -40 });
+    if (t > SMITE_MS && t < TOTAL_MS - 500 && chance(0.5, dt)) emit(stage, { x: target.x + rand(-w * 0.8, w * 0.8), y: target.y + rand(-h * 0.4, h * 0.6) }, { tints: GOLD, speed: [15, 50], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [0.2, 0.04], gravity: -40 });
   }).then(hide);
 };

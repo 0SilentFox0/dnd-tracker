@@ -1,5 +1,5 @@
 import { easeOutCubic } from "../runtime/easing";
-import { type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
+import { chance, type Debris, type FxPoint, rand, stepBodies } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { burst, impactSplash, perTarget } from "../runtime/recipes";
 import { jaggedShape, polyPath } from "../runtime/shapes";
@@ -72,7 +72,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
     g.restore();
   });
 
-  await tween(stage, FALL_MS, (k) => {
+  await tween(stage, FALL_MS, (k, dt) => {
     const e = k ** 1.7;
 
     pos = { x: start.x + (target.x - start.x) * e, y: start.y + (target.y - start.y) * e };
@@ -80,7 +80,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
 
     for (let i = 0; i < 3; i++) emit(stage, pos, { tints: palette.tints, speed: [10, 60], life: [0.25, 0.55], scale: [0.6, 0.06], spread: 6, drag: 1.5 });
 
-    if (Math.random() < 0.5) emit(stage, pos, { tints: SMOKE, speed: [5, 20], life: [0.5, 0.9], scale: [0.5, 1.3], spread: 4, additive: false, alpha: 0.5, gravity: -20 });
+    if (chance(0.5, dt)) emit(stage, pos, { tints: SMOKE, speed: [5, 20], life: [0.5, 0.9], scale: [0.5, 1.3], spread: 4, additive: false, alpha: 0.5, gravity: -20 });
   });
   hideHead();
 

@@ -1,7 +1,7 @@
 import { halfSize } from "../runtime/anchors";
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { rand } from "../runtime/geometry";
+import { chance, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { crescent } from "../runtime/shapes";
@@ -127,9 +127,9 @@ export const moonbeam: FxAnimation = ({ stage, from, to, targetEls }) =>
       if (el) void animateEl(stage, el, PIN, { duration: 1100, easing: "ease-out" });
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t > STRIKE_MS && t < TOTAL_MS - 500 && Math.random() < 0.45) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SILVER, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.16, 0.03], gravity: -15 });
+      if (t > STRIKE_MS && t < TOTAL_MS - 500 && chance(0.45, dt)) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h, h) }, { tints: SILVER, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.16, 0.03], gravity: -15 });
     }).then(() => void hide());
   });

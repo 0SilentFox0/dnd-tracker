@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { animateEl, schedule, show, tween } from "../runtime/stage";
 import { glow, sprite, spritePx } from "../runtime/texture";
@@ -207,14 +207,14 @@ export const netherhands: FxAnimation = ({ stage, to, targetEls }) => {
     });
   });
 
-  return tween(stage, TOTAL_MS, (k) => {
+  return tween(stage, TOTAL_MS, (k, dt) => {
     t = k * TOTAL_MS;
 
     // Warmth and hope seeping out of the seized: pale cold motes rising off them.
     for (const r of rows) {
       const local = t - r.delay;
 
-      if (local > GRAB_MS && local < SINK_MS && Math.random() < 0.5) emit(stage, { x: r.p.x + rand(-r.w * 0.8, r.w * 0.8), y: r.p.y + rand(-r.h * 0.4, r.h * 0.6) }, { tints: CHILL, speed: [15, 40], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.6, 1], scale: [0.22, 0.05], gravity: -30 });
+      if (local > GRAB_MS && local < SINK_MS && chance(0.5, dt)) emit(stage, { x: r.p.x + rand(-r.w * 0.8, r.w * 0.8), y: r.p.y + rand(-r.h * 0.4, r.h * 0.6) }, { tints: CHILL, speed: [15, 40], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.6, 1], scale: [0.22, 0.05], gravity: -30 });
     }
   }).then(() => void hide());
 };

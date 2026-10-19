@@ -1,7 +1,7 @@
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { figureHead, figurePath, summonSpot } from "../runtime/figure";
-import { rand } from "../runtime/geometry";
+import { chance, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { dropPath } from "../runtime/shapes";
@@ -155,16 +155,16 @@ export const firesummon: FxAnimation = ({ stage, from, to, targetEls }) =>
       void flash(stage, { x, y: ground - H * 0.55 }, "#ffd25a", H * 1.2, 450);
     });
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       if (t > ERUPT_MS && t < FORM_MS + 200) for (let n = 0; n < 4; n++) emit(stage, { x: x + rand(-H * 0.18, H * 0.18), y: ground - rand(0, H * 0.5) }, { tints: FLAME, speed: [60, 160], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.4, 0.8], scale: [0.6, 0.08], gravity: -120 });
 
       // Flames lick off the head and shoulders; the footsteps keep smouldering.
       if (t > FORM_MS && t < TOTAL_MS - 300) {
-        if (Math.random() < 0.8) emit(stage, { x: x + rand(-H * 0.2, H * 0.2), y: ground - H * rand(0.65, 0.95) }, { tints: FLAME, speed: [30, 80], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.3, 0.6], scale: [0.4, 0.05], gravity: -90 });
+        if (chance(0.8, dt)) emit(stage, { x: x + rand(-H * 0.2, H * 0.2), y: ground - H * rand(0.65, 0.95) }, { tints: FLAME, speed: [30, 80], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [0.3, 0.6], scale: [0.4, 0.05], gravity: -90 });
 
-        if (Math.random() < 0.3) {
+        if (chance(0.3, dt)) {
           const step = steps[Math.floor(Math.random() * 2)];
 
           emit(stage, { x: step.x + rand(-3, 3), y: step.y }, { tints: EMBER, speed: [10, 40], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.4, 0.8], scale: [0.25, 0.04], gravity: -40 });

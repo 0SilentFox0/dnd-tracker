@@ -1,6 +1,6 @@
 import { halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { rand } from "../runtime/geometry";
+import { chance, rand } from "../runtime/geometry";
 import { emit, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { plusSign, twinkle } from "../runtime/shapes";
@@ -122,10 +122,10 @@ export const sunbeam: FxAnimation = ({ stage, to, targetEls }) =>
 
     schedule(stage, BEAM_MS, () => void ring(stage, target, "#ffe39a", 800, w * 0.9, 3, 0.45));
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t > BEAM_MS - 150 && t < TOTAL_MS - 600 && Math.random() < 0.7) {
+      if (t > BEAM_MS - 150 && t < TOTAL_MS - 600 && chance(0.7, dt)) {
         const u = rand(0, 1);
 
         emit(stage, { x: at.x + (rand(-1, 1) * w * 0.8 * u), y: at.y + (target.y + h - at.y) * u }, { tints: WARM, speed: [5, 25], life: [0.5, 0.9], scale: [0.18, 0.03], gravity: 10 });

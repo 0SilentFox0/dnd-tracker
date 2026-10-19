@@ -1,5 +1,5 @@
 import { clamp01 } from "../runtime/easing";
-import { cubicBezier, type FxPoint, rand } from "../runtime/geometry";
+import { chance, cubicBezier, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { leafPath, taperedStroke } from "../runtime/shapes";
@@ -130,10 +130,10 @@ export const entangle: FxAnimation = async ({ stage, from, to, palette, spec }) 
 
     for (let i = 0; i < 10; i++) dust(1);
 
-    await tween(stage, GROW_MS, (k) => {
+    await tween(stage, GROW_MS, (k, dt) => {
       grow = 1 - (1 - k) ** 2;
 
-      if (Math.random() < 0.6) dust(0.8);
+      if (chance(0.6, dt)) dust(0.8);
     });
 
     for (let i = 0; i < 12; i++) emit(stage, { x: target.x + rand(-30, 30), y: target.y + rand(-20, 20) }, { tints: ["#e8ffb0", "#a8e060", "#ffffff"], speed: [20, 80], life: [0.3, 0.6], scale: [0.18, 0.02], drag: 2 });

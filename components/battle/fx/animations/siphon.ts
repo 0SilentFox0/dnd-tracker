@@ -1,7 +1,7 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { type FxPoint, pick, rand, wavePoints } from "../runtime/geometry";
+import { chance, type FxPoint, pick, rand, wavePoints } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { taperedStroke } from "../runtime/shapes";
@@ -126,13 +126,13 @@ export const siphon: FxAnimation = ({ stage, from, to, targetEls }) =>
       t = k * TOTAL_MS;
 
       // Grey fog creeps in round the foe first, curling into its sleeves.
-      if (t < 1600 && Math.random() < 0.7) {
+      if (t < 1600 && chance(0.7, dt)) {
         const side = Math.random() < 0.5 ? -1 : 1;
 
         emit(stage, { x: target.x + side * (w + rand(10, 30)), y: target.y + rand(-h * 0.3, h) }, { tints: FOG, speed: [20, 45], angle: side > 0 ? [Math.PI * 0.9, Math.PI * 1.1] : [-0.1, 0.1], life: [0.9, 1.4], scale: [0.3, 0.7], additive: false, alpha: 0.2, drag: 1 });
       }
 
-      if (t > LATCH_MS && t < LET_GO_MS - 150 && Math.random() < 0.4) motes.push({ lane: Math.floor(rand(0, 3)), u: 1, speed: rand(0.7, 1.1), tint: pick(LIGHT) });
+      if (t > LATCH_MS && t < LET_GO_MS - 150 && chance(0.4, dt)) motes.push({ lane: Math.floor(rand(0, 3)), u: 1, speed: rand(0.7, 1.1), tint: pick(LIGHT) });
 
       for (const m of motes) m.u -= m.speed * dt;
 

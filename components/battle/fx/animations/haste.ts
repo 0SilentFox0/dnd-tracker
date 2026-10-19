@@ -1,5 +1,5 @@
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, type FxPoint, rand } from "../runtime/geometry";
+import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geometry";
 import { playGhost } from "../runtime/ghosts";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
@@ -203,7 +203,7 @@ export const haste: FxAnimation = ({ stage, from, to, targetEls }) =>
 
         f.a += f.speed * dt;
 
-        if (k > 0.68 && Math.random() < 0.08) {
+        if (k > 0.68 && chance(0.08, dt)) {
           const r = 30 + f.h * 46;
 
           const v = f.speed * r * 0.6;
@@ -212,7 +212,7 @@ export const haste: FxAnimation = ({ stage, from, to, targetEls }) =>
         }
       }
 
-      if (k < 0.7 && Math.random() < 0.5) emit(stage, { x: target.x + rand(-40, 40), y: target.y + 24 }, { tints: WIND, speed: [30, 80], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.3, 0.6], scale: [0.14, 0.03], spread: 6 });
+      if (k < 0.7 && chance(0.5, dt)) emit(stage, { x: target.x + rand(-40, 40), y: target.y + 24 }, { tints: WIND, speed: [30, 80], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.3, 0.6], scale: [0.14, 0.03], spread: 6 });
     }).then(hide);
 
     await Promise.all([run, dash]);

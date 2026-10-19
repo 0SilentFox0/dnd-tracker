@@ -1,4 +1,5 @@
 import { edgeGlow, emitOnPerimeter, roundRect } from "../../runtime/frame-kit";
+import { chance } from "../../runtime/geometry";
 import { show, tween } from "../../runtime/stage";
 import type { FrameAnimation } from "./types";
 
@@ -45,12 +46,12 @@ export const necroticFrame: FrameAnimation = async (s, box, { light }) => {
     g.restore();
   });
 
-  await tween(s, CLOSE_MS, (v) => {
+  await tween(s, CLOSE_MS, (v, dt) => {
     k = Math.min(1, v / 0.6);
 
     emitOnPerimeter(s, box, { tints: light ? INK : SMOKE, speed: [12, 30], life: [0.7, 1.1], scale: light ? [0.45, 0.9] : [0.7, 1.3], drag: 1.2, additive: false, alpha: light ? 0.22 : 0.5 }, { count: light ? 2 : 3, inward: 0.6 });
 
-    if (Math.random() < 0.45) emitOnPerimeter(s, box, { tints: WISP, speed: [8, 22], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1], scale: [0.16, 0.03], gravity: -25 }, { offset: [4, 14] });
+    if (chance(0.45, dt)) emitOnPerimeter(s, box, { tints: WISP, speed: [8, 22], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1], scale: [0.16, 0.03], gravity: -25 }, { offset: [4, 14] });
   });
   await tween(s, FADE_MS, (v) => {
     fade = 1 - v;

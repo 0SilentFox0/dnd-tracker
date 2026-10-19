@@ -1,6 +1,6 @@
 import { clamp01, easeOutCubic } from "../runtime/easing";
 import { figureHead, figurePath, summonSpot } from "../runtime/figure";
-import { type FxPoint, rand, zigzag } from "../runtime/geometry";
+import { chance, type FxPoint, rand, zigzag } from "../runtime/geometry";
 import { flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { polyline } from "../runtime/shapes";
@@ -188,7 +188,7 @@ export const airsummon: FxAnimation = ({ stage, to, targetEls }) =>
 
     let next = 200;
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       if (t > next && t < CALM_MS) {
@@ -196,7 +196,7 @@ export const airsummon: FxAnimation = ({ stage, to, targetEls }) =>
         next = t + rand(110, 220);
       }
 
-      if (t > STRIKE_MS && t < TOTAL_MS - 500 && Math.random() < 0.06) {
+      if (t > STRIKE_MS && t < TOTAL_MS - 500 && chance(0.06, dt)) {
         const p = { x: x + rand(-H * 0.15, H * 0.15), y: ground - rand(H * 0.2, H * 0.8) };
 
         arcs.push({ pts: zigzag(p, { x: p.x + rand(-H * 0.12, H * 0.12), y: p.y + rand(-H * 0.12, H * 0.12) }, 4, H * 0.03), until: t + 90 });

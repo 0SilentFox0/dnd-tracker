@@ -1,6 +1,6 @@
 import { clamp01, easeOutCubic } from "../runtime/easing";
 import { figurePath, summonSpot } from "../runtime/figure";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { jaggedShape, polyPath } from "../runtime/shapes";
@@ -196,10 +196,10 @@ export const earthsummon: FxAnimation = ({ stage, to, targetEls }) =>
       if (el) void animateEl(stage, el, SHAKE, { duration: 420 });
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       // Grit trickling off the stone body.
-      if (t > LOCKED_MS && t < TOTAL_MS - 300 && Math.random() < 0.35) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(H * 0.3, H * 0.8) }, { tints: DUST, speed: [5, 20], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.5, 0.8], scale: [0.18, 0.08], gravity: 220, additive: false, alpha: 0.8 });
+      if (t > LOCKED_MS && t < TOTAL_MS - 300 && chance(0.35, dt)) emit(stage, { x: x + rand(-H * 0.3, H * 0.3), y: ground - rand(H * 0.3, H * 0.8) }, { tints: DUST, speed: [5, 20], angle: [Math.PI * 0.4, Math.PI * 0.6], life: [0.5, 0.8], scale: [0.18, 0.08], gravity: 220, additive: false, alpha: 0.8 });
     }).then(() => void hide());
   });

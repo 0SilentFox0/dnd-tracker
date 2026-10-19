@@ -1,7 +1,7 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { sinkingBadge } from "../runtime/badge";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { cloudPath } from "../runtime/shapes";
@@ -128,7 +128,7 @@ export const raincloud: FxAnimation = ({ stage, to, targetEls }) =>
       if (t > RAIN_MS && t < STOP_MS) {
         const width = size * 0.75;
 
-        for (let n = 0; n < 3; n++) if (Math.random() < 0.8) drops.push({ x: cloud.x + rand(-width / 2, width / 2), y: cloud.y + size * 0.15, vy: rand(260, 340), len: rand(8, 13) });
+        for (let n = 0; n < 3; n++) if (chance(0.8, dt)) drops.push({ x: cloud.x + rand(-width / 2, width / 2), y: cloud.y + size * 0.15, vy: rand(260, 340), len: rand(8, 13) });
       }
 
       for (const d of drops) {
@@ -141,12 +141,12 @@ export const raincloud: FxAnimation = ({ stage, to, targetEls }) =>
 
         d.vy = 0;
 
-        if (Math.random() < 0.3) emit(stage, d, { tints: MIST, speed: [10, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.2, 0.35], scale: [0.12, 0.03], gravity: 200 });
+        if (chance(0.3, dt)) emit(stage, d, { tints: MIST, speed: [10, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.2, 0.35], scale: [0.12, 0.03], gravity: 200 });
       }
 
       drops.splice(0, drops.length, ...drops.filter((d) => d.vy > 0));
 
-      if (t > RAIN_MS + 300 && t < STOP_MS && Math.random() < 0.35) emit(stage, { x: target.x + rand(-w, w), y: floor - rand(0, 8) }, { tints: MIST, speed: [4, 14], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [1, 1.5], scale: [0.5, 1.1], additive: false, alpha: 0.22 });
+      if (t > RAIN_MS + 300 && t < STOP_MS && chance(0.35, dt)) emit(stage, { x: target.x + rand(-w, w), y: floor - rand(0, 8) }, { tints: MIST, speed: [4, 14], angle: [-Math.PI * 0.6, -Math.PI * 0.4], life: [1, 1.5], scale: [0.5, 1.1], additive: false, alpha: 0.22 });
     }).then(hide);
 
     await Promise.all([run, gloomOver]);

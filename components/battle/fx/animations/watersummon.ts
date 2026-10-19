@@ -1,7 +1,7 @@
 import { lightBeam } from "../runtime/beam";
 import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
 import { figureHead, figurePath, summonSpot } from "../runtime/figure";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit, flash, ring, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { polyPath, twinkle } from "../runtime/shapes";
@@ -204,7 +204,7 @@ export const watersummon: FxAnimation = ({ stage, from, to, targetEls }) =>
       void streakBurst(stage, { x, y: ground - H * 0.55 }, { colors: ICE, count: 16, speed: [80, 200], gravity: 120, life: [0.3, 0.6] });
     });
 
-    await tween(stage, TOTAL_MS, (k) => {
+    await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
       // Spray tumbling off the top of the spout.
@@ -215,7 +215,7 @@ export const watersummon: FxAnimation = ({ stage, from, to, targetEls }) =>
       }
 
       // Cold mist rolling off its feet.
-      if (t > FREEZE_MS && t < TOTAL_MS - 400 && Math.random() < 0.35) {
+      if (t > FREEZE_MS && t < TOTAL_MS - 400 && chance(0.35, dt)) {
         const side = Math.random() < 0.5 ? -1 : 1;
 
         emit(stage, { x: x + side * rand(0, H * 0.15), y: ground - rand(0, 6) }, { tints: MIST, speed: [15, 40], angle: side < 0 ? [Math.PI * 0.95, Math.PI * 1.05] : [-0.05, 0.05], life: [0.7, 1.1], scale: [0.3, 0.6], drag: 1.2, additive: false, alpha: 0.22 });

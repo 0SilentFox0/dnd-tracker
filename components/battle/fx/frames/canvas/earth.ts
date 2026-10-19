@@ -1,6 +1,6 @@
 import { clamp01 } from "../../runtime/easing";
 import { bottomPoint, edgeGlow, type FrameBox, verticalFill } from "../../runtime/frame-kit";
-import { type Debris, type FxPoint, pick, rand, stepBodies } from "../../runtime/geometry";
+import { chance, type Debris, type FxPoint, pick, rand, stepBodies } from "../../runtime/geometry";
 import { emit } from "../../runtime/primitives";
 import { jaggedShape, polyline, polyPath } from "../../runtime/shapes";
 import { show, tween } from "../../runtime/stage";
@@ -109,7 +109,7 @@ export const earthFrame: FrameAnimation = async (s, box, { light }) => {
     k = v;
     physics(dt);
 
-    if (v < 0.5 && Math.random() < 0.35) emit(s, bottomPoint(box), { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: light ? 0.2 : 0.5 });
+    if (v < 0.5 && chance(0.35, dt)) emit(s, bottomPoint(box), { tints: DUST, speed: [8, 30], angle: [-Math.PI * 0.9, -Math.PI * 0.1], life: [0.6, 1], scale: [0.35, 0.8], drag: 2, additive: false, alpha: light ? 0.2 : 0.5 });
   });
   await tween(s, FADE_MS, (v, dt) => {
     fade = 1 - v;

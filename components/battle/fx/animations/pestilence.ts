@@ -1,6 +1,6 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
+import { chance, type FxPoint, rand } from "../runtime/geometry";
 import { emit } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { animateEl, show, tween, wait } from "../runtime/stage";
@@ -175,10 +175,10 @@ export const pestilence: FxAnimation = ({ stage, from, to, targetEls }) =>
         )
       : wait(stage, 0);
 
-    const run = tween(stage, TOTAL_MS, (k) => {
+    const run = tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t > ARRIVE_MS && t < SCATTER_MS && Math.random() < 0.5) emit(stage, { x: face.x + rand(-fr, fr), y: face.y + rand(-fr * 0.6, fr * 0.6) }, { tints: MIASMA, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.8, 1.2], scale: [0.4, 0.9], additive: false, alpha: 0.4, gravity: -12 });
+      if (t > ARRIVE_MS && t < SCATTER_MS && chance(0.5, dt)) emit(stage, { x: face.x + rand(-fr, fr), y: face.y + rand(-fr * 0.6, fr * 0.6) }, { tints: MIASMA, speed: [6, 18], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.8, 1.2], scale: [0.4, 0.9], additive: false, alpha: 0.4, gravity: -12 });
     }).then(hide);
 
     await Promise.all([run, sicken]);

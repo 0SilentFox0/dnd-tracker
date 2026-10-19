@@ -1,6 +1,6 @@
 import { faceOf, halfSize } from "../runtime/anchors";
 import { clamp01, easeOutCubic } from "../runtime/easing";
-import { cubicBezier, type FxPoint, pick, rand } from "../runtime/geometry";
+import { chance, cubicBezier, type FxPoint, pick, rand } from "../runtime/geometry";
 import { emit, shoot } from "../runtime/primitives";
 import { perTarget } from "../runtime/recipes";
 import { leafPath, taperedStroke } from "../runtime/shapes";
@@ -187,7 +187,7 @@ export const rebirth: FxAnimation = ({ stage, from, to, targetEls }) =>
     await tween(stage, TOTAL_MS, (k, dt) => {
       t = k * TOTAL_MS;
 
-      if (t > BLOOM_MS + 350 && t < RISE_MS + 500 && Math.random() < 0.7) {
+      if (t > BLOOM_MS + 350 && t < RISE_MS + 500 && chance(0.7, dt)) {
         const s = pick(stems);
 
         const b = pick(s.blossoms);
