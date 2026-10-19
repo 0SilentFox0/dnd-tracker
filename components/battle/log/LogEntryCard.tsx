@@ -1,5 +1,5 @@
 import { memo, type ReactNode, useMemo } from "react";
-import { ChevronDown, Frown, Hourglass, type LucideIcon, ScrollText, Shield, Sparkles, Star, Swords, Zap } from "lucide-react";
+import { ChevronDown, Flame, Frown, Hourglass, type LucideIcon, ScrollText, Shield, Sparkles, Star, Swords, Zap } from "lucide-react";
 
 import { HpChips } from "./HpChips";
 
@@ -30,7 +30,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
 }) {
   const view = useMemo(() => logEntryView(entry), [entry]);
 
-  const Icon = ICON[entry.actionType] ?? Sparkles;
+  const Icon = view.kind === "hazard" ? Flame : (ICON[entry.actionType] ?? Sparkles);
 
   const enemy = entry.actorSide === ParticipantSide.ENEMY;
 

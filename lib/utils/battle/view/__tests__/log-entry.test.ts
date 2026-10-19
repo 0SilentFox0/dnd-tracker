@@ -31,6 +31,14 @@ describe("logEntryView", () => {
     expect(attack.isTrigger).toBe(false);
     expect(logEntryView(entry("Тригери початку раунду 2: a")).isTrigger).toBe(true);
   });
+
+  it("запис небезпеки — мітка «небезпека» і kind hazard", () => {
+    const v = logEntryView({ ...entry("Тест: 5 fire шкоди від «Вогонь»"), actionType: "ability", actionDetails: { hazard: { label: "Вогонь", damageType: "fire", damage: 5 } } } as BattleAction);
+
+    expect(v.kindLabel).toBe("небезпека");
+    expect(v.kind).toBe("hazard");
+    expect(logEntryView({ ...entry("x"), actionType: "ability" } as BattleAction).kind).toBeUndefined();
+  });
 });
 
 describe("groupLogByRound", () => {

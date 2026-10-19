@@ -316,6 +316,32 @@ describe("небезпека на початку ходу в advanceTurn", () =>
     expect(out.participants[1].combatStats.currentHp).toBe(15);
   });
 
+  it("лише небезпека — окремий запис з actionDetails.hazard, без запису DOT", () => {
+    const out = advanceTurn({ participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
+
+    expect(out.actions.some((a) => a.actionDetails.damageRolls?.[0]?.dice === "DOT")).toBe(false);
+    expect(out.actions.find((a) => a.actionDetails.hazard)?.actionDetails.hazard).toEqual({ label: "Вогонь", damageType: "fire", damage: 5 });
+  });
+
+  it("DoT і небезпека — два записи, сума змін HP дорівнює загальній втраті", () => {
+    const burning = { ...placed(goblin), battleData: { ...placed(goblin).battleData, activeEffects: [makeEffect("burn", { name: "Опік", type: "debuff" as const, dotDamage: { damagePerRound: 3, damageType: "fire" } })] } };
+
+    const out = advanceTurn({ participants: [hero, burning], pending: [], scene, map, rng: () => 0 });
+
+    const dot = out.actions.find((a) => a.actionDetails.damageRolls?.[0]?.dice === "DOT");
+
+    const hazard = out.actions.find((a) => a.actionDetails.hazard);
+
+    expect(dot?.hpChanges).toEqual([expect.objectContaining({ oldHp: 20, newHp: 17, change: -3 })]);
+    expect(hazard?.hpChanges).toEqual([expect.objectContaining({ oldHp: 17, newHp: 12, change: -5 })]);
+
+    const dotIndex = out.actions.findIndex((a) => a === dot);
+
+    expect(dotIndex).toBeGreaterThanOrEqual(0);
+    expect(dotIndex).toBeLessThan(out.actions.findIndex((a) => a === hazard));
+    expect(-((dot?.hpChanges[0].change ?? 0) + (hazard?.hpChanges[0].change ?? 0))).toBe(20 - out.participants[1].combatStats.currentHp);
+  });
+
   it("смертельна шкода валить учасника", () => {
     const out = advanceTurn({ participants: [hero, placed(goblin, 3)], pending: [], scene, map, rng: () => 0 });
 

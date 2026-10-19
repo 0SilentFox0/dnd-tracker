@@ -9,6 +9,7 @@ export interface LogEntryView {
   kindLabel: string;
   hasDetails: boolean;
   isTrigger: boolean;
+  kind?: "hazard";
 }
 
 export interface LogRoundGroup {
@@ -48,12 +49,15 @@ export function logEntryView(e: BattleAction): LogEntryView {
     byId.set(c.participantId, { id: c.participantId, name: c.participantName, delta: (prev?.delta ?? 0) - c.change });
   }
 
+  const hazard = !!e.actionDetails?.hazard;
+
   return {
     headline,
     lines,
     hp: [...byId.values()].filter((h) => h.delta !== 0),
-    kindLabel: BATTLE_ACTION_LABELS[e.actionType] ?? "подія",
+    kindLabel: hazard ? "небезпека" : (BATTLE_ACTION_LABELS[e.actionType] ?? "подія"),
     hasDetails: getLogEntryDetailLines(e).length > 0,
     isTrigger: !!triggers,
+    ...(hazard && { kind: "hazard" as const }),
   };
 }

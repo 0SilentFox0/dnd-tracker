@@ -126,6 +126,7 @@ describe("move mutation", () => {
           hpChanges: [expect.objectContaining({ participantId: "hero", change: -5 })],
         }),
       ]);
+      expect(out.events[0]).toMatchObject({ details: { actionDetails: { hazard: { label: "Вогонь", damageType: "fire", damage: 5 } } } });
     });
 
     it("юніт ДМ без ліміту руху все одно отримує шкоду від небезпеки", () => {
@@ -166,6 +167,7 @@ describe("move mutation", () => {
       const out = moveMutation(withTerrain({ "3:0": fire, "3:1": acid }, { participants: [big, at(goblin, { x: 9, y: 4 })] }), { participantId: "hero", to: { x: 2, y: 0 } });
 
       expect(out.events).toHaveLength(1);
+      expect(out.events[0]).toMatchObject({ details: { actionDetails: { hazard: { label: "Кислота", damage: 8 } } } });
       expect(out.participants[0].combatStats.currentHp).toBe(big.combatStats.currentHp - 8);
     });
 

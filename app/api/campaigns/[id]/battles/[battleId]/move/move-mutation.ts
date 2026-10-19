@@ -106,7 +106,10 @@ function resolveHazardHit(
     details: {
       actorName: before.basicInfo.name,
       actorSide: before.basicInfo.side,
-      actionDetails: { damageRolls: [{ dice: cell.damage?.dice ?? String(cell.damage?.amount ?? 0), results: [], total: hit.damage, damageType: cell.damage?.type ?? "" }] },
+      actionDetails: {
+        hazard: { label: cell.label ?? "Небезпечна місцевість", damageType: cell.damage?.type ?? "", damage: hit.damage },
+        damageRolls: [{ dice: cell.damage?.dice ?? String(cell.damage?.amount ?? 0), results: [], total: hit.damage, damageType: cell.damage?.type ?? "" }],
+      },
     },
   };
 

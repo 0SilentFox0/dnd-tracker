@@ -157,6 +157,9 @@ export function runAdvanceTurnLoop(
 
     updatedInitiativeOrder = turnResult.participants;
 
+    // запис DOT закінчується до шкоди небезпеки — вона має власний запис
+    const dotHpAfter = turnResult.hazard?.hpBefore ?? turnResult.participant.combatStats.currentHp;
+
     if (turnResult.damageMessages.length > 0) {
       newLogEntries.push({
         id: `turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
@@ -183,10 +186,41 @@ export function runAdvanceTurnLoop(
             participantId: turnResult.participant.basicInfo.id,
             participantName: turnResult.participant.basicInfo.name,
             oldHp: nextParticipant.combatStats.currentHp,
-            newHp: turnResult.participant.combatStats.currentHp,
-            change:
-              turnResult.participant.combatStats.currentHp -
-              nextParticipant.combatStats.currentHp,
+            newHp: dotHpAfter,
+            change: dotHpAfter - nextParticipant.combatStats.currentHp,
+          },
+        ],
+        isCancelled: false,
+        stateBefore: getStateBeforeForEntry(),
+      });
+    }
+
+    const hazard = turnResult.hazard;
+
+    if (hazard) {
+      newLogEntries.push({
+        id: `hazard-${nextTurnIndex}-${Date.now()}-${attempts}`,
+        battleId,
+        round: nextRound,
+        actionIndex: currentBattleLogLength + newLogEntries.length,
+        timestamp: new Date(),
+        actorId: turnResult.participant.basicInfo.id,
+        actorName: turnResult.participant.basicInfo.name,
+        actorSide: turnResult.participant.basicInfo.side,
+        actionType: "ability",
+        targets: [],
+        actionDetails: {
+          hazard: { label: hazard.label, damageType: hazard.damageType, damage: hazard.damage },
+          damageRolls: [{ dice: "", results: [], total: hazard.damage, damageType: hazard.damageType }],
+        },
+        resultText: hazard.message,
+        hpChanges: [
+          {
+            participantId: turnResult.participant.basicInfo.id,
+            participantName: turnResult.participant.basicInfo.name,
+            oldHp: hazard.hpBefore,
+            newHp: hazard.hpAfter,
+            change: hazard.hpAfter - hazard.hpBefore,
           },
         ],
         isCancelled: false,

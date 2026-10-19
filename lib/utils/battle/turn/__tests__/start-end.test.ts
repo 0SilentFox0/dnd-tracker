@@ -113,24 +113,35 @@ describe("небезпека на початку ходу", () => {
     return createMockParticipant({ combatStats: { ...base.combatStats, currentHp: hp }, battleData: { ...base.battleData, position: { x: 1, y: 1 }, ...over } });
   };
 
-  it("завдає шкоди й пише її в damageMessages", () => {
+  it("завдає шкоди й повертає її окремо від damageMessages", () => {
     const p = standing();
 
     const out = processStartOfTurn(p, 2, [p], () => 0, map);
 
-    expect(out.damageMessages).toEqual(["Тест: 5 fire шкоди від «Вогонь»"]);
+    expect(out.damageMessages).toEqual([]);
+    expect(out.hazard).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, hpAfter: 15, label: "Вогонь", damageType: "fire" });
     expect(out.participant.combatStats.currentHp).toBe(15);
     expect(out.participant.battleData.hazardHitRound).toBe(2);
+  });
+
+  it("DoT і небезпека: damageMessages лише DoT, hpBefore небезпеки — HP після DoT", () => {
+    const p = standing(20, { activeEffects: [makeEffect("burn", { name: "Опік", type: "debuff", dotDamage: { damagePerRound: 3, damageType: "fire" } })] });
+
+    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+
+    expect(out.damageMessages).toEqual(["Тест: 3 fire шкоди від Опік"]);
+    expect(out.hazard).toMatchObject({ hpBefore: 17, hpAfter: 12, damage: 5 });
+    expect(out.participant.combatStats.currentHp).toBe(12);
   });
 
   it("уже отримав шкоду в цьому раунді або без карти — нічого", () => {
     const hit = standing(20, { hazardHitRound: 2 });
 
-    expect(processStartOfTurn(hit, 2, [hit], () => 0, map).damageMessages).toEqual([]);
+    expect(processStartOfTurn(hit, 2, [hit], () => 0, map).hazard).toBeUndefined();
 
     const p = standing();
 
-    expect(processStartOfTurn(p, 2, [p], () => 0).damageMessages).toEqual([]);
+    expect(processStartOfTurn(p, 2, [p], () => 0).hazard).toBeUndefined();
   });
 
   it("імунітет до заклинання, що створило зону, — шкоди немає", () => {
@@ -140,7 +151,7 @@ describe("небезпека на початку ходу", () => {
 
     const out = processStartOfTurn(p, 2, [p], () => 0, wall);
 
-    expect(out.damageMessages).toEqual([]);
+    expect(out.hazard).toBeUndefined();
     expect(out.participant.combatStats.currentHp).toBe(20);
   });
 

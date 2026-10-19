@@ -24,6 +24,16 @@ export interface StartOfTurnResult {
   expiredEffects: string[];
   abilityMessages: string[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
+  hazard?: StartOfTurnHazard;
+}
+
+export interface StartOfTurnHazard {
+  message: string;
+  damage: number;
+  hpBefore: number;
+  hpAfter: number;
+  label: string;
+  damageType: string;
 }
 
 /**
@@ -55,6 +65,8 @@ export function processStartOfTurn(
 
   const healMessages: string[] = [];
 
+  let hazardResult: StartOfTurnHazard | undefined;
+
   // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
@@ -79,8 +91,15 @@ export function processStartOfTurn(
     const hit = hazard && hazardHit(updatedParticipant, hazard, currentRound, allParticipants, rng);
 
     if (hit) {
+      hazardResult = {
+        message: hit.message,
+        damage: hit.damage,
+        hpBefore: updatedParticipant.combatStats.currentHp,
+        hpAfter: hit.participant.combatStats.currentHp,
+        label: hazard.label ?? "Небезпечна місцевість",
+        damageType: hazard.damage?.type ?? "",
+      };
       updatedParticipant = hit.participant;
-      damageMessages.push(hit.message);
     }
 
     const hotResult = applyHOTEffects(updatedParticipant);
@@ -170,6 +189,7 @@ export function processStartOfTurn(
     expiredEffects,
     abilityMessages,
     statusChanged,
+    ...(hazardResult && { hazard: hazardResult }),
   };
 }
 
