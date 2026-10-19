@@ -42,6 +42,20 @@ describe("attack mutation", () => {
     expect(out.scene?.turnIndex).toBeUndefined();
   });
 
+  it("схема: obstacle — необовʼязковий boolean, за замовчуванням false", () => {
+    expect(body().obstacle).toBe(false);
+    expect(body({ obstacle: true }).obstacle).toBe(true);
+    expect(attackBodySchema.safeParse({ attackerId: "hero", targetId: "gob", d20Roll: 15, obstacle: "так" }).success).toBe(false);
+  });
+
+  it("атака з перешкодою — шкода вдвічі менша", async () => {
+    const change = async (obstacle: boolean) => ((await attackMutation(ctx, body({ obstacle }))).events[0].hpChanges as { change: number }[])[0].change;
+
+    const full = await change(false);
+
+    expect(await change(true)).toBe(Math.max(1, Math.floor(full / 2)));
+  });
+
   it("атака з endTurn — хід передається тим самим збереженням", async () => {
     const out = await attackMutation(ctx, body({ endTurn: true }));
 

@@ -20,7 +20,7 @@ const STEPS = ["Зброя", "Ціль", "Кидок", "Шкода", "Підсу
 
 const STEP_INDEX = { weapon: 0, target: 1, roll: 2, damage: 3, summary: 4, submitting: 4 } as const;
 
-const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advantage", "Перевага"], ["disadvantage", "Перешкода"]];
+const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advantage", "Перевага"], ["disadvantage", "Недолік"]];
 
 const btn = "hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em]";
 
@@ -102,7 +102,16 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               <button key={m} type="button" onClick={() => wizard.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0", state.mode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
             ))}
           </div>
-          {state.mode !== "normal" && <div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
+          <button
+            type="button"
+            aria-pressed={state.obstacle}
+            onClick={wizard.toggleObstacle}
+            className={cn("mt-2 flex h-10 w-full items-center justify-between border px-3 text-sm", state.obstacle ? "border-[var(--enemy)] bg-[var(--enemy)]/15 font-bold text-[var(--ink)]" : "border-white/20 text-[#a89c88]")}
+          >
+            <span>Перешкода</span>
+            <span className="text-xs font-normal text-[var(--hud-muted)]">шкода ×0.5</span>
+          </button>
+          {state.mode !== "normal" &&<div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
           <DiceGrid
             sides={20}
             value={second}

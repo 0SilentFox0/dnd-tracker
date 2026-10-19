@@ -138,6 +138,8 @@ export interface AttackData {
   secondRolls?: number[];
   advantageRoll?: number;
   disadvantageRoll?: number;
+  /** «Перешкода»: шкода кожного влучання ×0.5 */
+  obstacle?: boolean;
   damageRolls: number[];
   attackId?: string;
 }

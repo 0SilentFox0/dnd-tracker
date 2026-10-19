@@ -1,5 +1,6 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
@@ -36,6 +37,7 @@ export type AttackPhaseInput = {
     secondRolls?: number[];
     advantageRoll?: number;
     disadvantageRoll?: number;
+    obstacle?: boolean;
     damageRolls: number[];
   };
   battleId: string;
@@ -101,7 +103,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   }
 
   if (attacker.actionFlags.hasUsedAction) {
-    throw new BattleRuleError("action_rejected", "Атакуючий уже використав дію");
+    throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
   }
 
   if (!isActive(attacker)) {
@@ -248,6 +250,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
+      obstacle: data.obstacle,
       rng,
     });
 

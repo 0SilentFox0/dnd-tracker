@@ -22,6 +22,7 @@ export interface ResolveHitParams {
   bonusPercent?: number;
   bonusLabel?: string;
   offTurn?: boolean;
+  obstacle?: boolean;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -40,6 +41,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     bonusPercent: p.bonusPercent,
     bonusLabel: p.bonusLabel,
     offTurn: p.offTurn,
+    obstacle: p.obstacle,
     rng: flow.ctx.rng,
   });
 
@@ -65,7 +67,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     actorId: attackerId,
     targetId,
     attackKind: attackKindOf(attack.type),
-    damage: hitDamage.resistanceResult.finalDamage,
+    damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
   });
 
   const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);

@@ -18,6 +18,8 @@ export interface ProcessAttackParams {
   damageMultiplier?: number;
   bonusPercent?: number;
   bonusLabel?: string;
+  /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
+  obstacle?: boolean;
   rng?: () => number;
 }
 

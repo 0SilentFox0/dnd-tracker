@@ -132,7 +132,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
     slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot }),
-    costUsed: (s: BookSpell) => !!caster && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
+    costUsed: (s: BookSpell) => !!caster && !free && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 

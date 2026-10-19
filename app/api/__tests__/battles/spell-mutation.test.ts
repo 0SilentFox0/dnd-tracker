@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero, participant } from "./fixtures";
 
+import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
 import { createSpellMutation, type SpellMutationDeps } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
@@ -153,6 +155,62 @@ describe("spell mutation", () => {
     const flags = out.participants.find((p) => p.basicInfo.id === "hero")?.actionFlags;
 
     expect(flags).toMatchObject({ hasUsedBonusAction: true, hasUsedAction: false });
+  });
+
+  describe("атака й закляття за дію ділять одну дію ходу", () => {
+    const fighter = { ...caster, battleData: { ...caster.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] } };
+
+    const tough = { ...goblin, combatStats: { ...goblin.combatStats, maxHp: 500, currentHp: 500 } };
+
+    const strike = (participants: BattleParticipant[], over: Partial<Parameters<typeof context>[0]> = {}) =>
+      attackMutation(context({ participants, ...over }), attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 15, damageRolls: [5] }));
+
+    const cast = (participants: BattleParticipant[], row: Spell = spellRow, over: Partial<Parameters<typeof context>[0]> = {}, extra: Record<string, unknown> = {}) =>
+      mutation(row)(context({ participants, ...over }), body(extra) as never);
+
+    it("атака → закляття за дію: 422 action_used", async () => {
+      const after = await strike([fighter, tough]);
+
+      await expect(cast(after.participants)).rejects.toMatchObject({ code: "action_used", message: API_ERRORS.ACTION_USED });
+    });
+
+    it("закляття за дію → атака: 422 action_used", async () => {
+      const after = await cast([fighter, tough]);
+
+      await expect(strike(after.participants)).rejects.toMatchObject({ code: "action_used", message: API_ERRORS.ACTION_USED });
+    });
+
+    it("атака → закляття за бонусну дію: дозволено", async () => {
+      const after = await strike([fighter, tough]);
+
+      const out = await cast(after.participants, { ...spellRow, cost: "bonusAction" } as Spell);
+
+      expect(out.events).toHaveLength(1);
+    });
+
+    it("дві дії за хід (пул додаткових дій): і атака, і закляття", async () => {
+      const twice = { ...fighter, battleData: { ...fighter.battleData, pendingExtraActions: 1 } };
+
+      const after = await strike([twice, tough]);
+
+      const out = await cast(after.participants);
+
+      expect(out.events).toHaveLength(1);
+      expect(out.participants.find((p) => p.basicInfo.id === "hero")?.actionFlags.hasUsedAction).toBe(true);
+    });
+
+    it("вільний каст DM після атаки дозволено і дію не витрачає", async () => {
+      const after = await strike([fighter, tough]);
+
+      const out = await cast(after.participants, spellRow, { isDM: true, userId: "dm" }, { free: true });
+
+      expect(out.events).toHaveLength(1);
+      await expect(cast(after.participants, spellRow, { isDM: true, userId: "dm" })).rejects.toMatchObject({ code: "action_used" });
+
+      const fresh = await cast([fighter, tough], spellRow, { isDM: true, userId: "dm" }, { free: true });
+
+      expect(fresh.participants.find((p) => p.basicInfo.id === "hero")?.actionFlags.hasUsedAction).toBe(false);
+    });
   });
 
   it("кубики мають збігатися з формулою: кількість і грані — invalid_dice", async () => {
