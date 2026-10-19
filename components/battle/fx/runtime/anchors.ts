@@ -18,10 +18,24 @@ function scrollViewport(el: HTMLElement): Box | null {
   return scroller && scroller.scrollHeight > scroller.clientHeight ? scroller.getBoundingClientRect() : null;
 }
 
-function visible(el: HTMLElement) {
+const RANK: Record<string, number> = { map: 0, detail: 2, track: 3 };
+
+/** map > main (без атрибута) > detail > track */
+export function anchorRank(el: HTMLElement): number {
+  return RANK[el.dataset.fxAnchor ?? ""] ?? 1;
+}
+
+const clipBox = (el: HTMLElement): Box | null => el.closest<HTMLElement>("[data-fx-clip]")?.getBoundingClientRect() ?? null;
+
+export function visible(el: HTMLElement) {
   const r = el.getBoundingClientRect();
 
   if (r.width <= 0 || r.height <= 0 || !overlaps(r, { top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth })) return false;
+
+  // зум і панорама виносять токен за межі карти, хоч він і в межах вікна
+  const clip = clipBox(el);
+
+  if (clip && !overlaps(r, clip)) return false;
 
   const viewport = scrollViewport(el);
 
@@ -33,7 +47,7 @@ const escape = (id: string) => (typeof CSS !== "undefined" && CSS.escape ? CSS.e
 function findAnchor(id: string, root: ParentNode = document): HTMLElement | null {
   const all = [...root.querySelectorAll<HTMLElement>(`[data-fx-participant="${escape(id)}"]`)].filter(visible);
 
-  return all.find((el) => el.dataset.fxAnchor !== "track") ?? all[0] ?? null;
+  return all.sort((a, b) => anchorRank(a) - anchorRank(b))[0] ?? null;
 }
 
 function centerOf(el: HTMLElement): FxPoint {

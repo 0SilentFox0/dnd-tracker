@@ -30,6 +30,7 @@ function mapClip(viewport: Rect, scrolls: boolean) {
   const clip = document.createElement("div");
 
   clip.dataset.fxClip = "";
+  clip.getBoundingClientRect = domRect({ ...viewport, h: viewport.h * 3 });
   scroller.appendChild(clip);
   scroller.getBoundingClientRect = domRect(viewport);
   Object.defineProperty(scroller, "clientHeight", { value: viewport.h });
@@ -98,5 +99,82 @@ describe("resolvePoints", () => {
     anchor("t", { x: 10, y: 650, w: 40, h: 40 }, false, clip);
 
     expect(resolvePoints(spec())?.to).toEqual([{ x: 30, y: 670 }]);
+  });
+});
+
+function ranked(id: string, rect: Rect, kind: "map" | "detail" | "track" | null, parent: HTMLElement = document.body) {
+  const el = anchor(id, rect, false, parent);
+
+  if (kind) el.dataset.fxAnchor = kind;
+
+  return el;
+}
+
+describe("ранжування якорів", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("токен карти важливіший за рядок, плитку деталей і трек — незалежно від порядку в DOM", () => {
+    ranked("t", { x: 10, y: 10, w: 20, h: 20 }, "track");
+    ranked("t", { x: 40, y: 10, w: 20, h: 20 }, "detail");
+    ranked("t", { x: 70, y: 10, w: 20, h: 20 }, null);
+    ranked("t", { x: 100, y: 10, w: 20, h: 20 }, "map");
+
+    expect(resolvePoints(spec())?.to[0]).toEqual({ x: 110, y: 20 });
+  });
+
+  it("рядок важливіший за плитку деталей", () => {
+    ranked("t", { x: 40, y: 10, w: 20, h: 20 }, "detail");
+    ranked("t", { x: 70, y: 10, w: 20, h: 20 }, null);
+
+    expect(resolvePoints(spec())?.to[0]).toEqual({ x: 80, y: 20 });
+  });
+});
+
+describe("відсікання за [data-fx-clip]", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  function clipBox(rect: Rect) {
+    const clip = document.createElement("div");
+
+    clip.dataset.fxClip = "";
+    clip.getBoundingClientRect = domRect(rect);
+    document.body.appendChild(clip);
+
+    return clip;
+  }
+
+  it("токен, відсунутий зумом за межі карти, невидимий — береться рядок", () => {
+    const clip = clipBox({ x: 0, y: 0, w: 300, h: 200 });
+
+    ranked("t", { x: 400, y: 50, w: 20, h: 20 }, "map", clip);
+    ranked("t", { x: 500, y: 300, w: 20, h: 20 }, null);
+
+    expect(resolvePoints(spec())?.to[0]).toEqual({ x: 510, y: 310 });
+  });
+
+  it("токен усередині видимої частини карти лишається першим", () => {
+    const clip = clipBox({ x: 0, y: 0, w: 300, h: 200 });
+
+    ranked("t", { x: 100, y: 50, w: 20, h: 20 }, "map", clip);
+    ranked("t", { x: 500, y: 300, w: 20, h: 20 }, null);
+
+    expect(resolvePoints(spec())?.to[0]).toEqual({ x: 110, y: 60 });
+  });
+
+  it("постріл: from — токен стрільця на карті, to — токен цілі", () => {
+    const clip = clipBox({ x: 0, y: 0, w: 300, h: 200 });
+
+    ranked("a", { x: 10, y: 10, w: 20, h: 20 }, "map", clip);
+    ranked("a", { x: 500, y: 300, w: 20, h: 20 }, null);
+    ranked("t", { x: 200, y: 100, w: 20, h: 20 }, "map", clip);
+
+    const points = resolvePoints(spec({ archetype: "ranged" }));
+
+    expect(points?.from).toEqual({ x: 20, y: 20 });
+    expect(points?.to[0]).toEqual({ x: 210, y: 110 });
   });
 });

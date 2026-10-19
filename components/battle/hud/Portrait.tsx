@@ -13,7 +13,7 @@ export interface PortraitProps {
   extra?: boolean;
   className?: string;
   /** FX anchor: the row/hero portrait, or its copy in the initiative track (used only when the row is off-screen). */
-  fx?: "main" | "track";
+  fx?: "main" | "track" | "detail";
 }
 
 export function Portrait({ participant, size = 40, current, me, extra, className, fx }: PortraitProps) {
@@ -24,7 +24,7 @@ export function Portrait({ participant, size = 40, current, me, extra, className
   return (
     <span
       data-fx-participant={fx ? participant.basicInfo.id : undefined}
-      data-fx-anchor={fx === "track" ? "track" : undefined}
+      data-fx-anchor={fx && fx !== "main" ? fx : undefined}
       className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#241d16] text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
       style={{
         width: size,
