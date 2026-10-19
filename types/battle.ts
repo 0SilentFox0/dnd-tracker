@@ -226,6 +226,8 @@ export interface BattleMapView {
   round?: number;
   /** Удар останньої дії по учаснику: рамка, спалах і тремтіння токена в момент влучання */
   impactFor?: (participantId: string) => FxImpact | null;
+  /** Ефекти для аур на токенах (той самий набір, що й у списку) */
+  effects?: ReadonlyMap<string, readonly ActiveEffect[]>;
 }
 
 export interface BattleMapActions {

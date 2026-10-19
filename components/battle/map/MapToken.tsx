@@ -2,13 +2,15 @@
 
 import { memo } from "react";
 
+import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
 import { Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
-import type { BattleParticipant } from "@/types/battle";
+import { NO_EFFECTS } from "@/lib/utils/battle/view";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 const PORTRAIT_SHARE = 0.7;
 
@@ -21,11 +23,13 @@ export interface MapTokenProps {
   current?: boolean;
   passThrough?: boolean;
   impact?: FxImpact | null;
+  /** анімовані аури станів, як на портреті в списку; іконок на карті немає */
+  effects?: readonly ActiveEffect[];
   onClick?: (id: string) => void;
   onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, onClick, onHover }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
@@ -69,6 +73,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
         >
           <Portrait participant={participant} size={portraitPx} current={current} />
         </span>
+        <StatusAuras effects={effects} size={portraitPx} />
       </button>
     </div>
   );

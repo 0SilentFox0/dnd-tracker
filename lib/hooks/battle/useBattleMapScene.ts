@@ -30,7 +30,7 @@ function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, c
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
-  const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents } = useBattleScene();
+  const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents, effects } = useBattleScene();
 
   const { requestAttack, mapAim, attackReady } = intents;
 
@@ -102,9 +102,10 @@ export function useBattleMapScene(): BattleMapScene | null {
       trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
       ...(pendingStroke.size > 0 && { pendingStroke }),
       impactFor,
+      effects,
       round: currentRound,
     };
-  }, [scene, map, hovered, hoverCell, pendingStroke, current, impactFor, currentRound]);
+  }, [scene, map, hovered, hoverCell, pendingStroke, current, impactFor, effects, currentRound]);
 
   const { mutate: move } = actions.move;
 

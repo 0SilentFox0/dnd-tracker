@@ -45,7 +45,10 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
 
   const hpFont = small ? nameFont : clamp(6, nameFont * 0.9, 12);
 
-  const minStripPx = Math.ceil(nameFont * 1.25 + 7);
+  // смуга HP удвічі товща за списочну й росте з токеном, але не тонша за 6 px на телефоні
+  const barPx = clamp(6, Math.round(boxPx * 0.08), 12);
+
+  const minStripPx = Math.ceil(nameFont * 1.25 + barPx + 4);
 
   return (
     <div
@@ -72,7 +75,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
         ref={shake}
         data-map-hud-strip
         className={cn("absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end overflow-hidden rounded-md border border-white/10 bg-black/70 px-1 py-0.5 backdrop-blur-[2px]", down && "opacity-40")}
-        style={showText ? { height: `max(28%, ${minStripPx}px)` } : undefined}
+        style={showText && small ? { height: `max(28%, ${minStripPx}px)` } : undefined}
       >
         {showText && small && (
           <div className={cn("flex justify-center whitespace-nowrap font-sans font-medium leading-tight", down && "line-through")} style={{ fontSize: hpFont }}>
@@ -101,7 +104,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
             )}
           </div>
         )}
-        <HealthBar participant={participant} exact={exact} className="mt-0.5 shrink-0" />
+        <HealthBar participant={participant} exact={exact} thickness={barPx} className="mt-0.5 shrink-0" />
       </div>
     </div>
   );

@@ -138,6 +138,23 @@ describe("BattleMap", () => {
       expect(container.querySelector('[data-map-hud="g"]')?.textContent).toContain("g");
     });
 
+    it("плашка великого токена обіймає вміст (без висоти 28 %), смуга HP товща за списочну", () => {
+      const big = { ...at("g", 0, 0), combatStats: { ...base.combatStats, gridSize: 2 } };
+
+      const { container } = render(<BattleMap map={square} participants={[at("small", 3, 0), big]} view={{ hud: new Map([["g", { exact: true }], ["small", { exact: true }]]) }} />);
+
+      const strip = (id: string) => container.querySelector<HTMLElement>(`[data-map-hud="${id}"] [data-map-hud-strip]`) as HTMLElement;
+
+      expect(strip("g").textContent).toContain("g");
+      expect(strip("g").style.height).toBe("");
+
+      for (const id of ["g", "small"]) {
+        const bar = strip(id).lastElementChild as HTMLElement;
+
+        expect(parseFloat(bar.style.height)).toBeGreaterThanOrEqual(6);
+      }
+    });
+
     it("tiny cells show only the bar", () => {
       avail = { width: 80, height: 60 };
 
