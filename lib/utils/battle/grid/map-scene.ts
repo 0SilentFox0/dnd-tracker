@@ -2,7 +2,7 @@ import { pickAttack } from "./attack-reach";
 import { cellKey } from "./geometry";
 import { type CellMark, isMoveMark, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
-import { templateAimAllowed, templateArea } from "./template";
+import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -100,15 +100,19 @@ export interface AimScene {
   participants: BattleParticipant[];
 }
 
-/** Клітинки шаблону в точці `at`; null — заклинатель поза картою або точка поза дальністю. */
-export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint } | null {
+/** Клітинки шаблону в точці `at`; null — заклинатель поза картою або точка поза дальністю. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
+export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
   const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
 
   if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range)) return null;
 
   const { cells } = templateArea(map, participants, caster, aim.template, at);
 
-  return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: at };
+  const { shape, hollow } = aim.template;
+
+  const pulseFrom = shape === "cone" || shape === "line" ? apexOf(cellsOf(caster), at) : at;
+
+  return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: hollow ? null : at, pulseFrom };
 }
 
 export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSceneInput): MapScene {
@@ -152,7 +156,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
     marks,
     trajectory: null,
     hud,
-    ...(aimed && { aim: aimed.aim }),
+    ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),
   };
 
   function aimAt(p: GridPoint): MapClick {

@@ -16,6 +16,7 @@ import {
   blockedSet,
   cellAtScreenPoint,
   cellCenter,
+  cellDistance,
   cellKey,
   cellLine,
   type CellMark,
@@ -269,17 +270,28 @@ const StrokeLayer = memo(function StrokeLayer({ preview, pending }: { preview: R
   );
 });
 
-const TemplateLayer = memo(function TemplateLayer({ marks, aim }: { marks: BattleMapView["marks"]; aim?: GridPoint | null }) {
+const PULSE_STEP_MS = 130;
+
+const pulseStep = (from: GridPoint | null | undefined, p: GridPoint) => (from ? cellDistance(from, p) : 0);
+
+/** Хвиля від центру (або вершини конуса/лінії) до країв: затримка анімації росте з відстанню клітинки. */
+const TemplateLayer = memo(function TemplateLayer({ marks, aim, pulseFrom }: Pick<BattleMapView, "marks" | "aim" | "pulseFrom">) {
   const cells = marks ? [...marks].flatMap(([k, m]) => (m === "template" ? [k] : [])) : [];
 
   if (cells.length === 0 && !aim) return null;
 
+  const pulse = (p: GridPoint) => {
+    const step = pulseStep(pulseFrom, p);
+
+    return { "data-pulse-step": step, className: "battle-map-pulse", style: { animationDelay: `${step * PULSE_STEP_MS}ms` } };
+  };
+
   return (
     <g pointerEvents="none">
       {cells.map((k) => (
-        <polygon key={`tp${k}`} data-template-cell={k} points={cellPolygon(parseKey(k))} fill="rgba(255,140,40,.28)" stroke="#ffb04a" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+        <polygon key={`tp${k}`} data-template-cell={k} {...pulse(parseKey(k))} points={cellPolygon(parseKey(k))} fill="rgba(255,140,40,.28)" stroke="#ffb04a" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
       ))}
-      {aim && <polygon data-template-aim={cellKey(aim)} points={cellPolygon(aim)} fill="rgba(255,176,74,.5)" stroke="#ffd27a" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
+      {aim && <polygon data-template-aim={cellKey(aim)} {...pulse(aim)} points={cellPolygon(aim)} fill="rgba(255,176,74,.5)" stroke="#ffd27a" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
     </g>
   );
 });
@@ -517,7 +529,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             onStrokeStart={painting ? onStrokeStart : undefined}
             scene={gridScene}
           />
-          <TemplateLayer marks={view?.marks} aim={view?.aim} />
+          <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">

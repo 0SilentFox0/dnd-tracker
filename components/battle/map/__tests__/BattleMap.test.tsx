@@ -670,4 +670,17 @@ describe("BattleMap — terrain stroke", () => {
     expect(cells[0].getAttribute("stroke")).toBe("#ffb04a");
     expect(container.querySelector('[data-template-aim="1:1"]')).not.toBeNull();
   });
+
+  it("превʼю шаблону пульсує хвилею від центру: затримка росте з відстанню клітинки", () => {
+    const marks = new Map([["1:1", "template" as const], ["2:1", "template" as const], ["3:1", "template" as const]]);
+
+    const { container } = render(<BattleMap map={square} participants={people} view={{ marks, aim: { x: 1, y: 1 }, pulseFrom: { x: 1, y: 1 } }} />);
+
+    const cells = [...container.querySelectorAll<SVGElement>("[data-template-cell]")];
+
+    expect(cells.map((c) => c.getAttribute("data-pulse-step"))).toEqual(["0", "1", "2"]);
+    expect(cells.every((c) => c.classList.contains("battle-map-pulse"))).toBe(true);
+    expect(cells.map((c) => c.style.animationDelay)).toEqual(["0ms", "130ms", "260ms"]);
+    expect(container.querySelector('[data-template-aim="1:1"]')?.getAttribute("data-pulse-step")).toBe("0");
+  });
 });

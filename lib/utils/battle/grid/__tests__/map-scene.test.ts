@@ -268,6 +268,24 @@ describe("deriveMapScene: наведення шаблону", () => {
 
     expect(cone?.marks.get("1:0")).toBe("template");
     expect(cone?.marks.has("0:0")).toBe(false);
+    expect(cone?.pulseFrom).toEqual({ x: 0, y: 0 });
+  });
+
+  it("aimView: пульс кола — від точки прицілу; кільце не підсвічує центр і не малює точку", () => {
+    const scene = { map, participants: [hero, near, far] };
+
+    const circle = aimView(scene, aim({ template: { shape: "circle", size: 10 } }), { x: 2, y: 2 });
+
+    expect(circle?.pulseFrom).toEqual({ x: 2, y: 2 });
+    expect(circle?.aim).toEqual({ x: 2, y: 2 });
+    expect(circle?.marks.has("2:2")).toBe(true);
+
+    const ring = aimView(scene, aim({ template: { shape: "circle", size: 10, hollow: true } }), { x: 2, y: 2 });
+
+    expect(ring?.marks.size).toBe(8);
+    expect(ring?.marks.has("2:2")).toBe(false);
+    expect(ring?.aim).toBeNull();
+    expect(ring?.pulseFrom).toEqual({ x: 2, y: 2 });
   });
 });
 

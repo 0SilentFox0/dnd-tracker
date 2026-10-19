@@ -216,6 +216,8 @@ export interface BattleMapView {
   trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged" } | null;
   /** Точка наведення шаблону заклинання */
   aim?: GridPoint | null;
+  /** Звідки біжить хвиля пульсу превʼю шаблону */
+  pulseFrom?: GridPoint | null;
   /** Плашка під токеном: без запису — exact */
   hud?: Map<string, { exact: boolean }>;
   /** Клітинки надісланих штрихів місцевості до відповіді сервера */
