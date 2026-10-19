@@ -1,4 +1,4 @@
-import { armorFactors } from "./hit-chance";
+import { armorFactors, unitSpellDpr } from "./hit-chance";
 import type { UnitStats } from "./stats";
 
 import {
@@ -10,6 +10,7 @@ import {
   SCALE_MAX,
   SCALE_MIN,
   TARGET_ROUNDS,
+  TIER_CEILING_QUANTILE,
 } from "@/lib/constants/battle-balance";
 
 export interface PartyPower {
@@ -23,6 +24,10 @@ export interface PartyPower {
   weaponShare?: number;
   /** Weapon DPR share of party DPR by `kind:damageType`. */
   damageProfile?: Record<string, number>;
+  /** Average save modifier by ability (members that report saves). */
+  saves?: Partial<Record<string, number>>;
+  /** Average spell resistance percent by damage type (members that report it). */
+  spellResist?: Record<string, number>;
 }
 
 export interface PartyMember {
@@ -32,14 +37,28 @@ export interface PartyMember {
   ac?: number;
   weaponDpr?: number;
   damageKey?: string;
+  saves?: Partial<Record<string, number>>;
+  spellResist?: Record<string, number>;
 }
 
 export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonus?: number; damageKey?: string }): PartyMember {
   return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr, damageKey: u.damageKey };
 }
 
-export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number; damageKey: string }): PartyMember {
-  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey };
+export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number; damageKey: string; saves?: Partial<Record<string, number>>; spellResist?: Record<string, number> }): PartyMember {
+  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey, ...(s.saves && { saves: s.saves }), ...(s.spellResist && { spellResist: s.spellResist }) };
+}
+
+function averageRecords(records: Array<{ values: Partial<Record<string, number>>; weight: number }>): Record<string, number> | undefined {
+  const total = records.reduce((a, r) => a + r.weight, 0);
+
+  if (total === 0) return undefined;
+
+  const sum: Record<string, number> = {};
+
+  for (const { values, weight } of records) for (const [k, v] of Object.entries(values)) sum[k] = (sum[k] ?? 0) + (v ?? 0) * weight;
+
+  return Object.fromEntries(Object.entries(sum).map(([k, v]) => [k, v / total]));
 }
 
 export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>): PartyPower {
@@ -85,6 +104,15 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
 
   if (acCount > 0) party.ac = acSum / acCount;
 
+  const saves = averageRecords(members.flatMap(({ stats, quantity = 1 }) => (stats.saves ? [{ values: stats.saves, weight: quantity }] : [])));
+
+  if (saves) party.saves = saves;
+
+  // опір рахується лише серед тих, хто його звітує (герої); відсутній тип — 0 %
+  const spellResist = averageRecords(members.flatMap(({ stats, quantity = 1 }) => (stats.spellResist ? [{ values: stats.spellResist, weight: quantity }] : [])));
+
+  if (spellResist && Object.keys(spellResist).length > 0) party.spellResist = spellResist;
+
   return party;
 }
 
@@ -92,11 +120,11 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
 export function effectiveUnit(unit: UnitStats, party: PartyPower): UnitStats {
   const f = armorFactors(unit, party);
 
-  if (f.hp === 1 && f.dpr === 1) return unit;
+  const dpr = unit.spell ? unitSpellDpr(unit.spell, party) : unit.dpr * f.dpr;
+
+  if (f.hp === 1 && dpr === unit.dpr) return unit;
 
   const hp = unit.hp * f.hp;
-
-  const dpr = unit.dpr * f.dpr;
 
   return { ...unit, hp, dpr, kpi: dpr / hp };
 }
@@ -149,22 +177,22 @@ export function targetEnemyPower(party: PartyPower): Power {
   return { hp: party.dpr * HIT_RATE * TARGET_ROUNDS, dpr: (HERO_EDGE * party.hp) / TARGET_ROUNDS };
 }
 
-/** Найслабший юніт (за HP і за DPR окремо) кожного тіру бібліотеки. */
+const lowerQuantile = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floor((values.length - 1) * TIER_CEILING_QUANTILE)];
+
+/** Слабкий край кожного тіру (за HP і за DPR окремо): нижній квартиль юнітів, яких ДМ виставляє сам, — без цілей прикликання. */
 export function weakestPerTier(library: UnitStats[]): TierCeilings {
-  const byTier: TierCeilings = new Map();
+  const byTier = new Map<number, UnitStats[]>();
 
   for (const u of library) {
-    if (u.hp <= 0 || u.dpr <= 0) continue;
+    if (u.hp <= 0 || u.dpr <= 0 || u.summon) continue;
 
-    const cur = byTier.get(u.level);
-
-    byTier.set(u.level, cur ? { hp: Math.min(cur.hp, u.hp), dpr: Math.min(cur.dpr, u.dpr) } : { hp: u.hp, dpr: u.dpr });
+    byTier.set(u.level, [...(byTier.get(u.level) ?? []), u]);
   }
 
-  return byTier;
+  return new Map([...byTier].map(([tier, units]) => [tier, { hp: lowerQuantile(units.map((u) => u.hp)), dpr: lowerQuantile(units.map((u) => u.dpr)) }]));
 }
 
-/** Стеля для тіру `tier`: найслабший юніт найближчого вищого тіру, якщо він є. */
+/** Стеля для тіру `tier`: слабкий край найближчого вищого тіру, якщо він є. */
 function ceilingFor(tier: number, weakest: TierCeilings): Power | null {
   let next: number | null = null;
 

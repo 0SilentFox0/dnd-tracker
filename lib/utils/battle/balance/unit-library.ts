@@ -9,7 +9,7 @@ import type { RaceRow } from "@/types/races";
 
 type UnitAttacks = Array<{ damageDice?: string; type?: string; attackBonus?: number; targetType?: string; maxTargets?: number }>;
 
-export const UNIT_SPELL_SELECT = { id: true, dice: true, targeting: true, spellEffects: true } as const;
+export const UNIT_SPELL_SELECT = { id: true, dice: true, targeting: true, resolution: true, spellEffects: true } as const;
 
 export interface UnitStatsRow {
   id: string;
@@ -60,10 +60,42 @@ export async function loadSpellsForUnits(campaignId: string, units: Array<{ know
   return new Map(rows.map((s) => [s.id, s as UnitSpellRow]));
 }
 
+/** Id юнітів, яких прикликають (`summon` з `unitId` в ефектах заклять чи вміннях). */
+export function summonedUnitIds(sources: unknown[]): Set<string> {
+  const out = new Set<string>();
+
+  const walk = (v: unknown) => {
+    if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+
+      if (o.kind === "summon" && typeof o.unitId === "string") out.add(o.unitId);
+
+      Object.values(o).forEach(walk);
+    }
+  };
+
+  sources.forEach(walk);
+
+  return out;
+}
+
+async function loadSummonSources(campaignId: string): Promise<unknown[]> {
+  const spells = await prisma.spell.findMany({ where: { campaignId, spellEffects: { array_contains: [{ kind: "summon" }] } }, select: { spellEffects: true } });
+
+  return spells.map((s) => s.spellEffects);
+}
+
 export async function loadUnitLibraryStats(campaignId: string): Promise<UnitStats[]> {
-  const [rows, races] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } })]);
+  const [rows, races, summonSources] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } }), loadSummonSources(campaignId)]);
 
   const [spellsById, resistById] = await Promise.all([loadSpellsForUnits(campaignId, rows), unitResistancesById(rows, races)]);
 
-  return rows.map((u) => unitRowStats(u, spellsById, resistById.get(u.id)));
+  const summoned = summonedUnitIds([...summonSources, ...rows.map((u) => u.abilities), ...races.map((r) => r.abilities)]);
+
+  return rows.map((u) => {
+    const stats = unitRowStats(u, spellsById, resistById.get(u.id));
+
+    return summoned.has(u.id) ? { ...stats, summon: true } : stats;
+  });
 }

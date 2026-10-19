@@ -189,7 +189,7 @@ describe("getUnitStats: модель DPR юніта", () => {
 
   const fire = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
 
-  it("DPR із заклинання: формула кубиків (база + ⌊рівень/3⌋, d6) × цілі, якщо воно сильніше за зброю", () => {
+  it("DPR із заклинання: формула кубиків юніта (база + ⌊рівень/2⌋, грані за рівнем) × цілі, якщо воно сильніше за зброю", () => {
     const stats = getUnitStats({
       ...base,
       level: 3,
@@ -208,6 +208,18 @@ describe("getUnitStats: модель DPR юніта", () => {
     const spells = [{ dice: 2, targeting: { kind: "area", side: "enemy", maxTargets: 3 }, spellEffects: [{ ...fire, falloff: [100, 50, 25] }] }];
 
     expect(getUnitStats({ ...base, attacks: [], spells }).dpr).toBe(7 * 1.5);
+  });
+
+  it("закляття сильніше за зброю несе дані для балансу: рятунок (СК 8 + майстерність), тип шкоди, зброю", () => {
+    const stats = getUnitStats({
+      ...base,
+      proficiencyBonus: 3,
+      attacks: [{ damageDice: "1d4", type: "melee" }],
+      spells: [{ dice: 3, targeting: { kind: "allEnemies" }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellEffects: [fire] }],
+    });
+
+    expect(stats.spell).toMatchObject({ dpr: stats.dpr, damageType: "fire", save: { ability: "dexterity", dc: 11, half: true }, weaponDpr: 2.5 });
+    expect(stats.attackBonus).toBeUndefined();
   });
 
   it("слабке заклинання не знижує DPR зброї", () => {

@@ -34,3 +34,16 @@ export function unitResistances(unit: BattleParticipant): Record<string, number>
 
   return out;
 }
+
+/** Опір героя до шкоди заклять за типом (`fire`, …, `magic` — закляття без типу), ненульові відсотки. */
+export function spellResistances(p: BattleParticipant): Record<string, number> {
+  const out: Record<string, number> = {};
+
+  for (const type of [...DAMAGE_TYPES, "magic"]) {
+    const percent = getCombinedResistancePercent(p, type, { fromSpell: true });
+
+    if (percent !== 0) out[type] = percent;
+  }
+
+  return out;
+}

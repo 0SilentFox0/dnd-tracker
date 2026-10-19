@@ -1,6 +1,17 @@
 import { SPELL_DAMAGE_KEY } from "./resist";
+import type { UnitSpellPower } from "./stats";
 
-import { ARMOR_FACTOR_MAX, ARMOR_FACTOR_MIN, DEFENSE_FACTOR_MAX, REF_HERO_HIT, REF_UNIT_HIT } from "@/lib/constants/battle-balance";
+import {
+  ARMOR_FACTOR_MAX,
+  ARMOR_FACTOR_MIN,
+  DEFENSE_FACTOR_MAX,
+  FALLBACK_SAVE_SUCCESS,
+  MIN_UNIT_STAT,
+  REF_HERO_HIT,
+  REF_UNIT_HIT,
+  TARGET_ROUNDS,
+  UNIT_SPELL_SLOTS,
+} from "@/lib/constants/battle-balance";
 
 /** d20 + bonus ≥ AC; natural 1 always misses, natural 20 always hits. */
 export function hitChance(attackBonus: number, ac: number): number {
@@ -25,6 +36,10 @@ export interface FactorParty {
   ac?: number;
   weaponShare?: number;
   damageProfile?: Record<string, number>;
+  /** Середній модифікатор рятунку партії за характеристикою. */
+  saves?: Partial<Record<string, number>>;
+  /** Середній опір партії до шкоди заклять за типом, %. */
+  spellResist?: Record<string, number>;
 }
 
 const taken = (resist: Record<string, number> | undefined, key: string) => 1 - (resist?.[key] ?? 0) / 100;
@@ -63,7 +78,32 @@ export function armorFactors(unit: FactorUnit, party: FactorParty): ArmorFactors
 
   const hp = landed === null ? 1 : landed <= 0 ? DEFENSE_FACTOR_MAX : clamp(1 / landed, DEFENSE_FACTOR_MAX);
 
-  const dpr = unit.attackBonus !== undefined && party.ac !== undefined ? clamp(hitChance(unit.attackBonus, party.ac) / REF_UNIT_HIT, ARMOR_FACTOR_MAX) : 1;
+  return { hp, dpr: unitHitFactor(unit.attackBonus, party) };
+}
 
-  return { hp, dpr };
+function unitHitFactor(attackBonus: number | undefined, party: FactorParty): number {
+  return attackBonus !== undefined && party.ac !== undefined ? clamp(hitChance(attackBonus, party.ac) / REF_UNIT_HIT, ARMOR_FACTOR_MAX) : 1;
+}
+
+function failedSaveShare(save: UnitSpellPower["save"], party: FactorParty): number {
+  if (!save) return 1;
+
+  const mod = party.saves?.[save.ability];
+
+  const success = mod === undefined ? FALLBACK_SAVE_SUCCESS : hitChance(mod, save.dc);
+
+  return 1 - success * (save.half ? 0.5 : 1);
+}
+
+/** Закляття юніта проти цієї партії: рятунки й опір зрізають шкоду, а слотів вистачає лише на частину раундів — решту б'є зброя. */
+export function unitSpellDpr(spell: UnitSpellPower, party: FactorParty): number {
+  const weapon = spell.weaponDpr * unitHitFactor(spell.weaponToHit, party);
+
+  const cast = spell.dpr * failedSaveShare(spell.save, party) * (1 - (party.spellResist?.[spell.damageType] ?? 0) / 100);
+
+  if (cast <= weapon) return Math.max(MIN_UNIT_STAT, weapon);
+
+  const casts = Math.min(UNIT_SPELL_SLOTS, TARGET_ROUNDS);
+
+  return Math.max(MIN_UNIT_STAT, (casts * cast + (TARGET_ROUNDS - casts) * weapon) / TARGET_ROUNDS);
 }

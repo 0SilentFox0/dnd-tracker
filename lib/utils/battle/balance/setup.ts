@@ -12,7 +12,7 @@ export interface SetupBalanceParticipant {
 
 export interface SetupBalanceStats {
   characterStats: Record<string, PartyMember>;
-  unitStats: Record<string, { dpr: number; hp: number; kpi: number; name: string; level: number; raceId: string | null; ac?: number; attackBonus?: number; damageKey?: string; resist?: Record<string, number> }>;
+  unitStats: Record<string, Omit<UnitStats, "unitId">>;
 }
 
 export function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitStats[] {
@@ -28,6 +28,8 @@ export function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]):
     ...(u.attackBonus !== undefined && { attackBonus: u.attackBonus }),
     ...(u.damageKey !== undefined && { damageKey: u.damageKey }),
     ...(u.resist !== undefined && { resist: u.resist }),
+    ...(u.spell !== undefined && { spell: u.spell }),
+    ...(u.summon && { summon: true }),
   }));
 }
 

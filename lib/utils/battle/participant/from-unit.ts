@@ -5,6 +5,7 @@ import { loadUnitRace } from "./load-race";
 
 import { AttackType, CombatStatus,ParticipantSourceType } from "@/lib/constants/battle";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { UNIT_SPELL_SLOTS } from "@/lib/constants/battle-balance";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
@@ -135,7 +136,7 @@ export async function createBattleParticipantFromUnit(
       spellcastingAbility: undefined,
       spellSaveDC: undefined,
       spellAttackBonus: undefined,
-      spellSlots: { universal: { max: 3, current: 3 } },
+      spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],
     },
     battleData: {

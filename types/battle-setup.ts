@@ -1,3 +1,4 @@
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { BattleMapConfig } from "@/types/battle";
 
@@ -55,7 +56,18 @@ export interface EntityStats {
   ac?: number;
   weaponDpr?: number;
   damageKey?: string;
+  saves?: Partial<Record<string, number>>;
+  spellResist?: Record<string, number>;
   dprBreakdown?: CharacterDprBreakdown;
+}
+
+/** Найкраще закляття юніта, коли воно сильніше за зброю (баланс зважує рятунки, опір партії і слоти). */
+export interface UnitSpellPower {
+  dpr: number;
+  damageType: string;
+  save?: { ability: AbilityKey; dc: number; half: boolean };
+  weaponDpr: number;
+  weaponToHit?: number;
 }
 
 export interface UnitEntityStats extends EntityStats {
@@ -64,6 +76,8 @@ export interface UnitEntityStats extends EntityStats {
   raceId: string | null;
   attackBonus?: number;
   resist?: Record<string, number>;
+  spell?: UnitSpellPower;
+  summon?: boolean;
 }
 
 export interface CreateBattleData {

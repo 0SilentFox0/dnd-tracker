@@ -1,6 +1,7 @@
 import { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
-import { damageKey } from "./resist";
+import { damageKey, spellResistances } from "./resist";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -13,10 +14,12 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { averageOf, diceAverage, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BranchLevel } from "@/lib/utils/skills/progression";
 import { spellDice } from "@/lib/utils/spells/model/dice";
-import { readSpellDefinition, spellEffects, spellTargeting } from "@/lib/utils/spells/model/read";
+import { readSpellDefinition, spellEffects, spellResolution, spellTargeting } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { CharacterDprBreakdown } from "@/types/battle-setup";
+import type { CharacterDprBreakdown, UnitSpellPower } from "@/types/battle-setup";
+
+export type { UnitSpellPower };
 
 export interface UnitStats {
   unitId: string;
@@ -31,6 +34,10 @@ export interface UnitStats {
   /** Best weapon's `kind:damageType` (party profile when the unit is an ally). */
   damageKey?: string;
   resist?: Record<string, number>;
+  /** Закляття сильніше за зброю: ефективну шкоду рахує `effectiveUnit` з рятунками, опором партії і слотами. */
+  spell?: UnitSpellPower;
+  /** Ціль прикликання (Фенікс, елементалі): ДМ не виставляє його сам, тож він не задає стелю тіру. */
+  summon?: boolean;
 }
 
 export interface GetCharacterStatsParams {
@@ -44,6 +51,7 @@ export interface GetCharacterStatsParams {
 export interface UnitSpellInput {
   dice?: number | null;
   targeting?: unknown;
+  resolution?: unknown;
   spellEffects?: unknown;
 }
 
@@ -84,23 +92,34 @@ function spellTargets(targeting: SpellTargeting): number {
   }
 }
 
-function bestSpellDpr(spells: UnitSpellInput[], level: number): number {
-  let best = 0;
+type BestSpell = Pick<UnitSpellPower, "dpr" | "damageType" | "save">;
+
+function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }): BestSpell | null {
+  let best: BestSpell | null = null;
 
   for (const [index, s] of spells.entries()) {
-    const row = { id: String(index), dice: s.dice, targeting: s.targeting, spellEffects: s.spellEffects };
+    const row = { id: String(index), dice: s.dice, targeting: s.targeting, resolution: s.resolution, spellEffects: s.spellEffects };
 
     const targets = spellTargets(spellTargeting(row));
 
     const damage = spellEffects(row).find((e) => e.kind === "dealDamage");
 
-    const dice = spellDice({ kind: "unit", level }, { dice: readSpellDefinition(row).dice, groupId: null }, () => null);
+    const dice = spellDice({ kind: "unit", level: unit.level }, { dice: readSpellDefinition(row).dice, groupId: null }, () => null);
 
-    if (!damage || targets === 0 || dice.count === 0) continue;
+    if (!damage || damage.kind !== "dealDamage" || targets === 0 || dice.count === 0) continue;
 
     const share = damage.falloff ? damage.falloff.slice(0, targets).reduce((a, b) => a + b, 0) / 100 : targets;
 
-    best = Math.max(best, ((dice.count * (dice.sides + 1)) / 2) * share);
+    const dpr = ((dice.count * (dice.sides + 1)) / 2) * share;
+
+    if (best && dpr <= best.dpr) continue;
+
+    const resolution = spellResolution(row);
+
+    // юніт без заклинальної характеристики: СК = 8 + майстерність (spellSaveDc рушія)
+    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: 8 + (unit.proficiencyBonus ?? 0), half: resolution.onSuccess === "half" } : undefined;
+
+    best = { dpr, damageType: damage.damageType ?? "magic", ...(save && { save }) };
   }
 
   return best;
@@ -136,7 +155,9 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     }
   }
 
-  const spellDpr = bestSpellDpr(unit.spells ?? [], unit.level);
+  const spell = bestSpell(unit.spells ?? [], unit);
+
+  const spellDpr = spell?.dpr ?? 0;
 
   const dpr = Math.max(MIN_UNIT_STAT, Math.max(weaponDpr, spellDpr) || diceAverage("1d6"));
 
@@ -157,6 +178,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     ...(unit.armorClass !== undefined && { ac: unit.armorClass }),
     ...(attackBonus !== undefined && { attackBonus }),
     ...(weaponLeads && weaponKey && { damageKey: weaponKey }),
+    ...(spell && !weaponLeads && { spell: { ...spell, weaponDpr: weaponDpr || diceAverage("1d6"), ...(unit.proficiencyBonus !== undefined && weaponToHit !== undefined && { weaponToHit }) } }),
   };
 }
 
@@ -179,6 +201,8 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
   ac: number;
   weaponDpr: number;
   damageKey: string;
+  saves: Record<AbilityKey, number>;
+  spellResist: Record<string, number>;
   dprBreakdown: CharacterDprBreakdown;
 } {
   const melee = bestAttack(participant, AttackType.MELEE);
@@ -222,6 +246,8 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
     ac: getEffectiveArmorClass(participant),
     weaponDpr,
     damageKey: damageKey(attackKindOf(best.type), best.damageType),
+    saves: participant.abilities.modifiers,
+    spellResist: spellResistances(participant),
     dprBreakdown: {
       physicalDpr,
       meleeAvg,

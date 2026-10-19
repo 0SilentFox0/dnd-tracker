@@ -54,6 +54,18 @@ describe("computeFairScaling", () => {
     expect(s.verdict).toBe("weak");
   });
 
+  it("ціль прикликання не задає стелю тіру; стеля — нижній квартиль, а не найслабший", () => {
+    const phoenix = { ...unit("phoenix", 2, 5, 2), summon: true };
+
+    const lib = [unit("a", 1, 10, 4), phoenix, unit("w1", 2, 30, 10), unit("w2", 2, 40, 12), unit("w3", 2, 50, 14), unit("w4", 2, 60, 16), unit("weakling", 2, 12, 5)];
+
+    const s = computeFairScaling({ dpr: 100, hp: 1000, heroCount: 4 }, [{ unitId: "a", quantity: 1 }], lib);
+
+    // HP тіру 2 без фенікса: 12, 30, 40, 50, 60 → нижній квартиль 30
+    expect(s.units.a.hpMult).toBe(3);
+    expect(s.units.a.dmgMult).toBeCloseTo(10 / 4);
+  });
+
   it("стеля не обмежує масштаб униз", () => {
     const s = computeFairScaling({ dpr: 2, hp: 20, heroCount: 1 }, [{ unitId: "goblin", quantity: 1 }], LIBRARY);
 
