@@ -68,6 +68,7 @@ const SAMPLES: Record<string, Ability[]> = {
   critRange: [catalog.critRange(19)],
   chaosVulnerabilityAura: [catalog.chaosVulnerabilityAura()],
   chaosAbsorb: [catalog.chaosAbsorb()],
+  hitSpell: [catalog.hitSpell("Тіньове прокляття", ["slow"])],
   flavor: [catalog.flavor("Літає")],
 };
 

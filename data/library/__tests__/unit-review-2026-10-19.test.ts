@@ -39,6 +39,8 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
     expect(abilityNames("mages-elemental-gargoyle")).toEqual(["Механізм", "Аура стихій"]);
     expect(abilityNames("mages-magnetic-golem")).toContain("Магнітне поле");
     for (const key of ["mages-elemental-gargoyle", "mages-magnetic-golem"]) for (const a of unit(key).abilities) expect(AbilitySchema.safeParse(a).success).toBe(true);
+    expect(abilityNames("dark-elves-shadow-mistress")).toEqual(["Тіньове прокляття"]);
+    expect(unit("dark-elves-shadow-mistress").spellKeys).toEqual(["suffering"]);
     expect(AbilitySchema.safeParse(onslaught).success).toBe(true);
   });
 });

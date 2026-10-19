@@ -14,6 +14,7 @@ import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -47,6 +48,7 @@ export type AttackPhaseInput = {
   isDM: boolean;
   rng?: Rng;
   map?: BattleMapConfig | null;
+  hitSpells?: ReadonlyMap<string, CastableSpell>;
 };
 
 export type AttackPhaseResult = {
@@ -259,6 +261,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       battleId,
       damageMultiplier,
       obstacle: data.obstacle,
+      hitSpells: input.hitSpells,
       rng,
     });
 

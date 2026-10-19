@@ -4,9 +4,12 @@ import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
 import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
+import { castHitSpell } from "./hit-spell";
 
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
 
 export interface ResolveHitParams {
@@ -23,6 +26,8 @@ export interface ResolveHitParams {
   bonusLabel?: string;
   offTurn?: boolean;
   obstacle?: boolean;
+  hitSpells?: ReadonlyMap<string, CastableSpell>;
+  battleId?: string;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -69,6 +74,22 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     attackKind: attackKindOf(attack.type),
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
   });
+
+  if (p.hitSpells && p.hitSpells.size > 0 && isActive(getP(flow, targetId))) {
+    const cast = castHitSpell({
+      attacker: getP(flow, attackerId),
+      targetId,
+      participants: flow.ps,
+      spells: p.hitSpells,
+      round: p.currentRound,
+      battleId: p.battleId ?? "",
+      attackKind: attackKindOf(attack.type),
+      rng: flow.ctx.rng,
+    });
+
+    flow.ps = cast.participants;
+    flow.messages.push(...cast.messages);
+  }
 
   const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
 

@@ -1,4 +1,5 @@
 import type { AttackRollResult } from "./attack";
+import type { CastableSpell } from "./spell-process";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
@@ -25,6 +26,8 @@ export interface ProcessAttackParams {
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;
+  /** закляття для прапорців castSpellOnHit, за id */
+  hitSpells?: ReadonlyMap<string, CastableSpell>;
 }
 
 export interface ProcessAttackResult {

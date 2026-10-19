@@ -144,6 +144,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     bonusPercent: params.bonusPercent,
     bonusLabel: params.bonusLabel,
     obstacle: params.obstacle,
+    hitSpells: params.hitSpells,
+    battleId,
   });
 
   const {

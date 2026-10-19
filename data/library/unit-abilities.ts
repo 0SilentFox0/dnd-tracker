@@ -284,6 +284,14 @@ export const chaosAbsorb = (): Ability => ({
   effects: [{ kind: "flag", flag: "spellAbsorb", school: "Хаос", percent: 50 }],
 });
 
+export const hitSpell = (name: string, spellIds: string[]): Ability => ({
+  id: "unit-hit-spell",
+  name,
+  description: "Влучання накладає на ціль випадкове закляття Темряви 1–3 рівня (рятівні кидки — як у закляття).",
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "castSpellOnHit", spellIds }],
+});
+
 export const guardian = (percent = 30): Ability => ({
   id: "unit-guardian",
   name: "Захисник",

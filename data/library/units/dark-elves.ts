@@ -1,5 +1,7 @@
 import type { LibraryUnit } from "../types";
-import { bravery, buffAlly, debuff, dot, doubleStrike, elementResist, falloff, firstStrike, magicImmunity, noRetaliation, regeneration, retaliateAura } from "../unit-abilities";
+import { bravery, buffAlly, debuff, dot, doubleStrike, elementResist, falloff, firstStrike, hitSpell, magicImmunity, noRetaliation, regeneration, retaliateAura } from "../unit-abilities";
+
+const MISTRESS_SPELLS = ["weakness", "slow", "frailty", "plague", "confusion", "suffering", "sorrow"];
 
 const base = { raceKey: "dark-elves" } as const;
 
@@ -23,7 +25,7 @@ export const DARK_ELF_UNITS: LibraryUnit[] = [
   { ...base, key: "dark-elves-rotting-hydra", gridSize: 2, name: "Гнила гідра", tier: 5, role: "alt", hp: 119, ac: 15, attackBonus: 8, initiative: 8, attacks: [{ name: "Укуси", type: "melee", dice: "3d6+9", damageType: "piercing", targets: 3 }], abilities: [...hydra("Укуси"), retaliateAura("Кислотна кров", 25, "acid")] },
   { ...base, key: "dark-elves-shadow-witch", name: "Відьма тіней", tier: 6, role: "base", hp: 127, ac: 15, attackBonus: 7, initiative: 10, attacks: [{ name: "Тіньовий промінь", type: "ranged", dice: "3d8+9", damageType: "necrotic" }], abilities: [], spellKeys: ["weakness", "slow", "frailty", "plague"] },
   { ...base, key: "dark-elves-shadow-matriarch", name: "Матріарх тіней", tier: 6, role: "upgrade", hp: 141, ac: 16, attackBonus: 8, initiative: 10, attacks: [{ name: "Тіньовий промінь", type: "ranged", dice: "3d8+11", damageType: "necrotic" }], abilities: [], spellKeys: ["weakness", "slow", "frailty", "plague", "confusion", "suffering", "sorrow"] },
-  { ...base, key: "dark-elves-shadow-mistress", name: "Володарка тіней", tier: 6, role: "alt", hp: 139, ac: 16, attackBonus: 8, initiative: 11, attacks: [{ name: "Тіньовий промінь", type: "ranged", dice: "3d8+11", damageType: "necrotic" }], abilities: [debuff("Удар відчаю", "morale", 1, 2)], spellKeys: ["suffering"] },
+  { ...base, key: "dark-elves-shadow-mistress", name: "Володарка тіней", tier: 6, role: "alt", hp: 139, ac: 16, attackBonus: 8, initiative: 11, attacks: [{ name: "Тіньовий промінь", type: "ranged", dice: "3d8+11", damageType: "necrotic" }], abilities: [hitSpell("Тіньове прокляття", MISTRESS_SPELLS)], spellKeys: ["suffering"] },
   { ...base, key: "dark-elves-shadow-dragon", gridSize: 2, name: "Тіньовий дракон", tier: 7, role: "base", hp: 215, ac: 16, attackBonus: 8, initiative: 10, flying: true, attacks: [{ name: "Подих", type: "melee", dice: "4d10+16", damageType: "necrotic", targets: 2 }], abilities: [falloff("Подих")] },
   { ...base, key: "dark-elves-black-dragon", gridSize: 2, name: "Чорний дракон", tier: 7, role: "upgrade", hp: 230, ac: 17, attackBonus: 9, initiative: 10, flying: true, attacks: [{ name: "Подих", type: "melee", dice: "4d10+20", damageType: "necrotic", targets: 2 }], abilities: [falloff("Подих"), magicImmunity()] },
   { ...base, key: "dark-elves-red-dragon", gridSize: 2, name: "Червоний дракон", tier: 7, role: "alt", hp: 235, ac: 16, attackBonus: 9, initiative: 11, flying: true, attacks: [{ name: "Подих", type: "melee", dice: "4d10+18", damageType: "fire", targets: 2 }], abilities: [falloff("Подих"), elementResist(["fire"], 100, "Імунітет до вогню"), dot("Опік", "2d6", "fire", 2)] },

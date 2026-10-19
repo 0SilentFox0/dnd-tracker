@@ -133,6 +133,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return `${e.percent >= 100 ? `імунітет: ${e.damageType}` : e.percent < 0 ? `вразливість ${e.damageType} ${-e.percent}%` : `опір ${e.damageType} ${e.percent}%`}${e.attackKind ? ` (${e.attackKind === "ranged" ? "дальні атаки" : "ближні атаки"})` : ""}${e.school ? ` (заклинання школи ${e.school})` : ""}`;
     case "spellAbsorb":
       return `лікується на ${e.percent}% шкоди від заклинань школи ${e.school}`;
+    case "castSpellOnHit":
+      return `влучання накладає випадкове закляття (із ${e.spellIds.length})`;
     case "spellImmunity":
       return e.spellIds ? `імунітет до заклинань (${e.spellIds.length})` : "імунітет до всіх заклинань";
     case "spellTargeting": {
@@ -181,6 +183,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   guaranteedHit: "Гарантоване влучання",
   resistance: "Опір / імунітет до шкоди",
   spellAbsorb: "Поглинання шкоди заклинань",
+  castSpellOnHit: "Закляття при влучанні",
   spellImmunity: "Імунітет до заклинань",
   spellTargeting: "Режим цілей заклять",
   counterAttack: "Контратака",
@@ -226,6 +229,10 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   spellAbsorb: [
     { name: "school", label: "Школа заклинань", input: "text" },
     { name: "percent", label: "% шкоди, що лікує", input: "number" },
+  ],
+  castSpellOnHit: [
+    { name: "spellIds", label: "Заклинання (одне з них, випадково)", input: "spells" },
+    { name: "attackKind", label: "Лише атаки", input: "select", options: [{ value: "melee", label: "ближні" }, { value: "ranged", label: "дальні" }], optional: true },
   ],
   spellImmunity: [{ name: "spellIds", label: "Заклинання (порожньо = усі)", input: "spells", optional: true }],
   spellTargeting: [

@@ -1,13 +1,19 @@
+import type { Spell } from "@prisma/client";
 import { z } from "zod";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
+import { prisma } from "@/lib/db";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
 export const attackBodySchema = z
@@ -60,14 +66,36 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
   if (reach) throw new BattleRuleError("action_rejected", reach);
 }
 
-const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
+export interface AttackMutationDeps extends SummonDeps {
+  loadSpells?(ids: string[]): Promise<Spell[]>;
+}
 
-export function createAttackMutation(deps: SummonDeps = defaultDeps) {
+const loadSpellsById = (ids: string[]) => prisma.spell.findMany({ where: { id: { in: ids } } });
+
+const defaultDeps: AttackMutationDeps = { loadPool: getCachedSummonPool, loadSpells: loadSpellsById };
+
+async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, deps: AttackMutationDeps): Promise<Map<string, CastableSpell>> {
+  const attacker = ctx.participants.find((p) => p.basicInfo.id === attackerId);
+
+  if (!attacker) return new Map();
+
+  const ids = [...new Set(findFlags(withSelf(ctx.participants, attacker), attackerId, "castSpellOnHit").flatMap((f) => f.spellIds))];
+
+  if (ids.length === 0) return new Map();
+
+  const rows = await (deps.loadSpells ?? loadSpellsById)(ids);
+
+  return new Map(rows.filter((r) => r.campaignId === ctx.scene.campaignId).map((r) => [r.id, toCastableSpell(r)]));
+}
+
+export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
   return async (ctx: BattleMutationContext, body: AttackBody): Promise<MutationResult> => {
     const { endTurn, ...data } = body;
 
     assertAttackInput(ctx, data);
     assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
+
+    const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
 
     const phase = runAttackPhase({
       battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
@@ -77,6 +105,7 @@ export function createAttackMutation(deps: SummonDeps = defaultDeps) {
       isDM: ctx.isDM,
       rng: ctx.rng,
       map: ctx.meta.map,
+      hitSpells,
     });
 
     const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
