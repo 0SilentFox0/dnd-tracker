@@ -249,8 +249,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const painting = Boolean(strokeTool && actions?.onStroke);
 
-  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting });
-
   const { cols, rows } = map;
 
   const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
@@ -360,6 +358,8 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const scrolls = phone && fit.height > avail.height + 0.5;
 
+  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting, wheelScrolls: scrolls });
+
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
   const tokens = useMemo(
@@ -396,17 +396,42 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const end = trajectory?.kind === "ranged" ? cellCenter(trajectory.to) : null;
 
+  const currentId = view?.currentId ?? null;
+
+  useEffect(() => {
+    const outer = outerRef.current;
+
+    if (!phone || !currentId || !outer || outer.scrollHeight <= outer.clientHeight) return;
+
+    const token = [...(containerRef.current?.querySelectorAll<HTMLElement>('[data-fx-anchor="map"]') ?? [])].find((el) => el.dataset.fxParticipant === currentId);
+
+    if (!token) return;
+
+    const t = token.getBoundingClientRect();
+
+    const o = outer.getBoundingClientRect();
+
+    const dy = t.top < o.top ? t.top - o.top : t.bottom > o.bottom ? t.bottom - o.bottom : 0;
+
+    if (dy !== 0) outer.scrollBy({ top: dy, behavior: "smooth" });
+  }, [phone, currentId, containerRef]);
+
+  // свайп угору-вниз віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
+  const touch = phone && scrolls && zoom === 1 && !painting ? "touch-pan-y" : "touch-none";
+
+  const bgPx = Math.ceil(size.width * pxPerUnit);
 
   return (
-    // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки
-    <div ref={outerRef} className={cn("flex h-full w-full justify-center", scrolls ? "items-start overflow-y-auto" : "items-center", className)}>
+    // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
+    <div ref={outerRef} className={cn("flex h-full w-full justify-center", phone && "overflow-y-auto [scrollbar-gutter:stable]", scrolls ? "items-start" : "items-center", className)}>
     <div
       ref={containerRef}
       data-fx-clip
       data-attack-cursor={trajectory?.kind}
       className={cn(
         "relative shrink-0 select-none overflow-hidden bg-black",
-        phone ? "touch-pan-y" : "touch-none rounded-xl border border-white/10",
+        touch,
+        !phone && "rounded-xl border border-white/10",
         // курсор-зброя має перебити інлайн cursor: pointer на клітинках і токенах
         trajectory && "cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!",
       )}
@@ -424,7 +449,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
         className="absolute"
         style={{ left: -win.x * UNIT * pxPerUnit, top: -win.y * UNIT * pxPerUnit, width: size.width * pxPerUnit, height: size.height * pxPerUnit }}
       >
-        <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
+        <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes={phone && bgPx > 0 ? `${bgPx}px` : "100vw"} className="object-cover" priority />
         <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
           <GridLayer
             map={map}

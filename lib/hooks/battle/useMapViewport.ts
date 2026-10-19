@@ -36,15 +36,24 @@ function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h:
   return { zoom: next, x: clampOffset(px - cx * next, next, w), y: clampOffset(py - cy * next, next, h) };
 }
 
-/** panLocked — один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
-export function useMapViewport({ panLocked = false }: { panLocked?: boolean } = {}) {
+export interface MapViewportOptions {
+  /** один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
+  panLocked?: boolean;
+  /** контейнер карти прокручується: без зуму колесо гортає його, а масштабує лише з Ctrl/⌘ */
+  wheelScrolls?: boolean;
+}
+
+export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapViewportOptions = {}) {
   const [view, setView] = useState<Viewport>(INITIAL);
 
   const locked = useRef(panLocked);
 
+  const latest = useRef({ wheelScrolls, zoom: view.zoom });
+
   useEffect(() => {
     locked.current = panLocked;
-  }, [panLocked]);
+    latest.current = { wheelScrolls, zoom: view.zoom };
+  }, [panLocked, wheelScrolls, view.zoom]);
 
   const pointers = useRef(new Map<number, { x: number; y: number }>());
 
@@ -62,6 +71,10 @@ export function useMapViewport({ panLocked = false }: { panLocked?: boolean } = 
     if (!el) return;
 
     const onWheel = (e: globalThis.WheelEvent) => {
+      const { wheelScrolls: scrolls, zoom } = latest.current;
+
+      if (scrolls && zoom === 1 && !e.ctrlKey && !e.metaKey) return;
+
       e.preventDefault();
 
       const rect = el.getBoundingClientRect();

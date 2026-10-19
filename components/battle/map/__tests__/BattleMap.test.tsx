@@ -409,6 +409,109 @@ describe("BattleMap — поворот у портреті", () => {
   });
 });
 
+describe("BattleMap — телефон: прокрутка, дотик, колесо", () => {
+  const tall: BattleMapConfig = { ...square, cols: 4, rows: 20 };
+
+  const clip = (c: HTMLElement) => c.querySelector("[data-fx-clip]") as HTMLElement;
+
+  const outer = (c: HTMLElement) => clip(c).parentElement as HTMLElement;
+
+  it("карта вміщується — touch-none, обгортка з резервом під смугу прокрутки", () => {
+    avail = { width: 400, height: 600 };
+
+    const { container } = render(<BattleMap map={square} participants={people} phone />);
+
+    expect(clip(container).className).toContain("touch-none");
+    expect(clip(container).className).not.toContain("touch-pan-y");
+    expect(outer(container).className).toContain("overflow-y-auto");
+    expect(outer(container).className).toContain("[scrollbar-gutter:stable]");
+  });
+
+  it("висока карта прокручується — touch-pan-y; у режимі місцевості — touch-none", () => {
+    avail = { width: 300, height: 300 };
+
+    const scrolling = render(<BattleMap map={tall} participants={people} phone />);
+
+    expect(clip(scrolling.container).className).toContain("touch-pan-y");
+    cleanup();
+
+    const painting = render(<BattleMap map={tall} participants={people} phone actions={{ onStroke: vi.fn() }} editing={{ strokeTool: true }} />);
+
+    expect(clip(painting.container).className).toContain("touch-none");
+  });
+
+  it("висока карта без зуму: колесо гортає, Ctrl/⌘+колесо масштабує", () => {
+    avail = { width: 300, height: 300 };
+
+    const { container } = render(<BattleMap map={tall} participants={people} phone />);
+
+    expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(true);
+
+    // happy-dom не переносить ctrlKey з ініціалізатора WheelEvent
+    const zoomWheel = new WheelEvent("wheel", { deltaY: -100, cancelable: true, bubbles: true });
+
+    Object.defineProperty(zoomWheel, "ctrlKey", { value: true });
+
+    expect(fireEvent(clip(container), zoomWheel)).toBe(false);
+  });
+
+  it("фон просить зображення реальної ширини, а не 100vw", () => {
+    avail = { width: 300, height: 300 };
+
+    const { container } = render(<BattleMap map={tall} participants={people} phone />);
+
+    expect(container.querySelector("img")?.getAttribute("sizes")).toBe("300px");
+  });
+
+  it("невернутий телефон — токени без контр-повороту", () => {
+    avail = { width: 600, height: 400 };
+
+    const { container } = render(<BattleMap map={square} participants={people} phone />);
+
+    expect(container.querySelector("[data-map-rotated]")).toBeNull();
+    expect(container.querySelector("[data-map-tokens]")?.className).not.toContain("-rotate-90");
+  });
+
+  it("десктоп у портретному контейнері не повертає й не обрізає поля", () => {
+    avail = { width: 300, height: 600 };
+
+    const blocked = ["0:0", "1:0", "2:0", "3:0", "0:1", "0:2"];
+
+    const { container } = render(<BattleMap map={{ ...square, blocked }} participants={people} />);
+
+    expect(container.querySelector("[data-map-rotated]")).toBeNull();
+    expect(container.querySelector("[data-map-tokens]")?.className).not.toContain("-rotate-90");
+
+    const cropped = container.querySelector("[data-fx-clip] svg")?.parentElement as HTMLElement;
+
+    expect(parseFloat(cropped.style.left)).toBe(0);
+    expect(parseFloat(cropped.style.top)).toBe(0);
+    expect(parseFloat(cropped.style.width)).toBeCloseTo(parseFloat(clip(container).style.width), 3);
+    expect(outer(container).className).not.toContain("overflow-y-auto");
+  });
+
+  it("на початку ходу прокручує до поточного токена, якщо він за краєм", () => {
+    avail = { width: 300, height: 300 };
+
+    const { container, rerender } = render(<BattleMap map={tall} participants={people} view={{ currentId: "h" }} phone />);
+
+    const box = outer(container);
+
+    Object.defineProperty(box, "clientHeight", { value: 300 });
+    Object.defineProperty(box, "scrollHeight", { value: 1500 });
+    box.getBoundingClientRect = () => ({ top: 0, bottom: 300, left: 0, right: 300, width: 300, height: 300 }) as DOMRect;
+    box.scrollBy = vi.fn() as unknown as typeof box.scrollBy;
+
+    const token = container.querySelector('[data-fx-participant="e"]') as HTMLElement;
+
+    token.getBoundingClientRect = () => ({ top: 800, bottom: 850, left: 10, right: 60, width: 50, height: 50 }) as DOMRect;
+
+    rerender(<BattleMap map={tall} participants={people} view={{ currentId: "e" }} phone />);
+
+    expect(box.scrollBy).toHaveBeenCalledWith({ top: 550, behavior: "smooth" });
+  });
+});
+
 describe("BattleMap — terrain stroke", () => {
   function setup(props: Partial<Parameters<typeof BattleMap>[0]> = {}) {
     const onStroke = vi.fn();
