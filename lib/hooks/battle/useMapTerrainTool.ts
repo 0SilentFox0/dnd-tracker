@@ -2,13 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { cellKey } from "@/lib/utils/battle/grid";
-import type { MapTerrainData } from "@/types/api";
+import type { MapTerrainData, MapTerrainResponse } from "@/types/api";
 import type { GridPoint, TerrainKind } from "@/types/battle";
 
 export type TerrainBrush = TerrainKind | "erase";
 
-export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
+export const MAX_STROKE_CELLS = 400;
+
+export const MAX_BARRIER_ROUNDS = 20;
 
 export interface MapTerrainTool {
   active: boolean;
@@ -21,15 +24,38 @@ export interface MapTerrainTool {
   label: string;
   setLabel(label: string): void;
   commit(cells: GridPoint[]): void;
+  /** клітинки штрихів, що чекають на відповідь сервера */
+  pending: ReadonlySet<string>;
 }
 
 interface Options {
   isDM: boolean;
-  mutate: (data: MapTerrainData) => void;
+  mutate: (data: MapTerrainData) => Promise<MapTerrainResponse | undefined>;
+  onSkipped?: (count: number) => void;
   onActivate?: () => void;
 }
 
-export function useMapTerrainTool({ isDM, mutate, onActivate }: Options): MapTerrainTool {
+const EMPTY: ReadonlySet<string> = new Set();
+
+const sameTerrain = (a: MapTerrainData["terrain"], b: MapTerrainData["terrain"]) => JSON.stringify(a) === JSON.stringify(b);
+
+function enqueue(queue: MapTerrainData[], next: MapTerrainData) {
+  const last = queue.at(-1);
+
+  if (last && sameTerrain(last.terrain, next.terrain)) {
+    const merged = [...new Set([...last.cells, ...next.cells])];
+
+    if (merged.length <= MAX_STROKE_CELLS) {
+      last.cells = merged;
+
+      return;
+    }
+  }
+
+  for (let i = 0; i < next.cells.length; i += MAX_STROKE_CELLS) queue.push({ ...next, cells: next.cells.slice(i, i + MAX_STROKE_CELLS) });
+}
+
+export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Options): MapTerrainTool {
   const [on, setOn] = useState(false);
 
   const [brush, setBrush] = useState<TerrainBrush>("wall");
@@ -38,13 +64,46 @@ export function useMapTerrainTool({ isDM, mutate, onActivate }: Options): MapTer
 
   const [label, setLabel] = useState(DEFAULT_HAZARD_LABEL);
 
+  const [pending, setPending] = useState<ReadonlySet<string>>(EMPTY);
+
   const active = on && isDM;
 
-  const latest = useRef({ brush, rounds, label, mutate });
+  const latest = useRef({ brush, rounds, label, mutate, onSkipped });
 
   useEffect(() => {
-    latest.current = { brush, rounds, label, mutate };
+    latest.current = { brush, rounds, label, mutate, onSkipped };
   });
+
+  const queue = useRef<MapTerrainData[]>([]);
+
+  const inFlight = useRef<MapTerrainData | null>(null);
+
+  const syncPending = useCallback(() => {
+    const all = [inFlight.current, ...queue.current].flatMap((d) => d?.cells ?? []);
+
+    setPending(all.length > 0 ? new Set(all) : EMPTY);
+  }, []);
+
+  // один запит за раз: паралельні штрихи читали б ту саму версію бою й ловили 409
+  const drain = useCallback(async () => {
+    if (inFlight.current) return;
+
+    for (let next = queue.current.shift(); next; next = queue.current.shift()) {
+      inFlight.current = next;
+      syncPending();
+
+      try {
+        const res = await latest.current.mutate(next);
+
+        if (res?.skipped?.length) latest.current.onSkipped?.(res.skipped.length);
+      } catch {
+        // помилку вже показав useBattleAction
+      }
+    }
+
+    inFlight.current = null;
+    syncPending();
+  }, [syncPending]);
 
   const close = useCallback(() => setOn(false), []);
 
@@ -53,24 +112,29 @@ export function useMapTerrainTool({ isDM, mutate, onActivate }: Options): MapTer
     onActivate?.();
   }, [onActivate]);
 
-  const commit = useCallback((points: GridPoint[]) => {
-    const cells = [...new Set(points.map(cellKey))];
+  const commit = useCallback(
+    (points: GridPoint[]) => {
+      const cells = [...new Set(points.map(cellKey))];
 
-    if (cells.length === 0) return;
+      if (cells.length === 0) return;
 
-    const { brush: b, rounds: r, label: l, mutate: run } = latest.current;
+      const { brush: b, rounds: r, label: l } = latest.current;
 
-    const terrain: MapTerrainData["terrain"] =
-      b === "erase"
-        ? null
-        : b === "barrier"
-          ? { kind: b, rounds: Math.min(20, Math.max(1, Math.trunc(r) || 1)) }
-          : b === "hazard"
-            ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL }
-            : { kind: b };
+      const terrain: MapTerrainData["terrain"] =
+        b === "erase"
+          ? null
+          : b === "barrier"
+            ? { kind: b, rounds: Math.min(MAX_BARRIER_ROUNDS, Math.max(1, Math.trunc(r) || 1)) }
+            : b === "hazard"
+              ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL }
+              : { kind: b };
 
-    run({ cells, terrain });
-  }, []);
+      enqueue(queue.current, { cells, terrain });
+      syncPending();
+      void drain();
+    },
+    [drain, syncPending],
+  );
 
   useEffect(() => {
     if (!active) return;
@@ -84,5 +148,5 @@ export function useMapTerrainTool({ isDM, mutate, onActivate }: Options): MapTer
     return () => window.removeEventListener("keydown", onKey);
   }, [active]);
 
-  return { active, toggle, close, brush, setBrush, rounds, setRounds, label, setLabel, commit };
+  return { active, toggle, close, brush, setBrush, rounds, setRounds, label, setLabel, commit, pending };
 }

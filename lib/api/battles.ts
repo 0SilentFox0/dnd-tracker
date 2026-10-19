@@ -18,6 +18,7 @@ import type {
   BattleVersion,
   BonusActionData,
   MapTerrainData,
+  MapTerrainResponse,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -120,8 +121,12 @@ export async function moveParticipant(campaignId: string, battleId: string, data
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/move`, data);
 }
 
-export async function setMapTerrain(campaignId: string, battleId: string, data: WithVersion<MapTerrainData>): Promise<BattleMutationResponse> {
-  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/map-terrain`, data);
+export async function setMapTerrain(
+  campaignId: string,
+  battleId: string,
+  data: WithVersion<MapTerrainData>,
+): Promise<BattleMutationResponse<MapTerrainResponse>> {
+  return campaignPost<BattleMutationResponse<MapTerrainResponse>>(campaignId, `/battles/${battleId}/map-terrain`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

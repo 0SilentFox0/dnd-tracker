@@ -11,7 +11,11 @@ export interface BattleActionOptions {
   invalidate?: ("battles" | "active-battles")[];
   onConflict?: () => void;
   onFailure?: (message: string) => void;
+  /** одна повторна спроба після 409 з версією з перечитаного кешу — лише для ідемпотентних дій */
+  retryOnConflict?: boolean;
 }
+
+const isConflict = (error: unknown) => error instanceof ApiError && error.status === 409;
 
 export function useBattleAction<TVars extends object, TResp = Record<string, unknown>>(
   campaignId: string,
@@ -27,9 +31,15 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
     mutationFn: async (vars: TVars) => {
       const pinned = (vars as { expectedVersion?: number }).expectedVersion;
 
-      const expectedVersion = pinned ?? queryClient.getQueryData<BattleScene>(key)?.version;
+      const send = () => fn({ ...vars, expectedVersion: pinned ?? queryClient.getQueryData<BattleScene>(key)?.version });
 
-      const { delta, response } = await fn({ ...vars, expectedVersion });
+      const { delta, response } = await send().catch(async (error: unknown) => {
+        if (!options.retryOnConflict || pinned !== undefined || !isConflict(error)) throw error;
+
+        await queryClient.invalidateQueries({ queryKey: key });
+
+        return send();
+      });
 
       const cached = queryClient.getQueryData<BattleScene>(key);
 
@@ -45,7 +55,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
       return response;
     },
     onError: (error) => {
-      if (error instanceof ApiError && error.status === 409) {
+      if (isConflict(error)) {
         void queryClient.invalidateQueries({ queryKey: key });
         options.onConflict?.();
 

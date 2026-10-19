@@ -109,6 +109,8 @@ export const CELL_FEET = 5;
 
 export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
 
+export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
+
 export const DEFAULT_BATTLE_MAP = {
   cols: 20,
   rows: 12,

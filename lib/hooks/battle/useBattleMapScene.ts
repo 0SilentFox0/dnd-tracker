@@ -6,6 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
 import { cellKey, deriveMapScene, deriveTrajectory, type MapClick } from "@/lib/utils/battle/grid";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface BattleMapScene {
@@ -35,9 +36,13 @@ export function useBattleMapScene(): BattleMapScene | null {
     setPlacingId(null);
   }, []);
 
-  const { mutate: mapTerrain } = actions.mapTerrain;
+  const { mutateAsync: mapTerrain } = actions.mapTerrain;
 
-  const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onActivate: stopPlacing });
+  const { show } = toast;
+
+  const onSkipped = useCallback((n: number) => show(`Пропущено ${n} ${pluralUk(n, ["клітинку", "клітинки", "клітинок"])} (зайняті або поза полем)`), [show]);
+
+  const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onSkipped, onActivate: stopPlacing });
 
   const placing = placingOn && isDM;
 
@@ -54,14 +59,21 @@ export function useBattleMapScene(): BattleMapScene | null {
     [map, order, current, viewer, canAct, isDM, placing, toolActive, placingId, selectedId],
   );
 
+  const { pending: pendingStroke } = terrainTool;
+
   const view = useMemo(
-    () => (scene ? { ...scene.view, trajectory: deriveTrajectory(scene.view.marks, scene.view.currentId ?? null, hoverCell) } : null),
-    [scene, hoverCell],
+    () =>
+      scene
+        ? {
+            ...scene.view,
+            trajectory: deriveTrajectory(scene.view.marks, scene.view.currentId ?? null, hoverCell),
+            ...(pendingStroke.size > 0 && { pendingStroke }),
+          }
+        : null,
+    [scene, hoverCell, pendingStroke],
   );
 
   const { mutate: move } = actions.move;
-
-  const { show } = toast;
 
   const { currentRound, currentTurnIndex } = battle;
 

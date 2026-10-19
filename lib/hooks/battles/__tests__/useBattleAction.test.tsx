@@ -146,3 +146,49 @@ describe("useBattleAction — версія і помилки", () => {
     await waitFor(() => expect(onFailure).toHaveBeenCalledWith("Бонусну дію вже використано цього ходу"));
   });
 });
+
+describe("useBattleAction — retryOnConflict", () => {
+  const conflict = () => new ApiError("conflict", 409, "/x", { code: "conflict", version: 7 });
+
+  it("409 — перечитує бій і повторює один раз зі свіжою версією, без тосту конфлікту", async () => {
+    const { qc, wrapper } = setup();
+
+    vi.spyOn(qc, "invalidateQueries").mockImplementation(async () => {
+      qc.setQueryData(key, { ...base, version: 7 });
+    });
+
+    const onConflict = vi.fn();
+
+    const fn = vi.fn().mockRejectedValueOnce(conflict()).mockResolvedValueOnce({ delta: delta(8) });
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", fn, { onConflict, retryOnConflict: true }), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({});
+    });
+
+    expect(fn).toHaveBeenNthCalledWith(1, { expectedVersion: 5 });
+    expect(fn).toHaveBeenNthCalledWith(2, { expectedVersion: 7 });
+    expect(onConflict).not.toHaveBeenCalled();
+    expect(qc.getQueryData<BattleScene>(key)?.version).toBe(8);
+  });
+
+  it("другий 409 — помилка й onConflict, без третьої спроби", async () => {
+    const { wrapper } = setup();
+
+    const onConflict = vi.fn();
+
+    const fn = vi.fn(async () => {
+      throw conflict();
+    });
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", fn, { onConflict, retryOnConflict: true }), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({}).catch(() => undefined);
+    });
+
+    expect(fn).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(onConflict).toHaveBeenCalledTimes(1));
+  });
+});

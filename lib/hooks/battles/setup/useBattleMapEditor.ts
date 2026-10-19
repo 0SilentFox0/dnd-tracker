@@ -2,13 +2,11 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { applyMargins, clampMargins, hasPlayableArea, inferMargins, type Margins, paintCells, resizeMap, type SetupTool } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
-
-export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
 
 export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
 

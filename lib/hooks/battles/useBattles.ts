@@ -41,6 +41,7 @@ import type {
   BattleScene,
   BonusActionData,
   MapTerrainData,
+  MapTerrainResponse,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -168,7 +169,7 @@ export const useMoveParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoveParticipantData>(c, b, (data) => moveParticipant(c, b, data), o);
 
 export const useMapTerrain = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<MapTerrainData>(c, b, (data) => setMapTerrain(c, b, data), o);
+  useBattleAction<MapTerrainData, MapTerrainResponse>(c, b, (data) => setMapTerrain(c, b, data), { ...o, retryOnConflict: true });
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

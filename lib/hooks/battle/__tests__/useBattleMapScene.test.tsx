@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useBattleMapScene } from "../useBattleMapScene";
 import { fakeScene } from "./fake-scene";
 
+import type { MapTerrainData } from "@/types/api";
 import type { BattleMapConfig } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -136,26 +137,82 @@ describe("useBattleMapScene", () => {
 
     act(() => current().actions.onStroke?.([{ x: 3, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }]));
 
-    expect(value.actions.mapTerrain.mutate).toHaveBeenCalledTimes(1);
-    expect(value.actions.mapTerrain.mutate).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь" } });
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(1);
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь" } });
   });
 
-  it("щітка: барʼєр з раундами, непрохідне, стерти", () => {
+  it("щітка: барʼєр з раундами, непрохідне, стерти", async () => {
     const { current, value } = setup(true);
 
-    const stroke = () => act(() => current().actions.onStroke?.([{ x: 2, y: 2 }]));
+    const stroke = () => act(async () => current().actions.onStroke?.([{ x: 2, y: 2 }]));
 
     act(() => current().terrainTool?.toggle());
-    stroke();
+    await stroke();
     act(() => current().terrainTool?.setBrush("barrier"));
     act(() => current().terrainTool?.setRounds(3));
-    stroke();
+    await stroke();
     act(() => current().terrainTool?.setBrush("erase"));
-    stroke();
+    await stroke();
 
-    const calls = vi.mocked(value.actions.mapTerrain.mutate).mock.calls.map((c) => c[0].terrain);
+    const calls = vi.mocked(value.actions.mapTerrain.mutateAsync).mock.calls.map((c) => (c[0] as MapTerrainData).terrain);
 
     expect(calls).toEqual([{ kind: "wall" }, { kind: "barrier", rounds: 3 }, null]);
+  });
+
+  it("штрихи по черзі: наступний іде після відповіді на попередній, черга однієї щітки зливається", async () => {
+    const { current, value } = setup(true);
+
+    const releases: Array<() => void> = [];
+
+    vi.mocked(value.actions.mapTerrain.mutateAsync).mockImplementation(() => new Promise((r) => releases.push(() => r(undefined))));
+
+    const stroke = (x: number) => act(() => current().actions.onStroke?.([{ x, y: 2 }]));
+
+    act(() => current().terrainTool?.toggle());
+    stroke(2);
+    stroke(3);
+    stroke(4);
+    act(() => current().terrainTool?.setBrush("erase"));
+    stroke(5);
+
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(1);
+    expect(current().view.pendingStroke).toEqual(new Set(["2:2", "3:2", "4:2", "5:2"]));
+
+    await act(async () => releases[0]());
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(2);
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenLastCalledWith({ cells: ["3:2", "4:2"], terrain: { kind: "wall" } });
+
+    await act(async () => releases[1]());
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenLastCalledWith({ cells: ["5:2"], terrain: null });
+
+    await act(async () => releases[2]());
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(3);
+    expect(current().view.pendingStroke).toBeUndefined();
+  });
+
+  it("помилка штриха не зупиняє чергу", async () => {
+    const { current, value } = setup(true);
+
+    vi.mocked(value.actions.mapTerrain.mutateAsync).mockRejectedValueOnce(new Error("409"));
+
+    act(() => current().terrainTool?.toggle());
+    await act(async () => {
+      current().actions.onStroke?.([{ x: 2, y: 2 }]);
+      current().actions.onStroke?.([{ x: 3, y: 2 }]);
+    });
+
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it("пропущені сервером клітинки — короткий тост", async () => {
+    const { current, value } = setup(true);
+
+    vi.mocked(value.actions.mapTerrain.mutateAsync).mockResolvedValueOnce({ skipped: ["0:0", "1:0"] });
+
+    act(() => current().terrainTool?.toggle());
+    await act(async () => current().actions.onStroke?.([{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }]));
+
+    expect(value.toast.show).toHaveBeenCalledWith("Пропущено 2 клітинки (зайняті або поза полем)");
   });
 
   it("Esc виходить з інструмента", () => {
