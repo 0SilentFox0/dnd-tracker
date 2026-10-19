@@ -4,10 +4,10 @@ import type { FxAnimation } from "./types";
 
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-export const area: FxAnimation = async ({ stage, from, to, palette, spec }) => {
+export const area: FxAnimation = async ({ stage, from, to, at, palette, spec }) => {
   if (!to.length) return;
 
-  const center = { x: to.reduce((s, p) => s + p.x, 0) / to.length, y: to.reduce((s, p) => s + p.y, 0) / to.length };
+  const center = at ?? { x: to.reduce((s, p) => s + p.x, 0) / to.length, y: to.reduce((s, p) => s + p.y, 0) / to.length };
 
   await shoot(stage, from, center, ARCHETYPE_FX.area.impactMs, palette.core, palette.tints);
 

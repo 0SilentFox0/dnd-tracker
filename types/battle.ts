@@ -422,6 +422,7 @@ export interface BattleAction {
     }>;
     spellDamageType?: string;
     spellTargeting?: string;
+    aimCell?: GridPoint;
     spellEffectKinds?: string[];
     // Для пасивок:
     triggeredAbilities?: Array<{

@@ -56,10 +56,18 @@ function centerOf(el: HTMLElement): FxPoint {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
-export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; targetEls: HTMLElement[]; actorEl: HTMLElement | null } | null {
+function cellPoint(at: { x: number; y: number }, root: ParentNode): FxPoint | undefined {
+  const el = root.querySelector<HTMLElement>(`[data-fx-cell="${at.x}:${at.y}"]`);
+
+  return el && visible(el) ? centerOf(el) : undefined;
+}
+
+export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; at?: FxPoint; targetEls: HTMLElement[]; actorEl: HTMLElement | null } | null {
   const targetEls = spec.targetIds.flatMap((id) => findAnchor(id, root) ?? []);
 
   const to = targetEls.map(centerOf);
+
+  const cell = spec.at && cellPoint(spec.at, root);
 
   if (to.length === 0) return null;
 
@@ -69,7 +77,7 @@ export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from
 
   const from = actorEl ? centerOf(actorEl) : { x: to[0].x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
 
-  return { from, to, targetEls, actorEl };
+  return { from, to, ...(cell && { at: cell }), targetEls, actorEl };
 }
 
 /** Half the width and height of a target row, for effects that wrap it; `fallback` when it is gone. */

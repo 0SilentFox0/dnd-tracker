@@ -28,5 +28,5 @@ export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode 
 
   const local = (p: FxPoint) => ({ x: p.x - box.left, y: p.y - box.top });
 
-  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
+  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), ...(points.at && { at: local(points.at) }), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
 }

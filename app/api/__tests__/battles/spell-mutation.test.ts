@@ -50,6 +50,8 @@ function mutation(row: Spell | null = spellRow, deps: Partial<SpellMutationDeps>
 
 const body = (over: Record<string, unknown> = {}) => ({ casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [4], ...over });
 
+const aimOf = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails?: { aimCell?: unknown } } | undefined)?.actionDetails?.aimCell;
+
 const hpOf = (out: { participants: BattleParticipant[] }, id: string) => out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 
 describe("spell mutation", () => {
@@ -307,6 +309,18 @@ describe("spell mutation", () => {
       expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp - 4);
       expect(hpOf(out, "gob2")).toBe(gob2.combatStats.currentHp);
       expect(out.scene?.map).toBeUndefined();
+    });
+
+    it("шаблон на карті записує aimCell у подію, одиночне заклинання без точки — ні", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 30 });
+
+      const aimed = await mutation(row)(onMap(), body({ targetIds: [], targetCell: { x: 5, y: 2 } }) as never);
+
+      expect(aimOf(aimed)).toEqual({ x: 5, y: 2 });
+
+      const single = await mutation()(context({ participants: [caster, goblin] }), body() as never);
+
+      expect(aimOf(single)).toBeUndefined();
     });
 
     it("точка поза дальністю — invalid_target", async () => {

@@ -49,7 +49,7 @@ function primary(action: BattleAction): FxSpec | null {
     return { ...base, archetype: d.attackKind === "ranged" ? "ranged" : "melee", element: elementOf(d.damageRolls?.[0]?.damageType, "physical"), hit: d.isHit !== false && d.isCriticalFail !== true };
   }
 
-  if (action.actionType === "spell") return { ...base, ...spellArchetype(action), hit: true };
+  if (action.actionType === "spell") return { ...base, ...spellArchetype(action), hit: true, ...(d.aimCell && { at: d.aimCell }) };
 
   return null;
 }

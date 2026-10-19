@@ -178,3 +178,35 @@ describe("відсікання за [data-fx-clip]", () => {
     expect(points?.to[0]).toEqual({ x: 210, y: 110 });
   });
 });
+
+describe("точка шаблону", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  function cell(key: string, rect: Rect, parent: HTMLElement = document.body) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+    el.setAttribute("data-fx-cell", key);
+    (el as unknown as HTMLElement).getBoundingClientRect = domRect(rect);
+    parent.appendChild(el);
+
+    return el;
+  }
+
+  it("at — центр видимої клітинки центру шаблону", () => {
+    anchor("t", { x: 10, y: 10, w: 20, h: 20 });
+    cell("4:2", { x: 100, y: 100, w: 30, h: 30 });
+
+    expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toEqual({ x: 115, y: 115 });
+  });
+
+  it("клітинка прокручена за край телефонної карти — at відсутнє (відкат до центроїда)", () => {
+    const clip = mapClip({ x: 0, y: 0, w: 300, h: 200 }, true);
+
+    anchor("t", { x: 10, y: 10, w: 20, h: 20 }, false, clip);
+    cell("4:2", { x: 100, y: 500, w: 30, h: 30 }, clip);
+
+    expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toBeUndefined();
+  });
+});

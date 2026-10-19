@@ -165,3 +165,15 @@ describe("mapAction", () => {
     expect(spell("Слово світла", { spellDamageType: "radiant", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"], totalDamage: 30 })).toMatchObject({ archetype: "holyword", element: "radiant" });
   });
 });
+
+describe("mapAction — точка шаблону", () => {
+  const cast = (details: Record<string, unknown>) => action({ actionType: "spell", actionDetails: { spellTargeting: "template", spellEffectKinds: ["dealDamage"], totalDamage: 12, ...details } });
+
+  it("переносить aimCell у FxSpec.at", () => {
+    expect(mapAction(cast({ aimCell: { x: 4, y: 2 } }))[0].at).toEqual({ x: 4, y: 2 });
+  });
+
+  it("без aimCell (бій без карти) — at відсутнє", () => {
+    expect(mapAction(cast({}))[0]).not.toHaveProperty("at");
+  });
+});

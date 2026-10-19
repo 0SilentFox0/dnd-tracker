@@ -9,6 +9,8 @@ export interface FxRun {
   stage: Stage;
   from: FxPoint;
   to: FxPoint[];
+  /** Template centre when the cast was aimed at a map cell. */
+  at?: FxPoint;
   /** The anchors behind `to`, index for index. */
   targetEls: HTMLElement[];
   actorEl: HTMLElement | null;
