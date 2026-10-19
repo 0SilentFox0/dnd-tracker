@@ -77,23 +77,26 @@ export interface MapView {
   rotated: boolean;
 }
 
-// поворот лише коли клітинка стає помітно більшою — інакше карта даремно «лягає на бік»
+// карта лягає вертикально, лише коли вона помітно ширша, ніж висока
 const ROTATE_MIN_RATIO = 1.15;
 
-/** рамка карти на екрані; rotated — карта повернута на 90° за годинниковою, width/height уже переставлені */
+/**
+ * рамка карти на екрані; rotated — карта повернута на 90° за годинниковою, width/height уже переставлені;
+ * fillWidth — рамка на всю ширину, висота може перевищити доступну (тоді її прокручують)
+ */
 export function fitMapView(
   avail: { width: number; height: number },
   map: Pick<BattleMapConfig, "cols" | "rows">,
-  { rotatable = false }: { rotatable?: boolean } = {},
+  { rotatable = false, fillWidth = false }: { rotatable?: boolean; fillWidth?: boolean } = {},
 ): MapView {
-  const flat = fitMapBox(avail, map);
-
-  if (!rotatable) return { ...flat, rotated: false };
-
   // за орієнтацією, а не за виграшем площі: інакше карта перекидається, коли панель знизу росте
-  const rotate = avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
+  const rotated = rotatable && avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
 
-  return rotate ? { ...fitMapBox(avail, { cols: map.rows, rows: map.cols }), rotated: true } : { ...flat, rotated: false };
+  const shown = rotated ? { cols: map.rows, rows: map.cols } : map;
+
+  const box = fillWidth ? { width: avail.width, height: (avail.width * shown.rows) / shown.cols } : fitMapBox(avail, shown);
+
+  return { ...box, rotated };
 }
 
 export type GridWindow = { x: number; y: number; cols: number; rows: number };

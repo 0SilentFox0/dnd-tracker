@@ -69,6 +69,14 @@ describe("fitMapView", () => {
     expect(fitMapView({ width: 382, height: 426 }, { cols: 15, rows: 9 }, { rotatable: true }).rotated).toBe(true);
   });
 
+  it("fillWidth: повернута карта на всю ширину, висота більша за доступну", () => {
+    expect(fitMapView({ width: 300, height: 400 }, wide, { rotatable: true, fillWidth: true })).toEqual({ width: 300, height: 500, rotated: true });
+  });
+
+  it("fillWidth без повороту: ширина екрана, висота за пропорцією", () => {
+    expect(fitMapView({ width: 600, height: 100 }, wide, { fillWidth: true })).toEqual({ width: 600, height: 360, rotated: false });
+  });
+
   it("порожній контейнер — без повороту", () => {
     expect(fitMapView({ width: 0, height: 0 }, wide, { rotatable: true })).toEqual({ width: 0, height: 0, rotated: false });
   });

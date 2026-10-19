@@ -35,7 +35,7 @@ export interface BattleMapProps {
   actions?: BattleMapActions;
   className?: string;
   editing?: BattleMapEditing;
-  /** телефон: карта обрізана до ігрових клітинок і лягає вертикально, якщо так клітинки більші */
+  /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
   phone?: boolean;
 }
 
@@ -354,7 +354,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const fit = fitMapView(avail, win, { rotatable: phone });
+  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone });
+
+  const scrolls = phone && fit.height > avail.height + 0.5;
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
@@ -379,11 +381,12 @@ export function BattleMap({ map, participants, view, actions, className, editing
   const end = view?.trajectory ? cellCenter(view.trajectory.to) : null;
 
   return (
-    <div ref={outerRef} className={cn("flex h-full w-full items-center justify-center", className)}>
+    // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки
+    <div ref={outerRef} className={cn("flex h-full w-full justify-center", scrolls ? "items-start overflow-y-auto" : "items-center", className)}>
     <div
       ref={containerRef}
       data-fx-clip
-      className="relative shrink-0 touch-none select-none overflow-hidden rounded-xl border border-white/10 bg-black"
+      className={cn("relative shrink-0 select-none overflow-hidden bg-black", phone ? "touch-pan-y" : "touch-none rounded-xl border border-white/10")}
       style={{ width: fit.width, height: fit.height }}
       {...bind}
     >
