@@ -49,7 +49,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const existedBefore = activeEffectIds(flow.ps);
 
   // дія витрачається до подій атаки: «оновлення дії» від вбивства чи «+1 дія» мають пережити цей удар
-  put(flow, applyMainActionUsed(getP(flow, attackerId)));
+  if (!params.actionSpent) put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
   const consume = (r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult => {
     flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });

@@ -76,3 +76,23 @@ describe("extra-action grants during an attack are counted once", () => {
     expect(self(second).actionFlags.hasUsedAction).toBe(true);
   });
 });
+
+describe("a multi-target volley is one action", () => {
+  const volley = (order: BattleParticipant[], rolls = [15, 15]) => attack(order, { attackId: "bw", targetIds: ["t1", "t2"], attackRolls: rolls, damageRolls: [] });
+
+  it("a hero with two actions keeps one after a two-target volley", () => {
+    const r = volley([hero({ pending: 1, maxTargets: 2 }), foe("t1"), foe("t2")]);
+
+    expect(r.allBattleActions.filter((e) => e.actionType === "attack")).toHaveLength(2);
+    expect(self(r).actionFlags.hasUsedAction).toBe(false);
+    expect(self(r).battleData.pendingExtraActions ?? 0).toBe(0);
+
+    expect(self(volley(r.finalInitiativeOrder)).actionFlags.hasUsedAction).toBe(true);
+  });
+
+  it("a hero with one action spends it on the volley", () => {
+    const r = volley([hero({ maxTargets: 2 }), foe("t1"), foe("t2")], [15, 3]);
+
+    expect(self(r).actionFlags.hasUsedAction).toBe(true);
+  });
+});
