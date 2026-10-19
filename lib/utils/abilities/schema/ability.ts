@@ -77,6 +77,7 @@ export const AbilitySchema = z
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
     maxTargets: z.number().int().min(1).optional(),
+    aim: z.object({ kind: z.enum(["cell", "direction"]), range: z.number().int().min(5) }).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
@@ -89,6 +90,10 @@ export const AbilitySchema = z
 
     if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
       ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
+    }
+
+    if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
+      ctx.addIssue({ code: "custom", path: ["aim"], message: "aim доступний лише для бонусної дії та дії" });
     }
 
     a.effects.forEach((effect, i) => {

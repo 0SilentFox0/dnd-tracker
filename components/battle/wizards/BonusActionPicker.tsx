@@ -14,10 +14,10 @@ import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOptions, bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone, trigger = "bonusAction" }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void; trigger?: "bonusAction" | "action" }) {
-  const { roster: { allies, enemies }, actions, battle } = useBattleScene();
+  const { roster: { allies, enemies }, actions, battle, intents } = useBattleScene();
 
   const [aiming, setAiming] = useState<ResolvedAbility | null>(null);
 
@@ -25,14 +25,16 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
   const [picked, setPicked] = useState<string[]>([]);
 
-  const fire = async (a: ResolvedAbility, targetIds: string[] = []) => {
+  const fire = async (a: ResolvedAbility, targetIds: string[] = [], targetCell?: GridPoint) => {
+    const cell = targetCell ? { targetCell } : {};
+
     try {
       if (trigger === "action") {
-        await actions.abilityAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetIds.length > 0 && { targetParticipantIds: targetIds }) });
+        await actions.abilityAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...cell, ...(targetIds.length > 0 && { targetParticipantIds: targetIds }) });
       } else if (targetIds.length > 1) {
-        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, targetParticipantIds: targetIds });
+        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...cell, targetParticipantIds: targetIds });
       } else {
-        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...(targetIds[0] && { targetParticipantId: targetIds[0] }) });
+        await actions.bonusAction.mutateAsync({ participantId: participant.basicInfo.id, abilityKey: a.key, ...cell, ...(targetIds[0] && { targetParticipantId: targetIds[0] }) });
       }
     } catch {
       return;
@@ -42,6 +44,22 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
     setPicked([]);
     onOpenChange(false);
     onDone();
+  };
+
+  const pick = (a: ResolvedAbility) => {
+    if (a.aim && battle.map) {
+      intents.setMapAim({
+        template: { shape: "circle", size: 5 },
+        casterId: participant.basicInfo.id,
+        range: a.aim.range,
+        onAim: (cell) => {
+          intents.setMapAim(null);
+          void fire(a, [], cell);
+        },
+      });
+      onOpenChange(false);
+    } else if (needsBonusTarget(a)) setAiming(a);
+    else void fire(a);
   };
 
   const side = aiming ? bonusTargetSide(aiming) : null;
@@ -59,7 +77,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
  onOpenChange(o); }} title={aiming ? `${aiming.name} · ціль` : trigger === "action" ? "Вміння" : "Бонусна дія"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       <div className="space-y-2">
         {!aiming && abilities.map(({ ability: a, cooldownLeft }) => (
-          <button key={a.key} type="button" disabled={cooldownLeft > 0 || actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => (needsBonusTarget(a) ? setAiming(a) : void fire(a))} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
+          <button key={a.key} type="button" disabled={cooldownLeft > 0 || actions.bonusAction.isPending || actions.abilityAction.isPending} onClick={() => pick(a)} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
             {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
             <span className="min-w-0">
               <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">ще {cooldownLeft} р.</span>}</span>

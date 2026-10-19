@@ -11,12 +11,14 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 
 export const abilityActionSchema = z.object({
   participantId: z.string(),
   abilityKey: z.string(),
   targetParticipantIds: z.array(z.string()).optional(),
+  targetCell: z.object({ x: z.number().int(), y: z.number().int() }).optional(),
 });
 
 export type AbilityActionBody = z.infer<typeof abilityActionSchema>;
@@ -43,13 +45,15 @@ export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (!withinLimits(participant, ability, ctx.scene.round)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
+    const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, data.targetCell);
+
     const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? [], participant);
 
     // дія витрачається до ефектів, щоб «оновлення дії» від них не перезаписалось
     const run = runAbilities(
       updateParticipant(ctx.participants, participant.basicInfo.id, applyMainActionUsed),
-      { type: "action", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds },
-      { round: ctx.scene.round, rng: ctx.rng ?? Math.random },
+      { type: "action", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) },
+      { round: ctx.scene.round, rng: ctx.rng ?? Math.random, ...(ctx.meta.map && { map: ctx.meta.map }) },
     );
 
     const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
