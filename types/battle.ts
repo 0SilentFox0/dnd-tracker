@@ -156,6 +156,14 @@ export interface GridPoint {
   y: number;
 }
 
+export type TemplateShape = "circle" | "cube" | "cone" | "line";
+
+/** size у футах: радіус кола, сторона куба, довжина конуса/лінії */
+export interface SpellTemplate {
+  shape: TemplateShape;
+  size: number;
+}
+
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
 export interface BattleMapConfig {
   cols: number;
