@@ -6,8 +6,6 @@ import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
 import { rollSavingThrow, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { BattleParticipant } from "@/types/battle";
 
-const NO_MAP_TARGETS = 3;
-
 export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
   const actor = findParticipant(ps, input.actorId);
 
@@ -15,7 +13,7 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const targets = input.map && isOnMap(actor)
     ? ps.filter((p) => isEnemyOf(actor)(p) && isOnMap(p) && footprintDistance(cellsOf(actor), cellsOf(p)) <= 1)
-    : pickedEnemies(ps, actor, input.targetIds, NO_MAP_TARGETS);
+    : pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length);
 
   if (!targets.length) return { ...maneuverResult(ps), messages: [`🔥 ${input.name}: ${actor.basicInfo.name} — поруч нікого`] };
 

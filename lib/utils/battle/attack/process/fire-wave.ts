@@ -1,8 +1,7 @@
+import { FIRE_WAVE_NO_MAP_VICTIMS } from "@/lib/constants/battle";
 import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
-import { apexOf, cellsOf, closestCell, isOnMap, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
+import { apexOf, bothOnMap, cellsOf, closestCell, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
-
-const NO_MAP_VICTIMS = 2;
 
 export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number): string[] {
   const victim = findParticipant(ps, victimId);
@@ -11,7 +10,7 @@ export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: Bat
 
   const isEnemy = (p: BattleParticipant) => p.basicInfo.side !== attacker.basicInfo.side && p.basicInfo.id !== victimId && isTargetable(p);
 
-  if (!map || !isOnMap(attacker) || !isOnMap(victim)) return ps.filter(isEnemy).slice(0, NO_MAP_VICTIMS).map((p) => p.basicInfo.id);
+  if (!bothOnMap(map, attacker, victim)) return ps.filter(isEnemy).slice(0, FIRE_WAVE_NO_MAP_VICTIMS).map((p) => p.basicInfo.id);
 
   const from = cellsOf(attacker);
 

@@ -5,8 +5,6 @@ import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engin
 import { canStand, cellKey, feetToCells, footprint, participantsInCells, rayCells, sizeOf } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-const NO_MAP_TARGETS = 3;
-
 function flightPath(map: BattleMapConfig, start: GridPoint, aim: GridPoint, rangeFeet: number | undefined): GridPoint[] {
   return rayCells(map, start, aim, { maxCells: rangeFeet === undefined ? Math.max(map.cols, map.rows) : feetToCells(rangeFeet), stopAtTarget: true });
 }
@@ -23,7 +21,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
   const start = actor.battleData.position;
 
   if (!input.map || !start || !input.targetCell) {
-    const targets = pickedEnemies(ps, actor, input.targetIds, NO_MAP_TARGETS);
+    const targets = pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length);
 
     return strikeAll(maneuverResult(ps), targets.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
   }

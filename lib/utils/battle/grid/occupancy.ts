@@ -15,6 +15,10 @@ export function isOnMap(p: BattleParticipant): boolean {
   return p.battleData.position !== undefined && occupiesCells(p);
 }
 
+export function bothOnMap(map: BattleMapConfig | null | undefined, ...ps: BattleParticipant[]): map is BattleMapConfig {
+  return !!map && ps.every(isOnMap);
+}
+
 export function cellsOf(p: BattleParticipant): GridPoint[] {
   return p.battleData.position ? footprint(p.battleData.position, sizeOf(p)) : [];
 }

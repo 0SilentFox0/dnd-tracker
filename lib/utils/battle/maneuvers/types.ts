@@ -8,6 +8,7 @@ export interface ManeuverInput {
   targetIds: string[];
   targetCell?: GridPoint;
   range?: number;
+  maxTargets?: number;
   map?: BattleMapConfig | null;
   round: number;
   rng: Rng;

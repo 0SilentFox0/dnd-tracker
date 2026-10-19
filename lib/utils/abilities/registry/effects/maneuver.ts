@@ -21,6 +21,7 @@ export function applyManeuver(input: EffectApplyInput<Extract<Effect, { kind: "m
     targetIds: event.targetIds ?? [],
     ...(event.targetCell && { targetCell: event.targetCell }),
     ...(ability.aim && { range: ability.aim.range }),
+    ...(ability.maxTargets && { maxTargets: ability.maxTargets }),
     map: ctx.map,
     round: ctx.round,
     rng: ctx.rng,
