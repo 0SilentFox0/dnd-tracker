@@ -38,6 +38,8 @@ export interface ActiveEffect {
   hotHeal?: {
     healPerRound: number;
   };
+  /** Сирий тип шкоди заклинання, що наклало ефект (для візуалу ауры) */
+  fxElement?: string;
   breakOnDamage?: boolean;
   consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
   expireAtTurnEnd?: boolean;
@@ -393,7 +395,12 @@ export interface BattleAction {
       id: string;
       name: string;
       duration: number;
+      type?: "buff" | "debuff" | "condition";
+      targetId?: string;
     }>;
+    spellDamageType?: string;
+    spellTargeting?: string;
+    spellEffectKinds?: string[];
     // Для пасивок:
     triggeredAbilities?: Array<{
       id: string;

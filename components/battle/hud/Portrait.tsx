@@ -12,15 +12,19 @@ export interface PortraitProps {
   me?: boolean;
   extra?: boolean;
   className?: string;
+  /** FX anchor: the row/hero portrait, or its copy in the initiative track (used only when the row is off-screen). */
+  fx?: "main" | "track";
 }
 
-export function Portrait({ participant, size = 40, current, me, extra, className }: PortraitProps) {
+export function Portrait({ participant, size = 40, current, me, extra, className, fx }: PortraitProps) {
   const { avatar, name, side } = participant.basicInfo;
 
   const ring = side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)";
 
   return (
     <span
+      data-fx-participant={fx ? participant.basicInfo.id : undefined}
+      data-fx-anchor={fx === "track" ? "track" : undefined}
       className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#241d16] text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
       style={{
         width: size,

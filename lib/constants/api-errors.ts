@@ -18,6 +18,8 @@ export const API_ERRORS = {
   ABILITY_TARGET_INVALID: "Недопустима ціль для цього вміння",
   BONUS_TARGET_MUST_BE_DEAD: "Ціль має бути мертвою",
   SPELL_TOO_MANY_TARGETS: "Забагато цілей для цього закляття",
+  ACTION_USED: "Дію цього ходу вже використано",
+  BONUS_ACTION_USED: "Бонусну дію цього ходу вже використано",
   INTERNAL: "Внутрішня помилка сервера",
   FOREIGN_KEY: "Пов'язаний запис не існує",
   CAMPAIGN_NOT_ACTIVE: "Кампанія не активна",

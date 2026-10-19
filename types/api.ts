@@ -141,9 +141,13 @@ export interface AttackData {
   /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
   attackRolls?: number[];
   /** Другий d20 на ціль (multi-target), у тому ж порядку, що й attackRolls; сервер сам вирішує перевагу/недолік */
-  secondRolls?: number[];
+  secondRolls?: (number | null)[];
   advantageRoll?: number;
   disadvantageRoll?: number;
+  /** Вибір гравця «Перевага/Недолік»; сервер застосовує, лише коли навички не задають режим */
+  rollMode?: "normal" | "advantage" | "disadvantage";
+  /** «Перешкода»: шкода кожного влучання ×0.5 */
+  obstacle?: boolean;
   damageRolls: number[];
   attackId?: string;
 }

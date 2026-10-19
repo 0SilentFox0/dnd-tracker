@@ -1,5 +1,5 @@
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
-import type { BookSpell } from "@/types/spells";
+import type { BookSpell, SpellDefinition, SpellRules } from "@/types/spells";
 
 export interface SpellRow {
   id: string;
@@ -13,10 +13,25 @@ export interface SpellRow {
   cost?: string;
   targeting?: unknown;
   resolution?: unknown;
+  spellEffects?: unknown;
+  stackable?: boolean;
+  maxStacks?: number | null;
+}
+
+/** Rules for the battle-effect preview; stacking only when on, so the common case adds no keys. */
+export function spellRules(def: SpellDefinition): SpellRules {
+  return {
+    dice: def.dice,
+    cost: def.cost,
+    targeting: def.targeting,
+    resolution: def.resolution,
+    spellEffects: def.effects,
+    ...(def.stackable && { stackable: true, maxStacks: def.maxStacks ?? null }),
+  };
 }
 
 export function toBookSpell(row: SpellRow): BookSpell {
-  const { dice, cost, targeting, resolution } = readSpellDefinition(row);
+  const { id, name, level, description, appearanceDescription, icon, spellGroup } = row;
 
-  return { ...row, dice, cost, targeting, resolution };
+  return { id, name, level, description, appearanceDescription, icon, spellGroup, ...spellRules(readSpellDefinition(row)) };
 }

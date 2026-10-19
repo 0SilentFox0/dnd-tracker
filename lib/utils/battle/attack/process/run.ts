@@ -48,6 +48,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const existedBefore = activeEffectIds(flow.ps);
 
+  // дія витрачається до подій атаки: «оновлення дії» від вбивства чи «+1 дія» мають пережити цей удар
+  if (!params.actionSpent) put(flow, applyMainActionUsed(getP(flow, attackerId)));
+
   const consume = (r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult => {
     flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
 
@@ -57,8 +60,6 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
 
   if (!isActive(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
-    put(flow, applyMainActionUsed(getP(flow, attackerId)));
-
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
 
     appendHpChanges(battleAction, before, flow.ps);
@@ -66,7 +67,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -80,12 +81,13 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     targetId,
     targetExtra: actionModifiers[targetId],
     rng: flow.ctx.rng,
+    manualMode: params.rollMode,
   });
 
   const second = attackRoll.secondRoll;
 
   if (second) {
-    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
+    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
   }
 
   const withRollDetails = <T extends { actionDetails: object }>(action: T): T => {
@@ -141,6 +143,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     actionModifiers: actionModifiers[attackerId],
     bonusPercent: params.bonusPercent,
     bonusLabel: params.bonusLabel,
+    obstacle: params.obstacle,
   });
 
   const {
@@ -154,9 +157,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     oldHp,
   } = hitDamage;
 
-  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
+  if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${totalFinalDamage}`);
 
-  put(flow, applyMainActionUsed(getP(flow, attackerId)));
+  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
 
   const battleAction = buildBattleActionForHit({
     attacker: getP(flow, attackerId),

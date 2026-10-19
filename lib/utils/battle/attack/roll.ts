@@ -1,5 +1,5 @@
 import type { AttackRollResult } from "../types/attack";
-import { calculateAttackBonus, hasAdvantage, hasDisadvantage } from "./bonus";
+import { calculateAttackBonus, forcedRollMode, type RollMode, rollModeReasons } from "./bonus";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
@@ -15,15 +15,18 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode } = {},
 ): AttackRollResult {
   const participants = withSelf(opts.participants ?? [], attacker);
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const hasAdv = hasAdvantage(attacker, attack, participants, opts.extra, opts);
+  const forced = forcedRollMode(rollModeReasons(attacker, attack, participants, opts));
 
-  const hasDisadv = hasDisadvantage(attacker, attack, participants, opts);
+  // вибір гравця діє лише тоді, коли навички нічого не вирішують
+  const mode = forced.forced ? forced.mode : (opts.manualMode ?? "normal");
+
+  const manual = !forced.forced && mode !== "normal";
 
   const critThreshold = Math.max(2, 20 + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
 
@@ -35,16 +38,16 @@ export function calculateAttackRoll(
 
   const rollSecond = () => rollDie(20, opts.rng);
 
-  if (hasAdv && !hasDisadv) {
+  if (mode === "advantage") {
     const value = advantageRoll ?? rollSecond();
 
-    secondRoll = { mode: "advantage", value, serverRolled: advantageRoll === undefined };
+    secondRoll = { mode: "advantage", value, serverRolled: advantageRoll === undefined, ...(manual && { manual }) };
     finalRoll = Math.max(d20Roll, value);
     advantageUsed = true;
-  } else if (hasDisadv && !hasAdv) {
+  } else if (mode === "disadvantage") {
     const value = disadvantageRoll ?? rollSecond();
 
-    secondRoll = { mode: "disadvantage", value, serverRolled: disadvantageRoll === undefined };
+    secondRoll = { mode: "disadvantage", value, serverRolled: disadvantageRoll === undefined, ...(manual && { manual }) };
     finalRoll = Math.min(d20Roll, value);
   }
 

@@ -5,7 +5,6 @@ export interface Campaign {
   inviteCode: string;
   dmUserId: string;
   maxLevel: number;
-  xpMultiplier: number;
   allowPlayerEdit: boolean;
   status: string;
   members?: Array<{
@@ -30,7 +29,6 @@ export interface CampaignSettings {
   name: string;
   description: string | null;
   maxLevel: number;
-  xpMultiplier: number;
   allowPlayerEdit: boolean;
   status: string;
 }

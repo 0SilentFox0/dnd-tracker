@@ -39,21 +39,22 @@ export function createAbilityActionMutation(deps: SummonDeps = defaultDeps) {
 
     if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
-    if (participant.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", "Дію вже використано цього ходу");
+    if (participant.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
 
     if (!withinLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
     const targetIds = assertAbilityTargets(ability, ctx.participants, data.targetParticipantIds ?? [], participant);
 
+    // дія витрачається до ефектів, щоб «оновлення дії» від них не перезаписалось
     const run = runAbilities(
-      ctx.participants,
+      updateParticipant(ctx.participants, participant.basicInfo.id, applyMainActionUsed),
       { type: "action", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds },
       { round: ctx.scene.round, rng: ctx.rng ?? Math.random },
     );
 
     const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
 
-    const participants = updateParticipant(summoned.order, participant.basicInfo.id, applyMainActionUsed);
+    const participants = summoned.order;
 
     const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
 

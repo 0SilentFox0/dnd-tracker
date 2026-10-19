@@ -50,7 +50,6 @@ async function hero(campaignId: string, race: string, archetype: string, level: 
     subrace: null,
     alignment: null,
     background: null,
-    experience: 0,
     avatar: null,
     strength: ability(kind) === "strength" ? 14 : 10,
     dexterity: ability(kind) === "dexterity" ? 14 : 10,

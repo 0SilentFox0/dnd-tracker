@@ -16,7 +16,7 @@ const get = async (query: string) => {
   return mod.GET(new Request(`http://x/api/campaigns/camp/spells${query}`), { params: Promise.resolve({ id: "camp" }) }) as Promise<NextResponse>;
 };
 
-const row = { id: "s1", name: "Іскра", level: 1, type: "target", damageType: "damage", diceCount: 1, diceType: "d6", savingThrow: { ability: "dexterity", onSuccess: "none" }, hitCheck: null, description: "Бʼє", icon: null, range: "30 ft", duration: null, concentration: false, damageElement: "fire", spellGroup: { id: "g", name: "Вогонь" } };
+const row = { id: "s1", name: "Іскра", level: 1, description: "Бʼє", appearanceDescription: null, icon: null, dice: 1, cost: "action", targeting: null, resolution: null, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], stackable: false, maxStacks: null, spellGroup: { id: "g", name: "Вогонь" } };
 
 describe("GET /spells?ids=", () => {
   beforeEach(() => {
@@ -35,8 +35,10 @@ describe("GET /spells?ids=", () => {
 
     expect(args.where).toEqual({ campaignId: "camp", id: { in: ["s1", "s2"] } });
     expect(args.select.effects).toBeUndefined();
-    expect(args.select.name).toBe(true);
-    expect(await res.json()).toEqual([{ ...row, savingThrow: { ability: "dexterity", onSuccess: "none" }, dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } }]);
+    expect(args.select).toMatchObject({ name: true, spellEffects: true, stackable: true, maxStacks: true });
+    expect(await res.json()).toEqual([
+      { id: "s1", name: "Іскра", level: 1, description: "Бʼє", appearanceDescription: null, icon: null, spellGroup: { id: "g", name: "Вогонь" }, dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: row.spellEffects },
+    ]);
     expect(res.headers.get("Cache-Control")).toBe("private, no-store");
   });
 

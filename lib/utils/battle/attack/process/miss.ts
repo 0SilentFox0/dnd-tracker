@@ -1,5 +1,4 @@
 import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
-import { applyMainActionUsed } from "../../participant";
 import { applyResistance } from "../../resistance";
 import type { ProcessAttackResult } from "../../types/attack-process";
 import type { AttackRollResult } from "..";
@@ -45,8 +44,6 @@ export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, 
     targetId,
     attackKind: attackKindOf(attack.type),
   });
-
-  put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
   const battleAction = buildBattleActionForMiss(
     getP(flow, attackerId),

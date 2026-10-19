@@ -72,11 +72,6 @@ export function buildCharacterFormBindings(
           ...prev,
           basicInfo: { ...prev.basicInfo, background: value },
         })),
-      setExperience: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, experience: value },
-        })),
       setAvatar: (value: string) =>
         setFormData((prev) => ({
           ...prev,

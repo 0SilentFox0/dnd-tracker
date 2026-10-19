@@ -15,6 +15,9 @@ export const BOOK_SPELL_SELECT = {
   cost: true,
   targeting: true,
   resolution: true,
+  spellEffects: true,
+  stackable: true,
+  maxStacks: true,
   spellGroup: { select: { id: true, name: true } },
 } satisfies Prisma.SpellSelect;
 

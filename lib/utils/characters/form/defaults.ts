@@ -14,7 +14,6 @@ export const defaultCharacterFormData: CharacterFormData = {
     subrace: "",
     alignment: "",
     background: "",
-    experience: 0,
     avatar: "",
   },
   abilityScores: {

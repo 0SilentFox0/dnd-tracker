@@ -3,6 +3,7 @@ import type { Spell } from "@prisma/client";
 import type { SpellRequestData } from "./cast-spell-schema";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { canActNow, controls } from "@/lib/utils/battle/common/control";
@@ -60,8 +61,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
       const isBonus = definition.cost === "bonusAction";
 
-      if (isBonus ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction) {
-        throw new BattleRuleError("action_used", isBonus ? "Бонусну дію вже використано" : "Дію вже використано");
+      // атака й закляття за дію ділять одну дію ходу; вільний каст DM її не витрачає
+      if (!free && (isBonus ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction)) {
+        throw new BattleRuleError("action_used", isBonus ? API_ERRORS.BONUS_ACTION_USED : API_ERRORS.ACTION_USED);
       }
     }
 

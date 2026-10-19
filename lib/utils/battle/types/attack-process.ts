@@ -11,6 +11,8 @@ export interface ProcessAttackParams {
   d20Roll: number;
   advantageRoll?: number;
   disadvantageRoll?: number;
+  /** Вибір гравця; діє лише коли навички не задають перевагу/недолік */
+  rollMode?: "normal" | "advantage" | "disadvantage";
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   currentRound: number;
@@ -18,6 +20,10 @@ export interface ProcessAttackParams {
   damageMultiplier?: number;
   bonusPercent?: number;
   bonusLabel?: string;
+  /** Наступні удари залпу: основну дію вже витратив перший удар */
+  actionSpent?: boolean;
+  /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
+  obstacle?: boolean;
   rng?: () => number;
 }
 

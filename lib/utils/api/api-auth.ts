@@ -29,7 +29,6 @@ export interface CampaignAccessResult extends AuthResult {
   campaign: {
     id: string;
     maxLevel: number;
-    xpMultiplier: number;
     members: Array<{ userId: string; role: string }>;
   };
 }
@@ -104,7 +103,6 @@ export async function requireCampaignAccess(
     campaign: {
       id: campaign.id,
       maxLevel: campaign.maxLevel,
-      xpMultiplier: campaign.xpMultiplier,
       members: campaign.members.map((m) => ({
         userId: m.userId,
         role: m.role,

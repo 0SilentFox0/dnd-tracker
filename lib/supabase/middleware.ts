@@ -95,7 +95,7 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims?.sub ?? null
 
-  const publicPaths = ['/sign-in', '/sign-up', '/auth/callback']
+  const publicPaths = ['/sign-in', '/sign-up', '/auth/callback', ...(process.env.NODE_ENV === 'development' ? ['/dev/'] : [])]
 
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
   

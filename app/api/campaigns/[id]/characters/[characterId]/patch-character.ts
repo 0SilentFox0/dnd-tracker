@@ -38,15 +38,13 @@ export async function patchCharacter(request: Request, campaignId: string, chara
 
   const data = isDM
     ? parsed
-    : ({ ...parsed, level: undefined, archetype: undefined, avatar: undefined, experience: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
+    : ({ ...parsed, level: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
 
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId, current: character.avatar });
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
-  const xpMultiplier = campaign.xpMultiplier ?? 1;
-
-  const finalLevel = resolveFinalLevel(character, data, xpMultiplier, campaign.maxLevel);
+  const finalLevel = resolveFinalLevel(character, data);
 
   if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
     return errorResponse(`Максимальний рівень кампанії — ${campaign.maxLevel}`, 422);
@@ -54,7 +52,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
 
   const race = finalLevel !== character.level ? await loadRaceProgression(campaignId, data.race ?? character.race) : null;
 
-  const computed = buildCharacterUpdateData({ character, data, xpMultiplier, campaign, race });
+  const computed = buildCharacterUpdateData({ character, data, campaign, race });
 
   const updatedCharacter = await prisma.character.update({
     where: { id: characterId },

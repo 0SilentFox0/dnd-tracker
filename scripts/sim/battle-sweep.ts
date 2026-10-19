@@ -786,7 +786,7 @@ async function untilTurnOf(pred: (p: any) => boolean) {
   return pred(current());
 }
 
-async function hitBy(target: any, logs: string[], hpBeforeHit?: number) {
+async function hitBy(target: any, logs: string[], hpBeforeHit?: number, d20 = 20) {
   await nextOnly();
 
   const ok = await untilTurnOf((p) => p.basicInfo.side !== target.basicInfo.side && alive(p) && p.battleData.attacks?.length && !p.actionFlags.hasUsedAction);
@@ -800,7 +800,7 @@ async function hitBy(target: any, logs: string[], hpBeforeHit?: number) {
   // HP ставимо вже на ходу атакувальника: регенерація на старті ходу не встигне підлікувати
   if (hpBeforeHit !== undefined) await call("participants", PATCH(target.basicInfo.id), { currentHp: hpBeforeHit });
 
-  const r = await call("attack", ATTACK, { attackerId: a.basicInfo.id, targetId: target.basicInfo.id, attackId: w.id, d20Roll: 20, disadvantageRoll: 20, advantageRoll: 20, damageRolls: rollDiceList(heroAttackDamageParts(a, w).formula, rng), endTurn: false });
+  const r = await call("attack", ATTACK, { attackerId: a.basicInfo.id, targetId: target.basicInfo.id, attackId: w.id, d20Roll: d20, disadvantageRoll: d20, advantageRoll: d20, damageRolls: rollDiceList(heroAttackDamageParts(a, w).formula, rng), endTurn: false });
 
   logs.push(...r.log.map((e: any) => e.resultText));
 
@@ -853,9 +853,8 @@ async function targeted(spells: Map<string, any>) {
   for (let i = 0; i < 12; i++) {
     const s0 = byName("Семгрун");
 
-    if (s0.combatStats.currentHp > s0.combatStats.maxHp * 0.14) await call("participants", PATCH(s0.basicInfo.id), { currentHp: Math.max(3, Math.floor(s0.combatStats.maxHp * 0.1)) });
-
-    await hitBy(byName("Семгрун"), logs);
+    // a crit at ~10 % HP is lethal, and abilities of a downed hero never fire: hit without a crit at exactly 15 %
+    await hitBy(s0, logs, Math.floor(s0.combatStats.maxHp * 0.15), 15);
 
     if (logs.some((l) => /→ Семгрун: \d+ шкоди/.test(l))) break;
   }

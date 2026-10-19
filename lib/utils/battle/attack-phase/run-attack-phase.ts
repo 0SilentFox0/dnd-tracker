@@ -1,8 +1,9 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, mergeParticipants, updateParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
@@ -32,10 +33,12 @@ export type AttackPhaseInput = {
     attackRoll?: number;
     /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
     attackRolls?: number[];
-    /** Сирі другі d20 на ціль; сервер вирішує перевагу/недолік сам */
-    secondRolls?: number[];
+    /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
+    secondRolls?: (number | null)[];
     advantageRoll?: number;
     disadvantageRoll?: number;
+    rollMode?: "normal" | "advantage" | "disadvantage";
+    obstacle?: boolean;
     damageRolls: number[];
   };
   battleId: string;
@@ -101,7 +104,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   }
 
   if (attacker.actionFlags.hasUsedAction) {
-    throw new BattleRuleError("action_rejected", "Атакуючий уже використав дію");
+    throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
   }
 
   if (!isActive(attacker)) {
@@ -198,8 +201,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   let damageCursor = 0;
 
-  let grantedExtra = false;
-
   const effectsBeforeVolley = activeEffectIds([attacker]);
 
   const heldBack: ActiveEffect[] = [];
@@ -236,18 +237,23 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
 
+    const second = data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
       target: freshTarget,
       attack,
       d20Roll,
-      advantageRoll: data.secondRolls?.[chosenAt] ?? data.advantageRoll,
-      disadvantageRoll: data.secondRolls?.[chosenAt] ?? data.disadvantageRoll,
+      advantageRoll: second,
+      disadvantageRoll: second,
+      rollMode: data.rollMode,
+      actionSpent: i > 0,
       damageRolls: damageRollsForTarget,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier,
+      obstacle: data.obstacle,
       rng,
     });
 
@@ -258,8 +264,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     summons.push(...attackResult.summons);
 
     const critType = attackResult.criticalEffectApplied?.effect.type;
-
-    if (critType === "free_attack" || critType === "combo_attack") grantedExtra = true;
 
     if (rolledByServer && attackResult.success) {
       attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
@@ -306,10 +310,6 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   }
 
   currentInitiativeOrder = restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack);
-
-  if (grantedExtra) {
-    currentInitiativeOrder = updateParticipant(currentInitiativeOrder, attacker.basicInfo.id, (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } }));
-  }
 
   const finalInitiativeOrder = currentInitiativeOrder;
 

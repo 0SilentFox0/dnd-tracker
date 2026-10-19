@@ -8,6 +8,7 @@ import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
+import { spellRules } from "@/lib/utils/spells/to-book-spell";
 import type { SkillForReference, SpellForReference } from "@/types/info-reference";
 
 const SKILL_SELECT = {
@@ -32,6 +33,8 @@ const SPELL_SELECT = {
   targeting: true,
   resolution: true,
   spellEffects: true,
+  stackable: true,
+  maxStacks: true,
   appearanceDescription: true,
   icon: true,
   spellGroup: { select: { name: true } },
@@ -79,6 +82,7 @@ export async function loadInfoReference(campaignId: string): Promise<InfoReferen
         appearanceDescription: s.appearanceDescription ?? null,
         groupName: s.spellGroup?.name ?? null,
         icon: s.icon ?? null,
+        rules: spellRules(def),
       };
     }),
   };
@@ -87,5 +91,5 @@ export async function loadInfoReference(campaignId: string): Promise<InfoReferen
 export function getCachedInfoReference(campaignId: string): Promise<InfoReference> {
   const tags = [cacheTags.skills(campaignId), cacheTags.mainSkills(campaignId), cacheTags.spells(campaignId)];
 
-  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
+  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v2", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
 }

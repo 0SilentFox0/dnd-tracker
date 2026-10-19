@@ -42,6 +42,15 @@ describe("abilityActionMutation", () => {
     expect(h.battleData.abilityUsage?.[strike.key].battle).toBe(1);
   });
 
+  it("an action ability that grants +1 action leaves exactly one more action", async () => {
+    const surge = resolved({ id: "su", name: "Порив", trigger: { event: "action" }, effects: [{ kind: "grantAction", extraActions: 1, target: "self" }] });
+
+    const h = find((await run([{ ...hero, battleData: { ...hero.battleData, resolvedAbilities: [surge] } }, goblin], surge.key)).participants, "hero");
+
+    expect(h.actionFlags.hasUsedAction).toBe(false);
+    expect(h.battleData.pendingExtraActions ?? 0).toBe(0);
+  });
+
   it("second action in the same turn is rejected", async () => {
     const used = { ...hero, actionFlags: { ...hero.actionFlags, hasUsedAction: true } };
 

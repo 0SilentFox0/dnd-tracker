@@ -385,3 +385,66 @@ describe("castSpell", () => {
     expect(r.battleAction.actionDetails.damageSteps?.e1).toHaveLength(2);
   });
 });
+
+describe("fx metadata", () => {
+  it("records damage type, targeting and effect kinds", () => {
+    const r = cast(spellOf({ targeting: { kind: "allEnemies" } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
+
+    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "fire", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"] });
+  });
+
+  it("finds damage type and kinds inside randomOf and omits damage type when none", () => {
+    const random = { kind: "randomOf", options: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 1 } }, dmg("cold")] } as Effect;
+
+    const r = cast(spellOf({ effects: [random] }), ["e1"], [enemy("e1")]);
+
+    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "cold", spellEffectKinds: expect.arrayContaining(["applyCondition", "dealDamage"]) });
+
+    const none = cast(spellOf({ effects: [{ kind: "note", text: "x" } as Effect] }), ["e1"], [enemy("e1")]);
+
+    expect("spellDamageType" in none.battleAction.actionDetails).toBe(false);
+  });
+
+  it("records applied debuffs per target", () => {
+    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+
+    expect(r.battleAction.actionDetails.appliedEffects?.[0]).toMatchObject({ targetId: "e1" });
+  });
+
+  it("tags lasting effects with the spell damage type", () => {
+    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [enemy("e1")]);
+
+    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+
+    expect(effects.length).toBeGreaterThan(0);
+    expect(effects.every((e) => e.fxElement === "cold")).toBe(true);
+  });
+
+  it("does not tag effects applied during the cast by a trigger", () => {
+    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+
+    const target = enemy("e1");
+
+    target.battleData.resolvedAbilities = [resolved({ name: "Відплата", trigger: { event: "spellCast", phase: "after", role: "target" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 2 }, target: "self" } as Effect] })];
+
+    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [target]);
+
+    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+
+    expect(effects.find((e) => e.name === "Заклинання")?.fxElement).toBe("cold");
+    expect(effects.find((e) => e.name === "Відплата")).toBeDefined();
+    expect(effects.find((e) => e.name === "Відплата")?.fxElement).toBeUndefined();
+  });
+
+  it("leaves fxElement unset when the spell has no damage type", () => {
+    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+
+    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+
+    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects[0].fxElement).toBeUndefined();
+  });
+});

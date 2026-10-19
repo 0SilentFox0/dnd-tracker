@@ -1,9 +1,9 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,10 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
   const { battle, isDM, isMyTurn, connection, actions } = useBattleScene();
 
   const confirm = useConfirm();
+
+  const { enabled: fxOn, motionAllowed, setEnabled: setFxOn } = useFxEnabled();
+
+  const fxHint = motionAllowed ? undefined : "Анімації вимкнено: у системі ввімкнено «Зменшити рух»";
 
   const reset = async () => {
     if (await confirm({ title: "Скинути бій?", description: "Бій повернеться до підготовки, журнал буде очищено.", confirmLabel: "Скинути" })) {
@@ -24,7 +28,10 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
     <header className="flex h-12 items-center gap-3 px-4">
       <span className="hud-sc truncate text-[15px] tracking-[.08em]">{battle.name}</span>
       {isMyTurn && battle.status === BattleStatus.ACTIVE && <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">Твій хід</span>}
-      <span className="hud-sc ml-auto flex items-center gap-2 text-sm text-[#b8ab95]">
+      <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? "Анімації дій: увімк." : "Анімації дій: вимк."} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-[#b8ab95]/60")}>
+        <Sparkles className="size-4" />
+      </button>
+      <span className="hud-sc flex items-center gap-2 text-sm text-[#b8ab95]">
         Раунд {battle.currentRound}
         <i className={cn("size-1.5 rounded-full", connection === "connected" ? "bg-[#9fb98a]" : "bg-[#f0b44c] animate-[hud-pulse_1.2s_infinite]")} />
       </span>

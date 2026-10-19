@@ -221,7 +221,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("уже використав");
+      expect(e).toMatchObject({ code: "action_used", message: "Дію цього ходу вже використано" });
     }
   });
 

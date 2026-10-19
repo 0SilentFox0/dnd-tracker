@@ -1,4 +1,5 @@
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
+import { setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -15,5 +16,5 @@ export function finishTurnEffects(p: BattleParticipant): { participant: BattlePa
 }
 
 export function endTurnCleanup(p: BattleParticipant): BattleParticipant {
-  return finishTurnEffects(p).participant;
+  return setExtraActionPool(finishTurnEffects(p).participant, 0);
 }

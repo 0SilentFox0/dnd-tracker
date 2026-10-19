@@ -1,4 +1,3 @@
-import { applyMainActionUsed } from "../../participant";
 import type { ProcessAttackResult } from "../../types/attack-process";
 import type { AttackRollResult } from "..";
 import { applyCriticalEffect } from "..";
@@ -41,8 +40,6 @@ export function handleCriticalFail(params: HandleCriticalFailParams): Omit<Proce
     targetId,
     attackKind: attackKindOf(attack.type),
   });
-
-  put(flow, applyMainActionUsed(getP(flow, attackerId)));
 
   const battleAction = buildBattleActionForCriticalFail(
     attacker,

@@ -7,6 +7,7 @@ import { applyVictoryCompletion } from "./turn-helpers";
 import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredBarriers } from "@/lib/utils/battle/grid/terrain";
+import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -40,6 +41,9 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
   }
 
   const ending = order[scene.turnIndex];
+
+  // невикористані додаткові дії згорають разом із ходом
+  if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));
 
   if (ending && isActive(ending)) {
     const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random });
@@ -78,7 +82,12 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
         ? {
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
-            battleData: { ...p.battleData, extraTurnActive: true, ...(p.battleData.movementUsed && { movementUsed: 0 }) },
+            battleData: {
+              ...p.battleData,
+              extraTurnActive: true,
+              pendingExtraActions: actionsPerTurnPool(p, order),
+              ...(p.battleData.movementUsed && { movementUsed: 0 }),
+            },
           }
         : p,
     );

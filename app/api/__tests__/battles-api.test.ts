@@ -57,7 +57,6 @@ describe("GET /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -141,7 +140,6 @@ describe("POST /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -169,7 +167,6 @@ describe("POST /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
-        xpMultiplier: 2.5,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });

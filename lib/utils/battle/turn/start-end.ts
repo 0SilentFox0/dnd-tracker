@@ -3,11 +3,11 @@ import { calculateInitiative, sortByInitiative } from "./initiative";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, isActive, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { BattleParticipant } from "@/types/battle";
@@ -126,12 +126,8 @@ export function processStartOfTurn(
 
   const id = participant.basicInfo.id;
 
-  // скидання перед нарахуванням: залишок пулу з минулого ходу не подвоює бонус
-  const perTurn = Math.floor(collectModifiers(withSelf(allParticipants, updatedParticipant), id, { stat: "actionsPerTurn" }).flat);
-
-  if (perTurn > 0 && isActive(updatedParticipant)) {
-    updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, pendingExtraActions: perTurn } };
-  }
+  // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
+  updatedParticipant = setExtraActionPool(updatedParticipant, isActive(updatedParticipant) ? actionsPerTurnPool(updatedParticipant, allParticipants) : 0);
 
   const ctx = { round: currentRound, rng };
 

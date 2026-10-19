@@ -1,0 +1,51 @@
+import { edgeGlow, emitOnPerimeter, roundRect } from "../../runtime/frame-kit";
+import { chance, rand } from "../../runtime/geometry";
+import { show, tween } from "../../runtime/stage";
+import type { FrameAnimation } from "./types";
+
+const WISP = ["#ff3a2a", "#c8101a", "#ff7a50"];
+
+const PULSE_MS = 600;
+
+const PULSES = 2;
+
+export const furyFrame: FrameAnimation = async (s, box) => {
+  let beat = 0;
+
+  let wave = 0;
+
+  const cx = box.x + box.w / 2;
+
+  const cy = box.y + box.h / 2;
+
+  const vignette = s.g.createRadialGradient(cx, cy, Math.min(box.w, box.h) * 0.25, cx, cy, Math.hypot(box.w, box.h) / 2);
+
+  vignette.addColorStop(0, "rgba(120,0,10,0)");
+  vignette.addColorStop(1, "rgba(170,10,20,0.55)");
+
+  const hide = show(s, (g) => {
+    g.save();
+    // The wave below keeps this glow.
+    edgeGlow(g, box, { fill: vignette, fillAlpha: beat, shadow: "#ff1a1a", blur: 8 + 22 * beat, stroke: `rgba(215,25,35,${0.35 + 0.65 * beat})`, width: 2 + 2 * beat });
+
+    const out = wave * 12;
+
+    g.globalAlpha = (1 - wave) * 0.9;
+    g.lineWidth = 2;
+    g.strokeStyle = "#ff4a3a";
+    roundRect(g, { x: box.x - out, y: box.y - out, w: box.w + out * 2, h: box.h + out * 2 }, 6 + out);
+    g.stroke();
+    g.restore();
+  });
+
+  for (let i = 0; i < PULSES; i++) {
+    await tween(s, PULSE_MS, (v, dt) => {
+      beat = Math.max(0, Math.sin(Math.min(1, v * 1.6) * Math.PI)) ** 0.6;
+      wave = Math.min(1, v * 1.4);
+
+      if (chance(0.6, dt)) emitOnPerimeter(s, box, { tints: WISP, speed: [10, 35], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.5, 0.9], scale: [rand(0.18, 0.3), 0.04], gravity: -60, drag: 0.8 });
+    });
+  }
+
+  hide();
+};

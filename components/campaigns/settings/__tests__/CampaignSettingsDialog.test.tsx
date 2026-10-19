@@ -12,7 +12,7 @@ vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ suc
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-const campaign = { name: "Зоря", description: null, maxLevel: 20, xpMultiplier: 2.5, allowPlayerEdit: true, status: "active" };
+const campaign = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, status: "active" };
 
 const renderDialog = () =>
   renderWithConfirm(

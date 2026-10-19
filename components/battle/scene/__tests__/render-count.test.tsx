@@ -80,7 +80,7 @@ const battle = {
   campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null,
 } as unknown as BattleScene;
 
-const hit = { actionIndex: 1, round: 1, actorId: "me", actorName: "me", actionType: "attack", targets: [{ participantId: "gob1", participantName: "gob1" }], resultText: "me влучає", hpChanges: [{ participantId: "gob1", participantName: "gob1", oldHp: 20, newHp: 13, change: 7 }] } as unknown as BattleAction;
+const hit = { actionIndex: 1, round: 1, actorId: "me", actorName: "me", actionType: "attack", actionDetails: {}, targets: [{ participantId: "gob1", participantName: "gob1" }], resultText: "me влучає", hpChanges: [{ participantId: "gob1", participantName: "gob1", oldHp: 20, newHp: 13, change: 7 }] } as unknown as BattleAction;
 
 const delta: ClientBattleDelta = {
   battleId: "b1",

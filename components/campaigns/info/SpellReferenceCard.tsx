@@ -3,6 +3,7 @@
 import { Loader2, Sparkles } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
 import {
   AccordionContent,
   AccordionItem,
@@ -119,6 +120,11 @@ export function SpellReferenceCard({
               </p>
             )}
           </div>
+          {spell.rules && (
+            <SpellBattlePreview
+              spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: null, rules: spell.rules }}
+            />
+          )}
         </div>
       </AccordionContent>
     </AccordionItem>

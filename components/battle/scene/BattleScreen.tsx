@@ -8,7 +8,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useSpellBookPrefetch } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +47,8 @@ const BattleResultScreen = dynamic(() => import("@/components/battle/overlays/Ba
 
 const DmRevivePrompt = dynamic(() => import("@/components/battle/dm/DmRevivePrompt").then((m) => m.DmRevivePrompt), { ssr: false });
 
+const BattleFxLayer = dynamic(() => import("@/components/battle/fx/BattleFxLayer").then((m) => m.BattleFxLayer), { ssr: false });
+
 const BattlePreparationView = dynamic(() => import("@/components/battle/overlays/BattlePreparationView").then((m) => m.BattlePreparationView));
 
 export function BattleScreen() {
@@ -60,6 +62,14 @@ export function BattleScreen() {
   const [completeOpen, setCompleteOpen] = useState(false);
 
   useSpellBookPrefetch();
+
+  const { userEnabled: fxOn } = useFxEnabled();
+
+  useEffect(() => {
+    if (!fxOn) return;
+
+    import("@/components/battle/fx/preload").then((m) => m.preloadFx()).catch(() => undefined);
+  }, [fxOn]);
 
   if (battle.status === BattleStatus.PREPARED) {
     const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
@@ -81,6 +91,7 @@ export function BattleScreen() {
       <BattleToast />
       {isDM && <DmRevivePrompt />}
       {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
+      <BattleFxLayer />
     </div>
   );
 }
