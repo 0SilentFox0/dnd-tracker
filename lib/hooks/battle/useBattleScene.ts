@@ -31,6 +31,7 @@ import {
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,
+  useUnitControl,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
@@ -92,6 +93,7 @@ export interface BattleSceneActions {
   reveal: ReturnType<typeof useRevealBattleParticipants>;
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
   scaleUnits: ReturnType<typeof useScaleBattleUnits>;
+  unitControl: ReturnType<typeof useUnitControl>;
   refreshSources: ReturnType<typeof useRefreshBattleSources>;
 }
 
@@ -305,6 +307,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     reveal: useRevealBattleParticipants(campaignId, battleId, o),
     updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
     scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
+    unitControl: useUnitControl(campaignId, battleId, o),
     refreshSources: useRefreshBattleSources(campaignId, battleId, o),
   };
 

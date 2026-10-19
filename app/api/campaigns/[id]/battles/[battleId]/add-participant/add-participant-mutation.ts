@@ -8,7 +8,6 @@ import {
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
 import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
-import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
@@ -137,7 +136,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
     }
 
     return {
-      participants: assignUnitControl(order, ctx.userId),
+      participants: order,
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
       events: [dmEvent(ctx, added, "DM додав на поле")],

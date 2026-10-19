@@ -5,7 +5,6 @@ import { DM_ACTOR } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
-import { assignUnitControl } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
@@ -54,7 +53,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
   const names = revealed.map((p) => p.basicInfo.name).join(", ");
 
   return {
-    participants: assignUnitControl(participants, ctx.userId),
+    participants: participants,
     pending,
     events: [
       {

@@ -207,6 +207,12 @@ export async function scaleBattleUnits(campaignId: string, battleId: string, dat
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/scale-units`, data);
 }
 
+export type UnitControlData = { mode: "assign"; participantId: string; controlledBy: string } | { mode: "random" };
+
+export async function setBattleUnitControl(campaignId: string, battleId: string, data: WithVersion<UnitControlData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/unit-control`, data);
+}
+
 export async function refreshBattleSources(campaignId: string, battleId: string, data: WithVersion<Record<string, never>>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/refresh-sources`, data);
 }
