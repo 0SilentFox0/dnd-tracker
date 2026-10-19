@@ -36,6 +36,34 @@ describe("BattleScreen", () => {
     expect(screen.queryByText(/Вороги ·/)).toBeNull();
   });
 
+  it("десктоп з картою: перемикач «Колонки» показує списки без карти", async () => {
+    media.wide = true;
+    window.localStorage.clear();
+
+    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+
+    const { container } = render(<BattleScreen />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Колонки" }));
+    expect(screen.getByText(/Союзники ·/)).toBeTruthy();
+    expect(screen.getByText(/Вороги ·/)).toBeTruthy();
+    expect(container.querySelector("[data-fx-clip]")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Карта" }));
+    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
+  });
+
+  it("десктоп без карти: перемикача немає", async () => {
+    media.wide = true;
+
+    const { wrapper } = fakeScene({ isMyTurn: false });
+
+    render(<BattleScreen />, { wrapper });
+
+    expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Колонки" })).toBeNull();
+  });
+
   it("телефон з картою: вкладка «Карта» за замовчуванням, є «Союзники» і «Вороги»", () => {
     media.wide = false;
 

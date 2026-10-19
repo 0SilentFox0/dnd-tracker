@@ -12,6 +12,7 @@ export {
   useBattleSceneDataValue,
   useBattleSceneValue,
 } from "./useBattleScene";
+export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
 export { useDamageShake, useHpChange } from "./useHpChange";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";

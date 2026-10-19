@@ -15,8 +15,9 @@ import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
+import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene, useBattleViewMode } from "@/lib/hooks/battle";
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
@@ -27,8 +28,21 @@ const H3 = ({ color, children }: { color: string; children: React.ReactNode }) =
   </h3>
 );
 
+function BattleColumns() {
+  const { allies, enemies } = useBattleScene();
+
+  return (
+    <>
+      <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
+      <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
+    </>
+  );
+}
+
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const { battle, awaiting, hero, isMyTurn, isDM, allies, enemies, selectedId, select, log } = useBattleScene();
+  const { battle, battleId, awaiting, hero, isMyTurn, isDM, selectedId, select, log } = useBattleScene();
+
+  const [viewMode, setViewMode] = useBattleViewMode(battleId);
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
@@ -50,12 +64,24 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
           {isDM && <DmPanel />}
         </aside>
         {battle.map ? (
-          <main className="min-h-0 p-3"><BattleMapPanel /></main>
-        ) : (
-          <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
-            <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
-            <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
+          <main className="flex min-h-0 flex-col">
+            <div className="flex justify-center px-3 pt-2">
+              <HudChipTabs
+                ariaLabel="Вигляд бою"
+                items={[
+                  { key: "map", label: "Карта", active: viewMode === "map", onSelect: () => setViewMode("map") },
+                  { key: "columns", label: "Колонки", active: viewMode === "columns", onSelect: () => setViewMode("columns") },
+                ]}
+              />
+            </div>
+            {viewMode === "map" ? (
+              <div className="min-h-0 flex-1 p-3"><BattleMapPanel /></div>
+            ) : (
+              <div className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></div>
+            )}
           </main>
+        ) : (
+          <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></main>
         )}
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
