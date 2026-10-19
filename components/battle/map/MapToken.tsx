@@ -2,9 +2,11 @@
 
 import { memo } from "react";
 
+import { HitFrame } from "@/components/battle/fx/PortraitFx";
 import { Portrait } from "@/components/battle/hud";
-import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
+import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -18,18 +20,17 @@ export interface MapTokenProps {
   selected?: boolean;
   current?: boolean;
   passThrough?: boolean;
+  impact?: FxImpact | null;
   onClick?: (id: string) => void;
   onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, onClick, onHover }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
 
-  const change = useHpChange(participant.combatStats.currentHp);
-
-  const shake = useDamageShake<HTMLButtonElement>(change);
+  const { change, shakeRef, delayStyle } = useHitFx<HTMLButtonElement>(participant.combatStats.currentHp, impact);
 
   const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * PORTRAIT_SHARE));
 
@@ -45,7 +46,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
       }}
     >
       <button
-        ref={shake}
+        ref={shakeRef}
         type="button"
         aria-label={name}
         data-fx-participant={id}
@@ -59,13 +60,15 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
         className={cn("absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center rounded-full", passThrough ? "pointer-events-none" : "pointer-events-auto", selected && "ring-2 ring-[var(--gold)]")}
         style={{ width: `${PORTRAIT_SHARE * 100}%`, height: `${PORTRAIT_SHARE * 100}%` }}
       >
-        <Portrait
+        <HitFrame change={change} />
+        <span
           key={`portrait:${change?.id ?? ""}`}
-          participant={participant}
-          size={portraitPx}
-          current={current}
-          className={cn(change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))}
-        />
+          data-map-token-flash={change ? (change.delta < 0 ? "damage" : "heal") : undefined}
+          style={delayStyle}
+          className={cn("inline-flex rounded-full", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))}
+        >
+          <Portrait participant={participant} size={portraitPx} current={current} />
+        </span>
       </button>
     </div>
   );

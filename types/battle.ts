@@ -3,6 +3,7 @@ import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abili
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { FxImpact } from "@/lib/utils/battle/fx";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -217,6 +218,8 @@ export interface BattleMapView {
   hud?: Map<string, { exact: boolean }>;
   /** Клітинки надісланих штрихів місцевості до відповіді сервера */
   pendingStroke?: ReadonlySet<string>;
+  /** Удар останньої дії по учаснику: рамка, спалах і тремтіння токена в момент влучання */
+  impactFor?: (participantId: string) => FxImpact | null;
 }
 
 export interface BattleMapActions {

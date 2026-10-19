@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
+import { useFxImpacts } from "./useFxImpact";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
 import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
@@ -75,6 +76,8 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { pending: pendingStroke } = terrainTool;
 
+  const impactFor = useFxImpacts();
+
   const view = useMemo(() => {
     if (!scene || !map) return null;
 
@@ -85,8 +88,9 @@ export function useBattleMapScene(): BattleMapScene | null {
       ...hovered,
       trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
       ...(pendingStroke.size > 0 && { pendingStroke }),
+      impactFor,
     };
-  }, [scene, map, mapAim, hoverCell, pendingStroke, current]);
+  }, [scene, map, mapAim, hoverCell, pendingStroke, current, impactFor]);
 
   const { mutate: move } = actions.move;
 

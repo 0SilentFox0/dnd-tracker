@@ -3,8 +3,9 @@
 import { memo } from "react";
 
 import { HealthBar, HealthLabel } from "@/components/battle/hud";
-import { useDamageShake, useHpChange } from "@/lib/hooks/battle";
+import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import type { FxImpact } from "@/lib/utils/battle/fx";
 import { sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
@@ -18,18 +19,17 @@ export interface MapTokenHudProps {
   pxPerUnit: number;
   exact: boolean;
   raised: boolean;
+  impact?: FxImpact | null;
 }
 
 const TEXT_MIN_CELL = 28;
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null }: MapTokenHudProps) {
   const { currentHp, maxHp } = participant.combatStats;
 
-  const change = useHpChange(currentHp);
-
-  const shake = useDamageShake<HTMLDivElement>(change);
+  const { change, shakeRef: shake, delayStyle } = useHitFx<HTMLDivElement>(currentHp, impact);
 
   const down = isDown(participant);
 
@@ -63,7 +63,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised }
         <span
           key={`float:${change.id}`}
           className={cn("hud-sc absolute bottom-[30%] left-1/2 z-10 -translate-x-1/2 font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}
-          style={{ fontSize: nameFont * 1.6 }}
+          style={{ ...delayStyle, fontSize: nameFont * 1.6 }}
         >
           {signedDelta(change.delta)}
         </span>

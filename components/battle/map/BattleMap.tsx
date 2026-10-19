@@ -484,6 +484,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             onClick={onTokenClick}
             onHover={painting || !onCellHover ? undefined : onTokenHover}
             passThrough={painting || movingId === p.basicInfo.id}
+            impact={view?.impactFor?.(p.basicInfo.id)}
           />
         ))}
         {tokens.map(({ p, box }) => {
@@ -500,6 +501,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
               pxPerUnit={pxPerUnit}
               exact={hud?.exact ?? false}
               raised={view?.selectedId === id || view?.currentId === id}
+              impact={view?.impactFor?.(id)}
             />
           );
         })}
