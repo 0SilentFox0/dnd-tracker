@@ -64,6 +64,14 @@ describe("abilityActionMutation", () => {
     await expect(run([spent, goblin], strike.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit" }));
   });
 
+  it("a cooling-down ability reports the rounds left, not an exhausted limit", async () => {
+    const slow = resolved({ id: "cd", name: "Ривок", trigger: { event: "action" }, limits: { cooldownRounds: 2 }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const cooling = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [slow], abilityUsage: { [slow.key]: { battle: 1, round: 0, turn: 0, lastRound: 1 } } } };
+
+    await expect(run([cooling, goblin], slow.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit", message: expect.stringContaining("Перезарядка") }));
+  });
+
   it("Ангел Хранитель revives a fallen ally at 50 %, a living target is rejected", async () => {
     const out = await run([hero, fallen()], angel.key, ["ally"]);
 

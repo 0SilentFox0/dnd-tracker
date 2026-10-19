@@ -12,7 +12,7 @@ import { isUp } from "@/lib/utils/battle/participant/state";
 import { spellNeedsSlot, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
 import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type SpellTier = "iron" | "bronze" | "silver" | "gold" | "mithril" | "platinum";
 
@@ -106,6 +106,10 @@ export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "
 }
 
 /** Маневри на карті цілять клітинкою або власним оточенням, тож ціль-учасник потрібна лише без карти. */
+export function abilityOnMap(map: BattleMapConfig | null | undefined, p: BattleParticipant): boolean {
+  return !!map && !!p.battleData.position;
+}
+
 export function needsBonusTarget(a: ResolvedAbility, onMap = false): boolean {
   if (onMap && a.effects.some((e) => e.kind === "maneuver")) return false;
 

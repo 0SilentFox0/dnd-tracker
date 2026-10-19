@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canActNow } from "@/lib/utils/battle/common/control";
@@ -12,7 +13,7 @@ import type { BattleParticipant, TerrainCell } from "@/types/battle";
 
 export const moveSchema = z.object({
   participantId: z.string(),
-  to: z.object({ x: z.number().int().min(0), y: z.number().int().min(0) }),
+  to: mapCellSchema,
   free: z.boolean().optional(),
   returnToStart: z.literal(true).optional(),
 });

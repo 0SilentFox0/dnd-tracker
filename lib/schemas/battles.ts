@@ -5,6 +5,8 @@ import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
+export const mapCellSchema = z.object({ x: z.number().int().min(0).max(59), y: z.number().int().min(0).max(59) });
+
 export const battleMapSchema = z.object({
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),

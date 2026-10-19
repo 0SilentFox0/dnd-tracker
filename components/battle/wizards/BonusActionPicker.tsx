@@ -13,7 +13,7 @@ import { useAbilityMapAim, useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilityMaxTargets, toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
-import { abilityOptions, bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
+import { abilityOnMap, abilityOptions, bonusTargetCandidates, bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -49,7 +49,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
   const mapAim = useAbilityMapAim(participant, (a, cell) => void fire(a, [], cell));
 
-  const onMap = !!battle.map && !!participant.battleData.position;
+  const onMap = abilityOnMap(battle.map, participant);
 
   const pick = (a: ResolvedAbility) => {
     if (a.aim && onMap) {
