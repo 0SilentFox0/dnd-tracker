@@ -61,6 +61,7 @@ export function SpellBook({ book }: { book: Book }) {
             })}
           </div>
           {view.allCount > 0 && <div className="hud-sc mt-3 text-sm">на всіх: {view.allCount}</div>}
+          {view.chain.length > 0 && <div className="hud-sc mt-3 text-sm">Ланцюг: {view.chain.map((p, i) => `${i + 1}. ${p.basicInfo.name}`).join(", ")}</div>}
           <button type="button" disabled={state.targetIds.length === 0} onClick={actions.confirmTargets} className={cn(seal, "mt-auto")}>Далі · кидки</button>
         </>
       )}

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { buildSpellPick, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withLiveAimTargets } from "@/lib/utils/battle/flows";
+import { buildSpellPick, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -345,6 +345,39 @@ describe("шаблон і дальність", () => {
 
       expect(aimed.step).toBe("rolls");
       expect(spellPayload(aimed)).toMatchObject({ targetIds: ["f"], targetCell: { x: 6, y: 0 } });
+    });
+  });
+
+  describe("ланцюг", () => {
+    const chainSpell = { id: "cl", name: "Ланцюгова блискавка", level: 4, dice: 2, targeting: { kind: "area", side: "enemy", maxTargets: 4, range: 60, chain: true } } as unknown as BookSpell;
+
+    it("buildSpellPick: на карті — одна перша ціль зі списку і ланцюг; без карти — ручний вибір до maxTargets", () => {
+      const onMapPick = buildSpellPick(order, hero, chainSpell, map);
+
+      expect(onMapPick).toMatchObject({ targetMode: "single", targetSide: "enemy", range: 60, chain: { side: "enemy", maxTargets: 4 } });
+      expect(onMapPick.maxTargets).toBeUndefined();
+
+      const listPick = buildSpellPick(order, hero, chainSpell, null);
+
+      expect(listPick).toMatchObject({ targetMode: "multi", maxTargets: 4 });
+      expect(listPick.chain).toBeUndefined();
+    });
+
+    it("withChainTargets: цілі — ланцюг від першої; payload несе лише першу", () => {
+      const pick = buildSpellPick(order, hero, chainSpell, map);
+
+      const s = run({ type: "OPEN", casterId: "h", level: 4 }, { type: "PICK", pick }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "f" }, { type: "SET_SAVE", id: "x", value: 3 });
+
+      const chained = withChainTargets(s, ["f", "g", "k"]);
+
+      expect(chained.targetIds).toEqual(["f", "g", "k"]);
+      expect(chained.saves).toEqual({});
+      expect(withChainTargets(chained, ["f", "g", "k"])).toBe(chained);
+      expect(spellPayload(chained).targetIds).toEqual(["f"]);
+
+      const plain = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "a" });
+
+      expect(withChainTargets(plain, ["a", "b"])).toBe(plain);
     });
   });
 

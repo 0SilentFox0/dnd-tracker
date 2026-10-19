@@ -14,6 +14,7 @@ const lib = vi.hoisted(() => ({
     { id: "rebirth", name: "Відродження лісу", level: 2, dice: 0, cost: "action", targeting: { kind: "allAlliesDead" }, resolution: { kind: "auto" } },
     { id: "meteor", name: "Метеор", level: 2, dice: 1, cost: "action", targeting: { kind: "template", shape: "circle", size: 5, side: "enemy", maxTargets: 4, range: 30 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } },
     { id: "dart", name: "Дротик", level: 2, dice: 1, cost: "action", targeting: { kind: "enemy", range: 5 }, resolution: { kind: "auto" } },
+    { id: "chain", name: "Ланцюгова блискавка", level: 2, dice: 1, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 4, range: 60, chain: true }, resolution: { kind: "auto" } },
     { id: "revive", name: "Воскресіння", level: 2, dice: 0, cost: "action", targeting: { kind: "allyDead" }, resolution: { kind: "auto" } },
   ],
 }));
@@ -362,6 +363,31 @@ describe("SpellBook", () => {
       fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
 
       expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
+    });
+
+    it("ланцюг: обрана перша ціль, превʼю порядку ланцюга, каст лише з першою", async () => {
+      const { wrapper, caster, value, castSpell, me, gob, ally } = onMap(["chain"]);
+
+      const orc = { ...gob, basicInfo: { ...gob.basicInfo, id: "orc", name: "Орк" }, battleData: { ...gob.battleData, position: { x: 7, y: 3 } } };
+
+      const imp = { ...gob, basicInfo: { ...gob.basicInfo, id: "imp", name: "Біс" }, battleData: { ...gob.battleData, position: { x: 5, y: 0 } } };
+
+      value.battle = { ...value.battle, initiativeOrder: [me, orc, gob, imp, ally] };
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Ланцюгова блискавка"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
+
+      expect(screen.getByText("Ланцюг: 1. Гоблін, 2. Біс, 3. Орк")).toBeTruthy();
+
+      fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "chain", targetIds: ["gob"] })));
     });
 
     it("шаблон без карти — звичайний вибір цілей", async () => {

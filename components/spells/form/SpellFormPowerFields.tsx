@@ -29,7 +29,7 @@ function targetingOf(kind: string, previous: SpellTargeting): SpellTargeting {
 
   const maxTargets = multi?.maxTargets ?? 3;
 
-  if (kind === "area") return { kind, side, maxTargets, ...range };
+  if (kind === "area") return { kind, side, maxTargets, ...range, ...(previous.kind === "area" && previous.chain ? { chain: true } : {}) };
 
   if (kind === "template") return { kind, shape: previous.kind === "template" ? previous.shape : "circle", size: previous.kind === "template" ? previous.size : 20, side, maxTargets, ...range, ...(previous.kind === "template" && previous.zone ? { zone: previous.zone } : {}) };
 
@@ -75,6 +75,12 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
             <Input id="targeting-max" type="number" min={1} max={20} value={targeting.maxTargets} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, maxTargets: clamp(e.target.value, 1, 20, 1) } })} className="w-24" />
           </div>
         </>
+      )}
+      {targeting.kind === "area" && (
+        <div className="col-span-2 flex items-center gap-2">
+          <Switch id="targeting-chain" checked={!!targeting.chain} onCheckedChange={(on) => setFormData({ ...formData, targeting: { ...targeting, chain: on || undefined } })} />
+          <Label htmlFor="targeting-chain">Ланцюг: наступна найближча ціль</Label>
+        </div>
       )}
       {RANGED_KINDS.includes(targeting.kind) && (
         <div className="col-span-2">

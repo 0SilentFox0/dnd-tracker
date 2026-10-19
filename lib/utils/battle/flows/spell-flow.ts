@@ -5,7 +5,7 @@ import { feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, type SpellChain, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -26,6 +26,8 @@ export interface SpellPick {
   zone?: boolean;
   /** одиночне заклинання, розширене вмінням: на карті — коло лише по своїй стороні */
   skillRadius?: SkillRadius;
+  /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
+  chain?: SpellChain;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -148,13 +150,20 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
   }
 }
 
+function withTargets(s: SpellFlowState, ids: string[]): SpellFlowState {
+  if (ids.length === s.targetIds.length && ids.every((id, i) => id === s.targetIds[i])) return s;
+
+  return { ...s, targetIds: ids, saves: Object.fromEntries(Object.entries(s.saves).filter(([id]) => ids.includes(id))) };
+}
+
 /** Шаблон: цілі — ті, кого точка зачіпає зараз; рух після наведення змінює список, тож підказки й каст беруть живий. */
 export function withLiveAimTargets(s: SpellFlowState, liveIds: string[]): SpellFlowState {
-  if (s.pick?.targetMode !== "template" || !s.aim) return s;
+  return s.pick?.targetMode === "template" && s.aim ? withTargets(s, liveIds) : s;
+}
 
-  if (liveIds.length === s.targetIds.length && liveIds.every((id, i) => id === s.targetIds[i])) return s;
-
-  return { ...s, targetIds: liveIds, saves: Object.fromEntries(Object.entries(s.saves).filter(([id]) => liveIds.includes(id))) };
+/** Ланцюг: обрана лише перша ціль, а рятунки й підсумок бачать увесь ланцюг від неї. */
+export function withChainTargets(s: SpellFlowState, chainIds: string[]): SpellFlowState {
+  return s.pick?.chain && s.targetIds.length > 0 ? withTargets(s, chainIds) : s;
 }
 
 export function spellPayload(s: SpellFlowState): SpellCastData {
@@ -163,7 +172,7 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
   return {
     casterId: s.casterId as string,
     spellId: s.pick?.spellId as string,
-    targetIds: s.pick?.targetMode === "none" ? [] : s.targetIds,
+    targetIds: s.pick?.targetMode === "none" ? [] : s.pick?.chain ? s.targetIds.slice(0, 1) : s.targetIds,
     ...(s.pick?.targetMode === "template" && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
@@ -205,9 +214,11 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
   const skillRadius: SkillRadius | undefined =
     onMap && skill.mode !== "single" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { mode: skill.mode, side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
 
+  const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets } : undefined;
+
   const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size } : skillRadius && skillRadiusTemplate(skillRadius.mode);
 
-  const isMulti = targeting.kind === "area" || targeting.kind === "template";
+  const isMulti = !chain && (targeting.kind === "area" || targeting.kind === "template");
 
   const auto = AUTO_TARGETING.includes(targeting.kind);
 
@@ -228,6 +239,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(template && { template }),
     ...(template && targeting.kind === "template" && targeting.zone && { zone: true }),
     ...(skillRadius && { skillRadius }),
+    ...(chain && { chain }),
     ...(range !== undefined && { range }),
     needsSaves: def.resolution.kind === "save" && !auto,
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),

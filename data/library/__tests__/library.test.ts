@@ -565,8 +565,8 @@ describe("spell map templates and ranges", () => {
     expect(spell?.definition.effects).toEqual([expect.objectContaining({ kind: "dealDamage", damageType: "fire" })]);
   });
 
-  it("chain lightning stays a manual pick with range 60", () => {
-    expect(byKey("chain-lightning")).toMatchObject({ kind: "area", maxTargets: 4, range: 60 });
+  it("chain lightning is a chain of 4 enemies with range 60", () => {
+    expect(byKey("chain-lightning")).toMatchObject({ kind: "area", side: "enemy", maxTargets: 4, range: 60, chain: true });
   });
 
   it.each([

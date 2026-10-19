@@ -165,3 +165,59 @@ describe("заклинання, розширене вмінням, на карт
     expect(resolve(bolt, ["e2"], { map, targetCell: { x: 6, y: 3 } })).toEqual({ ok: true, targetIds: ["e2"] });
   });
 });
+
+describe("ланцюг на карті", () => {
+  const chain: SpellTargeting = { kind: "area", side: "enemy", maxTargets: 4, range: 30, chain: true };
+
+  const k1 = at("k1", { x: 6, y: 2 }, ParticipantSide.ENEMY);
+
+  const k2 = at("k2", { x: 8, y: 2 }, ParticipantSide.ENEMY);
+
+  const k3 = at("k3", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+
+  const k4 = at("k4", { x: 12, y: 2 }, ParticipantSide.ENEMY);
+
+  const k5 = at("k5", { x: 13, y: 2 }, ParticipantSide.ENEMY);
+
+  const friend = at("a", { x: 6, y: 3 });
+
+  const dead = { ...at("dead", { x: 7, y: 2 }, ParticipantSide.ENEMY), combatStats: { ...k1.combatStats, currentHp: 0, status: "dead" as const } };
+
+  const unplaced = at("u", undefined, ParticipantSide.ENEMY);
+
+  const list = [caster, k5, k4, k3, k2, k1, friend, dead, unplaced];
+
+  it("від першої цілі — до найближчого живого ворога на карті від попередньої, без повторів, до maxTargets", () => {
+    expect(resolve(chain, ["k1"], { map }, list)).toEqual({ ok: true, targetIds: ["k1", "k2", "k3", "k4"] });
+  });
+
+  it("рівна відстань — за порядком ініціативи; ворогів менше за ліміт — коротший ланцюг", () => {
+    const left = at("l", { x: 4, y: 2 }, ParticipantSide.ENEMY);
+
+    const right = at("r", { x: 8, y: 2 }, ParticipantSide.ENEMY);
+
+    const mid = at("m", { x: 6, y: 2 }, ParticipantSide.ENEMY);
+
+    expect(resolve(chain, ["m"], { map }, [caster, right, left, mid])).toEqual({ ok: true, targetIds: ["m", "r", "l"] });
+  });
+
+  it("без обмеження довжини стрибка", () => {
+    const farFoe = at("far", { x: 19, y: 19 }, ParticipantSide.ENEMY);
+
+    expect(resolve(chain, ["k1"], { map }, [caster, k1, farFoe])).toEqual({ ok: true, targetIds: ["k1", "far"] });
+  });
+
+  it("на карті рівно одна перша ціль у межах дальності", () => {
+    expect(resolve(chain, ["k1", "k2"], { map }, list)).toEqual({ ok: false, error: "Оберіть одну першу ціль ланцюга" });
+    expect(resolve(chain, ["k5"], { map }, list)).toEqual({ ok: false, error: "Ціль поза дальністю заклинання" });
+    expect(resolve(chain, ["a"], { map }, list).ok).toBe(false);
+  });
+
+  it("без карти чи без позиції заклинателя — ручний вибір у порядку вибору", () => {
+    expect(resolve(chain, ["k3", "k1"], undefined, list)).toEqual({ ok: true, targetIds: ["k3", "k1"] });
+
+    const off = at("c", undefined);
+
+    expect(resolve(chain, ["k3", "k1"], { map }, [off, ...list.slice(1)], off)).toEqual({ ok: true, targetIds: ["k3", "k1"] });
+  });
+});

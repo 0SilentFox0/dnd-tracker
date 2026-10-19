@@ -31,7 +31,7 @@ const SELF: Targeting = { kind: "self" };
 
 const ALL_ENEMIES: Targeting = { kind: "allEnemies" };
 
-const enemies = (maxTargets: number, range?: number): Targeting => ({ kind: "area", side: "enemy", maxTargets, range });
+const enemies = (maxTargets: number, range?: number, extra: { chain?: true } = {}): Targeting => ({ kind: "area", side: "enemy", maxTargets, range, ...extra });
 
 const template = (
   shape: "circle" | "cube" | "cone" | "line",
@@ -500,10 +500,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Ланцюгова блискавка",
     school: CHAOS,
     level: 4,
-    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %).`,
+    description: `Блискавка стрибає між ворогами (до 4): перша ціль отримує ${power(2, "шкоди блискавкою")}, кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %). На карті заклинатель обирає першу ціль у межах 60 фт, а блискавка сама перескакує на найближчого до попередньої цілі ворога; без карти — до 4 ворогів на вибір у порядку стрибків.`,
     appearanceDescription:
       "Сліпучий розряд вистрибує з пальців заклинателя і, вдаривши першого ворога, перескакує на наступного, і далі, і далі. Повітря тріщить і пахне грозою, а кожен стрибок трохи тьмяніший за попередній.",
-    definition: def(2, enemies(4, 60), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
+    definition: def(2, enemies(4, 60, { chain: true }), [damage("lightning", { falloff: [100, 50, 25, 13] })]),
     raceModifiers: [],
   },
   {

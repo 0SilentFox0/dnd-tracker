@@ -21,11 +21,12 @@ import {
   spellSpec,
   spellTargetCandidates,
   spellTargetInRange,
+  withChainTargets,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
 import type { MapAim } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
-import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import { expandSpellTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -167,7 +168,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     ? spellAimTargets({ map, participants: order, caster }, aimPick, flow.aim).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
     : [];
 
-  const state = withLiveAimTargets(flow, aimTargets.map((t) => t.participant.basicInfo.id));
+  const chainFirst = flow.pick?.chain ? order.find((p) => p.basicInfo.id === flow.targetIds[0]) : undefined;
+
+  const chain = caster && chainFirst && flow.pick?.chain ? spellChain({ participants: order, caster }, flow.pick.chain, chainFirst) : [];
+
+  const state = withChainTargets(withLiveAimTargets(flow, aimTargets.map((t) => t.participant.basicInfo.id)), chain.map((p) => p.basicInfo.id));
 
   useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
 
@@ -196,7 +201,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, aimTargets, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, aimTargets, chain, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     aimConfirmable: !!state.aim && (aimTargets.length > 0 || !!state.pick?.zone),
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,

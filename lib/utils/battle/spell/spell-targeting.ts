@@ -73,6 +73,31 @@ export function skillRadiusArea({ map, participants, caster }: AimScene, radius:
   return { cells, targets: sided.slice(0, radius.maxTargets) };
 }
 
+export interface SpellChain {
+  side: "ally" | "enemy";
+  maxTargets: number;
+}
+
+/** Ланцюг на карті: кожна наступна ціль — найближча до попередньої жива на карті зі сторони заклинання; рівні — за ініціативою. */
+export function spellChain({ participants, caster }: Omit<AimScene, "map">, chain: SpellChain, first: BattleParticipant): BattleParticipant[] {
+  const mine = caster.basicInfo.side;
+
+  const pool = participants.filter((p) => p !== first && isActive(p) && isOnMap(p) && (p.basicInfo.side === mine) === (chain.side === "ally"));
+
+  const out = [first];
+
+  while (out.length < chain.maxTargets && pool.length > 0 && isOnMap(out[out.length - 1])) {
+    const from = cellsOf(out[out.length - 1]);
+
+    const next = pool.reduce((best, p) => (footprintDistance(from, cellsOf(p)) < footprintDistance(from, cellsOf(best)) ? p : best));
+
+    out.push(next);
+    pool.splice(pool.indexOf(next), 1);
+  }
+
+  return out;
+}
+
 export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: number): boolean {
   return targeting.mode === "all" || count <= targeting.maxTargets;
 }
@@ -189,6 +214,12 @@ export function resolveSpellTargets(
 
       if (picked.some((p) => !isActive(p) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
         return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
+      }
+
+      if (map && targeting.kind === "area" && targeting.chain) {
+        if (picked.length !== 1) return fail("Оберіть одну першу ціль ланцюга");
+
+        return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0]).map((p) => p.basicInfo.id) };
       }
 
       const skill = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
