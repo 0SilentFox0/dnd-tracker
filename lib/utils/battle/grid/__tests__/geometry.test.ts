@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellDistance, cellKey, cellLine, closestCell, footprint, footprintDistance, inBounds, neighbors } from "../geometry";
+import { cellDistance, cellKey, cellLine, cellsByDistance, closestCell, footprint, footprintDistance, inBounds, neighbors } from "../geometry";
 
 
 describe("квадратна сітка", () => {
@@ -59,5 +59,18 @@ describe("closestCell", () => {
     expect(closestCell(cells, [{ x: 0, y: 0 }])).toEqual({ x: 4, y: 4 });
     expect(closestCell(cells, [{ x: 9, y: 9 }])).toEqual({ x: 5, y: 5 });
     expect(closestCell(cells, [{ x: 4, y: 9 }])).toEqual({ x: 4, y: 5 });
+  });
+});
+
+describe("cellsByDistance", () => {
+  it("кільцями від точки, при рівності зверху вниз і зліва направо", () => {
+    const cells = cellsByDistance({ cols: 3, rows: 3 }, { x: 1, y: 1 });
+
+    expect(cells[0]).toEqual({ x: 1, y: 1 });
+    expect(cells.slice(1).map(cellKey)).toEqual(["0:0", "1:0", "2:0", "0:1", "2:1", "0:2", "1:2", "2:2"]);
+  });
+
+  it("містить лише клітинки карти", () => {
+    expect(cellsByDistance({ cols: 4, rows: 2 }, { x: 10, y: 10 })).toHaveLength(8);
   });
 });

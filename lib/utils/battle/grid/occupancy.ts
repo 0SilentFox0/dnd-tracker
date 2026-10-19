@@ -1,4 +1,4 @@
-import { cellDistance, cellKey, footprint, isPlayable } from "./geometry";
+import { cellKey, cellsByDistance, footprint, isPlayable } from "./geometry";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -33,19 +33,10 @@ export function canStand(map: BattleMapConfig, participants: BattleParticipant[]
   return fits(map, anchor, sizeOf(mover), others);
 }
 
-/** Найближчий до from якір, де mover може стати (кільцями від from). */
 export function nearestStandable(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, from: GridPoint): GridPoint | null {
-  const maxRing = Math.max(map.cols, map.rows);
+  const others = occupiedBy(participants, (p) => p.basicInfo.id !== mover.basicInfo.id);
 
-  for (let r = 0; r <= maxRing; r++) {
-    for (let y = from.y - r; y <= from.y + r; y++) {
-      for (let x = from.x - r; x <= from.x + r; x++) {
-        const cell = { x, y };
+  const size = sizeOf(mover);
 
-        if (cellDistance(cell, from) === r && canStand(map, participants, mover, cell)) return cell;
-      }
-    }
-  }
-
-  return null;
+  return cellsByDistance(map, from).find((cell) => fits(map, cell, size, others)) ?? null;
 }
