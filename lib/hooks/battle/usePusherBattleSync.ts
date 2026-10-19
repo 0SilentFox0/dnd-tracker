@@ -4,10 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { getBattleVersion } from "@/lib/api/battles";
-import { battleQueryKey } from "@/lib/hooks/battles";
-import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { battleKeys, battleQueryKey } from "@/lib/hooks/battles";
+import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { mergeAudio } from "@/lib/utils/audio/merge";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
+import type { BattleAudioEvent, BattleAudioSnapshot } from "@/types/audio";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
@@ -55,6 +57,9 @@ export function usePusherBattleSync(
   // видимість і перепідключення часто приходять разом: один запит версії на обидва
   const resync = useCallback(() => {
     resyncRef.current ??= (async () => {
+      // музика не має версії: пропущені battle-audio перечитуються окремо (лише якщо звук увімкнено)
+      void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
+
       if (queryClient.getQueryData<BattleScene>(queryKey()) === undefined) return;
 
       try {
@@ -139,6 +144,17 @@ export function usePusherBattleSync(
         else queryClient.setQueryData(queryKey(), next);
       };
 
+      const onAudio = (data: unknown) => {
+        const audio = (data as Partial<BattleAudioEvent> | null)?.audio;
+
+        if (!audio || typeof audio.seq !== "number") return;
+
+        queryClient.setQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId), (prev) => ({
+          audio: mergeAudio(prev?.audio ?? null, audio),
+          clockOffsetMs: prev?.clockOffsetMs ?? null,
+        }));
+      };
+
       const updateConnectionState = () => {
         if (!mounted) return;
 
@@ -175,6 +191,7 @@ export function usePusherBattleSync(
 
       debugLog("subscribed battle channel", { channel });
       battleChannel.bind("battle-delta", onDelta);
+      battleChannel.bind(BATTLE_AUDIO_EVENT, onAudio);
 
       const onSubscriptionError = (error: unknown) => {
         console.warn("[battle-sync] battle channel subscription failed, falling back to polling", error);
@@ -203,6 +220,7 @@ export function usePusherBattleSync(
 
       cleanupRef.current = () => {
         battleChannel.unbind("battle-delta", onDelta);
+        battleChannel.unbind(BATTLE_AUDIO_EVENT, onAudio);
         battleChannel.unbind("pusher:subscription_error", onSubscriptionError);
         battleChannel.unbind("pusher:subscription_succeeded", onSubscribed);
         pusher.connection.unbind("state_change", onState);

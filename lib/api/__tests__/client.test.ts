@@ -52,3 +52,17 @@ describe("errorMessage / request errors", () => {
     await expect(request("/api/x")).rejects.toMatchObject({ message: "Некоректний JSON у тілі запиту", status: 400 });
   });
 });
+
+describe("request onResponse", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("віддає сиру відповідь до розбору тіла (заголовок Date для годинника)", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 200, headers: { date: "Mon, 19 Oct 2026 10:00:00 GMT" } })));
+
+    const onResponse = vi.fn();
+
+    await campaignGet("c1", "/x", { onResponse });
+
+    expect(onResponse.mock.calls[0][0].headers.get("date")).toBe("Mon, 19 Oct 2026 10:00:00 GMT");
+  });
+});

@@ -1,0 +1,39 @@
+"use client";
+
+import { useMemo } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { sendBattleAudio } from "@/lib/api/battle-audio";
+import { ApiError } from "@/lib/api/client";
+import { battleKeys } from "@/lib/hooks/battles";
+import { mergeAudio } from "@/lib/utils/audio/merge";
+import type { BattleAudioCommand, BattleAudioSnapshot } from "@/types/audio";
+
+export interface BattleAudioControl {
+  send(cmd: BattleAudioCommand): void;
+  pending: boolean;
+}
+
+export function useBattleAudioControl(args: { campaignId: string; battleId: string; enabled: boolean; onFailure(message: string): void }): BattleAudioControl | null {
+  const { campaignId, battleId, enabled, onFailure } = args;
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (cmd: BattleAudioCommand) => sendBattleAudio(campaignId, battleId, cmd),
+    onSuccess: (fresh) =>
+      queryClient.setQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId), (prev) => ({
+        audio: mergeAudio(prev?.audio ?? null, fresh.audio),
+        clockOffsetMs: fresh.clockOffsetMs ?? prev?.clockOffsetMs ?? null,
+      })),
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
+
+      onFailure(error instanceof Error && error.message ? error.message : "Не вдалося керувати музикою");
+    },
+  });
+
+  const control = useMemo(() => ({ send: (cmd: BattleAudioCommand) => mutate(cmd), pending: isPending }), [mutate, isPending]);
+
+  return enabled ? control : null;
+}
