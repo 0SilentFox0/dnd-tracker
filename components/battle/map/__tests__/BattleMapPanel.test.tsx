@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMapPanel } from "../BattleMapPanel";
+import { MapToolsSlotContext } from "../MapToolsSlot";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
@@ -20,7 +21,7 @@ class RO {
 
 vi.stubGlobal("ResizeObserver", RO);
 
-function panel(isDM: boolean) {
+function panel(isDM: boolean, slot: HTMLElement | null = null) {
   const scene = fakeScene({ isDM, map: { cols: 10, rows: 5, background: null, opacity: 0.3 } });
 
   scene.me.battleData.position = { x: 0, y: 0 };
@@ -31,7 +32,9 @@ function panel(isDM: boolean) {
   return render(
     <Wrapper>
       <TooltipProvider>
-        <BattleMapPanel />
+        <MapToolsSlotContext.Provider value={slot}>
+          <BattleMapPanel />
+        </MapToolsSlotContext.Provider>
       </TooltipProvider>
     </Wrapper>,
   );
@@ -81,5 +84,22 @@ describe("BattleMapPanel", () => {
 
   it("гравець не бачить «Місцевість»", () => {
     expect(panel(false).queryByRole("button", { name: "Місцевість" })).toBeNull();
+  });
+
+  it("на десктопі з рядком над картою інструменти ДМ рендеряться в нього, палітра звисає вниз", () => {
+    const slot = document.createElement("div");
+
+    document.body.appendChild(slot);
+
+    const { container } = panel(true, slot);
+
+    expect(container.textContent).not.toContain("Розставити");
+    expect(slot.textContent).toContain("Розставити");
+
+    const terrain = Array.from(slot.querySelectorAll("button")).find((b) => b.textContent === "Місцевість") as HTMLButtonElement;
+
+    fireEvent.click(terrain);
+    expect(slot.textContent).toContain("Непрохідне");
+    slot.remove();
   });
 });

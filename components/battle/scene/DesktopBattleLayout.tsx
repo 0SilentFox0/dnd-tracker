@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
 
 import { AwaitingDmBanner } from "./AwaitingDmBanner";
@@ -10,6 +11,7 @@ import { LastActionTicker } from "./LastActionTicker";
 
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
+import { MapToolsSlotContext } from "@/components/battle/map/MapToolsSlot";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
@@ -47,6 +49,8 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
   // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
   const viewMode = intents.mapAim ? "map" : storedMode;
 
+  const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
+
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 
   return (
@@ -68,7 +72,8 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         </aside>
         {battle.map ? (
           <main className="flex min-h-0 flex-col">
-            <div className="flex justify-center px-3 pt-2">
+            <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 pt-2">
+              <div ref={setToolsSlot} className="flex min-w-0 items-center" />
               <HudChipTabs
                 ariaLabel="Вигляд бою"
                 items={[
@@ -78,7 +83,9 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
               />
             </div>
             {viewMode === "map" ? (
-              <div className="min-h-0 flex-1 p-3"><BattleMapPanel /></div>
+              <div className="min-h-0 flex-1 p-3">
+                <MapToolsSlotContext.Provider value={toolsSlot}><BattleMapPanel /></MapToolsSlotContext.Provider>
+              </div>
             ) : (
               <div className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></div>
             )}
