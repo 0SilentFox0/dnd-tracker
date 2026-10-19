@@ -1,9 +1,9 @@
-import { cellKey, neighbors } from "./geometry";
+import { cellKey, footprint, neighbors } from "./geometry";
 import { fits, occupiedBy, sizeOf } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export function movementBudget(p: BattleParticipant): number {
   if (hasEffectMarker(p, "immobilized")) return 0;
@@ -15,8 +15,14 @@ export function remainingMovement(p: BattleParticipant): number {
   return Math.max(0, movementBudget(p) - (p.battleData.movementUsed ?? 0));
 }
 
-// союзники прохідні, вороги — стіна; стати можна лише на вільне місце
-export function reachable(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, budget: number): Map<string, number> {
+// союзники прохідні, вороги — стіна; стати можна лише на вільне місце; avoid — клітинки, які footprint не зачіпає
+export function reachable(
+  map: BattleMapConfig,
+  participants: BattleParticipant[],
+  mover: BattleParticipant,
+  budget: number,
+  opts: { avoid?: ReadonlySet<string> } = {},
+): Map<string, number> {
   const start = mover.battleData.position;
 
   const result = new Map<string, number>();
@@ -30,6 +36,10 @@ export function reachable(map: BattleMapConfig, participants: BattleParticipant[
   const walls = occupiedBy(participants, (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side);
 
   const taken = occupiedBy(participants, notMe);
+
+  const { avoid } = opts;
+
+  const touchesAvoid = (anchor: GridPoint) => !!avoid?.size && footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
 
   const seen = new Map([[cellKey(start), 0]]);
 
@@ -45,7 +55,7 @@ export function reachable(map: BattleMapConfig, participants: BattleParticipant[
     for (const next of neighbors(cur)) {
       const key = cellKey(next);
 
-      if (seen.has(key) || !fits(map, next, size, walls)) continue;
+      if (seen.has(key) || !fits(map, next, size, walls) || touchesAvoid(next)) continue;
 
       seen.set(key, cost + 1);
       queue.push(next);

@@ -2,6 +2,9 @@
 
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { SelectField } from "@/components/ui/select-field";
+import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +14,8 @@ const BRUSHES: { value: TerrainBrush; label: string }[] = [
   { value: "hazard", label: "Небезпека" },
   { value: "erase", label: "Стерти" },
 ];
+
+const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
 
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
   return (
@@ -43,7 +48,22 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
         </label>
       )}
       {tool.brush === "hazard" && (
-        <Input aria-label="Підпис небезпеки" className="h-7 w-40 px-2 text-xs" maxLength={60} value={tool.label} onChange={(e) => tool.setLabel(e.target.value)} />
+        <>
+          <Input aria-label="Підпис небезпеки" className="h-7 w-40 px-2 text-xs" maxLength={60} value={tool.label} onChange={(e) => tool.setLabel(e.target.value)} />
+          <Input
+            aria-label="Шкода (кубики)"
+            aria-invalid={tool.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(tool.dice.trim())}
+            className="h-7 w-20 px-2 text-xs"
+            maxLength={12}
+            placeholder="без шкоди"
+            value={tool.dice}
+            onChange={(e) => tool.setDice(e.target.value)}
+          />
+          <label className="flex items-center gap-1 text-hud-muted">
+            Тип
+            <SelectField value={tool.damageType} onValueChange={tool.setDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} className="h-7 w-28 px-2 text-xs" />
+          </label>
+        </>
       )}
     </div>
   );

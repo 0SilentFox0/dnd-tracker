@@ -107,7 +107,7 @@ describe("BattleFormMap", () => {
     expect(blocked(container)).toHaveLength(1);
   });
 
-  it("palette: wall and hazard with label; no barrier option", () => {
+  it("palette: wall and hazard with label and damage; no barrier option", () => {
     const { container } = render(<Harness />);
 
     enable();
@@ -122,7 +122,15 @@ describe("BattleFormMap", () => {
     press(container, "2:1");
     release();
 
-    expect(seen.editor.map.terrain).toEqual({ "1:1": { kind: "wall" }, "2:1": { kind: "hazard", label: "Лава" } });
+    fireEvent.change(screen.getByLabelText("Шкода (кубики)"), { target: { value: "" } });
+    press(container, "3:1");
+    release();
+
+    expect(seen.editor.map.terrain).toEqual({
+      "1:1": { kind: "wall" },
+      "2:1": { kind: "hazard", label: "Лава", damage: { dice: "1d6", type: "fire" } },
+      "3:1": { kind: "hazard", label: "Лава" },
+    });
     expect(container.querySelector('[data-terrain="wall"]')).not.toBeNull();
     expect(container.querySelector('[data-terrain="hazard"]')).not.toBeNull();
   });

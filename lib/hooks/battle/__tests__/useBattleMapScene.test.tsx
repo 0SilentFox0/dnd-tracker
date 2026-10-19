@@ -123,7 +123,7 @@ describe("useBattleMapScene", () => {
     expect(current().terrainTool?.active).toBe(false);
   });
 
-  it("з інструментом клітинки й токени не рухають і не б'ють; штрих — один запит", () => {
+  it("з інструментом клітинки й токени не рухають і не б'ють; штрих — один запит", async () => {
     const { current, value } = setup(true);
 
     act(() => current().terrainTool?.toggle());
@@ -138,7 +138,18 @@ describe("useBattleMapScene", () => {
     act(() => current().actions.onStroke?.([{ x: 3, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }]));
 
     expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(1);
-    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь" } });
+    expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь", damage: { dice: "1d6", type: "fire" } } });
+
+    act(() => current().terrainTool?.setDice("2d8"));
+    act(() => current().terrainTool?.setDamageType("acid"));
+    await act(async () => current().actions.onStroke?.([{ x: 5, y: 1 }]));
+    act(() => current().terrainTool?.setDice(""));
+    await act(async () => current().actions.onStroke?.([{ x: 6, y: 1 }]));
+
+    const terrains = vi.mocked(value.actions.mapTerrain.mutateAsync).mock.calls.flatMap((c) => (c[0] as MapTerrainData).cells.map((cell) => [cell, (c[0] as MapTerrainData).terrain]));
+
+    expect(Object.fromEntries(terrains)).toMatchObject({ "5:1": { damage: { dice: "2d8", type: "acid" } }, "6:1": { kind: "hazard", label: "Вогонь" } });
+    expect(Object.fromEntries(terrains)["6:1"]).not.toHaveProperty("damage");
   });
 
   it("щітка: барʼєр з раундами, непрохідне, стерти", async () => {

@@ -105,6 +105,17 @@ describe("map-terrain mutation", () => {
     expect(out.response).toEqual({ skipped: ["9:0", "10:0"] });
   });
 
+  it("небезпека з шкодою: кубики й тип; некоректні кубики — відмова схеми", () => {
+    const damage = { dice: "2d6+1", type: "fire" };
+
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage } }).success).toBe(true);
+    expect(mapTerrainSchema.safeParse({ cells: ["1:1"], terrain: { kind: "hazard", damage: { dice: "2к6", type: "fire" } } }).success).toBe(false);
+
+    const out = mapTerrainMutation(ctx(), { cells: ["3:3"], terrain: { kind: "hazard", label: "Лава", damage } });
+
+    expect(out.scene?.map?.terrain?.["3:3"]).toEqual({ kind: "hazard", label: "Лава", damage });
+  });
+
   it("небезпека на клітинці учасника дозволена", () => {
     const out = mapTerrainMutation(ctx(), { cells: ["0:0"], terrain: { kind: "hazard" } });
 

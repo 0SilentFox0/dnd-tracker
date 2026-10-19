@@ -1,14 +1,21 @@
 import { cellKey, inBounds, neighbors } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell, TerrainDiff } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell, TerrainDamage, TerrainDiff } from "@/types/battle";
 
 export function terrainAt(map: Pick<BattleMapConfig, "terrain">, p: GridPoint): TerrainCell | undefined {
   return map.terrain?.[cellKey(p)];
+}
+
+/** Шкода небезпеки ДМ; порожні чи некоректні кубики — без шкоди (лише підсвітка). */
+export function hazardDamage(dice: string, type: string): (TerrainDamage & { dice: string }) | undefined {
+  const formula = dice.trim();
+
+  return HAZARD_DICE_PATTERN.test(formula) ? { dice: formula, type } : undefined;
 }
 
 export function hazardCells(map: Pick<BattleMapConfig, "terrain">): Set<string> {

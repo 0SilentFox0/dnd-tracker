@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { HAZARD_DICE_PATTERN, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
@@ -23,7 +23,7 @@ export const battleMapSchema = z.object({
         label: z.string().max(60).optional(),
         untilRound: z.number().int().min(1).optional(),
         damage: z
-          .object({ dice: z.string().regex(/^\d+d\d+([+-]\d+)?$/).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30) })
+          .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30) })
           .optional(),
       }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
     )

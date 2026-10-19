@@ -1,5 +1,6 @@
 export * from "./attack-reach";
 export * from "./geometry";
+export * from "./hazard";
 export * from "./layout";
 export * from "./map-editor";
 export * from "./map-scene";

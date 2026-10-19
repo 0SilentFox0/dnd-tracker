@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { cellKey } from "../geometry";
-import { applyMargins, clampMargins, hasPlayableArea, inferMargins, isPreviewSafeBackground, marginsBlocked, resizeMap, toggleBlocked } from "../map-editor";
+import { applyMargins, clampMargins, hasPlayableArea, inferMargins, isPreviewSafeBackground, marginsBlocked, paintCells, resizeMap, toggleBlocked } from "../map-editor";
+import { hazardDamage } from "../terrain";
 
 import type { BattleMapConfig } from "@/types/battle";
 
@@ -57,6 +58,20 @@ describe("map-editor", () => {
     expect(next.blocked).toContain("10:6");
     expect(next.blocked).toHaveLength(20 * 12 - 18 * 10 + 1);
     expect(next.blocked).not.toContain("2:2");
+  });
+
+  it("paintCells ставить небезпеку з підписом і шкодою", () => {
+    const m: BattleMapConfig = { cols: 5, rows: 5, background: null, opacity: 0.3 };
+
+    const damage = { dice: "1d6", type: "fire" };
+
+    expect(paintCells(m, [{ x: 1, y: 1 }], "hazard", { label: "Лава", damage }).terrain).toEqual({ "1:1": { kind: "hazard", label: "Лава", damage } });
+  });
+
+  it("hazardDamage: порожні або некоректні кубики — без шкоди", () => {
+    expect(hazardDamage(" 2d4+1 ", "acid")).toEqual({ dice: "2d4+1", type: "acid" });
+    expect(hazardDamage("", "fire")).toBeUndefined();
+    expect(hazardDamage("d6", "fire")).toBeUndefined();
   });
 
   it("clampMargins лишає 2 клітинки", () => {

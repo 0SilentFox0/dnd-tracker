@@ -10,6 +10,12 @@ export function cellKey(p: GridPoint): string {
   return `${p.x}:${p.y}`;
 }
 
+export function parseCellKey(key: string): GridPoint {
+  const [x, y] = key.split(":").map(Number);
+
+  return { x, y };
+}
+
 export function neighbors(p: GridPoint): GridPoint[] {
   return DIRS.map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy }));
 }

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { cellKey } from "@/lib/utils/battle/grid";
+import { DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
+import { cellKey, hazardDamage } from "@/lib/utils/battle/grid";
 import type { MapTerrainData, MapTerrainResponse } from "@/types/api";
 import type { GridPoint, TerrainKind } from "@/types/battle";
 
@@ -23,6 +23,11 @@ export interface MapTerrainTool {
   setRounds(rounds: number): void;
   label: string;
   setLabel(label: string): void;
+  /** порожньо — небезпека без шкоди */
+  dice: string;
+  setDice(dice: string): void;
+  damageType: string;
+  setDamageType(type: string): void;
   commit(cells: GridPoint[]): void;
   /** клітинки штрихів, що чекають на відповідь сервера */
   pending: ReadonlySet<string>;
@@ -64,14 +69,18 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
 
   const [label, setLabel] = useState(DEFAULT_HAZARD_LABEL);
 
+  const [dice, setDice] = useState(DEFAULT_HAZARD_DICE);
+
+  const [damageType, setDamageType] = useState(DEFAULT_HAZARD_DAMAGE_TYPE);
+
   const [pending, setPending] = useState<ReadonlySet<string>>(EMPTY);
 
   const active = on && isDM;
 
-  const latest = useRef({ brush, rounds, label, mutate, onSkipped });
+  const latest = useRef({ brush, rounds, label, dice, damageType, mutate, onSkipped });
 
   useEffect(() => {
-    latest.current = { brush, rounds, label, mutate, onSkipped };
+    latest.current = { brush, rounds, label, dice, damageType, mutate, onSkipped };
   });
 
   const queue = useRef<MapTerrainData[]>([]);
@@ -118,7 +127,9 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
 
       if (cells.length === 0) return;
 
-      const { brush: b, rounds: r, label: l } = latest.current;
+      const { brush: b, rounds: r, label: l, dice: d, damageType: t } = latest.current;
+
+      const damage = hazardDamage(d, t);
 
       const terrain: MapTerrainData["terrain"] =
         b === "erase"
@@ -126,7 +137,7 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
           : b === "barrier"
             ? { kind: b, rounds: Math.min(MAX_BARRIER_ROUNDS, Math.max(1, Math.trunc(r) || 1)) }
             : b === "hazard"
-              ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL }
+              ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL, ...(damage && { damage }) }
               : { kind: b };
 
       enqueue(queue.current, { cells, terrain });
@@ -148,5 +159,5 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
     return () => window.removeEventListener("keydown", onKey);
   }, [active]);
 
-  return { active, toggle, close, brush, setBrush, rounds, setRounds, label, setLabel, commit, pending };
+  return { active, toggle, close, brush, setBrush, rounds, setRounds, label, setLabel, dice, setDice, damageType, setDamageType, commit, pending };
 }

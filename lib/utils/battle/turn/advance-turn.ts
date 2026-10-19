@@ -111,6 +111,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
     currentBattleLogLength: scene.eventSeq + actions.length,
     pendingSummons: pending,
     rng,
+    map,
   });
 
   const newLogEntries = [...loop.newLogEntries];

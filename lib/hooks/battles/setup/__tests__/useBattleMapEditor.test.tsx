@@ -36,7 +36,15 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.setHazardLabel("Вогняна стіна"));
     act(() => result.current.setTool("hazard"));
     act(() => result.current.onStroke([{ x: 4, y: 3 }]));
-    expect(result.current.map.terrain?.["4:3"]).toEqual({ kind: "hazard", label: "Вогняна стіна" });
+    expect(result.current.map.terrain?.["4:3"]).toEqual({ kind: "hazard", label: "Вогняна стіна", damage: { dice: "1d6", type: "fire" } });
+
+    act(() => result.current.setHazardDice("2d4+1"));
+    act(() => result.current.setHazardDamageType("acid"));
+    act(() => result.current.onStroke([{ x: 5, y: 3 }]));
+    expect(result.current.map.terrain?.["5:3"]?.damage).toEqual({ dice: "2d4+1", type: "acid" });
+
+    act(() => result.current.setTool("erase"));
+    act(() => result.current.onStroke([{ x: 5, y: 3 }]));
 
     act(() => result.current.setTool("erase"));
     act(() => result.current.onStroke([{ x: 3, y: 3 }, { x: 4, y: 3 }]));

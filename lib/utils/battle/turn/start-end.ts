@@ -7,10 +7,11 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
-import { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 /**
  * Результат обробки початку ходу
@@ -30,6 +31,7 @@ export interface StartOfTurnResult {
  * @param participant - учасник бою
  * @param currentRound - поточний раунд
  * @param allParticipants - всі учасники бою (для контексту пасивок)
+ * @param map - карта бою: небезпечна клітинка під учасником шкодить після DoT
  * @returns результат обробки
  */
 export function processStartOfTurn(
@@ -37,6 +39,7 @@ export function processStartOfTurn(
   currentRound: number,
   allParticipants: BattleParticipant[],
   rng: Rng = Math.random,
+  map?: BattleMapConfig | null,
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
 
@@ -70,6 +73,15 @@ export function processStartOfTurn(
       updatedParticipant.combatStats.currentHp - dotResult.newHp,
     );
     damageMessages.push(...dotResult.damageMessages);
+
+    const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant) : null;
+
+    const hit = hazard && hazardHit(updatedParticipant, hazard, currentRound, allParticipants, rng);
+
+    if (hit) {
+      updatedParticipant = hit.participant;
+      damageMessages.push(hit.message);
+    }
 
     const hotResult = applyHOTEffects(updatedParticipant);
 

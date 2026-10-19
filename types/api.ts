@@ -180,7 +180,7 @@ export interface MapTerrainData {
   /** ключі "x:y" */
   cells: string[];
   /** null — стерти */
-  terrain: { kind: TerrainKind; label?: string; rounds?: number } | null;
+  terrain: { kind: TerrainKind; label?: string; rounds?: number; damage?: { dice: string; type: string } } | null;
 }
 
 export interface MapTerrainResponse {

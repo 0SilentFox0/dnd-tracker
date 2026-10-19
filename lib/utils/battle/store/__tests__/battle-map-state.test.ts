@@ -37,3 +37,19 @@ describe("позиція й рух у state", () => {
     expect(joinParticipant(stored, "b1").battleData).not.toHaveProperty("position");
   });
 });
+
+describe("hazardHitRound у state", () => {
+  const hit = { ...placed, battleData: { ...placed.battleData, hazardHitRound: 3 } };
+
+  it("живе в state і переживає split/join без зміни знімка", () => {
+    const stored = splitParticipant(hit, { orderIndex: 0, isPending: false });
+
+    expect(stored.state.hazardHitRound).toBe(3);
+    expect(stored.snapshotHash).toBe(splitParticipant(placed, { orderIndex: 0, isPending: false }).snapshotHash);
+    expect(joinParticipant(stored, "b1").battleData.hazardHitRound).toBe(3);
+  });
+
+  it("патч несе hazardHitRound", () => {
+    expect(buildParticipantPatch(placed, hit)).toEqual({ id: base.basicInfo.id, battleData: { hazardHitRound: 3 } });
+  });
+});

@@ -4,7 +4,7 @@ import { context, goblin, hero } from "./fixtures";
 
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -77,5 +77,82 @@ describe("move mutation", () => {
 
   it("без карти — відмова", () => {
     expect(() => moveMutation(context(), { participantId: "hero", to: { x: 1, y: 0 } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+
+  describe("небезпека", () => {
+    const fire: TerrainCell = { kind: "hazard", label: "Вогонь", damage: { amount: 5, type: "fire" } };
+
+    const withTerrain = (terrain: Record<string, TerrainCell>, over: Parameters<typeof context>[0] = {}, blocked?: string[]) => {
+      const base = ctx(over);
+
+      return { ...base, rng: () => 0, meta: { ...base.meta, map: { ...map, terrain, ...(blocked && { blocked }) } } };
+    };
+
+    it("вхід у небезпеку — шкода і подія журналу з hpChanges", () => {
+      const out = moveMutation(withTerrain({ "2:0": fire }), { participantId: "hero", to: { x: 2, y: 0 } });
+
+      expect(out.participants[0].combatStats.currentHp).toBe(hero.combatStats.currentHp - 5);
+      expect(out.participants[0].battleData.hazardHitRound).toBe(1);
+      expect(out.events).toEqual([
+        expect.objectContaining({
+          type: "ability",
+          actorId: "hero",
+          resultText: "Тест: 5 fire шкоди від «Вогонь»",
+          hpChanges: [expect.objectContaining({ participantId: "hero", change: -5 })],
+        }),
+      ]);
+    });
+
+    it("вихід і повторний вхід у тому самому раунді — без шкоди", () => {
+      const first = withTerrain({ "1:0": fire });
+
+      const entered = moveMutation(first, { participantId: "hero", to: { x: 1, y: 0 } });
+
+      const out = moveMutation({ ...first, participants: entered.participants }, { participantId: "hero", to: { x: 0, y: 0 } });
+
+      const back = moveMutation({ ...first, participants: out.participants }, { participantId: "hero", to: { x: 1, y: 0 } });
+
+      expect(entered.events).toHaveLength(1);
+      expect(back.events).toEqual([]);
+      expect(back.participants[0].combatStats.currentHp).toBe(entered.participants[0].combatStats.currentHp);
+    });
+
+    it("прохід повз з обходом тієї ж вартості — без шкоди; без обходу — шкода", () => {
+      expect(moveMutation(withTerrain({ "1:0": fire }), { participantId: "hero", to: { x: 2, y: 0 } }).events).toEqual([]);
+
+      const narrow = withTerrain({ "1:1": fire }, { participants: [at(hero, { x: 0, y: 1 }), at(goblin, { x: 9, y: 4 })] }, ["1:0", "1:2"]);
+
+      expect(moveMutation(narrow, { participantId: "hero", to: { x: 2, y: 1 } }).events).toHaveLength(1);
+    });
+
+    it("велика істота на двох небезпечних клітинках — одна шкода найсильнішої", () => {
+      const big = { ...at(hero, { x: 0, y: 0 }), combatStats: { ...at(hero, { x: 0, y: 0 }).combatStats, gridSize: 2 } };
+
+      const acid: TerrainCell = { kind: "hazard", label: "Кислота", damage: { amount: 8, type: "acid" } };
+
+      const out = moveMutation(withTerrain({ "3:0": fire, "3:1": acid }, { participants: [big, at(goblin, { x: 9, y: 4 })] }), { participantId: "hero", to: { x: 2, y: 0 } });
+
+      expect(out.events).toHaveLength(1);
+      expect(out.participants[0].combatStats.currentHp).toBe(big.combatStats.currentHp - 8);
+    });
+
+    it("смертельна шкода валить учасника", () => {
+      const weak = { ...at(hero, { x: 0, y: 0 }), combatStats: { ...at(hero, { x: 0, y: 0 }).combatStats, currentHp: 3 } };
+
+      const out = moveMutation(withTerrain({ "1:0": fire }, { participants: [weak, at(goblin, { x: 9, y: 4 })] }), { participantId: "hero", to: { x: 1, y: 0 } });
+
+      expect(out.participants[0].combatStats.status).toBe("unconscious");
+    });
+
+    it("розстановка ДМ і небезпека без damage — без шкоди", () => {
+      const placed = moveMutation({ ...withTerrain({ "8:0": fire }), isDM: true }, { participantId: "hero", to: { x: 8, y: 0 }, free: true });
+
+      expect(placed.events).toEqual([]);
+      expect(placed.participants[0].combatStats.currentHp).toBe(hero.combatStats.currentHp);
+
+      const plain = moveMutation(withTerrain({ "1:0": { kind: "hazard", label: "Калюжа" } }), { participantId: "hero", to: { x: 1, y: 0 } });
+
+      expect(plain.events).toEqual([]);
+    });
   });
 });

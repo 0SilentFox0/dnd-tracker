@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { applyMargins, clampMargins, hasPlayableArea, inferMargins, type Margins, paintCells, resizeMap, type SetupTool } from "@/lib/utils/battle/grid";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
+import { applyMargins, clampMargins, hasPlayableArea, hazardDamage, inferMargins, type Margins, paintCells, resizeMap, type SetupTool } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -20,6 +20,10 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   const [tool, setToolState] = useState<SetupTool | null>(null);
 
   const [hazardLabel, setHazardLabel] = useState(DEFAULT_HAZARD_LABEL);
+
+  const [hazardDice, setHazardDice] = useState(DEFAULT_HAZARD_DICE);
+
+  const [hazardDamageType, setHazardDamageType] = useState(DEFAULT_HAZARD_DAMAGE_TYPE);
 
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -70,14 +74,16 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     (cells: GridPoint[]) => {
       if (!tool || cells.length === 0) return;
 
-      const next = paintCells(map, cells, tool, tool === "hazard" ? hazardLabel.trim() || DEFAULT_HAZARD_LABEL : undefined);
+      const hazard = tool === "hazard" ? { label: hazardLabel.trim() || DEFAULT_HAZARD_LABEL, damage: hazardDamage(hazardDice, hazardDamageType) } : undefined;
+
+      const next = paintCells(map, cells, tool, hazard);
 
       if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
       setNotice(null);
       setMap(next);
     },
-    [tool, map, hazardLabel],
+    [tool, map, hazardLabel, hazardDice, hazardDamageType],
   );
 
   return {
@@ -92,6 +98,10 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     setTool,
     hazardLabel,
     setHazardLabel,
+    hazardDice,
+    setHazardDice,
+    hazardDamageType,
+    setHazardDamageType,
     onStroke,
     notice,
     setBackground,

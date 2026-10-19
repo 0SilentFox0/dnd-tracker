@@ -111,6 +111,12 @@ export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
 
 export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
 
+export const DEFAULT_HAZARD_DICE = "1d6";
+
+export const DEFAULT_HAZARD_DAMAGE_TYPE = "fire";
+
+export const HAZARD_DICE_PATTERN = /^\d+d\d+([+-]\d+)?$/;
+
 export const DEFAULT_BATTLE_MAP = {
   cols: 20,
   rows: 12,

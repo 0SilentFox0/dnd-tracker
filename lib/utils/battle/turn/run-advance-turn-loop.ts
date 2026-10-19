@@ -3,6 +3,7 @@ import { berserkBonusOf, runBerserkTurn } from "./berserk";
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
   processEndOfTurn,
@@ -10,7 +11,7 @@ import {
   processStartOfTurn,
 } from "@/lib/utils/battle/turn/start-end";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnLoopParams {
   initiativeOrder: BattleParticipant[];
@@ -20,6 +21,7 @@ export interface AdvanceTurnLoopParams {
   currentBattleLogLength: number;
   pendingSummons: BattleParticipant[];
   rng?: () => number;
+  map?: BattleMapConfig | null;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -42,6 +44,8 @@ export function runAdvanceTurnLoop(
     pendingSummons,
     rng = Math.random,
   } = params;
+
+  let map = params.map ?? null;
 
   const reserve = reserveOf(pendingSummons);
 
@@ -106,6 +110,8 @@ export function runAdvanceTurnLoop(
 
       clearedPendingSummons = true;
 
+      if (map) map = pruneExpiredTerrain(map, nextRound) ?? map;
+
       const roundResult = processStartOfRound(
         updatedInitiativeOrder,
         nextRound,
@@ -146,6 +152,7 @@ export function runAdvanceTurnLoop(
       nextRound,
       updatedInitiativeOrder,
       rng,
+      map,
     );
 
     updatedInitiativeOrder = turnResult.participants;

@@ -6,7 +6,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
-import type { ActiveEffect } from "@/types/battle";
+import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
 
@@ -102,4 +102,43 @@ it("processStartOfRound додає саммонів, але не резерв", 
 
   expect(ids).toContain("wolf");
   expect(ids).not.toContain("imp");
+});
+
+describe("небезпека на початку ходу", () => {
+  const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3, terrain: { "1:1": { kind: "hazard", label: "Вогонь", damage: { amount: 5, type: "fire" } } } };
+
+  const standing = (hp = 20, over: Partial<BattleParticipant["battleData"]> = {}) => {
+    const base = createMockParticipant();
+
+    return createMockParticipant({ combatStats: { ...base.combatStats, currentHp: hp }, battleData: { ...base.battleData, position: { x: 1, y: 1 }, ...over } });
+  };
+
+  it("завдає шкоди й пише її в damageMessages", () => {
+    const p = standing();
+
+    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+
+    expect(out.damageMessages).toEqual(["Тест: 5 fire шкоди від «Вогонь»"]);
+    expect(out.participant.combatStats.currentHp).toBe(15);
+    expect(out.participant.battleData.hazardHitRound).toBe(2);
+  });
+
+  it("уже отримав шкоду в цьому раунді або без карти — нічого", () => {
+    const hit = standing(20, { hazardHitRound: 2 });
+
+    expect(processStartOfTurn(hit, 2, [hit], () => 0, map).damageMessages).toEqual([]);
+
+    const p = standing();
+
+    expect(processStartOfTurn(p, 2, [p], () => 0).damageMessages).toEqual([]);
+  });
+
+  it("смерть від небезпеки обробляється як від DoT", () => {
+    const p = standing(3);
+
+    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+
+    expect(out.statusChanged).toBe(true);
+    expect(out.participant.combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
+  });
 });

@@ -299,3 +299,35 @@ describe("резерв", () => {
     });
   });
 });
+
+describe("небезпека на початку ходу в advanceTurn", () => {
+  const fire = { kind: "hazard" as const, label: "Вогонь", damage: { amount: 5, type: "fire" } };
+
+  const placed = (p: typeof hero, hp = 20) => ({ ...p, combatStats: { ...p.combatStats, currentHp: hp }, battleData: { ...p.battleData, position: { x: 1, y: 1 } } });
+
+  const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3, terrain: { "1:1": fire } };
+
+  it("шкода потрапляє в журнал з hpChanges", () => {
+    const out = advanceTurn({ participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
+
+    const entry = out.actions.find((a) => a.resultText.includes("«Вогонь»"));
+
+    expect(entry?.hpChanges).toEqual([expect.objectContaining({ participantId: "gob", oldHp: 20, newHp: 15, change: -5 })]);
+    expect(out.participants[1].combatStats.currentHp).toBe(15);
+  });
+
+  it("смертельна шкода валить учасника", () => {
+    const out = advanceTurn({ participants: [hero, placed(goblin, 3)], pending: [], scene, map, rng: () => 0 });
+
+    expect(out.participants[1].combatStats.status).toBe("unconscious");
+  });
+
+  it("небезпека, що скінчилася з минулим раундом, у новому не шкодить", () => {
+    const expiring: BattleMapConfig = { ...map, terrain: { "1:1": { ...fire, untilRound: 1 } } };
+
+    const out = advanceTurn({ participants: [placed(hero), goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: expiring, rng: () => 0 });
+
+    expect(out.scene.round).toBe(2);
+    expect(out.participants[0].combatStats.currentHp).toBe(20);
+  });
+});

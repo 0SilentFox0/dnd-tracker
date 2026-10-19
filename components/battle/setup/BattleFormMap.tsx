@@ -7,7 +7,10 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
+import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
+import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import type { BattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
 import { cn } from "@/lib/utils";
 import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
@@ -25,6 +28,8 @@ const TOOLS: { value: SetupTool; label: string }[] = [
   { value: "hazard", label: "Небезпека" },
   { value: "erase", label: "Стерти" },
 ];
+
+const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
 
 function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -116,7 +121,28 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 ))}
               </div>
               {editor.tool === "hazard" && (
-                <Input aria-label="Підпис небезпеки" maxLength={60} value={editor.hazardLabel} onChange={(e) => editor.setHazardLabel(e.target.value)} />
+                <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
+                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={editor.hazardLabel} onChange={(e) => editor.setHazardLabel(e.target.value)} />
+                  <div className="space-y-1">
+                    <Label htmlFor="map-hazard-dice" className="text-xs">
+                      Шкода (кубики)
+                    </Label>
+                    <Input
+                      id="map-hazard-dice"
+                      aria-invalid={editor.hazardDice.trim() !== "" && !HAZARD_DICE_PATTERN.test(editor.hazardDice.trim())}
+                      maxLength={12}
+                      placeholder="без шкоди"
+                      value={editor.hazardDice}
+                      onChange={(e) => editor.setHazardDice(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="map-hazard-type" className="text-xs">
+                      Тип
+                    </Label>
+                    <SelectField id="map-hazard-type" value={editor.hazardDamageType} onValueChange={editor.setHazardDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} />
+                  </div>
+                </div>
               )}
             </div>
             <div className="space-y-2">

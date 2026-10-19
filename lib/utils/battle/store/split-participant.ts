@@ -21,7 +21,7 @@ export function splitParticipant(
 
   const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
 
-  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, ...battleDataWithScoped } = p.battleData;
+  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, hazardHitRound, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
   const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown }, ["pendingScopedArtifactBonuses"]);
@@ -49,6 +49,7 @@ export function splitParticipant(
     pendingExtraActions,
     ...(position !== undefined && { position }),
     ...(movementUsed !== undefined && { movementUsed }),
+    ...(hazardHitRound !== undefined && { hazardHitRound }),
     spellSlotsCurrent,
   };
 
@@ -124,6 +125,7 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
       ...(state.pendingExtraActions !== undefined && { pendingExtraActions: state.pendingExtraActions }),
       ...(state.position !== undefined && { position: state.position }),
       ...(state.movementUsed !== undefined && { movementUsed: state.movementUsed }),
+      ...(state.hazardHitRound !== undefined && { hazardHitRound: state.hazardHitRound }),
     },
     actionFlags: {
       hasUsedAction: c.hasUsedAction,
