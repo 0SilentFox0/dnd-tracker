@@ -2,8 +2,8 @@
 
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Sword } from "lucide-react";
 
+import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
@@ -235,30 +235,6 @@ const TemplateLayer = memo(function TemplateLayer({ marks, aim }: { marks: Battl
 
 const NO_CELLS: ReadonlySet<string> = new Set();
 
-interface MeleeHintProps {
-  box: { cx: number; cy: number; size: number };
-  mapSize: { width: number; height: number };
-  pxPerUnit: number;
-}
-
-// HTML поверх токенів, а не в SVG: шар токенів контр-повертається на телефоні, тож меч стоїть рівно
-function MeleeHint({ box, mapSize, pxPerUnit }: MeleeHintProps) {
-  return (
-    <div
-      data-map-attack-hint="melee"
-      className="pointer-events-none absolute z-30 flex items-center justify-center"
-      style={{
-        left: `${((box.cx - box.size / 2) / mapSize.width) * 100}%`,
-        top: `${((box.cy - box.size / 2) / mapSize.height) * 100}%`,
-        width: `${(box.size / mapSize.width) * 100}%`,
-        height: `${(box.size / mapSize.height) * 100}%`,
-      }}
-    >
-      <Sword className="text-[#f2c14e] drop-shadow-[0_2px_3px_rgba(0,0,0,.9)]" style={{ width: Math.max(14, box.size * pxPerUnit * 0.45), height: Math.max(14, box.size * pxPerUnit * 0.45) }} strokeWidth={2.5} />
-    </div>
-  );
-}
-
 interface Stroke {
   pointerId: number;
   x: number;
@@ -420,7 +396,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const end = trajectory?.kind === "ranged" ? cellCenter(trajectory.to) : null;
 
-  const meleeTarget = trajectory?.kind === "melee" ? tokens.find((t) => t.p.basicInfo.id === trajectory.targetId) : undefined;
 
   return (
     // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки
@@ -428,8 +403,14 @@ export function BattleMap({ map, participants, view, actions, className, editing
     <div
       ref={containerRef}
       data-fx-clip
-      className={cn("relative shrink-0 select-none overflow-hidden bg-black", phone ? "touch-pan-y" : "touch-none rounded-xl border border-white/10")}
-      style={{ width: fit.width, height: fit.height }}
+      data-attack-cursor={trajectory?.kind}
+      className={cn(
+        "relative shrink-0 select-none overflow-hidden bg-black",
+        phone ? "touch-pan-y" : "touch-none rounded-xl border border-white/10",
+        // курсор-зброя має перебити інлайн cursor: pointer на клітинках і токенах
+        trajectory && "cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!",
+      )}
+      style={{ width: fit.width, height: fit.height, ...(trajectory && { "--attack-cursor": ATTACK_CURSOR[trajectory.kind] }) }}
       {...bind}
     >
       <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}>
@@ -496,7 +477,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
             />
           );
         })}
-        {meleeTarget && <MeleeHint box={meleeTarget.box} mapSize={size} pxPerUnit={pxPerUnit} />}
         </div>
       </div>
       </div>

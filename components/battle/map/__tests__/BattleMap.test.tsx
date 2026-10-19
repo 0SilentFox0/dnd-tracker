@@ -225,17 +225,25 @@ describe("BattleMap", () => {
     expect(onCellHover).toHaveBeenLastCalledWith(null);
   });
 
-  it("підказка атаки: дальня — лінія, ближня — меч у шарі токенів без лінії", () => {
+  it("підказка атаки: курсор-зброя за типом, лінія лише для дальньої", () => {
+    const clipOf = (c: HTMLElement) => c.querySelector("[data-fx-clip]") as HTMLElement;
+
     const ranged = render(<BattleMap map={square} participants={people} view={{ trajectory: { fromId: "h", targetId: "e", to: { x: 3, y: 2 }, kind: "ranged" } }} />);
 
     expect(ranged.container.querySelector('line[data-map-attack-hint="ranged"]')).not.toBeNull();
-    expect(ranged.container.querySelector('[data-map-attack-hint="melee"]')).toBeNull();
+    expect(clipOf(ranged.container).dataset.attackCursor).toBe("ranged");
+    expect(clipOf(ranged.container).style.getPropertyValue("--attack-cursor")).toContain("data:image/svg+xml");
     cleanup();
 
     const melee = render(<BattleMap map={square} participants={people} view={{ trajectory: { fromId: "h", targetId: "e", to: { x: 3, y: 2 }, kind: "melee" } }} />);
 
-    expect(melee.container.querySelector('[data-map-tokens] > [data-map-attack-hint="melee"]')).not.toBeNull();
+    expect(clipOf(melee.container).dataset.attackCursor).toBe("melee");
     expect(melee.container.querySelector('line[data-map-attack-hint="ranged"]')).toBeNull();
+    cleanup();
+
+    const idle = render(<BattleMap map={square} participants={people} />);
+
+    expect(clipOf(idle.container).dataset.attackCursor).toBeUndefined();
   });
 
   it("colors marked cells", () => {
