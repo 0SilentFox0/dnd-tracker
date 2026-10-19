@@ -1084,7 +1084,7 @@ async function spellModel() {
     if (current()?.basicInfo.name !== `${name} #1`) throw new Error(`Не дійшли до ходу ${name}`);
   };
 
-  // кубики: формула залежить від рівня кастера (Архімаг L6: 2 + ⌊6/3⌋ = 4к6 + 6)
+  // кубики юніта: 2 + ⌊6/2⌋ = 5, грані к8 з 5 рівня (Архімаг L6)
   const fireDice = dice("Архімаг", spells.fireball.id);
 
   const wrongCount = await cast("Архімаг", spells.fireball.id, ["Гоблін А"], [3, 3]);
@@ -1094,7 +1094,7 @@ async function spellModel() {
   quiet = false;
   check("Кубики заклинання: неправильна кількість відхиляється (422 invalid_dice)", wrongCount.status === 422 && wrongCount.body.code === "invalid_dice", JSON.stringify(wrongCount.body));
   check("Кубики заклинання: невірні грані відхиляються (422 invalid_dice)", wrongSides.status === 422 && wrongSides.body.code === "invalid_dice", JSON.stringify(wrongSides.body));
-  check("Формула кубиків Архімага L6: 4к6", fireDice.count === 4 && fireDice.sides === 6, JSON.stringify(fireDice));
+  check("Формула кубиків Архімага L6: 5к8", fireDice.count === 5 && fireDice.sides === 8, JSON.stringify(fireDice));
   quiet = true;
 
   const goblins = ["Гоблін А", "Гоблін Б", "Гоблін В"];
