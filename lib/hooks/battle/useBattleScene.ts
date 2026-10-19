@@ -54,6 +54,21 @@ export interface BattleLogState {
   focus: number | null;
 }
 
+export interface BattleLogPanel extends BattleLogState {
+  show(focus?: number | null): void;
+  close(): void;
+}
+
+/** Наміри гравця, що їх карта передає майстрам (не мутації — ті в `actions`). */
+export interface BattleSceneIntents {
+  attack: AttackIntent | null;
+  requestAttack(intent: AttackIntent): void;
+  clearAttack(): void;
+  /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
+  mapAim: MapAim | null;
+  setMapAim(aim: MapAim | null): void;
+}
+
 export interface BattleSceneActions {
   nextTurn: ReturnType<typeof useNextTurn>;
   attack: ReturnType<typeof useAttack>;
@@ -109,18 +124,11 @@ export interface BattleSceneValue extends BattleSceneData {
   resultScreen: AwaitingDialogState;
   connection: PusherConnectionState;
   selectedId: string | null;
-  attackIntent: AttackIntent | null;
-  requestAttack(intent: AttackIntent): void;
-  clearAttackIntent(): void;
-  /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
-  mapAim: MapAim | null;
-  setMapAim(aim: MapAim | null): void;
+  intents: BattleSceneIntents;
   toast: BattleToastApi;
   result: ResultFx | null;
   showResult(fx: ResultFx | null): void;
-  log: BattleLogState;
-  openLog(focus?: number | null): void;
-  closeLog(): void;
+  log: BattleLogPanel;
   logHistory: BattleLogHistory;
   actions: BattleSceneActions;
   anyPending: boolean;
@@ -322,17 +330,11 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     setDmControlledId,
     selectedId,
     select,
-    attackIntent,
-    requestAttack: setAttackIntent,
-    clearAttackIntent,
-    mapAim,
-    setMapAim,
+    intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim },
     toast,
     result,
     showResult,
-    log,
-    openLog,
-    closeLog,
+    log: { ...log, show: openLog, close: closeLog },
     readBattle,
     logHistory,
     actions,

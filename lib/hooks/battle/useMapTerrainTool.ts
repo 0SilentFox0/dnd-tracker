@@ -13,21 +13,21 @@ export const MAX_STROKE_CELLS = 400;
 
 export const MAX_BARRIER_ROUNDS = 20;
 
+export interface TerrainBrushSettings {
+  kind: TerrainBrush;
+  rounds: number;
+  label: string;
+  /** порожньо — небезпека без шкоди */
+  dice: string;
+  damageType: string;
+}
+
 export interface MapTerrainTool {
   active: boolean;
   toggle(): void;
   close(): void;
-  brush: TerrainBrush;
-  setBrush(brush: TerrainBrush): void;
-  rounds: number;
-  setRounds(rounds: number): void;
-  label: string;
-  setLabel(label: string): void;
-  /** порожньо — небезпека без шкоди */
-  dice: string;
-  setDice(dice: string): void;
-  damageType: string;
-  setDamageType(type: string): void;
+  brush: TerrainBrushSettings;
+  setBrush(patch: Partial<TerrainBrushSettings>): void;
   commit(cells: GridPoint[]): void;
   /** клітинки штрихів, що чекають на відповідь сервера */
   pending: ReadonlySet<string>;
@@ -41,6 +41,8 @@ interface Options {
 }
 
 const EMPTY: ReadonlySet<string> = new Set();
+
+const DEFAULT_BRUSH: TerrainBrushSettings = { kind: "wall", rounds: 1, label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
 
 const sameTerrain = (a: MapTerrainData["terrain"], b: MapTerrainData["terrain"]) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -63,24 +65,18 @@ function enqueue(queue: MapTerrainData[], next: MapTerrainData) {
 export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Options): MapTerrainTool {
   const [on, setOn] = useState(false);
 
-  const [brush, setBrush] = useState<TerrainBrush>("wall");
+  const [brush, setBrushState] = useState(DEFAULT_BRUSH);
 
-  const [rounds, setRounds] = useState(1);
-
-  const [label, setLabel] = useState(DEFAULT_HAZARD_LABEL);
-
-  const [dice, setDice] = useState(DEFAULT_HAZARD_DICE);
-
-  const [damageType, setDamageType] = useState(DEFAULT_HAZARD_DAMAGE_TYPE);
+  const setBrush = useCallback((patch: Partial<TerrainBrushSettings>) => setBrushState((b) => ({ ...b, ...patch })), []);
 
   const [pending, setPending] = useState<ReadonlySet<string>>(EMPTY);
 
   const active = on && isDM;
 
-  const latest = useRef({ brush, rounds, label, dice, damageType, mutate, onSkipped });
+  const latest = useRef({ brush, mutate, onSkipped });
 
   useEffect(() => {
-    latest.current = { brush, rounds, label, dice, damageType, mutate, onSkipped };
+    latest.current = { brush, mutate, onSkipped };
   });
 
   const queue = useRef<MapTerrainData[]>([]);
@@ -127,7 +123,7 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
 
       if (cells.length === 0) return;
 
-      const { brush: b, rounds: r, label: l, dice: d, damageType: t } = latest.current;
+      const { kind: b, rounds: r, label: l, dice: d, damageType: t } = latest.current.brush;
 
       const damage = hazardDamage(d, t);
 
@@ -159,5 +155,5 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
     return () => window.removeEventListener("keydown", onKey);
   }, [active]);
 
-  return { active, toggle, close, brush, setBrush, rounds, setRounds, label, setLabel, dice, setDice, damageType, setDamageType, commit, pending };
+  return { active, toggle, close, brush, setBrush, commit, pending };
 }

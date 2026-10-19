@@ -18,23 +18,25 @@ const BRUSHES: { value: TerrainBrush; label: string }[] = [
 const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
 
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
+  const { brush, setBrush } = tool;
+
   return (
     <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
       {BRUSHES.map(({ value, label }) => (
         <button
           key={value}
           type="button"
-          aria-pressed={tool.brush === value}
-          onClick={() => tool.setBrush(value)}
+          aria-pressed={brush.kind === value}
+          onClick={() => setBrush({ kind: value })}
           className={cn(
             "h-7 rounded-md border bg-black/60 px-2 hover:bg-black/80",
-            tool.brush === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
+            brush.kind === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
           )}
         >
           {label}
         </button>
       ))}
-      {tool.brush === "barrier" && (
+      {brush.kind === "barrier" && (
         <label className="flex items-center gap-1 text-hud-muted">
           Раундів
           <NumberInput
@@ -42,26 +44,26 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
             className="h-7 w-14 px-2 text-xs"
             min={1}
             max={MAX_BARRIER_ROUNDS}
-            value={tool.rounds}
-            onChange={(v) => tool.setRounds(Math.min(MAX_BARRIER_ROUNDS, Math.max(1, v ?? 1)))}
+            value={brush.rounds}
+            onChange={(v) => setBrush({ rounds: Math.min(MAX_BARRIER_ROUNDS, Math.max(1, v ?? 1)) })}
           />
         </label>
       )}
-      {tool.brush === "hazard" && (
+      {brush.kind === "hazard" && (
         <>
-          <Input aria-label="Підпис небезпеки" className="h-7 w-40 px-2 text-xs" maxLength={60} value={tool.label} onChange={(e) => tool.setLabel(e.target.value)} />
+          <Input aria-label="Підпис небезпеки" className="h-7 w-40 px-2 text-xs" maxLength={60} value={brush.label} onChange={(e) => setBrush({ label: e.target.value })} />
           <Input
             aria-label="Шкода (кубики)"
-            aria-invalid={tool.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(tool.dice.trim())}
+            aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
             className="h-7 w-20 px-2 text-xs"
             maxLength={12}
             placeholder="без шкоди"
-            value={tool.dice}
-            onChange={(e) => tool.setDice(e.target.value)}
+            value={brush.dice}
+            onChange={(e) => setBrush({ dice: e.target.value })}
           />
           <label className="flex items-center gap-1 text-hud-muted">
             Тип
-            <SelectField value={tool.damageType} onValueChange={tool.setDamageType} placeholder="Тип" options={DAMAGE_OPTIONS} className="h-7 w-28 px-2 text-xs" />
+            <SelectField value={brush.damageType} onValueChange={(damageType) => setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} className="h-7 w-28 px-2 text-xs" />
           </label>
         </>
       )}

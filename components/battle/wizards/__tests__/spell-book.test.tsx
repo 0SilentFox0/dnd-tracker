@@ -35,7 +35,7 @@ const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T)
 function Harness({ caster }: { caster: Parameters<typeof useSpellBook>[0] }) {
   const book = useSpellBook(caster && asHero(caster), {});
 
-  useEffect(() => book.open(2), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => book.actions.open(2), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <SpellBook book={book} />;
 }
@@ -188,7 +188,7 @@ describe("SpellBook", () => {
     function UnitHarness() {
       const book = useSpellBook(caster, {});
 
-      useEffect(() => book.open(), []); // eslint-disable-line react-hooks/exhaustive-deps
+      useEffect(() => book.actions.open(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
       return <SpellBook book={book} />;
     }
@@ -236,7 +236,7 @@ describe("SpellBook", () => {
       expect(screen.getByText("Оберіть точку на карті")).toBeTruthy();
       expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
 
-      const aim = vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
 
       expect(aim).toMatchObject({ template: { shape: "circle", size: 5 }, casterId: "me", range: 30 });
 
@@ -244,11 +244,11 @@ describe("SpellBook", () => {
 
       expect(screen.getByText("Гоблін")).toBeTruthy();
       expect(screen.getByText("⚠ союзник")).toBeTruthy();
-      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toMatchObject({ aim: { x: 4, y: 0 } });
+      expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toMatchObject({ aim: { x: 4, y: 0 } });
 
       fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
 
-      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
+      expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
       expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
 
       fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
@@ -282,7 +282,7 @@ describe("SpellBook", () => {
       });
 
       expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
-      expect(vi.mocked(value.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
+      expect(vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0]).toBeNull();
     });
   });
 });

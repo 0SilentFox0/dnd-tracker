@@ -49,7 +49,7 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
       <ChangeHpDialog open={dialogs.hpDialogParticipant !== null} onOpenChange={(o) => !o && dialogs.closeHpDialog()} participant={dialogs.hpDialogParticipant} isPending={actions.updateParticipant.isPending}
         onConfirm={(participantId, newHp) => actions.updateParticipant.mutate({ participantId, data: { currentHp: newHp } }, { onSuccess: dialogs.closeHpDialog })} />
       <DmCasterPickerDialog open={pickCaster} onOpenChange={setPickCaster} participants={battle.initiativeOrder}
-        onSelectCaster={(p) => { setCaster(p); setPickCaster(false); book.open(undefined, p); }} />
+        onSelectCaster={(p) => { setCaster(p); setPickCaster(false); book.actions.open(undefined, p); }} />
       <AwaitingDmDialog />
       <SpellBook book={book} />
     </>

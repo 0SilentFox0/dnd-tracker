@@ -30,17 +30,19 @@ const MAP_TAB = "map";
 type Tab = ParticipantSide | typeof MAP_TAB;
 
 export function MobileBattleLayout() {
-  const { battle, awaiting, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, openLog, closeLog, mapAim } = useBattleScene();
+  const { battle, awaiting, isDM, current, hero, isMyTurn, allies, enemies, selectedId, select, log, intents } = useBattleScene();
 
   const hasMap = !!battle.map;
 
   const [pickedTab, setTab] = useState<Tab>(MAP_TAB);
 
-  const tab: Tab = hasMap && mapAim ? MAP_TAB : pickedTab === MAP_TAB && !hasMap ? ParticipantSide.ENEMY : pickedTab;
+  const tab: Tab = hasMap && intents.mapAim ? MAP_TAB : pickedTab === MAP_TAB && !hasMap ? ParticipantSide.ENEMY : pickedTab;
 
   const [dmOpen, setDmOpen] = useState(false);
 
-  const openLatestLog = useCallback(() => openLog(), [openLog]);
+  const { show: showLog, close: closeLog } = log;
+
+  const openLatestLog = useCallback(() => showLog(), [showLog]);
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 

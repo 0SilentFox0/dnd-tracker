@@ -23,7 +23,9 @@ const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
 export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
-  const { anyPending, battle, attackIntent, clearAttackIntent } = useBattleScene();
+  const { anyPending, battle, intents } = useBattleScene();
+
+  const { attack: attackIntent, clearAttack: clearAttackIntent } = intents;
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
@@ -47,7 +49,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
 
   const { phase, actionUsed, skipped } = turn;
 
-  const { open: openAttack } = attack;
+  const { open: openAttack } = attack.actions;
 
   const { currentRound: round, currentTurnIndex: turnIndex } = battle;
 
@@ -79,7 +81,7 @@ export function MyTurnControls({ hero }: { hero: BattleParticipant }) {
           turn={turn}
           pending={anyPending}
           available={{ magic: hasMagic, bonus: bonusAbilities.length > 0, ability: actionAbilities.length > 0 }}
-          actions={{ attack: () => attack.open(), magic: () => book.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
+          actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
         />
       )}
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.endTurn()} onStay={turn.stay} />}

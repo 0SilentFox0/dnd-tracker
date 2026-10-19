@@ -12,7 +12,7 @@ import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 function Harness({ attacker }: { attacker: Parameters<typeof useAttackWizard>[0] }) {
   const wizard = useAttackWizard(attacker);
 
-  useEffect(() => wizard.open(), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => wizard.actions.open(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return <AttackWizard wizard={wizard} />;
 }

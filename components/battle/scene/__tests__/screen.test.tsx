@@ -209,12 +209,12 @@ describe("BattleScreen", () => {
     await vi.waitFor(() => expect(fx.preloadFx).toHaveBeenCalled());
   });
 
-  it("телефон: журнал відкривається станом сцени (openLog)", () => {
+  it("телефон: журнал відкривається станом сцени (log.show)", () => {
     media.wide = false;
 
     const s = fakeScene({ isMyTurn: false });
 
-    s.value.log = { open: true, focus: null };
+    s.value.log = { ...s.value.log, open: true };
 
     render(<BattleScreen />, { wrapper: s.wrapper });
 

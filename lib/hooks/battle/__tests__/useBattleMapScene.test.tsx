@@ -35,7 +35,7 @@ describe("useBattleMapScene", () => {
 
     act(() => current().actions.onTokenClick?.("gob"));
 
-    expect(value.requestAttack).toHaveBeenCalledWith({ targetId: "gob", attackId: "rapier", actorId: "me", round: 3, turnIndex: 0 });
+    expect(value.intents.requestAttack).toHaveBeenCalledWith({ targetId: "gob", attackId: "rapier", actorId: "me", round: 3, turnIndex: 0 });
   });
 
   it("не-ДМ не має перемикача розстановки", () => {
@@ -50,7 +50,7 @@ describe("useBattleMapScene", () => {
 
     act(() => current().actions.onTokenClick?.("ally"));
     expect(current().view.selectedId).toBe("ally");
-    expect(value.requestAttack).not.toHaveBeenCalled();
+    expect(value.intents.requestAttack).not.toHaveBeenCalled();
 
     act(() => current().actions.onCellClick?.({ x: 6, y: 2 }));
     act(() => current().actions.onCellClick?.({ x: 7, y: 2 }));
@@ -128,12 +128,12 @@ describe("useBattleMapScene", () => {
     const { current, value } = setup(true);
 
     act(() => current().terrainTool?.toggle());
-    act(() => current().terrainTool?.setBrush("hazard"));
-    act(() => current().terrainTool?.setLabel("Вогонь"));
+    act(() => current().terrainTool?.setBrush({ kind: "hazard" }));
+    act(() => current().terrainTool?.setBrush({ label: "Вогонь" }));
     act(() => current().actions.onTokenClick?.("gob"));
     act(() => current().actions.onCellClick?.({ x: 3, y: 0 }));
 
-    expect(value.requestAttack).not.toHaveBeenCalled();
+    expect(value.intents.requestAttack).not.toHaveBeenCalled();
     expect(value.actions.move.mutate).not.toHaveBeenCalled();
 
     act(() => current().actions.onStroke?.([{ x: 3, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 1 }]));
@@ -141,10 +141,10 @@ describe("useBattleMapScene", () => {
     expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(1);
     expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledWith({ cells: ["3:1", "4:1"], terrain: { kind: "hazard", label: "Вогонь", damage: { dice: "1d6", type: "fire" } } });
 
-    act(() => current().terrainTool?.setDice("2d8"));
-    act(() => current().terrainTool?.setDamageType("acid"));
+    act(() => current().terrainTool?.setBrush({ dice: "2d8" }));
+    act(() => current().terrainTool?.setBrush({ damageType: "acid" }));
     await act(async () => current().actions.onStroke?.([{ x: 5, y: 1 }]));
-    act(() => current().terrainTool?.setDice(""));
+    act(() => current().terrainTool?.setBrush({ dice: "" }));
     await act(async () => current().actions.onStroke?.([{ x: 6, y: 1 }]));
 
     const terrains = vi.mocked(value.actions.mapTerrain.mutateAsync).mock.calls.flatMap((c) => (c[0] as MapTerrainData).cells.map((cell) => [cell, (c[0] as MapTerrainData).terrain]));
@@ -160,10 +160,10 @@ describe("useBattleMapScene", () => {
 
     act(() => current().terrainTool?.toggle());
     await stroke();
-    act(() => current().terrainTool?.setBrush("barrier"));
-    act(() => current().terrainTool?.setRounds(3));
+    act(() => current().terrainTool?.setBrush({ kind: "barrier" }));
+    act(() => current().terrainTool?.setBrush({ rounds: 3 }));
     await stroke();
-    act(() => current().terrainTool?.setBrush("erase"));
+    act(() => current().terrainTool?.setBrush({ kind: "erase" }));
     await stroke();
 
     const calls = vi.mocked(value.actions.mapTerrain.mutateAsync).mock.calls.map((c) => (c[0] as MapTerrainData).terrain);
@@ -184,7 +184,7 @@ describe("useBattleMapScene", () => {
     stroke(2);
     stroke(3);
     stroke(4);
-    act(() => current().terrainTool?.setBrush("erase"));
+    act(() => current().terrainTool?.setBrush({ kind: "erase" }));
     stroke(5);
 
     expect(value.actions.mapTerrain.mutateAsync).toHaveBeenCalledTimes(1);
@@ -252,7 +252,7 @@ describe("useBattleMapScene", () => {
       expect(mapAim.onAim).toHaveBeenNthCalledWith(1, { x: 2, y: 1 });
       expect(mapAim.onAim).toHaveBeenNthCalledWith(2, { x: 1, y: 0 });
       expect(value.actions.move.mutate).not.toHaveBeenCalled();
-      expect(value.requestAttack).not.toHaveBeenCalled();
+      expect(value.intents.requestAttack).not.toHaveBeenCalled();
     });
 
     it("поза дальністю — підказка замість onAim", () => {

@@ -168,7 +168,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
       })
     : [];
 
-  useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.setMapAim });
+  useSpellMapAim(state, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
 
   const saveTargets = spellSaveTargets(targets, state, scene);
 
@@ -194,14 +194,17 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
-  return {
-    state, spells, byLevel, selected, targets, saveTargets, aimTargets, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+  const view = {
+    spells, byLevel, selected, targets, saveTargets, aimTargets, inRange, formulaOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     allCount: state.pick?.targetMode === "all" ? state.targetIds.length : 0,
     universalSlot,
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
     slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot }),
     costUsed: (s: BookSpell) => !!caster && !free && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
+  };
+
+  const actions = {
     open: (level?: number, casterOverride?: BattleParticipant) => {
       const who = casterOverride ?? caster;
 
@@ -231,4 +234,6 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     submit: () => dispatch({ type: "SUBMIT" }),
     close: () => dispatch({ type: "CLOSE" }),
   };
+
+  return { state, view, actions };
 }

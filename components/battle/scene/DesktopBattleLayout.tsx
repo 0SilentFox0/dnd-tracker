@@ -40,12 +40,12 @@ function BattleColumns() {
 }
 
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const { battle, battleId, awaiting, hero, isMyTurn, isDM, selectedId, select, log, mapAim } = useBattleScene();
+  const { battle, battleId, awaiting, hero, isMyTurn, isDM, selectedId, select, log, intents } = useBattleScene();
 
   const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
   // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
-  const viewMode = mapAim ? "map" : storedMode;
+  const viewMode = intents.mapAim ? "map" : storedMode;
 
   const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
 

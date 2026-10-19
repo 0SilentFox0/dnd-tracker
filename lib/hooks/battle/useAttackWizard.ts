@@ -186,10 +186,14 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     if (state.step === "submitting") void send();
   }, [state.step]);
 
-  return {
-    state, attack, attacks, targets, steps, estimate, unknownDefense, previews,
+  const view = {
+    attack, attacks, targets, steps, estimate, unknownDefense, previews,
     rollMode: currentMode,
     forcedMode: currentStrike?.forced,
+    canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
+  };
+
+  const actions = {
     open: (targetId?: string, attackId?: string) => {
       const first = attacks[0];
 
@@ -232,7 +236,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "CONFIRM_TARGETS", forced });
     },
-    canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     toggleObstacle: () => dispatch({ type: "TOGGLE_OBSTACLE" }),
@@ -249,4 +252,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     submit: () => dispatch({ type: "SUBMIT" }),
     close: () => dispatch({ type: "CLOSE" }),
   };
+
+  return { state, view, actions };
 }

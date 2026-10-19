@@ -16,9 +16,9 @@ function start() {
 
   const hook = renderHook(() => useAttackWizard(scene.me, onDone), { wrapper: scene.wrapper });
 
-  act(() => hook.result.current.open());
-  act(() => hook.result.current.toggleTarget("gob"));
-  act(() => hook.result.current.confirmTargets());
+  act(() => hook.result.current.actions.open());
+  act(() => hook.result.current.actions.toggleTarget("gob"));
+  act(() => hook.result.current.actions.confirmTargets());
 
   return { ...scene, onDone, result: hook.result };
 }
@@ -27,15 +27,15 @@ describe("useAttackWizard", () => {
   it("одна зброя: ціль → кидок (влучання за AC) → шкода → підсумок → відправка → результат", async () => {
     const { result, mutateAsync, showResult, onDone } = start();
 
-    act(() => result.current.roll(14));
+    act(() => result.current.actions.roll(14));
     expect(result.current.state.step).toBe("damage");
 
-    act(() => result.current.damage([6]));
+    act(() => result.current.actions.damage([6]));
     expect(result.current.state.step).toBe("summary");
-    expect(result.current.steps[0].some((s) => s.side === "target")).toBe(false);
-    expect(result.current.unknownDefense).toBe(true);
+    expect(result.current.view.steps[0].some((s) => s.side === "target")).toBe(false);
+    expect(result.current.view.unknownDefense).toBe(true);
 
-    act(() => result.current.submit());
+    act(() => result.current.actions.submit());
 
     await waitFor(() => expect(result.current.state.step).toBe("result"));
     expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ targetIds: ["gob"], attackRoll: 14, damageRolls: [6] }));
@@ -53,9 +53,9 @@ describe("useAttackWizard", () => {
       ],
     });
 
-    act(() => result.current.roll(14));
-    act(() => result.current.damage([6]));
-    act(() => result.current.submit());
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
 
     await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 7 })));
   });
@@ -63,7 +63,7 @@ describe("useAttackWizard", () => {
   it("промах — відправка одразу, результат «miss»", async () => {
     const { result, mutateAsync, showResult } = start();
 
-    act(() => result.current.roll(2));
+    act(() => result.current.actions.roll(2));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss" })));
@@ -74,9 +74,9 @@ describe("useAttackWizard", () => {
 
     mutateAsync.mockRejectedValueOnce(new Error("Стан бою змінився"));
 
-    act(() => result.current.roll(14));
-    act(() => result.current.damage([6]));
-    act(() => result.current.submit());
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
 
     await waitFor(() => expect(result.current.state).toMatchObject({ step: "summary", error: "Стан бою змінився" }));
   });
@@ -84,7 +84,7 @@ describe("useAttackWizard", () => {
   it("previews: бонуси й оцінка для кожної зброї", () => {
     const { result } = start();
 
-    expect(result.current.previews.rapier.estimate).toBeGreaterThan(0);
+    expect(result.current.view.previews.rapier.estimate).toBeGreaterThan(0);
   });
 
   it("відсіч цілі потрапляє в результат", async () => {
@@ -96,12 +96,12 @@ describe("useAttackWizard", () => {
 
     const { result } = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
 
-    act(() => result.current.open());
-    act(() => result.current.toggleTarget("gob"));
-    act(() => result.current.confirmTargets());
-    act(() => result.current.roll(14));
-    act(() => result.current.damage([6]));
-    act(() => result.current.submit());
+    act(() => result.current.actions.open());
+    act(() => result.current.actions.toggleTarget("gob"));
+    act(() => result.current.actions.confirmTargets());
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", retaliation: { name: "Гоблін", damage: 4 } })));
   });
@@ -115,12 +115,12 @@ describe("useAttackWizard", () => {
 
     const { result } = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
 
-    act(() => result.current.open());
-    act(() => result.current.toggleTarget("gob"));
-    act(() => result.current.confirmTargets());
-    act(() => result.current.roll(14));
-    act(() => result.current.damage([6]));
-    act(() => result.current.submit());
+    act(() => result.current.actions.open());
+    act(() => result.current.actions.toggleTarget("gob"));
+    act(() => result.current.actions.confirmTargets());
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss", critFail: expect.objectContaining({ name: "Падіння", flavor: "Ви спотикаєтесь." }) })));
   });
@@ -134,7 +134,7 @@ describe("useAttackWizard", () => {
 
     const { result } = renderHook(() => useAttackWizard(archer), { wrapper: scene.wrapper });
 
-    act(() => result.current.open("gob", "bow"));
+    act(() => result.current.actions.open("gob", "bow"));
 
     expect(result.current.state.step).toBe("roll");
     expect(result.current.state.attackId).toBe("bow");
@@ -150,7 +150,7 @@ describe("useAttackWizard", () => {
 
     const { result } = renderHook(() => useAttackWizard(archer), { wrapper: scene.wrapper });
 
-    act(() => result.current.open("gob"));
+    act(() => result.current.actions.open("gob"));
 
     expect(result.current.state.step).toBe("weapon");
   });

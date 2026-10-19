@@ -29,7 +29,9 @@ function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, c
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
-  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, requestAttack, toast, mapAim } = useBattleScene();
+  const { battle, current, viewer, isMyTurn, isDM, selectedId, select, actions, anyPending, toast, intents } = useBattleScene();
+
+  const { requestAttack, mapAim } = intents;
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 

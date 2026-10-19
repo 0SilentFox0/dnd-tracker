@@ -26,7 +26,9 @@ const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advan
 const btn = "hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em]";
 
 export function AttackWizard({ wizard }: { wizard: Wizard }) {
-  const { state, attack, attacks, targets, steps, estimate } = wizard;
+  const { state, view, actions } = wizard;
+
+  const { attack, attacks, targets, steps, estimate } = view;
 
   const [draft, setDraft] = useState<(number | undefined)[]>([]);
 
@@ -55,21 +57,21 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
   );
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && wizard.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       {header}
       {state.step === "weapon" && (
         <div className="space-y-2">
           {attacks.map((a) => (
-            <button key={a.id ?? a.name} type="button" onClick={() => wizard.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left", (a.id ?? a.name) === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
+            <button key={a.id ?? a.name} type="button" onClick={() => actions.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left", (a.id ?? a.name) === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
               {a.type === AttackType.RANGED ? <Crosshair className="size-7 shrink-0 text-[var(--gold)]" /> : <Swords className="size-7 shrink-0 text-[var(--gold)]" />}
               <span className="min-w-0 flex-1">
                 <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
-                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · {signed(wizard.previews[a.id ?? a.name]?.toHit ?? a.attackBonus)} до влучання</span>
+                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · {signed(view.previews[a.id ?? a.name]?.toHit ?? a.attackBonus)} до влучання</span>
                 <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
-                  {wizard.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
+                  {view.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
                 </span>
               </span>
-              <span className="w-[72px] text-right text-[15px]">{wizard.previews[a.id ?? a.name]?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {wizard.previews[a.id ?? a.name]?.estimate}</small></span>
+              <span className="w-[72px] text-right text-[15px]">{view.previews[a.id ?? a.name]?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {view.previews[a.id ?? a.name]?.estimate}</small></span>
             </button>
           ))}
         </div>
@@ -78,19 +80,19 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
         <>
           <div className="space-y-2">
             {targets.map((t) => (
-              <button key={t.basicInfo.id} type="button" onClick={() => wizard.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", state.targetIds.includes(t.basicInfo.id) ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
+              <button key={t.basicInfo.id} type="button" onClick={() => actions.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", state.targetIds.includes(t.basicInfo.id) ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
                 <Portrait participant={t} size={36} />
                 <span className="hud-sc flex-1 font-bold">{t.basicInfo.name}</span>
                 <HealthLabel participant={t} />
               </button>
             ))}
           </div>
-          {wizard.canSelectAllEnemies && (
-            <button type="button" onClick={wizard.selectAllEnemies} className={cn(btn, "mt-3 w-full border-white/25")}>Усі вороги</button>
+          {view.canSelectAllEnemies && (
+            <button type="button" onClick={actions.selectAllEnemies} className={cn(btn, "mt-3 w-full border-white/25")}>Усі вороги</button>
           )}
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={wizard.close} className={cn(btn, "border-white/25")}>Скасувати</button>
-            <button type="button" disabled={state.targetIds.length === 0} onClick={wizard.confirmTargets} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}>Далі · кидок</button>
+            <button type="button" onClick={actions.close} className={cn(btn, "border-white/25")}>Скасувати</button>
+            <button type="button" disabled={state.targetIds.length === 0} onClick={actions.confirmTargets} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}>Далі · кидок</button>
           </div>
         </>
       )}
@@ -98,31 +100,31 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
         <>
           <div className="hud-sc text-xl font-bold">Кидок атаки · d20</div>
           {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">Удар {state.index + 1} з {state.strikes.length} · {target.basicInfo.name}</div>}
-          <div className={cn("mt-3 grid h-10 grid-cols-3 border border-white/20", wizard.forcedMode && "opacity-60")}>
+          <div className={cn("mt-3 grid h-10 grid-cols-3 border border-white/20", view.forcedMode && "opacity-60")}>
             {MODES.map(([m, label]) => (
-              <button key={m} type="button" disabled={!!wizard.forcedMode} onClick={() => wizard.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed", wizard.rollMode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
+              <button key={m} type="button" disabled={!!view.forcedMode} onClick={() => actions.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed", view.rollMode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
             ))}
           </div>
-          {wizard.forcedMode && <div className="mt-1.5 text-xs text-[#cdb87e]">{wizard.forcedMode.reason}</div>}
+          {view.forcedMode && <div className="mt-1.5 text-xs text-[#cdb87e]">{view.forcedMode.reason}</div>}
           <label className="mt-2 flex h-10 cursor-pointer items-center gap-2.5 text-sm text-[#a89c88]">
-            <Checkbox checked={state.obstacle} onCheckedChange={wizard.toggleObstacle} className="border-white/40" />
+            <Checkbox checked={state.obstacle} onCheckedChange={actions.toggleObstacle} className="border-white/40" />
             <span className={cn(state.obstacle && "font-bold text-[var(--ink)]")}>Перешкода · шкода ×0.5</span>
           </label>
-          {wizard.rollMode !== "normal" && <div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
+          {view.rollMode !== "normal" && <div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
           <DiceGrid
             sides={20}
             value={second}
             onPick={(v) => {
-              if (wizard.rollMode !== "normal" && second === undefined) setSecond(v);
+              if (view.rollMode !== "normal" && second === undefined) setSecond(v);
               else {
-                wizard.roll(second ?? v, second === undefined ? undefined : v);
+                actions.roll(second ?? v, second === undefined ? undefined : v);
                 setSecond(undefined);
               }
             }}
           />
           <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
-            <AiRollButton onClick={wizard.aiRoll} />
-            <button type="button" onClick={wizard.back} className={cn(btn, "border-white/25")}>Назад</button>
+            <AiRollButton onClick={actions.aiRoll} />
+            <button type="button" onClick={actions.back} className={cn(btn, "border-white/25")}>Назад</button>
           </div>
         </>
       )}
@@ -140,7 +142,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               type="button"
               disabled={state.diceSlots.some((_, i) => draft[i] === undefined)}
               onClick={() => {
-                wizard.damage(draft as number[]);
+                actions.damage(draft as number[]);
                 setDraft([]);
               }}
               className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}
@@ -162,12 +164,12 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
               ))}
             </div>
           ))}
-          {wizard.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
+          {view.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
           {steps.length > 0 && <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold"><span>Орієнтовно</span><span className="text-[26px]">{estimate}</span></div>}
           {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" disabled={state.step === "submitting"} onClick={wizard.back} className={cn(btn, "border-white/25")}>← Назад</button>
-            <button type="button" disabled={state.step === "submitting"} onClick={wizard.submit} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>
+            <button type="button" disabled={state.step === "submitting"} onClick={actions.back} className={cn(btn, "border-white/25")}>← Назад</button>
+            <button type="button" disabled={state.step === "submitting"} onClick={actions.submit} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>
               {state.step === "submitting" ? <Loader2 className="size-5 animate-spin" /> : <><Swords className="size-5" />Атакувати</>}
             </button>
           </div>
