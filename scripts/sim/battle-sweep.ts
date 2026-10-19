@@ -839,7 +839,8 @@ async function targeted(spells: Map<string, any>) {
   // Супротив: HP < 15 %, негативний ефект, удар → очищення
   await call("participants", PATCH(sem.basicInfo.id), { currentHp: Math.max(2, Math.floor(sem.combatStats.maxHp * 0.1)) });
 
-  const dark = [...spells.values()].find((s: any) => s.name === "Сповільнення");
+  // not Сповільнення: Семгрун's Helm of the Dwarven Kings makes the party immune to it (and Сліпота)
+  const dark = [...spells.values()].find((s: any) => s.name === "Немічність");
 
   await nextOnly();
   await untilTurnOf((p) => p.basicInfo.side === "enemy" && alive(p) && !p.actionFlags.hasUsedAction);
@@ -862,7 +863,7 @@ async function targeted(spells: Map<string, any>) {
 
   const fxAfter = byName("Семгрун").battleData.activeEffects.map((e: any) => e.name);
 
-  tcheck("Супротив: при HP < 15 % влучання запускає очищення", logs.some((l) => /Супротив/.test(l)), `до: [${fxBefore}] після: [${fxAfter}]; ${logs.join(" | ").slice(0, 300)}`);
+  tcheck("Супротив: при HP < 15 % влучання запускає очищення", fxBefore.includes(dark.name) && !fxAfter.includes(dark.name) && logs.some((l) => /Супротив/.test(l)), `до: [${fxBefore}] після: [${fxAfter}]; ${logs.join(" | ").slice(0, 300)}`);
 
   // Друге серце (Намисто лева на Аграїлі)
   logs = [];
