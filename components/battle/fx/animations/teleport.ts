@@ -42,7 +42,8 @@ export const teleport: FxAnimation = async ({ stage, to, palette }) => {
 
     await wait(stage, GAP_MS);
 
-    void flash(stage, target, "#bfe6ff", 70, 300);
+    // The flash outlasts the fade-in; awaited so the run ends with nothing left drawing.
+    const flashed = flash(stage, target, "#bfe6ff", 70, 300);
 
     await tween(stage, IN_MS, (k) => {
       width = 0.12 + 0.8 * k;
@@ -50,5 +51,6 @@ export const teleport: FxAnimation = async ({ stage, to, palette }) => {
       alpha = pulse(k, 0.5);
     });
     hide();
+    await flashed;
   });
 };
