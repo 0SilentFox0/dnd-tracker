@@ -22,30 +22,33 @@ function ModeButton({ active, onClick, children }: { active: boolean; onClick: (
   );
 }
 
-/** rotatable — лише телефон: карта може лягти вертикально, щоб клітинки були більшими */
-export function BattleMapPanel({ rotatable = false }: { rotatable?: boolean }) {
+export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
   const scene = useBattleMapScene();
 
   if (!scene) return null;
 
   const { placement, terrainTool } = scene;
 
+  const tools = placement && terrainTool && (
+    // на телефоні карта займає всю ширину, тож кнопки йдуть рядком над нею, а не поверх клітинок
+    <div className={cn("z-20 flex flex-col items-start gap-1.5", phone ? "shrink-0 px-1 pb-1" : "absolute left-2 top-2")}>
+      <div className="flex gap-1.5">
+        <ModeButton active={placement.active} onClick={placement.toggle}>
+          Розставити
+        </ModeButton>
+        <ModeButton active={terrainTool.active} onClick={terrainTool.toggle}>
+          Місцевість
+        </ModeButton>
+      </div>
+      {terrainTool.active && <MapTerrainToolbar tool={terrainTool} />}
+    </div>
+  );
+
   return (
-    <div className="relative h-full">
-      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active }} rotatable={rotatable} className="h-full" />
-      {placement && terrainTool && (
-        <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5">
-          <div className="flex gap-1.5">
-            <ModeButton active={placement.active} onClick={placement.toggle}>
-              Розставити
-            </ModeButton>
-            <ModeButton active={terrainTool.active} onClick={terrainTool.toggle}>
-              Місцевість
-            </ModeButton>
-          </div>
-          {terrainTool.active && <MapTerrainToolbar tool={terrainTool} />}
-        </div>
-      )}
+    <div className={cn("relative h-full", phone && "flex flex-col")}>
+      {phone && tools}
+      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
+      {!phone && tools}
     </div>
   );
 }

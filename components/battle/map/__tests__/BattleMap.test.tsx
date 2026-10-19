@@ -329,10 +329,10 @@ describe("BattleMap — поворот у портреті", () => {
 
   const clip = (c: HTMLElement) => c.querySelector("[data-fx-clip]") as HTMLElement;
 
-  it("rotatable: широка карта у вузькому контейнері лягає вертикально, токени стоять рівно", () => {
+  it("phone: широка карта у вузькому контейнері лягає вертикально, токени стоять рівно", () => {
     avail = { width: 300, height: 600 };
 
-    const { container } = render(<BattleMap map={wide} participants={people} rotatable />);
+    const { container } = render(<BattleMap map={wide} participants={people} phone />);
 
     expect(clip(container).style.width).toBe("300px");
     expect(clip(container).style.height).toBe("600px");
@@ -346,13 +346,31 @@ describe("BattleMap — поворот у портреті", () => {
     expect(layer.querySelector('[data-fx-participant="h"]')).not.toBeNull();
   });
 
-  it("без rotatable (десктоп) карта не повертається", () => {
+  it("без phone (десктоп) карта не повертається", () => {
     avail = { width: 300, height: 600 };
 
     const { container } = render(<BattleMap map={wide} participants={people} />);
 
     expect(container.querySelector("[data-map-rotated]")).toBeNull();
     expect(clip(container).style.height).toBe("150px");
+  });
+
+  it("phone: рамка — лише ігрові клітинки, карта зсунута на поля", () => {
+    avail = { width: 600, height: 300 };
+
+    const blocked = ["0:0", "1:0", "2:0", "3:0", "4:0", "5:0", "6:0", "7:0", "0:1", "0:2", "0:3"];
+
+    const { container } = render(<BattleMap map={{ ...wide, blocked }} participants={people} phone />);
+
+    // 7×3 ігрових → 600/7 px на клітинку, рамка 600×(3·600/7)
+    expect(clip(container).style.width).toBe("600px");
+    expect(parseFloat(clip(container).style.height)).toBeCloseTo((3 * 600) / 7, 3);
+
+    const cropped = container.querySelector("[data-fx-clip] svg")?.parentElement as HTMLElement;
+
+    expect(parseFloat(cropped.style.left)).toBeCloseTo(-600 / 7, 3);
+    expect(parseFloat(cropped.style.top)).toBeCloseTo(-600 / 7, 3);
+    expect(parseFloat(cropped.style.width)).toBeCloseTo((8 * 600) / 7, 3);
   });
 });
 

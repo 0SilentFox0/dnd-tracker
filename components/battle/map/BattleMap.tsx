@@ -20,6 +20,7 @@ import {
   fitMapView,
   isMoveMark,
   mapSize,
+  playableBounds,
   tokenBox,
   UNIT,
 } from "@/lib/utils/battle/grid";
@@ -34,7 +35,8 @@ export interface BattleMapProps {
   actions?: BattleMapActions;
   className?: string;
   editing?: BattleMapEditing;
-  rotatable?: boolean;
+  /** телефон: карта обрізана до ігрових клітинок і лягає вертикально, якщо так клітинки більші */
+  phone?: boolean;
 }
 
 export interface BattleMapEditing {
@@ -240,7 +242,7 @@ interface Stroke {
   cells: Map<string, GridPoint>;
 }
 
-export function BattleMap({ map, participants, view, actions, className, editing = {}, rotatable = false }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, editing = {}, phone = false }: BattleMapProps) {
   const { clickableBlocked, showBlocked, strokeTool } = editing;
 
   const painting = Boolean(strokeTool && actions?.onStroke);
@@ -350,9 +352,11 @@ export function BattleMap({ map, participants, view, actions, className, editing
     };
   }, [painting, onStroke, cols, rows]);
 
-  const fit = fitMapView(avail, map, { rotatable });
+  const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const pxPerUnit = (fit.rotated ? fit.height : fit.width) / size.width;
+  const fit = fitMapView(avail, win, { rotatable: phone });
+
+  const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
   const tokens = useMemo(
     () =>
@@ -389,6 +393,10 @@ export function BattleMap({ map, participants, view, actions, className, editing
         data-map-rotated={fit.rotated || undefined}
         className={cn("absolute left-0 top-0 origin-top-left", !fit.rotated && "inset-0")}
         style={fit.rotated ? { width: fit.height, height: fit.width, transform: `translateX(${fit.width}px) rotate(90deg)` } : undefined}
+      >
+      <div
+        className="absolute"
+        style={{ left: -win.x * UNIT * pxPerUnit, top: -win.y * UNIT * pxPerUnit, width: size.width * pxPerUnit, height: size.height * pxPerUnit }}
       >
         <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes="100vw" className="object-cover" priority />
         <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
@@ -443,6 +451,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           );
         })}
         </div>
+      </div>
       </div>
       </div>
     </div>

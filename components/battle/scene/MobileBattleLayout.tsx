@@ -104,7 +104,7 @@ export function MobileBattleLayout() {
         )}
       </div>
       {mapTab ? (
-        <div className="min-h-0 flex-1 p-1"><BattleMapPanel rotatable /></div>
+        <div className="min-h-0 flex-1 p-1"><BattleMapPanel phone /></div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ParticipantList side={tab} />

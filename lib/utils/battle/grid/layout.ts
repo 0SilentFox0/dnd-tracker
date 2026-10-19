@@ -1,4 +1,4 @@
-import { footprint } from "./geometry";
+import { blockedSet, cellKey, footprint } from "./geometry";
 import { sizeOf } from "./occupancy";
 
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -78,7 +78,7 @@ export interface MapView {
 }
 
 // поворот лише коли клітинка стає помітно більшою — інакше карта даремно «лягає на бік»
-const ROTATE_MIN_GAIN = 1.15;
+const ROTATE_MIN_RATIO = 1.15;
 
 /** рамка карти на екрані; rotated — карта повернута на 90° за годинниковою, width/height уже переставлені */
 export function fitMapView(
@@ -90,7 +90,30 @@ export function fitMapView(
 
   if (!rotatable) return { ...flat, rotated: false };
 
-  const turned = fitMapBox(avail, { cols: map.rows, rows: map.cols });
+  // за орієнтацією, а не за виграшем площі: інакше карта перекидається, коли панель знизу росте
+  const rotate = avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
 
-  return turned.width / map.rows > (flat.width / map.cols) * ROTATE_MIN_GAIN ? { ...turned, rotated: true } : { ...flat, rotated: false };
+  return rotate ? { ...fitMapBox(avail, { cols: map.rows, rows: map.cols }), rotated: true } : { ...flat, rotated: false };
+}
+
+export type GridWindow = { x: number; y: number; cols: number; rows: number };
+
+/** найменший прямокутник з усіма ігровими клітинками; стіни ігрові, неігрові лише blocked */
+export function playableBounds(map: Pick<BattleMapConfig, "cols" | "rows" | "blocked">): GridWindow {
+  const blocked = blockedSet(map);
+
+  let x0 = map.cols, y0 = map.rows, x1 = -1, y1 = -1;
+
+  for (let y = 0; y < map.rows; y++) {
+    for (let x = 0; x < map.cols; x++) {
+      if (blocked.has(cellKey({ x, y }))) continue;
+
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x);
+      y1 = Math.max(y1, y);
+    }
+  }
+
+  return x1 < 0 ? { x: 0, y: 0, cols: map.cols, rows: map.rows } : { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
 }

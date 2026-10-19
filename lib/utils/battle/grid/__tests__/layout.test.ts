@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellAtScreenPoint, cellCenter, cellPolygon, fitMapBox, fitMapView, mapSize, tokenBox, UNIT } from "../layout";
+import { cellAtScreenPoint, cellCenter, cellPolygon, fitMapBox, fitMapView, mapSize, playableBounds, tokenBox, UNIT } from "../layout";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
@@ -65,6 +65,10 @@ describe("fitMapView", () => {
     expect(fitMapView({ width: 300, height: 600 }, { cols: 10, rows: 20 }, { rotatable: true }).rotated).toBe(false);
   });
 
+  it("портретний контейнер, що стиснувся під панеллю наведення, — карта лишається повернутою", () => {
+    expect(fitMapView({ width: 382, height: 426 }, { cols: 15, rows: 9 }, { rotatable: true }).rotated).toBe(true);
+  });
+
   it("порожній контейнер — без повороту", () => {
     expect(fitMapView({ width: 0, height: 0 }, wide, { rotatable: true })).toEqual({ width: 0, height: 0, rotated: false });
   });
@@ -96,5 +100,21 @@ describe("cellAtScreenPoint", () => {
     expect(cellAtScreenPoint(map, ctm, 400, 10)).toBeNull();
     expect(cellAtScreenPoint(map, ctm, -1, 10)).toBeNull();
     expect(cellAtScreenPoint(map, { ...ctm, a: 0, d: 0 }, 0, 0)).toBeNull();
+  });
+});
+
+describe("playableBounds", () => {
+  it("без неігрових клітинок — уся карта", () => {
+    expect(playableBounds({ cols: 4, rows: 3 })).toEqual({ x: 0, y: 0, cols: 4, rows: 3 });
+  });
+
+  it("поля по краях відкидаються, дірка всередині лишається", () => {
+    const blocked = ["0:0", "1:0", "2:0", "3:0", "0:1", "0:2", "0:3", "3:3", "2:2"];
+
+    expect(playableBounds({ cols: 4, rows: 4, blocked })).toEqual({ x: 1, y: 1, cols: 3, rows: 3 });
+  });
+
+  it("уся карта неігрова — повертає всю карту", () => {
+    expect(playableBounds({ cols: 2, rows: 1, blocked: ["0:0", "1:0"] })).toEqual({ x: 0, y: 0, cols: 2, rows: 1 });
   });
 });
