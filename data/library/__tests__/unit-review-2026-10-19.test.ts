@@ -32,5 +32,6 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
     expect(abilityNames("mages-archmage")).toContain("Енергетичний канал");
     for (const key of ["necromancers-skeleton", "necromancers-skeleton-archer", "necromancers-skeleton-warrior"]) expect(abilityNames(key)).not.toContain("Кістяне тіло");
     expect(abilityNames("necromancers-skeleton-warrior")).toContain("Великий щит");
+    expect(abilityNames("humans-defender-of-faith")).toEqual(["Подвійна відсіч"]);
   });
 });

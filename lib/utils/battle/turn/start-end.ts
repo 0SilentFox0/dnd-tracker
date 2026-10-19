@@ -130,6 +130,7 @@ export function processStartOfTurn(
       hasUsedBonusAction: hasNoBonusAction,
       hasUsedReaction: hasNoReaction,
     },
+    battleData: { ...updatedParticipant.battleData, retaliationsUsed: 0 },
   };
 
   if (updatedParticipant.battleData.movementUsed) {

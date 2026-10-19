@@ -8,6 +8,7 @@ import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
 const SAMPLES: Record<string, Ability[]> = {
   noRetaliation: [catalog.noRetaliation()],
   unlimitedRetaliation: [catalog.unlimitedRetaliation()],
+  extraRetaliations: [catalog.extraRetaliations(), catalog.extraRetaliations(2)],
   falloff: [catalog.falloff("Залп")],
   doubleStrike: [catalog.doubleStrike("Подвійний удар", 30)],
   firstStrike: [catalog.firstStrike("Таран"), catalog.firstStrike("Засідка", 75)],

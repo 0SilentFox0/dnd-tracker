@@ -286,6 +286,8 @@ export interface BattleParticipantBattleData {
   position?: GridPoint;
   /** Клітинок пройдено в поточному ході */
   movementUsed?: number;
+  /** Відсічей, уже даних з початку власного ходу; немає = за hasUsedReaction */
+  retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
   hazardHitRound?: number;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */

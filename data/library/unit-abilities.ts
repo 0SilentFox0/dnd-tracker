@@ -47,6 +47,14 @@ export const unlimitedRetaliation = (): Ability => ({
   effects: [{ kind: "flag", flag: "unlimitedRetaliation" }],
 });
 
+export const extraRetaliations = (count = 1): Ability => ({
+  id: "unit-extra-retaliations",
+  name: "Подвійна відсіч",
+  description: count === 1 ? "Відповідає на атаки двічі за раунд." : `Відповідає на атаки ${count + 1} рази за раунд.`,
+  trigger: passive,
+  effects: [{ kind: "flag", flag: "extraRetaliations", count }],
+});
+
 export const falloff = (name: string): Ability => ({
   id: "unit-falloff",
   name,

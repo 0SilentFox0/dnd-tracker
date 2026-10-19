@@ -24,6 +24,7 @@ const DEFAULTS: Record<FlagKey, Record<string, unknown>> = {
   moraleChance: { percent: 10 },
   noRetaliation: {},
   unlimitedRetaliation: {},
+  extraRetaliations: { count: 1 },
   noNegativeMorale: {},
   ignoreMorale: {},
   minMorale: { value: 1 },

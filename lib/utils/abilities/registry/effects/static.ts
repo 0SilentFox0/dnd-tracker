@@ -154,6 +154,8 @@ export function describeFlag(e: Extract<Effect, { kind: "flag" }>): string {
       return "атаки без відсічі";
     case "unlimitedRetaliation":
       return "відповідає на кожну атаку";
+    case "extraRetaliations":
+      return `+${e.count} відсіч за раунд`;
     case "noNegativeMorale":
       return "від'ємна мораль = 0";
     case "ignoreMorale":
@@ -186,6 +188,7 @@ export const FLAG_LABELS: Record<FlagKey, string> = {
   moraleChance: "Шанс додаткового ходу від моралі",
   noRetaliation: "Без відповіді",
   unlimitedRetaliation: "Безмежна відсіч",
+  extraRetaliations: "Додаткові відсічі за раунд",
   noNegativeMorale: "Мораль не нижче 0",
   ignoreMorale: "Мораль не діє",
   minMorale: "Мінімальна мораль",
@@ -235,6 +238,7 @@ export const FLAG_FIELDS: Record<FlagKey, readonly FieldMeta[]> = {
   moraleChance: [{ name: "percent", label: "+% до шансу додаткового ходу", input: "number" }],
   noRetaliation: [],
   unlimitedRetaliation: [],
+  extraRetaliations: [{ name: "count", label: "Додаткових відсічей", input: "number" }],
   noNegativeMorale: [],
   ignoreMorale: [],
   minMorale: [{ name: "value", label: "Мінімум (−3…3)", input: "number" }],

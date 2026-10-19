@@ -70,9 +70,15 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (findFlags(withSelf(participants, attacker), attackerId, "noRetaliation").length > 0) return null;
 
-  const unlimited = findFlags(withSelf(participants, defender), defenderId, "unlimitedRetaliation").length > 0;
+  const defenderFlags = withSelf(participants, defender);
 
-  if (provoked ? hasEffectMarker(defender, "no_reaction") : defender.actionFlags.hasUsedReaction && !unlimited) return null;
+  const unlimited = findFlags(defenderFlags, defenderId, "unlimitedRetaliation").length > 0;
+
+  const allowed = 1 + findFlags(defenderFlags, defenderId, "extraRetaliations").reduce((n, f) => n + f.count, 0);
+
+  const used = defender.battleData.retaliationsUsed ?? (defender.actionFlags.hasUsedReaction ? 1 : 0);
+
+  if (provoked ? hasEffectMarker(defender, "no_reaction") : used >= allowed && !unlimited) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 
@@ -82,7 +88,13 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng } };
 
-  if (!provoked && !unlimited) put(flow, { ...defender, actionFlags: { ...defender.actionFlags, hasUsedReaction: true } });
+  if (!provoked && !unlimited) {
+    put(flow, {
+      ...defender,
+      battleData: { ...defender.battleData, retaliationsUsed: used + 1 },
+      actionFlags: { ...defender.actionFlags, hasUsedReaction: used + 1 >= allowed },
+    });
+  }
 
   const first = rollDie(20, rng);
 
