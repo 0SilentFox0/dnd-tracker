@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aimInRange, feetToCells, participantsInCells, templateCells } from "../template";
+import { aimInRange, areaCentre, feetToCells, participantsInCells, templateCells, templateCentre } from "../template";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -125,5 +125,15 @@ describe("aimInRange", () => {
     expect(aimInRange(origin, { x: 50, y: 50 }, undefined)).toBe(true);
     expect(aimInRange(origin, { x: 7, y: 1 }, 30)).toBe(true);
     expect(aimInRange(origin, { x: 8, y: 1 }, 30)).toBe(false);
+  });
+});
+
+describe("templateCentre", () => {
+  it("коло — точка прицілу; лінія — клітинка біля центроїда; порожньо — undefined", () => {
+    const line = [k(2, 1), k(3, 1), k(4, 1), k(5, 1), k(6, 1)];
+
+    expect(templateCentre({ shape: "circle", size: 10 }, { x: 4, y: 4 }, [k(4, 4)])).toEqual({ x: 4, y: 4 });
+    expect(templateCentre({ shape: "line", size: 25 }, { x: 11, y: 1 }, line)).toEqual({ x: 4, y: 1 });
+    expect(areaCentre([])).toBeUndefined();
   });
 });

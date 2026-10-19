@@ -1,4 +1,4 @@
-import { cellDistance, cellKey, cellLine, footprintDistance, inBounds, isPlayable } from "./geometry";
+import { cellDistance, cellKey, cellLine, footprintDistance, inBounds, isPlayable, parseCellKey } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
@@ -119,6 +119,24 @@ export function participantsInCells(participants: BattleParticipant[], cells: st
 }
 
 const centered = (t: SpellTemplate) => t.shape === "circle" || t.shape === "cube";
+
+/** Клітинка шаблону, найближча до його центроїда. */
+export function areaCentre(cells: string[]): GridPoint | undefined {
+  const points = cells.map(parseCellKey);
+
+  if (points.length === 0) return undefined;
+
+  const cx = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+
+  const cy = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+
+  return points.reduce((best, p) => (Math.hypot(p.x - cx, p.y - cy) < Math.hypot(best.x - cx, best.y - cy) ? p : best));
+}
+
+/** Центр для FX: у кола й куба — точка прицілу, у конуса й лінії вона лише напрямок. */
+export function templateCentre(template: SpellTemplate, aim: GridPoint, cells: string[]): GridPoint | undefined {
+  return centered(template) ? aim : areaCentre(cells);
+}
 
 /** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола й куба. */
 export function templateAimAllowed(origin: GridPoint[], template: SpellTemplate, aim: GridPoint, rangeFeet: number | undefined): boolean {

@@ -4,7 +4,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { aimInRange, feetToCells, templateAimAllowed, templateArea } from "@/lib/utils/battle/grid/template";
+import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -102,7 +102,7 @@ export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: 
   return targeting.mode === "all" || count <= targeting.maxTargets;
 }
 
-export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[] } | { ok: false; error: string };
+export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[]; centre?: GridPoint } | { ok: false; error: string };
 
 export interface SpellMapContext {
   map: BattleMapConfig | null;
@@ -126,7 +126,7 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   if (cells.length === 0 || (targetIds.length === 0 && !targeting.zone)) return fail("У шаблоні немає цілей");
 
-  return { ok: true, targetIds, cells };
+  return { ok: true, targetIds, cells, centre: templateCentre(targeting, aim, cells) };
 }
 
 function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
@@ -140,7 +140,7 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
 
   if (targets.length === 0) return fail("У радіусі немає цілей");
 
-  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells };
+  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: aim.cell };
 }
 
 function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined): boolean {

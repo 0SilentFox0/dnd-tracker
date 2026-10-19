@@ -323,6 +323,25 @@ describe("spell mutation", () => {
       expect(aimOf(single)).toBeUndefined();
     });
 
+    it("конус: aimCell — клітинка шаблону біля його центру, а не точка напрямку", async () => {
+      const row = withTargeting({ kind: "template", shape: "cone", size: 15, side: "enemy", maxTargets: 3 });
+
+      const out = await mutation(row)(onMap(), body({ targetIds: [], targetCell: { x: 19, y: 2 } }) as never);
+
+      const aim = aimOf(out) as GridPoint | undefined;
+
+      expect(aim).toBeDefined();
+      expect(aim).not.toEqual({ x: 19, y: 2 });
+      expect(aim?.x ?? 0).toBeGreaterThan(2);
+      expect(aim?.x ?? 99).toBeLessThanOrEqual(5);
+    });
+
+    it("одиночне заклинання на карті з targetCell — без aimCell", async () => {
+      const out = await mutation()(onMap(), body({ targetCell: { x: 5, y: 2 } }) as never);
+
+      expect(aimOf(out)).toBeUndefined();
+    });
+
     it("точка поза дальністю — invalid_target", async () => {
       const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 30 });
 

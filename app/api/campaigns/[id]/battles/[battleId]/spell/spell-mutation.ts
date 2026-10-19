@@ -109,7 +109,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
 
-    if (resolution.cells && data.targetCell) result.battleAction.actionDetails.aimCell = data.targetCell;
+    if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
     if (serverRolled.length > 0) {
       result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => order.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
