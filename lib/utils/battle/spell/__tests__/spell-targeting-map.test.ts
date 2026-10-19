@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import type { Effect } from "@/lib/utils/abilities/schema";
 import { resolveSpellTargets, type SpellMapContext } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -10,8 +11,8 @@ const map: BattleMapConfig = { cols: 20, rows: 20, background: null, opacity: 0.
 
 const spell = { id: "sp", groupId: "chaos", level: 1 };
 
-function at(id: string, position: GridPoint | undefined, side: ParticipantSide = ParticipantSide.ALLY): BattleParticipant {
-  const p = makeParticipant({ id, side });
+function at(id: string, position: GridPoint | undefined, side: ParticipantSide = ParticipantSide.ALLY, effects: Effect[] = []): BattleParticipant {
+  const p = makeParticipant({ id, side, abilities: effects.length ? [resolved({ trigger: { event: "passive" }, effects })] : [] });
 
   return { ...p, battleData: { ...p.battleData, position } };
 }
@@ -101,5 +102,66 @@ describe("resolveSpellTargets на карті", () => {
     const unplacedEnemy = at("u", undefined, ParticipantSide.ENEMY);
 
     expect(resolve(area, ["e1", "u"], { map }, [...ps, unplacedEnemy])).toEqual({ ok: true, targetIds: ["e1", "u"] });
+  });
+});
+
+describe("заклинання, розширене вмінням, на карті — радіус", () => {
+  const widened = (mode: "area" | "all", maxTargets?: number) => at("c", { x: 2, y: 2 }, ParticipantSide.ALLY, [{ kind: "flag", flag: "spellTargeting", mode, ...(maxTargets && { maxTargets }) }]);
+
+  const near = at("n1", { x: 7, y: 3 }, ParticipantSide.ENEMY);
+
+  const mid = at("n2", { x: 6, y: 2 }, ParticipantSide.ENEMY);
+
+  const edge = at("n3", { x: 9, y: 3 }, ParticipantSide.ENEMY);
+
+  const friend = at("a", { x: 6, y: 3 });
+
+  const farFoe = at("far", { x: 18, y: 18 }, ParticipantSide.ENEMY);
+
+  const scene = (c: BattleParticipant) => [c, near, mid, edge, friend, farFoe];
+
+  const bolt: SpellTargeting = { kind: "enemy", range: 30 };
+
+  it("area: коло 10 футів, лише вороги, найближчі до точки, не більше maxTargets; обрані ігноруються", () => {
+    const c = widened("area", 2);
+
+    expect(resolve(bolt, ["far"], { map, targetCell: { x: 7, y: 3 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["n1", "n2"] });
+  });
+
+  it("all: коло 20 футів без ліміту, союзник у колі не зачеплений", () => {
+    const c = widened("all");
+
+    const r = resolve(bolt, [], { map, targetCell: { x: 7, y: 3 } }, scene(c), c);
+
+    expect(r).toMatchObject({ ok: true, targetIds: ["n1", "n2", "n3"] });
+    expect(r.ok && r.cells).toContain("7:7");
+  });
+
+  it("союзне заклинання зачіпає союзників разом із заклинателем, не ворогів", () => {
+    const c = widened("area");
+
+    expect(resolve({ kind: "ally" }, [], { map, targetCell: { x: 4, y: 2 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["c", "a"] });
+  });
+
+  it("точка поза дальністю, без точки, порожній радіус — відмова", () => {
+    const c = widened("area");
+
+    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: "Точка поза дальністю заклинання" });
+    expect(resolve(bolt, ["n1"], { map }, scene(c), c)).toEqual({ ok: false, error: "Оберіть точку на карті" });
+    expect(resolve(bolt, [], { map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toEqual({ ok: false, error: "У радіусі немає цілей" });
+  });
+
+  it("без карти чи без позиції заклинателя — ручний вибір як раніше", () => {
+    const c = widened("area", 2);
+
+    expect(resolve(bolt, ["n1", "far"], undefined, scene(c), c)).toEqual({ ok: true, targetIds: ["n1", "far"] });
+
+    const unplaced = { ...c, battleData: { ...c.battleData, position: undefined } };
+
+    expect(resolve(bolt, ["n1", "n3"], { map, targetCell: { x: 7, y: 3 } }, scene(unplaced), unplaced)).toEqual({ ok: true, targetIds: ["n1", "n3"] });
+  });
+
+  it("без вміння одиночне заклинання на карті лишається вибором цілі", () => {
+    expect(resolve(bolt, ["e2"], { map, targetCell: { x: 6, y: 3 } })).toEqual({ ok: true, targetIds: ["e2"] });
   });
 });

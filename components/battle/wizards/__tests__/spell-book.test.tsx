@@ -28,7 +28,9 @@ import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { MapAim } from "@/lib/utils/battle/grid";
+import type { ResolvedAbility } from "@/types/abilities";
 
 const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
 
@@ -201,8 +203,8 @@ describe("SpellBook", () => {
   });
 
   describe("на карті", () => {
-    const onMap = (knownSpells: string[], isDM = false) => {
-      const scene = fakeScene({ knownSpells, isDM, slots: { "2": { max: 3, current: 3 } }, map: { cols: 10, rows: 6, background: null, opacity: 0.3 } });
+    const onMap = (knownSpells: string[], isDM = false, abilities?: ResolvedAbility[]) => {
+      const scene = fakeScene({ knownSpells, isDM, abilities, slots: { "2": { max: 3, current: 3 } }, map: { cols: 10, rows: 6, background: null, opacity: 0.3 } });
 
       scene.me.battleData.position = { x: 0, y: 0 };
       scene.gob.battleData.position = { x: 4, y: 0 };
@@ -231,7 +233,7 @@ describe("SpellBook", () => {
       render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
 
       expect(screen.getByText("Оберіть точку на карті")).toBeTruthy();
       expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
@@ -264,7 +266,7 @@ describe("SpellBook", () => {
       const { rerender } = render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
 
       const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
 
@@ -285,7 +287,7 @@ describe("SpellBook", () => {
       const { rerender } = render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
 
       act(() => (vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim).onAim({ x: 4, y: 0 }));
 
@@ -313,12 +315,53 @@ describe("SpellBook", () => {
       render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
 
       act(() => (vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim).onAim({ x: 1, y: 4 }));
 
       expect(screen.getByText("Нікого не зачеплено")).toBeTruthy();
       expect((screen.getByRole("button", { name: "Підтвердити" }) as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it("одиночне, розширене вмінням: на карті — «Навести на карті», коло 10 футів лише по ворогах, каст з targetCell", async () => {
+      const area = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area" }] })];
+
+      const { wrapper, caster, value, castSpell } = onMap(["ray"], false, area);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
+
+      const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      expect(aim).toMatchObject({ template: { shape: "circle", size: 10 }, casterId: "me" });
+
+      act(() => aim.onAim({ x: 4, y: 0 }));
+
+      expect(screen.getByText("Гоблін")).toBeTruthy();
+      expect(screen.queryByText("Годрік")).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], targetCell: { x: 4, y: 0 } })));
+    });
+
+    it("одиночне, розширене вмінням, без карти — «Обрати цілі» й список", async () => {
+      const area = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area" }] })];
+
+      const { wrapper, caster } = fakeScene({ knownSpells: ["ray"], abilities: area, slots: { "2": { max: 3, current: 3 } } });
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.getByRole("button", { name: /Гоблін/ })).toBeTruthy();
     });
 
     it("шаблон без карти — звичайний вибір цілей", async () => {
@@ -339,7 +382,7 @@ describe("SpellBook", () => {
       render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Метеор"));
-      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Навести на карті" }));
       act(() => {
         window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       });

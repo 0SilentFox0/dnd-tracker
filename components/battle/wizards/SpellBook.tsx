@@ -14,11 +14,15 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { rollsComplete } from "@/lib/utils/battle/flows";
+import { rollsComplete, type SpellTargetMode } from "@/lib/utils/battle/flows";
 
 type Book = ReturnType<typeof useSpellBook>;
 
 const seal = "hud-sc flex h-[52px] w-full items-center justify-center gap-3 bg-[#7a2a1f] text-lg tracking-[.08em] text-[#f3e7cc] shadow-[inset_0_0_0_1px_#a8473a,inset_0_0_0_3px_#7a2a1f,inset_0_0_0_4px_rgba(243,231,204,.35)] disabled:opacity-50";
+
+const TARGETS_LABEL: Partial<Record<SpellTargetMode, string>> = { none: "Далі", template: "Навести на карті" };
+
+const targetsLabel = (mode: SpellTargetMode | undefined) => (mode && TARGETS_LABEL[mode]) ?? "Обрати цілі";
 
 export function SpellBook({ book }: { book: Book }) {
   const { state, view, actions } = book;
@@ -36,7 +40,7 @@ export function SpellBook({ book }: { book: Book }) {
       {state.step === "spell" && (
         <SpellDetail spell={selected} formula={view.formulaOf(selected)}>
           <button type="button" disabled={(selected.level > 0 && view.slotLeft(selected.level) === 0) || view.costUsed(selected)} onClick={actions.toTargets} className={cn(seal, "mt-auto")}>
-            <Swords className="size-5" />{state.pick?.targetMode === "none" ? "Далі" : "Обрати цілі"}
+            <Swords className="size-5" />{targetsLabel(state.pick?.targetMode)}
           </button>
         </SpellDetail>
       )}

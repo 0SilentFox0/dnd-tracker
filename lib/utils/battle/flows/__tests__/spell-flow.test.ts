@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { buildSpellPick, initialSpellFlow, rollsComplete, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withLiveAimTargets } from "@/lib/utils/battle/flows";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { buildSpellPick, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withLiveAimTargets } from "@/lib/utils/battle/flows";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -283,6 +284,68 @@ describe("шаблон і дальність", () => {
     const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 0 }, targetIds: ["f", "g"] }, { type: "SET_SAVE", id: "f", value: 10 }, { type: "SET_SAVE", id: "g", value: 4 });
 
     expect(spellFlow(s, { type: "SET_AIM", aim: { x: 7, y: 0 }, targetIds: ["f"] }).saves).toEqual({ f: 10 });
+  });
+
+  describe("розширене вмінням одиночне заклинання", () => {
+    const widened = (mode: "area" | "all") => {
+      const flag: Effect = { kind: "flag", flag: "spellTargeting", mode, ...(mode === "area" && { maxTargets: 1 }) };
+
+      const p = makeParticipant({ id: "h", side: ParticipantSide.ALLY, abilities: [resolved({ trigger: { event: "passive" }, effects: [flag] })] });
+
+      return { ...p, battleData: { ...p.battleData, position: { x: 0, y: 0 } } };
+    };
+
+    const bolt = { id: "b", name: "B", level: 1, dice: 1, targeting: { kind: "enemy", range: 30 } } as unknown as BookSpell;
+
+    const near = placed("f2", ParticipantSide.ENEMY, { x: 5, y: 0 });
+
+    const friend = placed("a", ParticipantSide.ALLY, { x: 6, y: 1 });
+
+    it("на карті area → коло 10 футів з лімітом, all → 20 футів; кнопки цілей — наведення", () => {
+      const area = widened("area");
+
+      expect(buildSpellPick([area, foe], area, bolt, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 10 }, targetSide: "enemy", range: 30, skillRadius: { mode: "area", side: "enemy", maxTargets: 1 } });
+
+      const all = widened("all");
+
+      expect(buildSpellPick([all, foe], all, bolt, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 20 }, skillRadius: { mode: "all", side: "enemy" } });
+    });
+
+    it("без карти чи позиції — список, як раніше", () => {
+      const area = widened("area");
+
+      expect(buildSpellPick([area, foe], area, bolt, null)).toMatchObject({ targetMode: "multi", maxTargets: 1 });
+      expect(buildSpellPick([area, foe], area, bolt, null).skillRadius).toBeUndefined();
+
+      const all = widened("all");
+
+      const unplaced = { ...all, battleData: { ...all.battleData, position: undefined } };
+
+      expect(buildSpellPick([unplaced, foe], unplaced, bolt, map).targetMode).toBe("all");
+    });
+
+    it("spellAimTargets: радіус бере лише сторону заклинання, найближчих до точки, до ліміту; шаблон — усіх", () => {
+      const area = widened("area");
+
+      const participants = [area, foe, near, friend];
+
+      const pick = buildSpellPick(participants, area, bolt, map);
+
+      expect(spellAimTargets({ map, participants, caster: area }, pick, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f"]);
+      expect(spellAimTargets({ map, participants, caster: area }, ball, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f", "f2", "a"]);
+      expect(spellAimTargets({ map, participants, caster: area }, ray, { x: 6, y: 0 })).toEqual([]);
+    });
+
+    it("reducer: радіус проходить шлях шаблону — точка, превʼю, targetCell у payload", () => {
+      const area = widened("area");
+
+      const pick = buildSpellPick([area, foe], area, bolt, map);
+
+      const aimed = run({ type: "OPEN", casterId: "h", level: 1 }, { type: "PICK", pick }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 0 }, targetIds: ["f"] }, { type: "CONFIRM_TARGETS" });
+
+      expect(aimed.step).toBe("rolls");
+      expect(spellPayload(aimed)).toMatchObject({ targetIds: ["f"], targetCell: { x: 6, y: 0 } });
+    });
   });
 
   it("spellTargetInRange: без карти, дальності чи позиції — у дальності", () => {

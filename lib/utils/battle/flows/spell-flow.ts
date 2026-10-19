@@ -1,11 +1,11 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { feetToCells } from "@/lib/utils/battle/grid/template";
+import { feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { type AimScene, type SkillRadius, skillRadiusArea, skillRadiusTemplate, spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellCastData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -24,6 +24,8 @@ export interface SpellPick {
   range?: number;
   /** шаблон лишає зону: його можна поставити й без цілей */
   zone?: boolean;
+  /** одиночне заклинання, розширене вмінням: на карті — коло лише по своїй стороні */
+  skillRadius?: SkillRadius;
   needsSaves: boolean;
   diceSlots: number[];
 }
@@ -198,9 +200,12 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const onMap = !!map && !!caster && isOnMap(caster);
 
-  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size } : undefined;
-
   const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
+
+  const skillRadius: SkillRadius | undefined =
+    onMap && skill.mode !== "single" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { mode: skill.mode, side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
+
+  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size } : skillRadius && skillRadiusTemplate(skillRadius.mode);
 
   const isMulti = targeting.kind === "area" || targeting.kind === "template";
 
@@ -222,10 +227,18 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     maxTargets,
     ...(template && { template }),
     ...(template && targeting.kind === "template" && targeting.zone && { zone: true }),
+    ...(skillRadius && { skillRadius }),
     ...(range !== undefined && { range }),
     needsSaves: def.resolution.kind === "save" && !auto,
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),
   };
+}
+
+/** Кого зачіпає наведення в точці: та сама функція, що й на сервері. */
+export function spellAimTargets(scene: AimScene, pick: SpellPick, aim: GridPoint): BattleParticipant[] {
+  if (pick.skillRadius) return skillRadiusArea(scene, pick.skillRadius, aim).targets;
+
+  return pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim).targets : [];
 }
 
 export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"]): BattleParticipant[] {

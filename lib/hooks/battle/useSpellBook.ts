@@ -9,6 +9,7 @@ import {
   buildSpellPick,
   casterUsesUniversalSlot,
   initialSpellFlow,
+  spellAimTargets,
   spellDefinition,
   spellFlow,
   type SpellFlowAction,
@@ -22,7 +23,7 @@ import {
   spellTargetInRange,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
-import { type MapAim, templateArea } from "@/lib/utils/battle/grid";
+import type { MapAim } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { expandSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
@@ -89,11 +90,9 @@ function useSpellMapAim(
 
   useEffect(() => {
     aimAt.current = (cell) => {
-      const template = state.pick?.template;
+      if (!map || !caster || !state.pick) return;
 
-      if (!map || !caster || !template) return;
-
-      const ids = templateArea(map, order, caster, template, cell).targets.map((p) => p.basicInfo.id);
+      const ids = spellAimTargets({ map, participants: order, caster }, state.pick, cell).map((p) => p.basicInfo.id);
 
       dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
     };
@@ -161,11 +160,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
 
-  const aimTemplate = flow.pick?.targetMode === "template" ? flow.pick.template : undefined;
+  const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
-  const aimTargets = map && caster && aimTemplate && flow.aim
-    ? templateArea(map, order, caster, aimTemplate, flow.aim).targets.map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
+  const aimTargets = map && caster && aimPick && flow.aim
+    ? spellAimTargets({ map, participants: order, caster }, aimPick, flow.aim).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side }))
     : [];
 
   const state = withLiveAimTargets(flow, aimTargets.map((t) => t.participant.basicInfo.id));

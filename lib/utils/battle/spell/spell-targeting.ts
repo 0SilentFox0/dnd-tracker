@@ -1,11 +1,12 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { SKILL_ALL_RADIUS_FEET, SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { feetToCells, templateAimAllowed, templateArea } from "@/lib/utils/battle/grid/template";
+import { aimInRange, feetToCells, templateAimAllowed, templateArea } from "@/lib/utils/battle/grid/template";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
 export interface SpellRef {
   id: string;
@@ -47,6 +48,31 @@ export function expandSpellTargets(ps: BattleParticipant[], casterId: string, sp
   return [...new Set([...chosenIds, ...side])];
 }
 
+export interface SkillRadius {
+  mode: "area" | "all";
+  side: "ally" | "enemy";
+  maxTargets: number;
+}
+
+export interface AimScene {
+  map: BattleMapConfig;
+  participants: BattleParticipant[];
+  caster: BattleParticipant;
+}
+
+export const skillRadiusTemplate = (mode: SkillRadius["mode"]): SpellTemplate => ({ shape: "circle", size: mode === "all" ? SKILL_ALL_RADIUS_FEET : SKILL_AREA_RADIUS_FEET });
+
+/** Розширене вмінням одиночне заклинання не б'є своїх: лише сторона заклинання, найближчі до точки, до maxTargets. */
+export function skillRadiusArea({ map, participants, caster }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
+  const { cells, targets } = templateArea(map, participants, caster, skillRadiusTemplate(radius.mode), aim);
+
+  const mine = caster.basicInfo.side;
+
+  const sided = targets.filter((p) => (p.basicInfo.side === mine) === (radius.side === "ally"));
+
+  return { cells, targets: sided.slice(0, radius.maxTargets) };
+}
+
 export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: number): boolean {
   return targeting.mode === "all" || count <= targeting.maxTargets;
 }
@@ -78,6 +104,20 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
   return { ok: true, targetIds, cells };
 }
 
+function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
+  if (!aim.cell) return fail("Оберіть точку на карті");
+
+  if (!inBounds(scene.map, aim.cell)) return fail("Точка поза картою");
+
+  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail("Точка поза дальністю заклинання");
+
+  const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
+
+  if (targets.length === 0) return fail("У радіусі немає цілей");
+
+  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells };
+}
+
 function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined): boolean {
   if (range === undefined) return false;
 
@@ -99,6 +139,14 @@ export function resolveSpellTargets(
   const map = mapCtx?.map && isOnMap(caster) ? mapCtx.map : null;
 
   if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell);
+
+  if (map && (targeting.kind === "ally" || targeting.kind === "enemy")) {
+    const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
+
+    if (skill.mode !== "single") {
+      return resolveSkillRadius({ map, participants: ps, caster }, { mode: skill.mode, side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
+    }
+  }
 
   const ids = (filter: (p: BattleParticipant) => boolean) => ps.filter(filter).map((p) => p.basicInfo.id);
 
