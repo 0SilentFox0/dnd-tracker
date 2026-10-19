@@ -10,7 +10,7 @@ import { calculateAttackRoll } from "./roll";
 
 import { AttackType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findFlags, findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -71,11 +71,11 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (findFlags(withSelf(participants, attacker), attackerId, "noRetaliation").length > 0) return null;
 
-  const defenderFlags = withSelf(participants, defender);
+  const defenderFlags = findFlagsMany(withSelf(participants, defender), defenderId, ["unlimitedRetaliation", "extraRetaliations"]);
 
-  const unlimited = findFlags(defenderFlags, defenderId, "unlimitedRetaliation").length > 0;
+  const unlimited = defenderFlags.unlimitedRetaliation.length > 0;
 
-  const allowed = 1 + findFlags(defenderFlags, defenderId, "extraRetaliations").reduce((n, f) => n + f.count, 0);
+  const allowed = 1 + defenderFlags.extraRetaliations.reduce((n, f) => n + f.count, 0);
 
   const used = defender.battleData.retaliationsUsed ?? (defender.actionFlags.hasUsedReaction ? 1 : 0);
 

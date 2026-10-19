@@ -2,7 +2,7 @@ import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, isTargetable, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
@@ -138,14 +138,11 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const isAoe = attack.targetType === "aoe";
 
-  const hitsAllEnemies = findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
+  const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const piercing =
-    !hitsAllEnemies &&
-    !isAoe &&
-    attack.type === AttackType.RANGED &&
-    !!input.map &&
-    findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "piercingShot").length > 0;
+  const hitsAllEnemies = flags.attackHitsAllEnemies.length > 0;
+
+  const piercing = !hitsAllEnemies && !isAoe && attack.type === AttackType.RANGED && !!input.map && flags.piercingShot.length > 0;
 
   const pierced = piercing
     ? [...new Set([...piercingTargets(input.map ?? undefined, initiativeOrder, attacker, chosenTargets[0].basicInfo.id), ...targetIds])].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? [])
@@ -189,7 +186,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const dist = attack.damageDistribution;
 
-  const falloffPercents = expanded ? [] : findFlags(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, "multiTargetFalloff").map((f) => f.percent);
+  const falloffPercents = expanded ? [] : flags.multiTargetFalloff.map((f) => f.percent);
 
   const falloff = falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1;
 

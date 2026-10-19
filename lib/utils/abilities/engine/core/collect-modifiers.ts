@@ -14,7 +14,8 @@ import type { BattleParticipant } from "@/types/battle";
 export type ModifierQuery =
   | { stat: StatKey; attackKind?: AttackKind }
   | { damage: { kind: DamageKind; school?: string | null; targetId?: string } }
-  | { flag: FlagKey };
+  | { flag: FlagKey }
+  | { flags: readonly FlagKey[] };
 
 export interface ModifierEntry {
   label: string;
@@ -52,6 +53,8 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
 
     return kindOk && !(kind === "magic" && f.school && school && f.school !== school);
   }
+
+  if ("flags" in query) return effect.kind === "flag" && query.flags.includes(effect.flag);
 
   return effect.kind === "flag" && effect.flag === query.flag;
 }
@@ -207,4 +210,15 @@ export function findFlags<F extends FlagKey>(
   extra?: StaticEffect[],
 ): Extract<FlagEffect, { flag: F }>[] {
   return collectModifiers(participants, id, { flag }, extra).flags as Extract<FlagEffect, { flag: F }>[];
+}
+
+export function findFlagsMany<F extends FlagKey>(
+  participants: BattleParticipant[],
+  id: string,
+  flags: readonly F[],
+  extra?: StaticEffect[],
+): { [K in F]: Extract<FlagEffect, { flag: K }>[] } {
+  const found = collectModifiers(participants, id, { flags }, extra).flags;
+
+  return Object.fromEntries(flags.map((flag) => [flag, found.filter((f) => f.flag === flag)])) as { [K in F]: Extract<FlagEffect, { flag: K }>[] };
 }
