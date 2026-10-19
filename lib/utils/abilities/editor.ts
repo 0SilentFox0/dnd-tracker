@@ -45,6 +45,7 @@ function baseEffect(kind: EffectKind): Effect {
     case "changeMorale":
       return { kind, delta: 1 };
     case "cleanse":
+    case "copySpellBuffs":
       return { kind };
     case "summon":
       return { kind, group: "Демони", tier: 1 };

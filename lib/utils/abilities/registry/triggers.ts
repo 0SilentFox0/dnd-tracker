@@ -102,14 +102,15 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
     fields: [
       PHASE,
       { name: "role", label: "Роль", input: "select", options: [{ value: "caster", label: "кастую я" }, { value: "target", label: "ціль — я" }] },
+      { name: "whose", label: "Чия ціль", input: "select", optional: true, options: [{ value: "self", label: "моя" }, { value: "ally", label: "союзника" }], visibleWhen: (v) => v.role === "target" },
       { name: "spellIds", label: "Закляття", input: "spells", optional: true },
       { name: "school", label: "Школа", input: "text", optional: true },
       { name: "spellLevels", label: "Рівні закляття", input: "numberList", optional: true },
     ],
-    matches: (t, e, o) =>
+    matches: (t, e, o, ps) =>
       e.type === "spellCast" &&
       e.phase === t.phase &&
-      (t.role === "caster" ? e.actorId === id(o) : e.targetIds.includes(id(o))) &&
+      (t.role === "caster" ? e.actorId === id(o) : spellTargetMatches(t.whose, e.targetIds, o, ps)) &&
       (!t.spellIds || (!!e.spellId && t.spellIds.includes(e.spellId))) &&
       (!t.school || e.school === t.school) &&
       (!t.spellLevels || (e.level !== undefined && t.spellLevels.includes(e.level))),
@@ -136,6 +137,16 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   action: { event: "action", label: "Основна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "action" && e.actorId === id(o) },
   bonusAction: { event: "bonusAction", label: "Бонусна дія (кнопка)", fields: [], matches: (_t, e, o) => e.type === "bonusAction" && e.actorId === id(o) },
 };
+
+function spellTargetMatches(whose: "self" | "ally" | undefined, targetIds: string[], owner: BattleParticipant, ps: BattleParticipant[]): boolean {
+  if (whose !== "ally") return targetIds.includes(id(owner));
+
+  return targetIds.some((tid) => {
+    const other = findParticipant(ps, tid);
+
+    return tid !== id(owner) && !!other && isActive(other) && sameSide(other, owner);
+  });
+}
 
 export function describeTrigger(trigger: Trigger): string[] {
   const def = TRIGGER_REGISTRY[trigger.event] as TriggerDefinition<TriggerEvent>;

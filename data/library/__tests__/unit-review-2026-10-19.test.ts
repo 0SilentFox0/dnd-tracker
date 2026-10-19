@@ -30,6 +30,7 @@ describe("огляд юнітів 2026-10-19 — дані", () => {
 
   it("здібності", () => {
     expect(abilityNames("elves-forest-ranger")).toEqual(["Приголомшливий постріл"]);
+    expect(abilityNames("elves-light-unicorn")).toEqual(["Аура опору магії", "Світле відлуння"]);
     expect(abilityNames("elves-wild-ent")).toContain("Сплутування");
     expect(abilityNames("mages-archmage")).toContain("Енергетичний канал");
     for (const key of ["necromancers-skeleton", "necromancers-skeleton-archer", "necromancers-skeleton-warrior"]) expect(abilityNames(key)).not.toContain("Кістяне тіло");

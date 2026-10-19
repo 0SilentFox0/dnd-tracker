@@ -20,12 +20,12 @@ const waspSwarm = (): Ability => ({
   effects: [{ kind: "dot", damagePerRound: "1d6", damageType: "poison", duration: { rounds: 3 }, target: "eventTarget" }],
 });
 
-const radiance = (): Ability => ({
-  id: "unit-radiance",
-  name: "Сяйво",
-  description: "На початку раунду кожен союзник лікується на 5 % максимального HP.",
-  trigger: { event: "roundStart" },
-  effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 5 }, target: "allAllies" }],
+const lightEcho = (): Ability => ({
+  id: "unit-light-echo",
+  name: "Світле відлуння",
+  description: "Коли союзник отримує баф від закляття Світла, єдиноріг теж його отримує.",
+  trigger: { event: "spellCast", phase: "after", role: "target", whose: "ally", school: "Світло" },
+  effects: [{ kind: "copySpellBuffs", target: "self" }],
 });
 
 export const ELF_UNITS: LibraryUnit[] = [
@@ -43,7 +43,7 @@ export const ELF_UNITS: LibraryUnit[] = [
   { ...base, key: "elves-high-druid", name: "Верховний друїд", tier: 4, role: "alt", hp: 73, ac: 14, attackBonus: 8, initiative: 10, attacks: [{ name: "Терновий постріл", type: "ranged", dice: "2d6+5", damageType: "piercing" }], abilities: [restoreSlotOnce("Передача мани")], spellKeys: ["healing-word", "moonbeam"] },
   { ...base, key: "elves-unicorn", gridSize: 2, name: "Єдиноріг", tier: 5, role: "base", hp: 107, ac: 15, attackBonus: 7, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+6", damageType: "piercing" }], abilities: [unicornAura()] },
   { ...base, key: "elves-war-unicorn", gridSize: 2, name: "Бойовий єдиноріг", tier: 5, role: "upgrade", hp: 119, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+7", damageType: "piercing" }], abilities: [unicornAura(), stun("Осліплюючий ріг", 20)] },
-  { ...base, key: "elves-light-unicorn", gridSize: 2, name: "Світлий єдиноріг", tier: 5, role: "alt", hp: 117, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+7", damageType: "radiant" }], abilities: [unicornAura(), radiance()] },
+  { ...base, key: "elves-light-unicorn", gridSize: 2, name: "Світлий єдиноріг", tier: 5, role: "alt", hp: 117, ac: 16, attackBonus: 8, initiative: 12, attacks: [{ name: "Ріг", type: "melee", dice: "3d8+7", damageType: "radiant" }], abilities: [unicornAura(), lightEcho()] },
   { ...base, key: "elves-ent", gridSize: 2, name: "Ент", tier: 6, role: "base", hp: 160, ac: 17, attackBonus: 7, initiative: 7, attacks: [{ name: "Кулак", type: "melee", dice: "3d8+11", damageType: "bludgeoning" }], abilities: ent() },
   { ...base, key: "elves-ancient-ent", gridSize: 2, name: "Древній ент", tier: 6, role: "upgrade", hp: 176, ac: 18, attackBonus: 8, initiative: 7, attacks: [{ name: "Кулак", type: "melee", dice: "3d8+13", damageType: "bludgeoning" }], abilities: [...ent(), buffAlly("Вкорінення", [{ stat: "armor", flat: 3 }], 1, { bonus: true, self: true })] },
   { ...base, key: "elves-wild-ent", gridSize: 2, name: "Дикий ент", tier: 6, role: "alt", hp: 171, ac: 17, attackBonus: 8, initiative: 7, attacks: [{ name: "Кулак", type: "melee", dice: "3d10+13", damageType: "bludgeoning" }, { name: "Кидок каменя", type: "ranged", dice: "3d8+9", damageType: "bludgeoning" }], abilities: [rage(), stun("Сплутування", 25)] },

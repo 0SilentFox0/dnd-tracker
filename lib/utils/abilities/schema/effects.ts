@@ -183,6 +183,8 @@ const SummonSchema = z
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 
+const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
+
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
 
 const BASE_EFFECTS = [
@@ -203,6 +205,7 @@ const BASE_EFFECTS = [
   ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,
+  CopySpellBuffsSchema,
   GuardSchema,
   SummonSchema,
   RaiseDeadSchema,
