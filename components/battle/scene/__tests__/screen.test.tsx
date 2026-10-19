@@ -15,7 +15,9 @@ vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabl
 vi.mock("@/components/battle/fx/preload", () => ({ preloadFx: fx.preloadFx }));
 
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
 vi.stubGlobal("ResizeObserver", class {
   observe() {}
@@ -24,6 +26,10 @@ vi.stubGlobal("ResizeObserver", class {
 });
 
 const MAP = { cols: 4, rows: 3, background: null, opacity: 0.3 };
+
+const base = createMockParticipant();
+
+const IMP = { ...base, basicInfo: { ...base.basicInfo, id: "imp", name: "Біс", side: ParticipantSide.ENEMY }, battleData: { ...base.battleData, reserved: true } };
 
 describe("BattleScreen", () => {
   afterEach(cleanup);
@@ -56,6 +62,41 @@ describe("BattleScreen", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Карта" }));
     expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
+  });
+
+  it("десктоп, вигляд «Карта»: резерв окремою групою з кнопкою введення; у «Колонках» — лише в списку", async () => {
+    media.wide = true;
+    window.localStorage.clear();
+
+    const { wrapper, value } = fakeScene({ isMyTurn: false, map: MAP, isDM: true, reserve: [IMP] });
+
+    render(<BattleScreen />, { wrapper });
+
+    const group = await screen.findByRole("region", { name: "Резерв" });
+
+    expect(group.textContent).toContain("Резерв (1)");
+    fireEvent.click(screen.getByRole("button", { name: "Ввести в бій: Біс" }));
+    expect(value.actions.reveal.mutate).toHaveBeenCalledWith({ participantIds: ["imp"] });
+
+    fireEvent.click(screen.getByRole("button", { name: "Колонки" }));
+    expect(screen.queryByRole("region", { name: "Резерв" })).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Ввести в бій: Біс" })).toHaveLength(1);
+  });
+
+  it("телефон, вкладка «Карта»: кнопка «Резерв (N)» відкриває список; без резерву кнопки немає", async () => {
+    media.wide = false;
+
+    const { wrapper, value } = fakeScene({ isMyTurn: false, map: MAP, isDM: true, reserve: [IMP] });
+
+    render(<BattleScreen />, { wrapper });
+
+    fireEvent.click(screen.getByRole("button", { name: "Резерв (1)" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Ввести в бій: Біс" }));
+    expect(value.actions.reveal.mutate).toHaveBeenCalledWith({ participantIds: ["imp"] });
+
+    cleanup();
+    render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper });
+    expect(screen.queryByRole("button", { name: /Резерв/ })).toBeNull();
   });
 
   it("десктоп без карти: перемикача немає", async () => {

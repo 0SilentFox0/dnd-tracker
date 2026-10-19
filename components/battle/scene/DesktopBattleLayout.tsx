@@ -16,6 +16,7 @@ import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrac
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
+import { ReserveGroup } from "@/components/battle/participants/ReservePanel";
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
@@ -69,6 +70,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
           {isMyTurn && hero && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
           {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
           {isDM && <DmPanel />}
+          {battle.map && viewMode === "map" && <ReserveGroup />}
         </aside>
         {battle.map ? (
           <main className="flex min-h-0 flex-col">

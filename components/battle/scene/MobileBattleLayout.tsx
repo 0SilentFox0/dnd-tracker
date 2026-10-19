@@ -17,6 +17,7 @@ import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrac
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
+import { ReserveSheetButton } from "@/components/battle/participants/ReservePanel";
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -99,6 +100,7 @@ export function MobileBattleLayout() {
           {tabBtn(ParticipantSide.ALLY, "Союзники", allies.length)}
           {tabBtn(ParticipantSide.ENEMY, "Вороги", enemies.length)}
         </div>
+        {mapTab && <ReserveSheetButton />}
         {isDM && battle.status !== BattleStatus.PREPARED && (
           <button type="button" onClick={() => setDmOpen(true)} aria-label="Відкрити швидкі дії DM" className="flex w-11 items-center justify-center text-[var(--gold)]">
             <Settings2 className="size-5" />

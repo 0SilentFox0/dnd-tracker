@@ -27,6 +27,7 @@ export interface FakeSceneOptions {
   map?: BattleScene["map"];
   mapAim?: MapAim | null;
   attackReady?: boolean;
+  reserve?: BattleParticipant[];
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -89,6 +90,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     scaleUnits: mutation(),
     move: mutation(),
     mapTerrain: mutation(),
+    reveal: mutation(),
   };
 
   const showResult = vi.fn();
@@ -105,7 +107,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     battle,
     viewer: { userId: "u", isDM: opts.isDM ?? false, canSeeEnemyHp: false },
     turn: { current: isMyTurn ? me : gob, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
-    roster: { myParticipants: [me], hero: me, allies: [me, ally], enemies: [gob], reserve: [] },
+    roster: { myParticipants: [me], hero: me, allies: [me, ally], enemies: [gob], reserve: opts.reserve ?? [] },
     awaiting: null,
     dialogs: { awaitingDm: { open: false, setOpen: vi.fn() }, resultScreen: { open: false, setOpen: vi.fn() } },
     effects: buildDisplayEffects(order),

@@ -1197,7 +1197,7 @@ async function reserveCheck() {
 
   const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: front.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }, { id: back.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 2, reserved: 2 }];
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Резерв", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Резерв", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
 
@@ -1210,6 +1210,12 @@ async function reserveCheck() {
   const revealedId = reserve()[0].basicInfo.id;
 
   const r = await call("reveal-participant", REVEAL, { participantIds: [revealedId] });
+
+  const placedAt = byId(revealedId)?.battleData.position;
+
+  const occupied = P().filter((p) => p.basicInfo.id !== revealedId && p.battleData.position).some((p) => cellsOf(p).some((c) => c.x === placedAt?.x && c.y === placedAt?.y));
+
+  tcheck("Резерв на карті: введений отримує вільну клітинку", r.status === 200 && !!placedAt && !occupied, `reveal=${r.status} позиція=${JSON.stringify(placedAt)} зайнята=${occupied}`);
 
   await nextOnly();
 
