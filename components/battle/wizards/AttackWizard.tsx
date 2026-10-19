@@ -23,7 +23,7 @@ const STEP_INDEX = { weapon: 0, target: 1, roll: 2, damage: 3, summary: 4, submi
 
 const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advantage", "Перевага"], ["disadvantage", "Недолік"]];
 
-const PICKED_LABEL = { melee: "Ближня атака · ціль поруч", ranged: "Дальня атака" } as const;
+const PICKED_LABEL = { melee: "Ближня атака", ranged: "Дальня атака" } as const;
 
 const PICKED_STEPS = new Set(["roll", "damage", "summary", "submitting"]);
 
@@ -68,6 +68,7 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
           <span className="flex items-center gap-1.5">
             {view.attackKind === "ranged" ? <Crosshair className="size-4" /> : <Swords className="size-4" />}
             {PICKED_LABEL[view.attackKind]}
+            {view.reachChecked && view.attackKind === "melee" && " · ціль поруч"}
           </span>
           {state.step === "roll" && state.weaponCount > 1 && state.index === 0 && (
             <button type="button" onClick={actions.changeWeapon} className="h-8 border border-white/25 px-2.5 text-xs text-[var(--ink)]">Змінити зброю</button>

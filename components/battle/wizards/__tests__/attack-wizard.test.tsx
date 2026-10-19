@@ -51,7 +51,10 @@ describe("AttackWizard", () => {
   });
 
   it("вибрані зброя й ціль: підпис ближньої атаки, «Змінити зброю» веде до вибору зброї з тією ж ціллю", async () => {
-    const { wrapper, me } = fakeScene();
+    const { wrapper, me, gob } = fakeScene({ map: { cols: 6, rows: 4, background: null, opacity: 0.3 } });
+
+    me.battleData.position = { x: 0, y: 0 };
+    gob.battleData.position = { x: 1, y: 0 };
 
     const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "60 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
 
@@ -67,6 +70,15 @@ describe("AttackWizard", () => {
 
     expect(screen.getByRole("button", { name: /Гоблін/ }).className).toContain("border-[var(--enemy)]");
     expect(screen.queryByText("Ближня атака · ціль поруч")).toBeNull();
+  });
+
+  it("без карти дальність не перевірено — лише «Ближня атака»", async () => {
+    const { wrapper, me } = fakeScene();
+
+    render(<Harness attacker={me} preset={{ targetId: "gob", attackId: "rapier" }} />, { wrapper });
+
+    expect(await screen.findByText("Ближня атака")).toBeTruthy();
+    expect(screen.queryByText(/ціль поруч/)).toBeNull();
   });
 
   it("дальня вибрана зброя — підпис «Дальня атака», одна зброя — без «Змінити зброю»", async () => {
