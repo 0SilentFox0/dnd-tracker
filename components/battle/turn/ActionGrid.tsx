@@ -13,7 +13,7 @@ const MORALE_LABEL: Record<MoraleOutcome, string> = { none: "Мораль: бе�
 const Tile = ({ icon: Icon, label, used, primary, onClick }: { icon: typeof Swords; label: string; used?: boolean; primary?: boolean; onClick?: () => void }) => (
   <button type="button" disabled={used} onClick={onClick} className={cn("flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40", primary ? "border-[var(--enemy)] bg-[var(--enemy)]/25" : "border-white/25 bg-black/55")}>
     <Icon className={cn("size-7 shrink-0", primary ? "text-[var(--bone)]" : "text-[var(--gold)]")} />
-    <span className="hud-sc text-[17px] leading-5">{label}</span>
+    <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">{label}</span>
   </button>
 );
 
