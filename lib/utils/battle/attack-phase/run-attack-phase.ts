@@ -4,7 +4,7 @@ import { resolveAttackTargets } from "./targets";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isActive, isAirborne, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
@@ -100,7 +100,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     throw new BattleAccessError(404, "Цілей немає в бою");
   }
 
-  if (chosenTargets.some((t) => t.battleData.airborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+  if (chosenTargets.some(isAirborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
 
   if (
     !currentParticipant ||

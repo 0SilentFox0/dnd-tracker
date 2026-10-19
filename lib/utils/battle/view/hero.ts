@@ -1,6 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
@@ -69,13 +69,15 @@ export function abilityCharges(p: BattleParticipant, round: number, triggers: re
   });
 }
 
+const isManeuver = (a: ResolvedAbility) => a.effects.some((e) => e.kind === "maneuver");
+
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 
 // flags read from the holder's side: these help whoever attacks the holder
 const HOSTILE_FLAGS = new Set(["advantageForAttackers", "disadvantage"]);
 
 export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
-  if (a.effects.some((e) => e.kind === "maneuver")) return ParticipantSide.ENEMY;
+  if (isManeuver(a)) return ParticipantSide.ENEMY;
 
   const aimed = a.effects.filter((e) => "target" in e && e.target === "eventTarget");
 
@@ -111,7 +113,7 @@ export function abilityOnMap(map: BattleMapConfig | null | undefined, p: BattleP
 }
 
 export function needsBonusTarget(a: ResolvedAbility, onMap = false): boolean {
-  if (onMap && a.effects.some((e) => e.kind === "maneuver")) return false;
+  if (onMap && isManeuver(a)) return false;
 
   return bonusTargetSide(a) !== null || deadTargetRules(a).requiresDead;
 }
@@ -123,7 +125,7 @@ export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticip
 
   const selfId = owner?.basicInfo.id;
 
-  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter((p) => isUp(p) && !p.battleData.airborne);
+  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter((p) => isUp(p) && !isAirborne(p));
 
   return a.effects.some((e) => e.kind === "guard") ? pool.filter((p) => p.basicInfo.id !== selfId) : pool;
 }

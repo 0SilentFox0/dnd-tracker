@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 
-import { aimView, cellKey, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode, returnToStartError } from "@/lib/utils/battle/grid";
+import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -75,7 +75,10 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { pending: pendingStroke } = terrainTool;
 
-  const returnId = canAct && map && current && !current.battleData.reserved && returnToStartError(map, order, current) === null ? current.basicInfo.id : null;
+  const returnId = useMemo(
+    () => (canAct && map && current && !current.battleData.reserved && checkReturnToStart(map, order, current).ok ? current.basicInfo.id : null),
+    [canAct, map, order, current],
+  );
 
   const view = useMemo(() => {
     if (!scene || !map) return null;

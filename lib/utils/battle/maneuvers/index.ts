@@ -8,6 +8,6 @@ import type { BattleParticipant } from "@/types/battle";
 
 export type { ManeuverInput, ManeuverResult };
 
-export { fireBurst, landDive, squall, startDive };
+export { landDive };
 
 export const MANEUVER_RUNNERS: Record<Maneuver, (ps: BattleParticipant[], input: ManeuverInput) => ManeuverResult> = { dive: startDive, squall, fireBurst };

@@ -13,7 +13,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
-import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Amount, Effect } from "@/lib/utils/abilities/schema";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
@@ -168,11 +168,13 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     for (const f of findFlags(flow.ps, id, "spellAbsorb", actionModifiers[id]).filter((x) => x.school === spell.groupId)) {
       const target = getP(flow, id);
 
-      const healed = Math.min(Math.floor((damage * f.percent) / 100), target.combatStats.maxHp - target.combatStats.currentHp);
+      if (target.combatStats.currentHp <= 0) continue;
 
-      if (healed <= 0 || target.combatStats.currentHp <= 0) continue;
+      const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100));
 
-      put(flow, { ...target, combatStats: { ...target.combatStats, currentHp: target.combatStats.currentHp + healed } });
+      if (healed <= 0) continue;
+
+      put(flow, participant);
       flow.messages.push(`💚 ${target.basicInfo.name}: поглинає ${healed} HP (${spell.name})`);
     }
   };

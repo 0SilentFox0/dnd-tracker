@@ -30,7 +30,7 @@ export interface ResolveHitParams {
   offTurn?: boolean;
   obstacle?: boolean;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
-  battleId?: string;
+  battleId: string;
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -87,7 +87,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
       participants: flow.ps,
       spells: p.hitSpells,
       round: p.currentRound,
-      battleId: p.battleId ?? "",
+      battleId: p.battleId,
       attackKind: attackKindOf(attack.type),
       rng: flow.ctx.rng,
     });

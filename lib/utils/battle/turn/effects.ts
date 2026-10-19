@@ -50,17 +50,17 @@ export function applyHOTEffects(participant: BattleParticipant): { newHp: number
   return { newHp: currentHp, healMessages };
 }
 
-/** Позначає ефекти, що вже є на учаснику на початку його ходу: саме їм цей хід зараховується. */
 // ініціатива/швидкість (Поспіх, Сповільнення): «N раундів» = N наступних сортувань черги на початку раунду
-export const isRoundCounted = (e: ActiveEffect) =>
+const isRoundCounted = (e: ActiveEffect) =>
   !!e.abilityEffects?.length && e.effects.length === 0 && e.abilityEffects.every((s) => s.kind === "modifyStat" && (s.stat === "initiative" || s.stat === "speed"));
 
+/** Позначає ефекти, що вже є на учаснику на початку його ходу: саме їм цей хід зараховується. */
 export function armEffects(effects: ActiveEffect[]): ActiveEffect[] {
   return effects.map((e) => (e.armed || e.permanent || e.countdownAtTurnStart || isRoundCounted(e) ? e : { ...e, armed: true }));
 }
 
-/** Після сортування черги на початку раунду: відлік для ефектів ініціативи. */
-export function countDownInitiativeEffects(p: BattleParticipant): BattleParticipant {
+/** Після сортування черги на початку раунду: відлік для ефектів ініціативи й швидкості. */
+export function countDownRoundEffects(p: BattleParticipant): BattleParticipant {
   if (!p.battleData.activeEffects.some(isRoundCounted)) return p;
 
   const activeEffects = p.battleData.activeEffects.flatMap((e) => (!isRoundCounted(e) ? [e] : e.duration <= 1 ? [] : [{ ...e, duration: e.duration - 1 }]));

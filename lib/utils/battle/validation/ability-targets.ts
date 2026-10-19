@@ -1,5 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { needsBonusTarget } from "@/lib/utils/battle/view";
@@ -19,7 +19,7 @@ export function assertAbilityTargets(ability: ResolvedAbility, ps: BattlePartici
 
   if (targets.some((t) => !t)) throw new BattleRuleError("invalid_target", API_ERRORS.NOT_FOUND);
 
-  if (targets.some((t) => t?.battleData.airborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+  if (targets.some((t) => t && isAirborne(t))) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
 
   if (targets.length === 0 && needsBonusTarget(ability, onMap)) {
     throw new BattleRuleError("invalid_target", deadTargetRules(ability).requiresDead ? API_ERRORS.BONUS_TARGET_MUST_BE_DEAD : API_ERRORS.ABILITY_TARGET_REQUIRED);

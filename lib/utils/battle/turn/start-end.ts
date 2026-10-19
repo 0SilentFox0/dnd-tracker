@@ -1,4 +1,4 @@
-import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownInitiativeEffects } from "./effects";
+import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart, countDownRoundEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
 import { resetTurnState } from "./turn-state";
 
@@ -285,7 +285,7 @@ export function processStartOfRound(
   );
 
   return {
-    updatedInitiativeOrder: sortedOrder.map(countDownInitiativeEffects),
+    updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
     message: `🔁 Початок Раунду ${currentRound}`,
     triggerMessages: messages,
   };

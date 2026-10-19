@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { returnToStartError } from "../return-to-start";
+import { checkReturnToStart } from "../return-to-start";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -27,11 +27,22 @@ const maiden = (over: { flag?: boolean; attacked?: boolean; returned?: boolean; 
   return flag ? grantPassive(p, [{ kind: "flag", flag: "strikeAndReturn" }]) : p;
 };
 
-const err = (mover: BattleParticipant, others: BattleParticipant[] = []) => returnToStartError(map, [mover, ...others], mover);
+const check = (mover: BattleParticipant, others: BattleParticipant[] = []) => checkReturnToStart(map, [mover, ...others], mover);
 
-describe("returnToStartError", () => {
+const err = (mover: BattleParticipant, others: BattleParticipant[] = []) => {
+  const r = check(mover, others);
+
+  return r.ok ? null : r.error;
+};
+
+describe("checkReturnToStart", () => {
   it("вільно: з прапорцем, після атаки", () => {
     expect(err(maiden())).toBeNull();
+    expect(check(maiden())).toEqual({ ok: true, to: { x: 1, y: 2 } });
+  });
+
+  it("без карти — відмова", () => {
+    expect(checkReturnToStart(null, [maiden()], maiden())).toEqual({ ok: false, error: "Повернутися неможливо" });
   });
 
   it("без прапорця — відмова", () => {

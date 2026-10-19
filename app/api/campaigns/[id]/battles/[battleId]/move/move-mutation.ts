@@ -5,7 +5,7 @@ import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canActNow } from "@/lib/utils/battle/common/control";
-import { canStand, cellKey, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable, returnToStartError } from "@/lib/utils/battle/grid";
+import { canStand, cellKey, checkReturnToStart,hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -79,15 +79,13 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {
-  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
+  const check = ownTurn ? checkReturnToStart(ctx.meta.map, participants, mover) : { ok: false as const, error: "Повернутися можна лише у свій хід" };
 
-  const error = ownTurn ? returnToStartError(map, participants, mover) : "Повернутися можна лише у свій хід";
-
-  if (error || !mover.battleData.turnStartPosition) throw new BattleRuleError("action_rejected", error ?? "Повернутися неможливо");
+  if (!check.ok) throw new BattleRuleError("action_rejected", check.error);
 
   assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 
-  const moved = { ...mover, battleData: { ...mover.battleData, position: mover.battleData.turnStartPosition, returnedThisTurn: true } };
+  const moved = { ...mover, battleData: { ...mover.battleData, position: check.to, returnedThisTurn: true } };
 
   return { participants: replaceParticipant(participants, moved), pending: ctx.pending, events: [] };
 }
