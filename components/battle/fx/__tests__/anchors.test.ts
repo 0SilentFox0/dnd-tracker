@@ -6,17 +6,37 @@ import type { FxSpec } from "@/lib/utils/battle/fx";
 
 const spec = (over: Partial<FxSpec> = {}): FxSpec => ({ key: "k", archetype: "bolt", element: "fire", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false, ...over });
 
-function anchor(id: string, rect: { x: number; y: number; w: number; h: number }, track = false) {
+type Rect = { x: number; y: number; w: number; h: number };
+
+const domRect = (rect: Rect) => () => ({ left: rect.x, top: rect.y, width: rect.w, height: rect.h, right: rect.x + rect.w, bottom: rect.y + rect.h, x: rect.x, y: rect.y, toJSON: () => ({}) }) as DOMRect;
+
+function anchor(id: string, rect: Rect, track = false, parent: HTMLElement = document.body) {
   const el = document.createElement("span");
 
   el.dataset.fxParticipant = id;
 
   if (track) el.dataset.fxAnchor = "track";
 
-  el.getBoundingClientRect = () => ({ left: rect.x, top: rect.y, width: rect.w, height: rect.h, right: rect.x + rect.w, bottom: rect.y + rect.h, x: rect.x, y: rect.y, toJSON: () => ({}) }) as DOMRect;
-  document.body.appendChild(el);
+  el.getBoundingClientRect = domRect(rect);
+  parent.appendChild(el);
 
   return el;
+}
+
+/** Обгортка карти на телефоні: прокручуваний div → [data-fx-clip] */
+function mapClip(viewport: Rect, scrolls: boolean) {
+  const scroller = document.createElement("div");
+
+  const clip = document.createElement("div");
+
+  clip.dataset.fxClip = "";
+  scroller.appendChild(clip);
+  scroller.getBoundingClientRect = domRect(viewport);
+  Object.defineProperty(scroller, "clientHeight", { value: viewport.h });
+  Object.defineProperty(scroller, "scrollHeight", { value: scrolls ? viewport.h * 3 : viewport.h });
+  document.body.appendChild(scroller);
+
+  return clip;
 }
 
 beforeEach(() => {
@@ -59,5 +79,24 @@ describe("resolvePoints", () => {
     anchor("t1", { x: 500, y: 100, w: 40, h: 40 });
 
     expect(resolvePoints(spec({ targetIds: ["t1", "t2"] }))?.to).toEqual([{ x: 520, y: 120 }]);
+  });
+
+  it("токен, прокручений за край прокручуваної карти, — поза екраном, хоч і у вікні", () => {
+    const clip = mapClip({ x: 0, y: 100, w: 400, h: 500 }, true);
+
+    anchor("a", { x: 10, y: 200, w: 40, h: 40 }, false, clip);
+    anchor("t", { x: 10, y: 650, w: 40, h: 40 }, false, clip);
+
+    expect(resolvePoints(spec())).toBeNull();
+    expect(resolvePoints(spec({ targetIds: ["a"], actorId: "t" }))?.from).toEqual({ x: 30, y: 820 });
+  });
+
+  it("карта не прокручується — межа вікна, як раніше", () => {
+    const clip = mapClip({ x: 0, y: 100, w: 400, h: 500 }, false);
+
+    anchor("a", { x: 10, y: 200, w: 40, h: 40 }, false, clip);
+    anchor("t", { x: 10, y: 650, w: 40, h: 40 }, false, clip);
+
+    expect(resolvePoints(spec())?.to).toEqual([{ x: 30, y: 670 }]);
   });
 });

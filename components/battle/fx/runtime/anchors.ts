@@ -2,10 +2,30 @@ import type { FxPoint } from "./geometry";
 
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
+interface Box {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+}
+
+const overlaps = (r: Box, v: Box) => r.bottom > v.top && r.right > v.left && r.top < v.bottom && r.left < v.right;
+
+/** Прокручувана обгортка карти (телефон): токен, прокручений за її край, не видно, хоч він і у вікні. */
+function scrollViewport(el: HTMLElement): Box | null {
+  const scroller = el.closest<HTMLElement>("[data-fx-clip]")?.parentElement;
+
+  return scroller && scroller.scrollHeight > scroller.clientHeight ? scroller.getBoundingClientRect() : null;
+}
+
 function visible(el: HTMLElement) {
   const r = el.getBoundingClientRect();
 
-  return r.width > 0 && r.height > 0 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth;
+  if (r.width <= 0 || r.height <= 0 || !overlaps(r, { top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth })) return false;
+
+  const viewport = scrollViewport(el);
+
+  return !viewport || overlaps(r, viewport);
 }
 
 const escape = (id: string) => (typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id.replace(/"/g, '\\"'));
