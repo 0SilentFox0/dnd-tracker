@@ -69,6 +69,17 @@ describe("MapTokenHud bar", () => {
     expect(strip.textContent).toContain("Огр");
     expect(strip.lastElementChild?.hasAttribute("data-map-hud-bar")).toBe(true);
   });
+
+  it("малий токен теж показує ім'я, але дрібнішим шрифтом", () => {
+    const nameFont = (c: HTMLElement) => parseFloat(q(c, "[data-map-hud-name]").style.fontSize);
+
+    const small = hud({ size: 1 }).container;
+
+    const big = hud({ size: 2 }).container;
+
+    expect(q(small, "[data-map-hud-strip]").textContent).toContain("Огр");
+    expect(nameFont(small)).toBeLessThan(nameFont(big));
+  });
 });
 
 describe("MapTokenHud status motifs", () => {

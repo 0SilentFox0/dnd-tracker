@@ -7,9 +7,10 @@
  * (рідкісні тригери), контроль юнітів і закляття 5-го рівня від імені гравця.
  * Змінює героїв і створює бої в БД — лише локальна копія (`scripts/db/prodcopy-db.sh`).
  *
- *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep [--mode all|sweep|targeted|control|level5] [--campaign <id>] [--out <dir>] [--consistency]
+ *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep [--mode all|sweep|targeted|control|level5] [--campaign <id>] [--out <dir>] [--consistency] [--keep-battles]
  *
  * Звіт: <out>/battle-sweep.md (+ data.json, log.txt). Код виходу 1, якщо є помилки.
+ * Створені бої видаляються після прогону; --keep-battles лишає їх для огляду в браузері.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -68,6 +69,8 @@ const OUT = arg("out") ?? join(tmpdir(), "battle-sweep");
 
 const CONSISTENCY = argv.includes("--consistency");
 
+const KEEP_BATTLES = argv.includes("--keep-battles");
+
 const ROUNDS = 5;
 
 const HERO_LEVEL = 9;
@@ -87,6 +90,22 @@ function mulberry32(a: number) {
 const rng = mulberry32(7);
 
 const pick = <T,>(xs: T[]) => xs[Math.floor(rng() * xs.length)];
+
+const createdBattles: string[] = [];
+
+async function createTestBattle(args: Parameters<typeof prisma.battleScene.create>[0]) {
+  const b = await prisma.battleScene.create(args);
+
+  createdBattles.push(b.id);
+
+  return b;
+}
+
+async function removeTestBattles() {
+  if (KEEP_BATTLES || !createdBattles.length) return;
+
+  await prisma.battleScene.deleteMany({ where: { id: { in: createdBattles } } });
+}
 
 let actingUser = "";
 
@@ -663,12 +682,12 @@ async function takeTurn(spells: Map<string, any>) {
   if (current()?.basicInfo.id === id && state.status === "active") await call("next-turn", NEXT);
 }
 
-async function runBattle(label: string, enemyUnitIds: string[], spells: Map<string, any>) {
+async function runBattle(label: string, unitIds: string[], spells: Map<string, any>, battleNo: number) {
   battleLabel = label;
 
-  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...enemyUnitIds.map((id) => ({ id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
+  const setup = mixedSides(unitIds, battleNo);
 
-  const battle = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${label}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+  const battle = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${label}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = battle.id;
   state = await readState();
@@ -687,13 +706,35 @@ async function runBattle(label: string, enemyUnitIds: string[], spells: Map<stri
 
   const enemies = P().filter((p) => p.basicInfo.side === "enemy");
 
-  return `${label}: раундів ${Math.min(state.currentRound, ROUNDS)}${state.status === "completed" ? " (завершено)" : ""}; герої живі ${allies.filter(alive).length}/${allies.length}, вороги живі ${enemies.filter(alive).length}/${enemies.length}`;
+  return `${label}: раундів ${Math.min(state.currentRound, ROUNDS)}${state.status === "completed" ? " (завершено)" : ""}; союзники живі ${allies.filter(alive).length}/${allies.length}, вороги живі ${enemies.filter(alive).length}/${enemies.length}`;
+}
+
+/** Герої й юніти на обох сторонах; герой міняє сторону від бою до бою, щоб кожен побув і союзником, і ворогом. */
+function mixedSides(unitIds: string[], battleNo: number) {
+  const heroes = heroRows.map((h, i) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: (i + battleNo) % 2 ? "enemy" : "ally" }));
+
+  const units = unitIds.map((id, i) => ({ id, type: ParticipantSourceType.UNIT, side: (i + battleNo) % 2 ? "ally" : "enemy", quantity: 1 }));
+
+  return [...heroes, ...units];
+}
+
+/** Юніти по черзі з різних рас, щоб у кожній пачці зустрілися різні раси. */
+function interleaveByRace(units: { id: string; raceId: string | null }[]) {
+  const byRace = new Map<string, string[]>();
+
+  for (const u of [...units].sort(() => rng() - 0.5)) byRace.set(u.raceId ?? "-", [...(byRace.get(u.raceId ?? "-") ?? []), u.id]);
+
+  const queues = [...byRace.values()];
+
+  const out: string[] = [];
+
+  while (queues.some((q) => q.length)) for (const q of queues) if (q.length) out.push(q.shift() as string);
+
+  return out;
 }
 
 async function sweep(spells: Map<string, any>, report: string[]) {
-  const units = (await prisma.unit.findMany({ where: { campaignId: ctx.campaignId } })).map((u: any) => u.id);
-
-  const shuffled = [...units].sort(() => rng() - 0.5);
+  const shuffled = interleaveByRace(await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, raceId: true } }));
 
   const chunks: string[][] = [];
 
@@ -709,7 +750,7 @@ async function sweep(spells: Map<string, any>, report: string[]) {
     for (const chunk of chunks.slice(r * per, (r + 1) * per)) {
       battleNo++;
 
-      const res = await runBattle(`Б${battleNo}/Р${r + 1}`, chunk, spells);
+      const res = await runBattle(`Б${battleNo}/Р${r + 1}`, chunk, spells, battleNo);
 
       if (res) report.push(`- ${res}`);
     }
@@ -778,6 +819,7 @@ async function main() {
   writeFileSync(join(OUT, "data.json"), JSON.stringify({ issues, coverage: [...coverage.values()].map((c) => ({ ...c, owners: [...c.owners] })), spells: [...spellStats.values()] }, null, 1));
   writeFileSync(join(OUT, "log.txt"), fullLog.join("\n"));
   console.info(targetedResults.join("\n"));
+  await removeTestBattles();
   console.info(`\n${errors.length ? "❌" : "✅"} помилок: ${errors.length}, попереджень: ${issues.length - errors.length}. Звіт: ${join(OUT, "battle-sweep.md")}`);
   await prisma.$disconnect();
   process.exit(errors.length ? 1 : 0);
@@ -838,7 +880,7 @@ async function targeted(spells: Map<string, any>) {
   const mkBattle = async (label: string) => {
     battleLabel = label;
 
-    const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${label}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+    const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${label}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
     ctx.battleId = b.id; state = await readState(); await call("start", START);
   };
@@ -969,7 +1011,7 @@ async function controlCheck(spells: Map<string, any>) {
 
   battleLabel = "КОНТРОЛЬ";
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ контроль", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ контроль", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
 
@@ -1030,7 +1072,7 @@ async function controlCheck(spells: Map<string, any>) {
   // бій без гравців: усі союзні юніти й герої DM
   const dmOnly = [...heroRows.filter((h) => h.controlledBy === dmId).map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: units[0].id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 }, { id: units[1].id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
 
-  const b2 = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ контроль без гравців", status: "prepared", participants: dmOnly as any, currentRound: 1, currentTurnIndex: 0 } });
+  const b2 = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ контроль без гравців", status: "prepared", participants: dmOnly as any, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b2.id; state = await readState(); await call("start", START);
 
@@ -1072,7 +1114,7 @@ async function level5Check(spells: Map<string, any>) {
 
       const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...easy.map((id) => ({ id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
 
-      const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${battleLabel}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+      const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${battleLabel}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
       ctx.battleId = b.id; state = await readState(); await call("start", START);
       await untilTurnOf((p) => p.basicInfo.name === casterName);
@@ -1126,7 +1168,7 @@ async function level5Check(spells: Map<string, any>) {
 
   const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...easy.map((id) => ({ id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Аватар", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Аватар", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
   await untilTurnOf((p) => p.basicInfo.name === "Маркел");
@@ -1158,7 +1200,7 @@ async function auraZoneCheck() {
 
   const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: nightmare.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Зона аури", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Зона аури", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
 
@@ -1197,7 +1239,7 @@ async function reserveCheck() {
 
   const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), { id: front.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }, { id: back.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 2, reserved: 2 }];
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Резерв", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Резерв", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
 
@@ -1236,11 +1278,11 @@ async function mapCheck(spells: Map<string, any>) {
   await applyRotation(0);
   battleLabel = "Карта";
 
-  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, take: 3 });
+  const units = interleaveByRace(await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, raceId: true } })).slice(0, 4);
 
-  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...units.map((u) => ({ id: u.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }))];
+  const setup = [...heroRows.map((h) => ({ id: h.id, type: ParticipantSourceType.CHARACTER, side: "ally" })), ...units.map((id, i) => ({ id, type: ParticipantSourceType.UNIT, side: i === 3 ? "ally" : "enemy", quantity: 1 }))];
 
-  const b = await prisma.battleScene.create({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Карта", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
+  const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ Карта", status: "prepared", participants: setup as any, map: { cols: 12, rows: 8, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } });
 
   ctx.battleId = b.id; state = await readState(); await call("start", START);
 
@@ -1444,4 +1486,4 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
   tcheck(emptyName, r.status === 200 && aim?.x === empty.x && aim?.y === empty.y && hitIds.length === 0, `${r.status} точка ${JSON.stringify(empty)}; aimCell=${JSON.stringify(aim)}; цілей ${hitIds.length}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ""}`);
 }
 
-main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });
+main().catch(async (e) => { console.error(e); await removeTestBattles().catch(() => undefined); await prisma.$disconnect(); process.exit(1); });

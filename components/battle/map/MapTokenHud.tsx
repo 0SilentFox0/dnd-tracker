@@ -58,7 +58,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
 
   const hpFont = clamp(7, boxPx * (small ? 0.12 : 0.06), small ? 11 : 13);
 
-  const nameFont = clamp(7, boxPx * 0.075, 14);
+  const nameFont = small ? clamp(6, boxPx * 0.1, 9) : clamp(7, boxPx * 0.075, 14);
 
   // з текстом смуга вміщує число; без тексту — тонка, але не тонша за 4 px на телефоні
   const barPx = showText ? Math.round(hpFont * 1.45) : clamp(4, Math.round(boxPx * 0.08), 8);
@@ -111,12 +111,12 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
         {motifs.map((m) => (
           <i key={m} aria-hidden data-hud-fx={m} className="map-hud-fx" />
         ))}
-        {showText && !small && (
-          <div className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
+        {showText && (
+          <div data-map-hud-name className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
             {participant.basicInfo.name}
           </div>
         )}
-        <div data-map-hud-bar data-hp-tone={down ? "down" : hpTone(ratio)} className={cn("map-hud-bar relative shrink-0", !small && showText && "mt-px")} style={{ height: barPx }}>
+        <div data-map-hud-bar data-hp-tone={down ? "down" : hpTone(ratio)} className={cn("map-hud-bar relative shrink-0", showText && "mt-px")} style={{ height: barPx }}>
           <i data-map-hud-trail className="map-hud-trail" style={{ width }} />
           <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
           {showText && (

@@ -129,12 +129,12 @@ describe("BattleMap", () => {
       expect(portrait.className).toContain("top-0");
     });
 
-    it("size-1 card has no name, size 2 shows it", () => {
+    it("both size-1 and size-2 cards show the name", () => {
       const big = { ...at("g", 0, 0), combatStats: { ...base.combatStats, gridSize: 2 } };
 
       const { container } = render(<BattleMap map={square} participants={[at("small", 3, 0), big]} />);
 
-      expect(container.querySelector('[data-map-hud="small"]')?.textContent).not.toContain("small");
+      expect(container.querySelector('[data-map-hud="small"]')?.textContent).toContain("small");
       expect(container.querySelector('[data-map-hud="g"]')?.textContent).toContain("g");
     });
 
