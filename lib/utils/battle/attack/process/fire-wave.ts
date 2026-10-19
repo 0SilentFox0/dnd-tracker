@@ -4,7 +4,7 @@ import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const NO_MAP_VICTIMS = 2;
 
-export function fireWaveVictims(map: BattleMapConfig | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number): string[] {
+export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number): string[] {
   const victim = findParticipant(ps, victimId);
 
   if (!victim) return [];

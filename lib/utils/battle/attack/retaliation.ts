@@ -87,7 +87,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, ...(input.map && { map: input.map }) } };
+  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
 
   if (!provoked && !unlimited) {
     put(flow, {

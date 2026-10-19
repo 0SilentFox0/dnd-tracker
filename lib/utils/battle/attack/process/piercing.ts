@@ -2,7 +2,7 @@ import { findParticipant } from "@/lib/utils/abilities/engine/core/participants"
 import { apexOf, cellDistance, cellKey, cellsOf, closestCell, footprintDistance, isOnMap, participantsInCells, rayCells } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-export function piercingTargets(map: BattleMapConfig | undefined, ps: BattleParticipant[], attacker: BattleParticipant, firstTargetId: string): string[] {
+export function piercingTargets(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, firstTargetId: string): string[] {
   const first = findParticipant(ps, firstTargetId);
 
   if (!map || !first || !isOnMap(attacker) || !isOnMap(first)) return [firstTargetId];

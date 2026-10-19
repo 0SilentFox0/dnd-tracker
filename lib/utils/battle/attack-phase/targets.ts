@@ -43,7 +43,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
   const targets = hitsAllEnemies
     ? [...chosen.filter(enemyOf(attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
     : piercing
-      ? byId([...new Set([...piercingTargets(map ?? undefined, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
+      ? byId([...new Set([...piercingTargets(map, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
       : chosen;
 
   if (targets.length === 0) throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");

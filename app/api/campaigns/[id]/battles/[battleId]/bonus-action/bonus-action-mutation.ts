@@ -52,7 +52,7 @@ export function createBonusActionMutation(deps: SummonDeps = defaultDeps) {
     const run = runAbilities(
       ctx.participants,
       { type: "bonusAction", actorId: participant.basicInfo.id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) },
-      { round: ctx.scene.round, rng: ctx.rng ?? Math.random, ...(ctx.meta.map && { map: ctx.meta.map }) },
+      { round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map },
     );
 
     const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });

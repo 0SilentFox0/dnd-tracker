@@ -7,7 +7,7 @@ export interface AbilityRunContext {
   round: number;
   rng: Rng;
   depth?: number;
-  map?: BattleMapConfig;
+  map?: BattleMapConfig | null;
 }
 
 export interface SummonRequest {
