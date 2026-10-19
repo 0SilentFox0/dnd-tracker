@@ -1,15 +1,15 @@
 "use client";
 
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import { Flame } from "lucide-react";
 
 import { ATTACK_CURSOR } from "./attack-cursors";
+import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
 import "./battle-map.css";
-import { DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import {
@@ -490,8 +490,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
   // свайп угору-вниз віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
   const touch = phone && scrolls && zoom === 1 && !painting ? "touch-pan-y" : "touch-none";
 
-  const bgPx = Math.ceil(size.width * pxPerUnit);
-
   return (
     // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
     <div ref={outerRef} className={cn("flex h-full w-full justify-center", phone && "overflow-y-auto [scrollbar-gutter:stable]", scrolls ? "items-start" : "items-center", className)}>
@@ -520,7 +518,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
         className="absolute"
         style={{ left: -win.x * UNIT * pxPerUnit, top: -win.y * UNIT * pxPerUnit, width: size.width * pxPerUnit, height: size.height * pxPerUnit }}
       >
-        <Image src={map.background ?? DEFAULT_MAP_BACKGROUND} alt="" fill sizes={phone && bgPx > 0 ? `${bgPx}px` : "100vw"} className="object-cover" priority />
+        <MapBackground map={map} cellPx={UNIT * pxPerUnit} phone={phone} />
         <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
           <GridLayer
             map={map}

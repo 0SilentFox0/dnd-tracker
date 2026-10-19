@@ -101,7 +101,7 @@ export function applyMargins(map: BattleMapConfig, m: Margins, prev: Margins = i
 
 export const MIN_SIDE = 4;
 
-export const MAX_SIDE = 40;
+export const MAX_SIDE = 60;
 
 export const MAX_MARGIN = 10;
 

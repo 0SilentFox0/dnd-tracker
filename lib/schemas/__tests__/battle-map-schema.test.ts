@@ -49,3 +49,15 @@ describe("battleMapSchema.terrain.damage", () => {
     expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", damage: { dice: "99999999d6", type: "fire" } } } }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.gridOffset і backgroundCols", () => {
+  it("зсув — частки клітинки 0 ≤ v < 1, обидві осі; масштаб фону — додатне число; обидва необовʼязкові й не відкидаються", () => {
+    const parsed = battleMapSchema.safeParse({ ...map, gridOffset: { x: 0, y: 0.99 }, backgroundCols: 15.625 });
+
+    expect(parsed.success && parsed.data).toMatchObject({ gridOffset: { x: 0, y: 0.99 }, backgroundCols: 15.625 });
+    expect(battleMapSchema.safeParse({ ...map, gridOffset: { x: 1, y: 0 } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, gridOffset: { x: -0.1, y: 0 } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, gridOffset: { x: 0.5 } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, backgroundCols: 0 }).success).toBe(false);
+  });
+});

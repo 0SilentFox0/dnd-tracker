@@ -13,7 +13,7 @@ import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import type { BattleMapEditor } from "@/lib/hooks/battles";
 import { cn } from "@/lib/utils";
-import { clamp, isPreviewSafeBackground, marginLimit,type Margins, MAX_MARGIN, MAX_SIDE, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
+import { clamp, isPreviewSafeBackground, marginLimit, type Margins, MAX_CELL_PX, MAX_GRID_OFFSET, MAX_MARGIN, MAX_SIDE, MIN_CELL_PX, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
 
 const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
   { key: "top", label: "Зверху" },
@@ -31,6 +31,17 @@ const TOOLS: { value: SetupTool; label: string }[] = [
 
 const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
 
+const SLIDER = "w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40";
+
+function RangeRow({ id, label, value, range, onChange }: { id: string; label: string; value: number; range: { min: number; max: number; step: number; disabled?: boolean }; onChange: (v: number) => void }) {
+  return (
+    <div>
+      <Label htmlFor={id}>{label}</Label>
+      <input id={id} type="range" {...range} value={value} onChange={(e) => onChange(Number(e.target.value))} className={SLIDER} />
+    </div>
+  );
+}
+
 function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between gap-3">
@@ -41,7 +52,11 @@ function ToggleRow({ id, label, checked, onChange }: { id: string; label: string
 }
 
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
-  const { enabled, map, margins, tool, notice } = editor.state;
+  const { enabled, map, margins, tool, notice, cellPx } = editor.state;
+
+  const offset = map.gridOffset ?? { x: 0, y: 0 };
+
+  const percent = (v: number) => `${Math.round(v * 100)}%`;
 
   const { brush, actions } = editor;
 
@@ -71,19 +86,18 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 <BoundedNumberInput id="map-rows" value={map.rows} min={MIN_SIDE} max={MAX_SIDE} onCommit={(v) => actions.setSize(map.cols, v)} />
               </div>
             </div>
-            <div>
-              <Label htmlFor="map-opacity">Прозорість сітки · {Math.round(map.opacity * 100)}%</Label>
-              <input
-                id="map-opacity"
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={map.opacity}
-                onChange={(e) => actions.setOpacity(Number(e.target.value))}
-                className="w-full accent-[var(--hud-gold,#f2c14e)]"
-              />
+            <RangeRow
+              id="map-cell-size"
+              label={`Розмір клітинки · ${cellPx === null ? "…" : `${cellPx} px`} · ${map.cols} × ${map.rows}`}
+              value={cellPx ?? MIN_CELL_PX}
+              range={{ min: MIN_CELL_PX, max: MAX_CELL_PX, step: 1, disabled: cellPx === null }}
+              onChange={actions.setCellSize}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <RangeRow id="map-offset-x" label={`Зсув сітки X · ${percent(offset.x)}`} value={offset.x} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(x) => actions.setGridOffset({ ...offset, x })} />
+              <RangeRow id="map-offset-y" label={`Зсув сітки Y · ${percent(offset.y)}`} value={offset.y} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(y) => actions.setGridOffset({ ...offset, y })} />
             </div>
+            <RangeRow id="map-opacity" label={`Прозорість сітки · ${percent(map.opacity)}`} value={map.opacity} range={{ min: 0, max: 1, step: 0.05 }} onChange={actions.setOpacity} />
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <Label>Поля (неігрові клітинки)</Label>

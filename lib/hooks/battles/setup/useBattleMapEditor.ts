@@ -2,8 +2,22 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { applyMargins, clampMargins, hasPlayableArea, hazardDamage, inferMargins, type Margins, paintCells, resizeMap, type SetupTool } from "@/lib/utils/battle/grid";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { useImageSize } from "@/lib/hooks/common";
+import {
+  applyMargins,
+  clampMargins,
+  gridForCellSize,
+  hasPlayableArea,
+  hazardDamage,
+  impliedCellPx,
+  inferMargins,
+  isPreviewSafeBackground,
+  type Margins,
+  paintCells,
+  resizeMap,
+  type SetupTool,
+} from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -45,11 +59,15 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     setNotice(null);
   }, []);
 
-  const setSize = useCallback(
-    (cols: number, rows: number) => {
+  const image = useImageSize(enabled ? (isPreviewSafeBackground(map.background) ? map.background : DEFAULT_MAP_BACKGROUND) : null);
+
+  const resize = useCallback(
+    (cols: number, rows: number, backgroundCols: number | undefined) => {
       const nextMargins = clampMargins({ cols, rows }, margins);
 
-      const next = applyMargins(resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows), nextMargins, NO_MARGINS);
+      const { backgroundCols: _old, ...sized } = applyMargins(resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows), nextMargins, NO_MARGINS);
+
+      const next = backgroundCols === undefined ? sized : { ...sized, backgroundCols };
 
       if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
@@ -59,6 +77,22 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     },
     [map, margins],
   );
+
+  // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку
+  const setSize = useCallback((cols: number, rows: number) => resize(cols, rows, undefined), [resize]);
+
+  const setCellSize = useCallback(
+    (cellPx: number) => {
+      if (!image) return;
+
+      const grid = gridForCellSize(image, cellPx);
+
+      resize(grid.cols, grid.rows, grid.backgroundCols);
+    },
+    [image, resize],
+  );
+
+  const setGridOffset = useCallback((gridOffset: { x: number; y: number }) => setMap((m) => ({ ...m, gridOffset })), []);
 
   const setMargins = useCallback(
     (next: Margins) => {
@@ -75,7 +109,8 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const setOpacity = useCallback((opacity: number) => setMap((m) => ({ ...m, opacity })), []);
 
-  const setBackground = useCallback((background: string | null) => setMap((m) => ({ ...m, background })), []);
+  // масштаб і зсув належать старому фону
+  const setBackground = useCallback((background: string | null) => setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({ ...m, background })), []);
 
   const onStroke = useCallback(
     (cells: GridPoint[]) => {
@@ -94,9 +129,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   );
 
   return {
-    state: { enabled, map, margins, tool, notice, value: enabled ? map : null },
+    state: { enabled, map, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
     brush,
-    actions: { setEnabled, setSize, setOpacity, setMargins, setTool, setBackground, setBrush, onStroke },
+    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, onStroke },
   };
 }
 

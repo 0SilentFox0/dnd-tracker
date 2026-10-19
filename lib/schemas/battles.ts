@@ -31,6 +31,8 @@ export const battleMapSchema = z.object({
     )
     .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
     .optional(),
+  backgroundCols: z.number().positive().max(200).optional(),
+  gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
 }).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
 
 export const createBattleSchema = z.object({

@@ -9,6 +9,7 @@ import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor
 import { MAX_SIDE, UNIT } from "@/lib/utils/battle/grid";
 
 vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
+vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useImageSize: (src: string | null) => (src ? { width: 1980, height: 1200 } : null) }));
 vi.stubGlobal(
   "ResizeObserver",
   class {
@@ -179,6 +180,42 @@ describe("BattleFormMap", () => {
     fireEvent.keyDown(cols, { key: "Enter" });
     expect(seen.editor.state.map.cols).toBe(MAX_SIDE);
     expect(cols.value).toBe(String(MAX_SIDE));
+  });
+
+  it("«Розмір клітинки»: повзунок задає cols/rows за фоном і зберігає ширину фону в клітинках; ручні колонки скидають масштаб", () => {
+    render(<Harness />);
+    enable();
+
+    const slider = screen.getByLabelText(/Розмір клітинки/) as HTMLInputElement;
+
+    expect(slider.value).toBe("100");
+
+    fireEvent.change(slider, { target: { value: "50" } });
+    expect(seen.editor.state.map).toMatchObject({ cols: 40, rows: 24, backgroundCols: 39.6 });
+    expect(screen.getByLabelText(/Розмір клітинки/).closest("div")?.textContent).toContain("50 px · 40 × 24");
+
+    typeIn("Колонки", "20");
+    expect(seen.editor.state.map.backgroundCols).toBeUndefined();
+    expect((screen.getByLabelText(/Розмір клітинки/) as HTMLInputElement).value).toBe("99");
+  });
+
+  it("«Зсув сітки»: зберігається частками клітинки, фон зсувається на −зсув клітинки", () => {
+    const { container } = render(<Harness />);
+
+    enable();
+    fireEvent.change(screen.getByLabelText(/Зсув сітки X/), { target: { value: "0.5" } });
+    fireEvent.change(screen.getByLabelText(/Зсув сітки Y/), { target: { value: "0.25" } });
+    expect(seen.editor.state.map.gridOffset).toEqual({ x: 0.5, y: 0.25 });
+
+    const box = container.querySelector("[data-map-background] > div") as HTMLElement;
+
+    const cellPx = parseFloat(box.style.width) / 20;
+
+    expect(parseFloat(box.style.left)).toBeCloseTo(-0.5 * cellPx);
+    expect(parseFloat(box.style.top)).toBeCloseTo(-0.25 * cellPx);
+
+    act(() => seen.editor.actions.setBackground("data:image/webp;base64,AAAA"));
+    expect(seen.editor.state.map.gridOffset).toBeUndefined();
   });
 
   it("default background button resets to null", () => {

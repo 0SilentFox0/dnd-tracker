@@ -178,6 +178,10 @@ export interface BattleMapConfig {
   blocked?: string[];
   /** Місцевість за ключем "x:y" */
   terrain?: Record<string, TerrainCell>;
+  /** Ширина фону в клітинках (з повзунка «Розмір клітинки»); без неї фон вписується в cols×rows */
+  backgroundCols?: number;
+  /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
+  gridOffset?: { x: number; y: number };
 }
 
 export type TerrainKind = "wall" | "barrier" | "hazard";
