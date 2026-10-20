@@ -72,6 +72,12 @@ export async function GET(
       return accessResult;
     }
 
+    if (new URL(request.url).searchParams.get("brief") === "1") {
+      const briefs = await prisma.battleScene.findMany({ where: { campaignId: id }, orderBy: { createdAt: "desc" }, select: { id: true, name: true, status: true } });
+
+      return NextResponse.json(briefs);
+    }
+
     const battles = await prisma.battleScene.findMany({
       where: {
         campaignId: id,

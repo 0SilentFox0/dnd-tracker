@@ -45,6 +45,8 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
 
       for (const list of options.invalidate ?? []) {
         void queryClient.invalidateQueries({ queryKey: list === "battles" ? battleKeys.list(campaignId) : battleKeys.active() });
+
+        if (list === "battles") void queryClient.invalidateQueries({ queryKey: battleKeys.briefs(campaignId) });
       }
 
       return response;

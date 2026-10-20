@@ -24,6 +24,7 @@ vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn(() => ({})) })
 vi.mock("@/lib/db", () => ({
   prisma: {
     slideDeck: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    scenarioPage: { findFirst: vi.fn() },
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
   },
 }));
@@ -32,7 +33,7 @@ const dm = { userId: "dm", isDM: true, campaign: { id: "c1", maxLevel: 20, membe
 
 const url = (n: string) => `https://p.supabase.co/storage/v1/object/public/scene-slides/c1/${n}.webp`;
 
-const row = (slides: unknown[], over: Record<string, unknown> = {}) => ({ id: "d1", campaignId: "c1", title: "Таверна", sortOrder: 0, slides, createdAt: new Date(0), updatedAt: new Date(0), ...over });
+const row = (slides: unknown[], over: Record<string, unknown> = {}) => ({ id: "d1", campaignId: "c1", title: "Таверна", sortOrder: 0, scenarioPageId: null, slides, createdAt: new Date(0), updatedAt: new Date(0), ...over });
 
 const slide = (id: string, n: string, extra: Record<string, unknown> = {}) => ({ id, imageUrl: url(n), ...extra });
 
@@ -42,6 +43,14 @@ const put = async (body: Record<string, unknown>) => {
   const { PUT } = await import("@/app/api/campaigns/[id]/decks/[deckId]/route");
 
   return PUT(new Request("http://x", { method: "PUT", body: JSON.stringify({ expectedUpdatedAt: EXPECTED, ...body }) }), { params: Promise.resolve({ id: "c1", deckId: "d1" }) });
+};
+
+const deckRowWith = (over: Record<string, unknown>) => row([], over);
+
+const patch = async (deckId: string, body: Record<string, unknown>) => {
+  const { PATCH } = await import("@/app/api/campaigns/[id]/decks/[deckId]/route");
+
+  return PATCH(new Request("http://x", { method: "PATCH", body: JSON.stringify(body) }), { params: Promise.resolve({ id: "c1", deckId }) });
 };
 
 const seedDeck = (old: ReturnType<typeof row>) => {
@@ -237,5 +246,34 @@ describe("decks API", () => {
     const res = await POST(new Request("http://x", { method: "POST", body: JSON.stringify({ size: 10, contentType: "image/webp" }) }), p);
 
     expect(await res.json()).toMatchObject({ path: "c1/x.webp", publicUrl: url("x") });
+  });
+
+  it("PATCH сцени: своя сцена — зберігає, updatedAt не змінюється", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(deckRowWith({ updatedAt: new Date("2026-10-21T10:00:00Z") }) as never);
+    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "p1" } as never);
+    vi.mocked(prisma.slideDeck.update).mockResolvedValue(deckRowWith({ scenarioPageId: "p1", updatedAt: new Date("2026-10-21T10:00:00Z") }) as never);
+
+    const res = await patch("d1", { scenarioPageId: "p1" });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(prisma.scenarioPage.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "p1", campaignId: "c1", kind: "scene" } });
+    expect(vi.mocked(prisma.slideDeck.update).mock.calls[0][0]).toMatchObject({ data: { scenarioPageId: "p1", updatedAt: new Date("2026-10-21T10:00:00Z") } });
+    expect((await res.json()).scenarioPageId).toBe("p1");
+  });
+
+  it("PATCH сцени: не сцена або чужа кампанія — 400", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(deckRowWith({}) as never);
+    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(null);
+
+    expect((await patch("d1", { scenarioPageId: "hero1" })).status).toBe(400);
+    expect(prisma.slideDeck.update).not.toHaveBeenCalled();
+  });
+
+  it("PATCH сцени: null відв'язує без перевірки сторінки", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(deckRowWith({ scenarioPageId: "p1" }) as never);
+    vi.mocked(prisma.slideDeck.update).mockResolvedValue(deckRowWith({ scenarioPageId: null }) as never);
+
+    expect((await patch("d1", { scenarioPageId: null })).status).toBe(200);
+    expect(prisma.scenarioPage.findFirst).not.toHaveBeenCalled();
   });
 });
