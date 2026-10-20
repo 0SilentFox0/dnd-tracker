@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { attackDiceRolls, moraleDiceRolls, spellDiceRolls } from "@/lib/utils/battle/dice-record";
+import { attackDiceRolls, spellDiceRolls } from "@/lib/utils/battle/dice-record";
 
 describe("attackDiceRolls", () => {
   it("один d20 і шкода з розмірами кожного кубика (слоти за зростанням розміру, як у diceSlots)", () => {
@@ -44,11 +44,5 @@ describe("spellDiceRolls", () => {
   it("лікування; без кубиків і рятунків — порожньо", () => {
     expect(spellDiceRolls({ casterId: "c", sides: 8, rolls: [7], heal: true, saves: [], presetSaveIds: new Set() })[0].kind).toBe("heal");
     expect(spellDiceRolls({ casterId: "c", sides: 8, rolls: [], heal: false, saves: [], presetSaveIds: new Set() })).toEqual([]);
-  });
-});
-
-describe("moraleDiceRolls", () => {
-  it("d10", () => {
-    expect(moraleDiceRolls("p", 9)).toEqual([{ kind: "morale", rollerId: "p", dice: [{ sides: 10, value: 9 }] }]);
   });
 });

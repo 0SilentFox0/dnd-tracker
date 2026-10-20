@@ -34,7 +34,3 @@ export function spellDiceRolls(input: { casterId: string; sides: number; rolls: 
 
   return [...power, ...saves];
 }
-
-export function moraleDiceRolls(participantId: string, d10: number): DiceRollGroup[] {
-  return [{ kind: "morale", rollerId: participantId, dice: [{ sides: 10, value: d10 }] }];
-}

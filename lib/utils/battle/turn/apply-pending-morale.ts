@@ -4,7 +4,6 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
-import { moraleDiceRolls } from "@/lib/utils/battle/dice-record";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -39,7 +38,7 @@ export function applyPendingMoraleCheck(
         actorSide: ParticipantSide.ALLY,
         actionType: "ability",
         targets: [],
-        actionDetails: { d10Roll, morale: 0, diceRolls: moraleDiceRolls(participantId, d10Roll) },
+        actionDetails: { d10Roll, morale: 0 },
         resultText: "Учасник не знайдений в initiativeOrder",
         hpChanges: [],
         isCancelled: false,
@@ -84,7 +83,6 @@ export function applyPendingMoraleCheck(
     actionDetails: {
       d10Roll,
       morale: effectiveMorale(participantForLog ?? participant, updatedInitiativeOrder).value,
-      diceRolls: moraleDiceRolls(participantId, d10Roll),
     },
     resultText: [moraleResult.message, ...triggerMessages].filter(Boolean).join(" | "),
   });
