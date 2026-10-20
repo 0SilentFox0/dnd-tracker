@@ -10,6 +10,9 @@ import type { BattleAudioState } from "@/types/audio";
 
 const TAP_HINT_AFTER_MS = 3_000;
 
+// при зміні відео ефекти синхронізації ще бачать старий плеєр, а виклик після destroy() кидає «reading 'src'»
+const destroyedPlayers = new WeakSet<YtPlayer>();
+
 export function useYoutubeSync(input: { videoId: string | null; state: BattleAudioState | null; clockOffsetMs: number; volume: number; muted: boolean }): {
   ref: (el: HTMLDivElement | null) => void;
   needsTap: boolean;
@@ -68,7 +71,12 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
 
     return () => {
       alive = false;
-      created?.destroy();
+
+      if (created) {
+        destroyedPlayers.add(created);
+        created.destroy();
+      }
+
       setPlayer(null);
       setNeedsTap(false);
       setFailed(false);
@@ -76,34 +84,40 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
     };
   }, [host, videoId]);
 
-  const media = useMemo<MediaHandle | null>(
-    () =>
-      player && {
-        ready: () => true,
-        currentTime: () => player.getCurrentTime(),
-        paused: () => player.getPlayerState() !== YT_STATE.PLAYING,
-        duration: () => player.getDuration() || null,
+  const media = useMemo<MediaHandle | null>(() => {
+    if (!player) return null;
+
+    const alive = () => !destroyedPlayers.has(player);
+
+    return {
+        ready: alive,
+        currentTime: () => (alive() ? player.getCurrentTime() : 0),
+        paused: () => !alive() || player.getPlayerState() !== YT_STATE.PLAYING,
+        duration: () => (alive() && player.getDuration()) || null,
         play: () => {
+          if (!alive()) return;
+
           player.playVideo();
           // iOS може проігнорувати playVideo без дотику до самого плеєра
           window.clearTimeout(tapHint.current);
-          tapHint.current = window.setTimeout(() => setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
+          tapHint.current = window.setTimeout(() => alive() && setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
         },
-        pause: () => player.pauseVideo(),
+        pause: () => {
+          if (alive()) player.pauseVideo();
+        },
         // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
         seek: (sec) => {
-          if (player.getDuration()) player.seekTo(sec, true);
+          if (alive() && player.getDuration()) player.seekTo(sec, true);
         },
-      },
-    [player],
-  );
+    };
+  }, [player]);
 
   const { state, clockOffsetMs, volume, muted } = input;
 
   useDriftSync(media, { state, clockOffsetMs, canPlay: true, resyncKey: starts });
 
   useEffect(() => {
-    if (!player) return;
+    if (!player || destroyedPlayers.has(player)) return;
 
     player.setVolume(Math.round(volume * 100));
 

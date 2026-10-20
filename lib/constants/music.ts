@@ -4,7 +4,7 @@ export const MAX_TRACK_MB = 10;
 
 export const MAX_TRACK_BYTES = MAX_TRACK_MB * 1024 * 1024;
 
-export const MAX_TRACKS_PER_CAMPAIGN = 40;
+export const MAX_TRACKS_PER_CAMPAIGN = 200;
 
 export const TRACK_TITLE_MAX = 120;
 
