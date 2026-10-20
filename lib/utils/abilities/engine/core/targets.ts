@@ -2,8 +2,7 @@ import { eventActorId, eventTargetIds } from "./events";
 import { findParticipant, isDormant, isTargetable } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
-import { mazeGridOf } from "@/lib/utils/battle/modes/maze/grid";
-import { seesTarget } from "@/lib/utils/battle/modes/maze/sight";
+import { modeSees } from "@/lib/utils/battle/modes/engine";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -22,10 +21,8 @@ export function resolveTargetIds(
 
   const side = owner.basicInfo.side;
 
-  const grid = mazeGridOf(map);
-
   // у лабіринті масові вміння по ворогах — лише ті, кого власник бачить (як і заклинання)
-  const reachable = (p: BattleParticipant) => targetableInPlay(p) && (!grid || p.basicInfo.side === side || seesTarget(grid, owner, p));
+  const reachable = (p: BattleParticipant) => targetableInPlay(p) && (p.basicInfo.side === side || modeSees(map, owner, p));
 
   switch (target ?? "self") {
     case "self":

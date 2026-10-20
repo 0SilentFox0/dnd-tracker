@@ -27,8 +27,9 @@ import {
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
 import { isOnMap, type MapAim } from "@/lib/utils/battle/grid";
+import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
-import { mazeSightedTargets, skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -199,7 +200,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const chain = caster && chainFirst && flow.pick?.chain ? spellChain({ participants: order, caster }, flow.pick.chain, chainFirst) : [];
 
-  const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? mazeSightedTargets(map, order, caster, skillAllTargets(order, caster, flow.pick.targetSide)) : [];
+  const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? modeSightedTargets(map, order, caster, skillAllTargets(order, caster, flow.pick.targetSide)) : [];
 
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
   const state = withAllTargets(withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id)), allSide);

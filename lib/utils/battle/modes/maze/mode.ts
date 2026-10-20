@@ -1,13 +1,19 @@
 import type { MapModeDefinition } from "../types";
 import { withMazeAwareness } from "./awareness";
+import { mazeGridOf } from "./grid";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
+import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
-import type { MazeConfig } from "@/types/battle";
+import type { BattleMapConfig, MazeConfig } from "@/types/battle";
+
+// хуки рушія викликаються лише для карти з лабіринтом
+const gridOf = (map: BattleMapConfig) => mazeGridOf(map)!;
 
 export const mazeMode: MapModeDefinition<MazeConfig> = {
   key: "maze",
@@ -33,6 +39,12 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     onReset: (maze) => ({ ...maze, marks: {}, dark: false, moved: false }),
     patchableFields: ["facing"],
   },
-  engine: {},
+  engine: {
+    sees: ({ map, viewer, target }) => seesTarget(gridOf(map), viewer, target),
+    aimHiddenText: ({ map, caster, cell }) => (mazeAimHidden(map, caster, cell) ? MAZE_TEXTS.aimOutOfSight : null),
+    targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? MAZE_TEXTS.targetOutOfSight : null),
+    meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? MAZE_TEXTS.wallBetween : null),
+    engages: ({ map, attacker, neighbour }) => inPlay(neighbour) && !meleeWallBetween(gridOf(map), attacker, neighbour),
+  },
   client: {},
 };

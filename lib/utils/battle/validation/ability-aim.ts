@@ -1,7 +1,6 @@
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange } from "@/lib/utils/battle/grid/template";
-import { mazeAimHidden } from "@/lib/utils/battle/modes/maze";
+import { modeAimHiddenText } from "@/lib/utils/battle/modes/engine";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -15,7 +14,9 @@ export function assertAbilityAim(ability: ResolvedAbility, map: BattleMapConfig 
     throw new BattleRuleError("invalid_target", "Задалеко");
   }
 
-  if (mazeAimHidden(map, actor, cell)) throw new BattleRuleError("invalid_target", MAZE_TEXTS.aimOutOfSight);
+  const hidden = modeAimHiddenText(map, actor, cell);
+
+  if (hidden) throw new BattleRuleError("invalid_target", hidden);
 
   return cell;
 }

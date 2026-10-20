@@ -2,7 +2,7 @@ import { spellLevelRoman } from "@/lib/constants/spells";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
-import { mazeTargetHidden } from "@/lib/utils/battle/modes/maze";
+import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
@@ -286,7 +286,7 @@ export function spellTargetInRange(map: BattleMapConfig | null, caster: BattlePa
 
   const inRange = range === undefined || footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
 
-  return inRange && !mazeTargetHidden(map, caster, [target]);
+  return inRange && !modeTargetHiddenText(map, caster, [target]);
 }
 
 export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState, viewer: { isDM: boolean; userId: string | null }): BattleParticipant[] {
