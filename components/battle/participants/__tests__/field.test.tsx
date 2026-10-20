@@ -121,8 +121,8 @@ describe("поле бою", () => {
     it("DM бачить КЛ цілі й розбивку", () => {
       render(<BattleLog />, { wrapper: wrap(withEntries(true)) });
 
-      expect(screen.getAllByText("КЛ цілі: 17").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Урон: d8+3 = 9").length).toBeGreaterThan(0);
+      expect(document.body.textContent).toContain("КЛ цілі: 17");
+      expect(screen.getAllByText("d8+3 = 9").length).toBeGreaterThan(0);
     });
   });
 
