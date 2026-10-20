@@ -7,12 +7,13 @@ import type {
   StoredParticipant,
 } from "./types";
 
-import type { BattleMapConfig, TerrainCell } from "@/types/battle";
+import type { BattleMapConfig, MazeConfig, TerrainCell } from "@/types/battle";
 
 export interface SnapshotState {
-  /** terrain лише для боїв із картою; старі знімки без поля — карту при відкаті не чіпаємо */
+  /** terrain і maze лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
   scene: Pick<BattleSceneState, "round" | "turnIndex" | "status" | "pendingMoraleCheck"> & {
     terrain?: Record<string, TerrainCell> | null;
+    maze?: MazeConfig | null;
   };
   participants: Array<{ columns: ParticipantColumns; state: ParticipantState }>;
   changedSnapshots?: Record<string, ParticipantSnapshot>;
@@ -35,7 +36,7 @@ export function buildSnapshotState(
       turnIndex: scene.turnIndex,
       status: scene.status,
       pendingMoraleCheck: scene.pendingMoraleCheck,
-      ...(map && { terrain: map.terrain ?? null }),
+      ...(map && { terrain: map.terrain ?? null, maze: map.maze ?? null }),
     },
     participants: before.map((p) => ({ columns: p.columns, state: p.state })),
   };

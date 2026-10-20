@@ -1,6 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { AbilityUsageCounter } from "@/types/abilities";
-import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, GridPoint } from "@/types/battle";
+import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -49,6 +49,10 @@ export interface ParticipantState {
   airborne?: AirborneState;
   hazardHitRound?: number;
   retaliationsUsed?: number;
+  dormant?: boolean;
+  facing?: Direction8;
+  escaped?: boolean;
+  mazeWakeRound?: number;
   spellSlotsCurrent: Record<string, number>;
 }
 

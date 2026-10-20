@@ -4,23 +4,50 @@ import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import type { BattleParticipantPatch, ClientBattleDelta } from "@/types/api";
-import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, MazeConfig } from "@/types/battle";
 
 const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 
 const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id, i) => id === b[i]);
 
-const withoutTerrain = ({ terrain: _terrain, ...rest }: BattleMapConfig) => JSON.stringify(rest);
+const baseOf = ({ terrain: _terrain, maze: _maze, ...rest }: BattleMapConfig) => JSON.stringify(rest);
 
-// повну карту шлемо лише коли змінилось щось, крім місцевості: інакше великі штрихи переповнюють Pusher
-function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain"> {
+type MazeFields = NonNullable<ClientBattleDelta["scene"]["maze"]>;
+
+// мітка чи прапорець не тягнуть ~20 КБ стін: шлемо лише змінені поля; null — треба повна карта
+function mazeChange(before: MazeConfig | null | undefined, after: MazeConfig | null | undefined): MazeFields | null | undefined {
+  if (before === after || (!before && !after)) return undefined;
+
+  if (!before || !after) return null;
+
+  if (before.walls !== after.walls && JSON.stringify(before.walls) !== JSON.stringify(after.walls)) return null;
+
+  const changed: Record<string, unknown> = {};
+
+  for (const key of new Set([...Object.keys(before), ...Object.keys(after)]) as Set<keyof MazeConfig>) {
+    if (key === "walls" || JSON.stringify(before[key]) === JSON.stringify(after[key])) continue;
+
+    if (after[key] === undefined) return null;
+
+    changed[key] = after[key];
+  }
+
+  return Object.keys(changed).length > 0 ? (changed as MazeFields) : undefined;
+}
+
+// повну карту шлемо лише коли змінилось щось, крім місцевості й полів лабіринту: інакше великі штрихи переповнюють Pusher
+function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain" | "maze"> {
   if (after === undefined || before === after) return {};
 
-  if (!before || !after || withoutTerrain(before) !== withoutTerrain(after)) return { map: after };
+  if (!before || !after || baseOf(before) !== baseOf(after)) return { map: after };
+
+  const maze = mazeChange(before.maze, after.maze);
+
+  if (maze === null) return { map: after };
 
   const terrain = diffTerrain(before.terrain, after.terrain);
 
-  return terrain ? { terrain } : {};
+  return { ...(terrain && { terrain }), ...(maze && { maze }) };
 }
 
 export function buildClientDelta(args: {

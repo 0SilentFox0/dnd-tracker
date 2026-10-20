@@ -62,8 +62,9 @@ export function buildPusherMessages(args: {
   pending?: BattleParticipant[];
   wasAwaiting?: boolean;
   delta: ClientBattleDelta;
+  maze?: boolean;
 }): PusherMessage[] {
-  const { before, after, participants, pending = [], wasAwaiting = false, delta } = args;
+  const { before, after, participants, pending = [], wasAwaiting = false, delta, maze = false } = args;
 
   const channel = battleChannelName(after.id);
 
@@ -77,7 +78,7 @@ export function buildPusherMessages(args: {
 
   const active = participants[after.turnIndex];
 
-  const awaiting = checkVictoryConditions(participants, reserveOf(pending)).awaiting !== null;
+  const awaiting = checkVictoryConditions(participants, reserveOf(pending), { maze }).awaiting !== null;
 
   if (after.status === BattleStatus.ACTIVE && !awaiting && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
     messages.push({

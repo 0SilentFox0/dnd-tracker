@@ -2,16 +2,19 @@ import { z } from "zod";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
+import { canStand } from "@/lib/utils/battle/grid/occupancy";
+import { mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
 } from "@/lib/utils/battle/participant";
 import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
+import { BattleAccessError, BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
   sourceId: z.string(),
@@ -19,6 +22,8 @@ export const addParticipantSchema = z.object({
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
   reserved: z.boolean().optional(),
+  /** клітинка для першого доданого; решту розставить карта */
+  position: mapCellSchema.optional(),
 });
 
 export type AddParticipantBody = z.infer<typeof addParticipantSchema>;
@@ -58,6 +63,37 @@ function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): Battle
     combatStats: { ...fresh.combatStats, maxHp, currentHp: maxHp },
     battleData: { ...fresh.battleData, hpMultiplier, damageMultiplier },
   };
+}
+
+function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: GridPoint): BattleParticipant {
+  const map = ctx.meta.map;
+
+  if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
+
+  if (!map.maze) {
+    if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
+
+    return { ...first, battleData: { ...first.battleData, position: to } };
+  }
+
+  const grid = { cols: map.cols, rows: map.rows, maze: map.maze };
+
+  const error = mazePlacementError(grid, { participants: ctx.participants, mover: first, to });
+
+  if (error) throw new BattleRuleError("action_rejected", error);
+
+  return placeInMaze(grid, first, to);
+}
+
+// у лабіринті доданий ворог з'являється сплячим
+function enterMap(ctx: BattleMutationContext, added: BattleParticipant[], position: GridPoint | undefined): BattleParticipant[] {
+  const maze = !!ctx.meta.map?.maze;
+
+  return added.map((p, i) => {
+    const asleep = maze && p.basicInfo.side === ParticipantSide.ENEMY ? { ...p, battleData: { ...p.battleData, dormant: true } } : p;
+
+    return i === 0 && position ? placeFirst(ctx, asleep, position) : asleep;
+  });
 }
 
 export function createAddParticipantMutation(deps: AddParticipantDeps = defaultDeps) {
@@ -102,7 +138,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
     const addedIds = new Set(added.map((p) => p.basicInfo.id));
 
-    const baked = applyBakedAuras([...ctx.participants, ...added], addedIds);
+    const baked = applyBakedAuras([...ctx.participants, ...enterMap(ctx, added, data.position)], addedIds);
 
     let order = baked.slice(0, ctx.participants.length);
 

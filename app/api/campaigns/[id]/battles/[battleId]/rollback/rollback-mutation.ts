@@ -6,6 +6,7 @@ import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SnapshotState } from "@/lib/utils/battle/store";
 import { BattleRuleError, loadSnapshotsFrom, restoreParticipantsAt } from "@/lib/utils/battle/store";
+import type { BattleMapConfig } from "@/types/battle";
 
 export const rollbackSchema = z.object({ actionIndex: z.number().int().min(1) });
 
@@ -17,6 +18,14 @@ const defaultLoad: LoadSnapshots = (battleId, seq) => loadSnapshotsFrom(prisma, 
 
 const defaultIsActiveEvent: IsActiveEvent = async (battleId, seq) =>
   (await prisma.battleEvent.count({ where: { battleId, seq, cancelledAt: null } })) > 0;
+
+function restoreMap(map: BattleMapConfig, scene: SnapshotState["scene"]): BattleMapConfig | undefined {
+  if (scene.terrain === undefined && scene.maze === undefined) return undefined;
+
+  const withTerrain = scene.terrain !== undefined ? replaceTerrain(map, scene.terrain) : map;
+
+  return scene.maze !== undefined && (scene.maze || map.maze) ? { ...withTerrain, maze: scene.maze } : withTerrain;
+}
 
 export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActiveEvent: IsActiveEvent = defaultIsActiveEvent) {
   return async (ctx: BattleMutationContext, body: z.infer<typeof rollbackSchema>): Promise<MutationResult> => {
@@ -40,7 +49,7 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
 
     const { scene } = first.state;
 
-    const map = ctx.meta.map && scene.terrain !== undefined ? replaceTerrain(ctx.meta.map, scene.terrain) : undefined;
+    const map = ctx.meta.map ? restoreMap(ctx.meta.map, scene) : undefined;
 
     return {
       participants,

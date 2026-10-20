@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
@@ -28,6 +29,8 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
   const revealed: BattleParticipant[] = [];
 
+  const maze = !!ctx.meta.map?.maze;
+
   for (const id of body.participantIds) {
     const found = pending.find((p) => p.basicInfo.id === id && isReserved(p));
 
@@ -37,7 +40,9 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
     const clean = dropBattleFlag(found, "reserved");
 
-    const entering: BattleParticipant = { ...clean, battleData: { ...clean.battleData, revealPending: true } };
+    const asleep = maze && clean.basicInfo.side === ParticipantSide.ENEMY;
+
+    const entering: BattleParticipant = { ...clean, battleData: { ...clean.battleData, revealPending: true, ...(asleep && { dormant: true }) } };
 
     order = insertAfterCurrent(order, ctx.scene.turnIndex, entering);
     revealed.push(entering);

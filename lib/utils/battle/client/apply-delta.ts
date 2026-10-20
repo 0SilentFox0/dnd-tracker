@@ -28,6 +28,14 @@ function mergeParticipantPatch(current: BattleParticipant, patch: BattleParticip
   };
 }
 
+function mergeMapDelta(map: BattleScene["map"], scene: ClientBattleDelta["scene"]): BattleScene["map"] {
+  if (!map) return map;
+
+  const withTerrain = scene.terrain ? applyTerrainDiff(map, scene.terrain) : map;
+
+  return scene.maze && withTerrain.maze ? { ...withTerrain, maze: { ...withTerrain.maze, ...scene.maze } } : withTerrain;
+}
+
 export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta): BattleScene | "refetch" {
   if (cached.version !== undefined && delta.version <= cached.version) return cached;
 
@@ -53,9 +61,9 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
 
   const { scene } = delta;
 
-  if (scene.terrain && !cached.map) return "refetch";
+  if ((scene.terrain && !cached.map) || (scene.maze && !cached.map?.maze)) return "refetch";
 
-  const map = scene.map !== undefined ? scene.map : scene.terrain && cached.map ? applyTerrainDiff(cached.map, scene.terrain) : cached.map;
+  const map = scene.map !== undefined ? scene.map : mergeMapDelta(cached.map, scene);
 
   // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
   const { knowledge: _knowledge, ...withoutKnowledge } = cached;

@@ -2,7 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { BattleMapConfig, GridPoint, TerrainDiff, TerrainKind } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -81,6 +81,8 @@ export interface ClientBattleDelta {
     map?: BattleMapConfig | null;
     /** зміни місцевості, коли решта карти та сама */
     terrain?: TerrainDiff;
+    /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
+    maze?: Partial<Omit<MazeConfig, "walls">>;
   };
   upserted: BattleParticipant[];
   patched?: BattleParticipantPatch[];
