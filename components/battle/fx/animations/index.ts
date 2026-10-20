@@ -13,7 +13,12 @@ import type { FxArchetype } from "@/lib/utils/battle/fx";
 
 type BaseArchetype = "melee" | "ranged" | "bolt" | "area" | "heal" | "buff" | "debuff" | "summon" | "death";
 
-type SignatureArchetype = Exclude<FxArchetype, BaseArchetype>;
+type SignatureArchetype = Exclude<FxArchetype, BaseArchetype | "dice">;
+
+type AnimatedArchetype = Exclude<FxArchetype, "dice">;
+
+// "dice" is drawn by the dice layer, never by this registry; the base fallback only guards a stray call.
+const animated = (a: FxArchetype): AnimatedArchetype => (a === "dice" ? "buff" : a);
 
 const BASE: Record<BaseArchetype, FxAnimation> = { melee, ranged, bolt, area, heal, buff, debuff, summon, death };
 
@@ -62,13 +67,15 @@ const SIGNATURES: Record<SignatureArchetype, { load: () => Promise<FxAnimation>;
   vampire: { load: () => import("./vampire").then((m) => m.vampire), fallback: "buff" },
 };
 
-const isBase = (a: FxArchetype): a is BaseArchetype => a in BASE;
+const isBase = (a: AnimatedArchetype): a is BaseArchetype => a in BASE;
 
 const loaded = new Map<SignatureArchetype, FxAnimation>();
 
 const pending = new Map<SignatureArchetype, Promise<FxAnimation>>();
 
-export function loadAnimation(archetype: FxArchetype): Promise<FxAnimation> {
+export function loadAnimation(requested: FxArchetype): Promise<FxAnimation> {
+  const archetype = animated(requested);
+
   if (isBase(archetype)) return Promise.resolve(BASE[archetype]);
 
   const ready = loaded.get(archetype);
@@ -103,7 +110,9 @@ export function preloadAnimation(archetype: FxArchetype) {
 }
 
 /** The archetype's animation, or its base fallback when the chunk fails or takes longer than `timeoutMs`. */
-export function animationFor(archetype: FxArchetype, timeoutMs: number): Promise<FxAnimation> {
+export function animationFor(requested: FxArchetype, timeoutMs: number): Promise<FxAnimation> {
+  const archetype = animated(requested);
+
   const fallback = BASE[isBase(archetype) ? archetype : SIGNATURES[archetype].fallback];
 
   const load = loadAnimation(archetype).catch(() => fallback);

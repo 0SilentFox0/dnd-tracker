@@ -33,6 +33,14 @@ describe("applyPendingMoraleCheck", () => {
     expect(moraleLogEntry.actionDetails?.morale).toBe(1);
   });
 
+  it("у лог пишеться d10Roll без diceRolls (кубик грає при зміні pending)", () => {
+    const { moraleLogEntry } = applyPendingMoraleCheck([p], payload(false), 1, "b1", 0, seq(0.5));
+
+    expect(moraleLogEntry.actionDetails?.d10Roll).toBe(10);
+    expect(moraleLogEntry.actionDetails?.diceRolls).toBeUndefined();
+    expect(applyPendingMoraleCheck([], payload(false), 1, "b1", 0).moraleLogEntry.actionDetails?.diceRolls).toBeUndefined();
+  });
+
   it("у польоті додатковий хід за мораль не видається", () => {
     const flying = { ...p, battleData: { ...p.battleData, airborne: { since: 1, percent: 200, name: "Пікірування" } } };
 

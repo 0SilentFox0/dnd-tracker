@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { deriveMazeView, maskMazeScene, MAZE_UNKNOWN_NAME, mazeFxVisible, mazeLogVisible, mazeVisible, visibleParticipants } from "@/lib/utils/battle/modes/maze";
+import { deriveMazeView, maskMazeFxAction, maskMazeScene, MAZE_UNKNOWN_NAME, mazeFxVisible, mazeLogVisible, mazeVisible, visibleParticipants } from "@/lib/utils/battle/modes/maze";
 import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { turnQueue } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant, GridPoint } from "@/types/battle";
@@ -96,6 +96,22 @@ describe("журнал і FX гравця в лабіринті", () => {
     expect(mazeFxVisible(view, action("far", { targets: [target("near")] }))).toBe(true);
     expect(mazeFxVisible(view, action("far", { targets: [target("b")] }))).toBe(false);
     expect(mazeFxVisible(view, action(DM_ACTOR.actorId, { actionDetails: { mazeEvent: "op" } }))).toBe(false);
+  });
+
+  it("maskMazeFxAction: рятунки невидимих зникають, імена невидимих — «невідомий»", () => {
+    const e = action("a", {
+      targets: [target("near"), target("far")],
+      hpChanges: [{ participantId: "far", participantName: "far", oldHp: 5, newHp: 1, change: 4 }],
+      actionDetails: { diceRolls: [{ kind: "save", rollerId: "near", dice: [{ sides: 20, value: 3 }] }, { kind: "save", rollerId: "far", dice: [{ sides: 20, value: 9 }] }, { kind: "damage", rollerId: "a", dice: [{ sides: 6, value: 2 }] }] },
+    });
+
+    const out = maskMazeFxAction(view, e);
+
+    expect(out.targets.map((t) => t.participantName)).toEqual(["near", MAZE_UNKNOWN_NAME]);
+    expect(out.hpChanges[0].participantName).toBe(MAZE_UNKNOWN_NAME);
+    expect(out.actorName).toBe("a");
+    expect(out.actionDetails.diceRolls?.map((g) => g.rollerId)).toEqual(["near", "a"]);
+    expect(maskMazeFxAction(deriveMazeView({ map, participants: all, userId: "dm", isDM: true }), e)).toBe(e);
   });
 
   it("maskMazeScene фільтрує журнал", () => {

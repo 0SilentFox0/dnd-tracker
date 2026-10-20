@@ -136,6 +136,23 @@ export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction
   return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => knows(view, id));
 }
 
+/** FX-копія запису для гравця: рятунки невидимих не показуються, імена невидимих — «невідомий». */
+export function maskMazeFxAction(view: MazeView | null | undefined, e: BattleAction): BattleAction {
+  if (!hidesFrom(view)) return e;
+
+  const name = (id: string, current: string) => (knows(view, id) ? current : MAZE_UNKNOWN_NAME);
+
+  const rolls = e.actionDetails?.diceRolls;
+
+  return {
+    ...e,
+    actorName: name(e.actorId, e.actorName),
+    targets: (e.targets ?? []).map((t) => ({ ...t, participantName: name(t.participantId, t.participantName) })),
+    hpChanges: (e.hpChanges ?? []).map((h) => ({ ...h, participantName: name(h.participantId, h.participantName) })),
+    ...(rolls && { actionDetails: { ...e.actionDetails, diceRolls: rolls.filter((g) => g.kind !== "save" || knows(view, g.rollerId)) } }),
+  };
+}
+
 export interface MazeMaskable {
   battle: { battleLog?: BattleAction[] };
   turn: { current: BattleParticipant | null; queue: QueueEntry[] };

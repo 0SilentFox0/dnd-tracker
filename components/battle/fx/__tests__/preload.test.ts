@@ -4,6 +4,7 @@ vi.mock("@/components/battle/fx/auras/AuraCanvas", () => {
   throw new Error("ChunkLoadError");
 });
 vi.mock("@/components/battle/fx/frames/ImpactFrame", () => ({}));
+vi.mock("@/components/battle/fx/dice/scene", () => ({}));
 
 import { preloadFx } from "@/components/battle/fx/preload";
 

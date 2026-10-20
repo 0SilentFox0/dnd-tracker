@@ -12,11 +12,12 @@ import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
+import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
 import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { canSeeExactStats, critOutcome, damageDiceSlots, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, critOutcome, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 

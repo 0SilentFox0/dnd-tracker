@@ -5,9 +5,10 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
+import { diceSlots, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 
 const base = createMockParticipant();
 
@@ -64,6 +65,21 @@ describe("attack mutation", () => {
     const out = await attackMutation(ctx, body({ d20Roll: 2, advantageRoll: 16, rollMode: "advantage" }));
 
     expect(out.events[0].details).toMatchObject({ actionDetails: { chosenD20: 16, secondRoll: { mode: "advantage", manual: true } } });
+  });
+
+  it("перевага: diceRolls містить обидва d20 і групу шкоди з розмірами кубиків", async () => {
+    const out = await attackMutation(ctx, body({ d20Roll: 2, advantageRoll: 16, rollMode: "advantage", damageRolls: [3] }));
+
+    const [firstSlot] = diceSlots(heroAttackDamageParts(hero, hero.battleData.attacks[0]).formula);
+
+    expect(out.events[0].details).toMatchObject({
+      actionDetails: {
+        diceRolls: [
+          { kind: "attack", rollerId: "hero", targetId: "gob", dice: [{ sides: 20, value: 2 }, { sides: 20, value: 16, chosen: true }] },
+          { kind: "damage", rollerId: "hero", targetId: "gob", dice: [{ sides: firstSlot, value: 3 }] },
+        ],
+      },
+    });
   });
 
   it("атака з endTurn — хід передається тим самим збереженням", async () => {

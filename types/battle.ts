@@ -410,6 +410,22 @@ export interface DamageStep {
   icon?: string | null;
 }
 
+export type DieSides = 4 | 6 | 8 | 10 | 12 | 20;
+
+export interface RolledDie {
+  sides: DieSides;
+  value: number;
+  chosen?: boolean;
+  server?: boolean;
+}
+
+export interface DiceRollGroup {
+  kind: "attack" | "damage" | "heal" | "save" | "morale";
+  rollerId: string;
+  targetId?: string;
+  dice: RolledDie[];
+}
+
 /**
  * Детальна дія в бою (BattleAction)
  * Кожна дія записується для історії та можливості відміни
@@ -514,6 +530,8 @@ export interface BattleAction {
     // Для перевірки моралі:
     d10Roll?: number;
     morale?: number;
+    /** Кожен кубик дії гравця/ДМа (розмір і грань) — для 3D-анімації кидка в усіх клієнтів */
+    diceRolls?: DiceRollGroup[];
     // Для бонусної дії (скіл):
     skillId?: string;
     skillName?: string;

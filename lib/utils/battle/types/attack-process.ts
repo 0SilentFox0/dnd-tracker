@@ -26,6 +26,10 @@ export interface ProcessAttackParams {
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;
+  /** Лише основна фаза атаки пише кубики в журнал (Шал та інші внутрішні удари — ні) */
+  recordDice?: boolean;
+  /** Що з кубиків докинув сервер: d20 і шкода від цього індексу */
+  serverRolled?: { d20?: boolean; damageFrom?: number };
   map?: BattleMapConfig | null;
   /** Лише текст і зміни учасників: summons і зона закляття на влучання не застосовуються (зараз це Dark 1-3) */
   hitSpells?: ReadonlyMap<string, CastableSpell>;

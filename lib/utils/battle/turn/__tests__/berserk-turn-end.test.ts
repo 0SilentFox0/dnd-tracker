@@ -42,3 +42,15 @@ describe("berserk with fire wave on a map", () => {
     expect(hp("far")).toBe(300);
   });
 });
+
+describe("berserk dice", () => {
+  it("удар Шалу не пише diceRolls (кубики не грають)", () => {
+    const berserker = makeParticipant({ id: "b" });
+
+    const victim = makeParticipant({ id: "v", side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 });
+
+    const r = runBerserkTurn({ participants: [berserker, victim], restrictedBy: berserker, participantId: "b", bonusPercent: 0, round: 1, battleId: "x", actionIndex: 0, rng: seq(0.5) });
+
+    expect(r.actions[0].actionDetails.diceRolls).toBeUndefined();
+  });
+});

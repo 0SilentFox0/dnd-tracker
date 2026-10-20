@@ -177,3 +177,16 @@ describe("mapAction — точка шаблону", () => {
     expect(mapAction(cast({}))[0]).not.toHaveProperty("at");
   });
 });
+
+describe("mapAction dice", () => {
+  const rolls = [{ kind: "attack" as const, rollerId: "a", dice: [{ sides: 20 as const, value: 12 }] }];
+
+  it("attack with diceRolls → [dice, melee]; without → [melee]; cancelled → []", () => {
+    const withDice = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, diceRolls: rolls } }));
+
+    expect(withDice.map((s) => s.archetype)).toEqual(["dice", "melee"]);
+    expect(withDice[0].dice).toBeDefined();
+    expect(mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true } })).map((s) => s.archetype)).toEqual(["melee"]);
+    expect(mapAction(action({ isCancelled: true, actionDetails: { diceRolls: rolls } }))).toEqual([]);
+  });
+});

@@ -10,7 +10,6 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { spellNeedsSlot, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { diceSlots } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -152,10 +151,4 @@ export function weaponPreview(p: BattleParticipant, attack: BattleAttack, all: B
   const estimate = averageAttackDamage(p, attack, all).total;
 
   return { bonuses, estimate, toHit: calculateAttackBonus(p, attack, all), formula: heroAttackDamageParts(p, attack).formula };
-}
-
-export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {
-  const slots = diceSlots(heroAttackDamageParts(p, attack).formula);
-
-  return slots.length ? slots : [6];
 }
