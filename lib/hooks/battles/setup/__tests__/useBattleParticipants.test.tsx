@@ -41,3 +41,23 @@ describe("useBattleParticipants reserve", () => {
     expect(result.current.list[0].reserved).toBe(1);
   });
 });
+
+describe("useBattleParticipants cycleUnit", () => {
+  it("не вибраний → союзник → прибрано", () => {
+    const { result } = renderHook(() => useBattleParticipants());
+
+    act(() => result.current.actions.cycleUnit("wolf"));
+    expect(result.current.list).toEqual([{ id: "wolf", type: ParticipantSourceType.UNIT, side: ParticipantSide.ALLY }]);
+
+    act(() => result.current.actions.cycleUnit("wolf"));
+    expect(result.current.list).toEqual([]);
+  });
+
+  it("ворог → союзник із тією ж кількістю", () => {
+    const { result } = renderHook(() => useBattleParticipants());
+
+    act(() => result.current.actions.addToSide("wolf", ParticipantSourceType.UNIT, ParticipantSide.ENEMY, 4));
+    act(() => result.current.actions.cycleUnit("wolf"));
+    expect(result.current.list[0]).toMatchObject({ side: ParticipantSide.ALLY, quantity: 4 });
+  });
+});

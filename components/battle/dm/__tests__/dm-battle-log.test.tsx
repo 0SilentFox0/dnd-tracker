@@ -2,13 +2,19 @@
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { BattleLogPanel } from "@/components/battle/log/BattleLogPanel";
+import { DmBattleLog } from "@/components/battle/dm/DmBattleLog";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "@/lib/constants/battle";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
+const scene = vi.hoisted(() => ({ battle: null as unknown }));
+
 vi.mock("@/components/battle/log/BattleLogLoadEarlier", () => ({ BattleLogLoadEarlier: () => null }));
+
+vi.mock("@/lib/hooks/battle", () => ({
+  useBattleScene: () => ({ battle: scene.battle, viewer: { isDM: true }, actions: { rollback: { mutate: vi.fn() } } }),
+}));
 
 afterEach(cleanup);
 
@@ -20,15 +26,17 @@ const battle = (status: BattleScene["status"]) =>
 
 const rollbackButtons = () => screen.queryAllByTitle(/Відмінити дію/);
 
-describe("BattleLogPanel — кнопка відкату", () => {
+describe("DmBattleLog — кнопка відкату", () => {
   it("активний бій — на кожному записі", () => {
-    renderWithConfirm(<BattleLogPanel battle={battle("active")} isDM onRollback={vi.fn()} embedInSidebar />);
+    scene.battle = battle("active");
+    renderWithConfirm(<DmBattleLog onClose={vi.fn()} />);
 
     expect(rollbackButtons()).toHaveLength(30);
   });
 
   it("завершений бій — лише на записах, для яких лишився знімок", () => {
-    renderWithConfirm(<BattleLogPanel battle={battle("completed")} isDM onRollback={vi.fn()} embedInSidebar />);
+    scene.battle = battle("completed");
+    renderWithConfirm(<DmBattleLog onClose={vi.fn()} />);
 
     expect(rollbackButtons()).toHaveLength(BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE);
   });

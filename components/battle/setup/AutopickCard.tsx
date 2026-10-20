@@ -3,6 +3,7 @@
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { SelectField } from "@/components/ui/select-field";
 import type { BalanceSuggestions } from "@/lib/hooks/battles";
 import type { IdName } from "@/types/common";
 
@@ -24,19 +25,15 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
         <>
           <div className="max-w-xs">
             <Label htmlFor="balanceRace">Раса юнітів</Label>
-            <select
+            <SelectField
               id="balanceRace"
-              className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+              className="mt-1"
               value={race}
-              onChange={(e) => actions.setRace(e.target.value)}
-            >
-              <option value="">Будь-яка</option>
-              {races.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
+              onValueChange={actions.setRace}
+              allowNone
+              noneLabel="Будь-яка"
+              options={races.map((r) => ({ value: r.id, label: r.name }))}
+            />
           </div>
           <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={actions.suggest} disabled={isLoading}>
