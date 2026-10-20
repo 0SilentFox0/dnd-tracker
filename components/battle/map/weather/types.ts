@@ -17,12 +17,23 @@ export interface WeatherEffect {
   opacity: number;
   /** частинок на мегапіксель */
   density: number;
-  cap: number;
+  /** стеля кількості; без неї — density */
+  maxParticles?: number;
+  minParticles?: number;
   create(size: WeatherSize, count: number, rand: Rand): WeatherSim;
 }
 
-export function particleCount(size: WeatherSize, effect: Pick<WeatherEffect, "density" | "cap">, scale = 1): number {
-  return Math.min(Math.round(effect.cap * scale), Math.round(((size.width * size.height) / 1e6) * effect.density * scale));
+export function particleCount(size: WeatherSize, effect: Pick<WeatherEffect, "density" | "maxParticles" | "minParticles">, scale = 1): number {
+  const { density, maxParticles = density, minParticles = 0 } = effect;
+
+  return Math.max(minParticles, Math.min(Math.round(maxParticles * scale), Math.round(((size.width * size.height) / 1e6) * density * scale)));
+}
+
+export const rgba = (rgb: string, alpha: number) => `rgba(${rgb},${alpha.toFixed(3)})`;
+
+export function fillFrame(g: CanvasRenderingContext2D, size: WeatherSize, style: CanvasRenderingContext2D["fillStyle"]) {
+  g.fillStyle = style;
+  g.fillRect(0, 0, size.width, size.height);
 }
 
 export const wrap = (v: number, max: number) => ((v % max) + max) % max;

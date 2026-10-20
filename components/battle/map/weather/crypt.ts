@@ -1,5 +1,5 @@
 import { createSnow } from "./snow";
-import { type Rand, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
+import { fillFrame, type Rand, rgba, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
 
 interface Firefly {
   x: number;
@@ -72,11 +72,11 @@ export function createCrypt(size: WeatherSize, count: number, rand: Rand): Weath
 
         if (k <= 0) continue;
 
-        g.fillStyle = `rgba(${FIREFLY_RGB},${(0.22 * k).toFixed(3)})`;
+        g.fillStyle = rgba(FIREFLY_RGB, 0.22 * k);
         g.beginPath();
         g.arc(f.x, f.y, f.r * 4, 0, Math.PI * 2);
         g.fill();
-        g.fillStyle = `rgba(${FIREFLY_RGB},${(0.95 * k).toFixed(3)})`;
+        g.fillStyle = rgba(FIREFLY_RGB, 0.95 * k);
         g.beginPath();
         g.arc(f.x, f.y, f.r, 0, Math.PI * 2);
         g.fill();
@@ -93,9 +93,8 @@ export function createCrypt(size: WeatherSize, count: number, rand: Rand): Weath
       const vignette = g.createRadialGradient(cx, cy, span * 0.3, cx, cy, span * 0.75);
 
       vignette.addColorStop(0, "rgba(0,12,10,0)");
-      vignette.addColorStop(1, `rgba(0,12,10,${(0.45 * pulse).toFixed(3)})`);
-      g.fillStyle = vignette;
-      g.fillRect(0, 0, size.width, size.height);
+      vignette.addColorStop(1, rgba("0,12,10", 0.45 * pulse));
+      fillFrame(g, size, vignette);
     },
   };
 }
@@ -104,6 +103,5 @@ export const crypt: WeatherEffect = {
   tint: "radial-gradient(ellipse at center, rgba(12,12,14,.15) 35%, rgba(0,0,0,.55))",
   opacity: 0.9,
   density: 260,
-  cap: 260,
   create: createCrypt,
 };

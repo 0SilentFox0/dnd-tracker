@@ -1,5 +1,5 @@
 import { createDrift } from "./drift";
-import type { Rand, WeatherEffect, WeatherSim, WeatherSize } from "./types";
+import { fillFrame, type Rand, rgba, type WeatherEffect, type WeatherSim, type WeatherSize } from "./types";
 
 interface Spark {
   x: number;
@@ -44,8 +44,7 @@ export function createEmbers(size: WeatherSize, count: number, rand: Rand): Weat
       });
     },
     draw(g) {
-      g.fillStyle = HELL_TINT;
-      g.fillRect(0, 0, size.width, size.height);
+      fillFrame(g, size, HELL_TINT);
 
       const top = size.height * 0.3;
 
@@ -53,8 +52,8 @@ export function createEmbers(size: WeatherSize, count: number, rand: Rand): Weat
 
       const glow = g.createLinearGradient(0, size.height, 0, top);
 
-      glow.addColorStop(0, `rgba(255,85,10,${(0.5 * flicker).toFixed(3)})`);
-      glow.addColorStop(0.45, `rgba(220,50,0,${(0.28 * flicker).toFixed(3)})`);
+      glow.addColorStop(0, rgba("255,85,10", 0.5 * flicker));
+      glow.addColorStop(0.45, rgba("220,50,0", 0.28 * flicker));
       glow.addColorStop(1, "rgba(200,40,0,0)");
       g.fillStyle = glow;
       g.fillRect(0, top, size.width, size.height - top);
@@ -64,7 +63,7 @@ export function createEmbers(size: WeatherSize, count: number, rand: Rand): Weat
       for (const s of sparks) {
         const k = 1 - s.age / s.life;
 
-        g.fillStyle = `rgba(255,${Math.round(110 + 110 * k)},40,${(0.95 * k).toFixed(3)})`;
+        g.fillStyle = rgba(`255,${Math.round(110 + 110 * k)},40`, 0.95 * k);
         g.beginPath();
         g.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         g.fill();
@@ -79,6 +78,5 @@ export const embers: WeatherEffect = {
   tint: "linear-gradient(to top, rgba(255,85,10,.55), rgba(200,45,0,.25) 45%, rgba(130,30,5,.2) 75%, rgba(30,16,12,.45))",
   opacity: 0.9,
   density: 560,
-  cap: 560,
   create: createEmbers,
 };

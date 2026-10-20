@@ -1,4 +1,4 @@
-import { type Rand, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
+import { fillFrame, type Rand, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
 
 interface Flake {
   x: number;
@@ -51,10 +51,7 @@ export function createSnow(size: WeatherSize, count: number, rand: Rand, o: Snow
       }
     },
     draw(g) {
-      if (o.haze) {
-        g.fillStyle = o.haze;
-        g.fillRect(0, 0, size.width, size.height);
-      }
+      if (o.haze) fillFrame(g, size, o.haze);
 
       g.fillStyle = o.color;
       g.beginPath();
@@ -73,7 +70,6 @@ export const snow: WeatherEffect = {
   tint: "rgba(200,215,240,.18)",
   opacity: 0.85,
   density: 220,
-  cap: 220,
   create: (size, count, rand) => createSnow(size, count, rand, { wind: 12, sway: 18, minSpeed: 28, maxSpeed: 70, color: "rgba(255,255,255,.85)" }),
 };
 
@@ -81,7 +77,6 @@ export const blizzard: WeatherEffect = {
   tint: "rgba(215,225,245,.3)",
   opacity: 0.85,
   density: 480,
-  cap: 480,
   create: (size, count, rand) =>
     createSnow(size, count, rand, { wind: 260, sway: 40, minSpeed: 120, maxSpeed: 220, color: "rgba(255,255,255,.8)", haze: "rgba(220,230,250,.12)" }),
 };

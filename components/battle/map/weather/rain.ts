@@ -1,4 +1,4 @@
-import { type Rand, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
+import { fillFrame, type Rand, type WeatherEffect, type WeatherSim, type WeatherSize, wrap } from "./types";
 
 interface Drop {
   x: number;
@@ -40,8 +40,7 @@ export function createRain(size: WeatherSize, count: number, rand: Rand, o: Rain
       }
     },
     draw(g) {
-      g.fillStyle = o.haze;
-      g.fillRect(0, 0, size.width, size.height);
+      fillFrame(g, size, o.haze);
       g.strokeStyle = o.color;
       g.lineWidth = o.lineWidth;
       g.lineCap = "round";
@@ -61,7 +60,6 @@ export const rain: WeatherEffect = {
   tint: "rgba(45,65,105,.3)",
   opacity: 0.85,
   density: 520,
-  cap: 520,
   create: (size, count, rand) =>
     createRain(size, count, rand, { wind: 80, minSpeed: 700, maxSpeed: 1000, color: "rgba(205,222,255,.85)", lineWidth: 1.6, haze: "rgba(30,45,80,.14)" }),
 };

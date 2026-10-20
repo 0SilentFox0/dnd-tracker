@@ -1,5 +1,5 @@
 import { createRain } from "./rain";
-import type { Rand, WeatherEffect, WeatherSim, WeatherSize } from "./types";
+import { fillFrame, type Rand, rgba, type WeatherEffect, type WeatherSim, type WeatherSize } from "./types";
 
 export const FLASH_SEC = 0.25;
 
@@ -28,10 +28,9 @@ export function createStorm(size: WeatherSize, count: number, rand: Rand): Weath
 
       if (flash <= 0) return;
 
-      g.fillStyle = `rgba(255,255,255,${(0.55 * flash).toFixed(3)})`;
-      g.fillRect(0, 0, size.width, size.height);
+      fillFrame(g, size, rgba("255,255,255", 0.55 * flash));
     },
   };
 }
 
-export const storm: WeatherEffect = { tint: "rgba(12,18,42,.42)", opacity: 0.85, density: 700, cap: 700, create: createStorm };
+export const storm: WeatherEffect = { tint: "rgba(12,18,42,.42)", opacity: 0.85, density: 700, create: createStorm };
