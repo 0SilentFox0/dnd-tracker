@@ -16,7 +16,7 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { isMazeDark, MAZE_DARK_ERROR, placeMazeParticipants, withMazeAwareness } from "@/lib/utils/battle/maze";
+import { isMazeDark, MAZE_DARK_ERROR, withMazeAwareness } from "@/lib/utils/battle/maze";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -108,12 +108,12 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
   }
 }
 
-function withVictory(scene: BattleSceneState, map: BattleMapConfig | null, result: MutationResult): MutationResult {
+function withVictory(scene: BattleSceneState, result: MutationResult): MutationResult {
   const status = result.scene?.status ?? scene.status;
 
   if (status !== BattleStatus.ACTIVE) return result;
 
-  const victory = checkVictoryConditions(result.participants, reserveOf(result.pending), { maze: !!map?.maze });
+  const victory = checkVictoryConditions(result.participants, reserveOf(result.pending));
 
   if (!victory.result) return result;
 
@@ -132,7 +132,7 @@ function withVictory(scene: BattleSceneState, map: BattleMapConfig | null, resul
 function withPlacement(map: BattleMapConfig | null, status: BattleStatus, result: MutationResult, place: boolean): MutationResult {
   if (!map || (result.scene?.status ?? status) !== BattleStatus.ACTIVE) return result;
 
-  const placed = !place ? result.participants : map.maze ? placeMazeParticipants({ cols: map.cols, rows: map.rows, maze: map.maze }, result.participants) : placeParticipants(map, result.participants);
+  const placed = place ? placeParticipants(map, result.participants) : result.participants;
 
   const participants = syncMapAuras(placed, map);
 
@@ -239,13 +239,11 @@ export async function runBattleMutation<TBody>(
       throw new BattleRuleError("action_rejected", MAZE_DARK_ERROR);
     }
 
-    const mazeOpts = { maze: !!loaded.meta.map?.maze };
-
     if (
       loaded.scene.status === BattleStatus.ACTIVE &&
       !options.allowWhileAwaitingDm &&
       !options.dryRun?.(parsed.body) &&
-      checkVictoryConditions(loaded.participants, reserveOf(loaded.pending), mazeOpts).awaiting
+      checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
     ) {
       throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
     }
@@ -256,7 +254,7 @@ export async function runBattleMutation<TBody>(
       throw new BattleConflictError(loaded.scene.version);
     }
 
-    const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending), mazeOpts).awaiting !== null;
+    const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting !== null;
 
     const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, parsed.body), new URL(req.url).pathname.split("/").pop());
 
@@ -266,7 +264,7 @@ export async function runBattleMutation<TBody>(
 
     const placed = withPlacement(map, loaded.scene.status, mutated, !isDryRun);
 
-    const result = withVictory(loaded.scene, map, isDryRun ? placed : withMazeAwareness(map, loaded.scene, placed));
+    const result = withVictory(loaded.scene, isDryRun ? placed : withMazeAwareness(map, loaded.scene, placed));
 
     if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
@@ -324,7 +322,7 @@ export async function runBattleMutation<TBody>(
       map: result.scene?.map,
     });
 
-    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta, maze: !!map?.maze }));
+    deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));
 
     return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
   } catch (err) {

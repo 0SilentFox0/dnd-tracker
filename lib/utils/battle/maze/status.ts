@@ -1,12 +1,8 @@
 import { ParticipantSide } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { inMazePlay, isActive, isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleParticipant } from "@/types/battle";
 
-export const isDormant = (p: BattleParticipant): boolean => !!p.battleData.dormant;
-
-export const isEscaped = (p: BattleParticipant): boolean => !!p.battleData.escaped;
-
-export const inMazePlay = (p: BattleParticipant): boolean => isActive(p) && !isDormant(p) && !isEscaped(p);
+export { inMazePlay, isDormant, isEscaped };
 
 /** Лише прапорці лабіринту: у звичайному бою завжди false. */
 export function mazeSkipsTurn(p: BattleParticipant, round: number): boolean {
@@ -15,7 +11,15 @@ export function mazeSkipsTurn(p: BattleParticipant, round: number): boolean {
 
 export const takesTurn = (p: BattleParticipant, round: number): boolean => isActive(p) && !mazeSkipsTurn(p, round);
 
-export const isMazeHero = (p: BattleParticipant): boolean => p.basicInfo.side === ParticipantSide.ALLY && inMazePlay(p) && p.battleData.position !== undefined;
+const isHeroSide = (p: BattleParticipant): boolean => p.basicInfo.side === ParticipantSide.ALLY;
+
+/** Стоїть на полі лабіринту: має клітинку, живий, не в резерві й не вибрався. */
+export const onMazeField = (p: BattleParticipant): boolean => p.battleData.position !== undefined && !p.battleData.reserved && !isEscaped(p) && isActive(p);
+
+/** Герої, що ще в лабіринті (зокрема без клітинки — їх розставить карта). */
+export const mazeHeroes = (ps: BattleParticipant[]): BattleParticipant[] => ps.filter((p) => isHeroSide(p) && !p.battleData.reserved && !isEscaped(p) && isActive(p));
+
+export const isMazeHero = (p: BattleParticipant): boolean => isHeroSide(p) && inMazePlay(p) && p.battleData.position !== undefined;
 
 /** Хто стоїть на ходу, коли ніхто не ходить: перший у грі лабіринту, інакше перший живий, інакше 0. */
 export function idleTurnIndex(order: BattleParticipant[]): number {

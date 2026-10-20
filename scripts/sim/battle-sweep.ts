@@ -1717,7 +1717,7 @@ async function mazeCheck() {
 
   const escapedAll = allies.length > 0 && allies.every((p) => p.battleData.escaped);
 
-  const awaiting = checkVictoryConditions(P(), [], { maze: true }).awaiting;
+  const awaiting = checkVictoryConditions(P()).awaiting;
 
   tcheck("Лабіринт: усі союзники вибралися → очікування рішення ДМ", escapedAll && awaiting === "victory" && state.status === "active", `вибралися ${allies.filter((p) => p.battleData.escaped).length}/${allies.length}; awaiting=${awaiting}; статус ${state.status}`);
 }
@@ -1754,5 +1754,5 @@ async function mazeTunnelCheck() {
 
   tcheck("Лабіринт: «1 тунель» — герої рядом від центру, вихід у кінці тунелю, вороги в резерві", rt.status === 200 && inLine && exitOnLine && onlyTunnel && enemiesGone && maze.teleports.length === 0 && maze.fog.length === 0, `${rt.status} у ряд=${inLine} вихід ${JSON.stringify(maze.exit)} лише тунель=${onlyTunnel} у резерві ${leaving.filter((id) => inReserve.has(id)).length}/${leaving.length}${rt.status !== 200 ? ` ${JSON.stringify(rt.body).slice(0, 150)}` : ""}`);
 
-  if (checkVictoryConditions(P(), reserve(), { maze: true }).awaiting && reserve().length > 0) await call("reveal-participant", REVEAL, { participantIds: reserve().map((p: any) => p.basicInfo.id) });
+  if (checkVictoryConditions(P(), reserve()).awaiting && reserve().length > 0) await call("reveal-participant", REVEAL, { participantIds: reserve().map((p: any) => p.basicInfo.id) });
 }

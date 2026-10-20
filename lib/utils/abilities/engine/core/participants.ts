@@ -30,8 +30,15 @@ export function isActive(p: BattleParticipant): boolean {
 
 export const isAirborne = (p: BattleParticipant): boolean => !!p.battleData.airborne;
 
+// прапорці лабіринту: сплячий і вибулий не діють і не зачіпаються масовими вміннями; поза лабіринтом завжди false
+export const isDormant = (p: BattleParticipant): boolean => !!p.battleData.dormant;
+
+export const isEscaped = (p: BattleParticipant): boolean => !!p.battleData.escaped;
+
+export const inMazePlay = (p: BattleParticipant): boolean => isActive(p) && !isDormant(p) && !isEscaped(p);
+
 export function isTargetable(p: BattleParticipant): boolean {
-  return isActive(p) && !isAirborne(p) && !p.battleData.escaped;
+  return isActive(p) && !isAirborne(p) && !isEscaped(p);
 }
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {

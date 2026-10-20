@@ -84,25 +84,25 @@ describe("maze: перемога", () => {
   const dead = (p: BattleParticipant): BattleParticipant => ({ ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD } });
 
   it("сплячий ворог живий: без перемоги", () => {
-    const v = checkVictoryConditions([hero("h"), foe("s", { dormant: true })], [], { maze: true });
+    const v = checkVictoryConditions([hero("h"), foe("s", { dormant: true })]);
 
     expect(v).toMatchObject({ isVictory: false, awaiting: null });
   });
 
   it("усі вороги мертві, сплячі теж: перемога", () => {
-    const v = checkVictoryConditions([hero("h"), dead(foe("s", { dormant: true }))], [], { maze: true });
+    const v = checkVictoryConditions([hero("h"), dead(foe("s", { dormant: true }))]);
 
     expect(v.isVictory).toBe(true);
   });
 
   it("усі живі герої вибралися: очікування рішення ДМ", () => {
-    const v = checkVictoryConditions([hero("h", { escaped: true }), dead(hero("d")), foe("s", { dormant: true })], [], { maze: true });
+    const v = checkVictoryConditions([hero("h", { escaped: true }), dead(hero("d")), foe("s", { dormant: true })]);
 
     expect(v).toMatchObject({ awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" });
   });
 
   it("є герой на полі: бій триває", () => {
-    const v = checkVictoryConditions([hero("h", { escaped: true }), hero("p"), foe("s")], [], { maze: true });
+    const v = checkVictoryConditions([hero("h", { escaped: true }), hero("p"), foe("s")]);
 
     expect(v.awaiting).toBeNull();
   });

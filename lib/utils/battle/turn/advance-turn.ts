@@ -130,7 +130,6 @@ export function advanceTurn({ participants, pending, scene, rng, map, skipEnding
     currentBattleLogLength: scene.eventSeq + actions.length,
     newLogEntries,
     reserve,
-    maze: !!map?.maze,
     getStateBeforeForEntry: () => undefined,
   });
 

@@ -8,7 +8,7 @@ import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/
 export const completeBattleSchema = z.object({ result: z.enum(["victory", "defeat"]).optional() });
 
 export function completeMutation(ctx: BattleMutationContext, body: z.infer<typeof completeBattleSchema>): MutationResult {
-  const result = body.result ?? checkVictoryConditions(ctx.participants, [], { maze: !!ctx.meta.map?.maze }).result ?? "victory";
+  const result = body.result ?? checkVictoryConditions(ctx.participants).result ?? "victory";
 
   const { updatedParticipants, battleAction } = completeBattle(ctx.participants, result, ctx.scene.round);
 

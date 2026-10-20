@@ -1,4 +1,5 @@
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -25,7 +26,6 @@ export function originalSide(p: BattleParticipant): ParticipantSide {
 export function checkVictoryConditions(
   initiativeOrder: BattleParticipant[],
   reserve: BattleParticipant[] = [],
-  opts: { maze?: boolean } = {},
 ): VictoryCheckResult {
   const reserveHas = (side: ParticipantSide) => reserve.some((p) => p.basicInfo.side === side);
 
@@ -58,7 +58,8 @@ export function checkVictoryConditions(
     };
   }
 
-  if (opts.maze && allies.some((a) => a.battleData.escaped) && !allies.some((a) => a.combatStats.status === CombatStatus.ACTIVE && !a.battleData.escaped)) {
+  // escaped ставить лише вихід лабіринту, тож окремий прапорець «це лабіринт» не потрібен
+  if (allies.some(isEscaped) && !allies.some((a) => isActive(a) && !isEscaped(a))) {
     return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" };
   }
 

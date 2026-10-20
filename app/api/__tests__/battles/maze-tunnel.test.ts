@@ -89,7 +89,7 @@ describe("перетасовка «1 тунель»", () => {
       expect(p.battleData.position).toBeUndefined();
     }
 
-    expect(checkVictoryConditions(out.participants, reserved, { maze: true }).isVictory).toBe(false);
+    expect(checkVictoryConditions(out.participants, reserved).isVictory).toBe(false);
   });
 
   it("стіни — лише тунель, вихід перенесено на його кінець; телепорти, туман і мітки стерто", () => {

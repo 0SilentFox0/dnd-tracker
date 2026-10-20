@@ -215,7 +215,7 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
 
   const reserveAll = reserveOf(battle.pendingSummons ?? []);
 
-  const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll, { maze: !!battle.map?.maze }).awaiting : null;
+  const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null;
 
   const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
 

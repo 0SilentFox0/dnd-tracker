@@ -15,7 +15,6 @@ export interface ApplyVictoryParams {
   currentBattleLogLength: number;
   newLogEntries: BattleAction[];
   reserve?: BattleParticipant[];
-  maze?: boolean;
   getStateBeforeForEntry: () =>
     | {
         initiativeOrder: BattleParticipant[];
@@ -41,11 +40,10 @@ export function applyVictoryCompletion(params: ApplyVictoryParams): ApplyVictory
     currentBattleLogLength,
     newLogEntries,
     reserve = [],
-    maze = false,
     getStateBeforeForEntry,
   } = params;
 
-  const victoryCheck = checkVictoryConditions(order, reserve, { maze });
+  const victoryCheck = checkVictoryConditions(order, reserve);
 
   let finalStatus = battleStatus;
 

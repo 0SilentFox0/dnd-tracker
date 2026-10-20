@@ -50,7 +50,7 @@ export function runAdvanceTurnLoop(
 
   const reserve = reserveOf(pendingSummons);
 
-  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve, { maze: !!params.map?.maze });
+  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve);
 
   let activeParticipantFound = false;
 
