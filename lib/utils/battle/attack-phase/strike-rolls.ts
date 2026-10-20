@@ -2,7 +2,7 @@ import type { AttackRequest, ValidatedAttackRequest } from "./request";
 
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
-import { diceCount, rollDiceList, rollDie } from "@/lib/utils/common/dice";
+import { diceCount, diceSlots, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 // multi-target ranged: основна ціль — повна шкода, додаткові — за falloff; інакше — damageDistribution або порівну
@@ -25,20 +25,20 @@ export function strikeD20(
   request: Pick<ValidatedAttackRequest, "singleRoll" | "usePerTargetRolls">,
   strike: { index: number; chosenAt: number; expanded: boolean },
   rng: Rng,
-): number {
+): { value: number; serverRolled: boolean } {
   const { singleRoll, usePerTargetRolls } = request;
 
-  const d20 = strike.expanded
-    ? ((usePerTargetRolls && strike.chosenAt >= 0 ? data.attackRolls?.[strike.chosenAt] : singleRoll) ?? rollDie(20, rng))
-    : usePerTargetRolls && data.attackRolls
-      ? data.attackRolls[strike.index]
-      : singleRoll;
+  const sent = strike.expanded ? (usePerTargetRolls && strike.chosenAt >= 0 ? data.attackRolls?.[strike.chosenAt] : singleRoll) : usePerTargetRolls && data.attackRolls ? data.attackRolls[strike.index] : singleRoll;
+
+  const serverRolled = strike.expanded && sent == null;
+
+  const d20 = serverRolled ? rollDie(20, rng) : sent;
 
   if (d20 == null || d20 < 1 || d20 > 20) {
     throw new BattleRuleError("action_rejected", `Некоректний кидок атаки для цілі ${strike.index + 1}`);
   }
 
-  return d20;
+  return { value: d20, serverRolled };
 }
 
 export interface StrikeDice {
@@ -61,7 +61,7 @@ export function damageDiceCursor(sent: number[], formula: string | null, rng: Rn
 
       if (own.length >= perStrike) return { rolls: own, serverRolled: null };
 
-      const extra = rollDiceList(formula, rng).slice(own.length);
+      const extra = diceSlots(formula).slice(own.length).map((sides) => rollDie(sides, rng));
 
       return { rolls: [...own, ...extra], serverRolled: extra };
     },

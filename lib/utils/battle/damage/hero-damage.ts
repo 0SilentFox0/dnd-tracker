@@ -1,7 +1,7 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { diceAverage, diceCount, mergeDiceFormulas } from "@/lib/utils/common/dice";
+import { diceAverage, diceCount, diceSlots, mergeDiceFormulas, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface HeroAttackDamageParts {
@@ -20,6 +20,17 @@ export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack
   const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type);
 
   return { weaponDice, heroDice, formula: mergeDiceFormulas(weaponDice, heroDice) };
+}
+
+/** Розміри кубиків шкоди за зростанням, як у формі гравця; вільний текст юніта («2d6 + STR») читається за першою групою. */
+export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {
+  const { formula } = heroAttackDamageParts(p, attack);
+
+  const strict = diceSlots(formula);
+
+  if (strict.length) return strict;
+
+  return parseDiceLenient(formula).groups.flatMap((g) => Array.from({ length: g.count }, () => g.size));
 }
 
 export interface HeroDamageContext {

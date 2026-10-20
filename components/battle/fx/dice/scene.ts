@@ -17,9 +17,9 @@ import {
   WebGLRenderer,
 } from "three";
 
-import { type Backend, createDiceEngine, type DiceEngine, DIE_RADIUS,type DieHandle } from "./engine";
+import { type Backend, createDiceEngine, type DiceEngine, type DieHandle } from "./engine";
 
-import { cross, DIM_NUMBERS, dot, getPolyhedron, len, sub } from "@/lib/utils/battle/fx/dice";
+import { cross, DIE_RADIUS, DIM_NUMBERS, dot, getPolyhedron, len, sub } from "@/lib/utils/battle/fx/dice";
 import type { DieSides } from "@/types/battle";
 
 const CELL_PX = 128;

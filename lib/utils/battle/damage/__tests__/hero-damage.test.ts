@@ -6,8 +6,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
-import { damageDiceSlots } from "@/lib/utils/battle/view";
+import { damageDiceSlots, heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const base = createMockParticipant();

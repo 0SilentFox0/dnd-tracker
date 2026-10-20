@@ -10,7 +10,7 @@ import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
 import { applyMainActionUsed, getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
@@ -87,14 +87,25 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
   }
 
-  const damageFormula = heroAttackDamageParts(getP(flow, attackerId), attack).formula;
+  const slots = damageDiceSlots(getP(flow, attackerId), attack);
 
   const withRollDetails = <T extends { actionDetails: BattleAction["actionDetails"] }>(action: T): T => {
     if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
 
     const damage = (action.actionDetails.damageRolls ?? []).flatMap((r) => r.results);
 
-    action.actionDetails.diceRolls = attackDiceRolls({ attackerId, targetId, d20: d20Roll, ...(second && { second, chosenD20: attackRoll.chosenD20 }), damage, damageFormula });
+    if (!params.recordDice) return action;
+
+    action.actionDetails.diceRolls = attackDiceRolls({
+      attackerId,
+      targetId,
+      d20: d20Roll,
+      d20Server: params.serverRolled?.d20,
+      ...(second && { second, chosenD20: attackRoll.chosenD20 }),
+      damage,
+      slots,
+      damageServerFrom: params.serverRolled?.damageFrom,
+    });
 
     return action;
   };

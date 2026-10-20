@@ -73,7 +73,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const d20Roll = strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
     const strikeDice = dice.next();
 
@@ -83,7 +83,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       attacker: currentAttacker,
       target: findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target,
       attack,
-      d20Roll,
+      d20Roll: strike.value,
       advantageRoll: second,
       disadvantageRoll: second,
       rollMode: data.rollMode,
@@ -97,6 +97,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       map: input.map,
       hitSpells: input.hitSpells,
       rng,
+      recordDice: true,
+      serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
     });
 
     if (attackResult.success) dice.hit();
