@@ -44,7 +44,7 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellDistance, cellKey, inBounds, mapCentre, neighbors, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/modes/maze";
-import { emptyMaze,MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN } from "@/lib/utils/battle/modes/maze/constants";
+import { emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN } from "@/lib/utils/battle/modes/maze/constants";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";

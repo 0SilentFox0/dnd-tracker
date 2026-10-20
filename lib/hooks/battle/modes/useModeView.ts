@@ -2,8 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 
-import { useBattleSceneData } from "../useBattleScene";
-
+import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import type { ModeView } from "@/lib/utils/battle/modes";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

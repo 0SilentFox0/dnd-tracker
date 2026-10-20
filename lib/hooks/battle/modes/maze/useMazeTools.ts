@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 
-import { useBattleScene } from "../../useBattleScene";
 import { type MazeEdgeStroke, useMazeEdgeStroke } from "./useMazeEdgeStroke";
 import { IDLE_MAZE_TOOL, type MazeGenerateInput, type MazeTool, useMazeToolState } from "./useMazeToolState";
 import { type MazeAsHero, useMazeView } from "./useMazeView";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { useBattleScene } from "@/lib/hooks/battle/useBattleScene";
 import { useNotify } from "@/lib/hooks/common";
 import { cellKey, samePoint } from "@/lib/utils/battle/grid";
 import { isEdgeCell } from "@/lib/utils/battle/modes/maze";

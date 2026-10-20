@@ -34,5 +34,5 @@ export function useModeDmPlace(map: BattleMapConfig | null | undefined): ((body:
 }
 
 export function useModeAutoSkip(): void {
-  useMazeDarkAutoSkip();
+  void ({ maze: useMazeDarkAutoSkip() } satisfies Record<MapModeKey, void>);
 }

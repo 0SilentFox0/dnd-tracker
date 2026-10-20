@@ -31,6 +31,7 @@ export interface SkillUpdatePayload {
 // Battles API
 import type { BattleAction,BattleParticipant, BattlePreparationParticipant } from "./battle";
 
+import type { MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 
 export interface BattleScene {
@@ -89,7 +90,7 @@ export interface ClientBattleDelta {
     terrain?: TerrainDiff;
     /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
     maze?: Partial<Omit<MazeConfig, "walls">>;
-  };
+  } & Partial<Record<Exclude<MapModeKey, "maze">, unknown>>;
   upserted: BattleParticipant[];
   patched?: BattleParticipantPatch[];
   removed: string[];

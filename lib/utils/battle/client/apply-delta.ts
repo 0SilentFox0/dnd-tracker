@@ -1,6 +1,6 @@
 import { BattleStatus } from "@/lib/constants/battle";
 import { applyTerrainDiff } from "@/lib/utils/battle/grid/terrain";
-import { mergeModeDeltas,MODE_MAP_KEYS } from "@/lib/utils/battle/modes/client";
+import { mergeModeDeltas, MODE_MAP_KEYS } from "@/lib/utils/battle/modes/client";
 import type { BattleParticipantPatch, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

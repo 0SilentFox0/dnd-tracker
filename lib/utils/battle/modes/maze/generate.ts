@@ -7,7 +7,7 @@ import { scatterAll } from "./scatter";
 import { isEdgeCell } from "./walls";
 
 import { allCells, cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
-import { emptyMaze,MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/utils/battle/modes/maze/constants";
+import { emptyMaze, MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/utils/battle/modes/maze/constants";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { GridPoint, MazeConfig, MazeDifficulty } from "@/types/battle";
 

@@ -16,7 +16,11 @@ export const allMapModes = (): MapModeDefinition<unknown>[] => [...(Object.value
 export function registerTestMode(mode: MapModeDefinition<unknown>): () => void {
   testModes.push(mode);
 
-  return () => void testModes.splice(testModes.indexOf(mode), 1);
+  return () => {
+    const i = testModes.indexOf(mode);
+
+    if (i >= 0) testModes.splice(i, 1);
+  };
 }
 
 export function activeMapMode(map: BattleMapConfig | null | undefined): MapModeDefinition<unknown> {

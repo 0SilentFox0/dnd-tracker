@@ -7,7 +7,7 @@ import { MazeViewProvider } from "../MazeViewProvider";
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { useModeView } from "@/lib/hooks/battle";
+import { ModeViewContext, useModeView } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
@@ -86,5 +86,45 @@ describe("маска лабіринту для гравця під MazeViewProvi
       expect(result.current.turn.current?.basicInfo.name).toBe("Гоблін");
       expect(result.current.battle.battleLog).toHaveLength(3);
     }
+  });
+
+  it("провайдер без лабіринту пропускає вигляд зовнішнього режиму", () => {
+    const outer = { view: null, visible: () => false, fxLog: [] };
+
+    const s = mazeScene({ maze: false });
+
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <s.wrapper>
+        <ModeViewContext.Provider value={outer}>
+          <MazeViewProvider>{children}</MazeViewProvider>
+        </ModeViewContext.Provider>
+      </s.wrapper>
+    );
+
+    const { result } = renderHook(() => useModeView(), { wrapper: Wrapper });
+
+    expect(result.current).toBe(outer);
+  });
+
+  it("вигляд лабіринту доходить до споживача крізь внутрішній неактивний провайдер", () => {
+    const s = mazeScene();
+
+    const Inactive = ({ children }: { children: ReactNode }) => {
+      const parent = useModeView();
+
+      return <ModeViewContext.Provider value={parent}>{children}</ModeViewContext.Provider>;
+    };
+
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <s.wrapper>
+        <MazeViewProvider>
+          <Inactive>{children}</Inactive>
+        </MazeViewProvider>
+      </s.wrapper>
+    );
+
+    const { result } = renderHook(() => useModeView(), { wrapper: Wrapper });
+
+    expect(result.current.view).not.toBeNull();
   });
 });

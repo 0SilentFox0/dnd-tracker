@@ -1,5 +1,6 @@
 import { BattleStatus } from "@/lib/constants/battle";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
+import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { MODE_MAP_KEYS, modeDeltas } from "@/lib/utils/battle/modes/client";
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
@@ -14,7 +15,7 @@ const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((
 const baseOf = (map: BattleMapConfig) => JSON.stringify(Object.fromEntries(Object.entries(map).filter(([k]) => k !== "terrain" && !MODE_MAP_KEYS.includes(k))));
 
 // повну карту шлемо лише коли змінилось щось, крім місцевості й полів лабіринту: інакше великі штрихи переповнюють Pusher
-function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain" | "maze"> {
+function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain" | MapModeKey> {
   if (after === undefined || before === after) return {};
 
   if (!before || !after || baseOf(before) !== baseOf(after)) return { map: after };

@@ -1,5 +1,6 @@
 import type { MapModeDefinition } from "../types";
 import { withMazeAwareness } from "./awareness";
+import { emptyMaze } from "./constants";
 import { mazeChange } from "./delta";
 import { mazeGridOf } from "./grid";
 import { mazeMoveZone } from "./move-zone";
@@ -7,12 +8,11 @@ import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
 import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
+import { MAZE_TEXTS } from "./texts";
 import { mazeFxVisible, mazeLogVisible } from "./view";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
-import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
-import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
 
