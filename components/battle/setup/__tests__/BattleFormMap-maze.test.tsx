@@ -40,6 +40,8 @@ function Harness() {
 
 afterEach(cleanup);
 
+const drawingHidden = () => (screen.getByText("Малювання клітинок").parentElement as HTMLElement).hidden;
+
 describe("перемикач «Лабіринт»", () => {
   it("без карти перемикача немає", () => {
     render(<Harness />);
@@ -57,11 +59,11 @@ describe("перемикач «Лабіринт»", () => {
     fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
 
     expect(seen.editor.state.value?.maze).toEqual(emptyMaze());
-    expect(screen.queryByText("Малювання клітинок")).toBeNull();
+    expect(drawingHidden()).toBe(true);
 
     fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
 
     expect(seen.editor.state.value?.maze).toBeNull();
-    expect(screen.getByText("Малювання клітинок")).toBeTruthy();
+    expect(drawingHidden()).toBe(false);
   });
 });

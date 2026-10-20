@@ -10,10 +10,11 @@ import { MazeEditPalette, MazeToolbar } from "./maze";
 import { useBattleMapScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-function ModeButton({ active, onClick, tall, children }: { active: boolean; onClick: () => void; tall: boolean; children: string }) {
+function ModeButton({ active, onClick, tall, hidden, children }: { active: boolean; onClick: () => void; tall: boolean; hidden?: boolean; children: string }) {
   return (
     <button
       type="button"
+      hidden={hidden}
       aria-pressed={active}
       onClick={onClick}
       className={cn(
@@ -47,22 +48,20 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
         <ModeButton active={placement.active} onClick={placement.toggle} tall={inRow}>
           Розставити
         </ModeButton>
-        {!scene.map.maze && (
-          <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow}>
-            Місцевість
-          </ModeButton>
-        )}
         {mazeTools && <MazeToolbar tools={mazeTools} tall={inRow} />}
+        <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow} hidden={!!scene.map.maze}>
+          Місцевість
+        </ModeButton>
       </div>
-      {mazeTools && mazeTools.tool !== "none" && (
-        <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
-          <MazeEditPalette tools={mazeTools} />
-        </div>
-      )}
       {terrainTool.active && (
         // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду
         <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
           <MapTerrainToolbar tool={terrainTool} />
+        </div>
+      )}
+      {mazeTools && mazeTools.tool !== "none" && (
+        <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
+          <MazeEditPalette tools={mazeTools} />
         </div>
       )}
     </div>
