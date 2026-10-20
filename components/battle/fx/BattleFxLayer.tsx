@@ -4,11 +4,14 @@ import { useEffect, useRef } from "react";
 
 import "@/components/battle/fx/fx.css";
 import { preloadAnimation } from "@/components/battle/fx/animations";
-import { DICE_TOTAL_MS, DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
+import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
 import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
 import { MAX_FX_MS } from "@/lib/utils/battle/fx";
+import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
+
+const DICE_BUDGET_MS = FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300;
 
 function withTimeout(run: Promise<void>, ms: number, onTimeout: () => void) {
   let timer = 0;
@@ -72,7 +75,7 @@ export function BattleFxLayer() {
 
       if (!current.dice) return;
 
-      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300, () => dice.current?.cancel());
+      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), DICE_BUDGET_MS, () => dice.current?.cancel());
     };
 
     // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.
@@ -80,7 +83,7 @@ export function BattleFxLayer() {
       cancelLayer(el);
       dice.current?.cancel();
       finish();
-    }, MAX_FX_MS + FX_LOAD_TIMEOUT_MS);
+    }, (current.archetype === "dice" ? DICE_BUDGET_MS + 300 : MAX_FX_MS) + FX_LOAD_TIMEOUT_MS);
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()

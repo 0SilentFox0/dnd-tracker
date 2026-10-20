@@ -2,10 +2,12 @@
 
 import { useEffect, useReducer, useRef } from "react";
 
+import { afterMoraleDice } from "./morale-dice";
 import { useBattleScene } from "./useBattleScene";
+import { useFxEnabled } from "./useFxEnabled";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { useConfirm } from "@/lib/hooks/common";
+import { useConfirm, usePageHidden } from "@/lib/hooks/common";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
 import { checkReturnToStart } from "@/lib/utils/battle/grid";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
@@ -19,6 +21,12 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
   const scene = useBattleScene();
 
   const confirm = useConfirm();
+
+  const fx = useFxEnabled();
+
+  const hidden = usePageHidden();
+
+  const fxActive = fx.enabled && !hidden;
 
   const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
     turnFlow(s, { type: "BEGIN", needsMorale: needsMoraleCheck(participant, scene.battle.initiativeOrder, scene.battle.pendingMoraleCheck) }),
@@ -104,6 +112,14 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
       dispatch({ type: "MORALE_RESULT", result });
 
       const base = { name: participant.basicInfo.name, d10, morale: effectiveMorale(participant, scene.readBattle()?.initiativeOrder ?? []).value };
+
+      if (fxActive && result !== "none") {
+        const signal = lifetime.current?.signal;
+
+        await afterMoraleDice(signal);
+
+        if (signal?.aborted) return;
+      }
 
       if (result === "extra") scene.result.show({ kind: "morale-extra", ...base });
       else if (result === "skip") {

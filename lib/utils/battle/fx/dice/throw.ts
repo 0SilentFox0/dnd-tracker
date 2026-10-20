@@ -4,6 +4,14 @@ import { createRng } from "./rng";
 
 export const THROW_MS = 1400;
 
+// гравці мають встигнути прочитати значення, тож кубики лежать ~2.3 с після приземлення
+export const DICE_HOLD_MS = 2350;
+
+export const DICE_FADE_MS = 400;
+
+// останній кубик стартує до 0.3 с пізніше (planThrow) — все одно встигає лягти в межах показу
+export const DICE_TOTAL_MS = THROW_MS + DICE_HOLD_MS + DICE_FADE_MS;
+
 export const DIE_RADIUS = 0.9;
 
 // Contact times (fraction of the throw): first landing, then three decaying bounces; the value locks on the last one.
@@ -80,16 +88,6 @@ export function computeRig(grid: { cols: number; rows: number }, { width, height
   const right = norm(cross(forward, [0, 1, 0]));
 
   return { pos, target, right, up: cross(right, forward), forward, fov: FOV, aspect, halfW: needW };
-}
-
-export function projectedDiePx(rig: Rig, { width, height }: { width: number; height: number }) {
-  const c: Vec3 = [0, 0, 0];
-
-  const [x0, y0] = project(rig, c, width, height);
-
-  const [x1, y1] = project(rig, [rig.right[0] * DIE_RADIUS, rig.right[1] * DIE_RADIUS, rig.right[2] * DIE_RADIUS], width, height);
-
-  return 2 * Math.hypot(x1 - x0, y1 - y0);
 }
 
 export function project(rig: Rig, p: Vec3, width: number, height: number): [number, number] {

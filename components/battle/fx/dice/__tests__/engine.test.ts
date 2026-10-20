@@ -1,11 +1,10 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type Backend, captionLines, createDiceEngine, DICE_TOTAL_MS } from "../engine";
+import { type Backend, createDiceEngine } from "../engine";
 
-import { FX_LOAD_TIMEOUT_MS } from "@/components/battle/fx/runtime/play";
-import { MAX_FX_MS } from "@/lib/utils/battle/fx";
 import type { DiceThrowSpec } from "@/lib/utils/battle/fx/dice";
+import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
 
 const spec: DiceThrowSpec = {
   seed: 7,
@@ -16,8 +15,6 @@ const spec: DiceThrowSpec = {
     ],
     [{ sides: 6, value: 3 }],
   ],
-  caption: "Айвен · атака → Біс",
-  extraSaves: 0,
 };
 
 function fakeBackend() {
@@ -61,24 +58,16 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const badgeTexts = () => Array.from(host.firstElementChild?.querySelectorAll("div") ?? []).map((el) => el.textContent);
-
 describe("dice engine", () => {
-  it("the whole throw fits the FX budget, so the action FX still follows", () => {
-    expect(DICE_TOTAL_MS + FX_LOAD_TIMEOUT_MS).toBeLessThanOrEqual(MAX_FX_MS);
-  });
+  it("no text over the dice; the dropped die is passed to the backend to dim", () => {
+    const backend = fakeBackend();
 
-  it("badge state comes from the slot: disadvantage keeps the lower die", () => {
-    const engine = createDiceEngine(host, fakeBackend);
+    const engine = createDiceEngine(host, () => backend);
 
     void engine.roll(spec);
 
-    const badges = Array.from(host.querySelectorAll<HTMLElement>("div > div > div")).filter((el) => /^\d+$/.test(el.textContent ?? ""));
-
-    expect(badges.map((b) => b.textContent)).toEqual(["4", "17", "3"]);
-    expect(badges[0].style.background).toContain("#ffd24a");
-    expect(badges[1].style.textDecoration).toBe("line-through");
-    expect(badgeTexts()).toContain("Айвен · атака → Біс");
+    expect(host.textContent).toBe("");
+    expect(backend.createDie).toHaveBeenNthCalledWith(2, expect.objectContaining({ sides: 20, value: 17, dropped: true }));
     engine.dispose();
   });
 
@@ -99,13 +88,12 @@ describe("dice engine", () => {
     await vi.advanceTimersByTimeAsync(200);
     expect(resolved).toBe(true);
     expect(backend.handles.every((h) => h.dispose.mock.calls.length === 1)).toBe(true);
-    expect(badgeTexts()).toEqual([]);
     expect(host.style.opacity).toBe("");
     engine.dispose();
     expect(backend.dispose).toHaveBeenCalledTimes(1);
   });
 
-  it("cancel resolves the throw at once and clears dice and badges", async () => {
+  it("cancel resolves the throw at once and clears the dice", async () => {
     const backend = fakeBackend();
 
     const engine = createDiceEngine(host, () => backend);
@@ -119,13 +107,7 @@ describe("dice engine", () => {
 
     expect(resolved).toBe(true);
     expect(backend.handles.every((h) => h.dispose.mock.calls.length === 1)).toBe(true);
-    expect(badgeTexts()).toEqual([]);
     engine.dispose();
   });
 
-  it("caption adds the hidden saves and dice beyond the limit", () => {
-    expect(captionLines({ ...spec, extraSaves: 2 }, 0)).toEqual(["Айвен · атака → Біс", "+2 рятунки"]);
-    expect(captionLines({ ...spec, extraSaves: 5 }, 1)).toEqual(["Айвен · атака → Біс", "+5 рятунків · +1 кубик"]);
-    expect(captionLines(spec, 0)).toEqual(["Айвен · атака → Біс"]);
-  });
 });

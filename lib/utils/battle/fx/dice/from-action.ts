@@ -5,8 +5,6 @@ import type { BattleAction, DiceRollGroup, DieSides } from "@/types/battle";
 export interface DiceThrowSpec {
   seed: number;
   groups: Array<Array<{ sides: DieSides; value: number; chosen?: boolean; dropped?: boolean }>>;
-  caption: string;
-  extraSaves: number;
 }
 
 const toDie = (group: DiceRollGroup) => {
@@ -15,26 +13,23 @@ const toDie = (group: DiceRollGroup) => {
   return group.dice.map((d) => ({ sides: d.sides, value: d.value, ...(d.chosen && { chosen: true }), ...(pick && !d.chosen && { dropped: true }) }));
 };
 
-function captionOf(action: BattleAction): string {
-  const target = action.targets[0]?.participantName;
+type RollKind = DiceRollGroup["kind"];
 
-  if (action.actionType === "spell") return `${action.actorName} · ${action.actionDetails.spellName ?? "заклинання"}`;
+// влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
+const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"]];
 
-  if (action.actionType === "attack") return `${action.actorName} · атака${target ? ` → ${target}` : ""}`;
-
-  return `${action.actorName} · мораль`;
-}
-
-export function diceThrowOf(action: BattleAction): DiceThrowSpec | null {
+export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
   const rolls = action.actionDetails.diceRolls;
 
-  if (action.isCancelled || !rolls?.length) return null;
+  if (action.isCancelled || !rolls?.length) return [];
 
-  const saves = rolls.filter((g) => g.kind === "save");
+  return PHASES.flatMap((kinds, phase) => {
+    const own = rolls.filter((g) => kinds.includes(g.kind));
 
-  const shownSaves = saves.slice(0, MAX_SAVES_SHOWN).flatMap(toDie);
+    if (!own.length) return [];
 
-  const groups = [...rolls.filter((g) => g.kind !== "save").map(toDie), ...(shownSaves.length ? [shownSaves] : [])];
+    const groups = kinds.includes("save") ? [own.slice(0, MAX_SAVES_SHOWN).flatMap(toDie)] : own.map(toDie);
 
-  return { seed: action.actionIndex, groups, caption: captionOf(action), extraSaves: Math.max(0, saves.length - MAX_SAVES_SHOWN) };
+    return [{ seed: action.actionIndex * PHASES.length + phase, groups }];
+  });
 }

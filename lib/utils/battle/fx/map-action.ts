@@ -1,4 +1,4 @@
-import { diceThrowOf } from "./dice/from-action";
+import { diceThrowsOf } from "./dice/from-action";
 import { elementOf } from "./element";
 import { spellFx } from "./spells";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
@@ -60,9 +60,7 @@ export function mapAction(action: BattleAction): FxSpec[] {
 
   const main = primary(action);
 
-  const throwSpec = diceThrowOf(action);
-
-  const dice: FxSpec[] = throwSpec ? [{ key: `${action.id}:dice`, archetype: "dice", element: "arcane", actorId: action.actorId, actorSide: action.actorSide, targetIds: [], hit: true, critical: false, dice: throwSpec }] : [];
+  const dice: FxSpec[] = diceThrowsOf(action).map((spec, i) => ({ key: `${action.id}:dice:${i}`, archetype: "dice", element: "arcane", actorId: action.actorId, actorSide: action.actorSide, targetIds: [], hit: true, critical: false, dice: spec }));
 
   const deaths: FxSpec[] = action.hpChanges
     .filter((h) => h.oldHp > 0 && h.newHp <= 0)

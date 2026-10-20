@@ -83,6 +83,7 @@ model Character {
   subrace             String?
   alignment           String?
   background          String?
+  notes               String?
   experience          Int                 @default(0)
   avatar              String?
   strength            Int                 @default(10)
