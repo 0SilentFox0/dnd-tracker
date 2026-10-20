@@ -1,78 +1,79 @@
 import { describe, expect, it } from "vitest";
 
 import { emptyMaze } from "@/lib/constants/battle";
-import { cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
-import { allReachExit, clusterAt, roomCentre, tunnelRoom } from "@/lib/utils/battle/maze";
+import { cellKey, neighbors } from "@/lib/utils/battle/grid/geometry";
+import { canStep, heroTunnel, mazeDistances, roomCentre, wallSet } from "@/lib/utils/battle/maze";
 import type { GridPoint } from "@/types/battle";
 
 const grid = { cols: 11, rows: 9 };
 
-const exits: Array<[string, GridPoint]> = [
-  ["лівий край", { x: 0, y: 2 }],
-  ["правий край", { x: 10, y: 6 }],
-  ["верхній край", { x: 3, y: 0 }],
-  ["нижній край", { x: 8, y: 8 }],
+const c = roomCentre(grid);
+
+const exits: Array<[string, GridPoint, "w" | "e" | "n" | "s", GridPoint]> = [
+  ["лівий край", { x: 0, y: 2 }, "w", { x: 0, y: c.y }],
+  ["правий край", { x: 10, y: 6 }, "e", { x: 10, y: c.y }],
+  ["верхній край", { x: 3, y: 0 }, "n", { x: c.x, y: 0 }],
+  ["нижній край", { x: 8, y: 8 }, "s", { x: c.x, y: 8 }],
 ];
 
-describe("tunnelRoom", () => {
-  it.each(exits)("%s: прямий тунель від виходу до центру, стіни лише вздовж нього", (_, exit) => {
-    const { walls, cells, mouth } = tunnelRoom(grid, exit);
+const mazeOf = (walls: string[], exit: GridPoint) => ({ ...grid, maze: { ...emptyMaze(), walls, exit } });
 
-    const c = roomCentre(grid);
+describe("heroTunnel", () => {
+  it.each(exits)("%s: прямий тунель від центру до того ж краю, вихід перенесено на його кінець", (_, oldExit, dir, newExit) => {
+    const t = heroTunnel(grid, oldExit, 3)!;
 
-    expect(cells[0].x === exit.x || cells[0].y === exit.y).toBe(true);
-    expect(cells.some((p) => cellKey(p) === cellKey(exit))).toBe(true);
+    expect(t.dir).toBe(dir);
+    expect(t.cells[0]).toEqual(c);
+    expect(t.exit).toEqual(newExit);
+    expect(t.cells.at(-1)).toEqual(newExit);
 
-    const horizontal = exit.x === 0 || exit.x === grid.cols - 1;
+    const horizontal = dir === "w" || dir === "e";
 
-    expect(cells.every((p) => (horizontal ? p.y === exit.y : p.x === exit.x))).toBe(true);
-    expect(mouth).toEqual(horizontal ? { x: c.x, y: exit.y } : { x: exit.x, y: c.y });
-    expect(cells.every((p) => cellDistance(p, mouth) >= 1)).toBe(true);
-    expect(cellDistance(cells.reduce((a, b) => (cellDistance(a, mouth) < cellDistance(b, mouth) ? a : b)), mouth)).toBe(1);
+    expect(t.cells.every((p) => (horizontal ? p.y === c.y : p.x === c.x))).toBe(true);
+  });
 
-    const tunnel = new Set(cells.map(cellKey));
+  it.each(exits)("%s: шлях до виходу лише вздовж тунелю, сусіди поза тунелем відгороджені", (_, oldExit) => {
+    const t = heroTunnel(grid, oldExit, 3)!;
 
-    for (const w of walls) {
-      const [x, y, side] = w.split(":");
+    const g = mazeOf(t.walls, t.exit);
 
-      const a = { x: Number(x), y: Number(y) };
+    const walls = wallSet(g.maze);
 
-      const b = side === "e" ? { x: a.x + 1, y: a.y } : { x: a.x, y: a.y + 1 };
+    const inside = new Set(t.cells.map(cellKey));
 
-      expect(tunnel.has(cellKey(a)) !== tunnel.has(cellKey(b))).toBe(true);
-      expect(side).toBe(horizontal ? "s" : "e");
+    for (const p of t.cells) {
+      for (const n of neighbors(p)) {
+        if (n.x < 0 || n.y < 0 || n.x >= grid.cols || n.y >= grid.rows || inside.has(cellKey(n))) continue;
+
+        expect(canStep(g, walls, p, n)).toBe(false);
+      }
     }
 
-    expect(walls.length).toBe(cells.length * 2);
+    const reach = mazeDistances(g, [t.exit]);
+
+    expect(t.cells.every((p) => reach.has(cellKey(p)))).toBe(true);
+    expect([...reach.keys()].every((k) => inside.has(k))).toBe(true);
   });
 
-  it.each(exits)("%s: героїв скупчено біля центру поза тунелем, усі доходять до виходу", (_, exit) => {
-    const { walls, cells } = tunnelRoom(grid, exit);
-
-    const maze = { cols: grid.cols, rows: grid.rows, maze: { ...emptyMaze(), walls, exit } };
-
-    const blocked = new Set(cells.map(cellKey));
-
-    const spots = clusterAt(maze, roomCentre(grid), 5, blocked)!;
-
-    expect(spots).toHaveLength(5);
-    expect(spots.some((p) => blocked.has(cellKey(p)))).toBe(false);
-    expect(new Set(spots.map(cellKey)).size).toBe(5);
-    expect(spots.every((p) => cellDistance(p, roomCentre(grid)) <= 1)).toBe(true);
-    expect(allReachExit(maze, spots)).toBe(true);
+  it("кутовий вихід — довша вісь", () => {
+    expect(heroTunnel({ cols: 15, rows: 7 }, { x: 0, y: 0 }, 2)!.dir).toBe("w");
+    expect(heroTunnel({ cols: 7, rows: 15 }, { x: 0, y: 0 }, 2)!.dir).toBe("n");
   });
-});
 
-describe("clusterAt", () => {
-  it("обходить заблоковані клітинки й повертає null, коли місця не вистачає", () => {
-    const maze = { cols: 3, rows: 3, maze: emptyMaze() };
+  it("мала карта: герої впритул влазять, клітинка виходу лишається вільною", () => {
+    const small = { cols: 7, rows: 7 };
 
-    const blocked = new Set(["1:1", "0:0"]);
+    const t = heroTunnel(small, { x: 0, y: 3 }, 3)!;
 
-    const spots = clusterAt(maze, { x: 1, y: 1 }, 7, blocked)!;
+    expect(t.dir).toBe("w");
+    expect(t.cells).toHaveLength(4);
+  });
 
-    expect(spots.map(cellKey)).not.toContain("1:1");
-    expect(spots).toHaveLength(7);
-    expect(clusterAt(maze, { x: 1, y: 1 }, 8, blocked)).toBeNull();
+  it("героїв більше, ніж клітинок до старого краю — протилежний край, далі інша вісь", () => {
+    const wide = { cols: 12, rows: 5 };
+
+    expect(heroTunnel(wide, { x: 11, y: 2 }, 6)!.dir).toBe("w");
+    expect(heroTunnel({ cols: 5, rows: 12 }, { x: 0, y: 2 }, 6)!.dir).toBe("n");
+    expect(heroTunnel({ cols: 5, rows: 5 }, { x: 0, y: 2 }, 6)).toBeNull();
   });
 });

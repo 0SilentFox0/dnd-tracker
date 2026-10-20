@@ -16,7 +16,7 @@ export interface VictoryCheckResult {
 }
 
 /** Зачарований юніт у переможних умовах лишається на своєму початковому боці. */
-function originalSide(p: BattleParticipant): ParticipantSide {
+export function originalSide(p: BattleParticipant): ParticipantSide {
   const origin = p.battleData.charmReturn ?? p.battleData.activeEffects.find((e) => e.charmOrigin)?.charmOrigin;
 
   return origin?.side ?? p.basicInfo.side;

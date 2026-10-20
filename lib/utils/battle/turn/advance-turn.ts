@@ -20,6 +20,8 @@ export interface AdvanceTurnInput {
   pending: BattleParticipant[];
   scene: BattleSceneState;
   map?: BattleMapConfig | null;
+  /** Того, хто ходив, уже немає в черзі: не завершувати хід учасника на turnIndex удруге */
+  skipEnding?: boolean;
 }
 
 export interface AdvanceTurnOutput {
@@ -29,7 +31,7 @@ export interface AdvanceTurnOutput {
   actions: BattleAction[];
 }
 
-export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceTurnInput): AdvanceTurnOutput {
+export function advanceTurn({ participants, pending, scene, rng, map, skipEnding = false }: AdvanceTurnInput): AdvanceTurnOutput {
   let order = participants;
 
   const actions: BattleAction[] = [];
@@ -42,7 +44,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
     if (morale.moraleLogEntry) actions.push(morale.moraleLogEntry);
   }
 
-  const ending = order[scene.turnIndex];
+  const ending = skipEnding ? undefined : order[scene.turnIndex];
 
   // невикористані додаткові дії згорають разом із ходом
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));
@@ -63,7 +65,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
 
   const current = order[scene.turnIndex];
 
-  const endingExtraTurn = current?.battleData.extraTurnActive === true;
+  const endingExtraTurn = !skipEnding && current?.battleData.extraTurnActive === true;
 
   if (endingExtraTurn) {
     order = order.map((p, i) =>
