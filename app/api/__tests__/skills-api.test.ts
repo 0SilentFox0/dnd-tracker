@@ -523,10 +523,10 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { id: string; basicInfo: { name: string } };
+    const data = await getResponseJson(response) as { id: string; name: string };
 
     expect(data.id).toBe("skill-1");
-    expect(data.basicInfo.name).toBe("Fireball");
+    expect(data.name).toBe("Fireball");
   });
 });
 
@@ -652,10 +652,10 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { id: string; basicInfo: { name: string } };
+    const data = await getResponseJson(response) as { id: string; name: string };
 
     expect(data.id).toBe("skill-1");
-    expect(data.basicInfo.name).toBe("Updated Name");
+    expect(data.name).toBe("Updated Name");
   });
 });
 

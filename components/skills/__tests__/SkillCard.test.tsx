@@ -6,7 +6,7 @@ import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import type { GroupedSkill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
 
 vi.mock("@/lib/hooks/skills", () => ({
   useMainSkills: () => ({ data: [] }),
@@ -35,14 +35,15 @@ vi.mock("@/components/common/OptimizedImage", () => ({
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkill {
+function minimalSkill(overrides: Partial<Skill> = {}): Skill {
   return {
     id: "skill-1",
     campaignId: "c1",
-    basicInfo: { name: "Тестовий скіл", description: "Опис", icon: undefined },
-    spellData: {},
-   
-    mainSkillData: {},
+    name: "Тестовий скіл",
+    description: "Опис",
+    icon: null,
+    spellId: null,
+    spellGroupId: null,
     createdAt: new Date(),
     spell: null,
     spellGroup: null,
@@ -60,15 +61,15 @@ describe("SkillCard", () => {
   });
 
   it("рендерить назву скіла", () => {
-    const skill = minimalGroupedSkill({ basicInfo: { name: "Вогняна куля" } });
+    const skill = minimalSkill({ name: "Вогняна куля" });
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Вогняна куля")).toBeInTheDocument();
   });
 
   it("рендерить опис, якщо він є", () => {
-    const skill = minimalGroupedSkill({
-      basicInfo: { name: "Скіл", description: "Короткий опис скіла" },
+    const skill = minimalSkill({
+      name: "Скіл", description: "Короткий опис скіла",
     });
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
@@ -76,7 +77,7 @@ describe("SkillCard", () => {
   });
 
   it("рендерить кнопку Редагувати з посиланням на сторінку скіла", () => {
-    const skill = minimalGroupedSkill();
+    const skill = minimalSkill();
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="camp-123" />);
 
@@ -89,8 +90,8 @@ describe("SkillCard", () => {
   });
 
   it("не рендерить блок опису, якщо опису немає", () => {
-    const skill = minimalGroupedSkill({
-      basicInfo: { name: "СкілБезОпису", description: "" },
+    const skill = minimalSkill({
+      name: "СкілБезОпису", description: "",
     });
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
@@ -99,14 +100,14 @@ describe("SkillCard", () => {
   });
 
   it("показує опис умінь", () => {
-    const skill = minimalGroupedSkill({ abilitySummary: ["Пасивно · шкода (ближня) +10%"] });
+    const skill = minimalSkill({ abilitySummary: ["Пасивно · шкода (ближня) +10%"] });
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Пасивно · шкода (ближня) +10%")).toBeInTheDocument();
   });
 
   it("не показує старий перемикач «Впливає на шкоду»", () => {
-    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" />);
+    renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" />);
     expect(screen.queryByText("Впливає на шкоду")).not.toBeInTheDocument();
   });
 
@@ -120,7 +121,7 @@ describe("SkillCard", () => {
   it("видаляє після підтвердження", async () => {
     const onRemove = vi.fn(async () => {});
 
-    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" onRemove={onRemove} />);
+    renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" actions={{ onDelete: onRemove }} />);
     fireEvent.click(within(await openDelete()).getByRole("button", { name: "Видалити" }));
 
     await vi.waitFor(() => expect(onRemove).toHaveBeenCalledWith("skill-1"));
@@ -131,7 +132,7 @@ describe("SkillCard", () => {
       throw new Error("Скіл використовується");
     });
 
-    renderWithConfirm(<SkillCard skill={minimalGroupedSkill()} campaignId="c1" onRemove={onRemove} />);
+    renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" actions={{ onDelete: onRemove }} />);
 
     const dialog = await openDelete();
 

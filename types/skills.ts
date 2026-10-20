@@ -1,4 +1,5 @@
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
+import type { IdName } from "@/types/common";
 
 export interface Skill {
   abilities?: Ability[];
@@ -9,53 +10,58 @@ export interface Skill {
   name: string;
   description: string | null;
   icon: string | null;
-  min_targets?: number | null;
-  max_targets?: number | null;
+  image?: string | null;
+  appearanceDescription?: string | null;
   spellId: string | null;
   spellGroupId: string | null;
   mainSkillId?: string | null;
   grantedSpellId?: string | null;
   createdAt: Date;
-  spell?: {
-    id: string;
-    name: string;
-  } | null;
-  spellGroup?: {
-    id: string;
-    name: string;
-  } | null;
+  spell?: IdName | null;
+  spellGroup?: IdName | null;
+  grantedSpell?: IdName | null;
 }
 
-/**
- * Згрупована структура скіла (як повертає API)
- */
-export interface GroupedSkill {
-  abilities?: Ability[];
-  abilitySummary?: string[];
-  abilityIssues?: ConversionIssue[];
-  id: string;
-  campaignId: string;
+export type PersonalSkillOption = Pick<Skill, "id" | "name" | "icon" | "description">;
+
+/** Request body of POST/PATCH `/skills` (grouped by form section). */
+export interface GroupedSkillPayload {
   basicInfo: {
     name: string;
     description?: string;
     icon?: string;
   };
+  abilities: Ability[];
   spellData: {
-    spellId?: string;
-    spellGroupId?: string;
-    grantedSpellId?: string;
+    spellId: string | null;
+    spellGroupId: string | null;
+    grantedSpellId: string | null;
   };
   mainSkillData: {
-    mainSkillId?: string;
+    mainSkillId: string | null;
   };
-  createdAt: Date;
-  spell?: {
-    id: string;
-    name: string;
-  } | null;
-  spellGroup?: {
-    id: string;
-    name: string;
-  } | null;
 }
-export type PersonalSkillOption = Pick<Skill, "id" | "name" | "icon" | "description">;
+
+export interface SkillTreeRow {
+  id: string;
+  campaignId: string;
+  race: string;
+  skills: unknown;
+  createdAt: string;
+}
+
+export interface SkillFormValues {
+  name: string;
+  description: string;
+  icon: string;
+  abilities: Ability[];
+  spellId: string | null;
+  spellGroupId: string | null;
+  grantedSpellId: string | null;
+  mainSkillId: string | null;
+}
+
+export interface SkillFormBinding {
+  data: SkillFormValues;
+  set: <K extends keyof SkillFormValues>(key: K, value: SkillFormValues[K]) => void;
+}

@@ -10,25 +10,21 @@ import {
 } from "@/lib/api/main-skills";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
-import type { MainSkillFormData } from "@/types/main-skills";
+import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
-/**
- * Отримує список основних навиків кампанії
- * @param options.enabled - якщо false, запит не виконується (наприклад, коли дані передані з сервера)
- */
 export function useMainSkills(
   campaignId: string,
-  options?: { enabled?: boolean },
+  options: { enabled?: boolean; initialData?: MainSkill[] } = {},
 ) {
   return useQuery({
     queryKey: skillKeys.mainSkills(campaignId),
     queryFn: () => getMainSkills(campaignId),
     staleTime: REFERENCE_STALE_MS,
-    enabled: options?.enabled !== false,
+    enabled: options.enabled !== false,
+    initialData: options.initialData,
   });
 }
 
-/** Створює новий основний навик */
 export function useCreateMainSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: MainSkillFormData) => createMainSkill(campaignId, data),
@@ -36,7 +32,6 @@ export function useCreateMainSkill(campaignId: string) {
   });
 }
 
-/** Оновлює основний навик */
 export function useUpdateMainSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: ({
@@ -50,12 +45,12 @@ export function useUpdateMainSkill(campaignId: string) {
   });
 }
 
-/** Видаляє основний навик */
 export function useDeleteMainSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (mainSkillId: string) =>
       deleteMainSkill(campaignId, mainSkillId),
-    // Також оновлюємо скіли, оскільки вони можуть посилатися на видалений mainSkill.
+    errorText: "Помилка при видаленні основного навику",
+    // скіли посилаються на видалений mainSkill
     invalidateKeys: [
       skillKeys.mainSkills(campaignId),
       skillKeys.list(campaignId),

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { createSkillSchema } from "./create-skill-schema";
-import { formatSkillsListResponse } from "./format-skills-response";
 import { listSkillsQuerySchema } from "./list-skills-query";
+import { readSkills } from "./read-skills";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
@@ -37,26 +37,21 @@ export async function POST(
 
     if (foreignRef) return foreignRef;
 
-    const basicInfo = data.basicInfo as Record<string, unknown>;
-
-    const spellData = data.spellData as Record<string, unknown>;
-
-    const mainSkillData = data.mainSkillData as Record<string, unknown>;
+    const { basicInfo, spellData, mainSkillData } = data;
 
     const skill = await prisma.skill.create({
       data: {
         campaignId: id,
         image: data.image ?? null,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
-        name: (basicInfo.name as string) || "",
-        description: (basicInfo.description as string) || null,
-        icon: (basicInfo.icon as string) || null,
-        spellId: (spellData.spellId as string) || null,
-        spellGroupId: (spellData.spellGroupId as string) || null,
-        grantedSpellId:
-          (spellData.grantedSpellId as string) || null,
-        mainSkillId: (mainSkillData.mainSkillId as string) || null,
-        spellNewSpellId: (spellData.grantedSpellId as string) || null,
+        name: basicInfo.name,
+        description: basicInfo.description || null,
+        icon: basicInfo.icon || null,
+        spellId: spellData.spellId || null,
+        spellGroupId: spellData.spellGroupId || null,
+        grantedSpellId: spellData.grantedSpellId || null,
+        mainSkillId: mainSkillData.mainSkillId || null,
+        spellNewSpellId: spellData.grantedSpellId || null,
       },
       include: {
         spell: true,
@@ -82,40 +77,19 @@ export async function GET(
 
     const accessResult = await requireCampaignAccess(id, false);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
+    if (accessResult instanceof NextResponse) return accessResult;
 
     const { mainSkillId } = listSkillsQuerySchema.parse(Object.fromEntries(new URL(request.url).searchParams));
 
-    if (mainSkillId) {
-      const options = await prisma.skill.findMany({
-        where: { campaignId: id, mainSkillId },
-        select: { id: true, name: true, icon: true, description: true },
-        orderBy: { createdAt: "desc" },
-      });
+    if (!mainSkillId) return await readSkills({ id, accessChecked: true });
 
-      return NextResponse.json(options);
-    }
-
-    const skills = await prisma.skill.findMany({
-      where: {
-        campaignId: id,
-      },
-      include: {
-        spell: true,
-        spellGroup: true,
-        grantedSpell: true,
-        mainSkill: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    const options = await prisma.skill.findMany({
+      where: { campaignId: id, mainSkillId },
+      select: { id: true, name: true, icon: true, description: true },
+      orderBy: { createdAt: "desc" },
     });
 
-    const formattedSkills = formatSkillsListResponse(skills);
-
-    return NextResponse.json(formattedSkills);
+    return NextResponse.json(options);
   } catch (error) {
     return handleApiError(error, { action: "list skills" });
   }

@@ -1,168 +1,68 @@
+"use client";
+
 import { type FormEvent, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 
-import { skillKeys } from "./keys";
 import { useMainSkills } from "./useMainSkills";
+import { useCreateSkill, useUpdateSkill } from "./useSkills";
 
-import { createSkill, updateSkill } from "@/lib/api/skills";
-import { abilitySaveError } from "@/lib/hooks/abilities";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import {
-  type InitialSkillFormData,
-  normalizeInitialSkillData,
-} from "@/lib/utils/skills/form/normalize";
+import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
+import { useNavigateFresh } from "@/lib/hooks/common";
+import { initialSkillFormValues } from "@/lib/utils/skills/form/normalize";
 import { buildSkillFormPayload } from "@/lib/utils/skills/form/payload";
-import { buildSkillFormReturn } from "@/lib/utils/skills/form/return";
-import type { IdName } from "@/types/common";
-import type { GroupedSkillPayload } from "@/types/hooks";
 import type { MainSkill } from "@/types/main-skills";
+import type { Skill, SkillFormBinding, SkillFormValues } from "@/types/skills";
 
 export function useSkillForm(
   campaignId: string,
-  spells: IdName[],
-  initialData?: InitialSkillFormData,
-  /** Якщо передано, не робимо GET /main-skills (дані вже з сервера) */
-  initialMainSkills?: MainSkill[],
+  { initialData, initialMainSkills }: { initialData?: Skill; initialMainSkills?: MainSkill[] } = {},
 ) {
   const router = useRouter();
 
-  const queryClient = useQueryClient();
+  const navigateFresh = useNavigateFresh();
 
-  const { data: mainSkillsFromApi = [] } = useMainSkills(campaignId, {
-    enabled: initialMainSkills === undefined,
-  });
+  const { data: mainSkillsFromApi = [] } = useMainSkills(campaignId, { enabled: initialMainSkills === undefined });
 
   const mainSkills = initialMainSkills ?? mainSkillsFromApi;
 
-  const isEdit = !!initialData;
+  const create = useCreateSkill(campaignId);
 
-  const normalizedData = normalizeInitialSkillData(initialData);
+  const update = useUpdateSkill(campaignId);
 
-  const [isSaving, setIsSaving] = useState(false);
+  const [values, setValues] = useState<SkillFormValues>(() => initialSkillFormValues(initialData));
 
   const [error, setError] = useState<string | null>(null);
 
-  const [name, setName] = useState(normalizedData?.name || "");
+  const validity = useAbilityValidity();
 
-  const [description, setDescription] = useState(
-    normalizedData?.description || "",
-  );
+  const set = useCallback<SkillFormBinding["set"]>((key, value) => setValues((prev) => ({ ...prev, [key]: value })), []);
 
-  const [icon, setIcon] = useState(normalizedData?.icon || "");
+  const listHref = `/campaigns/${campaignId}/dm/skills`;
 
-  const [abilities, setAbilities] = useState<Ability[]>(normalizedData?.abilities ?? []);
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
 
-  const [abilityErrors, setAbilityErrors] = useState(0);
+    if (!values.name.trim() || !validity.valid) return;
 
-  const abilitiesValid = abilityErrors === 0;
+    setError(null);
 
-  const [spellId, setSpellId] = useState<string | null>(
-    normalizedData?.spellId || null,
-  );
+    try {
+      const payload = buildSkillFormPayload(values);
 
-  const [spellGroupId, setSpellGroupId] = useState<string | null>(
-    normalizedData?.spellGroupId || null,
-  );
+      if (initialData) await update.mutateAsync({ skillId: initialData.id, data: payload });
+      else await create.mutateAsync(payload);
 
-  const [grantedSpellId, setGrantedSpellId] = useState<string | null>(
-    normalizedData?.grantedSpellId ?? null,
-  );
+      navigateFresh(listHref);
+    } catch (err) {
+      setError(abilitySaveError(err, "Помилка створення"));
+    }
+  };
 
-  const [mainSkillId, setMainSkillId] = useState<string | null>(
-    normalizedData?.mainSkillId || null,
-  );
-
-  const createPayload = useCallback((): GroupedSkillPayload => {
-    return buildSkillFormPayload({
-      name,
-      description,
-      icon,
-      abilities,
-      spellId,
-      spellGroupId,
-      grantedSpellId,
-      mainSkillId,
-    });
-  }, [
-    name,
-    description,
-    icon,
-    abilities,
-    spellId,
-    spellGroupId,
-    grantedSpellId,
-    mainSkillId,
-  ]);
-
-  const handleSubmit = useCallback(
-    async (event: FormEvent) => {
-      event.preventDefault();
-
-      if (!name.trim() || !abilitiesValid) return;
-
-      setIsSaving(true);
-      setError(null);
-
-      try {
-        const payload = createPayload();
-
-        if (isEdit && normalizedData?.id) {
-          await updateSkill(campaignId, normalizedData.id, payload);
-        } else {
-          await createSkill(campaignId, payload);
-        }
-
-        await queryClient.invalidateQueries({
-          queryKey: skillKeys.list(campaignId),
-        });
-        await queryClient.refetchQueries({
-          queryKey: skillKeys.list(campaignId),
-        });
-        router.push(`/campaigns/${campaignId}/dm/skills`);
-      } catch (err) {
-        setError(abilitySaveError(err, "Помилка створення"));
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [
-      createPayload,
-      isEdit,
-      normalizedData?.id,
-      campaignId,
-      queryClient,
-      router,
-      name,
-      abilitiesValid,
-    ],
-  );
-
-  return buildSkillFormReturn({
-    isSaving,
-    error,
-    isEdit,
+  return {
+    form: { data: values, set } satisfies SkillFormBinding,
     mainSkills,
-    name,
-    description,
-    icon,
-    setName,
-    setDescription,
-    setIcon,
-    abilities,
-    abilityIssues: normalizedData?.abilityIssues ?? [],
-    abilitiesValid,
-    abilityErrors,
-    setAbilities,
-    setAbilityErrors,
-    spellId,
-    spellGroupId,
-    grantedSpellId,
-    setSpellId,
-    setSpellGroupId,
-    setGrantedSpellId,
-    mainSkillId,
-    setMainSkillId,
-    handleSubmit,
-  });
+    abilities: { ...validity, issues: initialData?.abilityIssues ?? [] },
+    status: { isSaving: create.isPending || update.isPending, error, isEdit: !!initialData },
+    actions: { submit, cancel: () => router.push(listHref) },
+  };
 }

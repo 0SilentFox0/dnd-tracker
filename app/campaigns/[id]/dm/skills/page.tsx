@@ -1,37 +1,22 @@
 import { DMSkillsPageClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
-import { prisma } from "@/lib/db";
-import { withAbilitySummary } from "@/lib/utils/abilities/summary";
+import { readSkills } from "@/app/api/campaigns/[id]/skills/read-skills";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { skillKeys } from "@/lib/hooks/skills/keys";
+import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
+import { readOkJson } from "@/lib/utils/api/read-json";
+import type { Skill } from "@/types/skills";
 
-export default async function DMSkillsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DMSkillsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   await requireCampaignDM(id);
 
-  const skills = await prisma.skill.findMany({
-    where: {
-      campaignId: id,
-    },
-    include: {
-      spell: true,
-      spellGroup: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  const transformedSkills = skills.map((row) => withAbilitySummary("skill", row));
+  const skills = await readOkJson<Skill[]>(await readSkills({ id, accessChecked: true }));
 
   return (
-    <DMSkillsPageClient
-      campaignId={id}
-      initialSkills={transformedSkills}
-    />
+    <PrefetchedQuery queryKey={skillKeys.list(id)} data={skills}>
+      <DMSkillsPageClient campaignId={id} />
+    </PrefetchedQuery>
   );
 }

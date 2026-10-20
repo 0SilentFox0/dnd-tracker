@@ -1,14 +1,12 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 
-import { skillKeys } from "./keys";
 import { useSkills } from "./useSkills";
+import { useSkillTrees } from "./useSkillTrees";
 
-import { getSkillTrees } from "@/lib/api/skill-trees";
 import { type RaceRacialSkills, raceRacialSkills } from "@/lib/utils/races/racial-skills";
 
 export function useRacialSkills(campaignId: string, raceName: string): RaceRacialSkills {
-  const trees = useQuery({ queryKey: skillKeys.trees(campaignId), queryFn: () => getSkillTrees(campaignId), enabled: !!campaignId });
+  const trees = useSkillTrees(campaignId);
 
   const { data: skills = [] } = useSkills(campaignId);
 

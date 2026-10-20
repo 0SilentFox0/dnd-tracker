@@ -1,13 +1,9 @@
 import { DMMainSkillsPageClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
 
-export default async function DMMainSkillsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DMMainSkillsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   await requireCampaignDM(id);
@@ -18,13 +14,13 @@ export default async function DMMainSkillsPage({
   });
 
   return (
-    <DMMainSkillsPageClient 
-      campaignId={id} 
-      initialMainSkills={mainSkills.map(skill => ({
+    <DMMainSkillsPageClient
+      campaignId={id}
+      initialMainSkills={mainSkills.map((skill) => ({
         ...skill,
         createdAt: skill.createdAt.toISOString(),
         updatedAt: skill.updatedAt.toISOString(),
-      }))} 
+      }))}
     />
   );
 }

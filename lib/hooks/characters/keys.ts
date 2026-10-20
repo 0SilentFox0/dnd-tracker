@@ -15,6 +15,3 @@ export const characterWriteKeys = (campaignId: string) => [
   characterKeys.roster(campaignId),
   battleKeys.balance(campaignId),
 ];
-
-// TODO: drop once lib/hooks/skills migrates to characterKeys.sheet
-export const characterSheetKey = characterKeys.sheet;

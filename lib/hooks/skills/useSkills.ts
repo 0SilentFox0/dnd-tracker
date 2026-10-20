@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { skillKeys } from "./keys";
 
 import {
+  createSkill,
   deleteAllSkills,
   deleteSkill,
   duplicateSkill,
@@ -12,14 +13,14 @@ import {
   updateSkill,
 } from "@/lib/api/skills";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { SkillUpdatePayload } from "@/types/api";
+import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
 import type { PersonalSkillOption, Skill } from "@/types/skills";
 
-export function useSkills(campaignId: string, initialData?: Skill[]) {
+export function useSkills(campaignId: string, options: { initialData?: Skill[] } = {}) {
   return useQuery<Skill[]>({
     queryKey: skillKeys.list(campaignId),
     queryFn: () => getSkills(campaignId),
-    initialData,
+    initialData: options.initialData,
   });
 }
 
@@ -39,7 +40,13 @@ export function useSkill(campaignId: string, skillId: string) {
   });
 }
 
-/** Видаляє окремий скіл */
+export function useCreateSkill(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (data: SkillPayload) => createSkill(campaignId, data),
+    invalidateKeys: [skillKeys.list(campaignId)],
+  });
+}
+
 export function useDeleteSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (skillId: string) => deleteSkill(campaignId, skillId),
@@ -47,29 +54,22 @@ export function useDeleteSkill(campaignId: string) {
   });
 }
 
-/** Дублює скіл (створює копію з новим id, назва + " (копія)") */
+/** Копія з новим id, назва + " (копія)" */
 export function useDuplicateSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (skillId: string) => duplicateSkill(campaignId, skillId),
     invalidateKeys: [skillKeys.list(campaignId)],
+    errorText: "Не вдалося дублювати скіл. Спробуйте ще раз.",
   });
 }
 
-/** Оновлює скіл (частковий PATCH) */
 export function useUpdateSkill(campaignId: string) {
   return useCrudMutation({
-    mutationFn: ({
-      skillId,
-      data,
-    }: {
-      skillId: string;
-      data: SkillUpdatePayload;
-    }) => updateSkill(campaignId, skillId, data),
-    invalidateKeys: [skillKeys.list(campaignId)],
+    mutationFn: ({ skillId, data }: { skillId: string; data: SkillUpdatePayload }) => updateSkill(campaignId, skillId, data),
+    invalidateKeys: (_data, { skillId }) => [skillKeys.list(campaignId), skillKeys.detail(campaignId, skillId)],
   });
 }
 
-/** Видаляє всі скіли кампанії */
 export function useDeleteAllSkills(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllSkills(campaignId),

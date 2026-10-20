@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { SKILL_FORM_TAB, type SkillFormTabId } from "./skill-form-tabs";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
@@ -13,40 +11,19 @@ import { Button } from "@/components/ui/button";
 import { useSkillForm } from "@/lib/hooks/skills";
 import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
-import type { GroupedSkill, Skill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
 
 interface SkillCreateFormProps {
   campaignId: string;
   spells: IdName[];
-  spellGroups?: IdName[];
   initialMainSkills?: MainSkill[];
-  initialData?: Skill | GroupedSkill;
+  initialData?: Skill;
 }
 
-export function SkillCreateForm({
-  campaignId,
-  spells,
-  initialMainSkills,
-  initialData,
-}: SkillCreateFormProps) {
-  const router = useRouter();
+export function SkillCreateForm({ campaignId, spells, initialMainSkills, initialData }: SkillCreateFormProps) {
+  const { form, mainSkills, abilities, status, actions } = useSkillForm(campaignId, { initialData, initialMainSkills });
 
-  const {
-    isSaving,
-    error,
-    isEdit,
-    mainSkills,
-    basicInfo,
-    abilitiesGroup,
-    spell,
-    mainSkill,
-    handleSubmit,
-  } = useSkillForm(
-    campaignId,
-    spells,
-    initialData,
-    initialMainSkills
-  );
+  const { isSaving, error, isEdit } = status;
 
   const tabs: HudTab<SkillFormTabId>[] = [
     {
@@ -54,27 +31,27 @@ export function SkillCreateForm({
       label: "Основне",
       content: (
         <div className="space-y-5">
-          <SkillBasicInfo basicInfo={basicInfo} />
-          <SkillMainSkillSection mainSkill={mainSkill} mainSkills={mainSkills} />
+          <SkillBasicInfo form={form} />
+          <SkillMainSkillSection form={form} mainSkills={mainSkills} />
         </div>
       ),
     },
     {
       id: SKILL_FORM_TAB.spell,
       label: "Заклинання",
-      content: <SkillSpellSection spell={spell} spells={spells} />,
+      content: <SkillSpellSection form={form} spells={spells} />,
     },
     {
       id: SKILL_FORM_TAB.abilities,
       label: "Вміння",
-      invalid: abilitiesGroup.errors > 0,
+      invalid: !abilities.valid,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
-          value={abilitiesGroup.abilities}
-          onChange={abilitiesGroup.setAbilities}
-          issues={abilitiesGroup.issues}
-          onValidityChange={abilitiesGroup.onValidityChange}
+          value={form.data.abilities}
+          onChange={(next) => form.set("abilities", next)}
+          issues={abilities.issues}
+          onValidityChange={abilities.onValidityChange}
         />
       ),
     },
@@ -92,19 +69,19 @@ export function SkillCreateForm({
       )}
       <HudForm
         id="skill-form"
-        onSubmit={handleSubmit}
+        onSubmit={actions.submit}
         tabs={tabs}
         actions={
           <>
-            <Button type="button" variant="outline" onClick={() => router.push(`/campaigns/${campaignId}/dm/skills`)} disabled={isSaving}>
+            <Button type="button" variant="outline" onClick={actions.cancel} disabled={isSaving}>
               Скасувати
             </Button>
-            <Button type="submit" disabled={isSaving || !abilitiesGroup.valid}>
+            <Button type="submit" disabled={isSaving || !abilities.valid}>
               {isSaving
                 ? isEdit
                   ? "Збереження..."
                   : "Створення..."
-                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilitiesGroup.errors)}
+                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilities.errors)}
             </Button>
           </>
         }

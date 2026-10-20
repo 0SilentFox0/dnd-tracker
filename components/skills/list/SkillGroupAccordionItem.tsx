@@ -3,15 +3,9 @@
 import { Edit, X } from "lucide-react";
 
 import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
-import { SkillCard } from "@/components/skills/list/SkillCard";
+import { SkillCard, type SkillCardActions } from "@/components/skills/list/SkillCard";
 import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
-import { getSkillId } from "@/lib/utils/skills/skill-helpers";
-import type { GroupedSkill, Skill } from "@/types/skills";
-
-export interface SkillCardActions {
-  onDelete?: (skillId: string) => Promise<unknown> | void;
-  onDuplicate?: (skillId: string) => void;
-}
+import type { Skill } from "@/types/skills";
 
 export interface SkillGroupAccordionItemProps {
   groupName: string;
@@ -19,7 +13,7 @@ export interface SkillGroupAccordionItemProps {
   totalSkills: number;
   groupMenu?: { onRename: () => void; onRemoveAll: () => void };
   actions?: SkillCardActions;
-  skills: (Skill | GroupedSkill)[];
+  skills: Skill[];
   campaignId: string;
 }
 
@@ -50,13 +44,7 @@ export function SkillGroupAccordionItem({
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 pb-4">
         {skills.map((skill) => (
-          <SkillCard
-            key={getSkillId(skill)}
-            skill={skill}
-            campaignId={campaignId}
-            onRemove={actions?.onDelete}
-            onDuplicate={actions?.onDuplicate}
-          />
+          <SkillCard key={skill.id} skill={skill} campaignId={campaignId} actions={actions} />
         ))}
       </div>
     </GroupAccordionItem>

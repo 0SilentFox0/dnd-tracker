@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
-/** Схема для згрупованої структури створення скіла */
 export const createSkillSchema = z.object({
   basicInfo: z.object({
     name: z.string().min(1).max(100),

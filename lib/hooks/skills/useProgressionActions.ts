@@ -8,9 +8,8 @@ import { skillKeys } from "./keys";
 import { learnNode, resetProgression, unlearnNodes } from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
 import { battleKeys } from "@/lib/hooks/battles/keys";
-import { characterSheetKey } from "@/lib/hooks/characters";
 import { characterKeys } from "@/lib/hooks/characters/keys";
-import { useNotify } from "@/lib/hooks/common";
+import { useNotify, useSingleFlight } from "@/lib/hooks/common";
 import type { LearnBlockReason, UnlearnBlockReason } from "@/lib/utils/skills/progression";
 import { LEARN_BLOCK_TEXT, normalizeTree, skillPoints, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
 import type { CharacterSheet } from "@/types/characters";
@@ -25,13 +24,13 @@ export function useProgressionActions(campaignId: string, characterId: string) {
 
   const [pendingNodeId, setPendingNodeId] = useState<string | null>(null);
 
-  const inFlight = useRef(false);
+  const singleFlight = useSingleFlight();
 
   const sheetRefresh = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const key = skillKeys.progression(campaignId, characterId);
 
-  const sheetKey = characterSheetKey(campaignId, characterId);
+  const sheetKey = characterKeys.sheet(campaignId, characterId);
 
   const patchSheet = (unlocked: string[]) => {
     const dto = queryClient.getQueryData<CharacterProgressionDto>(key);
@@ -47,47 +46,44 @@ export function useProgressionActions(campaignId: string, characterId: string) {
     sheetRefresh.current = setTimeout(() => void queryClient.invalidateQueries({ queryKey: sheetKey }), SHEET_REFRESH_DELAY_MS);
   };
 
-  const run = async (nodeId: string, call: () => Promise<{ unlocked: string[] }>): Promise<boolean> => {
-    // подвійний тап приходить раніше, ніж React вимкне кнопку
-    if (inFlight.current) return false;
+  const run = (nodeId: string, call: () => Promise<{ unlocked: string[] }>): Promise<boolean> =>
+    singleFlight(async () => {
+      setPendingNodeId(nodeId);
 
-    inFlight.current = true;
-    setPendingNodeId(nodeId);
-    try {
-      const { unlocked } = await call();
+      try {
+        const { unlocked } = await call();
 
-      queryClient.setQueryData<CharacterProgressionDto>(key, (old) => (old ? { ...old, unlocked } : old));
-      queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(characterKeys.detail(campaignId, characterId), (old) => {
-        const treeId = queryClient.getQueryData<CharacterProgressionDto>(key)?.treeId;
+        queryClient.setQueryData<CharacterProgressionDto>(key, (old) => (old ? { ...old, unlocked } : old));
+        queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(characterKeys.detail(campaignId, characterId), (old) => {
+          const treeId = queryClient.getQueryData<CharacterProgressionDto>(key)?.treeId;
 
-        if (!old || !treeId) return old;
+          if (!old || !treeId) return old;
 
-        const progress = old.skillTreeProgress ?? {};
+          const progress = old.skillTreeProgress ?? {};
 
-        return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
-      });
-      patchSheet(unlocked);
-      void queryClient.invalidateQueries({ queryKey: battleKeys.balanceAll(), refetchType: "none" });
+          return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
+        });
+        patchSheet(unlocked);
+        void queryClient.invalidateQueries({ queryKey: battleKeys.balanceAll(), refetchType: "none" });
 
-      return true;
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 409) {
-        void queryClient.invalidateQueries({ queryKey: key });
-        await notify("Прогрес змінився — оновлено");
-      } else if (error instanceof ApiError && error.status === 422) {
-        const reason = (error.body as { reason?: string } | undefined)?.reason ?? "";
+        return true;
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409) {
+          void queryClient.invalidateQueries({ queryKey: key });
+          await notify("Прогрес змінився — оновлено");
+        } else if (error instanceof ApiError && error.status === 422) {
+          const reason = (error.body as { reason?: string } | undefined)?.reason ?? "";
 
-        await notify(LEARN_BLOCK_TEXT[reason as LearnBlockReason] ?? UNLEARN_BLOCK_TEXT[reason as UnlearnBlockReason] ?? error.message);
-      } else {
-        await notify((error as Error).message);
+          await notify(LEARN_BLOCK_TEXT[reason as LearnBlockReason] ?? UNLEARN_BLOCK_TEXT[reason as UnlearnBlockReason] ?? error.message);
+        } else {
+          await notify((error as Error).message);
+        }
+
+        return false;
+      } finally {
+        setPendingNodeId(null);
       }
-
-      return false;
-    } finally {
-      inFlight.current = false;
-      setPendingNodeId(null);
-    }
-  };
+    }) ?? Promise.resolve(false);
 
   return {
     learn: (nodeId: string) => run(nodeId, () => learnNode(campaignId, characterId, nodeId)),

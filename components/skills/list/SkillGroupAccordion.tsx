@@ -1,16 +1,16 @@
 "use client";
 
 import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
-import { type SkillCardActions, SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
+import type { SkillCardActions } from "@/components/skills/list/SkillCard";
+import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { isUngroupedKey } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
-import { calculateTotalSkillsInGroup } from "@/lib/utils/skills/skills";
-import type { GroupedSkill, Skill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
 import type { SpellGroup } from "@/types/spells";
 
 interface SkillGroupAccordionProps {
   groupName: string;
-  skills: (Skill | GroupedSkill)[];
+  skills: Skill[];
   campaignId: string;
   spellGroups: SpellGroup[];
   mainSkillColor?: string | null;
@@ -29,8 +29,6 @@ export function SkillGroupAccordion({
 
   const isUngrouped = isUngroupedKey(groupName);
 
-  const totalSkills = calculateTotalSkillsInGroup(skills);
-
   const actions = useSpellGroupActions({
     campaignId,
     groupName,
@@ -42,7 +40,7 @@ export function SkillGroupAccordion({
       <SkillGroupAccordionItem
         groupName={groupName}
         accent={mainSkillColor || undefined}
-        totalSkills={totalSkills}
+        totalSkills={skills.length}
         groupMenu={
           !isUngrouped && groupId
             ? {

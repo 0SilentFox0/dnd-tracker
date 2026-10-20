@@ -1,6 +1,6 @@
 import { EditSkillClient } from "./edit-skill-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
 import type { MainSkill } from "@/types/main-skills";
 
@@ -13,13 +13,8 @@ export default async function EditSkillPage({
 
   await requireCampaignDM(campaignId);
 
-  const [spells, spellGroups, mainSkills] = await Promise.all([
+  const [spells, mainSkills] = await Promise.all([
     prisma.spell.findMany({
-      where: { campaignId },
-      select: { id: true, name: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.spellGroup.findMany({
       where: { campaignId },
       select: { id: true, name: true },
       orderBy: { createdAt: "desc" },
@@ -45,7 +40,6 @@ export default async function EditSkillPage({
       campaignId={campaignId}
       skillId={skillId}
       spells={spells}
-      spellGroups={spellGroups}
       initialMainSkills={initialMainSkills}
     />
   );

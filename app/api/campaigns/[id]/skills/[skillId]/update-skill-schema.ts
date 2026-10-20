@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
-/** Схема для згрупованої структури (всі поля опціональні для оновлення) */
 export const updateSkillSchema = z.object({
   basicInfo: z
     .object({

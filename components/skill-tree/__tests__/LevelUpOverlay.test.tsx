@@ -12,7 +12,6 @@ vi.mock("@/lib/api/character-progression");
 let data: { level: number; seenLevel: number | null; isOwner: boolean } | undefined;
 
 vi.mock("@/lib/hooks/characters", () => ({
-  characterSheetKey: (c: string, ch: string) => ["character-sheet", c, ch],
   useCharacterSheet: () => ({ data: data && { viewer: { isOwner: data.isOwner, isDM: false }, progression: { freePoints: 2, level: data.level, seenLevel: data.seenLevel } } }),
 }));
 

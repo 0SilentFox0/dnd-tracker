@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { MainSkillEditForm } from "@/components/main-skills/MainSkillEditForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function EditMainSkillPage({

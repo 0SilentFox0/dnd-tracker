@@ -1,5 +1,5 @@
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
 
 export default async function NewSkillPage({
@@ -17,17 +17,5 @@ export default async function NewSkillPage({
     orderBy: { createdAt: "desc" },
   });
 
-  const spellGroups = await prisma.spellGroup.findMany({
-    where: { campaignId: id },
-    select: { id: true, name: true },
-    orderBy: { createdAt: "desc" },
-  });
-
-  return (
-    <SkillCreateForm
-      campaignId={id}
-      spells={spells}
-      spellGroups={spellGroups}
-    />
-  );
+  return <SkillCreateForm campaignId={id} spells={spells} />;
 }

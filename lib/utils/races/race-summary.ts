@@ -1,17 +1,7 @@
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
-import { getSkillMainSkillId } from "@/lib/utils/skills/skill-helpers";
 import type { MainSkill } from "@/types/main-skills";
-import type { Race, StatModifier } from "@/types/races";
+import type { Race, RacePassiveAbility, StatModifier } from "@/types/races";
 import type { Skill } from "@/types/skills";
-
-export interface RacePassiveAbility {
-  name?: string;
-  icon?: string;
-  description: string;
-  appearanceDescription?: string;
-  statImprovements?: string;
-  statModifiers?: Record<string, StatModifier>;
-}
 
 export function countRaceSkills(race: Race, skills: Skill[], treeSkillCount?: number | null): number {
   if (treeSkillCount != null) return treeSkillCount;
@@ -20,11 +10,7 @@ export function countRaceSkills(race: Race, skills: Skill[], treeSkillCount?: nu
 
   if (allowedMainSkills.length === 0) return skills.length;
 
-  return skills.filter((skill) => {
-    const mainSkillId = getSkillMainSkillId(skill);
-
-    return !mainSkillId || allowedMainSkills.includes(mainSkillId);
-  }).length;
+  return skills.filter((skill) => !skill.mainSkillId || allowedMainSkills.includes(skill.mainSkillId)).length;
 }
 
 export function raceMainSkillsForDisplay(race: Race, mainSkills: MainSkill[]): MainSkill[] {
