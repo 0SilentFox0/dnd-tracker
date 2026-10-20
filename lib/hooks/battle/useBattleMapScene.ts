@@ -11,6 +11,7 @@ import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
+import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -73,7 +74,9 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const order = battle.initiativeOrder ?? NO_ORDER;
 
-  const canAct = isMyTurn && !anyPending && !!current;
+  const moraleDue = !!current && awaitsMoraleCheck({ participants: order, scene: { turnIndex: battle.currentTurnIndex, pendingMoraleCheck: battle.pendingMoraleCheck } }, current.basicInfo.id);
+
+  const canAct = isMyTurn && !anyPending && !!current && !moraleDue;
 
   const actor = useMemo<MapSceneActor>(() => ({ current, viewer, canAct, isDM, attackReady }), [current, viewer, canAct, isDM, attackReady]);
 

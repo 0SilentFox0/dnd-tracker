@@ -11,8 +11,8 @@ import type { BattleMapConfig } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
-function setup(isDM: boolean, mapAim: MapAim | null = null) {
-  const scene = fakeScene({ isDM, map, mapAim });
+function setup(isDM: boolean, mapAim: MapAim | null = null, morale = 0) {
+  const scene = fakeScene({ isDM, map, mapAim, morale });
 
   scene.me.battleData.position = { x: 0, y: 0 };
   scene.gob.battleData.position = { x: 1, y: 0 };
@@ -36,6 +36,18 @@ describe("useBattleMapScene", () => {
     act(() => current().actions.onTokenClick?.("gob"));
 
     expect(value.intents.requestAttack).toHaveBeenCalledWith({ targetId: "gob", attackId: "rapier", actorId: "me", round: 3, turnIndex: 0 });
+  });
+
+  it("до перевірки моралі клік по клітинці не рухає героя", () => {
+    const due = setup(false, null, 2);
+
+    act(() => due.current().actions.onCellClick?.({ x: 3, y: 0 }));
+    expect(due.value.actions.move.mutate).not.toHaveBeenCalled();
+
+    const free = setup(false);
+
+    act(() => free.current().actions.onCellClick?.({ x: 3, y: 0 }));
+    expect(free.value.actions.move.mutate).toHaveBeenCalledWith({ participantId: "me", to: { x: 3, y: 0 } });
   });
 
   it("не-ДМ не має перемикача розстановки", () => {

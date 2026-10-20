@@ -7,7 +7,7 @@ import { markColor, mazeBudgetLeft } from "@/lib/utils/battle/modes/maze";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, rejectAction } from "@/lib/utils/battle/store";
-import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { MazeMarkData } from "@/types/api";
 
 export { mazeMarkSchema };
@@ -27,7 +27,7 @@ export function mazeMarkMutation(ctx: BattleMutationContext, data: MazeMarkBody)
 
   if (!position || isDormant(mover)) return rejectAction(MAZE_TEXTS.markUnable);
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
+  assertCanAct(ctx, mover.basicInfo.id);
 
   if (mazeBudgetLeft(mover) < 1) rejectAction(MAZE_TEXTS.markNoSteps);
 
