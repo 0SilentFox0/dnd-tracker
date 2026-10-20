@@ -1,6 +1,6 @@
 import { type BadgeSpec, createBadgeLayer } from "./badges";
 
-import { computeRig, DIE_RADIUS, type DiceThrowSpec, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
+import { computeRig, type DiceThrowSpec, DIE_RADIUS, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
 import type { DieSides } from "@/types/battle";
 
 const HOLD_MS = 350;

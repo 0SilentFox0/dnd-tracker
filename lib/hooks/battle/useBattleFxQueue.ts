@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { useModeView } from "./modes/useModeView";
-
 import { useBattleSceneData } from "./useBattleScene";
 
 import { usePageHidden } from "@/lib/hooks/common";
