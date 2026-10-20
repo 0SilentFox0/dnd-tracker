@@ -41,7 +41,11 @@ import * as mainSkills from "@/app/api/campaigns/[id]/main-skills/route";
 import * as member from "@/app/api/campaigns/[id]/members/[memberId]/route";
 import * as races from "@/app/api/campaigns/[id]/races/route";
 import * as scenarioPage from "@/app/api/campaigns/[id]/scenario/[pageId]/route";
+import * as scenarioSection from "@/app/api/campaigns/[id]/scenario/[pageId]/sections/[sectionId]/route";
+import * as scenarioVersions from "@/app/api/campaigns/[id]/scenario/[pageId]/versions/route";
+import * as scenarioMentions from "@/app/api/campaigns/[id]/scenario/mentions/route";
 import * as scenario from "@/app/api/campaigns/[id]/scenario/route";
+import * as scenarioSearch from "@/app/api/campaigns/[id]/scenario/search/route";
 import * as duplicateSkill from "@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route";
 import * as spellOne from "@/app/api/campaigns/[id]/spells/[spellId]/route";
 import * as spells from "@/app/api/campaigns/[id]/spells/route";
@@ -55,7 +59,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 
 type Handler = (req: Request, ctx: never) => Promise<Response>;
 
-const ids = { id: "c1", pageId: "pg1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1", battleId: "b1" };
+const ids = { id: "c1", pageId: "pg1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", sectionId: "s1", trackId: "t1", battleId: "b1" };
 
 const cases: Array<[string, Handler]> = [
   ["DELETE members/:memberId", member.DELETE],
@@ -88,6 +92,11 @@ const cases: Array<[string, Handler]> = [
   ["PUT scenario/:pageId", scenarioPage.PUT],
   ["PATCH scenario/:pageId", scenarioPage.PATCH],
   ["DELETE scenario/:pageId", scenarioPage.DELETE],
+  ["GET scenario/:pageId/versions", scenarioVersions.GET],
+  ["POST scenario/:pageId/versions", scenarioVersions.POST],
+  ["PATCH scenario/:pageId/sections/:sectionId", scenarioSection.PATCH],
+  ["GET scenario/search", scenarioSearch.GET],
+  ["GET scenario/mentions", scenarioMentions.GET],
 ];
 
 const asRole = (role: string | null) => {
