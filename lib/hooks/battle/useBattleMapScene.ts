@@ -215,7 +215,18 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
-  const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
+  const openWeather = useCallback(() => {
+    closeTerrain();
+    setMazeTool?.("none");
+  }, [closeTerrain, setMazeTool]);
+
+  const weatherTool = useMapWeatherTool({ isDM, onOpen: openWeather, current: map?.weather ?? null, mutation: actions.mapWeather });
+
+  const closeWeather = weatherTool?.close;
+
+  useEffect(() => {
+    if (toolActive) closeWeather?.();
+  }, [toolActive, closeWeather]);
 
   if (!map || !scene || !view) return null;
 
