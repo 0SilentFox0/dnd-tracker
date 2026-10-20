@@ -52,7 +52,7 @@ describe("інструменти карти взаємовиключні", () =>
   });
 
   it("погода закриває пензель terrain, а terrain — погоду", () => {
-    const { current, maze } = setup();
+    const { current } = setup();
 
     act(() => current().terrainTool?.toggle());
     act(() => current().weatherTool?.toggle());

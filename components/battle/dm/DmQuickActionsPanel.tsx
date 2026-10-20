@@ -8,8 +8,7 @@ import { DmParticipantRow } from "./DmParticipantRow";
 
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { type BattlePageDialogs, useBattleScene } from "@/lib/hooks/battle";
-import { useDmParticipantActions } from "@/lib/hooks/battle/useDmParticipantActions";
+import { type BattlePageDialogs, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleParticipant } from "@/types/battle";

@@ -5,7 +5,7 @@ import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
-import type { DmParticipantActions } from "@/lib/hooks/battle/useDmParticipantActions";
+import type { DmParticipantActions } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { mult } from "@/lib/utils/common/format";

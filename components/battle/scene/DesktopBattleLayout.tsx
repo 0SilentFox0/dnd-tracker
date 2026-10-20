@@ -21,9 +21,8 @@ import { ReserveGroup } from "@/components/battle/participants/ReservePanel";
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useBattleViewMode } from "@/lib/hooks/battle";
-import { useSelectedParticipant } from "@/lib/hooks/battle/useSelectedParticipant";
-import { myTurnKey } from "@/lib/utils/battle/view/my-turn-key";
+import { useBattleScene, useBattleViewMode, useSelectedParticipant } from "@/lib/hooks/battle";
+import { myTurnKey } from "@/lib/utils/battle/view";
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 

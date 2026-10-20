@@ -23,11 +23,9 @@ import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
-import { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "@/lib/hooks/battle/useMobileBattleTabs";
-import { useSelectedParticipant } from "@/lib/hooks/battle/useSelectedParticipant";
+import { MAP_TAB, type MobileBattleTab, useBattleScene, useMobileBattleTabs, useSelectedParticipant } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { myTurnKey } from "@/lib/utils/battle/view/my-turn-key";
+import { myTurnKey } from "@/lib/utils/battle/view";
 
 const ActionResultCard = dynamic(() => import("@/components/battle/overlays/ActionResultCard").then((m) => m.ActionResultCard), { ssr: false });
 
