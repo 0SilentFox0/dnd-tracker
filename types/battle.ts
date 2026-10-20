@@ -157,6 +157,31 @@ export interface GridPoint {
   y: number;
 }
 
+export type Direction8 = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+
+export type MazeDifficulty = "easy" | "medium" | "hard";
+
+export type MazeMarkSymbol = "arrow-n" | "arrow-e" | "arrow-s" | "arrow-w" | "cross" | "skull" | "star";
+
+export interface MazeMark {
+  symbol: MazeMarkSymbol;
+  color: string;
+  by: string;
+}
+
+/** walls — ребра "x:y:e" / "x:y:s"; fog і marks — за ключем клітинки "x:y" */
+export interface MazeConfig {
+  walls: string[];
+  exit: GridPoint | null;
+  difficulty: MazeDifficulty;
+  teleports: [GridPoint, GridPoint][];
+  fog: string[];
+  marks: Record<string, MazeMark>;
+  dark: boolean;
+  /** перший крок героя зроблено: «Згенерувати»/«Розкидати старти» більше недоступні */
+  moved?: boolean;
+}
+
 export type TemplateShape = "circle" | "cube" | "cone" | "line";
 
 /** size у футах: радіус кола, сторона куба, довжина конуса/лінії */
@@ -182,6 +207,7 @@ export interface BattleMapConfig {
   backgroundCols?: number;
   /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
   gridOffset?: { x: number; y: number };
+  maze?: MazeConfig | null;
 }
 
 export type TerrainKind = "wall" | "barrier" | "hazard";
@@ -310,6 +336,11 @@ export interface BattleParticipantBattleData {
   auraZones?: Record<string, number>;
   /** Якір (лівий верхній кут footprint) на карті бою; немає — учасник поза картою */
   position?: GridPoint;
+  /** Лабіринт: учасник спить, поки його не розбудять */
+  dormant?: boolean;
+  facing?: Direction8;
+  escaped?: boolean;
+  mazeWakeRound?: number;
   /** Клітинок пройдено в поточному ході */
   movementUsed?: number;
   /** Якір на початок поточного ходу (для «Удару і повернення») */

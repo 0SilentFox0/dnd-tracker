@@ -7,6 +7,26 @@ const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base
 
 export const mapCellSchema = z.object({ x: z.number().int().min(0).max(59), y: z.number().int().min(0).max(59) });
 
+export const mazeSchema = z.object({
+  walls: z.array(z.string().regex(/^\d+:\d+:[es]$/)).max(7200),
+  exit: mapCellSchema.nullable(),
+  difficulty: z.enum(["easy", "medium", "hard"]),
+  teleports: z.array(z.tuple([mapCellSchema, mapCellSchema])).max(20),
+  fog: z.array(z.string().regex(/^\d+:\d+$/)).max(3600),
+  marks: z
+    .record(
+      z.string().regex(/^\d+:\d+$/),
+      z.object({
+        symbol: z.enum(["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"]),
+        color: z.string().regex(/^#[0-9a-f]{6}$/),
+        by: z.string().max(64),
+      }),
+    )
+    .refine((m) => Object.keys(m).length <= 3600, "Забагато позначок"),
+  dark: z.boolean(),
+  moved: z.boolean().optional(),
+});
+
 export const battleMapSchema = z.object({
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),
@@ -33,6 +53,7 @@ export const battleMapSchema = z.object({
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
+  maze: mazeSchema.nullable().optional(),
 }).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
 
 export const createBattleSchema = z.object({
