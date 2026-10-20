@@ -1,10 +1,10 @@
 import type { QueueEntry } from "./queue";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import { inMazePlay, isEscaped, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
 
@@ -54,6 +54,9 @@ const onField = (p: BattleParticipant) => p.battleData.position !== undefined;
 
 const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && isActive(p) && !isEscaped(p) && onField(p);
 
+// непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
+const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && onField(p);
+
 export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: DeriveArgs): MazeView | null {
   const maze = map.maze;
 
@@ -67,7 +70,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     return { ...base, role: "dm", cells: null, visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
   }
 
-  const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isLiveHero(p));
+  const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
 
   if (own.length === 0) {
     const visible = participants.filter((p) => onField(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inMazePlay(p))));
@@ -108,3 +111,66 @@ export const filterQueue = (queue: QueueEntry[], view: MazeView): QueueEntry[] =
   queue.filter((e) => e.kind === "round" || view.visibleIds.has(idOf(e.participant)));
 
 export const mazeCellVisible = (view: MazeView, x: number, y: number): boolean => view.cells === null || view.cells.has(cellKey({ x, y }));
+
+export const MAZE_UNKNOWN_NAME = "невідомий";
+
+const hidesFrom = (view: MazeView | null | undefined): view is MazeView => view?.role === "player";
+
+const knows = (view: MazeView, id: string) => view.visibleIds.has(id) || view.ownIds.has(id);
+
+const SERVICE_ACTORS: ReadonlySet<string> = new Set([DM_ACTOR.actorId, SYSTEM_ACTOR.actorId]);
+
+/** Гравець у лабіринті бачить лише своїх і тих, хто зараз у полі зору; ДМ і глядач — усіх. */
+export const mazeVisible = (view: MazeView | null | undefined, p: BattleParticipant): boolean => !hidesFrom(view) || knows(view, idOf(p));
+
+export const visibleParticipants = (view: MazeView | null | undefined, list: BattleParticipant[]): BattleParticipant[] =>
+  hidesFrom(view) ? list.filter((p) => knows(view, idOf(p))) : list;
+
+const anyTargetKnown = (view: MazeView, e: BattleAction, known: (id: string) => boolean) => (e.targets ?? []).some((t) => known(t.participantId));
+
+/** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. */
+export function mazeLogVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
+  if (!hidesFrom(view)) return true;
+
+  const kind = e.actionDetails?.mazeEvent;
+
+  if (kind === "op") return false;
+
+  if (kind === "spotted") return view.ownIds.has(e.actorId);
+
+  if (SERVICE_ACTORS.has(e.actorId)) return !e.targets?.length || anyTargetKnown(view, e, (id) => knows(view, id));
+
+  // удар по своєму героєві гравець відчуває, навіть якщо нападника не видно
+  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => view.ownIds.has(id));
+}
+
+/** FX: лише коли видно виконавця або хоч одну ціль. */
+export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
+  if (!hidesFrom(view)) return true;
+
+  if (e.actionDetails?.mazeEvent) return false;
+
+  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => knows(view, id));
+}
+
+export interface MazeMaskable {
+  battle: { battleLog?: BattleAction[] };
+  turn: { current: BattleParticipant | null; queue: QueueEntry[] };
+  roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
+}
+
+/** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
+export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView | null | undefined): T {
+  if (!hidesFrom(view)) return scene;
+
+  const { current } = scene.turn;
+
+  const masked = current && !knows(view, idOf(current)) ? { ...current, basicInfo: { ...current.basicInfo, name: MAZE_UNKNOWN_NAME, avatar: undefined } } : current;
+
+  return {
+    ...scene,
+    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).filter((e) => mazeLogVisible(view, e)) },
+    turn: { ...scene.turn, current: masked, queue: filterQueue(scene.turn.queue, view) },
+    roster: { ...scene.roster, allies: visibleParticipants(view, scene.roster.allies), enemies: visibleParticipants(view, scene.roster.enemies) },
+  } as T;
+}

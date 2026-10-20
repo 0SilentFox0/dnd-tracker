@@ -39,7 +39,7 @@ export {
   useMazeTools,
 } from "./useMazeTools";
 export { MazeToolStateProvider } from "./useMazeToolState";
-export { type MazeAsHero, MazeViewProvider, useMazeView } from "./useMazeView";
+export { type MazeAsHero, MazeViewProvider, useMazeFxLog, useMazeView, useMazeVisible } from "./useMazeView";
 export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";

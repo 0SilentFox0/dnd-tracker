@@ -3,6 +3,7 @@
 import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
+import { useMazeVisible } from "./useMazeView";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import {
@@ -27,7 +28,7 @@ import {
 } from "@/lib/utils/battle/flows";
 import { isOnMap, type MapAim } from "@/lib/utils/battle/grid";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
-import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { mazeSightedTargets, skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -180,7 +181,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const map = scene.battle.map ?? null;
 
-  const targets = spellTargetCandidates(order, caster, flow.pick?.targetMode === "template" ? undefined : flow.pick?.targetSide);
+  const visible = useMazeVisible();
+
+  const targets = spellTargetCandidates(order, caster, flow.pick?.targetMode === "template" ? undefined : flow.pick?.targetSide).filter(visible);
 
   const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
 
@@ -190,13 +193,13 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const hover = useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
 
-  const aimPreview = hover && caster ? { targets: touchedAt(hover).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side })) } : null;
+  const aimPreview = hover && caster ? { targets: touchedAt(hover).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side })) } : null;
 
   const chainFirst = flow.pick?.chain ? order.find((p) => p.basicInfo.id === flow.targetIds[0]) : undefined;
 
   const chain = caster && chainFirst && flow.pick?.chain ? spellChain({ participants: order, caster }, flow.pick.chain, chainFirst) : [];
 
-  const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? skillAllTargets(order, caster, flow.pick.targetSide) : [];
+  const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? mazeSightedTargets(map, order, caster, skillAllTargets(order, caster, flow.pick.targetSide)) : [];
 
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
   const state = withAllTargets(withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id)), allSide);
@@ -232,7 +235,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, aimPreview, chain, inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, aimPreview, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),

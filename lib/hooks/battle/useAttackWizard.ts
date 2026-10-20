@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useBattleScene } from "./useBattleScene";
+import { useMazeVisible } from "./useMazeView";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -30,8 +31,10 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
+  const visible = useMazeVisible();
+
   const targets = order.filter(
-    (p) => isUp(p) && !isAirborne(p) && p !== attacker && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
+    (p) => isUp(p) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
 
   const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
@@ -84,7 +87,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const preselectAll = (chosen: BattleAttack) => {
     if (!hitsAll) return;
 
-    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen) : enemyTargets;
+    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen).filter(visible) : enemyTargets;
 
     dispatch({ type: "SET_TARGETS", ids: inReach.map((p) => p.basicInfo.id) });
   };
