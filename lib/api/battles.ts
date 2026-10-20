@@ -19,6 +19,8 @@ import type {
   BonusActionData,
   MapTerrainData,
   MapTerrainResponse,
+  MazeActionData,
+  MazeMarkData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -127,6 +129,14 @@ export async function setMapTerrain(
   data: WithVersion<MapTerrainData>,
 ): Promise<BattleMutationResponse<MapTerrainResponse>> {
   return campaignPost<BattleMutationResponse<MapTerrainResponse>>(campaignId, `/battles/${battleId}/map-terrain`, data);
+}
+
+export async function mazeAction(campaignId: string, battleId: string, data: WithVersion<MazeActionData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/maze`, data);
+}
+
+export async function mazeMark(campaignId: string, battleId: string, data: WithVersion<MazeMarkData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/maze-mark`, data);
 }
 
 export async function bonusAction(campaignId: string, battleId: string, data: WithVersion<BonusActionData>): Promise<BattleMutationResponse> {

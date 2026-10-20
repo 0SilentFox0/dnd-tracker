@@ -2,7 +2,7 @@ import type { GroupedSkillPayload } from "./hooks";
 
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, MazeConfig, MazeDifficulty, MazeMarkSymbol, TerrainDiff, TerrainKind } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -190,6 +190,21 @@ export interface MapTerrainData {
 export interface MapTerrainResponse {
   /** зайняті або поза полем клітинки, які сервер пропустив */
   skipped: string[];
+}
+
+export type MazeActionData =
+  | { op: "generate"; difficulty: MazeDifficulty; teleportPairs: number; fogPatches: number; exit: GridPoint | null }
+  | { op: "reshuffle"; mode: "walls" | "scatter"; teleportPairs: number; fogPatches: number }
+  | { op: "walls"; add: string[]; remove: string[] }
+  | { op: "exit"; cell: GridPoint }
+  | { op: "teleport"; pair: [GridPoint, GridPoint] | null; removeAt?: GridPoint }
+  | { op: "fog"; cells: string[]; on: boolean }
+  | { op: "dark"; on: boolean }
+  | { op: "scatterStarts" };
+
+export interface MazeMarkData {
+  participantId: string;
+  symbol: MazeMarkSymbol;
 }
 
 export interface AbilityActionData {

@@ -147,6 +147,10 @@ export const BATTLE_RATE_LIMITS = {
   move: { limit: 60, windowSeconds: 10 },
   /** Місцевість на карті (ДМ) — штрих за штрихом. */
   mapTerrain: { limit: 60, windowSeconds: 10 },
+  /** Правка лабіринту (ДМ). */
+  maze: { limit: 60, windowSeconds: 10 },
+  /** Мітка гравця в лабіринті. */
+  mazeMark: { limit: 30, windowSeconds: 10 },
   /** Next-turn — DM advance, рідше викликається. */
   nextTurn: { limit: 20, windowSeconds: 10 },
   /** PATCH HP / remove participant — DM-only, частіше OK. */

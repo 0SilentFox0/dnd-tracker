@@ -1,0 +1,67 @@
+import { describe, expect, it, vi } from "vitest";
+
+import { context, goblin, hero, participant } from "./fixtures";
+
+import { mazeMarkMutation, mazeMarkSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation";
+import { markColor, MAZE_DARK_ERROR } from "@/lib/utils/battle/maze";
+import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+
+const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 5, y: 0 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, moved: true, ...over });
+
+const at = (p: BattleParticipant, position: GridPoint, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position, ...extra } });
+
+const hero2 = participant("hero2", { controlledBy: "user-2", name: "Друга" });
+
+const ctx = (mazeOver: Partial<MazeConfig> = {}, over: Partial<BattleMutationContext> = {}, used = 0): BattleMutationContext => {
+  const base = context({ participants: [at(hero, { x: 0, y: 2 }, { movementUsed: used }), at(hero2, { x: 0, y: 4 }), at(goblin, { x: 5, y: 5 }, { dormant: true })], ...over });
+
+  const map: BattleMapConfig = { cols: 6, rows: 6, background: null, opacity: 0.3, maze: maze(mazeOver) };
+
+  return { ...base, meta: { ...base.meta, map } };
+};
+
+describe("maze-mark mutation", () => {
+  it("ставить мітку на свою клітинку кольором гравця і витрачає 1 крок", () => {
+    const out = mazeMarkMutation(ctx(), { participantId: "hero", symbol: "skull" });
+
+    expect(out.scene?.map?.maze?.marks["0:2"]).toEqual({ symbol: "skull", color: markColor("hero"), by: "hero" });
+    expect(out.participants[0].battleData.movementUsed).toBe(1);
+    expect(markColor("hero")).toBe(markColor("hero"));
+  });
+
+  it("4-та дія за хід → відмова", () => {
+    expect(() => mazeMarkMutation(ctx({}, {}, 3), { participantId: "hero", symbol: "star" })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+
+  it("чужий хід → 403, у тому числі для ДМ", () => {
+    expect(() => mazeMarkMutation(ctx(), { participantId: "hero2", symbol: "star" })).toThrow(expect.objectContaining({ status: 403 }));
+    expect(() => mazeMarkMutation(ctx({}, { isDM: true }), { participantId: "hero2", symbol: "star" })).toThrow(expect.objectContaining({ status: 403 }));
+  });
+
+  it("у темряві маршрут відхиляє мітку до виклику мутації", async () => {
+    const loaded = ctx({ dark: true });
+
+    const deps: PipelineDeps = {
+      getUserId: async () => loaded.userId,
+      rateLimit: vi.fn(),
+      loadBattle: async () => ({ scene: loaded.scene, meta: loaded.meta, participants: loaded.participants, pending: [], isDM: false, isMember: true }),
+      saveBattle: vi.fn(),
+      publish: vi.fn(),
+      loadRecentEvents: async () => [],
+    };
+
+    const mutate = vi.fn();
+
+    const res = await runBattleMutation(
+      new Request("http://x/api", { method: "POST", body: JSON.stringify({ participantId: "hero", symbol: "star" }) }),
+      { params: { id: "c1", battleId: "b1" }, access: BattleAccess.MEMBER, blockedInDark: true, schema: mazeMarkSchema, mutate } as never,
+      deps,
+    );
+
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toBe(MAZE_DARK_ERROR);
+    expect(mutate).not.toHaveBeenCalled();
+  });
+});

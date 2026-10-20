@@ -15,6 +15,8 @@ export {
   useCompleteBattle,
   useDeleteAllBattles,
   useMapTerrain,
+  useMazeAction,
+  useMazeMark,
   useMoraleCheck,
   useMoveParticipant,
   useNextTurn,

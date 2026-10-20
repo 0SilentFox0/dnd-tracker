@@ -21,6 +21,8 @@ import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]
 import { auraZoneMutation, auraZoneSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/aura-zone/aura-zone-mutation";
 import { bonusActionSchema, createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
 import { mapTerrainMutation, mapTerrainSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/map-terrain/map-terrain-mutation";
+import { mazeActionSchema, mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
+import { mazeMarkMutation, mazeMarkSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation";
 import { moraleCheckMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
 import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
@@ -274,6 +276,10 @@ const REVEAL = { access: "dm", requireStatus: "active", allowWhileAwaitingDm: tr
 const MOVE = { access: "member", requireStatus: "active", respond: "wrapped", schema: moveSchema, mutate: moveMutation };
 
 const MAP_TERRAIN = { access: "dm", requireStatus: "active", schema: mapTerrainSchema, mutate: mapTerrainMutation };
+
+const MAZE = { access: "dm", requireStatus: "active", schema: mazeActionSchema, mutate: mazeMutation };
+
+const MAZE_MARK = { access: "member", requireStatus: "active", blockedInDark: true, schema: mazeMarkSchema, mutate: mazeMarkMutation };
 
 const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 

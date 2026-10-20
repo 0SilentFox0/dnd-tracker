@@ -17,6 +17,8 @@ import {
   deleteAllBattles,
   deleteBattle,
   getBattle,
+  mazeAction,
+  mazeMark,
   moraleCheck,
   moveParticipant,
   nextTurn,
@@ -44,6 +46,8 @@ import type {
   BonusActionData,
   MapTerrainData,
   MapTerrainResponse,
+  MazeActionData,
+  MazeMarkData,
   MoraleCheckData,
   MoveParticipantData,
   SpellCastData,
@@ -165,6 +169,12 @@ export const useMoveParticipant = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useMapTerrain = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MapTerrainData, MapTerrainResponse>(c, b, (data) => setMapTerrain(c, b, data), { ...o, retryOnConflict: true });
+
+export const useMazeAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MazeActionData>(c, b, (data) => mazeAction(c, b, data), o);
+
+export const useMazeMark = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MazeMarkData>(c, b, (data) => mazeMark(c, b, data), o);
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);
