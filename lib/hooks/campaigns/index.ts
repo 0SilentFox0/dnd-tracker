@@ -9,3 +9,4 @@ export {
 } from "./useCampaignMutations";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { useJoinBattle } from "./useJoinBattle";
+export { useWatchShow } from "./useWatchShow";

@@ -4,13 +4,13 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
-import type { ActiveBattleRef, Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
+import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
 
 /**
- * Отримує активні бої в кампаніях, де користувач є учасником.
+ * Отримує активні бої й покази в кампаніях, де користувач є учасником.
  */
-export async function getActiveBattles(): Promise<ActiveBattleRef[]> {
-  return request<ActiveBattleRef[]>("/api/campaigns/active-battles");
+export async function getActiveSessions(): Promise<ActiveSessions> {
+  return request<ActiveSessions>("/api/campaigns/active-battles?withShows=1");
 }
 
 export async function updateCampaign(
