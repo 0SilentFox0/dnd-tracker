@@ -12,7 +12,9 @@
 
 ## Global Constraints
 
-- Робоча тека — worktree `/Users/silentfox/Work/dnd-tracker-scenario`, гілка `feat/scenario-editor`. Для локальної БД скопіюй `.env.local` з `/Users/silentfox/Work/dnd-tracker/.env.local` (не комітити).
+- Робоча тека — worktree `/Users/silentfox/Work/dnd-tracker-scenario`, гілка `feat/scenario-editor`. Перед Task 1 (одноразово): `cp /Users/silentfox/Work/dnd-tracker/.env.local . && pnpm install --frozen-lockfile` (`.env.local` не комітити; postinstall робить `prisma generate`).
+- `.env.local` дивиться на спільну локальну БД `localhost:54322/prodcopy` (не бекап). Ніколи не запускати `prisma migrate dev`/`migrate reset` — лише `pnpm migrate:deploy`.
+- Заголовок маркера (`callout.attrs.tag`) завжди видимий гравцеві в главах біографії; секретним може бути лише текст усередині.
 - Пакетний менеджер `pnpm`; після зміни `package.json` комітити `pnpm-lock.yaml`.
 - Міграція expand-only; кожен `CREATE TABLE` супроводжується `ALTER TABLE … ENABLE ROW LEVEL SECURITY` (`prisma/__tests__/migrations-rls.test.ts`).
 - Розмір `content` у PUT — до 512 KB (`SCENARIO_MAX_CONTENT_BYTES = 512 * 1024`), більший → 413.
@@ -24,7 +26,7 @@
 - Діалоги — лише `ResponsiveDialog`; підтвердження — `useConfirm()`, повідомлення — `useNotify()`/`useOptionalNotify()`.
 - Коментарі мінімальні (лише неочевидні «чому»); тексти UI українською; ідентифікатори англійською.
 - `padding-line-between-statements` і `simple-import-sort` — `pnpm lint --fix` після кожної задачі.
-- Фон сторінок «Сценарію» — дефолтна таверна (аркуш книги непрозорий); запис у `DM_SECTIONS` не додаємо.
+- Відступи від специфікації, погоджені на рівні плану: фон «Сценарію» — дефолтна таверна (аркуш книги непрозорий), запис у `DM_SECTIONS` не додаємо; @-посилання у «Грі» — посилання-чип без спливаючої картки (HoverCard у `components/ui` немає).
 
 ## Review Focus
 
@@ -874,7 +876,7 @@ git commit -m "feat(scenario): domain types, schemas and pure content utils"
 
 **Interfaces:**
 - Consumes: `scenarioContentSchema`, `emptyContent`, константи версій (Task 1).
-- Produces: `SUMMARY_SELECT`, `toSummary(row)`, `toPage(row)`, `readContent(json): ScenarioContent`, `listPages(campaignId): Promise<ScenarioPageSummary[]>`, `getPage(campaignId, pageId): Promise<ScenarioPage | null>`, `snapshotIfDue(page: { id: string; content: unknown }, userId: string, options?: { force?: boolean; now?: Date }): Promise<boolean>`, `pruneVersions(pageId): Promise<void>`; Prisma-делегати `prisma.scenarioPage`, `prisma.scenarioPageVersion`.
+- Produces: `SUMMARY_SELECT`, `OWNED_SELECT`, `toSummary(row)` (явний pick 10 полів), `toPage(row)`, `readContent(json): ScenarioContent`, `listPages(campaignId): Promise<ScenarioPageSummary[]>`, `getPage(campaignId, pageId): Promise<ScenarioPage | null>`, `snapshotIfDue(pageId: string, userId: string, options?: { force?: boolean; now?: Date }): Promise<boolean>` (сам читає `content`, лише коли знімок потрібен), `pruneVersions(pageId): Promise<void>`; Prisma-делегати `prisma.scenarioPage`, `prisma.scenarioPageVersion`.
 
 - [ ] **Step 1: Схема Prisma**
 
@@ -922,18 +924,55 @@ model ScenarioPageVersion {
 
 - [ ] **Step 2: Міграція**
 
-Локальна БД: `cp /Users/silentfox/Work/dnd-tracker/.env.local .env.local && pnpm db:local`.
-Run: `pnpm exec prisma migrate dev --name scenario_pages --create-only`
-Перейменуй створену теку на `prisma/migrations/20261021000000_scenario_pages` (щоб ішла після `20261020000000_campaign_tracks_battle_audio`) і допиши в кінець `migration.sql`:
+Міграцію пишемо руками (`migrate dev` на спільній prodcopy може запропонувати reset). Створи `prisma/migrations/20261021000000_scenario_pages/migration.sql`:
 
 ```sql
+CREATE TABLE "scenario_pages" (
+    "id" TEXT NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "kind" TEXT NOT NULL,
+    "arc" TEXT,
+    "title" TEXT NOT NULL,
+    "subtitle" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'draft',
+    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "characterId" TEXT,
+    "content" JSONB NOT NULL DEFAULT '{"legend":[],"sections":[]}',
+    "searchText" TEXT NOT NULL DEFAULT '',
+    "version" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    CONSTRAINT "scenario_pages_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "scenario_page_versions" (
+    "id" TEXT NOT NULL,
+    "pageId" TEXT NOT NULL,
+    "content" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdBy" TEXT NOT NULL,
+    CONSTRAINT "scenario_page_versions_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "scenario_pages_campaignId_sortOrder_idx" ON "scenario_pages"("campaignId", "sortOrder");
+
+CREATE INDEX "scenario_pages_characterId_idx" ON "scenario_pages"("characterId");
+
+CREATE INDEX "scenario_page_versions_pageId_createdAt_idx" ON "scenario_page_versions"("pageId", "createdAt");
+
+ALTER TABLE "scenario_pages" ADD CONSTRAINT "scenario_pages_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "scenario_pages" ADD CONSTRAINT "scenario_pages_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "characters"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "scenario_page_versions" ADD CONSTRAINT "scenario_page_versions_pageId_fkey" FOREIGN KEY ("pageId") REFERENCES "scenario_pages"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE "scenario_pages" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "scenario_page_versions" ENABLE ROW LEVEL SECURITY;
 ```
 
-Run: `pnpm exec prisma migrate dev && pnpm exec prisma generate && pnpm test:run prisma/__tests__/migrations-rls.test.ts`
-Expected: міграція застосована, RLS-тест PASS. Переконайся, що SQL містить лише `CREATE TABLE`/`CREATE INDEX`/`ADD CONSTRAINT`/`ENABLE ROW LEVEL SECURITY` (expand-only).
+Run: `pnpm exec prisma generate && pnpm db:local && pnpm test:run prisma/__tests__/migrations-rls.test.ts`
+Expected: `migrate deploy` застосовує `20261021000000_scenario_pages`, RLS-тест PASS. Звір SQL зі схемою: `node --env-file=.env.local node_modules/prisma/build/index.js migrate diff --from-schema-datasource prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --script` має вивести порожній diff (RLS у diff не входить — це нормально).
 
 - [ ] **Step 3: Падаючий тест сховища**
 
@@ -947,6 +986,7 @@ import { pruneVersions, readContent, snapshotIfDue, toSummary } from "@/lib/serv
 
 vi.mock("@/lib/db", () => ({
   prisma: {
+    scenarioPage: { findUnique: vi.fn(async () => ({ content: { legend: [], sections: [] } })) },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(), deleteMany: vi.fn() },
   },
 }));
@@ -961,23 +1001,28 @@ describe("page-store", () => {
     expect(readContent({ legend: [], sections: [] })).toEqual({ legend: [], sections: [] });
   });
 
-  it("toSummary серіалізує дату", () => {
-    expect(toSummary({ id: "p", kind: "scene", arc: null, title: "t", subtitle: null, status: "ready", sortOrder: 1, characterId: null, version: 3, updatedAt: now }).updatedAt).toBe("2026-10-21T12:00:00.000Z");
+  it("toSummary серіалізує дату і не пропускає content/searchText", () => {
+    const summary = toSummary({ id: "p", kind: "scene", arc: null, title: "t", subtitle: null, status: "ready", sortOrder: 1, characterId: null, version: 3, updatedAt: now, content: {}, searchText: "x" } as never);
+
+    expect(summary.updatedAt).toBe("2026-10-21T12:00:00.000Z");
+    expect(summary).not.toHaveProperty("content");
+    expect(summary).not.toHaveProperty("searchText");
   });
 
   it("знімок, якщо останній старший за 10 хв; ні — якщо свіжий", async () => {
     vi.mocked(prisma.scenarioPageVersion.findFirst).mockResolvedValueOnce({ createdAt: new Date("2026-10-21T11:40:00Z") } as never);
-    expect(await snapshotIfDue({ id: "p", content: { legend: [], sections: [] } }, "dm", { now })).toBe(true);
+    expect(await snapshotIfDue("p", "dm", { now })).toBe(true);
     expect(prisma.scenarioPageVersion.create).toHaveBeenCalledWith({ data: { pageId: "p", content: { legend: [], sections: [] }, createdBy: "dm" } });
 
     vi.mocked(prisma.scenarioPageVersion.findFirst).mockResolvedValueOnce({ createdAt: new Date("2026-10-21T11:55:00Z") } as never);
-    expect(await snapshotIfDue({ id: "p", content: {} }, "dm", { now })).toBe(false);
+    expect(await snapshotIfDue("p", "dm", { now })).toBe(false);
     expect(prisma.scenarioPageVersion.create).toHaveBeenCalledTimes(1);
+    expect(prisma.scenarioPage.findUnique).toHaveBeenCalledTimes(1);
   });
 
   it("force пише знімок завжди", async () => {
     vi.mocked(prisma.scenarioPageVersion.findFirst).mockResolvedValueOnce({ createdAt: now } as never);
-    expect(await snapshotIfDue({ id: "p", content: {} }, "dm", { now, force: true })).toBe(true);
+    expect(await snapshotIfDue("p", "dm", { now, force: true })).toBe(true);
   });
 
   it("pruneVersions лишає 50 найновіших", async () => {
@@ -1015,13 +1060,18 @@ export function readContent(json: unknown): ScenarioContent {
   return parsed.success ? parsed.data : emptyContent();
 }
 
+// explicit pick: rows may carry content/searchText, which must not leak into summaries (egress)
 export function toSummary(row: SummaryRow): ScenarioPageSummary {
-  return { ...row, kind: row.kind as ScenarioPageKind, status: row.status as ScenarioPageStatus, updatedAt: row.updatedAt.toISOString() };
+  const { id, kind, arc, title, subtitle, status, sortOrder, characterId, version, updatedAt } = row;
+
+  return { id, kind: kind as ScenarioPageKind, arc, title, subtitle, status: status as ScenarioPageStatus, sortOrder, characterId, version, updatedAt: updatedAt.toISOString() };
 }
 
 export function toPage(row: SummaryRow & { content: unknown }): ScenarioPage {
   return { ...toSummary(row), content: readContent(row.content) };
 }
+
+export const OWNED_SELECT = { id: true, campaignId: true, version: true, title: true } as const;
 
 export async function listPages(campaignId: string): Promise<ScenarioPageSummary[]> {
   const rows = await prisma.scenarioPage.findMany({ where: { campaignId }, select: SUMMARY_SELECT, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
@@ -1035,16 +1085,21 @@ export async function getPage(campaignId: string, pageId: string): Promise<Scena
   return row ? toPage(row) : null;
 }
 
-export async function snapshotIfDue(page: { id: string; content: unknown }, userId: string, options: { force?: boolean; now?: Date } = {}): Promise<boolean> {
+// reads the current content only when a snapshot is actually due — autosave runs every 1.5 s
+export async function snapshotIfDue(pageId: string, userId: string, options: { force?: boolean; now?: Date } = {}): Promise<boolean> {
   const now = options.now ?? new Date();
 
   if (!options.force) {
-    const last = await prisma.scenarioPageVersion.findFirst({ where: { pageId: page.id }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
+    const last = await prisma.scenarioPageVersion.findFirst({ where: { pageId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
 
     if (last && now.getTime() - last.createdAt.getTime() < SCENARIO_VERSION_INTERVAL_MS) return false;
   }
 
-  await prisma.scenarioPageVersion.create({ data: { pageId: page.id, content: page.content as Prisma.InputJsonValue, createdBy: userId } });
+  const page = await prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { content: true } });
+
+  if (!page) return false;
+
+  await prisma.scenarioPageVersion.create({ data: { pageId, content: page.content as Prisma.InputJsonValue, createdBy: userId } });
 
   return true;
 }
@@ -1255,7 +1310,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_SCENE_LEGEND } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema } from "@/lib/schemas/scenario";
-import { listPages, toSummary } from "@/lib/server/scenario/page-store";
+import { listPages, SUMMARY_SELECT, toSummary } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -1311,6 +1366,7 @@ export async function createScenarioHandler(req: Request, campaignId: string) {
         content: content as unknown as Prisma.InputJsonValue,
         searchText: buildSearchText(body.title, content),
       },
+      select: SUMMARY_SELECT,
     });
 
     return NextResponse.json(toSummary(row), { status: 201 });
@@ -1350,7 +1406,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
-import { pruneVersions, readContent, snapshotIfDue, toPage, toSummary } from "@/lib/server/scenario/page-store";
+import { OWNED_SELECT, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -1358,7 +1414,10 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
 
-export const ownedPage = (campaignId: string, pageId: string) => loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId } }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
+export const ownedPage = (campaignId: string, pageId: string) => loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: OWNED_SELECT }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
+
+export const ownedPageWithContent = (campaignId: string, pageId: string) =>
+  loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { ...SUMMARY_SELECT, campaignId: true, content: true } }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
 
 export async function getScenarioPageHandler(campaignId: string, pageId: string) {
   try {
@@ -1366,7 +1425,7 @@ export async function getScenarioPageHandler(campaignId: string, pageId: string)
 
     if (access instanceof NextResponse) return access;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await ownedPageWithContent(campaignId, pageId);
 
     return page instanceof NextResponse ? page : NextResponse.json(toPage(page));
   } catch (error) {
@@ -1392,7 +1451,7 @@ export async function saveScenarioContentHandler(req: Request, campaignId: strin
 
     if (page.version !== body.expectedVersion) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
-    if (await snapshotIfDue(page, access.userId)) await pruneVersions(pageId);
+    if (await snapshotIfDue(pageId, access.userId)) await pruneVersions(pageId);
 
     const { count } = await prisma.scenarioPage.updateMany({
       where: { id: pageId, version: body.expectedVersion },
@@ -1423,9 +1482,13 @@ export async function updateScenarioMetaHandler(req: Request, campaignId: string
 
     if (!(await characterInCampaign(campaignId, body.characterId))) return errorResponse(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
 
-    const searchText = body.title !== undefined && body.title !== page.title ? buildSearchText(body.title, readContent(page.content)) : undefined;
+    const titleChanged = body.title !== undefined && body.title !== page.title;
 
-    const row = await prisma.scenarioPage.update({ where: { id: pageId }, data: { ...body, ...(searchText !== undefined && { searchText }) } });
+    const current = titleChanged ? await prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { content: true } }) : null;
+
+    const searchText = titleChanged && body.title ? buildSearchText(body.title, readContent(current?.content)) : undefined;
+
+    const row = await prisma.scenarioPage.update({ where: { id: pageId }, data: { ...body, ...(searchText !== undefined && { searchText }) }, select: SUMMARY_SELECT });
 
     return NextResponse.json(toSummary(row));
   } catch (error) {
@@ -1509,7 +1572,7 @@ git commit -m "feat(scenario): pages API with optimistic version lock and snapsh
 - Test: `app/api/__tests__/scenario-aux-api.test.ts`
 
 **Interfaces:**
-- Consumes: `ownedPage` з `[pageId]/page-handlers.ts`, `page-store`, `findSnippet`, `buildSearchText`.
+- Consumes: `ownedPage` (лише `id, campaignId, version, title`) і `ownedPageWithContent` з `[pageId]/page-handlers.ts`, `page-store`, `findSnippet`, `buildSearchText`.
 - Produces HTTP:
   - `GET /scenario/[pageId]/versions` → `ScenarioVersionSummary[]`; `POST` `{ versionId }` → `ScenarioPage` (відкат, знімок поточного перед ним)
   - `PATCH /scenario/[pageId]/sections/[sectionId]` `{ played?, revealed? }` → `{ version: number; section: ScenarioSection }`; 404 розділ; 409 гонка
@@ -1648,7 +1711,7 @@ Run: `pnpm test:run app/api/__tests__/scenario-aux-api.test.ts` — Expected: FA
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
-import { ownedPage } from "../../page-handlers";
+import { ownedPageWithContent } from "../../page-handlers";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
@@ -1670,7 +1733,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     if (body instanceof NextResponse) return body;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await ownedPageWithContent(campaignId, pageId);
 
     if (page instanceof NextResponse) return page;
 
@@ -1722,7 +1785,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { restoreScenarioVersionSchema } from "@/lib/schemas/scenario";
-import { pruneVersions, readContent, snapshotIfDue, toPage } from "@/lib/server/scenario/page-store";
+import { pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -1765,12 +1828,13 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
 
     if (!version) return errorResponse(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
 
-    await snapshotIfDue(page, access.userId, { force: true });
+    await snapshotIfDue(pageId, access.userId, { force: true });
     await pruneVersions(pageId);
 
     const row = await prisma.scenarioPage.update({
       where: { id: pageId },
       data: { content: version.content as Prisma.InputJsonValue, searchText: buildSearchText(page.title, readContent(version.content)), version: { increment: 1 } },
+      select: { ...SUMMARY_SELECT, content: true },
     });
 
     return NextResponse.json(toPage(row));
@@ -2226,7 +2290,7 @@ describe("useScenarioDraft", () => {
     expect(result.current.content.legend[0].label).toBe("ab");
   });
 
-  it("409 → conflict, локальні зміни лишаються", async () => {
+  it("409 → conflict, локальні зміни лишаються, далі PUT не шлються до reload", async () => {
     vi.mocked(api.saveScenarioContent).mockRejectedValue(new ApiError("conflict", 409, "/x"));
 
     const { result } = renderHook(() => useScenarioDraft("c", page), { wrapper });
@@ -2236,6 +2300,39 @@ describe("useScenarioDraft", () => {
 
     expect(result.current.state).toBe("conflict");
     expect(result.current.content.legend[0].label).toBe("a");
+
+    act(() => result.current.setContent(rename("ab")));
+    await act(async () => vi.advanceTimersByTimeAsync(3000));
+    await act(async () => result.current.flush());
+
+    expect(api.saveScenarioContent).toHaveBeenCalledTimes(1);
+    expect(result.current.content.legend[0].label).toBe("ab");
+  });
+
+  it("flush чекає PUT, що вже летить, і дозберігає хвіст", async () => {
+    let resolveFirst: (v: { version: number }) => void = () => {};
+
+    vi.mocked(api.saveScenarioContent).mockImplementationOnce(() => new Promise((r) => (resolveFirst = r))).mockResolvedValueOnce({ version: 3 });
+
+    const { result } = renderHook(() => useScenarioDraft("c", page), { wrapper });
+
+    act(() => result.current.setContent(rename("a")));
+    await act(async () => vi.advanceTimersByTimeAsync(1500));
+    act(() => result.current.setContent(rename("ab")));
+
+    let done = false;
+
+    const flushing = act(async () => {
+      await result.current.flush();
+      done = true;
+    });
+
+    expect(done).toBe(false);
+    resolveFirst({ version: 2 });
+    await flushing;
+
+    expect(api.saveScenarioContent).toHaveBeenCalledTimes(2);
+    expect(result.current.state).toBe("saved");
   });
 
   it("мережева помилка → error, flush повторює", async () => {
@@ -2315,6 +2412,8 @@ import type { ScenarioContent, ScenarioPage } from "@/types/scenario";
 
 export type DraftState = "saved" | "dirty" | "saving" | "error" | "conflict";
 
+type DraftRef = { content: ScenarioContent; version: number; dirty: boolean; conflict: boolean; inFlight: Promise<void> | null; timer: ReturnType<typeof setTimeout> | null };
+
 export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
   const queryClient = useQueryClient();
 
@@ -2324,24 +2423,11 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 
   const [state, setState] = useState<DraftState>("saved");
 
-  const ref = useRef({ content: page.content, version: page.version, dirty: false, inFlight: false, again: false, timer: null as ReturnType<typeof setTimeout> | null });
+  const ref = useRef<DraftRef>({ content: page.content, version: page.version, dirty: false, conflict: false, inFlight: null, timer: null });
 
-  const flush = useCallback(async (): Promise<void> => {
+  const save = useCallback(async () => {
     const r = ref.current;
 
-    if (r.timer) clearTimeout(r.timer);
-
-    r.timer = null;
-
-    if (r.inFlight) {
-      r.again = true;
-
-      return;
-    }
-
-    if (!r.dirty) return;
-
-    r.inFlight = true;
     r.dirty = false;
     setState("saving");
 
@@ -2357,20 +2443,33 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
       r.dirty = true;
 
       if (error instanceof ApiError && error.status === 409) {
+        // stop saving until reload: every further PUT would 409 and pop another dialog
+        r.conflict = true;
         setState("conflict");
         notify("Сторінку змінено в іншій вкладці. Ваші правки лишились тут — перезавантажте сторінку, щоб побачити нову версію.");
       } else {
         setState("error");
       }
-    } finally {
-      r.inFlight = false;
-
-      if (r.again) {
-        r.again = false;
-        r.timer = setTimeout(() => void flush(), SCENARIO_AUTOSAVE_MS);
-      }
     }
   }, [campaignId, page.id, queryClient, notify]);
+
+  // resolves only when everything typed so far is saved (or failed) — callers await it before leaving edit mode
+  const flush = useCallback(async (): Promise<void> => {
+    const r = ref.current;
+
+    if (r.timer) clearTimeout(r.timer);
+
+    r.timer = null;
+
+    while (r.inFlight) await r.inFlight;
+
+    if (!r.dirty || r.conflict) return;
+
+    r.inFlight = save().finally(() => {
+      r.inFlight = null;
+    });
+    await r.inFlight;
+  }, [save]);
 
   const setContent = useCallback(
     (fn: (c: ScenarioContent) => ScenarioContent) => {
@@ -2379,12 +2478,14 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
       r.content = fn(r.content);
       r.dirty = true;
       setLocal(r.content);
-      setState((s) => (s === "conflict" ? s : "dirty"));
+
+      if (r.conflict) return;
+
+      setState("dirty");
 
       if (r.timer) clearTimeout(r.timer);
 
-      if (r.inFlight) r.again = true;
-      else r.timer = setTimeout(() => void flush(), SCENARIO_AUTOSAVE_MS);
+      r.timer = setTimeout(() => void flush(), SCENARIO_AUTOSAVE_MS);
     },
     [flush],
   );
@@ -2393,7 +2494,7 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
     const fresh = await getScenarioPage(campaignId, page.id);
 
     queryClient.setQueryData(scenarioKeys.page(campaignId, page.id), fresh);
-    ref.current = { ...ref.current, content: fresh.content, version: fresh.version, dirty: false };
+    ref.current = { ...ref.current, content: fresh.content, version: fresh.version, dirty: false, conflict: false };
     setLocal(fresh.content);
     setState("saved");
   }, [campaignId, page.id, queryClient]);
@@ -2415,7 +2516,7 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 }
 ```
 
-Зауваження для тесту 2: коли правка приходить під час `inFlight`, `again=true`, після завершення першого PUT планується таймер 1.5 с — тест чекає його через `advanceTimersByTimeAsync(1500)`.
+Тест 2: правка під час польоту першого PUT ставить таймер; він спрацьовує після 1.5 с, `flush` чекає завершення першого PUT і шле другий з новою версією.
 
 `useSectionProgress.ts`:
 
@@ -2481,6 +2582,7 @@ git commit -m "feat(scenario): client API and hooks with debounced autosave"
 ### Task 6: Книга й рендер (вигляд як в артефакті)
 
 **Files:**
+- Modify: `vitest-setup.ts` (мок `Alegreya`)
 - Create: `components/scenario/fonts.ts`, `components/scenario/scenario-book.css`, `components/scenario/ScenarioBook.tsx`, `components/scenario/ScenarioRichText.tsx`, `components/scenario/ScenarioLegend.tsx`, `components/scenario/index.ts`
 - Test: `components/scenario/__tests__/scenario-rich-text.test.tsx`
 
@@ -2499,8 +2601,6 @@ git commit -m "feat(scenario): client API and hooks with debounced autosave"
 // @vitest-environment happy-dom
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("@/components/scenario/fonts", () => ({ scenarioFontClassName: "" }));
 
 import { ScenarioRichText } from "@/components/scenario";
 import type { RichDoc } from "@/types/scenario";
@@ -2552,6 +2652,17 @@ describe("ScenarioRichText", () => {
 Run: `pnpm test:run components/scenario` — Expected: FAIL.
 
 - [ ] **Step 2: Шрифти й CSS**
+
+Спершу розшир глобальний мок у `vitest-setup.ts` (інакше всі тести, що імпортують `StoryTab`/книгу, падають з «No Alegreya export»):
+
+```ts
+vi.mock("next/font/google", () => ({
+  Alegreya: () => ({ variable: "" }),
+  Alegreya_SC: () => ({ variable: "" }),
+  Alegreya_Sans: () => ({ variable: "" }),
+  EB_Garamond: () => ({ variable: "" }),
+}));
+```
 
 `components/scenario/fonts.ts`:
 
@@ -2948,7 +3059,7 @@ export async function loadStoryChapters(characterId: string, campaignId: string)
 
 - `types/characters.ts`: змінити рядок `story` на
   `story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };` і додати `import type { StoryChapter } from "@/types/scenario";`.
-- `lib/utils/characters/sheet/build-sheet.ts`: у `SheetInput` додати `chapters: StoryChapter[];`, у `story: { … }` додати `chapters: input.chapters,`.
+- `lib/utils/characters/sheet/build-sheet.ts`: у `SheetInput` додати `chapters?: StoryChapter[];` (необов'язкове — наявні тести будують `SheetInput` без нього), у `story: { … }` додати `chapters: input.chapters ?? [],`.
 - `sheet-handler.ts` (`buildSheetFor`): додати `chapters: await loadStoryChapters(character.id, character.campaignId),` в об'єкт для `buildCharacterSheet` (імпорт з `@/lib/server/scenario/player-story`).
 - Усі фікстури, де будується `story` (`grep -rn "biography:" components lib app --include=*.ts --include=*.tsx`), — додати `chapters: []`. Тести, що мокають `prisma` для `buildSheetFor` (`app/api/__tests__/character-sheet-api.test.ts`, `character-sheet-queries.test.ts`), — додати `vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(async () => []) }))`.
 
@@ -2956,11 +3067,11 @@ Run: `pnpm exec tsc --noEmit -p . && pnpm test:run app/api/__tests__/character-s
 
 - [ ] **Step 4: UI глав — падаючий тест**
 
-Додай у `components/character-profile/__tests__/story-tab.test.tsx` (вгорі — `vi.mock("@/components/scenario/fonts", () => ({ scenarioFontClassName: "" }));`):
+Додай у `components/character-profile/__tests__/story-tab.test.tsx` (мок шрифтів уже глобальний — Task 6):
 
 ```tsx
 it("показує відкриті глави під біографією", () => {
-  const sheet = sheetFixture({ story: { ...sheetFixture().story, chapters: [{ id: "h1", title: "Після собору", rows: [{ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Застібка єдинорога" }] }] }] }] } });
+  const sheet = withSheet({ story: { ...sheetFixture.story, chapters: [{ id: "h1", title: "Після собору", rows: [{ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Застібка єдинорога" }] }] }] }] } });
 
   inProfile(sheet);
   expect(screen.getByText("Після собору")).toBeTruthy();
@@ -2968,12 +3079,12 @@ it("показує відкриті глави під біографією", () 
 });
 
 it("без глав — блок не рендериться", () => {
-  inProfile(sheetFixture());
+  inProfile(sheetFixture);
   expect(screen.queryByText("Глави історії")).toBeNull();
 });
 ```
 
-(Якщо `sheetFixture` не приймає часткових перевизначень — подивись його сигнатуру в `__tests__/sheet-fixture.ts` і передай змінений `story` тим способом, який він підтримує.)
+(`sheetFixture` — об'єкт `CharacterSheet`; `withSheet(over)` з того ж файлу повертає копію з перевизначеннями — звір його сигнатуру в `__tests__/sheet-fixture.ts`. У `sheetFixture.story` додай `chapters: []`.)
 
 Run: `pnpm test:run components/character-profile/__tests__/story-tab.test.tsx` — Expected: FAIL.
 
@@ -2985,7 +3096,8 @@ Run: `pnpm test:run components/character-profile/__tests__/story-tab.test.tsx` �
 "use client";
 
 import { HudSection } from "@/components/hud/form";
-import { ScenarioBook, ScenarioRichText } from "@/components/scenario";
+import { ScenarioBook } from "@/components/scenario/ScenarioBook";
+import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import type { StoryChapter } from "@/types/scenario";
 
 export function StoryChapters({ chapters, campaignId }: { chapters: StoryChapter[]; campaignId: string }) {
@@ -3033,7 +3145,7 @@ git commit -m "feat(scenario): revealed biography chapters in the character stor
 
 **Interfaces:**
 - Consumes: `useScenarioPages`, `useScenarioPageActions`, `useScenarioSearch`, `groupIndex`, `listPages`, `useCharacters(campaignId, { compact: true })` з `@/lib/hooks/characters`.
-- Produces: маршрут `/campaigns/[id]/dm/scenario`; `ScenarioIndex({ campaignId, pages, onMove })`, `ScenarioSearch({ campaignId })`, `CreateScenarioPageDialog({ campaignId, open, onOpenChange, onCreated })`.
+- Produces: маршрут `/campaigns/[id]/dm/scenario`; `ScenarioIndex({ campaignId, pages, onMove })`, `ScenarioSearch({ campaignId })`, `CreateScenarioPageDialog({ open, onOpenChange, characters, pending, onSubmit })`.
 
 - [ ] **Step 1: Падаючий тест індексу**
 
@@ -3043,8 +3155,6 @@ git commit -m "feat(scenario): revealed biography chapters in the character stor
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("@/components/scenario/fonts", () => ({ scenarioFontClassName: "" }));
 
 import { ScenarioIndex } from "@/components/scenario";
 import type { ScenarioPageSummary } from "@/types/scenario";
@@ -3448,8 +3558,6 @@ git commit -m "feat(scenario): DM scenario index with search, create and menu en
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/scenario/fonts", () => ({ scenarioFontClassName: "" }));
-
 import { ScenarioPageView } from "@/components/scenario";
 import type { ScenarioPage } from "@/types/scenario";
 
@@ -3691,7 +3799,7 @@ git commit -m "feat(scenario): play mode with anchors, hide notes and progress t
 - Consumes: `CALLOUT_KINDS`, `CALLOUT_LABELS`, `scenarioContentSchema` (для тесту), `MentionOption`.
 - Produces:
   - `buildExtensions(searchMentions: (q: string) => Promise<MentionOption[]>): Extensions`
-  - `RichTextEditor({ doc, onChange(doc: RichDoc), onReady(editor: Editor), searchMentions, placeholder? })`
+  - `RichTextEditor({ doc, onChange(doc: RichDoc), onReady(editor: Editor | null), searchMentions, label })`
   - `ScenarioToolbar({ editor: Editor | null })`
 
 - [ ] **Step 1: Залежності**
@@ -3728,7 +3836,7 @@ const doc: RichDoc = {
 
 describe("scenario tiptap extensions", () => {
   it("документ проходить через редактор без втрат і лишається валідним для схеми", () => {
-    editor = new Editor({ extensions: buildExtensions(async () => []), content: doc });
+    editor = new Editor({ element: document.createElement("div"), extensions: buildExtensions(async () => []), content: doc });
 
     const json = editor.getJSON() as RichDoc;
 
@@ -3744,7 +3852,7 @@ describe("scenario tiptap extensions", () => {
   });
 
   it("команди тулбара створюють дозволені вузли", () => {
-    editor = new Editor({ extensions: buildExtensions(async () => []), content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "x" }] }] } });
+    editor = new Editor({ element: document.createElement("div"), extensions: buildExtensions(async () => []), content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "x" }] }] } });
     editor.chain().selectAll().toggleWrap("callout", { kind: "event", tag: "Подія" }).run();
     editor.chain().focus("end").insertContent({ type: "token", attrs: { color: "green" } }).run();
     editor.chain().insertTable({ rows: 2, cols: 2, withHeaderRow: false }).run();
@@ -3817,7 +3925,10 @@ const Token = Node.create({
 
 const ScenarioMention = Mention.extend({
   addAttributes() {
-    return { ...this.parent?.(), type: { default: null } };
+    return {
+      ...this.parent?.(),
+      type: { default: null, parseHTML: (el: HTMLElement) => el.getAttribute("data-mention-type"), renderHTML: (attrs: { type?: string | null }) => (attrs.type ? { "data-mention-type": attrs.type } : {}) },
+    };
   },
 });
 
@@ -3830,12 +3941,13 @@ export function buildExtensions(searchMentions: (q: string) => Promise<MentionOp
     Say,
     Callout,
     Token,
-    ScenarioMention.configure({ HTMLAttributes: { class: "mention" }, renderText: ({ node }) => String(node.attrs.label ?? ""), renderHTML: ({ node }) => ["span", { class: "mention" }, String(node.attrs.label ?? "")], suggestion: mentionSuggestion(searchMentions) }),
+    // default renderHTML keeps data-type/data-id/data-label, so cut/paste inside the editor preserves mentions
+    ScenarioMention.configure({ HTMLAttributes: { class: "mention" }, suggestion: mentionSuggestion(searchMentions) }),
   ];
 }
 ```
 
-Якщо `getJSON()` для `mention` повертає додатковий атрибут `mentionSuggestionChar` — він проходить `attrsSchema` (`record<string, unknown>`), тест на `toMatchObject` це допускає. Якщо в Tiptap 3 опції `renderText`/`renderHTML` мають іншу форму, звір з `node_modules/@tiptap/extension-mention/dist/index.d.ts` і збережи результат: у редакторі згадка виглядає як `<span class="mention">Лейбл</span>`.
+Якщо `getJSON()` для `mention` повертає додатковий атрибут `mentionSuggestionChar` — він проходить `attrsSchema` (`record<string, unknown>`), тест на `toMatchObject` це допускає. У редакторі згадка виглядає як `@Лейбл` (дефолтний рендер Mention), у «Грі» — як посилання без `@`.
 
 - [ ] **Step 4: @-підказки**
 
@@ -3844,27 +3956,31 @@ export function buildExtensions(searchMentions: (q: string) => Promise<MentionOp
 ```tsx
 "use client";
 
-import { type Ref, useEffect, useImperativeHandle, useState } from "react";
+import { type Ref, useImperativeHandle, useState } from "react";
+import type { MentionNodeAttrs } from "@tiptap/extension-mention";
 
 import { MENTION_LABELS } from "@/lib/constants/scenario";
 import type { MentionOption } from "@/types/scenario";
 
 export type MentionListHandle = { onKeyDown: (event: KeyboardEvent) => boolean };
 
-export function MentionList({ items, command, ref }: { items: MentionOption[]; command: (item: MentionOption) => void; ref?: Ref<MentionListHandle> }) {
+export function MentionList({ items, command, ref }: { items: MentionOption[]; command: (attrs: MentionNodeAttrs) => void; ref?: Ref<MentionListHandle> }) {
   const [active, setActive] = useState(0);
 
-  useEffect(() => setActive(0), [items]);
+  // a new result list can be shorter than the old index — clamp instead of resetting state in an effect
+  const index = active < items.length ? active : 0;
+
+  const pick = (item: MentionOption) => command({ id: item.id, label: item.label, type: item.type } as MentionNodeAttrs);
 
   useImperativeHandle(ref, () => ({
     onKeyDown: (event) => {
       if (!items.length) return false;
 
-      if (event.key === "ArrowDown") return setActive((i) => (i + 1) % items.length), true;
+      if (event.key === "ArrowDown") return setActive((index + 1) % items.length), true;
 
-      if (event.key === "ArrowUp") return setActive((i) => (i - 1 + items.length) % items.length), true;
+      if (event.key === "ArrowUp") return setActive((index - 1 + items.length) % items.length), true;
 
-      if (event.key === "Enter") return command(items[active]), true;
+      if (event.key === "Enter") return pick(items[index]), true;
 
       return false;
     },
@@ -3878,10 +3994,10 @@ export function MentionList({ items, command, ref }: { items: MentionOption[]; c
           key={`${item.type}-${item.id}`}
           type="button"
           role="option"
-          aria-selected={i === active}
-          className={`flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left ${i === active ? "bg-white/10" : ""}`}
+          aria-selected={i === index}
+          className={`flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left ${i === index ? "bg-white/10" : ""}`}
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => command(item)}
+          onClick={() => pick(item)}
         >
           <span className="truncate">{item.label}</span>
           <span className="shrink-0 text-xs text-hud-muted">{MENTION_LABELS[item.type]}</span>
@@ -3895,16 +4011,18 @@ export function MentionList({ items, command, ref }: { items: MentionOption[]; c
 `components/scenario/editor/mention-suggestion.ts`:
 
 ```ts
+import type { MentionNodeAttrs, MentionOptions } from "@tiptap/extension-mention";
 import { ReactRenderer } from "@tiptap/react";
-import type { SuggestionKeyDownProps, SuggestionOptions, SuggestionProps } from "@tiptap/suggestion";
+import type { SuggestionKeyDownProps, SuggestionProps } from "@tiptap/suggestion";
 
 import { MentionList, type MentionListHandle } from "./MentionList";
 
 import type { MentionOption } from "@/types/scenario";
 
-type Props = SuggestionProps<MentionOption, MentionOption>;
+type Props = SuggestionProps<MentionOption, MentionNodeAttrs>;
 
-export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]>): Omit<SuggestionOptions<MentionOption, MentionOption>, "editor"> {
+// typed as Mention's own option so `command` matches MentionNodeAttrs (our extra `type` attr rides along)
+export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]>): MentionOptions["suggestion"] {
   return {
     char: "@",
     items: ({ query }) => search(query),
@@ -3953,7 +4071,7 @@ export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]
 }
 ```
 
-(Якщо типи `SuggestionOptions` у встановленій версії мають інші generic-параметри — звір з `node_modules/@tiptap/suggestion/dist/index.d.ts`; `MentionList` отримує `items` і `command` з `props`.)
+Після `pnpm add` звір з встановленими типами: `node_modules/@tiptap/extension-mention/dist/index.d.ts` (`MentionOptions["suggestion"]`, `MentionNodeAttrs`) і `node_modules/@tiptap/react/dist/index.d.ts` (`ReactRenderer`). Якщо `ReactRenderer` не передає `ref` функціональному компоненту без `forwardRef` (React 19 ref-as-prop), обгорни `MentionList` у `forwardRef` — інакше ↑/↓/Enter у підказці не працюватимуть. Перевір вручну в браузері (Task 13).
 
 - [ ] **Step 5: Редактор комірки й тулбар**
 
@@ -3973,7 +4091,7 @@ import type { MentionOption, RichDoc } from "@/types/scenario";
 export function RichTextEditor({ doc, onChange, onReady, searchMentions, label }: {
   doc: RichDoc;
   onChange: (doc: RichDoc) => void;
-  onReady: (editor: Editor) => void;
+  onReady: (editor: Editor | null) => void;
   searchMentions: (q: string) => Promise<MentionOption[]>;
   label: string;
 }) {
@@ -3989,7 +4107,12 @@ export function RichTextEditor({ doc, onChange, onReady, searchMentions, label }
   });
 
   useEffect(() => {
-    if (editor) onReady(editor);
+    if (!editor) return;
+
+    onReady(editor);
+
+    // the toolbar must not keep a destroyed instance while the next cell mounts
+    return () => onReady(null);
   }, [editor, onReady]);
 
   return <EditorContent editor={editor} />;
@@ -4122,7 +4245,7 @@ git commit -m "feat(scenario): tiptap extensions, cell editor, toolbar and @-men
 
 **Interfaces:**
 - Consumes: `useScenarioDraft`, `useMentionSearch`, `useScenarioPages`, `useScenarioPage`, `useScenarioPageActions`, `useScenarioVersions`, `useConfirm`; структурні функції з Task 1; `RichTextEditor`, `ScenarioToolbar` (Task 10); `ScenarioRichText` (Task 6).
-- Produces: `ScenarioEditor({ campaignId, page, onExit })` — default export для `next/dynamic` у `components/scenario/editor/index.ts`.
+- Produces: `ScenarioEditor({ campaignId, page, onExit, toolbarActions? })` — default export для `next/dynamic` у `components/scenario/editor/index.ts`; «Готово» спершу чекає `draft.flush()`, потім `onExit()`; `PagePropertiesDialog`, `VersionsDialog`.
 
 - [ ] **Step 1: Падаючий тест редактора структури**
 
@@ -4132,8 +4255,6 @@ git commit -m "feat(scenario): tiptap extensions, cell editor, toolbar and @-men
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("@/components/scenario/fonts", () => ({ scenarioFontClassName: "" }));
 
 const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => {}), reload: vi.fn() }));
 
@@ -4171,7 +4292,7 @@ const apply = () => {
 
 describe("ScenarioEditor", () => {
   it("комірка відкриває Tiptap лише по кліку; одночасно один редактор", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     expect(screen.queryByTestId("tiptap")).toBeNull();
     fireEvent.click(screen.getByText("Дзвони"));
@@ -4179,7 +4300,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("назва розділу, новий рядок, новий розділ — через setContent", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText("Назва розділу"), { target: { value: "1.0 Собор" } });
     expect(apply().sections[0].title).toBe("1.0 Собор");
@@ -4192,7 +4313,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("видалення розділу питає підтвердження", async () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити розділ: Собор" }));
     expect(await screen.findByText(/Видалити розділ «Собор»/)).toBeTruthy();
@@ -4200,7 +4321,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("на героєві є налаштування відкриття глави", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} />);
     expect(screen.getByLabelText("Коли відкрити гравцеві")).toBeTruthy();
   });
 });
@@ -4346,7 +4467,7 @@ import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type Cell = { rowId: string; column: "story" | "notes" } | null;
 
-export function ScenarioEditor({ campaignId, page, toolbarActions }: { campaignId: string; page: ScenarioPage; toolbarActions?: ReactNode }) {
+export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode }) {
   const draft = useScenarioDraft(campaignId, page);
 
   const searchMentions = useMentionSearch(campaignId);
@@ -4359,7 +4480,7 @@ export function ScenarioEditor({ campaignId, page, toolbarActions }: { campaignI
 
   const isHero = page.kind === "hero";
 
-  const onReady = useCallback((e: Editor) => setEditor(e), []);
+  const onReady = useCallback((e: Editor | null) => setEditor(e), []);
 
   const removeWithConfirm = async (title: string, apply: () => void) => {
     if (await confirm({ title: `Видалити ${title}?`, description: "Зміну можна відкотити через «Версії».", confirmLabel: "Видалити" })) apply();
@@ -4392,6 +4513,16 @@ export function ScenarioEditor({ campaignId, page, toolbarActions }: { campaignI
         <ScenarioToolbar editor={active ? editor : null} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} />
+          <button
+            type="button"
+            className="toggle"
+            onClick={async () => {
+              await draft.flush();
+              onExit();
+            }}
+          >
+            Готово
+          </button>
           {toolbarActions}
         </div>
       </div>
@@ -4472,7 +4603,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { LEGEND_KINDS, LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES } from "@/lib/constants/scenario";
+import { useRouter } from "next/navigation";
+
 import { useCharacters } from "@/lib/hooks/characters";
+import { useConfirm } from "@/lib/hooks/common";
 import { useScenarioPageActions } from "@/lib/hooks/scenario";
 import type { LegendEntry, LegendKind, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
 
@@ -4488,6 +4622,19 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
   const [items, setItems] = useState<LegendEntry[]>(legend);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((f) => ({ ...f, [key]: value }));
+
+  const router = useRouter();
+
+  const confirm = useConfirm();
+
+  const removePage = async () => {
+    if (!(await confirm({ title: `Видалити сторінку «${page.title}»?`, description: "Сторінку і всі її версії буде видалено назавжди.", confirmLabel: "Видалити" }))) return;
+
+    await actions
+      .remove(page.id)
+      .then(() => router.push(`/campaigns/${campaignId}/dm/scenario`))
+      .catch(() => {});
+  };
 
   const submit = async () => {
     await actions
@@ -4512,9 +4659,14 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
       onOpenChange={(o) => !o && onClose()}
       title="Властивості сторінки"
       footer={
-        <Button type="submit" form="scenario-props-form" disabled={actions.isPending || !form.title.trim()}>
-          Зберегти
-        </Button>
+        <>
+          <Button type="button" variant="destructive" disabled={actions.isPending} onClick={() => void removePage()}>
+            Видалити сторінку
+          </Button>
+          <Button type="submit" form="scenario-props-form" disabled={actions.isPending || !form.title.trim()}>
+            Зберегти
+          </Button>
+        </>
       }
     >
       <form
@@ -4685,14 +4837,19 @@ export function ScenarioPageClient({ campaignId, initialPage }: { campaignId: st
 
   const [versionsOpen, setVersionsOpen] = useState(false);
 
+  // edit mode leaves through the editor's own «Готово», which awaits the last save first
   const actions = (
     <>
-      <button type="button" className="toggle" onClick={() => setEditBase(editBase ? null : page)}>
-        {editBase ? "Гра" : "Редагувати"}
-      </button>
-      <button type="button" className="toggle" onClick={() => setVersionsOpen(true)}>
-        Версії
-      </button>
+      {!editBase && (
+        <>
+          <button type="button" className="toggle" onClick={() => setEditBase(page)}>
+            Редагувати
+          </button>
+          <button type="button" className="toggle" onClick={() => setVersionsOpen(true)}>
+            Версії
+          </button>
+        </>
+      )}
       <Link className="toggle" href={`/campaigns/${campaignId}/dm/scenario`}>
         До змісту
       </Link>
@@ -4711,7 +4868,7 @@ export function ScenarioPageClient({ campaignId, initialPage }: { campaignId: st
         actions={actions}
       />
       {editBase ? (
-        <ScenarioEditor campaignId={campaignId} page={editBase} />
+        <ScenarioEditor campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} />
       ) : (
         <ScenarioPageView
           page={page}
@@ -4719,13 +4876,13 @@ export function ScenarioPageClient({ campaignId, initialPage }: { campaignId: st
           progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending }}
         />
       )}
-      {versionsOpen && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => setEditBase(null)} />}
+      {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}
     </ScenarioBook>
   );
 }
 ```
 
-Після відновлення версії редактор закривається (`setEditBase(null)`), а «Гра» показує відновлений вміст із кешу (`useScenarioVersions.restore` кладе його туди). У режимі редагування `ScenarioBar` лишається зверху, тулбар редактора липне під ним; якщо вони перекриваються, зміни `top` у `.sb-toolbar-wrap` на висоту `.sb-bar` (49px).
+«Версії» доступні лише в «Грі», тож відкат не перетинається з автозбереженням; «Гра» показує відновлений вміст із кешу (`useScenarioVersions.restore` кладе його туди). Вхід у редагування бере свіжу `page` з кешу, тож версія для `expectedVersion` актуальна. У режимі редагування `ScenarioBar` лишається зверху, тулбар редактора липне під ним; якщо вони перекриваються, зміни `top` у `.sb-toolbar-wrap` на висоту `.sb-bar` (49px).
 
 Run: `pnpm test:run components/scenario && pnpm lint --fix && pnpm exec tsc --noEmit -p .` — Expected: PASS.
 
@@ -4747,7 +4904,7 @@ git commit -m "feat(scenario): edit mode with structure editor, autosave status,
 
 **Interfaces:**
 - Consumes: `scenarioContentSchema`, `buildSearchText`, `newId` (Task 1).
-- Produces: `parseArtifactHtml(html: string, kind: ScenarioPageKind): { title: string; subtitle: string | null; content: ScenarioContent }`; CLI `pnpm import-scenario <manifest.json> <campaignId> [--dry-run]`.
+- Produces: `parseArtifactHtml(html: string, kind: ScenarioPageKind): { title: string; subtitle: string | null; content: ScenarioContent }`; CLI `pnpm import-scenario <manifest.json> <campaignId> [--dry-run] [--force]` (наявні сторінки пропускає; `--force` перезаписує, спершу зберігши версію).
 
 Підготовка (робить контролер, не імплементер): HTML артефактів вивантажено в `.scenario-import/` (поза git) разом з `manifest.json`:
 
@@ -5083,7 +5240,9 @@ async function main() {
 
   const dryRun = process.argv.includes("--dry-run");
 
-  if (!manifestPath || !campaignId) throw new Error("Usage: pnpm import-scenario <manifest.json> <campaignId> [--dry-run]");
+  const force = process.argv.includes("--force");
+
+  if (!manifestPath || !campaignId) throw new Error("Usage: pnpm import-scenario <manifest.json> <campaignId> [--dry-run] [--force]");
 
   const entries = JSON.parse(readFileSync(manifestPath, "utf8")) as Entry[];
 
@@ -5107,12 +5266,24 @@ async function main() {
 
     const existing = await prisma.scenarioPage.findFirst({ where: { campaignId, title: parsed.title }, select: { id: true } });
 
+    // re-import would wipe DM edits and played/revealed flags — existing pages are skipped unless --force
+    if (existing && !force) {
+      console.info(`skip ${entry.kind} «${parsed.title}»: вже є (перезапис — --force)`);
+      continue;
+    }
+
     console.info(`${existing ? "update" : "create"} ${entry.kind} «${parsed.title}»: ${content.sections.length} розділів, ${content.sections.reduce((n, s) => n + s.rows.length, 0)} рядків`);
 
     if (dryRun) continue;
 
-    if (existing) await prisma.scenarioPage.update({ where: { id: existing.id }, data: { ...data, version: { increment: 1 } } });
-    else await prisma.scenarioPage.create({ data });
+    if (existing) {
+      const current = await prisma.scenarioPage.findUnique({ where: { id: existing.id }, select: { content: true } });
+
+      await prisma.scenarioPageVersion.create({ data: { pageId: existing.id, content: current?.content ?? {}, createdBy: "import" } });
+      await prisma.scenarioPage.update({ where: { id: existing.id }, data: { ...data, version: { increment: 1 } } });
+    } else {
+      await prisma.scenarioPage.create({ data });
+    }
   }
 
   await prisma.$disconnect();
@@ -5170,11 +5341,22 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm dev
 
 Mobile (375 px): індекс, «Гра» (рядки в одну колонку), тулбар прокручується горизонтально, без горизонтального скролу сторінки.
 
-- [ ] **Step 3: Прибирання**
+- [ ] **Step 3: Імпорт на прод (лише після злиття в main і деплою, з окремого підтвердження користувача)**
+
+Міграцію застосовує Vercel-білд з `main`. Потім:
+
+```bash
+pnpm import-scenario .scenario-import/manifest.json cmuylhk0c0001ia06lg5eommv --dry-run  # з DATABASE_URL прод-пулера з .env.production-db.local
+pnpm import-scenario .scenario-import/manifest.json cmuylhk0c0001ia06lg5eommv
+```
+
+Запуск: `node --env-file=.env.production-db.local node_modules/.bin/tsx --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts …` (як інші прод-сіди). Глави біографій імпортуються закритими — відкриває DM.
+
+- [ ] **Step 4: Прибирання**
 
 Видали тестові сторінки, створені під час перевірки на prodcopy (не імпортовані). Запиши результати перевірки в коміт або звіт, якщо щось лишилося відкритим.
 
-- [ ] **Step 4: Commit виправлень (якщо були)**
+- [ ] **Step 5: Commit виправлень (якщо були)**
 
 ```bash
 git add -A
