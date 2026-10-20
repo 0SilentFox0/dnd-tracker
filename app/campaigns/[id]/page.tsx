@@ -103,7 +103,10 @@ export default async function CampaignDetailPage({
             <HudTile key={path} href={`/campaigns/${id}/dm/${path}`} icon={<Icon className="size-5" />} title={title} subtitle={subtitle} />
           ))}
         {!isDM && (
-          <HudTile href={`/campaigns/${id}/character`} icon={<User className="size-5" />} title="Мій персонаж" subtitle="Перегляд та редагування персонажа" />
+          <>
+            <HudTile href={`/campaigns/${id}/character`} icon={<User className="size-5" />} title="Мій персонаж" subtitle="Перегляд та редагування персонажа" />
+            <HudTile href={`/campaigns/${id}/show`} icon={<Images className="size-5" />} title="Показ" subtitle="Слайди й музику від ДМ під час гри" />
+          </>
         )}
       </div>
     </HudPage>

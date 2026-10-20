@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Home, LogOut, Menu, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
+import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
@@ -137,6 +138,7 @@ export function Header({ email }: { email: string | null }) {
 
         <div className="flex items-center gap-2">
           <JoinBattleButton />
+          <WatchShowButton />
           <AbbreviationsInfoDialog />
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">
