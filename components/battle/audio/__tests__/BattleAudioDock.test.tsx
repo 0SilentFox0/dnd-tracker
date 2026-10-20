@@ -22,8 +22,8 @@ const fileState = audioState({ track: { ...fileTrack, title: "Бій у таве
 
 const ytState = audioState({ trackId: "t2", track: youtubeTrack });
 
-function Screen({ show = true, placement = "corner", collapseOn = null }: { show?: boolean; placement?: "corner" | "strip"; collapseOn?: string | null }) {
-  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} collapseOn={collapseOn} />}</BattleAudioProvider>;
+function Screen({ show = true, placement = "corner", collapseOn = null, collapseTick = 0 }: { show?: boolean; placement?: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
+  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} collapseOn={collapseOn} collapseTick={collapseTick} />}</BattleAudioProvider>;
 }
 
 function dock(opts: { isDM?: boolean; audio?: BattleAudioState | null; placement?: "corner" | "strip" }) {
@@ -414,6 +414,37 @@ describe("BattleAudioDock — розташування", () => {
 
     rerender(<Screen placement="strip" collapseOn="h1-2-n" />);
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
+  });
+
+  it("телефон: розгорнуте вікно ходу (collapseTick) згортає панель; <audio> і iframe лишаються, користувач може розгорнути знову", () => {
+    setWide(false);
+
+    const { container, getByRole, rerender } = render(<Screen placement="strip" />, { wrapper: fakeScene({ audio: ytState }).wrapper });
+
+    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+
+    const audio = container.querySelector("audio");
+
+    const player = container.querySelector("[data-youtube-player]");
+
+    rerender(<Screen placement="strip" collapseTick={1} />);
+
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
+    expect(container.querySelector("audio")).toBe(audio);
+    expect(container.querySelector("[data-youtube-player]")).toBe(player);
+
+    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    rerender(<Screen placement="strip" collapseTick={1} />);
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
+  });
+
+  it("телефон: шар дока z-40 — над списком (z-0) і жетонами, під діалогами й тостами (z-50)", () => {
+    setWide(false);
+
+    const { container } = dock({ audio: fileState, placement: "strip" });
+
+    expect(container.querySelector("[data-battle-audio=strip]")?.className).toContain("z-40");
   });
 
   it("кут: сам не fixed — позицію дає CornerStack", () => {

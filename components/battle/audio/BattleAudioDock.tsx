@@ -14,8 +14,9 @@ import { cn } from "@/lib/utils";
 /**
  * corner — у CornerStack зліва внизу (desktop, лобі); strip — шар над областю карти/списку телефона, чип зліва внизу.
  * collapseOn — ідентичність ходу: нове не-null значення згортає панель (вікно ходу забирає ту саму висоту).
+ * collapseTick — лічильник: кожне зростання (розгорнуте вікно ходу на телефоні) теж згортає панель.
  */
-export function BattleAudioDock({ placement, collapseOn = null }: { placement: "corner" | "strip"; collapseOn?: string | null }) {
+export function BattleAudioDock({ placement, collapseOn = null, collapseTick = 0 }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
   const { state, sound, dm, prefs } = useBattleAudio();
 
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -25,10 +26,13 @@ export function BattleAudioDock({ placement, collapseOn = null }: { placement: "
 
   const [seenCollapseOn, setSeenCollapseOn] = useState(collapseOn);
 
-  if (collapseOn !== seenCollapseOn) {
-    setSeenCollapseOn(collapseOn);
+  const [seenTick, setSeenTick] = useState(collapseTick);
 
-    if (collapseOn !== null) setChoice(false);
+  if (collapseOn !== seenCollapseOn || collapseTick !== seenTick) {
+    setSeenCollapseOn(collapseOn);
+    setSeenTick(collapseTick);
+
+    if ((collapseOn !== null && collapseOn !== seenCollapseOn) || collapseTick > seenTick) setChoice(false);
   }
 
   const expanded = choice ?? (placement === "corner" && wide);
@@ -52,7 +56,7 @@ export function BattleAudioDock({ placement, collapseOn = null }: { placement: "
 
   return (
     // strip: панель стискається до висоти шару й гортається, тож заголовок із «Згорнути» не виходить за верх
-    <div data-battle-audio={placement} className={cn(strip && "pointer-events-none absolute inset-2 z-30 flex flex-col items-start justify-end")}>
+    <div data-battle-audio={placement} className={cn(strip && "pointer-events-none absolute inset-2 z-40 flex flex-col items-start justify-end")}>
       <div className={cn(strip && "pointer-events-auto flex min-h-0 flex-col")}>
         <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded ? "sr-only" : strip && "flex min-h-0 flex-col")}>
           <AudioPlayerPanel view={{ onCollapse: () => setChoice(false), capped: strip }}>

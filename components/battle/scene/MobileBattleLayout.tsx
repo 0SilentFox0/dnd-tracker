@@ -53,7 +53,12 @@ export function MobileBattleLayout() {
     if (next !== MAP_TAB) setListTab(next);
   };
 
-  const expand = useCallback(() => setPickedTab(listTab), [listTab]);
+  const [expandTick, setExpandTick] = useState(0);
+
+  const expand = useCallback(() => {
+    setPickedTab(listTab);
+    setExpandTick((n) => n + 1);
+  }, [listTab]);
 
   const [slot, setSlot] = useState<HTMLDivElement | null>(null);
 
@@ -115,11 +120,11 @@ export function MobileBattleLayout() {
         {mapTab ? (
           <div className="min-h-0 flex-1"><BattleMapPanel phone /></div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div data-participant-scroll className="relative z-0 min-h-0 flex-1 overflow-y-auto">
             <ParticipantList side={tab} />
           </div>
         )}
-        <BattleAudioDock placement="strip" collapseOn={myTurnKey} />
+        <BattleAudioDock placement="strip" collapseOn={myTurnKey} collapseTick={expandTick} />
       </div>
       {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
       {(hero || mapTab) && (

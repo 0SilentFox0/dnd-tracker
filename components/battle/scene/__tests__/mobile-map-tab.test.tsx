@@ -9,10 +9,10 @@ const aura = vi.hoisted(() => ({ step: null as unknown }));
 
 vi.mock("@/lib/hooks/battle", async (importOriginal) => ({ ...(await importOriginal<object>()), useAuraZones: () => aura.step }));
 
-const dockProps = vi.hoisted(() => ({ current: null as { collapseOn?: string | null } | null }));
+const dockProps = vi.hoisted(() => ({ current: null as { collapseOn?: string | null; collapseTick?: number } | null }));
 
 vi.mock("@/components/battle/audio/BattleAudioDock", () => ({
-  BattleAudioDock: (props: { collapseOn?: string | null }) => {
+  BattleAudioDock: (props: { collapseOn?: string | null; collapseTick?: number }) => {
     dockProps.current = props;
 
     return null;
@@ -74,6 +74,26 @@ describe("MobileBattleLayout — вкладка «Карта» на весь е�
     fireEvent.click(tab(/Карта/));
     fireEvent.click(screen.getByRole("button", { name: /Твій хід · Дії/ }));
     expect(tab(/Союзники/).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("розгортання смуги ходу (мораль, мій хід) піднімає collapseTick для дока", () => {
+    const { wrapper } = fakeScene({ isMyTurn: true, map: MAP, morale: 2 });
+
+    render(<MobileBattleLayout />, { wrapper });
+
+    const before = dockProps.current?.collapseTick ?? 0;
+
+    fireEvent.click(screen.getByRole("button", { name: /Перевірка моралі/ }));
+    expect(dockProps.current?.collapseTick).toBeGreaterThan(before);
+  });
+
+  it("список гортається в окремому шарі z-0, під доком", () => {
+    const { wrapper } = fakeScene({ isMyTurn: true, map: MAP });
+
+    const { container } = render(<MobileBattleLayout />, { wrapper });
+
+    fireEvent.click(tab(/Союзники/));
+    expect(container.querySelector("[data-participant-scroll]")?.className).toContain("z-0");
   });
 
   it("мораль: рядок «Перевірка моралі» замість кубиків", () => {
