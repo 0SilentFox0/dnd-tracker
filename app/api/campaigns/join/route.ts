@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { kvDel } from "@/lib/cache/kv";
+import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
 import { requireAuthUser } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
@@ -26,12 +27,9 @@ export async function POST(request: Request) {
 
     const { inviteCode } = parsedBody;
 
-    // Знаходимо кампанію за кодом
     const campaign = await prisma.campaign.findUnique({
       where: { inviteCode },
-      include: {
-        members: true,
-      },
+      include: { members: { select: { userId: true } } },
     });
 
     if (!campaign) {
@@ -42,50 +40,25 @@ export async function POST(request: Request) {
       return errorResponse(API_ERRORS.CAMPAIGN_NOT_ACTIVE, 400);
     }
 
-    // Перевіряємо чи юзер вже є учасником
-    const existingMember = campaign.members.find((m) => m.userId === userId);
-
-    if (existingMember) {
+    if (campaign.members.some((m) => m.userId === userId)) {
       return errorResponse(API_ERRORS.ALREADY_MEMBER, 400);
     }
 
-    // Перевіряємо чи юзер існує в базі
-    let user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    await ensureDbUser(authUser);
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          id: userId,
-          email: authUser.email || "",
-          displayName:
-            authUser.user_metadata?.full_name ||
-            authUser.user_metadata?.name ||
-            authUser.email?.split("@")[0] ||
-            "User",
-          avatar:
-            authUser.user_metadata?.avatar_url ||
-            authUser.user_metadata?.picture ||
-            null,
-        },
-      });
-    }
-
-    // Додаємо юзера до кампанії
     const member = await prisma.campaignMember.create({
       data: {
         campaignId: campaign.id,
-        userId: userId,
+        userId,
         role: CampaignRole.PLAYER,
       },
       include: {
         campaign: true,
-        user: true,
+        user: { select: PUBLIC_USER_SELECT },
       },
     });
 
-    await kvDel(`campaigns:${userId}`);
+    await invalidateCampaignLists([userId, ...campaign.members.map((m) => m.userId)]);
 
     return NextResponse.json(member);
   } catch (error) {

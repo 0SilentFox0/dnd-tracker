@@ -26,7 +26,6 @@ export async function DELETE(
 
     const { level } = parsedBody;
 
-    // Видаляємо всі заклинання рівня в кампанії
     const result = await prisma.spell.deleteMany({
       where: {
         campaignId: id,

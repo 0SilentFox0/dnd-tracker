@@ -8,6 +8,7 @@ import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
@@ -27,6 +28,14 @@ export async function POST(
     const data = await parseBody(createSkillSchema, request);
 
     if (data instanceof NextResponse) return data;
+
+    const foreignRef = await invalidCampaignRefs(id, {
+      spell: [data.spellData.spellId, data.spellData.grantedSpellId],
+      spellGroup: data.spellData.spellGroupId,
+      mainSkill: data.mainSkillData.mainSkillId,
+    });
+
+    if (foreignRef) return foreignRef;
 
     const basicInfo = data.basicInfo as Record<string, unknown>;
 
@@ -125,7 +134,6 @@ export async function DELETE(
       return accessResult;
     }
 
-    // Видаляємо всі скіли кампанії
     const result = await prisma.skill.deleteMany({
       where: {
         campaignId: id,

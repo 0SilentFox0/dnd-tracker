@@ -11,6 +11,7 @@ import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/read";
 import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
@@ -21,8 +22,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -32,6 +32,10 @@ export async function POST(
     const data = await parseBody(createArtifactSchema, request);
 
     if (data instanceof NextResponse) return data;
+
+    const foreignRef = await invalidCampaignRefs(id, { artifactSet: data.setId });
+
+    if (foreignRef) return foreignRef;
 
     let icon = data.icon;
 
@@ -79,8 +83,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
+
     const accessResult = await requireCampaignAccess(id, false);
 
     if (accessResult instanceof NextResponse) {

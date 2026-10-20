@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
@@ -14,34 +15,34 @@ export async function DELETE(
 ) {
   try {
     const { id, memberId } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
     }
 
-    // Перевіряємо чи учасник існує та належить до цієї кампанії
     const member = await loadOwned(
       prisma.campaignMember.findUnique({
         where: { id: memberId },
-        select: { campaignId: true, role: true },
+        select: { campaignId: true, role: true, userId: true },
       }),
       id,
     );
 
     if (member instanceof NextResponse) return member;
 
-    // Не дозволяємо видаляти DM
     if (member.role === CampaignRole.DM) {
       return errorResponse(API_ERRORS.CANNOT_REMOVE_DM, 400);
     }
 
-    // Видаляємо учасника
     await prisma.campaignMember.deleteMany({
       where: { id: memberId },
     });
+
+    const remaining = await prisma.campaignMember.findMany({ where: { campaignId: id }, select: { userId: true } });
+
+    await invalidateCampaignLists([member.userId, ...remaining.map((m) => m.userId)]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

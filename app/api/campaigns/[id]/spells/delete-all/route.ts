@@ -18,7 +18,6 @@ export async function DELETE(
       return accessResult;
     }
 
-    // Видаляємо всі заклинання кампанії
     const result = await prisma.spell.deleteMany({
       where: {
         campaignId: id,

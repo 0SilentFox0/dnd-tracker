@@ -110,7 +110,7 @@ export function CharacterBasicInfo({
             placeholder="Виберіть гравця"
             options={campaignMembers.map((member) => ({
               value: member.id,
-              label: `${member.displayName} (${member.email})`,
+              label: member.email ? `${member.displayName} (${member.email})` : member.displayName,
             }))}
             required
             triggerClassName="w-full"

@@ -4,18 +4,20 @@
  */
 
 import { redirect } from "next/navigation";
-import type { Campaign, CampaignMember, User } from "@prisma/client";
+import type { Campaign, CampaignMember } from "@prisma/client";
 
 import { getAuthUser } from "@/lib/auth";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
+import type { PublicUser } from "@/types/campaigns";
 
 type SlimMembership = {
   userId: string;
   role: string;
 };
 
-type FullMembership = CampaignMember & { user: User };
+type FullMembership = CampaignMember & { user: PublicUser };
 
 /**
  * Завантажує campaign + проста перевірка членства.
@@ -92,7 +94,7 @@ export async function requireCampaignWithMembers(
 ): Promise<{
   campaign: Campaign & {
     members: FullMembership[];
-    dm: User | null;
+    dm: PublicUser | null;
   };
   userId: string;
   role: string;
@@ -108,9 +110,9 @@ export async function requireCampaignWithMembers(
     where: { id: campaignId },
     include: {
       members: {
-        include: { user: true },
+        include: { user: { select: PUBLIC_USER_SELECT } },
       },
-      dm: true,
+      dm: { select: PUBLIC_USER_SELECT },
     },
   });
 

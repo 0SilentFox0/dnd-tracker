@@ -14,7 +14,7 @@ export const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
 };
 
 /** Аліаси (різні написання) → канонічна назва базового навику */
-export const MAIN_SKILL_ALIASES: Record<string, string> = {
+const MAIN_SKILL_ALIASES: Record<string, string> = {
   "Темна Магія": "Магія Темряви",
   "Темна магія": "Магія Темряви",
   "Темрява": "Магія Темряви",
@@ -24,7 +24,7 @@ export const MAIN_SKILL_ALIASES: Record<string, string> = {
 };
 
 /** Усі канонічні назви базових навиків (для валідації) */
-export const MAIN_SKILL_NAMES = new Set([
+const MAIN_SKILL_NAMES = new Set([
   ...Object.values(MAIN_SKILL_BY_CATEGORY),
 ]);
 

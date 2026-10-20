@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
@@ -26,11 +27,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
 
   const isOwner = character.controlledBy === userId;
 
-  const campaignWithAllow = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { allowPlayerEdit: true } });
-
-  const allowPlayerEdit = campaignWithAllow?.allowPlayerEdit ?? false;
-
-  if (!isDM && !(isOwner && allowPlayerEdit)) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+  if (!isDM && !(isOwner && campaign.allowPlayerEdit)) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
   const parsed = await parseBody(updateCharacterSchema, request);
 
@@ -69,7 +66,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
       ...(computed.skillTreeProgressUpdate !== undefined && { skillTreeProgress: computed.skillTreeProgressUpdate }),
       ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
     },
-    include: { user: true, inventory: true },
+    include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
   });
 
   return NextResponse.json(updatedCharacter);

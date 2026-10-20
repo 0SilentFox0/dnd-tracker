@@ -11,18 +11,21 @@ export interface Campaign {
     id: string;
     userId: string;
     role: string;
-    user?: {
-      id: string;
-      displayName: string;
-      email: string;
-    };
+    user?: PublicUser;
   }>;
 }
 
+export interface PublicUser {
+  id: string;
+  displayName: string;
+  avatar: string | null;
+}
+
+/** Рядок GET /members: `id` — userId; `email` лише для DM. */
 export interface CampaignMember {
   id: string;
   displayName: string;
-  email: string;
+  email?: string;
 }
 
 export interface CampaignSettings {

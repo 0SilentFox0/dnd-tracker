@@ -13,5 +13,5 @@ export function useCampaignMembers(campaignId: string) {
     staleTime: ENTITY_STALE_MS,
   });
 
-  return { members: data ?? [], loading: isPending && !!campaignId, error: error?.message ?? null };
+  return { members: data ?? [], isLoading: isPending && !!campaignId, error: error?.message ?? null };
 }

@@ -187,6 +187,7 @@ describe("PATCH /api/campaigns/[id]", () => {
       campaign: {
         id: campaignId,
         maxLevel: 20,
+        allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });

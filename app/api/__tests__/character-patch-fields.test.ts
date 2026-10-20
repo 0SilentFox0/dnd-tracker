@@ -62,7 +62,7 @@ describe("PATCH archetype", () => {
   const params = { params: Promise.resolve({ id: "camp", characterId: "ch" }) };
 
   const access = (userId: string, isDM: boolean) =>
-    ({ userId, isDM, campaign: { id: "camp", maxLevel: 20 } }) as never;
+    ({ userId, isDM, campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true } }) as never;
 
   const patch = async (body: unknown) => {
     const { PATCH } = await import("@/app/api/campaigns/[id]/characters/[characterId]/route");

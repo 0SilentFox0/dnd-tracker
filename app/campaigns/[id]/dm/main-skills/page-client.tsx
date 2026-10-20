@@ -48,7 +48,7 @@ export function DMMainSkillsPageClient({
     <HudPage>
       <HudPageHeader
         title="Основні Навики"
-        subtitle={`Управління основними навиками для дерев прокачки Всього: ${mainSkills.length}`}
+        subtitle={`Управління основними навиками для дерев прокачки · Всього: ${mainSkills.length}`}
         actions={<Button onClick={() => setCreateDialogOpen(true)}>Створити основний навик</Button>}
       />
 

@@ -10,7 +10,6 @@ export const COMMON_IMMUNITIES = [
   "магії",
 ] as const;
 
-export type CommonImmunity = typeof COMMON_IMMUNITIES[number];
 
 // Патерни для парсингу імунітетів з опису
 export const IMMUNITY_PATTERNS = [

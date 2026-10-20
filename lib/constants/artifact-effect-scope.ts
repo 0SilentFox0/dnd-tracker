@@ -2,9 +2,11 @@
  * На кого діють бонуси повного сету / артефакта з нестандартною «аурою».
  */
 
-export const ARTIFACT_EFFECT_SELF = "self" as const;
-export const ARTIFACT_EFFECT_ALL_ALLIES = "all_allies" as const;
-export const ARTIFACT_EFFECT_ALL_ENEMIES = "all_enemies" as const;
+const ARTIFACT_EFFECT_SELF = "self" as const;
+
+const ARTIFACT_EFFECT_ALL_ALLIES = "all_allies" as const;
+
+const ARTIFACT_EFFECT_ALL_ENEMIES = "all_enemies" as const;
 
 export type ArtifactEffectAudience =
   | typeof ARTIFACT_EFFECT_SELF
@@ -21,7 +23,7 @@ export function isArtifactEffectAudience(
   );
 }
 
-export function parseImmuneSpellIds(raw: unknown): string[] {
+function parseImmuneSpellIds(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
 
   const out: string[] = [];

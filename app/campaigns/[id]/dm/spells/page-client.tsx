@@ -62,7 +62,7 @@ export function DMSpellsPageClient({
     <HudPage>
       <HudPageHeader
         title="Заклинання"
-        subtitle={`База заклинань кампанії Всього: ${spells.length}`}
+        subtitle={`База заклинань кампанії · Всього: ${spells.length}`}
         actions={
           <>
             <CreateSpellGroupDialog campaignId={campaignId} />

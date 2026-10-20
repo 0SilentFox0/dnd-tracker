@@ -1,3 +1,4 @@
+import type { PublicUser } from "./campaigns";
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { BookSpell } from "./spells";
 
@@ -131,11 +132,7 @@ export interface Character {
   seenLevel?: number | null;
   createdAt: string;
   updatedAt: string;
-  user?: {
-    id: string;
-    displayName: string;
-    email: string;
-  };
+  user?: PublicUser | null;
   inventory?: {
     id: string;
     equipped: EquippedItems;

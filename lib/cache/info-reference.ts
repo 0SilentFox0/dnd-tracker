@@ -45,7 +45,7 @@ export interface InfoReference {
   spells: SpellForReference[];
 }
 
-export async function loadInfoReference(campaignId: string): Promise<InfoReference> {
+async function loadInfoReference(campaignId: string): Promise<InfoReference> {
   const [skills, spells] = await Promise.all([
     prisma.skill.findMany({ where: { campaignId }, select: SKILL_SELECT, orderBy: { createdAt: "desc" } }),
     prisma.spell.findMany({ where: { campaignId }, select: SPELL_SELECT, orderBy: [{ level: "asc" }, { name: "asc" }] }),

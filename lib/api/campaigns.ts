@@ -4,7 +4,7 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
-import type { Campaign, CampaignMember } from "@/types/campaigns";
+import type { Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
 
 export type ActiveBattle = { id: string; campaignId: string };
 
@@ -17,39 +17,13 @@ export async function getActiveBattles(): Promise<ActiveBattle[]> {
 
 export async function updateCampaign(
   campaignId: string,
-  data: Partial<{
-    name: string;
-    description: string | null;
-    maxLevel: number;
-    allowPlayerEdit: boolean;
-    status: string;
-  }>,
+  data: Partial<CampaignSettings>,
 ): Promise<Campaign> {
   return campaignPatch<Campaign>(campaignId, "", data);
 }
 
-/**
- * Отримує кампанію за ID
- */
-export async function getCampaign(campaignId: string): Promise<Campaign> {
-  return campaignGet<Campaign>(campaignId, "");
-}
-
-/**
- * Отримує список учасників кампанії
- */
-export async function getCampaignMembers(
-  campaignId: string
-): Promise<CampaignMember[]> {
-  const campaign = await getCampaign(campaignId);
-
-  return (
-    campaign.members?.map((m) => ({
-      id: m.user?.id || m.userId,
-      displayName: m.user?.displayName || m.user?.email || "Unknown",
-      email: m.user?.email || "",
-    })) || []
-  );
+export async function getCampaignMembers(campaignId: string): Promise<CampaignMember[]> {
+  return campaignGet<CampaignMember[]>(campaignId, "/members");
 }
 
 /**

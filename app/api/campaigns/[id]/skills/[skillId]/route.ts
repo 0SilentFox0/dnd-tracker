@@ -9,6 +9,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -61,6 +62,14 @@ export async function PATCH(
     const data = await parseBody(updateSkillSchema, request);
 
     if (data instanceof NextResponse) return data;
+
+    const foreignRef = await invalidCampaignRefs(id, {
+      spell: [data.spellData?.spellId, data.spellData?.grantedSpellId],
+      spellGroup: data.spellData?.spellGroupId,
+      mainSkill: data.mainSkillData?.mainSkillId,
+    });
+
+    if (foreignRef) return foreignRef;
 
     const updateData = buildSkillUpdateData(data);
 

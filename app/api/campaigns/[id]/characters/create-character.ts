@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
@@ -84,7 +85,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
         skillTreeProgress: {},
       },
-      include: { user: true },
+      include: { user: { select: PUBLIC_USER_SELECT } },
     });
 
     await prisma.characterInventory.create({

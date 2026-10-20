@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 
-import { kvDel } from "@/lib/cache/kv";
+import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
+
+const CAMPAIGN_INCLUDE = {
+  members: { include: { user: { select: PUBLIC_USER_SELECT } } },
+  dm: { select: PUBLIC_USER_SELECT },
+} as const;
 
 export async function GET(
   request: Request,
@@ -17,8 +22,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо авторизацію
+
     const authResult = await requireAuth();
 
     if (authResult instanceof NextResponse) {
@@ -29,24 +33,14 @@ export async function GET(
 
     const campaign = await prisma.campaign.findUnique({
       where: { id },
-      include: {
-        members: {
-          include: {
-            user: true,
-          },
-        },
-        dm: true,
-      },
+      include: CAMPAIGN_INCLUDE,
     });
 
     if (!campaign) {
       return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
     }
 
-    // Перевіряємо чи юзер є учасником кампанії
-    const userMember = campaign.members.find(m => m.userId === userId);
-
-    if (!userMember) {
+    if (!campaign.members.some((m) => m.userId === userId)) {
       return errorResponse(API_ERRORS.FORBIDDEN, 403);
     }
 
@@ -62,31 +56,11 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
       return accessResult;
-    }
-
-    const { userId } = accessResult;
-
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      include: {
-        members: true,
-      },
-    });
-
-    if (!campaign) {
-      return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-    }
-
-    const userMember = campaign.members.find((m) => m.userId === userId);
-
-    if (!userMember || userMember.role !== CampaignRole.DM) {
-      return errorResponse(API_ERRORS.FORBIDDEN, 403);
     }
 
     const data = await parseBody(updateCampaignSchema, request);
@@ -103,17 +77,10 @@ export async function PATCH(
         allowPlayerEdit: data.allowPlayerEdit,
         status: data.status,
       },
-      include: {
-        members: {
-          include: { user: true },
-        },
-        dm: true,
-      },
+      include: CAMPAIGN_INCLUDE,
     });
 
-    for (const m of updatedCampaign.members) {
-      await kvDel(`campaigns:${m.userId}`);
-    }
+    await invalidateCampaignLists(updatedCampaign.members.map((m) => m.userId));
 
     return NextResponse.json(updatedCampaign);
   } catch (error) {
@@ -142,9 +109,7 @@ export async function DELETE(
     // Усі залежні таблиці мають onDelete: Cascade (або SetNull всередині кампанії).
     await prisma.campaign.delete({ where: { id } });
 
-    for (const m of members) {
-      await kvDel(`campaigns:${m.userId}`);
-    }
+    await invalidateCampaignLists(members.map((m) => m.userId));
 
     invalidateReference(Object.values(ReferenceKind), id);
 

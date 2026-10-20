@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 
 import { getRedirectOrigin } from './redirect-origin'
 
-import { prisma } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
+import { ensureDbUser } from '@/lib/utils/api/db-user'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -49,29 +49,7 @@ export async function GET(request: Request) {
     }
 
     try {
-      let dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-      })
-
-      if (!dbUser) {
-        dbUser = await prisma.user.create({
-          data: {
-            id: user.id,
-            email: user.email || '',
-            displayName: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-            avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-          },
-        })
-      } else {
-        dbUser = await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            email: user.email || dbUser.email,
-            displayName: user.user_metadata?.full_name || user.user_metadata?.name || dbUser.displayName,
-            avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture || dbUser.avatar,
-          },
-        })
-      }
+      await ensureDbUser(user, { refresh: true })
     } catch (dbError) {
       console.error('Database error:', dbError)
       // Продовжуємо навіть якщо є помилка з базою - користувач все одно авторизований
