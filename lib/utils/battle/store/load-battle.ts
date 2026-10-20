@@ -21,7 +21,7 @@ type ParticipantRow = ParticipantColumns & {
   snapshotHash: string;
 };
 
-export function rowToParticipant(row: ParticipantRow): BattleParticipant {
+function rowToParticipant(row: ParticipantRow): BattleParticipant {
   const { battleId, snapshot, state, snapshotHash, ...columns } = row;
 
   return joinParticipant(

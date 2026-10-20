@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { abilitySaveError } from "@/lib/hooks/abilities";
+import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useConfirm } from "@/lib/hooks/common";
 import {
   type ArtifactFormState,
@@ -23,13 +23,11 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
 
   const [fields, setFields] = useState<ArtifactFormState>({ ...initial, weapon: initial.weapon ?? {} });
 
-  const [abilityErrors, setAbilityErrors] = useState(0);
+  const abilities = useAbilityValidity();
 
   const [isSaving, setIsSaving] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
-
-  const abilitiesValid = abilityErrors === 0;
 
   const setField = <K extends keyof ArtifactFormState>(key: K, value: ArtifactFormState[K]) =>
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -37,7 +35,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!fields.name.trim() || !abilitiesValid) return;
+    if (!fields.name.trim() || !abilities.valid) return;
 
     setIsSaving(true);
     setError(null);
@@ -58,7 +56,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
 
   return {
     form: { data: fields, set: setField },
-    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilitiesValid },
+    abilities,
     status: { isSaving, isBusy: isSaving, error },
     actions: { submit, remove },
   };

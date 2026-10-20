@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { SyncArtifactSetError } from "@/lib/utils/artifacts/sync-artifact-set-members";
+import { SyncArtifactSetError } from "@/lib/server/artifacts/sync-artifact-set-members";
 
 /** Відповідь 400 для відомих помилок валідації / синхронізації сету. */
 export function toArtifactSetErrorResponse(

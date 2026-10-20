@@ -7,7 +7,7 @@ import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
-export function formulaContext(p: BattleParticipant): Record<string, number> {
+function formulaContext(p: BattleParticipant): Record<string, number> {
   const { maxHp, currentHp } = p.combatStats;
 
   return {

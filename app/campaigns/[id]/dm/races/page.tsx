@@ -1,7 +1,7 @@
 import { DMRacesPageClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { toRace } from "@/lib/utils/races/to-race";
 
 export default async function DMRacesPage({

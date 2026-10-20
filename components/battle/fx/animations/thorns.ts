@@ -1,16 +1,16 @@
-import { halfSize } from "../runtime/anchors";
-import { sinkingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, perTick, rand } from "../runtime/geometry";
-import { motionPath } from "../runtime/motion";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { polyline, thornPath } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, timeline, tween } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { sinkingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { motionPath } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { polyline, thornPath } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, show, type Stage, timeline, tween } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ERUPT_MS = ARCHETYPE_FX.thorns.impactMs;
@@ -66,11 +66,68 @@ function vein(from: FxPoint, to: FxPoint): FxPoint[] {
   });
 }
 
-export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    await hook(stage, from, target);
+/** The veins of pain lit crimson by a pulse. */
+function painVeins(g: CanvasRenderingContext2D, veins: FxPoint[][], beat: number, wither: number) {
+  g.globalCompositeOperation = "lighter";
+  g.lineCap = "round";
 
-    const el = targetEls[i];
+  for (const v of veins) {
+    g.globalAlpha = beat * 0.8 * (1 - wither);
+    g.strokeStyle = "#c0104a";
+    g.lineWidth = 2.2;
+    polyline(g, v);
+    g.strokeStyle = "#ff7a9a";
+    g.lineWidth = 0.8;
+    polyline(g, v);
+  }
+}
+
+/** The bramble the thorns grow from, snaking along under the foe. */
+function bramble(g: CanvasRenderingContext2D, spikes: Thorn[], vine: number) {
+  g.globalCompositeOperation = "source-over";
+  g.globalAlpha = vine;
+  g.lineCap = "round";
+
+  for (const [color, width] of [["#3a0a1a", 6], ["#0a0306", 4]] as const) {
+    g.strokeStyle = color;
+    g.lineWidth = width;
+    g.beginPath();
+    spikes.forEach((sp, n) => {
+      const y = sp.y - 2 + (n % 2 ? 3 : -3);
+
+      if (n === 0) g.moveTo(sp.x, y);
+      else g.quadraticCurveTo((sp.x + spikes[n - 1].x) / 2, y + (n % 2 ? 6 : -6), sp.x, y);
+    });
+    g.stroke();
+  }
+}
+
+/** One thorn stabbing up (overshooting, then settling), its edge lit by the pulse. */
+function spike(g: CanvasRenderingContext2D, sp: Thorn, t: number, look: { fill: CanvasGradient; beat: number; wither: number }) {
+  const k = clamp01((t - sp.born) / 160);
+
+  if (k <= 0) return;
+
+  const grow = (k < 1 ? easeOutCubic(k) * 1.15 : 1) * (1 - look.wither * 0.9);
+
+  g.save();
+  g.translate(sp.x, sp.y);
+  g.rotate(sp.lean);
+  g.scale(1, (grow * sp.len) / 40);
+  g.globalAlpha = 1 - look.wither;
+  g.globalCompositeOperation = "source-over";
+  thornPath(g, 40, sp.width, sp.bend);
+  g.fillStyle = look.fill;
+  g.fill();
+  g.strokeStyle = `rgba(210,30,75,${0.2 + look.beat * 0.75})`;
+  g.lineWidth = 1;
+  g.stroke();
+  g.restore();
+}
+
+export const thorns: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    await hook(stage, from, target);
 
     const { w, h } = halfSize(el);
 
@@ -108,65 +165,13 @@ export const thorns: FxAnimation = ({ stage, from, to, targetEls }) =>
 
         sprite(g, throb, target.x, target.y, (w * 2.4) / 64, (h * 2.6) / 64, beat * 0.6);
 
-        if (beat > 0.05) {
-          g.globalCompositeOperation = "lighter";
-          g.lineCap = "round";
+        if (beat > 0.05) painVeins(g, veins, beat, wither);
 
-          for (const v of veins) {
-            g.globalAlpha = beat * 0.8 * (1 - wither);
-            g.strokeStyle = "#c0104a";
-            g.lineWidth = 2.2;
-            polyline(g, v);
-            g.strokeStyle = "#ff7a9a";
-            g.lineWidth = 0.8;
-            polyline(g, v);
-          }
-        }
-
-        // The bramble the thorns grow from, snaking along under the foe.
         const vine = clamp01(t / 180) * (1 - wither);
 
-        if (vine > 0) {
-          g.globalCompositeOperation = "source-over";
-          g.globalAlpha = vine;
-          g.lineCap = "round";
+        if (vine > 0) bramble(g, spikes, vine);
 
-          for (const [color, width] of [["#3a0a1a", 6], ["#0a0306", 4]] as const) {
-            g.strokeStyle = color;
-            g.lineWidth = width;
-            g.beginPath();
-            spikes.forEach((sp, n) => {
-              const y = sp.y - 2 + (n % 2 ? 3 : -3);
-
-              if (n === 0) g.moveTo(sp.x, y);
-              else g.quadraticCurveTo((sp.x + spikes[n - 1].x) / 2, y + (n % 2 ? 6 : -6), sp.x, y);
-            });
-            g.stroke();
-          }
-        }
-
-        for (const sp of spikes) {
-          const k = clamp01((t - sp.born) / 160);
-
-          if (k <= 0) continue;
-
-          // Overshoot on the way up: they stab, then settle.
-          const grow = (k < 1 ? easeOutCubic(k) * 1.15 : 1) * (1 - wither * 0.9);
-
-          g.save();
-          g.translate(sp.x, sp.y);
-          g.rotate(sp.lean);
-          g.scale(1, (grow * sp.len) / 40);
-          g.globalAlpha = 1 - wither;
-          g.globalCompositeOperation = "source-over";
-          thornPath(g, 40, sp.width, sp.bend);
-          g.fillStyle = fill;
-          g.fill();
-          g.strokeStyle = `rgba(210,30,75,${0.2 + beat * 0.75})`;
-          g.lineWidth = 1;
-          g.stroke();
-          g.restore();
-        }
+        for (const sp of spikes) spike(g, sp, t, { fill, beat, wither });
 
         sinkingBadge(g, target.x + w * 0.35, target.y - h - 10, clamp01((t - 900) / 1300), "−3 атака", BADGE);
         g.globalAlpha = 1;

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { markLevelSeen } from "@/lib/api/character-progression";
-import { characterSheetKey, useCharacterSheet } from "@/lib/hooks/characters";
+import { useCharacterSheet } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import type { CharacterSheet } from "@/types/characters";
 
 export function useLevelUpCelebration(campaignId: string, characterId: string) {
@@ -40,7 +41,7 @@ export function useLevelUpCelebration(campaignId: string, characterId: string) {
 
   const dismiss = () => {
     setDismissedFor(opened?.to ?? level);
-    queryClient.setQueryData<CharacterSheet>(characterSheetKey(campaignId, characterId), (old) =>
+    queryClient.setQueryData<CharacterSheet>(characterKeys.sheet(campaignId, characterId), (old) =>
       old ? { ...old, progression: { ...old.progression, seenLevel: old.progression.level } } : old,
     );
   };

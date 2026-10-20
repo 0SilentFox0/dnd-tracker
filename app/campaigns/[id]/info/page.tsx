@@ -5,7 +5,7 @@ import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { loadArtifactReference } from "@/lib/cache/artifact-reference";
 import { getCachedInfoReference } from "@/lib/cache/info-reference";
-import { requireCampaignMember } from "@/lib/campaigns/access";
+import { requireCampaignMember } from "@/lib/server/campaigns/access";
 
 export default async function CampaignInfoPage({
   params,
@@ -24,11 +24,9 @@ export default async function CampaignInfoPage({
         title="Інформація — Довідник"
         subtitle="Скіли, заклинання та артефакти кампанії: як діють, опис вигляду, у кого артефакти."
         actions={
-          <Link href={`/campaigns/${campaignId}`} className="shrink-0">
-            <Button variant="outline" className="min-h-11 touch-manipulation sm:min-h-9">
-              Назад до кампанії
-            </Button>
-          </Link>
+          <Button variant="outline" className="min-h-11 touch-manipulation sm:min-h-9 shrink-0" asChild>
+            <Link href={`/campaigns/${campaignId}`}>Назад до кампанії</Link>
+          </Button>
         }
       />
 

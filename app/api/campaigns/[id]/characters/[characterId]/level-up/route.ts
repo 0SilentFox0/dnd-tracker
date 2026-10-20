@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { loadRaceProgression } from "../load-race-progression";
 
 import { prisma } from "@/lib/db";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
@@ -58,7 +59,7 @@ export async function POST(
         spellSlots: gain.spellSlots as Prisma.InputJsonValue,
       },
       include: {
-        user: true,
+        user: { select: PUBLIC_USER_SELECT },
         inventory: true,
       },
     });

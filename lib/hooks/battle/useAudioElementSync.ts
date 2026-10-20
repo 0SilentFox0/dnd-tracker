@@ -18,7 +18,7 @@ export interface MediaSyncInput {
 }
 
 /** Порожній WAV: play() у жесті розблоковує елемент на iOS, коли треку ще немає. */
-export const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
 
 const isBlocked = (e: unknown) => e instanceof Error && e.name === "NotAllowedError";
 

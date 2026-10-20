@@ -1,24 +1,23 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { characterSheetKey } from "./keys";
+import { characterKeys } from "./keys";
 
 import { putCharacterGoals } from "@/lib/api/characters";
 import { GoalAuthor } from "@/lib/constants/characters";
-import { useNotify } from "@/lib/hooks/common";
+import { useCrudMutation } from "@/lib/hooks/common";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CharacterGoal, CharacterSheet } from "@/types/characters";
 
 export function useCharacterGoals(campaignId: string, characterId: string) {
   const queryClient = useQueryClient();
 
-  const notify = useNotify();
+  const key = characterKeys.sheet(campaignId, characterId);
 
-  const key = characterSheetKey(campaignId, characterId);
-
-  const mutation = useMutation({
+  const mutation = useCrudMutation({
     mutationFn: ({ goals, seen }: { goals: GoalInput[]; seen?: string[] }) => putCharacterGoals(campaignId, characterId, goals, seen),
+    errorText: "Не вдалося зберегти цілі",
     onMutate: async ({ goals }) => {
       await queryClient.cancelQueries({ queryKey: key });
 
@@ -34,18 +33,11 @@ export function useCharacterGoals(campaignId: string, characterId: string) {
       return { previous };
     },
     onSuccess: ({ goals }) => queryClient.setQueryData<CharacterSheet>(key, (old) => (old ? { ...old, story: { ...old.story, goals } } : old)),
-    onError: (_error, _vars, context) => {
-      queryClient.setQueryData(key, context?.previous);
-      void notify("Не вдалося зберегти цілі");
-    },
+    onError: (_error, _vars, context) => queryClient.setQueryData(key, context?.previous),
   });
 
   return {
-    save: (goals: GoalInput[], seen?: string[]) =>
-      mutation.mutateAsync({ goals, seen }).then(
-        () => true,
-        () => false,
-      ),
+    save: (goals: GoalInput[], seen?: string[]) => mutation.mutateOk({ goals, seen }),
     isPending: mutation.isPending,
   };
 }

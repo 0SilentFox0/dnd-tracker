@@ -14,8 +14,11 @@ vi.mock("@/lib/api/skill-trees");
 let races: Array<{ id: string; name: string; availableSkills: string[] }> = [{ id: "r1", name: "Ельф", availableSkills: ["attack"] }];
 
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: races }) }));
-vi.mock("@/lib/hooks/skills/useMainSkills", () => ({ useMainSkills: () => ({ data: [{ id: "attack", name: "Напад", color: "red" }, { id: "defense", name: "Захист", color: "blue" }] }) }));
-vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id: "o1", name: "Кровопуск", mainSkillId: "attack" }, { id: "o2", name: "Шквал", mainSkillId: "attack" }, { id: "api", basicInfo: { name: "З API", icon: "/i.png" }, mainSkillData: { mainSkillId: "attack" } }] }) }));
+vi.mock("@/lib/hooks/skills/useMainSkills", () => ({
+  useMainSkills: () => ({ data: [{ id: "attack", name: "Напад", color: "red" }, { id: "defense", name: "Захист", color: "blue" }] }),
+  useCreateMainSkill: () => ({ mutateAsync: (data: { name: string; color: string }) => createMainSkill("c", data) }),
+}));
+vi.mock("@/lib/hooks/skills/useSkills", () => ({ useSkills: () => ({ data: [{ id: "o1", name: "Кровопуск", mainSkillId: "attack" }, { id: "o2", name: "Шквал", mainSkillId: "attack" }, { id: "api", name: "З API", icon: "/i.png", mainSkillId: "attack" }] }) }));
 
 const notify = vi.fn(async () => {});
 
@@ -117,7 +120,7 @@ describe("useSkillTreeEditor", () => {
     expect(seeded.result.current.state.dirty).toBe(true);
   });
 
-  it("гілка й іконка скіла з формату API (mainSkillData, basicInfo)", async () => {
+  it("гілка й іконка скіла з відповіді API", async () => {
     vi.mocked(treesApi.getSkillTrees).mockResolvedValue([rowWith([])] as never);
 
     const { result } = setup();

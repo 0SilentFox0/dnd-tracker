@@ -1,9 +1,6 @@
 import { effectiveMorale, moraleChanceBonus } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleParticipant } from "@/types/battle";
 
-/**
- * Результат перевірки моралі
- */
 export interface MoraleCheckResult {
   shouldSkipTurn: boolean;
   hasExtraTurn: boolean;
@@ -13,7 +10,7 @@ export interface MoraleCheckResult {
 }
 
 /** Межа d10: позитивна мораль +N — додатковий хід на ≥ 11−N, негативна −N — пропуск на ≤ N. */
-export function moraleThreshold(value: number): { kind: "extra" | "skip"; threshold: number } {
+function moraleThreshold(value: number): { kind: "extra" | "skip"; threshold: number } {
   const n = Math.min(10, Math.abs(value));
 
   return value > 0 ? { kind: "extra", threshold: 11 - n } : { kind: "skip", threshold: n };

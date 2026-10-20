@@ -1,5 +1,5 @@
 import { UnitEditForm } from "@/components/units/form/UnitEditForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function EditUnitPage({ params }: { params: Promise<{ id: string; unitId: string }> }) {
   const { id, unitId } = await params;

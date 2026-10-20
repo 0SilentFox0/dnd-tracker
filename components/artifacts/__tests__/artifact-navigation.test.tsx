@@ -37,6 +37,7 @@ import { ArtifactCreateForm } from "@/components/artifacts/ArtifactCreateForm";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
 import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { deleteArtifact } from "@/lib/api/artifacts";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient()}>
@@ -73,12 +74,13 @@ describe("навігація артефактів", () => {
     expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
   });
 
-  it("кнопка видалення в серверному списку оновлює сторінку після підтвердження", async () => {
+  it("кнопка видалення в списку видаляє через мутацію без refresh сторінки", async () => {
     render(<ArtifactDeleteButton campaignId="c1" artifactId="a1" />, { wrapper });
 
     fireEvent.click(screen.getByTitle("Видалити артефакт"));
     fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Видалити" }));
 
-    await waitFor(() => expect(nav.calls).toEqual(["refresh"]));
+    await waitFor(() => expect(deleteArtifact).toHaveBeenCalledWith("c1", "a1"));
+    expect(nav.calls).toEqual([]);
   });
 });

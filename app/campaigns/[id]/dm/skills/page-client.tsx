@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
 
@@ -10,61 +9,15 @@ import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useNotify } from "@/lib/hooks/common";
-import {
-  useDeleteAllSkills,
-  useDeleteSkill,
-  useDuplicateSkill,
-  useMainSkills,
-  useSkills,
-} from "@/lib/hooks/skills";
+import { useSkillsList } from "@/lib/hooks/skills";
 import { pluralUk } from "@/lib/utils/common/plural";
-import {
-  convertGroupedSkillsToArray,
-  groupSkillsByMainSkill,
-} from "@/lib/utils/skills/skills";
-import type { Skill } from "@/types/skills";
 
-interface DMSkillsPageClientProps {
-  campaignId: string;
-  initialSkills: Skill[];
-}
+const SKILL_NOUNS: [string, string, string] = ["скіл", "скіли", "скілів"];
 
-export function DMSkillsPageClient({
-  campaignId,
-  initialSkills,
-}: DMSkillsPageClientProps) {
-  const notify = useNotify();
+export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
+  const { skills, isLoading, groups, actions } = useSkillsList(campaignId);
 
-  const { data: skills = initialSkills, isLoading: skillsLoading } = useSkills(
-    campaignId,
-    initialSkills
-  );
-
-  const { data: mainSkills = [] } = useMainSkills(campaignId);
-
-  const deleteAllSkillsMutation = useDeleteAllSkills(campaignId);
-
-  const deleteSkillMutation = useDeleteSkill(campaignId);
-
-  const duplicateSkillMutation = useDuplicateSkill(campaignId);
-
-  const groupedSkills = useMemo(() => {
-    const groupedSkillsMap = groupSkillsByMainSkill(skills, mainSkills);
-
-    return convertGroupedSkillsToArray(groupedSkillsMap);
-  }, [skills, mainSkills]);
-
-  const handleDeleteSkill = (skillId: string) => deleteSkillMutation.mutateAsync(skillId);
-
-  const handleDuplicateSkill = async (skillId: string) => {
-    try {
-      await duplicateSkillMutation.mutateAsync(skillId);
-    } catch (error) {
-      console.error("Error duplicating skill:", error);
-      void notify("Не вдалося дублювати скіл. Спробуйте ще раз.");
-    }
-  };
+  const newSkillHref = `/campaigns/${campaignId}/dm/skills/new`;
 
   return (
     <HudPage>
@@ -73,57 +26,56 @@ export function DMSkillsPageClient({
         subtitle="Управління скілами та їх ефектами"
         actions={
           <>
-            <Link href={`/campaigns/${campaignId}/dm/main-skills`}>
-              <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm">
-                + Основний навик
-              </Button>
-            </Link>
-            <Link href={`/campaigns/${campaignId}/dm/skills/new`}>
-              <Button className="whitespace-nowrap text-xs sm:text-sm">+ Створити скіл</Button>
-            </Link>
+            <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+              <Link href={`/campaigns/${campaignId}/dm/main-skills`}>+ Основний навик</Link>
+            </Button>
+            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+              <Link href={newSkillHref}>+ Створити скіл</Link>
+            </Button>
             {skills.length > 0 && (
-              <Link href={`/campaigns/${campaignId}/dm/print/skills`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm">
+              <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+                <Link href={`/campaigns/${campaignId}/dm/print/skills`} target="_blank" rel="noopener noreferrer">
                   <Printer className="h-4 w-4 mr-1" />
                   Версія для друку
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
             <DeleteAllButton
               count={skills.length}
-              nouns={["скіл", "скіли", "скілів"]}
-              description={`Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, ["скіл", "скіли", "скілів"])}). Цю дію неможливо скасувати.`}
-              onConfirm={() => deleteAllSkillsMutation.mutateAsync()}
+              nouns={SKILL_NOUNS}
+              description={`Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, SKILL_NOUNS)}). Цю дію неможливо скасувати.`}
+              onConfirm={actions.removeAll}
             />
           </>
         }
       />
 
-      {skillsLoading && skills.length === 0 ? (
+      {isLoading && skills.length === 0 ? (
         <LoadingState rows={6} label="Завантаження скілів…" />
       ) : skills.length === 0 ? (
-        <EmptyState icon={Sparkles} title="Ще немає скілів" description="Створіть перший скіл, щоб наповнити дерево прокачки." action={<Link href={`/campaigns/${campaignId}/dm/skills/new`}><Button>Створити перший скіл</Button></Link>} />
+        <EmptyState
+          icon={Sparkles}
+          title="Ще немає скілів"
+          description="Створіть перший скіл, щоб наповнити дерево прокачки."
+          action={
+            <Button asChild>
+              <Link href={newSkillHref}>Створити перший скіл</Link>
+            </Button>
+          }
+        />
       ) : (
-        <Accordion
-          type="multiple"
-          defaultValue={groupedSkills.map(([groupName]) => groupName)}
-          className="space-y-2"
-        >
-          {groupedSkills.map(([groupName, groupSkills]) => {
-            const mainSkill = mainSkills.find((ms) => ms.name === groupName);
-
-            return (
-              <SkillGroupAccordion
-                key={groupName}
-                groupName={groupName}
-                skills={groupSkills}
-                campaignId={campaignId}
-                spellGroups={[]}
-                mainSkillColor={mainSkill?.color}
-                actions={{ onDelete: handleDeleteSkill, onDuplicate: handleDuplicateSkill }}
-              />
-            );
-          })}
+        <Accordion type="multiple" defaultValue={groups.map((g) => g.name)} className="space-y-2">
+          {groups.map((group) => (
+            <SkillGroupAccordion
+              key={group.name}
+              groupName={group.name}
+              skills={group.skills}
+              campaignId={campaignId}
+              spellGroups={[]}
+              mainSkillColor={group.color}
+              actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
+            />
+          ))}
         </Accordion>
       )}
     </HudPage>

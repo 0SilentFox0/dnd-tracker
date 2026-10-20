@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { SelectedSpellsList } from "@/components/spells/list/SelectedSpellsList";
-import { SpellDropdownContent } from "@/components/spells/ui/SpellDropdownContent";
+import { SpellDropdownContent } from "@/components/spells/SpellDropdownContent";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

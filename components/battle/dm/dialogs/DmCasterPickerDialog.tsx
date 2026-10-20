@@ -1,5 +1,6 @@
 "use client";
 
+import { SideDot } from "@/components/battle/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -49,7 +50,7 @@ export function DmCasterPickerDialog({
                 onSelectCaster(p);
               }}
             >
-              <i className="size-2 shrink-0 rounded-full" style={{ background: p.basicInfo.side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)" }} />
+              <SideDot side={p.basicInfo.side} />
               <span className="font-medium">{p.basicInfo.name}</span>
               {p.basicInfo.side && (
                 <span className="text-muted-foreground text-xs">

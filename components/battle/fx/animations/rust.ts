@@ -1,13 +1,16 @@
-import { halfSize } from "../runtime/anchors";
-import { sinkingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, chance, type Debris, type FxPoint, pick, rand, stepBodies } from "../runtime/geometry";
-import { perTarget } from "../runtime/recipes";
-import { drawRustPatch, polyline, type RustPatch,rustPatch } from "../runtime/shapes";
-import { animateEl, show, type Stage, timeline, tween } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { sinkingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, type FxPoint, pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter } from "@/components/battle/fx/runtime/motion";
+import { type Debris, stepBodies } from "@/components/battle/fx/runtime/physics";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { drawRustPatch, polyline, type RustPatch,rustPatch } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, show, type Stage, timeline, tween } from "@/components/battle/fx/runtime/stage";
+import { RUST_FLAKES } from "@/components/battle/fx/runtime/swatches";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const HIT_MS = ARCHETYPE_FX.rust.impactMs;
@@ -15,8 +18,6 @@ const HIT_MS = ARCHETYPE_FX.rust.impactMs;
 const TOTAL_MS = 2600;
 
 const FADE_MS = 2150;
-
-const FLAKES = ["#8a3e12", "#a8521c", "#5a2a0e", "#c0682a"];
 
 const BADGE = { top: "#6a3418", bottom: "#24120a", rim: "#c0682a", ink: "#f0d8c0" };
 
@@ -71,11 +72,9 @@ function crack(from: FxPoint, angle: number, len: number): FxPoint[] {
   return pts;
 }
 
-export const rust: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
+export const rust: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await drip(stage, from, target);
-
-    const el = targetEls[i];
 
     const { w, h } = halfSize(el);
 
@@ -155,7 +154,7 @@ export const rust: FxAnimation = ({ stage, from, to, targetEls }) =>
         if (t > 350 && t < FADE_MS - HIT_MS && chance(0.55, dt)) {
           const b = pick(blots);
 
-          flakes.push({ x: b.x + rand(-b.r, b.r), y: b.y + rand(-b.r, b.r) * 0.5, vx: rand(-25, 25), vy: rand(-30, 0), rot: rand(0, 6), spin: rand(-6, 6), size: rand(2.5, 4.5), color: pick(FLAKES), born: t });
+          flakes.push({ x: b.x + rand(-b.r, b.r), y: b.y + rand(-b.r, b.r) * 0.5, vx: rand(-25, 25), vy: rand(-30, 0), rot: rand(0, 6), spin: rand(-6, 6), size: rand(2.5, 4.5), color: pick(RUST_FLAKES), born: t });
         }
 
         stepBodies(flakes, dt, 160);
@@ -166,8 +165,7 @@ export const rust: FxAnimation = ({ stage, from, to, targetEls }) =>
       },
     );
 
-    const corrode = animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.3 }, { filter: "grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - HIT_MS });
-
+    const corrode = animateEl(stage, el, holdFilter("grayscale(.85) sepia(.35) brightness(.75) contrast(1.1)", 0.3, 0.8), { duration: TOTAL_MS - HIT_MS });
 
     await Promise.all([run, corrode]);
   });

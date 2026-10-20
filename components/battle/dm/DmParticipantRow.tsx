@@ -2,14 +2,14 @@
 
 import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
 
+import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
-import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import type { UnitControlRow } from "@/lib/hooks/battle";
+import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import type { DmParticipantActions } from "@/lib/hooks/battle/useDmParticipantActions";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+import { mult } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
-
-const mult = (n: number) => `×${Math.round(n * 100) / 100}`;
 
 function scaleLabel({ battleData }: BattleParticipant): string | null {
   const parts = [battleData.hpMultiplier, battleData.damageMultiplier].map((m) => (m !== undefined && m !== 1 ? m : null));
@@ -20,15 +20,6 @@ function scaleLabel({ battleData }: BattleParticipant): string | null {
 }
 
 const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
-
-export interface DmParticipantActions {
-  onChangeHp: (p: BattleParticipant) => void;
-  onTakeControl: (p: BattleParticipant | null) => void;
-  onRemove: (p: BattleParticipant) => void;
-  onKill?: (p: BattleParticipant) => void;
-  onDone?: () => void;
-  unitControl?: UnitControlRow;
-}
 
 interface DmParticipantRowProps {
   participant: BattleParticipant;
@@ -49,7 +40,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
-      <i className="size-2 shrink-0 rounded-full" style={{ background: participant.basicInfo.side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)" }} />
+      <SideDot side={participant.basicInfo.side} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
         {label && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
@@ -103,10 +94,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
           className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
           title="Видалити з бою"
           onClick={async () => {
-            if (
-              typeof window !== "undefined" &&
-              (await confirm({ title: "Видалити " + participant.basicInfo.name + " з бою?", confirmLabel: "Видалити", destructive: true }))
-            ) {
+            if (await confirm({ title: "Видалити " + participant.basicInfo.name + " з бою?", confirmLabel: "Видалити", destructive: true })) {
               onRemove(participant);
               close();
             }

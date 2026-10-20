@@ -19,7 +19,7 @@ vi.mock("@/components/ui/select-field", () => ({
   },
 }));
 
-const abilities = { personalSkillId: "", setters: { setPersonalSkillId: vi.fn() } };
+const abilities = { data: { personalSkillId: "" }, set: vi.fn() };
 
 describe("CharacterAbilitiesSection", () => {
   beforeEach(() => {

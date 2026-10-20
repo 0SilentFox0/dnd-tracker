@@ -110,14 +110,14 @@ describe("impactFor", () => {
   it("teleport, entangle and a death never borrow a damage frame", () => {
     expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellEffectKinds: ["note"] } }), "t")).toBeNull();
     expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Корені", spellEffectKinds: ["applyCondition"] } }), "t")).toBeNull();
-    expect(impactForSpec({ key: "k", archetype: "death", element: "necrotic", actorId: "a", actorSide: "player", targetIds: ["t"], hit: true, critical: false }, "t")).toBeNull();
+    expect(impactForSpec({ key: "k", archetype: "death", element: "necrotic", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false }, "t")).toBeNull();
   });
 
   it("every archetype that frames a hit lands it after its own impact time", () => {
     for (const archetype of FX_ARCHETYPES) {
       const { impact, impactMs } = ARCHETYPE_FX[archetype];
 
-      const got = impactForSpec({ key: "k", archetype, element: "fire", actorId: "a", actorSide: "player", targetIds: ["t"], hit: true, critical: false }, "t");
+      const got = impactForSpec({ key: "k", archetype, element: "fire", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false }, "t");
 
       expect(got && { kind: got.kind, delayMs: got.delayMs }).toEqual(impact === "none" ? null : { kind: impact, delayMs: impactMs });
     }

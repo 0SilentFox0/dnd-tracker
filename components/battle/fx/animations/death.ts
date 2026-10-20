@@ -1,10 +1,11 @@
-import { emit, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { schedule, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
-export const death: FxAnimation = ({ stage, to }) =>
-  perTarget(stage, to, 0, async (target) => {
+import { emit, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { schedule, wait } from "@/components/battle/fx/runtime/stage";
+
+export const death: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target }) => {
     for (let i = 0; i < 30; i++) {
       schedule(stage, (i / 30) * 400, () => emit(stage, target, { tints: ["#2a2a2e", "#4a4a52", "#1a1a1e"], speed: [10, 40], angle: [-Math.PI * 0.65, -Math.PI * 0.35], life: [0.8, 1.2], scale: [0.5, 1.2], spread: 24, gravity: -20, additive: false, alpha: 0.7 }));
     }

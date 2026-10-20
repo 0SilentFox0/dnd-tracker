@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ghostOf } from "../runtime/ghosts";
-import { cancelLayer, stageFor } from "../runtime/stage";
+import { ghostOf } from "@/components/battle/fx/runtime/ghosts";
+import { cancelLayer, stageFor } from "@/components/battle/fx/runtime/stage";
 
 const fakeCtx = { setTransform: vi.fn(), clearRect: vi.fn(), save: vi.fn(), restore: vi.fn(), drawImage: vi.fn() };
 

@@ -1,17 +1,26 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
-import { kvDel, kvGet, kvSet } from "@/lib/cache/kv";
+import { campaignListKey, invalidateCampaignLists } from "@/lib/cache/campaign-list";
+import { kvGet, kvSet } from "@/lib/cache/kv";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
+import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuth, requireAuthUser } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { generateInviteCode } from "@/lib/utils/campaigns/invite-code";
 
-// Генерує унікальний код запрошення
-function generateInviteCode(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
+const INVITE_CODE_ATTEMPTS = 5;
+
+function isInviteCodeClash(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    String(error.meta?.target ?? "").includes("inviteCode")
+  );
 }
 
 export async function POST(request: Request) {
@@ -28,46 +37,33 @@ export async function POST(request: Request) {
 
     if (data instanceof NextResponse) return data;
 
-    // Перевіряємо чи юзер існує в базі, якщо ні - створюємо
-    let user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    await ensureDbUser(authUser);
 
-    if (!user) {
-      user = await prisma.user.create({
+    const create = () =>
+      prisma.campaign.create({
         data: {
-          id: userId,
-          email: authUser.email || "",
-          displayName: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || "User",
-          avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null,
+          name: data.name,
+          description: data.description,
+          inviteCode: generateInviteCode(),
+          dmUserId: userId,
+          maxLevel: data.maxLevel,
+          allowPlayerEdit: data.allowPlayerEdit,
+          members: { create: { userId, role: CampaignRole.DM } },
         },
+        include: { members: true },
       });
+
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const campaign = await create();
+
+        await invalidateCampaignLists([userId]);
+
+        return NextResponse.json(campaign);
+      } catch (error) {
+        if (attempt >= INVITE_CODE_ATTEMPTS || !isInviteCodeClash(error)) throw error;
+      }
     }
-
-    // Створюємо кампанію
-    const campaign = await prisma.campaign.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        inviteCode: generateInviteCode(),
-        dmUserId: userId,
-        maxLevel: data.maxLevel,
-        allowPlayerEdit: data.allowPlayerEdit,
-        members: {
-          create: {
-            userId: userId,
-            role: CampaignRole.DM,
-          },
-        },
-      },
-      include: {
-        members: true,
-      },
-    });
-
-    await kvDel(`campaigns:${userId}`);
-
-    return NextResponse.json(campaign);
   } catch (error) {
     return handleApiError(error, { action: "create campaign" });
   }
@@ -83,7 +79,7 @@ export async function GET() {
 
     const { userId } = authResult;
 
-    const cacheKey = `campaigns:${userId}`;
+    const cacheKey = campaignListKey(userId);
 
     const cached = await kvGet<unknown[]>(cacheKey);
 
@@ -92,23 +88,9 @@ export async function GET() {
     }
 
     const campaigns = await prisma.campaign.findMany({
-      where: {
-        members: {
-          some: {
-            userId: userId,
-          },
-        },
-      },
-      include: {
-        members: {
-          include: {
-            user: true,
-          },
-        },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      where: { members: { some: { userId } } },
+      include: { members: { include: { user: { select: PUBLIC_USER_SELECT } } } },
+      orderBy: { updatedAt: "desc" },
     });
 
     await kvSet(cacheKey, campaigns);

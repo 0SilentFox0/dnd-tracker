@@ -9,6 +9,7 @@ import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
 
+import { SideDot } from "@/components/battle/hud";
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { MapToolsSlotContext } from "@/components/battle/map/MapToolsSlot";
@@ -21,12 +22,14 @@ import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useBattleViewMode } from "@/lib/hooks/battle";
+import { useSelectedParticipant } from "@/lib/hooks/battle/useSelectedParticipant";
+import { myTurnKey } from "@/lib/utils/battle/view/my-turn-key";
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
-const H3 = ({ color, children }: { color: string; children: React.ReactNode }) => (
+const H3 = ({ side, children }: { side: ParticipantSide; children: React.ReactNode }) => (
   <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
-    <i className="size-2 rounded-full" style={{ background: color }} />
+    <SideDot side={side} />
     {children}
   </h3>
 );
@@ -36,14 +39,14 @@ function BattleColumns() {
 
   return (
     <>
-      <div className="min-w-0"><H3 color="var(--ally)">Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
-      <div className="min-w-0"><H3 color="var(--enemy)">Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
+      <div className="min-w-0"><H3 side={ParticipantSide.ALLY}>Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
+      <div className="min-w-0"><H3 side={ParticipantSide.ENEMY}>Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
     </>
   );
 }
 
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, selectedId, select, log, intents } = useBattleScene();
+  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, select, log, intents } = useBattleScene();
 
   const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
@@ -52,7 +55,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
 
   const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
-  const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
+  const selected = useSelectedParticipant();
 
   return (
     <div className="below-header flex flex-col overflow-hidden">
@@ -67,7 +70,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
         <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5">
           {hero && <MyHeroPanel hero={hero} />}
-          {isMyTurn && hero && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} />}
+          {isMyTurn && hero && <MyTurnControls key={myTurnKey(hero, battle.currentRound)} hero={hero} />}
           {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
           {isDM && <DmPanel />}
           {battle.map && viewMode === "map" && <ReserveGroup />}

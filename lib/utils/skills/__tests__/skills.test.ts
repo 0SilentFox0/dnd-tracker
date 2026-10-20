@@ -1,14 +1,13 @@
 import { describe, expect,it } from "vitest";
 
 import {
-  calculateTotalSkillsInGroup,
   convertGroupedSkillsToArray,
   groupSkillsByMainSkill,
 } from "../skills";
 
 import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { MainSkill } from "@/types/main-skills";
-import type { GroupedSkill, Skill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
 
 describe("skills utils", () => {
   const mainSkills: MainSkill[] = [
@@ -16,14 +15,16 @@ describe("skills utils", () => {
     { id: "ms2", campaignId: "c1", name: "Магія", color: "#0000ff", createdAt: "", updatedAt: "" },
   ];
 
-  function grouped(id: string, name: string, mainSkillId?: string): GroupedSkill {
+  function grouped(id: string, name: string, mainSkillId?: string): Skill {
     return {
       id,
       campaignId: "c1",
-      basicInfo: { name },
-      spellData: {},
-     
-      mainSkillData: { mainSkillId },
+      name,
+      description: null,
+      icon: null,
+      spellId: null,
+      spellGroupId: null,
+      mainSkillId,
       createdAt: new Date(),
       spell: null,
       spellGroup: null,
@@ -53,20 +54,9 @@ describe("skills utils", () => {
     });
   });
 
-  describe("calculateTotalSkillsInGroup", () => {
-    it("повертає кількість скілів у масиві", () => {
-      const skills = [grouped("s1", "A"), grouped("s2", "B")];
-
-      expect(calculateTotalSkillsInGroup(skills)).toBe(2);
-    });
-    it("повертає 0 для порожнього масиву", () => {
-      expect(calculateTotalSkillsInGroup([])).toBe(0);
-    });
-  });
-
   describe("convertGroupedSkillsToArray", () => {
     it("перетворює Map у відсортований масив пар [назва, скіли]", () => {
-      const map = new Map<string, (Skill | GroupedSkill)[]>();
+      const map = new Map<string, Skill[]>();
 
       map.set("Бойові", [grouped("s1", "Удар")]);
       map.set("Магія", [grouped("s2", "Вогняна куля")]);
@@ -78,7 +68,7 @@ describe("skills utils", () => {
       expect(arr[1][0]).toBe("Магія");
     });
     it("основний навик з назвою «Без основного навику» не вважається нерозподіленим", () => {
-      const map = new Map<string, (Skill | GroupedSkill)[]>();
+      const map = new Map<string, Skill[]>();
 
       map.set(UNGROUPED_KEY, [grouped("s1", "X")]);
       map.set("Без основного навику", [grouped("s2", "Y")]);
@@ -89,7 +79,7 @@ describe("skills utils", () => {
     });
 
     it("ставить «Без основного навику» в кінець", () => {
-      const map = new Map<string, (Skill | GroupedSkill)[]>();
+      const map = new Map<string, Skill[]>();
 
       map.set(UNGROUPED_KEY, [grouped("s1", "X")]);
       map.set("А", [grouped("s2", "Y")]);

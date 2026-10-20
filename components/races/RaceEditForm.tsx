@@ -27,8 +27,8 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
             <Button type="button" variant="outline" onClick={editor.actions.cancel}>
               Скасувати
             </Button>
-            <Button type="submit" disabled={editor.isSaving || !editor.abilities.valid}>
-              {editor.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", editor.abilities.errors)}
+            <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
+              {editor.status.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", editor.abilities.errors)}
             </Button>
           </>
         }
@@ -38,7 +38,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
             campaignId={campaignId}
             form={editor.form}
             abilityIssues={race.abilityIssues}
-            onAbilitiesValidityChange={(_, n) => editor.abilities.setErrors(n)}
+            onAbilitiesValidityChange={editor.abilities.onValidityChange}
           />
         </div>
       </HudForm>

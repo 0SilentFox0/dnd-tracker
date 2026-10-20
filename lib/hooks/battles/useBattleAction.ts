@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { battleKeys } from "./keys";
-import { battleQueryKey } from "./keys";
+import { battleKeys, battleQueryKey } from "./keys";
+import { writeBattleDelta } from "./write-battle-delta";
 
 import { ApiError } from "@/lib/api/client";
-import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 
@@ -42,12 +41,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
         return send();
       });
 
-      const cached = queryClient.getQueryData<BattleScene>(key);
-
-      const next = cached ? applyBattleDelta(cached, delta) : "refetch";
-
-      if (next === "refetch") await queryClient.invalidateQueries({ queryKey: key });
-      else queryClient.setQueryData(key, next);
+      await writeBattleDelta(queryClient, key, delta);
 
       for (const list of options.invalidate ?? []) {
         void queryClient.invalidateQueries({ queryKey: list === "battles" ? battleKeys.list(campaignId) : battleKeys.active() });

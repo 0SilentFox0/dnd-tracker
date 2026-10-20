@@ -1,6 +1,7 @@
 "use client";
 
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { SetupEntityCard } from "./SetupEntityCard";
+
 import { HudSection } from "@/components/hud/form";
 import {
   Tooltip,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
+import { round1 } from "@/lib/utils/common/format";
 import type { EntityStats, SetupCharacter } from "@/types/battle-setup";
 
 interface CharactersListCardProps {
@@ -20,156 +22,73 @@ interface CharactersListCardProps {
   actions: Pick<ParticipantActions, "toggle">;
 }
 
-function CharacterRow({
-  character,
-  stats,
-  isSelected,
-  onToggle,
-}: {
-  character: SetupCharacter;
-  stats: EntityStats | undefined;
-  isSelected: boolean;
-  onToggle: (checked: boolean) => void;
-}) {
-  const breakdown = stats?.dprBreakdown;
-
+function DprBreakdownTip({ breakdown }: { breakdown: NonNullable<EntityStats["dprBreakdown"]> }) {
   return (
-    <button
-      type="button"
-      onClick={() => onToggle(!isSelected)}
-      className={`w-full text-left flex items-center gap-4 p-1 rounded-xl border-2 transition-all hover:bg-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-        isSelected
-          ? "border-primary bg-primary/10 shadow-sm"
-          : "border-border hover:border-primary/50"
-      }`}
-    >
-      <EntityIcon src={character.avatar} name={character.name} alt={character.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">👤</span>} />
-      <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-        <span className="text-base font-semibold truncate">
-          {character.name}
-        </span>
-        {stats && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">
-              DPR {Math.round(stats.dpr * 10) / 10} · HP {stats.hp} · KPI {stats.kpi}
-            </span>
-            {breakdown && (
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground cursor-help"
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && e.stopPropagation()
-                      }
-                      role="button"
-                      tabIndex={0}
-                    >
-                      Як рахується DPR
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="max-w-[320px] whitespace-pre-wrap py-2 px-3 text-left"
-                  >
-                    <div className="font-medium mb-1">Розрахунок DPR</div>
-                    <ul className="space-y-0.5 text-xs">
-                      {breakdown.logLines.map((line, i) => (
-                        <li key={i}>{line}</li>
-                      ))}
-                    </ul>
-                    <div className="mt-1.5 pt-1.5 border-t border-background/50 font-medium">
-                      Фізика: {Math.round(breakdown.physicalDpr * 10) / 10} ·
-                      Магія: {breakdown.spellDpr} · Навички:{" "}
-                      {breakdown.nonMagicDpr}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        )}
-      </div>
-      {isSelected && (
-        <div
-          className="shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-          aria-hidden
-        >
-          <svg
-            className="w-3.5 h-3.5 text-primary-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            className="cursor-help text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.key === "Enter" && e.stopPropagation()}
+            role="button"
+            tabIndex={0}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
-      )}
-    </button>
+            Як рахується DPR
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="max-w-[320px] whitespace-pre-wrap px-3 py-2 text-left">
+          <div className="mb-1 font-medium">Розрахунок DPR</div>
+          <ul className="space-y-0.5 text-xs">
+            {breakdown.logLines.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+          <div className="mt-1.5 border-t border-background/50 pt-1.5 font-medium">
+            Фізика: {round1(breakdown.physicalDpr)} · Магія: {breakdown.spellDpr} · Навички: {breakdown.nonMagicDpr}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
-export function CharactersListCard({
-  playerCharacters,
-  npcCharacters,
-  entityStats,
-  selection,
-  actions,
-}: CharactersListCardProps) {
+export function CharactersListCard({ playerCharacters, npcCharacters, entityStats, selection, actions }: CharactersListCardProps) {
+  const groups = [
+    { title: "Гравці", characters: playerCharacters },
+    { title: "NPC Герої", characters: npcCharacters },
+  ].filter((g) => g.characters.length > 0);
+
   return (
     <HudSection title="Персонажі" className="max-h-[600px] space-y-4 overflow-y-auto">
-        <p className="text-xs text-muted-foreground">Гравці та NPC герої</p>
-        {playerCharacters.length > 0 && (
-          <div>
-            <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
-              Гравці ({playerCharacters.length})
-            </h3>
-            <div className="space-y-3">
-              {playerCharacters.map((character) => (
-                <CharacterRow
+      <p className="text-xs text-muted-foreground">Гравці та NPC герої</p>
+      {groups.map(({ title, characters }) => (
+        <div key={title}>
+          <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+            {title} ({characters.length})
+          </h3>
+          <div className="space-y-3">
+            {characters.map((character) => {
+              const stats = entityStats?.[character.id];
+
+              const isSelected = selection.isSelected(character.id);
+
+              return (
+                <SetupEntityCard
                   key={character.id}
-                  character={character}
-                  stats={entityStats?.[character.id]}
-                  isSelected={selection.isSelected(character.id)}
-                  onToggle={(checked) =>
-                    actions.toggle(character.id, ParticipantSourceType.CHARACTER, checked)
-                  }
+                  entity={character}
+                  fallbackIcon="👤"
+                  stats={stats}
+                  statsExtra={stats?.dprBreakdown && <DprBreakdownTip breakdown={stats.dprBreakdown} />}
+                  state={{ isSelected }}
+                  onToggle={() => actions.toggle(character.id, ParticipantSourceType.CHARACTER, !isSelected)}
                 />
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
-        {npcCharacters.length > 0 && (
-          <div>
-            <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
-              NPC Герої ({npcCharacters.length})
-            </h3>
-            <div className="space-y-3">
-              {npcCharacters.map((character) => (
-                <CharacterRow
-                  key={character.id}
-                  character={character}
-                  stats={entityStats?.[character.id]}
-                  isSelected={selection.isSelected(character.id)}
-                  onToggle={(checked) =>
-                    actions.toggle(character.id, ParticipantSourceType.CHARACTER, checked)
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        {playerCharacters.length === 0 && npcCharacters.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Немає доступних персонажів
-          </p>
-        )}
+        </div>
+      ))}
+      {groups.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">Немає доступних персонажів</p>}
     </HudSection>
   );
 }

@@ -4,13 +4,12 @@ import { memo } from "react";
 import { Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
-import { EffectLine, HealthBar, HealthLabel, Portrait } from "@/components/battle/hud";
+import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
-import { signedDelta } from "@/lib/utils/common/format";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, impact, onSelect }: {
@@ -32,13 +31,9 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
     <div ref={shakeRef} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
       <HitFrame change={change} />
-      {change && (
-        <span key={`float:${change.id}`} style={delayStyle} className={cn("hud-sc pointer-events-none absolute left-6 top-2 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
-          {signedDelta(change.delta)}
-        </span>
-      )}
+      <HitFloat change={change} delayStyle={delayStyle} className="left-6 top-2 text-[26px]" />
       <PortraitFx effects={effects} size={48}>
-        <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="main" size={48} current={current} className={cn("pointer-events-none", change && !change.impact && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+        <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="main" size={48} current={current} className={cn("pointer-events-none", !change?.impact && hitFlashClass(change))} />
       </PortraitFx>
       <div className="min-w-0 flex-1">
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>

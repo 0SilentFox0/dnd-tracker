@@ -17,7 +17,7 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
 }
 
 export function DmAudioControls({ dm }: { dm: BattleAudioDm }) {
-  const { state, prefs } = useBattleAudio();
+  const { state } = useBattleAudio();
 
   const { control, library } = dm;
 
@@ -54,7 +54,7 @@ export function DmAudioControls({ dm }: { dm: BattleAudioDm }) {
           Бібліотека порожня — <Link href={dm.musicHref} className="underline">додайте треки</Link>.
         </p>
       ) : (
-        <DmPlaylist dm={dm} state={state} playlist={prefs.playlist} />
+        <DmPlaylist dm={dm} />
       )}
     </div>
   );

@@ -1,14 +1,14 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, type FxPoint } from "../runtime/geometry";
-import { motionPath } from "../runtime/motion";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { twinkle } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, tween } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, type FxPoint } from "@/components/battle/fx/runtime/geometry";
+import { motionPath } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { twinkle } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, progress, schedule, show, type Stage, tween } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const BAR_MS = ARCHETYPE_FX.puppet.impactMs;
@@ -66,10 +66,8 @@ function controlBar(g: CanvasRenderingContext2D, len: number) {
   g.stroke();
 }
 
-export const puppet: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const puppet: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const face = faceOf(el, target);
@@ -173,9 +171,5 @@ export const puppet: FxAnimation = ({ stage, from, to, targetEls }) =>
   });
 
 function twinkleAt(stage: Stage, at: FxPoint) {
-  let k = 0;
-
-  const hide = show(stage, (g) => twinkle(g, at.x, at.y, 7 * Math.sin(k * Math.PI), "#f4f0ff", 1));
-
-  return tween(stage, 300, (v) => (k = v)).then(hide);
+  return progress(stage, 300, (g, k) => twinkle(g, at.x, at.y, 7 * Math.sin(k * Math.PI), "#f4f0ff", 1));
 }

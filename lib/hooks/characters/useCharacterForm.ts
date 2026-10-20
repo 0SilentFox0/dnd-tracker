@@ -7,7 +7,7 @@ import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
 
-export interface UseCharacterFormOptions {
+interface UseCharacterFormOptions {
   initialData?: Partial<Character> | Partial<CharacterFormData>;
   type?: CharacterTypeValue;
   onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;

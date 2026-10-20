@@ -1,18 +1,9 @@
-"use client";
+import type { ReactNode } from "react";
+import type { QueryKey } from "@tanstack/react-query";
 
-import { type ReactNode, useState } from "react";
-import { type QueryKey, useQueryClient } from "@tanstack/react-query";
+import { SeedQuery } from "@/lib/providers/prefetched-query-client";
 
-const versionOf = (v: unknown) => (v && typeof v === "object" && typeof (v as { version?: unknown }).version === "number" ? (v as { version: number }).version : undefined);
-
-// перемонтування повторно віддає дані першого HTML — не затираємо ними новішу версію з дельт
-function notNewer(data: unknown, cached: unknown): boolean {
-  const a = versionOf(data);
-
-  const b = versionOf(cached);
-
-  return a !== undefined && b !== undefined && a <= b;
-}
+const renderedAt = () => Date.now();
 
 /**
  * Seeds the client query cache with data a server page already loaded, so the first HTML has it
@@ -20,15 +11,9 @@ function notNewer(data: unknown, cached: unknown): boolean {
  * setQueryData stamps the local clock: a dehydrated server timestamp would make skewed clients refetch at once.
  */
 export function PrefetchedQuery({ queryKey, data, children }: { queryKey: QueryKey; data: unknown; children: ReactNode }) {
-  const queryClient = useQueryClient();
-
-  const [seeded, setSeeded] = useState<unknown>(undefined);
-
-  if (data != null && seeded !== data) {
-    setSeeded(data);
-
-    if (!notNewer(data, queryClient.getQueryData(queryKey))) queryClient.setQueryData(queryKey, data);
-  }
-
-  return children;
+  return (
+    <SeedQuery queryKey={queryKey} data={data} seededAt={renderedAt()}>
+      {children}
+    </SeedQuery>
+  );
 }

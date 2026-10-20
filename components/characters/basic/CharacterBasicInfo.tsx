@@ -1,9 +1,5 @@
 "use client";
 
-/**
- * Компонент для базової інформації про персонажа
- */
-
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
@@ -11,38 +7,12 @@ import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
+import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import { CampaignMember } from "@/types/campaigns";
 import type { Race } from "@/types/races";
 
 interface CharacterBasicInfoProps {
-  basicInfo: {
-    name: string;
-    type: CharacterTypeValue;
-    controlledBy: string;
-    level: number;
-    class: string;
-    subclass?: string;
-    archetype?: string;
-    race: string;
-    subrace?: string;
-    alignment?: string;
-    background?: string;
-    avatar?: string;
-    setters: {
-      setName: (value: string) => void;
-      setType: (value: CharacterTypeValue) => void;
-      setControlledBy: (value: string) => void;
-      setLevel: (value: number) => void;
-      setClass: (value: string) => void;
-      setSubclass: (value: string) => void;
-      setArchetype: (value: string) => void;
-      setRace: (value: string) => void;
-      setSubrace: (value: string) => void;
-      setAlignment: (value: string) => void;
-      setBackground: (value: string) => void;
-      setAvatar: (value: string) => void;
-    };
-  };
+  basicInfo: CharacterFormBindings["basicInfo"];
   campaignMembers?: CampaignMember[];
   races?: Race[];
   isPlayerView?: boolean;
@@ -54,20 +24,9 @@ export function CharacterBasicInfo({
   races = [],
   isPlayerView = false,
 }: CharacterBasicInfoProps) {
-  const {
-    name,
-    type,
-    controlledBy,
-    level,
-    class: className,
-    subclass,
-    archetype,
-    race,
-    subrace,
-    alignment,
-    avatar,
-    setters,
-  } = basicInfo;
+  const { data, set } = basicInfo;
+
+  const { name, type, controlledBy, level, class: className, subclass, archetype, race, subrace, alignment, avatar } = data;
 
   return (
     <div className="grid grid-cols-2 gap-4 w-full">
@@ -75,7 +34,7 @@ export function CharacterBasicInfo({
         id="name"
         label="Ім'я"
         value={name}
-        onChange={(e) => setters.setName(e.target.value)}
+        onChange={(e) => set("name", e.target.value)}
         required
         placeholder="Ім'я персонажа"
         containerClassName="w-full min-w-0"
@@ -87,9 +46,7 @@ export function CharacterBasicInfo({
         <SelectField
           id="type"
           value={type}
-          onValueChange={(value) =>
-            setters.setType(value as CharacterTypeValue)
-          }
+          onValueChange={(value) => set("type", value as CharacterTypeValue)}
           placeholder="Виберіть тип"
           options={[
             { value: CharacterType.PLAYER, label: "Гравець" },
@@ -106,11 +63,11 @@ export function CharacterBasicInfo({
           <SelectField
             id="controlledBy"
             value={controlledBy}
-            onValueChange={(value) => setters.setControlledBy(value)}
+            onValueChange={(value) => set("controlledBy", value)}
             placeholder="Виберіть гравця"
             options={campaignMembers.map((member) => ({
               value: member.id,
-              label: `${member.displayName} (${member.email})`,
+              label: member.email ? `${member.displayName} (${member.email})` : member.displayName,
             }))}
             required
             triggerClassName="w-full"
@@ -123,7 +80,7 @@ export function CharacterBasicInfo({
         <SelectField
           id="race"
           value={race}
-          onValueChange={(value) => setters.setRace(value)}
+          onValueChange={(value) => set("race", value)}
           placeholder="Виберіть расу"
           options={races.map((r) => ({ value: r.name, label: r.name }))}
           required
@@ -135,7 +92,7 @@ export function CharacterBasicInfo({
         id="subrace"
         label="Підраса"
         value={subrace || ""}
-        onChange={(e) => setters.setSubrace(e.target.value)}
+        onChange={(e) => set("subrace", e.target.value)}
         placeholder="Наприклад: Темний Ельф"
         containerClassName="w-full min-w-0"
         className="w-full"
@@ -144,7 +101,7 @@ export function CharacterBasicInfo({
         id="class"
         label="Клас"
         value={className}
-        onChange={(e) => setters.setClass(e.target.value)}
+        onChange={(e) => set("class", e.target.value)}
         required
         placeholder="Наприклад: Паладин"
         containerClassName="w-full min-w-0"
@@ -154,7 +111,7 @@ export function CharacterBasicInfo({
         id="subclass"
         label="Підклас"
         value={subclass || ""}
-        onChange={(e) => setters.setSubclass(e.target.value)}
+        onChange={(e) => set("subclass", e.target.value)}
         placeholder="Наприклад: Клятва Месника"
         containerClassName="w-full min-w-0"
         className="w-full"
@@ -165,7 +122,7 @@ export function CharacterBasicInfo({
           <SelectField
             id="archetype"
             value={archetype || ""}
-            onValueChange={(value) => setters.setArchetype(value)}
+            onValueChange={(value) => set("archetype", value)}
             options={HERO_ARCHETYPE_OPTIONS.filter((o) => o.value)}
             allowNone
             noneLabel={HERO_ARCHETYPE_OPTIONS[0].label}
@@ -179,7 +136,7 @@ export function CharacterBasicInfo({
         <SelectField
           id="alignment"
           value={alignment || ""}
-          onValueChange={(value) => setters.setAlignment(value)}
+          onValueChange={(value) => set("alignment", value)}
           placeholder="Виберіть світогляд"
           options={ALIGNMENTS.map((align) => ({ value: align, label: align }))}
           allowNone
@@ -196,14 +153,14 @@ export function CharacterBasicInfo({
           min="1"
           max="30"
           value={level}
-          onChange={(e) => setters.setLevel(parseInt(e.target.value) || 1)}
+          onChange={(e) => set("level", parseInt(e.target.value) || 1)}
           containerClassName="w-full min-w-0"
           className="w-full"
         />
       </div>
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={setters.setAvatar} fallbackText={name} maxSide={1200} />
+          <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={(value) => set("avatar", value)} fallbackText={name} maxSide={1200} />
         </div>
       )}
     </div>

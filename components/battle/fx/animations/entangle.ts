@@ -1,11 +1,11 @@
-import { clamp01 } from "../runtime/easing";
-import { chance, cubicBezier, type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { leafPath, taperedStroke } from "../runtime/shapes";
-import { show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { clamp01 } from "@/components/battle/fx/runtime/easing";
+import { chance, cubicBezier, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { leafPath, taperedStroke } from "@/components/battle/fx/runtime/shapes";
+import { show, tween, wait } from "@/components/battle/fx/runtime/stage";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Vine {
@@ -90,13 +90,13 @@ function drawVine(g: CanvasRenderingContext2D, v: Vine, grow: number) {
   }
 }
 
-export const entangle: FxAnimation = async ({ stage, from, to, palette, spec }) => {
+export const entangle: FxAnimation = async ({ stage, from, targets, palette, spec }) => {
   void flash(stage, from, palette.core, 70, 300);
   for (let n = 0; n < 8; n++) emit(stage, from, { tints: palette.tints, speed: [20, 70], life: [0.3, 0.6], scale: [0.25, 0.03], drag: 2 });
 
   await wait(stage, LEAD_MS);
 
-  await perTarget(stage, to, ARCHETYPE_FX.entangle.staggerMs, async (target) => {
+  await perTarget(stage, targets, ARCHETYPE_FX.entangle.staggerMs, async ({ at: target }) => {
     const n = spec.critical ? 8 : 6;
 
     const vines = Array.from({ length: n }, (_, i) => makeVine(target, i, n));

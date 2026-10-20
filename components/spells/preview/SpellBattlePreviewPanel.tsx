@@ -11,9 +11,8 @@ import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { type FxRunner, useFxEnabled, useSpellFxPlayback } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
-import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
-import { castableOf, previewCastFx, type PreviewSpell } from "@/lib/utils/battle/fx/spell-preview";
+import { PREVIEW_UNITS, type PreviewSpell, type PreviewUnit } from "@/lib/utils/battle/fx";
+import { castableOf, previewCastFx } from "@/lib/utils/battle/fx/spell-preview";
 
 // a preview has no queue to hold up, so it waits for the signature however long its chunk takes
 const RUNNER: FxRunner = { play: (layer, spec, root) => playFx(layer, spec, root, Infinity), cancel: cancelLayer };
@@ -42,7 +41,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
 
   const { spec, targets, targetIds, auras } = preview;
 
-  const { arenaRef, layerRef, token, settled, replay } = useSpellFxPlayback(spec, fx.enabled, RUNNER);
+  const { arenaRef, layerRef, hit, settled, replay } = useSpellFxPlayback(spec, fx.enabled, RUNNER);
 
   if (!spec && auras.length === 0) return null;
 
@@ -51,13 +50,11 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
   const row = (unit: PreviewUnit) => (
     <PreviewUnitRow
       key={unit.id}
-      compact
-      book={book}
       unit={unit}
       target={targets.find((t) => t.id === unit.id)}
-      hit={fx.enabled && spec ? { token, delayMs: ARCHETYPE_FX[spec.archetype].impactMs } : null}
+      hit={hit}
       aurasOn={settled}
-      still={!fx.motionAllowed}
+      look={{ compact: true, book, still: !fx.motionAllowed }}
     />
   );
 

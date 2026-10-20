@@ -15,7 +15,7 @@ import {
 
 import { type Effect, EffectSchema } from "@/lib/utils/abilities/schema";
 
-type SpellRow = {
+type SpellRulesRow = {
   id: string;
   dice?: number | null;
   cost?: string | null;
@@ -63,21 +63,21 @@ function readList<T>(schema: { safeParse: (v: unknown) => { success: true; data:
   return valid;
 }
 
-export const spellTargeting = (row: SpellRow): SpellTargeting => readOne(SpellTargetingSchema, row.targeting, DEFAULT_TARGETING, "targeting", row.id);
+export const spellTargeting = (row: SpellRulesRow): SpellTargeting => readOne(SpellTargetingSchema, row.targeting, DEFAULT_TARGETING, "targeting", row.id);
 
-export const spellResolution = (row: SpellRow): SpellResolution => readOne(SpellResolutionSchema, row.resolution, DEFAULT_RESOLUTION, "resolution", row.id);
+export const spellResolution = (row: SpellRulesRow): SpellResolution => readOne(SpellResolutionSchema, row.resolution, DEFAULT_RESOLUTION, "resolution", row.id);
 
-export const spellCost = (row: SpellRow): SpellCost => readOne(SpellCostSchema, row.cost, "action", "cost", row.id);
+export const spellCost = (row: SpellRulesRow): SpellCost => readOne(SpellCostSchema, row.cost, "action", "cost", row.id);
 
-export const spellDiceCount = (row: SpellRow): number => readOne(SpellDiceSchema, row.dice, 0, "dice", row.id);
+export const spellDiceCount = (row: SpellRulesRow): number => readOne(SpellDiceSchema, row.dice, 0, "dice", row.id);
 
-export const spellEffects = (row: SpellRow): Effect[] => readList<Effect>(EffectSchema, row.spellEffects, "effects", row.id);
+export const spellEffects = (row: SpellRulesRow): Effect[] => readList<Effect>(EffectSchema, row.spellEffects, "effects", row.id);
 
-export const spellRaceModifiers = (row: SpellRow): RaceModifier[] => readList<RaceModifier>(RaceModifierSchema, row.raceModifiers, "raceModifiers", row.id);
+export const spellRaceModifiers = (row: SpellRulesRow): RaceModifier[] => readList<RaceModifier>(RaceModifierSchema, row.raceModifiers, "raceModifiers", row.id);
 
 const readMaxStacks = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 10 ? (v as number) : undefined);
 
-export function readSpellDefinition(row: SpellRow): SpellDefinition {
+export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
   return {
     dice: spellDiceCount(row),
     cost: spellCost(row),

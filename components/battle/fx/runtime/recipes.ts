@@ -1,15 +1,15 @@
 import { fadeOut } from "./easing";
-import type { FxPoint } from "./geometry";
+import type { FxPoint, FxTarget } from "./geometry";
 import type { FxPalette } from "./palette";
 import { emit, type EmitOptions, flash } from "./primitives";
 import { playSheet, SHEETS } from "./sprites";
-import { show, type Stage, tween, wait } from "./stage";
+import { progress, type Stage, wait } from "./stage";
 import { glow, sprite } from "./texture";
 
 /** Runs `fn` for every target, the i-th one `i × staggerMs` later. */
-export function perTarget(s: Stage, to: FxPoint[], staggerMs: number | undefined, fn: (target: FxPoint, i: number) => Promise<void>) {
+export function perTarget(s: Stage, targets: FxTarget[], staggerMs: number | undefined, fn: (target: FxTarget, i: number) => Promise<void>) {
   return Promise.all(
-    to.map(async (target, i) => {
+    targets.map(async (target, i) => {
       if (staggerMs) await wait(s, i * staggerMs);
 
       await fn(target, i);
@@ -38,14 +38,7 @@ export function impactSplash(s: Stage, at: FxPoint, palette: FxPalette, opts: { 
  * `onTick` gets the progress, for the particles that rise with it.
  */
 export function pillar(s: Stage, base: FxPoint, opts: { tint: string; width: number; height: number; rise: number; holdUntil: number }, onTick: (k: number, dt: number) => void) {
-  let k = 0;
-
   const tex = glow(opts.tint);
 
-  const hide = show(s, (g) => sprite(g, tex, base.x, base.y, opts.width, opts.height * Math.min(1, k * opts.rise), fadeOut(k, opts.holdUntil), true, 0.9));
-
-  return tween(s, 1000, (v, dt) => {
-    k = v;
-    onTick(v, dt);
-  }).then(hide);
+  return progress(s, 1000, (g, k) => sprite(g, tex, base.x, base.y, opts.width, opts.height * Math.min(1, k * opts.rise), fadeOut(k, opts.holdUntil), true, 0.9), onTick);
 }

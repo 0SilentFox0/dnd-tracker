@@ -1,15 +1,15 @@
-import { halfSize } from "../runtime/anchors";
-import { lightBeam } from "../runtime/beam";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { crescent } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { lightBeam } from "@/components/battle/fx/runtime/beam";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { chance, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { crescent } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const MOON_MS = 420;
@@ -27,10 +27,8 @@ const PIN: Keyframe[] = [
   { transform: "none", filter: "none" },
 ];
 
-export const moonbeam: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const moonbeam: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const ground = target.y + h;

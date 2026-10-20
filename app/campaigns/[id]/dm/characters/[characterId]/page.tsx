@@ -1,6 +1,6 @@
 import { readCharacterSheet } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet";
 import { CharacterProfile } from "@/components/character-profile";
-import { characterSheetKey } from "@/lib/hooks/characters/keys";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { CharacterSheet } from "@/types/characters";
@@ -11,7 +11,7 @@ export default async function DmCharacterPage({ params, searchParams }: { params
   const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId }));
 
   return (
-    <PrefetchedQuery queryKey={characterSheetKey(id, characterId)} data={sheet}>
+    <PrefetchedQuery queryKey={characterKeys.sheet(id, characterId)} data={sheet}>
       <CharacterProfile campaignId={id} characterId={characterId} canEdit initialTab={tab} />
     </PrefetchedQuery>
   );

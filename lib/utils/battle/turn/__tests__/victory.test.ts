@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
-import { calculateAllyHpChangesOnVictory, checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
+import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleAction } from "@/types/battle";
 
 describe("completeBattle", () => {
@@ -19,14 +19,23 @@ describe("completeBattle", () => {
     expect(battleAction.actionDetails.battleResult).toBe("victory");
   });
 
-  it("лікування при перемозі пишеться від'ємною зміною, як в інших hpChanges", () => {
+  it("applyVictoryCompletion не дублює зміни HP за хід — лише відроджених", () => {
     const base = createMockParticipant();
 
     const before = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero", side: ParticipantSide.ALLY }, combatStats: { ...base.combatStats, currentHp: 10 } });
 
-    const after = { ...before, combatStats: { ...before.combatStats, currentHp: 30 } };
+    const regenerated = { ...before, combatStats: { ...before.combatStats, currentHp: 30 } };
 
-    expect(calculateAllyHpChangesOnVictory([before], [after], { result: "victory" } as never)).toEqual([expect.objectContaining({ oldHp: 10, newHp: 30, change: -20 })]);
+    const downed = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "pal", side: ParticipantSide.ALLY }, combatStats: { ...base.combatStats, currentHp: 0, status: "unconscious" } });
+
+    const enemy = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "e", side: ParticipantSide.ENEMY }, combatStats: { ...base.combatStats, currentHp: 0, status: "dead" } });
+
+    const newLogEntries: BattleAction[] = [];
+
+    applyVictoryCompletion({ updatedInitiativeOrder: [regenerated, downed, enemy], initiativeOrder: [before, downed, enemy], battleStatus: "active", battleId: "b", nextRound: 4, currentBattleLogLength: 7, newLogEntries, getStateBeforeForEntry: () => undefined });
+
+    expect(newLogEntries[0]).toMatchObject({ battleId: "b", round: 4, actionIndex: 7, resultText: "🎉 Бій завершено! Перемога союзників!" });
+    expect(newLogEntries[0].hpChanges).toEqual([expect.objectContaining({ participantId: "pal", oldHp: 0, change: -downed.combatStats.maxHp })]);
   });
 
   it("поразка: battleResult у actionDetails", () => {

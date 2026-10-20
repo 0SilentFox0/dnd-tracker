@@ -1,48 +1,25 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
+import { type AttackRequest, validateAttackRequest } from "./request";
+import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { AttackType } from "@/lib/constants/battle";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, isAirborne, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
-import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { canActNow } from "@/lib/utils/battle/common/control";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { diceCount, rollDiceList } from "@/lib/utils/common/dice";
-import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
   battle: {
-    initiativeOrder: unknown;
-    battleLog: unknown;
+    initiativeOrder: BattleParticipant[];
     currentRound: number;
     currentTurnIndex: number;
   };
-  data: {
-    attackerId: string;
-    targetId?: string;
-    targetIds?: string[];
-    attackId?: string;
-    d20Roll?: number;
-    attackRoll?: number;
-    /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
-    attackRolls?: number[];
-    /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
-    secondRolls?: (number | null)[];
-    advantageRoll?: number;
-    disadvantageRoll?: number;
-    rollMode?: "normal" | "advantage" | "disadvantage";
-    obstacle?: boolean;
-    damageRolls: number[];
-  };
+  data: AttackRequest;
   battleId: string;
   userId: string;
   isDM: boolean;
@@ -54,7 +31,6 @@ export type AttackPhaseInput = {
 export type AttackPhaseResult = {
   finalInitiativeOrder: BattleParticipant[];
   allBattleActions: BattleAction[];
-  baseBattleLog: BattleAction[];
   summons: SummonRequest[];
 };
 
@@ -64,100 +40,17 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const rng = input.rng ?? Math.random;
 
-  const initiativeOrder = battle.initiativeOrder as BattleParticipant[];
+  const initiativeOrder = battle.initiativeOrder;
 
-  const baseBattleLog = (battle.battleLog as BattleAction[]) || [];
+  const request = validateAttackRequest({ participants: initiativeOrder, scene: { turnIndex: battle.currentTurnIndex }, userId, isDM }, data);
 
-  const singleRoll = data.d20Roll ?? data.attackRoll;
-
-  const targetIds = data.targetIds || (data.targetId ? [data.targetId] : []);
-
-  const chosenTargets = [...new Set(targetIds)].flatMap((id) => initiativeOrder.find((p) => p.basicInfo.id === id) ?? []);
-
-  const usePerTargetRolls =
-    Array.isArray(data.attackRolls) &&
-    data.attackRolls.length === chosenTargets.length;
-
-  if (!singleRoll && !usePerTargetRolls) {
-    throw new BattleRuleError("action_rejected", "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)");
-  }
-
-  const attacker = initiativeOrder.find(
-    (p) => p.basicInfo.id === data.attackerId,
-  );
-
-  if (!attacker) {
-    throw new BattleAccessError(404, "Атакуючого немає в бою");
-  }
-
-  const currentParticipant = initiativeOrder[battle.currentTurnIndex];
-
-  if (!canActNow({ isDM, userId }, attacker, currentParticipant)) {
-    throw new BattleAccessError(403, "Атакувати може лише DM або той, хто зараз ходить");
-  }
-
-  if (chosenTargets.length === 0) {
-    throw new BattleAccessError(404, "Цілей немає в бою");
-  }
-
-  if (chosenTargets.some(isAirborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
-
-  if (
-    !currentParticipant ||
-    currentParticipant.basicInfo.id !== attacker.basicInfo.id
-  ) {
-    throw new BattleRuleError("action_rejected", "Зараз не хід атакуючого");
-  }
-
-  if (attacker.actionFlags.hasUsedAction) {
-    throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
-  }
-
-  if (!isActive(attacker)) {
-    throw new BattleRuleError("action_rejected", "Атакуючий не може діяти (непритомний або мертвий)");
-  }
-
-  let attack = data.attackId
-    ? attacker.battleData.attacks.find(
-        (a) => a.id === data.attackId || a.name === data.attackId,
-      )
-    : null;
-
-  if (!attack) attack = attacker.battleData.attacks[0];
-
-  if (!attack) {
-    throw new BattleRuleError("action_rejected", "У атакуючого немає доступної атаки");
-  }
-
-  const attackKind = attackKindOf(attack.type);
-
-  if (getDisabledAttackKinds(attacker)[attackKind]) {
-    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
-  }
+  const { attacker, attack, chosenTargets, targetIds } = request;
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
   const { targets, expanded, isMultiTargetRanged, falloff } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
-  const chosenIndex = (id: string) => chosenTargets.findIndex((t) => t.basicInfo.id === id);
-
-  const dist = attack.damageDistribution;
-
-  // Для multi-target ranged: окремий кидок на ціль; основна ціль — повна шкода, додаткові — за falloff
-  const damageFractions: number[] =
-    isMultiTargetRanged
-      ? targets.map((_, i) => (i === 0 ? 1 : falloff))
-      : dist &&
-          dist.length === targets.length &&
-          dist.every((n) => typeof n === "number" && n >= 0 && n <= 100)
-        ? (() => {
-            const sum = dist.reduce((a, b) => a + b, 0);
-
-            return sum > 0
-              ? dist.map((p) => p / sum)
-              : targets.map(() => 1 / targets.length);
-          })()
-        : targets.map(() => 1 / targets.length);
+  const fractions = damageFractions(targets, attack, { isMultiTargetRanged, falloff });
 
   let currentAttacker = { ...attacker };
 
@@ -167,12 +60,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const summons: SummonRequest[] = [];
 
-  // кожне влучання мультицільової атаки — свій блок кубиків повної формули (зброя + рівень героя), по черзі влучань
   const damageFormula = isMultiTargetRanged && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
 
-  const dicePerTarget = damageFormula ? diceCount(damageFormula) : 0;
-
-  let damageCursor = 0;
+  const dice = damageDiceCursor(data.damageRolls, damageFormula, rng);
 
   const effectsBeforeVolley = activeEffectIds([attacker]);
 
@@ -181,75 +71,47 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
-    const chosenAt = expanded ? chosenIndex(target.basicInfo.id) : i;
+    const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const d20Roll = expanded
-      ? ((usePerTargetRolls && chosenAt >= 0 ? data.attackRolls?.[chosenAt] : singleRoll) ?? rollDie(20, rng))
-      : usePerTargetRolls && data.attackRolls
-        ? data.attackRolls[i]
-        : singleRoll;
+    const d20Roll = strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
-    if (d20Roll == null || d20Roll < 1 || d20Roll > 20) {
-      throw new BattleRuleError("action_rejected", `Некоректний кидок атаки для цілі ${i + 1}`);
-    }
-
-    const damageMultiplier =
-      targets.length > 1 ? damageFractions[i] : undefined;
-
-    const perStrike = dicePerTarget > 0;
-
-    const sentRolls = perStrike ? data.damageRolls.slice(damageCursor, damageCursor + dicePerTarget) : [];
-
-    const rolledByServer = perStrike && sentRolls.length < dicePerTarget;
-
-    const damageRollsForTarget = perStrike
-      ? rolledByServer
-        ? [...sentRolls, ...rollDiceList(damageFormula ?? "", rng).slice(sentRolls.length)]
-        : sentRolls
-      : data.damageRolls;
-
-    const freshTarget = currentInitiativeOrder.find((p) => p.basicInfo.id === target.basicInfo.id) ?? target;
+    const strikeDice = dice.next();
 
     const second = data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll;
 
     const attackResult = processAttack({
       attacker: currentAttacker,
-      target: freshTarget,
+      target: findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target,
       attack,
       d20Roll,
       advantageRoll: second,
       disadvantageRoll: second,
       rollMode: data.rollMode,
       actionSpent: i > 0,
-      damageRolls: damageRollsForTarget,
+      damageRolls: strikeDice.rolls,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
       battleId,
-      damageMultiplier,
+      damageMultiplier: targets.length > 1 ? fractions[i] : undefined,
       obstacle: data.obstacle,
       map: input.map,
       hitSpells: input.hitSpells,
       rng,
     });
 
-    if (perStrike && attackResult.success) damageCursor += dicePerTarget;
+    if (attackResult.success) dice.hit();
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;
     summons.push(...attackResult.summons);
 
-    const critType = attackResult.criticalEffectApplied?.effect.type;
-
-    if (rolledByServer && attackResult.success) {
-      attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${damageRollsForTarget.slice(sentRolls.length).join(", ")}`;
+    if (strikeDice.serverRolled && attackResult.success) {
+      attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${strikeDice.serverRolled.join(", ")}`;
     }
 
-    allBattleActions.push({
-      ...attackResult.battleAction,
-      actionIndex: baseBattleLog.length + allBattleActions.length,
-    });
+    allBattleActions.push(attackResult.battleAction);
 
-    const provoked = critType === "provoke_opportunity_attack";
+    const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
 
     if (i === 0 || provoked) {
       const retaliation = resolveRetaliation({
@@ -268,11 +130,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
       if (retaliation) {
         currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, retaliation.participants);
-        currentAttacker = retaliation.participants.find((p) => p.basicInfo.id === attacker.basicInfo.id) ?? currentAttacker;
-        allBattleActions.push({
-          ...retaliation.battleAction,
-          actionIndex: baseBattleLog.length + allBattleActions.length,
-        });
+        currentAttacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? currentAttacker;
+        allBattleActions.push(retaliation.battleAction);
       }
     }
 
@@ -285,14 +144,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     if (!isActive(currentAttacker)) break;
   }
 
-  currentInitiativeOrder = restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack);
-
-  const finalInitiativeOrder = currentInitiativeOrder;
-
   return {
-    finalInitiativeOrder,
+    finalInitiativeOrder: restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack),
     allBattleActions,
-    baseBattleLog,
     summons,
   };
 }

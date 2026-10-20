@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import type { Unit } from "@/types/units";
+import type { Unit, UnitAttack } from "@/types/units";
 
 const list = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
 
@@ -26,7 +26,7 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     proficiencyBonus: row.proficiencyBonus,
     minTargets: row.minTargets,
     maxTargets: row.maxTargets,
-    attacks: list<Unit["attacks"][number]>(row.attacks),
+    attacks: list<UnitAttack>(row.attacks),
     immunities: list<string>(row.immunities),
     knownSpells: list<string>(row.knownSpells),
     avatar: row.avatar,

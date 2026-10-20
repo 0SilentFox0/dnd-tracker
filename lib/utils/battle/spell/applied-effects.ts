@@ -1,3 +1,4 @@
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export interface AppliedEffect {
@@ -8,7 +9,7 @@ export interface AppliedEffect {
   targetId: string;
 }
 
-const effectsOf = (list: BattleParticipant[], id: string) => list.find((p) => p.basicInfo.id === id)?.battleData.activeEffects ?? [];
+const effectsOf = (list: BattleParticipant[], id: string) => findParticipant(list, id)?.battleData.activeEffects ?? [];
 
 export function diffAppliedEffects(before: BattleParticipant[], after: BattleParticipant[], targetIds: string[]): AppliedEffect[] {
   return targetIds.flatMap((targetId) => {

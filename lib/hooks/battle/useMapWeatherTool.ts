@@ -27,9 +27,9 @@ export function useMapWeatherTool(args: {
 
   const [active, setActive] = useState(false);
 
-  const toggle = useCallback(() => setActive((o) => !o), []);
-
   const close = useCallback(() => setActive(false), []);
+
+  const toggle = useCallback(() => setActive((o) => !o), []);
 
   const choose = useCallback(
     (kind: WeatherKind | null) => {

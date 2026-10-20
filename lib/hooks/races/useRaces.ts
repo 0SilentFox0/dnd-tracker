@@ -8,6 +8,7 @@ import {
   getRaces,
   updateRace,
 } from "@/lib/api/races";
+import { battleKeys } from "@/lib/hooks/battles/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { skillKeys } from "@/lib/hooks/skills/keys";
@@ -20,17 +21,16 @@ const raceDependentKeys = (campaignId: string) => [
   unitKeys.list(campaignId),
   characterKeys.lists(campaignId),
   skillKeys.trees(campaignId),
+  battleKeys.balance(campaignId),
 ];
 
-export function useRaces(campaignId: string, initialRaces?: Race[], options: { enabled?: boolean } = {}) {
+export function useRaces(campaignId: string, opts?: { initialData?: Race[]; enabled?: boolean }) {
   return useQuery<Race[]>({
     queryKey: raceKeys.list(campaignId),
     staleTime: REFERENCE_STALE_MS,
     queryFn: () => getRaces(campaignId),
-    enabled: options.enabled ?? true,
-    ...(initialRaces && initialRaces.length > 0
-      ? { initialData: initialRaces }
-      : {}),
+    enabled: opts?.enabled ?? true,
+    ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
   });
 }
 

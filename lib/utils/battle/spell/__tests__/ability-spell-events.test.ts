@@ -45,6 +45,35 @@ describe("spell ability events", () => {
     expect(r.allParticipantsUpdated?.find((p) => p.basicInfo.id === "e2")?.combatStats.morale).toBe(-1);
   });
 
+  it("ефект зі своєю ціллю (усі вороги) вбиває не-ціль каста: kill спрацьовує, шкода в підписі", () => {
+    const glory = resolved({ trigger: { event: "kill", role: "killer" }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const c = makeParticipant({ id: "c", abilities: [glory] });
+
+    const quake: CastableSpell = { ...firebolt, id: "s2", name: "Землетрус", level: 0, definition: { ...firebolt.definition, targeting: { kind: "self" }, effects: [{ kind: "dealDamage", amount: 5, damageType: "magic", target: "allEnemies" }] } };
+
+    const r = castSpell({ caster: c, spell: quake, targetIds: ["c"], allParticipants: [c, makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 3 })], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
+
+    expect(hpOf(r, "e")).toBe(0);
+    expect(r.casterUpdated.combatStats.morale).toBe(1);
+    expect(r.battleAction.resultText).toContain("шкода: 3");
+    expect(r.battleAction.actionDetails.totalDamage).toBe(3);
+  });
+
+  it("відбита на кастера шкода не входить у підсумок, а його смерть не рахується йому як kill", () => {
+    const glory = resolved({ trigger: { event: "kill", role: "killer" }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const reflect = resolved({ trigger: { event: "spellCast", phase: "after", role: "target" }, effects: [{ kind: "dealDamage", amount: 4, damageType: "magic", target: "eventActor" }] }, { id: "rf" });
+
+    const r = cast(makeParticipant({ id: "c", hp: 4, abilities: [glory] }), [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50, abilities: [reflect] })]);
+
+    expect(hpOf(r, "c")).toBe(0);
+    expect(hpOf(r, "e")).toBe(45);
+    expect(r.battleAction.resultText).toContain("шкода: 5)");
+    expect(r.battleAction.actionDetails.totalDamage).toBe(5);
+    expect(r.casterUpdated.combatStats.morale).toBe(0);
+  });
+
   it("бонус шкоди з spellCast/before діє на це заклинання", () => {
     const focus = resolved({ trigger: { event: "spellCast", phase: "before", role: "caster" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 100 }] });
 

@@ -39,7 +39,7 @@ export function unitRowStats(u: UnitStatsRow, spellsById: Map<string, UnitSpellR
 }
 
 /** Resistances from the participant the battle would build (unit and race abilities, immunities). */
-export async function unitResistancesById(units: UnitFromPrisma[], races: RaceRow[]): Promise<Map<string, Record<string, number>>> {
+async function unitResistancesById(units: UnitFromPrisma[], races: RaceRow[]): Promise<Map<string, Record<string, number>>> {
   const racesById = Object.fromEntries(races.map((r) => [r.id, r]));
 
   const built = await Promise.all(units.map((u) => createBattleParticipantFromUnit(u, "", ParticipantSide.ENEMY, 1, racesById)));
@@ -48,7 +48,7 @@ export async function unitResistancesById(units: UnitFromPrisma[], races: RaceRo
 }
 
 /** One narrow query for every spell the given units know. */
-export async function loadSpellsForUnits(campaignId: string, units: Array<{ knownSpells?: unknown }>): Promise<Map<string, UnitSpellRow>> {
+async function loadSpellsForUnits(campaignId: string, units: Array<{ knownSpells?: unknown }>): Promise<Map<string, UnitSpellRow>> {
   const ids = new Set<string>();
 
   for (const u of units) if (Array.isArray(u.knownSpells)) for (const id of u.knownSpells) if (typeof id === "string") ids.add(id);

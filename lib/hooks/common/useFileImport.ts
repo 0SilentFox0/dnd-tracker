@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-export interface UseFileImportOptions<T> {
+interface UseFileImportOptions<T> {
   onImport: (data: T[]) => Promise<{ imported: number; total: number; skipped?: number; warnings?: string[] }>;
   parseCSV?: (file: File) => Promise<T[]>;
   parseJSON?: (file: File) => Promise<T[]>;
 }
 
-export type FileImportSuccess = { imported: number; total: number; warnings?: string[] };
+type FileImportSuccess = { imported: number; total: number; skipped?: number; warnings?: string[] };
 
 export interface UseFileImportReturn {
   file: File | null;
@@ -16,9 +16,6 @@ export interface UseFileImportReturn {
     isLoading: boolean;
   };
   actions: {
-    setFile: (file: File | null) => void;
-    setError: (error: string | null) => void;
-    setSuccess: (success: FileImportSuccess | null) => void;
     handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleImport: () => Promise<void>;
     reset: () => void;
@@ -99,6 +96,7 @@ export function useFileImport<T>({
       setSuccess({
         imported: result.imported,
         total: result.total,
+        skipped: result.skipped,
         warnings: result.warnings,
       });
     } catch (err) {
@@ -121,6 +119,6 @@ export function useFileImport<T>({
   return {
     file,
     status: { error, success, isLoading },
-    actions: { setFile, setError, setSuccess, handleFileChange, handleImport, reset },
+    actions: { handleFileChange, handleImport, reset },
   };
 }

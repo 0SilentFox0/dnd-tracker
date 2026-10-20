@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { perimeter } from "@/components/battle/fx/frames/kit";
 import { clamp01, envelope, fadeOut, pulse } from "@/components/battle/fx/runtime/easing";
-import { perimeter } from "@/components/battle/fx/runtime/frame-kit";
-import { cubicBezier, stepBodies } from "@/components/battle/fx/runtime/geometry";
+import { cubicBezier } from "@/components/battle/fx/runtime/geometry";
+import { stepBodies } from "@/components/battle/fx/runtime/physics";
 
 const box = { x: 10, y: 20, w: 100, h: 50 };
 

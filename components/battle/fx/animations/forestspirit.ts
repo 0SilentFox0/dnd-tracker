@@ -1,13 +1,13 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { glowPulse } from "../runtime/motion";
-import { emit, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, smoothstep } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { glowPulse } from "@/components/battle/fx/runtime/motion";
+import { emit, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FORM_MS = 350;
@@ -125,10 +125,8 @@ function stag(g: CanvasRenderingContext2D, s: number, bow: number, alpha: number
   return { muzzle: at({ x: -0.62, y: -0.84 }), tips: ANTLERS.tips.map(at) };
 }
 
-export const forestspirit: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const forestspirit: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { h } = halfSize(el);
 
     const ground = target.y + h;
@@ -180,7 +178,7 @@ export const forestspirit: FxAnimation = ({ stage, from, to, targetEls }) =>
 
           const oy = target.y + Math.sin(time * f.speed * 1.3 + f.phase) * f.orbit * 0.6;
 
-          const e = wake * wake * (3 - 2 * wake);
+          const e = smoothstep(wake);
 
           const x = tip.x + (ox - tip.x) * e;
 

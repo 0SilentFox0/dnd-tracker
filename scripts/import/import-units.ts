@@ -3,8 +3,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { importUnitsSchema } from "@/lib/schemas/units";
-import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
+import { convertCSVRowToUnit } from "@/lib/utils/units/unit-parsing";
 import { DEFAULT_CAMPAIGN_ID } from "@/scripts/shared/default-campaign";
 import type { CSVUnitRow } from "@/types/import";
 

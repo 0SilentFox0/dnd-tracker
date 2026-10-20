@@ -1,13 +1,13 @@
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geometry";
-import { playGhost } from "../runtime/ghosts";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { feather } from "../runtime/shapes";
-import { animateEl, show, type Stage, tween, wait } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { playGhost } from "@/components/battle/fx/runtime/ghosts";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { feather } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, progress, show, type Stage, tween, wait } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const WHIRL_MS = 1300;
@@ -34,9 +34,7 @@ async function gust(stage: Stage, from: FxPoint, to: FxPoint) {
 
   const lines = Array.from({ length: 7 }, () => ({ off: rand(-14, 14), delay: rand(0, 0.25), len: rand(0.18, 0.32) }));
 
-  let k = 0;
-
-  const hide = show(stage, (g) => {
+  await progress(stage, ARCHETYPE_FX.haste.impactMs, (g, k) => {
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";
 
@@ -63,18 +61,13 @@ async function gust(stage: Stage, from: FxPoint, to: FxPoint) {
       g.stroke();
     }
   });
-
-  await tween(stage, ARCHETYPE_FX.haste.impactMs, (v) => (k = v));
-  hide();
 }
 
 // Motion lines streaming back from the hero as it surges forward.
 function speedLines(stage: Stage, target: FxPoint, dir: number) {
   const lines = Array.from({ length: 12 }, () => ({ y: target.y + rand(-28, 28), x0: target.x + dir * rand(-20, 40), len: rand(50, 110), delay: rand(0, 0.3) }));
 
-  let k = 0;
-
-  const hide = show(stage, (g) => {
+  return progress(stage, 420, (g, k) => {
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";
     g.strokeStyle = "#e6fbff";
@@ -94,15 +87,11 @@ function speedLines(stage: Stage, target: FxPoint, dir: number) {
       g.stroke();
     }
   });
-
-  return tween(stage, 420, (v) => (k = v)).then(hide);
 }
 
-export const haste: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
+export const haste: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await gust(stage, from, target);
-
-    const el = targetEls[i];
 
     const box = stage.layer.getBoundingClientRect();
 

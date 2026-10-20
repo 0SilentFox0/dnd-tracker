@@ -202,6 +202,9 @@
   --maze-wall-edge: #0a0a0a;
   --maze-exit-core: #fff4c2;
   --maze-exit-glow: #ffc84a;
+  --maze-exit-deep: #b4520a;
+  --maze-arch-stone: #3a3732;
+  --maze-arch-edge: #9b948a;
   --maze-rune: #9fd8ff;
   --maze-fog: rgba(170, 176, 186, 0.55);
   --maze-edit-hover: rgba(242, 193, 78, 0.35);
@@ -222,12 +225,11 @@
 .maze-edge-pending { fill: var(--maze-edit-pending); }
 .maze-picked { fill: var(--maze-picked-fill); stroke: var(--maze-picked-edge); stroke-width: 3px; }
 
-@keyframes maze-exit-pulse {
-  0%, 100% { opacity: 0.7; transform: scale(0.92); }
-  50% { opacity: 1; transform: scale(1.06); }
+@keyframes maze-exit-swirl {
+  to { transform: rotate(360deg); }
 }
 
-.maze-exit { transform-box: fill-box; transform-origin: center; animation: maze-exit-pulse 2.2s ease-in-out infinite; }
+.maze-exit-swirl { transform-box: fill-box; transform-origin: center; animation: maze-exit-swirl 6s linear infinite; }
 
 [data-dormant] { opacity: 0.5; }
 
@@ -244,5 +246,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .maze-exit { animation: none; }
+  .maze-exit-swirl { animation: none; }
 }

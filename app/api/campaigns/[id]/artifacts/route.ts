@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
+import { readArtifacts } from "./read-artifacts";
+
 import { prisma } from "@/lib/db";
 import { createArtifactSchema } from "@/lib/schemas/artifacts";
-import {
-  mirrorArtifactIconToSupabase,
-  shouldMirrorArtifactIconUrl,
-} from "@/lib/supabase/artifact-icon-storage";
-import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/read";
-import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
-import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
@@ -21,8 +19,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    
-    // Перевіряємо права DM
+
     const accessResult = await requireDM(id);
 
     if (accessResult instanceof NextResponse) {
@@ -33,21 +30,20 @@ export async function POST(
 
     if (data instanceof NextResponse) return data;
 
+    const foreignRef = await invalidCampaignRefs(id, { artifactSet: data.setId });
+
+    if (foreignRef) return foreignRef;
+
     let icon = data.icon;
 
-    if (shouldMirrorArtifactIconUrl(icon)) {
-      const sourceUrl = (typeof icon === "string" ? icon : "").trim();
+    if (icon !== undefined) {
+      const resolved = await resolveArtifactIconForPersistence(icon, { campaignId: id, objectBaseName: randomUUID() });
 
-      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
-        campaignId: id,
-        objectBaseName: randomUUID(),
-      });
-
-      if (!mirrored.ok) {
-        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      icon = mirrored.publicUrl;
+      icon = resolved.value;
     }
 
     const artifact = await prisma.artifact.create({
@@ -74,41 +70,12 @@ export async function POST(
 }
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
-    
-    // Перевіряємо доступ до кампанії (не обов'язково DM)
-    const accessResult = await requireCampaignAccess(id, false);
+  const { id } = await params;
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const rows = await prisma.artifact.findMany({
-      where: {
-        campaignId: id,
-      },
-      include: {
-        artifactSet: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    const artifacts = rows.map(({ abilities, ...row }) => ({
-      ...row,
-      sheetBonuses: sheetStatBonuses(artifactAbilities({ ...row, abilities })),
-      abilitySummary: abilitySummary("artifact", { ...row, abilities }),
-    }));
-
-    return NextResponse.json(artifacts);
-  } catch (error) {
-    return handleApiError(error, { action: "list artifacts" });
-  }
+  return readArtifacts({ id });
 }
 
 export async function DELETE(

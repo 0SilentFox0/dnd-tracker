@@ -6,7 +6,7 @@ import { useFxEnabled } from "@/lib/hooks/battle";
 import { aurasOf } from "@/lib/utils/battle/fx";
 import type { ActiveEffect } from "@/types/battle";
 
-const AuraCanvas = dynamic(() => import("./canvas/AuraCanvas").then((m) => m.AuraCanvas), { ssr: false });
+const AuraCanvas = dynamic(() => import("./AuraCanvas").then((m) => m.AuraCanvas), { ssr: false });
 
 export function StatusAuras({ effects, size }: { effects: readonly ActiveEffect[]; size: number }) {
   const { userEnabled, motionAllowed } = useFxEnabled();

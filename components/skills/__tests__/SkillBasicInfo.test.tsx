@@ -14,22 +14,9 @@ describe("SkillBasicInfo", () => {
   afterEach(cleanup);
 
   it("рендерить поле назви, опису та іконки", () => {
-    const setters = {
-      setName: vi.fn(),
-      setDescription: vi.fn(),
-      setIcon: vi.fn(),
-    };
+    const data = { name: "Назва скіла", description: "Опис", icon: "", abilities: [], spellId: null, spellGroupId: null, grantedSpellId: null, mainSkillId: null };
 
-    render(
-      <SkillBasicInfo
-        basicInfo={{
-          name: "Назва скіла",
-          description: "Опис",
-          icon: "",
-          setters,
-        }}
-      />,
-    );
+    render(<SkillBasicInfo form={{ data, set: vi.fn() }} />);
     expect(screen.getByDisplayValue("Назва скіла")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Опис")).toBeInTheDocument();
     expect(screen.getByLabelText(/іконка/i)).toBeInTheDocument();

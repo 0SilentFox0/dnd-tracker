@@ -8,10 +8,6 @@ import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
-/**
- * POST /api/campaigns/[id]/skills/[skillId]/duplicate
- * Створює копію скіла з новим id (назва + " (копія)")
- */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string; skillId: string }> },

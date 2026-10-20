@@ -1,6 +1,6 @@
 import { NewCharacterForm } from "@/components/characters/NewCharacterForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function NewCharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string }> }) {
   const { id } = await params;

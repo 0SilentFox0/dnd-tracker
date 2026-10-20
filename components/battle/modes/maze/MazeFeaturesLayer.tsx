@@ -43,6 +43,12 @@ function MarkGlyph({ cell, mark, rotated }: { cell: GridPoint; mark: MazeMark; r
   );
 }
 
+const ARCH_STONE = "M-38,40 V-10 A38,38 0 0 1 38,-10 V40 H24 V-10 A24,24 0 0 0 -24,-10 V40 Z";
+
+const ARCH_OPENING = "M-24,40 V-10 A24,24 0 0 1 24,-10 V40 Z";
+
+const SWIRL = "M0,6 m-4,0 a4,4 0 1,1 8,0 a8,8 0 1,1 -16,0 a12,12 0 1,1 24,0 a16,16 0 1,1 -32,0";
+
 interface Props {
   map: BattleMapConfig;
   view: MazeView | null | undefined;
@@ -70,7 +76,9 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
 
   const blurId = `maze-fog-${ids}`;
 
-  const glowId = `maze-exit-${ids}`;
+  const portalId = `maze-exit-${ids}`;
+
+  const clipId = `maze-exit-clip-${ids}`;
 
   return (
     <g pointerEvents="none" data-maze-features="">
@@ -78,11 +86,14 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
         <filter id={blurId} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation={UNIT * 0.12} />
         </filter>
-        <radialGradient id={glowId}>
-          <stop offset="0%" stopColor="var(--maze-exit-core)" stopOpacity={0.95} />
-          <stop offset="60%" stopColor="var(--maze-exit-glow)" stopOpacity={0.55} />
-          <stop offset="100%" stopColor="var(--maze-exit-glow)" stopOpacity={0} />
+        <radialGradient id={portalId} cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stopColor="var(--maze-exit-core)" />
+          <stop offset="55%" stopColor="var(--maze-exit-glow)" />
+          <stop offset="100%" stopColor="var(--maze-exit-deep)" />
         </radialGradient>
+        <clipPath id={clipId}>
+          <path d={ARCH_OPENING} />
+        </clipPath>
       </defs>
       <g filter={`url(#${blurId})`}>
         {fog.map((key) => {
@@ -92,7 +103,13 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
         })}
       </g>
       {exit && (
-        <circle className="maze-exit" data-maze-exit={cellKey(exit)} cx={cellCenter(exit).x} cy={cellCenter(exit).y} r={UNIT * 0.62} fill={`url(#${glowId})`} />
+        <g className="maze-exit" data-maze-exit={cellKey(exit)} transform={`translate(${cellCenter(exit).x} ${cellCenter(exit).y})${rotated ? " rotate(-90)" : ""}`}>
+          <path d={ARCH_OPENING} fill={`url(#${portalId})`} />
+          <g clipPath={`url(#${clipId})`}>
+            <path className="maze-exit-swirl" d={SWIRL} fill="none" stroke="var(--maze-exit-core)" strokeWidth={3} strokeLinecap="round" opacity={0.85} />
+          </g>
+          <path d={ARCH_STONE} fill="var(--maze-arch-stone)" stroke="var(--maze-arch-edge)" strokeWidth={3} strokeLinejoin="round" />
+        </g>
       )}
       {links.map(([a, b]) => {
         const [ca, cb] = [cellCenter(a), cellCenter(b)];

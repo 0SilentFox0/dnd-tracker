@@ -1,13 +1,13 @@
-import { faceOf } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, chance, type FxPoint, rand } from "../runtime/geometry";
-import { motionPath } from "../runtime/motion";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { animateEl, timeline } from "../runtime/stage";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter, motionPath } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { animateEl, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ARRIVE_MS = ARCHETYPE_FX.blindfold.impactMs;
@@ -38,10 +38,133 @@ function velvet(g: CanvasRenderingContext2D, y0: number, y1: number) {
   return grad;
 }
 
-export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
+interface Head {
+  eyes: FxPoint;
+  fr: number;
+}
 
+const RIBBON = "#8a5ac8";
+
+const VELVET = "#0c0612";
+
+/** The ribbon in flight: a rippling black strip trailing behind its head. */
+function ribbonInFlight(g: CanvasRenderingContext2D, trail: FxPoint[], t: number) {
+  g.globalCompositeOperation = "source-over";
+  g.lineCap = "round";
+
+  for (const [color, width] of [[RIBBON, 12], [VELVET, 8]] as const) {
+    g.strokeStyle = color;
+    g.lineWidth = width;
+    g.beginPath();
+    trail.forEach((p, n) => g.lineTo(p.x, p.y + Math.sin(n * 0.9 + t / 40) * 4));
+    g.stroke();
+  }
+}
+
+/** It whips round the head, `wrap` of the way to settling over the eyes. */
+function whipRound(g: CanvasRenderingContext2D, { eyes, fr }: Head, wrap: number) {
+  const sweep = easeOutCubic(wrap) * Math.PI * 3;
+
+  const rx = fr * (1.5 - wrap * 0.35);
+
+  const ry = fr * 0.4;
+
+  g.globalCompositeOperation = "source-over";
+  g.lineCap = "round";
+
+  for (const [color, width] of [[RIBBON, 12], [VELVET, 8.5]] as const) {
+    g.strokeStyle = color;
+    g.lineWidth = width;
+    g.beginPath();
+
+    for (let n = 0; n <= 30; n++) {
+      const a = sweep - (n / 30) * Math.min(sweep, Math.PI * 1.4);
+
+      g.lineTo(eyes.x + Math.cos(a) * rx, eyes.y + Math.sin(a) * ry);
+    }
+
+    g.stroke();
+  }
+}
+
+/** The knot and two tails fluttering off the side of the head (in the band's frame). */
+function knot(g: CanvasRenderingContext2D, fr: number, hw: number, t: number) {
+  g.fillStyle = VELVET;
+
+  for (const [dy, len, ph] of [[-0.05, 0.85, 0], [0.12, 0.7, 1.4]] as const) {
+    const flap = Math.sin(t / 110 + ph) * fr * 0.15;
+
+    g.beginPath();
+    g.moveTo(hw * 0.95, dy * fr - fr * 0.1);
+    g.quadraticCurveTo(hw + fr * len * 0.5, dy * fr + flap, hw + fr * len, dy * fr + fr * 0.25 + flap * 1.4);
+    g.lineTo(hw + fr * len * 0.85, dy * fr + fr * 0.4 + flap);
+    g.quadraticCurveTo(hw + fr * len * 0.45, dy * fr + fr * 0.15 + flap * 0.6, hw * 0.95, dy * fr + fr * 0.12);
+    g.closePath();
+    g.fill();
+  }
+
+  g.beginPath();
+  g.ellipse(hw * 0.98, 0, fr * 0.16, fr * 0.2, 0, 0, Math.PI * 2);
+  g.fill();
+}
+
+/** The band tied tight over the eyes, fading as it `lift`s, with a velvet sheen sliding along it. */
+function band(g: CanvasRenderingContext2D, { eyes, fr }: Head, t: number, lift: number, look: { fill: CanvasGradient; sheen: HTMLCanvasElement }) {
+  const tight = easeOutCubic(clamp01((t - ARRIVE_MS - WRAP_MS) / 160));
+
+  const hw = fr * 1.12;
+
+  const hh = fr * (0.5 - tight * 0.12);
+
+  g.save();
+  g.translate(eyes.x, eyes.y);
+  g.globalAlpha = 1 - lift;
+  g.globalCompositeOperation = "source-over";
+  g.fillStyle = look.fill;
+  g.beginPath();
+  g.moveTo(-hw, -hh);
+  g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
+  g.lineTo(hw, hh);
+  g.quadraticCurveTo(0, hh + fr * 0.08, -hw, hh);
+  g.closePath();
+  g.fill();
+  g.strokeStyle = RIBBON;
+  g.lineWidth = 1.5;
+  g.beginPath();
+  g.moveTo(-hw, -hh);
+  g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
+  g.moveTo(-hw, hh);
+  g.quadraticCurveTo(0, hh + fr * 0.08, hw, hh);
+  g.stroke();
+  knot(g, fr, hw, t);
+  g.restore();
+
+  sprite(g, look.sheen, eyes.x + Math.sin(t / 300) * hw * 0.7, eyes.y, (fr * 1.1) / 64, (fr * 0.35) / 64, 0.5 * (1 - lift));
+}
+
+/** The quiet laughter of the dark: thin violet grins drifting up round the head. */
+function laughter(g: CanvasRenderingContext2D, laughs: Laugh[], t: number) {
+  g.globalCompositeOperation = "lighter";
+  g.lineCap = "round";
+  g.strokeStyle = "#a070e0";
+
+  for (const l of laughs) {
+    const k = clamp01((t - l.born) / 800);
+
+    if (k >= 1) continue;
+
+    g.globalAlpha = Math.sin(k * Math.PI) * 0.8;
+    g.lineWidth = 1.6;
+    g.beginPath();
+    g.arc(l.x, l.y - k * 14, l.size, Math.PI * 0.15, Math.PI * 0.85);
+    g.stroke();
+  }
+
+  g.globalAlpha = 1;
+}
+
+export const blindfold: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const face = faceOf(el, target);
 
     const fr = Math.max(14, face.r);
@@ -54,9 +177,9 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const laughs: Laugh[] = [];
 
-    const sheen = glow("#6a3aa0");
+    const head: Head = { eyes, fr };
 
-    const band = velvet(stage.g, -fr * 0.3, fr * 0.3);
+    const look = { fill: velvet(stage.g, -fr * 0.3, fr * 0.3), sheen: glow("#6a3aa0") };
 
     const run = timeline(
       stage,
@@ -67,118 +190,15 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
         spritePx(g, glow("#120818"), eyes.x, eyes.y, fr * 4, fr * 3, 0.75 * clamp01((t - ARRIVE_MS) / 300) * (1 - lift), false);
         g.globalAlpha = 1;
 
-        // The ribbon in flight: a rippling black strip trailing behind its head.
-        if (t < ARRIVE_MS && trail.length > 1) {
-          g.globalCompositeOperation = "source-over";
-          g.lineCap = "round";
+        if (t < ARRIVE_MS && trail.length > 1) ribbonInFlight(g, trail, t);
 
-          for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8]] as const) {
-            g.strokeStyle = color;
-            g.lineWidth = width;
-            g.beginPath();
-            trail.forEach((p, n) => g.lineTo(p.x, p.y + Math.sin(n * 0.9 + t / 40) * 4));
-            g.stroke();
-          }
-        }
-
-        // It whips round the head, then settles tight over the eyes.
         const wrap = clamp01((t - ARRIVE_MS) / WRAP_MS);
 
-        if (wrap > 0 && wrap < 1) {
-          const sweep = easeOutCubic(wrap) * Math.PI * 3;
+        if (wrap > 0 && wrap < 1) whipRound(g, head, wrap);
 
-          const rx = fr * (1.5 - wrap * 0.35);
+        if (wrap >= 1 && lift < 1) band(g, head, t, lift, look);
 
-          const ry = fr * 0.4;
-
-          g.globalCompositeOperation = "source-over";
-          g.lineCap = "round";
-
-          for (const [color, width] of [["#8a5ac8", 12], ["#0c0612", 8.5]] as const) {
-            g.strokeStyle = color;
-            g.lineWidth = width;
-            g.beginPath();
-
-            for (let n = 0; n <= 30; n++) {
-              const a = sweep - (n / 30) * Math.min(sweep, Math.PI * 1.4);
-
-              g.lineTo(eyes.x + Math.cos(a) * rx, eyes.y + Math.sin(a) * ry);
-            }
-
-            g.stroke();
-          }
-        }
-
-        if (wrap >= 1 && lift < 1) {
-          const tight = easeOutCubic(clamp01((t - ARRIVE_MS - WRAP_MS) / 160));
-
-          const hw = fr * 1.12;
-
-          const hh = fr * (0.5 - tight * 0.12);
-
-          g.save();
-          g.translate(eyes.x, eyes.y);
-          g.globalAlpha = 1 - lift;
-          g.globalCompositeOperation = "source-over";
-          g.fillStyle = band;
-          g.beginPath();
-          g.moveTo(-hw, -hh);
-          g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
-          g.lineTo(hw, hh);
-          g.quadraticCurveTo(0, hh + fr * 0.08, -hw, hh);
-          g.closePath();
-          g.fill();
-          g.strokeStyle = "#8a5ac8";
-          g.lineWidth = 1.5;
-          g.beginPath();
-          g.moveTo(-hw, -hh);
-          g.quadraticCurveTo(0, -hh - fr * 0.08, hw, -hh);
-          g.moveTo(-hw, hh);
-          g.quadraticCurveTo(0, hh + fr * 0.08, hw, hh);
-          g.stroke();
-
-          // The knot and two tails fluttering off the side of the head.
-          g.fillStyle = "#0c0612";
-
-          for (const [dy, len, ph] of [[-0.05, 0.85, 0], [0.12, 0.7, 1.4]] as const) {
-            const flap = Math.sin(t / 110 + ph) * fr * 0.15;
-
-            g.beginPath();
-            g.moveTo(hw * 0.95, dy * fr - fr * 0.1);
-            g.quadraticCurveTo(hw + fr * len * 0.5, dy * fr + flap, hw + fr * len, dy * fr + fr * 0.25 + flap * 1.4);
-            g.lineTo(hw + fr * len * 0.85, dy * fr + fr * 0.4 + flap);
-            g.quadraticCurveTo(hw + fr * len * 0.45, dy * fr + fr * 0.15 + flap * 0.6, hw * 0.95, dy * fr + fr * 0.12);
-            g.closePath();
-            g.fill();
-          }
-
-          g.beginPath();
-          g.ellipse(hw * 0.98, 0, fr * 0.16, fr * 0.2, 0, 0, Math.PI * 2);
-          g.fill();
-          g.restore();
-
-          // A velvet sheen sliding along the band.
-          sprite(g, sheen, eyes.x + Math.sin(t / 300) * hw * 0.7, eyes.y, (fr * 1.1) / 64, (fr * 0.35) / 64, 0.5 * (1 - lift));
-        }
-
-        // The quiet laughter of the dark: thin violet grins drifting up round the head.
-        g.globalCompositeOperation = "lighter";
-        g.lineCap = "round";
-        g.strokeStyle = "#a070e0";
-
-        for (const l of laughs) {
-          const k = clamp01((t - l.born) / 800);
-
-          if (k >= 1) continue;
-
-          g.globalAlpha = Math.sin(k * Math.PI) * 0.8;
-          g.lineWidth = 1.6;
-          g.beginPath();
-          g.arc(l.x, l.y - k * 14, l.size, Math.PI * 0.15, Math.PI * 0.85);
-          g.stroke();
-        }
-
-        g.globalAlpha = 1;
+        laughter(g, laughs, t);
       },
       (t, dt) => {
         if (t < ARRIVE_MS) {
@@ -212,7 +232,7 @@ export const blindfold: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const darkened = Promise.all([
       animateEl(stage, el, flail.keyframes, { duration: flail.duration, delay: ARRIVE_MS + WRAP_MS, easing: "ease-in-out" }),
-      animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(.55) contrast(1.1)", offset: 0.15 }, { filter: "brightness(.55) contrast(1.1)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS - WRAP_MS, delay: ARRIVE_MS + WRAP_MS }),
+      animateEl(stage, el, holdFilter("brightness(.55) contrast(1.1)", 0.15, 0.8), { duration: TOTAL_MS - ARRIVE_MS - WRAP_MS, delay: ARRIVE_MS + WRAP_MS }),
     ]);
 
     let next = ARRIVE_MS + WRAP_MS;

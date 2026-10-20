@@ -33,7 +33,6 @@ export const DND_SAVING_THROWS = [
 ] as const;
 
 export type DndSkill = (typeof DND_SKILLS)[number];
-export type DndSavingThrow = (typeof DND_SAVING_THROWS)[number];
 
 export const DND_SKILL_META: Record<DndSkill, { label: string; ability: "strength" | "dexterity" | "intelligence" | "wisdom" | "charisma" }> = {
   acrobatics: { label: "Акробатика", ability: "dexterity" },

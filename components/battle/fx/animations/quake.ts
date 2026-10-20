@@ -1,10 +1,11 @@
-import { fadeOut } from "../runtime/easing";
-import { type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { show, tween } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { fadeOut } from "@/components/battle/fx/runtime/easing";
+import { type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { type Debris, stepBodies } from "@/components/battle/fx/runtime/physics";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { progress } from "@/components/battle/fx/runtime/stage";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Crack {
@@ -38,8 +39,8 @@ function makeCrack(angle: number): Crack {
   return { pts, width: rand(2, 3) };
 }
 
-export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
-  await perTarget(stage, to, ARCHETYPE_FX.quake.staggerMs, async (target, ti) => {
+export const quake: FxAnimation = async ({ stage, targets, palette, spec }) => {
+  await perTarget(stage, targets, ARCHETYPE_FX.quake.staggerMs, async ({ at: target }, ti) => {
     const base = { x: target.x, y: target.y + 20 };
 
     const n = spec.critical ? 4 : 3 + (ti % 2);
@@ -48,9 +49,9 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
 
     const chunks: Chunk[] = Array.from({ length: spec.critical ? 10 : 6 + (ti % 5) }, () => ({ x: base.x + rand(-30, 30), y: base.y, vx: rand(-70, 70), vy: rand(-320, -180), size: rand(2.5, 5), round: Math.random() > 0.5 }));
 
-    let k = 0;
+    const dust = () => emit(stage, { x: base.x + rand(-26, 26), y: base.y - 2 }, { tints: palette.tints, speed: [20, 110], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.5, 1.5], gravity: -12, drag: 2, additive: false, alpha: 0.55 });
 
-    const hide = show(stage, (g) => {
+    await progress(stage, QUAKE_MS, (g, k) => {
       // The cracks finish growing at the impact moment.
       const grow = Math.min(1, (k * QUAKE_MS) / ARCHETYPE_FX.quake.impactMs);
 
@@ -95,17 +96,10 @@ export const quake: FxAnimation = async ({ stage, to, palette, spec }) => {
       }
 
       g.globalAlpha = 1;
-    });
-
-    const dust = () => emit(stage, { x: base.x + rand(-26, 26), y: base.y - 2 }, { tints: palette.tints, speed: [20, 110], angle: [-Math.PI * 0.95, -Math.PI * 0.05], life: [0.6, 1.1], scale: [0.5, 1.5], gravity: -12, drag: 2, additive: false, alpha: 0.55 });
-
-    await tween(stage, QUAKE_MS, (v, dt) => {
-      k = v;
-
+    }, (v, dt) => {
       if (v < 0.6) perTick(2, dt, () => dust());
 
       if (v >= 0.3) stepBodies(chunks, dt, 900);
     });
-    hide();
   });
 };

@@ -1,18 +1,17 @@
-import type { FxPoint } from "../runtime/geometry";
-import type { FxPalette } from "../runtime/palette";
-import type { Stage } from "../runtime/stage";
-
+import type { FxPoint, FxTarget } from "@/components/battle/fx/runtime/geometry";
+import type { FxPalette } from "@/components/battle/fx/runtime/palette";
+import type { Stage } from "@/components/battle/fx/runtime/stage";
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
-export interface FxRun {
+interface FxRun {
   spec: FxSpec;
   stage: Stage;
   from: FxPoint;
+  /** `targets`' points. */
   to: FxPoint[];
+  targets: FxTarget[];
   /** Template centre when the cast was aimed at a map cell. */
   at?: FxPoint;
-  /** The anchors behind `to`, index for index. */
-  targetEls: HTMLElement[];
   actorEl: HTMLElement | null;
   palette: FxPalette;
 }

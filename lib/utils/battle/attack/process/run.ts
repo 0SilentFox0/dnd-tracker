@@ -1,15 +1,3 @@
-import {
-  applyMainActionUsed,
-  getEffectiveArmorClass,
-} from "../../participant";
-import type {
-  ProcessAttackParams,
-  ProcessAttackResult,
-} from "../../types/attack-process";
-import { activeEffectIds, consumeAttackEffects } from "../consume-effects";
-import { critFlavorFor } from "../critical";
-import { calculateAttackRoll } from "..";
-import { appendHpChanges, type AttackFlow, fire, getP, put } from "./ability-flow";
 import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
 import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
@@ -17,7 +5,13 @@ import { handleMiss } from "./miss";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
+import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
+import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
+import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { applyMainActionUsed, getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 
 export type { ProcessAttackParams, ProcessAttackResult };
 
@@ -44,7 +38,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: AttackFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map } };
 
   const existedBefore = activeEffectIds(flow.ps);
 
@@ -148,18 +142,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     battleId,
   });
 
-  const {
-    damageCalculation,
-    physicalDamage,
-    totalFinalDamage,
-    resistanceResult,
-    additionalDamageBreakdown,
-    criticalEffectApplied,
-    damageSteps,
-    oldHp,
-  } = hitDamage;
-
-  if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${totalFinalDamage}`);
+  if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 
   fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
 
@@ -171,16 +154,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     damageRolls,
     attackRoll,
     targetAC,
-    damageCalculation,
-    physicalDamage,
-    totalFinalDamage,
-    resistanceResult,
-    criticalEffectApplied,
-    damageSteps,
-    beforeMessages: [],
-    afterMessages: flow.messages,
+    hitDamage,
+    messages: flow.messages,
     vampirismHeal,
-    oldHp,
     battleId,
     currentRound,
     critFlavorText,
@@ -193,16 +169,16 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     success: true,
     attackRoll,
     damage: {
-      totalDamage: damageCalculation.totalDamage,
-      finalDamage: totalFinalDamage,
-      breakdown: damageCalculation.breakdown,
-      resistanceBreakdown: resistanceResult.breakdown,
-      additionalDamageBreakdown,
+      totalDamage: hitDamage.damageCalculation.totalDamage,
+      finalDamage: hitDamage.totalFinalDamage,
+      breakdown: hitDamage.damageCalculation.breakdown,
+      resistanceBreakdown: hitDamage.resistanceResult.breakdown,
+      additionalDamageBreakdown: hitDamage.additionalDamageBreakdown,
     },
     targetUpdated: getP(flow, targetId),
     attackerUpdated: getP(flow, attackerId),
     allParticipantsUpdated: flow.ps,
-    criticalEffectApplied,
+    criticalEffectApplied: hitDamage.criticalEffectApplied,
     battleAction,
   }, true);
 }

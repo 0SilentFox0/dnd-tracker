@@ -1,5 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
@@ -8,7 +9,6 @@ import { loadCharacterContext } from "@/lib/utils/battle/participant/load-charac
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import { normalizeTree, readUnlocked, skillPoints } from "@/lib/utils/skills/progression";
-import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
 export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true, tokens: { orderBy: { createdAt: "desc" } } } });

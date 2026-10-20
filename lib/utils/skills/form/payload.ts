@@ -1,30 +1,7 @@
-import type { Ability } from "@/lib/utils/abilities/schema";
-import type { GroupedSkillPayload } from "@/types/hooks";
+import type { GroupedSkillPayload, SkillFormValues } from "@/types/skills";
 
-export interface SkillFormPayloadState {
-  name: string;
-  description: string;
-  icon: string;
-  abilities: Ability[];
-  spellId: string | null;
-  spellGroupId: string | null;
-  grantedSpellId: string | null;
-  mainSkillId: string | null;
-}
-
-export function buildSkillFormPayload(
-  state: SkillFormPayloadState,
-): GroupedSkillPayload {
-  const {
-    name,
-    description,
-    icon,
-    abilities,
-    spellId,
-    spellGroupId,
-    grantedSpellId,
-    mainSkillId,
-  } = state;
+export function buildSkillFormPayload(values: SkillFormValues): GroupedSkillPayload {
+  const { name, description, icon, abilities, spellId, spellGroupId, grantedSpellId, mainSkillId } = values;
 
   return {
     basicInfo: {

@@ -5,8 +5,8 @@ import { Loader2, Sparkles, Swords } from "lucide-react";
 import { SaveRolls } from "./spellbook/SaveRolls";
 import { SpellAimPanel } from "./spellbook/SpellAimPanel";
 import { SpellSummary } from "./spellbook/SpellSummary";
+import { TargetButton } from "./TargetButton";
 
-import { Portrait } from "@/components/battle/hud";
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
@@ -55,11 +55,15 @@ export function SpellBook({ book }: { book: Book }) {
               const reachable = view.inRange(t);
 
               return (
-                <button key={t.basicInfo.id} type="button" disabled={!reachable} onClick={() => actions.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left disabled:opacity-50", state.targetIds.includes(t.basicInfo.id) ? "border-[#7a2a1f] bg-[#7a2a1f]/10" : "border-[#2a2018]/20")}>
-                  <Portrait participant={t} size={32} />
-                  <span className="hud-sc font-bold">{t.basicInfo.name}</span>
-                  {!reachable && <span className="ml-auto text-sm italic">Поза дальністю</span>}
-                </button>
+                <TargetButton
+                  key={t.basicInfo.id}
+                  participant={t}
+                  tone="parchment"
+                  selected={state.targetIds.includes(t.basicInfo.id)}
+                  disabled={!reachable}
+                  onClick={() => actions.toggleTarget(t.basicInfo.id)}
+                  trailing={!reachable && <span className="ml-auto text-sm italic">Поза дальністю</span>}
+                />
               );
             })}
           </div>

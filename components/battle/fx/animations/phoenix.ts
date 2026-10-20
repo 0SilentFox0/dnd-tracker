@@ -1,15 +1,16 @@
-import { lightBeam } from "../runtime/beam";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { summonSpot } from "../runtime/figure";
-import { bezier, chance, type FxPoint, perTick, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { dropPath, feather } from "../runtime/shapes";
-import { schedule, timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { lightBeam } from "@/components/battle/fx/runtime/beam";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { summonSpot } from "@/components/battle/fx/runtime/figure";
+import { bezier, chance, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { dropPath, feather } from "@/components/battle/fx/runtime/shapes";
+import { schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { FLAME } from "@/components/battle/fx/runtime/swatches";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const THROW_MS = 320;
@@ -19,8 +20,6 @@ const RISE_MS = 650;
 const CRY_MS = ARCHETYPE_FX.phoenix.impactMs + 250;
 
 const TOTAL_MS = 2700;
-
-const FLAME = ["#fff3b0", "#ffd25a", "#ff8a1f", "#ff4a00"];
 
 const ASH = ["#8a8580", "#6a6560", "#b0aaa2"];
 
@@ -117,9 +116,9 @@ function bird(g: CanvasRenderingContext2D, s: number, open: number, flap: number
   }
 }
 
-export const phoenix: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { x, ground, height: H } = summonSpot(targetEls[i], target);
+export const phoenix: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { x, ground, height: H } = summonSpot(el, target);
 
     const dir = x < stage.layer.clientWidth / 2 ? 1 : -1;
 

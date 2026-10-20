@@ -2,16 +2,16 @@
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { recordingContext } from "@/components/battle/fx/__tests__/recording-canvas";
 import { BattleMap } from "@/components/battle/map";
 import { WeatherLayer } from "@/components/battle/map/weather/WeatherLayer";
+import { recordingContext } from "@/lib/utils/canvas/__tests__/recording-canvas";
 import type { BattleMapConfig } from "@/types/battle";
 
 const unsubscribe = vi.hoisted(() => vi.fn());
 
 const subscribe = vi.hoisted(() => vi.fn(() => unsubscribe));
 
-vi.mock("@/components/battle/fx/runtime/ticker", () => ({ subscribe }));
+vi.mock("@/lib/utils/canvas/ticker", () => ({ subscribe }));
 
 class RO {
   constructor(private cb: (entries: { contentRect: { width: number; height: number } }[]) => void) {}

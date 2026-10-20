@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
-import { rangeLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
+import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import { SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 import type { Spell } from "@/types/spells";
 
@@ -55,6 +55,5 @@ describe("шаблон, дальність і зона заклинання", ()
   it("лейбли", () => {
     expect(targetingLabel(template)).toBe("Конус 15 фт");
     expect(targetingLabel({ ...template, shape: "circle", size: 10 })).toBe("Коло 10 фт");
-    expect(rangeLabel(60)).toBe("Дальність 60 фт");
   });
 });

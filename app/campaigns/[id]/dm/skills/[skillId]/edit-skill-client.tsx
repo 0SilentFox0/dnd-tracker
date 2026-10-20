@@ -9,23 +9,15 @@ import { Button } from "@/components/ui/button";
 import { useSkill } from "@/lib/hooks/skills";
 import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
-import type { GroupedSkill } from "@/types/skills";
 
 interface EditSkillClientProps {
   campaignId: string;
   skillId: string;
   spells: IdName[];
-  spellGroups: IdName[];
   initialMainSkills: MainSkill[];
 }
 
-export function EditSkillClient({
-  campaignId,
-  skillId,
-  spells,
-  spellGroups,
-  initialMainSkills,
-}: EditSkillClientProps) {
+export function EditSkillClient({ campaignId, skillId, spells, initialMainSkills }: EditSkillClientProps) {
   const query = useSkill(campaignId, skillId);
 
   if (query.isError) {
@@ -33,9 +25,9 @@ export function EditSkillClient({
       <HudFormPage title="Редагувати скіл">
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
         <div className="p-4">
-          <Link href={`/campaigns/${campaignId}/dm/skills`}>
-            <Button variant="outline">Назад до бібліотеки скілів</Button>
-          </Link>
+          <Button variant="outline" asChild>
+            <Link href={`/campaigns/${campaignId}/dm/skills`}>Назад до бібліотеки скілів</Link>
+          </Button>
         </div>
       </HudFormPage>
     );
@@ -51,13 +43,7 @@ export function EditSkillClient({
       }
     >
       {(skill) => (
-        <SkillCreateForm
-          campaignId={campaignId}
-          spells={spells}
-          spellGroups={spellGroups}
-          initialMainSkills={initialMainSkills}
-          initialData={skill as unknown as GroupedSkill}
-        />
+        <SkillCreateForm campaignId={campaignId} spells={spells} initialMainSkills={initialMainSkills} initialData={skill} />
       )}
     </QueryState>
   );

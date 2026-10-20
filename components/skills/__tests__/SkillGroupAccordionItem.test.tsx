@@ -7,7 +7,7 @@ import { afterEach,describe, expect, it, vi } from "vitest";
 import { SkillGroupAccordionItem } from "@/components/skills/list/SkillGroupAccordionItem";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { Accordion } from "@/components/ui/accordion";
-import type { GroupedSkill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
 
 function renderItem(props: React.ComponentProps<typeof SkillGroupAccordionItem>) {
   return renderWithConfirm(
@@ -42,14 +42,15 @@ vi.mock("@/components/common/OptimizedImage", () => ({
   }) => <span data-testid="skill-icon" title={alt}>{fallback}</span>,
 }));
 
-function minimalGroupedSkill(overrides: Partial<GroupedSkill> = {}): GroupedSkill {
+function minimalSkill(overrides: Partial<Skill> = {}): Skill {
   return {
     id: "skill-1",
     campaignId: "c1",
-    basicInfo: { name: "Скіл у групі", description: "Опис", icon: undefined },
-    spellData: {},
-   
-    mainSkillData: {},
+    name: "Скіл у групі",
+    description: "Опис",
+    icon: null,
+    spellId: null,
+    spellGroupId: null,
     createdAt: new Date(),
     spell: null,
     spellGroup: null,
@@ -66,8 +67,8 @@ describe("SkillGroupAccordionItem", () => {
       totalSkills: 2,
       groupMenu: { onRename: vi.fn(), onRemoveAll: vi.fn() },
       skills: [
-        minimalGroupedSkill({ id: "s1", basicInfo: { name: "Удар", description: undefined, icon: undefined } }),
-        minimalGroupedSkill({ id: "s2", basicInfo: { name: "Блок", description: undefined, icon: undefined } }),
+        minimalSkill({ id: "s1", name: "Удар", description: null }),
+        minimalSkill({ id: "s2", name: "Блок", description: null }),
       ],
       campaignId: "c1",
     });
@@ -80,7 +81,7 @@ describe("SkillGroupAccordionItem", () => {
       groupName: "Група",
       totalSkills: 1,
       groupMenu: undefined,
-      skills: [minimalGroupedSkill({ basicInfo: { name: "Єдиний скіл", description: undefined, icon: undefined } })],
+      skills: [minimalSkill({ name: "Єдиний скіл", description: null })],
       campaignId: "c1",
     });
     fireEvent.click(screen.getByRole("button", { name: /Група/i }));

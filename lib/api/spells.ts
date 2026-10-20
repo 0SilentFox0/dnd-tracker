@@ -4,10 +4,19 @@ import {
   campaignPatch,
   campaignPost,
   campaignRequest,
+  createCampaignCrudApi,
 } from "@/lib/api/client";
 import { SPELL_IDS_QUERY_MAX } from "@/lib/constants/spells";
 import type { CreateSpellInput, UpdateSpellInput } from "@/lib/schemas/spells";
 import type { BookSpell, Spell, SpellGroup } from "@/types/spells";
+
+const spellsApi = createCampaignCrudApi<Spell, CreateSpellInput, UpdateSpellInput, { success: boolean }>("/spells");
+
+export const getSpells = spellsApi.list;
+export const getSpell = spellsApi.get;
+export const createSpell = spellsApi.create;
+export const updateSpell = spellsApi.update;
+export const deleteSpell = spellsApi.remove;
 
 export async function updateSpellAppearance(
   campaignId: string,
@@ -17,10 +26,6 @@ export async function updateSpellAppearance(
   return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, {
     appearanceDescription,
   });
-}
-
-export async function getSpells(campaignId: string): Promise<Spell[]> {
-  return campaignGet<Spell[]>(campaignId, "/spells");
 }
 
 export async function getSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {
@@ -94,38 +99,6 @@ export async function deleteAllSpells(
   return campaignDelete<{ success: boolean; deleted: number }>(
     campaignId,
     "/spells/delete-all",
-  );
-}
-
-export async function createSpell(
-  campaignId: string,
-  data: CreateSpellInput,
-): Promise<Spell> {
-  return campaignPost<Spell>(campaignId, "/spells", data);
-}
-
-export async function getSpell(
-  campaignId: string,
-  spellId: string,
-): Promise<Spell> {
-  return campaignGet<Spell>(campaignId, `/spells/${spellId}`);
-}
-
-export async function updateSpell(
-  campaignId: string,
-  spellId: string,
-  data: UpdateSpellInput,
-): Promise<Spell> {
-  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, data);
-}
-
-export async function deleteSpell(
-  campaignId: string,
-  spellId: string,
-): Promise<{ success: boolean }> {
-  return campaignDelete<{ success: boolean }>(
-    campaignId,
-    `/spells/${spellId}`,
   );
 }
 

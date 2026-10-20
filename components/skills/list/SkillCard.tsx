@@ -11,21 +11,17 @@ import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useMainSkills, useUpdateSkill } from "@/lib/hooks/skills";
-import {
-  getSkillDescription,
-  getSkillIcon,
-  getSkillId,
-  getSkillMainSkillId,
-  getSkillName,
-  getSkillSpell,
-} from "@/lib/utils/skills/skill-helpers";
-import type { GroupedSkill, Skill } from "@/types/skills";
+import type { Skill } from "@/types/skills";
+
+export interface SkillCardActions {
+  onDelete?: (skillId: string) => Promise<unknown> | void;
+  onDuplicate?: (skillId: string) => void;
+}
 
 export interface SkillCardProps {
-  skill: Skill | GroupedSkill;
+  skill: Skill;
   campaignId: string;
-  onRemove?: (skillId: string) => Promise<unknown> | void;
-  onDuplicate?: (skillId: string) => void;
+  actions?: SkillCardActions;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;
 }
@@ -41,8 +37,7 @@ function SkillCardShell({ printMode, children }: { printMode: boolean; children:
 export function SkillCard({
   skill,
   campaignId,
-  onRemove,
-  onDuplicate,
+  actions,
   printMode = false,
 }: SkillCardProps) {
   const confirm = useConfirm();
@@ -51,17 +46,9 @@ export function SkillCard({
 
   const updateSkillMutation = useUpdateSkill(campaignId);
 
-  const skillId = getSkillId(skill);
+  const { id: skillId, name: skillName, description: skillDescription, icon: skillIcon, spell: skillSpell } = skill;
 
-  const currentMainSkillId = getSkillMainSkillId(skill) ?? null;
-
-  const skillName = getSkillName(skill);
-
-  const skillDescription = getSkillDescription(skill);
-
-  const skillIcon = getSkillIcon(skill);
-
-  const skillSpell = getSkillSpell(skill);
+  const { onDelete, onDuplicate } = actions ?? {};
 
   const abilitySummary = skill.abilitySummary ?? [];
 
@@ -72,7 +59,7 @@ export function SkillCard({
       confirmLabel: "Видалити",
       destructive: true,
       onConfirm: async () => {
-        await onRemove?.(skillId);
+        await onDelete?.(skillId);
       },
     });
 
@@ -100,17 +87,12 @@ export function SkillCard({
           </div>
           {!printMode && (
             <SkillCardActionsMenu
-              skillId={skillId}
-              currentMainSkillId={currentMainSkillId}
+              currentMainSkillId={skill.mainSkillId ?? null}
               mainSkills={mainSkills}
-              onRemove={onRemove}
-              onDuplicate={onDuplicate}
-              onOpenDeleteDialog={() => void handleRemove()}
-              onUpdateMainSkill={(mainSkillId) => {
-                updateSkillMutation.mutate({
-                  skillId,
-                  data: { mainSkillData: { mainSkillId } },
-                });
+              actions={{
+                onSelectMainSkill: (mainSkillId) => updateSkillMutation.mutate({ skillId, data: { mainSkillData: { mainSkillId } } }),
+                onDuplicate: onDuplicate && (() => onDuplicate(skillId)),
+                onDelete: onDelete && (() => void handleRemove()),
               }}
             />
           )}
@@ -140,18 +122,9 @@ export function SkillCard({
         </div>
       </div>
       {!printMode && (
-        <>
-          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full text-xs sm:text-sm"
-            >
-              Редагувати
-            </Button>
-          </Link>
-
-        </>
+        <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
+          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>Редагувати</Link>
+        </Button>
       )}
     </SkillCardShell>
   );

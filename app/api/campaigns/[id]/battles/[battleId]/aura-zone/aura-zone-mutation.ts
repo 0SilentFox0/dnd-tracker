@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive, participantNames } from "@/lib/utils/abilities/engine/core/participants";
+import { participantNames } from "@/lib/utils/abilities/engine/core/participants";
 import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
-import { canActNow } from "@/lib/utils/battle/common/control";
+import { requireActor } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
 
 export const auraZoneSchema = z.object({
@@ -17,13 +17,11 @@ export const auraZoneSchema = z.object({
 export type AuraZoneBody = z.infer<typeof auraZoneSchema>;
 
 export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody): MutationResult {
-  const owner = findParticipant(ctx.participants, data.participantId);
-
-  if (!owner) throw new BattleAccessError(404, "Учасника немає в бою");
-
-  if (!canActNow(ctx, owner, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
-
-  if (!isActive(owner)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
+  const owner = requireActor(ctx, data.participantId, {
+    missing: "Учасника немає в бою",
+    forbidden: API_ERRORS.FORBIDDEN,
+    inactive: { code: "participant_dead", message: "Учасник не може діяти" },
+  });
 
   const aura = areaAuras(owner).find((a) => a.id === data.auraId);
 

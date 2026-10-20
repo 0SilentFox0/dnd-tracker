@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isPlayable } from "../geometry";
 import { canStand } from "../occupancy";
 import { reachable } from "../path";
-import { applyTerrain, applyTerrainDiff, diffTerrain, hazardCells, pruneExpiredTerrain, terrainAt, threatCells } from "../terrain";
+import { applyTerrain, applyTerrainDiff, diffTerrain, hazardCells, pruneExpiredTerrain, threatCells } from "../terrain";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -26,17 +26,11 @@ function p(id: string, side: string, position: GridPoint | undefined, extra: { a
   };
 }
 
-describe("terrainAt / hazardCells", () => {
+describe("hazardCells", () => {
   const map: BattleMapConfig = {
     ...base,
     terrain: { "1:1": { kind: "hazard", label: "Вогонь" }, "2:2": { kind: "wall" }, "3:3": { kind: "hazard" } },
   };
-
-  it("читає клітинку за точкою", () => {
-    expect(terrainAt(map, { x: 1, y: 1 })).toEqual({ kind: "hazard", label: "Вогонь" });
-    expect(terrainAt(map, { x: 0, y: 0 })).toBeUndefined();
-    expect(terrainAt(base, { x: 1, y: 1 })).toBeUndefined();
-  });
 
   it("hazardCells — лише небезпеки", () => {
     expect([...hazardCells(map)].sort()).toEqual(["1:1", "3:3"]);

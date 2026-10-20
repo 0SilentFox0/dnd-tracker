@@ -3,7 +3,7 @@
 import { SetupParticipantRow } from "./SetupParticipantRow";
 
 import { HudSection } from "@/components/hud/form";
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { ParticipantActions } from "@/lib/hooks/battles";
 import type { BattlePreparationParticipant } from "@/types/battle";
 import type { SetupCharacter, SetupUnit } from "@/types/battle-setup";
@@ -38,27 +38,26 @@ export function SidePanelCard({
 
   const otherSide = side === ParticipantSide.ALLY ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 
-  const characterParticipants = participants.filter(
-    (p) => p.side === side && p.type === ParticipantSourceType.CHARACTER,
-  );
+  const sideParticipants = participants.filter((p) => p.side === side);
 
-  const unitParticipants = participants.filter(
-    (p) => p.side === side && p.type === ParticipantSourceType.UNIT,
-  );
+  const groups: { title: string; type: ParticipantSourceTypeValue; entities: Pick<SetupCharacter, "id" | "name" | "avatar">[] }[] = [
+    { title: "Персонажі", type: ParticipantSourceType.CHARACTER, entities: characters },
+    { title: "Юніти", type: ParticipantSourceType.UNIT, entities: units },
+  ];
 
-  const isEmpty = participants.filter((p) => p.side === side).length === 0;
+  const visibleGroups = groups
+    .map((g) => ({ ...g, members: sideParticipants.filter((p) => p.type === g.type) }))
+    .filter((g) => g.members.length > 0);
 
   return (
     <HudSection title={config.title} className="mt-0 max-h-[500px] space-y-3 overflow-y-auto">
         <p className="text-xs text-muted-foreground">{config.description}</p>
-        {characterParticipants.length > 0 && (
-          <div>
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
-              Персонажі
-            </h4>
+        {visibleGroups.map(({ title, type, entities, members }) => (
+          <div key={type}>
+            <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{title}</h4>
             <div className="space-y-2">
-              {characterParticipants.map((participant) => {
-                const entity = characters.find((c) => c.id === participant.id);
+              {members.map((participant) => {
+                const entity = entities.find((e) => e.id === participant.id);
 
                 if (!entity) return null;
 
@@ -67,6 +66,7 @@ export function SidePanelCard({
                     key={participant.id}
                     name={entity.name}
                     avatar={entity.avatar}
+                    quantity={type === ParticipantSourceType.UNIT ? (participant.quantity ?? 1) : undefined}
                     side={side}
                     reserved={participant.reserved ?? 0}
                     actions={{
@@ -79,38 +79,8 @@ export function SidePanelCard({
               })}
             </div>
           </div>
-        )}
-        {unitParticipants.length > 0 && (
-          <div>
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
-              Юніти
-            </h4>
-            <div className="space-y-2">
-              {unitParticipants.map((participant) => {
-                const entity = units.find((u) => u.id === participant.id);
-
-                if (!entity) return null;
-
-                return (
-                  <SetupParticipantRow
-                    key={participant.id}
-                    name={entity.name}
-                    avatar={entity.avatar}
-                    quantity={participant.quantity ?? 1}
-                    side={side}
-                    reserved={participant.reserved ?? 0}
-                    actions={{
-                      onMoveToOtherSide: () => actions.setSide(participant.id, otherSide),
-                      onRemove: () => actions.remove(participant.id),
-                      onReserveChange: (n) => actions.setReserve(participant.id, n),
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {isEmpty && (
+        ))}
+        {sideParticipants.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-8">
             Оберіть учасників зі списку нижче
           </p>

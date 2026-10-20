@@ -1,6 +1,3 @@
-import { getEffectiveArmorClass } from "../participant";
-import type { AttackRollResult } from "../types/attack";
-import { appendHpChanges, type AttackFlow, getP, put } from "./process/ability-flow";
 import { buildRetaliationAction, type BuildRetaliationParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
@@ -13,11 +10,13 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags, findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { type ActionFlow, appendHpChanges, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
-import { parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
-import { rollDie } from "@/lib/utils/common/dice";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
@@ -87,7 +86,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: AttackFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
 
   if (!provoked && !unlimited) {
     put(flow, {

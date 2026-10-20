@@ -1,7 +1,7 @@
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { BattleParticipant } from "@/types/battle";
 
-export function clampHeroDamageMultiplier(raw: number | undefined | null): number {
+function clampHeroDamageMultiplier(raw: number | undefined | null): number {
   const x = raw ?? 1;
 
   if (!Number.isFinite(x)) return 1;
@@ -19,9 +19,7 @@ export function heroMagicMultiplier(p: BattleParticipant): number {
   return clampHeroDamageMultiplier(p.abilities.magicMultiplier);
 }
 
-/**
- * Після модифікаторів скілів/артефактів; перед дробленням по цілях / опором.
- */
+/** Після модифікаторів скілів/артефактів; перед дробленням по цілях / опором. */
 export function applyHeroDmDamageMultiplier(
   attacker: BattleParticipant,
   attackType: AttackType,

@@ -22,7 +22,7 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 
-vi.mock("@/lib/utils/artifacts/artifact-set-queries", () => ({
+vi.mock("@/lib/server/artifacts/artifact-set-queries", () => ({
   findArtifactSetInCampaign: vi.fn(async () => ({ id: "s1", campaignId: "c1", icon: "https://game-icons.net/a.svg" })),
   buildArtifactSetPatchInput: vi.fn(() => ({})),
   updateArtifactSetRow: vi.fn(),

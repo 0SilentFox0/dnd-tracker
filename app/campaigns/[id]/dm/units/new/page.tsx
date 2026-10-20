@@ -1,5 +1,5 @@
 import { UnitCreateForm } from "@/components/units/form/UnitCreateForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function NewUnitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -1,12 +1,9 @@
 import { HudSection } from "@/components/hud/form";
 import { HudCard } from "@/components/hud/page";
 import type { BalanceHint, FairScaling, PartyPower } from "@/lib/utils/battle/balance";
+import { mult, round1 } from "@/lib/utils/common/format";
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
-
-const mult = (n: number) => `×${(Math.round(n * 100) / 100).toString()}`;
-
-export function describeHint(hint: BalanceHint): string {
+function describeHint(hint: BalanceHint): string {
   const list = hint.changes.map((c) => `${c.name} ×${Math.abs(c.delta)}`).join(", ");
 
   return hint.kind === "weak" ? `Слабко: додайте ${list}` : `Забагато: приберіть ${list}`;

@@ -1,7 +1,7 @@
 import { DMCharactersClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { CharacterType } from "@/lib/constants/characters";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function DMCharactersPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ type?: string }> }) {
   const { id } = await params;

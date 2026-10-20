@@ -1,6 +1,5 @@
-import { skillAbilities } from "@/lib/utils/abilities/read";
-import { damageAffinity } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import type { IdName } from "@/types/common";
 
 export interface SkillRowForResponse {
   id: string;
@@ -16,35 +15,33 @@ export interface SkillRowForResponse {
   image: string | null;
   appearanceDescription?: string | null;
   createdAt: Date;
-  spell?: { id: string; name: string } | null;
-  spellGroup?: { id: string; name: string } | null;
-  grantedSpell?: { id: string; name: string } | null;
+  spell?: IdName | null;
+  spellGroup?: IdName | null;
+  grantedSpell?: IdName | null;
 }
 
-export function groupSkillRow(skill: SkillRowForResponse) {
+const idName = (row: IdName | null | undefined) => (row ? { id: row.id, name: row.name } : null);
+
+export function skillRowFields(skill: SkillRowForResponse) {
   return {
     id: skill.id,
     campaignId: skill.campaignId,
-    basicInfo: { name: skill.name, description: skill.description ?? "", icon: skill.icon ?? "" },
+    name: skill.name,
+    description: skill.description,
+    icon: skill.icon,
     image: skill.image ?? null,
     appearanceDescription: skill.appearanceDescription ?? null,
-    spellData: {
-      spellId: skill.spellId || undefined,
-      spellGroupId: skill.spellGroupId || undefined,
-      grantedSpellId: skill.grantedSpellId || undefined,
-    },
-    mainSkillData: { mainSkillId: skill.mainSkillId || undefined },
+    spellId: skill.spellId,
+    spellGroupId: skill.spellGroupId,
+    grantedSpellId: skill.grantedSpellId ?? null,
+    mainSkillId: skill.mainSkillId,
     createdAt: skill.createdAt,
-    spell: skill.spell ? { id: skill.spell.id, name: skill.spell.name } : null,
-    spellGroup: skill.spellGroup ? { id: skill.spellGroup.id, name: skill.spellGroup.name } : null,
-    grantedSpell: skill.grantedSpell ? { id: skill.grantedSpell.id, name: skill.grantedSpell.name } : null,
+    spell: idName(skill.spell),
+    spellGroup: idName(skill.spellGroup),
+    grantedSpell: idName(skill.grantedSpell),
   };
 }
 
 export function formatSkillsListResponse(skills: SkillRowForResponse[]) {
-  return skills.map((skill) => ({
-    ...groupSkillRow(skill),
-    abilitySummary: abilitySummary("skill", skill),
-    damageAffinity: damageAffinity(skillAbilities(skill)),
-  }));
+  return skills.map((skill) => ({ ...skillRowFields(skill), abilitySummary: abilitySummary("skill", skill) }));
 }

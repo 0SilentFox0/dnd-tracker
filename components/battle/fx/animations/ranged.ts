@@ -1,9 +1,9 @@
-import { arcControl, bezier, type FxPoint } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { show, tween, wait } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { arcControl, bezier, type FxPoint } from "@/components/battle/fx/runtime/geometry";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { progress, wait } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) => {
@@ -19,9 +19,7 @@ export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) =>
 
   const head = glow(palette.core);
 
-  let k = 0;
-
-  const hide = show(stage, (g) => {
+  await progress(stage, ARCHETYPE_FX.ranged.impactMs, (g, k) => {
     const p = bezier(from, ctrl, end, k);
 
     const q = bezier(from, ctrl, end, Math.max(0, k - 0.02));
@@ -39,9 +37,6 @@ export const ranged: FxAnimation = async ({ spec, stage, from, to, palette }) =>
     g.stroke();
     sprite(g, head, p.x, p.y, 0.45, undefined, g.globalAlpha);
   });
-
-  await tween(stage, ARCHETYPE_FX.ranged.impactMs, (v) => (k = v));
-  hide();
 
   if (spec.hit) for (let i = 0; i < 20; i++) emit(stage, target, { tints: palette.tints, speed: [60, 220], life: [0.3, 0.6], scale: [0.4, 0.03], drag: 3, gravity: 200 });
 

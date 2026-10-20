@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Network } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
@@ -8,8 +7,7 @@ import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
 import { Button } from "@/components/ui/button";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { useDeleteMainSkill, useMainSkills } from "@/lib/hooks/skills";
+import { useMainSkillsList } from "@/lib/hooks/skills";
 import type { MainSkill } from "@/types/main-skills";
 
 interface DMMainSkillsPageClientProps {
@@ -17,39 +15,15 @@ interface DMMainSkillsPageClientProps {
   initialMainSkills: MainSkill[];
 }
 
-export function DMMainSkillsPageClient({
-  campaignId,
-  initialMainSkills,
-}: DMMainSkillsPageClientProps) {
-  const notify = useNotify();
-
-  const confirm = useConfirm();
-
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
-  const { data: mainSkills = initialMainSkills } = useMainSkills(campaignId);
-
-  const deleteMainSkillMutation = useDeleteMainSkill(campaignId);
-
-  const handleDelete = async (mainSkillId: string) => {
-    if (
-      (await confirm({ title: "Ви впевнені, що хочете видалити цей основний навик? Це також видалить всі скіли, пов'язані з ним.", confirmLabel: "Видалити", destructive: true }))
-    ) {
-      try {
-        await deleteMainSkillMutation.mutateAsync(mainSkillId);
-      } catch (error) {
-        console.error("Error deleting main skill:", error);
-        void notify("Помилка при видаленні основного навику");
-      }
-    }
-  };
+export function DMMainSkillsPageClient({ campaignId, initialMainSkills }: DMMainSkillsPageClientProps) {
+  const { mainSkills, createDialog, actions } = useMainSkillsList(campaignId, initialMainSkills);
 
   return (
     <HudPage>
       <HudPageHeader
         title="Основні Навики"
-        subtitle={`Управління основними навиками для дерев прокачки Всього: ${mainSkills.length}`}
-        actions={<Button onClick={() => setCreateDialogOpen(true)}>Створити основний навик</Button>}
+        subtitle={`Управління основними навиками для дерев прокачки · Всього: ${mainSkills.length}`}
+        actions={<Button onClick={() => createDialog.setOpen(true)}>Створити основний навик</Button>}
       />
 
       {mainSkills.length === 0 ? (
@@ -57,21 +31,12 @@ export function DMMainSkillsPageClient({
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {mainSkills.map((mainSkill) => (
-            <MainSkillCard
-              key={mainSkill.id}
-              mainSkill={mainSkill}
-              campaignId={campaignId}
-              onDelete={handleDelete}
-            />
+            <MainSkillCard key={mainSkill.id} mainSkill={mainSkill} campaignId={campaignId} onDelete={(id) => void actions.remove(id)} />
           ))}
         </div>
       )}
 
-      <CreateMainSkillDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        campaignId={campaignId}
-      />
+      <CreateMainSkillDialog open={createDialog.open} onOpenChange={createDialog.setOpen} campaignId={campaignId} />
     </HudPage>
   );
 }

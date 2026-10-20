@@ -136,3 +136,8 @@ export function cryptoRandom(): number {
 
   return buf[0] / 2 ** 32;
 }
+
+/** Випадковий елемент непорожнього списку; rng() === 1 дає останній, а не вихід за межі. */
+export function pickOne<T>(list: readonly T[], rng: () => number = Math.random): T {
+  return list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
+}

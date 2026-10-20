@@ -1,6 +1,8 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { pickOne } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 export const controlledByDm = (p: BattleParticipant, dmUserId: string | null) =>
@@ -32,7 +34,7 @@ const withController = (p: BattleParticipant, controlledBy: string): BattleParti
 export type SetControllerResult = { participants: BattleParticipant[]; unit: BattleParticipant } | { error: string };
 
 export function setUnitController(order: BattleParticipant[], unitId: string, controlledBy: string, dmUserId: string): SetControllerResult {
-  const target = order.find((p) => p.basicInfo.id === unitId);
+  const target = findParticipant(order, unitId);
 
   if (!target || !isAssignableUnit(target)) return { error: "Цим юнітом не можна керувати гравцю" };
 
@@ -55,7 +57,7 @@ export function randomizeUnitControl(order: BattleParticipant[], dmUserId: strin
   const participants = order.map((p) => {
     if (!isAssignableUnit(p) || !controlledByDm(p, dmUserId)) return p;
 
-    const unit = withController(p, owners[Math.floor(rng() * owners.length)]);
+    const unit = withController(p, pickOne(owners, rng));
 
     if (unit !== p) assigned.push({ unit, owner: unit.basicInfo.controlledBy });
 

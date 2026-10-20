@@ -4,12 +4,10 @@ import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { BattleStatus } from "@/lib/constants/battle";
 
-export type BattleListKind = BattleStatus;
-
 interface BattleListCardProps {
   battle: { id: string; name: string; description: string | null; currentRound: number; participants: unknown };
   campaignId: string;
-  kind: BattleListKind;
+  kind: BattleStatus;
 }
 
 const KIND = {
@@ -47,30 +45,24 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
       </div>
 
       {kind === BattleStatus.ACTIVE && (
-        <Link href={playHref} className="block">
-          <Button className="w-full">Перейти до бою</Button>
-        </Link>
+        <Button asChild className="w-full">
+          <Link href={playHref}>Перейти до бою</Link>
+        </Button>
       )}
       {kind === BattleStatus.PREPARED && (
         <div className="flex gap-2">
-          <Link href={editHref} className="flex-1">
-            <Button variant="outline" className="w-full" size="sm">
-              Редагувати
-            </Button>
-          </Link>
-          <Link href={playHref} className="flex-1">
-            <Button className="w-full" size="sm">
-              Запустити
-            </Button>
-          </Link>
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href={editHref}>Редагувати</Link>
+          </Button>
+          <Button asChild size="sm" className="flex-1">
+            <Link href={playHref}>Запустити</Link>
+          </Button>
         </div>
       )}
       {kind === BattleStatus.COMPLETED && (
-        <Link href={editHref} className="block">
-          <Button variant="outline" size="sm" className="w-full">
-            Переглянути
-          </Button>
-        </Link>
+        <Button asChild variant="outline" size="sm" className="w-full">
+          <Link href={editHref}>Переглянути</Link>
+        </Button>
       )}
     </HudCard>
   );

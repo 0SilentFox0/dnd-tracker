@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { HudFormPage } from "@/components/hud/form";
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { readAbilities } from "@/lib/utils/abilities/read";
 
 export default async function EditArtifactSetPage({

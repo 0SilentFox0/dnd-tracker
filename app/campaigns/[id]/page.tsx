@@ -6,8 +6,8 @@ import { CampaignSettingsButton } from "@/components/campaigns/settings/Campaign
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
-import { requireCampaignWithMembers } from "@/lib/campaigns/access";
 import { CampaignStatus } from "@/lib/constants/campaigns";
+import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
 import { pluralUk } from "@/lib/utils/common/plural";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";

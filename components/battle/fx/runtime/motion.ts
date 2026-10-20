@@ -43,3 +43,12 @@ export function glowPulse(color: string, { brightness, saturate, peak, blur = 6 
 
   return [{ filter: "none" }, { filter, offset: peak }, { filter: "none" }];
 }
+
+/** A row tinted by `filter` from `inAt` to `outAt` of the run, plain at both ends; `extra` props (a transform) hold with it. */
+export function holdFilter(filter: string, inAt: number, outAt: number, extra: Keyframe = {}): Keyframe[] {
+  const rest: Keyframe = { filter: "none", ...Object.fromEntries(Object.keys(extra).map((k) => [k, "none"])) };
+
+  const held: Keyframe = { filter, ...extra };
+
+  return [rest, { ...held, offset: inAt }, { ...held, offset: outAt }, rest];
+}

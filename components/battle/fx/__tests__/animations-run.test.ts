@@ -1,9 +1,8 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { stubCanvasContexts } from "./recording-canvas";
-
 import { FX_ARCHETYPES,type FxArchetype } from "@/lib/utils/battle/fx";
+import { stubCanvasContexts } from "@/lib/utils/canvas/__tests__/recording-canvas";
 
 // Area spells rarely catch more; each extra target adds its stagger to the run.
 const MAX_TARGETS = 6;
@@ -79,11 +78,11 @@ function row(x: number, y: number) {
 async function setup() {
   vi.resetModules();
 
-  const { loadAnimation } = await import("../animations");
+  const { loadAnimation } = await import("@/components/battle/fx/animations");
 
-  const { PALETTE } = await import("../runtime/palette");
+  const { PALETTE } = await import("@/components/battle/fx/runtime/palette");
 
-  const { cancelLayer, stageFor } = await import("../runtime/stage");
+  const { cancelLayer, stageFor } = await import("@/components/battle/fx/runtime/stage");
 
   const { MAX_FX_MS } = await import("@/lib/utils/battle/fx");
 
@@ -109,11 +108,11 @@ async function setup() {
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     };
 
-    const spec = { key: "k", archetype, element: "fire" as const, actorId: "a", actorSide: "player", targetIds: targetEls.map((_, i) => `t${i}`), hit: true, critical: false };
+    const spec = { key: "k", archetype, element: "fire" as const, actorId: "a", actorSide: "ally" as const, targetIds: targetEls.map((_, i) => `t${i}`), hit: true, critical: false };
 
     let done = false;
 
-    const run = animation({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targetEls, actorEl, palette: PALETTE[spec.element] }).then(() => {
+    const run = animation({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targets: targetEls.map((el) => ({ at: centre(el), el })), actorEl, palette: PALETTE[spec.element] }).then(() => {
       done = true;
     });
 

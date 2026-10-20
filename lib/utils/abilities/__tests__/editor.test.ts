@@ -5,7 +5,6 @@ import {
   changeEffectKind,
   changeTriggerEvent,
   getAtPath,
-  newAbility,
   newEffect,
   newTrigger,
   setAtPath,
@@ -71,7 +70,7 @@ describe("editor helpers", () => {
   });
 
   it("validateAbilities — шляхи помилок", () => {
-    const r = validateAbilities([newAbility([]), { id: "x", name: "Б", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: 5 }] }]);
+    const r = validateAbilities([{ id: "a1", name: "Нове вміння", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] }, { id: "x", name: "Б", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: 5 }] }]);
 
     expect(r.ok).toBe(false);
     expect(Object.keys(r.errorsByPath)).toContain("1.effects.0");

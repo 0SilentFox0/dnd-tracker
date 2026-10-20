@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { writeAudioSnapshot } from "./audio-snapshot";
@@ -8,6 +8,7 @@ import { writeAudioSnapshot } from "./audio-snapshot";
 import { sendBattleAudio } from "@/lib/api/battle-audio";
 import { ApiError } from "@/lib/api/client";
 import { battleKeys } from "@/lib/hooks/battles";
+import { useSingleFlight } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleAudioCommand } from "@/types/audio";
 
@@ -21,10 +22,9 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
 
   const queryClient = useQueryClient();
 
-  // disabled={pending} діє лише після рендеру: другий клік подвійного натискання встигає раніше
-  const inFlight = useRef(false);
+  const singleFlight = useSingleFlight();
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: (cmd: BattleAudioCommand) => sendBattleAudio(campaignId, battleId, cmd),
     onSuccess: (fresh) => writeAudioSnapshot(queryClient, { campaignId, battleId }, fresh),
     onError: (error) => {
@@ -32,22 +32,15 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
 
       onFailure(errorMessage(error, "Не вдалося керувати музикою"));
     },
-    onSettled: () => {
-      inFlight.current = false;
-    },
   });
 
   const control = useMemo(
     () => ({
-      send: (cmd: BattleAudioCommand) => {
-        if (inFlight.current) return;
-
-        inFlight.current = true;
-        mutate(cmd);
-      },
+      // помилку вже обробив onError
+      send: (cmd: BattleAudioCommand) => void singleFlight(() => mutateAsync(cmd).catch(() => undefined)),
       pending: isPending,
     }),
-    [mutate, isPending],
+    [singleFlight, mutateAsync, isPending],
   );
 
   return enabled ? control : null;

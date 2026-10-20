@@ -1,13 +1,13 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, chance, farSide, type FxPoint, rand, wavePoints } from "../runtime/geometry";
-import { emit, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { taperedStroke, twinkle } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, farSide, type FxPoint, rand, wavePoints } from "@/components/battle/fx/runtime/geometry";
+import { emit, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { taperedStroke, twinkle } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FLY_MS = 480;
@@ -93,10 +93,8 @@ function fangs(g: CanvasRenderingContext2D, x: number, y: number, len: number, g
   }
 }
 
-export const vampire: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const vampire: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const face = faceOf(el, target);

@@ -45,7 +45,7 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const onError = useCallback((e: unknown) => void notify(errorMessage(e, "Не вдалося зберегти")), [notify]);
 
-  const invalidateKeys = useMemo(() => [trackKeys.list(campaignId)], [campaignId]);
+  const invalidateKeys = [trackKeys.list(campaignId)];
 
   const { mutateAsync: uploadAsync, isPending: isUploading } = useCrudMutation({
     mutationFn: async (file: File) => uploadTrackFile(campaignId, file, { title: stripExtension(file.name), durationSec: await readAudioDuration(file) }),
@@ -53,13 +53,12 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
     onError,
   });
 
-  const { mutateAsync: youtubeAsync, isPending: isAddingYoutube } = useCrudMutation({ mutationFn: (data: { url: string; title?: string }) => createTrack(campaignId, { kind: "youtube", ...data }), invalidateKeys, onError });
+  const { mutateOk: addYoutube, isPending: isAddingYoutube } = useCrudMutation({ mutationFn: (data: { url: string; title?: string }) => createTrack(campaignId, { kind: "youtube", ...data }), invalidateKeys, onError });
 
   const { mutate: deleteMutate } = useCrudMutation({ mutationFn: (id: string) => deleteTrack(campaignId, id), invalidateKeys, onError });
 
   const { mutate: reorderMutate, isPending: isReordering } = useCrudMutation({
     mutationFn: (ids: string[]) => reorderTracks(campaignId, ids),
-    invalidateKeys: [],
     onSuccess: (list) => queryClient.setQueryData(trackKeys.list(campaignId), list),
     onError,
   });
@@ -68,8 +67,6 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
   const upload = useCallback(async (file: File) => {
     await uploadAsync(file).catch(() => undefined);
   }, [uploadAsync]);
-
-  const addYoutube = useCallback(async (data: { url: string; title?: string }) => youtubeAsync(data).then(() => true, () => false), [youtubeAsync]);
 
   const rename = useRenameTrack(campaignId, onError);
 

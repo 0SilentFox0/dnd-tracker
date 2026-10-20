@@ -2,8 +2,9 @@
 
 import { Zap } from "lucide-react";
 
-import { HealthLabel, Portrait } from "@/components/battle/hud";
+import { HealthLabel } from "@/components/battle/hud";
 import { AbilityAimPanel } from "@/components/battle/wizards/AbilityAimPanel";
+import { TargetButton } from "@/components/battle/wizards/TargetButton";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -39,11 +40,15 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
             </button>
           ))}
           {ability && candidates.map((t) => (
-            <button key={t.basicInfo.id} type="button" disabled={isPending} onClick={() => aiming.choose(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", picked.includes(t.basicInfo.id) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-white/15")}>
-              <Portrait participant={t} size={36} />
-              <span className="hud-sc font-bold">{t.basicInfo.name}</span>
-              {side === ParticipantSide.ENEMY ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
-            </button>
+            <TargetButton
+              key={t.basicInfo.id}
+              participant={t}
+              tone="gold"
+              selected={picked.includes(t.basicInfo.id)}
+              disabled={isPending}
+              onClick={() => aiming.choose(t.basicInfo.id)}
+              trailing={side === ParticipantSide.ENEMY ? <HealthLabel participant={t} /> : <span className="ml-auto text-sm text-[#d6cbb7]">{t.combatStats.currentHp} / {t.combatStats.maxHp}</span>}
+            />
           ))}
           {ability && max > 1 && (
             <button type="button" disabled={picked.length === 0 || isPending} onClick={aiming.confirm} className="hud-sc flex h-12 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40">

@@ -35,10 +35,7 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
 
   return {
     query,
-    levelUp,
-    confirmDelete,
-    removeAll,
-    isDeletingAll: deleteAll.isPending,
-    levelingUpId: levelUpMutation.isPending ? levelUpMutation.variables : undefined,
+    actions: { levelUp, confirmDelete, removeAll },
+    status: { isDeletingAll: deleteAll.isPending, levelingUpId: levelUpMutation.isPending ? levelUpMutation.variables : undefined },
   };
 }

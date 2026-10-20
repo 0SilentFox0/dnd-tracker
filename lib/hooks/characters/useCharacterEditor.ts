@@ -15,7 +15,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const update = useUpdateCharacter(campaignId, characterId);
 
-  const { members, loading: membersLoading } = useCampaignMembers(campaignId);
+  const { members, isLoading: membersLoading } = useCampaignMembers(campaignId);
 
   const { data: races = [] } = useRaces(campaignId);
 
@@ -51,5 +51,3 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   return { query, ready: seededFor === characterId, form, equipped, setEquipped, options: { members, membersLoading, races } };
 }
-
-export type CharacterEditor = ReturnType<typeof useCharacterEditor>;

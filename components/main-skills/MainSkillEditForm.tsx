@@ -13,26 +13,26 @@ interface MainSkillEditFormProps {
 }
 
 export function MainSkillEditForm({ campaignId, mainSkill }: MainSkillEditFormProps) {
-  const form = useMainSkillForm(campaignId, mainSkill);
+  const { form, spellGroups, status, actions } = useMainSkillForm(campaignId, mainSkill);
 
   return (
     <HudFormPage title="Редагувати основний навик" aside="Оновіть інформацію про основний навик">
       <HudForm
         id="main-skill-form"
-        onSubmit={form.submit}
+        onSubmit={actions.submit}
         actions={
           <>
-            <Button type="button" variant="outline" onClick={form.cancel}>
+            <Button type="button" variant="outline" onClick={actions.cancel}>
               Скасувати
             </Button>
-            <Button type="submit" disabled={form.isSaving}>
-              {form.isSaving ? "Збереження..." : "Зберегти зміни"}
+            <Button type="submit" disabled={status.isSaving}>
+              {status.isSaving ? "Збереження..." : "Зберегти зміни"}
             </Button>
           </>
         }
       >
         <div className="space-y-6">
-          <MainSkillFormFields form={form.formData} onChange={form.patch} spellGroups={form.spellGroups} />
+          <MainSkillFormFields form={form.data} onChange={form.set} spellGroups={spellGroups} />
         </div>
       </HudForm>
     </HudFormPage>

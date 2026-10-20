@@ -1,10 +1,17 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { resolvePoints } from "@/components/battle/fx/runtime/anchors";
+import { resolvePoints as resolve } from "@/components/battle/fx/runtime/anchors";
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
 const spec = (over: Partial<FxSpec> = {}): FxSpec => ({ key: "k", archetype: "bolt", element: "fire", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false, ...over });
+
+// The points behind `targets`, which most cases check.
+function resolvePoints(...args: Parameters<typeof resolve>) {
+  const r = resolve(...args);
+
+  return r && { ...r, to: r.targets.map((t) => t.at) };
+}
 
 type Rect = { x: number; y: number; w: number; h: number };
 
@@ -218,13 +225,13 @@ describe("точка шаблону", () => {
     expect(resolvePoints(spec({ archetype: "area", at: { x: 4, y: 2 } }))?.at).toBeUndefined();
   });
 
-  it("каст у порожню зону: to — точка прицілу; точку не видно — FX немає", () => {
+  it("каст у порожню зону: ціль — точка прицілу; точку не видно — FX немає", () => {
     anchor("a", { x: 10, y: 10, w: 20, h: 20 });
     cell("4:2", { x: 100, y: 100, w: 30, h: 30 });
 
     const empty = spec({ archetype: "area", targetIds: [], at: { x: 4, y: 2 } });
 
-    expect(resolvePoints(empty)).toMatchObject({ from: { x: 20, y: 20 }, to: [{ x: 115, y: 115 }], at: { x: 115, y: 115 }, targetEls: [] });
+    expect(resolvePoints(empty)).toMatchObject({ from: { x: 20, y: 20 }, targets: [{ at: { x: 115, y: 115 }, el: null }], at: { x: 115, y: 115 } });
     expect(resolvePoints({ ...empty, at: { x: 9, y: 9 } })).toBeNull();
   });
 });

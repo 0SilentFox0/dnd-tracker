@@ -1,11 +1,11 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const GRAB_MS = ARCHETYPE_FX.netherhands.impactMs;
@@ -104,9 +104,9 @@ function skull(g: CanvasRenderingContext2D, size: number) {
   for (let n = -1; n <= 1; n++) g.fillRect(n * size * 0.12 - size * 0.025, size * 0.33, size * 0.05, size * 0.09);
 }
 
-export const netherhands: FxAnimation = ({ stage, to, targetEls }) => {
+export const netherhands: FxAnimation = ({ stage, to, targets }) => {
   const rows = to.map((p, i) => {
-    const { w, h } = halfSize(targetEls[i]);
+    const { w, h } = halfSize(targets[i].el);
 
     const ground = p.y + h + 2;
 
@@ -213,7 +213,7 @@ export const netherhands: FxAnimation = ({ stage, to, targetEls }) => {
 
   rows.forEach((r, i) => {
     schedule(stage, r.delay + GRAB_MS, () => {
-      void animateEl(stage, targetEls[i], SHUDDER, { duration: 1300, easing: "ease-out" });
+      void animateEl(stage, targets[i].el, SHUDDER, { duration: 1300, easing: "ease-out" });
     });
   });
 

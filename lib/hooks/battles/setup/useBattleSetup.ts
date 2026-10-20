@@ -46,7 +46,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
     campaignId,
     battleId,
     loading: loadingData,
-    details: { value: formData, setValue: setFormData },
+    details: { data: formData, set: setFormData },
     data: { characters, units, races, entityStats, playerCharacters, npcCharacters },
     participants,
     balance,

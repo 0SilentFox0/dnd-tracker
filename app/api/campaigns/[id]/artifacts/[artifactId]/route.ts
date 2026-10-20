@@ -3,12 +3,9 @@ import { randomUUID } from "crypto";
 
 import { prisma } from "@/lib/db";
 import { patchArtifactSchema } from "@/lib/schemas/artifacts";
-import {
-  mirrorArtifactIconToSupabase,
-  shouldMirrorArtifactIconUrl,
-} from "@/lib/supabase/artifact-icon-storage";
-import { readAbilities } from "@/lib/utils/abilities/read";
-import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
+import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
@@ -38,7 +35,7 @@ export async function GET(
 
     if (artifact instanceof NextResponse) return artifact;
 
-    const { abilities, issues: abilityIssues } = readAbilities("artifact", artifact as NonNullable<typeof artifact>);
+    const { abilities, issues: abilityIssues } = readAbilities("artifact", artifact);
 
     return NextResponse.json({ ...artifact, abilities, abilityIssues });
   } catch (error) {
@@ -72,25 +69,23 @@ export async function PATCH(
 
     if (data instanceof NextResponse) return data;
 
+    const foreignRef = await invalidCampaignRefs(id, { artifactSet: data.setId });
+
+    if (foreignRef) return foreignRef;
+
     let resolvedIcon = data.icon;
 
-    if (
-      data.icon !== undefined &&
-      data.icon !== artifact.icon &&
-      shouldMirrorArtifactIconUrl(data.icon)
-    ) {
-      const sourceUrl = (typeof data.icon === "string" ? data.icon : "").trim();
-
-      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
+    if (data.icon !== undefined && data.icon !== artifact.icon) {
+      const resolved = await resolveArtifactIconForPersistence(data.icon, {
         campaignId: id,
         objectBaseName: `${artifactId}-${randomUUID()}`,
       });
 
-      if (!mirrored.ok) {
-        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      resolvedIcon = mirrored.publicUrl;
+      resolvedIcon = resolved.value;
     }
 
     const updatedArtifact = await prisma.artifact.update({

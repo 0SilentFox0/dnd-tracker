@@ -9,11 +9,11 @@ import type { GridPoint, TerrainKind } from "@/types/battle";
 
 export type TerrainBrush = TerrainKind | "erase";
 
-export const MAX_STROKE_CELLS = 400;
+const MAX_STROKE_CELLS = 400;
 
 export const MAX_BARRIER_ROUNDS = 20;
 
-export interface TerrainBrushSettings {
+interface TerrainBrushSettings {
   kind: TerrainBrush;
   rounds: number;
   label: string;

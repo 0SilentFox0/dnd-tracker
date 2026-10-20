@@ -1,0 +1,20 @@
+"use client";
+
+import { useState } from "react";
+
+import { spellKeys } from "./keys";
+
+import { updateSpellAppearance } from "@/lib/api/spells";
+import { useCrudMutation } from "@/lib/hooks/common";
+
+export function useUpdateSpellAppearance(campaignId: string, spellId: string, initial: string) {
+  const [data, set] = useState(initial);
+
+  const mutation = useCrudMutation({
+    mutationFn: (value: string) => updateSpellAppearance(campaignId, spellId, value || null),
+    invalidateKeys: [spellKeys.list(campaignId), spellKeys.detail(campaignId, spellId)],
+    errorText: "Не вдалося зберегти опис вигляду",
+  });
+
+  return { draft: { data, set }, status: { isSaving: mutation.isPending }, save: () => mutation.mutate(data) };
+}

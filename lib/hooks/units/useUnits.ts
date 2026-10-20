@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import { unitKeys } from "./keys";
+import { unitKeys, unitWriteKeys } from "./keys";
 
 import { createUnit, deleteAllUnits, deleteUnit, getUnit, getUnits, updateUnit } from "@/lib/api/units";
 import { useCrudMutation } from "@/lib/hooks/common";
@@ -30,40 +30,27 @@ export function useUnit(campaignId: string, unitId: string) {
 export function useCreateUnit(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: Partial<Unit>) => createUnit(campaignId, data),
-    invalidateKeys: [unitKeys.list(campaignId)],
+    invalidateKeys: unitWriteKeys(campaignId),
   });
 }
 
 export function useDeleteAllUnits(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllUnits(campaignId),
-    invalidateKeys: [unitKeys.list(campaignId)],
+    invalidateKeys: unitWriteKeys(campaignId),
   });
 }
 
 export function useDeleteUnit(campaignId: string) {
   return useCrudMutation({
     mutationFn: (unitId: string) => deleteUnit(campaignId, unitId),
-    invalidateKeys: [unitKeys.list(campaignId)],
+    invalidateKeys: unitWriteKeys(campaignId),
   });
 }
 
 export function useUpdateUnit(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      unitId,
-      data,
-    }: {
-      unitId: string;
-      data: Partial<Unit>;
-    }) => updateUnit(campaignId, unitId, data),
-    onSuccess: (_, { unitId }) => {
-      queryClient.invalidateQueries({ queryKey: unitKeys.list(campaignId) });
-      queryClient.invalidateQueries({
-        queryKey: unitKeys.detail(campaignId, unitId),
-      });
-    },
+  return useCrudMutation({
+    mutationFn: ({ unitId, data }: { unitId: string; data: Partial<Unit> }) => updateUnit(campaignId, unitId, data),
+    invalidateKeys: (_, { unitId }) => [...unitWriteKeys(campaignId), unitKeys.detail(campaignId, unitId)],
   });
 }

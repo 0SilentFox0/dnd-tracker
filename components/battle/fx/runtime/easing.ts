@@ -21,6 +21,10 @@ export function fadeInOut(k: number, edge = 0.2) {
   return Math.min(1, k / edge, (1 - k) / edge);
 }
 
+export function smoothstep(k: number) {
+  return k * k * (3 - 2 * k);
+}
+
 export function easeOutCubic(k: number) {
   return 1 - (1 - k) ** 3;
 }

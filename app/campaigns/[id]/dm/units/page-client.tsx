@@ -26,7 +26,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
     <HudPage>
       <HudPageHeader
         title="NPC Юніти"
-        subtitle={`Управління мобами та юнітами Всього: ${list.units.length}`}
+        subtitle={`Управління мобами та юнітами · Всього: ${list.units.length}`}
         actions={
           <>
             <UnitImportDialog campaignId={campaignId} />

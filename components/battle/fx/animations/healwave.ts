@@ -1,11 +1,12 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, pick, rand } from "../runtime/geometry";
-import { glowPulse } from "../runtime/motion";
-import { emit } from "../runtime/primitives";
-import { animateEl, schedule, timeline } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { glowPulse } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { HEAL_MOTES } from "@/components/battle/fx/runtime/swatches";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const START_MS = 120;
@@ -13,8 +14,6 @@ const START_MS = 120;
 const TOTAL_MS = 2400;
 
 const PETALS = ["#ffffff", "#ffe36a", "#ffb0d0", "#b8c8ff", "#ffd0a0"];
-
-const MOTES = ["#e8ffd8", "#9ff0a0", "#5fd27a"];
 
 const REVIVE = glowPulse("#7fe88a", { brightness: 1.3, saturate: 1.25, peak: 0.3 });
 
@@ -49,7 +48,7 @@ function flower(g: CanvasRenderingContext2D, f: Flower, k: number) {
   g.restore();
 }
 
-export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
+export const healwave: FxAnimation = ({ stage, from, to, targets }) => {
   const W = stage.layer.clientWidth;
 
   const Hf = stage.layer.clientHeight;
@@ -61,7 +60,7 @@ export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
 
   const reach = Math.max(Math.hypot(W, Hf), far + 60);
 
-  const rows = to.map((p, i) => ({ p, ...halfSize(targetEls[i]), dist: Math.hypot(p.x - from.x, p.y - from.y) }));
+  const rows = to.map((p, i) => ({ p, ...halfSize(targets[i].el), dist: Math.hypot(p.x - from.x, p.y - from.y) }));
 
   const flowers: Flower[] = [];
 
@@ -146,9 +145,9 @@ export const healwave: FxAnimation = ({ stage, from, to, targetEls }) => {
 
   rows.forEach((row, i) => {
     schedule(stage, START_MS + row.dist / speed, () => {
-      for (let n = 0; n < 12; n++) emit(stage, { x: row.p.x + rand(-row.w, row.w), y: row.p.y + rand(-row.h * 0.4, row.h) }, { tints: MOTES, speed: [20, 60], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
+      for (let n = 0; n < 12; n++) emit(stage, { x: row.p.x + rand(-row.w, row.w), y: row.p.y + rand(-row.h * 0.4, row.h) }, { tints: HEAL_MOTES, speed: [20, 60], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
 
-      void animateEl(stage, targetEls[i], REVIVE, { duration: 900, easing: "ease-out" });
+      void animateEl(stage, targets[i].el, REVIVE, { duration: 900, easing: "ease-out" });
     });
   });
 

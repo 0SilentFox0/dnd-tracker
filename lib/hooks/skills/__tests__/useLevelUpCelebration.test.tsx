@@ -5,7 +5,7 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as progressionApi from "@/lib/api/character-progression";
-import { characterSheetKey } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useLevelUpCelebration } from "@/lib/hooks/skills";
 import type { CharacterSheet } from "@/types/characters";
 
@@ -19,7 +19,7 @@ const sheet = (isDM: boolean) => ({ viewer: { isDM, isOwner: true }, progression
 const setup = (isDM: boolean) => {
   const qc = new QueryClient();
 
-  qc.setQueryData(characterSheetKey("c", "ch"), sheet(isDM));
+  qc.setQueryData(characterKeys.sheet("c", "ch"), sheet(isDM));
 
   const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 
@@ -37,7 +37,7 @@ describe("useLevelUpCelebration", () => {
     await waitFor(() => expect(progressionApi.markLevelSeen).toHaveBeenCalledWith("c", "ch"));
     act(() => result.current.dismiss());
 
-    expect(qc.getQueryData<CharacterSheet>(characterSheetKey("c", "ch"))?.progression.seenLevel).toBe(5);
+    expect(qc.getQueryData<CharacterSheet>(characterKeys.sheet("c", "ch"))?.progression.seenLevel).toBe(5);
     expect(result.current.celebration).toBeNull();
   });
 
@@ -48,7 +48,7 @@ describe("useLevelUpCelebration", () => {
 
     expect(result.current.celebration).toEqual({ from: 3, to: 5, free: 2 });
 
-    act(() => qc.setQueryData(characterSheetKey("c", "ch"), { ...sheet(false), progression: { freePoints: 1, level: 5, seenLevel: 5 } }));
+    act(() => qc.setQueryData(characterKeys.sheet("c", "ch"), { ...sheet(false), progression: { freePoints: 1, level: 5, seenLevel: 5 } }));
 
     await waitFor(() => expect(result.current.celebration).toEqual({ from: 3, to: 5, free: 1 }));
 

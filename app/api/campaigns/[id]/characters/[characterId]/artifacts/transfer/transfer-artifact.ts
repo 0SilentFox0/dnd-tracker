@@ -3,11 +3,11 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { ensureInventory, lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { ensureInventory, lockCampaignArtifacts } from "@/lib/utils/artifacts/lock";
 import { planTransfer, TransferError, type TransferErrorCode } from "@/lib/utils/artifacts/ownership";
 import type { EquippedItems } from "@/types/inventory";
 

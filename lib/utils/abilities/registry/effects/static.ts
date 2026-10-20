@@ -10,7 +10,7 @@ import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 
-export function stripTiming(effect: StaticEffect): StaticEffect {
+function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
 
   return rest as StaticEffect;

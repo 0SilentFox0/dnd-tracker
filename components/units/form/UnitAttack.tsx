@@ -8,25 +8,12 @@ import { SelectField } from "@/components/ui/select-field";
 import { ATTACK_KIND_LABELS, AttackType } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-
-export interface UnitAttackItem {
-  name: string;
-  type?: AttackType;
-  targetType?: "target" | "aoe";
-  attackBonus: number;
-  damageDice: string;
-  damageType: string;
-  range?: string;
-  properties?: string;
-  maxTargets?: number;
-  damageDistribution?: number[];
-  guaranteedDamage?: number;
-}
+import type { UnitAttack as UnitAttackValue } from "@/types/units";
 
 interface UnitAttackProps {
-  attack: UnitAttackItem;
+  attack: UnitAttackValue;
   index: number;
-  onChange: (attack: UnitAttackItem) => void;
+  onChange: (attack: UnitAttackValue) => void;
   onRemove: () => void;
 }
 

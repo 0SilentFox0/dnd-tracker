@@ -5,3 +5,4 @@ export {
   useRaces,
   useUpdateRace,
 } from "./useRaces";
+export { useRacesList } from "./useRacesList";

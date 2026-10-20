@@ -1,13 +1,13 @@
-import { perTick } from "../runtime/geometry";
-import { emit, ring, shoot } from "../runtime/primitives";
-import { perTarget, pillar } from "../runtime/recipes";
-import { wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { perTick } from "@/components/battle/fx/runtime/geometry";
+import { emit, ring, shoot } from "@/components/battle/fx/runtime/primitives";
+import { perTarget, pillar } from "@/components/battle/fx/runtime/recipes";
+import { wait } from "@/components/battle/fx/runtime/stage";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
-export const heal: FxAnimation = ({ stage, from, to, palette }) =>
-  perTarget(stage, to, 0, async (target) => {
+export const heal: FxAnimation = ({ stage, from, targets, palette }) =>
+  perTarget(stage, targets, 0, async ({ at: target }) => {
     await shoot(stage, from, target, ARCHETYPE_FX.heal.impactMs, palette.core, palette.tints);
 
     const rising = pillar(stage, { x: target.x, y: target.y + 30 }, { tint: palette.accent, width: 1.3, height: 4, rise: 3, holdUntil: 0.3 }, (k, dt) => {

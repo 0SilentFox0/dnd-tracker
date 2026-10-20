@@ -6,11 +6,11 @@ import { getCachedSpells } from "@/lib/cache/reference-data";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createSpellSchema } from "@/lib/schemas";
+import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
 import { requireCampaignAccess,requireDM } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { loadBookSpellsByIds } from "@/lib/utils/spells/book-spells-by-ids";
 import { spellDefinitionColumns } from "@/lib/utils/spells/model/read";
 
 export async function POST(

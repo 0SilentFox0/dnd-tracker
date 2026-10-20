@@ -1,12 +1,13 @@
-import { clamp01, envelope } from "../runtime/easing";
-import { summonSpot } from "../runtime/figure";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { schedule, timeline } from "../runtime/stage";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { clamp01, envelope } from "@/components/battle/fx/runtime/easing";
+import { summonSpot } from "@/components/battle/fx/runtime/figure";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { VIOLET } from "@/components/battle/fx/runtime/swatches";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FORM_MS = ARCHETYPE_FX.avatar.impactMs;
@@ -14,8 +15,6 @@ const FORM_MS = ARCHETYPE_FX.avatar.impactMs;
 const TOTAL_MS = 2700;
 
 const SMOKE = ["#1a0a26", "#2a1238", "#140a1c"];
-
-const VIOLET = ["#f3d0ff", "#b04dff", "#8a2be2"];
 
 // A hooded robe `h` tall, feet at the origin; `warp` lets its edges drift like smoke.
 function robePath(g: CanvasRenderingContext2D, h: number, warp: (p: FxPoint, i: number) => FxPoint) {
@@ -44,9 +43,9 @@ function robePath(g: CanvasRenderingContext2D, h: number, warp: (p: FxPoint, i: 
   g.closePath();
 }
 
-export const avatar: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const spot = summonSpot(targetEls[i], target);
+export const avatar: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const spot = summonSpot(el, target);
 
     const { x, ground } = spot;
 

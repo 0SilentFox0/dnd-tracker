@@ -17,9 +17,9 @@ import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
 import type { Race } from "@/types/races";
-import type { Unit } from "@/types/units";
+import type { Unit, UnitAttack } from "@/types/units";
 
-function primaryAttackIndex(attacks: Unit["attacks"]): number {
+function primaryAttackIndex(attacks: UnitAttack[]): number {
   if (!attacks.length) return -1;
 
   const meleeIdx = attacks.findIndex(
@@ -45,7 +45,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
     e.dataTransfer.setData("text/plain", unit.name);
   };
 
-  const attacks: Unit["attacks"] = Array.isArray(unit.attacks)
+  const attacks: UnitAttack[] = Array.isArray(unit.attacks)
     ? unit.attacks
     : [];
 
