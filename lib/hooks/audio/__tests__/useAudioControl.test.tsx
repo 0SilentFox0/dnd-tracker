@@ -4,21 +4,27 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useBattleAudioControl } from "../useBattleAudioControl";
+import type { AudioHost } from "../host";
+import { useAudioControl } from "../useAudioControl";
 
 import { sendBattleAudio } from "@/lib/api/battle-audio";
+import { battleKeys } from "@/lib/hooks/battles";
 
 vi.mock("@/lib/api/battle-audio", () => ({ sendBattleAudio: vi.fn() }));
 
 const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>;
 
-describe("useBattleAudioControl", () => {
+const KEY = battleKeys.audio("c1", "b1");
+
+const host = (onFailure = vi.fn(), isDM = true): AudioHost => ({ campaignId: "c1", isDM, queryKey: KEY, seed: null, fetch: vi.fn(), send: (cmd) => sendBattleAudio("c1", "b1", cmd), onFailure });
+
+describe("useAudioControl", () => {
   it("подвійний клік (дві команди до рендеру) — один POST; після відповіді наступна команда йде", async () => {
     let resolve: () => void = () => undefined;
 
     vi.mocked(sendBattleAudio).mockImplementation(() => new Promise((r) => (resolve = () => r({ audio: null, clockOffsetMs: 0 }))));
 
-    const { result } = renderHook(() => useBattleAudioControl({ campaignId: "c1", battleId: "b1", enabled: true, onFailure: vi.fn() }), { wrapper });
+    const { result } = renderHook(() => useAudioControl(host()), { wrapper });
 
     act(() => {
       result.current?.send({ action: "pause" });

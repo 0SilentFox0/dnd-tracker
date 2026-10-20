@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { writeAudioSnapshot } from "./audio-snapshot";
 import { useBattleResync } from "./useBattleResync";
 import { usePusherChannel, usePusherConnection } from "./usePusherChannel";
 
+import { writeAudioSnapshot } from "@/lib/hooks/audio";
 import { battleKeys } from "@/lib/hooks/battles/keys";
 import { writeBattleDelta } from "@/lib/hooks/battles/write-battle-delta";
 import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
@@ -72,7 +72,7 @@ export function usePusherBattleSync(
 
         if (!audio || typeof audio.seq !== "number") return;
 
-        writeAudioSnapshot(queryClient, { campaignId, battleId }, { audio });
+        writeAudioSnapshot(queryClient, battleKeys.audio(campaignId, battleId), { audio });
       },
     },
     {

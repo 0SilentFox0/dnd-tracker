@@ -2,9 +2,9 @@
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { BattleAudioDock } from "../BattleAudioDock";
-import { BattleAudioProvider } from "../BattleAudioProvider";
+import { AudioDock } from "../AudioDock";
 
+import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { sendBattleAudio } from "@/lib/api/battle-audio";
 import { getTracks, updateTrack } from "@/lib/api/tracks";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
@@ -16,14 +16,14 @@ vi.mock("@/lib/api/tracks", () => ({ getTracks: vi.fn(), updateTrack: vi.fn(asyn
 
 const yt = vi.hoisted(() => ({ needsTap: false }));
 
-vi.mock("@/lib/hooks/battle/useYoutubeSync", () => ({ useYoutubeSync: () => ({ ref: () => undefined, needsTap: yt.needsTap, failed: false }) }));
+vi.mock("@/lib/hooks/audio/useYoutubeSync", () => ({ useYoutubeSync: () => ({ ref: () => undefined, needsTap: yt.needsTap, failed: false }) }));
 
 const fileState = audioState({ track: { ...fileTrack, title: "Бій у таверні" } });
 
 const ytState = audioState({ trackId: "t2", track: youtubeTrack });
 
 function Screen({ show = true, placement = "corner", collapseOn = null, collapseTick = 0 }: { show?: boolean; placement?: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
-  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} collapseOn={collapseOn} collapseTick={collapseTick} />}</BattleAudioProvider>;
+  return <BattleAudioProvider>{show && <AudioDock placement={placement} collapseOn={collapseOn} collapseTick={collapseTick} />}</BattleAudioProvider>;
 }
 
 function dock(opts: { isDM?: boolean; audio?: BattleAudioState | null; placement?: "corner" | "strip" }) {
@@ -53,7 +53,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("BattleAudioDock — гравець", () => {
+describe("AudioDock — гравець", () => {
   it("без треку — нічого", () => {
     const { container } = dock({ audio: null });
 
@@ -99,11 +99,11 @@ describe("BattleAudioDock — гравець", () => {
     fireEvent.click(getByRole("button", { name: "Згорнути плеєр" }));
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
     expect(container.querySelector("[data-audio-panel]")?.className).toContain("sr-only");
-    expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+    expect(queryByRole("region", { name: "Музика" })).toBeNull();
 
     fireEvent.click(getByRole("button", { name: /Розгорнути плеєр/ }));
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
-    expect(getByRole("region", { name: "Музика бою" })).toBeTruthy();
+    expect(getByRole("region", { name: "Музика" })).toBeTruthy();
   });
 
   it("телефон: смуга й кут на вузькому екрані стартують згорнутими — чип із назвою треку", () => {
@@ -113,7 +113,7 @@ describe("BattleAudioDock — гравець", () => {
       const { getByRole, queryByRole, unmount } = dock({ audio: fileState, placement });
 
       expect(getByRole("button", { name: "Розгорнути плеєр: Бій у таверні" })).toBeTruthy();
-      expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+      expect(queryByRole("region", { name: "Музика" })).toBeNull();
       unmount();
     }
   });
@@ -123,7 +123,7 @@ describe("BattleAudioDock — гравець", () => {
 
     const { getByRole, queryByRole, container } = dock({ audio: fileState, placement: "strip" });
 
-    expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+    expect(queryByRole("region", { name: "Музика" })).toBeNull();
 
     fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
 
@@ -160,7 +160,7 @@ describe("BattleAudioDock — гравець", () => {
   });
 });
 
-describe("BattleAudioDock — ДМ", () => {
+describe("AudioDock — ДМ", () => {
   it("без треку бачить бібліотеку; клік по треку — play", async () => {
     const { findByRole } = dock({ isDM: true, audio: null });
 
@@ -316,7 +316,7 @@ describe("BattleAudioDock — ДМ", () => {
   });
 });
 
-describe("BattleAudioDock — плейлист лише для ДМ", () => {
+describe("AudioDock — плейлист лише для ДМ", () => {
   it("гравець не бачить плейлиста й олівців", () => {
     const { queryByRole } = dock({ audio: fileState });
 
@@ -327,7 +327,7 @@ describe("BattleAudioDock — плейлист лише для ДМ", () => {
   });
 });
 
-describe("BattleAudioDock — перемикач «Відео»", () => {
+describe("AudioDock — перемикач «Відео»", () => {
   it("лише для YouTube-треку", () => {
     const { queryByRole } = dock({ audio: fileState });
 
@@ -347,7 +347,7 @@ describe("BattleAudioDock — перемикач «Відео»", () => {
 
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
     expect(container.querySelector("[data-youtube-video]")?.className).toContain("sr-only");
-    expect(getByRole("region", { name: "Музика бою" })).toBeTruthy();
+    expect(getByRole("region", { name: "Музика" })).toBeTruthy();
     expect(getByRole("slider", { name: "Гучність" })).toBeTruthy();
     expect(getByRole("button", { name: "Відео", pressed: false })).toBeTruthy();
     expect(localStorage.getItem("battle-music-video")).toBe("off");
@@ -376,7 +376,7 @@ describe("BattleAudioDock — перемикач «Відео»", () => {
   });
 });
 
-describe("BattleAudioDock — розташування", () => {
+describe("AudioDock — розташування", () => {
   it("телефон: згорнутий чип зліва над смугою ходу", () => {
     setWide(false);
 
@@ -396,7 +396,7 @@ describe("BattleAudioDock — розташування", () => {
 
     fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
 
-    const panel = getByRole("region", { name: "Музика бою" });
+    const panel = getByRole("region", { name: "Музика" });
 
     expect(panel.className).toContain("max-h-[50dvh]");
     expect(panel.className).toContain("overflow-y-auto");
@@ -412,7 +412,7 @@ describe("BattleAudioDock — розташування", () => {
   it("кут (desktop): висота панелі не обмежена, заголовок звичайний", () => {
     const { getByRole } = dock({ audio: fileState });
 
-    const panel = getByRole("region", { name: "Музика бою" });
+    const panel = getByRole("region", { name: "Музика" });
 
     expect(panel.className).not.toContain("max-h-[50dvh]");
     expect(panel.querySelector("[data-audio-header]")?.className).not.toContain("sticky");

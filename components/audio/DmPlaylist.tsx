@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, Pencil, Search, X } from "lucide-react";
 
 import { TrackTitleInput } from "@/components/music/TrackTitleInput";
-import { type BattleAudioDm, type PlaylistView, useBattleAudio, usePlaylistView } from "@/lib/hooks/battle";
+import { type PlayerAudioDm, type PlaylistView, usePlayerAudio, usePlaylistView } from "@/lib/hooks/audio";
 import { cn } from "@/lib/utils";
 import { trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
 import type { CampaignTrack, TrackKind } from "@/types/audio";
@@ -85,8 +85,8 @@ function PlaylistFilters({ view, total }: { view: PlaylistView; total: number })
   );
 }
 
-export function DmPlaylist({ dm }: { dm: BattleAudioDm }) {
-  const { state, prefs } = useBattleAudio();
+export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
+  const { state, prefs } = usePlayerAudio();
 
   const { open, set } = prefs.playlist;
 

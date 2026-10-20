@@ -4,13 +4,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useBattleAudioState } from "../useBattleAudioState";
+import type { AudioHost } from "../host";
+import { useAudioState } from "../useAudioState";
 
 import { getBattleAudio } from "@/lib/api/battle-audio";
 import { battleKeys } from "@/lib/hooks/battles";
 import type { BattleAudioState } from "@/types/audio";
 
 vi.mock("@/lib/api/battle-audio", () => ({ getBattleAudio: vi.fn() }));
+
+const KEY = battleKeys.audio("c1", "b1");
+
+const host = (seed: BattleAudioState | null): AudioHost => ({ campaignId: "c1", isDM: false, queryKey: KEY, seed, fetch: () => getBattleAudio("c1", "b1"), send: vi.fn(), onFailure: vi.fn() });
 
 const state = (seq: number): BattleAudioState => ({ trackId: "t", track: null, playing: true, offsetSec: 0, startedAt: 0, seq });
 
@@ -20,11 +25,11 @@ function setup(client = new QueryClient({ defaultOptions: { queries: { retry: fa
   return { client, wrapper };
 }
 
-describe("useBattleAudioState", () => {
+describe("useAudioState", () => {
   it("до розблокування — стан зі сцени, без запиту; сцена з новішим seq оновлює, зі старішим — ні", () => {
     const { wrapper } = setup();
 
-    const { result, rerender } = renderHook(({ seed }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed, unlocked: false }), { wrapper, initialProps: { seed: state(2) as BattleAudioState | null } });
+    const { result, rerender } = renderHook(({ seed }) => useAudioState({ host: host(seed), unlocked: false }), { wrapper, initialProps: { seed: state(2) as BattleAudioState | null } });
 
     expect(result.current).toEqual({ audio: state(2), clockOffsetMs: null });
 
@@ -44,7 +49,7 @@ describe("useBattleAudioState", () => {
 
     const { wrapper } = setup();
 
-    const { result, rerender } = renderHook(({ unlocked }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), unlocked }), { wrapper, initialProps: { unlocked: false } });
+    const { result, rerender } = renderHook(({ unlocked }) => useAudioState({ host: host(state(2)), unlocked }), { wrapper, initialProps: { unlocked: false } });
 
     rerender({ unlocked: true });
 
@@ -57,7 +62,7 @@ describe("useBattleAudioState", () => {
 
     const { client, wrapper } = setup(new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 60_000 } } }));
 
-    const { result, rerender } = renderHook(({ unlocked }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), unlocked }), { wrapper, initialProps: { unlocked: false } });
+    const { result, rerender } = renderHook(({ unlocked }) => useAudioState({ host: host(state(2)), unlocked }), { wrapper, initialProps: { unlocked: false } });
 
     client.setQueryData(battleKeys.audio("c1", "b1"), { audio: state(3), clockOffsetMs: null });
     rerender({ unlocked: true });

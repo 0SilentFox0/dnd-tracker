@@ -8,7 +8,7 @@ import { CornerStack } from "./CornerStack";
 import { NoticeStackContext } from "./MapStrip";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
-import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
+import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
@@ -93,7 +93,7 @@ export function BattleScreen() {
         <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
           <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
           <CornerStack>
-            <BattleAudioDock placement="corner" />
+            <AudioDock placement="corner" />
           </CornerStack>
         </div>
       ) : (
@@ -107,7 +107,7 @@ export function BattleScreen() {
           {Desktop && (
             <CornerStack>
               <ActionResultCard />
-              <BattleAudioDock placement="corner" />
+              <AudioDock placement="corner" />
             </CornerStack>
           )}
           {isDM && <DmRevivePrompt />}

@@ -7,16 +7,16 @@ import { DmAudioControls } from "./DmAudioControls";
 import { NowPlayingLabel } from "./NowPlayingLabel";
 import { UnlockSoundButton } from "./UnlockSoundButton";
 
-import { useBattleAudio } from "@/lib/hooks/battle";
+import { usePlayerAudio } from "@/lib/hooks/audio";
 import { cn } from "@/lib/utils";
 
 /** capped — висота не більше пів екрана з прокруткою, заголовок липкий */
 export function AudioPlayerPanel({ view, children }: { view: { onCollapse(): void; capped?: boolean }; children?: ReactNode }) {
-  const { state, sound, prefs, dm } = useBattleAudio();
+  const { state, sound, prefs, dm } = usePlayerAudio();
 
   return (
     <section
-      aria-label="Музика бою"
+      aria-label="Музика"
       className={cn("w-64 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg", view.capped && "max-h-[50dvh] min-h-0 overflow-y-auto overscroll-contain pt-0")}
     >
       <header data-audio-header className={cn("flex items-center gap-2", view.capped && "sticky top-0 z-10 bg-black pt-2")}>

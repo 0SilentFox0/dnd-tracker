@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { TrackList, type TrackListActions } from "./TrackList";
 
 import { Input } from "@/components/ui/input";
-import { usePlaylistView } from "@/lib/hooks/battle";
+import { usePlaylistView } from "@/lib/hooks/audio";
 import { useTrackPreview } from "@/lib/hooks/music";
 import type { CampaignTrack } from "@/types/audio";
 

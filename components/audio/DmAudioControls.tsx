@@ -6,7 +6,7 @@ import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 import { DmPlaylist } from "./DmPlaylist";
 
-import { type BattleAudioDm, useBattleAudio } from "@/lib/hooks/battle";
+import { type PlayerAudioDm, usePlayerAudio } from "@/lib/hooks/audio";
 
 function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: ReactNode }) {
   return (
@@ -16,8 +16,8 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
   );
 }
 
-export function DmAudioControls({ dm }: { dm: BattleAudioDm }) {
-  const { state } = useBattleAudio();
+export function DmAudioControls({ dm }: { dm: PlayerAudioDm }) {
+  const { state } = usePlayerAudio();
 
   const { control, library } = dm;
 

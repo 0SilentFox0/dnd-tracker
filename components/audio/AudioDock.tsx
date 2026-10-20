@@ -7,7 +7,7 @@ import { NowPlayingLabel } from "./NowPlayingLabel";
 import { UnlockSoundButton } from "./UnlockSoundButton";
 import { YoutubePlayer } from "./YoutubePlayer";
 
-import { useBattleAudio } from "@/lib/hooks/battle";
+import { usePlayerAudio } from "@/lib/hooks/audio";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
  * collapseOn — ідентичність ходу: нове не-null значення згортає панель (вікно ходу забирає ту саму висоту).
  * collapseTick — лічильник: кожне зростання (розгорнуте вікно ходу на телефоні) теж згортає панель.
  */
-export function BattleAudioDock({ placement, collapseOn = null, collapseTick = 0 }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
-  const { state, sound, dm, prefs } = useBattleAudio();
+export function AudioDock({ placement, collapseOn = null, collapseTick = 0 }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
+  const { state, sound, dm, prefs } = usePlayerAudio();
 
   const wide = useMediaQuery(DESKTOP_QUERY);
 

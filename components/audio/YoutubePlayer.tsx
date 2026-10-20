@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 
 import { YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
-import { useBattleAudio, useYoutubeSync } from "@/lib/hooks/battle";
+import { usePlayerAudio, useYoutubeSync } from "@/lib/hooks/audio";
 import { cn } from "@/lib/utils";
 
 /** Видимий YouTube-плеєр бою. Показане відео — не менше 200×200 (вимога YouTube); сховане (перемикач «Відео» чи згорнута панель) лишає iframe змонтованим, тож звук іде. */
 export function YoutubePlayer({ videoId, onNeedsTap }: { videoId: string; onNeedsTap(): void }) {
-  const { state, clockOffsetMs, prefs } = useBattleAudio();
+  const { state, clockOffsetMs, prefs } = usePlayerAudio();
 
   const { ref, needsTap, failed } = useYoutubeSync({ videoId, state, clockOffsetMs, volume: prefs.volume, muted: prefs.muted });
 
