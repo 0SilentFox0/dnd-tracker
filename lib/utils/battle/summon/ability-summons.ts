@@ -4,6 +4,7 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
+import { pickOne } from "@/lib/utils/common/dice";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
@@ -77,7 +78,7 @@ export async function applyAbilitySummons(
     const banished: string[] = [];
 
     for (let i = 0; i < count; i++) {
-      const unit = candidates[Math.min(candidates.length - 1, Math.floor(opts.rng() * candidates.length))];
+      const unit = pickOne(candidates, opts.rng);
 
       const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
 

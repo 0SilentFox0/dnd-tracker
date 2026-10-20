@@ -6,13 +6,15 @@ import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { canActNow, controls } from "@/lib/utils/battle/common/control";
-import { applyTerrain } from "@/lib/utils/battle/grid/terrain";
+import { canActNow } from "@/lib/utils/battle/common/control";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
+import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -68,13 +70,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       }
     }
 
-    if (caster.battleData.activeEffects.some((e) => e.effects.some((d) => d.type === "disable_spell_casting"))) {
+    if (hasEffectMarker(caster, "disable_spell_casting")) {
       throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
     }
 
-    const { targeting } = definition;
-
-    const resolution = resolveSpellTargets(order, caster, spell, targeting, data.targetIds, { map: ctx.meta.map, targetCell: data.targetCell });
+    const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, { map: ctx.meta.map, targetCell: data.targetCell });
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
@@ -87,12 +87,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     assertSpellRolls(expected, diceRolls);
 
-    // клієнтські рятівні кидки приймаються лише від DM або за цілі, якими керує користувач; решту кидає сервер
-    const sent = data.saveRolls ?? [];
-
-    const trusted = sent.filter((s) => controls(ctx, order.find((p) => p.basicInfo.id === s.participantId)));
-
-    const serverRolled = sent.filter((s) => !trusted.includes(s)).map((s) => s.participantId);
+    const { trusted, serverRolled } = splitSaveRolls(ctx, order, data.saveRolls);
 
     const result = castSpell({
       caster,
@@ -129,21 +124,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 
-    const zone = targeting.kind === "template" ? targeting.zone : undefined;
-
-    const map = ctx.meta.map;
-
-    // постійну небезпеку, яку намалював ДМ, зона не перезаписує: інакше вона зникла б разом із зоною
-    const zoneCells = map && resolution.cells?.filter((k) => !(map.terrain?.[k]?.kind === "hazard" && map.terrain[k].untilRound === undefined));
-
-    const hazard = zone && map && zoneCells?.length
-      ? applyTerrain(map, zoneCells, {
-          kind: "hazard",
-          label: zone.label ?? spell.name,
-          untilRound: ctx.scene.round + zone.rounds - 1,
-          ...(result.spellDamage && { damage: { ...result.spellDamage, spellId: spell.id } }),
-        })
-      : null;
+    const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage });
 
     return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
   };

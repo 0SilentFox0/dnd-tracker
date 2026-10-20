@@ -1,10 +1,7 @@
-/**
- * Застосовує збережену перевірку моралі (pendingMoraleCheck) при next-turn:
- * екстра-хід, подія moraleCheck для вмінь, запис у battleLog.
- */
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -24,9 +21,7 @@ export function applyPendingMoraleCheck(
 ): ApplyPendingMoraleResult {
   const { participantId, d10Roll, moraleResult } = payload;
 
-  const participant = initiativeOrder.find(
-    (p) => p.basicInfo.id === participantId,
-  );
+  const participant = findParticipant(initiativeOrder, participantId);
 
   if (!participant) {
     return {
@@ -51,25 +46,21 @@ export function applyPendingMoraleCheck(
     };
   }
 
-  let updatedInitiativeOrder = [...initiativeOrder];
-
   // без клона: учасник ходить ще раз наприкінці раунду (advanceTurn); з додаткового ходу — не ланцюжком
-  if (moraleResult.hasExtraTurn && !participant.battleData.extraTurnActive && !participant.battleData.airborne) {
-    updatedInitiativeOrder = updatedInitiativeOrder.map((p) =>
-      p.basicInfo.id === participant.basicInfo.id
-        ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: true } }
-        : p,
-    );
-  }
+  const grantsExtraTurn = moraleResult.hasExtraTurn && !participant.battleData.extraTurnActive && !participant.battleData.airborne;
 
-  // паніка: до власного наступного ходу не відповідає на удари (скидання — на початку ходу)
-  if (moraleResult.shouldSkipTurn) {
-    updatedInitiativeOrder = updatedInitiativeOrder.map((p) =>
-      p.basicInfo.id === participant.basicInfo.id
-        ? { ...p, actionFlags: { ...p.actionFlags, hasUsedReaction: true } }
-        : p,
-    );
-  }
+  let updatedInitiativeOrder =
+    grantsExtraTurn || moraleResult.shouldSkipTurn
+      ? updateParticipant(initiativeOrder, participantId, (p) => ({
+          ...p,
+          actionFlags: {
+            ...p.actionFlags,
+            ...(grantsExtraTurn && { hasExtraTurn: true }),
+            // паніка: до власного наступного ходу не відповідає на удари (скидання — на початку ходу)
+            ...(moraleResult.shouldSkipTurn && { hasUsedReaction: true }),
+          },
+        }))
+      : initiativeOrder;
 
   const moraleSuccess = moraleResult.hasExtraTurn || !moraleResult.shouldSkipTurn;
 
@@ -83,9 +74,7 @@ export function applyPendingMoraleCheck(
 
   const triggerMessages = run.messages;
 
-  const participantForLog = updatedInitiativeOrder.find(
-    (p) => p.basicInfo.id === participant.basicInfo.id,
-  );
+  const participantForLog = findParticipant(updatedInitiativeOrder, participantId);
 
   const moraleLogEntry: BattleAction = {
     id: `morale-${participant.basicInfo.id}-${Date.now()}`,

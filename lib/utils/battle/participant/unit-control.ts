@@ -1,6 +1,7 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { pickOne } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 export const controlledByDm = (p: BattleParticipant, dmUserId: string | null) =>
@@ -55,7 +56,7 @@ export function randomizeUnitControl(order: BattleParticipant[], dmUserId: strin
   const participants = order.map((p) => {
     if (!isAssignableUnit(p) || !controlledByDm(p, dmUserId)) return p;
 
-    const unit = withController(p, owners[Math.floor(rng() * owners.length)]);
+    const unit = withController(p, pickOne(owners, rng));
 
     if (unit !== p) assigned.push({ unit, owner: unit.basicInfo.controlledBy });
 

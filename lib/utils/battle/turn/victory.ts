@@ -3,11 +3,6 @@ import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participa
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
-/**
- * Перевіряє умови перемоги
- * @param initiativeOrder - всі учасники бою
- * @returns результат перевірки
- */
 export interface VictoryCheckResult {
   isVictory: boolean;
   isDefeat: boolean;
@@ -23,6 +18,7 @@ export function originalSide(p: BattleParticipant): ParticipantSide {
   return origin?.side ?? p.basicInfo.side;
 }
 
+/** Перевіряє умови перемоги. */
 export function checkVictoryConditions(
   initiativeOrder: BattleParticipant[],
   reserve: BattleParticipant[] = [],
@@ -86,122 +82,45 @@ export function checkVictoryConditions(
   };
 }
 
-/**
- * Завершує бій та відновлює HP союзників
- * @param initiativeOrder - всі учасники бою
- * @param result - результат бою ("victory" | "defeat")
- * @param currentRound - поточний раунд
- * @returns оновлений список учасників та BattleAction для логу
- */
+const revivesOnVictory = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status === CombatStatus.UNCONSCIOUS;
+
+/** Завершує бій: знімає чари, при перемозі відроджує непритомних союзників. */
 export function completeBattle(
   initiativeOrder: BattleParticipant[],
   result: "victory" | "defeat",
-  currentRound: number
+  currentRound: number,
 ): {
   updatedParticipants: BattleParticipant[];
   battleAction: BattleAction;
 } {
   const restored = initiativeOrder.map(restoreCharm);
 
-  const updatedParticipants = restored.map((participant) => {
-    if (
-      result === "victory" &&
-      participant.basicInfo.side === ParticipantSide.ALLY &&
-      participant.combatStats.status === CombatStatus.UNCONSCIOUS
-    ) {
-      return {
-        ...participant,
-        combatStats: {
-          ...participant.combatStats,
-          currentHp: participant.combatStats.maxHp,
-          status: CombatStatus.ACTIVE,
-        },
-      };
-    }
+  const revived = result === "victory" ? restored.filter(revivesOnVictory) : [];
 
-    return participant;
-  });
+  const updatedParticipants = restored.map((p) =>
+    revived.includes(p) ? { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p,
+  );
 
   const battleAction: BattleAction = {
     id: `battle-complete-${Date.now()}`,
-    battleId: "", // буде встановлено в route
+    battleId: "",
     round: currentRound,
-    actionIndex: 0, // буде встановлено в route
+    actionIndex: 0,
     timestamp: new Date(),
     ...SYSTEM_ACTOR,
     actionType: "end_turn",
     targets: [],
     actionDetails: { battleResult: result },
-    resultText:
-      result === "victory"
-        ? "🎉 Бій завершено! Перемога союзників!"
-        : "💀 Бій завершено! Поразка союзників!",
-    // з учасників до відродження: після нього вони вже active
-    hpChanges: restored
-      .filter(
-        (p) =>
-          result === "victory" &&
-          p.basicInfo.side === ParticipantSide.ALLY &&
-          p.combatStats.status === CombatStatus.UNCONSCIOUS,
-      )
-      .map((p) => ({
-        participantId: p.basicInfo.id,
-        participantName: p.basicInfo.name,
-        oldHp: p.combatStats.currentHp,
-        newHp: p.combatStats.maxHp,
-        change: p.combatStats.currentHp - p.combatStats.maxHp,
-      })),
+    resultText: result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!",
+    hpChanges: revived.map((p) => ({
+      participantId: p.basicInfo.id,
+      participantName: p.basicInfo.name,
+      oldHp: p.combatStats.currentHp,
+      newHp: p.combatStats.maxHp,
+      change: p.combatStats.currentHp - p.combatStats.maxHp,
+    })),
     isCancelled: false,
   };
 
-  return {
-    updatedParticipants,
-    battleAction,
-  };
-}
-
-/**
- * Обчислює зміни HP для союзників після перемоги
- * @param originalInitiativeOrder - оригінальний порядок ініціативи
- * @param updatedInitiativeOrder - оновлений порядок ініціативи
- * @param victoryResult - результат перевірки перемоги
- * @returns масив змін HP для союзників
- */
-export function calculateAllyHpChangesOnVictory(
-  originalInitiativeOrder: BattleParticipant[],
-  updatedInitiativeOrder: BattleParticipant[],
-  victoryResult: VictoryCheckResult
-): Array<{
-  participantId: string;
-  participantName: string;
-  oldHp: number;
-  newHp: number;
-  change: number;
-}> {
-  const originalById = new Map(
-    originalInitiativeOrder.map((p) => [p.basicInfo.id, p])
-  );
-
-  return updatedInitiativeOrder
-    .filter((p) => p.basicInfo.side === ParticipantSide.ALLY)
-    .map((p) => {
-      const original = originalById.get(p.basicInfo.id);
-
-      const oldHp = original?.combatStats.currentHp ?? p.combatStats.currentHp;
-
-      const newHp = p.combatStats.currentHp;
-
-      if (oldHp !== newHp && victoryResult.result === "victory") {
-        return {
-          participantId: p.basicInfo.id,
-          participantName: p.basicInfo.name,
-          oldHp,
-          newHp,
-          change: oldHp - newHp,
-        };
-      }
-
-      return null;
-    })
-    .filter((change): change is NonNullable<typeof change> => change !== null);
+  return { updatedParticipants, battleAction };
 }

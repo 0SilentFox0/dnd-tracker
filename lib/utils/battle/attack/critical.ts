@@ -1,4 +1,4 @@
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { addActiveEffect } from "@/lib/utils/battle/turn/effects";
@@ -24,45 +24,36 @@ const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
 const MARK: StaticEffect = { kind: "flag", flag: "advantageForAttackers" };
 
 /** Modifier-like crit effects are StaticEffects; condition markers stay in `effects`, where battle-turn and disabled-attacks read them. */
+const SPECS: Record<CriticalEffectType, EffectSpec | ((effect: CriticalEffect) => EffectSpec) | null> = {
+  advantage_next_attack: { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack", expireAtTurnEnd: true },
+  disadvantage_next_attack: { idPart: "disadvantage", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack", expireAtTurnEnd: true },
+  ac_debuff: (effect) => ({
+    idPart: "ac-debuff",
+    type: "debuff",
+    modifiers: [{ kind: "modifyStat", stat: "armor", flat: typeof effect.effect.value === "number" ? effect.effect.value : -2 }],
+  }),
+  combo_attack: { idPart: "combo", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" },
+  block_bonus_action: { idPart: "block-bonus", type: "debuff", legacy: "no_bonus_action" },
+  advantage_on_target: { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true },
+  advantage_on_self: { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true },
+  prone: { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE], expireAtTurnEnd: true },
+  weakened_next_hit: { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true },
+  lose_action: { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: SKIP_ACTION_CERTAIN, duration: 1 },
+  double_damage: null,
+  max_damage: null,
+  additional_damage: null,
+  free_attack: null,
+  ignore_reactions: null,
+  simple_miss: null,
+  lose_bonus_action: null,
+  provoke_opportunity_attack: null,
+  lose_reaction: null,
+};
+
 function specFor(effect: CriticalEffect): EffectSpec | null {
-  switch (effect.effect.type) {
-    case "advantage_next_attack":
-      return { idPart: "advantage", type: "buff", modifiers: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack", expireAtTurnEnd: true };
-    case "disadvantage_next_attack":
-      return { idPart: "disadvantage", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack", expireAtTurnEnd: true };
-    case "ac_debuff":
-      return {
-        idPart: "ac-debuff",
-        type: "debuff",
-        modifiers: [{ kind: "modifyStat", stat: "armor", flat: typeof effect.effect.value === "number" ? effect.effect.value : -2 }],
-      };
-    case "combo_attack":
-      return { idPart: "combo", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" };
-    case "block_bonus_action":
-      return { idPart: "block-bonus", type: "debuff", legacy: "no_bonus_action" };
-    case "advantage_on_target":
-      return { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true };
-    case "advantage_on_self":
-      return { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true };
-    case "prone":
-      return { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE], expireAtTurnEnd: true };
-    case "weakened_next_hit":
-      return { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true };
-    case "lose_action":
-      return { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: SKIP_ACTION_CERTAIN, duration: 1 };
-    case "double_damage":
-    case "max_damage":
-    case "additional_damage":
-    case "free_attack":
-    case "ignore_reactions":
-    case "simple_miss":
-    case "lose_bonus_action":
-    case "provoke_opportunity_attack":
-    case "lose_reaction":
-      return null;
-    default:
-      return effect.effect.type satisfies never;
-  }
+  const spec = SPECS[effect.effect.type];
+
+  return typeof spec === "function" ? spec(effect) : spec;
 }
 
 export function critFlavorFor(

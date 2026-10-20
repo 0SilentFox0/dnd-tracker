@@ -30,6 +30,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
+import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 
 export type { EffectApplyInput, EffectApplyResult };
@@ -129,9 +130,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     fields: [{ name: "options", label: "Варіанти", input: "effects" }],
     describe: (e) => `одне з: ${e.options.map(describeEffect).join(" / ")}`,
     apply: (i) => {
-      const index = Math.min(i.effect.options.length - 1, Math.floor(i.ctx.rng() * i.effect.options.length));
-
-      const option = i.effect.options[index];
+      const option = pickOne(i.effect.options, i.ctx.rng);
 
       const targetIds = "target" in option && option.target ? resolveTargetIds(option.target, i.ownerId, i.event, i.participants, i.ctx) : i.targetIds;
 

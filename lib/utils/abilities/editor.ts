@@ -12,55 +12,35 @@ export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon" && k !== "maneuver");
 }
 
-function baseEffect(kind: EffectKind): Effect {
-  switch (kind) {
-    case "modifyStat":
-      return { kind, stat: "armor", flat: 1 };
-    case "damageBonus":
-      return { kind, filter: { kind: "all" }, percent: 10 };
-    case "flag":
-      return { kind, flag: "advantage", attackKind: "all" };
-    case "note":
-      return { kind, text: "Опис" };
-    case "grantAction":
-      return { kind, refreshAction: true };
-    case "dealDamage":
-      return { kind, amount: "1d6", target: "eventTarget" };
-    case "heal":
-      return { kind, amount: "1d8" };
-    case "dot":
-      return { kind, damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" };
-    case "hot":
-      return { kind, healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" };
-    case "berserk":
-      return { kind, damageBonusPercent: 50, duration: { rounds: 1 }, target: "eventTarget" };
-    case "charm":
-      return { kind, duration: { rounds: 1 }, target: "eventTarget" };
-    case "applyCondition":
-      return { kind, condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" };
-    case "restoreSpellSlot":
-      return { kind, count: 1 };
-    case "drainSpellSlot":
-      return { kind, count: 1, target: "eventTarget" };
-    case "changeMorale":
-      return { kind, delta: 1 };
-    case "cleanse":
-    case "copySpellBuffs":
-      return { kind };
-    case "summon":
-      return { kind, group: "Демони", tier: 1 };
-    case "raiseDead":
-      return { kind, hpPercent: 50, target: "eventTarget" };
-    case "guard":
-      return { kind, percent: 50, duration: { rounds: 2 }, target: "eventTarget" };
-    case "mark":
-      return { kind, markId: "mark", duration: { rounds: 2 }, target: "eventTarget" };
-    case "maneuver":
-      return { kind, maneuver: "fireBurst", percentOfAttack: 50 };
-    case "randomOf":
-      return { kind, options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] };
-  }
-}
+type WithoutKind<T> = T extends unknown ? Omit<T, "kind"> : never;
+
+const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: K }>> } = {
+  modifyStat: { stat: "armor", flat: 1 },
+  damageBonus: { filter: { kind: "all" }, percent: 10 },
+  flag: { flag: "advantage", attackKind: "all" },
+  note: { text: "Опис" },
+  grantAction: { refreshAction: true },
+  dealDamage: { amount: "1d6", target: "eventTarget" },
+  heal: { amount: "1d8" },
+  dot: { damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" },
+  hot: { healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" },
+  berserk: { damageBonusPercent: 50, duration: { rounds: 1 }, target: "eventTarget" },
+  charm: { duration: { rounds: 1 }, target: "eventTarget" },
+  applyCondition: { condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" },
+  restoreSpellSlot: { count: 1 },
+  drainSpellSlot: { count: 1, target: "eventTarget" },
+  changeMorale: { delta: 1 },
+  cleanse: {},
+  copySpellBuffs: {},
+  summon: { group: "Демони", tier: 1 },
+  raiseDead: { hpPercent: 50, target: "eventTarget" },
+  guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
+  mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
+  maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
+  randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
+};
+
+const baseEffect = (kind: EffectKind): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]) }) as Effect;
 
 function fitToTrigger(effect: Effect, trigger: Trigger): Effect {
   if (trigger.event === "passive") {

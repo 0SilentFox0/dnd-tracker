@@ -5,8 +5,7 @@ import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
-import { rollDiceList } from "@/lib/utils/common/dice";
-import { rollDie } from "@/lib/utils/common/dice";
+import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
@@ -81,7 +80,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     return finishTurn(participants, [note(berserker, params, `🤬 Шал: ${berserker.basicInfo.name} ${reason}`)], params);
   }
 
-  const target = victims[Math.min(victims.length - 1, Math.floor(rng() * victims.length))];
+  const target = pickOne(victims, rng);
 
   const result = processAttack({
     attacker: berserker,
