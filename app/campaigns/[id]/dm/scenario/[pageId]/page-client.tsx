@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { LoadingState } from "@/components/common/states";
+import { LoadingState, QueryState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioPageView } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { useScenarioPage, useSectionProgress } from "@/lib/hooks/scenario";
@@ -13,9 +13,15 @@ import type { ScenarioPage } from "@/types/scenario";
 
 const ScenarioEditor = dynamic(() => import("@/components/scenario/editor"), { ssr: false, loading: () => <LoadingState /> });
 
-export function ScenarioPageClient({ campaignId, initialPage, playedPages }: { campaignId: string; initialPage: ScenarioPage; playedPages: { id: string; played: string[] }[] }) {
-  const { data: page = initialPage } = useScenarioPage(campaignId, initialPage.id, initialPage);
+type PlayedPages = { id: string; played: string[] }[];
 
+export function ScenarioPageClient({ campaignId, pageId, playedPages }: { campaignId: string; pageId: string; playedPages: PlayedPages }) {
+  const query = useScenarioPage(campaignId, pageId);
+
+  return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} />}</QueryState>;
+}
+
+function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages }) {
   const progress = useSectionProgress(campaignId, page.id);
 
   const [hideNotes, setHideNotes] = useState(false);

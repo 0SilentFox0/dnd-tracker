@@ -4,23 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, QueryState } from "@/components/common/states";
 import { CreateScenarioPageDialog, ScenarioBook, ScenarioIndex, ScenarioSearch } from "@/components/scenario";
 import { Button } from "@/components/ui/button";
-import { useCharacters } from "@/lib/hooks/characters";
 import { useScenarioPageActions, useScenarioPages } from "@/lib/hooks/scenario";
-import type { ScenarioPageSummary } from "@/types/scenario";
 
-export function ScenarioIndexPageClient({ campaignId, campaignName, initialPages }: { campaignId: string; campaignName: string; initialPages: ScenarioPageSummary[] }) {
+export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
   const router = useRouter();
 
-  const { data: pages = initialPages } = useScenarioPages(campaignId, initialPages);
+  const pages = useScenarioPages(campaignId);
 
   const actions = useScenarioPageActions(campaignId);
-
-  const { data: roster = [] } = useCharacters(campaignId, { compact: true });
-
-  const characters = roster.map((c) => ({ id: c.id, name: c.name }));
 
   const [creating, setCreating] = useState(false);
 
@@ -36,12 +30,14 @@ export function ScenarioIndexPageClient({ campaignId, campaignName, initialPages
             Нова сторінка
           </Button>
         </div>
-        {pages.length === 0 ? <EmptyState title="Сценарій порожній" description="Створіть першу сцену або імпортуйте наявні." /> : <ScenarioIndex campaignId={campaignId} pages={pages} onMove={(id, dir, siblings) => void actions.move(id, dir, siblings).catch(() => {})} />}
+        <QueryState query={pages} empty={<EmptyState title="Сценарій порожній" description="Створіть першу сцену або імпортуйте наявні." />}>
+          {(list) => <ScenarioIndex campaignId={campaignId} pages={list} onMove={(id, dir, siblings) => void actions.move(id, dir, siblings).catch(() => {})} />}
+        </QueryState>
       </div>
       <CreateScenarioPageDialog
         open={creating}
         onOpenChange={setCreating}
-        characters={characters}
+        campaignId={campaignId}
         pending={actions.isPending}
         onSubmit={(data) =>
           void actions
