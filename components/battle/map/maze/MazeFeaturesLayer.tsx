@@ -49,17 +49,6 @@ const ARCH_OPENING = "M-24,40 V-10 A24,24 0 0 1 24,-10 V40 Z";
 
 const SWIRL = "M0,6 m-4,0 a4,4 0 1,1 8,0 a8,8 0 1,1 -16,0 a12,12 0 1,1 24,0 a16,16 0 1,1 -32,0";
 
-// основа арки — до рамки поля, отвір — досередини
-function archTurn(exit: GridPoint, map: BattleMapConfig) {
-  if (exit.y === map.rows - 1) return 0;
-
-  if (exit.y === 0) return 180;
-
-  if (exit.x === 0) return 90;
-
-  return exit.x === map.cols - 1 ? -90 : 0;
-}
-
 interface Props {
   map: BattleMapConfig;
   view: MazeView | null | undefined;
@@ -114,7 +103,7 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
         })}
       </g>
       {exit && (
-        <g className="maze-exit" data-maze-exit={cellKey(exit)} transform={`translate(${cellCenter(exit).x} ${cellCenter(exit).y}) rotate(${archTurn(exit, map)})`}>
+        <g className="maze-exit" data-maze-exit={cellKey(exit)} transform={`translate(${cellCenter(exit).x} ${cellCenter(exit).y})${rotated ? " rotate(-90)" : ""}`}>
           <path d={ARCH_OPENING} fill={`url(#${portalId})`} />
           <g clipPath={`url(#${clipId})`}>
             <path className="maze-exit-swirl" d={SWIRL} fill="none" stroke="var(--maze-exit-core)" strokeWidth={3} strokeLinecap="round" opacity={0.85} />
