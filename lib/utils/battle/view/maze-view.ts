@@ -85,7 +85,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   const visibleIds = new Set(own.map(idOf));
 
   for (const p of participants) {
-    if (visibleIds.has(idOf(p)) || !onField(p) || isEscaped(p) || !isActive(p)) continue;
+    if (visibleIds.has(idOf(p)) || !onField(p) || isEscaped(p)) continue;
 
     const target = p.battleData.position!;
 
