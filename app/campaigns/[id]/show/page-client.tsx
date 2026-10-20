@@ -3,6 +3,7 @@
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
 import { FullscreenButton } from "@/components/show/stage/FullscreenButton";
+import { ShowBattleCall } from "@/components/show/stage/ShowBattleCall";
 import { ShowControlPanel } from "@/components/show/stage/ShowControlPanel";
 import { ShowStage } from "@/components/show/stage/ShowStage";
 import { useNotify } from "@/lib/hooks/common";
@@ -26,6 +27,7 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
       <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
           <ShowStage show={show} />
+          {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
           <div className="absolute right-3 top-3 z-20">
             <FullscreenButton />
           </div>
