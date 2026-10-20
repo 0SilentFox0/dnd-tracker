@@ -277,27 +277,64 @@ describe("шаблон і дальність", () => {
     expect(withLiveAimTargets(single, [])).toBe(single);
   });
 
-  it("клік по карті остаточний: «Назад» із кидків не повертає до наведення, з підсумку — лише до кидків", () => {
+  it("«Назад» із кидків вертає до цілей (карта), із цілей — до книги; без цілей — з кидків до книги", () => {
     const rolls = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: ball }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: ["f"] }, { type: "CONFIRM_TARGETS" });
 
     expect(rolls.step).toBe("rolls");
-    expect(canGoBack(rolls)).toBe(false);
-    expect(spellFlow(rolls, { type: "BACK" })).toBe(rolls);
+    expect(canGoBack(rolls)).toBe(true);
+
+    const targets = spellFlow(rolls, { type: "BACK" });
+
+    expect(targets.step).toBe("targets");
+    expect(spellFlow(targets, { type: "SET_AIM", aim: { x: 2, y: 2 }, targetIds: [] }).aim).toEqual({ x: 2, y: 2 });
+    expect(spellFlow(targets, { type: "BACK" }).step).toBe("spell");
 
     const summary = [{ type: "SET_DAMAGE", index: 0, value: 3 }, { type: "TO_SUMMARY" }].reduce<SpellFlowState>((s, a) => spellFlow(s, a as SpellFlowAction), rolls);
 
-    expect(canGoBack(summary)).toBe(true);
     expect(spellFlow(summary, { type: "BACK" }).step).toBe("rolls");
 
-    const bare = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: { ...ball, needsSaves: false, diceSlots: [] } }, { type: "TO_TARGETS" }, { type: "SET_AIM", aim: { x: 6, y: 1 }, targetIds: [] }, { type: "CONFIRM_TARGETS" });
+    const auto = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick: { ...aura, diceSlots: [6] } }, { type: "TO_TARGETS" });
 
-    expect(bare.step).toBe("summary");
-    expect(spellFlow(bare, { type: "BACK" })).toBe(bare);
+    expect(auto.step).toBe("rolls");
+    expect(spellFlow(auto, { type: "BACK" }).step).toBe("spell");
+  });
 
-    const single = run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick: ray }, { type: "TO_TARGETS" }, { type: "TOGGLE_TARGET", id: "f" }, { type: "CONFIRM_TARGETS" });
+  describe("PICK_TARGET (клік по токену на карті)", () => {
+    const start = (pick: SpellPick) => run({ type: "OPEN", casterId: "h", level: 2 }, { type: "PICK", pick }, { type: "TO_TARGETS" });
 
-    expect(canGoBack(single)).toBe(true);
-    expect(spellFlow(single, { type: "BACK" }).step).toBe("targets");
+    it("одиночне: клік обирає ціль і одразу веде до кидків", () => {
+      const s = spellFlow(start(ray), { type: "PICK_TARGET", id: "f" });
+
+      expect(s).toMatchObject({ step: "rolls", targetIds: ["f"] });
+    });
+
+    it("одиночне без кидків — одразу підсумок", () => {
+      const s = spellFlow(start({ ...ray, diceSlots: [] }), { type: "PICK_TARGET", id: "f" });
+
+      expect(s.step).toBe("summary");
+    });
+
+    it("ланцюг: клік лише обирає першу ціль, підтвердження окреме", () => {
+      const s = spellFlow(start({ ...ray, chain: { side: "enemy", maxTargets: 3 } }), { type: "PICK_TARGET", id: "f" });
+
+      expect(s).toMatchObject({ step: "targets", targetIds: ["f"] });
+      expect(spellFlow(s, { type: "CONFIRM_TARGETS" }).step).toBe("rolls");
+    });
+
+    it("кілька цілей: перемикання з ліміту maxTargets, підтвердження окреме", () => {
+      const capped = { ...cloud, maxTargets: 2 };
+
+      const s = ["a", "b", "c"].reduce((acc, id) => spellFlow(acc, { type: "PICK_TARGET", id }), start(capped));
+
+      expect(s).toMatchObject({ step: "targets", targetIds: ["a", "b"] });
+      expect(spellFlow(s, { type: "PICK_TARGET", id: "a" }).targetIds).toEqual(["b"]);
+    });
+
+    it("поза кроком цілей клік по токену не підтверджує", () => {
+      const rolls = spellFlow(start(ray), { type: "PICK_TARGET", id: "f" });
+
+      expect(spellFlow(rolls, { type: "PICK_TARGET", id: "g" })).toBe(rolls);
+    });
   });
 
   it("SET_AIM і CONFIRM_TARGETS діють лише на кроці цілей: застарілий onAim на кидках нічого не змінює", () => {

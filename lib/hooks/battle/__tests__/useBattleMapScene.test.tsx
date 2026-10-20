@@ -5,14 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { useBattleMapScene } from "../useBattleMapScene";
 import { fakeScene } from "./fake-scene";
 
-import type { MapAim } from "@/lib/utils/battle/grid";
+import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import type { MapTerrainData } from "@/types/api";
 import type { BattleMapConfig } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
-function setup(isDM: boolean, mapAim: MapAim | null = null) {
-  const scene = fakeScene({ isDM, map, mapAim });
+function setup(isDM: boolean, mapAim: MapAim | null = null, mapPick: MapPick | null = null) {
+  const scene = fakeScene({ isDM, map, mapAim, mapPick });
 
   scene.me.battleData.position = { x: 0, y: 0 };
   scene.gob.battleData.position = { x: 1, y: 0 };
@@ -240,6 +240,35 @@ describe("useBattleMapScene", () => {
 
   describe("наведення шаблону", () => {
     const aim = (over: Partial<MapAim> = {}): MapAim => ({ template: { shape: "circle", size: 5 }, casterId: "me", range: 15, onAim: vi.fn(), ...over });
+
+    describe("вибір цілей заклинання", () => {
+      const pick = (over: Partial<MapPick> = {}): MapPick => ({ casterId: "me", targets: [{ id: "gob", reachable: true }, { id: "ally", reachable: false }], selectedIds: [], onPick: vi.fn(), ...over });
+
+      it("клік по токену й клітинці з ціллю — onPick, без руху, атаки й виділення", () => {
+        const mapPick = pick();
+
+        const { current, value } = setup(false, null, mapPick);
+
+        act(() => current().actions.onTokenClick?.("gob"));
+        act(() => current().actions.onCellClick?.({ x: 1, y: 0 }));
+
+        expect(mapPick.onPick).toHaveBeenCalledTimes(2);
+        expect(mapPick.onPick).toHaveBeenCalledWith("gob");
+        expect(value.actions.move.mutate).not.toHaveBeenCalled();
+        expect(value.intents.requestAttack).not.toHaveBeenCalled();
+        expect(value.select).not.toHaveBeenCalled();
+      });
+
+      it("недосяжна ціль — підказка, а позначки йдуть у view", () => {
+        const { current, value } = setup(false, null, pick({ selectedIds: ["gob"] }));
+
+        act(() => current().actions.onTokenClick?.("ally"));
+
+        expect(value.toast.show).toHaveBeenCalledWith("Поза дальністю");
+        expect(current().view.marks?.get("1:0")).toBe("picked");
+        expect(current().view.marks?.get("0:4")).toBe("invalid-target");
+      });
+    });
 
     it("клік по клітинці й токену — onAim, без руху й атаки", () => {
       const mapAim = aim();
