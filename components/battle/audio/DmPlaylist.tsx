@@ -1,58 +1,22 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight, Pencil } from "lucide-react";
 
-import { TRACK_TITLE_MAX } from "@/lib/constants/music";
+import { TrackTitleInput } from "@/components/music/TrackTitleInput";
 import type { BattleAudioValue } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { CampaignTrack } from "@/types/audio";
 
 type Library = NonNullable<BattleAudioValue["library"]>;
 
-function TitleEditor({ track, onDone }: { track: CampaignTrack; onDone(title: string | null): void }) {
-  // Esc знімає поле з фокусу, і blur не мусить зберегти скасовану назву
-  const settled = useRef(false);
-
-  const finish = (title: string | null) => {
-    if (settled.current) return;
-
-    settled.current = true;
-    onDone(title);
-  };
-
-  return (
-    <input
-      aria-label="Нова назва треку"
-      autoFocus
-      defaultValue={track.title}
-      maxLength={TRACK_TITLE_MAX}
-      onBlur={(e) => finish(e.currentTarget.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") finish(e.currentTarget.value);
-
-        if (e.key === "Escape") finish(null);
-      }}
-      className="min-w-0 flex-1 rounded border border-hud-rule bg-black/60 px-1.5 py-1 text-hud-bone"
-    />
-  );
-}
-
 function TrackRow({ track, current, disabled, actions }: { track: CampaignTrack; current: boolean; disabled: boolean; actions: { play(): void; rename(title: string): void } }) {
   const [editing, setEditing] = useState(false);
-
-  const done = (raw: string | null) => {
-    setEditing(false);
-
-    const title = raw?.trim();
-
-    if (title && title !== track.title) actions.rename(title);
-  };
 
   return (
     <li className="flex items-center gap-1">
       {editing ? (
-        <TitleEditor track={track} onDone={done} />
+        <TrackTitleInput track={track} onRename={actions.rename} onClose={() => setEditing(false)} className="h-auto rounded border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs" />
       ) : (
         <button
           type="button"
