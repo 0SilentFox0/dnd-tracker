@@ -72,7 +72,7 @@ export function BattleFxLayer() {
 
       if (!current.dice) return;
 
-      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS, () => dice.current?.cancel());
+      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), DICE_TOTAL_MS + 300, () => dice.current?.cancel());
     };
 
     // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.

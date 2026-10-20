@@ -10,7 +10,7 @@ const h = vi.hoisted(() => ({
 
 vi.mock("../scene", () => ({ createThreeDice: h.createThreeDice }));
 
-import { DiceStage, type DiceStageHandle } from "../DiceStage";
+import { DiceStage, type DiceStageHandle, sceneLoader } from "../DiceStage";
 
 import type { DiceThrowSpec } from "@/lib/utils/battle/fx/dice";
 
@@ -102,5 +102,54 @@ describe("DiceStage", () => {
     await Promise.resolve();
 
     expect(h.engine.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("чанк, що вантажиться довше 800 мс: play повертається без кидка, наступний кидок використовує завантажене", async () => {
+    vi.useFakeTimers();
+
+    h.createThreeDice.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(h.engine), 1000)));
+
+    const { ref } = mount();
+
+    await act(async () => {
+      const played = ref.current?.play(spec);
+
+      await vi.advanceTimersByTimeAsync(850);
+      await played;
+    });
+
+    expect(h.engine.roll).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+      await ref.current?.play(spec);
+    });
+
+    expect(h.engine.roll).toHaveBeenCalledTimes(1);
+    expect(h.createThreeDice).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it("невдалий import: наступний кидок пробує знову", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const load = vi.spyOn(sceneLoader, "load").mockRejectedValueOnce(new Error("chunk"));
+
+    const { ref } = mount();
+
+    await act(async () => {
+      await ref.current?.play(spec);
+    });
+
+    expect(h.engine.roll).not.toHaveBeenCalled();
+
+    load.mockRestore();
+
+    await act(async () => {
+      await ref.current?.play(spec);
+    });
+
+    expect(h.engine.roll).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 });
