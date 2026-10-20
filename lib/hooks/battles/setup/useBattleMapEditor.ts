@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND, emptyMaze } from "@/lib/constants/battle";
 import { useImageSize } from "@/lib/hooks/common";
 import {
   applyMargins,
@@ -112,6 +112,12 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   // масштаб і зсув належать старому фону
   const setBackground = useCallback((background: string | null) => setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({ ...m, background })), []);
 
+  const setMaze = useCallback((on: boolean) => {
+    setMap((m) => ({ ...m, maze: on ? emptyMaze() : null }));
+
+    if (on) setToolState(null);
+  }, []);
+
   const onStroke = useCallback(
     (cells: GridPoint[]) => {
       if (!tool || cells.length === 0) return;
@@ -129,9 +135,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   );
 
   return {
-    state: { enabled, map, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
+    state: { enabled, map, maze: map.maze ?? null, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
     brush,
-    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, onStroke },
+    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, setMaze, onStroke },
   };
 }
 

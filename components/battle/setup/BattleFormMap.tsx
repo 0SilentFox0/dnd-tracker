@@ -52,7 +52,7 @@ function ToggleRow({ id, label, checked, onChange }: { id: string; label: string
 }
 
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
-  const { enabled, map, margins, tool, notice, cellPx } = editor.state;
+  const { enabled, map, maze, margins, tool, notice, cellPx } = editor.state;
 
   const offset = map.gridOffset ?? { x: 0, y: 0 };
 
@@ -73,6 +73,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
   return (
     <HudSection title="Карта бою" className="space-y-4">
       <ToggleRow id="map-enabled" label="Бій на карті" checked={enabled} onChange={actions.setEnabled} />
+      {enabled && <ToggleRow id="map-maze" label="Лабіринт" checked={maze !== null} onChange={actions.setMaze} />}
       {enabled && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
           <div className="space-y-4">
@@ -116,49 +117,51 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 ))}
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Малювання клітинок</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {TOOLS.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={tool === value}
-                    onClick={() => actions.setTool(tool === value ? null : value)}
-                    className={cn(
-                      "h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50",
-                      tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {tool === "hazard" && (
-                <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
-                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={brush.label} onChange={(e) => actions.setBrush({ label: e.target.value })} />
-                  <div className="space-y-1">
-                    <Label htmlFor="map-hazard-dice" className="text-xs">
-                      Шкода (кубики)
-                    </Label>
-                    <Input
-                      id="map-hazard-dice"
-                      aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
-                      maxLength={12}
-                      placeholder="без шкоди"
-                      value={brush.dice}
-                      onChange={(e) => actions.setBrush({ dice: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="map-hazard-type" className="text-xs">
-                      Тип
-                    </Label>
-                    <SelectField id="map-hazard-type" value={brush.damageType} onValueChange={(damageType) => actions.setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} />
-                  </div>
+            {maze === null && (
+              <div className="space-y-2">
+                <Label>Малювання клітинок</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {TOOLS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={tool === value}
+                      onClick={() => actions.setTool(tool === value ? null : value)}
+                      className={cn(
+                        "h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50",
+                        tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+                {tool === "hazard" && (
+                  <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
+                    <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={brush.label} onChange={(e) => actions.setBrush({ label: e.target.value })} />
+                    <div className="space-y-1">
+                      <Label htmlFor="map-hazard-dice" className="text-xs">
+                        Шкода (кубики)
+                      </Label>
+                      <Input
+                        id="map-hazard-dice"
+                        aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
+                        maxLength={12}
+                        placeholder="без шкоди"
+                        value={brush.dice}
+                        onChange={(e) => actions.setBrush({ dice: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="map-hazard-type" className="text-xs">
+                        Тип
+                      </Label>
+                      <SelectField id="map-hazard-type" value={brush.damageType} onValueChange={(damageType) => actions.setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <ImageUpload value={map.background ?? ""} onChange={(v) => actions.setBackground(v || null)} label="Фон карти" maxSide={2400} allowFile />
               <Button type="button" variant="outline" size="sm" onClick={() => actions.setBackground(null)} disabled={map.background === null}>

@@ -1,0 +1,67 @@
+// @vitest-environment happy-dom
+import { useEffect } from "react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { BattleFormMap } from "@/components/battle/setup/BattleFormMap";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { emptyMaze } from "@/lib/constants/battle";
+import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
+
+vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
+vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useImageSize: (src: string | null) => (src ? { width: 1980, height: 1200 } : null) }));
+vi.stubGlobal(
+  "ResizeObserver",
+  class {
+    constructor(private cb: (e: { contentRect: { width: number; height: number } }[]) => void) {}
+    observe() {
+      this.cb([{ contentRect: { width: 800, height: 600 } }]);
+    }
+    disconnect() {}
+    unobserve() {}
+  },
+);
+
+const seen = vi.hoisted(() => ({ editor: null as unknown as ReturnType<typeof import("@/lib/hooks/battles/setup/useBattleMapEditor").useBattleMapEditor> }));
+
+function Harness() {
+  const editor = useBattleMapEditor(null);
+
+  useEffect(() => {
+    seen.editor = editor;
+  });
+
+  return (
+    <ConfirmProvider>
+      <BattleFormMap editor={editor} />
+    </ConfirmProvider>
+  );
+}
+
+afterEach(cleanup);
+
+describe("перемикач «Лабіринт»", () => {
+  it("без карти перемикача немає", () => {
+    render(<Harness />);
+
+    expect(screen.queryByRole("switch", { name: "Лабіринт" })).toBeNull();
+  });
+
+  it("вмикання дає map.maze = emptyMaze() і ховає палітру місцевості", () => {
+    render(<Harness />);
+
+    fireEvent.click(screen.getByRole("switch", { name: "Бій на карті" }));
+
+    expect(screen.getByText("Малювання клітинок")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
+
+    expect(seen.editor.state.value?.maze).toEqual(emptyMaze());
+    expect(screen.queryByText("Малювання клітинок")).toBeNull();
+
+    fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
+
+    expect(seen.editor.state.value?.maze).toBeNull();
+    expect(screen.getByText("Малювання клітинок")).toBeTruthy();
+  });
+});
