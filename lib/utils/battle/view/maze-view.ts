@@ -3,7 +3,7 @@ import type { QueueEntry } from "./queue";
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { inMazePlay, isEscaped, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
+import { inMazePlay, isEscaped, isMazeHero, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
@@ -12,6 +12,8 @@ export interface MazeView {
   role: MazeRole;
   /** null — бачить усі клітинки */
   cells: ReadonlySet<string> | null;
+  /** Лише для ДМ: що зараз бачать усі герої на полі разом */
+  partyCells: ReadonlySet<string> | null;
   visibleIds: ReadonlySet<string>;
   /** Свої герої гравця (або герой «Очима гравця»); для ДМ і глядача порожньо */
   ownIds: ReadonlySet<string>;
@@ -64,10 +66,12 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
 
   const grid = { cols: map.cols, rows: map.rows, maze };
 
-  const base = { mazeDark: maze.dark };
+  const viewersOf = (list: BattleParticipant[]) => list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
+
+  const base = { mazeDark: maze.dark, partyCells: null };
 
   if (isDM && !asHeroId) {
-    return { ...base, role: "dm", cells: null, visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
+    return { ...base, role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
   }
 
   const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
@@ -78,7 +82,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
   }
 
-  const viewers = own.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
+  const viewers = viewersOf(own);
 
   const cells = unionVision(grid, viewers);
 

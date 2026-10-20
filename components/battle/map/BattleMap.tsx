@@ -7,7 +7,7 @@ import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
-import { MazeDarkScreen, MazeEdgeEditor, MazeFeaturesLayer, MazeFogOfWar, MazeWallsLayer } from "./maze";
+import { MazeDarkScreen, MazeEdgeEditor, MazeFeaturesLayer, MazeFogOfWar, MazePartyVision, MazeWallsLayer } from "./maze";
 
 import "./battle-map.css";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
@@ -541,6 +541,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           />
           <MazeFeaturesLayer map={map} view={maze} rotated={fit.rotated} />
           <MazeFogOfWar map={map} view={maze} />
+          <MazePartyVision view={maze} />
           <MazeWallsLayer map={map} view={maze} />
           {mazeEditing && <MazeEdgeEditor map={map} editing={mazeEditing} />}
           <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
