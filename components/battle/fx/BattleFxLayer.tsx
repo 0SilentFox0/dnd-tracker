@@ -68,5 +68,6 @@ export function BattleFxLayer() {
     };
   }, [current, done]);
 
-  return <div ref={layer} className="fx-layer" aria-hidden />;
+  // «fixed» обходить .battle-hud > :not(.fixed) { position: relative }, інакше шар стоїть під екраном
+  return <div ref={layer} className="fx-layer fixed" aria-hidden />;
 }
