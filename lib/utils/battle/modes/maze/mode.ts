@@ -6,6 +6,7 @@ import { mazeGridOf } from "./grid";
 import { mazeMoveZone } from "./move-zone";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
+import { nearestMazeCell } from "./revive";
 import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
 import { MAZE_TEXTS } from "./texts";
@@ -39,6 +40,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
 
       return placeInMaze(grid, mover, to);
     },
+    placeRevived: ({ map, config, participants, mover, from }) => nearestMazeCell({ ...map, maze: config }, participants, mover, from),
     onEnter: ({ participant }) =>
       participant.basicInfo.side === ParticipantSide.ENEMY ? { ...participant, battleData: { ...participant.battleData, dormant: true } } : participant,
     onReset: (maze) => ({ ...maze, marks: {}, dark: false, moved: false }),

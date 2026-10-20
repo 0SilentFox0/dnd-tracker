@@ -16,7 +16,9 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
+import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
+import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -129,10 +131,14 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
   };
 }
 
-function withPlacement(map: BattleMapConfig | null, status: BattleStatus, result: MutationResult, place: boolean): MutationResult {
-  if (!map || (result.scene?.status ?? status) !== BattleStatus.ACTIVE) return result;
+function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+  const cleared = clearFallenEffects(result.participants);
 
-  const placed = place ? placeParticipants(map, result.participants) : result.participants;
+  if (cleared !== result.participants) result = { ...result, participants: cleared };
+
+  if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
+
+  const placed = place ? placeParticipants(map, placeRevived(map, scene.participants, result.participants)) : result.participants;
 
   const participants = syncMapAuras(placed, map);
 
@@ -264,7 +270,7 @@ export async function runBattleMutation<TBody>(
 
     const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-    const placed = withPlacement(map, loaded.scene.status, mutated, !isDryRun);
+    const placed = withPlacement(map, { status: loaded.scene.status, participants: loaded.participants }, mutated, !isDryRun);
 
     const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed));
 
