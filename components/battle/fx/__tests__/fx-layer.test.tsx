@@ -151,7 +151,7 @@ describe("BattleFxLayer", () => {
     render(<BattleFxLayer />);
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800 + 2800);
+      await vi.advanceTimersByTimeAsync(800 + 2800 + 300);
     });
     expect(h.diceCancel).toHaveBeenCalled();
     expect(h.done).toHaveBeenCalledWith("d1");
