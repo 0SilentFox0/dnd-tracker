@@ -33,6 +33,13 @@ describe("applyPendingMoraleCheck", () => {
     expect(moraleLogEntry.actionDetails?.morale).toBe(1);
   });
 
+  it("у лог пишеться кубик d10 моралі", () => {
+    const { moraleLogEntry } = applyPendingMoraleCheck([p], payload(false), 1, "b1", 0, seq(0.5));
+
+    expect(moraleLogEntry.actionDetails?.diceRolls).toEqual([{ kind: "morale", rollerId: p.basicInfo.id, dice: [{ sides: 10, value: 10 }] }]);
+    expect(applyPendingMoraleCheck([], payload(false), 1, "b1", 0).moraleLogEntry.actionDetails?.diceRolls).toHaveLength(1);
+  });
+
   it("у польоті додатковий хід за мораль не видається", () => {
     const flying = { ...p, battleData: { ...p.battleData, airborne: { since: 1, percent: 200, name: "Пікірування" } } };
 

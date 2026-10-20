@@ -112,6 +112,22 @@ describe("spell mutation", () => {
       expect(dealt(out)).toBe(4);
     });
 
+    it("diceRolls: шкода кубиками, рятунок введеного і докинутий сервером", async () => {
+      const dm = context({ participants: [caster, goblin, gob2], isDM: true, userId: "dm", rng: () => 0.99 });
+
+      const area = { ...save, targeting: { kind: "area", side: "enemy", maxTargets: 2 } } as unknown as Spell;
+
+      const out = await mutation(area)(dm, body({ targetIds: ["gob", "gob2"], saveRolls: [{ participantId: "gob", roll: 7 }] }) as never);
+
+      const rolls = (out.events[0].details as { actionDetails: { diceRolls: { kind: string; rollerId: string; dice: { sides: number; value: number; server?: boolean }[] }[] } }).actionDetails.diceRolls;
+
+      expect(rolls.map((g) => g.kind)).toEqual(["damage", "save", "save"]);
+      expect(rolls[0].dice).toEqual([{ sides: 6, value: 4 }]);
+      expect(rolls[1]).toMatchObject({ rollerId: "gob", dice: [{ sides: 20, value: 7 }] });
+      expect(rolls[1].dice[0].server).toBeUndefined();
+      expect(rolls[2]).toMatchObject({ rollerId: "gob2", dice: [{ sides: 20, value: 20, server: true }] });
+    });
+
     it("нецілий кидок відхиляє схема", async () => {
       const { spellSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema");
 

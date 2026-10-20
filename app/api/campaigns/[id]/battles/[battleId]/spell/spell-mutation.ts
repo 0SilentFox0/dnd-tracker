@@ -7,6 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { requireActor } from "@/lib/utils/battle/common/control";
+import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -100,6 +101,17 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     });
 
     if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
+
+    const groups = spellDiceRolls({
+      casterId: caster.basicInfo.id,
+      sides: expected.sides,
+      rolls: diceRolls,
+      heal: (result.battleAction.actionDetails.totalHealing ?? 0) > 0 && !(result.battleAction.actionDetails.totalDamage ?? 0),
+      saves: result.battleAction.actionDetails.savingThrows ?? [],
+      presetSaveIds: new Set(trusted.map((s) => s.participantId)),
+    });
+
+    if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
 
     if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 

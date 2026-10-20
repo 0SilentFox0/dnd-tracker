@@ -10,8 +10,11 @@ import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
 import { applyMainActionUsed, getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
+import type { BattleAction } from "@/types/battle";
 
 export type { ProcessAttackParams, ProcessAttackResult };
 
@@ -84,8 +87,14 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
   }
 
-  const withRollDetails = <T extends { actionDetails: object }>(action: T): T => {
+  const damageFormula = heroAttackDamageParts(getP(flow, attackerId), attack).formula;
+
+  const withRollDetails = <T extends { actionDetails: BattleAction["actionDetails"] }>(action: T): T => {
     if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
+
+    const damage = (action.actionDetails.damageRolls ?? []).flatMap((r) => r.results);
+
+    action.actionDetails.diceRolls = attackDiceRolls({ attackerId, targetId, d20: d20Roll, ...(second && { second, chosenD20: attackRoll.chosenD20 }), damage, damageFormula });
 
     return action;
   };
