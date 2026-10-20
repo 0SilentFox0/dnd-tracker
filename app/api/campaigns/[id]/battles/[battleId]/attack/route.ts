@@ -11,7 +11,7 @@ export async function POST(
     params: await params,
     access: BattleAccess.MEMBER,
     requireStatus: BattleStatus.ACTIVE,
-    blockedInDark: true,
+    blockedByMode: true,
     rateLimitScope: "attack",
     schema: attackBodySchema,
     mutate: attackMutation,

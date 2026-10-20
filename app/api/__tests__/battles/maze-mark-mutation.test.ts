@@ -52,7 +52,7 @@ describe("maze-mark mutation", () => {
 
     const res = await runBattleMutation(
       new Request("http://x/api", { method: "POST", body: JSON.stringify({ participantId: "hero", symbol: "star" }) }),
-      { params: { id: "c1", battleId: "b1" }, access: BattleAccess.MEMBER, blockedInDark: true, schema: mazeMarkSchema, mutate } as never,
+      { params: { id: "c1", battleId: "b1" }, access: BattleAccess.MEMBER, blockedByMode: true, schema: mazeMarkSchema, mutate } as never,
       deps,
     );
 

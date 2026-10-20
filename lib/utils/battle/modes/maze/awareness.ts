@@ -66,7 +66,7 @@ export function mazeAwareness(grid: MazeGrid, { participants, round, sleep }: Aw
 
 interface AwareOutcome {
   participants: BattleParticipant[];
-  events: NewBattleEvent[];
+  events?: NewBattleEvent[];
   scene?: ScenePatch;
 }
 
@@ -80,5 +80,5 @@ export function withMazeAwareness<T extends AwareOutcome>(map: BattleMapConfig |
 
   if (out.participants === result.participants) return result;
 
-  return { ...result, participants: out.participants, events: [...result.events, ...out.events] };
+  return { ...result, participants: out.participants, events: [...(result.events ?? []), ...out.events] };
 }

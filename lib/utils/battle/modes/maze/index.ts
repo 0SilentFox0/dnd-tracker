@@ -12,6 +12,7 @@ export * from "./placement";
 export * from "./rng";
 export * from "./scatter";
 export * from "./sight";
+export * from "./start";
 export * from "./status";
 export * from "./tunnel";
 export * from "./view";

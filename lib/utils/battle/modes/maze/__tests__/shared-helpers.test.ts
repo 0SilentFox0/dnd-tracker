@@ -8,7 +8,6 @@ import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import {
   edgeCells,
-  enterMazeAsleep,
   featureKeys,
   fogSet,
   isPlaced,
@@ -21,6 +20,7 @@ import {
   scatterFreeStarts,
   teleportPartner,
 } from "@/lib/utils/battle/modes/maze";
+import { modeEnter } from "@/lib/utils/battle/modes/server";
 
 describe("ребра", () => {
   it("parseEdgeKey і edgeCells", () => {
@@ -96,14 +96,14 @@ describe("статуси учасників", () => {
     expect(mazeHeroes([hero, offMap, foe, gone]).map((p) => p.basicInfo.id)).toEqual(["h", "o"]);
   });
 
-  it("enterMazeAsleep — лише ворог і лише в лабіринті", () => {
+  it("modeEnter — лише ворог і лише в лабіринті", () => {
     const foe = placed("f");
 
     const maze = testMap(6, 6, { maze: mazeOf() });
 
-    expect(enterMazeAsleep(maze, foe).battleData.dormant).toBe(true);
-    expect(enterMazeAsleep(maze, hero)).toBe(hero);
-    expect(enterMazeAsleep(testMap(6, 6), foe)).toBe(foe);
+    expect(modeEnter(maze, foe).battleData.dormant).toBe(true);
+    expect(modeEnter(maze, hero)).toBe(hero);
+    expect(modeEnter(testMap(6, 6), foe)).toBe(foe);
   });
 });
 

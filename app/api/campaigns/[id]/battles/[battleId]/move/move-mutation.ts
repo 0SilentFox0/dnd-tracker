@@ -8,11 +8,11 @@ import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canStand, cellKey, checkReturnToStart,hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
-import { mazeGridOf } from "@/lib/utils/battle/modes/maze";
+import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
-import type { BattleParticipant, TerrainCell } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, TerrainCell } from "@/types/battle";
 
 export const moveSchema = z.object({
   participantId: z.string(),
@@ -23,14 +23,18 @@ export const moveSchema = z.object({
 
 export type MoveBody = z.infer<typeof moveSchema>;
 
+type ModeMove = (ctx: BattleMutationContext, data: MoveBody, map: BattleMapConfig) => MutationResult;
+
+const MODE_MOVES: Partial<Record<MapModeKey, ModeMove>> = { maze: mazeMove };
+
 export function moveMutation(ctx: BattleMutationContext, data: MoveBody): MutationResult {
   const map = ctx.meta.map;
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
 
-  const grid = mazeGridOf(map);
+  const own = MODE_MOVES[activeMapMode(map).key as MapModeKey];
 
-  if (grid) return mazeMove(ctx, data, { map, grid });
+  if (own) return own(ctx, data, map);
 
   const { participants, mover, ownTurn } = resolveMover(ctx, data.participantId, (ps) => placeParticipants(map, ps));
 

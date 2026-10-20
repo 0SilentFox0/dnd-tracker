@@ -259,19 +259,19 @@ const START = { access: "dm", requireStatus: "prepared", mutate: createStartMuta
 
 const NEXT = { access: "currentController", requireStatus: "active", mutate: nextTurnMutation };
 
-const ATTACK = { access: "member", requireStatus: "active", blockedInDark: true, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
+const ATTACK = { access: "member", requireStatus: "active", blockedByMode: true, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
-const BONUS = { access: "member", requireStatus: "active", blockedInDark: true, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
+const BONUS = { access: "member", requireStatus: "active", blockedByMode: true, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
-const ABILITY = { access: "member", requireStatus: "active", blockedInDark: true, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
+const ABILITY = { access: "member", requireStatus: "active", blockedByMode: true, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
-const SPELL = { access: "member", requireStatus: "active", blockedInDark: true, schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
+const SPELL = { access: "member", requireStatus: "active", blockedByMode: true, schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
 
 const UNIT_CONTROL = { access: "dm", requireStatus: "active", schema: unitControlSchema, mutate: unitControlMutation };
 
-const AURA_ZONE = { access: "member", requireStatus: "active", blockedInDark: true, schema: auraZoneSchema, mutate: auraZoneMutation };
+const AURA_ZONE = { access: "member", requireStatus: "active", blockedByMode: true, schema: auraZoneSchema, mutate: auraZoneMutation };
 
-const MORALE = { access: "member", requireStatus: "active", blockedInDark: true, schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
+const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
 
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
 
@@ -283,7 +283,7 @@ const MAP_TERRAIN = { access: "dm", requireStatus: "active", schema: mapTerrainS
 
 const MAZE = { access: "dm", requireStatus: "active", schema: mazeActionSchema, mutate: mazeMutation };
 
-const MAZE_MARK = { access: "member", requireStatus: "active", blockedInDark: true, schema: mazeMarkSchema, mutate: mazeMarkMutation };
+const MAZE_MARK = { access: "member", requireStatus: "active", blockedByMode: true, schema: mazeMarkSchema, mutate: mazeMarkMutation };
 
 const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 
