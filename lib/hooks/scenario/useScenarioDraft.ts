@@ -62,7 +62,6 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
     }
   }, [campaignId, page.id, queryClient, notify]);
 
-  // resolves true only when nothing typed so far is left unsaved — callers await it before leaving edit mode
   const flush = useCallback(async (): Promise<boolean> => {
     const r = ref.current;
 

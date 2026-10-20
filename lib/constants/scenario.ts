@@ -13,6 +13,7 @@ export const MARK_TYPES = ["bold", "italic", "secret"] as const;
 export const SCENARIO_MAX_CONTENT_BYTES = 512 * 1024;
 export const SCENARIO_VERSION_INTERVAL_MS = 10 * 60 * 1000;
 export const SCENARIO_MAX_VERSIONS = 50;
+export const SCENARIO_MAX_LEGEND = 12;
 export const SCENARIO_AUTOSAVE_MS = 1500;
 export const SCENARIO_SEARCH_LIMIT = 20;
 export const SCENARIO_MENTION_LIMIT = 5;

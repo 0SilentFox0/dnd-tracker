@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { CharacterSelect } from "./CharacterSelect";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +15,14 @@ import type { CreateScenarioPageData, ScenarioPageKind } from "@/types/scenario"
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  characters: { id: string; name: string }[];
+  campaignId: string;
   pending: boolean;
   onSubmit: (data: CreateScenarioPageData) => void;
 };
 
 const KIND_OPTIONS = PAGE_KINDS.map((k) => ({ value: k, label: PAGE_KIND_LABELS[k] }));
 
-export function CreateScenarioPageDialog({ open, onOpenChange, characters, pending, onSubmit }: Props) {
+export function CreateScenarioPageDialog({ open, onOpenChange, campaignId, pending, onSubmit }: Props) {
   const [kind, setKind] = useState<ScenarioPageKind>("scene");
 
   const [title, setTitle] = useState("");
@@ -66,14 +68,7 @@ export function CreateScenarioPageDialog({ open, onOpenChange, characters, pendi
         {kind === "hero" && (
           <div className="space-y-1.5">
             <Label htmlFor="scenario-character">Персонаж</Label>
-            <SelectField
-              id="scenario-character"
-              value={characterId}
-              onValueChange={setCharacterId}
-              options={characters.map((c) => ({ value: c.id, label: c.name }))}
-              allowNone
-              noneLabel="— без прив'язки —"
-            />
+            <CharacterSelect campaignId={campaignId} id="scenario-character" value={characterId} onValueChange={setCharacterId} enabled={open} />
           </div>
         )}
       </form>

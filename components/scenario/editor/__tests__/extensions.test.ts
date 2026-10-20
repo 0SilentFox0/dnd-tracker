@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
-import { Editor } from "@tiptap/core";
+import { Editor, getSchema } from "@tiptap/core";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { buildExtensions } from "@/components/scenario/editor/extensions";
+import { MARK_TYPES, NODE_TYPES } from "@/lib/constants/scenario";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import type { RichDoc } from "@/types/scenario";
 
@@ -46,5 +47,12 @@ describe("scenario tiptap extensions", () => {
     const parsed = scenarioContentSchema.safeParse({ legend: [], sections: [{ id: "s", title: "s", played: false, rows: [{ id: "r", story: editor.getJSON(), notes: { type: "doc", content: [] } }] }] });
 
     expect(parsed.success).toBe(true);
+  });
+
+  it("вузли й марки редактора збігаються з allowlist схеми", () => {
+    const schema = getSchema(buildExtensions(async () => []));
+
+    expect(new Set(Object.keys(schema.nodes))).toEqual(new Set(NODE_TYPES));
+    expect(new Set(Object.keys(schema.marks))).toEqual(new Set(MARK_TYPES));
   });
 });

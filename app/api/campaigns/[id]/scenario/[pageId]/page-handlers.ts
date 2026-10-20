@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
-
-import { characterInCampaign } from "../scenario-handlers";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
-import { InvalidScenarioContentError, OWNED_SELECT, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
+import { characterInCampaign, loadOwnedPage } from "@/lib/server/scenario/loaders";
+import { contentWrite, InvalidScenarioContentError, OWNED_SELECT, OWNED_WITH_CONTENT_SELECT, readContent, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
+import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -15,18 +14,13 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
 
-export const ownedPage = (campaignId: string, pageId: string) => loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: OWNED_SELECT }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
-
-export const ownedPageWithContent = (campaignId: string, pageId: string) =>
-  loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { ...SUMMARY_SELECT, campaignId: true, content: true } }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
-
 export async function getScenarioPageHandler(campaignId: string, pageId: string) {
   try {
     const access = await requireDM(campaignId);
 
     if (access instanceof NextResponse) return access;
 
-    const page = await ownedPageWithContent(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_WITH_CONTENT_SELECT);
 
     return page instanceof NextResponse ? page : NextResponse.json(toPage(page));
   } catch (error) {
@@ -48,17 +42,17 @@ export async function saveScenarioContentHandler(req: Request, campaignId: strin
 
     if (Buffer.byteLength(JSON.stringify(body.content)) > SCENARIO_MAX_CONTENT_BYTES) return errorResponse(API_ERRORS.SCENARIO_TOO_LARGE, 413);
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
 
     if (page.version !== body.expectedVersion) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
-    if (await snapshotIfDue(pageId, access.userId)) await pruneVersions(pageId);
+    if (await snapshotIfDue(prisma, pageId, access.userId)) await pruneVersions(prisma, pageId);
 
     const { count } = await prisma.scenarioPage.updateMany({
       where: { id: pageId, version: body.expectedVersion },
-      data: { content: body.content as unknown as Prisma.InputJsonValue, searchText: buildSearchText(page.title, body.content), version: { increment: 1 } },
+      data: { ...contentWrite(page.title, body.content), version: { increment: 1 } },
     });
 
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
@@ -79,7 +73,7 @@ export async function updateScenarioMetaHandler(req: Request, campaignId: string
 
     if (body instanceof NextResponse) return body;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
 
@@ -105,7 +99,7 @@ export async function deleteScenarioPageHandler(campaignId: string, pageId: stri
 
     if (access instanceof NextResponse) return access;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
 

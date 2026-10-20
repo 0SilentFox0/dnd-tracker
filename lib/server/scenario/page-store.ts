@@ -2,7 +2,6 @@ import type { Prisma } from "@prisma/client";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { SCENARIO_MAX_VERSIONS, SCENARIO_VERSION_INTERVAL_MS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { emptyContent } from "@/lib/utils/scenario/structure";
@@ -18,16 +17,18 @@ export class InvalidScenarioContentError extends Error {
   }
 }
 
+export const OWNED_SELECT = { id: true, campaignId: true, version: true, title: true } as const;
+
+export const OWNED_WITH_CONTENT_SELECT = { ...SUMMARY_SELECT, campaignId: true, content: true } as const;
+
 export function parseContent(json: unknown): ScenarioContent | null {
   const parsed = scenarioContentSchema.safeParse(json);
 
   return parsed.success ? parsed.data : null;
 }
 
-// lenient: read-only consumers (player chapters, search text) treat broken content as empty
 export const readContent = (json: unknown): ScenarioContent => parseContent(json) ?? emptyContent();
 
-// strict: anything that feeds the editor or writes content back must not turn broken content into an empty page
 export function readContentStrict(json: unknown): ScenarioContent {
   const content = parseContent(json);
 
@@ -36,7 +37,7 @@ export function readContentStrict(json: unknown): ScenarioContent {
   return content;
 }
 
-// explicit pick: rows may carry content/searchText, which must not leak into summaries (egress)
+// rows may carry content/searchText; they must not leak into summaries (egress)
 export function toSummary(row: SummaryRow): ScenarioPageSummary {
   const { id, kind, arc, title, subtitle, status, sortOrder, characterId, version, updatedAt } = row;
 
@@ -47,43 +48,10 @@ export function toPage(row: SummaryRow & { content: unknown }): ScenarioPage {
   return { ...toSummary(row), content: readContentStrict(row.content) };
 }
 
-export const OWNED_SELECT = { id: true, campaignId: true, version: true, title: true } as const;
-
 export async function listPages(campaignId: string): Promise<ScenarioPageSummary[]> {
   const rows = await prisma.scenarioPage.findMany({ where: { campaignId }, select: SUMMARY_SELECT, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
 
   return rows.map(toSummary);
-}
-
-export async function getPage(campaignId: string, pageId: string): Promise<ScenarioPage | null> {
-  const row = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { ...SUMMARY_SELECT, content: true } });
-
-  return row ? toPage(row) : null;
-}
-
-// reads the current content only when a snapshot is actually due — autosave runs every 1.5 s
-export async function snapshotIfDue(pageId: string, userId: string, options: { force?: boolean; now?: Date } = {}): Promise<boolean> {
-  const now = options.now ?? new Date();
-
-  if (!options.force) {
-    const last = await prisma.scenarioPageVersion.findFirst({ where: { pageId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
-
-    if (last && now.getTime() - last.createdAt.getTime() < SCENARIO_VERSION_INTERVAL_MS) return false;
-  }
-
-  const page = await prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { content: true } });
-
-  if (!page) return false;
-
-  await prisma.scenarioPageVersion.create({ data: { pageId, content: page.content as Prisma.InputJsonValue, createdBy: userId } });
-
-  return true;
-}
-
-export async function pruneVersions(pageId: string): Promise<void> {
-  const stale = await prisma.scenarioPageVersion.findMany({ where: { pageId }, orderBy: { createdAt: "desc" }, skip: SCENARIO_MAX_VERSIONS, select: { id: true } });
-
-  if (stale.length) await prisma.scenarioPageVersion.deleteMany({ where: { id: { in: stale.map((v) => v.id) } } });
 }
 
 // only played section ids leave the DB — scene pages are large and these lookups run on every sheet / hero page view
@@ -94,3 +62,5 @@ export async function loadPlayedSections(campaignId: string, pageIds: string[]):
     SELECT id, COALESCE(jsonb_path_query_array(content, '$.sections[*] ? (@.played == true).id'), '[]'::jsonb) AS played
     FROM scenario_pages WHERE "campaignId" = ${campaignId} AND id = ANY(${pageIds}::text[])`;
 }
+
+export { contentWrite, toJson } from "./content-write";

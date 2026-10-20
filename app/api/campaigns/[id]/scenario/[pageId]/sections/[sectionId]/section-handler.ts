@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
-
-import { ownedPageWithContent } from "../../page-handlers";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { scenarioSectionPatchSchema } from "@/lib/schemas/scenario";
-import { InvalidScenarioContentError, readContentStrict } from "@/lib/server/scenario/page-store";
+import { loadOwnedPage } from "@/lib/server/scenario/loaders";
+import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, readContentStrict, toJson } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -23,7 +21,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     if (body instanceof NextResponse) return body;
 
-    const page = await ownedPageWithContent(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_WITH_CONTENT_SELECT);
 
     if (page instanceof NextResponse) return page;
 
@@ -36,7 +34,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
       ...(body.revealed !== undefined && { revealedAt: body.revealed ? new Date().toISOString() : null }),
     });
 
-    const { count } = await prisma.scenarioPage.updateMany({ where: { id: pageId, version: page.version }, data: { content: next as unknown as Prisma.InputJsonValue, version: { increment: 1 } } });
+    const { count } = await prisma.scenarioPage.updateMany({ where: { id: pageId, version: page.version }, data: { content: toJson(next), version: { increment: 1 } } });
 
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
