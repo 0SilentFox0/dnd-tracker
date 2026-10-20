@@ -14,3 +14,4 @@ export { useNotify, useOptionalNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";
 export { useReducedMotion } from "./useReducedMotion";
 export { useSingleFlight } from "./useSingleFlight";
+export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";

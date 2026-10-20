@@ -4,19 +4,22 @@ import { readSlides, saveDeckSchema, showCommandSchema, slideUploadRequestSchema
 
 const slide = (id: string, extra: Record<string, unknown> = {}) => ({ id, imageUrl: "https://x.supabase.co/storage/v1/object/public/scene-slides/c1/a.webp", ...extra });
 
+const T = "2026-01-01T00:00:00.000Z";
+
 describe("show schemas", () => {
   it("набір: порожні заголовок/підпис стають undefined, пробіли обрізаються", () => {
-    const parsed = saveDeckSchema.parse({ title: "  Таверна ", slides: [slide("slide-0001", { title: "  ", caption: " Минуло три дні " })] });
+    const parsed = saveDeckSchema.parse({ expectedUpdatedAt: T, title: "  Таверна ", slides: [slide("slide-0001", { title: "  ", caption: " Минуло три дні " })] });
 
-    expect(parsed).toEqual({ title: "Таверна", slides: [{ id: "slide-0001", imageUrl: slide("x").imageUrl, title: undefined, caption: "Минуло три дні" }] });
+    expect(parsed).toEqual({ expectedUpdatedAt: T, title: "Таверна", slides: [{ id: "slide-0001", imageUrl: slide("x").imageUrl, title: undefined, caption: "Минуло три дні" }] });
   });
 
   it("набір: дублікати id, 101 слайд, підпис 201 символ, не-http посилання — відхиляються", () => {
-    expect(saveDeckSchema.safeParse({ title: "a", slides: [slide("slide-0001"), slide("slide-0001")] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ title: "a", slides: Array.from({ length: 101 }, (_, i) => slide(`slide-${1000 + i}`)) }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ title: "a", slides: [slide("slide-0001", { caption: "x".repeat(201) })] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ title: "a", slides: [{ id: "slide-0001", imageUrl: "javascript:alert(1)" }] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ title: " ", slides: [] }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001"), slide("slide-0001")] }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: Array.from({ length: 101 }, (_, i) => slide(`slide-${1000 + i}`)) }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001", { caption: "x".repeat(201) })] }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [{ id: "slide-0001", imageUrl: "javascript:alert(1)" }] }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: " ", slides: [] }).success).toBe(false);
+    expect(saveDeckSchema.safeParse({ title: "a", slides: [] }).success).toBe(false);
   });
 
   it("квиток: лише webp/jpeg до 8 МБ", () => {

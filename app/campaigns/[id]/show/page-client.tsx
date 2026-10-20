@@ -13,7 +13,7 @@ import { usePusherShowSync, useShowAudioHost, useShowControl, useShowKeys, useSh
 export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM: boolean }) {
   const notify = useNotify();
 
-  const stageRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
 
   usePusherShowSync(campaignId);
 
@@ -27,13 +27,13 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
 
   return (
     <AudioPlayerProvider host={host}>
-      <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
-        <div ref={stageRef} className="relative min-h-[60dvh] flex-1">
+      <div ref={pageRef} className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col [&:fullscreen]:bg-black">
+        <div className="relative min-h-[60dvh] flex-1">
           <ShowStage show={show} />
           <div className="absolute right-3 top-3 z-20">
-            <FullscreenButton target={stageRef} />
+            <FullscreenButton target={pageRef} />
           </div>
-          <div className="absolute bottom-3 left-3 z-30">
+          <div className="absolute left-3 top-3 z-30">
             <AudioDock placement="corner" />
           </div>
         </div>

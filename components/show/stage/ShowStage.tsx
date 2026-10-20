@@ -14,15 +14,15 @@ import type { ShowState } from "@/types/show";
 const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
 
 export function ShowStage({ show }: { show: ShowState | null }) {
-  const layers = useSlideLayers(show?.slide ?? null);
+  const { layers, onLoad } = useSlideLayers(show?.slide ?? null);
 
   const current = show?.slide ?? null;
 
   return (
     <div className="relative size-full overflow-hidden bg-black">
-      {layers.map(({ slide, leaving }) => (
-        <div key={slide.id + slide.imageUrl} className={cn("absolute inset-0 animate-in fade-in", leaving && "opacity-0 transition-opacity")} style={{ animationDuration: `${SLIDE_CROSSFADE_MS}ms`, transitionDuration: `${SLIDE_CROSSFADE_MS}ms` }}>
-          <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority />
+      {layers.map(({ slide, leaving, visible }) => (
+        <div key={slide.imageUrl} className={cn("absolute inset-0 transition-opacity", visible ? "opacity-100" : "opacity-0")} style={{ transitionDuration: `${SLIDE_CROSSFADE_MS}ms` }}>
+          <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority onLoad={leaving ? undefined : onLoad} />
         </div>
       ))}
       {current && <SlideCaption key={current.id} slide={current} />}

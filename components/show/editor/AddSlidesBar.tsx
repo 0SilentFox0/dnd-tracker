@@ -6,11 +6,14 @@ import { ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX_SLIDES_PER_DECK, SLIDE_FILE_ACCEPT } from "@/lib/constants/show";
+import { useNotify } from "@/lib/hooks/common";
 import type { useDeckEditor } from "@/lib/hooks/show";
 
 const isHttpUrl = (value: string) => URL.canParse(value) && /^https?:$/.test(new URL(value).protocol);
 
 export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useDeckEditor>["upload"]; count: number }) {
+  const notify = useNotify();
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [url, setUrl] = useState("");
@@ -33,9 +36,13 @@ export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useD
           hidden
           accept={SLIDE_FILE_ACCEPT}
           onChange={(e) => {
-            const files = [...(e.target.files ?? [])];
+            const picked = [...(e.target.files ?? [])];
 
             e.target.value = "";
+
+            const files = picked.slice(0, Math.max(MAX_SLIDES_PER_DECK - count, 0));
+
+            if (files.length < picked.length) void notify(`Додано ${files.length} з ${picked.length}: у наборі максимум ${MAX_SLIDES_PER_DECK} слайдів`);
 
             if (files.length) void upload.addFiles(files);
           }}

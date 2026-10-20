@@ -20,6 +20,8 @@ export function useShowState(campaignId: string): { show: ShowState | null } {
       return queryClient.getQueryData<ShowSnapshot>(showKeys.state(campaignId)) ?? { show: null, clockOffsetMs: null };
     },
     staleTime: Infinity,
+    // без Pusher стан не доходить подіями — повільний polling
+    refetchInterval: process.env.NEXT_PUBLIC_PUSHER_KEY ? false : 30_000,
     refetchOnWindowFocus: false,
   });
 

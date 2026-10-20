@@ -9,7 +9,7 @@ import { DECK_TITLE_MAX } from "@/lib/constants/show";
 
 const FORM_ID = "new-deck-form";
 
-export function NewDeckDialog({ open, onOpenChange, onCreate, pending }: { open: boolean; onOpenChange(open: boolean): void; onCreate(title: string): Promise<void>; pending: boolean }) {
+export function NewDeckDialog({ open, onOpenChange, onCreate, pending }: { open: boolean; onOpenChange(open: boolean): void; onCreate(title: string): Promise<boolean>; pending: boolean }) {
   const [title, setTitle] = useState("");
 
   const trimmed = title.trim();
@@ -30,8 +30,8 @@ export function NewDeckDialog({ open, onOpenChange, onCreate, pending }: { open:
         id={FORM_ID}
         onSubmit={async (e) => {
           e.preventDefault();
-          await onCreate(trimmed);
-          setTitle("");
+
+          if (await onCreate(trimmed)) setTitle("");
         }}
       >
         <Input aria-label="Назва" placeholder="Назва" maxLength={DECK_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />

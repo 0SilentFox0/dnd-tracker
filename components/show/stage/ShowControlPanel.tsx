@@ -22,7 +22,7 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
 
   useEffect(() => {
     currentRef.current?.scrollIntoView?.({ inline: "center", block: "nearest" });
-  }, [currentId]);
+  }, [currentId, deck]);
 
   const end = async () => {
     if (await confirm({ title: "Завершити показ?", description: "Гравці побачать очікування, музика зупиниться.", confirmLabel: "Завершити", destructive: true })) void control.send({ action: "end" });

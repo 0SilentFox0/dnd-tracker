@@ -73,7 +73,9 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
         onCreate={async (title) => {
           const deck = await mutations.create(title);
 
-          router.push(`${base}/dm/show/${deck.id}`);
+          if (deck) router.push(`${base}/dm/show/${deck.id}`);
+
+          return !!deck;
         }}
       />
     </HudPage>

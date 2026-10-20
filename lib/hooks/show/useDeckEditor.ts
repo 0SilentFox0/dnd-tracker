@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useReducer, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
+import { useDeck } from "./useDecks";
 import { useSlideUpload } from "./useSlideUpload";
 
 import { saveDeck } from "@/lib/api/decks";
-import { useNotify } from "@/lib/hooks/common";
+import { useNotify, useUnsavedChangesGuard } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { type DeckDraft, deckDraftReducer } from "@/lib/utils/show/deck-draft";
 import type { SlideDeck } from "@/types/show";
@@ -19,7 +20,12 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
 
   const notify = useNotify();
 
-  const [saved, setSaved] = useState(() => draftOf(deck));
+  const { data: server = deck } = useDeck(campaignId, deck.id, { initial: deck });
+
+  const [saved, setSaved] = useState(() => draftOf(server));
+
+  // updatedAt, на якому стоїть чернетка: PUT з ним відхилиться, якщо набір змінили деінде
+  const [base, setBase] = useState(server.updatedAt);
 
   const [draft, dispatch] = useReducer(deckDraftReducer, saved);
 
@@ -30,10 +36,11 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
   const { upload, progress, newSlideId } = useSlideUpload(campaignId, fail);
 
   const mutation = useMutation({
-    mutationFn: (data: DeckDraft) => saveDeck(campaignId, deck.id, data),
+    mutationFn: (data: DeckDraft) => saveDeck(campaignId, deck.id, { ...data, expectedUpdatedAt: base }),
     onSuccess: (fresh) => {
       const next = draftOf(fresh);
 
+      setBase(fresh.updatedAt);
       setSaved(next);
       dispatch({ type: "reset", draft: next });
       queryClient.setQueryData(showKeys.deck(campaignId, deck.id), fresh);
@@ -42,15 +49,15 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
     onError: (e) => fail(errorMessage(e, "Не вдалося зберегти набір")),
   });
 
-  useEffect(() => {
-    if (!dirty) return;
+  if (server.updatedAt !== base && !dirty) {
+    const next = draftOf(server);
 
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    setBase(server.updatedAt);
+    setSaved(next);
+    dispatch({ type: "reset", draft: next });
+  }
 
-    window.addEventListener("beforeunload", warn);
-
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  useUnsavedChangesGuard(dirty);
 
   const addFiles = useCallback(async (files: File[]) => dispatch({ type: "add", slides: await upload(files) }), [upload]);
 
@@ -60,9 +67,11 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
     draft,
     dispatch,
     dirty,
-    save: async () => {
-      await mutation.mutateAsync(draft).catch(() => undefined);
-    },
+    save: () =>
+      mutation.mutateAsync(draft).then(
+        () => true,
+        () => false,
+      ),
     saving: mutation.isPending,
     upload: { addFiles, addUrl, progress },
   };

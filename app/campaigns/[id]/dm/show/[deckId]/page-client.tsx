@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Images } from "lucide-react";
 
@@ -12,14 +13,12 @@ import { SlideGrid } from "@/components/show/editor/SlideGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DECK_TITLE_MAX } from "@/lib/constants/show";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { useNotify } from "@/lib/hooks/common";
 import { useDeckEditor, useShowControl } from "@/lib/hooks/show";
 import type { SlideDeck } from "@/types/show";
 
 export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string; deck: SlideDeck }) {
   const router = useRouter();
-
-  const confirm = useConfirm();
 
   const notify = useNotify();
 
@@ -37,14 +36,8 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
 
   const editing = editingIndex === -1 ? null : { slide: draft.slides[editingIndex], index: editingIndex };
 
-  const back = async () => {
-    if (dirty && !(await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти", destructive: true }))) return;
-
-    router.push(`${base}/dm/show`);
-  };
-
   const startShow = async () => {
-    if (dirty) await editor.save();
+    if (dirty && !(await editor.save())) return;
 
     if (await control.send({ action: "open", deckId: deck.id })) router.push(`${base}/show`);
   };
@@ -53,9 +46,9 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
     <HudFormPage
       title="Набір слайдів"
       aside={
-        <button type="button" onClick={() => void back()} className="underline">
+        <Link href={`${base}/dm/show`} className="underline">
           ← До наборів
-        </button>
+        </Link>
       }
     >
       <HudForm
