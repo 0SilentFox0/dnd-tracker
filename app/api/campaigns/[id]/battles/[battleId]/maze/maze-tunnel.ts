@@ -2,8 +2,9 @@ import type { MazeEnv } from "./maze-ops";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { heroTunnel, isEscaped, isPlaced, mazeAwareness, nearestFree } from "@/lib/utils/battle/maze";
+import { heroTunnel, isPlaced, mazeAwareness, nearestFree } from "@/lib/utils/battle/maze";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";

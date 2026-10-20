@@ -3,9 +3,9 @@ import { cellsOf, isOnMap } from "./occupancy";
 
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { inPlay, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { inMazePlay, mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
+import { mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function attackRangeCells(range?: string): number | null {
@@ -40,7 +40,7 @@ export function attackReachError(
   }
 
   // у лабіринті сплячий ворог чи ворог за стіною не заважає стріляти (і не видає себе помилкою)
-  const engages = (p: BattleParticipant) => (maze ? inMazePlay(p) && !meleeWallBetween(maze, attacker, p) : isActive(p));
+  const engages = (p: BattleParticipant) => (maze ? inPlay(p) && !meleeWallBetween(maze, attacker, p) : isActive(p));
 
   const engaged = participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && distanceTo(p) <= 1 && engages(p));
 

@@ -14,6 +14,7 @@ import "./battle-map.css";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { DRAG_THRESHOLD, type MazeEditing, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import {
   blockedSet,
   cellAtScreenPoint,
@@ -31,7 +32,6 @@ import {
   tokenBox,
   UNIT,
 } from "@/lib/utils/battle/grid";
-import { isDormant, isEscaped } from "@/lib/utils/battle/maze";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };

@@ -1,9 +1,9 @@
 import type { QueueEntry } from "./queue";
 
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { edgeCells, inMazePlay, isEscaped, isMazeHero, isPlaced, mazeGridOf, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
+import { edgeCells, isMazeHero, isPlaced, mazeGridOf, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
@@ -65,7 +65,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
 
   if (own.length === 0) {
-    const visible = participants.filter((p) => isPlaced(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inMazePlay(p))));
+    const visible = participants.filter((p) => isPlaced(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inPlay(p))));
 
     return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
   }

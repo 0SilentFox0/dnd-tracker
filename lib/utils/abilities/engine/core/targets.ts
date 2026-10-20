@@ -7,7 +7,7 @@ import { seesTarget } from "@/lib/utils/battle/maze/sight";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-const inPlay = (p: BattleParticipant) => isTargetable(p) && !isDormant(p);
+const targetableInPlay = (p: BattleParticipant) => isTargetable(p) && !isDormant(p);
 
 export function resolveTargetIds(
   target: AbilityTarget | undefined,
@@ -25,7 +25,7 @@ export function resolveTargetIds(
   const grid = mazeGridOf(map);
 
   // у лабіринті масові вміння по ворогах — лише ті, кого власник бачить (як і заклинання)
-  const reachable = (p: BattleParticipant) => inPlay(p) && (!grid || p.basicInfo.side === side || seesTarget(grid, owner, p));
+  const reachable = (p: BattleParticipant) => targetableInPlay(p) && (!grid || p.basicInfo.side === side || seesTarget(grid, owner, p));
 
   switch (target ?? "self") {
     case "self":
@@ -48,7 +48,7 @@ export function resolveTargetIds(
     // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
     case "allAllies":
     case "nearbyAllies":
-      return ps.filter((p) => inPlay(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => targetableInPlay(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":
     case "nearbyEnemies":
       return ps.filter((p) => reachable(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);

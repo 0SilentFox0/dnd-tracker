@@ -58,7 +58,7 @@ export function checkVictoryConditions(
     };
   }
 
-  // escaped ставить лише вихід лабіринту, тож окремий прапорець «це лабіринт» не потрібен
+  // escaped ставить лише режим карти (вихід), тож окремий прапорець режиму не потрібен
   if (allies.some(isEscaped) && !allies.some((a) => isActive(a) && !isEscaped(a))) {
     return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" };
   }

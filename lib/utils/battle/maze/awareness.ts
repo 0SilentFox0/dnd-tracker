@@ -1,10 +1,10 @@
 import { type MazeGrid, mazeGridOf } from "./grid";
-import { inMazePlay, isDormant, isMazeHero, isPlaced, type PlacedParticipant } from "./status";
+import { isMazeHero, isPlaced, type PlacedParticipant } from "./status";
 import { mazeVision, seesParticipant, viewpointOf } from "./vision";
 
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { inPlay, isActive, isDormant } from "@/lib/utils/abilities/engine/core/participants";
 import { actorEvent, systemEvent } from "@/lib/utils/battle/store/event-mapping";
 import type { NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -28,7 +28,7 @@ interface Watcher {
 
 const isFieldEnemy = (p: BattleParticipant): p is PlacedParticipant => p.basicInfo.side === ParticipantSide.ENEMY && isPlaced(p) && !p.battleData.reserved && isActive(p);
 
-const isAwakeEnemy = (p: BattleParticipant) => isFieldEnemy(p) && inMazePlay(p);
+const isAwakeEnemy = (p: BattleParticipant) => isFieldEnemy(p) && inPlay(p);
 
 export function mazeAwareness(grid: MazeGrid, { participants, round, sleep }: AwarenessArgs): AwarenessResult {
   const watchers: Watcher[] = participants.filter(isMazeHero).flatMap((hero) => {
@@ -54,7 +54,7 @@ export function mazeAwareness(grid: MazeGrid, { participants, round, sleep }: Aw
       return { ...p, battleData: { ...p.battleData, dormant: false, mazeWakeRound: round + 1 } };
     }
 
-    if (sleep && inMazePlay(p) && !seenBy) return { ...p, battleData: { ...p.battleData, dormant: true } };
+    if (sleep && inPlay(p) && !seenBy) return { ...p, battleData: { ...p.battleData, dormant: true } };
 
     return p;
   });

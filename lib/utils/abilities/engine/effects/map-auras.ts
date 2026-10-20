@@ -1,7 +1,7 @@
 import { areaAuras, auraZoneEffect, zoneCandidates } from "./area-aura";
 
 import { AURA_RADIUS_CELLS } from "@/lib/constants/battle";
-import { inMazePlay } from "@/lib/utils/abilities/engine/core/participants";
+import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -17,7 +17,7 @@ export function syncMapAuras(participants: BattleParticipant[], map: BattleMapCo
   for (const owner of participants) {
     const ownerId = owner.basicInfo.id;
 
-    if (!inMazePlay(owner)) {
+    if (!inPlay(owner)) {
       managed.add(ownerId);
 
       continue;

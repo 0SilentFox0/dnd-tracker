@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { idleTurnIndex, inMazePlay, isMazeHero, takesTurn } from "../status";
+import { isMazeHero } from "../status";
 import { flag, mazeMap } from "./fixtures";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import { idleTurnIndex, inPlay, isTargetable, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { occupiesCells } from "@/lib/utils/battle/grid/occupancy";
@@ -24,13 +24,13 @@ describe("takesTurn", () => {
     expect(takesTurn(flag(p, { mazeWakeRound: 3 }), 3)).toBe(true);
   });
 
-  it("inMazePlay і isMazeHero", () => {
+  it("inPlay і isMazeHero", () => {
     const h = placed("h", { side: ParticipantSide.ALLY, at: { x: 0, y: 0 } });
 
     expect(isMazeHero(h)).toBe(true);
     expect(isMazeHero(placed("h2", { side: ParticipantSide.ALLY }))).toBe(false);
     expect(isMazeHero(flag(h, { escaped: true }))).toBe(false);
-    expect(inMazePlay(flag(h, { dormant: true }))).toBe(false);
+    expect(inPlay(flag(h, { dormant: true }))).toBe(false);
   });
 });
 

@@ -4,13 +4,12 @@ import { resetTurnState } from "./turn-state";
 
 import { CombatStatus, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, idleTurnIndex, isActive, replaceParticipant, sitsOutTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
-import { idleTurnIndex, mazeSkipsTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -73,7 +72,7 @@ export function processStartOfTurn(
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
     updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
-    !mazeSkipsTurn(updatedParticipant, currentRound)
+    !sitsOutTurn(updatedParticipant, currentRound)
   ) {
     const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
 
@@ -241,7 +240,7 @@ export function processEndOfTurn(
       nextParticipant &&
       nextParticipant.combatStats.status !== CombatStatus.DEAD &&
       nextParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
-      !mazeSkipsTurn(nextParticipant, nextRound)
+      !sitsOutTurn(nextParticipant, nextRound)
     ) {
       break;
     }

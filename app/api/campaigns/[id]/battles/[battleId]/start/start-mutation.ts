@@ -1,7 +1,8 @@
 import { buildStartOrder } from "./start-battle-handler";
 
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { inwardFacing, takesTurn } from "@/lib/utils/battle/maze";
+import { takesTurn } from "@/lib/utils/abilities/engine/core/participants";
+import { inwardFacing } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";

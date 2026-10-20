@@ -5,10 +5,9 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
 
-import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { replaceParticipant, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
-import { takesTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
