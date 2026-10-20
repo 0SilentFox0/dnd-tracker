@@ -74,7 +74,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
           value={formData.abilities ?? []}
           onChange={(abilities) => change({ abilities })}
           issues={abilityIssues}
-          onValidityChange={(_, n) => editor.abilities.setErrors(n)}
+          onValidityChange={editor.abilities.onValidityChange}
         />
       ),
     },

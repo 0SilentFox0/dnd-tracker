@@ -61,10 +61,10 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: "Основне",
       content: (
         <BattleFormBasicInfo
-          name={details.value.name}
-          description={details.value.description}
-          onNameChange={(value) => details.setValue((prev) => ({ ...prev, name: value }))}
-          onDescriptionChange={(value) => details.setValue((prev) => ({ ...prev, description: value }))}
+          name={details.data.name}
+          description={details.data.description}
+          onNameChange={(value) => details.set((prev) => ({ ...prev, name: value }))}
+          onDescriptionChange={(value) => details.set((prev) => ({ ...prev, description: value }))}
         />
       ),
     },

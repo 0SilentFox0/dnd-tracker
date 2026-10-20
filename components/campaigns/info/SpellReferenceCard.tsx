@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppearanceSave } from "@/lib/hooks/common";
+import { useUpdateSpellAppearance } from "@/lib/hooks/spells";
 import {
   formatMechanicsSpell,
   getShortSpellSummary,
@@ -30,15 +30,9 @@ export function SpellReferenceCard({
   spell,
   isDM,
 }: SpellReferenceCardProps) {
-  const {
-    value: appearance,
-    setValue: setAppearance,
-    saving,
-    save,
-  } = useAppearanceSave(
+  const { draft: { data: appearance, set: setAppearance }, status: { isSaving: saving }, save } = useUpdateSpellAppearance(
     campaignId,
     spell.id,
-    "spell",
     spell.appearanceDescription ?? "",
   );
 

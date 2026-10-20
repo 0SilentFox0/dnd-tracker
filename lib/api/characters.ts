@@ -11,9 +11,6 @@ import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
 import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, RosterHero } from "@/types/characters";
 
-/**
- * Отримує персонажа за ID
- */
 export async function getCharacter(
   campaignId: string,
   characterId: string,
@@ -35,9 +32,6 @@ export const deleteCharacterToken = (campaignId: string, characterId: string, to
 
 export const getCharacterSheet = (campaignId: string, characterId: string) => campaignGet<CharacterSheet>(campaignId, `/characters/${characterId}/sheet`);
 
-/**
- * Отримує список персонажів кампанії
- */
 export async function getCharacters(
   campaignId: string,
   opts?: { type?: CharacterTypeValue; compact?: boolean },
@@ -55,9 +49,6 @@ export async function getCharacters(
   return campaignGet<Character[]>(campaignId, path);
 }
 
-/**
- * Створює нового персонажа
- */
 export async function createCharacter(
   campaignId: string,
   data: CharacterFormData,
@@ -67,9 +58,6 @@ export async function createCharacter(
   return campaignPost<Character>(campaignId, "/characters", flatData);
 }
 
-/**
- * Оновлює персонажа
- */
 export async function updateCharacter(
   campaignId: string,
   characterId: string,
@@ -87,9 +75,6 @@ export async function updateCharacter(
   );
 }
 
-/**
- * Підняти рівень персонажа (лише DM)
- */
 export async function levelUpCharacter(
   campaignId: string,
   characterId: string,
@@ -101,9 +86,6 @@ export async function levelUpCharacter(
   );
 }
 
-/**
- * Видаляє персонажа
- */
 export async function deleteCharacter(
   campaignId: string,
   characterId: string,
@@ -111,9 +93,6 @@ export async function deleteCharacter(
   await campaignDelete<void>(campaignId, `/characters/${characterId}`);
 }
 
-/**
- * Видаляє всіх персонажів гравців кампанії
- */
 export async function deleteAllCharacters(
   campaignId: string,
 ): Promise<{ success: boolean; deleted: number }> {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { campaignGet, campaignRequest, errorMessage, request } from "../client";
+import { bodyErrorMessage, campaignGet, campaignRequest, request } from "../client";
 
 describe("campaignRequest", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -25,25 +25,25 @@ describe("campaignRequest", () => {
   });
 });
 
-describe("errorMessage / request errors", () => {
+describe("bodyErrorMessage / request errors", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("рядок error показується як є", () => {
-    expect(errorMessage({ error: "Недостатньо прав" }, "x")).toBe("Недостатньо прав");
+    expect(bodyErrorMessage({ error: "Недостатньо прав" }, "x")).toBe("Недостатньо прав");
   });
 
   it("error + issues — повідомлення з деталями", () => {
-    expect(errorMessage({ error: "Некоректні дані запиту", issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
+    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
       "Некоректні дані запиту: Required; Too short",
     );
   });
 
   it("старий формат (error — масив issues) досі читається", () => {
-    expect(errorMessage({ error: [{ message: "Required" }] }, "x")).toBe("Required");
+    expect(bodyErrorMessage({ error: [{ message: "Required" }] }, "x")).toBe("Required");
   });
 
   it("без error — запасний текст", () => {
-    expect(errorMessage(null, "Bad Request")).toBe("Bad Request");
+    expect(bodyErrorMessage(null, "Bad Request")).toBe("Bad Request");
   });
 
   it("request кидає ApiError з українським повідомленням сервера", async () => {

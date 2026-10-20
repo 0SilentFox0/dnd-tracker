@@ -5,23 +5,27 @@ import { useRouter } from "next/navigation";
 
 import { useUpdateRace } from "./useRaces";
 
+import { useAbilityValidity } from "@/lib/hooks/abilities";
+import { useNavigateFresh } from "@/lib/hooks/common";
 import type { RaceFormData } from "@/types/races";
 
 export function useRaceForm(campaignId: string, raceId: string, initial: RaceFormData) {
   const router = useRouter();
 
+  const navigateFresh = useNavigateFresh();
+
   const update = useUpdateRace(campaignId);
 
   const [formData, setFormData] = useState<RaceFormData>(initial);
 
-  const [abilityErrors, setAbilityErrors] = useState(0);
+  const abilities = useAbilityValidity();
 
   const listHref = `/campaigns/${campaignId}/dm/races`;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (abilityErrors > 0) return;
+    if (!abilities.valid) return;
 
     const data: RaceFormData = {
       ...formData,
@@ -33,21 +37,13 @@ export function useRaceForm(campaignId: string, raceId: string, initial: RaceFor
       },
     };
 
-    update.mutate(
-      { raceId, data },
-      {
-        onSuccess: () => {
-          router.push(listHref);
-          router.refresh();
-        },
-      },
-    );
+    update.mutate({ raceId, data }, { onSuccess: () => navigateFresh(listHref) });
   };
 
   return {
     form: { data: formData, set: setFormData },
-    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilityErrors === 0 },
-    isSaving: update.isPending,
+    abilities,
+    status: { isSaving: update.isPending },
     actions: { submit, cancel: () => router.push(listHref) },
   };
 }

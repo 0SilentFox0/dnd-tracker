@@ -8,6 +8,7 @@ import {
   getRaces,
   updateRace,
 } from "@/lib/api/races";
+import { battleKeys } from "@/lib/hooks/battles/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { skillKeys } from "@/lib/hooks/skills/keys";
@@ -20,6 +21,7 @@ const raceDependentKeys = (campaignId: string) => [
   unitKeys.list(campaignId),
   characterKeys.lists(campaignId),
   skillKeys.trees(campaignId),
+  battleKeys.balance(campaignId),
 ];
 
 export function useRaces(campaignId: string, initialRaces?: Race[], options: { enabled?: boolean } = {}) {

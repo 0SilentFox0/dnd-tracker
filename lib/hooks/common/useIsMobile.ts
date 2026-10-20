@@ -1,6 +1,6 @@
 import { useMediaQuery } from "./useMediaQuery";
 
-export const MOBILE_QUERY = "(max-width: 639px)";
+const MOBILE_QUERY = "(max-width: 639px)";
 
 /** Десктопна розкладка бою (три колонки) */
 export const DESKTOP_QUERY = "(min-width: 1024px)";

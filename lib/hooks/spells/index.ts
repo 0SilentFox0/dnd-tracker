@@ -16,3 +16,4 @@ export {
 } from "./useSpells";
 export { usePrefetchSpellsByIds, useSpellsByIds } from "./useSpellsByIds";
 export { useSpellSelection } from "./useSpellSelection";
+export { useUpdateSpellAppearance } from "./useUpdateSpellAppearance";

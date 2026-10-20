@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type PointerEvent, useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 
 const MIN_ZOOM = 1;
 
@@ -36,7 +36,7 @@ function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h:
   return { zoom: next, x: clampOffset(px - cx * next, next, w), y: clampOffset(py - cy * next, next, h) };
 }
 
-export interface MapViewportOptions {
+interface MapViewportOptions {
   /** один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
   panLocked?: boolean;
   /** контейнер карти прокручується: без зуму колесо гортає його, а масштабує лише з Ctrl/⌘ */
@@ -48,12 +48,9 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
 
   const locked = useRef(panLocked);
 
-  const latest = useRef({ wheelScrolls, zoom: view.zoom });
-
   useEffect(() => {
     locked.current = panLocked;
-    latest.current = { wheelScrolls, zoom: view.zoom };
-  }, [panLocked, wheelScrolls, view.zoom]);
+  }, [panLocked]);
 
   const pointers = useRef(new Map<number, { x: number; y: number }>());
 
@@ -65,28 +62,28 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
 
   const dragged = useRef(false);
 
+  const onWheel = useEffectEvent((e: globalThis.WheelEvent, el: HTMLElement) => {
+    if (wheelScrolls && view.zoom === 1 && !e.ctrlKey && !e.metaKey) return;
+
+    e.preventDefault();
+
+    const rect = el.getBoundingClientRect();
+
+    const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
+
+    setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height));
+  });
+
   useEffect(() => {
     const el = containerRef.current;
 
     if (!el) return;
 
-    const onWheel = (e: globalThis.WheelEvent) => {
-      const { wheelScrolls: scrolls, zoom } = latest.current;
+    const listener = (e: globalThis.WheelEvent) => onWheel(e, el);
 
-      if (scrolls && zoom === 1 && !e.ctrlKey && !e.metaKey) return;
+    el.addEventListener("wheel", listener, { passive: false });
 
-      e.preventDefault();
-
-      const rect = el.getBoundingClientRect();
-
-      const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
-
-      setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height));
-    };
-
-    el.addEventListener("wheel", onWheel, { passive: false });
-
-    return () => el.removeEventListener("wheel", onWheel);
+    return () => el.removeEventListener("wheel", listener);
   }, []);
 
   const onPointerDown = useCallback((e: PointerEvent<HTMLElement>) => {

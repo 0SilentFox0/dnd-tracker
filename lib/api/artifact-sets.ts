@@ -13,7 +13,7 @@ export type ArtifactSetCreatePayload = {
   abilities?: Ability[];
 };
 
-export type ArtifactSetUpdatePayload = {
+type ArtifactSetUpdatePayload = {
   name?: string;
   description?: string | null;
   setBonus?: unknown | null;

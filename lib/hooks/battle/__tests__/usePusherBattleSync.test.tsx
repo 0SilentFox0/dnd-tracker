@@ -227,6 +227,28 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
     if (d1?.version === 2 && d2?.version === 2) expect(d1.initiativeOrder).toEqual(d2.initiativeOrder);
   });
 
+  it("зміна currentUserId перепідписує лише user-канал, канал бою лишається", async () => {
+    const qc = new QueryClient();
+
+    const { rerender } = render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
+
+    await subscribed();
+    await waitFor(() => expect(channelBindings.has("private-user-user-1")).toBe(true));
+
+    const pusher = mockPusherInstance;
+
+    if (!pusher) throw new Error("no pusher");
+
+    const subscribe = vi.spyOn(pusher, "subscribe");
+
+    rerender(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-2" client={qc} />);
+
+    await waitFor(() => expect(channelBindings.has("private-user-user-2")).toBe(true));
+    expect(subscribe.mock.calls.map(([name]) => name)).toEqual(["private-user-user-2"]);
+    expect(channelBindings.has("private-user-user-1")).toBe(false);
+    expect(channelBindings.get(channelName)?.has("battle-delta")).toBe(true);
+  });
+
   it("refetch-сигнал новішої версії — одна інвалідація; версія, яку кеш уже має, — нічого", async () => {
     const qc = new QueryClient();
 

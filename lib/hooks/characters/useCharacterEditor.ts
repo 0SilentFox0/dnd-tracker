@@ -51,5 +51,3 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   return { query, ready: seededFor === characterId, form, equipped, setEquipped, options: { members, membersLoading, races } };
 }
-
-export type CharacterEditor = ReturnType<typeof useCharacterEditor>;

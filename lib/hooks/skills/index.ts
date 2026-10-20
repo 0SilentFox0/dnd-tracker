@@ -21,3 +21,4 @@ export {
   useUpdateSkill,
 } from "./useSkills";
 export { useSkillTreeEditor } from "./useSkillTreeEditor";
+export { useUpdateSkillAppearance } from "./useUpdateSkillAppearance";

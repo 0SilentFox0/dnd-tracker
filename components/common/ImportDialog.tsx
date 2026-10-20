@@ -102,6 +102,7 @@ export function ImportDialog({
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>
                   Успішно імпортовано {success.imported} з {success.total} записів
+                  {success.skipped ? `, пропущено ${success.skipped}` : ""}
                 </span>
               </div>
               {success.warnings?.map((warning) => (

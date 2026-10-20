@@ -10,156 +10,102 @@ import {
 } from "@/lib/utils/campaigns/info-reference";
 import type { ArtifactForReference, ReferenceFilters, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
+interface FilterValues {
+  mainSkill: string | null;
+  spellLevel: number | null;
+  spellGroup: string | null;
+  spellType: string | null;
+  artifactRarity: string | null;
+  artifactSlot: string | null;
+  artifactSet: string | null;
+}
+
+const NO_FILTERS: FilterValues = {
+  mainSkill: null,
+  spellLevel: null,
+  spellGroup: null,
+  spellType: null,
+  artifactRarity: null,
+  artifactSlot: null,
+  artifactSet: null,
+};
+
+function uniqueSorted<T, V extends string | number>(items: T[], pick: (item: T) => V | null | undefined, compare?: (a: V, b: V) => number): V[] {
+  const values = new Set<V>();
+
+  for (const item of items) {
+    const value = pick(item);
+
+    if (value !== null && value !== undefined && value !== "") values.add(value);
+  }
+
+  return [...values].sort(compare);
+}
+
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = []) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [section, setSection] = useState<SectionTab>("all");
 
-  const [mainSkillFilter, setMainSkillFilter] = useState<string | null>(null);
-
-  const [spellLevelFilter, setSpellLevelFilter] = useState<number | null>(null);
-
-  const [spellGroupFilter, setSpellGroupFilter] = useState<string | null>(null);
-
-  const [spellTypeFilter, setSpellTypeFilter] = useState<string | null>(null);
-
-  const [artifactRarityFilter, setArtifactRarityFilter] = useState<string | null>(null);
-
-  const [artifactSlotFilter, setArtifactSlotFilter] = useState<string | null>(null);
-
-  const [artifactSetFilter, setArtifactSetFilter] = useState<string | null>(null);
+  const [values, setValues] = useState<FilterValues>(NO_FILTERS);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const deferredSearch = useDeferredValue(searchQuery);
 
-  const mainSkillOptions = useMemo(() => {
-    const set = new Set<string>();
+  const options = useMemo(() => {
+    const slots = new Map(artifacts.map((a) => [a.slot, a.slotLabel]));
 
-    skills.forEach((s) => {
-      if (s.mainSkillName) set.add(s.mainSkillName);
-    });
+    return {
+      mainSkill: uniqueSorted(skills, (s) => s.mainSkillName),
+      spellLevel: uniqueSorted(spells, (s) => s.level, (a, b) => a - b),
+      spellGroup: uniqueSorted(spells, (s) => s.groupName),
+      spellType: uniqueSorted(spells, (s) => s.type),
+      artifactRarity: uniqueSorted(artifacts, (a) => a.rarity),
+      artifactSlot: Array.from(slots, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
+      artifactSet: uniqueSorted(artifacts, (a) => a.setName),
+    };
+  }, [skills, spells, artifacts]);
 
-    return Array.from(set).sort();
-  }, [skills]);
+  const filteredSkills = useMemo(
+    () => skills.filter((s) => matchSearch(skillSearchText(s), deferredSearch) && (!values.mainSkill || s.mainSkillName === values.mainSkill)),
+    [skills, deferredSearch, values.mainSkill],
+  );
 
-  const spellLevelOptions = useMemo(() => {
-    const set = new Set<number>();
+  const filteredSpells = useMemo(
+    () =>
+      spells.filter(
+        (s) =>
+          matchSearch(spellSearchText(s), deferredSearch) &&
+          (values.spellLevel == null || s.level === values.spellLevel) &&
+          (!values.spellGroup || s.groupName === values.spellGroup) &&
+          (!values.spellType || s.type === values.spellType),
+      ),
+    [spells, deferredSearch, values.spellLevel, values.spellGroup, values.spellType],
+  );
 
-    spells.forEach((s) => set.add(s.level));
+  const filteredArtifacts = useMemo(
+    () =>
+      artifacts.filter(
+        (a) =>
+          matchSearch(artifactSearchText(a), deferredSearch) &&
+          (!values.artifactRarity || a.rarity === values.artifactRarity) &&
+          (!values.artifactSlot || a.slot === values.artifactSlot) &&
+          (!values.artifactSet || a.setName === values.artifactSet),
+      ),
+    [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
+  );
 
-    return Array.from(set).sort((a, b) => a - b);
-  }, [spells]);
+  const field = <K extends keyof FilterValues>(key: K) => ({
+    value: values[key],
+    set: (value: FilterValues[K] | null) => setValues((prev) => ({ ...prev, [key]: value })),
+  });
 
-  const spellGroupOptions = useMemo(() => {
-    const set = new Set<string>();
-
-    spells.forEach((s) => {
-      if (s.groupName) set.add(s.groupName);
-    });
-
-    return Array.from(set).sort();
-  }, [spells]);
-
-  const spellTypeOptions = useMemo(() => {
-    const set = new Set<string>();
-
-    spells.forEach((s) => set.add(s.type));
-
-    return Array.from(set).sort();
-  }, [spells]);
-
-  const artifactRarityOptions = useMemo(() => {
-    const set = new Set<string>();
-
-    artifacts.forEach((a) => {
-      if (a.rarity) set.add(a.rarity);
-    });
-
-    return Array.from(set).sort();
-  }, [artifacts]);
-
-  const artifactSlotOptions = useMemo(() => {
-    const map = new Map<string, string>();
-
-    artifacts.forEach((a) => map.set(a.slot, a.slotLabel));
-
-    return Array.from(map, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label));
-  }, [artifacts]);
-
-  const artifactSetOptions = useMemo(() => {
-    const set = new Set<string>();
-
-    artifacts.forEach((a) => {
-      if (a.setName) set.add(a.setName);
-    });
-
-    return Array.from(set).sort();
-  }, [artifacts]);
-
-  const filteredSkills = useMemo(() => {
-    return skills.filter((s) => {
-      if (!matchSearch(skillSearchText(s), deferredSearch)) return false;
-
-      if (mainSkillFilter && s.mainSkillName !== mainSkillFilter) return false;
-
-      return true;
-    });
-  }, [skills, deferredSearch, mainSkillFilter]);
-
-  const filteredSpells = useMemo(() => {
-    return spells.filter((s) => {
-      if (!matchSearch(spellSearchText(s), deferredSearch)) return false;
-
-      if (spellLevelFilter != null && s.level !== spellLevelFilter) return false;
-
-      if (spellGroupFilter && s.groupName !== spellGroupFilter) return false;
-
-      if (spellTypeFilter && s.type !== spellTypeFilter) return false;
-
-      return true;
-    });
-  }, [
-    spells,
-    deferredSearch,
-    spellLevelFilter,
-    spellGroupFilter,
-    spellTypeFilter,
-  ]);
-
-  const filteredArtifacts = useMemo(() => {
-    return artifacts.filter((a) => {
-      if (!matchSearch(artifactSearchText(a), deferredSearch)) return false;
-
-      if (artifactRarityFilter && a.rarity !== artifactRarityFilter) return false;
-
-      if (artifactSlotFilter && a.slot !== artifactSlotFilter) return false;
-
-      if (artifactSetFilter && a.setName !== artifactSetFilter) return false;
-
-      return true;
-    });
-  }, [artifacts, deferredSearch, artifactRarityFilter, artifactSlotFilter, artifactSetFilter]);
-
-  const hasActiveFilters =
-    deferredSearch.trim() !== "" ||
-    mainSkillFilter != null ||
-    spellLevelFilter != null ||
-    spellGroupFilter != null ||
-    spellTypeFilter != null ||
-    artifactRarityFilter != null ||
-    artifactSlotFilter != null ||
-    artifactSetFilter != null;
+  const hasActiveFilters = deferredSearch.trim() !== "" || Object.values(values).some((v) => v != null);
 
   const clearAllFilters = () => {
     setSearchQuery("");
-    setMainSkillFilter(null);
-    setSpellLevelFilter(null);
-    setSpellGroupFilter(null);
-    setSpellTypeFilter(null);
-    setArtifactRarityFilter(null);
-    setArtifactSlotFilter(null);
-    setArtifactSetFilter(null);
+    setValues(NO_FILTERS);
   };
 
   const showSkills = section === "all" || section === "skills";
@@ -174,8 +120,6 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
 
   const artifactsEmpty = showArtifacts && filteredArtifacts.length === 0;
 
-  const nothingFound = skillsEmpty && spellsEmpty && artifactsEmpty;
-
   const filters: ReferenceFilters = {
     search: { value: searchQuery, set: setSearchQuery },
     section: { value: section, set: setSection },
@@ -184,27 +128,23 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     clearAll: clearAllFilters,
     visible: { skills: showSkills, spells: showSpells, artifacts: showArtifacts },
     skill: {
-      mainSkill: { value: mainSkillFilter, set: setMainSkillFilter, options: mainSkillOptions },
+      mainSkill: { ...field("mainSkill"), options: options.mainSkill },
     },
     spell: {
-      level: { value: spellLevelFilter, set: setSpellLevelFilter, options: spellLevelOptions },
-      group: { value: spellGroupFilter, set: setSpellGroupFilter, options: spellGroupOptions },
-      type: { value: spellTypeFilter, set: setSpellTypeFilter, options: spellTypeOptions },
+      level: { ...field("spellLevel"), options: options.spellLevel },
+      group: { ...field("spellGroup"), options: options.spellGroup },
+      type: { ...field("spellType"), options: options.spellType },
     },
     artifact: {
-      rarity: { value: artifactRarityFilter, set: setArtifactRarityFilter, options: artifactRarityOptions },
-      slot: { value: artifactSlotFilter, set: setArtifactSlotFilter, options: artifactSlotOptions },
-      artifactSet: { value: artifactSetFilter, set: setArtifactSetFilter, options: artifactSetOptions },
+      rarity: { ...field("artifactRarity"), options: options.artifactRarity },
+      slot: { ...field("artifactSlot"), options: options.artifactSlot },
+      artifactSet: { ...field("artifactSet"), options: options.artifactSet },
     },
   };
 
   return {
     filters,
-    results: {
-      filteredSkills,
-      filteredSpells,
-      filteredArtifacts,
-    },
+    results: { filteredSkills, filteredSpells, filteredArtifacts },
     ui: {
       shown: {
         skills: showSkills && !skillsEmpty,
@@ -214,7 +154,7 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
       skillsEmpty,
       spellsEmpty,
       artifactsEmpty,
-      nothingFound,
+      nothingFound: skillsEmpty && spellsEmpty && artifactsEmpty,
     },
   };
 }

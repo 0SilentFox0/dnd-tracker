@@ -46,8 +46,8 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
               label="Видалити всіх"
               description="Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати."
               icon={<Trash2 className="mr-2 h-4 w-4" />}
-              pending={page.isDeletingAll}
-              onConfirm={page.removeAll}
+              pending={page.status.isDeletingAll}
+              onConfirm={page.actions.removeAll}
             />
             <Link href={newHref}>
               <Button className="whitespace-nowrap">
@@ -91,8 +91,8 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
                 key={character.id}
                 character={character}
                 campaignId={campaignId}
-                busy={page.levelingUpId === character.id}
-                actions={{ onLevelUp: character.level < maxLevel ? () => page.levelUp(character) : undefined, onDelete: () => void page.confirmDelete(character) }}
+                busy={page.status.levelingUpId === character.id}
+                actions={{ onLevelUp: character.level < maxLevel ? () => page.actions.levelUp(character) : undefined, onDelete: () => void page.actions.confirmDelete(character) }}
               />
             ))}
           </div>

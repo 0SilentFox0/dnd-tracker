@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { characterKeys } from "./keys";
+import { characterKeys, characterWriteKeys } from "./keys";
 
 import {
   createCharacter,
@@ -12,7 +12,6 @@ import {
   updateCharacter,
 } from "@/lib/api/characters";
 import { type CharacterTypeValue } from "@/lib/constants/characters";
-import { battleKeys } from "@/lib/hooks/battles/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { skillKeys } from "@/lib/hooks/skills/keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
@@ -20,7 +19,7 @@ import type { Character, CharacterFormData, CharacterListItem } from "@/types/ch
 
 export type { Character };
 
-/** Без `opts` — усі персонажі кампанії (гравці та npc_hero). `compact` — без важких JSON/інвентаря (менший egress). */
+// compact — без важких JSON/інвентаря (менший egress)
 export function useCharacters(
   campaignId: string,
   opts?: { type?: CharacterTypeValue; compact?: boolean; enabled?: boolean },
@@ -46,7 +45,7 @@ export function useCharacter(campaignId: string, characterId: string) {
 export function useCreateCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: CharacterFormData) => createCharacter(campaignId, data),
-    invalidateKeys: [characterKeys.lists(campaignId)],
+    invalidateKeys: characterWriteKeys(campaignId),
   });
 }
 
@@ -54,11 +53,10 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
   return useCrudMutation({
     mutationFn: (data: CharacterFormData) => updateCharacter(campaignId, characterId, data),
     invalidateKeys: [
-      characterKeys.lists(campaignId),
+      ...characterWriteKeys(campaignId),
       characterKeys.detail(campaignId, characterId),
       skillKeys.progression(campaignId, characterId),
       characterKeys.sheet(campaignId, characterId),
-      battleKeys.balanceAll(),
     ],
   });
 }
@@ -68,11 +66,10 @@ export function useLevelUpCharacter(campaignId: string) {
     mutationFn: (characterId: string) =>
       levelUpCharacter(campaignId, characterId),
     invalidateKeys: [
-      characterKeys.lists(campaignId),
+      ...characterWriteKeys(campaignId),
       characterKeys.details(campaignId),
       characterKeys.sheet(campaignId),
       skillKeys.progressionOf(campaignId),
-      battleKeys.balanceAll(),
     ],
   });
 }
@@ -81,13 +78,13 @@ export function useDeleteCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (characterId: string) =>
       deleteCharacter(campaignId, characterId),
-    invalidateKeys: [characterKeys.lists(campaignId)],
+    invalidateKeys: characterWriteKeys(campaignId),
   });
 }
 
 export function useDeleteAllCharacters(campaignId: string) {
   return useCrudMutation({
     mutationFn: () => deleteAllCharacters(campaignId),
-    invalidateKeys: [characterKeys.lists(campaignId)],
+    invalidateKeys: characterWriteKeys(campaignId),
   });
 }

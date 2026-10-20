@@ -160,7 +160,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
           value={data.abilities}
           onChange={(a) => set("abilities", a)}
           issues={initial.abilityIssues}
-          onValidityChange={(_, n) => editor.abilities.setErrors(n)}
+          onValidityChange={editor.abilities.onValidityChange}
         />
       ),
     },

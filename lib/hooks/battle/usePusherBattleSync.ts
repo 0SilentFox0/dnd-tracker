@@ -1,29 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { writeAudioSnapshot } from "./audio-snapshot";
+import { useBattleResync } from "./useBattleResync";
+import { usePusherChannel, usePusherConnection } from "./usePusherChannel";
 
-import { getBattleVersion } from "@/lib/api/battles";
-import { battleKeys, battleQueryKey } from "@/lib/hooks/battles";
+import { battleKeys } from "@/lib/hooks/battles/keys";
+import { writeBattleDelta } from "@/lib/hooks/battles/write-battle-delta";
 import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
-import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAudioEvent } from "@/types/audio";
 
+export { RESYNC_AFTER_HIDDEN_MS } from "./useBattleResync";
+
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
-const isBattleSyncDebugEnabled = false;
-
-export const RESYNC_AFTER_HIDDEN_MS = 15_000;
+const CONNECTION_STATES = new Set(["connected", "connecting", "disconnected", "unavailable"]);
 
 /**
- * Підписка на Pusher-канали бою: оновлення битви, старт, завершення, turn-started для поточного юзера.
- * Застосовує battle-delta до кешу; refetch-сигнал або пропуск версії — одна інвалідація.
- * Канал battle-* підписується окремо від currentUserId, щоб не втрачати події під час завантаження userId.
- * Після першої підписки, будь-якого розриву або довго схованої вкладки питає лише версію; повний GET — коли вона новіша за кеш.
- * Повертає connectionState для індикатора з'єднання.
+ * Pusher-канали бою: battle-delta і battle-audio в кеш, turn-started для поточного юзера.
+ * Канал battle-* не залежить від currentUserId, щоб не втрачати події під час завантаження userId.
+ * Після першої підписки, розриву або довго схованої вкладки — перевірка версії (useBattleResync).
  */
 export function usePusherBattleSync(
   campaignId: string,
@@ -33,288 +32,81 @@ export function usePusherBattleSync(
 ): { connectionState: PusherConnectionState } {
   const queryClient = useQueryClient();
 
-  const [connectionState, setConnectionState] = useState<PusherConnectionState>(null);
+  const resync = useBattleResync(campaignId, battleId);
 
-  const pusherRef = useRef<ReturnType<
-    typeof import("@/lib/pusher/client").getPusherClient
-  > | null>(null);
+  const [rawState, setRawState] = useState<PusherConnectionState>(null);
 
-  const userChannelRef = useRef<string | null>(null);
+  const [failedChannel, setFailedChannel] = useState<string | null>(null);
 
-  const wasDisconnectedRef = useRef(false);
+  const resyncedChannelRef = useRef<string | null>(null);
 
-  const subscriptionFailedRef = useRef(false);
+  const channel = battleChannelName(battleId);
 
-  const cleanupRef = useRef<(() => void) | null>(null);
-
-  const onTurnStartedRef = useRef(onTurnStarted);
-
-  onTurnStartedRef.current = onTurnStarted;
-
-  const queryKey = useCallback(() => battleQueryKey(campaignId, battleId), [campaignId, battleId]);
-
-  const resyncRef = useRef<Promise<void> | null>(null);
-
-  // видимість і перепідключення часто приходять разом: один запит версії на обидва
-  const resync = useCallback(() => {
-    resyncRef.current ??= (async () => {
-      // музика не має версії: пропущені battle-audio перечитуються окремо (лише якщо звук увімкнено)
-      void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
-
-      if (queryClient.getQueryData<BattleScene>(queryKey()) === undefined) return;
-
-      try {
-        const { version } = await getBattleVersion(campaignId, battleId);
-
-        const cached = queryClient.getQueryData<BattleScene>(queryKey())?.version;
-
-        if (cached === undefined || version <= cached) return;
-      } catch {
-        // без версії безпечніше перечитати бій
-      }
-
-      await queryClient.invalidateQueries({ queryKey: queryKey() });
-    })().finally(() => {
-      resyncRef.current = null;
-    });
-
-    return resyncRef.current;
-  }, [campaignId, battleId, queryClient, queryKey]);
-
-  const debugLog = useCallback(
-    (message: string, payload?: unknown) => {
-      if (!isBattleSyncDebugEnabled) return;
-
-      const prefix = `[battle-sync][battle:${battleId}][user:${currentUserId ?? "anon"}]`;
-
-      if (payload === undefined) {
-        console.info(prefix, message);
-      } else {
-        console.info(prefix, message, payload);
-      }
+  usePusherConnection(
+    (state) => {
+      if (CONNECTION_STATES.has(state)) setRawState(state as PusherConnectionState);
     },
-    [battleId, currentUserId],
+    () => void resync(),
   );
 
-  // 1) Підписка на канал бою — БЕЗ залежності від currentUserId, щоб не відписуватись під час завантаження userId (гравець не втрачає battle-delta).
-  useEffect(() => {
-    if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_PUSHER_KEY) {
-      debugLog("skip init: no window or NEXT_PUBLIC_PUSHER_KEY");
+  usePusherChannel(
+    channel,
+    {
+      "battle-delta": (data) => {
+        const key = battleKeys.scene(campaignId, battleId);
 
-      return;
-    }
-
-    let mounted = true;
-
-    import("@/lib/pusher/client").then(({ getPusherClient }) => {
-      if (!mounted) return;
-
-      const pusher = getPusherClient();
-
-      pusherRef.current = pusher;
-
-      if (!pusher) {
-        debugLog("skip init: pusher client is null");
-
-        return;
-      }
-
-      const channel = battleChannelName(battleId);
-
-      debugLog("pusher init (battle channel)", {
-        queryKey: queryKey(),
-        battleChannel: channel,
-      });
-
-      const onDelta = (data: unknown) => {
         if (!data || typeof data !== "object" || !("version" in data)) {
-          void queryClient.invalidateQueries({ queryKey: queryKey() });
+          void queryClient.invalidateQueries({ queryKey: key });
 
           return;
         }
 
-        const cached = queryClient.getQueryData<BattleScene>(queryKey());
-
         const signal = data as ClientBattleDelta | BattleRefetchSignal;
 
-        if (cached?.version !== undefined && signal.version <= cached.version) return;
+        const cachedVersion = queryClient.getQueryData<BattleScene>(key)?.version;
 
-        const next = !cached || "refetch" in signal ? "refetch" : applyBattleDelta(cached, signal);
+        if (cachedVersion !== undefined && signal.version <= cachedVersion) return;
 
-        if (next === "refetch") void queryClient.invalidateQueries({ queryKey: queryKey() });
-        else queryClient.setQueryData(queryKey(), next);
-      };
-
-      const onAudio = (data: unknown) => {
+        void writeBattleDelta(queryClient, key, signal);
+      },
+      [BATTLE_AUDIO_EVENT]: (data) => {
         const audio = (data as Partial<BattleAudioEvent> | null)?.audio;
 
         if (!audio || typeof audio.seq !== "number") return;
 
         writeAudioSnapshot(queryClient, { campaignId, battleId }, { audio });
-      };
-
-      const updateConnectionState = () => {
-        if (!mounted) return;
-
-        const state = pusher.connection.state;
-
-        // з'єднання живе, але канал бою не підписаний — дельт не буде, хай працює polling
-        if (subscriptionFailedRef.current) {
-          setConnectionState("unavailable");
-
-          return;
-        }
-
-        if (state === "connected" || state === "connecting" || state === "disconnected" || state === "unavailable") {
-          setConnectionState(state);
-        }
-      };
-
-      const onState = (states: { previous: string; current: string }) => {
-        debugLog("connection state change", states);
-        updateConnectionState();
-
-        if (states.previous === "connected" && states.current !== "connected") wasDisconnectedRef.current = true;
-
-        if (states.current === "connected" && wasDisconnectedRef.current) {
-          wasDisconnectedRef.current = false;
-          void resync();
-        }
-      };
-
-      pusher.connection.bind("state_change", onState);
-      updateConnectionState();
-
-      const battleChannel = pusher.subscribe(channel);
-
-      debugLog("subscribed battle channel", { channel });
-      battleChannel.bind("battle-delta", onDelta);
-      battleChannel.bind(BATTLE_AUDIO_EVENT, onAudio);
-
-      const onSubscriptionError = (error: unknown) => {
-        console.warn("[battle-sync] battle channel subscription failed, falling back to polling", error);
-        subscriptionFailedRef.current = true;
-        updateConnectionState();
-      };
-
-      let firstSubscription = true;
-
+      },
+    },
+    {
       // the cached scene (server HTML or GET) predates the subscription: deltas in between would be lost
-      const onSubscribed = () => {
-        const recovered = subscriptionFailedRef.current;
+      onSubscribed: () => {
+        const recovered = failedChannel === channel;
 
-        if (!recovered && !firstSubscription) return;
+        if (!recovered && resyncedChannelRef.current === channel) return;
 
-        firstSubscription = false;
-        subscriptionFailedRef.current = false;
+        resyncedChannelRef.current = channel;
 
-        if (recovered) updateConnectionState();
+        if (recovered) setFailedChannel(null);
 
         void resync();
-      };
+      },
+      onError: (error) => {
+        console.warn("[battle-sync] battle channel subscription failed, falling back to polling", error);
+        setFailedChannel(channel);
+      },
+    },
+  );
 
-      battleChannel.bind("pusher:subscription_error", onSubscriptionError);
-      battleChannel.bind("pusher:subscription_succeeded", onSubscribed);
+  usePusherChannel(currentUserId ? userChannelName(currentUserId) : null, {
+    "turn-started": (data) => {
+      const name = (data as { participantName?: string } | null)?.participantName;
 
-      cleanupRef.current = () => {
-        battleChannel.unbind("battle-delta", onDelta);
-        battleChannel.unbind(BATTLE_AUDIO_EVENT, onAudio);
-        battleChannel.unbind("pusher:subscription_error", onSubscriptionError);
-        battleChannel.unbind("pusher:subscription_succeeded", onSubscribed);
-        pusher.connection.unbind("state_change", onState);
-      };
-    });
+      onTurnStarted(name ? "Твій хід: " + name : "Твій хід!");
+    },
+  });
 
-    return () => {
-      mounted = false;
-
-      const p = pusherRef.current;
-
-      cleanupRef.current?.();
-      cleanupRef.current = null;
-      subscriptionFailedRef.current = false;
-
-      if (p) {
-        debugLog("cleanup battle channel only");
-        p.unsubscribe(battleChannelName(battleId));
-        // не обнуляємо pusherRef — другий effect використовує його для cleanup user-каналу
-      }
-    };
-  }, [battleId, campaignId, queryClient, queryKey, debugLog, resync]);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    let hiddenAt: number | null = null;
-
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") {
-        hiddenAt = Date.now();
-
-        return;
-      }
-
-      if (hiddenAt !== null && Date.now() - hiddenAt > RESYNC_AFTER_HIDDEN_MS) void resync();
-
-      hiddenAt = null;
-    };
-
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, [resync]);
-
-  // 2) Підписка на user-* канал для turn-started — окремий effect, залежить від currentUserId.
-  useEffect(() => {
-    if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_PUSHER_KEY || !currentUserId) {
-      return;
-    }
-
-    let mounted = true;
-
-    import("@/lib/pusher/client").then(({ getPusherClient }) => {
-      if (!mounted) return;
-
-      const pusher = getPusherClient();
-
-      if (!pusher) return;
-
-      const channel = userChannelName(currentUserId);
-
-      userChannelRef.current = channel;
-      debugLog("subscribed user channel", { channel });
-
-      const userChannel = pusher.subscribe(channel);
-
-      userChannel.bind(
-        "turn-started",
-        (data: { participantName?: string }) => {
-          debugLog("event received: turn-started", data);
-          onTurnStartedRef.current(
-            data?.participantName
-              ? "Твій хід: " + data.participantName
-              : "Твій хід!",
-          );
-        },
-      );
-    });
-
-    return () => {
-      mounted = false;
-
-      const p = pusherRef.current;
-
-      if (p) {
-        const uc = userChannelRef.current;
-
-        if (uc) {
-          debugLog("cleanup user channel");
-          p.unsubscribe(uc);
-          userChannelRef.current = null;
-        }
-      }
-    };
-  }, [battleId, currentUserId, debugLog]);
+  // з'єднання живе, але канал бою не підписаний — дельт не буде, хай працює polling
+  const connectionState = failedChannel === channel ? "unavailable" : rawState;
 
   return { connectionState };
 }

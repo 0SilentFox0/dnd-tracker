@@ -1,21 +1,17 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-import { unitKeys } from "./keys";
+import { unitWriteKeys } from "./keys";
 
 import { importUnits } from "@/lib/api/units";
-import { useFileImport } from "@/lib/hooks/common";
+import { useCrudMutation, useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
 import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
 import type { CSVUnitRow, ImportUnit } from "@/types/import";
 
 export function useUnitImport(campaignId: string) {
-  const queryClient = useQueryClient();
-
-  const importMutation = useMutation({
+  const importMutation = useCrudMutation({
     mutationFn: (units: ImportUnit[]) => importUnits(campaignId, { units }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: unitKeys.list(campaignId) }),
+    invalidateKeys: unitWriteKeys(campaignId),
   });
 
   return useFileImport<ImportUnit>({

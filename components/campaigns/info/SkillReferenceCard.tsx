@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppearanceSave } from "@/lib/hooks/common";
+import { useUpdateSkillAppearance } from "@/lib/hooks/skills";
 import {
   formatMechanicsSkill,
   getShortSkillSummary,
@@ -29,15 +29,9 @@ export function SkillReferenceCard({
   skill,
   isDM,
 }: SkillReferenceCardProps) {
-  const {
-    value: appearance,
-    setValue: setAppearance,
-    saving,
-    save,
-  } = useAppearanceSave(
+  const { draft: { data: appearance, set: setAppearance }, status: { isSaving: saving }, save } = useUpdateSkillAppearance(
     campaignId,
     skill.id,
-    "skill",
     skill.appearanceDescription ?? "",
   );
 

@@ -5,7 +5,7 @@ import { HudPage } from "@/components/hud/page";
 import { requireCampaignMember } from "@/lib/campaigns/access";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import { characterSheetKey } from "@/lib/hooks/characters/keys";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { CharacterSheet } from "@/types/characters";
@@ -31,7 +31,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
   const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel } }));
 
   return (
-    <PrefetchedQuery queryKey={characterSheetKey(id, character.id)} data={sheet}>
+    <PrefetchedQuery queryKey={characterKeys.sheet(id, character.id)} data={sheet}>
       <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />
     </PrefetchedQuery>
   );

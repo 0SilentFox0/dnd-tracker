@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { useAbilityValidity } from "@/lib/hooks/abilities";
 import { useRaces } from "@/lib/hooks/races";
 import { useSpells } from "@/lib/hooks/spells";
 import type { Unit } from "@/types/units";
@@ -15,7 +16,7 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
 
   const [dirty, setDirty] = useState(false);
 
-  const [abilityErrors, setAbilityErrors] = useState(0);
+  const abilities = useAbilityValidity();
 
   const races = useMemo(() => [...(rawRaces ?? [])].sort((a, b) => a.name.localeCompare(b.name, "uk")), [rawRaces]);
 
@@ -29,7 +30,7 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
   return {
     form: { data: formData, set: setFormData, change, dirty },
     options: { races, race, spells },
-    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilityErrors === 0 },
+    abilities,
   };
 }
 

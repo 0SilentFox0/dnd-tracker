@@ -13,7 +13,7 @@ interface AutopickCardProps {
 }
 
 export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
-  const { loading, race, suggested, done, actions } = balance;
+  const { isLoading, race, suggested, done, actions } = balance;
 
   return (
     <HudSection title="Підбір ворогів" className="space-y-4">
@@ -39,8 +39,8 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
             </select>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" onClick={actions.suggest} disabled={loading}>
-              {loading ? "Підбір…" : "Підібрати"}
+            <Button type="button" onClick={actions.suggest} disabled={isLoading}>
+              {isLoading ? "Підбір…" : "Підібрати"}
             </Button>
             {suggested.length > 0 && (
               <Button type="button" variant="secondary" onClick={actions.apply}>

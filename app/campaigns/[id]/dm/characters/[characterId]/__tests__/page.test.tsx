@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { NextResponse } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { characterSheetKey } from "@/lib/hooks/characters/keys";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 
 const readCharacterSheet = vi.hoisted(() => vi.fn());
@@ -25,7 +25,7 @@ describe("DmCharacterPage (server)", () => {
 
     expect(readCharacterSheet).toHaveBeenCalledWith({ id: "c1", characterId: "ch9" });
     expect(el.type).toBe(PrefetchedQuery);
-    expect(el.props.queryKey).toEqual(characterSheetKey("c1", "ch9"));
+    expect(el.props.queryKey).toEqual(characterKeys.sheet("c1", "ch9"));
     expect(el.props.data).toEqual(sheet);
     expect(el.props.children.props.canEdit).toBe(true);
   });
