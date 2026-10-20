@@ -19,7 +19,7 @@ const fall = (p: BattleParticipant, status: BattleParticipant["combatStats"]["st
 
 const revive = (p: BattleParticipant): BattleParticipant => ({ ...p, combatStats: { ...p.combatStats, status: CombatStatus.ACTIVE, currentHp: 5 } });
 
-const at = (id: string, x: number, y: number, size?: number, side = ParticipantSide.ALLY) => placed(id, { at: { x, y }, size, side });
+const at = (id: string, x: number, y: number, size?: number, side: ParticipantSide = ParticipantSide.ALLY) => placed(id, { at: { x, y }, size, side });
 
 const withEffects = (p: BattleParticipant, ids: string[]): BattleParticipant => ({ ...p, battleData: { ...p.battleData, activeEffects: ids.map((id) => makeEffect(id)) } });
 
