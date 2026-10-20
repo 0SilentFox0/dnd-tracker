@@ -13,20 +13,25 @@ export interface MediaSyncInput {
   active: boolean;
   volume: number;
   muted: boolean;
+  /** play() поза жестом відхилено (новий елемент на iOS) — знову потрібна кнопка «Увімкнути звук» */
+  onBlocked?(): void;
 }
 
 /** Порожній WAV: play() у жесті розблоковує елемент на iOS, коли треку ще немає. */
 export const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+
+const isBlocked = (e: unknown) => e instanceof Error && e.name === "NotAllowedError";
 
 const durationOf = (el: HTMLAudioElement, state: BattleAudioState | null) => (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : (state?.track?.durationSec ?? null));
 
 export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudioElement | null) => void; prime(): void; failed: boolean } {
   const node = useRef<HTMLAudioElement | null>(null);
 
-  // state only re-runs the effects when the element changes; it is mutated through the ref
+  // стан лише перезапускає ефекти при зміні елемента; сам елемент змінюється через ref
   const [attached, setAttached] = useState<HTMLAudioElement | null>(null);
 
-  const [failed, setFailed] = useState(false);
+  // помилка привʼязана до src: інший трек, YouTube чи «Стоп» прибирають її без скидання в ефекті
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
   const latest = useRef(input);
 
@@ -56,7 +61,7 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
 
     if (plan.seekTo !== null && el.readyState >= 1) el.currentTime = plan.seekTo;
 
-    if (plan.play) void el.play().catch(() => undefined);
+    if (plan.play) void el.play().catch((e: unknown) => isBlocked(e) && latest.current.onBlocked?.());
   }, []);
 
   const { active, src, state, clockOffsetMs, volume, muted } = input;
@@ -97,11 +102,11 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     if (!attached || !el) return;
 
     const onLoaded = () => {
-      setFailed(false);
+      setFailedSrc(null);
       sync();
     };
 
-    const onError = () => setFailed(true);
+    const onError = () => setFailedSrc(el.getAttribute("src"));
 
     el.addEventListener("loadedmetadata", onLoaded);
     el.addEventListener("error", onError);
@@ -128,5 +133,5 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     void el.play().catch(() => undefined);
   }, []);
 
-  return { ref, prime, failed };
+  return { ref, prime, failed: failedSrc !== null && failedSrc === (active ? src : null) };
 }

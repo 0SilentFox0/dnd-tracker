@@ -78,36 +78,33 @@ export function BattleScreen() {
     import("@/components/battle/fx/preload").then((m) => m.preloadFx()).catch(() => undefined);
   }, [fxOn]);
 
-  if (battle.status === BattleStatus.PREPARED) {
-    const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
+  const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
 
-    const onField = battle.participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
+  const onField = battle.participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
-    return (
-      <BattleAudioProvider>
-        <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
+  // один провайдер на обидві гілки: <audio> у ньому переживає «Почати бій»
+  return (
+    <BattleAudioProvider>
+      {battle.status === BattleStatus.PREPARED ? (
+        <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
           <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onField > 0} />
           <BattleAudioDock placement="corner" />
         </div>
-      </BattleAudioProvider>
-    );
-  }
-
-  return (
-    <BattleAudioProvider>
-    <div className={cn("battle-hud", hudFontClassName)}>
-      {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
-      <ResultOverlay />
-      {Desktop && <ActionResultCard />}
-      {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
-      <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
-        <BattleToast />
-      </div>
-      {Desktop && <BattleAudioDock placement="corner" />}
-      {isDM && <DmRevivePrompt />}
-      {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
-      <BattleFxLayer />
-    </div>
+      ) : (
+        <div className={cn("battle-hud", hudFontClassName)}>
+          {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
+          <ResultOverlay />
+          {Desktop && <ActionResultCard />}
+          {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
+          <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
+            <BattleToast />
+          </div>
+          {Desktop && <BattleAudioDock placement="corner" />}
+          {isDM && <DmRevivePrompt />}
+          {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
+          <BattleFxLayer />
+        </div>
+      )}
     </BattleAudioProvider>
   );
 }

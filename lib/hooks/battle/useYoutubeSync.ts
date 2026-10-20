@@ -93,7 +93,8 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
 
     if (plan.pause) player.pauseVideo();
 
-    if (plan.seekTo !== null) player.seekTo(plan.seekTo, true);
+    // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
+    if (plan.seekTo !== null && durationSec) player.seekTo(plan.seekTo, true);
 
     if (plan.play) {
       player.playVideo();

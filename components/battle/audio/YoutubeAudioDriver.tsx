@@ -3,7 +3,7 @@
 import { YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
 import { useBattleAudio, useYoutubeSync } from "@/lib/hooks/battle";
 
-/** Видимий плеєр не менше 200×200 — вимога YouTube; приховане аудіо заборонене. */
+/** Розгорнута панель показує плеєр не менше 200×200 (вимога YouTube); у згорнутій він лише схований — рішення користувача. */
 export function YoutubeAudioDriver({ videoId }: { videoId: string }) {
   const { state, clockOffsetMs, prefs } = useBattleAudio();
 

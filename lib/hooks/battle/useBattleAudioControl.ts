@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { sendBattleAudio } from "@/lib/api/battle-audio";
@@ -19,6 +19,9 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
 
   const queryClient = useQueryClient();
 
+  // disabled={pending} діє лише після рендеру: другий клік подвійного натискання встигає раніше
+  const inFlight = useRef(false);
+
   const { mutate, isPending } = useMutation({
     mutationFn: (cmd: BattleAudioCommand) => sendBattleAudio(campaignId, battleId, cmd),
     onSuccess: (fresh) =>
@@ -31,9 +34,23 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
 
       onFailure(error instanceof Error && error.message ? error.message : "Не вдалося керувати музикою");
     },
+    onSettled: () => {
+      inFlight.current = false;
+    },
   });
 
-  const control = useMemo(() => ({ send: (cmd: BattleAudioCommand) => mutate(cmd), pending: isPending }), [mutate, isPending]);
+  const control = useMemo(
+    () => ({
+      send: (cmd: BattleAudioCommand) => {
+        if (inFlight.current) return;
+
+        inFlight.current = true;
+        mutate(cmd);
+      },
+      pending: isPending,
+    }),
+    [mutate, isPending],
+  );
 
   return enabled ? control : null;
 }

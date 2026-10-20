@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useBattleAudioState } from "../useBattleAudioState";
 
 import { getBattleAudio } from "@/lib/api/battle-audio";
+import { battleKeys } from "@/lib/hooks/battles";
 import type { BattleAudioState } from "@/types/audio";
 
 vi.mock("@/lib/api/battle-audio", () => ({ getBattleAudio: vi.fn() }));
@@ -48,6 +49,20 @@ describe("useBattleAudioState", () => {
     rerender({ live: true });
 
     await waitFor(() => expect(result.current).toEqual({ audio: state(7), clockOffsetMs: 1_200 }));
+    expect(getBattleAudio).toHaveBeenCalledTimes(1);
+  });
+
+  it("із типовим staleTime 60 с: сцена й Pusher уже записали кеш — розблокування все одно один GET (годинник)", async () => {
+    vi.mocked(getBattleAudio).mockClear().mockResolvedValue({ audio: state(4), clockOffsetMs: -3_000 });
+
+    const { client, wrapper } = setup(new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 60_000 } } }));
+
+    const { result, rerender } = renderHook(({ live }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), live }), { wrapper, initialProps: { live: false } });
+
+    client.setQueryData(battleKeys.audio("c1", "b1"), { audio: state(3), clockOffsetMs: null });
+    rerender({ live: true });
+
+    await waitFor(() => expect(result.current).toEqual({ audio: state(4), clockOffsetMs: -3_000 }));
     expect(getBattleAudio).toHaveBeenCalledTimes(1);
   });
 });

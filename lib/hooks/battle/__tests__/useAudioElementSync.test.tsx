@@ -95,4 +95,16 @@ describe("useAudioElementSync", () => {
     act(() => vi.advanceTimersByTime(10_000));
     expect(el.currentTime).toBe(40);
   });
+
+  it("помилка файлу — failed; зміна src (інший трек, YouTube, «Стоп») скидає failed", () => {
+    const { getByTestId, rerender } = render(<Harness {...base} />);
+
+    act(() => {
+      getByTestId("audio").dispatchEvent(new Event("error"));
+    });
+    expect(api.failed).toBe(true);
+
+    rerender(<Harness {...base} src={null} />);
+    expect(api.failed).toBe(false);
+  });
 });

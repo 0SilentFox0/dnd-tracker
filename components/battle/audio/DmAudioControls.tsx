@@ -27,6 +27,9 @@ export function DmAudioControls({ state, control, library }: { state: BattleAudi
 
   const empty = library.tracks.length === 0;
 
+  // поточний трек на паузі продовжується з місця паузи: play почав би з нуля
+  const pick = (trackId: string) => send(trackId === state?.trackId && !playing ? { action: "resume" } : { action: "play", trackId });
+
   return (
     <div className="mt-2 border-t border-hud-rule pt-2">
       <div className="flex justify-center gap-1">
@@ -59,7 +62,7 @@ export function DmAudioControls({ state, control, library }: { state: BattleAudi
                 type="button"
                 aria-current={t.id === state?.trackId || undefined}
                 disabled={pending}
-                onClick={() => send({ action: "play", trackId: t.id })}
+                onClick={() => pick(t.id)}
                 className={cn("w-full truncate rounded px-1.5 py-1 text-left hover:bg-white/10", t.id === state?.trackId && "text-hud-gold-bright")}
               >
                 {t.kind === "youtube" ? "▶ " : "♪ "}

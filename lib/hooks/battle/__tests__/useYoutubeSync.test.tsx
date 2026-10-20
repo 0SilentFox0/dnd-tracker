@@ -8,6 +8,8 @@ import type { BattleAudioState } from "@/types/audio";
 
 const created = vi.hoisted(() => [] as Array<{ options: Record<string, unknown>; player: Record<string, ReturnType<typeof vi.fn>> }>);
 
+const duration = vi.hoisted(() => ({ sec: 200 }));
+
 vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
   YT_STATE: { PLAYING: 1, PAUSED: 2 },
   loadYoutubeIframeApi: vi.fn(async () => ({
@@ -18,7 +20,7 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
           pauseVideo: vi.fn(),
           seekTo: vi.fn(),
           getCurrentTime: vi.fn(() => 5),
-          getDuration: vi.fn(() => 200),
+          getDuration: vi.fn(() => duration.sec),
           getPlayerState: vi.fn(() => 2),
           setVolume: vi.fn(),
           mute: vi.fn(),
@@ -44,6 +46,7 @@ function Harness({ videoId }: { videoId: string | null }) {
 
 beforeEach(() => {
   created.length = 0;
+  duration.sec = 200;
   vi.useFakeTimers({ now: 60_000, toFake: ["Date"] });
 });
 
@@ -82,5 +85,13 @@ describe("useYoutubeSync", () => {
     expect(created[0].player.destroy).toHaveBeenCalled();
 
     act(() => unmount());
+  });
+
+  it("тривалість ще невідома (0) — грає, але не перемотує: ціль без петлі могла б вийти за кінець", async () => {
+    duration.sec = 0;
+    render(<Harness videoId="dQw4w9WgXcQ" />);
+
+    await waitFor(() => expect(created[0]?.player.playVideo).toHaveBeenCalled());
+    expect(created[0].player.seekTo).not.toHaveBeenCalled();
   });
 });

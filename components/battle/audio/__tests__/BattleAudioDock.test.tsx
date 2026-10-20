@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BattleAudioDock } from "../BattleAudioDock";
@@ -18,21 +18,22 @@ const fileTrack: BattleAudioState = { trackId: "t1", track: { title: "Бій у 
 
 const ytTrack: BattleAudioState = { ...fileTrack, trackId: "t2", track: { title: "Епік", kind: "youtube", url: null, youtubeId: "dQw4w9WgXcQ", durationSec: null } };
 
-function dock(opts: { isDM?: boolean; audio?: BattleAudioState | null }) {
+function Screen({ show = true, placement = "corner" }: { show?: boolean; placement?: "corner" | "strip" }) {
+  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} />}</BattleAudioProvider>;
+}
+
+function dock(opts: { isDM?: boolean; audio?: BattleAudioState | null; placement?: "corner" | "strip" }) {
   const scene = fakeScene({ isDM: opts.isDM ?? false, audio: opts.audio ?? null });
 
-  const Wrapper = scene.wrapper;
+  return render(<Screen placement={opts.placement} />, { wrapper: scene.wrapper });
+}
 
-  return render(
-    <Wrapper>
-      <BattleAudioProvider>
-        <BattleAudioDock placement="corner" />
-      </BattleAudioProvider>
-    </Wrapper>,
-  );
+function setWide(wide: boolean) {
+  vi.stubGlobal("matchMedia", (query: string) => ({ matches: wide && query.includes("min-width"), media: query, addEventListener: () => undefined, removeEventListener: () => undefined }));
 }
 
 beforeEach(() => {
+  setWide(true);
   localStorage.clear();
   vi.clearAllMocks();
   vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
@@ -44,7 +45,10 @@ beforeEach(() => {
   ]);
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("BattleAudioDock — гравець", () => {
   it("без треку — нічого", () => {
@@ -77,8 +81,8 @@ describe("BattleAudioDock — гравець", () => {
     expect(localStorage.getItem("battle-music-muted")).toBe("on");
   });
 
-  it("YouTube: видимий плеєр 200×200 лише після увімкнення звуку; згортання прибирає iframe", () => {
-    const { container, getByRole } = dock({ audio: ytTrack });
+  it("YouTube: видимий плеєр 200×200 лише після увімкнення звуку; згорнута панель лишає той самий iframe (звук іде), лише ховає", () => {
+    const { container, getByRole, queryByRole } = dock({ audio: ytTrack });
 
     expect(container.querySelector("[data-youtube-player]")).toBeNull();
 
@@ -90,8 +94,51 @@ describe("BattleAudioDock — гравець", () => {
     expect(player?.style.height).toBe("200px");
 
     fireEvent.click(getByRole("button", { name: "Згорнути плеєр" }));
-    expect(container.querySelector("[data-youtube-player]")).toBeNull();
-    expect(getByRole("button", { name: /Розгорнути плеєр/ })).toBeTruthy();
+    expect(container.querySelector("[data-youtube-player]")).toBe(player);
+    expect(container.querySelector("[data-audio-panel]")?.className).toContain("sr-only");
+    expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+
+    fireEvent.click(getByRole("button", { name: /Розгорнути плеєр/ }));
+    expect(container.querySelector("[data-youtube-player]")).toBe(player);
+    expect(getByRole("region", { name: "Музика бою" })).toBeTruthy();
+  });
+
+  it("телефон: смуга й кут на вузькому екрані стартують згорнутими — чип із назвою треку", () => {
+    setWide(false);
+
+    for (const placement of ["strip", "corner"] as const) {
+      const { getByRole, queryByRole, unmount } = dock({ audio: fileTrack, placement });
+
+      expect(getByRole("button", { name: "Розгорнути плеєр: Бій у таверні" })).toBeTruthy();
+      expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+      unmount();
+    }
+  });
+
+  it("один <audio> на сторінку: панель зникає й з'являється (Стоп, лобі → бій, 1024 px) — той самий розблокований елемент", () => {
+    const { container, getByRole, rerender } = dock({ audio: fileTrack });
+
+    const el = container.querySelector("audio");
+
+    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    rerender(<Screen show={false} />);
+    expect(container.querySelector("audio")).toBe(el);
+
+    rerender(<Screen placement="strip" />);
+    expect(container.querySelector("audio")).toBe(el);
+    expect(el?.getAttribute("src")).toBe("https://s/1.mp3");
+  });
+
+  it("play() поза жестом відхилено (NotAllowedError) — знову «Увімкнути звук»", async () => {
+    const { getByRole, findByRole } = dock({ audio: fileTrack });
+
+    const blocked = Object.assign(new Error("blocked"), { name: "NotAllowedError" });
+
+    vi.mocked(HTMLMediaElement.prototype.play).mockResolvedValueOnce(undefined).mockRejectedValue(blocked);
+
+    await act(async () => fireEvent.click(getByRole("button", { name: "Увімкнути звук" })));
+
+    expect(await findByRole("button", { name: "Увімкнути звук" })).toBeTruthy();
   });
 });
 
@@ -114,6 +161,26 @@ describe("BattleAudioDock — ДМ", () => {
       fireEvent.click(getByRole("button", { name }));
       await waitFor(() => expect(sendBattleAudio).toHaveBeenLastCalledWith("c1", "b1", { action }));
     }
+  });
+
+  it("подвійний клік «Пауза» — одна команда", async () => {
+    const { getByRole } = dock({ isDM: true, audio: fileTrack });
+
+    const pause = getByRole("button", { name: "Пауза" });
+
+    fireEvent.click(pause);
+    fireEvent.click(pause);
+
+    await waitFor(() => expect(sendBattleAudio).toHaveBeenCalledTimes(1));
+  });
+
+  it("клік по поточному треку на паузі — resume з місця паузи, а не play з нуля", async () => {
+    const { findByRole } = dock({ isDM: true, audio: { ...fileTrack, playing: false, offsetSec: 19.5 } });
+
+    fireEvent.click(await findByRole("button", { name: /Бій у таверні/, current: true }));
+
+    await waitFor(() => expect(sendBattleAudio).toHaveBeenCalledWith("c1", "b1", { action: "resume" }));
+    expect(sendBattleAudio).toHaveBeenCalledTimes(1);
   });
 
   it("на паузі кнопка — «Грати» → resume", async () => {

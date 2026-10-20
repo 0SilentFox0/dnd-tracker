@@ -24,6 +24,8 @@ export function useBattleAudioState(args: { campaignId: string; battleId: string
       return { audio: mergeAudio(prev?.audio ?? null, fresh.audio), clockOffsetMs: fresh.clockOffsetMs ?? prev?.clockOffsetMs ?? null };
     },
     enabled: live,
+    // сцена й Pusher пишуть кеш через setQueryData і роблять його «свіжим», а годинник міряє лише GET після розблокування
+    staleTime: 0,
     initialData: { audio: seed ?? null, clockOffsetMs: null },
     initialDataUpdatedAt: 0,
     refetchOnWindowFocus: false,

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
+import { useAudioElementSync } from "./useAudioElementSync";
 import { type AudioPrefs, useAudioPrefs } from "./useAudioPrefs";
 import { type BattleAudioControl, useBattleAudioControl } from "./useBattleAudioControl";
 import { useBattleAudioState } from "./useBattleAudioState";
@@ -13,7 +14,8 @@ import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 export interface BattleAudioValue {
   state: BattleAudioState | null;
   clockOffsetMs: number;
-  sound: { unlocked: boolean; unlock(): void };
+  /** failed — файл треку не завантажився */
+  sound: { unlocked: boolean; unlock(): void; failed: boolean };
   prefs: AudioPrefs;
   control: BattleAudioControl | null;
   library: { tracks: CampaignTrack[]; loading: boolean } | null;
@@ -23,7 +25,8 @@ export const BattleAudioContext = createContext<BattleAudioValue | null>(null);
 
 const NO_TRACKS: CampaignTrack[] = [];
 
-export function useBattleAudioValue(): BattleAudioValue {
+/** audioRef — єдиний <audio> сторінки в BattleAudioProvider: iOS розблоковує саме елемент, тож він не мусить перемонтовуватися разом із панеллю. */
+export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el: HTMLAudioElement | null) => void } {
   const { campaignId, battleId, battle, viewer: { isDM }, toast: { show } } = useBattleScene();
 
   // браузери пускають звук лише після жесту: один клік на кожне відкриття сторінки
@@ -37,19 +40,40 @@ export function useBattleAudioValue(): BattleAudioValue {
 
   const { data: tracks = NO_TRACKS, isLoading } = useTracks(campaignId, { enabled: isDM });
 
-  const unlock = useCallback(() => setUnlocked(true), []);
+  const track = audio?.track ?? null;
 
-  return useMemo(
+  const relock = useCallback(() => setUnlocked(false), []);
+
+  const media = useAudioElementSync({
+    src: track?.kind === "file" ? track.url : null,
+    state: audio,
+    clockOffsetMs: clockOffsetMs ?? 0,
+    active: unlocked,
+    volume: prefs.volume,
+    muted: prefs.muted,
+    onBlocked: relock,
+  });
+
+  const { prime, failed } = media;
+
+  const unlock = useCallback(() => {
+    prime();
+    setUnlocked(true);
+  }, [prime]);
+
+  const value = useMemo(
     () => ({
       state: audio,
       clockOffsetMs: clockOffsetMs ?? 0,
-      sound: { unlocked, unlock },
+      sound: { unlocked, unlock, failed },
       prefs,
       control,
       library: isDM ? { tracks, loading: isLoading } : null,
     }),
-    [audio, clockOffsetMs, unlocked, unlock, prefs, control, isDM, tracks, isLoading],
+    [audio, clockOffsetMs, unlocked, unlock, failed, prefs, control, isDM, tracks, isLoading],
   );
+
+  return { value, audioRef: media.ref };
 }
 
 export function useBattleAudio(): BattleAudioValue {
