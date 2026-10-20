@@ -19,8 +19,9 @@ function applyUsageResets(ps: BattleParticipant[], event: AbilityEvent): BattleP
   return ps;
 }
 
+// сплячий у лабіринті й вибулий з нього не діють: їхні вміння не спрацьовують
 function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
-  return isActive(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
+  return (isActive(owner) && !owner.battleData.dormant && !owner.battleData.escaped) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
 }
 
 export function runAbilities(participants: BattleParticipant[], event: AbilityEvent, ctx: AbilityRunContext): AbilityRunResult {

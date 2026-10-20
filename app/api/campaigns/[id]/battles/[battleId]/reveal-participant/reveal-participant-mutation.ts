@@ -50,7 +50,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
   const ids = new Set(revealed.map((p) => p.basicInfo.id));
 
-  const joined = runAbilities(applyBakedAuras(order, ids), { type: "battleStart", newcomerIds: [...ids] }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random });
+  const joined = runAbilities(applyBakedAuras(order, ids), { type: "battleStart", newcomerIds: [...ids] }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map });
 
   const participants = joined.participants.map((p) => (ids.has(p.basicInfo.id) ? { ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, joined.participants) } } : p));
 

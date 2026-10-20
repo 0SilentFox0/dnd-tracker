@@ -18,12 +18,13 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/turn/initiative";
-import type { BattleAction, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export async function buildStartOrder(
   battleId: string,
   campaignId: string,
   setup: BattlePreparationParticipant[],
+  map: BattleMapConfig | null = null,
 ): Promise<{ order: BattleParticipant[]; reserve: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
   const participantsRaw = setup as Array<{
     id: string;
@@ -133,6 +134,7 @@ export async function buildStartOrder(
   const sortedInitiativeOrder = applyStartOfBattleAndSort(
     initiativeOrder,
     battleId,
+    map,
   );
 
   return {
@@ -142,13 +144,18 @@ export async function buildStartOrder(
   };
 }
 
+// у лабіринті вороги починають сплячими — їхні стартові вміння не спрацьовують
+const asleepInMaze = (order: BattleParticipant[], map: BattleMapConfig | null) =>
+  map?.maze ? order.map((p) => (p.basicInfo.side === ParticipantSide.ENEMY ? { ...p, battleData: { ...p.battleData, dormant: true } } : p)) : order;
+
 function applyStartOfBattleAndSort(
   initiativeOrder: BattleParticipant[],
   battleId: string,
+  map: BattleMapConfig | null,
 ): { order: BattleParticipant[]; triggerLogEntries: BattleAction[] } {
-  const ctx = { round: 1, rng: Math.random };
+  const ctx = { round: 1, rng: Math.random, map };
 
-  const battleStart = runAbilities(initiativeOrder, { type: "battleStart" }, ctx);
+  const battleStart = runAbilities(asleepInMaze(initiativeOrder, map), { type: "battleStart" }, ctx);
 
   const roundStart = runAbilities(battleStart.participants, { type: "roundStart" }, ctx);
 

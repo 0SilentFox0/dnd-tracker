@@ -21,7 +21,7 @@ describe("start mutation", () => {
 
     const out = await createStartMutation(build)(ctx);
 
-    expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup);
+    expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup, ctx.meta.map);
     expect(out.participants).toEqual([hero]);
     expect(out.scene).toMatchObject({ status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, completedAt: null });
     expect(out.scene?.startedAt).toBeInstanceOf(Date);

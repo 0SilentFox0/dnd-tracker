@@ -23,7 +23,7 @@ export function createStartMutation(build = buildStartOrder) {
       throw new BattleRuleError("invalid_target", "Немає учасників для бою");
     }
 
-    const { order, reserve, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup);
+    const { order, reserve, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup, ctx.meta.map);
 
     if (order.length === 0) {
       throw new BattleRuleError("invalid_target", "Хоча б один учасник має бути на полі");
