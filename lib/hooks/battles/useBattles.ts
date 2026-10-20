@@ -30,6 +30,7 @@ import {
   setAuraZone,
   setBattleUnitControl,
   setMapTerrain,
+  setMapWeather,
   startBattle,
   updateBattle,
   updateBattleParticipant,
@@ -46,6 +47,7 @@ import type {
   BonusActionData,
   MapTerrainData,
   MapTerrainResponse,
+  MapWeatherData,
   MazeActionData,
   MazeMarkData,
   MoraleCheckData,
@@ -175,6 +177,9 @@ export const useMazeAction = (c: string, b: string, o: ActionOpts = {}) =>
 
 export const useMazeMark = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MazeMarkData>(c, b, (data) => mazeMark(c, b, data), o);
+
+export const useMapWeather = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<MapWeatherData>(c, b, (data) => setMapWeather(c, b, data), { ...o, retryOnConflict: true });
 
 export const useBonusAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BonusActionData>(c, b, (data) => bonusAction(c, b, data), o);

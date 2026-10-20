@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RESYNC_AFTER_HIDDEN_MS, usePusherBattleSync } from "../usePusherBattleSync";
 
 import { getBattleVersion } from "@/lib/api/battles";
+import { audioState } from "@/lib/utils/audio/__tests__/fixtures";
 import type { BattleScene } from "@/types/api";
 
 vi.mock("@/lib/api/battles", () => ({ getBattleVersion: vi.fn() }));
@@ -302,6 +303,54 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
     warn.mockRestore();
   });
 
+  const audioKey = ["battle-audio", campaignId, battleId];
+
+  const audioAt = (seq: number) => audioState({ startedAt: 1_000, seq });
+
+  it("battle-audio пише лише кеш музики: новіший seq — так, старіший — ні; сцену й версію не чіпає", async () => {
+    const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="u1" client={qc} />);
+
+    await waitFor(() => expect(channelBindings.get(channelName)?.has("battle-audio")).toBe(true));
+
+    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(2) }));
+    expect(qc.getQueryData(audioKey)).toEqual({ audio: audioAt(2), clockOffsetMs: null });
+
+    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(1) }));
+    expect((qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq).toBe(2);
+
+    act(() => simulateTrigger(channelName, "battle-audio", { battleId }));
+    expect((qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq).toBe(2);
+
+    expect((qc.getQueryData(key) as BattleScene).version).toBe(4);
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it("перепідключення інвалідовує й кеш музики (пропущені battle-audio)", async () => {
+    vi.mocked(getBattleVersion).mockResolvedValue({ version: 1 });
+
+    const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 1 }));
+
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="u1" client={qc} />);
+
+    await subscribed();
+
+    act(() => changeState("connected", "disconnected"));
+    act(() => changeState("disconnected", "connected"));
+
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: audioKey }));
+    expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+  });
+
   describe("ресинхронізація після розриву", () => {
     async function mounted(version = 5) {
       const qc = new QueryClient();
@@ -342,7 +391,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       await subscribed();
       await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
 
-      expect(invalidate).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
     });
 
     it("перша підписка з актуальним кешем — без повного GET", async () => {
@@ -352,7 +401,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
       await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
       await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
-      expect(invalidate).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
     });
 
     it("будь-який вихід із connected і повернення — запит версії; новіша → повний GET", async () => {
@@ -377,7 +426,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
       await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
       await Promise.resolve();
-      expect(invalidate).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
     });
 
     it("вкладка схована довше за поріг — перевірка версії при поверненні; коротко — нічого", async () => {
@@ -421,7 +470,8 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
       expect(getBattleVersion).toHaveBeenCalledTimes(1);
 
       await act(async () => resolve({ version: 9 }));
-      await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
+      expect(invalidate.mock.calls.filter(([f]) => JSON.stringify(f?.queryKey) === JSON.stringify(key))).toHaveLength(1);
       now.mockRestore();
     });
   });

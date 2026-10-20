@@ -5,6 +5,7 @@ import { battleQueryKey } from "./keys";
 
 import { ApiError } from "@/lib/api/client";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 
 export interface BattleActionOptions {
@@ -62,7 +63,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
         return;
       }
 
-      options.onFailure?.(error instanceof Error && error.message ? error.message : "Дію не виконано");
+      options.onFailure?.(errorMessage(error, "Дію не виконано"));
     },
   });
 }

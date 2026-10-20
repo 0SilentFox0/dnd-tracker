@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { useFxImpacts } from "./useFxImpact";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
+import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 import { type MazeTools, useMazeTools } from "./useMazeTools";
 import { useMazeView } from "./useMazeView";
 
@@ -20,6 +21,7 @@ export interface BattleMapScene {
   placement: { active: boolean; toggle(): void } | null;
   terrainTool: MapTerrainTool | null;
   mazeTools: MazeTools | null;
+  weatherTool: MapWeatherTool | null;
 }
 
 const NO_ORDER: BattleParticipant[] = [];
@@ -213,7 +215,9 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
+  const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
+
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, mazeTools };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, mazeTools, weatherTool };
 }

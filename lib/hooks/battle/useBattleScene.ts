@@ -22,6 +22,7 @@ import {
   useCastSpell,
   useCompleteBattle,
   useMapTerrain,
+  useMapWeather,
   useMazeAction,
   useMazeMark,
   useMoraleCheck,
@@ -98,6 +99,7 @@ export interface BattleSceneActions {
   mapTerrain: ReturnType<typeof useMapTerrain>;
   maze: ReturnType<typeof useMazeAction>;
   mazeMark: ReturnType<typeof useMazeMark>;
+  mapWeather: ReturnType<typeof useMapWeather>;
   bonusAction: ReturnType<typeof useBonusAction>;
   abilityAction: ReturnType<typeof useAbilityAction>;
   auraZone: ReturnType<typeof useAuraZone>;
@@ -314,6 +316,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     mapTerrain: useMapTerrain(campaignId, battleId, o),
     maze: useMazeAction(campaignId, battleId, o),
     mazeMark: useMazeMark(campaignId, battleId, o),
+    mapWeather: useMapWeather(campaignId, battleId, o),
     bonusAction: useBonusAction(campaignId, battleId, o),
     abilityAction: useAbilityAction(campaignId, battleId, o),
     auraZone: useAuraZone(campaignId, battleId, o),

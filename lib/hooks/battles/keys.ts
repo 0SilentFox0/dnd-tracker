@@ -5,6 +5,7 @@ export const battleKeys = {
   active: () => ["active-battles"] as const,
   balance: (campaignId: string) => ["battle-balance", campaignId] as const,
   balanceAll: () => ["battle-balance"] as const,
+  audio: (campaignId: string, battleId: string) => ["battle-audio", campaignId, battleId] as const,
 };
 
 export const battleQueryKey = battleKeys.scene;

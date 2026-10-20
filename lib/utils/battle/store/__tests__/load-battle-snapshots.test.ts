@@ -29,6 +29,7 @@ function fakeDb(rows = stored) {
     version: 3,
     eventSeq: 0,
     pendingMoraleCheck: null,
+    audio: { trackId: "t1", track: null, playing: false, offsetSec: 5, startedAt: 1, seq: 7 },
     startedAt: null,
     completedAt: null,
     createdAt: new Date(0),
@@ -120,6 +121,15 @@ describe("loadBattle: снапшоти учасників", () => {
     touched.combatStats.armorClass = 0;
 
     expect((await load(db))?.participants).toEqual(pristine);
+  });
+
+  it("читає колонку audio в meta", async () => {
+    const { db, findFirst } = fakeDb();
+
+    const loaded = await load(db);
+
+    expect((findFirst.mock.calls[0] as unknown as [{ select: Record<string, unknown> }])[0].select.audio).toBe(true);
+    expect(loaded?.meta.audio).toMatchObject({ seq: 7, offsetSec: 5 });
   });
 });
 

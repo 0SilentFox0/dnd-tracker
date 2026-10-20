@@ -1,5 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { AbilityUsageCounter } from "@/types/abilities";
+import type { BattleAudioState } from "@/types/audio";
 import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint } from "@/types/battle";
 
 export interface BattleSceneState {
@@ -84,6 +85,7 @@ export interface BattleMeta {
   setup: BattlePreparationParticipant[];
   friendlyFire: boolean;
   map: BattleMapConfig | null;
+  audio?: BattleAudioState | null;
   createdAt: Date;
 }
 

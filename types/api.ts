@@ -5,7 +5,8 @@ import type { GroupedSkillPayload } from "./hooks";
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
-import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind } from "@/types/battle";
+import type { BattleAudioState } from "@/types/audio";
+import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -61,6 +62,8 @@ export interface BattleScene {
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
   map?: BattleMapConfig | null;
+  /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
+  audio?: BattleAudioState | null;
   /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
   knowledge?: BattleKnowledge;
 }
@@ -198,6 +201,11 @@ export interface MapTerrainResponse {
 export type MazeActionData = z.infer<typeof mazeActionSchema>;
 
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
+
+export interface MapWeatherData {
+  /** null — ясно */
+  weather: WeatherKind | null;
+}
 
 export interface AbilityActionData {
   participantId: string;

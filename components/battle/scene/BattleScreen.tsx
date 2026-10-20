@@ -4,14 +4,18 @@ import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { BattleToast } from "./BattleToast";
+import { CornerStack } from "./CornerStack";
 import { NoticeStackContext } from "./MapStrip";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
+import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
+import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useMazeDarkAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
-import { useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+import type { BattlePreparationParticipant } from "@/types/battle";
 
 type DesktopLayout = ComponentType<{ onComplete: () => void }>;
 
@@ -28,7 +32,7 @@ function loadDesktopLayout() {
   return desktopLoad;
 }
 
-if (typeof window !== "undefined" && window.matchMedia?.("(min-width: 1024px)").matches) void loadDesktopLayout();
+if (typeof window !== "undefined" && window.matchMedia?.(DESKTOP_QUERY).matches) void loadDesktopLayout();
 
 function useDesktopLayout(wide: boolean): DesktopLayout | null {
   const [, setLoaded] = useState(desktopLayout !== null);
@@ -54,11 +58,15 @@ const BattleFxLayer = dynamic(() => import("@/components/battle/fx/BattleFxLayer
 
 const BattlePreparationView = dynamic(() => import("@/components/battle/overlays/BattlePreparationView").then((m) => m.BattlePreparationView));
 
+const sideCount = (participants: BattlePreparationParticipant[], side: string) => participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
+
+const onFieldCount = (participants: BattlePreparationParticipant[]) => participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
+
 export function BattleScreen() {
   const { battle, viewer: { isDM }, actions } = useBattleScene();
 
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
-  const wide = useMediaQuery("(min-width: 1024px)");
+  const wide = useMediaQuery(DESKTOP_QUERY);
 
   const Desktop = useDesktopLayout(wide);
 
@@ -78,30 +86,35 @@ export function BattleScreen() {
     import("@/components/battle/fx/preload").then((m) => m.preloadFx()).catch(() => undefined);
   }, [fxOn]);
 
-  if (battle.status === BattleStatus.PREPARED) {
-    const count = (side: string) => battle.participants.filter((p) => p.side === side).reduce((s, p) => s + (p.quantity ?? 1), 0);
-
-    const onField = battle.participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
-
-    return (
-      <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)} >
-        <BattlePreparationView alliesCount={count(ParticipantSide.ALLY)} enemiesCount={count(ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onField > 0} />
-      </div>
-    );
-  }
-
+  // один провайдер на обидві гілки: <audio> у ньому переживає «Почати бій»
   return (
-    <div className={cn("battle-hud", hudFontClassName)}>
-      {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
-      <ResultOverlay />
-      {Desktop && <ActionResultCard />}
-      {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
-      <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
-        <BattleToast />
-      </div>
-      {isDM && <DmRevivePrompt />}
-      {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
-      <BattleFxLayer />
-    </div>
+    <BattleAudioProvider>
+      {battle.status === BattleStatus.PREPARED ? (
+        <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
+          <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
+          <CornerStack>
+            <BattleAudioDock placement="corner" />
+          </CornerStack>
+        </div>
+      ) : (
+        <div className={cn("battle-hud", hudFontClassName)}>
+          {Desktop ? <Desktop onComplete={() => setCompleteOpen(true)} /> : <NoticeStackContext value={notices}><MobileBattleLayout /></NoticeStackContext>}
+          <ResultOverlay />
+          {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
+          <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
+            <BattleToast />
+          </div>
+          {Desktop && (
+            <CornerStack>
+              <ActionResultCard />
+              <BattleAudioDock placement="corner" />
+            </CornerStack>
+          )}
+          {isDM && <DmRevivePrompt />}
+          {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
+          <BattleFxLayer />
+        </div>
+      )}
+    </BattleAudioProvider>
   );
 }

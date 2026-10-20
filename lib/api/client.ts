@@ -63,11 +63,14 @@ export function setGlobalApiErrorHandler(handler: GlobalErrorHandler): void {
  * Виконати запит до API з єдиною обробкою помилок.
  * При !response.ok викликається globalErrorHandler і кидається ApiError.
  */
-export async function request<T>(
-  url: string,
-  options: RequestInit & { parseResponse?: "json" | "text" | "none" } = {},
-): Promise<T> {
-  const { parseResponse = "json", ...fetchOptions } = options;
+export type RequestOptions = RequestInit & {
+  parseResponse?: "json" | "text" | "none";
+  /** сира відповідь до розбору тіла — для заголовків (Date) */
+  onResponse?: (response: Response) => void;
+};
+
+export async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
+  const { parseResponse = "json", onResponse, ...fetchOptions } = options;
 
   const response = await fetch(url, {
     ...fetchOptions,
@@ -76,6 +79,8 @@ export async function request<T>(
       ...fetchOptions.headers,
     },
   });
+
+  onResponse?.(response);
 
   const text = await response.text();
 
@@ -115,10 +120,7 @@ export async function request<T>(
   return (body ?? null) as T;
 }
 
-export type CampaignRequestOptions = Omit<
-  RequestInit & { parseResponse?: "json" | "text" | "none" },
-  "body"
-> & { body?: unknown };
+export type CampaignRequestOptions = Omit<RequestOptions, "body"> & { body?: unknown };
 
 /**
  * Запит до campaign-scoped API: будує URL через getCampaignApiUrl і викликає request().

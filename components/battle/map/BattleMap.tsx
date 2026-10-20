@@ -3,6 +3,7 @@
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Flame } from "lucide-react";
 
+import { WeatherLayer } from "./weather/WeatherLayer";
 import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
@@ -58,9 +59,10 @@ const HATCH_ID = "battle-map-barrier-hatch";
 
 const HAZARD_GRADIENT_ID = "battle-map-hazard-fire";
 
+// приглушено: яскрава заливка перекривала фон карти; від недосяжних клітинок відрізняє контур
 const ZONE = {
-  move: { fill: "rgba(70,200,70,.16)", stroke: "#7dff5a", glow: "rgba(125,255,90,.28)" },
-  danger: { fill: "rgba(220,60,50,.2)", stroke: "#ff5a4a", glow: "rgba(255,90,74,.3)" },
+  move: { fill: "rgba(90,210,80,.07)", stroke: "rgba(140,255,110,.6)", glow: "rgba(125,255,90,.12)" },
+  danger: { fill: "rgba(225,70,55,.09)", stroke: "rgba(255,100,85,.65)", glow: "rgba(255,90,74,.13)" },
 } as const;
 
 type MarkValue = CellMark | number | undefined;
@@ -234,7 +236,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
       })}
       <g pointerEvents="none">
         {zoneCells.map(({ p, zone }) => (
-          <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={7} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={4} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
         ))}
         {zoneCells.map(({ p, zone }) => (
           <polygon
@@ -243,7 +245,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
             points={cellPolygon(p)}
             fill="none"
             stroke={zone.stroke}
-            strokeWidth={2.5}
+            strokeWidth={1.5}
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
           />
@@ -597,6 +599,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
       </div>
       </div>
       {maze?.dark && <MazeDarkScreen own={participants.filter((p) => maze.ownIds.has(p.basicInfo.id))} />}
+      <WeatherLayer weather={map.weather} phone={phone} />
     </div>
     </div>
   );

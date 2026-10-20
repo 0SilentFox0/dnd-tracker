@@ -2,6 +2,7 @@ import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abili
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import type { MazeView } from "@/lib/utils/battle/view/maze-view";
@@ -193,6 +194,8 @@ export interface SpellTemplate {
   hollow?: boolean;
 }
 
+export type WeatherKind = (typeof WEATHER_KINDS)[number];
+
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
 export interface BattleMapConfig {
   cols: number;
@@ -209,6 +212,8 @@ export interface BattleMapConfig {
   /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
   gridOffset?: { x: number; y: number };
   maze?: MazeConfig | null;
+  /** Атмосфера без механіки; відсутня або null — ясно */
+  weather?: WeatherKind | null;
 }
 
 export type TerrainKind = "wall" | "barrier" | "hazard";

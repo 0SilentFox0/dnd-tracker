@@ -1,3 +1,5 @@
+import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "./music";
+
 export const API_ERRORS = {
   UNAUTHORIZED: "Потрібна авторизація",
   FORBIDDEN: "Недостатньо прав",
@@ -33,4 +35,14 @@ export const API_ERRORS = {
   ARTIFACT_UNKNOWN_SLOT: "Невідомий слот",
   ARTIFACT_ALREADY_EQUIPPED: "Цей артефакт уже вдягнено в інший слот",
   ARTIFACT_HELD_BY_OTHER: "Артефакт уже носить інший герой",
+  TRACK_NOT_FOUND: "Трек не знайдено",
+  TRACK_LIMIT: `У бібліотеці вже ${MAX_TRACKS_PER_CAMPAIGN} треків — видаліть зайві`,
+  TRACK_FILE_INVALID: `Потрібен файл ${TRACK_FORMATS_LABEL} до ${MAX_TRACK_MB} МБ`,
+  TRACK_UPLOAD_MISSING: "Файл не завантажено — спробуйте ще раз",
+  TRACK_DUPLICATE: "Цей файл уже є в бібліотеці",
+  TRACK_ORDER_MISMATCH: "Порядок має містити всі треки кампанії",
+  YOUTUBE_URL_INVALID: "Не вдалося розпізнати посилання YouTube",
+  BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",
+  BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",
+  BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
 } as const;

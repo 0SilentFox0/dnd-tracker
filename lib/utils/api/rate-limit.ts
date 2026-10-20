@@ -151,6 +151,10 @@ export const BATTLE_RATE_LIMITS = {
   maze: { limit: 60, windowSeconds: 10 },
   /** Мітка гравця в лабіринті. */
   mazeMark: { limit: 30, windowSeconds: 10 },
+  /** Погода на карті (ДМ) — рідко. */
+  mapWeather: { limit: 10, windowSeconds: 10 },
+  /** Музика бою (ДМ): перемикання треків. */
+  audio: { limit: 20, windowSeconds: 10 },
   /** Next-turn — DM advance, рідше викликається. */
   nextTurn: { limit: 20, windowSeconds: 10 },
   /** PATCH HP / remove participant — DM-only, частіше OK. */

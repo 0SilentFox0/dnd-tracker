@@ -11,6 +11,7 @@ import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
 import { MapStripRow, MapStripSlotContext } from "./MapStrip";
 
+import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
@@ -52,7 +53,12 @@ export function MobileBattleLayout() {
     if (next !== MAP_TAB) setListTab(next);
   };
 
-  const expand = useCallback(() => setPickedTab(listTab), [listTab]);
+  const [expandTick, setExpandTick] = useState(0);
+
+  const expand = useCallback(() => {
+    setPickedTab(listTab);
+    setExpandTick((n) => n + 1);
+  }, [listTab]);
 
   const [slot, setSlot] = useState<HTMLDivElement | null>(null);
 
@@ -71,6 +77,8 @@ export function MobileBattleLayout() {
   );
 
   const completed = battle.status === BattleStatus.COMPLETED;
+
+  const myTurnKey = hero && isMyTurn ? `${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}` : null;
 
   const waitingFor = <span className="italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></span>;
 
@@ -107,19 +115,23 @@ export function MobileBattleLayout() {
           </button>
         )}
       </div>
-      {mapTab ? (
-        <div className="min-h-0 flex-1"><BattleMapPanel phone /></div>
-      ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <ParticipantList side={tab} />
-        </div>
-      )}
+      {/* док — шар над картою/списком: панель не може вилізти за верх області, а на будь-якій вкладці лишається змонтованою (звук іде) */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {mapTab ? (
+          <div className="min-h-0 flex-1"><BattleMapPanel phone /></div>
+        ) : (
+          <div data-participant-scroll className="relative z-0 min-h-0 flex-1 overflow-y-auto">
+            <ParticipantList side={tab} />
+          </div>
+        )}
+        <BattleAudioDock placement="strip" collapseOn={myTurnKey} collapseTick={expandTick} />
+      </div>
       {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
       {(hero || mapTab) && (
         <div className={cn("border-t border-white/[.22] bg-black/70 px-4", mapTab ? "pb-[max(8px,env(safe-area-inset-bottom))] pt-1" : "pb-[max(12px,env(safe-area-inset-bottom))] pt-3")}>
           {mapTab && <div ref={setSlot} data-map-strip-slot />}
           {hero && !mapTab && <MyHeroPanel hero={hero} compact={isMyTurn} />}
-          {hero && isMyTurn && <MyTurnControls key={`${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}`} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
+          {hero && isMyTurn && <MyTurnControls key={myTurnKey} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
           {mapTab && !(hero && isMyTurn) && !intents.mapAim && (
             <MapStripRow onExpand={expand}>
               {completed ? <span className="hud-sc">Бій завершено</span> : awaiting ? <span className="hud-sc">{isDM ? "Бій чекає вашого рішення" : "Очікуємо рішення ДМ"}</span> : waitingFor}

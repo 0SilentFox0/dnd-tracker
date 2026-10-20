@@ -37,6 +37,13 @@ describe("toBattleResponse", () => {
     expect(prepared.participants).toEqual(meta.setup);
     expect(prepared.userRole).toBe("player");
   });
+
+  it("стан музики з meta йде у сцену; без нього — null", () => {
+    const audio = { trackId: "t1", track: null, playing: true, offsetSec: 0, startedAt: 1, seq: 2 };
+
+    expect(toBattleResponse({ meta: { ...meta, audio } }, scene, [], [], { mode: "full", entries: [] }).audio).toEqual(audio);
+    expect(toBattleResponse({ meta }, scene, [], [], { mode: "full", entries: [] }).audio).toBeNull();
+  });
 });
 
 describe("buildPusherMessages", () => {

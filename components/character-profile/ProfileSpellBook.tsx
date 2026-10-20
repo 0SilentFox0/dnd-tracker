@@ -4,14 +4,14 @@ import { HUD_SURFACE } from "@/components/hud";
 import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useSpellBrowser } from "@/lib/hooks/characters";
-import { useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BookSpell } from "@/types/spells";
 
 export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells: BookSpell[]; slots: { level: number; count: number }[]; open: boolean; onOpenChange: (open: boolean) => void }) {
   const book = useSpellBrowser(spells, slots);
 
-  const wide = useMediaQuery("(min-width: 1024px)");
+  const wide = useMediaQuery(DESKTOP_QUERY);
 
   const showDetail = !!book.selected;
 

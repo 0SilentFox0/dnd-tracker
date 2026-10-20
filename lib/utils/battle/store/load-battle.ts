@@ -6,6 +6,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export type BattleDb = Pick<
@@ -102,6 +103,7 @@ export async function loadBattle(
       eventSeq: true,
       pendingMoraleCheck: true,
       map: true,
+      audio: true,
       startedAt: true,
       completedAt: true,
       createdAt: true,
@@ -140,6 +142,7 @@ export async function loadBattle(
       setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
       friendlyFire: row.campaign.friendlyFire ?? false,
       map: (row.map ?? null) as BattleMapConfig | null,
+      audio: (row.audio ?? null) as BattleAudioState | null,
       createdAt: row.createdAt,
     },
     participants: all.filter((p) => !p.isPending).map((p) => p.participant),

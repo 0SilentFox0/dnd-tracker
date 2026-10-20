@@ -74,4 +74,12 @@ describe("saveBattle: карта", () => {
 
     expect(data[0].state.scene.terrain).toEqual(map.terrain);
   });
+
+  it("збереження бою ніколи не пише колонку audio", async () => {
+    const { db, tx } = fakeDb();
+
+    await saveBattle(db, { ...before, meta: { ...before.meta, audio: { trackId: "t", track: null, playing: true, offsetSec: 0, startedAt: 0, seq: 1 } } }, { participants: [hero], pending: [], events: [event], scene: { turnIndex: 0 } });
+
+    expect((tx.battleScene.updateMany.mock.calls[0] as unknown as [{ data: object }])[0].data).not.toHaveProperty("audio");
+  });
 });

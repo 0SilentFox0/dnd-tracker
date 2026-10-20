@@ -18,3 +18,6 @@ export const BATTLE_CHANNEL_PREFIX = "private-battle-";
 export const USER_CHANNEL_PREFIX = "private-user-";
 
 export const PUSHER_AUTH_ENDPOINT = "/api/pusher/auth";
+
+/** Окремо від battle-delta: музика не підвищує версію бою. */
+export const BATTLE_AUDIO_EVENT = "battle-audio";

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
+import { CornerStack } from "@/components/battle/scene/CornerStack";
 import { MapStripSlotContext, NoticeStackContext } from "@/components/battle/scene/MapStrip";
 import { ACTION_RESULT_MS, type ActionResultFx } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
@@ -45,14 +46,14 @@ describe("ActionResultCard", () => {
     expect(screen.queryByRole("status")).toBeNull();
   });
 
-  it("не модальна: без затемнення на весь екран; на десктопі — у лівому нижньому куті", () => {
+  it("не модальна: без затемнення на весь екран; на десктопі — у кутовому стовпчику", () => {
     const { wrapper } = fakeScene({ result: { kind: "hit", targetName: "Циклоп", damage: 10, downed: false, d20: 14 } });
 
-    render(<ActionResultCard />, { wrapper });
+    render(<CornerStack><ActionResultCard /></CornerStack>, { wrapper });
 
     expect(card().className).not.toContain("inset-0");
-    expect(card().className).toContain("lg:bottom-4");
-    expect(card().className).toContain("lg:left-4");
+    expect(card().className).not.toContain("fixed");
+    expect(card().className).toContain("w-[300px]");
   });
 
   it("на телефоні з картою стає в смугу під картою", () => {

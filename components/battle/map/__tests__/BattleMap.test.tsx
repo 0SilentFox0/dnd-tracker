@@ -304,11 +304,13 @@ describe("BattleMap", () => {
 
     const bad = container.querySelector('[data-fx-zone="danger"]') as SVGElement;
 
-    expect(ok.getAttribute("stroke")).toBe("#7dff5a");
+    expect(ok.getAttribute("stroke")).toBe("rgba(140,255,110,.6)");
     expect(ok.getAttribute("vector-effect")).toBe("non-scaling-stroke");
-    expect(bad.getAttribute("stroke")).toBe("#ff5a4a");
-    expect(container.querySelector('polygon[data-fx-cell="1:0"]')?.getAttribute("fill")).toBe("rgba(70,200,70,.16)");
-    expect(container.querySelector('polygon[data-fx-cell="2:0"]')?.getAttribute("fill")).toBe("rgba(220,60,50,.2)");
+    expect(Number(ok.getAttribute("stroke-width"))).toBeLessThanOrEqual(1.5);
+    expect(bad.getAttribute("stroke")).toBe("rgba(255,100,85,.65)");
+    // приглушена заливка: фон карти лишається видимим
+    expect(container.querySelector('polygon[data-fx-cell="1:0"]')?.getAttribute("fill")).toBe("rgba(90,210,80,.07)");
+    expect(container.querySelector('polygon[data-fx-cell="2:0"]')?.getAttribute("fill")).toBe("rgba(225,70,55,.09)");
   });
 
   it("renders wall, barrier and hazard terrain under the grid", () => {
@@ -357,7 +359,7 @@ describe("BattleMap", () => {
 
     const danger = container.querySelector('polygon[data-fx-cell="2:0"]') as Element;
 
-    expect(danger.getAttribute("fill")).toBe("rgba(220,60,50,.2)");
+    expect(danger.getAttribute("fill")).toBe("rgba(225,70,55,.09)");
     expect(danger.querySelector("title")).toBeNull();
     expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
   });

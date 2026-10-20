@@ -1,17 +1,24 @@
 import { vi } from "vitest";
 
+export interface RecordedCall {
+  method: string;
+  args: unknown[];
+  /** fillStyle at call time */
+  fillStyle: unknown;
+}
+
 export interface Recorder {
   calls: string[];
   blurs: number[];
+  /** every method call with its arguments; gradient `addColorStop` calls included */
+  args: RecordedCall[];
 }
 
-/** A 2D context that accepts every call, recording method names and each `shadowBlur` assignment. */
+/** A 2D context that accepts every call, recording method names, arguments and each `shadowBlur` assignment. */
 export function recordingContext(canvas?: HTMLCanvasElement): CanvasRenderingContext2D & { rec: Recorder } {
-  const rec: Recorder = { calls: [], blurs: [] };
+  const rec: Recorder = { calls: [], blurs: [], args: [] };
 
   const state: Record<string | symbol, unknown> = { canvas, rec, globalAlpha: 1, globalCompositeOperation: "source-over", shadowBlur: 0, lineWidth: 1 };
-
-  const gradient = { addColorStop: () => undefined };
 
   return new Proxy(state, {
     get(target, key) {
@@ -21,8 +28,13 @@ export function recordingContext(canvas?: HTMLCanvasElement): CanvasRenderingCon
 
       return (...args: unknown[]) => {
         rec.calls.push(key);
+        rec.args.push({ method: key, args, fillStyle: target.fillStyle });
 
-        if (key.startsWith("create") && key.endsWith("Gradient")) return gradient;
+        if (key.startsWith("create") && key.endsWith("Gradient")) return {
+            addColorStop: (...stop: unknown[]) => {
+              rec.args.push({ method: "addColorStop", args: stop, fillStyle: target.fillStyle });
+            },
+          };
 
         if (key === "createPattern") return {};
 

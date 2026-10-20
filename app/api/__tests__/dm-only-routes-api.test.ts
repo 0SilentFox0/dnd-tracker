@@ -32,6 +32,7 @@ vi.mock("@/lib/db", () => ({
 import * as artifactSetOne from "@/app/api/campaigns/[id]/artifact-sets/[setId]/route";
 import * as artifactSets from "@/app/api/campaigns/[id]/artifact-sets/route";
 import * as artifacts from "@/app/api/campaigns/[id]/artifacts/route";
+import * as battleAudio from "@/app/api/campaigns/[id]/battles/[battleId]/audio/route";
 import * as inventory from "@/app/api/campaigns/[id]/characters/[characterId]/inventory/route";
 import * as levelUp from "@/app/api/campaigns/[id]/characters/[characterId]/level-up/route";
 import * as characters from "@/app/api/campaigns/[id]/characters/route";
@@ -42,13 +43,17 @@ import * as races from "@/app/api/campaigns/[id]/races/route";
 import * as duplicateSkill from "@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route";
 import * as spellOne from "@/app/api/campaigns/[id]/spells/[spellId]/route";
 import * as spells from "@/app/api/campaigns/[id]/spells/route";
+import * as trackOne from "@/app/api/campaigns/[id]/tracks/[trackId]/route";
+import * as trackOrder from "@/app/api/campaigns/[id]/tracks/order/route";
+import * as tracks from "@/app/api/campaigns/[id]/tracks/route";
+import * as trackUpload from "@/app/api/campaigns/[id]/tracks/upload-url/route";
 import * as units from "@/app/api/campaigns/[id]/units/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole } from "@/lib/constants/campaigns";
 
 type Handler = (req: Request, ctx: never) => Promise<Response>;
 
-const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1" };
+const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1", battleId: "b1" };
 
 const cases: Array<[string, Handler]> = [
   ["DELETE members/:memberId", member.DELETE],
@@ -68,6 +73,13 @@ const cases: Array<[string, Handler]> = [
   ["POST skills/:skillId/duplicate", duplicateSkill.POST],
   ["POST races", races.POST],
   ["POST units", units.POST],
+  ["GET tracks", tracks.GET],
+  ["POST tracks", tracks.POST],
+  ["POST tracks/upload-url", trackUpload.POST],
+  ["PATCH tracks/:trackId", trackOne.PATCH],
+  ["DELETE tracks/:trackId", trackOne.DELETE],
+  ["PUT tracks/order", trackOrder.PUT],
+  ["POST battles/:battleId/audio", battleAudio.POST],
 ];
 
 const asRole = (role: string | null) => {

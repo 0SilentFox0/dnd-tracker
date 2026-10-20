@@ -1,6 +1,6 @@
 export { ConfirmContext, type ConfirmFn } from "./confirm-context";
 export { prefersReducedMotion } from "./media-query";
-export { createStorageFlag, type StorageFlag, useStorageFlag } from "./storage-flag";
+export { createStorageFlag, createStorageNumber, createStorageValue, type StorageCodec, type StorageValue, useStorageValue } from "./storage-value";
 export { useAppearanceSave } from "./useAppearanceSave";
 export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
@@ -9,6 +9,7 @@ export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";
 export { useImageSize } from "./useImageSize";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
+export { DESKTOP_QUERY } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";

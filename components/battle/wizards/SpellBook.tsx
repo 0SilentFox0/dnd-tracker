@@ -12,7 +12,7 @@ import { HUD_SURFACE } from "@/components/hud";
 import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
-import { useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { canGoBack, rollsComplete, type SpellTargetMode } from "@/lib/utils/battle/flows";
 
@@ -29,7 +29,7 @@ export function SpellBook({ book }: { book: Book }) {
 
   const { byLevel, selected, targets } = view;
 
-  const wide = useMediaQuery("(min-width: 1024px)");
+  const wide = useMediaQuery(DESKTOP_QUERY);
 
   const aiming = state.step === "targets" && state.pick?.targetMode === "template";
 
