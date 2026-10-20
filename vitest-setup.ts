@@ -4,6 +4,7 @@ import "@testing-library/jest-dom/vitest";
 
 // next/font only works inside the Next compiler; components that import components/hud/fonts need a stub
 vi.mock("next/font/google", () => ({
+  Alegreya: () => ({ variable: "" }),
   Alegreya_SC: () => ({ variable: "" }),
   Alegreya_Sans: () => ({ variable: "" }),
   EB_Garamond: () => ({ variable: "" }),
