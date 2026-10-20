@@ -1,5 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { loadStoryChapters } from "@/lib/server/scenario/player-story";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
@@ -38,6 +39,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     participant,
     viewer,
     maxLevel,
+    chapters: await loadStoryChapters(character.id, character.campaignId),
     character,
     raceIcon: race?.icon ?? null,
     immunities: getCharacterImmunities(character, race as never),

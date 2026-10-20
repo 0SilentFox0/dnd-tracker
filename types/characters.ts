@@ -1,5 +1,6 @@
 import type { PublicUser } from "./campaigns";
 import type { EquippedItems, InventoryItem } from "./inventory";
+import type { StoryChapter } from "./scenario";
 import type { BookSpell } from "./spells";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
@@ -232,7 +233,7 @@ export interface CharacterSheet {
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
-  story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[] };
+  story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
 }
 
