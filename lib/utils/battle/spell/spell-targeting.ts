@@ -7,7 +7,7 @@ import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
-import { MAZE_AIM_OUT_OF_SIGHT, MAZE_TARGET_OUT_OF_SIGHT, mazeAimHidden, mazeTargetHidden } from "@/lib/utils/battle/maze";
+import { MAZE_AIM_OUT_OF_SIGHT, MAZE_TARGET_OUT_OF_SIGHT, mazeAimHidden, mazeGridOf, mazeTargetHidden, seesTarget } from "@/lib/utils/battle/maze";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
@@ -58,6 +58,19 @@ export function skillAllTargets(ps: BattleParticipant[], caster: BattleParticipa
   const mine = caster.basicInfo.side;
 
   return ps.filter((p) => isTargetable(p) && !isReserved(p) && (p.basicInfo.side === mine) === (side === "ally")).map((p) => p.basicInfo.id);
+}
+
+/** У лабіринті масові («усі») заклинання б'ють лише ворогів у полі зору заклинателя; союзників — як і раніше. */
+export function mazeSightedTargets(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], caster: BattleParticipant, ids: string[]): string[] {
+  const grid = mazeGridOf(map);
+
+  if (!grid) return ids;
+
+  return ids.filter((id) => {
+    const p = findParticipant(ps, id);
+
+    return !p || p.basicInfo.side === caster.basicInfo.side || seesTarget(grid, caster, p);
+  });
 }
 
 export interface SkillRadius {
@@ -184,7 +197,7 @@ export function resolveSpellTargets(
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
 
     if (skill.mode === "all") {
-      const all = skillAllTargets(ps, caster, targeting.kind);
+      const all = mazeSightedTargets(map, ps, caster, skillAllTargets(ps, caster, targeting.kind));
 
       return all.length > 0 ? { ok: true, targetIds: all } : fail("Немає цілей заклинання");
     }
@@ -208,15 +221,17 @@ export function resolveSpellTargets(
 
   if (map && SIGHTED_KINDS.has(targeting.kind) && mazeTargetHidden(map, caster, picked)) return fail(MAZE_TARGET_OUT_OF_SIGHT);
 
+  const sighted = (filter: (p: BattleParticipant) => boolean) => mazeSightedTargets(map, ps, caster, ids(filter));
+
   switch (targeting.kind) {
     case "self":
       return { ok: true, targetIds: [caster.basicInfo.id] };
     case "allAllies":
       return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
     case "allEnemies":
-      return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side !== side) };
+      return { ok: true, targetIds: sighted((p) => isTargetable(p) && p.basicInfo.side !== side) };
     case "everyone":
-      return { ok: true, targetIds: ids(isTargetable) };
+      return { ok: true, targetIds: sighted(isTargetable) };
     case "allAlliesDead": {
       const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
 

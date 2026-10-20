@@ -5,6 +5,9 @@ import type { AbilityTarget } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
+// сплячий у лабіринті ворог «заморожений»: масові вміння його не зачіпають
+const inPlay = (p: BattleParticipant) => isTargetable(p) && !p.battleData.dormant;
+
 export function resolveTargetIds(
   target: AbilityTarget | undefined,
   ownerId: string,
@@ -38,11 +41,11 @@ export function resolveTargetIds(
     // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
     case "allAllies":
     case "nearbyAllies":
-      return ps.filter((p) => isTargetable(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => inPlay(p) && p.basicInfo.side === side).map((p) => p.basicInfo.id);
     case "allEnemies":
     case "nearbyEnemies":
-      return ps.filter((p) => isTargetable(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
+      return ps.filter((p) => inPlay(p) && p.basicInfo.side !== side).map((p) => p.basicInfo.id);
     case "everyone":
-      return ps.filter(isTargetable).map((p) => p.basicInfo.id);
+      return ps.filter(inPlay).map((p) => p.basicInfo.id);
   }
 }
