@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { type DialogState, useAwaitingDmDialog } from "./useAwaitingDmDialog";
 import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
 import { type BattleToastApi, useBattleToast } from "./useBattleToast";
 import { useDisplayEffectMap } from "./useDisplayEffectMap";
@@ -152,10 +153,7 @@ export interface BattleSceneData {
   readBattle(): BattleScene | undefined;
 }
 
-export interface DialogState {
-  open: boolean;
-  setOpen(open: boolean): void;
-}
+export type { DialogState } from "./useAwaitingDmDialog";
 
 export interface BattleSceneDialogs {
   awaitingDm: DialogState;
@@ -342,16 +340,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId) : null), [battle, userId, dmControlledId]);
 
-  const [dismissedAwaiting, setDismissedAwaiting] = useState<"victory" | "defeat" | null>(null);
-
-  const awaitingNow = derived?.awaiting ?? null;
-
-  if (!awaitingNow && dismissedAwaiting) setDismissedAwaiting(null);
-
-  const awaitingDm: DialogState = {
-    open: !!derived?.viewer.isDM && !!awaitingNow && dismissedAwaiting !== awaitingNow,
-    setOpen: (open) => setDismissedAwaiting(open ? null : awaitingNow),
-  };
+  const awaitingDm = useAwaitingDmDialog(!!derived?.viewer.isDM, derived?.awaiting ?? null);
 
   const [resultDismissed, setResultDismissed] = useState(false);
 
