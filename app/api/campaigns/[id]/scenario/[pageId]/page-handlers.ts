@@ -1,0 +1,118 @@
+import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
+
+import { characterInCampaign } from "../scenario-handlers";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
+import { prisma } from "@/lib/db";
+import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
+import { InvalidScenarioContentError, OWNED_SELECT, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
+import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
+import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadOwned } from "@/lib/utils/api/load-owned";
+import { parseBody } from "@/lib/utils/api/parse-body";
+import { buildSearchText } from "@/lib/utils/scenario/search-text";
+
+export const ownedPage = (campaignId: string, pageId: string) => loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: OWNED_SELECT }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
+
+export const ownedPageWithContent = (campaignId: string, pageId: string) =>
+  loadOwned(prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { ...SUMMARY_SELECT, campaignId: true, content: true } }), campaignId, API_ERRORS.SCENARIO_NOT_FOUND);
+
+export async function getScenarioPageHandler(campaignId: string, pageId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    const page = await ownedPageWithContent(campaignId, pageId);
+
+    return page instanceof NextResponse ? page : NextResponse.json(toPage(page));
+  } catch (error) {
+    if (error instanceof InvalidScenarioContentError) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
+
+    return handleApiError(error, { action: "get scenario page" });
+  }
+}
+
+export async function saveScenarioContentHandler(req: Request, campaignId: string, pageId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    const body = await parseBody(saveScenarioContentSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    if (Buffer.byteLength(JSON.stringify(body.content)) > SCENARIO_MAX_CONTENT_BYTES) return errorResponse(API_ERRORS.SCENARIO_TOO_LARGE, 413);
+
+    const page = await ownedPage(campaignId, pageId);
+
+    if (page instanceof NextResponse) return page;
+
+    if (page.version !== body.expectedVersion) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
+
+    if (await snapshotIfDue(pageId, access.userId)) await pruneVersions(pageId);
+
+    const { count } = await prisma.scenarioPage.updateMany({
+      where: { id: pageId, version: body.expectedVersion },
+      data: { content: body.content as unknown as Prisma.InputJsonValue, searchText: buildSearchText(page.title, body.content), version: { increment: 1 } },
+    });
+
+    if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
+
+    return NextResponse.json({ version: body.expectedVersion + 1 });
+  } catch (error) {
+    return handleApiError(error, { action: "save scenario page" });
+  }
+}
+
+export async function updateScenarioMetaHandler(req: Request, campaignId: string, pageId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    const body = await parseBody(updateScenarioMetaSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    const page = await ownedPage(campaignId, pageId);
+
+    if (page instanceof NextResponse) return page;
+
+    if (!(await characterInCampaign(campaignId, body.characterId))) return errorResponse(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
+
+    const titleChanged = body.title !== undefined && body.title !== page.title;
+
+    const current = titleChanged ? await prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { content: true } }) : null;
+
+    const searchText = titleChanged && body.title ? buildSearchText(body.title, readContent(current?.content)) : undefined;
+
+    const row = await prisma.scenarioPage.update({ where: { id: pageId }, data: { ...body, ...(searchText !== undefined && { searchText }) }, select: SUMMARY_SELECT });
+
+    return NextResponse.json(toSummary(row));
+  } catch (error) {
+    return handleApiError(error, { action: "update scenario page" });
+  }
+}
+
+export async function deleteScenarioPageHandler(campaignId: string, pageId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    const page = await ownedPage(campaignId, pageId);
+
+    if (page instanceof NextResponse) return page;
+
+    await prisma.scenarioPage.delete({ where: { id: pageId } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return handleApiError(error, { action: "delete scenario page" });
+  }
+}

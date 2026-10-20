@@ -42,6 +42,7 @@ model Campaign {
   characters      Character[]
   mainSkills      MainSkill[]
   races           Race[]
+  scenarioPages   ScenarioPage[]
   skillTrees      SkillTree[]
   skills          Skill[]
   spellGroups     SpellGroup[]
@@ -115,6 +116,7 @@ model Character {
   rangedMultiplier    Float?
   inventory           CharacterInventory?
   characterSkills     CharacterSkills[]
+  scenarioPages       ScenarioPage[]
   tokens              CharacterToken[]
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
@@ -494,4 +496,40 @@ model CharacterToken {
 
   @@index([characterId])
   @@map("character_tokens")
+}
+
+model ScenarioPage {
+  id          String                @id @default(cuid())
+  campaignId  String
+  kind        String
+  arc         String?
+  title       String
+  subtitle    String?
+  status      String                @default("draft")
+  sortOrder   Int                   @default(0)
+  characterId String?
+  content     Json                  @default("{\"legend\":[],\"sections\":[]}")
+  searchText  String                @default("")
+  version     Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  campaign    Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character   Character?            @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  versions    ScenarioPageVersion[]
+
+  @@index([campaignId, sortOrder])
+  @@index([characterId])
+  @@map("scenario_pages")
+}
+
+model ScenarioPageVersion {
+  id        String       @id @default(cuid())
+  pageId    String
+  content   Json
+  createdAt DateTime     @default(now())
+  createdBy String
+  page      ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
+  @@map("scenario_page_versions")
 }

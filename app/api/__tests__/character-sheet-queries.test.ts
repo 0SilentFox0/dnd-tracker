@@ -8,6 +8,7 @@ const db = vi.hoisted(() => ({
   results: {} as Record<string, unknown>,
 }));
 
+vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(async () => []) }));
 vi.mock("@/lib/db", () => {
   const model = (name: string) =>
     new Proxy(
