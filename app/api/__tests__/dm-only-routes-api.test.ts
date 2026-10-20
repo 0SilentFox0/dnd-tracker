@@ -36,6 +36,9 @@ import * as battleAudio from "@/app/api/campaigns/[id]/battles/[battleId]/audio/
 import * as inventory from "@/app/api/campaigns/[id]/characters/[characterId]/inventory/route";
 import * as levelUp from "@/app/api/campaigns/[id]/characters/[characterId]/level-up/route";
 import * as characters from "@/app/api/campaigns/[id]/characters/route";
+import * as deckOne from "@/app/api/campaigns/[id]/decks/[deckId]/route";
+import * as decks from "@/app/api/campaigns/[id]/decks/route";
+import * as deckUpload from "@/app/api/campaigns/[id]/decks/upload-url/route";
 import * as mainSkillOne from "@/app/api/campaigns/[id]/main-skills/[mainSkillId]/route";
 import * as mainSkills from "@/app/api/campaigns/[id]/main-skills/route";
 import * as member from "@/app/api/campaigns/[id]/members/[memberId]/route";
@@ -53,7 +56,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 
 type Handler = (req: Request, ctx: never) => Promise<Response>;
 
-const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1", battleId: "b1" };
+const ids = { id: "c1", memberId: "m1", mainSkillId: "ms1", spellId: "sp1", setId: "as1", characterId: "ch1", skillId: "sk1", trackId: "t1", battleId: "b1", deckId: "d1" };
 
 const cases: Array<[string, Handler]> = [
   ["DELETE members/:memberId", member.DELETE],
@@ -80,6 +83,12 @@ const cases: Array<[string, Handler]> = [
   ["DELETE tracks/:trackId", trackOne.DELETE],
   ["PUT tracks/order", trackOrder.PUT],
   ["POST battles/:battleId/audio", battleAudio.POST],
+  ["GET decks", decks.GET],
+  ["POST decks", decks.POST],
+  ["GET decks/:deckId", deckOne.GET],
+  ["PUT decks/:deckId", deckOne.PUT],
+  ["DELETE decks/:deckId", deckOne.DELETE],
+  ["POST decks/upload-url", deckUpload.POST],
 ];
 
 const asRole = (role: string | null) => {
