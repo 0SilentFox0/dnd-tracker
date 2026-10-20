@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { CombatStatus, DM_ACTOR, emptyMaze, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { flag, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { deriveMazeView, maskMazeScene, MAZE_UNKNOWN_NAME, mazeFxVisible, mazeLogVisible, mazeVisible, turnQueue, visibleParticipants } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -11,7 +12,7 @@ const mine = (id: string, at: GridPoint, user = "u1"): BattleParticipant => {
   return { ...p, basicInfo: { ...p.basicInfo, controlledBy: user }, battleData: { ...p.battleData, facing: "e" } };
 };
 
-const map = testMap(12, 12, { maze: { ...emptyMaze(), exit: { x: 11, y: 0 } } });
+const map = mazeMap({ exit: { x: 11, y: 0 } }, 12);
 
 const hero = mine("a", { x: 1, y: 5 });
 
@@ -21,7 +22,7 @@ const near = placed("near", { at: { x: 3, y: 5 } });
 
 const far = placed("far", { at: { x: 1, y: 10 } });
 
-const sleeper = { ...placed("zzz", { at: { x: 9, y: 2 } }), battleData: { ...placed("zzz", { at: { x: 9, y: 2 } }).battleData, dormant: true } };
+const sleeper = flag(placed("zzz", { at: { x: 9, y: 2 } }), { dormant: true });
 
 const all = [hero, otherHero, near, far, sleeper];
 
@@ -119,5 +120,34 @@ describe("непритомний герой лишає гравця гравце
     const dead = { ...hero, combatStats: { ...hero.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
 
     expect(deriveMazeView({ map, participants: [dead, otherHero], userId: "u1", isDM: false })!.role).toBe("spectator");
+  });
+});
+
+describe("журнал лабіринту: перетасовку не бачить ніхто", () => {
+  const entry = (id: string, mazeEvent?: "op" | "reshuffle"): BattleAction =>
+    ({ id, actorId: DM_ACTOR.actorId, actorName: "ДМ", targets: [], actionDetails: mazeEvent ? { mazeEvent } : {}, resultText: id, hpChanges: [] }) as unknown as BattleAction;
+
+  const scene = { battle: { battleLog: [entry("reshuffle", "reshuffle"), entry("dark", "op"), entry("note")] }, turn: { current: null, queue: [] }, roster: { allies: [hero], enemies: [] } };
+
+  const ids = (s: typeof scene) => s.battle.battleLog.map((e) => e.id);
+
+  const empty = mazeMap({}, 12);
+
+  const viewOf = (userId: string, isDM = false) => deriveMazeView({ map: empty, participants: [hero], userId, isDM });
+
+  it("ДМ бачить інші події ДМа, але не перетасовку", () => {
+    expect(ids(maskMazeScene(scene, viewOf("dm", true)))).toEqual(["dark", "note"]);
+  });
+
+  it("гравець не бачить ні перетасовки, ні інших змін лабіринту", () => {
+    expect(ids(maskMazeScene(scene, viewOf("u1")))).toEqual(["note"]);
+  });
+
+  it("глядач теж не бачить перетасовки", () => {
+    expect(ids(maskMazeScene(scene, viewOf("nobody")))).toEqual(["dark", "note"]);
+  });
+
+  it("без лабіринту сцена та сама", () => {
+    expect(maskMazeScene(scene, null)).toBe(scene);
   });
 });

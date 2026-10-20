@@ -1,5 +1,6 @@
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { ParticipantSide } from "@/lib/constants/battle";
+import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { mazeMap as sharedMazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { deriveMazeView } from "@/lib/utils/battle/view";
 import type { BattleMapConfig, BattleParticipant, BattleParticipantBattleData, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
@@ -25,7 +26,7 @@ export const enemy = (id: string, at: GridPoint, data: Partial<BattleParticipant
   return { ...p, battleData: { ...p.battleData, ...data } };
 };
 
-export const mazeMap = (maze: Partial<MazeConfig> = {}, cols = 8, rows = 6): BattleMapConfig => testMap(cols, rows, { maze: { ...emptyMaze(), ...maze } });
+export const mazeMap = (maze: Partial<MazeConfig> = {}, cols = 8, rows = 6): BattleMapConfig => sharedMazeMap(maze, cols, rows);
 
 export const viewOf = (map: BattleMapConfig, participants: BattleParticipant[], role: "dm" | "player") =>
   deriveMazeView({ map, participants, userId: role === "dm" ? "dm" : "u", isDM: role === "dm" });

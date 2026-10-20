@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { ParticipantSide } from "@/lib/constants/battle";
+import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { deriveMapScene, type MapSceneActor } from "@/lib/utils/battle/grid";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { deriveMazeView } from "@/lib/utils/battle/view";
 import type { BattleMapConfig, BattleParticipant, Direction8, GridPoint } from "@/types/battle";
 
@@ -12,7 +13,7 @@ const hero = (at: GridPoint, facing: Direction8): BattleParticipant => {
   return { ...p, basicInfo: { ...p.basicInfo, controlledBy: "u" }, battleData: { ...p.battleData, facing } };
 };
 
-const mazeMap = (walls: string[] = []): BattleMapConfig => testMap(8, 8, { maze: { ...emptyMaze(), exit: { x: 7, y: 7 }, walls } });
+const withExit = (walls: string[] = []): BattleMapConfig => mazeMap({ exit: { x: 7, y: 7 }, walls });
 
 function scene(map: BattleMapConfig, participants: BattleParticipant[], isDM: boolean) {
   const current = participants[0];
@@ -30,7 +31,7 @@ describe("deriveMapScene у лабіринті", () => {
   it("зона ходу не переходить через стіну й не довша за 3 кроки", () => {
     const wallColumn = Array.from({ length: 8 }, (_, y) => `1:${y}:e`);
 
-    const { scene: s } = scene(mazeMap(wallColumn), [hero({ x: 1, y: 1 }, "s")], true);
+    const { scene: s } = scene(withExit(wallColumn), [hero({ x: 1, y: 1 }, "s")], true);
 
     const keys = moveKeys(s.view.marks);
 
@@ -41,7 +42,7 @@ describe("deriveMapScene у лабіринті", () => {
   });
 
   it("гравець: позначені лише клітинки в полі зору, прихований ворог не ціль", () => {
-    const map = mazeMap();
+    const map = withExit();
 
     const people = [hero({ x: 1, y: 1 }, "s"), placed("e", { at: { x: 4, y: 1 } })];
 
@@ -62,14 +63,32 @@ describe("deriveMapScene у лабіринті", () => {
   });
 
   it("клік по досяжній клітинці — хід туди", () => {
-    const { scene: s } = scene(mazeMap(), [hero({ x: 1, y: 1 }, "s")], false);
+    const { scene: s } = scene(withExit(), [hero({ x: 1, y: 1 }, "s")], false);
 
     expect(s.cellClick({ x: 1, y: 3 })).toEqual({ kind: "move", participantId: "h", to: { x: 1, y: 3 }, free: false });
   });
 
   it("у темряві зони ходу немає", () => {
-    const map: BattleMapConfig = { ...mazeMap(), maze: { ...emptyMaze(), dark: true } };
+    const map = mazeMap({ dark: true });
 
     expect(moveKeys(scene(map, [hero({ x: 1, y: 1 }, "s")], true).scene.view.marks)).toHaveLength(0);
+  });
+});
+
+describe("лабіринт без виходу ще не готовий", () => {
+  it("немає зони ходу, клік по сусідній клітинці — не хід (і гравцю, і ДМ)", () => {
+    for (const isDM of [false, true]) {
+      const { scene: s } = scene(mazeMap(), [hero({ x: 1, y: 1 }, "s")], isDM);
+
+      expect(moveKeys(s.view.marks)).toEqual([]);
+      expect(s.cellClick({ x: 1, y: 2 }).kind).not.toBe("move");
+    }
+  });
+
+  it("з виходом зона ходу є", () => {
+    const { scene: s } = scene(withExit(), [hero({ x: 1, y: 1 }, "s")], false);
+
+    expect(moveKeys(s.view.marks).length).toBeGreaterThan(0);
+    expect(s.cellClick({ x: 1, y: 2 }).kind).toBe("move");
   });
 });

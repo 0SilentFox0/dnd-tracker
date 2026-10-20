@@ -1,16 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { applyMazeMove, mazeBudgetLeft, mazeReachable, placeMazeParticipants } from "../movement";
+import { mazeGrid } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
-const mk = (over: Partial<MazeConfig> = {}, cols = 10, rows = 10) => ({
-  cols,
-  rows,
-  maze: { walls: [], exit: null, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over } as MazeConfig,
-});
+const mk = (over: Partial<MazeConfig> = {}, cols = 10, rows = 10) => mazeGrid(over, cols, rows);
 
 const hero = (at: GridPoint, id = "h"): BattleParticipant => placed(id, { side: ParticipantSide.ALLY, at });
 
@@ -171,5 +168,22 @@ describe("placeMazeParticipants", () => {
     const cells = out.map((p) => `${p.battleData.position?.x}:${p.battleData.position?.y}`);
 
     expect(new Set(cells).size).toBe(cells.length);
+  });
+});
+
+describe("вихід лише для героїв", () => {
+  it("ворог на виході не «вибирається», герой — так", () => {
+    const g = mazeGrid({ exit: { x: 5, y: 0 } }, 6);
+
+    const enemy = placed("e", { at: { x: 4, y: 0 } });
+
+    const out = applyMazeMove(g, { participants: [enemy], mover: enemy, to: { x: 5, y: 0 } });
+
+    expect(out).toMatchObject({ escaped: false });
+    expect("mover" in out && out.mover.battleData.escaped).toBeFalsy();
+
+    const h = placed("h", { side: ParticipantSide.ALLY, at: { x: 4, y: 0 } });
+
+    expect(applyMazeMove(g, { participants: [h], mover: h, to: { x: 5, y: 0 } })).toMatchObject({ escaped: true });
   });
 });

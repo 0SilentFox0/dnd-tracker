@@ -20,8 +20,9 @@ vi.mock("@/lib/utils/battle/participant", () => ({
 }));
 
 import { buildStartOrder } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-battle-handler";
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 
 const roar = resolved({ trigger: { event: "battleStart" }, effects: [{ kind: "dealDamage", amount: 4, target: "allEnemies" }] });
 
@@ -35,7 +36,7 @@ describe("buildStartOrder: лабіринт", () => {
     mocks.fromCharacter.mockResolvedValue(makeParticipant({ id: "h1", hp: 20, maxHp: 20 }));
     mocks.fromUnit.mockImplementation(async () => makeParticipant({ id: "w1", side: ParticipantSide.ENEMY, abilities: [roar] }));
 
-    const map = { cols: 8, rows: 8, background: null, opacity: 0.3, maze: emptyMaze() };
+    const map = mazeMap();
 
     const inMaze = await buildStartOrder("b1", "c1", setup as never, map);
 

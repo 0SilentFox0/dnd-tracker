@@ -6,12 +6,13 @@ import { afterEach, describe, expect, it } from "vitest";
 import { MazeViewProvider } from "../MazeViewProvider";
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { useMazeFxLog } from "@/lib/hooks/battle/useMazeView";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { BattleAction } from "@/types/battle";
 
 afterEach(cleanup);
@@ -21,7 +22,7 @@ const entry = (actorId: string, targets: string[] = []): BattleAction =>
 
 /** Фрейда (0,0) дивиться на схід; гоблін (0,5) — позаду поля зору; Годрік (7,5) — далеко. */
 function mazeScene({ isDM = false, maze = true } = {}) {
-  const s = fakeScene({ isDM, isMyTurn: false, map: testMap(8, 6, maze ? { maze: { ...emptyMaze(), exit: { x: 7, y: 0 } } } : {}) });
+  const s = fakeScene({ isDM, isMyTurn: false, map: maze ? mazeMap({ exit: { x: 7, y: 0 } }, 8, 6) : testMap(8, 6) });
 
   s.me.basicInfo.controlledBy = "u";
   s.me.battleData.position = { x: 0, y: 0 };

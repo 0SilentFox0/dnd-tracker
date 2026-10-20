@@ -8,6 +8,7 @@ import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellKey, mapCentre } from "@/lib/utils/battle/grid/geometry";
 import { heroTunnel, mazeDistances } from "@/lib/utils/battle/maze";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { buildSnapshotState, prepareSave } from "@/lib/utils/battle/store";
@@ -16,21 +17,16 @@ import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "
 
 const SIZE = 9;
 
-const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({
+const START: Partial<MazeConfig> = {
   walls: ["2:2:e", "3:3:s", "5:5:e"],
   exit: { x: 0, y: 2 },
-  difficulty: "medium",
   teleports: [[{ x: 1, y: 1 }, { x: 7, y: 7 }]],
   fog: ["4:4"],
   marks: { "3:3": { symbol: "star", color: "#fff", by: "hero" } },
-  dark: false,
   moved: true,
-  ...over,
-});
+};
 
-const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => ({ cols: SIZE, rows: SIZE, background: null, opacity: 0.3, maze: maze(over) });
-
-const at = (p: BattleParticipant, position: GridPoint, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position, ...extra } });
+const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ ...START, ...over }, SIZE);
 
 const hero2 = participant("hero2", { controlledBy: "user-2", name: "Друга" });
 
@@ -61,7 +57,7 @@ const ctx = (over: Partial<BattleMutationContext> = {}, mazeOver: Partial<MazeCo
     ...over,
   });
 
-  return { ...base, meta: { ...base.meta, map: mapOf(mazeOver) } };
+  return withMap(base, mapOf(mazeOver));
 };
 
 const tunnel = (c: BattleMutationContext) => mazeMutation(c, { op: "reshuffle", mode: "tunnel", teleportPairs: 2, fogPatches: 2 });
@@ -176,6 +172,6 @@ describe("перетасовка «1 тунель»", () => {
     expect(restored.pending.filter(isReserved)).toEqual([]);
     expect(byId(restored.participants, "hero").battleData.position).toEqual({ x: 8, y: 8 });
     expect(byId(restored.participants, "gob").battleData).toMatchObject({ position: { x: 2, y: 6 }, dormant: true });
-    expect(restored.scene?.map?.maze).toMatchObject({ walls: maze().walls, exit: { x: 0, y: 2 }, teleports: maze().teleports });
+    expect(restored.scene?.map?.maze).toMatchObject({ walls: START.walls, exit: { x: 0, y: 2 }, teleports: START.teleports });
   });
 });

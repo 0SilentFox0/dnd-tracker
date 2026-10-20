@@ -6,18 +6,12 @@ import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/m
 import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { mazeActionSchema } from "@/lib/schemas/battles";
+import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, MazeConfig } from "@/types/battle";
 
-const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 7, y: 0 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over });
-
-const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => ({ cols: 8, rows: 8, background: null, opacity: 0.3, maze: maze(over) });
-
-const at = (p: BattleParticipant, position: GridPoint, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => ({
-  ...p,
-  battleData: { ...p.battleData, position, ...extra },
-});
+const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 7, y: 0 }, ...over });
 
 const hero2 = participant("hero2", { controlledBy: "user-2", name: "Друга" });
 
@@ -28,10 +22,8 @@ const ctx = (mazeOver: Partial<MazeConfig> = {}, over: Partial<BattleMutationCon
     ...over,
   });
 
-  return { ...base, meta: { ...base.meta, map: mapOf(mazeOver) } };
+  return withMap(base, mapOf(mazeOver));
 };
-
-const rejected = (fn: () => unknown, message?: string) => expect(fn).toThrow(expect.objectContaining({ code: "action_rejected", ...(message && { message }) }));
 
 const features = { teleportPairs: 1, fogPatches: 1 };
 
@@ -63,7 +55,7 @@ describe("DM maze route", () => {
   it("бій без лабіринту — відмова", () => {
     const base = ctx();
 
-    rejected(() => mazeMutation({ ...base, meta: { ...base.meta, map: { ...mapOf(), maze: null } } }, { op: "dark", on: true }), "Цей бій не лабіринт");
+    expectRejected(() => mazeMutation({ ...base, meta: { ...base.meta, map: { ...mapOf(), maze: null } } }, { op: "dark", on: true }), "Цей бій не лабіринт");
   });
 
   it("generate: нові стіни, вихід на краю, герої на краях, вороги не прокидаються, dark зберігається", () => {
@@ -87,8 +79,8 @@ describe("DM maze route", () => {
 
     expect(pos.x === 0 || pos.y === 0 || pos.x === 7 || pos.y === 7).toBe(true);
 
-    rejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
-    rejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "Лабіринт уже пройдено частково — використайте «Перетасувати»");
+    expectRejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
+    expectRejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "Лабіринт уже пройдено частково — використайте «Перетасувати»");
   });
 
   it("generate: герой без позиції не стає на зайняту крайню клітинку, ніхто не ділить клітинку", () => {
@@ -131,14 +123,14 @@ describe("DM maze route", () => {
 
     expect(out.scene?.map?.maze?.walls).toEqual(["2:2:s"]);
 
-    rejected(() => mazeMutation(ctx(), { op: "walls", add: ["0:2:e", "0:1:s", "0:2:s"], remove: [] }), "Ці стіни замурують учасника — шляху до виходу не залишиться");
-    rejected(() => mazeMutation(ctx(), { op: "walls", add: ["7:0:e"], remove: [] }));
+    expectRejected(() => mazeMutation(ctx(), { op: "walls", add: ["0:2:e", "0:1:s", "0:2:s"], remove: [] }), "Ці стіни замурують учасника — шляху до виходу не залишиться");
+    expectRejected(() => mazeMutation(ctx(), { op: "walls", add: ["7:0:e"], remove: [] }));
   });
 
   it("exit: лише край; не замуровує", () => {
     expect(mazeMutation(ctx(), { op: "exit", cell: { x: 7, y: 3 } }).scene?.map?.maze?.exit).toEqual({ x: 7, y: 3 });
 
-    rejected(() => mazeMutation(ctx(), { op: "exit", cell: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
+    expectRejected(() => mazeMutation(ctx(), { op: "exit", cell: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
   });
 
   it("teleport: додає пару, прибирає за клітинкою; зайнята клітинка пари → відмова", () => {
@@ -152,8 +144,8 @@ describe("DM maze route", () => {
 
     expect(removed.scene?.map?.maze?.teleports).toEqual([]);
 
-    rejected(() => mazeMutation(ctx({ teleports: [pair] }), { op: "teleport", pair: [{ x: 2, y: 2 }, { x: 3, y: 3 }] }));
-    rejected(() => mazeMutation(ctx(), { op: "teleport", pair: null }));
+    expectRejected(() => mazeMutation(ctx({ teleports: [pair] }), { op: "teleport", pair: [{ x: 2, y: 2 }, { x: 3, y: 3 }] }));
+    expectRejected(() => mazeMutation(ctx(), { op: "teleport", pair: null }));
   });
 
   it("fog: вмикає й вимикає клітинки; поза картою → відмова", () => {
@@ -164,7 +156,7 @@ describe("DM maze route", () => {
     const off = mazeMutation(ctx({ fog: ["2:2", "3:3"] }), { op: "fog", cells: ["2:2"], on: false });
 
     expect(off.scene?.map?.maze?.fog).toEqual(["3:3"]);
-    rejected(() => mazeMutation(ctx(), { op: "fog", cells: ["9:9"], on: true }));
+    expectRejected(() => mazeMutation(ctx(), { op: "fog", cells: ["9:9"], on: true }));
   });
 
   it("dark перемикає темряву", () => {
@@ -183,6 +175,6 @@ describe("DM maze route", () => {
     }
 
     expect(out.participants[2].battleData.position).toEqual({ x: 6, y: 6 });
-    rejected(() => mazeMutation(ctx({ moved: true }), { op: "scatterStarts" }));
+    expectRejected(() => mazeMutation(ctx({ moved: true }), { op: "scatterStarts" }));
   });
 });

@@ -6,6 +6,7 @@ import { placeTeleports, teleportPartner } from "../features";
 import type { MazeGrid as MazeGridLike } from "../grid";
 import { mulberry32 } from "../rng";
 import { mazeNeighbors, wallSet } from "../walls";
+import { mazeGrid } from "./fixtures";
 
 import { emptyMaze } from "@/lib/constants/battle";
 import { allCells, cellKey } from "@/lib/utils/battle/grid/geometry";
@@ -17,7 +18,7 @@ const pathLength = (g: ReturnType<typeof grid>, from: GridPoint, to: GridPoint) 
 
 const reachesExit = (g: ReturnType<typeof grid>, from: GridPoint) => allReachExit(g, [from]);
 
-const grid = (maze: Partial<MazeConfig>) => ({ cols: 4, rows: 3, maze: { ...emptyMaze(), ...maze } });
+const grid = (maze: Partial<MazeConfig>) => mazeGrid(maze, 4, 3);
 
 describe("mazeDistances", () => {
   it("counts 8-direction steps on an open grid", () => {

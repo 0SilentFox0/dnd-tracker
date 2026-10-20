@@ -5,6 +5,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { createAddParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -161,5 +162,22 @@ describe("add-participant mutation", () => {
 
       expect(out.participants.find((p) => p.basicInfo.id === "new-u1")?.combatStats.maxHp).toBe(10);
     });
+  });
+});
+
+describe("add-participant у лабіринті", () => {
+  const mazeCtx = () => withMap(context({ isDM: true, participants: [at(hero, { x: 0, y: 2 }), at(goblin, { x: 5, y: 5 }, { dormant: true })] }), mazeMap({ exit: { x: 5, y: 0 } }, 6));
+
+  it("ворог сплячий на вказаній клітинці; на вихід — відмова", async () => {
+    const add = createAddParticipantMutation(deps({ fromUnit: vi.fn(async (_u: unknown, _b: string, side: ParticipantSide, n: number) => participant(`new-u${n}`, { side })) }));
+
+    const out = await add(mazeCtx(), { sourceId: "u1", type: "unit", side: "enemy", quantity: 2, position: { x: 3, y: 3 } });
+
+    const added = out.participants.filter((p) => p.basicInfo.id.startsWith("new-u"));
+
+    expect(added.map((p) => p.battleData.dormant)).toEqual([true, true]);
+    expect(added[0].battleData.position).toEqual({ x: 3, y: 3 });
+
+    await expect(add(mazeCtx(), { sourceId: "u1", type: "unit", side: "enemy", quantity: 1, position: { x: 5, y: 0 } })).rejects.toMatchObject({ code: "action_rejected" });
   });
 });

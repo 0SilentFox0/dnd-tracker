@@ -3,16 +3,16 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MazeMarkPicker } from "../MazeMarkPicker";
+import { mazeMap } from "./maze-fixtures";
 
 import { MazeViewProvider } from "@/components/battle/scene/MazeViewProvider";
-import { emptyMaze } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import type { MazeConfig } from "@/types/battle";
 
 afterEach(cleanup);
 
-function setup(maze: Partial<ReturnType<typeof emptyMaze>> = {}, used = 0) {
-  const scene = fakeScene({ map: testMap(8, 6, { maze: { ...emptyMaze(), ...maze } }) });
+function setup(maze: Partial<MazeConfig> = {}, used = 0) {
+  const scene = fakeScene({ map: mazeMap(maze) });
 
   scene.me.battleData.position = { x: 1, y: 1 };
   scene.me.battleData.movementUsed = used;
@@ -45,7 +45,7 @@ describe("MazeMarkPicker", () => {
 
   it("ДМ керує героєм у темряві — кнопки немає; при світлі — є", () => {
     const shown = (dark: boolean) => {
-      const s = fakeScene({ isDM: true, map: testMap(8, 6, { maze: { ...emptyMaze(), exit: { x: 7, y: 0 }, dark } }) });
+      const s = fakeScene({ isDM: true, map: mazeMap({ exit: { x: 7, y: 0 }, dark }) });
 
       s.me.battleData.position = { x: 1, y: 1 };
       (s.value.actions as unknown as Record<string, unknown>).mazeMark = { mutate: vi.fn(), isPending: false };

@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
-import type { BattleParticipant } from "@/types/battle";
+import { flag } from "@/lib/utils/battle/maze/__tests__/fixtures";
 
 const hero = { type: "skill" as const, id: "banner" };
 
@@ -12,18 +12,16 @@ const allyAura = resolved({ id: "allies-attack", trigger: { event: "passive" }, 
 
 const enemyAura = resolved({ id: "enemies-attack", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: -1, target: "allEnemies" }] }, hero);
 
-const flagged = (p: BattleParticipant, data: Partial<BattleParticipant["battleData"]>): BattleParticipant => ({ ...p, battleData: { ...p.battleData, ...data } });
-
 describe("лабіринт: аури сторони", () => {
   const leader = makeParticipant({ id: "lead", side: ParticipantSide.ALLY, abilities: [allyAura, enemyAura] });
 
   const friend = makeParticipant({ id: "friend", side: ParticipantSide.ALLY });
 
-  const gone = flagged(makeParticipant({ id: "gone", side: ParticipantSide.ALLY }), { escaped: true });
+  const gone = flag(makeParticipant({ id: "gone", side: ParticipantSide.ALLY }), { escaped: true });
 
   const foe = makeParticipant({ id: "foe", side: ParticipantSide.ENEMY });
 
-  const sleeper = flagged(makeParticipant({ id: "zzz", side: ParticipantSide.ENEMY }), { dormant: true });
+  const sleeper = flag(makeParticipant({ id: "zzz", side: ParticipantSide.ENEMY }), { dormant: true });
 
   const ps = [leader, friend, gone, foe, sleeper];
 
@@ -33,7 +31,7 @@ describe("лабіринт: аури сторони", () => {
   });
 
   it("вибулий герой не дає аури союзникам", () => {
-    const escapedLeader = flagged(leader, { escaped: true });
+    const escapedLeader = flag(leader, { escaped: true });
 
     expect(statWithModifiers([escapedLeader, friend, foe], "friend", "attackBonus", 5)).toBe(5);
     expect(statWithModifiers([escapedLeader, friend, foe], "foe", "attackBonus", 5)).toBe(5);

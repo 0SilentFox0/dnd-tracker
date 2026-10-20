@@ -3,14 +3,15 @@ import { describe, expect, it } from "vitest";
 import { mulberry32 } from "../rng";
 import { scatterAll, scatterStarts } from "../scatter";
 import { isEdgeCell } from "../walls";
+import { mazeGrid } from "./fixtures";
 
-import { emptyMaze, MAZE_SCATTER_MIN_GAP } from "@/lib/constants/battle";
+import { MAZE_SCATTER_MIN_GAP } from "@/lib/constants/battle";
 import { cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
 import type { MazeConfig } from "@/types/battle";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i}`);
 
-const grid = (cols: number, rows: number, maze: Partial<MazeConfig> = {}) => ({ cols, rows, maze: { ...emptyMaze(), ...maze } });
+const grid = (cols: number, rows: number, maze: Partial<MazeConfig> = {}) => mazeGrid(maze, cols, rows);
 
 describe("scatterStarts", () => {
   it("distinct edge cells, never the exit", () => {
@@ -69,5 +70,19 @@ describe("scatterAll", () => {
 
     expect(scatterAll(grid(6, 4), ids(8), mulberry32(3))).toBeNull();
     expect(performance.now() - start).toBeLessThan(100);
+  });
+});
+
+describe("розкидання стартів повз телепорти", () => {
+  it("герої не стають на телепорт (3×3: рівно 5 вільних крайніх клітинок)", () => {
+    const g = grid(3, 3, { exit: { x: 2, y: 0 }, teleports: [[{ x: 0, y: 1 }, { x: 1, y: 2 }]] });
+
+    for (let seed = 0; seed < 30; seed++) {
+      const starts = scatterStarts(g, ["a", "b", "c", "d", "e"], mulberry32(seed));
+
+      expect(starts).not.toBeNull();
+      expect(Object.values(starts ?? {}).map(cellKey)).not.toContain("0:1");
+      expect(Object.values(starts ?? {}).map(cellKey)).not.toContain("1:2");
+    }
   });
 });

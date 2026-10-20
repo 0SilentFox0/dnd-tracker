@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const facingEast = (p: BattleParticipant): BattleParticipant => ({ ...p, battleData: { ...p.battleData, facing: "e" } });
@@ -17,7 +18,7 @@ const escaped: BattleParticipant = { ...placed("gone", { side: ParticipantSide.A
 
 const ps = [owner, seen, hidden, escaped];
 
-const maze = testMap(12, 12, { maze: { ...emptyMaze(), walls: ["5:5:e", "5:4:e", "5:6:e"] } });
+const maze = mazeMap({ walls: ["5:5:e", "5:4:e", "5:6:e"] }, 12);
 
 const event = { type: "action" as const, actorId: "me", abilityKey: "k" };
 

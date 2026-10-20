@@ -2,17 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { aimView } from "@/lib/utils/battle/grid/map-scene";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleMapConfig } from "@/types/battle";
 
-const map: BattleMapConfig = {
-  cols: 12,
-  rows: 12,
-  background: null,
-  opacity: 0.4,
-  maze: { walls: ["6:5:e"], exit: { x: 11, y: 11 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false },
-};
+const map = mazeMap({ walls: ["6:5:e"], exit: { x: 11, y: 11 } }, 12);
 
 const base = createMockParticipant();
 

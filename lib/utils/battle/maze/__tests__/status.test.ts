@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { inMazePlay, isMazeHero, takesTurn } from "../status";
+import { idleTurnIndex, inMazePlay, isMazeHero, takesTurn } from "../status";
+import { flag, mazeMap } from "./fixtures";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -10,9 +11,6 @@ import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/pla
 import { occupiesCells } from "@/lib/utils/battle/grid/occupancy";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { turnQueue } from "@/lib/utils/battle/view";
-import type { BattleParticipant } from "@/types/battle";
-
-const flag = (p: BattleParticipant, data: Partial<BattleParticipant["battleData"]>): BattleParticipant => ({ ...p, battleData: { ...p.battleData, ...data } });
 
 describe("takesTurn", () => {
   it("dormant, escaped, мертвий та рано прокинутий не ходять", () => {
@@ -47,9 +45,7 @@ describe("escaped: поза полем", () => {
 
 describe("placeParticipants у лабіринті", () => {
   it("2x2 ворог стає 1x1; без лабіринту без змін", () => {
-    const maze = { walls: [], exit: null, difficulty: "medium" as const, teleports: [], fog: [], marks: {}, dark: false };
-
-    const inMaze = placeParticipants(testMap(10, 10, { maze }), [placed("big", { size: 2 })]);
+    const inMaze = placeParticipants(mazeMap({}, 10), [placed("big", { size: 2 })]);
 
     expect(byId(inMaze, "big").combatStats.gridSize).toBe(1);
 
@@ -82,5 +78,20 @@ describe("аури й черга", () => {
     const ids = turnQueue(order, 0, 1).flatMap((e) => (e.kind === "round" ? [] : [e.participant.basicInfo.id]));
 
     expect(ids).toEqual(["a", "d", "a", "d"]);
+  });
+});
+
+describe("idleTurnIndex — коли ніхто не ходить", () => {
+  it("перший у грі, а не сплячий чи той, хто вибрався", () => {
+    const sleeper = flag(placed("z"), { dormant: true });
+
+    const out = flag(placed("o", { side: ParticipantSide.ALLY }), { escaped: true });
+
+    const waking = flag(placed("w"), { mazeWakeRound: 9 });
+
+    expect(idleTurnIndex([sleeper, out, waking])).toBe(2);
+    expect(idleTurnIndex([sleeper, out])).toBe(0);
+    expect(idleTurnIndex([{ ...sleeper, combatStats: { ...sleeper.combatStats, status: CombatStatus.DEAD } }, out])).toBe(1);
+    expect(idleTurnIndex([])).toBe(0);
   });
 });

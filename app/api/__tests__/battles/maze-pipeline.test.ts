@@ -8,6 +8,7 @@ import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { allInteriorEdges } from "@/lib/utils/battle/maze";
+import { at, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -22,14 +23,7 @@ const PLAYER = "user-1";
 
 const wire = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
-const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 7, y: 7 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over });
-
-const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => ({ cols: size, rows: size, background: null, opacity: 0.3, maze: maze(over) });
-
-const at = (p: BattleParticipant, position: GridPoint, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => ({
-  ...p,
-  battleData: { ...p.battleData, position, ...extra },
-});
+const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => mazeMap({ exit: { x: 7, y: 7 }, ...over }, size);
 
 const scene0: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,

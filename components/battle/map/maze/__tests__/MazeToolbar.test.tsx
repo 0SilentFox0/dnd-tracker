@@ -4,15 +4,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MazeToolbar } from "../MazeToolbar";
-import { RO } from "./maze-fixtures";
+import { mazeMap, RO } from "./maze-fixtures";
 
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { MazeViewProvider } from "@/components/battle/scene/MazeViewProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { emptyMaze } from "@/lib/constants/battle";
 import { type MazeTools, useMazeView } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { MazeConfig } from "@/types/battle";
 
 afterEach(cleanup);
@@ -20,7 +18,7 @@ afterEach(cleanup);
 vi.stubGlobal("ResizeObserver", RO);
 
 function panel({ isDM = true, phone = false, maze = {} as Partial<MazeConfig> } = {}) {
-  const scene = fakeScene({ isDM, map: { cols: 8, rows: 6, background: null, opacity: 0.3, maze: { ...emptyMaze(), ...maze } } });
+  const scene = fakeScene({ isDM, map: mazeMap(maze) });
 
   const mutate = vi.fn();
 
@@ -161,7 +159,7 @@ function ToolbarWithAsHero() {
 
 describe("«Очима гравця» завжди можна вимкнути", () => {
   it("після вибору героя є кнопка «Вимкнути», що повертає погляд ДМ", () => {
-    const s = fakeScene({ isDM: true, map: testMap(8, 6, { maze: { ...emptyMaze(), exit: { x: 7, y: 0 } } }) });
+    const s = fakeScene({ isDM: true, map: mazeMap({ exit: { x: 7, y: 0 } }) });
 
     const Wrapper = ({ children }: { children: ReactNode }) => (
       <s.wrapper>

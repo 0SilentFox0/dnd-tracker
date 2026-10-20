@@ -5,8 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useMazeDarkAutoSkip } from "../useMazeDarkAutoSkip";
 import { fakeScene, type FakeSceneOptions } from "./fake-scene";
 
-import { emptyMaze } from "@/lib/constants/battle";
-import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 
 const skip = vi.fn();
 
@@ -21,7 +20,7 @@ vi.mock("@/lib/hooks/battles", async (orig) => ({
   },
 }));
 
-const map = (dark: boolean) => testMap(8, 6, { maze: { ...emptyMaze(), dark } });
+const map = (dark: boolean) => mazeMap({ dark }, 8, 6);
 
 function setup(opts: FakeSceneOptions & { pending?: boolean; moraleCheck?: boolean } = {}) {
   const scene = fakeScene({ map: map(true), ...opts });

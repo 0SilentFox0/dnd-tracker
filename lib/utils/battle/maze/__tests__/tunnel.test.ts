@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { emptyMaze } from "@/lib/constants/battle";
+import { mazeGrid } from "./fixtures";
+
 import { cellKey, mapCentre, neighbors } from "@/lib/utils/battle/grid/geometry";
 import { canStep, heroTunnel, mazeDistances, wallSet } from "@/lib/utils/battle/maze";
 import type { GridPoint } from "@/types/battle";
@@ -16,7 +17,7 @@ const exits: Array<[string, GridPoint, "w" | "e" | "n" | "s", GridPoint]> = [
   ["нижній край", { x: 8, y: 8 }, "s", { x: c.x, y: 8 }],
 ];
 
-const mazeOf = (walls: string[], exit: GridPoint) => ({ ...grid, maze: { ...emptyMaze(), walls, exit } });
+const tunnelGrid = (walls: string[], exit: GridPoint) => mazeGrid({ walls, exit }, grid.cols, grid.rows);
 
 describe("heroTunnel", () => {
   it.each(exits)("%s: прямий тунель від центру до того ж краю, вихід перенесено на його кінець", (_, oldExit, dir, newExit) => {
@@ -35,7 +36,7 @@ describe("heroTunnel", () => {
   it.each(exits)("%s: шлях до виходу лише вздовж тунелю, сусіди поза тунелем відгороджені", (_, oldExit) => {
     const t = heroTunnel(grid, oldExit, 3)!;
 
-    const g = mazeOf(t.walls, t.exit);
+    const g = tunnelGrid(t.walls, t.exit);
 
     const walls = wallSet(g.maze);
 

@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { mazeAwareness, withMazeAwareness } from "../awareness";
+import { mazeGrid, mazeMap } from "./fixtures";
 
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
-const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 9, y: 9 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over });
-
-const grid = (over: Partial<MazeConfig> = {}) => ({ cols: 10, rows: 10, maze: maze(over) });
+const grid = (over: Partial<MazeConfig> = {}) => mazeGrid({ exit: { x: 9, y: 9 }, ...over }, 10);
 
 const hero = (at: GridPoint, facing: Direction8 = "e", id = "h"): BattleParticipant => {
   const p = placed(id, { side: ParticipantSide.ALLY, at });
@@ -63,11 +62,11 @@ describe("mazeAwareness", () => {
 
     const result = { participants, pending: [], events: [] };
 
-    const noExit = testMap(10, 10, { maze: maze({ exit: null }) });
+    const noExit = mazeMap({}, 10);
 
     expect(withMazeAwareness(noExit, { status: BattleStatus.ACTIVE, round: 1 }, result)).toBe(result);
 
-    const ready = testMap(10, 10, { maze: maze() });
+    const ready = mazeMap({ exit: { x: 9, y: 9 } }, 10);
 
     expect(withMazeAwareness(ready, { status: BattleStatus.PREPARED, round: 1 }, result)).toBe(result);
     expect(withMazeAwareness(testMap(), { status: BattleStatus.ACTIVE, round: 1 }, result)).toBe(result);

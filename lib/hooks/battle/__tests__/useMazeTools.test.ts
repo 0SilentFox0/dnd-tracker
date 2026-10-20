@@ -6,12 +6,13 @@ import { useMazePlaceUnit } from "../useMazePlaceUnit";
 import { useMazeTools } from "../useMazeTools";
 import { fakeScene } from "./fake-scene";
 
-import { emptyMaze, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { MazeConfig } from "@/types/battle";
 
 function setup(maze: Partial<MazeConfig> = {}, isDM = true) {
-  const scene = fakeScene({ isDM, map: { cols: 8, rows: 6, background: null, opacity: 0.3, maze: { ...emptyMaze(), ...maze } } });
+  const scene = fakeScene({ isDM, map: mazeMap(maze, 8, 6) });
 
   const maze$ = { mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false };
 

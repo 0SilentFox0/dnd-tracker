@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { deriveMazeView, filterQueue, turnQueue } from "@/lib/utils/battle/view";
-import type { BattleParticipant, GridPoint } from "@/types/battle";
+import { spellTargetCandidates } from "@/lib/utils/battle/flows/spell-flow";
+import { flag, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { deriveMazeView, filterQueue, turnQueue, visibleParticipants } from "@/lib/utils/battle/view";
+import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
 const withControl = (p: BattleParticipant, userId: string, facing: "e" | "w" = "e"): BattleParticipant => ({
   ...p,
@@ -13,9 +15,7 @@ const withControl = (p: BattleParticipant, userId: string, facing: "e" | "w" = "
 
 const hero = (id: string, at: GridPoint, user: string) => withControl(placed(id, { side: ParticipantSide.ALLY, at }), user);
 
-const mapWith = (maze: Partial<ReturnType<typeof emptyMaze>> = {}) => testMap(12, 12, { maze: { ...emptyMaze(), ...maze } });
-
-const flag = (p: BattleParticipant, data: Partial<BattleParticipant["battleData"]>): BattleParticipant => ({ ...p, battleData: { ...p.battleData, ...data } });
+const mapWith = (maze: Partial<MazeConfig> = {}) => mazeMap(maze, 12);
 
 describe("deriveMazeView", () => {
   const a = hero("a", { x: 1, y: 5 }, "u1");
@@ -112,5 +112,31 @@ describe("deriveMazeView", () => {
     const ids = filterQueue(turnQueue(order, 0, 1), v).map((e) => (e.kind === "round" ? "|" : e.participant.basicInfo.id));
 
     expect(ids).toEqual(["a", "|", "a"]);
+  });
+});
+
+describe("лабіринт: непритомні союзники", () => {
+  const downed = (p: BattleParticipant): BattleParticipant => ({ ...p, combatStats: { ...p.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS } });
+
+  const caster = hero("me", { x: 1, y: 5 }, "u1");
+
+  const nearFallen = downed(hero("near", { x: 3, y: 5 }, "u2"));
+
+  const farFallen = downed(hero("far", { x: 7, y: 5 }, "u3"));
+
+  const all = [caster, nearFallen, farFallen];
+
+  const view = deriveMazeView({ map: mapWith({ walls: ["5:5:e", "5:4:e", "5:6:e"] }), participants: all, userId: "u1", isDM: false })!;
+
+  it("непритомний союзник у полі зору видимий і є ціллю закляття воскресіння", () => {
+    expect(view.visibleIds.has("near")).toBe(true);
+
+    const candidates = spellTargetCandidates(visibleParticipants(view, all), caster, "dead").map((p) => p.basicInfo.id);
+
+    expect(candidates).toEqual(["near"]);
+  });
+
+  it("непритомний союзник поза полем зору прихований", () => {
+    expect(view.visibleIds.has("far")).toBe(false);
   });
 });

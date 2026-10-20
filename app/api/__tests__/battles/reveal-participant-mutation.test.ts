@@ -5,6 +5,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { revealParticipantMutation, revealParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -81,5 +82,15 @@ describe("reveal-participant на карті", () => {
     const taken = (saved?.participants ?? []).filter((p) => p !== imp).flatMap((p) => cellsOf(p).map((c) => `${c.x}:${c.y}`));
 
     expect(cellsOf(imp as BattleParticipant).some((c) => taken.includes(`${c.x}:${c.y}`))).toBe(false);
+  });
+});
+
+describe("reveal-participant у лабіринті", () => {
+  it("розкритий ворог входить сплячим", () => {
+    const base = context({ isDM: true, participants: [at(hero, { x: 0, y: 2 }), at(goblin, { x: 5, y: 5 }, { dormant: true })], pending: [reserved("imp")] });
+
+    const out = revealParticipantMutation(withMap(base, mazeMap({ exit: { x: 5, y: 0 } }, 6)), { participantIds: ["imp"] });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "imp")?.battleData.dormant).toBe(true);
   });
 });

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -14,9 +14,7 @@ const scene: BattleSceneState = {
   eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null,
 };
 
-const maze = { walls: [], exit: null, difficulty: "medium" as const, teleports: [], fog: [], marks: {}, dark: false };
-
-const map = testMap(10, 10, { maze });
+const map = mazeMap({}, 10);
 
 const mk = (id: string, side: ParticipantSide, data: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => {
   const b = createMockParticipant();

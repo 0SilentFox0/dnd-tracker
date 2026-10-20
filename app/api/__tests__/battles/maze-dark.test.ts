@@ -9,20 +9,17 @@ import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/m
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import type { BattleMutationContext, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+import type { BattleMapConfig, MazeConfig } from "@/types/battle";
 
-const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 5, y: 0 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: true, moved: true, ...over });
-
-const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => ({ cols: 6, rows: 6, background: null, opacity: 0.3, maze: maze(over) });
-
-const at = (p: BattleParticipant, position: GridPoint): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position } });
+const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 5, y: 0 }, dark: true, moved: true, ...over }, 6);
 
 const ctx = (map: BattleMapConfig | null, over: Partial<BattleMutationContext> = {}): BattleMutationContext => {
   const base = context({ participants: [at(hero, { x: 0, y: 2 }), at(goblin, { x: 1, y: 2 })], ...over });
 
-  return { ...base, meta: { ...base.meta, map } };
+  return withMap(base, map);
 };
 
 function deps(loaded: BattleMutationContext): PipelineDeps {
