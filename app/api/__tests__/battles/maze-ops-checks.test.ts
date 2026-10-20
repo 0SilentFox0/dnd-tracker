@@ -51,14 +51,10 @@ describe("maze ops: телепорти й вихід перевіряються 
   });
 });
 
-describe("maze ops: кожна дія ДМ пише коротку подію (ціль для відкату)", () => {
+describe("maze ops: великі дії ДМ пишуть коротку подію (ціль для відкату)", () => {
   const cases: Array<[MazeAction, string]> = [
     [{ op: "generate", difficulty: "easy", teleportPairs: 0, fogPatches: 0, exit: null }, MAZE_OP_TEXT.generate],
     [{ op: "reshuffle", mode: "walls", teleportPairs: 0, fogPatches: 0 }, MAZE_OP_TEXT.reshuffle],
-    [{ op: "walls", add: ["3:3:e"], remove: [] }, MAZE_OP_TEXT.walls],
-    [{ op: "exit", cell: { x: 7, y: 4 } }, MAZE_OP_TEXT.exit],
-    [{ op: "teleport", pair: [{ x: 2, y: 2 }, { x: 5, y: 5 }] }, MAZE_OP_TEXT.teleport],
-    [{ op: "fog", cells: ["2:2"], on: true }, MAZE_OP_TEXT.fog],
     [{ op: "dark", on: true }, MAZE_OP_TEXT.darkOn],
     [{ op: "dark", on: false }, MAZE_OP_TEXT.darkOff],
     [{ op: "scatterStarts" }, MAZE_OP_TEXT.scatterStarts],
@@ -67,6 +63,24 @@ describe("maze ops: кожна дія ДМ пише коротку подію (�
   it.each(cases)("%o", (action, text) => {
     const out = mazeMutation(ctx(), action);
 
-    expect(out.events[0]).toMatchObject({ actorId: "dm", resultText: text, details: { actionDetails: { mazeEvent: "op" } } });
+    const kind = action.op === "reshuffle" ? "reshuffle" : "op";
+
+    expect(out.events[0]).toMatchObject({ actorId: "dm", resultText: text, details: { actionDetails: { mazeEvent: kind } } });
+  });
+});
+
+describe("maze ops: правки пензлем без події (і без знімка)", () => {
+  const edits: MazeAction[] = [
+    { op: "walls", add: ["3:3:e"], remove: [] },
+    { op: "exit", cell: { x: 7, y: 4 } },
+    { op: "teleport", pair: [{ x: 2, y: 2 }, { x: 5, y: 5 }] },
+    { op: "fog", cells: ["2:2"], on: true },
+  ];
+
+  it.each(edits)("%o", (action) => {
+    const out = mazeMutation(ctx(), action);
+
+    expect(out.events).toEqual([]);
+    expect(out.scene?.map?.maze).toBeTruthy();
   });
 });

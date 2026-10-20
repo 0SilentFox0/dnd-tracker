@@ -102,6 +102,7 @@ function memoryBattle(participants: BattleParticipant[], map: BattleMapConfig) {
     meta,
     participant: (id: string) => joined().find((p) => p.basicInfo.id === id) as BattleParticipant,
     events: () => events,
+    snapshots: () => snapshots,
     rollback: createRollbackMutation(
       async (_battleId, seq) => {
         const start = [...snapshots].reverse().find((s) => s.seq <= seq);
@@ -183,20 +184,27 @@ describe("maze у конвеєрі", () => {
     expect(b.participant("gob").battleData).toMatchObject({ dormant: false, position: { x: 4, y: 0 }, mazeWakeRound: awake.mazeWakeRound });
   });
 
-  it("правка стін пише подію; відкат до неї скасовує лише її", async () => {
+  it("правка стін не пише ні події, ні знімка; відкат пізнішої дії її зберігає, ранішої — скасовує", async () => {
     const b = memoryBattle([at(hero, { x: 0, y: 0 }, { facing: "s" })], mapOf({ walls: ["3:3:e"], moved: true }));
 
-    await b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, { op: "walls", add: ["5:5:s"], remove: [] });
+    const maze = (body: unknown) => b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, body);
 
-    await b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, { op: "dark", on: true });
+    await maze({ op: "dark", on: true });
+    await maze({ op: "walls", add: ["5:5:s"], remove: [] });
+    await maze({ op: "dark", on: false });
 
     const seqs = b.events().map((e) => [e.resultText, e.seq] as const);
 
-    expect(seqs.map(([t]) => t)).toEqual([MAZE_OP_TEXT.walls, MAZE_OP_TEXT.darkOn]);
+    expect(seqs.map(([t]) => t)).toEqual([MAZE_OP_TEXT.darkOn, MAZE_OP_TEXT.darkOff]);
+    expect(b.snapshots()).toHaveLength(2);
 
     await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: seqs[1][1] });
 
-    expect(b.meta.map?.maze).toMatchObject({ walls: ["3:3:e", "5:5:s"], dark: false });
+    expect(b.meta.map?.maze).toMatchObject({ walls: ["3:3:e", "5:5:s"], dark: true });
+
+    await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: seqs[0][1] });
+
+    expect(b.meta.map?.maze).toMatchObject({ walls: ["3:3:e"], dark: false });
   });
 });
 

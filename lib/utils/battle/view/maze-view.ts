@@ -128,11 +128,13 @@ export const visibleParticipants = (view: MazeView | null | undefined, list: Bat
 
 const anyTargetKnown = (view: MazeView, e: BattleAction, known: (id: string) => boolean) => (e.targets ?? []).some((t) => known(t.participantId));
 
-/** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. */
+/** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. Перетасовку не бачить ніхто. */
 export function mazeLogVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
-  if (!hidesFrom(view)) return true;
-
   const kind = e.actionDetails?.mazeEvent;
+
+  if (kind === "reshuffle") return false;
+
+  if (!hidesFrom(view)) return true;
 
   if (kind === "op") return false;
 
@@ -161,7 +163,11 @@ export interface MazeMaskable {
 
 /** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
 export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView | null | undefined): T {
-  if (!hidesFrom(view)) return scene;
+  if (!hidesFrom(view)) {
+    const log = scene.battle.battleLog ?? [];
+
+    return view && log.some((e) => !mazeLogVisible(view, e)) ? { ...scene, battle: { ...scene.battle, battleLog: log.filter((e) => mazeLogVisible(view, e)) } } : scene;
+  }
 
   const { current } = scene.turn;
 

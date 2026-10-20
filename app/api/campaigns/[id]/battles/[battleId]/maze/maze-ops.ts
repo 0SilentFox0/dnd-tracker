@@ -83,26 +83,29 @@ function canonicalCell(key: string, grid: { cols: number; rows: number }): strin
 export const MAZE_OP_TEXT = {
   generate: "ДМ згенерував лабіринт",
   reshuffle: "ДМ перетасував лабіринт",
-  walls: "ДМ змінив стіни лабіринту",
-  exit: "ДМ переніс вихід",
-  teleport: "ДМ змінив телепорти",
-  fog: "ДМ змінив туман",
   darkOn: "Темрява",
   darkOff: "Світло",
   scatterStarts: "ДМ розкидав героїв по краях",
 } as const;
 
 // подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
-function mazeOpEvent(round: number, text: string): NewBattleEvent {
+function mazeOpEvent(round: number, text: string, kind: "op" | "reshuffle"): NewBattleEvent {
   const event = dmEvent(round, text);
 
-  return { ...event, details: { ...event.details, actionDetails: { mazeEvent: "op" } } };
+  return { ...event, details: { ...event.details, actionDetails: { mazeEvent: kind } } };
 }
 
-function finish(ctx: BattleMutationContext, maze: MazeConfig, text: string, extra: Partial<MutationResult> = {}): MutationResult {
+function finish(ctx: BattleMutationContext, maze: MazeConfig, text: string, extra: Partial<MutationResult> = {}, kind: "op" | "reshuffle" = "op"): MutationResult {
   const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
 
-  return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, ...extra, events: [mazeOpEvent(ctx.scene.round, text), ...(extra.events ?? [])] };
+  return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, ...extra, events: [mazeOpEvent(ctx.scene.round, text, kind), ...(extra.events ?? [])] };
+}
+
+// правки пензлем ДМа йдуть часто: без події й знімка (відкат до попередньої дії поверне й ці правки)
+function edited(ctx: BattleMutationContext, maze: MazeConfig): MutationResult {
+  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
+
+  return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, events: [] };
 }
 
 const gridOf = (ctx: BattleMutationContext, maze: MazeConfig) => {
@@ -200,7 +203,7 @@ const reshuffle: OpHandler<"reshuffle"> = (ctx, maze, body) => {
 
   const awareness = mazeAwareness({ ...grid, maze: result.maze }, { participants: moved, round: ctx.scene.round, sleep: true });
 
-  return finish(ctx, result.maze, MAZE_OP_TEXT.reshuffle, { participants: awareness.participants, events: awareness.events });
+  return finish(ctx, result.maze, MAZE_OP_TEXT.reshuffle, { participants: awareness.participants, events: awareness.events }, "reshuffle");
 };
 
 const walls: OpHandler<"walls"> = (ctx, maze, body) => {
@@ -216,7 +219,7 @@ const walls: OpHandler<"walls"> = (ctx, maze, body) => {
 
   assertReachable(ctx, updated);
 
-  return finish(ctx, updated, MAZE_OP_TEXT.walls);
+  return edited(ctx, updated);
 };
 
 const exit: OpHandler<"exit"> = (ctx, maze, body) => {
@@ -230,7 +233,7 @@ const exit: OpHandler<"exit"> = (ctx, maze, body) => {
 
   assertReachable(ctx, updated);
 
-  return finish(ctx, updated, MAZE_OP_TEXT.exit);
+  return edited(ctx, updated);
 };
 
 const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
@@ -260,7 +263,7 @@ const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
 
   assertReachable(ctx, updated);
 
-  return finish(ctx, updated, MAZE_OP_TEXT.teleport);
+  return edited(ctx, updated);
 };
 
 const fog: OpHandler<"fog"> = (ctx, maze, body) => {
@@ -275,7 +278,7 @@ const fog: OpHandler<"fog"> = (ctx, maze, body) => {
     else next.delete(cell);
   }
 
-  return finish(ctx, { ...maze, fog: [...next] }, MAZE_OP_TEXT.fog);
+  return edited(ctx, { ...maze, fog: [...next] });
 };
 
 const dark: OpHandler<"dark"> = (ctx, maze, body) => finish(ctx, { ...maze, dark: body.on }, body.on ? MAZE_OP_TEXT.darkOn : MAZE_OP_TEXT.darkOff);
