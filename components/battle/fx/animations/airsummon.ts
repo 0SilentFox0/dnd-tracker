@@ -1,14 +1,14 @@
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { figureHead, figurePath, summonSpot } from "../runtime/figure";
-import { chance, type FxPoint, rand, zigzag } from "../runtime/geometry";
-import { flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { polyline } from "../runtime/shapes";
-import { schedule, timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { figureHead, figurePath, summonSpot } from "@/components/battle/fx/runtime/figure";
+import { chance, type FxPoint, rand, zigzag } from "@/components/battle/fx/runtime/geometry";
+import { flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { polyline } from "@/components/battle/fx/runtime/shapes";
+import { schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const STRIKE_MS = ARCHETYPE_FX.airsummon.impactMs;
@@ -34,16 +34,134 @@ interface Arc {
   until: number;
 }
 
-export const airsummon: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { x, ground, height: H } = summonSpot(targetEls[i], target);
+interface Funnel {
+  x: number;
+  ground: number;
+  top: number;
+  H: number;
+}
 
-    const head = figureHead(H);
+/** Funnel radius at height share u: a narrow foot under the caster, a wide mouth up top. */
+const funnelRadius = (H: number, u: number, k: number) => (H * 0.05 + u ** 1.4 * H * 0.42) * k;
+
+/** The whirlwind: thin bands racing round a funnel, back halves dimmer. */
+function whirlwind(g: CanvasRenderingContext2D, { x, ground, top, H }: Funnel, time: number, spin: number, reach: number) {
+  g.globalCompositeOperation = "lighter";
+  g.lineCap = "round";
+
+  for (let b = 0; b < BANDS; b++) {
+    const u = (b + 0.5) / BANDS;
+
+    const y = ground - (ground - top) * u * reach;
+
+    const r = funnelRadius(H, u, spin);
+
+    const phase = -time * 11 + b * 0.7;
+
+    for (const [from, alpha] of [[phase, 0.75], [phase + Math.PI, 0.3]] as const) {
+      g.globalAlpha = alpha * spin;
+      g.strokeStyle = b % 3 ? "#d8ecf5" : "#9fd8ff";
+      g.lineWidth = 1.2 + u * 1.6;
+      g.beginPath();
+      g.ellipse(x, y, r, r * 0.22, 0, from, from + Math.PI * 0.75);
+      g.stroke();
+    }
+  }
+}
+
+/** Dust and torn leaves whirling with it. */
+function whirlingSpecks(g: CanvasRenderingContext2D, { x, ground, top, H }: Funnel, specks: Speck[], time: number, spin: number, reach: number) {
+  for (const s of specks) {
+    const u = s.u * reach;
+
+    const r = funnelRadius(H, s.u, spin) * 1.05;
+
+    const a = s.a - time * s.speed;
+
+    const front = Math.sin(a) > 0;
+
+    g.globalCompositeOperation = "source-over";
+    g.globalAlpha = spin * (front ? 0.9 : 0.4);
+    g.fillStyle = s.leaf ? "#7a9a48" : "#b8a080";
+    g.beginPath();
+    g.ellipse(x + Math.cos(a) * r, ground - (ground - top) * u + Math.sin(a) * r * 0.22, s.size * (s.leaf ? 1.6 : 1), s.size * 0.7, a, 0, Math.PI * 2);
+    g.fill();
+  }
+}
+
+/** Lightning crackling inside the funnel. */
+function crackling(g: CanvasRenderingContext2D, arcs: Arc[], t: number) {
+  g.globalCompositeOperation = "lighter";
+
+  for (const arc of arcs) {
+    if (t > arc.until) continue;
+
+    g.globalAlpha = 0.9;
+    g.strokeStyle = "rgba(159,216,255,0.6)";
+    g.lineWidth = 4;
+    polyline(g, arc.pts);
+    g.strokeStyle = "#ffffff";
+    g.lineWidth = 1.4;
+    polyline(g, arc.pts);
+  }
+}
+
+/** Wind curling round the body (in the figure's frame). */
+function windCurls(g: CanvasRenderingContext2D, H: number, time: number, body: number) {
+  g.lineWidth = 1.1;
+
+  for (let n = 0; n < 3; n++) {
+    const y = -H * (0.25 + n * 0.22);
+
+    const phase = time * 7 + n * 2;
+
+    g.globalAlpha = body * 0.6;
+    g.beginPath();
+    g.ellipse(0, y, H * 0.3, H * 0.06, -0.15, phase, phase + Math.PI * 0.9);
+    g.stroke();
+  }
+}
+
+/** The see-through figure standing in the eye of the storm. */
+function airFigure(g: CanvasRenderingContext2D, { x, ground, H }: Funnel, time: number, body: number) {
+  const head = figureHead(H);
+
+  const sway = (p: FxPoint, n: number) => ({ x: p.x + Math.sin(time * 6 + n * 0.8 + p.y * 0.06) * H * 0.015, y: p.y });
+
+  g.save();
+  g.translate(x, ground);
+  spritePx(g, glow("#9fd8ff"), 0, -H * 0.5, H, H * 1.3, 0.35 * body);
+  g.globalCompositeOperation = "source-over";
+  g.globalAlpha = body * 0.22;
+  g.fillStyle = "#cfeaff";
+  figurePath(g, H, { armLift: 0.2 }, sway);
+  g.fill();
+  g.globalCompositeOperation = "lighter";
+  g.strokeStyle = "#cfeaff";
+  g.globalAlpha = body * 0.25;
+  g.lineWidth = 4;
+  figurePath(g, H, { armLift: 0.2 }, sway);
+  g.stroke();
+  g.globalAlpha = body * 0.75;
+  g.lineWidth = 1.1;
+  g.strokeStyle = "#f2faff";
+  g.stroke();
+  windCurls(g, H, time, body);
+
+  for (const side of [-1, 1]) spritePx(g, glow("#ffffff"), head.x + side * head.r * 0.42, head.y + head.r * 0.1, head.r * 0.6, undefined, body);
+
+  g.restore();
+}
+
+export const airsummon: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { x, ground, height: H } = summonSpot(el, target);
 
     const top = ground - H * 1.15;
 
-    // Funnel radius at height share u: a narrow foot under the caster, a wide mouth up top.
-    const radius = (u: number, k: number) => (H * 0.05 + u ** 1.4 * H * 0.42) * k;
+    const funnel: Funnel = { x, ground, top, H };
+
+    const radius = (u: number, k: number) => funnelRadius(H, u, k);
 
     const specks: Speck[] = Array.from({ length: 34 }, () => ({ u: rand(0.05, 1), a: rand(0, Math.PI * 2), speed: rand(7, 11), size: rand(1.2, 2.6), leaf: Math.random() < 0.25 }));
 
@@ -59,107 +177,16 @@ export const airsummon: FxAnimation = ({ stage, to, targetEls }) =>
 
         const reach = easeOutCubic(clamp01(t / 600));
 
-        // The whirlwind: thin bands racing round a funnel, back halves dimmer.
         if (spin > 0) {
-          g.globalCompositeOperation = "lighter";
-          g.lineCap = "round";
-
-          for (let b = 0; b < BANDS; b++) {
-            const u = (b + 0.5) / BANDS;
-
-            const y = ground - (ground - top) * u * reach;
-
-            const r = radius(u, spin);
-
-            const phase = -time * 11 + b * 0.7;
-
-            for (const [from, alpha] of [[phase, 0.75], [phase + Math.PI, 0.3]] as const) {
-              g.globalAlpha = alpha * spin;
-              g.strokeStyle = b % 3 ? "#d8ecf5" : "#9fd8ff";
-              g.lineWidth = 1.2 + u * 1.6;
-              g.beginPath();
-              g.ellipse(x, y, r, r * 0.22, 0, from, from + Math.PI * 0.75);
-              g.stroke();
-            }
-          }
-
-          // Dust and torn leaves whirling with it.
-          for (const s of specks) {
-            const u = s.u * reach;
-
-            const r = radius(s.u, spin) * 1.05;
-
-            const a = s.a - time * s.speed;
-
-            const front = Math.sin(a) > 0;
-
-            g.globalCompositeOperation = "source-over";
-            g.globalAlpha = spin * (front ? 0.9 : 0.4);
-            g.fillStyle = s.leaf ? "#7a9a48" : "#b8a080";
-            g.beginPath();
-            g.ellipse(x + Math.cos(a) * r, ground - (ground - top) * u + Math.sin(a) * r * 0.22, s.size * (s.leaf ? 1.6 : 1), s.size * 0.7, a, 0, Math.PI * 2);
-            g.fill();
-          }
+          whirlwind(g, funnel, time, spin, reach);
+          whirlingSpecks(g, funnel, specks, time, spin, reach);
         }
 
-        // Lightning crackling inside the funnel.
-        g.globalCompositeOperation = "lighter";
+        crackling(g, arcs, t);
 
-        for (const arc of arcs) {
-          if (t > arc.until) continue;
-
-          g.globalAlpha = 0.9;
-          g.strokeStyle = "rgba(159,216,255,0.6)";
-          g.lineWidth = 4;
-          polyline(g, arc.pts);
-          g.strokeStyle = "#ffffff";
-          g.lineWidth = 1.4;
-          polyline(g, arc.pts);
-        }
-
-        // The see-through figure standing in the eye of the storm.
         const body = clamp01((t - STRIKE_MS) / 450) * (1 - clamp01((t - TOTAL_MS + 450) / 450));
 
-        if (body > 0) {
-          const sway = (p: FxPoint, n: number) => ({ x: p.x + Math.sin(time * 6 + n * 0.8 + p.y * 0.06) * H * 0.015, y: p.y });
-
-          g.save();
-          g.translate(x, ground);
-          spritePx(g, glow("#9fd8ff"), 0, -H * 0.5, H, H * 1.3, 0.35 * body);
-          g.globalCompositeOperation = "source-over";
-          g.globalAlpha = body * 0.22;
-          g.fillStyle = "#cfeaff";
-          figurePath(g, H, { armLift: 0.2 }, sway);
-          g.fill();
-          g.globalCompositeOperation = "lighter";
-          g.strokeStyle = "#cfeaff";
-          g.globalAlpha = body * 0.25;
-          g.lineWidth = 4;
-          figurePath(g, H, { armLift: 0.2 }, sway);
-          g.stroke();
-          g.globalAlpha = body * 0.75;
-          g.lineWidth = 1.1;
-          g.strokeStyle = "#f2faff";
-          g.stroke();
-
-          // Wind curling round the body.
-          g.lineWidth = 1.1;
-
-          for (let n = 0; n < 3; n++) {
-            const y = -H * (0.25 + n * 0.22);
-
-            const phase = time * 7 + n * 2;
-
-            g.globalAlpha = body * 0.6;
-            g.beginPath();
-            g.ellipse(0, y, H * 0.3, H * 0.06, -0.15, phase, phase + Math.PI * 0.9);
-            g.stroke();
-          }
-
-          for (const side of [-1, 1]) spritePx(g, glow("#ffffff"), head.x + side * head.r * 0.42, head.y + head.r * 0.1, head.r * 0.6, undefined, body);
-
-          g.restore();
-        }
+        if (body > 0) airFigure(g, funnel, time, body);
 
         g.globalAlpha = 1;
       },

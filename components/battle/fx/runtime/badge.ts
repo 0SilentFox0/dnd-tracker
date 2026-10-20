@@ -7,9 +7,11 @@ export interface BadgeLook {
   ink: string;
 }
 
+const badgeHalf = (text: string) => Math.max(19, text.length * 4.2);
+
 /** A small heraldic shield reading `text` (a stat bonus), centred on (x, y); the caller animates its rise and fade. */
 export function shieldBadge(g: CanvasRenderingContext2D, x: number, y: number, alpha: number, text: string, look: BadgeLook) {
-  const half = Math.max(19, text.length * 4.2);
+  const half = badgeHalf(text);
 
   g.save();
   g.globalAlpha = alpha;
@@ -55,11 +57,10 @@ export function risingBadge(g: CanvasRenderingContext2D, x: number, y: number, k
 export function sinkingBadge(g: CanvasRenderingContext2D, x: number, top: number, k: number, text: string, look: BadgeLook) {
   if (k <= 0 || k >= 1) return;
 
-  const ease = 1 - (1 - k) ** 3;
-
-  const half = Math.max(19, text.length * 4.2) * 1.3 + 4;
+  // the shield is drawn at 1.3×
+  const half = badgeHalf(text) * 1.3 + 4;
 
   const right = g.canvas.clientWidth || Infinity;
 
-  shieldBadge(g, Math.max(half, Math.min(right - half, x)), Math.max(24, top) + ease * 12, Math.min(1, k / 0.15, (1 - k) / 0.35), text, look);
+  shieldBadge(g, Math.max(half, Math.min(right - half, x)), Math.max(24, top) + easeOutCubic(k) * 12, Math.min(1, k / 0.15, (1 - k) / 0.35), text, look);
 }

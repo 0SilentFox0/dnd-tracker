@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import type { BattleMapConfig } from "@/types/battle";
 
-vi.mock("@/components/battle/fx/runtime/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
+vi.mock("@/lib/utils/canvas/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
 
 afterEach(cleanup);
 

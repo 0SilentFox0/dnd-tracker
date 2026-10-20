@@ -18,7 +18,7 @@ function flushFrames(count: number, stepMs = 16) {
 async function load() {
   vi.resetModules();
 
-  return { ...(await import("../runtime/stage")), ...(await import("../runtime/ticker")), ...(await import("../runtime/primitives")) };
+  return { ...(await import("@/components/battle/fx/runtime/stage")), ...(await import("@/lib/utils/canvas/ticker")), ...(await import("@/components/battle/fx/runtime/primitives")) };
 }
 
 beforeEach(() => {

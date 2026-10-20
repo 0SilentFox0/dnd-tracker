@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: true, userEnabled: true, motionAllowed: true, setEnabled: vi.fn() }) }));
-vi.mock("@/components/battle/fx/auras/canvas/AuraCanvas", () => ({ AuraCanvas: ({ kinds, size }: { kinds: string[]; size: number }) => <span data-testid="aura" data-kinds={kinds.join(",")} data-size={size} /> }));
+vi.mock("@/components/battle/fx/auras/AuraCanvas", () => ({ AuraCanvas: ({ kinds, size }: { kinds: string[]; size: number }) => <span data-testid="aura" data-kinds={kinds.join(",")} data-size={size} /> }));
 vi.mock("@/components/battle/fx/frames/ImpactFrame", () => ({ ImpactFrame: ({ impact }: { impact: FxImpact }) => <i data-testid="impact-frame" data-element={impact.element} /> }));
 
 import { MapToken } from "@/components/battle/map/MapToken";

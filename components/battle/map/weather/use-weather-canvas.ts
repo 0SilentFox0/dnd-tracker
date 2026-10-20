@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { WEATHER_EFFECTS } from "./index";
 import { particleCount, type WeatherSim, type WeatherSize } from "./types";
 
-import { fitCanvas } from "@/components/battle/fx/runtime/canvas-size";
-import { subscribe } from "@/components/battle/fx/runtime/ticker";
+import { fitCanvas } from "@/lib/utils/canvas/canvas-size";
+import { subscribe } from "@/lib/utils/canvas/ticker";
 import type { WeatherKind } from "@/types/battle";
 
 // частинки дрібні: понад 1.5× пікселів не видно, а заливка дорожчає квадратично

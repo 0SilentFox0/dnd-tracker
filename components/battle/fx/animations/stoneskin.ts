@@ -1,14 +1,14 @@
-import { type BadgeLook, risingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { type FxPoint, rand } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { jaggedShape, stonePlate } from "../runtime/shapes";
-import { animateEl, type Stage, timeline, wait } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { type BadgeLook, risingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { jaggedShape, stonePlate } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, type Stage, timeline, wait } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SNAP_MS = ARCHETYPE_FX.stoneskin.impactMs;
@@ -130,7 +130,7 @@ function shell(g: CanvasRenderingContext2D, at: FxPoint, alpha: number, shine: n
   g.restore();
 }
 
-async function thud(stage: Stage, target: FxPoint, el: HTMLElement | undefined) {
+async function thud(stage: Stage, target: FxPoint, el: HTMLElement | null) {
   const feet = { x: target.x, y: target.y + RY - 2 };
 
   for (let n = 0; n < 14; n++) emit(stage, { x: feet.x + rand(-40, 40), y: feet.y }, { tints: DUST, speed: [30, 120], angle: n % 2 ? [-0.5, 0.15] : [Math.PI - 0.15, Math.PI + 0.5], life: [0.6, 1.1], scale: [0.4, 1.1], drag: 2.5, additive: false, alpha: 0.5, gravity: -15 });
@@ -138,8 +138,8 @@ async function thud(stage: Stage, target: FxPoint, el: HTMLElement | undefined) 
   await Promise.all([animateEl(stage, el, THUD, { duration: 300, easing: "ease-out" }), streakBurst(stage, { x: target.x, y: target.y - RY + 4 }, { colors: SPARKS, count: 10, angle: -Math.PI / 2, cone: 1.2, speed: [120, 260], life: [0.2, 0.4], gravity: 400, width: [1, 1.6] })]);
 }
 
-export const stoneskin: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
+export const stoneskin: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const list = plates(target);
 
     const cracks = veins();
@@ -202,8 +202,7 @@ export const stoneskin: FxAnimation = ({ stage, to, targetEls }) =>
       },
     );
 
-    const landed = wait(stage, SNAP_MS).then(() => thud(stage, target, targetEls[i]));
-
+    const landed = wait(stage, SNAP_MS).then(() => thud(stage, target, el));
 
     await Promise.all([run, landed]);
   });

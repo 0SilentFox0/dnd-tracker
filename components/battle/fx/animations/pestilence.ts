@@ -1,12 +1,13 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { animateEl, timeline } from "../runtime/stage";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { animateEl, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ARRIVE_MS = ARCHETYPE_FX.pestilence.impactMs;
@@ -72,10 +73,8 @@ function stench(g: CanvasRenderingContext2D, x: number, y: number, k: number, ph
   g.stroke();
 }
 
-export const pestilence: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const pestilence: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const face = faceOf(el, target);
@@ -174,8 +173,7 @@ export const pestilence: FxAnimation = ({ stage, from, to, targetEls }) =>
       },
     );
 
-    const sicken = animateEl(stage, el, [{ filter: "none" }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.25 }, { filter: "saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", offset: 0.75 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS, delay: ARRIVE_MS });
-
+    const sicken = animateEl(stage, el, holdFilter("saturate(.7) sepia(.35) hue-rotate(35deg) brightness(.85)", 0.25, 0.75), { duration: TOTAL_MS - ARRIVE_MS, delay: ARRIVE_MS });
 
     await Promise.all([run, sicken]);
   });

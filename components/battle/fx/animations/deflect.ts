@@ -1,13 +1,13 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, envelope } from "../runtime/easing";
-import { farSide, type FxPoint, rand } from "../runtime/geometry";
-import { flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { arrow } from "../runtime/shapes";
-import { timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, envelope } from "@/components/battle/fx/runtime/easing";
+import { farSide, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { arrow } from "@/components/battle/fx/runtime/shapes";
+import { timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const TOTAL_MS = 2500;
@@ -26,9 +26,103 @@ interface Arrow {
   free?: { x: number; y: number; vx: number; vy: number; rot: number; spin: number; t0: number };
 }
 
-export const deflect: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { w, h } = halfSize(targetEls[i]);
+interface Veil {
+  rx: number;
+  ry: number;
+  fill: CanvasGradient;
+}
+
+/** The swirling veil: thin sheets of light chasing each other round the hero (centred on it). */
+function veil(g: CanvasRenderingContext2D, { rx, ry, fill }: Veil, t: number, life: number) {
+  const spin = t / 260;
+
+  g.globalAlpha = life;
+  g.fillStyle = fill;
+  g.beginPath();
+  g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+  g.fill();
+
+  for (let s = 0; s < 4; s++) {
+    const head = spin * (s % 2 ? -0.7 : 1) + (s * Math.PI) / 2;
+
+    const span = 0.9 + 0.5 * Math.sin(t / 300 + s);
+
+    const k = 1 + (s % 2) * 0.08;
+
+    for (let b = 0; b < 2; b++) {
+      g.globalAlpha = life * (b ? 0.95 : 0.3);
+      g.strokeStyle = b ? "#fffbe8" : "#ffd86b";
+      g.lineWidth = b ? 1.6 : 8;
+      g.beginPath();
+      g.ellipse(0, 0, rx * k, ry * k, 0, head, head + span * life);
+      g.stroke();
+    }
+  }
+}
+
+/** Where an arrow glanced, the veil flares in a short bright arc. */
+function glanceFlares(g: CanvasRenderingContext2D, { rx, ry }: Veil, ripples: { at: number; angle: number }[], t: number) {
+  for (const r of ripples) {
+    const k = (t - r.at) / 450;
+
+    if (k <= 0 || k >= 1) continue;
+
+    g.globalAlpha = 1 - k;
+    g.strokeStyle = "#ffffff";
+    g.lineWidth = 3 * (1 - k) + 1;
+    g.beginPath();
+    g.ellipse(0, 0, rx * (1 + k * 0.12), ry * (1 + k * 0.12), 0, r.angle - 0.5 - k * 0.4, r.angle + 0.5 + k * 0.4);
+    g.stroke();
+  }
+}
+
+/** An arrow in flight with its streak, or tumbling off after the glance. */
+function volleyArrow(g: CanvasRenderingContext2D, a: Arrow, t: number, trail: CanvasGradient) {
+  const k = (t - a.at) / FLIGHT_MS;
+
+  if (k <= 0) return;
+
+  let x: number, y: number, rot: number, alpha: number;
+
+  if (a.free) {
+    const age = (t - a.free.t0) / 1000;
+
+    ({ x, y, rot } = a.free);
+    alpha = clamp01(1 - (age - 0.55) / 0.35);
+  } else {
+    const e = Math.min(1, k);
+
+    x = a.start.x + (a.hit.x - a.start.x) * e;
+    y = a.start.y + (a.hit.y - a.start.y) * e;
+    rot = Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x);
+    alpha = Math.min(1, k * 4);
+  }
+
+  if (alpha <= 0) return;
+
+  g.save();
+  g.translate(x, y);
+  g.rotate(rot);
+  g.globalAlpha = alpha;
+
+  if (!a.free) {
+    g.strokeStyle = trail;
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(-70, 0);
+    g.lineTo(-38, 0);
+    g.stroke();
+  }
+
+  g.shadowColor = "rgba(0,0,0,0.7)";
+  g.shadowBlur = 3;
+  arrow(g, 40);
+  g.restore();
+}
+
+export const deflect: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { w, h } = halfSize(el);
 
     const rx = w + 14;
 
@@ -47,111 +141,33 @@ export const deflect: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const ripples: { at: number; angle: number }[] = [];
 
+    const fill = stage.g.createRadialGradient(0, 0, ry * 0.4, 0, 0, rx);
+
+    fill.addColorStop(0, "rgba(255,240,200,0)");
+    fill.addColorStop(1, "rgba(255,226,150,0.12)");
+
+    const trail = stage.g.createLinearGradient(-70, 0, 0, 0);
+
+    trail.addColorStop(0, "rgba(255,255,255,0)");
+    trail.addColorStop(1, "rgba(255,255,255,0.55)");
+
+    const shape: Veil = { rx, ry, fill };
+
     const run = timeline(
       stage,
       TOTAL_MS,
       (g, t) => {
-        const life = envelope(t / TOTAL_MS, 0.12, 0.2);
-
-        const spin = t / 260;
-
-        // The swirling veil: thin sheets of light chasing each other round the hero.
         g.save();
         g.translate(target.x, target.y);
         g.globalCompositeOperation = "lighter";
         g.lineCap = "round";
-
-        const fill = g.createRadialGradient(0, 0, ry * 0.4, 0, 0, rx);
-
-        fill.addColorStop(0, "rgba(255,240,200,0)");
-        fill.addColorStop(1, "rgba(255,226,150,0.12)");
-        g.globalAlpha = life;
-        g.fillStyle = fill;
-        g.beginPath();
-        g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-        g.fill();
-
-        for (let s = 0; s < 4; s++) {
-          const head = spin * (s % 2 ? -0.7 : 1) + (s * Math.PI) / 2;
-
-          const span = 0.9 + 0.5 * Math.sin(t / 300 + s);
-
-          const k = 1 + (s % 2) * 0.08;
-
-          for (let b = 0; b < 2; b++) {
-            g.globalAlpha = life * (b ? 0.95 : 0.3);
-            g.strokeStyle = b ? "#fffbe8" : "#ffd86b";
-            g.lineWidth = b ? 1.6 : 8;
-            g.beginPath();
-            g.ellipse(0, 0, rx * k, ry * k, 0, head, head + span * life);
-            g.stroke();
-          }
-        }
-
-        // Where an arrow glanced, the veil flares in a short bright arc.
-        for (const r of ripples) {
-          const k = (t - r.at) / 450;
-
-          if (k <= 0 || k >= 1) continue;
-
-          g.globalAlpha = 1 - k;
-          g.strokeStyle = "#ffffff";
-          g.lineWidth = 3 * (1 - k) + 1;
-          g.beginPath();
-          g.ellipse(0, 0, rx * (1 + k * 0.12), ry * (1 + k * 0.12), 0, r.angle - 0.5 - k * 0.4, r.angle + 0.5 + k * 0.4);
-          g.stroke();
-        }
-
+        veil(g, shape, t, envelope(t / TOTAL_MS, 0.12, 0.2));
+        glanceFlares(g, shape, ripples, t);
         g.restore();
 
         g.globalCompositeOperation = "source-over";
 
-        for (const a of arrows) {
-          const k = (t - a.at) / FLIGHT_MS;
-
-          if (k <= 0) continue;
-
-          let x: number, y: number, rot: number, alpha: number;
-
-          if (a.free) {
-            const age = (t - a.free.t0) / 1000;
-
-            ({ x, y, rot } = a.free);
-            alpha = clamp01(1 - (age - 0.55) / 0.35);
-          } else {
-            const e = Math.min(1, k);
-
-            x = a.start.x + (a.hit.x - a.start.x) * e;
-            y = a.start.y + (a.hit.y - a.start.y) * e;
-            rot = Math.atan2(a.hit.y - a.start.y, a.hit.x - a.start.x);
-            alpha = Math.min(1, k * 4);
-          }
-
-          if (alpha <= 0) continue;
-
-          g.save();
-          g.translate(x, y);
-          g.rotate(rot);
-          g.globalAlpha = alpha;
-
-          if (!a.free) {
-            const trail = g.createLinearGradient(-70, 0, 0, 0);
-
-            trail.addColorStop(0, "rgba(255,255,255,0)");
-            trail.addColorStop(1, "rgba(255,255,255,0.55)");
-            g.strokeStyle = trail;
-            g.lineWidth = 2;
-            g.beginPath();
-            g.moveTo(-70, 0);
-            g.lineTo(-38, 0);
-            g.stroke();
-          }
-
-          g.shadowColor = "rgba(0,0,0,0.7)";
-          g.shadowBlur = 3;
-          arrow(g, 40);
-          g.restore();
-        }
+        for (const a of arrows) volleyArrow(g, a, t, trail);
       },
       (t, dt) => {
         for (const a of arrows) {
@@ -175,7 +191,6 @@ export const deflect: FxAnimation = ({ stage, from, to, targetEls }) =>
         }
       },
     );
-
 
     await run;
   });

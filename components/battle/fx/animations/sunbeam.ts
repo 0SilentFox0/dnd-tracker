@@ -1,13 +1,13 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, rand } from "../runtime/geometry";
-import { emit, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { plusSign, twinkle } from "../runtime/shapes";
-import { schedule, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { chance, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { plusSign, twinkle } from "@/components/battle/fx/runtime/shapes";
+import { schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const BEAM_MS = ARCHETYPE_FX.sunbeam.impactMs;
@@ -52,9 +52,9 @@ function sun(g: CanvasRenderingContext2D, x: number, y: number, r: number, bloom
   g.restore();
 }
 
-export const sunbeam: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { w, h } = halfSize(targetEls[i]);
+export const sunbeam: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { w, h } = halfSize(el);
 
     const at = { x: target.x, y: Math.max(16, target.y - h - 34) };
 
@@ -130,7 +130,6 @@ export const sunbeam: FxAnimation = ({ stage, to, targetEls }) =>
     );
 
     schedule(stage, BEAM_MS, () => void ring(stage, target, "#ffe39a", 800, w * 0.9, 3, 0.45));
-
 
     await run;
   });

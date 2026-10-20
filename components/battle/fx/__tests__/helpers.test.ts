@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { perTick, prune } from "../runtime/geometry";
-import { glowPulse } from "../runtime/motion";
+import { perTick, prune } from "@/components/battle/fx/runtime/geometry";
+import { glowPulse } from "@/components/battle/fx/runtime/motion";
 
 afterEach(() => vi.restoreAllMocks());
 

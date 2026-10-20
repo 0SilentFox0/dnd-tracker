@@ -1,4 +1,4 @@
-import type { FxPoint } from "./geometry";
+import type { FxPoint, FxTarget } from "./geometry";
 
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
@@ -11,7 +11,7 @@ interface Box {
 
 const overlaps = (r: Box, v: Box) => r.bottom > v.top && r.right > v.left && r.top < v.bottom && r.left < v.right;
 
-/** Прокручувана обгортка карти (телефон): токен, прокручений за її край, не видно, хоч він і у вікні. */
+/** The map's scrolling wrapper (phones): a token scrolled past its edge is hidden even while inside the window. */
 function scrollViewport(el: HTMLElement): Box | null {
   const scroller = el.closest<HTMLElement>("[data-fx-clip]")?.parentElement;
 
@@ -20,7 +20,7 @@ function scrollViewport(el: HTMLElement): Box | null {
 
 const RANK: Record<string, number> = { map: 0, detail: 2, track: 3 };
 
-/** map > main (без атрибута) > detail > track */
+/** map > main (no attribute) > detail > track */
 export function anchorRank(el: HTMLElement): number {
   return RANK[el.dataset.fxAnchor ?? ""] ?? 1;
 }
@@ -32,7 +32,7 @@ export function visible(el: HTMLElement) {
 
   if (r.width <= 0 || r.height <= 0 || !overlaps(r, { top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth })) return false;
 
-  // зум і панорама виносять токен за межі карти, хоч він і в межах вікна
+  // zoom and pan move a token off the map while it is still inside the window
   const clip = clipBox(el);
 
   if (clip && !overlaps(r, clip)) return false;
@@ -57,31 +57,29 @@ function centerOf(el: HTMLElement): FxPoint {
 }
 
 function cellPoint(at: { x: number; y: number }, root: ParentNode): FxPoint | undefined {
-  // карта може бути змонтована двічі (телефон/десктоп) — беремо видиму копію
+  // the map may be mounted twice (phone/desktop): take the visible copy
   const el = [...root.querySelectorAll<HTMLElement>(`[data-fx-cell="${at.x}:${at.y}"]`)].find(visible);
 
   return el && centerOf(el);
 }
 
-export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; to: FxPoint[]; at?: FxPoint; targetEls: HTMLElement[]; actorEl: HTMLElement | null } | null {
-  const targetEls = spec.targetIds.flatMap((id) => findAnchor(id, root) ?? []);
-
-  const to = targetEls.map(centerOf);
+export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from: FxPoint; targets: FxTarget[]; at?: FxPoint; actorEl: HTMLElement | null } | null {
+  const found = spec.targetIds.flatMap((id) => findAnchor(id, root) ?? []).map((el) => ({ at: centerOf(el), el }));
 
   const cell = spec.at && cellPoint(spec.at, root);
 
-  // заклинання в порожню зону летить у точку прицілу, якщо її видно
-  const aimed = spec.targetIds.length === 0 && cell ? [cell] : to;
+  // a cast into an empty zone flies to the aimed cell, when it is visible
+  const targets: FxTarget[] = spec.targetIds.length === 0 && cell ? [{ at: cell, el: null }] : found;
 
-  if (aimed.length === 0) return null;
+  if (targets.length === 0) return null;
 
-  if (spec.archetype === "death") return { from: aimed[0], to: aimed, targetEls, actorEl: null };
+  if (spec.archetype === "death") return { from: targets[0].at, targets, actorEl: null };
 
   const actorEl = findAnchor(spec.actorId, root);
 
-  const from = actorEl ? centerOf(actorEl) : { x: aimed[0].x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
+  const from = actorEl ? centerOf(actorEl) : { x: targets[0].at.x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
 
-  return { from, to: aimed, ...(cell && { at: cell }), targetEls, actorEl };
+  return { from, targets, ...(cell && { at: cell }), actorEl };
 }
 
 /** Half the width and height of a target row, for effects that wrap it; `fallback` when it is gone. */

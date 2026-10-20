@@ -104,26 +104,17 @@ export function preloadAnimation(archetype: FxArchetype) {
 
 /** The archetype's animation, or its base fallback when the chunk fails or takes longer than `timeoutMs`. */
 export function animationFor(archetype: FxArchetype, timeoutMs: number): Promise<FxAnimation> {
-  if (isBase(archetype)) return Promise.resolve(BASE[archetype]);
+  const fallback = BASE[isBase(archetype) ? archetype : SIGNATURES[archetype].fallback];
 
-  const ready = loaded.get(archetype);
+  const load = loadAnimation(archetype).catch(() => fallback);
 
-  if (ready) return Promise.resolve(ready);
+  if (!Number.isFinite(timeoutMs)) return load;
 
-  const fallback = BASE[SIGNATURES[archetype].fallback];
+  let timer: ReturnType<typeof setTimeout> | undefined;
 
-  return new Promise((resolve) => {
-    const timer = Number.isFinite(timeoutMs) ? setTimeout(() => resolve(fallback), timeoutMs) : undefined;
-
-    loadAnimation(archetype).then(
-      (anim) => {
-        clearTimeout(timer);
-        resolve(anim);
-      },
-      () => {
-        clearTimeout(timer);
-        resolve(fallback);
-      },
-    );
+  const late = new Promise<FxAnimation>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), timeoutMs);
   });
+
+  return Promise.race([load, late]).finally(() => clearTimeout(timer));
 }

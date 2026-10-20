@@ -1,14 +1,14 @@
-import { halfSize } from "../runtime/anchors";
-import { lightBeam } from "../runtime/beam";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { leafPath } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { lightBeam } from "@/components/battle/fx/runtime/beam";
+import { clamp01, easeOutCubic, envelope, smoothstep } from "@/components/battle/fx/runtime/easing";
+import { rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { leafPath } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SOUL_MS = ARCHETYPE_FX.resurrect.impactMs;
@@ -49,10 +49,8 @@ function petal(g: CanvasRenderingContext2D, size: number) {
   g.fill();
 }
 
-export const resurrect: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const resurrect: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const sky = Math.max(-30, target.y - 240);
@@ -124,7 +122,7 @@ export const resurrect: FxAnimation = ({ stage, to, targetEls }) =>
 
         const s = clamp01((t - DESCEND_AT) / (SOUL_MS - DESCEND_AT));
 
-        const e = s * s * (3 - 2 * s);
+        const e = smoothstep(s);
 
         soul = { x: target.x + Math.sin(e * Math.PI * 3) * 18 * (1 - e), y: sky + 20 + (target.y - sky - 20) * e };
         trail.push(soul);
@@ -141,7 +139,6 @@ export const resurrect: FxAnimation = ({ stage, to, targetEls }) =>
     });
 
     const breathe = animateEl(stage, el, BREATH, { duration: 1000, easing: "ease-out", delay: SOUL_MS });
-
 
     await Promise.all([run, breathe]);
   });

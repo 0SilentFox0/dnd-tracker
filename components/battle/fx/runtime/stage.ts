@@ -1,6 +1,7 @@
-import { fitCanvas } from "./canvas-size";
 import { SpriteParticles } from "./particles";
-import { subscribe } from "./ticker";
+
+import { fitCanvas } from "@/lib/utils/canvas/canvas-size";
+import { subscribe } from "@/lib/utils/canvas/ticker";
 
 type Draw = (g: CanvasRenderingContext2D) => void;
 
@@ -179,6 +180,18 @@ export function timeline(s: Stage, ms: number, draw: (g: CanvasRenderingContext2
   return tween(s, ms, (k, dt) => {
     t = k * ms;
     onTick?.(t, dt);
+  }).then(() => void hide());
+}
+
+/** `draw` every frame for `ms`, given the progress 0..1; `onTick` runs first on each frame with the same progress and dt (s). */
+export function progress(s: Stage, ms: number, draw: (g: CanvasRenderingContext2D, k: number) => void, onTick?: (k: number, dt: number) => void) {
+  let k = 0;
+
+  const hide = show(s, (g) => draw(g, k));
+
+  return tween(s, ms, (v, dt) => {
+    k = v;
+    onTick?.(v, dt);
   }).then(() => void hide());
 }
 

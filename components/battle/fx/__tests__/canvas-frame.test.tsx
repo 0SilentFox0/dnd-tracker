@@ -2,7 +2,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CanvasFrame } from "@/components/battle/fx/frames/canvas/CanvasFrame";
+import { CanvasFrame } from "@/components/battle/fx/frames/CanvasFrame";
 
 function hostSize(px: number) {
   vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(px);

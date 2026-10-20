@@ -1,12 +1,12 @@
-import { faceOf } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { type FxPoint, pick, rand } from "../runtime/geometry";
-import { motionPath } from "../runtime/motion";
-import { perTarget } from "../runtime/recipes";
-import { animateEl, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { type FxPoint, pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter, motionPath } from "@/components/battle/fx/runtime/motion";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { animateEl, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ARRIVE_MS = ARCHETYPE_FX.whispers.impactMs;
@@ -34,10 +34,125 @@ interface Call {
   mark: boolean;
 }
 
-export const whispers: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
+type Voice = Orbit & { from: FxPoint };
 
+function posOf(head: FxPoint, o: Orbit, time: number): FxPoint {
+  const a = o.phase + (time / 1000) * o.speed;
+
+  const x = Math.cos(a) * o.rx;
+
+  const y = Math.sin(a) * o.ry;
+
+  return { x: head.x + x * Math.cos(o.tilt) - y * Math.sin(o.tilt), y: head.y + x * Math.sin(o.tilt) + y * Math.cos(o.tilt) };
+}
+
+/** Comet-like voices with fading tails circling the head; `join` takes them from their sides into the swirl. */
+function cometVoices(g: CanvasRenderingContext2D, head: FxPoint, voices: Voice[], t: number, join: number, quiet: number, white: HTMLCanvasElement) {
+  g.globalCompositeOperation = "lighter";
+  g.lineCap = "round";
+
+  for (const o of voices) {
+    const trail = Array.from({ length: 9 }, (_, n) => {
+      const p = posOf(head, o, t - n * 30);
+
+      return { x: o.from.x + (p.x - o.from.x) * join, y: o.from.y + (p.y - o.from.y) * join };
+    });
+
+    g.strokeStyle = o.tint;
+
+    for (let n = 0; n < trail.length - 1; n++) {
+      g.globalAlpha = (1 - n / trail.length) * 0.8 * quiet;
+      g.lineWidth = 2.6 * (1 - n / trail.length) + 0.4;
+      g.beginPath();
+      g.moveTo(trail[n].x, trail[n].y);
+      g.lineTo(trail[n + 1].x, trail[n + 1].y);
+      g.stroke();
+    }
+
+    sprite(g, glow(o.tint), trail[0].x, trail[0].y, 0.16, undefined, 0.7 * quiet);
+    sprite(g, white, trail[0].x, trail[0].y, 0.06, undefined, quiet);
+  }
+}
+
+/** A slow spiral turning over the head: the thoughts going round and round. */
+function thoughtSpiral(g: CanvasRenderingContext2D, head: FxPoint, fr: number, t: number, spin: number, wisp: HTMLCanvasElement) {
+  g.save();
+  g.translate(head.x, head.y - fr * 1.25);
+  g.rotate(-t / 260);
+  g.scale(1, 0.55);
+  g.globalCompositeOperation = "lighter";
+  g.globalAlpha = spin * 0.9;
+  g.strokeStyle = "#c8a8ff";
+  g.lineWidth = 2;
+  g.lineCap = "round";
+  g.beginPath();
+
+  for (let n = 0; n <= 40; n++) {
+    const a = (n / 40) * Math.PI * 5;
+
+    const rad = (n / 40) * fr * 0.85;
+
+    g.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+  }
+
+  g.stroke();
+  g.restore();
+  sprite(g, wisp, head.x, head.y - fr * 1.25, (fr * 2.4) / 64, (fr * 1.4) / 64, spin * 0.35);
+}
+
+function questionMark(g: CanvasRenderingContext2D, x: number, y: number, fr: number) {
+  g.font = `700 ${Math.round(fr * 0.75)}px Georgia, serif`;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.shadowColor = "#8a5aff";
+  g.shadowBlur = 6;
+  g.fillText("?", x, y);
+  g.shadowBlur = 0;
+}
+
+function arrowMark(g: CanvasRenderingContext2D, x: number, y: number, angle: number) {
+  g.save();
+  g.translate(x, y);
+  g.rotate(angle);
+  g.lineWidth = 2;
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.beginPath();
+  g.moveTo(-4, -5);
+  g.lineTo(3, 0);
+  g.lineTo(-4, 5);
+  g.stroke();
+  g.restore();
+}
+
+/** Every voice calls a different way: arrows and question marks pop round the head. */
+function calling(g: CanvasRenderingContext2D, calls: Call[], fr: number, t: number, quiet: number) {
+  g.globalCompositeOperation = "source-over";
+
+  for (const c of calls) {
+    const k = clamp01((t - c.born) / 520);
+
+    if (k >= 1) continue;
+
+    const drift = easeOutCubic(k) * 10;
+
+    const x = c.x + Math.cos(c.angle) * drift;
+
+    const y = c.y + Math.sin(c.angle) * drift;
+
+    g.globalAlpha = Math.sin(k * Math.PI) * quiet;
+    g.fillStyle = "#e8dcff";
+    g.strokeStyle = "#e8dcff";
+
+    if (c.mark) questionMark(g, x, y, fr);
+    else arrowMark(g, x, y, c.angle);
+  }
+
+  g.globalAlpha = 1;
+}
+
+export const whispers: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const face = faceOf(el, target);
 
     const fr = Math.max(14, face.r);
@@ -45,7 +160,7 @@ export const whispers: FxAnimation = ({ stage, to, targetEls }) =>
     const head = { x: face.x, y: face.y - fr * 0.1 };
 
     // Each voice comes from a different side of the field and joins the swirl round the head.
-    const voices: (Orbit & { from: FxPoint })[] = Array.from({ length: 6 }, (_, n) => {
+    const voices: Voice[] = Array.from({ length: 6 }, (_, n) => {
       const a = (n / 6) * Math.PI * 2 + rand(-0.3, 0.3);
 
       return { tilt: rand(-0.6, 0.6), rx: fr * rand(1.4, 2), ry: fr * rand(0.45, 0.7), speed: (n % 2 ? 1 : -1) * rand(4, 6.5), phase: rand(0, 6), tint: pick(VOICES), from: { x: head.x + Math.cos(a) * 130, y: head.y + Math.sin(a) * 80 } };
@@ -57,122 +172,19 @@ export const whispers: FxAnimation = ({ stage, to, targetEls }) =>
 
     const white = glow("#ffffff");
 
-    const posOf = (o: Orbit, time: number): FxPoint => {
-      const a = o.phase + (time / 1000) * o.speed;
-
-      const x = Math.cos(a) * o.rx;
-
-      const y = Math.sin(a) * o.ry;
-
-      return { x: head.x + x * Math.cos(o.tilt) - y * Math.sin(o.tilt), y: head.y + x * Math.sin(o.tilt) + y * Math.cos(o.tilt) };
-    };
-
     const run = timeline(
       stage,
       TOTAL_MS,
       (g, t) => {
         const quiet = 1 - clamp01((t - QUIET_MS) / 400);
 
-        const join = easeOutCubic(clamp01(t / ARRIVE_MS));
+        cometVoices(g, head, voices, t, easeOutCubic(clamp01(t / ARRIVE_MS)), quiet, white);
 
-        // Comet-like voices with fading tails circling the head.
-        g.globalCompositeOperation = "lighter";
-        g.lineCap = "round";
-
-        for (const o of voices) {
-          const trail = Array.from({ length: 9 }, (_, n) => {
-            const p = posOf(o, t - n * 30);
-
-            return { x: o.from.x + (p.x - o.from.x) * join, y: o.from.y + (p.y - o.from.y) * join };
-          });
-
-          g.strokeStyle = o.tint;
-
-          for (let n = 0; n < trail.length - 1; n++) {
-            g.globalAlpha = (1 - n / trail.length) * 0.8 * quiet;
-            g.lineWidth = 2.6 * (1 - n / trail.length) + 0.4;
-            g.beginPath();
-            g.moveTo(trail[n].x, trail[n].y);
-            g.lineTo(trail[n + 1].x, trail[n + 1].y);
-            g.stroke();
-          }
-
-          sprite(g, glow(o.tint), trail[0].x, trail[0].y, 0.16, undefined, 0.7 * quiet);
-          sprite(g, white, trail[0].x, trail[0].y, 0.06, undefined, quiet);
-        }
-
-        // A slow spiral turning over the head: the thoughts going round and round.
         const spin = envelope(clamp01((t - ARRIVE_MS + 150) / (TOTAL_MS - ARRIVE_MS)), 0.15, 0.2);
 
-        if (spin > 0) {
-          g.save();
-          g.translate(head.x, head.y - fr * 1.25);
-          g.rotate(-t / 260);
-          g.scale(1, 0.55);
-          g.globalCompositeOperation = "lighter";
-          g.globalAlpha = spin * 0.9;
-          g.strokeStyle = "#c8a8ff";
-          g.lineWidth = 2;
-          g.lineCap = "round";
-          g.beginPath();
+        if (spin > 0) thoughtSpiral(g, head, fr, t, spin, wisp);
 
-          for (let n = 0; n <= 40; n++) {
-            const a = (n / 40) * Math.PI * 5;
-
-            const rad = (n / 40) * fr * 0.85;
-
-            g.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
-          }
-
-          g.stroke();
-          g.restore();
-          sprite(g, wisp, head.x, head.y - fr * 1.25, (fr * 2.4) / 64, (fr * 1.4) / 64, spin * 0.35);
-        }
-
-        // Every voice calls a different way: arrows and question marks pop round the head.
-        g.globalCompositeOperation = "source-over";
-
-        for (const c of calls) {
-          const k = clamp01((t - c.born) / 520);
-
-          if (k >= 1) continue;
-
-          const drift = easeOutCubic(k) * 10;
-
-          const x = c.x + Math.cos(c.angle) * drift;
-
-          const y = c.y + Math.sin(c.angle) * drift;
-
-          g.globalAlpha = Math.sin(k * Math.PI) * quiet;
-          g.fillStyle = "#e8dcff";
-          g.strokeStyle = "#e8dcff";
-
-          if (c.mark) {
-            g.font = `700 ${Math.round(fr * 0.75)}px Georgia, serif`;
-            g.textAlign = "center";
-            g.textBaseline = "middle";
-            g.shadowColor = "#8a5aff";
-            g.shadowBlur = 6;
-            g.fillText("?", x, y);
-            g.shadowBlur = 0;
-            continue;
-          }
-
-          g.save();
-          g.translate(x, y);
-          g.rotate(c.angle);
-          g.lineWidth = 2;
-          g.lineCap = "round";
-          g.lineJoin = "round";
-          g.beginPath();
-          g.moveTo(-4, -5);
-          g.lineTo(3, 0);
-          g.lineTo(-4, 5);
-          g.stroke();
-          g.restore();
-        }
-
-        g.globalAlpha = 1;
+        calling(g, calls, fr, t, quiet);
       },
       (t) => {
         if (t > next && t < QUIET_MS - 300) {
@@ -199,7 +211,7 @@ export const whispers: FxAnimation = ({ stage, to, targetEls }) =>
 
     const lost = Promise.all([
       animateEl(stage, el, glance.keyframes, { duration: glance.duration, delay: ARRIVE_MS, easing: "ease-in-out" }),
-      animateEl(stage, el, [{ filter: "none" }, { filter: "saturate(.6) brightness(.9) hue-rotate(20deg)", offset: 0.2 }, { filter: "saturate(.6) brightness(.9) hue-rotate(20deg)", offset: 0.8 }, { filter: "none" }], { duration: TOTAL_MS - ARRIVE_MS, delay: ARRIVE_MS }),
+      animateEl(stage, el, holdFilter("saturate(.6) brightness(.9) hue-rotate(20deg)", 0.2, 0.8), { duration: TOTAL_MS - ARRIVE_MS, delay: ARRIVE_MS }),
     ]);
 
     let next = ARRIVE_MS;

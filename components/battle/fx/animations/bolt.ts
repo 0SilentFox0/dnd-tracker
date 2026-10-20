@@ -1,7 +1,7 @@
-import { ring, shoot } from "../runtime/primitives";
-import { burst, impactSplash } from "../runtime/recipes";
 import type { FxAnimation } from "./types";
 
+import { ring, shoot } from "@/components/battle/fx/runtime/primitives";
+import { burst, impactSplash } from "@/components/battle/fx/runtime/recipes";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 export const bolt: FxAnimation = async ({ stage, from, to, palette, spec }) => {

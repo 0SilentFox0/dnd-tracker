@@ -1,12 +1,13 @@
-import { easeOutCubic } from "../runtime/easing";
-import { chance, type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { burst, impactSplash, perTarget } from "../runtime/recipes";
-import { jaggedShape, polyPath } from "../runtime/shapes";
-import { show, tween } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { type Debris, stepBodies } from "@/components/battle/fx/runtime/physics";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { burst, impactSplash, perTarget } from "@/components/battle/fx/runtime/recipes";
+import { jaggedShape, polyPath } from "@/components/battle/fx/runtime/shapes";
+import { progress, show, tween } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 interface Rock extends Debris {
@@ -92,9 +93,7 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
 
   const ground = target.y + 22;
 
-  let k = 0;
-
-  const hideBlast = show(stage, (g) => {
+  const blast = progress(stage, AFTER_MS, (g, k) => {
     const e = easeOutCubic(Math.min(1, k * 1.6));
 
     g.globalCompositeOperation = "lighter";
@@ -128,19 +127,15 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
     }
 
     g.globalAlpha = 1;
-  });
+  }, (_, dt) => stepBodies(rocks, dt, 900));
 
   burst(stage, target, palette.tints, spec.critical ? 60 : 40, { speed: [60, 320], life: [0.35, 0.8], gravity: 80 });
   for (let n = 0; n < 12; n++) emit(stage, { x: target.x, y: ground }, { tints: SMOKE, speed: [20, 90], angle: [-Math.PI, 0], life: [0.6, 1.1], scale: [0.6, 1.6], drag: 2, additive: false, alpha: 0.55, gravity: -25 });
 
   await Promise.all([
     impactSplash(stage, target, palette, { flash: spec.critical ? 190 : 150, flashMs: 420, sheetScale: spec.critical ? 2.8 : 2.3 }),
-    tween(stage, AFTER_MS, (v, dt) => {
-      k = v;
-      stepBodies(rocks, dt, 900);
-    }),
+    blast,
   ]);
-  hideBlast();
 }
 
-export const meteor: FxAnimation = (run) => perTarget(run.stage, run.to, ARCHETYPE_FX.meteor.staggerMs, (target) => strike(run, target));
+export const meteor: FxAnimation = (run) => perTarget(run.stage, run.targets, ARCHETYPE_FX.meteor.staggerMs, ({ at: target }) => strike(run, target));

@@ -1,6 +1,6 @@
 import { easeOutCubic } from "./easing";
 import { arcControl, bezier, type FxPoint, perTick, pick, rand } from "./geometry";
-import { show, type Stage, tween, wake } from "./stage";
+import { progress, show, type Stage, tween, wake } from "./stage";
 import { glow, sprite } from "./texture";
 
 export interface EmitOptions {
@@ -69,9 +69,7 @@ export async function shoot(s: Stage, from: FxPoint, to: FxPoint, ms: number, ti
 
 /** An expanding ring; `squash` < 1 flattens it into an ellipse lying round a row. */
 export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: number, width = 3, squash = 1) {
-  let k = 0;
-
-  const hide = show(s, (g) => {
+  return progress(s, ms, (g, k) => {
     const e = easeOutCubic(k);
 
     g.globalAlpha = 1 - k;
@@ -82,16 +80,10 @@ export function ring(s: Stage, at: FxPoint, color: string, ms: number, to: numbe
     g.ellipse(at.x, at.y, 8 + e * to, (8 + e * to) * squash, 0, 0, Math.PI * 2);
     g.stroke();
   });
-
-  return tween(s, ms, (v) => (k = v)).then(hide);
 }
 
 export function flash(s: Stage, at: FxPoint, tint: string, size: number, ms: number) {
-  let k = 0;
-
   const tex = glow(tint);
 
-  const hide = show(s, (g) => sprite(g, tex, at.x, at.y, (size / 32) * (0.4 + k), undefined, 1 - k));
-
-  return tween(s, ms, (v) => (k = v)).then(hide);
+  return progress(s, ms, (g, k) => sprite(g, tex, at.x, at.y, (size / 32) * (0.4 + k), undefined, 1 - k));
 }

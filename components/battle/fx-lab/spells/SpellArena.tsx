@@ -1,6 +1,6 @@
 "use client";
 
-import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { type Ref, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
 import type { SpellArenaHandle } from "./types";
 
@@ -8,16 +8,10 @@ import { ARCHETYPE_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
 import { PreviewUnitRow } from "@/components/battle/fx/preview/PreviewUnitRow";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
-import { PREVIEW_UNITS, type PreviewUnit } from "@/lib/utils/battle/fx/preview-units";
-import type { SpellFxPreview } from "@/lib/utils/battle/fx/spell-preview";
+import { type FxRunner, useSpellFxPlayback } from "@/lib/hooks/battle";
+import { PREVIEW_UNITS, type PreviewUnit, type SpellFxPreview } from "@/lib/utils/battle/fx";
 
 const AURA_MS = 4000;
-
-interface Shown {
-  token: number;
-  spell: SpellFxPreview;
-}
 
 // the app header is fixed, so "visible" starts below it
 function revealBelowHeader(el: HTMLElement) {
@@ -29,81 +23,57 @@ function revealBelowHeader(el: HTMLElement) {
 }
 
 export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
-  const arenaRef = useRef<HTMLDivElement>(null);
-
-  const layerRef = useRef<HTMLDivElement>(null);
-
-  const runId = useRef(0);
-
-  const auraTimer = useRef<number | undefined>(undefined);
-
-  const [shown, setShown] = useState<Shown | null>(null);
-
-  const [aurasOn, setAurasOn] = useState(false);
+  const [spell, setSpell] = useState<SpellFxPreview | null>(null);
 
   const [status, setStatus] = useState("Натисніть ▶ на картці закляття.");
 
-  const play = async (spell: SpellFxPreview) => {
-    const arena = arenaRef.current;
+  const runner = useMemo<FxRunner>(
+    () => ({
+      play: (layer, spec, root) => playFx(layer, spec, root, Infinity).catch((e: unknown) => setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`)),
+      cancel: cancelLayer,
+    }),
+    [],
+  );
 
-    const layer = layerRef.current;
+  const spec = spell?.spec ?? null;
 
-    if (!arena || !layer) return;
+  const { arenaRef, layerRef, hit, settled, replay } = useSpellFxPlayback(spec, true, runner);
 
-    const id = ++runId.current;
+  const [auraExpired, setAuraExpired] = useState(false);
 
-    window.clearTimeout(auraTimer.current);
-    cancelLayer(layer);
-    setAurasOn(false);
-    setShown({ token: id, spell });
+  const aurasOn = !!spec && settled && !auraExpired;
 
-    if (!spell.spec) {
-      setStatus(`${spell.name}: анімації немає${spell.error ? ` (${spell.error})` : ""}`);
+  useEffect(() => {
+    if (!spec || !settled) return;
+
+    const timer = window.setTimeout(() => setAuraExpired(true), AURA_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [spec, settled]);
+
+  const play = (next: SpellFxPreview) => {
+    setSpell(next);
+    setAuraExpired(false);
+    replay();
+
+    if (!next.spec) {
+      setStatus(`${next.name}: анімації немає${next.error ? ` (${next.error})` : ""}`);
 
       return;
     }
 
     // a sticky arena is always visible on desktop; on phones the arena may be scrolled away
-    revealBelowHeader(arena);
+    if (arenaRef.current) revealBelowHeader(arenaRef.current);
 
-    setStatus(`${spell.name}: ${ARCHETYPE_LABEL[spell.spec.archetype]} · ${ELEMENT_LABEL[spell.spec.element]}`);
-
-    try {
-      await playFx(layer, { ...spell.spec, key: `spells-${id}` }, arena, Infinity);
-    } catch (e) {
-      setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`);
-    }
-
-    if (runId.current !== id) return;
-
-    setAurasOn(true);
-    auraTimer.current = window.setTimeout(() => {
-      if (runId.current === id) setAurasOn(false);
-    }, AURA_MS);
+    setStatus(`${next.name}: ${ARCHETYPE_LABEL[next.spec.archetype]} · ${ELEMENT_LABEL[next.spec.element]}`);
   };
 
-  useImperativeHandle(ref, () => ({ play: (spell) => void play(spell) }));
-
-  useEffect(() => {
-    const layer = layerRef.current;
-
-    return () => {
-      window.clearTimeout(auraTimer.current);
-
-      if (layer) cancelLayer(layer);
-    };
-  }, []);
+  useImperativeHandle(ref, () => ({ play }));
 
   const column = (side: PreviewUnit["side"]) => (
     <div className="space-y-2">
       {PREVIEW_UNITS.filter((u) => u.side === side).map((u) => (
-        <PreviewUnitRow
-          key={u.id}
-          unit={u}
-          target={shown?.spell.targets.find((t) => t.id === u.id)}
-          hit={shown?.spell.spec ? { token: shown.token, delayMs: ARCHETYPE_FX[shown.spell.spec.archetype].impactMs } : null}
-          aurasOn={aurasOn}
-        />
+        <PreviewUnitRow key={u.id} unit={u} target={spell?.targets.find((t) => t.id === u.id)} hit={hit} aurasOn={aurasOn} />
       ))}
     </div>
   );

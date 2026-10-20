@@ -1,10 +1,10 @@
-import { pulse } from "../runtime/easing";
-import { emit, flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { show, tween, wait } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { pulse } from "@/components/battle/fx/runtime/easing";
+import { emit, flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { show, tween, wait } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const OUT_MS = ARCHETYPE_FX.teleport.impactMs;
@@ -13,12 +13,12 @@ const GAP_MS = 250;
 
 const IN_MS = 250;
 
-export const teleport: FxAnimation = async ({ stage, to, palette }) => {
+export const teleport: FxAnimation = async ({ stage, targets, palette }) => {
   const tex = glow("#bfe6ff");
 
   const core = glow("#ffffff");
 
-  await perTarget(stage, to, 0, async (target) => {
+  await perTarget(stage, targets, 0, async ({ at: target }) => {
     let width = 1;
 
     let height = 0.6;
