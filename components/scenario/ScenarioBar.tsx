@@ -45,13 +45,15 @@ export function ScenarioBar({ title, sections, hideNotes, onToggleNotes, theme, 
             </a>
           ))}
         </nav>
-        <button type="button" className="toggle" aria-pressed={hideNotes} onClick={onToggleNotes}>
-          {hideNotes ? "Показати нотатки" : "Сховати нотатки"}
-        </button>
-        <button type="button" className="toggle" onClick={onToggleTheme}>
-          {theme === "dark" ? "Світла" : "Темна"}
-        </button>
-        {actions}
+        <div className="sb-bar-btns">
+          <button type="button" className="toggle" aria-pressed={hideNotes} onClick={onToggleNotes}>
+            {hideNotes ? "Показати нотатки" : "Сховати нотатки"}
+          </button>
+          <button type="button" className="toggle" onClick={onToggleTheme}>
+            {theme === "dark" ? "Світла" : "Темна"}
+          </button>
+          {actions}
+        </div>
       </div>
     </div>
   );

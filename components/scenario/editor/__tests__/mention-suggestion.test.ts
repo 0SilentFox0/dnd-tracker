@@ -70,4 +70,23 @@ describe("mentionSuggestion render", () => {
     expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 30 - 6 - 288);
     expect(Number.parseFloat(el.style.left)).toBe(window.innerWidth - 288 - 6);
   });
+
+  it("використовує виміряну висоту списку для відкриття над кареткою", () => {
+    const r = lifecycle();
+
+    const rect = { left: 10, top: window.innerHeight - 150, bottom: window.innerHeight - 130 };
+
+    const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(100);
+
+    r.onStart?.(props(rect));
+
+    const el = document.body.firstElementChild as HTMLElement;
+
+    expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 130 + 6);
+
+    height.mockReturnValue(160);
+    r.onUpdate?.(props(rect));
+    expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 150 - 6 - 160);
+    height.mockRestore();
+  });
 });

@@ -53,6 +53,13 @@ export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]
         });
       };
 
+      const placeMeasured = (props: Props) => {
+        place(props);
+        requestAnimationFrame(() => {
+          if (renderer) place(props);
+        });
+      };
+
       const close = () => {
         renderer?.element.remove();
         renderer?.destroy();
@@ -65,11 +72,11 @@ export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]
 
           renderer = created;
           document.body.appendChild(created.element);
-          place(props);
+          placeMeasured(props);
         },
         onUpdate: (props) => {
           renderer?.updateProps(props);
-          place(props);
+          placeMeasured(props);
         },
         onKeyDown: ({ event }: SuggestionKeyDownProps) => {
           if (event.key === "Escape") {
