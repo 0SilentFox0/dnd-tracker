@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioPageView } from "@/components/scenario";
-import type { ScenarioPage } from "@/types/scenario";
+import type { ScenarioPlay } from "@/lib/hooks/scenario";
+import type { ScenarioPage, ScenarioRow } from "@/types/scenario";
 
 afterEach(cleanup);
 
@@ -51,5 +52,67 @@ describe("ScenarioPageView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "✓ Відкрито (після розділу)" }));
     expect(onRevealed).toHaveBeenCalledWith("s10", true);
+  });
+});
+
+describe("ScenarioPageView — режим гри", () => {
+  const mention = { type: "doc" as const, content: [{ type: "paragraph" as const, content: [{ type: "mention" as const, attrs: { type: "unit", id: "u1", label: "Вовк" } }] }] };
+
+  const pageWith = (rows: ScenarioRow[]): ScenarioPage => ({ ...page("scene"), content: { legend: [], sections: [{ id: "s1", title: "Розділ", played: false, rows }] } });
+
+  const play = (over: Partial<ScenarioPlay> = {}): ScenarioPlay => ({
+    lookup: {
+      decks: new Map([["d1", [{ id: "slide-a", imageUrl: "https://x/a.webp" }]]]),
+      battles: new Map([["b1", { id: "b1", name: "Засідка", status: "prepared" }], ["b3", { id: "b3", name: "Старий", status: "completed" }]]),
+      show: null,
+    },
+    showSlide: vi.fn(),
+    runBattle: vi.fn(),
+    pending: false,
+    control: { send: vi.fn(), pending: false },
+    ...over,
+  } as ScenarioPlay);
+
+  it("клік по рядку зі слайдом — showSlide; по згадці — ні", () => {
+    const pl = play();
+
+    const row = { id: "r1", story: mention, notes: p(""), slide: { deckId: "d1", slideId: "slide-a" } };
+
+    render(<ScenarioPageView page={pageWith([row])} campaignId="c" play={pl} />);
+
+    fireEvent.click(screen.getByText("Вовк"));
+    expect(pl.showSlide).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Показати слайд" }));
+    expect(pl.showSlide).toHaveBeenCalledWith(row);
+  });
+
+  it("активний рядок має is-current", () => {
+    const base = play();
+
+    const pl = play({ lookup: { ...base.lookup, show: { deckId: "d1", deckTitle: "Ліс", slide: { id: "slide-a", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1 } } as never });
+
+    const { container } = render(<ScenarioPageView page={pageWith([{ id: "r1", story: p("Текст"), notes: p(""), slide: { deckId: "d1", slideId: "slide-a" } }])} campaignId="c" play={pl} />);
+
+    expect(container.querySelector(".row.is-current")).toBeTruthy();
+  });
+
+  it("кнопки бою за статусом; завершений — неактивна", () => {
+    const pl = play();
+
+    render(<ScenarioPageView page={pageWith([{ id: "r1", story: p("А"), notes: p(""), battleId: "b1" }, { id: "r2", story: p("Б"), notes: p(""), battleId: "b3" }])} campaignId="c" play={pl} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "⚔ Почати бій «Засідка»" }));
+    expect(pl.runBattle).toHaveBeenCalled();
+    expect((screen.getByRole("button", { name: "Бій завершено" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("висяче посилання — «недоступно», без кнопки", () => {
+    const base = play();
+
+    render(<ScenarioPageView page={pageWith([{ id: "r1", story: p("А"), notes: p(""), slide: { deckId: "gone", slideId: "x" } }])} campaignId="c" play={play({ lookup: { ...base.lookup, decks: new Map([["gone", null]]) } })} />);
+
+    expect(screen.getByText("Слайд недоступний")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Показати слайд" })).toBeNull();
   });
 });

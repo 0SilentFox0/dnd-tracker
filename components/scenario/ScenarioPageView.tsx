@@ -1,15 +1,19 @@
 "use client";
 
+import { RowPlayControls } from "./play/RowPlayControls";
 import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
 
+import type { ScenarioPlay } from "@/lib/hooks/scenario";
+import { cn } from "@/lib/utils";
 import { isDocEmpty } from "@/lib/utils/scenario/doc";
+import { rowSlideState } from "@/lib/utils/scenario/play";
 import { isChapterOpen, type PlayedLookup } from "@/lib/utils/scenario/reveal";
 import type { ScenarioPage } from "@/types/scenario";
 
 type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean; played?: PlayedLookup };
 
-export function ScenarioPageView({ page, campaignId, progress }: { page: ScenarioPage; campaignId: string; progress?: Progress }) {
+export function ScenarioPageView({ page, campaignId, progress, play }: { page: ScenarioPage; campaignId: string; progress?: Progress; play?: ScenarioPlay }) {
   const isHero = page.kind === "hero";
 
   return (
@@ -35,20 +39,33 @@ export function ScenarioPageView({ page, campaignId, progress }: { page: Scenari
                   </button>
                 )}
               </h2>
-              {s.rows.map((r) => (
-                <div key={r.id} className="row">
-                  <div className="story">
-                    <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
+              {s.rows.map((r) => {
+                const slideState = play ? rowSlideState(r, play.lookup) : null;
+
+                const clickable = slideState?.kind === "ready";
+
+                return (
+                  <div
+                    key={r.id}
+                    className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.active && "is-current")}
+                    onClick={
+                      clickable
+                        ? (e) => {
+                            if ((e.target as HTMLElement).closest("a, button") || window.getSelection()?.toString()) return;
+
+                            play?.showSlide(r);
+                          }
+                        : undefined
+                    }
+                  >
+                    <div className="story">
+                      <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
+                      {play && <RowPlayControls campaignId={campaignId} row={r} play={play} />}
+                    </div>
+                    <aside className="notes">{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
                   </div>
-                  {isDocEmpty(r.notes) ? (
-                    <aside className="notes" />
-                  ) : (
-                    <aside className="notes">
-                      <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />
-                    </aside>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </section>
           );
         })}
