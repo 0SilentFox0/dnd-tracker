@@ -2,50 +2,24 @@
 
 import { type FormEvent, useState } from "react";
 
-import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
+import { DEFAULT_MAZE_COUNTS, MazeCountsFields } from "./MazeCountsFields";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
+import { MAZE_DIFFICULTIES } from "@/lib/constants/battle";
 import type { MazeGenerateInput } from "@/lib/hooks/battle";
 import type { MazeDifficulty } from "@/types/battle";
 
-export const MAX_TELEPORT_PAIRS = 10;
+const DIFFICULTY_LABELS: Record<MazeDifficulty, string> = { easy: "Легкий", medium: "Середній", hard: "Складний" };
 
-export const MAX_FOG_PATCHES = 20;
-
-export interface MazeCounts {
-  teleportPairs: number;
-  fogPatches: number;
-}
-
-const DIFFICULTY_OPTIONS: { value: MazeDifficulty; label: string }[] = [
-  { value: "easy", label: "Легкий" },
-  { value: "medium", label: "Середній" },
-  { value: "hard", label: "Складний" },
-];
+const DIFFICULTY_OPTIONS = MAZE_DIFFICULTIES.map((value) => ({ value, label: DIFFICULTY_LABELS[value] }));
 
 const EXIT_OPTIONS: { value: MazeGenerateInput["exit"]; label: string }[] = [
   { value: "random", label: "Випадковий" },
   { value: "pick", label: "Вибрати на карті" },
 ];
-
-export const DEFAULT_MAZE_COUNTS: MazeCounts = { teleportPairs: 1, fogPatches: 2 };
-
-export function MazeCountsFields({ value, onChange }: { value: MazeCounts; onChange: (next: MazeCounts) => void }) {
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="space-y-1.5">
-        <Label htmlFor="maze-teleports">Пари телепортів</Label>
-        <BoundedNumberInput id="maze-teleports" value={value.teleportPairs} min={0} max={MAX_TELEPORT_PAIRS} onCommit={(teleportPairs) => onChange({ ...value, teleportPairs })} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="maze-fog">Плями туману</Label>
-        <BoundedNumberInput id="maze-fog" value={value.fogPatches} min={0} max={MAX_FOG_PATCHES} onCommit={(fogPatches) => onChange({ ...value, fogPatches })} />
-      </div>
-    </div>
-  );
-}
 
 interface Props {
   open: boolean;

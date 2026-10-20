@@ -3,6 +3,7 @@
 import { memo } from "react";
 
 import { UNIT } from "@/lib/utils/battle/grid";
+import { parseEdgeKey } from "@/lib/utils/battle/maze";
 import type { MazeView } from "@/lib/utils/battle/view";
 import type { BattleMapConfig } from "@/types/battle";
 
@@ -12,15 +13,11 @@ const HALF = MAZE_WALL_WIDTH / 2;
 
 /** Прямокутник ребра "x:y:e" / "x:y:s" із заокругленими кінцями, що заходять у кути. */
 export function wallRect(edge: string): { x: number; y: number; width: number; height: number } {
-  const [x, y, side] = edge.split(":");
+  const { a, side } = parseEdgeKey(edge);
 
-  const cx = Number(x);
+  if (side === "e") return { x: (a.x + 1) * UNIT - HALF, y: a.y * UNIT - HALF, width: MAZE_WALL_WIDTH, height: UNIT + MAZE_WALL_WIDTH };
 
-  const cy = Number(y);
-
-  if (side === "e") return { x: (cx + 1) * UNIT - HALF, y: cy * UNIT - HALF, width: MAZE_WALL_WIDTH, height: UNIT + MAZE_WALL_WIDTH };
-
-  return { x: cx * UNIT - HALF, y: (cy + 1) * UNIT - HALF, width: UNIT + MAZE_WALL_WIDTH, height: MAZE_WALL_WIDTH };
+  return { x: a.x * UNIT - HALF, y: (a.y + 1) * UNIT - HALF, width: UNIT + MAZE_WALL_WIDTH, height: MAZE_WALL_WIDTH };
 }
 
 interface Props {

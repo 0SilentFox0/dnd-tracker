@@ -2,7 +2,7 @@
 
 import { memo, useId } from "react";
 
-import { UNIT } from "@/lib/utils/battle/grid";
+import { parseCellKey, UNIT } from "@/lib/utils/battle/grid";
 import type { MazeView } from "@/lib/utils/battle/view";
 import type { BattleMapConfig } from "@/types/battle";
 
@@ -29,7 +29,7 @@ export const MazeFogOfWar = memo(function MazeFogOfWar({ map, view }: Props) {
         <mask id={id} maskUnits="userSpaceOnUse" x={0} y={0} width={width} height={height}>
           <rect x={0} y={0} width={width} height={height} fill="white" />
           {[...cells].map((key) => {
-            const [x, y] = key.split(":").map(Number);
+            const { x, y } = parseCellKey(key);
 
             return <rect key={key} data-maze-visible={key} x={x * UNIT} y={y * UNIT} width={UNIT} height={UNIT} fill="black" />;
           })}

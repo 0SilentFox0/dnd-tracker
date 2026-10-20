@@ -197,13 +197,17 @@
 }
 
 /* Лабіринт: темний камінь, сяйво виходу, руни телепортів, туман, сплячі токени */
-[data-maze-walls], [data-maze-features] {
+[data-maze-walls], [data-maze-features], [data-maze-editor] {
   --maze-wall: #000;
   --maze-wall-edge: #0a0a0a;
   --maze-exit-core: #fff4c2;
   --maze-exit-glow: #ffc84a;
   --maze-rune: #9fd8ff;
   --maze-fog: rgba(170, 176, 186, 0.55);
+  --maze-edit-hover: rgba(242, 193, 78, 0.35);
+  --maze-edit-pending: rgba(242, 193, 78, 0.55);
+  --maze-picked-fill: rgba(168, 120, 255, 0.35);
+  --maze-picked-edge: #c4a6ff;
 }
 
 .maze-wall { fill: var(--maze-wall); stroke: var(--maze-wall-edge); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
@@ -213,6 +217,10 @@
 .maze-teleport { stroke: var(--maze-rune); filter: drop-shadow(0 0 4px var(--maze-rune)); }
 .maze-teleport-link { stroke: var(--maze-rune); stroke-width: 3px; stroke-opacity: 0.7; vector-effect: non-scaling-stroke; }
 .maze-mark { filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)); }
+.maze-edge-hit { fill: transparent; cursor: crosshair; }
+.maze-edge-hit:hover { fill: var(--maze-edit-hover); }
+.maze-edge-pending { fill: var(--maze-edit-pending); }
+.maze-picked { fill: var(--maze-picked-fill); stroke: var(--maze-picked-edge); stroke-width: 3px; }
 
 @keyframes maze-exit-pulse {
   0%, 100% { opacity: 0.7; transform: scale(0.92); }

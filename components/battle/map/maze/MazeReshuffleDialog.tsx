@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from "react";
 
-import { DEFAULT_MAZE_COUNTS, MazeCountsFields } from "./MazeGenerateDialog";
+import { DEFAULT_MAZE_COUNTS, MazeCountsFields } from "./MazeCountsFields";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,11 @@ const MODE_OPTIONS: { value: MazeReshuffleMode; label: string }[] = [
   { value: "tunnel", label: "1 тунель" },
 ];
 
+const KEEPS_EXIT = "Вихід лишається на місці; нікого не буде замуровано.";
+
 const DESCRIPTIONS: Record<MazeReshuffleMode, string> = {
-  walls: "Вихід лишається на місці; нікого не буде замуровано.",
-  scatter: "Вихід лишається на місці; нікого не буде замуровано.",
+  walls: KEEPS_EXIT,
+  scatter: KEEPS_EXIT,
   tunnel: "Вороги йдуть у резерв ДМа, решта карти — одна кімната. Герої стають рядом у прямому тунелі від центру до краю; вихід переноситься в кінець тунелю.",
 };
 

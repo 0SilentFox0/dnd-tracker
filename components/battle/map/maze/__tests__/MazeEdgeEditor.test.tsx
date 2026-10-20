@@ -41,7 +41,7 @@ describe("MazeEdgeEditor", () => {
     expect(r.y + r.height).toBeLessThan(UNIT);
   });
 
-  it("штрих: pointerdown → begin, pointerenter → enter, pointerup на вікні → end", () => {
+  it("штрих: pointerdown → begin, наведення → enter, pointerup на вікні → end", () => {
     const { container, stroke } = editor();
 
     fireEvent.pointerDown(container.querySelector('[data-maze-edge="0:0:e"]')!, { button: 0 });
@@ -56,7 +56,7 @@ describe("MazeEdgeEditor", () => {
   it("ребра штриха підсвічені", () => {
     const { container } = editor();
 
-    expect(container.querySelector('[data-maze-edge="0:0:s"]')!.getAttribute("class")).toContain("fill-[rgba(242,193,78,.55)]");
+    expect([...container.querySelectorAll("[data-maze-pending]")].map((el) => el.getAttribute("data-maze-pending"))).toEqual(["0:0:s"]);
   });
 
   it("поза режимом стін — без зон ребер, але з підсвіткою вибраного телепорту", () => {

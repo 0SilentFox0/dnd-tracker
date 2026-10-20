@@ -3,19 +3,22 @@
 import { useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Skull, Star, X } from "lucide-react";
 
+import { MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
 import { useBattleScene, useMazeView } from "@/lib/hooks/battle";
 import { mazeBudgetLeft } from "@/lib/utils/battle/maze";
 import type { BattleParticipant, MazeMarkSymbol } from "@/types/battle";
 
-const SYMBOLS: { symbol: MazeMarkSymbol; label: string; Icon: typeof Star }[] = [
-  { symbol: "arrow-n", label: "Стрілка вгору", Icon: ArrowUp },
-  { symbol: "arrow-e", label: "Стрілка праворуч", Icon: ArrowRight },
-  { symbol: "arrow-s", label: "Стрілка вниз", Icon: ArrowDown },
-  { symbol: "arrow-w", label: "Стрілка ліворуч", Icon: ArrowLeft },
-  { symbol: "cross", label: "Хрест", Icon: X },
-  { symbol: "skull", label: "Череп", Icon: Skull },
-  { symbol: "star", label: "Зірка", Icon: Star },
-];
+const SYMBOL_UI: Record<MazeMarkSymbol, { label: string; Icon: typeof Star }> = {
+  "arrow-n": { label: "Стрілка вгору", Icon: ArrowUp },
+  "arrow-e": { label: "Стрілка праворуч", Icon: ArrowRight },
+  "arrow-s": { label: "Стрілка вниз", Icon: ArrowDown },
+  "arrow-w": { label: "Стрілка ліворуч", Icon: ArrowLeft },
+  cross: { label: "Хрест", Icon: X },
+  skull: { label: "Череп", Icon: Skull },
+  star: { label: "Зірка", Icon: Star },
+};
+
+const SYMBOLS = MAZE_MARK_SYMBOLS.map((symbol) => ({ symbol, ...SYMBOL_UI[symbol] }));
 
 export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
   const { battle, actions, anyPending } = useBattleScene();

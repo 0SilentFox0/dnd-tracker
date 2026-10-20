@@ -2,7 +2,7 @@
 
 import { memo, useId } from "react";
 
-import { cellCenter, cellKey, UNIT } from "@/lib/utils/battle/grid";
+import { cellCenter, cellKey, parseCellKey, UNIT } from "@/lib/utils/battle/grid";
 import type { MazeView } from "@/lib/utils/battle/view";
 import type { BattleMapConfig, GridPoint, MazeMark, MazeMarkSymbol } from "@/types/battle";
 
@@ -14,20 +14,22 @@ const STAR = "M0,-20 L5.9,-8.1 L19,-6.2 L9.5,3.1 L11.8,16.2 L0,10 L-11.8,16.2 L-
 
 const SKULL = "M-15,2 A15,15 0 1,1 15,2 V8 H8 V16 H-8 V8 H-15 Z M-7,-4 a4,4 0 1,0 0.1,0 Z M7,-4 a4,4 0 1,0 0.1,0 Z";
 
-const ARROW_TURN: Partial<Record<MazeMarkSymbol, number>> = { "arrow-n": 0, "arrow-e": 90, "arrow-s": 180, "arrow-w": 270 };
+const CROSS = "M-14,-14 L14,14 M14,-14 L-14,14";
 
-const SYMBOL_PATH: Record<"star" | "skull", string> = { star: STAR, skull: SKULL };
-
-const parseKey = (key: string): GridPoint => {
-  const [x, y] = key.split(":").map(Number);
-
-  return { x, y };
+const GLYPHS: Record<MazeMarkSymbol, { d: string; turn?: number; stroke?: boolean }> = {
+  "arrow-n": { d: ARROW, turn: 0 },
+  "arrow-e": { d: ARROW, turn: 90 },
+  "arrow-s": { d: ARROW, turn: 180 },
+  "arrow-w": { d: ARROW, turn: 270 },
+  cross: { d: CROSS, stroke: true },
+  skull: { d: SKULL },
+  star: { d: STAR },
 };
 
 function MarkGlyph({ cell, mark, rotated }: { cell: GridPoint; mark: MazeMark; rotated: boolean }) {
   const c = cellCenter(cell);
 
-  const turn = ARROW_TURN[mark.symbol];
+  const { d, turn, stroke } = GLYPHS[mark.symbol];
 
   // стрілка вказує сторону лабіринту, тож на повернутій карті крутиться разом із нею; решта символів стоїть прямо
   const angle = turn ?? (rotated ? -90 : 0);
@@ -36,11 +38,7 @@ function MarkGlyph({ cell, mark, rotated }: { cell: GridPoint; mark: MazeMark; r
 
   return (
     <g data-maze-mark={cellKey(cell)} data-mark-symbol={mark.symbol} transform={transform} style={{ color: mark.color }} className="maze-mark">
-      {mark.symbol === "cross" ? (
-        <path d="M-14,-14 L14,14 M14,-14 L-14,14" fill="none" stroke="currentColor" strokeWidth={7} strokeLinecap="round" />
-      ) : (
-        <path d={turn === undefined ? SYMBOL_PATH[mark.symbol as "star" | "skull"] : ARROW} fill="currentColor" fillRule="evenodd" />
-      )}
+      {stroke ? <path d={d} fill="none" stroke="currentColor" strokeWidth={7} strokeLinecap="round" /> : <path d={d} fill="currentColor" fillRule="evenodd" />}
     </g>
   );
 }
@@ -88,7 +86,7 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
       </defs>
       <g filter={`url(#${blurId})`}>
         {fog.map((key) => {
-          const p = parseKey(key);
+          const p = parseCellKey(key);
 
           return <rect key={key} className="maze-fog" data-maze-fog={key} x={p.x * UNIT} y={p.y * UNIT} width={UNIT} height={UNIT} />;
         })}
@@ -112,7 +110,7 @@ export const MazeFeaturesLayer = memo(function MazeFeaturesLayer({ map, view, ro
         );
       })}
       {marks.map(([key, mark]) => (
-        <MarkGlyph key={`m${key}`} cell={parseKey(key)} mark={mark} rotated={rotated} />
+        <MarkGlyph key={`m${key}`} cell={parseCellKey(key)} mark={mark} rotated={rotated} />
       ))}
     </g>
   );
