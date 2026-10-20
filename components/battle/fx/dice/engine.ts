@@ -1,6 +1,6 @@
-import { type BadgeSpec, createBadgeLayer } from "./badges";
+import { badgeHeightPx, type BadgeSpec, createBadgeLayer } from "./badges";
 
-import { computeRig, type DiceThrowSpec, DIE_RADIUS, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
+import { computeRig, type DiceThrowSpec, DIE_RADIUS, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, projectedDiePx, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
 import type { DieSides } from "@/types/battle";
 
 const HOLD_MS = 350;
@@ -82,6 +82,8 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
 
   let rig = computeRig(grid, { width: 1, height: 1 });
 
+  let diePx = 96;
+
   let startedAt = 0;
 
   let frame = 0;
@@ -95,6 +97,7 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
 
     rig = computeRig(grid, { width: w, height: h });
     backend.resize(w, h, rig);
+    diePx = projectedDiePx(rig, { width: w, height: h });
 
     const r = DIE_RADIUS * 1.2;
 
@@ -109,7 +112,7 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
       top = Math.min(top, y);
     });
 
-    if (Number.isFinite(top)) badges.moveCaption(w / 2, Math.max(CAPTION_GAP_PX, top - CAPTION_GAP_PX));
+    if (Number.isFinite(top)) badges.moveCaption(w / 2, Math.max(CAPTION_GAP_PX, top - badgeHeightPx(diePx) - CAPTION_GAP_PX));
   }
 
   function stop() {
@@ -193,6 +196,7 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
       badges.reset(
         slots.map((s) => ({ value: s.value, state: badgeState(s) })),
         captionLines(spec, overflow),
+        { diePx },
       );
       dice = slots.map((slot, i) => ({
         handle: backend.createDie(slot.sides, slot.value),

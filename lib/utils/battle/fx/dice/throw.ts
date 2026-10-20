@@ -82,6 +82,16 @@ export function computeRig(grid: { cols: number; rows: number }, { width, height
   return { pos, target, right, up: cross(right, forward), forward, fov: FOV, aspect, halfW: needW };
 }
 
+export function projectedDiePx(rig: Rig, { width, height }: { width: number; height: number }) {
+  const c: Vec3 = [0, 0, 0];
+
+  const [x0, y0] = project(rig, c, width, height);
+
+  const [x1, y1] = project(rig, [rig.right[0] * DIE_RADIUS, rig.right[1] * DIE_RADIUS, rig.right[2] * DIE_RADIUS], width, height);
+
+  return 2 * Math.hypot(x1 - x0, y1 - y0);
+}
+
 export function project(rig: Rig, p: Vec3, width: number, height: number): [number, number] {
   const v = sub(p, rig.pos);
 

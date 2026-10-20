@@ -5,7 +5,20 @@ export interface BadgeSpec {
   state: "plain" | "chosen" | "dropped";
 }
 
-const BASE = "position:absolute;left:0;top:0;opacity:0;pointer-events:none;font:800 40px/1 system-ui,sans-serif;padding:4px 12px;border-radius:12px;white-space:nowrap;transform-origin:50% 100%;";
+const MAX_FONT = 40;
+
+const MIN_FONT = 14;
+
+export const badgeFontPx = (diePx: number) => Math.round(Math.min(MAX_FONT, Math.max(MIN_FONT, 0.55 * diePx)));
+
+const badgeBase = (font: number) =>
+  `position:absolute;left:0;top:0;opacity:0;pointer-events:none;font:800 ${font}px/1 system-ui,sans-serif;padding:${Math.round(font * 0.1)}px ${Math.round(font * 0.3)}px;border-radius:${Math.round(font * 0.3)}px;white-space:nowrap;transform-origin:50% 100%;`;
+
+export const badgeHeightPx = (diePx: number) => {
+  const font = badgeFontPx(diePx);
+
+  return font + 2 * Math.round(font * 0.1) + 4;
+};
 
 const LOOK: Record<BadgeSpec["state"], string> = {
   plain: "color:#fff;background:rgba(20,14,40,.82);border:2px solid rgba(255,255,255,.35);",
@@ -45,13 +58,15 @@ export function createBadgeLayer(host: HTMLElement) {
   };
 
   return {
-    reset(specs: BadgeSpec[], lines: string[] = []) {
+    reset(specs: BadgeSpec[], lines: string[] = [], { diePx }: { diePx: number } = { diePx: 96 }) {
+      const base = badgeBase(badgeFontPx(diePx));
+
       clear();
       items = specs.map((spec) => {
         const el = document.createElement("div");
 
         el.textContent = String(spec.value);
-        el.style.cssText = BASE + LOOK[spec.state];
+        el.style.cssText = base + LOOK[spec.state];
         layer.appendChild(el);
 
         return { el, x: 0, y: 0 };
