@@ -112,6 +112,7 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
           {items.map((item, i) => (
             <div key={i} className="flex gap-2">
               <SelectField
+                aria-label="Колір позначки"
                 value={item.kind}
                 onValueChange={(v) => setItems((l) => l.map((x, j) => (j === i ? { ...x, kind: v as LegendKind } : x)))}
                 options={LEGEND_OPTIONS}

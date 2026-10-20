@@ -40,6 +40,7 @@ export function RevealSettings({ campaignId, rule, revealed, onChange, onToggleR
   return (
     <div className="sans" style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 14, margin: "8px 0" }}>
       <SelectField
+        aria-label="Коли відкрити гравцеві"
         value={local.mode}
         onValueChange={(v) => changeMode(v as Mode)}
         options={scenes.length ? MODE_OPTIONS : MODE_OPTIONS.map((o) => ({ ...o, disabled: o.value === "afterSection" }))}
@@ -47,8 +48,9 @@ export function RevealSettings({ campaignId, rule, revealed, onChange, onToggleR
       />
       {local.mode === "afterSection" && (
         <>
-          <SelectField value={pageId} onValueChange={changeScene} options={scenes.map((s) => ({ value: s.id, label: s.title }))} placeholder="Сцена" className="w-auto min-w-40" />
+          <SelectField aria-label="Сцена" value={pageId} onValueChange={changeScene} options={scenes.map((s) => ({ value: s.id, label: s.title }))} placeholder="Сцена" className="w-auto min-w-40" />
           <SelectField
+            aria-label="Розділ сцени"
             value={sectionId}
             onValueChange={(v) => onChange({ mode: "afterSection", pageId, sectionId: v })}
             options={(targetPage?.content.sections ?? []).map((s) => ({ value: s.id, label: s.title }))}

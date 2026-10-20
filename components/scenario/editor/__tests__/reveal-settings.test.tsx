@@ -7,8 +7,8 @@ vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPage: (_c: string, id: string | null) => ({ data: id ? { content: { sections: [{ id: "s1", title: "Собор" }, { id: "s2", title: "Дзвіниця" }] } } : undefined }),
 }));
 vi.mock("@/components/ui/select-field", () => ({
-  SelectField: ({ value, onValueChange, options, placeholder }: { value: string; onValueChange: (v: string) => void; options: { value: string; label: string }[]; placeholder?: string }) => (
-    <select aria-label={placeholder ?? "mode"} value={value} onChange={(e) => onValueChange(e.target.value)}>
+  SelectField: ({ value, onValueChange, options, "aria-label": ariaLabel }: { value: string; onValueChange: (v: string) => void; options: { value: string; label: string }[]; "aria-label"?: string }) => (
+    <select aria-label={ariaLabel} value={value} onChange={(e) => onValueChange(e.target.value)}>
       <option value="">—</option>
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -35,21 +35,21 @@ describe("RevealSettings", () => {
   it("режим → сцена → розділ: onChange лише з обраним розділом", () => {
     const onChange = setup();
 
-    fireEvent.change(screen.getByLabelText("mode"), { target: { value: "afterSection" } });
+    fireEvent.change(screen.getByLabelText("Коли відкрити гравцеві"), { target: { value: "afterSection" } });
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByLabelText("Сцена")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Сцена"), { target: { value: "sc2" } });
     expect(onChange).toHaveBeenLastCalledWith({ mode: "manual" });
 
-    fireEvent.change(screen.getByLabelText("— оберіть розділ —"), { target: { value: "s2" } });
+    fireEvent.change(screen.getByLabelText("Розділ сцени"), { target: { value: "s2" } });
     expect(onChange).toHaveBeenLastCalledWith({ mode: "afterSection", pageId: "sc2", sectionId: "s2" });
   });
 
   it("повернення до «Вручну» скидає правило", () => {
     const onChange = setup({ mode: "afterSection", pageId: "sc1", sectionId: "s1" });
 
-    fireEvent.change(screen.getByLabelText("mode"), { target: { value: "manual" } });
+    fireEvent.change(screen.getByLabelText("Коли відкрити гравцеві"), { target: { value: "manual" } });
     expect(onChange).toHaveBeenCalledWith({ mode: "manual" });
   });
 
@@ -57,6 +57,6 @@ describe("RevealSettings", () => {
     setup({ mode: "afterSection", pageId: "sc1", sectionId: "s2" });
 
     expect((screen.getByLabelText("Сцена") as HTMLSelectElement).value).toBe("sc1");
-    expect((screen.getByLabelText("— оберіть розділ —") as HTMLSelectElement).value).toBe("s2");
+    expect((screen.getByLabelText("Розділ сцени") as HTMLSelectElement).value).toBe("s2");
   });
 });

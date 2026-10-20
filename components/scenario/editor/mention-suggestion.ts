@@ -7,6 +7,12 @@ import { MentionList, type MentionListHandle } from "./MentionList";
 
 import type { MentionOption } from "@/types/scenario";
 
+const LIST_WIDTH = 288;
+
+const LIST_HEIGHT = 288;
+
+const GAP = 6;
+
 type Props = SuggestionProps<MentionOption, MentionNodeAttrs>;
 
 export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]>): MentionOptions["suggestion"] {
@@ -17,13 +23,34 @@ export function mentionSuggestion(search: (q: string) => Promise<MentionOption[]
       let renderer: ReactRenderer<MentionListHandle, ComponentProps<typeof MentionList>> | null = null;
 
       const place = (props: Props) => {
-        const rect = props.clientRect?.();
-
         const el = renderer?.element as HTMLElement | undefined;
 
-        if (!rect || !el) return;
+        if (!el) return;
 
-        Object.assign(el.style, { position: "fixed", left: `${Math.min(rect.left, window.innerWidth - 300)}px`, top: `${rect.bottom + 6}px`, zIndex: "60" });
+        let rect: { left: number; top: number; bottom: number } | null = props.clientRect?.() ?? null;
+
+        if (!rect) {
+          try {
+            rect = props.editor.view.coordsAtPos(props.range.to);
+          } catch {
+            return;
+          }
+        }
+
+        const width = el.offsetWidth || LIST_WIDTH;
+
+        const height = el.offsetHeight || LIST_HEIGHT;
+
+        const below = rect.bottom + GAP;
+
+        const top = below + height > window.innerHeight && rect.top - GAP - height >= 0 ? rect.top - GAP - height : below;
+
+        Object.assign(el.style, {
+          position: "fixed",
+          left: `${Math.max(0, Math.min(rect.left, window.innerWidth - width - GAP))}px`,
+          top: `${Math.max(0, Math.min(top, window.innerHeight - height))}px`,
+          zIndex: "60",
+        });
       };
 
       const close = () => {

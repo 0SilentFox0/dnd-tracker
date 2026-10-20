@@ -101,6 +101,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
             />
             {isHero && (
               <RevealSettings
+                key={JSON.stringify(s.reveal ?? null)}
                 campaignId={campaignId}
                 rule={s.reveal}
                 revealed={!!s.revealedAt}

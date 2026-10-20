@@ -22,11 +22,13 @@ export type SearchWindow = { win: string; at: number; cutBefore: boolean; needle
 
 // `win` is a slice of one section line cut in SQL: `at` is the match offset inside it
 export function snippetFromWindow({ win, at, cutBefore, needleLength }: SearchWindow): string | null {
-  if (at < 0 || at > win.length) return null;
+  const chars = Array.from(win);
 
-  const head = win.slice(0, at);
+  if (at < 0 || at > chars.length) return null;
 
-  const afterAll = win.slice(at + needleLength, at + needleLength + SNIPPET_RADIUS + 1);
+  const head = chars.slice(0, at).join("");
+
+  const afterAll = chars.slice(at + needleLength, at + needleLength + SNIPPET_RADIUS + 1).join("");
 
   const nl = afterAll.indexOf("\n");
 
@@ -34,5 +36,5 @@ export function snippetFromWindow({ win, at, cutBefore, needleLength }: SearchWi
 
   const more = nl < 0 && afterAll.length > SNIPPET_RADIUS;
 
-  return `${cutBefore ? "…" : ""}${head}${win.slice(at, at + needleLength)}${tail}${more ? "…" : ""}`;
+  return `${cutBefore ? "…" : ""}${head}${chars.slice(at, at + needleLength).join("")}${tail}${more ? "…" : ""}`;
 }

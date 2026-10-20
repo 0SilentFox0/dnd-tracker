@@ -23,6 +23,7 @@ describe("search text", () => {
     expect(snippetFromWindow({ win: "Собор Дзвони обриваються", at: 6, cutBefore: false, needleLength: 6 })).toBe("Собор Дзвони обриваються");
     expect(snippetFromWindow({ win: "ний Дзвони обриваються\n§s11\tМонастир", at: 4, cutBefore: true, needleLength: 6 })).toBe("…ний Дзвони обриваються");
     expect(snippetFromWindow({ win: `Дзвони ${"а".repeat(80)}`, at: 0, cutBefore: false, needleLength: 6 })).toBe(`Дзвони ${"а".repeat(59)}…`);
+    expect(snippetFromWindow({ win: "🎲🎲 Дзвони обриваються", at: 3, cutBefore: false, needleLength: 6 })).toBe("🎲🎲 Дзвони обриваються");
     expect(snippetFromWindow({ win: "x", at: -1, cutBefore: false, needleLength: 1 })).toBeNull();
   });
 });
