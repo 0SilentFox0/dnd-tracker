@@ -33,7 +33,7 @@ declare global {
   }
 }
 
-export const YT_STATE = { PLAYING: 1, PAUSED: 2 } as const;
+export const YT_STATE = { ENDED: 0, PLAYING: 1, PAUSED: 2 } as const;
 
 let loading: Promise<YtNamespace> | null = null;
 
