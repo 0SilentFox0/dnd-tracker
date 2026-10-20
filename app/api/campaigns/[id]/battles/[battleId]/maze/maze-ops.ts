@@ -12,8 +12,10 @@ import {
   MAZE_EXIT_ERROR,
   MAZE_SCATTER_ERROR,
   mazeAwareness,
+  type MazeGrid,
   mulberry32,
   reshuffleMaze,
+  type Rng,
   scatterStarts,
   seedFrom,
 } from "@/lib/utils/battle/maze";
@@ -106,6 +108,22 @@ function withPositions(participants: BattleParticipant[], positions: Record<stri
   });
 }
 
+const SCATTER_ATTEMPTS = 20;
+
+function scatterFree(grid: MazeGrid, { heroIds, others }: { heroIds: string[]; others: BattleParticipant[] }, rnd: Rng): Record<string, GridPoint> | null {
+  const taken = new Set(positionsOf(others).map(cellKey));
+
+  for (let attempt = 0; attempt < SCATTER_ATTEMPTS; attempt++) {
+    const starts = scatterStarts(grid, heroIds, rnd);
+
+    if (!starts) return null;
+
+    if (!Object.values(starts).some((c) => taken.has(cellKey(c)))) return starts;
+  }
+
+  return null;
+}
+
 const generate: OpHandler<"generate"> = (ctx, maze, body) => {
   if (maze.moved) reject(MOVED_ERROR);
 
@@ -117,7 +135,7 @@ const generate: OpHandler<"generate"> = (ctx, maze, body) => {
 
   const rnd = mulberry32(seedOf(ctx));
 
-  const scattered = edgeHeroes ? {} : scatterStarts(grid, heroes.map((h) => h.basicInfo.id), rnd);
+  const scattered = edgeHeroes ? {} : scatterFree(grid, { heroIds: heroes.map((h) => h.basicInfo.id), others: ctx.participants.filter((p) => !heroes.includes(p)) }, rnd);
 
   if (!scattered) return reject(MAZE_SCATTER_ERROR);
 

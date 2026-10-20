@@ -4,6 +4,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 
 import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
 import { mazeActionSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_EXIT_ERROR } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -88,6 +89,21 @@ describe("DM maze route", () => {
 
     rejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_EXIT_ERROR);
     rejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "Лабіринт уже пройдено частково — використайте «Перетасувати»");
+  });
+
+  it("generate: герой без позиції не стає на зайняту крайню клітинку, ніхто не ділить клітинку", () => {
+    const enemies = [0, 1, 2, 3, 4, 5].map((i) => at(participant(`g${i}`, { side: ParticipantSide.ENEMY }), { x: i, y: 0 }, { dormant: true }));
+
+    for (let i = 0; i < 20; i++) {
+      const base = ctx({}, { participants: [{ ...hero, battleData: { ...hero.battleData, position: undefined } }, ...enemies] });
+
+      const out = mazeMutation(base, { op: "generate", difficulty: "easy", ...features, exit: null });
+
+      const keys = out.participants.map((p) => `${p.battleData.position?.x}:${p.battleData.position?.y}`);
+
+      expect(new Set(keys).size).toBe(keys.length);
+      expect(out.participants[0].battleData.position).toBeDefined();
+    }
   });
 
   it("reshuffle walls: позиції сталі, вихід і dark збережені, мітки стерті; невидимий ворог засинає", () => {
