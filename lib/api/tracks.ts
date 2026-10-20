@@ -22,7 +22,7 @@ export async function uploadTrackFile(campaignId: string, file: File, meta: { ti
 
   if (!checked.ok) throw new Error(checked.message);
 
-  const request: TrackUploadRequest = { name: file.name, size: file.size, contentType: TRACK_FORMATS[checked.format].contentType };
+  const request: TrackUploadRequest = { name: file.name, size: file.size, contentType: TRACK_FORMATS[checked.value].contentType };
 
   const ticket = await campaignPost<TrackUploadTicket>(campaignId, "/tracks/upload-url", request);
 

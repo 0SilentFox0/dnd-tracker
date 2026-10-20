@@ -46,7 +46,7 @@ describe("tracks API", () => {
     vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.campaignTrack.aggregate).mockResolvedValue({ _max: { sortOrder: 2 } } as never);
     vi.mocked(prisma.campaignTrack.create).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => row({ ...data, id: "new" })) as never);
-    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: true, url: "https://s/battle-music/x.mp3" });
+    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: true, value: "https://s/battle-music/x.mp3" });
   });
 
   it("не ДМ — 403 і без запису", async () => {
@@ -125,7 +125,7 @@ describe("tracks API", () => {
   });
 
   it("квиток: перевіряє тип і розмір, видає підписаний шлях", async () => {
-    vi.mocked(storage.createTrackUploadTicket).mockResolvedValue({ ok: true, ticket: { bucket: "battle-music", path: PATH, token: "tok", contentType: "audio/mpeg" } });
+    vi.mocked(storage.createTrackUploadTicket).mockResolvedValue({ ok: true, value: { bucket: "battle-music", path: PATH, token: "tok", contentType: "audio/mpeg" } });
 
     const { POST: ticket } = await import("@/app/api/campaigns/[id]/tracks/upload-url/route");
 

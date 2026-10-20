@@ -16,7 +16,7 @@ describe("track file", () => {
   });
 
   it("розмір 1 байт..10 МБ", () => {
-    expect(validateTrackFile({ name: "a.mp3", type: "audio/mpeg", size: MAX_TRACK_BYTES })).toEqual({ ok: true, format: "mp3" });
+    expect(validateTrackFile({ name: "a.mp3", type: "audio/mpeg", size: MAX_TRACK_BYTES })).toEqual({ ok: true, value: "mp3" });
     expect(validateTrackFile({ name: "a.mp3", type: "audio/mpeg", size: MAX_TRACK_BYTES + 1 })).toEqual({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
     expect(validateTrackFile({ name: "a.mp3", type: "audio/mpeg", size: 0 })).toEqual({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
     expect(validateTrackFile({ name: "a.ogg", type: "audio/ogg", size: 10 })).toEqual({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });

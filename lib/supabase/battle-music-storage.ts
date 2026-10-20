@@ -2,6 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_EXTENSIONS, TRACK_FORMATS,type TrackFormat } from "@/lib/constants/music";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TrackUploadTicket } from "@/types/audio";
+import type { Result } from "@/types/common";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -13,38 +14,38 @@ export function trackPathOwnedBy(path: string, campaignId: string): boolean {
   return TRACK_OBJECT.exec(path)?.[1] === campaignId;
 }
 
-async function ensureMusicBucket(supabase: Admin): Promise<{ ok: true } | { ok: false; message: string }> {
+type Bucket = ReturnType<Admin["storage"]["from"]>;
+
+async function musicBucket(supabase: Admin): Promise<Result<Bucket>> {
   const { data, error } = await supabase.storage.listBuckets();
 
   if (error) return { ok: false, message: error.message };
 
-  if (data?.some((b) => b.name === BATTLE_MUSIC_BUCKET)) return { ok: true };
+  if (data?.some((b) => b.name === BATTLE_MUSIC_BUCKET)) return { ok: true, value: supabase.storage.from(BATTLE_MUSIC_BUCKET) };
 
   // ліміт і типи на рівні бакета: Storage сам відхилить чужий файл за підписаним URL
   const created = await supabase.storage.createBucket(BATTLE_MUSIC_BUCKET, { public: true, fileSizeLimit: MAX_TRACK_BYTES, allowedMimeTypes: TRACK_CONTENT_TYPES });
 
-  return created.error ? { ok: false, message: created.error.message } : { ok: true };
+  return created.error ? { ok: false, message: created.error.message } : { ok: true, value: supabase.storage.from(BATTLE_MUSIC_BUCKET) };
 }
 
-export async function createTrackUploadTicket(campaignId: string, format: TrackFormat): Promise<{ ok: true; ticket: TrackUploadTicket } | { ok: false; message: string }> {
-  const supabase = createAdminClient();
+export async function createTrackUploadTicket(campaignId: string, format: TrackFormat): Promise<Result<TrackUploadTicket>> {
+  const bucket = await musicBucket(createAdminClient());
 
-  const ensured = await ensureMusicBucket(supabase);
-
-  if (!ensured.ok) return ensured;
+  if (!bucket.ok) return bucket;
 
   const { ext, contentType } = TRACK_FORMATS[format];
 
   const path = `${campaignId}/${crypto.randomUUID().replace(/-/g, "")}.${ext}`;
 
-  const { data, error } = await supabase.storage.from(BATTLE_MUSIC_BUCKET).createSignedUploadUrl(path);
+  const { data, error } = await bucket.value.createSignedUploadUrl(path);
 
   if (error || !data) return { ok: false, message: error?.message ?? API_ERRORS.INTERNAL };
 
-  return { ok: true, ticket: { bucket: BATTLE_MUSIC_BUCKET, path: data.path, token: data.token, contentType } };
+  return { ok: true, value: { bucket: BATTLE_MUSIC_BUCKET, path: data.path, token: data.token, contentType } };
 }
 
-export async function verifyUploadedTrack(path: string): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
+export async function verifyUploadedTrack(path: string): Promise<Result<string>> {
   const bucket = createAdminClient().storage.from(BATTLE_MUSIC_BUCKET);
 
   const { data, error } = await bucket.info(path);
@@ -59,7 +60,7 @@ export async function verifyUploadedTrack(path: string): Promise<{ ok: true; url
     return { ok: false, message: API_ERRORS.TRACK_FILE_INVALID };
   }
 
-  return { ok: true, url: bucket.getPublicUrl(path).data.publicUrl };
+  return { ok: true, value: bucket.getPublicUrl(path).data.publicUrl };
 }
 
 export function trackObjectPath(url: string): string | null {

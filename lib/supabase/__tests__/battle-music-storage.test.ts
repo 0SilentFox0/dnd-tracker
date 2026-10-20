@@ -42,13 +42,13 @@ describe("battle-music storage", () => {
     const r = await createTrackUploadTicket("camp1", "m4a");
 
     expect(storage.createBucket).toHaveBeenCalledWith("battle-music", { public: true, fileSizeLimit: 10 * 1024 * 1024, allowedMimeTypes: ["audio/mpeg", "audio/mp4"] });
-    expect(r).toMatchObject({ ok: true, ticket: { bucket: "battle-music", token: "tok", contentType: "audio/mp4" } });
-    expect(r.ok && trackPathOwnedBy(r.ticket.path, "camp1")).toBe(true);
+    expect(r).toMatchObject({ ok: true, value: { bucket: "battle-music", token: "tok", contentType: "audio/mp4" } });
+    expect(r.ok && trackPathOwnedBy(r.value.path, "camp1")).toBe(true);
   });
 
   it("перевірка: існує, ≤ 10 МБ, аудіо — публічний URL; інакше обʼєкт видаляється", async () => {
     bucketApi.info.mockResolvedValueOnce({ data: { size: 5_000_000, contentType: "audio/mpeg" }, error: null });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: true, url: `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}` });
+    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: true, value: `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}` });
 
     bucketApi.info.mockResolvedValueOnce({ data: { size: 20_000_000, contentType: "audio/mpeg" }, error: null });
     expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: "Потрібен файл MP3 або M4A до 10 МБ" });

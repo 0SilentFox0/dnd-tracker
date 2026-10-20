@@ -1,5 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { MAX_TRACK_BYTES, TRACK_EXTENSIONS, type TrackFormat } from "@/lib/constants/music";
+import type { Result } from "@/types/common";
 
 const isTrackFormat = (ext: string | undefined): ext is TrackFormat => (TRACK_EXTENSIONS as string[]).includes(ext ?? "");
 
@@ -34,10 +35,10 @@ export function trackFormatOfUrl(url: string | null): TrackFormat | null {
   return isTrackFormat(ext) ? ext : null;
 }
 
-export function validateTrackFile(file: { name: string; type: string; size: number }): { ok: true; format: TrackFormat } | { ok: false; message: string } {
+export function validateTrackFile(file: { name: string; type: string; size: number }): Result<TrackFormat> {
   const format = detectTrackFormat(file);
 
   if (!format || file.size <= 0 || file.size > MAX_TRACK_BYTES) return { ok: false, message: API_ERRORS.TRACK_FILE_INVALID };
 
-  return { ok: true, format };
+  return { ok: true, value: format };
 }

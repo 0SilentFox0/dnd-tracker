@@ -12,22 +12,13 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import { applyAudioCommand, type AudioLibraryEntry, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
-import type { BattleAudioEvent, BattleAudioResponse, BattleAudioState, TrackKind } from "@/types/audio";
+import { applyAudioCommand, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
+import { loadAudioLibrary } from "@/lib/utils/audio/track-store";
+import type { BattleAudioEvent, BattleAudioResponse, BattleAudioState } from "@/types/audio";
 
 type BattleParams = { id: string; battleId: string };
 
 const findAudio = (p: BattleParams) => prisma.battleScene.findFirst({ where: { id: p.battleId, campaignId: p.id }, select: { audio: true } });
-
-async function loadLibrary(campaignId: string): Promise<AudioLibraryEntry[]> {
-  const rows = await prisma.campaignTrack.findMany({
-    where: { campaignId },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: { id: true, title: true, kind: true, url: true, youtubeId: true, durationSec: true },
-  });
-
-  return rows.map(({ id, ...t }) => ({ id, track: { ...t, kind: t.kind as TrackKind } }));
-}
 
 export async function readBattleAudio(params: BattleParams): Promise<NextResponse> {
   try {
@@ -67,9 +58,11 @@ export async function commandBattleAudio(req: Request, params: BattleParams): Pr
 
     const prev = (battle.audio ?? null) as BattleAudioState | null;
 
-    const next = applyAudioCommand(prev, cmd, { now: Date.now(), library: commandNeedsLibrary(cmd) ? await loadLibrary(params.id) : [] });
+    const result = applyAudioCommand(prev, cmd, { now: Date.now(), library: commandNeedsLibrary(cmd) ? await loadAudioLibrary(params.id) : [] });
 
-    if ("error" in next) return errorResponse(next.error, 422);
+    if (!result.ok) return errorResponse(result.message, 422);
+
+    const next = result.value;
 
     // без version і журналу; умова за seq відсікає паралельну команду з іншої вкладки ДМ
     const { count } = await prisma.battleScene.updateMany({

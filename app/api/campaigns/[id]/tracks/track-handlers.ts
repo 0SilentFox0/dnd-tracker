@@ -12,23 +12,14 @@ import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { validateTrackFile } from "@/lib/utils/audio/track-file";
+import { listTracks, toCampaignTrack } from "@/lib/utils/audio/track-store";
 import { parseYoutubeId } from "@/lib/utils/audio/youtube-id";
 import { fetchYoutubeTitle } from "@/lib/utils/audio/youtube-oembed";
-import type { CampaignTrack, TrackKind } from "@/types/audio";
-
-const ORDER = [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }];
+import type { Result } from "@/types/common";
 
 type TrackSource = Pick<TrackRow, "kind" | "title" | "url" | "youtubeId" | "durationSec">;
 
-export function toCampaignTrack(row: TrackRow): CampaignTrack {
-  return { id: row.id, title: row.title, kind: row.kind as TrackKind, url: row.url, youtubeId: row.youtubeId, durationSec: row.durationSec, sortOrder: row.sortOrder, createdAt: row.createdAt.toISOString() };
-}
-
-export async function listTracks(campaignId: string): Promise<CampaignTrack[]> {
-  return (await prisma.campaignTrack.findMany({ where: { campaignId }, orderBy: ORDER })).map(toCampaignTrack);
-}
-
-const full = async (campaignId: string) => (await prisma.campaignTrack.count({ where: { campaignId } })) >= MAX_TRACKS_PER_CAMPAIGN;
+const isLibraryFull = async (campaignId: string) => (await prisma.campaignTrack.count({ where: { campaignId } })) >= MAX_TRACKS_PER_CAMPAIGN;
 
 export async function getTracksHandler(campaignId: string) {
   try {
@@ -56,37 +47,37 @@ export async function issueUploadTicketHandler(req: Request, campaignId: string)
 
     if (!file.ok) return errorResponse(file.message, 400);
 
-    if (await full(campaignId)) return errorResponse(API_ERRORS.TRACK_LIMIT, 400);
+    if (await isLibraryFull(campaignId)) return errorResponse(API_ERRORS.TRACK_LIMIT, 400);
 
-    const ticket = await createTrackUploadTicket(campaignId, file.format);
+    const ticket = await createTrackUploadTicket(campaignId, file.value);
 
-    return ticket.ok ? NextResponse.json(ticket.ticket) : errorResponse(ticket.message, 500);
+    return ticket.ok ? NextResponse.json(ticket.value) : errorResponse(ticket.message, 500);
   } catch (error) {
     return handleApiError(error, { action: "issue track upload" });
   }
 }
 
-async function fileSource(campaignId: string, body: { path: string; title: string; durationSec?: number }): Promise<TrackSource | { error: string }> {
-  if (!trackPathOwnedBy(body.path, campaignId)) return { error: API_ERRORS.TRACK_UPLOAD_MISSING };
+async function fileSource(campaignId: string, body: { path: string; title: string; durationSec?: number }): Promise<Result<TrackSource>> {
+  if (!trackPathOwnedBy(body.path, campaignId)) return { ok: false, message: API_ERRORS.TRACK_UPLOAD_MISSING };
 
   const verified = await verifyUploadedTrack(body.path);
 
-  if (!verified.ok) return { error: verified.message };
+  if (!verified.ok) return verified;
 
   // спільний обʼєкт у двох рядках: видалення одного стерло б файл іншого
-  if (await prisma.campaignTrack.findFirst({ where: { campaignId, url: verified.url }, select: { id: true } })) return { error: API_ERRORS.TRACK_DUPLICATE };
+  if (await prisma.campaignTrack.findFirst({ where: { campaignId, url: verified.value }, select: { id: true } })) return { ok: false, message: API_ERRORS.TRACK_DUPLICATE };
 
-  return { kind: "file", title: body.title, url: verified.url, youtubeId: null, durationSec: body.durationSec ?? null };
+  return { ok: true, value: { kind: "file", title: body.title, url: verified.value, youtubeId: null, durationSec: body.durationSec ?? null } };
 }
 
-async function youtubeSource(body: { url: string; title?: string }): Promise<TrackSource | { error: string }> {
+async function youtubeSource(body: { url: string; title?: string }): Promise<Result<TrackSource>> {
   const youtubeId = parseYoutubeId(body.url);
 
-  if (!youtubeId) return { error: API_ERRORS.YOUTUBE_URL_INVALID };
+  if (!youtubeId) return { ok: false, message: API_ERRORS.YOUTUBE_URL_INVALID };
 
   const title = body.title ?? (await fetchYoutubeTitle(youtubeId)) ?? `YouTube ${youtubeId}`;
 
-  return { kind: "youtube", title, url: null, youtubeId, durationSec: null };
+  return { ok: true, value: { kind: "youtube", title, url: null, youtubeId, durationSec: null } };
 }
 
 export async function createTrackHandler(req: Request, campaignId: string) {
@@ -99,15 +90,15 @@ export async function createTrackHandler(req: Request, campaignId: string) {
 
     if (body instanceof NextResponse) return body;
 
-    if (await full(campaignId)) return errorResponse(API_ERRORS.TRACK_LIMIT, 400);
+    if (await isLibraryFull(campaignId)) return errorResponse(API_ERRORS.TRACK_LIMIT, 400);
 
     const source = body.kind === "file" ? await fileSource(campaignId, body) : await youtubeSource(body);
 
-    if ("error" in source) return errorResponse(source.error, 400);
+    if (!source.ok) return errorResponse(source.message, 400);
 
     const last = await prisma.campaignTrack.aggregate({ where: { campaignId }, _max: { sortOrder: true } });
 
-    const row = await prisma.campaignTrack.create({ data: { campaignId, ...source, sortOrder: (last._max.sortOrder ?? -1) + 1 } });
+    const row = await prisma.campaignTrack.create({ data: { campaignId, ...source.value, sortOrder: (last._max.sortOrder ?? -1) + 1 } });
 
     return NextResponse.json(toCampaignTrack(row), { status: 201 });
   } catch (error) {
