@@ -47,7 +47,9 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     const deckId = deckIdFor(cmd, prev);
 
-    const [deck, library] = await Promise.all([deckId ? loadShowDeck(campaignId, deckId) : null, showNeedsLibrary(cmd) ? loadAudioLibrary(campaignId) : []]);
+    const deck = deckId ? await loadShowDeck(campaignId, deckId) : null;
+
+    const library = showNeedsLibrary(prev, cmd, deck) ? await loadAudioLibrary(campaignId) : [];
 
     const result = applyShowCommand(prev, cmd, { now: Date.now(), deck, library });
 

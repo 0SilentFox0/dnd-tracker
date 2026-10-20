@@ -14,22 +14,37 @@ import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { removedSlideUrls } from "@/lib/utils/show/deck-files";
-import { refreshShowSlide } from "@/lib/utils/show/show-command";
-import type { Slide } from "@/types/show";
+import { applyShowCommand, refreshShowSlide } from "@/lib/utils/show/show-command";
+import type { ShowState, Slide } from "@/types/show";
 
 const ownedDeck = (campaignId: string, deckId: string) => loadOwned(prisma.slideDeck.findUnique({ where: { id: deckId } }), campaignId, API_ERRORS.DECK_NOT_FOUND);
 
-/** Після відповіді: стерти файли, що зникли, крім картинки на екрані і картинок інших наборів. */
-function cleanupLater(campaignId: string, deckId: string, before: Slide[], after_: Slide[]) {
-  after(async () => {
-    const [show, elsewhere] = await Promise.all([readShowState(campaignId), urlsUsedElsewhere(campaignId, deckId)]);
+/** Стерти файли, що зникли, крім картинки на екрані і картинок інших наборів. */
+async function removeUnusedFiles(campaignId: string, deckId: string, before: Slide[], after_: Slide[], shown?: ShowState | null) {
+  const [show, elsewhere] = await Promise.all([shown === undefined ? readShowState(campaignId) : shown, urlsUsedElsewhere(campaignId, deckId)]);
 
-    const keep = [...elsewhere, ...(show?.slide ? [show.slide.imageUrl] : [])];
+  const keep = [...elsewhere, ...(show?.slide ? [show.slide.imageUrl] : [])];
 
-    const urls = removedSlideUrls(before, after_, keep);
+  const urls = removedSlideUrls(before, after_, keep);
 
-    if (urls.length > 0) await removeSlideFiles(campaignId, urls);
-  });
+  if (urls.length > 0) await removeSlideFiles(campaignId, urls);
+}
+
+const cleanupLater = (campaignId: string, deckId: string, before: Slide[], after_: Slide[]) => after(() => removeUnusedFiles(campaignId, deckId, before, after_));
+
+/** Показ не лишається вказувати на видалений набір. */
+async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowState | null | undefined> {
+  const show = await readShowState(campaignId);
+
+  if (show?.deckId !== deckId) return undefined;
+
+  const ended = applyShowCommand(show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
+
+  if (!ended.ok || !(await writeShowState(campaignId, show, ended.value))) return undefined;
+
+  await publishShow(campaignId, ended.value);
+
+  return ended.value;
 }
 
 export async function getDecksHandler(campaignId: string) {
@@ -96,13 +111,26 @@ export async function saveDeckHandler(req: Request, campaignId: string, deckId: 
 
     if (deck instanceof NextResponse) return deck;
 
+    if (deck.updatedAt.toISOString() !== body.expectedUpdatedAt) return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
+
     const previous = readSlides(deck.slides);
 
     const slides = await persistSlideImages(campaignId, body.slides, previous);
 
     if (!slides.ok) return errorResponse(slides.message, 400);
 
-    const saved = toSlideDeck(await prisma.slideDeck.update({ where: { id: deckId }, data: { title: body.title, slides: slides.value as unknown as Prisma.InputJsonValue } }));
+    const written = await prisma.slideDeck.updateMany({
+      where: { id: deckId, campaignId, updatedAt: deck.updatedAt },
+      data: { title: body.title, slides: slides.value as unknown as Prisma.InputJsonValue },
+    });
+
+    if (written.count === 0) return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
+
+    const row = await prisma.slideDeck.findUnique({ where: { id: deckId } });
+
+    if (!row) return errorResponse(API_ERRORS.DECK_NOT_FOUND, 404);
+
+    const saved = toSlideDeck(row);
 
     cleanupLater(campaignId, deckId, previous, saved.slides);
 
@@ -133,7 +161,9 @@ export async function deleteDeckHandler(campaignId: string, deckId: string) {
 
     await prisma.slideDeck.delete({ where: { id: deckId } });
 
-    cleanupLater(campaignId, deckId, readSlides(deck.slides), []);
+    const previous = readSlides(deck.slides);
+
+    after(async () => removeUnusedFiles(campaignId, deckId, previous, [], await endShowOfDeck(campaignId, deckId)));
 
     return NextResponse.json({ ok: true });
   } catch (error) {

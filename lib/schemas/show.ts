@@ -38,7 +38,7 @@ const deckTitleSchema = z.string().trim().min(1).max(DECK_TITLE_MAX);
 
 export const createDeckSchema = z.object({ title: deckTitleSchema });
 
-export const saveDeckSchema = z.object({ title: deckTitleSchema, slides: slidesSchema });
+export const saveDeckSchema = z.object({ title: deckTitleSchema, slides: slidesSchema, expectedUpdatedAt: z.string().datetime() });
 
 export const slideUploadRequestSchema = z.object({
   size: z.number().int().positive().max(MAX_SLIDE_BYTES),

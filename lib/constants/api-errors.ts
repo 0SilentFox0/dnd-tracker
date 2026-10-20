@@ -52,6 +52,7 @@ export const API_ERRORS = {
   BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",
   BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
   DECK_NOT_FOUND: "Набір слайдів не знайдено",
+  DECK_CONFLICT: "Набір змінено в іншому місці — оновіть сторінку",
   DECK_LIMIT: `У кампанії вже ${MAX_DECKS_PER_CAMPAIGN} наборів — видаліть зайві`,
   SLIDE_NOT_FOUND: "Слайд не знайдено",
   SLIDE_FILE_INVALID: `Потрібна картинка WebP або JPEG до ${MAX_SLIDE_MB} МБ`,

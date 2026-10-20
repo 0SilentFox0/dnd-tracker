@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { applyShowCommand, refreshShowSlide, type ShowDeck } from "../show-command";
+import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack } from "../show-command";
 
 import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioState } from "@/types/audio";
@@ -144,5 +144,25 @@ describe("refreshShowSlide", () => {
     expect(refreshShowSlide(showing(0), deck)).toBeNull();
     expect(refreshShowSlide(showing(0), { ...deck, id: "d2" })).toBeNull();
     expect(refreshShowSlide(showing(0), { ...deck, slides: [s(2), s(3)] })).toBeNull();
+  });
+});
+
+describe("targetSlideTrack / showNeedsLibrary", () => {
+  it("open і next/prev дають трек слайда-цілі", () => {
+    expect(targetSlideTrack(null, { action: "open", deckId: "d1" }, deck)).toBeUndefined();
+    expect(targetSlideTrack(null, { action: "open", deckId: "d1", slideId: "slide-0002" }, deck)).toBe("t2");
+    expect(targetSlideTrack(showing(0), { action: "next" }, deck)).toBe("t2");
+    expect(targetSlideTrack(showing(2), { action: "prev" }, deck)).toBe("t2");
+    expect(targetSlideTrack(showing(2), { action: "next" }, deck)).toBeUndefined();
+    expect(targetSlideTrack(showing(0), { action: "end" }, deck)).toBeUndefined();
+    expect(targetSlideTrack(showing(0), { action: "next" }, null)).toBeUndefined();
+  });
+
+  it("бібліотека потрібна лише для нового треку або команди аудіо з вибором", () => {
+    expect(showNeedsLibrary(showing(1), { action: "next" }, deck)).toBe(false);
+    expect(showNeedsLibrary(showing(0), { action: "next" }, deck)).toBe(true);
+    expect(showNeedsLibrary(showing(0, { audio: audio({ trackId: "t2" }) }), { action: "next" }, deck)).toBe(false);
+    expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "pause" } }, deck)).toBe(false);
+    expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "play", trackId: "t1" } }, deck)).toBe(true);
   });
 });

@@ -24,7 +24,28 @@ const done = (value: ShowState): Outcome => ({ ok: true, value });
 
 const EMPTY: ShowState = { deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 0 };
 
-export const showNeedsLibrary = (cmd: ShowCommand): boolean => cmd.action === "open" || cmd.action === "next" || cmd.action === "prev" || (cmd.action === "audio" && commandNeedsLibrary(cmd.command));
+/** Трек слайда, на який перейде команда (без застосування). */
+export function targetSlideTrack(prev: ShowState | null, cmd: ShowCommand, deck: ShowDeck | null): string | undefined {
+  if (!deck || deck.slides.length === 0) return undefined;
+
+  if (cmd.action === "open") return (cmd.slideId ? deck.slides.find((s) => s.id === cmd.slideId) : deck.slides[0])?.trackId;
+
+  if (cmd.action !== "next" && cmd.action !== "prev") return undefined;
+
+  const at = deck.slides.findIndex((s) => s.id === prev?.slide?.id);
+
+  if (at === -1) return deck.slides[0].trackId;
+
+  return deck.slides[Math.min(Math.max(at + (cmd.action === "next" ? 1 : -1), 0), deck.slides.length - 1)].trackId;
+}
+
+export function showNeedsLibrary(prev: ShowState | null, cmd: ShowCommand, deck: ShowDeck | null): boolean {
+  if (cmd.action === "audio") return commandNeedsLibrary(cmd.command);
+
+  const track = targetSlideTrack(prev, cmd, deck);
+
+  return !!track && track !== prev?.audio?.trackId;
+}
 
 function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, ctx: Ctx): BattleAudioState | null {
   // той самий трек — навіть на паузі — не чіпаємо: паузу ДМ поставив свідомо

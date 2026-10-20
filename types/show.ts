@@ -32,6 +32,7 @@ export interface CreateDeckData {
 export interface SaveDeckData {
   title: string;
   slides: Slide[];
+  expectedUpdatedAt: string;
 }
 
 /** Те, що бачать усі учасники: лише поточний слайд і картинка наступного (без набору — спойлери). */
