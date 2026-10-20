@@ -14,9 +14,22 @@ import type { BattleAudioState } from "@/types/audio";
 vi.mock("@/lib/api/battle-audio", () => ({ getBattleAudio: vi.fn(() => new Promise(() => undefined)), sendBattleAudio: vi.fn(async () => ({ audio: null, clockOffsetMs: 0 })) }));
 vi.mock("@/lib/api/tracks", () => ({ getTracks: vi.fn(), updateTrack: vi.fn(async () => ({})) }));
 
-const yt = vi.hoisted(() => ({ needsTap: false }));
+const yt = vi.hoisted(() => ({ needsTap: false, crash: false }));
 
-vi.mock("@/lib/hooks/audio/useYoutubeSync", () => ({ useYoutubeSync: () => ({ ref: () => undefined, needsTap: yt.needsTap, failed: false }) }));
+vi.mock("@/lib/hooks/audio/useYoutubeSync", async () => {
+  const { useEffect } = await import("react");
+
+  return {
+    useYoutubeSync: () => {
+      // як справжній збій: seekTo на знищеному плеєрі з ефекту синхронізації
+      useEffect(() => {
+        if (yt.crash) throw new TypeError("Cannot read properties of null (reading 'src')");
+      });
+
+      return { ref: () => undefined, needsTap: yt.needsTap, failed: false };
+    },
+  };
+});
 
 const fileState = audioState({ track: { ...fileTrack, title: "Бій у таверні" } });
 
@@ -41,6 +54,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   yt.needsTap = false;
+  yt.crash = false;
   stubMediaElement();
   vi.mocked(getTracks).mockResolvedValue([
     campaignTrack({ title: "Бій у таверні" }),
@@ -483,5 +497,25 @@ describe("AudioDock — розташування", () => {
     const { container } = dock({ audio: fileState });
 
     expect(container.querySelector("[data-battle-audio=corner]")?.className).not.toContain("fixed");
+  });
+});
+
+describe("BattleAudioDock — збій YouTube-плеєра", () => {
+  it("помилка плеєра лишається в доку: назва треку на місці, «Перезапустити» монтує плеєр знову", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    yt.crash = true;
+
+    const { container, getByRole, getByText } = dock({ audio: ytState });
+
+    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+
+    expect(getByRole("alert").textContent).toContain("Плеєр збоїв");
+    expect(getByText(youtubeTrack.title)).toBeTruthy();
+    expect(container.querySelector("[data-youtube-player]")).toBeNull();
+
+    yt.crash = false;
+    fireEvent.click(getByRole("button", { name: "Перезапустити плеєр" }));
+
+    expect(container.querySelector("[data-youtube-player]")).not.toBeNull();
   });
 });

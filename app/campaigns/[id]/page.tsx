@@ -1,4 +1,4 @@
-import { BookOpen, Gem, GitBranch, Images, Music, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
@@ -23,6 +23,7 @@ export default async function CampaignDetailPage({
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
   const dmTiles = [
+    { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
     { path: "characters", icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців" },
     { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
     { path: "spells", icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії" },

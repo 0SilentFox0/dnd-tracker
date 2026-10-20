@@ -45,6 +45,7 @@ export const sheetFixture: CharacterSheet = {
   progression: { freePoints: 0, level: 5, seenLevel: null },
   story: {
     biography: "Мати ==загинула== давно",
+    chapters: [],
     goals: [
       { id: "d1", text: "Знайти брата", status: "active", author: "dm" },
       { id: "p1", text: "Повернути лук", status: "active", author: "player" },

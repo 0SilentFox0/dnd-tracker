@@ -59,4 +59,11 @@ export const API_ERRORS = {
   SHOW_DECK_EMPTY: "У наборі немає слайдів",
   SHOW_NOT_RUNNING: "Показ не запущено",
   SHOW_CONFLICT: "Стан показу змінився — повторіть",
+  SCENARIO_NOT_FOUND: "Сторінку сценарію не знайдено",
+  SCENARIO_SECTION_NOT_FOUND: "Розділ не знайдено",
+  SCENARIO_VERSION_NOT_FOUND: "Версію не знайдено",
+  SCENARIO_CONFLICT: "Сторінку змінено в іншій вкладці — перезавантажте її",
+  SCENARIO_TOO_LARGE: "Сторінка завелика (понад 512 КБ) — розділіть її на кілька",
+  SCENARIO_CONTENT_INVALID: "Вміст сторінки пошкоджено й не може бути відкритий — відновіть попередню версію або зверніться до підтримки",
+  SCENARIO_CHARACTER_INVALID: "Персонажа не знайдено в цій кампанії",
 } as const;

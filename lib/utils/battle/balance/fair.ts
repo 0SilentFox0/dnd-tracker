@@ -4,6 +4,11 @@ import type { UnitStats } from "./stats";
 import {
   BALANCE_TOLERANCE,
   HERO_EDGE,
+  HIGH_LEVEL_DPR_BOOST,
+  HIGH_LEVEL_FROM,
+  HIGH_LEVEL_HP_BOOST,
+  HIGH_LEVEL_MAX_STEPS,
+  HIGH_LEVEL_SPAN,
   HINT_MAX_STEPS,
   HIT_RATE,
   MAX_UNIT_QUANTITY,
@@ -17,6 +22,8 @@ export interface PartyPower {
   dpr: number;
   hp: number;
   heroCount: number;
+  /** Average level of the heroes (allied units do not count). */
+  heroLevel?: number;
   /** Weapon to-hit of the party, weighted by weapon DPR. */
   toHit?: number;
   ac?: number;
@@ -33,6 +40,7 @@ export interface PartyPower {
 export interface PartyMember {
   dpr: number;
   hp: number;
+  level?: number;
   toHit?: number;
   ac?: number;
   weaponDpr?: number;
@@ -45,8 +53,8 @@ export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonu
   return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr, damageKey: u.damageKey };
 }
 
-export function heroMember(s: { dpr: number; hp: number; toHit: number; ac: number; weaponDpr: number; damageKey: string; saves?: Partial<Record<string, number>>; spellResist?: Record<string, number> }): PartyMember {
-  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey, ...(s.saves && { saves: s.saves }), ...(s.spellResist && { spellResist: s.spellResist }) };
+export function heroMember(s: { dpr: number; hp: number; level?: number; toHit: number; ac: number; weaponDpr: number; damageKey: string; saves?: Partial<Record<string, number>>; spellResist?: Record<string, number> }): PartyMember {
+  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey, ...(s.level !== undefined && { level: s.level }), ...(s.saves && { saves: s.saves }), ...(s.spellResist && { spellResist: s.spellResist }) };
 }
 
 function averageRecords(records: Array<{ values: Partial<Record<string, number>>; weight: number }>): Record<string, number> | undefined {
@@ -72,6 +80,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
 
   let acSum = 0;
 
+  const heroLevels: number[] = [];
+
   const byKey: Record<string, number> = {};
 
   for (const { stats, quantity = 1, hero } of members) {
@@ -79,6 +89,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
     party.hp += stats.hp * quantity;
 
     if (hero) party.heroCount += 1;
+
+    if (hero && stats.level !== undefined) heroLevels.push(stats.level);
 
     const weaponDpr = (stats.weaponDpr ?? stats.dpr) * quantity;
 
@@ -103,6 +115,8 @@ export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: 
   }
 
   if (acCount > 0) party.ac = acSum / acCount;
+
+  if (heroLevels.length > 0) party.heroLevel = heroLevels.reduce((a, l) => a + l, 0) / heroLevels.length;
 
   const saves = averageRecords(members.flatMap(({ stats, quantity = 1 }) => (stats.saves ? [{ values: stats.saves, weight: quantity }] : [])));
 
@@ -173,8 +187,16 @@ export type TierCeilings = Map<number, Power>;
 
 const clampScale = (x: number) => Math.min(SCALE_MAX, Math.max(SCALE_MIN, x));
 
+function highLevelSteps(heroLevel: number | undefined): number {
+  if (heroLevel === undefined) return 0;
+
+  return Math.min(HIGH_LEVEL_MAX_STEPS, Math.max(0, (heroLevel - HIGH_LEVEL_FROM) / HIGH_LEVEL_SPAN));
+}
+
 export function targetEnemyPower(party: PartyPower): Power {
-  return { hp: party.dpr * HIT_RATE * TARGET_ROUNDS, dpr: (HERO_EDGE * party.hp) / TARGET_ROUNDS };
+  const t = highLevelSteps(party.heroLevel);
+
+  return { hp: party.dpr * HIT_RATE * TARGET_ROUNDS * (1 + HIGH_LEVEL_HP_BOOST * t), dpr: ((HERO_EDGE * party.hp) / TARGET_ROUNDS) * (1 + HIGH_LEVEL_DPR_BOOST * t) };
 }
 
 const lowerQuantile = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floor((values.length - 1) * TIER_CEILING_QUANTILE)];

@@ -26,6 +26,7 @@ export interface SelectOptionGroup {
 
 interface SelectFieldProps {
   id?: string;
+  "aria-label"?: string;
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
@@ -43,6 +44,7 @@ interface SelectFieldProps {
 
 export function SelectField({
   id,
+  "aria-label": ariaLabel,
   value,
   onValueChange,
   placeholder = "Виберіть опцію",
@@ -74,7 +76,7 @@ export function SelectField({
       disabled={disabled}
       required={required}
     >
-      <SelectTrigger id={id} className={cn(triggerClassName, className)}>
+      <SelectTrigger id={id} aria-label={ariaLabel} className={cn(triggerClassName, className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

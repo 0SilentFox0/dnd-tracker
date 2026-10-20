@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LogOut, Menu, User } from "lucide-react";
@@ -28,6 +28,29 @@ export function Header({ email }: { email: string | null }) {
 
   const signOutForm = useRef<HTMLFormElement>(null);
 
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+
+    if (!el) return;
+
+    const root = document.documentElement;
+
+    const sync = () => root.style.setProperty("--app-header-h", `${el.offsetHeight}px`);
+
+    sync();
+
+    const observer = new ResizeObserver(sync);
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--app-header-h");
+    };
+  }, []);
+
   if (
     pathname?.startsWith("/sign-in") ||
     pathname?.startsWith("/sign-up") ||
@@ -51,7 +74,7 @@ export function Header({ email }: { email: string | null }) {
   const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
+    <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
@@ -117,6 +140,11 @@ export function Header({ email }: { email: string | null }) {
                     <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/music`}>
                         Музика
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/scenario`}>
+                        Сценарій
                       </Link>
                     </DropdownMenuItem>
                   </>
