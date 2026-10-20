@@ -63,14 +63,17 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
   return effect.kind === "flag" && effect.flag === query.flag;
 }
 
+// вибулий з лабіринту поза боєм: аури сторони його не зачіпають і від нього не діють; сплячий ворог «заморожений»
+const outOfMazePlay = (source: BattleParticipant, subject: BattleParticipant) => !!source.battleData.escaped || !!subject.battleData.escaped;
+
 export function appliesTo(target: StaticEffect["target"], source: BattleParticipant, subject: BattleParticipant): boolean {
   switch (target ?? "self") {
     case "self":
       return source.basicInfo.id === subject.basicInfo.id;
     case "allAllies":
-      return source.basicInfo.side === subject.basicInfo.side;
+      return source.basicInfo.side === subject.basicInfo.side && (source.basicInfo.id === subject.basicInfo.id || !outOfMazePlay(source, subject));
     case "allEnemies":
-      return source.basicInfo.side !== subject.basicInfo.side;
+      return source.basicInfo.side !== subject.basicInfo.side && !outOfMazePlay(source, subject) && !subject.battleData.dormant;
     default:
       return false;
   }

@@ -34,7 +34,7 @@ export const zoneEffectId = (ownerId: string, auraId: string) => `zone:${ownerId
 export function zoneCandidates(ps: BattleParticipant[], owner: BattleParticipant, target: AreaTarget): BattleParticipant[] {
   const allies = target === "nearbyAllies";
 
-  return ps.filter((p) => isActive(p) && (p.basicInfo.side === owner.basicInfo.side) === allies);
+  return ps.filter((p) => isActive(p) && !p.battleData.escaped && !p.battleData.dormant && (p.basicInfo.side === owner.basicInfo.side) === allies);
 }
 
 /** Поточний склад зони — з ефектів на цілях. */
