@@ -19,7 +19,7 @@ export function ShowStage({ show }: { show: ShowState | null }) {
   const current = show?.slide ?? null;
 
   return (
-    <div className="relative size-full overflow-hidden bg-black">
+    <div className="absolute inset-0 overflow-hidden bg-black">
       {layers.map(({ slide, key, role }) => (
         <div
           key={key}
