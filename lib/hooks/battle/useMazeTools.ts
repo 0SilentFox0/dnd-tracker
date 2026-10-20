@@ -11,7 +11,7 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { useNotify } from "@/lib/hooks/common";
 import { cellKey, samePoint } from "@/lib/utils/battle/grid";
-import { isEdgeCell } from "@/lib/utils/battle/maze";
+import { isEdgeCell } from "@/lib/utils/battle/modes/maze";
 import type { MazeActionData } from "@/types/api";
 import type { GridPoint, MazeConfig } from "@/types/battle";
 

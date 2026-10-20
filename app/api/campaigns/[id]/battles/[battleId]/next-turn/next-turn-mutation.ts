@@ -1,5 +1,5 @@
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { isMazeDark } from "@/lib/utils/battle/maze";
+import { isMazeDark } from "@/lib/utils/battle/modes/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { actorEvent, battleActionToEvent } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";

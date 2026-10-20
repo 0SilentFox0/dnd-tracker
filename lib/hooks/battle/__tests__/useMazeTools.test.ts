@@ -8,7 +8,7 @@ import { fakeScene } from "./fake-scene";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { MazeConfig } from "@/types/battle";
 
 function setup(maze: Partial<MazeConfig> = {}, isDM = true) {

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { emptyMaze } from "@/lib/constants/battle";
 import { activeMapMode, NORMAL_MODE } from "@/lib/utils/battle/modes";
+import { mazeMode } from "@/lib/utils/battle/modes/maze";
 import type { BattleMapConfig } from "@/types/battle";
 
 const base: BattleMapConfig = { cols: 10, rows: 8 } as BattleMapConfig;
@@ -21,5 +23,11 @@ describe("activeMapMode", () => {
     expect(NORMAL_MODE.server).toEqual({});
     expect(NORMAL_MODE.engine).toEqual({});
     expect(NORMAL_MODE.client).toEqual({});
+  });
+
+  it("карта з лабіринтом — режим maze", () => {
+    expect(activeMapMode({ ...base, maze: emptyMaze() })).toBe(mazeMode);
+    expect(mazeMode.configOf({ ...base, maze: emptyMaze() })).toEqual(emptyMaze());
+    expect(mazeMode.withConfig(base, null).maze).toBeNull();
   });
 });

@@ -1,9 +1,12 @@
-import type { QueueEntry } from "./queue";
+import { mazeGridOf } from "./grid";
+import { isMazeHero, isPlaced } from "./status";
+import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
+import { edgeCells } from "./walls";
 
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { edgeCells, isMazeHero, isPlaced, mazeGridOf, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
+import type { QueueEntry } from "@/lib/utils/battle/view/queue";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";

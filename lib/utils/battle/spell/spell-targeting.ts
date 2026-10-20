@@ -8,7 +8,7 @@ import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
-import { mazeAimHidden, mazeGridOf, mazeTargetHidden, seesTarget } from "@/lib/utils/battle/maze";
+import { mazeAimHidden, mazeGridOf, mazeTargetHidden, seesTarget } from "@/lib/utils/battle/modes/maze";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";

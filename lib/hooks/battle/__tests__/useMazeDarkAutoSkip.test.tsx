@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useMazeDarkAutoSkip } from "../useMazeDarkAutoSkip";
 import { fakeScene, type FakeSceneOptions } from "./fake-scene";
 
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 
 const skip = vi.fn();
 

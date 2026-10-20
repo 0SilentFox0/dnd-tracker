@@ -5,7 +5,7 @@ import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MA
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
-import type { MazeView } from "@/lib/utils/battle/view/maze-view";
+import type { MazeView } from "@/lib/utils/battle/modes/maze";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 

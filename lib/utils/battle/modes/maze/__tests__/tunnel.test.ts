@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mazeGrid } from "./fixtures";
 
 import { cellKey, mapCentre, neighbors } from "@/lib/utils/battle/grid/geometry";
-import { canStep, heroTunnel, mazeDistances, wallSet } from "@/lib/utils/battle/maze";
+import { canStep, heroTunnel, mazeDistances, wallSet } from "@/lib/utils/battle/modes/maze";
 import type { GridPoint } from "@/types/battle";
 
 const grid = { cols: 11, rows: 9 };

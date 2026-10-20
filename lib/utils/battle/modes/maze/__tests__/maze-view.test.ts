@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { spellTargetCandidates } from "@/lib/utils/battle/flows/spell-flow";
-import { flag, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
-import { deriveMazeView, filterQueue, turnQueue, visibleParticipants } from "@/lib/utils/battle/view";
+import { deriveMazeView, filterQueue, visibleParticipants } from "@/lib/utils/battle/modes/maze";
+import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { turnQueue } from "@/lib/utils/battle/view";
 import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
 const withControl = (p: BattleParticipant, userId: string, facing: "e" | "w" = "e"): BattleParticipant => ({

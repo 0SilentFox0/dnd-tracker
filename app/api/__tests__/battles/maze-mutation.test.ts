@@ -6,7 +6,7 @@ import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/m
 import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { mazeActionSchema } from "@/lib/schemas/battles";
-import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMapConfig, GridPoint, MazeConfig } from "@/types/battle";

@@ -1,9 +1,10 @@
+import { mazeMode } from "./maze/mode";
 import { NORMAL_MODE } from "./normal";
 import type { MapModeDefinition } from "./types";
 
 import type { BattleMapConfig } from "@/types/battle";
 
-export const MAP_MODE_REGISTRY = {} as const satisfies Record<string, MapModeDefinition<never>>;
+export const MAP_MODE_REGISTRY = { maze: mazeMode } as const satisfies Record<string, MapModeDefinition<unknown>>;
 
 export type MapModeKey = keyof typeof MAP_MODE_REGISTRY;
 

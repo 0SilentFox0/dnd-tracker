@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { canStand } from "@/lib/utils/battle/grid/occupancy";
-import { enterMazeAsleep, mazeGridOf, mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
+import { enterMazeAsleep, mazeGridOf, mazePlacementError, placeInMaze } from "@/lib/utils/battle/modes/maze";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,

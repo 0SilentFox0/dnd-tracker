@@ -3,7 +3,7 @@
 import { memo, useId } from "react";
 
 import { cellCenter, cellKey, parseCellKey, UNIT } from "@/lib/utils/battle/grid";
-import type { MazeView } from "@/lib/utils/battle/view";
+import { MazeView } from "@/lib/utils/battle/modes/maze";
 import type { BattleMapConfig, GridPoint, MazeMark, MazeMarkSymbol } from "@/types/battle";
 
 const RUNE = "M0,-30 L26,15 L-26,15 Z M0,30 L-26,-15 L26,-15 Z";

@@ -17,7 +17,7 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { isMazeDark, withMazeAwareness } from "@/lib/utils/battle/maze";
+import { isMazeDark, withMazeAwareness } from "@/lib/utils/battle/modes/maze";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,

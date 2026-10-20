@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const facingEast = (p: BattleParticipant): BattleParticipant => ({ ...p, battleData: { ...p.battleData, facing: "e" } });

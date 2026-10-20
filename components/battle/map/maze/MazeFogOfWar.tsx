@@ -3,7 +3,7 @@
 import { memo, useId } from "react";
 
 import { parseCellKey, UNIT } from "@/lib/utils/battle/grid";
-import type { MazeView } from "@/lib/utils/battle/view";
+import { MazeView } from "@/lib/utils/battle/modes/maze";
 import type { BattleMapConfig } from "@/types/battle";
 
 interface Props {

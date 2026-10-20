@@ -20,7 +20,7 @@ import {
   type Rng,
   scatterFreeStarts,
   seedFrom,
-} from "@/lib/utils/battle/maze";
+} from "@/lib/utils/battle/modes/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
 import type { MazeActionData } from "@/types/api";

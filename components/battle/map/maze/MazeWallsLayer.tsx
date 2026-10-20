@@ -3,8 +3,7 @@
 import { memo } from "react";
 
 import { UNIT } from "@/lib/utils/battle/grid";
-import { parseEdgeKey } from "@/lib/utils/battle/maze";
-import type { MazeView } from "@/lib/utils/battle/view";
+import { MazeView, parseEdgeKey } from "@/lib/utils/battle/modes/maze";
 import type { BattleMapConfig } from "@/types/battle";
 
 export const MAZE_WALL_WIDTH = 10;

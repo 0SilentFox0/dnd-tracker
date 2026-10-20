@@ -7,8 +7,8 @@ import { apexOf, templateAimAllowed, templateArea } from "./template";
 import { AttackType } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { mazeAimHidden, mazeBudgetLeft, mazeGridOf, mazeReachable } from "@/lib/utils/battle/maze";
-import type { MazeView } from "@/lib/utils/battle/view/maze-view";
+import type { MazeView } from "@/lib/utils/battle/modes/maze";
+import { mazeAimHidden, mazeBudgetLeft, mazeGridOf, mazeReachable } from "@/lib/utils/battle/modes/maze";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 

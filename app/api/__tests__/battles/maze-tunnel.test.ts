@@ -7,8 +7,8 @@ import { createRollbackMutation } from "@/app/api/campaigns/[id]/battles/[battle
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { heroTunnel, mazeDistances } from "@/lib/utils/battle/maze";
-import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { heroTunnel, mazeDistances } from "@/lib/utils/battle/modes/maze";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { buildSnapshotState, prepareSave } from "@/lib/utils/battle/store";

@@ -10,7 +10,7 @@ import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { enterMazeAsleep } from "@/lib/utils/battle/maze/status";
+import { enterMazeAsleep } from "@/lib/utils/battle/modes/maze/status";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,

@@ -7,8 +7,8 @@ import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[batt
 import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
-import { allInteriorEdges } from "@/lib/utils/battle/maze";
-import { at, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { allInteriorEdges } from "@/lib/utils/battle/modes/maze";
+import { at, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";

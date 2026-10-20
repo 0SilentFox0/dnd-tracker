@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { mazeMap as sharedMazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
-import { deriveMazeView } from "@/lib/utils/battle/view";
+import { deriveMazeView } from "@/lib/utils/battle/modes/maze";
+import { mazeMap as sharedMazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleMapConfig, BattleParticipant, BattleParticipantBattleData, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
 export class RO {

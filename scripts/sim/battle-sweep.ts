@@ -44,7 +44,7 @@ import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellDistance, cellKey, inBounds, mapCentre, neighbors, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
-import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
+import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/modes/maze";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { MAZE_LIMITS } from "@/lib/constants/battle";
-import { wallSet } from "@/lib/utils/battle/maze";
+import { wallSet } from "@/lib/utils/battle/modes/maze";
 import type { MazeActionData } from "@/types/api";
 import type { MazeConfig } from "@/types/battle";
 

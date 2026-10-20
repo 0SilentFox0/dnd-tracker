@@ -5,7 +5,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Skull, Star, X } from "lucid
 
 import { MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
 import { useBattleScene, useMazeView } from "@/lib/hooks/battle";
-import { mazeBudgetLeft } from "@/lib/utils/battle/maze";
+import { mazeBudgetLeft } from "@/lib/utils/battle/modes/maze";
 import type { BattleParticipant, MazeMarkSymbol } from "@/types/battle";
 
 const SYMBOL_UI: Record<MazeMarkSymbol, { label: string; Icon: typeof Star }> = {

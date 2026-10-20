@@ -5,7 +5,7 @@ import { AttackType, CELL_FEET } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { inPlay, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
+import { mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/modes/maze";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function attackRangeCells(range?: string): number | null {

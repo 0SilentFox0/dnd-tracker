@@ -5,7 +5,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { createAddParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleParticipant } from "@/types/battle";
 

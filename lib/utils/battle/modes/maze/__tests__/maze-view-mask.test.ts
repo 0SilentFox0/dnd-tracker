@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { flag, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
-import { deriveMazeView, maskMazeScene, MAZE_UNKNOWN_NAME, mazeFxVisible, mazeLogVisible, mazeVisible, turnQueue, visibleParticipants } from "@/lib/utils/battle/view";
+import { deriveMazeView, maskMazeScene, MAZE_UNKNOWN_NAME, mazeFxVisible, mazeLogVisible, mazeVisible, visibleParticipants } from "@/lib/utils/battle/modes/maze";
+import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { turnQueue } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant, GridPoint } from "@/types/battle";
 
 const mine = (id: string, at: GridPoint, user = "u1"): BattleParticipant => {

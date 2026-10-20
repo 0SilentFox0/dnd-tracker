@@ -2,8 +2,8 @@ import { cellKey, cellsByDistance, footprint } from "./geometry";
 import { fits, occupiesCells, sizeOf } from "./occupancy";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { mazeGridOf } from "@/lib/utils/battle/maze/grid";
-import { placeMazeParticipants } from "@/lib/utils/battle/maze/movement";
+import { mazeGridOf } from "@/lib/utils/battle/modes/maze/grid";
+import { placeMazeParticipants } from "@/lib/utils/battle/modes/maze/movement";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {

@@ -2,8 +2,8 @@ import { eventActorId, eventTargetIds } from "./events";
 import { findParticipant, isDormant, isTargetable } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
-import { mazeGridOf } from "@/lib/utils/battle/maze/grid";
-import { seesTarget } from "@/lib/utils/battle/maze/sight";
+import { mazeGridOf } from "@/lib/utils/battle/modes/maze/grid";
+import { seesTarget } from "@/lib/utils/battle/modes/maze/sight";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 

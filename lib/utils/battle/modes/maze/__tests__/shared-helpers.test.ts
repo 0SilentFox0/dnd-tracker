@@ -20,7 +20,7 @@ import {
   parseEdgeKey,
   scatterFreeStarts,
   teleportPartner,
-} from "@/lib/utils/battle/maze";
+} from "@/lib/utils/battle/modes/maze";
 
 describe("ребра", () => {
   it("parseEdgeKey і edgeCells", () => {

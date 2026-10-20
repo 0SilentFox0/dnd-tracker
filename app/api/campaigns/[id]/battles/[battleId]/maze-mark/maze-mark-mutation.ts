@@ -4,7 +4,7 @@ import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { mazeMarkSchema } from "@/lib/schemas/battles";
 import { isDormant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { markColor, mazeBudgetLeft } from "@/lib/utils/battle/maze";
+import { markColor, mazeBudgetLeft } from "@/lib/utils/battle/modes/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, rejectAction } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";

@@ -4,7 +4,7 @@ import { context, goblin, hero } from "./fixtures";
 
 import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { MazeActionData as MazeAction } from "@/types/api";
 import type { MazeConfig } from "@/types/battle";

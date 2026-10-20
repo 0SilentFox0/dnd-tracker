@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { applyMazeMove, type MazeGrid, mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
+import { applyMazeMove, type MazeGrid, mazePlacementError, placeInMaze } from "@/lib/utils/battle/modes/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { actorEvent, battleActionToEvent, rejectAction } from "@/lib/utils/battle/store";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";

@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { enemy, hero, mazeMap, RO, viewOf } from "./maze-fixtures";
 
 import { BattleMap } from "@/components/battle/map";
-import { mazeVision, unionVision, viewpointOf } from "@/lib/utils/battle/maze";
+import { mazeVision, unionVision, viewpointOf } from "@/lib/utils/battle/modes/maze";
 
 afterEach(cleanup);
 

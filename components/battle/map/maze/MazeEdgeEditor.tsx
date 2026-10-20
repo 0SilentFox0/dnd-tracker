@@ -4,7 +4,7 @@ import { memo, type PointerEvent, useEffect, useMemo } from "react";
 
 import type { MazeEditing } from "@/lib/hooks/battle";
 import { UNIT } from "@/lib/utils/battle/grid";
-import { allInteriorEdges, parseEdgeKey } from "@/lib/utils/battle/maze";
+import { allInteriorEdges, parseEdgeKey } from "@/lib/utils/battle/modes/maze";
 import type { BattleMapConfig } from "@/types/battle";
 
 const BAND = 30;

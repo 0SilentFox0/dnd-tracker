@@ -12,7 +12,7 @@ import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { useMazeFxLog } from "@/lib/hooks/battle/useMazeView";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleAction } from "@/types/battle";
 
 afterEach(cleanup);
