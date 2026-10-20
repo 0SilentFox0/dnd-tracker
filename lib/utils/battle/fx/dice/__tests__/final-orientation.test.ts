@@ -9,11 +9,11 @@ describe.each(ALL)("d%s", (sides) => {
   const poly = getPolyhedron(sides);
 
   it("turns every value's face to the camera with the number upright on screen", () => {
-    for (const aspect of [0.8, 1.8]) {
+    for (const size of [{ width: 400, height: 500 }, { width: 900, height: 500 }]) {
       for (const count of [1, 2, 6]) {
         const { slots } = layoutDice([Array.from({ length: count }, () => ({ sides, value: 1 }))]);
 
-        const rig = computeRig({ cols: count, rows: 1 }, aspect);
+        const rig = computeRig({ cols: count, rows: 1 }, size);
 
         for (const face of poly.faces) {
           slots.forEach((slot, i) => {
@@ -37,7 +37,7 @@ describe.each(ALL)("d%s", (sides) => {
   });
 
   it("ends the scripted throw in the final orientation, at rest", () => {
-    const rig = computeRig({ cols: 1, rows: 1 }, 1.5);
+    const rig = computeRig({ cols: 1, rows: 1 }, { width: 750, height: 500 });
 
     for (const face of poly.faces) {
       const end: Vec3 = [1, 0, 1];

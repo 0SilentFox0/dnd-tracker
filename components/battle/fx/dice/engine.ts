@@ -1,11 +1,9 @@
 import { type BadgeSpec, createBadgeLayer } from "./badges";
 
-import { computeRig, type DiceThrowSpec, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
+import { computeRig, DIE_RADIUS, type DiceThrowSpec, type DieSlot, getPolyhedron, layoutDice, lowestY, planThrow, project, type Quat, type Rig, sampleThrow, settleProgress, slotPosition, THROW_MS, type ThrowPlan, type Vec3 } from "@/lib/utils/battle/fx/dice";
 import type { DieSides } from "@/types/battle";
 
-export const DIE_RADIUS = 0.9;
-
-const HOLD_MS = 600;
+const HOLD_MS = 350;
 
 const FADE_OUT_MS = 400;
 
@@ -82,7 +80,7 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
 
   let grid = { cols: 1, rows: 1 };
 
-  let rig = computeRig(grid, 1);
+  let rig = computeRig(grid, { width: 1, height: 1 });
 
   let startedAt = 0;
 
@@ -95,7 +93,7 @@ export function createDiceEngine(host: HTMLElement, makeBackend: (host: HTMLElem
 
     const h = host.clientHeight || 1;
 
-    rig = computeRig(grid, w / h);
+    rig = computeRig(grid, { width: w, height: h });
     backend.resize(w, h, rig);
 
     const r = DIE_RADIUS * 1.2;

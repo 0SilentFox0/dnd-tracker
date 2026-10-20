@@ -2,7 +2,9 @@ import type { DieSlot } from "./layout";
 import { add, cross, dot, norm, qAxisAngle, qFromUnitVectors, qMul, qRotate, qSlerp, type Quat, scale, sub, type Vec3 } from "./math";
 import { createRng } from "./rng";
 
-export const THROW_MS = 1800;
+export const THROW_MS = 1400;
+
+export const DIE_RADIUS = 0.9;
 
 // Contact times (fraction of the throw): first landing, then three decaying bounces; the value locks on the last one.
 export const BOUNCE_KEYS = [0.34, 0.58, 0.77, 0.9] as const;
@@ -50,14 +52,22 @@ export interface Rig {
   halfW: number;
 }
 
-export function computeRig(grid: { cols: number; rows: number }, aspect: number): Rig {
+const GRID_MAX_W = 0.6;
+
+const GRID_MAX_H = 0.5;
+
+export const dieSizePx = ({ width, height }: { width: number; height: number }) => Math.min(96, Math.max(44, 0.09 * Math.min(width, height)));
+
+export function computeRig(grid: { cols: number; rows: number }, { width, height }: { width: number; height: number }): Rig {
+  const aspect = width / height;
+
   const needW = (Math.max(1, grid.cols) * SPACING) / 2 + 0.8;
 
   const needH = (Math.max(1, grid.rows) * SPACING) / 2 + 1.6;
 
   const t = Math.tan((FOV / 2) * (Math.PI / 180));
 
-  const dist = Math.max(8, needW / (t * aspect), (needH / t) * 0.95);
+  const dist = Math.max(needW / (t * aspect * GRID_MAX_W), needH / (t * GRID_MAX_H), (2 * DIE_RADIUS * height) / (2 * t * dieSizePx({ width, height })));
 
   const elevation = (76 * Math.PI) / 180;
 
