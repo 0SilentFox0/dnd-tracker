@@ -19,7 +19,6 @@ vi.mock("@/components/battle/fx/runtime/play", () => ({ playFx: h.playFx, FX_LOA
 vi.mock("@/components/battle/fx/animations", () => ({ preloadAnimation: h.preloadAnimation }));
 vi.mock("@/components/battle/fx/runtime/stage", () => ({ cancelLayer: h.cancelLayer }));
 vi.mock("@/components/battle/fx/dice/DiceStage", () => ({
-  DICE_TOTAL_MS: 2800,
   DiceStage: forwardRef(function DiceStage(_, ref) {
     useImperativeHandle(ref, () => ({ play: h.dicePlay, cancel: h.diceCancel }));
 
@@ -33,6 +32,7 @@ vi.mock("@/lib/hooks/battle", () => ({
 
 import { BattleFxLayer } from "@/components/battle/fx/BattleFxLayer";
 import { MAX_FX_MS } from "@/lib/utils/battle/fx";
+import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -126,7 +126,7 @@ describe("BattleFxLayer", () => {
   it("a dice throw plays on the dice stage and finishes when it lands", async () => {
     let land = () => undefined as void;
 
-    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [], caption: "", extraSaves: 0 } };
+    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [] } };
     h.dicePlay.mockReturnValue(new Promise<void>((resolve) => (land = resolve)));
     render(<BattleFxLayer />);
 
@@ -146,12 +146,12 @@ describe("BattleFxLayer", () => {
   });
 
   it("a dice throw that never lands is cancelled and the queue moves on", async () => {
-    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [], caption: "", extraSaves: 0 } };
+    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [] } };
     h.dicePlay.mockReturnValue(new Promise(() => undefined));
     render(<BattleFxLayer />);
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800 + 2800 + 300);
+      await vi.advanceTimersByTimeAsync(800 + DICE_TOTAL_MS + 300);
     });
     expect(h.diceCancel).toHaveBeenCalled();
     expect(h.done).toHaveBeenCalledWith("d1");

@@ -5,7 +5,7 @@ export { type HudMotif, hudMotifsOf } from "./hud-motif";
 export { type FxImpact, impactFor } from "./impact";
 export { mapAction } from "./map-action";
 export { PREVIEW_UNITS, type PreviewUnit, type PreviewUnitId } from "./preview-units";
-export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, shiftFxQueue } from "./queue";
+export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, isMoraleFx, shiftFxQueue } from "./queue";
 export type { PreviewSpell, SpellFxPreview, SpellFxTarget } from "./spell-preview";
 export { type SpellFx, spellFx } from "./spells";
 export { MAX_FX_MS } from "./timing";

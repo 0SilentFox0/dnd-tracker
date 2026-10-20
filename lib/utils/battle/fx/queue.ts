@@ -18,6 +18,8 @@ export interface FxQueueInput {
   morale: MoraleThrow | null;
 }
 
+export const isMoraleFx = (key: string) => key.startsWith("morale:");
+
 const moraleFx = ({ key, spec }: MoraleThrow): FxSpec => ({ key: `morale:${key}`, archetype: "dice", element: "arcane", actorId: key.split(":")[2], actorSide: "ally", targetIds: [], hit: true, critical: false, dice: spec });
 
 export const INITIAL_FX_QUEUE: FxQueueState = { log: null, seen: null, queue: [] };

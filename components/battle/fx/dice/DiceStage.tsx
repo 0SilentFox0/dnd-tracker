@@ -3,7 +3,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 import type { DiceEngine } from "./engine";
-import { DICE_TOTAL_MS } from "./engine";
 
 import { FX_LOAD_TIMEOUT_MS } from "@/components/battle/fx/runtime/play";
 import type { DiceThrowSpec } from "@/lib/utils/battle/fx/dice";
@@ -12,8 +11,6 @@ export interface DiceStageHandle {
   play(spec: DiceThrowSpec): Promise<void>;
   cancel(): void;
 }
-
-export { DICE_TOTAL_MS };
 
 export const sceneLoader = { load: () => import("./scene") };
 

@@ -189,4 +189,11 @@ describe("mapAction dice", () => {
     expect(mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true } })).map((s) => s.archetype)).toEqual(["melee"]);
     expect(mapAction(action({ isCancelled: true, actionDetails: { diceRolls: rolls } }))).toEqual([]);
   });
+
+  it("влучання і шкода — два окремі кидки перед анімацією удару", () => {
+    const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, diceRolls: [...rolls, { kind: "damage", rollerId: "a", dice: [{ sides: 8, value: 5 }] }] } }));
+
+    expect(specs.map((s) => s.archetype)).toEqual(["dice", "dice", "melee"]);
+    expect(new Set(specs.map((s) => s.key)).size).toBe(3);
+  });
 });
