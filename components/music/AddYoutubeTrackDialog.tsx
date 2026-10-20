@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { parseYoutubeId } from "@/lib/utils/audio/youtube-id";
 
 const FORM_ID = "add-youtube-track";
@@ -49,7 +50,7 @@ export function AddYoutubeTrackDialog({ open, onOpenChange, onSubmit, pending }:
       >
         <Input aria-label="Посилання YouTube" placeholder="https://youtu.be/…" value={url} onChange={(e) => setUrl(e.target.value)} />
         {url && !valid && <p className="text-xs text-[var(--enemy)]">Не вдалося розпізнати посилання YouTube</p>}
-        <Input aria-label="Назва (необовʼязково)" placeholder="Назва" maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Input aria-label="Назва (необовʼязково)" placeholder="Назва" maxLength={TRACK_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
       </form>
     </ResponsiveDialog>
   );

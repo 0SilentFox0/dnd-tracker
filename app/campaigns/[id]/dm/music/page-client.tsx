@@ -9,7 +9,7 @@ import { AddYoutubeTrackDialog } from "@/components/music/AddYoutubeTrackDialog"
 import { TrackList } from "@/components/music/TrackList";
 import { UploadTrackButton } from "@/components/music/UploadTrackButton";
 import { Button } from "@/components/ui/button";
-import { MAX_TRACKS_PER_CAMPAIGN } from "@/lib/constants/music";
+import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "@/lib/constants/music";
 import { useMusicLibrary } from "@/lib/hooks/tracks";
 import type { CampaignTrack } from "@/types/audio";
 
@@ -24,7 +24,7 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
     <HudPage>
       <HudPageHeader
         title="Музика"
-        subtitle={`${library.tracks.length} з ${MAX_TRACKS_PER_CAMPAIGN} треків · MP3 або M4A до 10 МБ`}
+        subtitle={`${library.tracks.length} з ${MAX_TRACKS_PER_CAMPAIGN} треків · ${TRACK_FORMATS_LABEL} до ${MAX_TRACK_MB} МБ`}
         actions={
           <>
             <UploadTrackButton onFile={(file) => void library.upload(file)} pending={library.busy || full} />
@@ -38,7 +38,7 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
       {library.loading && library.tracks.length === 0 ? (
         <LoadingState rows={4} label="Завантаження треків…" />
       ) : library.tracks.length === 0 ? (
-        <EmptyState icon={Music} title="Ще немає треків" description="Завантажте MP3 або додайте посилання YouTube — ДМ вмикає їх у бою." />
+        <EmptyState icon={Music} title="Ще немає треків" description={`Завантажте ${TRACK_FORMATS_LABEL} або додайте посилання YouTube — ДМ вмикає їх у бою.`} />
       ) : (
         <TrackList tracks={library.tracks} busy={library.busy} actions={{ onRename: library.rename, onDelete: (t) => void library.remove(t), onMove: library.move }} />
       )}

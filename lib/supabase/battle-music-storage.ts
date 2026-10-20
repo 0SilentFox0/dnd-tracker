@@ -1,12 +1,11 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_FORMATS } from "@/lib/constants/music";
+import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_EXTENSIONS, TRACK_FORMATS,type TrackFormat } from "@/lib/constants/music";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { TrackFormat } from "@/lib/utils/audio/track-file";
 import type { TrackUploadTicket } from "@/types/audio";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
-const TRACK_OBJECT = /^([^/]+)\/[a-f0-9]{32}\.(mp3|m4a)$/;
+const TRACK_OBJECT = new RegExp(`^([^/]+)/[a-f0-9]{32}\\.(${TRACK_EXTENSIONS.join("|")})$`);
 
 const PUBLIC_MARKER = `/storage/v1/object/public/${BATTLE_MUSIC_BUCKET}/`;
 

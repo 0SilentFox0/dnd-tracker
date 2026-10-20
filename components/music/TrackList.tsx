@@ -6,6 +6,8 @@ import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TRACK_TITLE_MAX } from "@/lib/constants/music";
+import { trackFormatOfUrl } from "@/lib/utils/audio/track-file";
 import type { CampaignTrack } from "@/types/audio";
 
 export interface TrackListActions {
@@ -19,7 +21,7 @@ const duration = (sec: number | null) => (sec ? `${Math.floor(sec / 60)}:${Strin
 function kindLabel(t: CampaignTrack) {
   if (t.kind === "youtube") return "YouTube";
 
-  const format = t.url?.match(/\.(mp3|m4a)$/i)?.[1].toUpperCase() ?? "Файл";
+  const format = trackFormatOfUrl(t.url)?.toUpperCase() ?? "Файл";
 
   const d = duration(t.durationSec);
 
@@ -45,7 +47,7 @@ function TrackTitle({ track, onRename }: { track: CampaignTrack; onRename: Track
     <Input
       aria-label="Назва треку"
       value={draft}
-      maxLength={120}
+      maxLength={TRACK_TITLE_MAX}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}

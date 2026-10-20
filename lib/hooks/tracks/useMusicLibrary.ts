@@ -8,6 +8,7 @@ import { useRenameTrack } from "./useRenameTrack";
 import { useTracks } from "./useTracks";
 
 import { createTrack, deleteTrack, reorderTracks, uploadTrackFile } from "@/lib/api/tracks";
+import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { useConfirm, useCrudMutation, useNotify } from "@/lib/hooks/common";
 import { moveTrack } from "@/lib/utils/audio/order";
 import { readAudioDuration } from "@/lib/utils/audio/read-duration";
@@ -24,7 +25,7 @@ export interface MusicLibrary {
   move(index: number, dir: -1 | 1): void;
 }
 
-const stripExtension = (name: string) => name.replace(/\.[^.]+$/, "").slice(0, 120) || "Трек";
+const stripExtension = (name: string) => name.replace(/\.[^.]+$/, "").slice(0, TRACK_TITLE_MAX) || "Трек";
 
 const messageOf = (e: unknown) => (e instanceof Error && e.message ? e.message : "Не вдалося зберегти");
 
