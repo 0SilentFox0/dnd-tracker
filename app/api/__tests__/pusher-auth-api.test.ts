@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { battleChannelName, showChannelName, userChannelName } from "@/lib/pusher/channels";
 
 const authorizeChannel = vi.hoisted(() => vi.fn(() => ({ auth: "signed" })));
 
@@ -8,9 +8,11 @@ const getClaims = vi.hoisted(() => vi.fn());
 
 const findBattle = vi.hoisted(() => vi.fn());
 
+const findMember = vi.hoisted(() => vi.fn());
+
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { authorizeChannel } }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getClaims } }) }));
-vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: findBattle } } }));
+vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: findBattle }, campaignMember: { findFirst: findMember } } }));
 
 import { POST } from "@/app/api/pusher/auth/route";
 
@@ -59,6 +61,26 @@ describe("POST /api/pusher/auth", () => {
   it("власний user-канал — так, чужий — 403", async () => {
     expect((await auth(userChannelName(MEMBER))).status).toBe(200);
     expect((await auth(userChannelName("u-other"))).status).toBe(403);
+  });
+
+  it("учасник кампанії підписується на канал показу", async () => {
+    findMember.mockResolvedValue({ id: "m1" });
+
+    const res = await auth(showChannelName("c1"));
+
+    expect(res.status).toBe(200);
+    expect(findMember).toHaveBeenCalledWith(expect.objectContaining({ where: { campaignId: "c1", userId: MEMBER } }));
+  });
+
+  it("не учасник кампанії — канал показу 403", async () => {
+    findMember.mockResolvedValue(null);
+
+    expect((await auth(showChannelName("c1"))).status).toBe(403);
+  });
+
+  it("канал показу без id — 403", async () => {
+    expect((await auth("private-show-")).status).toBe(403);
+    expect(findMember).not.toHaveBeenCalled();
   });
 
   it("невідомий префікс — 403", async () => {
