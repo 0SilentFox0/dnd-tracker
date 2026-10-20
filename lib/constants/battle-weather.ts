@@ -1,8 +1,6 @@
-import type { WeatherKind } from "@/types/battle";
+export const WEATHER_KINDS = ["rain", "storm", "snow", "blizzard", "fog", "embers", "crypt"] as const;
 
-export const WEATHER_KINDS = ["rain", "storm", "snow", "blizzard", "fog", "embers", "crypt"] as const satisfies readonly WeatherKind[];
-
-export const WEATHER_LABELS: Record<WeatherKind, string> = {
+export const WEATHER_LABELS: Record<(typeof WEATHER_KINDS)[number], string> = {
   rain: "Дощ",
   storm: "Гроза",
   snow: "Сніг",

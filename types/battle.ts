@@ -2,6 +2,7 @@ import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abili
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -167,10 +168,9 @@ export interface SpellTemplate {
   hollow?: boolean;
 }
 
-export type WeatherKind = "rain" | "storm" | "snow" | "blizzard" | "fog" | "embers" | "crypt";
+export type WeatherKind = (typeof WEATHER_KINDS)[number];
 
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
-
 export interface BattleMapConfig {
   cols: number;
   rows: number;

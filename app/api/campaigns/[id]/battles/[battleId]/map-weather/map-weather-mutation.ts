@@ -1,14 +1,13 @@
 import { z } from "zod";
 
-import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
+import { weatherKindSchema } from "@/lib/schemas";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
+import type { MapWeatherData } from "@/types/api";
 
-export const mapWeatherSchema = z.object({ weather: z.enum(WEATHER_KINDS).nullable() });
+export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() }) satisfies z.ZodType<MapWeatherData>;
 
-export type MapWeatherBody = z.infer<typeof mapWeatherSchema>;
-
-export function mapWeatherMutation(ctx: BattleMutationContext, body: MapWeatherBody): MutationResult {
+export function mapWeatherMutation(ctx: BattleMutationContext, body: MapWeatherData): MutationResult {
   const map = ctx.meta.map;
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");

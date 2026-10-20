@@ -6,9 +6,8 @@ import type { MapWeatherData } from "@/types/api";
 import type { WeatherKind } from "@/types/battle";
 
 export interface MapWeatherTool {
-  open: boolean;
+  active: boolean;
   toggle(): void;
-  close(): void;
   current: WeatherKind | null;
   pending: boolean;
   choose(kind: WeatherKind | null): void;
@@ -25,22 +24,20 @@ export function useMapWeatherTool(args: {
     mutation: { mutate, isPending },
   } = args;
 
-  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(false);
 
-  const toggle = useCallback(() => setOpen((o) => !o), []);
-
-  const close = useCallback(() => setOpen(false), []);
+  const toggle = useCallback(() => setActive((o) => !o), []);
 
   const choose = useCallback(
     (kind: WeatherKind | null) => {
-      setOpen(false);
+      setActive(false);
 
       if (kind !== current) mutate({ weather: kind });
     },
     [current, mutate],
   );
 
-  const tool = useMemo(() => ({ open, toggle, close, current, pending: isPending, choose }), [open, toggle, close, current, isPending, choose]);
+  const tool = useMemo(() => ({ active, toggle, current, pending: isPending, choose }), [active, toggle, current, isPending, choose]);
 
   return isDM ? tool : null;
 }

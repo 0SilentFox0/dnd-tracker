@@ -48,15 +48,15 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
         <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow}>
           Місцевість
         </ModeButton>
-        <ModeButton active={weatherTool.open} onClick={weatherTool.toggle} tall={inRow}>
+        <ModeButton active={weatherTool.active} onClick={weatherTool.toggle} tall={inRow}>
           Погода
         </ModeButton>
       </div>
-      {(terrainTool.active || weatherTool.open) && (
+      {(terrainTool.active || weatherTool.active) && (
         // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду
         <div className={cn("flex flex-col items-start gap-1.5", inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
           {terrainTool.active && <MapTerrainToolbar tool={terrainTool} />}
-          {weatherTool.open && <MapWeatherPicker tool={weatherTool} />}
+          {weatherTool.active && <MapWeatherPicker tool={weatherTool} />}
         </div>
       )}
     </div>
