@@ -9,15 +9,9 @@ import { RaceCard } from "@/components/races/RaceCard";
 import { Button } from "@/components/ui/button";
 import { useRacesList } from "@/lib/hooks/races";
 import { pluralUk } from "@/lib/utils/common/plural";
-import type { Race } from "@/types/races";
 
-interface DMRacesPageClientProps {
-  campaignId: string;
-  initialRaces: Race[];
-}
-
-export function DMRacesPageClient({ campaignId, initialRaces }: DMRacesPageClientProps) {
-  const list = useRacesList(campaignId, initialRaces);
+export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
+  const list = useRacesList(campaignId);
 
   const { races } = list;
 

@@ -5,12 +5,12 @@ import { useState } from "react";
 import { useCreateRace, useDeleteRace, useRaces } from "./useRaces";
 
 import { useConfirm } from "@/lib/hooks/common";
-import type { Race, RaceFormData } from "@/types/races";
+import type { RaceFormData } from "@/types/races";
 
-export function useRacesList(campaignId: string, initialRaces: Race[]) {
+export function useRacesList(campaignId: string) {
   const confirm = useConfirm();
 
-  const { data: races = initialRaces, isLoading } = useRaces(campaignId, { initialData: initialRaces });
+  const { data: races = [], isLoading } = useRaces(campaignId);
 
   const create = useCreateRace(campaignId);
 

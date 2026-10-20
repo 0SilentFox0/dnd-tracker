@@ -12,15 +12,9 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useSpellsList } from "@/lib/hooks/spells";
 import { pluralUk } from "@/lib/utils/common/plural";
-import type { Spell } from "@/types/spells";
 
-interface DMSpellsPageClientProps {
-  campaignId: string;
-  initialSpells: Spell[];
-}
-
-export function DMSpellsPageClient({ campaignId, initialSpells }: DMSpellsPageClientProps) {
-  const list = useSpellsList(campaignId, initialSpells);
+export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
+  const list = useSpellsList(campaignId);
 
   const count = list.spells.length;
 

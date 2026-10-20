@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { raceNameConflict } from "./race-name";
+import { readRaces } from "./read-races";
 
-import { getCachedRaces } from "@/lib/cache/reference-data";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { raceColorAt } from "@/lib/constants/race-colors";
 import { prisma } from "@/lib/db";
 import { createRaceSchema } from "@/lib/schemas";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
@@ -22,15 +21,7 @@ export async function GET(
     const { id } = await params;
 
     // Доступ для будь-якого учасника кампанії (гравці мають бачити раси при створенні/редагуванні персонажа)
-    const accessResult = await requireCampaignAccess(id, false);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const races = await getCachedRaces(id);
-
-    return NextResponse.json(races, { headers: PRIVATE_NO_STORE_HEADERS });
+    return readRaces({ id });
   } catch (error) {
     return handleApiError(error, { action: "list races" });
   }

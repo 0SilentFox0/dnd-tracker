@@ -24,12 +24,11 @@ import type { Spell, SpellGroup } from "@/types/spells";
 
 export type { Spell, SpellGroup };
 
-export function useSpells(campaignId: string, opts?: { initialData?: Spell[]; enabled?: boolean }) {
+export function useSpells(campaignId: string, opts?: { enabled?: boolean }) {
   return useQuery<Spell[]>({
     queryKey: spellKeys.list(campaignId),
     queryFn: () => getSpells(campaignId),
     staleTime: REFERENCE_STALE_MS,
-    ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
     enabled: !!campaignId && (opts?.enabled ?? true),
   });
 }

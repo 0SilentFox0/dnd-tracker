@@ -1,28 +1,22 @@
 import { DMSpellsPageClient } from "./page-client";
 
-import { prisma } from "@/lib/db";
+import { readSpells } from "@/app/api/campaigns/[id]/spells/read-spells";
+import { spellKeys } from "@/lib/hooks/spells/keys";
+import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { readOkJson } from "@/lib/utils/api/read-json";
+import type { Spell } from "@/types/spells";
 
-export default async function DMSpellsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DMSpellsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   await requireCampaignDM(id);
 
-  const spells = await prisma.spell.findMany({
-    where: {
-      campaignId: id,
-    },
-    include: {
-      spellGroup: true,
-    },
-    orderBy: {
-      level: "asc",
-    },
-  });
+  const spells = await readOkJson<Spell[]>(await readSpells({ id, accessChecked: true }));
 
-  return <DMSpellsPageClient campaignId={id} initialSpells={spells} />;
+  return (
+    <PrefetchedQuery queryKey={spellKeys.list(id)} data={spells}>
+      <DMSpellsPageClient campaignId={id} />
+    </PrefetchedQuery>
+  );
 }

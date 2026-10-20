@@ -24,13 +24,12 @@ const raceDependentKeys = (campaignId: string) => [
   battleKeys.balance(campaignId),
 ];
 
-export function useRaces(campaignId: string, opts?: { initialData?: Race[]; enabled?: boolean }) {
+export function useRaces(campaignId: string, opts?: { enabled?: boolean }) {
   return useQuery<Race[]>({
     queryKey: raceKeys.list(campaignId),
     staleTime: REFERENCE_STALE_MS,
     queryFn: () => getRaces(campaignId),
     enabled: opts?.enabled ?? true,
-    ...(opts?.initialData !== undefined && { initialData: opts.initialData }),
   });
 }
 
