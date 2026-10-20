@@ -4,9 +4,10 @@ import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { trackKeys } from "./keys";
+import { useRenameTrack } from "./useRenameTrack";
 import { useTracks } from "./useTracks";
 
-import { createTrack, deleteTrack, reorderTracks, updateTrack, uploadTrackFile } from "@/lib/api/tracks";
+import { createTrack, deleteTrack, reorderTracks, uploadTrackFile } from "@/lib/api/tracks";
 import { useConfirm, useCrudMutation, useNotify } from "@/lib/hooks/common";
 import { moveTrack } from "@/lib/utils/audio/order";
 import { readAudioDuration } from "@/lib/utils/audio/read-duration";
@@ -56,8 +57,6 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const youtubeM = useCrudMutation({ mutationFn: (data: { url: string; title?: string }) => createTrack(campaignId, { kind: "youtube", ...data }), invalidateKeys, onError });
 
-  const renameM = useCrudMutation({ mutationFn: ({ id, title }: { id: string; title: string }) => updateTrack(campaignId, id, { title }), invalidateKeys, onError });
-
   const deleteM = useCrudMutation({ mutationFn: (id: string) => deleteTrack(campaignId, id), invalidateKeys, onError });
 
   const reorderM = useMutation({
@@ -76,9 +75,7 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const addYoutube = useCallback(async (data: { url: string; title?: string }) => youtubeAsync(data).then(() => true, () => false), [youtubeAsync]);
 
-  const { mutate: renameMutate } = renameM;
-
-  const rename = useCallback((id: string, title: string) => renameMutate({ id, title }), [renameMutate]);
+  const rename = useRenameTrack(campaignId, onError);
 
   const { mutate: deleteMutate } = deleteM;
 
