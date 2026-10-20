@@ -6,6 +6,7 @@ import { enemy, hero, mazeMap, RO, viewOf } from "./maze-fixtures";
 
 import { BattleMap } from "@/components/battle/map";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
+import { MazeViewProvider } from "@/components/battle/scene/MazeViewProvider";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { cellPolygon } from "@/lib/utils/battle/grid";
 
@@ -136,7 +137,9 @@ describe("шкала ініціативи в лабіринті", () => {
 
     const { container } = render(
       <Wrapper>
-        <InitiativeTrack />
+        <MazeViewProvider>
+          <InitiativeTrack />
+        </MazeViewProvider>
       </Wrapper>,
     );
 

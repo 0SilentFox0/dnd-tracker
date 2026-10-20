@@ -1,6 +1,6 @@
 import { pickAttack } from "./attack-reach";
 import { cellKey, parseCellKey } from "./geometry";
-import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
+import { type CellMark, isMoveMark, type MoveStep, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
@@ -123,21 +123,46 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
   return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: hollow ? null : at, pulseFrom };
 }
 
+interface MoveZoneInput {
+  map: BattleMapConfig;
+  participants: BattleParticipant[];
+  seen: BattleParticipant[];
+  mover: BattleParticipant;
+  view: MazeView | null | undefined;
+  dmUserId: string | null;
+}
+
+interface MoveZone {
+  steps: Map<string, MoveStep>;
+  marks: Map<string, CellMark | number>;
+}
+
 /** Лабіринт: кроки лише крізь видимі клітинки й повз видимих учасників — прихованих гравець не має вгадувати з зони ходу. */
-function mazeMoveSteps(map: BattleMapConfig, seen: BattleParticipant[], mover: BattleParticipant, view: MazeView | null | undefined) {
+function mazeMoveZone({ map, seen, mover, view }: MoveZoneInput): MoveZone {
   const grid = mazeGridOf(map);
 
-  const steps = new Map<string, { anchor: GridPoint; cost: number }>();
+  const zone: MoveZone = { steps: new Map(), marks: new Map() };
 
   // без виходу лабіринт ще не готовий — сервер відхилить будь-який крок
-  if (!grid || grid.maze.dark || !grid.maze.exit) return steps;
+  if (!grid || grid.maze.dark || !grid.maze.exit) return zone;
 
   const reach = mazeReachable(grid, { participants: seen, mover, budget: mazeBudgetLeft(mover), limit: view?.cells ?? undefined });
 
-  for (const [key, { cost }] of reach) steps.set(key, { anchor: parseCellKey(key), cost });
+  for (const [key, { cost }] of reach) {
+    zone.steps.set(key, { anchor: parseCellKey(key), cost });
+    zone.marks.set(key, cost);
+  }
 
-  return steps;
+  return zone;
 }
+
+function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): MoveZone {
+  const steps = moveSteps(map, participants, mover, { dmUserId });
+
+  return { steps, marks: moveZoneMarks(map, participants, mover, { dmUserId, steps }) };
+}
+
+const moveZone = (input: MoveZoneInput): MoveZone => (input.map.maze ? mazeMoveZone(input) : openMoveZone(input));
 
 export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }: MapSceneInput): MapScene {
   const { current, viewer, canAct, isDM, attackReady } = actor;
@@ -164,17 +189,16 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
-  const moveOpts = { dmUserId: isDM ? viewer.userId : null };
-
   const seen = map.maze && maze ? participants.filter((p) => maze.visibleIds.has(p.basicInfo.id)) : participants;
 
   const canMove = !aim && !placing && !tool && canAct && current?.battleData.position;
 
-  const steps = canMove && current ? (map.maze ? mazeMoveSteps(map, seen, current, maze) : moveSteps(map, participants, current, moveOpts)) : null;
+  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: maze, dmUserId: isDM ? viewer.userId : null }) : null;
 
-  if (steps && current) {
-    if (map.maze) for (const [key, { cost }] of steps) marks.set(key, cost);
-    else for (const [key, cost] of moveZoneMarks(map, participants, current, { ...moveOpts, steps })) marks.set(key, cost);
+  const steps = zone?.steps ?? null;
+
+  if (zone && current) {
+    for (const [key, mark] of zone.marks) marks.set(key, mark);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, seen, current, attacks)) marks.set(key, mark);
   }

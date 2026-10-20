@@ -1,22 +1,18 @@
 "use client";
 
-import { memo, useMemo, useRef } from "react";
+import { memo, useRef } from "react";
 
 import { Portrait } from "@/components/battle/hud";
 import { ROMAN_NUMERALS } from "@/lib/constants/spells";
-import { useBattleSceneData, useMazeView } from "@/lib/hooks/battle";
+import { useBattleSceneData } from "@/lib/hooks/battle";
 import { useFlip } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { filterQueue, queueKeys } from "@/lib/utils/battle/view";
+import { queueKeys } from "@/lib/utils/battle/view";
 
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack() {
-  const { turn: { queue: fullQueue }, roster: { myParticipants }, select } = useBattleSceneData();
-
-  const { view: maze } = useMazeView();
-
-  const queue = useMemo(() => (maze?.role === "player" ? filterQueue(fullQueue, maze) : fullQueue), [fullQueue, maze]);
+  const { turn: { queue }, roster: { myParticipants }, select } = useBattleSceneData();
 
   const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 

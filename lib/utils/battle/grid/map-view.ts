@@ -15,7 +15,7 @@ export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[
 
 export const isMoveMark = (m: CellMark | number | undefined): boolean => typeof m === "number" || m === "move" || m === "move-danger";
 
-interface MoveStep {
+export interface MoveStep {
   anchor: GridPoint;
   cost: number;
 }
