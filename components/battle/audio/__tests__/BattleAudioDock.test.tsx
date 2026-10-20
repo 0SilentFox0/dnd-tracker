@@ -115,6 +115,21 @@ describe("BattleAudioDock — гравець", () => {
     }
   });
 
+  it("телефон: у згорнутому чипі є «Увімкнути звук» — розблоковує в тому ж кліку, далі лишається чип", () => {
+    setWide(false);
+
+    const { getByRole, queryByRole, container } = dock({ audio: fileTrack, placement: "strip" });
+
+    expect(queryByRole("region", { name: "Музика бою" })).toBeNull();
+
+    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    expect(container.querySelector("audio")?.getAttribute("src")).toBe("https://s/1.mp3");
+    expect(queryByRole("button", { name: "Увімкнути звук" })).toBeNull();
+    expect(getByRole("button", { name: "Розгорнути плеєр: Бій у таверні" })).toBeTruthy();
+  });
+
   it("один <audio> на сторінку: панель зникає й з'являється (Стоп, лобі → бій, 1024 px) — той самий розблокований елемент", () => {
     const { container, getByRole, rerender } = dock({ audio: fileTrack });
 

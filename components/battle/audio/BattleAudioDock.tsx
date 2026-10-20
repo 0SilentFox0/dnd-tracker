@@ -6,6 +6,7 @@ import { Music } from "lucide-react";
 import { AudioPlayerPanel } from "./AudioPlayerPanel";
 import { YoutubeAudioDriver } from "./YoutubeAudioDriver";
 
+import { Button } from "@/components/ui/button";
 import { useBattleAudio } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -35,19 +36,26 @@ export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }
       <div className={cn(placement === "strip" && "pointer-events-auto absolute bottom-2 right-2 z-30")}>
         <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded && "sr-only")}>
           <AudioPlayerPanel audio={audio} view={{ failed: sound.failed, onCollapse: () => setChoice(false), onUnlock: sound.unlock }}>
-            {youtubeId && <YoutubeAudioDriver videoId={youtubeId} />}
+            {youtubeId && <YoutubeAudioDriver videoId={youtubeId} onNeedsTap={() => setChoice(true)} />}
           </AudioPlayerPanel>
         </div>
         {!expanded && (
-          <button
-            type="button"
-            aria-label={`Розгорнути плеєр: ${track?.title ?? "Музика"}`}
-            onClick={() => setChoice(true)}
-            className="flex max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 py-1.5 text-xs text-hud-bone shadow-lg"
-          >
-            <Music className="size-4 shrink-0 text-hud-gold" />
-            <span className="truncate">{track?.title ?? "Музика"}</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            {track && !sound.unlocked && (
+              <Button size="sm" className="rounded-full" onClick={sound.unlock}>
+                Увімкнути звук
+              </Button>
+            )}
+            <button
+              type="button"
+              aria-label={`Розгорнути плеєр: ${track?.title ?? "Музика"}`}
+              onClick={() => setChoice(true)}
+              className="flex max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 py-1.5 text-xs text-hud-bone shadow-lg"
+            >
+              <Music className="size-4 shrink-0 text-hud-gold" />
+              <span className="truncate">{track?.title ?? "Музика"}</span>
+            </button>
+          </div>
         )}
       </div>
     </div>
