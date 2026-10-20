@@ -68,7 +68,7 @@ describe("attack mutation", () => {
   });
 
   it("перевага: diceRolls містить обидва d20 і групу шкоди з розмірами кубиків", async () => {
-    const out = await attackMutation(ctx, body({ d20Roll: 2, advantageRoll: 16, rollMode: "advantage", damageRolls: [5] }));
+    const out = await attackMutation(ctx, body({ d20Roll: 2, advantageRoll: 16, rollMode: "advantage", damageRolls: [3] }));
 
     const [firstSlot] = diceSlots(heroAttackDamageParts(hero, hero.battleData.attacks[0]).formula);
 
@@ -76,7 +76,7 @@ describe("attack mutation", () => {
       actionDetails: {
         diceRolls: [
           { kind: "attack", rollerId: "hero", targetId: "gob", dice: [{ sides: 20, value: 2 }, { sides: 20, value: 16, chosen: true }] },
-          { kind: "damage", rollerId: "hero", targetId: "gob", dice: [{ sides: firstSlot, value: 5 }] },
+          { kind: "damage", rollerId: "hero", targetId: "gob", dice: [{ sides: firstSlot, value: 3 }] },
         ],
       },
     });
