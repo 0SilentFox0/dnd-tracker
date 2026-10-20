@@ -233,21 +233,23 @@ describe("BattleAudioDock — ДМ", () => {
 
   it("плейлист з групами «Раса - Тема»: заголовки груп, пошук, фільтр групи й типу, згортання групи", async () => {
     vi.mocked(getTracks).mockResolvedValue([
-      campaignTrack({ id: "a", title: "Люди - Битва", kind: "youtube", youtubeId: "aaaaaaaaaaa", url: null }),
-      campaignTrack({ id: "b", title: "Ельфи - Битва", kind: "youtube", youtubeId: "bbbbbbbbbbb", url: null, sortOrder: 1 }),
+      campaignTrack({ id: "a", title: "Люди - Тема", kind: "youtube", youtubeId: "aaaaaaaaaaa", url: null }),
+      campaignTrack({ id: "b", title: "Ельфи - Тема", kind: "youtube", youtubeId: "bbbbbbbbbbb", url: null, sortOrder: 1 }),
       campaignTrack({ id: "c", title: "Люди - Місто", sortOrder: 2 }),
+      campaignTrack({ id: "d", title: "Люди - Битва 1", kind: "youtube", youtubeId: "ddddddddddd", url: null, sortOrder: 3 }),
     ]);
 
     const { findByRole, getByRole, queryByRole, getByText } = dock({ isDM: true, audio: fileState });
 
     const people = await findByRole("list", { name: "Люди" });
 
-    expect([...people.querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Битва", "♪ Місто"]);
+    expect([...people.querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Тема", "♪ Місто"]);
     expect(getByRole("list", { name: "Ельфи" })).toBeTruthy();
+    expect([...getByRole("list", { name: "Битва" }).querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Люди - Битва 1"]);
 
-    fireEvent.change(getByRole("searchbox", { name: "Пошук треку" }), { target: { value: "битва ельфи" } });
+    fireEvent.change(getByRole("searchbox", { name: "Пошук треку" }), { target: { value: "тема ельфи" } });
     expect(queryByRole("list", { name: "Люди" })).toBeNull();
-    expect(getByText("Знайдено 1 з 3")).toBeTruthy();
+    expect(getByText("Знайдено 1 з 4")).toBeTruthy();
 
     fireEvent.click(getByRole("button", { name: "Скинути фільтри" }));
     fireEvent.change(getByRole("combobox", { name: "Група" }), { target: { value: "Люди" } });

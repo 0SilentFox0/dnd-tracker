@@ -12,17 +12,21 @@ export const trackUploadRequestSchema = z.object({
   contentType: z.string().max(100),
 });
 
+const trackDurationSchema = z.number().int().positive().max(86_400);
+
 const youtubeUrlSchema = z
   .string()
   .max(300)
   .refine((v) => parseYoutubeId(v) !== null, API_ERRORS.YOUTUBE_URL_INVALID);
 
 export const createTrackSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("file"), path: z.string().min(1).max(200), title: trackTitleSchema, durationSec: z.number().int().positive().max(86_400).optional() }),
+  z.object({ kind: z.literal("file"), path: z.string().min(1).max(200), title: trackTitleSchema, durationSec: trackDurationSchema.optional() }),
   z.object({ kind: z.literal("youtube"), url: youtubeUrlSchema, title: trackTitleSchema.optional() }),
 ]);
 
-export const updateTrackSchema = z.object({ title: trackTitleSchema });
+export const updateTrackSchema = z
+  .object({ title: trackTitleSchema.optional(), url: youtubeUrlSchema.optional(), durationSec: trackDurationSchema.nullable().optional() })
+  .refine((v) => Object.values(v).some((x) => x !== undefined), "Немає що змінювати");
 
 export const reorderTracksSchema = z.object({ ids: z.array(z.string().min(1).max(64)).min(1).max(MAX_TRACKS_PER_CAMPAIGN) });
 
