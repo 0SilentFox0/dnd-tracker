@@ -22,7 +22,7 @@ function scene(map: BattleMapConfig, participants: BattleParticipant[], isDM: bo
 
   const actor: MapSceneActor = { current, viewer: { userId: isDM ? "dm" : "u", isDM, canSeeEnemyHp: false }, canAct: true, isDM, attackReady: true };
 
-  return { maze, scene: deriveMapScene({ map, participants, selectedId: null, actor, mode: { placing: false, placingId: null }, maze }) };
+  return { maze, scene: deriveMapScene({ map, participants, selectedId: null, actor, mode: { placing: false, placingId: null }, modeView: maze }) };
 }
 
 const moveKeys = (marks: Map<string, unknown> | undefined) => [...(marks ?? [])].flatMap(([k, m]) => (typeof m === "number" ? [k] : []));

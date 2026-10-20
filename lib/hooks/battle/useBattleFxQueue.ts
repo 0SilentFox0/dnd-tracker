@@ -2,14 +2,14 @@
 
 import { useCallback, useState } from "react";
 
-import { useMazeFxLog } from "./useMazeView";
+import { useModeView } from "./modes/useModeView";
 
 import { usePageHidden } from "@/lib/hooks/common";
 import { advanceFxQueue, INITIAL_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
 
 /** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */
 export function useBattleFxQueue(enabled: boolean) {
-  const log = useMazeFxLog();
+  const { fxLog: log } = useModeView();
 
   const hidden = usePageHidden();
 

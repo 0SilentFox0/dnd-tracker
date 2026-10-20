@@ -1,4 +1,5 @@
 import { activeModeWithConfig } from "./registry";
+import type { ModeMoveZone, ModeView } from "./types";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -46,4 +47,10 @@ export function modeSightedTargets(map: MapArg, ps: BattleParticipant[], caster:
 
     return !p || p.basicInfo.side === caster.basicInfo.side || modeSees(map, caster, p);
   });
+}
+
+export function modeMoveZone(map: MapArg, input: { seen: BattleParticipant[]; mover: BattleParticipant; view: ModeView | null | undefined }): ModeMoveZone | null {
+  const active = activeModeWithConfig(map);
+
+  return active?.mode.engine.moveZone?.({ config: active.config, map: active.map, seen: input.seen, mover: input.mover, view: input.view ?? null }) ?? null;
 }

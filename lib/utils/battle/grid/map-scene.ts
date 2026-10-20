@@ -1,14 +1,13 @@
 import { pickAttack } from "./attack-reach";
-import { cellKey, parseCellKey } from "./geometry";
-import { type CellMark, isMoveMark, type MoveStep, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
+import { cellKey } from "./geometry";
+import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { modeAimHiddenText } from "@/lib/utils/battle/modes/engine";
-import type { MazeView } from "@/lib/utils/battle/modes/maze";
-import { mazeBudgetLeft, mazeGridOf, mazeReachable } from "@/lib/utils/battle/modes/maze";
+import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
+import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -46,7 +45,7 @@ export interface MapSceneInput {
   selectedId: string | null;
   actor: MapSceneActor;
   mode: MapSceneMode;
-  maze?: MazeView | null;
+  modeView?: ModeView | null;
 }
 
 export type MapClick =
@@ -128,33 +127,11 @@ interface MoveZoneInput {
   participants: BattleParticipant[];
   seen: BattleParticipant[];
   mover: BattleParticipant;
-  view: MazeView | null | undefined;
+  view: ModeView | null | undefined;
   dmUserId: string | null;
 }
 
-interface MoveZone {
-  steps: Map<string, MoveStep>;
-  marks: Map<string, CellMark | number>;
-}
-
-/** Лабіринт: кроки лише крізь видимі клітинки й повз видимих учасників — прихованих гравець не має вгадувати з зони ходу. */
-function mazeMoveZone({ map, seen, mover, view }: MoveZoneInput): MoveZone {
-  const grid = mazeGridOf(map);
-
-  const zone: MoveZone = { steps: new Map(), marks: new Map() };
-
-  // без виходу лабіринт ще не готовий — сервер відхилить будь-який крок
-  if (!grid || grid.maze.dark || !grid.maze.exit) return zone;
-
-  const reach = mazeReachable(grid, { participants: seen, mover, budget: mazeBudgetLeft(mover), limit: view?.cells ?? undefined });
-
-  for (const [key, { cost }] of reach) {
-    zone.steps.set(key, { anchor: parseCellKey(key), cost });
-    zone.marks.set(key, cost);
-  }
-
-  return zone;
-}
+type MoveZone = ModeMoveZone;
 
 function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): MoveZone {
   const steps = moveSteps(map, participants, mover, { dmUserId });
@@ -162,9 +139,9 @@ function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): Mo
   return { steps, marks: moveZoneMarks(map, participants, mover, { dmUserId, steps }) };
 }
 
-const moveZone = (input: MoveZoneInput): MoveZone => (input.map.maze ? mazeMoveZone(input) : openMoveZone(input));
+const moveZone = (input: MoveZoneInput): MoveZone => modeMoveZone(input.map, input) ?? openMoveZone(input);
 
-export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }: MapSceneInput): MapScene {
+export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...input }: MapSceneInput): MapScene {
   const { current, viewer, canAct, isDM, attackReady } = actor;
 
   const { placingId } = mode;
@@ -189,11 +166,11 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
-  const seen = map.maze && maze ? participants.filter((p) => maze.visibleIds.has(p.basicInfo.id)) : participants;
+  const seen = modeView ? participants.filter((p) => modeView.visibleIds.has(p.basicInfo.id)) : participants;
 
   const canMove = !aim && !placing && !tool && canAct && current?.battleData.position;
 
-  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: maze, dmUserId: isDM ? viewer.userId : null }) : null;
+  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: modeView, dmUserId: isDM ? viewer.userId : null }) : null;
 
   const steps = zone?.steps ?? null;
 

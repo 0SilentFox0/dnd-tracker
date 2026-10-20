@@ -6,8 +6,8 @@ import { BattleMap } from "./BattleMap";
 import { MapTerrainToolbar } from "./MapTerrainToolbar";
 import { useMapToolsSlot } from "./MapToolsSlot";
 import { MapWeatherPicker } from "./MapWeatherPicker";
-import { MazeEditPalette, MazeToolbar } from "./maze";
 
+import { modeUiOf } from "@/components/battle/modes";
 import { useBattleMapScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,9 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
 
   const { placement, terrainTool, weatherTool } = scene;
 
-  const mazeTools = phone ? null : scene.mazeTools;
+  const modeTools = phone ? null : scene.modeTools;
+
+  const ui = modeUiOf(scene.map);
 
   const inRow = !phone && !!slot;
 
@@ -49,8 +51,8 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
         <ModeButton active={placement.active} onClick={placement.toggle} tall={inRow}>
           Розставити
         </ModeButton>
-        {mazeTools && <MazeToolbar tools={mazeTools} tall={inRow} />}
-        <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow} hidden={!!scene.map.maze}>
+        {modeTools && ui?.Toolbar && <ui.Toolbar tools={modeTools.raw} tall={inRow} />}
+        <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow} hidden={!!ui?.hidesTerrain}>
           Місцевість
         </ModeButton>
         <ModeButton active={weatherTool.active} onClick={weatherTool.toggle} tall={inRow}>
@@ -64,9 +66,9 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
           {weatherTool.active && <MapWeatherPicker tool={weatherTool} />}
         </div>
       )}
-      {mazeTools && mazeTools.state.tool !== "none" && (
+      {modeTools?.paletteOpen && ui?.EditPalette && (
         <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
-          <MazeEditPalette tools={mazeTools} />
+          <ui.EditPalette tools={modeTools.raw} />
         </div>
       )}
     </div>
@@ -75,7 +77,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
   return (
     <div className={cn("relative h-full", phone && "flex flex-col")}>
       {phone && tools}
-      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active, maze: mazeTools?.editing }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
+      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active, mode: modeTools }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
       {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}
     </div>
   );

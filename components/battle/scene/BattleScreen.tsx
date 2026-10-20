@@ -12,7 +12,7 @@ import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useFxEnabled, useMazeDarkAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { BattlePreparationParticipant } from "@/types/battle";
@@ -76,7 +76,7 @@ export function BattleScreen() {
 
   useSpellBookPrefetch();
 
-  useMazeDarkAutoSkip();
+  useModeAutoSkip();
 
   const { userEnabled: fxOn } = useFxEnabled();
 

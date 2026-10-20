@@ -2,13 +2,14 @@ import type { MapModeDefinition } from "../types";
 import { withMazeAwareness } from "./awareness";
 import { mazeChange } from "./delta";
 import { mazeGridOf } from "./grid";
+import { mazeMoveZone } from "./move-zone";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
 import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
 import { mazeFxVisible, mazeLogVisible } from "./view";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
@@ -21,6 +22,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
   key: "maze",
   configOf: (map) => map?.maze ?? null,
   withConfig: (map, maze) => ({ ...map, maze }),
+  emptyConfig: () => emptyMaze(),
   server: {
     onStart: ({ map, order }) => startMaze(map, order),
     afterMutation: ({ map, scene, result }) => withMazeAwareness(map, scene, result),
@@ -47,6 +49,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? MAZE_TEXTS.targetOutOfSight : null),
     meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? MAZE_TEXTS.wallBetween : null),
     engages: ({ map, attacker, neighbour }) => inPlay(neighbour) && !meleeWallBetween(gridOf(map), attacker, neighbour),
+    moveZone: mazeMoveZone,
   },
   client: {
     deltaOf: mazeChange,

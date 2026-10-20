@@ -2,8 +2,8 @@
 
 import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
+import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
-import { useMazeVisible } from "./useMazeView";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -31,7 +31,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
-  const visible = useMazeVisible();
+  const { visible } = useModeView();
 
   const targets = order.filter(
     (p) => isUp(p) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),

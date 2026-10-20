@@ -8,11 +8,11 @@ import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
-import { MazeDarkScreen, MazeEdgeEditor, MazeFeaturesLayer, MazeFogOfWar, MazePartyVision, MazeWallsLayer } from "./maze";
 
 import "./battle-map.css";
+import { modeUiOf } from "@/components/battle/modes";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { DRAG_THRESHOLD, type MazeEditing, useMapViewport } from "@/lib/hooks/battle";
+import { DRAG_THRESHOLD, type ModeTools, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import {
@@ -51,8 +51,8 @@ export interface BattleMapEditing {
   clickableBlocked?: boolean;
   showBlocked?: boolean;
   strokeTool?: boolean;
-  /** інструменти ДМ у лабіринті; null — жоден не активний */
-  maze?: MazeEditing | null;
+  /** інструменти ДМ активного режиму; null — жоден не активний */
+  mode?: ModeTools | null;
 }
 
 const HATCH_ID = "battle-map-barrier-hatch";
@@ -321,7 +321,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const painting = Boolean(strokeTool && actions?.onStroke);
 
-  const mazeEditing = editing.maze ?? null;
+  const modeTools = editing.mode ?? null;
+
+  const ui = modeUiOf(map);
 
   const { cols, rows } = map;
 
@@ -432,7 +434,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const scrolls = phone && fit.height > avail.height + 0.5;
 
-  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || mazeEditing?.tool === "walls", wheelScrolls: scrolls });
+  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || !!modeTools?.panLocked, wheelScrolls: scrolls });
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
@@ -440,19 +442,19 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const gridScene = useMemo(() => ({ round, rotated: fit.rotated }), [round, fit.rotated]);
 
-  const maze = view?.maze;
+  const modeView = view?.mode;
 
   const tokens = useMemo(
     () =>
       participants
         .filter((p) => !p.battleData.reserved)
-        .filter((p) => !maze || (!isEscaped(p) && maze.visibleIds.has(p.basicInfo.id)))
+        .filter((p) => !modeView || (!isEscaped(p) && modeView.visibleIds.has(p.basicInfo.id)))
         .flatMap((p) => {
           const box = tokenBox(p);
 
           return box ? [{ p, box }] : [];
         }),
-    [participants, maze],
+    [participants, modeView],
   );
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
@@ -541,11 +543,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             onStrokeStart={painting ? onStrokeStart : undefined}
             scene={gridScene}
           />
-          <MazeFeaturesLayer map={map} view={maze} rotated={fit.rotated} />
-          <MazeFogOfWar map={map} view={maze} />
-          <MazePartyVision view={maze} />
-          <MazeWallsLayer map={map} view={maze} />
-          {mazeEditing && <MazeEdgeEditor map={map} editing={mazeEditing} />}
+          {ui?.MapLayers && <ui.MapLayers map={map} view={modeView ?? null} rotated={fit.rotated} editing={modeTools?.toolActive ? modeTools.raw : null} />}
           <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
@@ -568,10 +566,10 @@ export function BattleMap({ map, participants, view, actions, className, editing
             current={view?.currentId === p.basicInfo.id}
             onClick={onTokenClick}
             onHover={painting || !onCellHover ? undefined : onTokenHover}
-            passThrough={painting || !!mazeEditing || movingId === p.basicInfo.id}
+            passThrough={painting || !!modeTools?.toolActive || movingId === p.basicInfo.id}
             impact={view?.impactFor?.(p.basicInfo.id)}
             effects={view?.effects?.get(p.basicInfo.id)}
-            dormant={!!maze?.showDormant && isDormant(p)}
+            dormant={!!modeView?.showDormant && isDormant(p)}
           />
         ))}
         {tokens.map(({ p, box }) => {
@@ -598,7 +596,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
       </div>
       </div>
       </div>
-      {maze?.dark && <MazeDarkScreen own={participants.filter((p) => maze.ownIds.has(p.basicInfo.id))} />}
+      {ui?.MapOverlay && <ui.MapOverlay view={modeView ?? null} participants={participants} />}
       <WeatherLayer weather={map.weather} phone={phone} />
     </div>
     </div>

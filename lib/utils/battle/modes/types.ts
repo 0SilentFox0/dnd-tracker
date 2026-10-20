@@ -1,3 +1,4 @@
+import type { CellMark, MoveStep } from "@/lib/utils/battle/grid";
 import type { BattleSceneState, NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -8,6 +9,11 @@ export interface ModeView {
   ownIds: ReadonlySet<string>;
   showDormant: boolean;
   dark: boolean;
+}
+
+export interface ModeMoveZone {
+  steps: Map<string, MoveStep>;
+  marks: Map<string, CellMark | number>;
 }
 
 export interface ModeAwareOutcome {
@@ -48,6 +54,8 @@ export interface ModeEngineHooks<C> {
   meleeBlockedText?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; target: BattleParticipant }): string | null;
   /** Чи «зв'язує» сусід стрільця (звичайно — isActive). */
   engages?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; neighbour: BattleParticipant }): boolean;
+  /** Зона ходу замість звичайної; `seen` — учасники, яких бачить глядач. */
+  moveZone?(args: { config: C; map: BattleMapConfig; seen: BattleParticipant[]; mover: BattleParticipant; view: ModeView | null }): ModeMoveZone | null;
 }
 
 export interface ModeClientHooks<C> {
@@ -63,6 +71,8 @@ export interface MapModeDefinition<C = unknown> {
   configOf(map: BattleMapConfig | null | undefined): C | null;
   /** Карта з новим конфігом (null — вимкнути режим). */
   withConfig(map: BattleMapConfig, config: C | null): BattleMapConfig;
+  /** Початковий конфіг при вмиканні режиму в налаштуваннях бою. */
+  emptyConfig?(): C;
   server: ModeServerHooks<C>;
   engine: ModeEngineHooks<C>;
   client: ModeClientHooks<C>;

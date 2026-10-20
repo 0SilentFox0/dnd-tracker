@@ -2,8 +2,8 @@
 
 import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef, useState } from "react";
 
+import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
-import { useMazeVisible } from "./useMazeView";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import {
@@ -182,7 +182,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const map = scene.battle.map ?? null;
 
-  const visible = useMazeVisible();
+  const { visible } = useModeView();
 
   const targets = spellTargetCandidates(order, caster, flow.pick?.targetMode === "template" ? undefined : flow.pick?.targetSide).filter(visible);
 
