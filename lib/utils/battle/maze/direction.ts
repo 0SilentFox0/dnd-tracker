@@ -1,3 +1,4 @@
+import { mapCentre } from "@/lib/utils/battle/grid/geometry";
 import type { Direction8, GridPoint } from "@/types/battle";
 
 export const DIR_VECTORS: Record<Direction8, GridPoint> = {
@@ -24,7 +25,7 @@ export function inwardFacing(grid: { cols: number; rows: number }, p: GridPoint)
 
   const dy = p.y === 0 ? 1 : p.y === grid.rows - 1 ? -1 : 0;
 
-  if (dx === 0 && dy === 0) return directionOf(p, { x: Math.floor(grid.cols / 2), y: Math.floor(grid.rows / 2) }) ?? "s";
+  if (dx === 0 && dy === 0) return directionOf(p, mapCentre(grid)) ?? "s";
 
   return BY_VECTOR.get(`${dx}:${dy}`) as Direction8;
 }

@@ -1,26 +1,13 @@
+import type { GridSize } from "./grid";
 import { pick, randInt, type Rng, shuffled } from "./rng";
-import type { MazeGrid } from "./vision";
 import { allInteriorEdges, edgeKey } from "./walls";
 
-import { cellKey } from "@/lib/utils/battle/grid/geometry";
+import { cellKey, orthoNeighbors } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint, MazeDifficulty } from "@/types/battle";
-
-export type GridSize = Pick<MazeGrid, "cols" | "rows">;
 
 export type CarveAlgo = "backtracker" | "prim";
 
-const ORTHO = [
-  { x: 1, y: 0 },
-  { x: -1, y: 0 },
-  { x: 0, y: 1 },
-  { x: 0, y: -1 },
-];
-
 const LOOP_SHARE: Record<MazeDifficulty, number> = { easy: 0.25, medium: 0.08, hard: 0.02 };
-
-function orthoNeighbors(grid: GridSize, p: GridPoint): GridPoint[] {
-  return ORTHO.map((d) => ({ x: p.x + d.x, y: p.y + d.y })).filter((n) => n.x >= 0 && n.y >= 0 && n.x < grid.cols && n.y < grid.rows);
-}
 
 function openEdge(walls: Set<string>, a: GridPoint, b: GridPoint): void {
   walls.delete(edgeKey(a, b) as string);
@@ -113,9 +100,9 @@ function openHall(grid: GridSize, walls: Set<string>, rnd: Rng): void {
 
   for (let y = y0; y < y0 + size; y++) {
     for (let x = x0; x < x0 + size; x++) {
-      if (x + 1 < x0 + size) walls.delete(`${x}:${y}:e`);
+      if (x + 1 < x0 + size) openEdge(walls, { x, y }, { x: x + 1, y });
 
-      if (y + 1 < y0 + size) walls.delete(`${x}:${y}:s`);
+      if (y + 1 < y0 + size) openEdge(walls, { x, y }, { x, y: y + 1 });
     }
   }
 }

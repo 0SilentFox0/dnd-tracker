@@ -2,6 +2,7 @@ import { cellKey, cellsByDistance, footprint } from "./geometry";
 import { fits, occupiesCells, sizeOf } from "./occupancy";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { mazeGridOf } from "@/lib/utils/battle/maze/grid";
 import { placeMazeParticipants } from "@/lib/utils/battle/maze/movement";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -26,7 +27,9 @@ function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
 }
 
 export function placeParticipants(map: BattleMapConfig, participants: BattleParticipant[]): BattleParticipant[] {
-  if (map.maze) return placeMazeParticipants({ cols: map.cols, rows: map.rows, maze: map.maze }, participants);
+  const grid = mazeGridOf(map);
+
+  if (grid) return placeMazeParticipants(grid, participants);
 
   const blocked = new Set<string>();
 

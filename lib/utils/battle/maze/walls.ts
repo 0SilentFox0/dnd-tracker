@@ -1,7 +1,7 @@
+import type { GridSize } from "./grid";
+
 import { cellKey, inBounds, neighbors } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint, MazeConfig } from "@/types/battle";
-
-type Grid = { cols: number; rows: number };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
 
@@ -34,7 +34,28 @@ export function edgeKey(a: GridPoint, b: GridPoint): string | null {
   return `${cellKey(first)}:${dx !== 0 ? "e" : "s"}`;
 }
 
-export function hasWall(grid: Grid, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
+export interface ParsedEdge {
+  a: GridPoint;
+  b: GridPoint;
+  side: "e" | "s";
+}
+
+/** "x:y:e" — ребро між (x,y) і (x+1,y); "x:y:s" — між (x,y) і (x,y+1). */
+export function parseEdgeKey(edge: string): ParsedEdge {
+  const [x, y, side] = edge.split(":");
+
+  const a = { x: Number(x), y: Number(y) };
+
+  return side === "e" ? { a, b: { x: a.x + 1, y: a.y }, side } : { a, b: { x: a.x, y: a.y + 1 }, side: "s" };
+}
+
+export function edgeCells(edge: string): [GridPoint, GridPoint] {
+  const { a, b } = parseEdgeKey(edge);
+
+  return [a, b];
+}
+
+export function hasWall(grid: GridSize, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
   if (!inBounds(grid, a) || !inBounds(grid, b)) return true;
 
   const key = edgeKey(a, b);
@@ -42,7 +63,7 @@ export function hasWall(grid: Grid, walls: ReadonlySet<string>, a: GridPoint, b:
   return key !== null && walls.has(key);
 }
 
-export function cornerOpen(grid: Grid, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
+export function cornerOpen(grid: GridSize, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
   const ax = { x: b.x, y: a.y };
 
   const ay = { x: a.x, y: b.y };
@@ -50,7 +71,7 @@ export function cornerOpen(grid: Grid, walls: ReadonlySet<string>, a: GridPoint,
   return !hasWall(grid, walls, a, ax) && !hasWall(grid, walls, a, ay) && !hasWall(grid, walls, ax, b) && !hasWall(grid, walls, ay, b);
 }
 
-export function canStep(grid: Grid, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
+export function canStep(grid: GridSize, walls: ReadonlySet<string>, a: GridPoint, b: GridPoint): boolean {
   const dx = Math.abs(b.x - a.x);
 
   const dy = Math.abs(b.y - a.y);
@@ -62,11 +83,11 @@ export function canStep(grid: Grid, walls: ReadonlySet<string>, a: GridPoint, b:
   return inBounds(grid, a) && inBounds(grid, b) && cornerOpen(grid, walls, a, b);
 }
 
-export function isEdgeCell(grid: Grid, p: GridPoint): boolean {
+export function isEdgeCell(grid: GridSize, p: GridPoint): boolean {
   return p.x === 0 || p.y === 0 || p.x === grid.cols - 1 || p.y === grid.rows - 1;
 }
 
-export function allInteriorEdges(grid: Grid): string[] {
+export function allInteriorEdges(grid: GridSize): string[] {
   const out: string[] = [];
 
   for (let y = 0; y < grid.rows; y++) {
@@ -80,6 +101,6 @@ export function allInteriorEdges(grid: Grid): string[] {
   return out;
 }
 
-export function mazeNeighbors(grid: Grid, walls: ReadonlySet<string>, p: GridPoint): GridPoint[] {
+export function mazeNeighbors(grid: GridSize, walls: ReadonlySet<string>, p: GridPoint): GridPoint[] {
   return neighbors(p).filter((n) => canStep(grid, walls, p, n));
 }

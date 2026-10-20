@@ -1,7 +1,8 @@
-import type { MazeGrid } from "./vision";
+import { teleportPartner } from "./features";
+import type { MazeGrid } from "./grid";
 import { mazeNeighbors, wallSet } from "./walls";
 
-import { cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { allCells, cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint } from "@/types/battle";
 
 export function mazeDistances(grid: MazeGrid, sources: GridPoint[]): Map<string, number> {
@@ -36,59 +37,63 @@ export function mazeDistances(grid: MazeGrid, sources: GridPoint[]): Map<string,
   return dist;
 }
 
-export function pathLength(grid: MazeGrid, from: GridPoint, to: GridPoint): number | null {
-  if (!inBounds(grid, to)) return null;
-
-  return mazeDistances(grid, [from]).get(cellKey(to)) ?? null;
-}
-
-function warpTargets(grid: MazeGrid): Map<string, GridPoint> {
-  const out = new Map<string, GridPoint>();
-
-  for (const [a, b] of grid.maze.teleports) {
-    out.set(cellKey(a), b);
-    out.set(cellKey(b), a);
-  }
-
-  return out;
-}
-
-/** Як у русі: телепорт не пройти наскрізь — ступив на нього, і тебе переносить до пари. */
-export function reachesExit(grid: MazeGrid, from: GridPoint): boolean {
-  const { exit } = grid.maze;
-
-  if (!exit) return true;
-
-  const exitKey = cellKey(exit);
-
-  if (cellKey(from) === exitKey) return true;
-
+/**
+ * Клітинки, з яких можна дійти до виходу. Як у русі: телепорт не пройти наскрізь — ступив на нього, і тебе переносить до пари.
+ * Один зворотний пошук на всю карту замість окремого пошуку від кожного учасника.
+ */
+function exitReachers(grid: MazeGrid, exitKey: string): ReadonlySet<string> {
   const walls = wallSet(grid.maze);
 
-  const warp = warpTargets(grid);
+  const from = new Map<string, GridPoint[]>();
 
-  const seen = new Set([cellKey(from)]);
+  const good = new Set<string>();
 
-  const queue: GridPoint[] = [from];
+  const queue: GridPoint[] = [];
 
-  for (let i = 0; i < queue.length; i++) {
-    for (const n of mazeNeighbors(grid, walls, queue[i])) {
-      const key = cellKey(n);
+  for (const cell of allCells(grid)) {
+    for (const n of mazeNeighbors(grid, walls, cell)) {
+      if (cellKey(n) === exitKey) {
+        if (!good.has(cellKey(cell))) {
+          good.add(cellKey(cell));
+          queue.push(cell);
+        }
 
-      if (key === exitKey) return true;
+        continue;
+      }
 
-      const land = warp.get(key) ?? n;
+      const land = cellKey(teleportPartner(grid.maze, n) ?? n);
 
-      if (seen.has(cellKey(land))) continue;
+      const list = from.get(land);
 
-      seen.add(cellKey(land));
-      queue.push(land);
+      if (list) list.push(cell);
+      else from.set(land, [cell]);
     }
   }
 
-  return false;
+  for (let i = 0; i < queue.length; i++) {
+    for (const prev of from.get(cellKey(queue[i])) ?? []) {
+      if (good.has(cellKey(prev))) continue;
+
+      good.add(cellKey(prev));
+      queue.push(prev);
+    }
+  }
+
+  return good;
 }
 
 export function allReachExit(grid: MazeGrid, points: GridPoint[]): boolean {
-  return points.every((p) => reachesExit(grid, p));
+  const { exit } = grid.maze;
+
+  if (!exit || points.length === 0) return true;
+
+  const exitKey = cellKey(exit);
+
+  const others = points.filter((p) => cellKey(p) !== exitKey);
+
+  if (others.length === 0) return true;
+
+  const good = exitReachers(grid, exitKey);
+
+  return others.every((p) => good.has(cellKey(p)));
 }

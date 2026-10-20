@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { emptyMaze } from "@/lib/constants/battle";
-import { cellKey, neighbors } from "@/lib/utils/battle/grid/geometry";
-import { canStep, heroTunnel, mazeDistances, roomCentre, wallSet } from "@/lib/utils/battle/maze";
+import { cellKey, mapCentre, neighbors } from "@/lib/utils/battle/grid/geometry";
+import { canStep, heroTunnel, mazeDistances, wallSet } from "@/lib/utils/battle/maze";
 import type { GridPoint } from "@/types/battle";
 
 const grid = { cols: 11, rows: 9 };
 
-const c = roomCentre(grid);
+const c = mapCentre(grid);
 
 const exits: Array<[string, GridPoint, "w" | "e" | "n" | "s", GridPoint]> = [
   ["лівий край", { x: 0, y: 2 }, "w", { x: 0, y: c.y }],

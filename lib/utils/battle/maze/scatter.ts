@@ -1,10 +1,12 @@
-import { allCells } from "./features";
+import { allReachExit } from "./connectivity";
+import { featureKeys } from "./features";
+import type { MazeGrid } from "./grid";
 import { type Rng, shuffled } from "./rng";
-import type { MazeGrid } from "./vision";
 import { isEdgeCell } from "./walls";
 
 import { MAZE_SCATTER_MIN_GAP } from "@/lib/constants/battle";
-import { cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { allCells, cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint } from "@/types/battle";
 
 const SCATTER_ATTEMPTS = 20;
@@ -12,19 +14,16 @@ const SCATTER_ATTEMPTS = 20;
 // MAZE_SCATTER_MIN_GAP — порожні клітинки між учасниками, тож відстань на 1 більша
 const MIN_DISTANCE = MAZE_SCATTER_MIN_GAP + 1;
 
-function notExit(grid: MazeGrid): (p: GridPoint) => boolean {
-  const exit = grid.maze.exit;
+const freeCells = (grid: MazeGrid): GridPoint[] => {
+  const features = featureKeys(grid.maze);
 
-  return (p) => !exit || cellKey(p) !== cellKey(exit);
-}
+  return allCells(grid).filter((p) => !features.has(cellKey(p)));
+};
 
-/** null — крайніх клітинок менше, ніж героїв */
 export function scatterStarts(grid: MazeGrid, heroes: string[], rnd: Rng): Record<string, GridPoint> | null {
-  const teleports = new Set(grid.maze.teleports.flat().map(cellKey));
-
   const cells = shuffled(
     rnd,
-    allCells(grid).filter((p) => isEdgeCell(grid, p) && notExit(grid)(p) && !teleports.has(cellKey(p))),
+    freeCells(grid).filter((p) => isEdgeCell(grid, p)),
   );
 
   if (cells.length < heroes.length) return null;
@@ -32,10 +31,35 @@ export function scatterStarts(grid: MazeGrid, heroes: string[], rnd: Rng): Recor
   return Object.fromEntries(heroes.map((id, i) => [id, cells[i]]));
 }
 
-export function scatterAll(grid: MazeGrid, ids: string[], rnd: Rng): Record<string, GridPoint> | null {
-  const teleports = new Set(grid.maze.teleports.flat().map(cellKey));
+export interface FreeStartsArgs {
+  heroIds: string[];
+  /** клітинки решти учасників на полі */
+  others: GridPoint[];
+  /** усі мають мати шлях до виходу; інакше повтор, а після всіх спроб — «замурують» */
+  mustReachExit?: boolean;
+}
 
-  const free = allCells(grid).filter((p) => notExit(grid)(p) && !teleports.has(cellKey(p)));
+/** Старти героїв на крайніх клітинках, не зайнятих рештою учасників. */
+export function scatterFreeStarts(grid: MazeGrid, { heroIds, others, mustReachExit = false }: FreeStartsArgs, rnd: Rng): { starts: Record<string, GridPoint> } | { error: string } {
+  const taken = new Set(others.map(cellKey));
+
+  for (let attempt = 0; attempt < SCATTER_ATTEMPTS; attempt++) {
+    const starts = scatterStarts(grid, heroIds, rnd);
+
+    if (!starts) return { error: MAZE_TEXTS.scatterNoRoom };
+
+    if (Object.values(starts).some((c) => taken.has(cellKey(c)))) continue;
+
+    if (mustReachExit && !allReachExit(grid, [...others, ...Object.values(starts)])) continue;
+
+    return { starts };
+  }
+
+  return { error: mustReachExit ? MAZE_TEXTS.walledIn : MAZE_TEXTS.scatterNoRoom };
+}
+
+export function scatterAll(grid: MazeGrid, ids: string[], rnd: Rng): Record<string, GridPoint> | null {
+  const free = freeCells(grid);
 
   if (free.length < ids.length) return null;
 

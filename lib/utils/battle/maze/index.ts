@@ -4,6 +4,7 @@ export * from "./connectivity";
 export * from "./direction";
 export * from "./features";
 export * from "./generate";
+export * from "./grid";
 export * from "./marks";
 export * from "./movement";
 export * from "./placement";

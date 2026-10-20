@@ -1,20 +1,25 @@
-import type { GridSize } from "./carve";
+import type { GridSize } from "./grid";
 import { pick, randInt, type Rng, shuffled } from "./rng";
 
 import { MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/constants/battle";
-import { cellDistance, cellKey, neighbors } from "@/lib/utils/battle/grid/geometry";
-import type { GridPoint } from "@/types/battle";
+import { allCells, cellDistance, cellKey, neighbors, orthoNeighbors, samePoint } from "@/lib/utils/battle/grid/geometry";
+import type { GridPoint, MazeConfig } from "@/types/battle";
 
 const PATCH_ATTEMPTS = 30;
 
-export function allCells(grid: GridSize): GridPoint[] {
-  const out: GridPoint[] = [];
+/** Клітинки виходу й телепортів: на них не ставлять учасників і не проходять крізь них. */
+export function featureKeys(maze: Pick<MazeConfig, "exit" | "teleports">): Set<string> {
+  return new Set([...(maze.exit ? [cellKey(maze.exit)] : []), ...maze.teleports.flatMap(([a, b]) => [cellKey(a), cellKey(b)])]);
+}
 
-  for (let y = 0; y < grid.rows; y++) {
-    for (let x = 0; x < grid.cols; x++) out.push({ x, y });
+export function teleportPartner(maze: Pick<MazeConfig, "teleports">, cell: GridPoint): GridPoint | null {
+  for (const [a, b] of maze.teleports) {
+    if (samePoint(a, cell)) return b;
+
+    if (samePoint(b, cell)) return a;
   }
 
-  return out;
+  return null;
 }
 
 export function placeTeleports(
@@ -30,8 +35,10 @@ export function placeTeleports(
 
   const pairs: [GridPoint, GridPoint][] = [];
 
+  const cells = allCells(grid);
+
   for (let i = 0; i < count; i++) {
-    const free = allCells(grid).filter((c) => !taken.has(cellKey(c)));
+    const free = cells.filter((c) => !taken.has(cellKey(c)));
 
     const pair = shuffled(rnd, free)
       .slice(0, PATCH_ATTEMPTS)
@@ -59,14 +66,7 @@ function growPatch(grid: GridSize, seed: GridPoint, size: number, blocked: (p: G
   const inPatch = new Set([cellKey(seed)]);
 
   while (patch.length < size) {
-    const options = patch.flatMap((p) =>
-      [
-        { x: p.x + 1, y: p.y },
-        { x: p.x - 1, y: p.y },
-        { x: p.x, y: p.y + 1 },
-        { x: p.x, y: p.y - 1 },
-      ].filter((n) => n.x >= 0 && n.y >= 0 && n.x < grid.cols && n.y < grid.rows && !inPatch.has(cellKey(n)) && !blocked(n)),
-    );
+    const options = patch.flatMap((p) => orthoNeighbors(grid, p).filter((n) => !inPatch.has(cellKey(n)) && !blocked(n)));
 
     if (!options.length) break;
 

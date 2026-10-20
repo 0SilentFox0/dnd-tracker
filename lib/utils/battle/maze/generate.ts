@@ -1,20 +1,15 @@
-import { addLoops, type CarveAlgo, carvePerfect, type GridSize } from "./carve";
+import { addLoops, type CarveAlgo, carvePerfect } from "./carve";
 import { allReachExit, mazeDistances } from "./connectivity";
-import { allCells, placeFog, placeTeleports } from "./features";
+import { placeFog, placeTeleports } from "./features";
+import type { GridSize, MazeGrid } from "./grid";
 import { mulberry32, pick, type Rng } from "./rng";
 import { scatterAll } from "./scatter";
-import type { MazeGrid } from "./vision";
 import { isEdgeCell } from "./walls";
 
-import { MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/constants/battle";
-import { cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { emptyMaze, MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { allCells, cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint, MazeConfig, MazeDifficulty } from "@/types/battle";
-
-export const MAZE_GENERATION_ERROR = "Не вдалося згенерувати лабіринт — спробуйте менший рівень складності або більшу карту";
-
-export const MAZE_SCATTER_ERROR = "Замало місця для розкидання";
-
-export const MAZE_EXIT_ERROR = "Вихід має бути на краю карти";
 
 export interface GenerateInput {
   grid: GridSize;
@@ -71,6 +66,19 @@ function pickExit(grid: MazeGrid, input: GenerateInput, rnd: Rng): GridPoint | n
   );
 }
 
+type Attempt<T> = T | { error: string } | null;
+
+/** Спроби з послідовними зернами: null — повторити, { error } — здатися одразу. */
+function retrySeeded<T>(seed: number, attempt: (rnd: Rng) => Attempt<T>): T | { error: string } {
+  for (let i = 0; i < MAZE_MAX_GENERATION_ATTEMPTS; i++) {
+    const out = attempt(mulberry32(seed + i));
+
+    if (out !== null) return out;
+  }
+
+  return { error: MAZE_TEXTS.generationFailed };
+}
+
 function withFeatures(grid: GridSize, maze: MazeConfig, counts: { teleportPairs: number; fogPatches: number }, occupied: GridPoint[], rnd: Rng): MazeConfig {
   const teleports = placeTeleports(grid, counts.teleportPairs, new Set(occupied.map(cellKey)), maze.exit, rnd);
 
@@ -84,46 +92,38 @@ function withFeatures(grid: GridSize, maze: MazeConfig, counts: { teleportPairs:
 export function generateMaze(input: GenerateInput): MazeConfig | { error: string } {
   const { grid, difficulty } = input;
 
-  if (input.exit && (!inBounds(grid, input.exit) || !isEdgeCell(grid, input.exit))) return { error: MAZE_EXIT_ERROR };
+  if (input.exit && (!inBounds(grid, input.exit) || !isEdgeCell(grid, input.exit))) return { error: MAZE_TEXTS.exitOnEdge };
 
   const points = [...input.positions, ...input.starts];
 
-  for (let attempt = 0; attempt < MAZE_MAX_GENERATION_ATTEMPTS; attempt++) {
-    const rnd = mulberry32(input.seed + attempt);
-
-    const base: MazeConfig = { walls: carveWalls(grid, difficulty, rnd), exit: null, difficulty, teleports: [], fog: [], marks: {}, dark: false };
+  return retrySeeded(input.seed, (rnd) => {
+    const base: MazeConfig = { ...emptyMaze(difficulty), walls: carveWalls(grid, difficulty, rnd) };
 
     const exit = input.exit ?? pickExit({ ...grid, maze: base }, input, rnd);
 
-    if (!exit) continue;
+    if (!exit) return null;
 
     const maze = withFeatures(grid, { ...base, exit }, input, points, rnd);
 
-    if (allReachExit({ ...grid, maze }, points)) return maze;
-  }
-
-  return { error: MAZE_GENERATION_ERROR };
+    return allReachExit({ ...grid, maze }, points) ? maze : null;
+  });
 }
 
 export function reshuffleMaze(input: ReshuffleInput): ReshuffleResult | { error: string } {
   const { grid, maze: prev } = input;
 
-  for (let attempt = 0; attempt < MAZE_MAX_GENERATION_ATTEMPTS; attempt++) {
-    const rnd = mulberry32(input.seed + attempt);
-
+  return retrySeeded(input.seed, (rnd): Attempt<ReshuffleResult> => {
     const base: MazeConfig = { ...prev, walls: carveWalls(grid, prev.difficulty, rnd), teleports: [], fog: [], marks: {} };
 
     const positions = input.mode === "scatter" ? scatterAll({ ...grid, maze: base }, input.participantIds, rnd) : input.positions;
 
     // розкидання не залежить від стін — повтор із новим зерном не допоможе
-    if (!positions) return { error: MAZE_SCATTER_ERROR };
+    if (!positions) return { error: MAZE_TEXTS.scatterNoRoom };
 
     const points = Object.values(positions);
 
     const maze = withFeatures(grid, base, input, points, rnd);
 
-    if (allReachExit({ ...grid, maze }, points)) return { maze, positions };
-  }
-
-  return { error: MAZE_GENERATION_ERROR };
+    return allReachExit({ ...grid, maze }, points) ? { maze, positions } : null;
+  });
 }

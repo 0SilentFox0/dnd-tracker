@@ -1,9 +1,11 @@
 import { directionOf, inwardFacing } from "./direction";
-import type { MazeGrid } from "./vision";
-import { canStep, wallSet } from "./walls";
+import { featureKeys, teleportPartner } from "./features";
+import type { MazeGrid } from "./grid";
+import { canStep, isEdgeCell, wallSet } from "./walls";
 
 import { MAZE_STEPS_PER_TURN, ParticipantSide } from "@/lib/constants/battle";
-import { cellKey, cellsByDistance, inBounds, neighbors } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { cellKey, cellsByDistance, mapCentre, neighbors, samePoint } from "@/lib/utils/battle/grid/geometry";
 import { occupiedBy, occupiesCells } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -26,15 +28,7 @@ export interface Reach {
   path: GridPoint[];
 }
 
-export const MAZE_MOVE_ERROR = "Туди не пройти: стіна, зайнято або не вистачає кроків";
-
 export const mazeBudgetLeft = (p: BattleParticipant): number => Math.max(0, MAZE_STEPS_PER_TURN - (p.battleData.movementUsed ?? 0));
-
-function terminalKeys(grid: MazeGrid): Set<string> {
-  const { exit, teleports } = grid.maze;
-
-  return new Set([...(exit ? [cellKey(exit)] : []), ...teleports.flatMap(([a, b]) => [cellKey(a), cellKey(b)])]);
-}
 
 /** Шлях включно зі стартовою клітинкою; сама стартова в результат не потрапляє. */
 export function mazeReachable(grid: MazeGrid, { participants, mover, budget, limit }: ReachableArgs): Map<string, Reach> {
@@ -48,7 +42,7 @@ export function mazeReachable(grid: MazeGrid, { participants, mover, budget, lim
 
   const blocked = occupiedBy(participants, (p) => p.basicInfo.id !== mover.basicInfo.id);
 
-  const terminal = terminalKeys(grid);
+  const terminal = featureKeys(grid.maze);
 
   const startKey = cellKey(start);
 
@@ -81,30 +75,18 @@ export function mazeReachable(grid: MazeGrid, { participants, mover, budget, lim
   return out;
 }
 
-const samePoint = (a: GridPoint, b: GridPoint) => a.x === b.x && a.y === b.y;
-
-function teleportPartner(grid: MazeGrid, cell: GridPoint): GridPoint | null {
-  for (const [a, b] of grid.maze.teleports) {
-    if (samePoint(a, cell)) return b;
-
-    if (samePoint(b, cell)) return a;
-  }
-
-  return null;
-}
-
 export function applyMazeMove(grid: MazeGrid, args: { participants: BattleParticipant[]; mover: BattleParticipant; to: GridPoint }): MazeMoveResult | { error: string } {
   const { participants, mover, to } = args;
 
   const reach = mazeReachable(grid, { participants, mover, budget: mazeBudgetLeft(mover) }).get(cellKey(to));
 
-  if (!reach) return { error: MAZE_MOVE_ERROR };
+  if (!reach) return { error: MAZE_TEXTS.moveBlocked };
 
   const prev = reach.path[reach.path.length - 2];
 
   const blocked = occupiedBy(participants, (p) => p.basicInfo.id !== mover.basicInfo.id);
 
-  const partner = teleportPartner(grid, to);
+  const partner = teleportPartner(grid.maze, to);
 
   const teleported = partner !== null && !blocked.has(cellKey(partner));
 
@@ -127,17 +109,13 @@ export function placeMazeParticipants(grid: MazeGrid, participants: BattlePartic
 
   const taken = occupiedBy(sized, () => true);
 
-  const reserved = terminalKeys(grid);
+  const reserved = featureKeys(grid.maze);
 
-  const center = { x: Math.floor(grid.cols / 2), y: Math.floor(grid.rows / 2) };
+  const cells = cellsByDistance(grid, mapCentre(grid)).filter((c) => !reserved.has(cellKey(c)));
 
-  const cells = cellsByDistance(grid, center).filter((c) => inBounds(grid, c) && !reserved.has(cellKey(c)));
+  const edge = cells.filter((c) => isEdgeCell(grid, c));
 
-  const isEdge = (c: GridPoint) => c.x === 0 || c.y === 0 || c.x === grid.cols - 1 || c.y === grid.rows - 1;
-
-  const edge = cells.filter(isEdge);
-
-  const inner = cells.filter((c) => !isEdge(c));
+  const inner = cells.filter((c) => !isEdgeCell(grid, c));
 
   return sized.map((p) => {
     if (p.battleData.position || !occupiesCells(p)) return p;

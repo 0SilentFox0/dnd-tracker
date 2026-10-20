@@ -16,8 +16,21 @@ export function parseCellKey(key: string): GridPoint {
   return { x, y };
 }
 
+export const samePoint = (a: GridPoint, b: GridPoint): boolean => a.x === b.x && a.y === b.y;
+
+const ORTHO_DIRS = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+] as const;
+
 export function neighbors(p: GridPoint): GridPoint[] {
   return DIRS.map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy }));
+}
+
+export function orthoNeighbors(map: Pick<BattleMapConfig, "cols" | "rows">, p: GridPoint): GridPoint[] {
+  return ORTHO_DIRS.map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).filter((n) => inBounds(map, n));
 }
 
 export function cellDistance(a: GridPoint, b: GridPoint): number {
@@ -149,13 +162,20 @@ export function closestCell(cells: GridPoint[], to: GridPoint[]): GridPoint {
   return cells.reduce((best, c) => (footprintDistance(to, [c]) < footprintDistance(to, [best]) ? c : best), cells[0]);
 }
 
-/** Усі клітинки карти за зростанням відстані від `from`; при рівності — рядками зверху вниз. */
-export function cellsByDistance(map: Pick<BattleMapConfig, "cols" | "rows">, from: GridPoint): GridPoint[] {
+/** Усі клітинки карти рядками зверху вниз. */
+export function allCells(map: Pick<BattleMapConfig, "cols" | "rows">): GridPoint[] {
   const all: GridPoint[] = [];
 
   for (let y = 0; y < map.rows; y++) {
     for (let x = 0; x < map.cols; x++) all.push({ x, y });
   }
 
-  return all.sort((a, b) => cellDistance(a, from) - cellDistance(b, from));
+  return all;
+}
+
+export const mapCentre = (map: Pick<BattleMapConfig, "cols" | "rows">): GridPoint => ({ x: Math.floor(map.cols / 2), y: Math.floor(map.rows / 2) });
+
+/** Усі клітинки карти за зростанням відстані від `from`; при рівності — рядками зверху вниз. */
+export function cellsByDistance(map: Pick<BattleMapConfig, "cols" | "rows">, from: GridPoint): GridPoint[] {
+  return allCells(map).sort((a, b) => cellDistance(a, from) - cellDistance(b, from));
 }
