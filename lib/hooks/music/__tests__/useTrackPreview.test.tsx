@@ -8,13 +8,21 @@ import type { CampaignTrack } from "@/types/audio";
 
 const audios: FakeAudio[] = [];
 
+let nextPlay: Promise<void> | null = null;
+
 class FakeAudio {
   src: string;
   duration = 100;
   currentTime = 25;
   pause = vi.fn();
   load = vi.fn();
-  play = vi.fn(() => Promise.resolve());
+  play = vi.fn(() => {
+    const p = nextPlay ?? Promise.resolve();
+
+    nextPlay = null;
+
+    return p;
+  });
   addEventListener = vi.fn();
   removeAttribute = vi.fn();
 
@@ -69,6 +77,22 @@ describe("useTrackPreview", () => {
     act(() => result.current.toggle(file("a")));
     unmount();
     expect(audios[0].pause).toHaveBeenCalled();
+  });
+
+  it("перерваний play() попереднього треку не зупиняє наступний", async () => {
+    let rejectFirst: (e: Error) => void = () => undefined;
+
+    const { result } = renderHook(() => useTrackPreview());
+
+    nextPlay = new Promise((_, reject) => (rejectFirst = reject));
+
+    act(() => result.current.toggle(file("a")));
+    act(() => result.current.toggle(file("b")));
+    await act(async () => rejectFirst(new Error("AbortError")));
+
+    expect(result.current.playingId).toBe("b");
+    expect(result.current.failedId).toBeNull();
+    expect(audios[1].pause).not.toHaveBeenCalled();
   });
 
   it("трек без джерела не стає активним", () => {

@@ -229,7 +229,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const onMap = !!map && !!caster && isOnMap(caster);
 
-  const mapTargeting = flow.step === "targets" && onMap;
+  // полеглі зникають з карти — воскресіння обирає ціль зі списку у вікні
+  const mapTargeting = flow.step === "targets" && onMap && flow.pick?.targetSide !== "dead";
 
   const hover = useSpellMapTargeting(flow, dispatch, {
     caster, order, map, active: mapTargeting, candidates: targets.filter(isOnMap), inRange, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,

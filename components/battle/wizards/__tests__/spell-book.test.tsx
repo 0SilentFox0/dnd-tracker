@@ -280,6 +280,27 @@ describe("SpellBook", () => {
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ball", targetIds: ["gob"], saveRolls: [{ participantId: "gob", roll: 12 }] })));
     });
 
+    it("воскресіння: полеглого союзника немає на карті — ціль обирається зі списку у вікні", async () => {
+      const { wrapper, caster, value, castSpell, ally } = onMap(["revive"]);
+
+      ally.combatStats.status = "dead";
+      ally.combatStats.currentHp = 0;
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Воскресіння"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(lastPick(value) ?? null).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: /Годрік/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "revive", targetIds: ["ally"] })));
+    });
+
     it("недосяжну ціль клік не обирає", async () => {
       const { wrapper, caster, value } = onMap(["dart"]);
 

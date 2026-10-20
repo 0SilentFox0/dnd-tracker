@@ -25,12 +25,20 @@ interface Source {
 function fileSource(url: string, onEnd: () => void, onError: () => void): Source {
   const audio = new Audio(url);
 
-  audio.addEventListener("ended", onEnd);
-  audio.addEventListener("error", onError);
-  audio.play().catch(onError);
+  // після stop старе джерело мовчить: перерваний play() відхиляється, коли вже грає наступний трек
+  let alive = true;
+
+  const ended = () => alive && onEnd();
+
+  const failed = () => alive && onError();
+
+  audio.addEventListener("ended", ended);
+  audio.addEventListener("error", failed);
+  audio.play().catch(failed);
 
   return {
     stop: () => {
+      alive = false;
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -70,11 +78,11 @@ function youtubeSource(videoId: string, onEnd: () => void, onError: () => void):
           onStateChange: (e) => {
             if (alive && e.data === YT_STATE.ENDED) onEnd();
           },
-          onError,
+          onError: () => alive && onError(),
         },
       });
     },
-    onError,
+    () => alive && onError(),
   );
 
   return {
