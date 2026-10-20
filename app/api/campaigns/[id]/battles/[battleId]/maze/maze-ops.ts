@@ -1,7 +1,6 @@
 import { tunnelMutation } from "./maze-tunnel";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellKey, inBounds, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import {
   allReachExit,
@@ -21,6 +20,7 @@ import {
   scatterFreeStarts,
   seedFrom,
 } from "@/lib/utils/battle/modes/maze";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
 import type { MazeActionData } from "@/types/api";

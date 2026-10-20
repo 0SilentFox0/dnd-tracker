@@ -6,9 +6,9 @@ import { mulberry32, pick, type Rng } from "./rng";
 import { scatterAll } from "./scatter";
 import { isEdgeCell } from "./walls";
 
-import { emptyMaze, MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { allCells, cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { emptyMaze,MAZE_MAX_GENERATION_ATTEMPTS } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { GridPoint, MazeConfig, MazeDifficulty } from "@/types/battle";
 
 export interface GenerateInput {

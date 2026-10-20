@@ -1,8 +1,8 @@
 import type { GridSize } from "./grid";
 import { pick, randInt, type Rng, shuffled } from "./rng";
 
-import { MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/constants/battle";
 import { allCells, cellDistance, cellKey, neighbors, orthoNeighbors, samePoint } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/utils/battle/modes/maze/constants";
 import type { GridPoint, MazeConfig } from "@/types/battle";
 
 const PATCH_ATTEMPTS = 30;

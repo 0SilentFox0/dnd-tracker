@@ -7,8 +7,8 @@ import { useMazePlaceUnit } from "../useMazePlaceUnit";
 import { useMazeTools } from "../useMazeTools";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { MazeConfig } from "@/types/battle";
 
 function setup(maze: Partial<MazeConfig> = {}, isDM = true) {

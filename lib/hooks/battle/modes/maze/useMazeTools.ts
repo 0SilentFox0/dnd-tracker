@@ -8,10 +8,10 @@ import { IDLE_MAZE_TOOL, type MazeGenerateInput, type MazeTool, useMazeToolState
 import { type MazeAsHero, useMazeView } from "./useMazeView";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { useNotify } from "@/lib/hooks/common";
 import { cellKey, samePoint } from "@/lib/utils/battle/grid";
 import { isEdgeCell } from "@/lib/utils/battle/modes/maze";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { MazeActionData } from "@/types/api";
 import type { GridPoint, MazeConfig } from "@/types/battle";
 

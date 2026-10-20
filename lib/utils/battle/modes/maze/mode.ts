@@ -9,9 +9,10 @@ import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from ".
 import { startMaze } from "./start";
 import { mazeFxVisible, mazeLogVisible } from "./view";
 
-import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
+import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
 

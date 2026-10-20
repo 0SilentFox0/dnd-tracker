@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { flag, mazeOf } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import {
@@ -20,6 +19,7 @@ import {
   scatterFreeStarts,
   teleportPartner,
 } from "@/lib/utils/battle/modes/maze";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { modeEnter } from "@/lib/utils/battle/modes/server";
 
 describe("ребра", () => {

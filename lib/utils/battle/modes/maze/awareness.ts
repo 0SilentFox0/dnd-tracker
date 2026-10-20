@@ -3,8 +3,8 @@ import { isMazeHero, isPlaced, type PlacedParticipant } from "./status";
 import { mazeVision, seesParticipant, viewpointOf } from "./vision";
 
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { inPlay, isActive, isDormant } from "@/lib/utils/abilities/engine/core/participants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { actorEvent, systemEvent } from "@/lib/utils/battle/store/event-mapping";
 import type { NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";

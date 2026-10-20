@@ -4,9 +4,9 @@ import type { MazeGrid } from "./grid";
 import { type Rng, shuffled } from "./rng";
 import { isEdgeCell } from "./walls";
 
-import { MAZE_SCATTER_MIN_GAP } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { allCells, cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_SCATTER_MIN_GAP } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { GridPoint } from "@/types/battle";
 
 const SCATTER_ATTEMPTS = 20;

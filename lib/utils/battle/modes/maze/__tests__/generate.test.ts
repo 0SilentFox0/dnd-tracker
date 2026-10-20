@@ -4,9 +4,9 @@ import { allReachExit, mazeDistances } from "../connectivity";
 import { type GenerateInput, generateMaze, reshuffleMaze } from "../generate";
 import { isEdgeCell } from "../walls";
 
-import { emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellDistance, cellKey, parseCellKey } from "@/lib/utils/battle/grid/geometry";
+import { emptyMaze,MAZE_SCATTER_MIN_GAP, MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { GridPoint, MazeConfig, MazeDifficulty } from "@/types/battle";
 
 const p = (x: number, y: number) => ({ x, y });

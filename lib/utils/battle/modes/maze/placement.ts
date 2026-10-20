@@ -3,9 +3,9 @@ import type { MazeGrid } from "./grid";
 import { isEdgeCell } from "./walls";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellKey, inBounds, samePoint } from "@/lib/utils/battle/grid/geometry";
 import { occupiedBy } from "@/lib/utils/battle/grid/occupancy";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface MazePlacementArgs {

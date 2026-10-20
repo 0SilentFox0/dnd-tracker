@@ -2,8 +2,8 @@ import { DIR_VECTORS } from "./direction";
 import { fogSet, type MazeGrid } from "./grid";
 import { canStep, mazeNeighbors, wallSet } from "./walls";
 
-import { MAZE_VISION_RANGE } from "@/lib/constants/battle";
 import { cellDistance, cellKey, cellLine, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_VISION_RANGE } from "@/lib/utils/battle/modes/maze/constants";
 import type { BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
 export interface Viewpoint {

@@ -8,8 +8,8 @@ import { mulberry32 } from "../rng";
 import { mazeNeighbors, wallSet } from "../walls";
 import { mazeGrid } from "./fixtures";
 
-import { emptyMaze } from "@/lib/constants/battle";
 import { allCells, cellKey } from "@/lib/utils/battle/grid/geometry";
+import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 import type { GridPoint, MazeConfig } from "@/types/battle";
 
 const p = (x: number, y: number) => ({ x, y });

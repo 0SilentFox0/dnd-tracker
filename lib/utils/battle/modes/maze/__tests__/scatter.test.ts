@@ -5,8 +5,8 @@ import { scatterAll, scatterStarts } from "../scatter";
 import { isEdgeCell } from "../walls";
 import { mazeGrid } from "./fixtures";
 
-import { MAZE_SCATTER_MIN_GAP } from "@/lib/constants/battle";
 import { cellDistance, cellKey } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_SCATTER_MIN_GAP } from "@/lib/utils/battle/modes/maze/constants";
 import type { MazeConfig } from "@/types/battle";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i}`);

@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { mazeMarkMutation, mazeMarkSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { markColor } from "@/lib/utils/battle/modes/maze";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { MazeConfig } from "@/types/battle";

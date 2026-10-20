@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { battleMapSchema, mazeSchema } from "../battles";
 
-import { emptyMaze } from "@/lib/constants/battle";
+import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 
 const valid = {
   ...emptyMaze("hard"),

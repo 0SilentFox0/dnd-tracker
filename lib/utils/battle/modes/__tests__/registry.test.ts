@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { emptyMaze } from "@/lib/constants/battle";
 import { activeMapMode, NORMAL_MODE } from "@/lib/utils/battle/modes";
 import { mazeMode } from "@/lib/utils/battle/modes/maze";
+import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 import type { BattleMapConfig } from "@/types/battle";
 
 const base: BattleMapConfig = { cols: 10, rows: 8 } as BattleMapConfig;

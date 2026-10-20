@@ -1,4 +1,4 @@
-import { MAZE_MARK_COLORS } from "@/lib/constants/battle";
+import { MAZE_MARK_COLORS } from "@/lib/utils/battle/modes/maze/constants";
 
 export function markColor(participantId: string): string {
   let hash = 0;

@@ -3,10 +3,11 @@ import { featureKeys, teleportPartner } from "./features";
 import type { MazeGrid } from "./grid";
 import { canStep, isEdgeCell, wallSet } from "./walls";
 
-import { MAZE_STEPS_PER_TURN, ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { cellKey, cellsByDistance, mapCentre, neighbors, samePoint } from "@/lib/utils/battle/grid/geometry";
 import { occupiedBy, occupiesCells } from "@/lib/utils/battle/grid/occupancy";
+import { MAZE_STEPS_PER_TURN } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface MazeMoveResult {
