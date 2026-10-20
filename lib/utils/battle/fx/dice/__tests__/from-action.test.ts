@@ -38,7 +38,7 @@ describe("diceThrowOf", () => {
     expect(diceThrowOf(action({ actionDetails: { diceRolls: [] } }))).toBeNull();
   });
 
-  it("підпис бере ім'я цілі як є (маскування вже в журналі)", () => {
+  it("підпис бере ім'я цілі як є (маскування — у maskMazeFxAction)", () => {
     const spec = diceThrowOf(action({ targets: [{ participantId: "t", participantName: "невідомий" }], actionDetails: { diceRolls: [{ kind: "attack", rollerId: "a", dice: [{ sides: 20, value: 10 }] }] } }));
 
     expect(spec?.caption).toContain("невідомий");

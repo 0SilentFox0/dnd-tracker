@@ -6,7 +6,7 @@ import type { ModeViewValue } from "../useModeView";
 
 import { type BattleSceneData, type BattleSceneValue, useBattleScene, useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { modeFxVisible } from "@/lib/utils/battle/modes/client";
-import { deriveMazeView, maskMazeScene, type MazeView, mazeVisible } from "@/lib/utils/battle/modes/maze";
+import { deriveMazeView, maskMazeFxAction, maskMazeScene, type MazeView, mazeVisible } from "@/lib/utils/battle/modes/maze";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -74,7 +74,7 @@ export function useMazeMaskValue(): MazeMaskValue {
     () => ({
       view,
       visible: (p) => mazeVisible(view, p),
-      fxLog: view?.role === "player" ? log.filter((e) => modeFxVisible(map, view, e)) : log,
+      fxLog: view?.role === "player" ? log.filter((e) => modeFxVisible(map, view, e)).map((e) => maskMazeFxAction(view, e)) : log,
     }),
     [view, log, map],
   );
