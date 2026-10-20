@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import "server-only";
 import { prisma } from "@/lib/db";
 import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
 import type { BookSpell } from "@/types/spells";

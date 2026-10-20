@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import "server-only";
 import { prisma } from "@/lib/db";
 import type { AuthUserResult } from "@/lib/utils/api/api-auth";
 

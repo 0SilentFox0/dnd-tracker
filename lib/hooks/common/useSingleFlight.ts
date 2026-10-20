@@ -11,7 +11,16 @@ export function useSingleFlight(): <T>(task: () => Promise<T>) => Promise<T> | n
 
     busy.current = true;
 
-    return task().finally(() => {
+    let run: Promise<T>;
+
+    // a sync throw must still release busy, and the task keeps starting synchronously
+    try {
+      run = task();
+    } catch (error) {
+      run = Promise.reject(error);
+    }
+
+    return run.finally(() => {
       busy.current = false;
     });
   }, []);

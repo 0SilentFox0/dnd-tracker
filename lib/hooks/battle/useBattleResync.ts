@@ -13,34 +13,42 @@ export const RESYNC_AFTER_HIDDEN_MS = 15_000;
 export function useBattleResync(campaignId: string, battleId: string): () => Promise<void> {
   const queryClient = useQueryClient();
 
-  const inFlightRef = useRef<Promise<void> | null>(null);
+  // ключ — бій: запит старого бою не має блокувати (чи скидати) запит нового
+  const inFlightRef = useRef<{ battleId: string; promise: Promise<void> } | null>(null);
 
   // видимість і перепідключення часто приходять разом: один запит версії на обидва
   const resync = useCallback(() => {
+    if (inFlightRef.current?.battleId === battleId) return inFlightRef.current.promise;
+
     const key = battleKeys.scene(campaignId, battleId);
 
-    inFlightRef.current ??= (async () => {
-      // музика не має версії: пропущені battle-audio перечитуються окремо (лише якщо звук увімкнено)
-      void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
+    const entry = {
+      battleId,
+      promise: (async () => {
+        // музика не має версії: пропущені battle-audio перечитуються окремо (лише якщо звук увімкнено)
+        void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
 
-      if (queryClient.getQueryData<BattleScene>(key) === undefined) return;
+        if (queryClient.getQueryData<BattleScene>(key) === undefined) return;
 
-      try {
-        const { version } = await getBattleVersion(campaignId, battleId);
+        try {
+          const { version } = await getBattleVersion(campaignId, battleId);
 
-        const cached = queryClient.getQueryData<BattleScene>(key)?.version;
+          const cached = queryClient.getQueryData<BattleScene>(key)?.version;
 
-        if (cached === undefined || version <= cached) return;
-      } catch {
-        // без версії безпечніше перечитати бій
-      }
+          if (cached === undefined || version <= cached) return;
+        } catch {
+          // без версії безпечніше перечитати бій
+        }
 
-      await queryClient.invalidateQueries({ queryKey: key });
-    })().finally(() => {
-      inFlightRef.current = null;
-    });
+        await queryClient.invalidateQueries({ queryKey: key });
+      })().finally(() => {
+        if (inFlightRef.current === entry) inFlightRef.current = null;
+      }),
+    };
 
-    return inFlightRef.current;
+    inFlightRef.current = entry;
+
+    return entry.promise;
   }, [campaignId, battleId, queryClient]);
 
   useEffect(() => {

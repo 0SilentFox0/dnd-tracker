@@ -3,10 +3,10 @@ import { randomUUID } from "crypto";
 
 import { prisma } from "@/lib/db";
 import { patchArtifactSchema } from "@/lib/schemas/artifacts";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
-import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";

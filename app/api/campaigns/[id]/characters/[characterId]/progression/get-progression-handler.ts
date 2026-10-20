@@ -51,7 +51,7 @@ export async function buildProgressionDto(campaignId: string, ctx: ProgressionCo
           icon: s.icon ?? null,
           summary: abilitySummary("skill", s),
           description: s.description ?? "",
-          ...toSpellSkillInfo(s as never),
+          ...toSpellSkillInfo(s),
           damageAffinity: damageAffinity(skillAbilities(s)),
         },
       ]),

@@ -14,7 +14,7 @@ async function personalSpellIds(character: CharacterFromPrisma, context?: Campai
 
   const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findUnique({ where: { id } });
 
-  const spellId = skill ? toSpellSkillInfo(skill as never).grantedSpellId : null;
+  const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
 
   return spellId ? [spellId] : [];
 }
@@ -57,7 +57,7 @@ export async function resolveLearnedSpellsAndMastery(
 
     const fromTree = learnedSpellIdsFromNodes(learned, {
       branchSpellGroup,
-      skills: Object.fromEntries(skills.map((s) => [s.id, toSpellSkillInfo(s as never)])),
+      skills: Object.fromEntries(skills.map((s) => [s.id, toSpellSkillInfo(s)])),
       spells,
     });
 

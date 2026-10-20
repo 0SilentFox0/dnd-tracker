@@ -61,7 +61,7 @@ function isImageDataUrl(value: string): boolean {
 }
 
 /** Шлях: `{campaignId}/{objectBaseName}{ext}`, upsert. */
-export async function putImage(buffer: Buffer, mime: string, target: StoredImage): Promise<Result<string>> {
+async function putImage(buffer: Buffer, mime: string, target: StoredImage): Promise<Result<string>> {
   let supabase: ReturnType<typeof createAdminClient>;
 
   try {

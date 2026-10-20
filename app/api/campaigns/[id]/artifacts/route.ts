@@ -5,10 +5,10 @@ import { readArtifacts } from "./read-artifacts";
 
 import { prisma } from "@/lib/db";
 import { createArtifactSchema } from "@/lib/schemas/artifacts";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
-import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";

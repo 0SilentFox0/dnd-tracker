@@ -1,14 +1,13 @@
-import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
-import { applyResistance, immunityNote } from "../../resistance";
-import { outcomeFor } from "./outcome";
-import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "./state";
-
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { getP, put } from "@/lib/utils/battle/common/action-flow";
+import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
+import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
+import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
@@ -69,6 +68,8 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
 const baseFor = (state: SpellCastState, e: Effect) => (isDamageEffect(e) ? state.power.damage : state.power.heal);
 
 export function applyTo(state: SpellCastState, effect: Effect, effectIndex: number, id: string, index: number): void {
+  state.touchedIds.add(id);
+
   if (NO_TARGET_KINDS.has(effect.kind)) return runEffect(state, effect, effectIndex, [id], baseFor(state, effect));
 
   const outcome = outcomeFor(state, id);

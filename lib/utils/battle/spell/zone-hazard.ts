@@ -1,6 +1,5 @@
-import type { CastableSpell } from "../types/spell-process";
-
 import { applyTerrain } from "@/lib/utils/battle/grid/terrain";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleMapConfig, TerrainDamage } from "@/types/battle";
 
 interface ZoneHazardInput {

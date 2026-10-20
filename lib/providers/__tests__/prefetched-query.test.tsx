@@ -4,6 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
+import { SeedQuery } from "@/lib/providers/prefetched-query-client";
 
 const KEY = ["battle", "c1", "b1"] as const;
 
@@ -88,5 +89,30 @@ describe("PrefetchedQuery", () => {
     );
 
     expect(client.getQueryData(KEY)).toBe(cached);
+  });
+
+  it("Back з payload router cache не затирає новіший кеш списку без version", () => {
+    const client = new QueryClient();
+
+    const seed = (data: unknown, seededAt: number) =>
+      render(
+        <QueryClientProvider client={client}>
+          <SeedQuery queryKey={KEY} data={data} seededAt={seededAt}>
+            <span />
+          </SeedQuery>
+        </QueryClientProvider>,
+      );
+
+    const html = [{ id: "s1", name: "Старе" }];
+
+    seed(html, 100).unmount();
+    client.setQueryData(KEY, [{ id: "s1", name: "Нове" }]);
+    seed(html, 100).unmount();
+
+    expect(client.getQueryData(KEY)).toEqual([{ id: "s1", name: "Нове" }]);
+
+    seed([{ id: "s1", name: "З сервера" }], 200);
+
+    expect(client.getQueryData(KEY)).toEqual([{ id: "s1", name: "З сервера" }]);
   });
 });

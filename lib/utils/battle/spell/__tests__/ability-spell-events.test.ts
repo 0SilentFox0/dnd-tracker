@@ -60,6 +60,20 @@ describe("spell ability events", () => {
     expect(r.battleAction.actionDetails.totalDamage).toBe(3);
   });
 
+  it("відбита на кастера шкода не входить у підсумок, а його смерть не рахується йому як kill", () => {
+    const glory = resolved({ trigger: { event: "kill", role: "killer" }, effects: [{ kind: "changeMorale", delta: 1 }] });
+
+    const reflect = resolved({ trigger: { event: "spellCast", phase: "after", role: "target" }, effects: [{ kind: "dealDamage", amount: 4, damageType: "magic", target: "eventActor" }] }, { id: "rf" });
+
+    const r = cast(makeParticipant({ id: "c", hp: 4, abilities: [glory] }), [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50, abilities: [reflect] })]);
+
+    expect(hpOf(r, "c")).toBe(0);
+    expect(hpOf(r, "e")).toBe(45);
+    expect(r.battleAction.resultText).toContain("шкода: 5)");
+    expect(r.battleAction.actionDetails.totalDamage).toBe(5);
+    expect(r.casterUpdated.combatStats.morale).toBe(0);
+  });
+
   it("бонус шкоди з spellCast/before діє на це заклинання", () => {
     const focus = resolved({ trigger: { event: "spellCast", phase: "before", role: "caster" }, effects: [{ kind: "damageBonus", filter: { kind: "magic" }, percent: 100 }] });
 

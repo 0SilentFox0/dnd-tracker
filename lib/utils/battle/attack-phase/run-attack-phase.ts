@@ -13,8 +13,6 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-export { findAttack, requestedTargetIds } from "./request";
-
 export type AttackPhaseInput = {
   battle: {
     initiativeOrder: BattleParticipant[];

@@ -1,11 +1,10 @@
-import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
-import { applyMainActionUsed } from "../../participant";
-import type { CastSpellResult } from "../../types/spell-process";
-import { diffAppliedEffects } from "../applied-effects";
-import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "./state";
-
 import { findParticipant, isActive, mergeParticipants } from "@/lib/utils/abilities/engine/core/participants";
 import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
+import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { applyMainActionUsed } from "@/lib/utils/battle/participant";
+import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
+import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
+import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant } from "@/types/battle";
 
 export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean }): void {
@@ -36,28 +35,30 @@ function fxMeta(def: SpellCastState["spell"]["definition"]) {
   };
 }
 
-/** Кожен, хто впав за каст — і від ефектів зі своєю ціллю (всі вороги тощо), — отримує lethalDamage/kill. */
+/** Кожен, кого зачепило заклинання і хто впав, отримує lethalDamage/kill; власна смерть кастера — без kill на його рахунок. */
 function settleAllDowned(state: SpellCastState, before: BattleParticipant[]): void {
-  const ids = [...state.targetIds, ...before.map((p) => p.basicInfo.id).filter((id) => !state.targetIds.includes(id))];
+  const casterId = state.caster.basicInfo.id;
 
-  for (const id of ids) {
+  for (const id of state.touchedIds) {
     const prev = findParticipant(before, id);
 
-    if (prev && isActive(prev)) settleDowned(state.flow, id, state.caster.basicInfo.id);
+    if (prev && isActive(prev)) settleDowned(state.flow, id, id === casterId ? null : casterId);
   }
 }
 
-function hpTotals(before: BattleParticipant[], after: BattleParticipant[]): { dealt: number; healed: number } {
+function hpTotals(state: SpellCastState, before: BattleParticipant[]): { dealt: number; healed: number } {
   let dealt = 0;
 
   let healed = 0;
 
-  for (const p of after) {
-    const prev = findParticipant(before, p.basicInfo.id);
+  for (const id of state.touchedIds) {
+    const prev = findParticipant(before, id);
 
-    if (!prev) continue;
+    const now = findParticipant(state.flow.ps, id);
 
-    const delta = p.combatStats.currentHp - prev.combatStats.currentHp;
+    if (!prev || !now) continue;
+
+    const delta = now.combatStats.currentHp - prev.combatStats.currentHp;
 
     if (delta < 0) dealt -= delta;
     else healed += delta;
@@ -84,7 +85,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
   settleAllDowned(state, before);
   fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds: state.targetIds, ...state.info });
 
-  const { dealt, healed } = hpTotals(before, flow.ps);
+  const { dealt, healed } = hpTotals(state, before);
 
   const caption = [dealt > 0 ? `шкода: ${dealt}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
 

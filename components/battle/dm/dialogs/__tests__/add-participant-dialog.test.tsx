@@ -87,6 +87,37 @@ describe("AddParticipantDialog", () => {
     expect((screen.getByRole("button", { name: "Додати" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("помилка додавання: Скасувати не стирає введене", () => {
+    vi.mocked(useCharacters).mockReturnValue({ data: [{ id: "h1", name: "Фрейда" }] } as never);
+
+    const props = { onOpenChange: vi.fn(), campaignId: "c", onAdd: vi.fn() };
+
+    const { rerender } = render(<AddParticipantDialog open {...props} />);
+
+    fireEvent.change(screen.getAllByTestId("select")[2], { target: { value: "h1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Додати" }));
+    rerender(<AddParticipantDialog open isPending {...props} />);
+    rerender(<AddParticipantDialog open isPending={false} {...props} />);
+    rerender(<AddParticipantDialog open={false} isPending={false} {...props} />);
+    rerender(<AddParticipantDialog open isPending={false} {...props} />);
+
+    expect((screen.getAllByTestId("select")[2] as HTMLSelectElement).value).toBe("h1");
+  });
+
+  it("кількість юнітів обмежена лімітом сервера (10)", () => {
+    vi.mocked(useUnitPicker).mockReturnValue(picker({ raceKey: "r1", unitId: "u1", tiers: [{ level: 1, units: [{ id: "u1", name: "Біс" }] }] }) as never);
+
+    const onAdd = vi.fn();
+
+    render(<AddParticipantDialog open onOpenChange={vi.fn()} campaignId="c" onAdd={onAdd} />);
+
+    fireEvent.change(screen.getAllByTestId("select")[1], { target: { value: "unit" } });
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "20" } });
+    fireEvent.click(screen.getByRole("button", { name: "Додати" }));
+
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ quantity: 10 }));
+  });
+
   it("юніти обраної раси згруповані за рівнями", () => {
     vi.mocked(useUnitPicker).mockReturnValue(
       picker({

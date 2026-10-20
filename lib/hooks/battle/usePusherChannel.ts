@@ -19,7 +19,7 @@ interface ChannelCallbacks {
 }
 
 /** Лінивий pusher-js: setup отримує клієнт, коли модуль завантажено; повертає cleanup для useEffect. */
-export function withPusher(setup: (pusher: PusherClient) => () => void): () => void {
+function withPusher(setup: (pusher: PusherClient) => () => void): () => void {
   if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_PUSHER_KEY) return () => {};
 
   let mounted = true;

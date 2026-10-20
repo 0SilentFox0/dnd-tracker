@@ -6,9 +6,9 @@ import { readSkills } from "./read-skills";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 

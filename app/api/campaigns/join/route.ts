@@ -5,9 +5,9 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
+import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuthUser } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 

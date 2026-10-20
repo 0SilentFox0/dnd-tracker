@@ -6,6 +6,7 @@ import { useCrudMutation } from "@/lib/hooks/common";
 export function useTransferArtifact(campaignId: string, characterId: string) {
   return useCrudMutation({
     mutationFn: (body: { slot: string; toCharacterId: string }) => transferArtifact(campaignId, characterId, body),
+    awaitInvalidation: true,
     invalidateKeys: [characterKeys.sheet(campaignId), characterKeys.roster(campaignId), characterKeys.details(campaignId)],
   });
 }

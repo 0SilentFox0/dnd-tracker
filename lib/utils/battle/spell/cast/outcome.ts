@@ -1,8 +1,7 @@
-import { rollSavingThrow } from "../power";
-import { participantImmuneToSpell } from "../spell-immunity";
-import type { Outcome, SpellCastState } from "./state";
-
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
+import { rollSavingThrow } from "@/lib/utils/battle/spell/power";
+import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 

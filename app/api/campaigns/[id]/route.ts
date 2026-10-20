@@ -5,9 +5,9 @@ import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 

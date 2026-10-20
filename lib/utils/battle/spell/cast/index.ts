@@ -1,14 +1,13 @@
-import type { CastSpellParams, CastSpellResult } from "../../types/spell-process";
-import { computeSpellPower, spellSaveDc } from "../power";
-import { spellNeedsSlot, spellSlotKey } from "../slot";
-import { applyTo } from "./effects";
-import { finishSpellAction, spendCastCost } from "./finish";
-import { resolveOutcome } from "./outcome";
-import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from "./state";
-
 import { findParticipant, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
+import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
+import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
+import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
+import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
+import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
+import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { AbilityEvent } from "@/types/abilities";
 
 export function castSpell(params: CastSpellParams): CastSpellResult {
@@ -54,6 +53,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     spell,
     caster,
     targetIds,
+    touchedIds: new Set(targetIds),
     info,
     ability: abilityOf(spell),
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId] }),

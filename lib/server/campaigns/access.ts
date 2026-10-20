@@ -6,10 +6,11 @@
 import { redirect } from "next/navigation";
 import type { Campaign, CampaignMember } from "@prisma/client";
 
+import "server-only";
 import { getAuthUser } from "@/lib/auth";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { PUBLIC_USER_SELECT } from "@/lib/utils/api/db-user";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import type { PublicUser } from "@/types/campaigns";
 
 type SlimMembership = {

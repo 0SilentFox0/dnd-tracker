@@ -13,8 +13,6 @@ import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pu
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAudioEvent } from "@/types/audio";
 
-export { RESYNC_AFTER_HIDDEN_MS } from "./useBattleResync";
-
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
 const CONNECTION_STATES = new Set(["connected", "connecting", "disconnected", "unavailable"]);

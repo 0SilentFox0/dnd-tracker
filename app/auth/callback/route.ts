@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 
 import { getRedirectOrigin } from './redirect-origin'
 
+import { ensureDbUser } from '@/lib/server/users/db-user'
 import { createClient } from '@/lib/supabase/server'
-import { ensureDbUser } from '@/lib/utils/api/db-user'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)

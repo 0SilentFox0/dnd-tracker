@@ -1,5 +1,6 @@
 import type { NextResponse } from "next/server";
 
+import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { errorResponse } from "@/lib/utils/api/api-response";

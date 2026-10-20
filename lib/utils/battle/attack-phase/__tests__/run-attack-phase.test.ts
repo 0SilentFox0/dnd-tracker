@@ -9,12 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import {
-  type AttackPhaseInput,
-  findAttack,
-  requestedTargetIds,
-  runAttackPhase,
-} from "../run-attack-phase";
+import { findAttack, requestedTargetIds } from "../request";
+import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";

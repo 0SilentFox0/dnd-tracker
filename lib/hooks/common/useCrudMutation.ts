@@ -23,6 +23,8 @@ export function useCrudMutation<
   invalidateKeys?: QueryKey[] | ((data: TData, variables: TVariables) => QueryKey[]);
   /** shown in a notice when the mutation fails */
   errorText?: string;
+  /** mutateAsync resolves only after the invalidated queries refetched */
+  awaitInvalidation?: boolean;
   onMutate?: Options<TData, TError, TVariables, TContext>["onMutate"];
   onSuccess?: Options<TData, TError, TVariables, TContext>["onSuccess"];
   onError?: Options<TData, TError, TVariables, TContext>["onError"];
@@ -32,17 +34,18 @@ export function useCrudMutation<
 
   const notify = useOptionalNotify();
 
-  const { mutationFn, invalidateKeys = [], errorText, onMutate, onSuccess, onError, onSettled } = options;
+  const { mutationFn, invalidateKeys = [], errorText, awaitInvalidation = false, onMutate, onSuccess, onError, onSettled } = options;
 
   const mutation = useMutation<TData, TError, TVariables, TContext>({
     mutationFn,
     onMutate,
-    onSuccess: (data, variables, onMutateResult, context) => {
+    onSuccess: async (data, variables, onMutateResult, context) => {
       const keys = typeof invalidateKeys === "function" ? invalidateKeys(data, variables) : invalidateKeys;
 
-      for (const key of keys) {
-        void queryClient.invalidateQueries({ queryKey: key });
-      }
+      const invalidations = Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
+
+      if (awaitInvalidation) await invalidations;
+      else void invalidations;
 
       onSuccess?.(data, variables, onMutateResult, context);
     },

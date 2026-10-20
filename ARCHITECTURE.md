@@ -165,7 +165,7 @@ React-хуки згруповані по папках за доменом; ко�
 #### `lib/utils/skills/`
 
 - **`progression/`** — єдиний рушій прокачки: `normalizeTree` (вузли дерева), `canLearn`/`canUnlearn` (правила), `progressionView`/`rankOffers` (UI гравця), `resolveLearned` (бій, баланс, заклинання), `validateTree` і редагування JSON для DM.
-- **`skill-helpers.ts`** тощо — допоміжні функції для скілів і форм.
+- **`skills.ts`** (групування скілів за основними навичками) і **`form/`** (нормалізація й payload форми скіла).
 
 #### `lib/utils/spells/`
 

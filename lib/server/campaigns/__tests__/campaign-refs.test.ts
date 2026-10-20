@@ -10,7 +10,7 @@ const db = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ prisma: db }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 
 describe("invalidCampaignRefs", () => {
   beforeEach(() => {

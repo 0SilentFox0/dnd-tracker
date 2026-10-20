@@ -1,10 +1,9 @@
-import type { CastableSpell } from "../../types/spell-process";
-import type { SpellPower } from "../power";
-
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { Amount, Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
+import type { SpellPower } from "@/lib/utils/battle/spell/power";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -20,6 +19,8 @@ export interface SpellCastState {
   /** Кастер до каста: сторона й множник балансу. */
   caster: BattleParticipant;
   targetIds: string[];
+  /** Цілі каста й усі, кого зачепили власні ефекти заклинання — без тих, кого змінили лише тригери. */
+  touchedIds: Set<string>;
   info: { spellId: string; school: string | null; level: number };
   ability: ResolvedAbility;
   power: SpellPower;
