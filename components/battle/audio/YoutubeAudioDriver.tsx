@@ -4,8 +4,9 @@ import { useEffect } from "react";
 
 import { YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
 import { useBattleAudio, useYoutubeSync } from "@/lib/hooks/battle";
+import { cn } from "@/lib/utils";
 
-/** Розгорнута панель показує плеєр не менше 200×200 (вимога YouTube); у згорнутій він лише схований — рішення користувача. */
+/** Показане відео — не менше 200×200 (вимога YouTube); сховане (перемикач «Відео» чи згорнута панель) лишає iframe змонтованим, тож звук іде. */
 export function YoutubeAudioDriver({ videoId, onNeedsTap }: { videoId: string; onNeedsTap(): void }) {
   const { state, clockOffsetMs, prefs } = useBattleAudio();
 
@@ -15,9 +16,13 @@ export function YoutubeAudioDriver({ videoId, onNeedsTap }: { videoId: string; o
     if (needsTap) onNeedsTap();
   }, [needsTap, onNeedsTap]);
 
+  const shown = prefs.video.shown;
+
   return (
     <div className="mt-2 flex flex-col items-center gap-1">
-      <div data-youtube-player ref={ref} className="overflow-hidden rounded bg-black" style={{ width: YOUTUBE_PLAYER_PX, height: YOUTUBE_PLAYER_PX }} />
+      <div data-youtube-video={shown ? "shown" : "hidden"} aria-hidden={!shown || undefined} inert={!shown} className={cn(!shown && "sr-only")}>
+        <div data-youtube-player ref={ref} className="overflow-hidden rounded bg-black" style={{ width: YOUTUBE_PLAYER_PX, height: YOUTUBE_PLAYER_PX }} />
+      </div>
       {needsTap && <p className="text-hud-muted">Торкніться ▶ у плеєрі</p>}
       {failed && <p role="alert" className="text-[var(--enemy)]">Відео недоступне для вбудовування</p>}
     </div>

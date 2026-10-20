@@ -31,3 +31,7 @@ export const AUDIO_VOLUME_KEY = "battle-music-volume";
 export const AUDIO_MUTED_KEY = "battle-music-muted";
 
 export const DEFAULT_AUDIO_VOLUME = 0.6;
+
+export const AUDIO_VIDEO_KEY = "battle-music-video";
+
+export const AUDIO_PLAYLIST_KEY = "battle-music-playlist";

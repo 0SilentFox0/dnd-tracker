@@ -8,7 +8,7 @@ import { type BattleAudioControl, useBattleAudioControl } from "./useBattleAudio
 import { useBattleAudioState } from "./useBattleAudioState";
 import { useBattleScene } from "./useBattleScene";
 
-import { useTracks } from "@/lib/hooks/tracks";
+import { useRenameTrack, useTracks } from "@/lib/hooks/tracks";
 import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 
 export interface BattleAudioValue {
@@ -18,7 +18,7 @@ export interface BattleAudioValue {
   sound: { unlocked: boolean; unlock(): void; failed: boolean };
   prefs: AudioPrefs;
   control: BattleAudioControl | null;
-  library: { tracks: CampaignTrack[]; loading: boolean } | null;
+  library: { tracks: CampaignTrack[]; loading: boolean; rename(id: string, title: string): void } | null;
 }
 
 export const BattleAudioContext = createContext<BattleAudioValue | null>(null);
@@ -39,6 +39,8 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
   const control = useBattleAudioControl({ campaignId, battleId, enabled: isDM, onFailure: show });
 
   const { data: tracks = NO_TRACKS, isLoading } = useTracks(campaignId, { enabled: isDM });
+
+  const rename = useRenameTrack(campaignId, (e) => show(e instanceof Error && e.message ? e.message : "Не вдалося перейменувати трек"));
 
   const track = audio?.track ?? null;
 
@@ -68,9 +70,9 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
       sound: { unlocked, unlock, failed },
       prefs,
       control,
-      library: isDM ? { tracks, loading: isLoading } : null,
+      library: isDM ? { tracks, loading: isLoading, rename } : null,
     }),
-    [audio, clockOffsetMs, unlocked, unlock, failed, prefs, control, isDM, tracks, isLoading],
+    [audio, clockOffsetMs, unlocked, unlock, failed, prefs, control, isDM, tracks, isLoading, rename],
   );
 
   return { value, audioRef: media.ref };
