@@ -8,6 +8,7 @@ export * from "./movement";
 export * from "./placement";
 export * from "./rng";
 export * from "./scatter";
+export * from "./sight";
 export * from "./status";
 export * from "./vision";
 export * from "./walls";

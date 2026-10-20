@@ -7,6 +7,7 @@ import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
+import { MAZE_AIM_OUT_OF_SIGHT, MAZE_TARGET_OUT_OF_SIGHT, mazeAimHidden, mazeTargetHidden } from "@/lib/utils/battle/maze";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
@@ -119,6 +120,8 @@ export interface SpellMapContext {
   targetCell?: GridPoint;
 }
 
+const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef["kind"]> = new Set(["ally", "enemy", "allyDead", "area", "template"]);
+
 const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
 
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
@@ -129,6 +132,8 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
   if (!inBounds(map, aim)) return fail("Точка поза картою");
 
   if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
+
+  if (mazeAimHidden(map, caster, aim)) return fail(MAZE_AIM_OUT_OF_SIGHT);
 
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
@@ -145,6 +150,8 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
   if (!inBounds(scene.map, aim.cell)) return fail("Точка поза картою");
 
   if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail("Точка поза дальністю заклинання");
+
+  if (mazeAimHidden(scene.map, scene.caster, aim.cell)) return fail(MAZE_AIM_OUT_OF_SIGHT);
 
   const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
 
@@ -198,6 +205,8 @@ export function resolveSpellTargets(
   if (picked.some(isAirborne)) return fail(API_ERRORS.TARGET_AIRBORNE);
 
   if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail("Ціль поза дальністю заклинання");
+
+  if (map && SIGHTED_KINDS.has(targeting.kind) && mazeTargetHidden(map, caster, picked)) return fail(MAZE_TARGET_OUT_OF_SIGHT);
 
   switch (targeting.kind) {
     case "self":

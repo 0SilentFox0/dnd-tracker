@@ -6,6 +6,7 @@ import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { MAZE_AIM_OUT_OF_SIGHT, mazeAimHidden } from "@/lib/utils/battle/maze";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -106,7 +107,7 @@ export interface AimScene {
 export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
   const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
 
-  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range)) return null;
+  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range) || mazeAimHidden(map, caster, at)) return null;
 
   const { cells } = templateArea(map, participants, caster, aim.template, at);
 
@@ -169,6 +170,8 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
   function aimAt(p: GridPoint): MapClick {
     if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: "Поза дальністю" };
+
+    if (mazeAimHidden(map, aimCaster, p)) return { kind: "reject", reason: MAZE_AIM_OUT_OF_SIGHT };
 
     return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Оберіть напрямок" };
   }

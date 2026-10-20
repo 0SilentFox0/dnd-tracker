@@ -2,6 +2,7 @@ import { spellLevelRoman } from "@/lib/constants/spells";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
+import { mazeTargetHidden } from "@/lib/utils/battle/maze";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
@@ -281,9 +282,11 @@ export function spellTargetCandidates(order: BattleParticipant[], caster: Battle
 
 /** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає. */
 export function spellTargetInRange(map: BattleMapConfig | null, caster: BattleParticipant | null, target: BattleParticipant, range: number | undefined): boolean {
-  if (!map || range === undefined || !caster || !isOnMap(caster) || target.battleData.position === undefined) return true;
+  if (!map || !caster || !isOnMap(caster) || target.battleData.position === undefined) return true;
 
-  return footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
+  const inRange = range === undefined || footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
+
+  return inRange && !mazeTargetHidden(map, caster, [target]);
 }
 
 export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState, viewer: { isDM: boolean; userId: string | null }): BattleParticipant[] {

@@ -16,7 +16,7 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { placeMazeParticipants, withMazeAwareness } from "@/lib/utils/battle/maze";
+import { isMazeDark, MAZE_DARK_ERROR, placeMazeParticipants, withMazeAwareness } from "@/lib/utils/battle/maze";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -80,6 +80,7 @@ export interface RunBattleMutationOptions<TBody> {
   respond?: "battle" | "wrapped" | "response";
   includeRecentEvents?: number;
   includeKnowledge?: boolean;
+  blockedInDark?: boolean;
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
@@ -232,6 +233,10 @@ export async function runBattleMutation<TBody>(
 
     if (allowed && !allowed.includes(loaded.scene.status)) {
       throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
+    }
+
+    if (options.blockedInDark && isMazeDark(loaded.meta.map) && !options.dryRun?.(parsed.body)) {
+      throw new BattleRuleError("action_rejected", MAZE_DARK_ERROR);
     }
 
     const mazeOpts = { maze: !!loaded.meta.map?.maze };

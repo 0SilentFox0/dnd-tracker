@@ -3,7 +3,7 @@ import { resolveMover } from "./resolve-mover";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { MazeGrid } from "@/lib/utils/battle/maze";
-import { applyMazeMove, heroEvent, mazePlacementError, placeInMaze, placeMazeParticipants } from "@/lib/utils/battle/maze";
+import { applyMazeMove, heroEvent, MAZE_DARK_ERROR, mazePlacementError, placeInMaze, placeMazeParticipants } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -32,6 +32,8 @@ export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, grid: M
 
     return { participants: replaceParticipant(participants, placeInMaze(grid, mover, data.to)), pending: ctx.pending, events: [] };
   }
+
+  if (grid.maze.dark) throw new BattleRuleError("action_rejected", MAZE_DARK_ERROR);
 
   assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 

@@ -4,6 +4,7 @@ import { cellsOf, isOnMap } from "./occupancy";
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { MAZE_TARGET_OUT_OF_SIGHT, MAZE_WALL_BETWEEN, mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function attackRangeCells(range?: string): number | null {
@@ -29,8 +30,12 @@ export function attackReachError(
 
   const placed = targets.filter((t) => t.battleData.position);
 
+  const maze = mazeGridOf(map);
+
   if (attackKindOf(attack.type) === AttackType.MELEE) {
-    return placed.some((t) => distanceTo(t) > 1) ? "Ціль не поруч — спершу підійдіть" : null;
+    if (placed.some((t) => distanceTo(t) > 1)) return "Ціль не поруч — спершу підійдіть";
+
+    return maze && placed.some((t) => meleeWallBetween(maze, attacker, t)) ? MAZE_WALL_BETWEEN : null;
   }
 
   const engaged = participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isActive(p) && isOnMap(p) && distanceTo(p) <= 1);
@@ -39,7 +44,9 @@ export function attackReachError(
 
   const range = attackRangeCells(attack.range);
 
-  return range !== null && placed.some((t) => distanceTo(t) > range) ? "Ціль поза дальністю атаки" : null;
+  if (range !== null && placed.some((t) => distanceTo(t) > range)) return "Ціль поза дальністю атаки";
+
+  return maze && placed.some((t) => !seesTarget(maze, attacker, t)) ? MAZE_TARGET_OUT_OF_SIGHT : null;
 }
 
 export function enemiesInReach(map: BattleMapConfig | null, participants: BattleParticipant[], attacker: BattleParticipant, attack: BattleAttack): BattleParticipant[] {
