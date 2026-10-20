@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { allReachExit, mazeDistances } from "../connectivity";
-import { type GenerateInput, generateMaze, MAZE_SCATTER_ERROR, reshuffleMaze } from "../generate";
+import { type GenerateInput, generateMaze, reshuffleMaze } from "../generate";
 import { isEdgeCell } from "../walls";
 
 import { emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_TELEPORT_MIN_DISTANCE } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellDistance, cellKey, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import type { GridPoint, MazeConfig, MazeDifficulty } from "@/types/battle";
 
@@ -239,7 +240,7 @@ describe("reshuffleMaze", () => {
 
     const res = reshuffleMaze({ ...base, grid: { cols: 6, rows: 4 }, maze: { ...prev, exit: p(5, 2) }, participantIds: ids, positions: {}, mode: "scatter" });
 
-    expect(res).toEqual({ error: MAZE_SCATTER_ERROR });
+    expect(res).toEqual({ error: MAZE_TEXTS.scatterNoRoom });
     expect(performance.now() - start).toBeLessThan(100);
   });
 });

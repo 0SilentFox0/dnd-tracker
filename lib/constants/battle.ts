@@ -141,6 +141,12 @@ export const MAZE_SCATTER_MIN_GAP = 2;
 
 export const MAZE_MAX_GENERATION_ATTEMPTS = 50;
 
+export const MAZE_DIFFICULTIES = ["easy", "medium", "hard"] as const;
+
+export const MAZE_MARK_SYMBOLS = ["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"] as const;
+
+export const MAZE_LIMITS = { wallEdgesPerOp: 400, fogCellsPerOp: 400, teleportPairs: 10, fogPatches: 20 } as const;
+
 export const MAZE_MARK_COLORS: string[] = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#a855f7", "#ec4899"];
 
 export function emptyMaze(difficulty: MazeDifficulty = "medium"): MazeConfig {

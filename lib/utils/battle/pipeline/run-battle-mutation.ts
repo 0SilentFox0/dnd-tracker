@@ -9,6 +9,7 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
@@ -16,7 +17,7 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { isMazeDark, MAZE_DARK_ERROR, withMazeAwareness } from "@/lib/utils/battle/maze";
+import { isMazeDark, withMazeAwareness } from "@/lib/utils/battle/maze";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -236,7 +237,7 @@ export async function runBattleMutation<TBody>(
     }
 
     if (options.blockedInDark && isMazeDark(loaded.meta.map) && !options.dryRun?.(parsed.body)) {
-      throw new BattleRuleError("action_rejected", MAZE_DARK_ERROR);
+      throw new BattleRuleError("action_rejected", MAZE_TEXTS.dark);
     }
 
     if (

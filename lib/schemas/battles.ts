@@ -1,23 +1,31 @@
 import { z } from "zod";
 
-import { HAZARD_DICE_PATTERN, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
 export const mapCellSchema = z.object({ x: z.number().int().min(0).max(59), y: z.number().int().min(0).max(59) });
 
+const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
+
+const cellKeySchema = z.string().regex(/^\d+:\d+$/);
+
+const mazeDifficultySchema = z.enum(MAZE_DIFFICULTIES);
+
+const mazeMarkSymbolSchema = z.enum(MAZE_MARK_SYMBOLS);
+
 export const mazeSchema = z.object({
-  walls: z.array(z.string().regex(/^\d+:\d+:[es]$/)).max(7200),
+  walls: z.array(edgeKeySchema).max(7200),
   exit: mapCellSchema.nullable(),
-  difficulty: z.enum(["easy", "medium", "hard"]),
+  difficulty: mazeDifficultySchema,
   teleports: z.array(z.tuple([mapCellSchema, mapCellSchema])).max(20),
-  fog: z.array(z.string().regex(/^\d+:\d+$/)).max(3600),
+  fog: z.array(cellKeySchema).max(3600),
   marks: z
     .record(
-      z.string().regex(/^\d+:\d+$/),
+      cellKeySchema,
       z.object({
-        symbol: z.enum(["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"]),
+        symbol: mazeMarkSymbolSchema,
         color: z.string().regex(/^#[0-9a-f]{6}$/),
         by: z.string().max(64),
       }),
@@ -25,6 +33,29 @@ export const mazeSchema = z.object({
     .refine((m) => Object.keys(m).length <= 3600, "Забагато позначок"),
   dark: z.boolean(),
   moved: z.boolean().optional(),
+});
+
+const mazeFeatureCounts = {
+  teleportPairs: z.number().int().min(0).max(MAZE_LIMITS.teleportPairs),
+  fogPatches: z.number().int().min(0).max(MAZE_LIMITS.fogPatches),
+};
+
+const edgeBatch = z.array(edgeKeySchema).max(MAZE_LIMITS.wallEdgesPerOp);
+
+export const mazeActionSchema = z.discriminatedUnion("op", [
+  z.object({ op: z.literal("generate"), difficulty: mazeDifficultySchema, ...mazeFeatureCounts, exit: mapCellSchema.nullable() }),
+  z.object({ op: z.literal("reshuffle"), mode: z.enum(["walls", "scatter", "tunnel"]), ...mazeFeatureCounts }),
+  z.object({ op: z.literal("walls"), add: edgeBatch, remove: edgeBatch }),
+  z.object({ op: z.literal("exit"), cell: mapCellSchema }),
+  z.object({ op: z.literal("teleport"), pair: z.tuple([mapCellSchema, mapCellSchema]).nullable(), removeAt: mapCellSchema.optional() }),
+  z.object({ op: z.literal("fog"), cells: z.array(cellKeySchema).max(MAZE_LIMITS.fogCellsPerOp), on: z.boolean() }),
+  z.object({ op: z.literal("dark"), on: z.boolean() }),
+  z.object({ op: z.literal("scatterStarts") }),
+]);
+
+export const mazeMarkSchema = z.object({
+  participantId: z.string(),
+  symbol: mazeMarkSymbolSchema,
 });
 
 export const battleMapSchema = z.object({

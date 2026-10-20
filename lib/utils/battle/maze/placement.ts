@@ -1,9 +1,10 @@
 import { inwardFacing } from "./direction";
-import type { MazeGrid } from "./vision";
+import type { MazeGrid } from "./grid";
 import { isEdgeCell } from "./walls";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { cellKey, inBounds, samePoint } from "@/lib/utils/battle/grid/geometry";
 import { occupiedBy } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -13,26 +14,21 @@ export interface MazePlacementArgs {
   to: GridPoint;
 }
 
-export const MAZE_PLACEMENT_ERROR = {
-  outside: "Клітинка поза картою",
-  exit: "На вихід ставити не можна",
-  taken: "Клітинка зайнята",
-  edge: "До першого кроку герої стоять лише на краю лабіринту",
-} as const;
+const ERROR = MAZE_TEXTS.placement;
 
 const isHeroSide = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY;
 
 /** Розстановка ДМ: без бюджету й шляху; герої до першого кроку — лише на краю. */
 export function mazePlacementError(grid: MazeGrid, { participants, mover, to }: MazePlacementArgs): string | null {
-  if (!inBounds(grid, to)) return MAZE_PLACEMENT_ERROR.outside;
+  if (!inBounds(grid, to)) return ERROR.outside;
 
   const { exit, moved } = grid.maze;
 
-  if (exit && exit.x === to.x && exit.y === to.y) return MAZE_PLACEMENT_ERROR.exit;
+  if (exit && samePoint(exit, to)) return ERROR.exit;
 
-  if (occupiedBy(participants, (p) => p.basicInfo.id !== mover.basicInfo.id).has(cellKey(to))) return MAZE_PLACEMENT_ERROR.taken;
+  if (occupiedBy(participants, (p) => p.basicInfo.id !== mover.basicInfo.id).has(cellKey(to))) return ERROR.taken;
 
-  if (isHeroSide(mover) && !moved && !isEdgeCell(grid, to)) return MAZE_PLACEMENT_ERROR.edge;
+  if (isHeroSide(mover) && !moved && !isEdgeCell(grid, to)) return ERROR.edge;
 
   return null;
 }

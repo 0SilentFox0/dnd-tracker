@@ -35,3 +35,7 @@ export class BattleRuleError extends Error {
     this.name = "BattleRuleError";
   }
 }
+
+export function rejectAction(message: string): never {
+  throw new BattleRuleError("action_rejected", message);
+}

@@ -1,13 +1,14 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
-import { MAZE_AIM_OUT_OF_SIGHT, MAZE_TARGET_OUT_OF_SIGHT, mazeAimHidden, mazeGridOf, mazeTargetHidden, seesTarget } from "@/lib/utils/battle/maze";
+import { mazeAimHidden, mazeGridOf, mazeTargetHidden, seesTarget } from "@/lib/utils/battle/maze";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
@@ -146,7 +147,7 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
 
-  if (mazeAimHidden(map, caster, aim)) return fail(MAZE_AIM_OUT_OF_SIGHT);
+  if (mazeAimHidden(map, caster, aim)) return fail(MAZE_TEXTS.aimOutOfSight);
 
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
@@ -164,7 +165,7 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
 
   if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail("Точка поза дальністю заклинання");
 
-  if (mazeAimHidden(scene.map, scene.caster, aim.cell)) return fail(MAZE_AIM_OUT_OF_SIGHT);
+  if (mazeAimHidden(scene.map, scene.caster, aim.cell)) return fail(MAZE_TEXTS.aimOutOfSight);
 
   const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
 
@@ -219,7 +220,7 @@ export function resolveSpellTargets(
 
   if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail("Ціль поза дальністю заклинання");
 
-  if (map && SIGHTED_KINDS.has(targeting.kind) && mazeTargetHidden(map, caster, picked)) return fail(MAZE_TARGET_OUT_OF_SIGHT);
+  if (map && SIGHTED_KINDS.has(targeting.kind) && mazeTargetHidden(map, caster, picked)) return fail(MAZE_TEXTS.targetOutOfSight);
 
   const sighted = (filter: (p: BattleParticipant) => boolean) => mazeSightedTargets(map, ps, caster, ids(filter));
 

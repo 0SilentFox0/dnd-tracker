@@ -2,9 +2,10 @@ import { footprintDistance } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { inMazePlay, MAZE_TARGET_OUT_OF_SIGHT, MAZE_WALL_BETWEEN, mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
+import { inMazePlay, mazeGridOf, meleeWallBetween, seesTarget } from "@/lib/utils/battle/maze";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function attackRangeCells(range?: string): number | null {
@@ -35,7 +36,7 @@ export function attackReachError(
   if (attackKindOf(attack.type) === AttackType.MELEE) {
     if (placed.some((t) => distanceTo(t) > 1)) return "Ціль не поруч — спершу підійдіть";
 
-    return maze && placed.some((t) => meleeWallBetween(maze, attacker, t)) ? MAZE_WALL_BETWEEN : null;
+    return maze && placed.some((t) => meleeWallBetween(maze, attacker, t)) ? MAZE_TEXTS.wallBetween : null;
   }
 
   // у лабіринті сплячий ворог чи ворог за стіною не заважає стріляти (і не видає себе помилкою)
@@ -49,7 +50,7 @@ export function attackReachError(
 
   if (range !== null && placed.some((t) => distanceTo(t) > range)) return "Ціль поза дальністю атаки";
 
-  return maze && placed.some((t) => !seesTarget(maze, attacker, t)) ? MAZE_TARGET_OUT_OF_SIGHT : null;
+  return maze && placed.some((t) => !seesTarget(maze, attacker, t)) ? MAZE_TEXTS.targetOutOfSight : null;
 }
 
 export function enemiesInReach(map: BattleMapConfig | null, participants: BattleParticipant[], attacker: BattleParticipant, attack: BattleAttack): BattleParticipant[] {

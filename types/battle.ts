@@ -1,7 +1,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { AttackType, type CombatStatusType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import type { MazeView } from "@/lib/utils/battle/view/maze-view";
@@ -160,9 +160,9 @@ export interface GridPoint {
 
 export type Direction8 = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 
-export type MazeDifficulty = "easy" | "medium" | "hard";
+export type MazeDifficulty = (typeof MAZE_DIFFICULTIES)[number];
 
-export type MazeMarkSymbol = "arrow-n" | "arrow-e" | "arrow-s" | "arrow-w" | "cross" | "skull" | "star";
+export type MazeMarkSymbol = (typeof MAZE_MARK_SYMBOLS)[number];
 
 export interface MazeMark {
   symbol: MazeMarkSymbol;
@@ -545,6 +545,5 @@ export type AddParticipantData = {
   side: ParticipantSide;
   quantity?: number;
   reserved?: boolean;
-  /** клітинка для першого доданого */
   position?: GridPoint;
 };
