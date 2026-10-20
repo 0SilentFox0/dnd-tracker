@@ -45,6 +45,7 @@ export const API_ERRORS = {
   TRACK_UPLOAD_MISSING: "Файл не завантажено — спробуйте ще раз",
   TRACK_DUPLICATE: "Цей файл уже є в бібліотеці",
   TRACK_ORDER_MISMATCH: "Порядок має містити всі треки кампанії",
+  TRACK_URL_LOCKED: "Посилання можна змінити лише в треку з YouTube",
   YOUTUBE_URL_INVALID: "Не вдалося розпізнати посилання YouTube",
   BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",
   BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",

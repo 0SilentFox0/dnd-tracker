@@ -36,7 +36,7 @@ export function MobileBattleLayout() {
 
   const hasMap = !!battle.map;
 
-  const { tab, set: setTab, expand, expandTick } = useMobileBattleTabs({ hasMap, mapAim: !!intents.mapAim });
+  const { tab, set: setTab, expand, expandTick } = useMobileBattleTabs({ hasMap, mapAim: !!(intents.mapAim || intents.mapPick) });
 
   const mapTab = tab === MAP_TAB;
 
@@ -112,7 +112,7 @@ export function MobileBattleLayout() {
           {mapTab && <div ref={setSlot} data-map-strip-slot />}
           {hero && !mapTab && <MyHeroPanel hero={hero} compact={isMyTurn} />}
           {hero && isMyTurn && <MyTurnControls key={turnKey} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
-          {mapTab && !(hero && isMyTurn) && !intents.mapAim && (
+          {mapTab && !(hero && isMyTurn) && !intents.mapAim && !intents.mapPick && (
             <MapStripRow onExpand={expand}>
               {completed ? <span className="hud-sc">Бій завершено</span> : awaiting ? <span className="hud-sc">{isDM ? "Бій чекає вашого рішення" : "Очікуємо рішення ДМ"}</span> : waitingFor}
             </MapStripRow>

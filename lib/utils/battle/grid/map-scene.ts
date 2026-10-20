@@ -22,6 +22,14 @@ export interface MapAim {
   onHover?(cell: GridPoint | null): void;
 }
 
+/** Вибір цілей заклинання кліком по токенах: кого можна обрати, хто вже обраний. */
+export interface MapPick {
+  casterId: string;
+  targets: { id: string; reachable: boolean }[];
+  selectedIds: string[];
+  onPick(id: string): void;
+}
+
 /** Хто дивиться на карту й чи може зараз ходити. */
 export interface MapSceneActor {
   current: BattleParticipant | null;
@@ -38,6 +46,7 @@ export interface MapSceneMode {
   placingId: string | null;
   toolActive?: boolean;
   aim?: MapAim | null;
+  pick?: MapPick | null;
 }
 
 export interface MapSceneInput {
@@ -56,7 +65,8 @@ export type MapClick =
   | { kind: "reject"; reason: string }
   | { kind: "select"; id: string }
   | { kind: "arm"; id: string }
-  | { kind: "aim"; cell: GridPoint };
+  | { kind: "aim"; cell: GridPoint }
+  | { kind: "pick"; id: string };
 
 export interface MapScene {
   participants: BattleParticipant[];
@@ -157,6 +167,8 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
   const aim = aimCaster && isOnMap(aimCaster) ? mode.aim : null;
 
+  const pick = mode.pick && !placing && !tool && !aim ? mode.pick : null;
+
   const marks = new Map<string, CellMark | number>();
 
   const attacks = current?.battleData.attacks ?? [];
@@ -169,7 +181,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
   const seen = modeView ? participants.filter((p) => modeView.visibleIds.has(p.basicInfo.id)) : participants;
 
-  const canMove = !aim && !placing && !tool && canAct && current?.battleData.position;
+  const canMove = !aim && !pick && !placing && !tool && canAct && current?.battleData.position;
 
   const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: modeView, dmUserId: isDM ? viewer.userId : null }) : null;
 
@@ -179,6 +191,18 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     for (const [key, mark] of zone.marks) marks.set(key, mark);
 
     if (canAttack) for (const [key, mark] of targetMarks(map, seen, current, attacks)) marks.set(key, mark);
+  }
+
+  if (pick) {
+    for (const { id, reachable } of pick.targets) {
+      const target = findParticipant(participants, id);
+
+      if (!target || !isOnMap(target)) continue;
+
+      const mark: CellMark = !reachable ? "invalid-target" : pick.selectedIds.includes(id) ? "picked" : "pick";
+
+      for (const c of cellsOf(target)) marks.set(cellKey(c), mark);
+    }
   }
 
   const hud: NonNullable<BattleMapView["hud"]> = new Map();
@@ -204,6 +228,14 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Оберіть напрямок" };
   }
 
+  function pickAt(id: string): MapClick {
+    const entry = pick?.targets.find((t) => t.id === id);
+
+    if (!entry) return { kind: "reject", reason: "Ця ціль не підходить для заклинання" };
+
+    return entry.reachable ? { kind: "pick", id } : { kind: "reject", reason: "Поза дальністю" };
+  }
+
   function tokenClick(id: string): MapClick {
     if (tool) return { kind: "none" };
 
@@ -212,6 +244,8 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
 
     if (aim) return target && isOnMap(target) ? aimAt(centreCell(target)) : { kind: "none" };
+
+    if (pick) return pickAt(id);
 
     if (canAct && canAttack && current && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
       const mark = marks.get(cellKey(cellsOf(target)[0]));
@@ -240,6 +274,12 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     if (aim) return aimAt(p);
 
     const key = cellKey(p);
+
+    if (pick) {
+      const occupant = participants.find((x) => isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key));
+
+      return occupant ? tokenClick(occupant.basicInfo.id) : { kind: "none" };
+    }
 
     const mark = marks.get(key);
 

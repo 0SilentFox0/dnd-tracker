@@ -71,6 +71,9 @@ export type CreateTrackData =
   | { kind: "file"; path: string; title: string; durationSec?: number }
   | { kind: "youtube"; url: string; title?: string };
 
+/** url — лише YouTube-трек; durationSec: null очищає тривалість */
 export interface UpdateTrackData {
-  title: string;
+  title?: string;
+  url?: string;
+  durationSec?: number | null;
 }

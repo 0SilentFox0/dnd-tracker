@@ -11,7 +11,7 @@ import { canStand, cellKey, checkReturnToStart,hazardHit, hazardOnMove, moveBudg
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
-import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, BattleParticipant, TerrainCell } from "@/types/battle";
 
 export const moveSchema = z.object({
@@ -48,7 +48,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   const placement = !ownTurn || (ctx.isDM && data.free === true);
 
   if (!placement) {
-    assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
+    assertCanAct(ctx, mover.basicInfo.id);
 
     const cost = reachable(map, participants, mover, moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover)).get(cellKey(data.to));
 
@@ -76,7 +76,7 @@ function returnToStart(ctx: BattleMutationContext, participants: BattleParticipa
 
   if (!check.ok) throw new BattleRuleError("action_rejected", check.error);
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
+  assertCanAct(ctx, mover.basicInfo.id);
 
   const moved = { ...mover, battleData: { ...mover.battleData, position: check.to, returnedThisTurn: true } };
 

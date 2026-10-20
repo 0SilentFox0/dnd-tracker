@@ -68,5 +68,7 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
 
 /** Ефекти для показу: персональні пасивки + ті, що діють (без зон мертвих власників), злиті по вміннях. */
 export function displayEffects(p: BattleParticipant, order: BattleParticipant[]): ActiveEffect[] {
+  if (!isActive(p)) return [];
+
   return mergeEffectsForDisplay([...personalPassiveEffects(p, order), ...liveActiveEffects(p, order)]);
 }

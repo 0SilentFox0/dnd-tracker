@@ -164,6 +164,25 @@ describe("tracks API", () => {
     expect(await res.json()).toMatchObject({ title: "Нова" });
   });
 
+  it("PATCH змінює посилання YouTube й тривалість; для файлу посилання заборонене; порожній запит — 400", async () => {
+    const { PATCH } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+
+    vi.mocked(prisma.campaignTrack.findUnique).mockResolvedValue(row({ kind: "youtube", url: null, youtubeId: "oldVideoId_1" }) as never);
+    vi.mocked(prisma.campaignTrack.update).mockResolvedValue(row() as never);
+
+    expect((await PATCH(req("PATCH", { url: "https://youtu.be/dQw4w9WgXcQ", durationSec: null }), params({ trackId: "t1" }))).status).toBe(200);
+    expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "t1" }, data: { youtubeId: "dQw4w9WgXcQ", durationSec: null } });
+
+    expect((await PATCH(req("PATCH", {}), params({ trackId: "t1" }))).status).toBe(400);
+    expect((await PATCH(req("PATCH", { url: "https://example.com" }), params({ trackId: "t1" }))).status).toBe(400);
+
+    vi.mocked(prisma.campaignTrack.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.campaignTrack.update).mockClear();
+
+    expect((await PATCH(req("PATCH", { url: "https://youtu.be/dQw4w9WgXcQ" }), params({ trackId: "t1" }))).status).toBe(400);
+    expect(prisma.campaignTrack.update).not.toHaveBeenCalled();
+  });
+
   it("PUT order: лише повний набір треків кампанії", async () => {
     const { PUT } = await import("@/app/api/campaigns/[id]/tracks/order/route");
 

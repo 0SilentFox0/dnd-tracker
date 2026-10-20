@@ -8,7 +8,7 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
-import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
@@ -44,7 +44,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (!isActive(participant)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, participant.basicInfo.id);
+  assertCanAct(ctx, participant.basicInfo.id);
 
   const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === req.abilityKey && a.trigger.event === trigger);
 

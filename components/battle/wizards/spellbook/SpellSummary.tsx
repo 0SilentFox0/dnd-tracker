@@ -20,10 +20,10 @@ export function SpellSummary({ spell, state, targets, formula, targeting, slotCo
         {state.targetIds.length > 0 && <p>Цілі: {state.targetIds.map((id) => targets.find((t) => t.basicInfo.id === id)?.basicInfo.name).join(", ")}</p>}
         {state.pick?.targetMode === "none" && <p>Цілі: {targetingLabel(targeting)}</p>}
         {state.damage.length > 0 && <p>Кубики: {state.damage.join(" + ")} = {state.damage.reduce<number>((a, b) => a + (b ?? 0), 0)} ({formula})</p>}
-        <p className="mt-2 text-sm italic text-[#7a6650]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
-        {slotCost && <p className="text-sm italic text-[#7a6650]">{slotCost}</p>}
+        <p className="mt-2 text-sm italic text-[var(--hud-muted)]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
+        {slotCost && <p className="text-sm italic text-[var(--hud-muted)]">{slotCost}</p>}
       </div>
-      {state.error && <p className="mt-2 text-sm text-[#9c2a1d]">{state.error}</p>}
+      {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
     </>
   );
 }

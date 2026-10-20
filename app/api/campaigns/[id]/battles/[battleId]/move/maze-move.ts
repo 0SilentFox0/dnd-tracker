@@ -7,7 +7,7 @@ import { applyMazeMove, mazeGridOf, mazePlacementError, placeInMaze } from "@/li
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { actorEvent, battleActionToEvent, rejectAction } from "@/lib/utils/battle/store";
-import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
+import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
 export interface MazeMoveBody {
@@ -36,7 +36,7 @@ export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, base: B
 
   if (grid.maze.dark) rejectAction(MAZE_TEXTS.dark);
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
+  assertCanAct(ctx, mover.basicInfo.id);
 
   const step = applyMazeMove(grid, { participants, mover, to: data.to });
 

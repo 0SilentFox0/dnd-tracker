@@ -4,37 +4,70 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TrackList } from "../TrackList";
 
+import type { TrackPreview } from "@/lib/hooks/music";
 import type { CampaignTrack } from "@/types/audio";
 
 afterEach(cleanup);
 
 const track = (id: string, kind: CampaignTrack["kind"] = "file"): CampaignTrack => ({ id, title: `Трек ${id}`, kind, url: null, youtubeId: kind === "youtube" ? "dQw4w9WgXcQ" : null, durationSec: 61, sortOrder: 0, createdAt: "" });
 
-function setup() {
-  const actions = { onRename: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
+const previewOf = (over: Partial<TrackPreview> = {}): TrackPreview => ({ playingId: null, failedId: null, progress: null, toggle: vi.fn(), stop: vi.fn(), ...over });
 
-  const view = render(<TrackList tracks={[{ ...track("a"), url: "https://s/camp1/a.mp3" }, track("b", "youtube"), { ...track("c"), url: "https://s/camp1/c.m4a", durationSec: null }]} busy={false} actions={actions} />);
+function setup(preview = previewOf()) {
+  const actions = { onRename: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
 
-  return { ...view, actions };
+  const view = render(<TrackList tracks={[{ ...track("a"), url: "https://s/camp1/a.mp3" }, track("b", "youtube"), { ...track("c"), url: "https://s/camp1/c.m4a", durationSec: null }]} busy={false} actions={actions} preview={preview} />);
+
+  return { ...view, actions, preview };
 }
 
 describe("TrackList", () => {
   it("назва, формат файлу з посилання (MP3, M4A) і тривалість; крайні стрілки вимкнені", () => {
-    const { getByText, getByDisplayValue, getAllByRole } = setup();
+    const { getByText, getAllByText, getByDisplayValue, getAllByRole } = setup();
 
     expect(getByDisplayValue("Трек a")).toBeTruthy();
-    expect(getByText("MP3 · 1:01")).toBeTruthy();
+    expect(getByText("MP3")).toBeTruthy();
+    expect(getAllByText("1:01")).toHaveLength(2);
     expect(getByText("M4A")).toBeTruthy();
     expect(getByText("YouTube")).toBeTruthy();
-    expect((getAllByRole("button", { name: "Вище" })[0] as HTMLButtonElement).disabled).toBe(true);
-    expect((getAllByRole("button", { name: "Нижче" })[2] as HTMLButtonElement).disabled).toBe(true);
+    expect((getAllByRole("button", { name: "Раніше" })[0] as HTMLButtonElement).disabled).toBe(true);
+    expect((getAllByRole("button", { name: "Пізніше" })[2] as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("показує посилання: файл — публічний URL, YouTube — youtu.be", () => {
+    const { container } = setup();
+
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+
+    expect(hrefs).toEqual(["https://s/camp1/a.mp3", "https://youtu.be/dQw4w9WgXcQ", "https://s/camp1/c.m4a"]);
+  });
+
+  it("«Слухати» вмикає трек; для активного — «Пауза», прогрес і помилка", () => {
+    const { getAllByRole, preview } = setup();
+
+    fireEvent.click(getAllByRole("button", { name: "Слухати" })[1]);
+    expect(preview.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+    cleanup();
+
+    const view = setup(previewOf({ playingId: "a", failedId: "b", progress: 0.4 }));
+
+    expect(view.getAllByRole("button", { name: "Пауза" })).toHaveLength(1);
+    expect(view.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("40");
+    expect(view.getByRole("alert")).toBeTruthy();
+  });
+
+  it("«Редагувати» передає трек", () => {
+    const { getAllByRole, actions } = setup();
+
+    fireEvent.click(getAllByRole("button", { name: "Редагувати" })[1]);
+    expect(actions.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
   });
 
   it("стрілка, видалення й перейменування викликають дії", () => {
     const { getAllByRole, getAllByLabelText, actions } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "Нижче" })[0]);
-    expect(actions.onMove).toHaveBeenCalledWith(0, 1);
+    fireEvent.click(getAllByRole("button", { name: "Пізніше" })[0]);
+    expect(actions.onMove).toHaveBeenCalledWith("a", 1);
 
     fireEvent.click(getAllByRole("button", { name: "Видалити" })[1]);
     expect(actions.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));

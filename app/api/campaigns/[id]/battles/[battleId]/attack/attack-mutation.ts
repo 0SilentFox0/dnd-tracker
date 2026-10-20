@@ -12,7 +12,7 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
-import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
+import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
@@ -92,7 +92,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
     const { endTurn, ...data } = body;
 
     assertAttackInput(ctx, data);
-    assertNotPanicking(ctx.scene.pendingMoraleCheck, data.attackerId);
+    assertCanAct(ctx, data.attackerId);
 
     const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
 

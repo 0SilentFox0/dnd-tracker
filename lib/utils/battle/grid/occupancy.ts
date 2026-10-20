@@ -8,8 +8,13 @@ export function sizeOf(p: BattleParticipant): number {
   return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));
 }
 
+/** Мертвий чи непритомний: зникає з поля, поки його не воскресять. */
+export function isFallen(p: BattleParticipant): boolean {
+  return p.combatStats.status !== CombatStatus.ACTIVE;
+}
+
 export function occupiesCells(p: BattleParticipant): boolean {
-  return !p.battleData.reserved && !isEscaped(p) && !isAirborne(p) && p.combatStats.status !== CombatStatus.DEAD;
+  return !p.battleData.reserved && !isEscaped(p) && !isAirborne(p) && !isFallen(p);
 }
 
 export function isOnMap(p: BattleParticipant): boolean {

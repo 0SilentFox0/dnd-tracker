@@ -17,7 +17,7 @@ import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
-import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 
@@ -56,7 +56,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     const { definition } = spell;
 
     if (!data.preview) {
-      assertNotPanicking(ctx.scene.pendingMoraleCheck, caster.basicInfo.id);
+      assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });
 
       const isBonus = definition.cost === "bonusAction";
 

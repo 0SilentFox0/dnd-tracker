@@ -8,7 +8,7 @@ import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { MapAim } from "@/lib/utils/battle/grid";
+import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
@@ -27,6 +27,7 @@ export interface FakeSceneOptions {
   afterLog?: BattleAction[];
   map?: BattleScene["map"];
   mapAim?: MapAim | null;
+  mapPick?: MapPick | null;
   attackReady?: boolean;
   reserve?: BattleParticipant[];
   audio?: BattleScene["audio"];
@@ -120,7 +121,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     selectedId: null,
     select: vi.fn(),
     clickParticipant: vi.fn(),
-    intents: { attack: null, requestAttack: vi.fn(), clearAttack: vi.fn(), mapAim: opts.mapAim ?? null, setMapAim: vi.fn(), attackReady: opts.attackReady ?? true, setAttackReady: vi.fn() },
+    intents: { attack: null, requestAttack: vi.fn(), clearAttack: vi.fn(), mapAim: opts.mapAim ?? null, setMapAim: vi.fn(), mapPick: opts.mapPick ?? null, setMapPick: vi.fn(), attackReady: opts.attackReady ?? true, setAttackReady: vi.fn() },
     toast,
     result: { fx: opts.result ?? null, show: showResult },
     log: { open: false, focus: null, show: openLog, close: vi.fn() },

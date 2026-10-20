@@ -30,7 +30,7 @@ import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { MapAim } from "@/lib/utils/battle/grid";
+import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import type { ResolvedAbility } from "@/types/abilities";
 
 const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
@@ -214,18 +214,144 @@ describe("SpellBook", () => {
       return scene;
     };
 
-    it("одиночне: ціль поза дальністю вимкнена з підписом", async () => {
-      const { wrapper, caster } = onMap(["dart"]);
+    const lastPick = (value: ReturnType<typeof onMap>["value"]) => vi.mocked(value.intents.setMapPick).mock.calls.at(-1)?.[0] as MapPick | null;
+
+    it("одиночне: книга закривається, ціль обирається на карті; поза дальністю — недосяжна", async () => {
+      const { wrapper, caster, value } = onMap(["dart"]);
 
       render(<Harness caster={caster} />, { wrapper });
 
       fireEvent.click(await screen.findByText("Дротик"));
       fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
 
-      const gob = screen.getByRole("button", { name: /Гоблін/ }) as HTMLButtonElement;
+      expect(screen.queryByRole("button", { name: /II коло/ })).toBeNull();
+      expect(screen.getByRole("region", { name: "Наведення заклинання" })).toBeTruthy();
+      expect(screen.getByText("Оберіть ціль на карті")).toBeTruthy();
+      expect(screen.queryByRole("button", { name: /Гоблін/ })).toBeNull();
+      expect(lastPick(value)).toMatchObject({ casterId: "me", targets: [{ id: "gob", reachable: false }], selectedIds: [] });
+    });
 
-      expect(gob.disabled).toBe(true);
-      expect(gob.textContent).toContain("Поза дальністю");
+    it("одиночне: клік по токену одразу веде до вікна кидків, каст з обраною ціллю, карта звільняється", async () => {
+      const { wrapper, caster, value, castSpell } = onMap(["ray"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(lastPick(value)).toMatchObject({ targets: [{ id: "gob", reachable: true }] });
+
+      act(() => lastPick(value)?.onPick("gob"));
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(lastPick(value)).toBeNull();
+
+      fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+      fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], diceRolls: [4, 5] })));
+    });
+
+    it("кілька цілей: клік перемикає, «Далі · кидки» підтверджує, ліміт maxTargets у підказці", async () => {
+      const { wrapper, caster, value, castSpell } = onMap(["ball"], true);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Вогняна куля"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.getByText("Оберіть цілі на карті · 0/2")).toBeTruthy();
+      expect((screen.getByRole("button", { name: "Далі · кидки" }) as HTMLButtonElement).disabled).toBe(true);
+
+      act(() => lastPick(value)?.onPick("gob"));
+
+      expect(screen.getByText("Оберіть цілі на карті · 1/2")).toBeTruthy();
+      expect(screen.getByRole("list", { name: "Обрані цілі" }).textContent).toContain("Гоблін");
+      expect(lastPick(value)?.selectedIds).toEqual(["gob"]);
+
+      fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+      fireEvent.change(screen.getByLabelText("Рятівний кидок: Гоблін"), { target: { value: "12" } });
+      fireEvent.click(screen.getByRole("button", { name: "Авто-кидок" }));
+      fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ball", targetIds: ["gob"], saveRolls: [{ participantId: "gob", roll: 12 }] })));
+    });
+
+    it("воскресіння: полеглого союзника немає на карті — ціль обирається зі списку у вікні", async () => {
+      const { wrapper, caster, value, castSpell, ally } = onMap(["revive"]);
+
+      ally.combatStats.status = "dead";
+      ally.combatStats.currentHp = 0;
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Воскресіння"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(lastPick(value) ?? null).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: /Годрік/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+      fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+      await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "revive", targetIds: ["ally"] })));
+    });
+
+    it("недосяжну ціль клік не обирає", async () => {
+      const { wrapper, caster, value } = onMap(["dart"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Дротик"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      act(() => lastPick(value)?.onPick("gob"));
+
+      expect(screen.getByRole("region", { name: "Наведення заклинання" })).toBeTruthy();
+    });
+
+    it("«Назад» на кидках вертає до карти, «Назад» на карті — до книги; «Скасувати» чистить усе", async () => {
+      const { wrapper, caster, value } = onMap(["ray"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      act(() => lastPick(value)?.onPick("gob"));
+      fireEvent.click(screen.getByRole("button", { name: "← Назад" }));
+
+      expect(screen.getByRole("region", { name: "Наведення заклинання" })).toBeTruthy();
+      expect(lastPick(value)).toMatchObject({ selectedIds: ["gob"] });
+
+      fireEvent.click(screen.getByRole("button", { name: "← Назад" }));
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(screen.getByRole("button", { name: /Обрати цілі/ })).toBeTruthy();
+
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
+      expect(lastPick(value)).toBeNull();
+    });
+
+    it("Esc під час вибору цілей закриває майстер і звільняє карту", async () => {
+      const { wrapper, caster, value } = onMap(["ray"]);
+
+      render(<Harness caster={caster} />, { wrapper });
+
+      fireEvent.click(await screen.findByText("Палаючий промінь"));
+      fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      });
+
+      expect(screen.queryByRole("region", { name: "Наведення заклинання" })).toBeNull();
+      expect(lastPick(value)).toBeNull();
     });
 
     it("шаблон: клік по точці з цілями одразу підтверджує → кидки, каст з targetCell; кнопки «Підтвердити» немає", async () => {
@@ -258,7 +384,7 @@ describe("SpellBook", () => {
       await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "meteor", targetCell: { x: 4, y: 0 } })));
     });
 
-    it("шаблон: після кліку по карті «Назад» на кидках немає, а застарілий onAim не змінює точку", async () => {
+    it("шаблон: «Назад» із кидків вертає до наведення, нова точка замінює стару", async () => {
       const { wrapper, caster, value, castSpell } = onMap(["meteor"], true);
 
       render(<Harness caster={caster} />, { wrapper });
@@ -268,13 +394,19 @@ describe("SpellBook", () => {
 
       const aim = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
 
-      act(() => aim.onAim({ x: 4, y: 0 }));
+      act(() => aim.onAim({ x: 1, y: 4 }));
 
-      expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
-      expect(screen.queryByRole("button", { name: "← Назад" })).toBeNull();
       expect(screen.queryByText("Оберіть точку на карті")).toBeNull();
 
-      act(() => aim.onAim({ x: 1, y: 4 }));
+      fireEvent.click(screen.getByRole("button", { name: "← Назад" }));
+
+      expect(screen.getByText("Оберіть точку на карті")).toBeTruthy();
+
+      const again = vi.mocked(value.intents.setMapAim).mock.calls.at(-1)?.[0] as MapAim;
+
+      act(() => again.onAim({ x: 4, y: 0 }));
+
+      expect(screen.getByLabelText("Рятівний кидок: Годрік")).toBeTruthy();
 
       fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
       fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
@@ -425,7 +557,7 @@ describe("SpellBook", () => {
       expect(screen.queryByRole("note")).toBeNull();
     });
 
-    it("ланцюг: обрана перша ціль, превʼю порядку ланцюга, каст лише з першою", async () => {
+    it("ланцюг: на карті обирається перша ціль, панель показує порядок ланцюга, каст лише з першою", async () => {
       const { wrapper, caster, value, castSpell, me, gob, ally } = onMap(["chain"]);
 
       const orc = { ...gob, basicInfo: { ...gob.basicInfo, id: "orc", name: "Орк" }, battleData: { ...gob.battleData, position: { x: 7, y: 3 } } };
@@ -438,9 +570,14 @@ describe("SpellBook", () => {
 
       fireEvent.click(await screen.findByText("Ланцюгова блискавка"));
       fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
-      fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
 
-      expect(screen.getByText("Ланцюг: 1. Гоблін, 2. Біс, 3. Орк")).toBeTruthy();
+      expect(screen.getByText("Оберіть першу ціль на карті")).toBeTruthy();
+
+      act(() => lastPick(value)?.onPick("gob"));
+
+      const names = screen.getAllByRole("listitem").map((li) => li.textContent);
+
+      expect(names.map((n) => /\d\. \S+/.exec(n ?? "")?.[0])).toEqual(["1. Гоблін", "2. Біс", "3. Орк"]);
 
       fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
       fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });

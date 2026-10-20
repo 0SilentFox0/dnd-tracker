@@ -35,6 +35,8 @@ export interface ModeServerHooks<C> {
   placeAll?(args: { map: BattleMapConfig; config: C; participants: BattleParticipant[] }): BattleParticipant[];
   /** Поставити одного на клітинку; кидає BattleRuleError з текстом відмови. */
   placeOne?(args: { map: BattleMapConfig; config: C; participants: BattleParticipant[]; mover: BattleParticipant; to: GridPoint }): BattleParticipant;
+  /** Найближча вільна клітинка для воскреслого (спершу сама `from`); null — вільних немає. */
+  placeRevived?(args: { map: BattleMapConfig; config: C; participants: BattleParticipant[]; mover: BattleParticipant; from: GridPoint }): GridPoint | null;
   /** Учасник з'являється в бою (додано ДМ чи відкрито резерв). */
   onEnter?(args: { config: C; participant: BattleParticipant }): BattleParticipant;
   /** Конфіг після скидання бою. */

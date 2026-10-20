@@ -11,6 +11,7 @@ import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
+import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -38,7 +39,7 @@ const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a &
 export function useBattleMapScene(): BattleMapScene | null {
   const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents, effects } = useBattleScene();
 
-  const { requestAttack, mapAim, attackReady } = intents;
+  const { requestAttack, mapAim, mapPick, attackReady } = intents;
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
@@ -73,11 +74,13 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const order = battle.initiativeOrder ?? NO_ORDER;
 
-  const canAct = isMyTurn && !anyPending && !!current;
+  const moraleDue = !!current && awaitsMoraleCheck({ participants: order, scene: { turnIndex: battle.currentTurnIndex, pendingMoraleCheck: battle.pendingMoraleCheck } }, current.basicInfo.id);
+
+  const canAct = isMyTurn && !anyPending && !!current && !moraleDue;
 
   const actor = useMemo<MapSceneActor>(() => ({ current, viewer, canAct, isDM, attackReady }), [current, viewer, canAct, isDM, attackReady]);
 
-  const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim }), [placing, placingId, toolActive, mapAim]);
+  const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim, pick: mapPick }), [placing, placingId, toolActive, mapAim, mapPick]);
 
   const { view: modeView } = useModeView();
 
@@ -138,11 +141,12 @@ export function useBattleMapScene(): BattleMapScene | null {
       select: (c) => select(c.id),
       arm: (c) => setPlacingId(c.id),
       aim: (c) => mapAim?.onAim(c.cell),
+      pick: (c) => mapPick?.onPick(c.id),
       none: () => undefined,
     };
 
     return (click: MapClick) => dispatchClick(handlers, click);
-  }, [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim]);
+  }, [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim, mapPick]);
 
   const { commit } = terrainTool;
 

@@ -16,18 +16,36 @@ export interface TrackGroup<T> {
   tracks: T[];
 }
 
-/** Група — частина назви до « - » («Люди - Битва» → «Люди») */
+export const BATTLE_TRACK_GROUP = "Битва";
+
+const BATTLE_TITLE = /^Битва(\s|$)/u;
+
+const separatorAt = (title: string) => title.indexOf(TRACK_GROUP_SEPARATOR);
+
+const isBattleTitle = (title: string) => {
+  const at = separatorAt(title);
+
+  return at > 0 && BATTLE_TITLE.test(title.slice(at + TRACK_GROUP_SEPARATOR.length).trim());
+};
+
+/** Група — частина назви до « - » («Люди - Місто» → «Люди»); усі «<раса> - Битва N» — в одній групі «Битва» */
 export function trackGroupName(title: string): string {
-  const at = title.indexOf(TRACK_GROUP_SEPARATOR);
+  if (isBattleTitle(title)) return BATTLE_TRACK_GROUP;
+
+  const at = separatorAt(title);
 
   const group = at > 0 ? title.slice(0, at).trim() : "";
 
   return group || OTHER_TRACK_GROUP;
 }
 
-/** Назва без префікса групи — під заголовком групи він зайвий */
+/** Назва без префікса групи; у групі «Битва» префікс — раса, тож назва лишається повною */
 export function trackLabelInGroup(title: string): string {
-  return trackGroupName(title) === OTHER_TRACK_GROUP ? title : title.slice(title.indexOf(TRACK_GROUP_SEPARATOR) + TRACK_GROUP_SEPARATOR.length).trim() || title;
+  const group = trackGroupName(title);
+
+  if (group === OTHER_TRACK_GROUP || group === BATTLE_TRACK_GROUP) return title;
+
+  return title.slice(separatorAt(title) + TRACK_GROUP_SEPARATOR.length).trim() || title;
 }
 
 /** Групи в порядку першої появи в бібліотеці, «Інше» — в кінці */

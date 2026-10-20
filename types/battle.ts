@@ -241,7 +241,7 @@ export interface TerrainDiff {
   removed?: string[];
 }
 
-export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template";
+export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template" | "pick" | "picked";
 
 export interface BattleMapView {
   selectedId?: string | null;

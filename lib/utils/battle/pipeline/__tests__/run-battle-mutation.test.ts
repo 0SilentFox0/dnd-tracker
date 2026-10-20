@@ -508,4 +508,56 @@ describe("резерв і рішення ДМ", () => {
     expect(res.status).toBe(200);
     expect(vi.mocked(d.saveBattle).mock.calls[0][1].scene?.status).toBeUndefined();
   });
+
+  it("мутація, що вбиває, чистить ефекти; воскресіння ставить на найближчу вільну клітинку", async () => {
+    const at = (p: BattleParticipant, x: number, y: number): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position: { x, y } } });
+
+    const effect = { id: "e", name: "Щит", type: "buff" as const, duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [] };
+
+    const dead = { ...at(hero, 3, 2), combatStats: { ...hero.combatStats, status: "dead" as const, currentHp: 0 } };
+
+    const stander = at(goblin, 3, 2);
+
+    const before = withMap();
+
+    const kill = deps({ loadBattle: vi.fn(async () => ({ ...before, participants: [at(hero, 3, 2), stander] })) });
+
+    await runBattleMutation(
+      req(),
+      {
+        params,
+        access: "member",
+        mutate: (ctx) => ({
+          participants: ctx.participants.map((p) => (p.basicInfo.id === "hero" ? { ...dead, battleData: { ...dead.battleData, activeEffects: [effect] } } : p)),
+          pending: ctx.pending,
+          events: [],
+        }),
+      },
+      kill,
+    );
+
+    expect(vi.mocked(kill.saveBattle).mock.calls[0][1].participants[0].battleData.activeEffects).toEqual([]);
+
+    const raise = deps({ loadBattle: vi.fn(async () => ({ ...before, participants: [dead, stander] })) });
+
+    await runBattleMutation(
+      req(),
+      {
+        params,
+        access: "member",
+        mutate: (ctx) => ({
+          participants: ctx.participants.map((p) => (p.basicInfo.id === "hero" ? { ...p, combatStats: { ...p.combatStats, status: "active" as const, currentHp: 1 } } : p)),
+          pending: ctx.pending,
+          events: [],
+        }),
+      },
+      raise,
+    );
+
+    const saved = vi.mocked(raise.saveBattle).mock.calls[0][1].participants;
+
+    expect(saved[1].battleData.position).toEqual({ x: 3, y: 2 });
+    expect(saved[0].battleData.position).not.toEqual({ x: 3, y: 2 });
+    expect(saved[0].battleData.position).toBeDefined();
+  });
 });
