@@ -26,6 +26,8 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
 
   const tapHint = useRef<number | undefined>(undefined);
 
+  const syncRef = useRef<() => void>(() => undefined);
+
   useEffect(() => {
     latest.current = input;
   });
@@ -55,7 +57,13 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
           playerVars: { autoplay: 0, controls: 1, loop: 1, playlist: videoId, playsinline: 1, rel: 0 },
           events: {
             onReady: () => alive && setPlayer(created),
-            onStateChange: (e) => e.data === YT_STATE.PLAYING && setNeedsTap(false),
+            onStateChange: (e) => {
+              if (e.data !== YT_STATE.PLAYING) return;
+
+              setNeedsTap(false);
+              // тривалість стає відомою лише з PLAYING — не чекаємо перевірки дрейфу
+              syncRef.current();
+            },
             onError: () => setFailed(true),
           },
         });
@@ -103,6 +111,10 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
       tapHint.current = window.setTimeout(() => setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
     }
   }, [player]);
+
+  useEffect(() => {
+    syncRef.current = sync;
+  }, [sync]);
 
   const { state, clockOffsetMs, volume, muted } = input;
 

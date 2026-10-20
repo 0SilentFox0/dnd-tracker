@@ -14,7 +14,7 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
   YT_STATE: { PLAYING: 1, PAUSED: 2 },
   loadYoutubeIframeApi: vi.fn(async () => ({
     Player: class {
-      constructor(_el: HTMLElement, options: { events: { onReady(): void } } & Record<string, unknown>) {
+      constructor(_el: HTMLElement, options: { events: { onReady(): void; onStateChange(e: { data: number }): void } } & Record<string, unknown>) {
         const player = {
           playVideo: vi.fn(),
           pauseVideo: vi.fn(),
@@ -93,5 +93,19 @@ describe("useYoutubeSync", () => {
 
     await waitFor(() => expect(created[0]?.player.playVideo).toHaveBeenCalled());
     expect(created[0].player.seekTo).not.toHaveBeenCalled();
+  });
+
+  it("тривалість стала відома лише на PLAYING — перемотує одразу, не чекаючи перевірки дрейфу", async () => {
+    duration.sec = 0;
+    render(<Harness videoId="dQw4w9WgXcQ" />);
+
+    await waitFor(() => expect(created[0]?.player.playVideo).toHaveBeenCalled());
+
+    const { options, player } = created[0];
+
+    duration.sec = 200;
+    act(() => (options.events as { onStateChange(e: { data: number }): void }).onStateChange({ data: 1 }));
+
+    expect(player.seekTo).toHaveBeenCalledWith(60, true);
   });
 });
