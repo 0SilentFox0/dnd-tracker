@@ -9,6 +9,9 @@ import type { GridPoint } from "@/types/battle";
 
 const SCATTER_ATTEMPTS = 20;
 
+// MAZE_SCATTER_MIN_GAP — порожні клітинки між учасниками, тож відстань на 1 більша
+const MIN_DISTANCE = MAZE_SCATTER_MIN_GAP + 1;
+
 function notExit(grid: MazeGrid): (p: GridPoint) => boolean {
   const exit = grid.maze.exit;
 
@@ -40,7 +43,7 @@ export function scatterAll(grid: MazeGrid, ids: string[], rnd: Rng): Record<stri
     for (const p of shuffled(rnd, free)) {
       if (chosen.length === ids.length) break;
 
-      if (chosen.every((c) => cellDistance(c, p) >= MAZE_SCATTER_MIN_GAP)) chosen.push(p);
+      if (chosen.every((c) => cellDistance(c, p) >= MIN_DISTANCE)) chosen.push(p);
     }
 
     if (chosen.length === ids.length) return Object.fromEntries(ids.map((id, i) => [id, chosen[i]]));

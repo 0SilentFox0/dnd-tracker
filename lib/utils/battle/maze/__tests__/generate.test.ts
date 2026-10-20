@@ -211,7 +211,7 @@ describe("reshuffleMaze", () => {
       expect(Object.keys(res.positions).sort()).toEqual(["a", "b", "c"]);
 
       for (let i = 0; i < cells.length; i++) {
-        for (let j = i + 1; j < cells.length; j++) expect(cellDistance(cells[i], cells[j])).toBeGreaterThanOrEqual(MAZE_SCATTER_MIN_GAP);
+        for (let j = i + 1; j < cells.length; j++) expect(cellDistance(cells[i], cells[j])).toBeGreaterThanOrEqual(MAZE_SCATTER_MIN_GAP + 1);
       }
 
       const keys = cells.map(cellKey);

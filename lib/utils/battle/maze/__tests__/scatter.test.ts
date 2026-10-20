@@ -43,12 +43,24 @@ describe("scatterAll", () => {
       expect(cells).toHaveLength(10);
 
       for (let i = 0; i < cells.length; i++) {
-        for (let j = i + 1; j < cells.length; j++) expect(cellDistance(cells[i], cells[j])).toBeGreaterThanOrEqual(MAZE_SCATTER_MIN_GAP);
+        for (let j = i + 1; j < cells.length; j++) expect(cellDistance(cells[i], cells[j])).toBeGreaterThanOrEqual(MAZE_SCATTER_MIN_GAP + 1);
       }
 
       expect(cells.map(cellKey)).not.toContain("0:5");
       expect(cells.map(cellKey)).not.toContain("3:3");
       expect(cells.map(cellKey)).not.toContain("10:10");
+    }
+  });
+
+  it("fits many participants on a roomy map", () => {
+    expect(Object.keys(scatterAll(grid(40, 30), ids(30), mulberry32(5)) ?? {})).toHaveLength(30);
+  });
+
+  it("two participants are at least 3 apart", () => {
+    for (let seed = 0; seed < 20; seed++) {
+      const [a, b] = Object.values(scatterAll(grid(4, 4), ids(2), mulberry32(seed)) ?? {});
+
+      expect(cellDistance(a, b)).toBeGreaterThanOrEqual(3);
     }
   });
 
