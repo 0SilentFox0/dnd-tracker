@@ -11,7 +11,7 @@ const item = (kind: "turn" | "extra", participant: BattleParticipant, current = 
   kind, participant, current, down: isDown(participant),
 });
 
-const inMazeLimbo = (p: BattleParticipant) => isDormant(p) || isEscaped(p);
+const outOfPlay = (p: BattleParticipant) => isDormant(p) || isEscaped(p);
 
 export function turnQueue(order: BattleParticipant[], turnIndex: number, round: number): QueueEntry[] {
   const current = order[turnIndex];
@@ -22,7 +22,7 @@ export function turnQueue(order: BattleParticipant[], turnIndex: number, round: 
 
   const rest = extraActive ? [item("extra", current, true)] : order.slice(turnIndex).map((p, i) => item("turn", p, i === 0));
 
-  const live = (e: QueueEntry) => e.kind === "round" || (!inMazeLimbo(e.participant) && (e.current || !e.down));
+  const live = (e: QueueEntry) => e.kind === "round" || (!outOfPlay(e.participant) && (e.current || !e.down));
 
   const all: QueueEntry[] = [...rest, ...extras, { kind: "round", round: round + 1 }, ...order.map((p) => item("turn", p))];
 
