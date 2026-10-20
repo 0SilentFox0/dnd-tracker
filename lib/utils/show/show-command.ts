@@ -103,15 +103,21 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
   }
 }
 
-const sameSlide = (a: Slide | null, b: Slide) => !!a && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId;
+const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId;
 
-/** Після збереження набору: знімок поточного слайда без перемикання і без автотреку. */
-export function refreshShowSlide(prev: ShowState, deck: ShowDeck): ShowState | null {
+/** Після збереження набору: знімок поточного слайда без перемикання і без автотреку; видалений слайд замінює сусід, порожній набір завершує показ. */
+export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before: Slide[]; now: number }): ShowState | null {
   if (prev.deckId !== deck.id) return null;
 
-  const at = deck.slides.findIndex((s) => s.id === prev.slide?.id);
+  if (deck.slides.length === 0) {
+    const ended = applyShowCommand(prev, { action: "end" }, { now: ctx.now, deck: null, library: [] });
 
-  if (at === -1) return null;
+    return ended.ok ? ended.value : null;
+  }
+
+  let at = deck.slides.findIndex((s) => s.id === prev.slide?.id);
+
+  if (at === -1) at = Math.min(Math.max(ctx.before.findIndex((s) => s.id === prev.slide?.id), 0), deck.slides.length - 1);
 
   const { slide, nextImageUrl } = slideAt(deck, at);
 

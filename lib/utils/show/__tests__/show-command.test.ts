@@ -128,22 +128,44 @@ describe("applyShowCommand", () => {
 });
 
 describe("refreshShowSlide", () => {
+  const at = { before: deck.slides, now: 5_000 };
+
   it("змінився підпис поточного слайда — новий знімок і seq+1", () => {
     const edited: ShowDeck = { ...deck, slides: [{ ...s(1), caption: "Новий" }, s(2, "t2"), s(3)] };
 
-    expect(refreshShowSlide(showing(0), edited)).toEqual({ ...showing(0), slide: { ...s(1), caption: "Новий" }, seq: 5 });
+    expect(refreshShowSlide(showing(0), edited, at)).toEqual({ ...showing(0), slide: { ...s(1), caption: "Новий" }, seq: 5 });
   });
 
   it("змінився наступний слайд — новий nextImageUrl", () => {
     const edited: ShowDeck = { ...deck, slides: [s(1), s(3)] };
 
-    expect(refreshShowSlide(showing(0), edited)?.nextImageUrl).toBe(img(3));
+    expect(refreshShowSlide(showing(0), edited, at)?.nextImageUrl).toBe(img(3));
   });
 
-  it("нічого не змінилося, інший набір або слайд видалено — null", () => {
-    expect(refreshShowSlide(showing(0), deck)).toBeNull();
-    expect(refreshShowSlide(showing(0), { ...deck, id: "d2" })).toBeNull();
-    expect(refreshShowSlide(showing(0), { ...deck, slides: [s(2), s(3)] })).toBeNull();
+  it("нічого не змінилося або інший набір — null", () => {
+    expect(refreshShowSlide(showing(0), deck, at)).toBeNull();
+    expect(refreshShowSlide(showing(0), { ...deck, id: "d2" }, at)).toBeNull();
+  });
+
+  it("поточний слайд видалено — сусід на тому ж місці без автотреку, музика та сама", () => {
+    const playing = audio();
+
+    expect(refreshShowSlide(showing(0, { audio: playing }), { ...deck, slides: [s(2, "t2"), s(3)] }, at)).toEqual({
+      ...showing(0, { audio: playing }),
+      slide: s(2, "t2"),
+      nextImageUrl: img(3),
+      seq: 5,
+    });
+    expect(refreshShowSlide(showing(2), { ...deck, slides: [s(1), s(2, "t2")] }, at)).toMatchObject({ slide: s(2, "t2"), nextImageUrl: null, seq: 5 });
+  });
+
+  it("набір спорожнів — показ завершено, як командою end", () => {
+    const prev = showing(1, { audio: audio() });
+
+    const ended = ok(applyShowCommand(prev, { action: "end" }, { ...ctx, deck: null, library: [] }));
+
+    expect(refreshShowSlide(prev, { ...deck, slides: [] }, at)).toEqual(ended);
+    expect(ended).toMatchObject({ deckId: null, slide: null, nextImageUrl: null, audio: { playing: false }, seq: 5 });
   });
 });
 

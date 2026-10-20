@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import * as imageStorage from "@/lib/supabase/image-storage";
 import * as storage from "@/lib/supabase/scene-slide-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -125,6 +126,7 @@ describe("decks API", () => {
 
     expect(res.status).toBe(409);
     expect(prisma.slideDeck.update).not.toHaveBeenCalled();
+    expect(imageStorage.resolveImageForPersistence).not.toHaveBeenCalled();
     await runAfter();
     expect(storage.removeSlideFiles).not.toHaveBeenCalled();
   });
@@ -139,6 +141,58 @@ describe("decks API", () => {
     expect(await res.json()).toMatchObject({ error: "Набір змінено в іншому місці — оновіть сторінку" });
     await runAfter();
     expect(storage.removeSlideFiles).not.toHaveBeenCalled();
+  });
+
+  it("PUT: конфлікт запису після дзеркалювання — 409, віддзеркалені цим запитом копії стерто до відповіді", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(row([slide("slide-0001", "a")]) as never);
+    vi.mocked(prisma.slideDeck.update).mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError("not found", { code: "P2025", clientVersion: "6" }));
+
+    const res = await put({ title: "a", slides: [slide("slide-0001", "a"), { id: "slide-0005", imageUrl: "https://example.com/x.png" }] });
+
+    expect(res.status).toBe(409);
+    expect(storage.removeSlideFiles).toHaveBeenCalledExactlyOnceWith("c1", ["https://p.supabase.co/storage/v1/object/public/scene-slides/c1/mirrored.png"]);
+  });
+
+  it("PUT без слайда, що зараз на екрані: показ переходить на сусіда, файл видаленого слайда стирається", async () => {
+    seedDeck(row([slide("slide-0001", "a"), slide("slide-0002", "b"), slide("slide-0003", "c")]));
+    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ deckId: "d1", deckTitle: "Таверна", slide: slide("slide-0002", "b"), nextImageUrl: url("c"), audio: null, seq: 3 } as never);
+
+    await put({ title: "Таверна", slides: [slide("slide-0001", "a"), slide("slide-0003", "c")] });
+    await runAfter();
+
+    expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "c1", seq: 3 }, data: { deckId: "d1", slide: slide("slide-0003", "c"), nextImageUrl: null, seq: 4 } });
+    expect(trigger).toHaveBeenCalledWith("private-show-c1", "show-state", expect.objectContaining({ show: expect.objectContaining({ slide: slide("slide-0003", "c"), seq: 4 }) }));
+    expect(storage.removeSlideFiles).toHaveBeenCalledWith("c1", [url("b")]);
+  });
+
+  it("PUT поточного набору без слайдів: показ завершується, усі файли стираються", async () => {
+    seedDeck(row([slide("slide-0001", "a"), slide("slide-0002", "b")]));
+    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ deckId: "d1", deckTitle: "Таверна", slide: slide("slide-0001", "a"), nextImageUrl: url("b"), audio: null, seq: 3 } as never);
+
+    await put({ title: "Таверна", slides: [] });
+    await runAfter();
+
+    expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ data: { deckId: null, nextImageUrl: null, seq: 4 } });
+    expect(storage.removeSlideFiles).toHaveBeenCalledWith("c1", [url("a"), url("b")]);
+  });
+
+  it("DELETE: конфлікт seq при завершенні показу — перечитати і повторити", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(row([slide("slide-0001", "a")]) as never);
+
+    const shown = (seq: number) => ({ deckId: "d1", deckTitle: "Таверна", slide: slide("slide-0001", "a"), nextImageUrl: null, audio: null, seq });
+
+    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValueOnce(shown(3) as never).mockResolvedValueOnce(shown(4) as never);
+    vi.mocked(prisma.campaignShow.updateMany).mockResolvedValueOnce({ count: 0 });
+
+    const { DELETE } = await import("@/app/api/campaigns/[id]/decks/[deckId]/route");
+
+    await DELETE(new Request("http://x", { method: "DELETE" }), { params: Promise.resolve({ id: "c1", deckId: "d1" }) });
+    await runAfter();
+
+    expect(prisma.campaignShow.updateMany).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[1][0]).toMatchObject({ where: { seq: 4 }, data: { deckId: null, seq: 5 } });
+    expect(trigger).toHaveBeenCalledWith("private-show-c1", "show-state", expect.objectContaining({ show: expect.objectContaining({ deckId: null, seq: 5 }) }));
+    expect(storage.removeSlideFiles).toHaveBeenCalledWith("c1", [url("a")]);
   });
 
   it("DELETE набору, що зараз у показі: показ завершується, файл екрана теж стирається", async () => {

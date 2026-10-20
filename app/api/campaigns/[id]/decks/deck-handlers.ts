@@ -44,26 +44,39 @@ async function removeUnusedFiles(campaignId: string, deckId: string, slides: { b
   if (urls.length > 0) await removeSlideFiles(campaignId, urls);
 }
 
-async function refreshShownDeck(campaignId: string, show: ShowState | null, saved: SlideDeck) {
-  const next = show && refreshShowSlide(show, saved);
+/** Повертає стан показу після оновлення — з нього рахується, які файли ще на екрані. */
+async function refreshShownDeck(campaignId: string, show: ShowState | null, saved: SlideDeck, before: Slide[]): Promise<ShowState | null> {
+  const next = show && refreshShowSlide(show, saved, { before, now: Date.now() });
 
   // конфлікт з командою ДМ не страшний: наступне перемикання візьме свіжий набір
-  if (next && (await writeShowState(campaignId, show, next))) await publishShow(campaignId, next);
+  if (!next || !(await writeShowState(campaignId, show, next))) return show;
+
+  await publishShow(campaignId, next);
+
+  return next;
 }
+
+const END_SHOW_ATTEMPTS = 3;
 
 /** Показ не лишається вказувати на видалений набір. */
 async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowState | null> {
-  const show = await readShowState(campaignId);
+  let show = await readShowState(campaignId);
 
-  if (show?.deckId !== deckId) return show;
+  for (let attempt = 0; attempt < END_SHOW_ATTEMPTS && show?.deckId === deckId; attempt++) {
+    const ended = applyShowCommand(show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
 
-  const ended = applyShowCommand(show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
+    if (!ended.ok) return show;
 
-  if (!ended.ok || !(await writeShowState(campaignId, show, ended.value))) return show;
+    if (await writeShowState(campaignId, show, ended.value)) {
+      await publishShow(campaignId, ended.value);
 
-  await publishShow(campaignId, ended.value);
+      return ended.value;
+    }
 
-  return ended.value;
+    show = await readShowState(campaignId);
+  }
+
+  return show;
 }
 
 const isNotFound = (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
@@ -127,14 +140,21 @@ export function saveDeckHandler(req: Request, campaignId: string, deckId: string
         throw error;
       });
 
-    if (!row) return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
+    if (!row) {
+      // копії, зроблені цим запитом, нікуди не записані
+      const mirrored = removedSlideUrls(slides.value, body.slides, []);
+
+      if (mirrored.length > 0) await removeSlideFiles(campaignId, mirrored);
+
+      return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
+    }
 
     const saved = toSlideDeck(row);
 
     after(async () => {
-      const show = await readShowState(campaignId);
+      const show = await refreshShownDeck(campaignId, await readShowState(campaignId), saved, previous);
 
-      await Promise.all([refreshShownDeck(campaignId, show, saved), removeUnusedFiles(campaignId, deckId, { before: previous, remaining: saved.slides }, show)]);
+      await removeUnusedFiles(campaignId, deckId, { before: previous, remaining: saved.slides }, show);
     });
 
     return NextResponse.json(saved);
