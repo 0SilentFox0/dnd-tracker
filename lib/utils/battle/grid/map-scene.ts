@@ -5,6 +5,7 @@ import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
@@ -107,7 +108,7 @@ export interface AimScene {
 
 /** Клітинки шаблону в точці `at`; null — заклинатель поза картою, точка поза дальністю або шаблон без клітинок. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
 export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
-  const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
+  const caster = findParticipant(participants, aim.casterId);
 
   if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range) || modeAimHiddenText(map, caster, at)) return null;
 
@@ -152,7 +153,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
-  const aimCaster = mode.aim && !placing && !tool ? participants.find((p) => p.basicInfo.id === mode.aim?.casterId) : undefined;
+  const aimCaster = mode.aim && !placing && !tool ? findParticipant(participants, mode.aim.casterId) : undefined;
 
   const aim = aimCaster && isOnMap(aimCaster) ? mode.aim : null;
 
@@ -206,7 +207,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   function tokenClick(id: string): MapClick {
     if (tool) return { kind: "none" };
 
-    const target = participants.find((p) => p.basicInfo.id === id);
+    const target = findParticipant(participants, id);
 
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
 
@@ -231,7 +232,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     if (tool) return { kind: "none" };
 
     if (placing) {
-      const placed = placingId ? participants.find((x) => x.basicInfo.id === placingId) : undefined;
+      const placed = placingId ? findParticipant(participants, placingId) : undefined;
 
       return placed && isOnMap(placed) ? { kind: "move", participantId: placed.basicInfo.id, to: p, free: true } : { kind: "none" };
     }

@@ -4,8 +4,6 @@ import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyVictoryParams {
   updatedInitiativeOrder: BattleParticipant[];
-  /** @deprecated не використовується — лишено для сумісності з викликом в advance-turn.ts */
-  initiativeOrder: BattleParticipant[];
   battleStatus: string;
   battleId: string;
   nextRound: number;
