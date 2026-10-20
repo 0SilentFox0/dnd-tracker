@@ -8,6 +8,18 @@ import type { CampaignTrack } from "@/types/audio";
 
 afterEach(cleanup);
 
+vi.mock("@/lib/hooks/music", async () => {
+  const { useState } = await import("react");
+
+  return {
+    useTrackPreview: () => {
+      const [playingId, setPlayingId] = useState<string | null>(null);
+
+      return { playingId, failedId: null, progress: null, toggle: (t: { id: string }) => setPlayingId((p) => (p === t.id ? null : t.id)), stop: () => setPlayingId(null) };
+    },
+  };
+});
+
 const track = (id: string, title: string): CampaignTrack => ({ id, title, kind: "youtube", url: null, youtubeId: "dQw4w9WgXcQ", durationSec: null, sortOrder: 0, createdAt: "" });
 
 const tracks = [track("1", "Люди - Місто"), track("2", "Люди - Битва 1"), track("3", "Ельфи - Битва"), track("4", "Ельфи - Місто")];
@@ -19,6 +31,15 @@ function setup() {
 }
 
 describe("TrackGroups", () => {
+  it("на всіх групах одночасно активний лише один трек", () => {
+    const { getAllByRole, queryAllByRole } = setup();
+
+    fireEvent.click(getAllByRole("button", { name: "Слухати" })[0]);
+    expect(queryAllByRole("button", { name: "Пауза" })).toHaveLength(1);
+    fireEvent.click(getAllByRole("button", { name: "Слухати" })[2]);
+    expect(queryAllByRole("button", { name: "Пауза" })).toHaveLength(1);
+  });
+
   it("групи за расами, усі битви — в окремій групі «Битва»", () => {
     const { getByRole } = setup();
 

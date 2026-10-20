@@ -6,10 +6,13 @@ import { TrackList, type TrackListActions } from "./TrackList";
 
 import { Input } from "@/components/ui/input";
 import { usePlaylistView } from "@/lib/hooks/battle";
+import { useTrackPreview } from "@/lib/hooks/music";
 import type { CampaignTrack } from "@/types/audio";
 
 export function TrackGroups({ tracks, busy, actions }: { tracks: CampaignTrack[]; busy: boolean; actions: TrackListActions }) {
   const view = usePlaylistView(tracks);
+
+  const preview = useTrackPreview();
 
   const { data, set } = view.filter;
 
@@ -33,12 +36,12 @@ export function TrackGroups({ tracks, busy, actions }: { tracks: CampaignTrack[]
                 <span className="hud-sc min-w-0 flex-1 truncate tracking-[.08em]">{g.name}</span>
                 <span className="text-xs text-hud-muted">{g.tracks.length}</span>
               </button>
-              {!folded && <TrackList tracks={g.tracks} busy={busy} actions={actions} />}
+              {!folded && <TrackList tracks={g.tracks} busy={busy} actions={actions} preview={preview} />}
             </section>
           );
         })
       ) : (
-        <TrackList tracks={view.groups.flatMap((g) => g.tracks)} busy={busy} actions={actions} />
+        <TrackList tracks={view.groups.flatMap((g) => g.tracks)} busy={busy} actions={actions} preview={preview} />
       )}
     </div>
   );
