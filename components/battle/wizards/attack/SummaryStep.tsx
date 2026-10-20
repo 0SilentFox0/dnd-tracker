@@ -3,7 +3,7 @@ import { Loader2, Swords } from "lucide-react";
 import { type AttackWizardModel,btn, primaryBtn } from "./shared";
 
 import { cn } from "@/lib/utils";
-import { formatDamageStep } from "@/lib/utils/battle/view/damage-step";
+import { formatDamageStep } from "@/lib/utils/battle/view";
 
 export function SummaryStep({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
   const submitting = state.step === "submitting";

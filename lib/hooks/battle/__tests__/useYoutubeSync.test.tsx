@@ -28,8 +28,13 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
           destroy: vi.fn(),
         };
 
+        // як справжній YT: після destroy() iframe вже немає, будь-який виклик падає
+        const live = Object.fromEntries(
+          Object.entries(player).map(([k, fn]) => [k, (...a: unknown[]) => (k !== "destroy" && player.destroy.mock.calls.length ? (null as unknown as { src: string }).src : fn(...a))]),
+        );
+
         created.push({ options, player });
-        Object.assign(this, player);
+        Object.assign(this, live);
         queueMicrotask(() => options.events.onReady());
       }
     },
@@ -38,8 +43,8 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
 
 const state = audioState({ track: youtubeTrack });
 
-function Harness({ videoId }: { videoId: string | null }) {
-  const { ref } = useYoutubeSync({ videoId, state, clockOffsetMs: 0, volume: 0.4, muted: false });
+function Harness({ videoId, audio = state }: { videoId: string | null; audio?: typeof state }) {
+  const { ref } = useYoutubeSync({ videoId, state: audio, clockOffsetMs: 0, volume: 0.4, muted: false });
 
   return <div ref={ref} />;
 }
@@ -85,6 +90,18 @@ describe("useYoutubeSync", () => {
     expect(created[0].player.destroy).toHaveBeenCalled();
 
     act(() => unmount());
+  });
+
+  it("перемикання на інший трек: знищений плеєр більше не викликається (YT кидав «reading 'src'»)", async () => {
+    const { rerender } = render(<Harness videoId="dQw4w9WgXcQ" />);
+
+    await waitFor(() => expect(created[0]?.player.playVideo).toHaveBeenCalled());
+
+    const next = audioState({ trackId: "t3", track: { ...youtubeTrack, youtubeId: "aaaaaaaaaaa" }, seq: state.seq + 1 });
+
+    expect(() => rerender(<Harness videoId="aaaaaaaaaaa" audio={next} />)).not.toThrow();
+    await waitFor(() => expect(created).toHaveLength(2));
+    await waitFor(() => expect(created[1].player.playVideo).toHaveBeenCalled());
   });
 
   it("тривалість ще невідома (0) — грає, але не перемотує: ціль без петлі могла б вийти за кінець", async () => {

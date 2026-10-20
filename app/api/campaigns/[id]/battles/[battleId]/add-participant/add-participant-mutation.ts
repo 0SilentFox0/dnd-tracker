@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { prisma } from "@/lib/db";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { canStand } from "@/lib/utils/battle/grid/occupancy";
-import { enterMazeAsleep, mazeGridOf, mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
+import { modeEnter, modePlaceOne } from "@/lib/utils/battle/modes/server";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -20,7 +21,7 @@ export const addParticipantSchema = z.object({
   sourceId: z.string(),
   type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
-  quantity: z.number().int().min(1).max(10).optional().default(1),
+  quantity: z.number().int().min(UNIT_QUANTITY.min).max(UNIT_QUANTITY.max).optional().default(1),
   reserved: z.boolean().optional(),
   position: mapCellSchema.optional(),
 });
@@ -69,24 +70,18 @@ function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: Gr
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
 
-  const grid = mazeGridOf(map);
+  const own = modePlaceOne(map, { participants: ctx.participants, mover: first, to });
 
-  if (!grid) {
-    if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
+  if (own) return own;
 
-    return { ...first, battleData: { ...first.battleData, position: to } };
-  }
+  if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
 
-  const error = mazePlacementError(grid, { participants: ctx.participants, mover: first, to });
-
-  if (error) throw new BattleRuleError("action_rejected", error);
-
-  return placeInMaze(grid, first, to);
+  return { ...first, battleData: { ...first.battleData, position: to } };
 }
 
 function enterMap(ctx: BattleMutationContext, added: BattleParticipant[], position: GridPoint | undefined): BattleParticipant[] {
   return added.map((p, i) => {
-    const asleep = enterMazeAsleep(ctx.meta.map, p);
+    const asleep = modeEnter(ctx.meta.map, p);
 
     return i === 0 && position ? placeFirst(ctx, asleep, position) : asleep;
   });

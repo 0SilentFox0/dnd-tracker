@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { aimView } from "@/lib/utils/battle/grid/map-scene";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
 import type { ResolvedAbility } from "@/types/abilities";
 

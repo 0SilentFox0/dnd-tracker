@@ -109,8 +109,8 @@ describe("tracks API", () => {
     expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({ data: expect.objectContaining({ title: "YouTube dQw4w9WgXcQ" }) });
   });
 
-  it("ліміт 40: і квиток, і створення відмовляють", async () => {
-    vi.mocked(prisma.campaignTrack.count).mockResolvedValue(40);
+  it("ліміт 200: і квиток, і створення відмовляють", async () => {
+    vi.mocked(prisma.campaignTrack.count).mockResolvedValue(200);
 
     const { POST } = await tracksRoute();
 
@@ -119,7 +119,7 @@ describe("tracks API", () => {
     const created = await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
 
     expect(created.status).toBe(400);
-    expect(await created.json()).toEqual({ error: "У бібліотеці вже 40 треків — видаліть зайві" });
+    expect(await created.json()).toEqual({ error: "У бібліотеці вже 200 треків — видаліть зайві" });
     expect((await ticket(req("POST", { name: "a.mp3", size: 100, contentType: "audio/mpeg" }), params())).status).toBe(400);
     expect(storage.createTrackUploadTicket).not.toHaveBeenCalled();
   });

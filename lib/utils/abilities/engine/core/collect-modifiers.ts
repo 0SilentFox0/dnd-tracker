@@ -63,16 +63,16 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
   return effect.kind === "flag" && effect.flag === query.flag;
 }
 
-const outOfMazePlay = (source: BattleParticipant, subject: BattleParticipant) => isEscaped(source) || isEscaped(subject);
+const outOfPlay = (source: BattleParticipant, subject: BattleParticipant) => isEscaped(source) || isEscaped(subject);
 
 export function appliesTo(target: StaticEffect["target"], source: BattleParticipant, subject: BattleParticipant): boolean {
   switch (target ?? "self") {
     case "self":
       return source.basicInfo.id === subject.basicInfo.id;
     case "allAllies":
-      return source.basicInfo.side === subject.basicInfo.side && (source.basicInfo.id === subject.basicInfo.id || !outOfMazePlay(source, subject));
+      return source.basicInfo.side === subject.basicInfo.side && (source.basicInfo.id === subject.basicInfo.id || !outOfPlay(source, subject));
     case "allEnemies":
-      return source.basicInfo.side !== subject.basicInfo.side && !outOfMazePlay(source, subject) && !isDormant(subject);
+      return source.basicInfo.side !== subject.basicInfo.side && !outOfPlay(source, subject) && !isDormant(subject);
     default:
       return false;
   }

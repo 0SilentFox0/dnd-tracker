@@ -3,6 +3,7 @@ import { z } from "zod";
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
+import { restoreModeSlices } from "@/lib/utils/battle/modes/server";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SnapshotState } from "@/lib/utils/battle/store";
 import { BattleRuleError, loadSnapshotsFrom, restoreParticipantsAt } from "@/lib/utils/battle/store";
@@ -20,11 +21,9 @@ const defaultIsActiveEvent: IsActiveEvent = async (battleId, seq) =>
   (await prisma.battleEvent.count({ where: { battleId, seq, cancelledAt: null } })) > 0;
 
 function restoreMap(map: BattleMapConfig, scene: SnapshotState["scene"]): BattleMapConfig | undefined {
-  if (scene.terrain === undefined && scene.maze === undefined) return undefined;
+  const restored = restoreModeSlices(scene.terrain !== undefined ? replaceTerrain(map, scene.terrain) : map, scene);
 
-  const withTerrain = scene.terrain !== undefined ? replaceTerrain(map, scene.terrain) : map;
-
-  return scene.maze !== undefined && (scene.maze || map.maze) ? { ...withTerrain, maze: scene.maze } : withTerrain;
+  return restored === map ? undefined : restored;
 }
 
 export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActiveEvent: IsActiveEvent = defaultIsActiveEvent) {

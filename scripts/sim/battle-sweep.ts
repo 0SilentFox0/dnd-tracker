@@ -33,9 +33,8 @@ import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/c
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/unit-control/unit-control-mutation";
-import { BATTLE_LOG_RECENT_EVENTS, emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN, ParticipantSourceType } from "@/lib/constants/battle";
+import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -44,7 +43,9 @@ import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellDistance, cellKey, inBounds, mapCentre, neighbors, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
-import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
+import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/modes/maze";
+import { emptyMaze,MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN } from "@/lib/utils/battle/modes/maze/constants";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
@@ -259,19 +260,19 @@ const START = { access: "dm", requireStatus: "prepared", mutate: createStartMuta
 
 const NEXT = { access: "currentController", requireStatus: "active", mutate: nextTurnMutation };
 
-const ATTACK = { access: "member", requireStatus: "active", blockedInDark: true, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
+const ATTACK = { access: "member", requireStatus: "active", blockedByMode: true, schema: attackBodySchema, mutate: createAttackMutation({ ...summonDeps, loadSpells: loadSpellsFromDb }) };
 
-const BONUS = { access: "member", requireStatus: "active", blockedInDark: true, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
+const BONUS = { access: "member", requireStatus: "active", blockedByMode: true, schema: bonusActionSchema, mutate: createBonusActionMutation(summonDeps) };
 
-const ABILITY = { access: "member", requireStatus: "active", blockedInDark: true, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
+const ABILITY = { access: "member", requireStatus: "active", blockedByMode: true, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
-const SPELL = { access: "member", requireStatus: "active", blockedInDark: true, schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
+const SPELL = { access: "member", requireStatus: "active", blockedByMode: true, schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
 
 const UNIT_CONTROL = { access: "dm", requireStatus: "active", schema: unitControlSchema, mutate: unitControlMutation };
 
-const AURA_ZONE = { access: "member", requireStatus: "active", blockedInDark: true, schema: auraZoneSchema, mutate: auraZoneMutation };
+const AURA_ZONE = { access: "member", requireStatus: "active", blockedByMode: true, schema: auraZoneSchema, mutate: auraZoneMutation };
 
-const MORALE = { access: "member", requireStatus: "active", blockedInDark: true, schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
+const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
 
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
 
@@ -283,7 +284,7 @@ const MAP_TERRAIN = { access: "dm", requireStatus: "active", schema: mapTerrainS
 
 const MAZE = { access: "dm", requireStatus: "active", schema: mazeActionSchema, mutate: mazeMutation };
 
-const MAZE_MARK = { access: "member", requireStatus: "active", blockedInDark: true, schema: mazeMarkSchema, mutate: mazeMarkMutation };
+const MAZE_MARK = { access: "member", requireStatus: "active", blockedByMode: true, schema: mazeMarkSchema, mutate: mazeMarkMutation };
 
 const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 

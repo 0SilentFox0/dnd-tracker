@@ -7,6 +7,7 @@ import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
 import { heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
+import { applyWeaponFlat } from "./weapon-flat";
 
 import { AttackType } from "@/lib/constants/battle";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -68,6 +69,16 @@ export function computeDamageBreakdown(
     breakdown.push(`──────────`);
     breakdown.push(`× 2 (крит) = ${totalDamage} урону`);
     steps.push({ label: "Критичне влучання", side: "attacker", kind: "multiplier", value: 2, after: totalDamage });
+  }
+
+  const flat = applyWeaponFlat(totalDamage, attack);
+
+  totalDamage = flat.damage;
+
+  if (flat.step && flat.line) {
+    breakdown.push(`──────────`);
+    breakdown.push(flat.line);
+    steps.push(flat.step);
   }
 
   const heroDm = applyHeroDmDamageMultiplier(

@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { deriveMapScene, type MapSceneActor } from "@/lib/utils/battle/grid";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
-import { deriveMazeView } from "@/lib/utils/battle/view";
+import { deriveMazeView } from "@/lib/utils/battle/modes/maze";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleMapConfig, BattleParticipant, Direction8, GridPoint } from "@/types/battle";
 
 const hero = (at: GridPoint, facing: Direction8): BattleParticipant => {
@@ -22,7 +22,7 @@ function scene(map: BattleMapConfig, participants: BattleParticipant[], isDM: bo
 
   const actor: MapSceneActor = { current, viewer: { userId: isDM ? "dm" : "u", isDM, canSeeEnemyHp: false }, canAct: true, isDM, attackReady: true };
 
-  return { maze, scene: deriveMapScene({ map, participants, selectedId: null, actor, mode: { placing: false, placingId: null }, maze }) };
+  return { maze, scene: deriveMapScene({ map, participants, selectedId: null, actor, mode: { placing: false, placingId: null }, modeView: maze }) };
 }
 
 const moveKeys = (marks: Map<string, unknown> | undefined) => [...(marks ?? [])].flatMap(([k, m]) => (typeof m === "number" ? [k] : []));

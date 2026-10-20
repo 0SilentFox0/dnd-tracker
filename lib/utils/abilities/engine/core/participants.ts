@@ -30,12 +30,23 @@ export function isActive(p: BattleParticipant): boolean {
 
 export const isAirborne = (p: BattleParticipant): boolean => !!p.battleData.airborne;
 
-// прапорці лабіринту: сплячий і вибулий не діють і не зачіпаються масовими вміннями; поза лабіринтом завжди false
+// сплячий і вибулий не діють і не зачіпаються масовими вміннями; ставить лише режим карти
 export const isDormant = (p: BattleParticipant): boolean => !!p.battleData.dormant;
 
 export const isEscaped = (p: BattleParticipant): boolean => !!p.battleData.escaped;
 
-export const inMazePlay = (p: BattleParticipant): boolean => isActive(p) && !isDormant(p) && !isEscaped(p);
+export const inPlay = (p: BattleParticipant): boolean => isActive(p) && !isDormant(p) && !isEscaped(p);
+
+export const sitsOutTurn = (p: BattleParticipant, round: number): boolean => isDormant(p) || isEscaped(p) || (p.battleData.mazeWakeRound ?? 0) > round;
+
+export const takesTurn = (p: BattleParticipant, round: number): boolean => isActive(p) && !sitsOutTurn(p, round);
+
+/** Хто стоїть на ходу, коли ніхто не ходить: перший у грі, інакше перший живий, інакше 0. */
+export function idleTurnIndex(order: BattleParticipant[]): number {
+  const firstInPlay = order.findIndex(inPlay);
+
+  return firstInPlay >= 0 ? firstInPlay : Math.max(0, order.findIndex(isActive));
+}
 
 export function isTargetable(p: BattleParticipant): boolean {
   return isActive(p) && !isAirborne(p) && !isEscaped(p);

@@ -15,6 +15,20 @@ const DIALOG_RESTRICTED_PATHS = [
   { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
 ];
 
+const MODE_IMPORT_PATTERN = {
+  group: ["@/lib/utils/battle/modes/maze*", "@/lib/hooks/battle/modes/maze*", "@/components/battle/modes/maze*"],
+  message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
+};
+
+const MODE_OWNED_FILES = [
+  "lib/utils/battle/modes/**",
+  "lib/hooks/battle/modes/**",
+  "components/battle/modes/**",
+  "app/api/campaigns/[[]id]/battles/[[]battleId]/maze/**",
+  "app/api/campaigns/[[]id]/battles/[[]battleId]/maze-mark/**",
+  "app/api/campaigns/[[]id]/battles/[[]battleId]/move/**",
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -137,6 +151,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: DIALOG_RESTRICTED_PATHS,
+          patterns: [MODE_IMPORT_PATTERN],
         },
       ],
       "no-restricted-globals": [
@@ -154,6 +169,32 @@ const eslintConfig = defineConfig([
   {
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
     ignores: ["app/api/**", "components/ui/**", "**/__tests__/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: DIALOG_RESTRICTED_PATHS,
+          patterns: [
+            {
+              group: ["@/lib/api", "@/lib/api/*"],
+              message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
+            },
+            MODE_IMPORT_PATTERN,
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}"],
+    ignores: ["components/ui/**"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: DIALOG_RESTRICTED_PATHS }],
+    },
+  },
+  {
+    files: ["components/battle/modes/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**"],
     rules: {
       "no-restricted-imports": [
         "error",

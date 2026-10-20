@@ -2,7 +2,7 @@ import { effectSource } from "./timed-effects";
 
 import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
 import { auraKey } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, inMazePlay, isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, inPlay, isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { AREA_TARGETS, type AreaTarget, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { ResolvedAbility } from "@/types/abilities";
@@ -34,7 +34,7 @@ export const zoneEffectId = (ownerId: string, auraId: string) => `zone:${ownerId
 export function zoneCandidates(ps: BattleParticipant[], owner: BattleParticipant, target: AreaTarget): BattleParticipant[] {
   const allies = target === "nearbyAllies";
 
-  return ps.filter((p) => inMazePlay(p) && (p.basicInfo.side === owner.basicInfo.side) === allies);
+  return ps.filter((p) => inPlay(p) && (p.basicInfo.side === owner.basicInfo.side) === allies);
 }
 
 /** Поточний склад зони — з ефектів на цілях. */

@@ -1,0 +1,163 @@
+import type { ModeView } from "../types";
+import { mazeGridOf } from "./grid";
+import { isMazeHero, isPlaced } from "./status";
+import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
+import { edgeCells } from "./walls";
+
+import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
+import { cellKey } from "@/lib/utils/battle/grid/geometry";
+import { filterQueueByView, type QueueEntry } from "@/lib/utils/battle/view/queue";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+
+export type MazeRole = "dm" | "player" | "spectator";
+
+export interface MazeView extends ModeView {
+  role: MazeRole;
+  /** Лише для ДМ: що зараз бачать усі герої на полі разом */
+  partyCells: ReadonlySet<string> | null;
+  /** Стіна на межі видимої клітинки (для гравця) */
+  showWalls: (edge: string) => boolean;
+  showTeleportLinks: boolean;
+  showFog: boolean;
+  showExit: boolean;
+  mazeDark: boolean;
+}
+
+interface DeriveArgs {
+  map: BattleMapConfig;
+  participants: BattleParticipant[];
+  userId: string;
+  isDM: boolean;
+  asHeroId?: string | null;
+}
+
+const always = () => true;
+
+const NO_IDS: ReadonlySet<string> = new Set();
+
+const idOf = (p: BattleParticipant) => p.basicInfo.id;
+
+const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && isActive(p) && !isEscaped(p) && isPlaced(p);
+
+// непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
+const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && isPlaced(p);
+
+export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: DeriveArgs): MazeView | null {
+  const grid = mazeGridOf(map);
+
+  if (!grid) return null;
+
+  const { maze } = grid;
+
+  const viewersOf = (list: BattleParticipant[]) => list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
+
+  const base = { mazeDark: maze.dark, partyCells: null };
+
+  if (isDM && !asHeroId) {
+    return { ...base, role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
+  }
+
+  const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
+
+  if (own.length === 0) {
+    const visible = participants.filter((p) => isPlaced(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inPlay(p))));
+
+    return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
+  }
+
+  const viewers = viewersOf(own);
+
+  const cells = unionVision(grid, viewers);
+
+  const visibleIds = new Set(own.map(idOf));
+
+  for (const p of participants) {
+    if (visibleIds.has(idOf(p)) || !isPlaced(p) || isEscaped(p)) continue;
+
+    if (viewers.some((v) => seesParticipant(grid, cells, v.position, p.battleData.position))) visibleIds.add(idOf(p));
+  }
+
+  return {
+    ...base,
+    role: "player",
+    cells,
+    visibleIds,
+    ownIds: new Set(own.map(idOf)),
+    showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
+    showTeleportLinks: false,
+    showFog: true,
+    showDormant: true,
+    showExit: true,
+    dark: maze.dark,
+  };
+}
+
+export const MAZE_UNKNOWN_NAME = "невідомий";
+
+const hidesFrom = (view: MazeView | null | undefined): view is MazeView => view?.role === "player";
+
+const knows = (view: MazeView, id: string) => view.visibleIds.has(id) || view.ownIds.has(id);
+
+const SERVICE_ACTORS: ReadonlySet<string> = new Set([DM_ACTOR.actorId, SYSTEM_ACTOR.actorId]);
+
+/** Гравець у лабіринті бачить лише своїх і тих, хто зараз у полі зору; ДМ і глядач — усіх. */
+export const mazeVisible = (view: MazeView | null | undefined, p: BattleParticipant): boolean => !hidesFrom(view) || knows(view, idOf(p));
+
+export const visibleParticipants = (view: MazeView | null | undefined, list: BattleParticipant[]): BattleParticipant[] =>
+  hidesFrom(view) ? list.filter((p) => knows(view, idOf(p))) : list;
+
+const anyTargetKnown = (view: MazeView, e: BattleAction, known: (id: string) => boolean) => (e.targets ?? []).some((t) => known(t.participantId));
+
+/** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. Перетасовку не бачить ніхто. */
+export function mazeLogVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
+  const kind = e.actionDetails?.mazeEvent;
+
+  if (kind === "reshuffle") return false;
+
+  if (!hidesFrom(view)) return true;
+
+  if (kind === "op") return false;
+
+  if (kind === "spotted") return view.ownIds.has(e.actorId);
+
+  if (SERVICE_ACTORS.has(e.actorId)) return !e.targets?.length || anyTargetKnown(view, e, (id) => knows(view, id));
+
+  // удар по своєму героєві гравець відчуває, навіть якщо нападника не видно
+  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => view.ownIds.has(id));
+}
+
+/** FX: лише коли видно виконавця або хоч одну ціль. */
+export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
+  if (!hidesFrom(view)) return true;
+
+  if (e.actionDetails?.mazeEvent) return false;
+
+  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => knows(view, id));
+}
+
+export interface MazeMaskable {
+  battle: { battleLog?: BattleAction[] };
+  turn: { current: BattleParticipant | null; queue: QueueEntry[] };
+  roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
+}
+
+/** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
+export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView | null | undefined): T {
+  if (!hidesFrom(view)) {
+    const log = scene.battle.battleLog ?? [];
+
+    return view && log.some((e) => !mazeLogVisible(view, e)) ? { ...scene, battle: { ...scene.battle, battleLog: log.filter((e) => mazeLogVisible(view, e)) } } : scene;
+  }
+
+  const { current } = scene.turn;
+
+  const masked = current && !knows(view, idOf(current)) ? { ...current, basicInfo: { ...current.basicInfo, name: MAZE_UNKNOWN_NAME, avatar: undefined } } : current;
+
+  return {
+    ...scene,
+    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).filter((e) => mazeLogVisible(view, e)) },
+    turn: { ...scene.turn, current: masked, queue: filterQueueByView(scene.turn.queue, view) },
+    roster: { ...scene.roster, allies: visibleParticipants(view, scene.roster.allies), enemies: visibleParticipants(view, scene.roster.enemies) },
+  } as T;
+}

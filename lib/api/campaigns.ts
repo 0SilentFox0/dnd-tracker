@@ -4,15 +4,13 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
-import type { Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
-
-type ActiveBattle = { id: string; campaignId: string };
+import type { ActiveBattleRef, Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
 
 /**
  * Отримує активні бої в кампаніях, де користувач є учасником.
  */
-export async function getActiveBattles(): Promise<ActiveBattle[]> {
-  return request<ActiveBattle[]>("/api/campaigns/active-battles");
+export async function getActiveBattles(): Promise<ActiveBattleRef[]> {
+  return request<ActiveBattleRef[]>("/api/campaigns/active-battles");
 }
 
 export async function updateCampaign(

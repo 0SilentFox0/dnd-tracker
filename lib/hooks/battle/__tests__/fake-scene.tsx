@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi } from "vitest";
 
+import { MazeToolStateContext, useMazeToolStateValue } from "../modes/maze/useMazeToolState";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
-import { MazeToolStateContext, useMazeToolStateValue } from "../useMazeToolState";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";

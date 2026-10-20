@@ -10,7 +10,7 @@ import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { enterMazeAsleep } from "@/lib/utils/battle/maze/status";
+import { modeEnter } from "@/lib/utils/battle/modes/server";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -154,7 +154,7 @@ function applyStartOfBattleAndSort(
 
   const battleStart = runAbilities(
     // сплячі вороги лабіринту не спрацьовують на старті
-    initiativeOrder.map((p) => enterMazeAsleep(map, p)),
+    initiativeOrder.map((p) => modeEnter(map, p)),
     { type: "battleStart" },
     ctx,
   );

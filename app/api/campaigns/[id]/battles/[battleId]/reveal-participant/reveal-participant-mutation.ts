@@ -3,7 +3,7 @@ import { z } from "zod";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { enterMazeAsleep } from "@/lib/utils/battle/maze/status";
+import { modeEnter } from "@/lib/utils/battle/modes/server";
 import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
@@ -38,7 +38,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
     const clean = dropBattleFlag(found, "reserved");
 
-    const entering = enterMazeAsleep(ctx.meta.map, { ...clean, battleData: { ...clean.battleData, revealPending: true } });
+    const entering = modeEnter(ctx.meta.map, { ...clean, battleData: { ...clean.battleData, revealPending: true } });
 
     order = insertAfterCurrent(order, ctx.scene.turnIndex, entering);
     revealed.push(entering);

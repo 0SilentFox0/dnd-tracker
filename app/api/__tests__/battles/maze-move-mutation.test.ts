@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
 

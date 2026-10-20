@@ -113,11 +113,11 @@ const unit = (attacks: Array<{ damageDice: string; type: string }>) =>
   getUnitStats({ id: "u", name: "u", maxHp: 20, level: 1, strength: 14, dexterity: 12, attacks });
 
 describe("баланс: середня шкода з кубиків", () => {
-  it("юніт: кубики зброї + модифікатор характеристики; «+N» з кубиків не рахується", () => {
-    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(6.5);
+  it("юніт: кубики зброї + модифікатор характеристики; «+N» зброї входить у середнє", () => {
+    expect(unit([{ damageDice: "1d8+2", type: "melee" }]).dpr).toBe(8.5);
   });
 
-  it("оцінка юніта = влучання рушія із середніми кидками: «+16» з «4d10+16» шкоди не дає", () => {
+  it("оцінка юніта = влучання рушія із середніми кидками: «+16» з «4d10+16» входить у шкоду", () => {
     const base = makeParticipant({ id: "u" });
 
     const attack = { ...sword, damageDice: "4d10+16" } as BattleAttack;
@@ -135,7 +135,7 @@ describe("баланс: середня шкода з кубиків", () => {
 
     const estimate = getUnitStats({ id: "u", name: "u", maxHp: 20, level: 7, strength: 16, dexterity: 10, attacks: [attack] }).dpr;
 
-    expect(estimate).toBe(25);
+    expect(estimate).toBe(41);
     expect(hit.physicalDamage).toBe(estimate);
   });
 

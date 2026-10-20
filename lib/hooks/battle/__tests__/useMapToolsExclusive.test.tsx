@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import { useBattleMapScene } from "../useBattleMapScene";
 import { fakeScene } from "./fake-scene";
 
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import type { MazeTools } from "@/lib/hooks/battle/modes/maze";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 
 function setup() {
   const scene = fakeScene({ isDM: true, map: mazeMap({}, 8, 6) });
@@ -20,31 +21,33 @@ function setup() {
     return hook.result.current;
   };
 
-  return { current };
+  const maze = () => current().modeTools?.raw as MazeTools | undefined;
+
+  return { current, maze };
 }
 
 describe("інструменти карти взаємовиключні", () => {
   it("погода закриває інструмент лабіринту", () => {
-    const { current } = setup();
+    const { current, maze } = setup();
 
-    act(() => current().mazeTools?.actions.setTool("walls"));
-    expect(current().mazeTools?.state.tool).toBe("walls");
+    act(() => maze()?.actions.setTool("walls"));
+    expect(maze()?.state.tool).toBe("walls");
 
     act(() => current().weatherTool?.toggle());
 
     expect(current().weatherTool?.active).toBe(true);
-    expect(current().mazeTools?.state.tool).toBe("none");
+    expect(maze()?.state.tool).toBe("none");
   });
 
   it("інструмент лабіринту закриває палітру погоди", () => {
-    const { current } = setup();
+    const { current, maze } = setup();
 
     act(() => current().weatherTool?.toggle());
     expect(current().weatherTool?.active).toBe(true);
 
-    act(() => current().mazeTools?.actions.setTool("exit"));
+    act(() => maze()?.actions.setTool("exit"));
 
-    expect(current().mazeTools?.state.tool).toBe("exit");
+    expect(maze()?.state.tool).toBe("exit");
     expect(current().weatherTool?.active).toBe(false);
   });
 

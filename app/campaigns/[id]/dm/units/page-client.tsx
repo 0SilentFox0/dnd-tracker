@@ -39,9 +39,11 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
             <DeleteAllButton
               count={list.units.length}
               nouns={["юніт", "юніти", "юнітів"]}
-              label="Видалити всі юніти"
-              description={`Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${list.units.length} юнітів.`}
-              onConfirm={list.actions.removeAll}
+              confirm={{
+                label: "Видалити всі юніти",
+                description: `Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${list.units.length} юнітів.`,
+              }}
+              actions={{ onConfirm: list.actions.removeAll }}
             />
           </>
         }

@@ -5,7 +5,7 @@ import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtu
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { spellTargetInRange } from "@/lib/utils/battle/flows/spell-flow";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { resolveSpellTargets, type SpellMapContext } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { AbilityEvent } from "@/types/abilities";

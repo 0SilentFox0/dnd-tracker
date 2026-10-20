@@ -22,7 +22,7 @@ vi.mock("@/lib/utils/battle/participant", () => ({
 import { buildStartOrder } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-battle-handler";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 
 const roar = resolved({ trigger: { event: "battleStart" }, effects: [{ kind: "dealDamage", amount: 4, target: "allEnemies" }] });
 

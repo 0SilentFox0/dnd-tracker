@@ -16,10 +16,10 @@ describe("music schemas", () => {
     expect(updateTrackSchema.safeParse({ title: "x".repeat(121) }).success).toBe(false);
   });
 
-  it("reorder: 1..40 id", () => {
+  it("reorder: 1..200 id", () => {
     expect(reorderTracksSchema.safeParse({ ids: ["a"] }).success).toBe(true);
     expect(reorderTracksSchema.safeParse({ ids: [] }).success).toBe(false);
-    expect(reorderTracksSchema.safeParse({ ids: Array.from({ length: 41 }, (_, i) => `t${i}`) }).success).toBe(false);
+    expect(reorderTracksSchema.safeParse({ ids: Array.from({ length: 201 }, (_, i) => `t${i}`) }).success).toBe(false);
   });
 
   it("команди аудіо: play вимагає trackId, невідома дія — ні", () => {

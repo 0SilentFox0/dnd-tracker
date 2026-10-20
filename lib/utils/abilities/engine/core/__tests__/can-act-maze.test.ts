@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { hpOf, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { flag, mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 
 const roar = resolved({ trigger: { event: "battleStart" }, effects: [{ kind: "dealDamage", amount: 4, target: "allEnemies" }] });
 

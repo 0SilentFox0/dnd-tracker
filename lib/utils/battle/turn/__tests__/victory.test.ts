@@ -32,7 +32,7 @@ describe("completeBattle", () => {
 
     const newLogEntries: BattleAction[] = [];
 
-    applyVictoryCompletion({ updatedInitiativeOrder: [regenerated, downed, enemy], initiativeOrder: [before, downed, enemy], battleStatus: "active", battleId: "b", nextRound: 4, currentBattleLogLength: 7, newLogEntries, getStateBeforeForEntry: () => undefined });
+    applyVictoryCompletion({ updatedInitiativeOrder: [regenerated, downed, enemy], battleStatus: "active", battleId: "b", nextRound: 4, currentBattleLogLength: 7, newLogEntries, getStateBeforeForEntry: () => undefined });
 
     expect(newLogEntries[0]).toMatchObject({ battleId: "b", round: 4, actionIndex: 7, resultText: "🎉 Бій завершено! Перемога союзників!" });
     expect(newLogEntries[0].hpChanges).toEqual([expect.objectContaining({ participantId: "pal", oldHp: 0, change: -downed.combatStats.maxHp })]);
@@ -78,7 +78,7 @@ describe("зачарований юніт і перемога", () => {
 
     const newLogEntries: BattleAction[] = [];
 
-    const out = applyVictoryCompletion({ updatedInitiativeOrder: [hero, enemy, { ...charmedLast, combatStats: { ...charmedLast.combatStats, currentHp: 0, status: "dead" } }], initiativeOrder: [hero, enemy, charmedLast], battleStatus: "active", battleId: "b", nextRound: 2, currentBattleLogLength: 0, newLogEntries, getStateBeforeForEntry: () => undefined });
+    const out = applyVictoryCompletion({ updatedInitiativeOrder: [hero, enemy, { ...charmedLast, combatStats: { ...charmedLast.combatStats, currentHp: 0, status: "dead" } }], battleStatus: "active", battleId: "b", nextRound: 2, currentBattleLogLength: 0, newLogEntries, getStateBeforeForEntry: () => undefined });
 
     expect(out.finalStatus).toBe("completed");
     expect(newLogEntries[0].actionDetails.battleResult).toBe("victory");

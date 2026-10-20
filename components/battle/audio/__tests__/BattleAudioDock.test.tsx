@@ -231,6 +231,36 @@ describe("BattleAudioDock — ДМ", () => {
     expect(list.querySelector("[aria-current=true]")?.textContent).toContain("Бій у таверні");
   });
 
+  it("плейлист з групами «Раса - Тема»: заголовки груп, пошук, фільтр групи й типу, згортання групи", async () => {
+    vi.mocked(getTracks).mockResolvedValue([
+      campaignTrack({ id: "a", title: "Люди - Битва", kind: "youtube", youtubeId: "aaaaaaaaaaa", url: null }),
+      campaignTrack({ id: "b", title: "Ельфи - Битва", kind: "youtube", youtubeId: "bbbbbbbbbbb", url: null, sortOrder: 1 }),
+      campaignTrack({ id: "c", title: "Люди - Місто", sortOrder: 2 }),
+    ]);
+
+    const { findByRole, getByRole, queryByRole, getByText } = dock({ isDM: true, audio: fileState });
+
+    const people = await findByRole("list", { name: "Люди" });
+
+    expect([...people.querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Битва", "♪ Місто"]);
+    expect(getByRole("list", { name: "Ельфи" })).toBeTruthy();
+
+    fireEvent.change(getByRole("searchbox", { name: "Пошук треку" }), { target: { value: "битва ельфи" } });
+    expect(queryByRole("list", { name: "Люди" })).toBeNull();
+    expect(getByText("Знайдено 1 з 3")).toBeTruthy();
+
+    fireEvent.click(getByRole("button", { name: "Скинути фільтри" }));
+    fireEvent.change(getByRole("combobox", { name: "Група" }), { target: { value: "Люди" } });
+    fireEvent.change(getByRole("combobox", { name: "Тип треку" }), { target: { value: "file" } });
+    expect([...getByRole("list", { name: "Люди" }).querySelectorAll("li")].map((li) => li.textContent)).toEqual(["♪ Місто"]);
+    expect(queryByRole("list", { name: "Ельфи" })).toBeNull();
+
+    fireEvent.click(getByRole("button", { name: "Скинути фільтри" }));
+    fireEvent.click(getByRole("button", { name: /^Люди/, expanded: true }));
+    expect(queryByRole("list", { name: "Люди" })).toBeNull();
+    expect(getByRole("list", { name: "Ельфи" })).toBeTruthy();
+  });
+
   it("плейлист згортається, і це запамʼятовується на пристрої", async () => {
     const first = dock({ isDM: true, audio: fileState });
 

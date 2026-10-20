@@ -4,7 +4,7 @@ import { attackReachError, enemiesInReach } from "../attack-reach";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { mazeMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 9, y: 9 }, ...over }, 10);

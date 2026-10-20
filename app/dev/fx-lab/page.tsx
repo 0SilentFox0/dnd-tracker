@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { FxLab } from "@/components/battle/fx-lab/FxLab";
+import { FxLab } from "@/components/battle/dev/FxLab";
 
 export const metadata = { title: "Лабораторія анімацій" };
 

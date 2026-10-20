@@ -9,7 +9,6 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
@@ -17,7 +16,7 @@ import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-l
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
-import { isMazeDark, withMazeAwareness } from "@/lib/utils/battle/maze";
+import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type {
   BattleDelta,
@@ -81,7 +80,7 @@ export interface RunBattleMutationOptions<TBody> {
   respond?: "battle" | "wrapped" | "response";
   includeRecentEvents?: number;
   includeKnowledge?: boolean;
-  blockedInDark?: boolean;
+  blockedByMode?: boolean;
   mutate(ctx: BattleMutationContext, body: TBody): MutationResult | Promise<MutationResult>;
 }
 
@@ -236,8 +235,10 @@ export async function runBattleMutation<TBody>(
       throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
     }
 
-    if (options.blockedInDark && isMazeDark(loaded.meta.map) && !options.dryRun?.(parsed.body)) {
-      throw new BattleRuleError("action_rejected", MAZE_TEXTS.dark);
+    const blocked = options.blockedByMode ? modeBlockedText(loaded.meta.map) : null;
+
+    if (blocked && !options.dryRun?.(parsed.body)) {
+      throw new BattleRuleError("action_rejected", blocked);
     }
 
     if (
@@ -265,7 +266,7 @@ export async function runBattleMutation<TBody>(
 
     const placed = withPlacement(map, loaded.scene.status, mutated, !isDryRun);
 
-    const result = withVictory(loaded.scene, isDryRun ? placed : withMazeAwareness(map, loaded.scene, placed));
+    const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed));
 
     if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);

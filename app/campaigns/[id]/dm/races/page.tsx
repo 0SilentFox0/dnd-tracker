@@ -1,28 +1,22 @@
 import { DMRacesPageClient } from "./page-client";
 
-import { prisma } from "@/lib/db";
+import { readRaces } from "@/app/api/campaigns/[id]/races/read-races";
+import { raceKeys } from "@/lib/hooks/races/keys";
+import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
-import { toRace } from "@/lib/utils/races/to-race";
+import { readOkJson } from "@/lib/utils/api/read-json";
+import type { Race } from "@/types/races";
 
-export default async function DMRacesPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DMRacesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   await requireCampaignDM(id);
 
-  const racesData = await prisma.race.findMany({ omit: { abilities: true },
-    where: {
-      campaignId: id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const races = await readOkJson<Race[]>(await readRaces({ id, accessChecked: true }));
 
-  const races = racesData.map((race) => toRace(race));
-
-  return <DMRacesPageClient campaignId={id} initialRaces={races} />;
+  return (
+    <PrefetchedQuery queryKey={raceKeys.list(id)} data={races}>
+      <DMRacesPageClient campaignId={id} />
+    </PrefetchedQuery>
+  );
 }

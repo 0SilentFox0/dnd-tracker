@@ -16,13 +16,11 @@ export interface MapWeatherTool {
 
 export function useMapWeatherTool(args: {
   isDM: boolean;
-  onOpen?: () => void;
   current: WeatherKind | null;
   mutation: { mutate(data: MapWeatherData): void; isPending: boolean };
 }): MapWeatherTool | null {
   const {
     isDM,
-    onOpen,
     current,
     mutation: { mutate, isPending },
   } = args;
@@ -31,11 +29,7 @@ export function useMapWeatherTool(args: {
 
   const close = useCallback(() => setActive(false), []);
 
-  const toggle = useCallback(() => {
-    if (!active) onOpen?.();
-
-    setActive(!active);
-  }, [active, onOpen]);
+  const toggle = useCallback(() => setActive((o) => !o), []);
 
   const choose = useCallback(
     (kind: WeatherKind | null) => {

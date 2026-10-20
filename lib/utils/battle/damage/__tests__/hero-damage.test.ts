@@ -37,15 +37,15 @@ const preview = (attacker: BattleParticipant, rolls: number[]) =>
   computeDamageBreakdown({ attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
 
 describe("шкода атаки: числа до дедупу", () => {
-  it("герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2", () => {
-    expect(hit(hero, sword, [5])).toBe(19);
-    expect(preview(hero, [5])).toBe(19);
+  it("герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2 + 2 (бонус зброї)", () => {
+    expect(hit(hero, sword, [5])).toBe(21);
+    expect(preview(hero, [5])).toBe(21);
   });
 
-  it("герой кинув зброю й кубики рівня разом: сума кидків + 5 + 2", () => {
-    expect(hit(hero, sword, [5, 3, 4])).toBe(19);
-    expect(preview(hero, [5, 3, 4])).toBe(19);
-    expect(hit(hero, sword, [6, 6, 8])).toBe(27);
+  it("герой кинув зброю й кубики рівня разом: сума кидків + 5 + 2 + 2 (бонус зброї)", () => {
+    expect(hit(hero, sword, [5, 3, 4])).toBe(21);
+    expect(preview(hero, [5, 3, 4])).toBe(21);
+    expect(hit(hero, sword, [6, 6, 8])).toBe(29);
   });
 
   it("середня шкода й слоти кубиків", () => {
@@ -57,7 +57,7 @@ describe("шкода атаки: числа до дедупу", () => {
   });
 
   it("юніт: кидки + характеристика", () => {
-    expect(hit(unit, sword, [5])).toBe(7);
+    expect(hit(unit, sword, [5])).toBe(9);
     expect(hit(unit, { ...sword, damageDice: "" }, [3])).toBe(5);
   });
 

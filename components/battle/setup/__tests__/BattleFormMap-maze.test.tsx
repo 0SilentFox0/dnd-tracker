@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleFormMap } from "@/components/battle/setup/BattleFormMap";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { emptyMaze } from "@/lib/constants/battle";
 import { useBattleMapEditor } from "@/lib/hooks/battles/setup/useBattleMapEditor";
+import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 
 vi.mock("next/image", () => ({ default: ({ src }: { src: string }) => <i data-bg={src} /> }));
 vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useImageSize: (src: string | null) => (src ? { width: 1980, height: 1200 } : null) }));

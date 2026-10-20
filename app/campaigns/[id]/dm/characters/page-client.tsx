@@ -42,12 +42,14 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
             <DeleteAllButton
               count={characterCount}
               nouns={["персонаж", "персонажі", "персонажів"]}
-              title="Видалити всіх персонажів?"
-              label="Видалити всіх"
-              description="Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати."
-              icon={<Trash2 className="mr-2 h-4 w-4" />}
-              pending={page.status.isDeletingAll}
-              onConfirm={page.actions.removeAll}
+              confirm={{
+                title: "Видалити всіх персонажів?",
+                label: "Видалити всіх",
+                description: "Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати.",
+              }}
+              view={{ icon: <Trash2 className="mr-2 h-4 w-4" /> }}
+              status={{ isPending: page.status.isDeletingAll }}
+              actions={{ onConfirm: page.actions.removeAll }}
             />
             <Button className="whitespace-nowrap" asChild>
               <Link href={newHref}>+ Створити персонажа</Link>

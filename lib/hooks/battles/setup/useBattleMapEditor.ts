@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND, emptyMaze } from "@/lib/constants/battle";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useImageSize } from "@/lib/hooks/common";
 import {
   applyMargins,
@@ -18,7 +18,12 @@ import {
   resizeMap,
   type SetupTool,
 } from "@/lib/utils/battle/grid";
+import { MAP_MODE_REGISTRY, type MapModeDefinition, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
+
+const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
+
+const modeOf = (key: MapModeKey) => MAP_MODE_REGISTRY[key] as MapModeDefinition<unknown>;
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -112,8 +117,11 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   // масштаб і зсув належать старому фону
   const setBackground = useCallback((background: string | null) => setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({ ...m, background })), []);
 
-  const setMaze = useCallback((on: boolean) => {
-    setMap((m) => ({ ...m, maze: on ? emptyMaze() : null }));
+  const setMode = useCallback((key: MapModeKey, on: boolean) => {
+    const mode = modeOf(key);
+
+    // один режим на бій
+    setMap((m) => mode.withConfig(MODE_KEYS.reduce((acc, other) => (other === key ? acc : modeOf(other).withConfig(acc, null)), m), on ? (mode.emptyConfig?.() ?? null) : null));
 
     if (on) setToolState(null);
   }, []);
@@ -135,9 +143,9 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   );
 
   return {
-    state: { enabled, map, maze: map.maze ?? null, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
+    state: { enabled, map, mode: MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ?? null, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
     brush,
-    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, setMaze, onStroke },
+    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, setMode, onStroke },
   };
 }
 

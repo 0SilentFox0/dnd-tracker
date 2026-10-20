@@ -5,7 +5,7 @@ import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MA
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
-import type { MazeView } from "@/lib/utils/battle/view/maze-view";
+import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -266,8 +266,8 @@ export interface BattleMapView {
   impactFor?: (participantId: string) => FxImpact | null;
   /** Ефекти для аур на токенах (той самий набір, що й у списку) */
   effects?: ReadonlyMap<string, readonly ActiveEffect[]>;
-  /** Що з лабіринту бачить глядач карти; null — не лабіринт */
-  maze?: MazeView | null;
+  /** Що з режиму карти бачить глядач; null — звичайна карта */
+  mode?: ModeView | null;
 }
 
 export interface BattleMapActions {

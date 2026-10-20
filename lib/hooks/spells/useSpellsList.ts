@@ -5,10 +5,9 @@ import { useMemo } from "react";
 import { useDeleteAllSpells, useMoveSpellToGroup, useRemoveSpellFromGroup, useSpellGroups, useSpells } from "./useSpells";
 
 import { convertGroupedSpellsToArray, groupSpellsByGroupAndLevel } from "@/lib/utils/spells/spells";
-import type { Spell } from "@/types/spells";
 
-export function useSpellsList(campaignId: string, initialSpells: Spell[]) {
-  const { data: spells = initialSpells, isLoading } = useSpells(campaignId, { initialData: initialSpells });
+export function useSpellsList(campaignId: string) {
+  const { data: spells = [], isLoading } = useSpells(campaignId);
 
   const { data: spellGroups = [] } = useSpellGroups(campaignId);
 

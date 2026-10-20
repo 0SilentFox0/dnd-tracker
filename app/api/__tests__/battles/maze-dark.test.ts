@@ -8,8 +8,8 @@ import { attackBodySchema } from "@/app/api/campaigns/[id]/battles/[battleId]/at
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
@@ -44,24 +44,24 @@ const attackBody = { attackerId: "hero", targetId: "gob", d20Roll: 10 };
 const spellBody = { casterId: "hero", spellId: "s1", targetIds: ["gob"] };
 
 describe("темрява в лабіринті", () => {
-  it("attack і spell з blockedInDark → 422 «Темрява — ніхто не може діяти», мутація не викликається", async () => {
+  it("attack і spell з blockedByMode → 422 «Темрява — ніхто не може діяти», мутація не викликається", async () => {
     for (const [schema, body] of [[attackBodySchema, attackBody], [spellSchema, spellBody]] as const) {
       const mutate = vi.fn();
 
-      const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedInDark: true, schema, mutate }, body);
+      const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedByMode: true, schema, mutate }, body);
 
       expect(out).toEqual({ status: 422, json: { code: "action_rejected", error: MAZE_TEXTS.dark } });
       expect(mutate).not.toHaveBeenCalled();
     }
   });
 
-  it("при світлі, без лабіринту чи без blockedInDark — мутація працює", async () => {
-    for (const [map, blockedInDark] of [[mapOf({ dark: false }), true], [{ cols: 6, rows: 6, background: null, opacity: 0.3 }, true], [mapOf(), false]] as const) {
+  it("при світлі, без лабіринту чи без blockedByMode — мутація працює", async () => {
+    for (const [map, blockedByMode] of [[mapOf({ dark: false }), true], [{ cols: 6, rows: 6, background: null, opacity: 0.3 }, true], [mapOf(), false]] as const) {
       const loaded = ctx(map);
 
       const mutate = vi.fn(() => ({ participants: loaded.participants, pending: [], events: [] }));
 
-      const out = await call(loaded, { access: BattleAccess.MEMBER, blockedInDark, mutate }, {});
+      const out = await call(loaded, { access: BattleAccess.MEMBER, blockedByMode, mutate }, {});
 
       expect(out.status).toBe(200);
       expect(mutate).toHaveBeenCalledOnce();
@@ -102,10 +102,10 @@ function routes(dir: string): string[] {
   });
 }
 
-describe("blockedInDark", () => {
+describe("blockedByMode", () => {
   it("стоїть на всіх діях учасника, але не на русі (ДМ розставляє) і не на next-turn", () => {
     const blocked = routes(ROOT)
-      .filter((file) => /blockedInDark:\s*true/.test(readFileSync(file, "utf8")))
+      .filter((file) => /blockedByMode:\s*true/.test(readFileSync(file, "utf8")))
       .map((file) => relative(ROOT, join(file, "..")))
       .sort();
 

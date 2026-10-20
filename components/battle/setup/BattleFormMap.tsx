@@ -1,6 +1,9 @@
 "use client";
 
+import { ToggleRow } from "./ToggleRow";
+
 import { BattleMap } from "@/components/battle/map";
+import { MAP_MODE_UI, type MapModeUi } from "@/components/battle/modes";
 import { HudSection } from "@/components/hud/form";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
@@ -8,12 +11,12 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { Switch } from "@/components/ui/switch";
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import type { BattleMapEditor } from "@/lib/hooks/battles";
 import { cn } from "@/lib/utils";
 import { clamp, isPreviewSafeBackground, marginLimit, type Margins, MAX_CELL_PX, MAX_GRID_OFFSET, MAX_MARGIN, MAX_SIDE, MIN_CELL_PX, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
+import type { MapModeKey } from "@/lib/utils/battle/modes";
 
 const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
   { key: "top", label: "Зверху" },
@@ -42,17 +45,8 @@ function RangeRow({ id, label, value, range, onChange }: { id: string; label: st
   );
 }
 
-function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <Label htmlFor={id}>{label}</Label>
-      <Switch id={id} aria-label={label} checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
-
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
-  const { enabled, map, maze, margins, tool, notice, cellPx } = editor.state;
+  const { enabled, map, mode, margins, tool, notice, cellPx } = editor.state;
 
   const offset = map.gridOffset ?? { x: 0, y: 0 };
 
@@ -70,10 +64,14 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
     actions.setMargins({ top: n, right: n, bottom: n, left: n });
   };
 
+  const modeToggles = (Object.entries(MAP_MODE_UI) as [MapModeKey, MapModeUi][]).map(
+    ([key, { SetupToggle }]) => SetupToggle && <SetupToggle key={key} checked={mode === key} onChange={(on) => actions.setMode(key, on)} />,
+  );
+
   return (
     <HudSection title="Карта бою" className="space-y-4">
       <ToggleRow id="map-enabled" label="Бій на карті" checked={enabled} onChange={actions.setEnabled} />
-      {enabled && <ToggleRow id="map-maze" label="Лабіринт" checked={maze !== null} onChange={actions.setMaze} />}
+      {enabled && modeToggles}
       {enabled && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
           <div className="space-y-4">
@@ -117,7 +115,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 ))}
               </div>
             </div>
-            <div className="space-y-2" hidden={maze !== null}>
+            <div className="space-y-2" hidden={!!mode && !!MAP_MODE_UI[mode].hidesTerrain}>
               <Label>Малювання клітинок</Label>
               <div className="flex flex-wrap gap-1.5">
                 {TOOLS.map(({ value, label }) => (

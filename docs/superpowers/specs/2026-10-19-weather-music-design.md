@@ -35,7 +35,7 @@
 
 ### Бібліотека кампанії
 - Таблиця `campaign_tracks` (міграція expand-only з `ENABLE ROW LEVEL SECURITY`): `id`, `campaignId` (FK, cascade), `title`, `kind` (`"file" | "youtube"`), `url` (Storage URL для файлу), `youtubeId` (для YouTube), `durationSec?`, `sortOrder`, `createdAt`.
-- Файли: бакет Supabase `battle-music`, MP3 (і M4A) до 10 МБ, унікальне імʼя, `cacheControl` 1 рік; до 40 треків на кампанію. Перевірка розміру й типу на клієнті й сервері.
+- Файли: бакет Supabase `battle-music`, MP3 (і M4A) до 10 МБ, унікальне імʼя, `cacheControl` 1 рік; до 200 треків на кампанію. Перевірка розміру й типу на клієнті й сервері.
 - YouTube: посилання `youtu.be/…`, `watch?v=…`, `shorts/…` → `youtubeId` (Zod-regex), назва — введена ДМ або з oEmbed за потреби.
 - Сторінка ДМ `app/campaigns/[id]/dm/music` (HUD-сторінка): список, завантажити MP3, додати YouTube, перейменувати, видалити (з підтвердженням), змінити порядок. API: `app/api/campaigns/[id]/tracks/...` → `lib/api/tracks.ts` → `lib/hooks/tracks`.
 

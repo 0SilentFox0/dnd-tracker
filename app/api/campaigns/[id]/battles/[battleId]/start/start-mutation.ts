@@ -1,19 +1,9 @@
 import { buildStartOrder } from "./start-battle-handler";
 
-import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { inwardFacing, takesTurn } from "@/lib/utils/battle/maze";
+import { BattleStatus } from "@/lib/constants/battle";
+import { modeStart } from "@/lib/utils/battle/modes/server";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
-
-// вороги вже сплячі з buildStartOrder; герої дивляться всередину лабіринту
-function faceInward(map: BattleMapConfig, order: BattleParticipant[]): BattleParticipant[] {
-  return order.map((p) => {
-    const at = p.battleData.position;
-
-    return at && p.basicInfo.side !== ParticipantSide.ENEMY ? { ...p, battleData: { ...p.battleData, facing: inwardFacing(map, at) } } : p;
-  });
-}
 
 export function createStartMutation(build = buildStartOrder) {
   return async (ctx: BattleMutationContext): Promise<MutationResult> => {
@@ -29,9 +19,11 @@ export function createStartMutation(build = buildStartOrder) {
 
     const map = ctx.meta.map;
 
-    const participants = map?.maze ? faceInward(map, order) : order;
+    const started = modeStart(map, order);
 
-    const turnIndex = map?.maze ? Math.max(0, participants.findIndex((p) => takesTurn(p, 1))) : 0;
+    const participants = started?.participants ?? order;
+
+    const turnIndex = started?.turnIndex ?? 0;
 
     return {
       participants,

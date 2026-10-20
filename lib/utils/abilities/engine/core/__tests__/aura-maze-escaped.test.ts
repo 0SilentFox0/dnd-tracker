@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
-import { flag } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { flag } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 
 const hero = { type: "skill" as const, id: "banner" };
 

@@ -141,8 +141,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
   for (const a of attacks) {
     const isRanged = (a.type as string) === AttackType.RANGED;
 
-    // A hit deals only the rolled dice (`computeHitDamage`): the "+N" of `damageDice` never lands, so it is not power.
-    const avg = averageOf({ ...parseDiceLenient((a.damageDice as string) || "1d6"), flat: 0 }) + (isRanged ? dexMod : strMod);
+    const avg = averageOf(parseDiceLenient((a.damageDice as string) || "1d6")) + (isRanged ? dexMod : strMod);
 
     const reach = a.targetType === "aoe" ? a.maxTargets || unit.maxTargets || 1 : unit.maxTargets || 1;
 

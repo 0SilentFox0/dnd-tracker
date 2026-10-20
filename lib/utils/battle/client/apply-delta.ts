@@ -1,5 +1,6 @@
 import { BattleStatus } from "@/lib/constants/battle";
 import { applyTerrainDiff } from "@/lib/utils/battle/grid/terrain";
+import { mergeModeDeltas,MODE_MAP_KEYS } from "@/lib/utils/battle/modes/client";
 import type { BattleParticipantPatch, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -28,12 +29,12 @@ function mergeParticipantPatch(current: BattleParticipant, patch: BattleParticip
   };
 }
 
-function mergeMapDelta(map: BattleScene["map"], scene: ClientBattleDelta["scene"]): BattleScene["map"] {
-  if (!map) return map;
+function mergeMapDelta(map: BattleScene["map"], scene: ClientBattleDelta["scene"]): BattleScene["map"] | "refetch" {
+  const modePatched = MODE_MAP_KEYS.some((key) => (scene as Record<string, unknown>)[key] !== undefined);
 
-  const withTerrain = scene.terrain ? applyTerrainDiff(map, scene.terrain) : map;
+  if (!map) return modePatched ? "refetch" : map;
 
-  return scene.maze && withTerrain.maze ? { ...withTerrain, maze: { ...withTerrain.maze, ...scene.maze } } : withTerrain;
+  return mergeModeDeltas(scene.terrain ? applyTerrainDiff(map, scene.terrain) : map, scene);
 }
 
 export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta): BattleScene | "refetch" {
@@ -61,9 +62,11 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
 
   const { scene } = delta;
 
-  if ((scene.terrain && !cached.map) || (scene.maze && !cached.map?.maze)) return "refetch";
+  if (scene.terrain && !cached.map) return "refetch";
 
   const map = scene.map !== undefined ? scene.map : mergeMapDelta(cached.map, scene);
+
+  if (map === "refetch") return "refetch";
 
   // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
   const { knowledge: _knowledge, ...withoutKnowledge } = cached;

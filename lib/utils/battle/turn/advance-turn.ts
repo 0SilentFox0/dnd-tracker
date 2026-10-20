@@ -5,10 +5,9 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
 
-import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, replaceParticipant, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
-import { takesTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
@@ -68,7 +67,7 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    const finished = finishTurnEffects(order.find((p) => p.basicInfo.id === ending.basicInfo.id) ?? ending);
+    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending);
 
     order = replaceParticipant(order, finished.participant);
 
@@ -135,7 +134,6 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
 
   const victory = applyVictoryCompletion({
     updatedInitiativeOrder: loop.updatedInitiativeOrder,
-    initiativeOrder: order,
     battleStatus: scene.status,
     battleId: scene.id,
     nextRound: loop.nextRound,

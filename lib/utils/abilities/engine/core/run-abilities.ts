@@ -1,4 +1,4 @@
-import { findParticipant, inMazePlay, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
+import { findParticipant, inPlay, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
@@ -20,7 +20,7 @@ function applyUsageResets(ps: BattleParticipant[], event: AbilityEvent): BattleP
 }
 
 function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
-  return inMazePlay(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
+  return inPlay(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
 }
 
 export function runAbilities(participants: BattleParticipant[], event: AbilityEvent, ctx: AbilityRunContext): AbilityRunResult {

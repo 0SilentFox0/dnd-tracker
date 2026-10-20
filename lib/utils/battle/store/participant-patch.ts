@@ -1,19 +1,27 @@
 import { stableStringify } from "./stable-json";
 
+import { MAP_MODE_REGISTRY } from "@/lib/utils/battle/modes/registry";
 import type { BattleParticipantPatch } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 type PatchableFields = { [K in keyof BattleParticipant]?: ReadonlyArray<keyof BattleParticipant[K]> };
 
 // поля, які зберігаються в колонках і state (див. splitParticipant); решта — у знімку й приходить повним учасником
-export const PATCHABLE_PARTICIPANT_FIELDS = {
+const CORE_PATCHABLE_FIELDS = {
   basicInfo: ["side", "controlledBy"],
   abilities: ["initiative"],
   combatStats: ["currentHp", "tempHp", "maxHp", "morale", "status"],
   spellcasting: ["spellSlots"],
-  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions", "position", "movementUsed", "turnStartPosition", "returnedThisTurn", "airborne", "hazardHitRound", "retaliationsUsed", "dormant", "facing", "escaped", "mazeWakeRound"],
+  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions", "position", "movementUsed", "turnStartPosition", "returnedThisTurn", "airborne", "hazardHitRound", "retaliationsUsed", "dormant", "escaped", "mazeWakeRound"],
   actionFlags: ["hasUsedAction", "hasUsedBonusAction", "hasUsedReaction", "hasExtraTurn"],
 } as const satisfies PatchableFields;
+
+const modePatchableFields = Object.values(MAP_MODE_REGISTRY).flatMap((m) => m.server.patchableFields ?? []) as Array<keyof BattleParticipant["battleData"]>;
+
+export const PATCHABLE_PARTICIPANT_FIELDS: PatchableFields = {
+  ...CORE_PATCHABLE_FIELDS,
+  battleData: [...CORE_PATCHABLE_FIELDS.battleData, ...modePatchableFields],
+};
 
 export const FULL_PARTICIPANT = "full";
 

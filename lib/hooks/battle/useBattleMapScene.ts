@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { palettesToClose } from "./modes/palettes";
+import { type ModeTools, useModeTools } from "./modes/tools";
+import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
-import { useFxImpacts } from "./useFxImpact";
+import { useFxImpacts } from "./useFxImpacts";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
-import { type MazeTools, useMazeTools } from "./useMazeTools";
-import { useMazeView } from "./useMazeView";
 
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -20,7 +21,7 @@ export interface BattleMapScene {
   actions: BattleMapActions;
   placement: { active: boolean; toggle(): void } | null;
   terrainTool: MapTerrainTool | null;
-  mazeTools: MazeTools | null;
+  modeTools: ModeTools | null;
   weatherTool: MapWeatherTool | null;
 }
 
@@ -60,15 +61,15 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onSkipped, onActivate: stopPlacing });
 
-  const mazeTools = useMazeTools();
-
-  const mazeTool = mazeTools?.state.tool ?? "none";
-
-  const placing = placingOn && isDM && mazeTool === "none";
-
-  const toolActive = terrainTool.active || mazeTool !== "none";
-
   const map = battle.map ?? null;
+
+  const modeTools = useModeTools(map);
+
+  const modeToolActive = !!modeTools?.toolActive;
+
+  const placing = placingOn && isDM && !modeToolActive;
+
+  const toolActive = terrainTool.active || modeToolActive;
 
   const order = battle.initiativeOrder ?? NO_ORDER;
 
@@ -78,11 +79,11 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim }), [placing, placingId, toolActive, mapAim]);
 
-  const { view: maze } = useMazeView();
+  const { view: modeView } = useModeView();
 
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode, maze }) : null),
-    [map, order, selectedId, actor, mode, maze],
+    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode, modeView }) : null),
+    [map, order, selectedId, actor, mode, modeView],
   );
 
   const { pending: pendingStroke } = terrainTool;
@@ -121,9 +122,9 @@ export function useBattleMapScene(): BattleMapScene | null {
       impactFor,
       effects,
       round: currentRound,
-      maze,
+      mode: modeView,
     };
-  }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, maze]);
+  }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, modeView]);
 
   const { mutate: move } = actions.move;
 
@@ -151,14 +152,14 @@ export function useBattleMapScene(): BattleMapScene | null {
     if (current && to) move({ participantId: current.basicInfo.id, to, returnToStart: true });
   }, [move, current]);
 
-  const mazeClick = mazeTools?.actions.clickCell;
+  const modeClick = modeTools?.clickCell;
 
-  const setMazeTool = mazeTools?.actions.setTool;
+  const closeModeTool = modeTools?.closeTool;
 
-  const latest = useRef({ scene, handle, anyPending, stroke: commit, returnToStart, mazeTool, mazeClick });
+  const latest = useRef({ scene, handle, anyPending, stroke: commit, returnToStart, modeToolActive, modeClick });
 
   useEffect(() => {
-    latest.current = { scene, handle, anyPending, stroke: commit, returnToStart, mazeTool, mazeClick };
+    latest.current = { scene, handle, anyPending, stroke: commit, returnToStart, modeToolActive, modeClick };
   });
 
   const mapActions = useMemo<BattleMapActions>(
@@ -168,7 +169,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
         if (l.anyPending) return;
 
-        if (l.mazeTool !== "none") l.mazeClick?.(p);
+        if (l.modeToolActive) l.modeClick?.(p);
         else if (l.scene) l.handle(l.scene.cellClick(p));
       },
       onCellHover: (p) =>
@@ -196,8 +197,8 @@ export function useBattleMapScene(): BattleMapScene | null {
     setPlacingOn(!placing);
     setPlacingId(null);
     closeTerrain();
-    setMazeTool?.("none");
-  }, [placing, closeTerrain, setMazeTool]);
+    closeModeTool?.();
+  }, [placing, closeTerrain, closeModeTool]);
 
   useEffect(() => {
     if (!placing) return;
@@ -213,22 +214,31 @@ export function useBattleMapScene(): BattleMapScene | null {
     return () => window.removeEventListener("keydown", onKey);
   }, [placing, stopPlacing]);
 
-  const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
+  const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
 
-  const openWeather = useCallback(() => {
-    closeTerrain();
-    setMazeTool?.("none");
-  }, [closeTerrain, setMazeTool]);
+  const modePalette = !!modeTools?.paletteOpen;
 
-  const weatherTool = useMapWeatherTool({ isDM, onOpen: openWeather, current: map?.weather ?? null, mutation: actions.mapWeather });
+  const terrainPalette = terrainTool.active;
+
+  const weatherPalette = !!weatherTool?.active;
 
   const closeWeather = weatherTool?.close;
 
+  const prevPalettes = useRef({ mode: modePalette, terrain: terrainPalette, weather: weatherPalette });
+
   useEffect(() => {
-    if (toolActive) closeWeather?.();
-  }, [toolActive, closeWeather]);
+    const next = { mode: modePalette, terrain: terrainPalette, weather: weatherPalette };
+
+    const closers = { mode: closeModeTool, terrain: closeTerrain, weather: closeWeather };
+
+    for (const key of palettesToClose(prevPalettes.current, next)) closers[key]?.();
+
+    prevPalettes.current = next;
+  }, [modePalette, terrainPalette, weatherPalette, closeModeTool, closeTerrain, closeWeather]);
+
+  const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, mazeTools, weatherTool };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, modeTools, weatherTool };
 }

@@ -5,7 +5,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { revealParticipantMutation, revealParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
-import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
+import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";

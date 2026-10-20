@@ -1,14 +1,14 @@
 import { pickAttack } from "./attack-reach";
-import { cellKey, parseCellKey } from "./geometry";
-import { type CellMark, isMoveMark, type MoveStep, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
+import { cellKey } from "./geometry";
+import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
-import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { mazeAimHidden, mazeBudgetLeft, mazeGridOf, mazeReachable } from "@/lib/utils/battle/maze";
-import type { MazeView } from "@/lib/utils/battle/view/maze-view";
+import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
+import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -46,7 +46,7 @@ export interface MapSceneInput {
   selectedId: string | null;
   actor: MapSceneActor;
   mode: MapSceneMode;
-  maze?: MazeView | null;
+  modeView?: ModeView | null;
 }
 
 export type MapClick =
@@ -108,9 +108,9 @@ export interface AimScene {
 
 /** Клітинки шаблону в точці `at`; null — заклинатель поза картою, точка поза дальністю або шаблон без клітинок. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
 export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
-  const caster = participants.find((p) => p.basicInfo.id === aim.casterId);
+  const caster = findParticipant(participants, aim.casterId);
 
-  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range) || mazeAimHidden(map, caster, at)) return null;
+  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range) || modeAimHiddenText(map, caster, at)) return null;
 
   const { cells } = templateArea(map, participants, caster, aim.template, at);
 
@@ -128,33 +128,11 @@ interface MoveZoneInput {
   participants: BattleParticipant[];
   seen: BattleParticipant[];
   mover: BattleParticipant;
-  view: MazeView | null | undefined;
+  view: ModeView | null | undefined;
   dmUserId: string | null;
 }
 
-interface MoveZone {
-  steps: Map<string, MoveStep>;
-  marks: Map<string, CellMark | number>;
-}
-
-/** Лабіринт: кроки лише крізь видимі клітинки й повз видимих учасників — прихованих гравець не має вгадувати з зони ходу. */
-function mazeMoveZone({ map, seen, mover, view }: MoveZoneInput): MoveZone {
-  const grid = mazeGridOf(map);
-
-  const zone: MoveZone = { steps: new Map(), marks: new Map() };
-
-  // без виходу лабіринт ще не готовий — сервер відхилить будь-який крок
-  if (!grid || grid.maze.dark || !grid.maze.exit) return zone;
-
-  const reach = mazeReachable(grid, { participants: seen, mover, budget: mazeBudgetLeft(mover), limit: view?.cells ?? undefined });
-
-  for (const [key, { cost }] of reach) {
-    zone.steps.set(key, { anchor: parseCellKey(key), cost });
-    zone.marks.set(key, cost);
-  }
-
-  return zone;
-}
+type MoveZone = ModeMoveZone;
 
 function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): MoveZone {
   const steps = moveSteps(map, participants, mover, { dmUserId });
@@ -162,9 +140,9 @@ function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): Mo
   return { steps, marks: moveZoneMarks(map, participants, mover, { dmUserId, steps }) };
 }
 
-const moveZone = (input: MoveZoneInput): MoveZone => (input.map.maze ? mazeMoveZone(input) : openMoveZone(input));
+const moveZone = (input: MoveZoneInput): MoveZone => modeMoveZone(input.map, input) ?? openMoveZone(input);
 
-export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }: MapSceneInput): MapScene {
+export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...input }: MapSceneInput): MapScene {
   const { current, viewer, canAct, isDM, attackReady } = actor;
 
   const { placingId } = mode;
@@ -175,7 +153,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
 
   const participants = input.participants.filter((p) => !p.battleData.reserved);
 
-  const aimCaster = mode.aim && !placing && !tool ? participants.find((p) => p.basicInfo.id === mode.aim?.casterId) : undefined;
+  const aimCaster = mode.aim && !placing && !tool ? findParticipant(participants, mode.aim.casterId) : undefined;
 
   const aim = aimCaster && isOnMap(aimCaster) ? mode.aim : null;
 
@@ -189,11 +167,11 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
-  const seen = map.maze && maze ? participants.filter((p) => maze.visibleIds.has(p.basicInfo.id)) : participants;
+  const seen = modeView ? participants.filter((p) => modeView.visibleIds.has(p.basicInfo.id)) : participants;
 
   const canMove = !aim && !placing && !tool && canAct && current?.battleData.position;
 
-  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: maze, dmUserId: isDM ? viewer.userId : null }) : null;
+  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: modeView, dmUserId: isDM ? viewer.userId : null }) : null;
 
   const steps = zone?.steps ?? null;
 
@@ -219,7 +197,9 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
   function aimAt(p: GridPoint): MapClick {
     if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: "Поза дальністю" };
 
-    if (mazeAimHidden(map, aimCaster, p)) return { kind: "reject", reason: MAZE_TEXTS.aimOutOfSight };
+    const hidden = modeAimHiddenText(map, aimCaster, p);
+
+    if (hidden) return { kind: "reject", reason: hidden };
 
     return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Оберіть напрямок" };
   }
@@ -227,7 +207,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
   function tokenClick(id: string): MapClick {
     if (tool) return { kind: "none" };
 
-    const target = participants.find((p) => p.basicInfo.id === id);
+    const target = findParticipant(participants, id);
 
     if (placing) return target && isOnMap(target) ? { kind: "arm", id } : { kind: "none" };
 
@@ -252,7 +232,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }:
     if (tool) return { kind: "none" };
 
     if (placing) {
-      const placed = placingId ? participants.find((x) => x.basicInfo.id === placingId) : undefined;
+      const placed = placingId ? findParticipant(participants, placingId) : undefined;
 
       return placed && isOnMap(placed) ? { kind: "move", participantId: placed.basicInfo.id, to: p, free: true } : { kind: "none" };
     }

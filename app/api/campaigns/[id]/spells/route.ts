@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { listSpellsQuerySchema } from "./list-spells-query";
+import { readSpells } from "./read-spells";
 
-import { getCachedSpells } from "@/lib/cache/reference-data";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { createSpellSchema } from "@/lib/schemas";
@@ -74,9 +74,7 @@ export async function GET(
 
     if (ids) return NextResponse.json(await loadBookSpellsByIds(id, ids), { headers: PRIVATE_NO_STORE_HEADERS });
 
-    const spells = await getCachedSpells(id);
-
-    return NextResponse.json(spells, { headers: PRIVATE_NO_STORE_HEADERS });
+    return readSpells({ id, accessChecked: true });
   } catch (error) {
     return handleApiError(error, { action: "list spells" });
   }

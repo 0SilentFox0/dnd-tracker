@@ -1,10 +1,9 @@
 import { berserkBonusOf, runBerserkTurn } from "./berserk";
 
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
-import { idleTurnIndex, mazeSkipsTurn, takesTurn } from "@/lib/utils/battle/maze/status";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
   processEndOfTurn,
@@ -149,7 +148,7 @@ export function runAdvanceTurnLoop(
 
     if (!nextParticipant) break;
 
-    if (mazeSkipsTurn(nextParticipant, nextRound)) {
+    if (sitsOutTurn(nextParticipant, nextRound)) {
       // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ
       if (!updatedInitiativeOrder.some((p) => takesTurn(p, nextRound))) {
         nextTurnIndex = idleTurnIndex(updatedInitiativeOrder);
