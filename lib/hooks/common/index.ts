@@ -1,7 +1,6 @@
 export { ConfirmContext, type ConfirmFn } from "./confirm-context";
 export { prefersReducedMotion } from "./media-query";
-export { createStorageFlag, type StorageFlag, useStorageFlag } from "./storage-flag";
-export { createStorageNumber, type StorageNumber, useStorageNumber } from "./storage-number";
+export { createStorageFlag, createStorageNumber, createStorageValue, type StorageCodec, type StorageValue, useStorageValue } from "./storage-value";
 export { useAppearanceSave } from "./useAppearanceSave";
 export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";

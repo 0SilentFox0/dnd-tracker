@@ -2,7 +2,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createStorageFlag, useStorageFlag } from "@/lib/hooks/common/storage-flag";
+import { createStorageFlag, useStorageValue } from "@/lib/hooks/common/storage-value";
 
 afterEach(() => {
   window.localStorage.clear();
@@ -23,7 +23,7 @@ describe("createStorageFlag", () => {
 
     const getItem = vi.spyOn(window.localStorage, "getItem");
 
-    const { result, rerender } = renderHook(() => useStorageFlag(flag));
+    const { result, rerender } = renderHook(() => useStorageValue(flag, false));
 
     rerender();
     rerender();
@@ -35,7 +35,7 @@ describe("createStorageFlag", () => {
   it("set persists and notifies; a storage event from another tab re-reads", () => {
     const flag = createStorageFlag("f5", true);
 
-    const { result } = renderHook(() => useStorageFlag(flag));
+    const { result } = renderHook(() => useStorageValue(flag, false));
 
     act(() => flag.set(false));
 
@@ -53,14 +53,14 @@ describe("createStorageFlag", () => {
   it("re-reads after a gap with no subscribers (another tab may have changed it)", () => {
     const flag = createStorageFlag("f6", true);
 
-    const first = renderHook(() => useStorageFlag(flag));
+    const first = renderHook(() => useStorageValue(flag, false));
 
     expect(first.result.current).toBe(true);
     first.unmount();
 
     window.localStorage.setItem("f6", "off");
 
-    const second = renderHook(() => useStorageFlag(flag));
+    const second = renderHook(() => useStorageValue(flag, false));
 
     expect(second.result.current).toBe(false);
   });
@@ -68,7 +68,7 @@ describe("createStorageFlag", () => {
   it("ignores sessionStorage events", () => {
     const flag = createStorageFlag("f7", true);
 
-    const { result } = renderHook(() => useStorageFlag(flag));
+    const { result } = renderHook(() => useStorageValue(flag, false));
 
     window.localStorage.setItem("f7", "off");
     act(() => {

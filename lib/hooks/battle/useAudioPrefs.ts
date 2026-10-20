@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { AUDIO_MUTED_KEY, AUDIO_PLAYLIST_KEY, AUDIO_VIDEO_KEY, AUDIO_VOLUME_KEY, DEFAULT_AUDIO_VOLUME } from "@/lib/constants/music";
-import { createStorageFlag, createStorageNumber, useStorageFlag, useStorageNumber } from "@/lib/hooks/common";
+import { createStorageFlag, createStorageNumber, useStorageValue } from "@/lib/hooks/common";
 
 export interface AudioPrefs {
   volume: number;
@@ -23,13 +23,13 @@ const videoFlag = createStorageFlag(AUDIO_VIDEO_KEY, true);
 const playlistFlag = createStorageFlag(AUDIO_PLAYLIST_KEY, true);
 
 export function useAudioPrefs(): AudioPrefs {
-  const volume = useStorageNumber(volumeStore, DEFAULT_AUDIO_VOLUME);
+  const volume = useStorageValue(volumeStore, DEFAULT_AUDIO_VOLUME);
 
-  const muted = useStorageFlag(mutedFlag, false);
+  const muted = useStorageValue(mutedFlag, false);
 
-  const video = useStorageFlag(videoFlag, true);
+  const video = useStorageValue(videoFlag, true);
 
-  const playlist = useStorageFlag(playlistFlag, true);
+  const playlist = useStorageValue(playlistFlag, true);
 
   return useMemo(
     () => ({
