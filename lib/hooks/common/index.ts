@@ -3,6 +3,8 @@ export { prefersReducedMotion } from "./media-query";
 export { createStorageFlag, createStorageNumber, createStorageValue, type StorageCodec, type StorageValue, useStorageValue } from "./storage-value";
 export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
+export { useCssVarHeight } from "./useCssVarHeight";
+export { useDebouncedValue } from "./useDebouncedValue";
 export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";

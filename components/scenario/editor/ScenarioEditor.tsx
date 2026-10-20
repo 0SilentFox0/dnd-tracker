@@ -2,24 +2,22 @@
 
 import { type ReactNode, useCallback, useState } from "react";
 import type { Editor } from "@tiptap/core";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 
+import { OrderButtons } from "./OrderButtons";
 import { PagePropertiesDialog } from "./PagePropertiesDialog";
 import { RevealSettings } from "./RevealSettings";
-import { RichTextEditor } from "./RichTextEditor";
 import { SaveStatus } from "./SaveStatus";
+import { type CellColumn, ScenarioCell } from "./ScenarioCell";
 import { ScenarioToolbar } from "./ScenarioToolbar";
 import { SectionHeaderEditor } from "./SectionHeaderEditor";
 
 import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
-import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import { useConfirm } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
-import { isDocEmpty } from "@/lib/utils/scenario/doc";
 import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
-type Cell = { rowId: string; column: "story" | "notes" } | null;
+type ActiveCell = { rowId: string; column: CellColumn } | null;
 
 export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode }) {
   const draft = useScenarioDraft(campaignId, page);
@@ -32,7 +30,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
 
   const [propsOpen, setPropsOpen] = useState(false);
 
-  const [active, setActive] = useState<Cell>(null);
+  const [active, setActive] = useState<ActiveCell>(null);
 
   const [editor, setEditor] = useState<Editor | null>(null);
 
@@ -50,23 +48,17 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
     if ((await draft.flush()) || (await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти" }))) onExit();
   };
 
-  const cell = (sectionId: string, rowId: string, column: "story" | "notes", doc: RichDoc) => {
-    const isActive = active?.rowId === rowId && active.column === column;
-
-    if (isActive) {
-      return (
-        <div className="sb-cell is-active">
-          <RichTextEditor key={`${rowId}-${column}`} doc={doc} label={column === "story" ? "Сюжет" : "Нотатки майстра"} searchMentions={searchMentions} onReady={onReady} onChange={(next) => draft.setContent((c) => updateRow(c, sectionId, rowId, { [column]: next }))} />
-        </div>
-      );
-    }
-
-    return (
-      <div className="sb-cell" role="button" tabIndex={0} onClick={() => setActive({ rowId, column })} onKeyDown={(e) => e.key === "Enter" && setActive({ rowId, column })}>
-        {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? "Сюжет — натисніть, щоб писати" : "Нотатки майстра"}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} />}
-      </div>
-    );
-  };
+  const renderCell = (sectionId: string, rowId: string, column: CellColumn, doc: RichDoc) => (
+    <ScenarioCell
+      campaignId={campaignId}
+      rowId={rowId}
+      column={column}
+      doc={doc}
+      active={active?.rowId === rowId && active.column === column}
+      searchMentions={searchMentions}
+      handlers={{ onActivate: () => setActive({ rowId, column }), onReady, onChange: (next) => draft.setContent((c) => updateRow(c, sectionId, rowId, { [column]: next })) }}
+    />
+  );
 
   return (
     <>
@@ -111,13 +103,15 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
             )}
             {s.rows.map((r) => (
               <div key={r.id} className="row">
-                <div className="story">{cell(s.id, r.id, "story", r.story)}</div>
+                <div className="story">{renderCell(s.id, r.id, "story", r.story)}</div>
                 <aside className="notes" style={{ display: "block" }}>
-                  {cell(s.id, r.id, "notes", r.notes)}
+                  {renderCell(s.id, r.id, "notes", r.notes)}
                   <div className="sans" style={{ display: "flex", gap: 4, marginTop: 10, justifyContent: "flex-end" }}>
-                    <button type="button" className="toggle" aria-label="Рядок вгору" onClick={() => draft.setContent((c) => moveRow(c, s.id, r.id, -1))}><ArrowUp className="size-4" /></button>
-                    <button type="button" className="toggle" aria-label="Рядок вниз" onClick={() => draft.setContent((c) => moveRow(c, s.id, r.id, 1))}><ArrowDown className="size-4" /></button>
-                    <button type="button" className="toggle" aria-label="Видалити рядок" onClick={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}><Trash2 className="size-4" /></button>
+                    <OrderButtons
+                      labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
+                      onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
+                      onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                    />
                   </div>
                 </aside>
               </div>

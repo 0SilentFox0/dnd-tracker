@@ -1,6 +1,8 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useRef } from "react";
+
+import { useCssVarHeight } from "@/lib/hooks/common";
 
 export function ScenarioBar({ title, sections, hideNotes, onToggleNotes, theme, onToggleTheme, actions }: {
   title: string;
@@ -13,26 +15,9 @@ export function ScenarioBar({ title, sections, hideNotes, onToggleNotes, theme, 
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const el = ref.current;
+  useCssVarHeight(ref, "--sb-bar-h");
 
-    const host = el?.parentElement;
-
-    if (!el || !host) return;
-
-    const sync = () => host.style.setProperty("--sb-bar-h", `${el.offsetHeight}px`);
-
-    sync();
-
-    const observer = new ResizeObserver(sync);
-
-    observer.observe(el);
-
-    return () => {
-      observer.disconnect();
-      host.style.removeProperty("--sb-bar-h");
-    };
-  }, []);
+  useCssVarHeight(ref, "--app-header-h", "header");
 
   return (
     <div ref={ref} className="sb-bar">
