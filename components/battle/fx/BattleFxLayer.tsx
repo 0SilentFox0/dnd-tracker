@@ -7,11 +7,24 @@ import { preloadAnimation } from "@/components/battle/fx/animations";
 import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
 import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
-import { MAX_FX_MS } from "@/lib/utils/battle/fx";
+import { fireFxImpact, useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
+import { ARCHETYPE_FX, type FxSpec, MAX_FX_MS } from "@/lib/utils/battle/fx";
 import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
 
 const DICE_BUDGET_MS = FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300;
+
+const NO_IMPACT = new Set(["dice", "death"]);
+
+// таймер не скасовується: пізній сигнал нешкідливий, а ранній «done» його б загубив
+function impactStarter(spec: FxSpec): (() => void) | undefined {
+  const { actionId } = spec;
+
+  if (!actionId || NO_IMPACT.has(spec.archetype)) return;
+
+  return () => {
+    window.setTimeout(() => fireFxImpact(actionId), ARCHETYPE_FX[spec.archetype].impactMs);
+  };
+}
 
 function withTimeout(run: Promise<void>, ms: number, onTimeout: () => void) {
   let timer = 0;
@@ -71,7 +84,7 @@ export function BattleFxLayer() {
     };
 
     const play = () => {
-      if (current.archetype !== "dice") return playFx(el, current);
+      if (current.archetype !== "dice") return playFx(el, current, document, FX_LOAD_TIMEOUT_MS, impactStarter(current));
 
       if (!current.dice) return;
 

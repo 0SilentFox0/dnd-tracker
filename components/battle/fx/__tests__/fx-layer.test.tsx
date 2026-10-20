@@ -4,7 +4,8 @@ import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => ({
-  current: { key: "k1", archetype: "haste" } as { key: string; archetype: string; dice?: unknown },
+  current: { key: "k1", archetype: "haste" } as { key: string; archetype: string; dice?: unknown; actionId?: string },
+  fire: vi.fn(),
   active: true,
   done: vi.fn(),
   cancelLayer: vi.fn(),
@@ -26,6 +27,7 @@ vi.mock("@/components/battle/fx/dice/DiceStage", () => ({
   }),
 }));
 vi.mock("@/lib/hooks/battle", () => ({
+  fireFxImpact: h.fire,
   useFxEnabled: () => ({ enabled: true }),
   useBattleFxQueue: () => ({ current: h.current, queue: [h.current], done: h.done, active: h.active }),
 }));
@@ -37,6 +39,7 @@ import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
 beforeEach(() => {
   vi.useFakeTimers();
   h.done.mockClear();
+  h.fire.mockClear();
   h.cancelLayer.mockClear();
   h.playFx.mockReset();
   h.dicePlay.mockReset();
@@ -51,6 +54,41 @@ afterEach(() => {
 });
 
 describe("BattleFxLayer", () => {
+  it("основна FX дії шле сигнал удару через impactMs від старту анімації", async () => {
+    h.current = { key: "act1:0", archetype: "bolt", actionId: "act1" } as typeof h.current;
+    h.playFx.mockImplementation((_layer: unknown, _spec: unknown, _root: unknown, _t: unknown, onStart?: () => void) => {
+      onStart?.();
+
+      return new Promise(() => undefined);
+    });
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(599);
+    });
+    expect(h.fire).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(h.fire).toHaveBeenCalledWith("act1");
+  });
+
+  it("смерть і кубики сигналу не шлють", async () => {
+    h.current = { key: "act2:death:t", archetype: "death", actionId: "act2" } as typeof h.current;
+    h.playFx.mockImplementation((_l: unknown, _s: unknown, _r: unknown, _t: unknown, onStart?: () => void) => {
+      onStart?.();
+
+      return Promise.resolve();
+    });
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    expect(h.fire).not.toHaveBeenCalled();
+  });
+
   it("a stuck animation is cancelled on its stage when the guard gives up on it", async () => {
     h.playFx.mockReturnValue(new Promise(() => undefined));
     render(<BattleFxLayer />);
