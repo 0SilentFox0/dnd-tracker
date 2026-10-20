@@ -62,6 +62,7 @@ export const ARCHETYPE_FX: Record<FxArchetype, ArchetypeFx> = {
   thornvines: { impactMs: 700, impact: "damage" },
   moonbeam: { impactMs: 650, impact: "damage" },
   vampire: { impactMs: 800, impact: "none" },
+  dice: { impactMs: 0, impact: "none" },
 };
 
-export const FX_ARCHETYPES = Object.keys(ARCHETYPE_FX) as FxArchetype[];
+export const FX_ARCHETYPES = (Object.keys(ARCHETYPE_FX) as FxArchetype[]).filter((a) => a !== "dice");

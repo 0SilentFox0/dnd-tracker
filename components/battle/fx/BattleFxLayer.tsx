@@ -18,7 +18,7 @@ export function BattleFxLayer() {
 
   // Signatures load the moment they are queued, so they are ready by their turn.
   useEffect(() => {
-    for (const spec of queue) preloadAnimation(spec.archetype);
+    for (const spec of queue) if (spec.archetype !== "dice") preloadAnimation(spec.archetype);
   }, [queue]);
 
   // Hidden tab, FX off or unmount: drop the running animation, so nothing stale resumes later.
@@ -54,7 +54,7 @@ export function BattleFxLayer() {
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()
-      .then(() => (cancelled ? undefined : playFx(el, current)))
+      .then(() => (cancelled || current.archetype === "dice" ? undefined : playFx(el, current)))
       .catch((e: unknown) => console.warn("battle fx", e))
       .finally(() => {
         window.clearTimeout(guard);
