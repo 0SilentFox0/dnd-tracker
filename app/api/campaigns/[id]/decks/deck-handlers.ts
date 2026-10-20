@@ -1,5 +1,5 @@
 import { after, NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { MAX_DECKS_PER_CAMPAIGN } from "@/lib/constants/show";
@@ -15,94 +15,91 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { removedSlideUrls } from "@/lib/utils/show/deck-files";
 import { applyShowCommand, refreshShowSlide } from "@/lib/utils/show/show-command";
-import type { ShowState, Slide } from "@/types/show";
+import type { ShowState, Slide, SlideDeck } from "@/types/show";
 
 const ownedDeck = (campaignId: string, deckId: string) => loadOwned(prisma.slideDeck.findUnique({ where: { id: deckId } }), campaignId, API_ERRORS.DECK_NOT_FOUND);
 
-/** Стерти файли, що зникли, крім картинки на екрані і картинок інших наборів. */
-async function removeUnusedFiles(campaignId: string, deckId: string, before: Slide[], after_: Slide[], shown?: ShowState | null) {
-  const [show, elsewhere] = await Promise.all([shown === undefined ? readShowState(campaignId) : shown, urlsUsedElsewhere(campaignId, deckId)]);
+async function asDM(campaignId: string, action: string, run: () => Promise<NextResponse>): Promise<NextResponse> {
+  try {
+    const access = await requireDM(campaignId);
 
-  const keep = [...elsewhere, ...(show?.slide ? [show.slide.imageUrl] : [])];
+    if (access instanceof NextResponse) return access;
 
-  const urls = removedSlideUrls(before, after_, keep);
+    return await run();
+  } catch (error) {
+    return handleApiError(error, { action });
+  }
+}
+
+/** Картинка на екрані і картинки інших наборів лишаються. */
+async function removeUnusedFiles(campaignId: string, deckId: string, slides: { before: Slide[]; remaining: Slide[] }, show: ShowState | null) {
+  const removed = removedSlideUrls(slides.before, slides.remaining, show?.slide ? [show.slide.imageUrl] : []);
+
+  if (removed.length === 0) return;
+
+  const elsewhere = await urlsUsedElsewhere(campaignId, deckId);
+
+  const urls = removed.filter((url) => !elsewhere.has(url));
 
   if (urls.length > 0) await removeSlideFiles(campaignId, urls);
 }
 
-const cleanupLater = (campaignId: string, deckId: string, before: Slide[], after_: Slide[]) => after(() => removeUnusedFiles(campaignId, deckId, before, after_));
+async function refreshShownDeck(campaignId: string, show: ShowState | null, saved: SlideDeck) {
+  const next = show && refreshShowSlide(show, saved);
+
+  // конфлікт з командою ДМ не страшний: наступне перемикання візьме свіжий набір
+  if (next && (await writeShowState(campaignId, show, next))) await publishShow(campaignId, next);
+}
 
 /** Показ не лишається вказувати на видалений набір. */
-async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowState | null | undefined> {
+async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowState | null> {
   const show = await readShowState(campaignId);
 
-  if (show?.deckId !== deckId) return undefined;
+  if (show?.deckId !== deckId) return show;
 
   const ended = applyShowCommand(show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
 
-  if (!ended.ok || !(await writeShowState(campaignId, show, ended.value))) return undefined;
+  if (!ended.ok || !(await writeShowState(campaignId, show, ended.value))) return show;
 
   await publishShow(campaignId, ended.value);
 
   return ended.value;
 }
 
-export async function getDecksHandler(campaignId: string) {
-  try {
-    const access = await requireDM(campaignId);
+const isNotFound = (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
 
-    if (access instanceof NextResponse) return access;
-
-    return NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } });
-  } catch (error) {
-    return handleApiError(error, { action: "list decks" });
-  }
+export function getDecksHandler(campaignId: string) {
+  return asDM(campaignId, "list decks", async () => NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } }));
 }
 
-export async function createDeckHandler(req: Request, campaignId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export function createDeckHandler(req: Request, campaignId: string) {
+  return asDM(campaignId, "create deck", async () => {
     const body = await parseBody(createDeckSchema, req);
 
     if (body instanceof NextResponse) return body;
 
-    if ((await prisma.slideDeck.count({ where: { campaignId } })) >= MAX_DECKS_PER_CAMPAIGN) return errorResponse(API_ERRORS.DECK_LIMIT, 400);
+    const existing = await prisma.slideDeck.aggregate({ where: { campaignId }, _count: true, _max: { sortOrder: true } });
 
-    const last = await prisma.slideDeck.aggregate({ where: { campaignId }, _max: { sortOrder: true } });
+    if (existing._count >= MAX_DECKS_PER_CAMPAIGN) return errorResponse(API_ERRORS.DECK_LIMIT, 400);
 
-    const row = await prisma.slideDeck.create({ data: { campaignId, title: body.title, sortOrder: (last._max.sortOrder ?? -1) + 1 } });
+    const row = await prisma.slideDeck.create({ data: { campaignId, title: body.title, sortOrder: (existing._max.sortOrder ?? -1) + 1 } });
 
     return NextResponse.json(toSlideDeck(row), { status: 201 });
-  } catch (error) {
-    return handleApiError(error, { action: "create deck" });
-  }
+  });
 }
 
-export async function getDeckHandler(campaignId: string, deckId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export function getDeckHandler(campaignId: string, deckId: string) {
+  return asDM(campaignId, "get deck", async () => {
     const deck = await ownedDeck(campaignId, deckId);
 
     if (deck instanceof NextResponse) return deck;
 
     return NextResponse.json(toSlideDeck(deck), { headers: { "Cache-Control": "no-store" } });
-  } catch (error) {
-    return handleApiError(error, { action: "get deck" });
-  }
+  });
 }
 
-export async function saveDeckHandler(req: Request, campaignId: string, deckId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export function saveDeckHandler(req: Request, campaignId: string, deckId: string) {
+  return asDM(campaignId, "save deck", async () => {
     const body = await parseBody(saveDeckSchema, req);
 
     if (body instanceof NextResponse) return body;
@@ -119,42 +116,33 @@ export async function saveDeckHandler(req: Request, campaignId: string, deckId: 
 
     if (!slides.ok) return errorResponse(slides.message, 400);
 
-    const written = await prisma.slideDeck.updateMany({
-      where: { id: deckId, campaignId, updatedAt: deck.updatedAt },
-      data: { title: body.title, slides: slides.value as unknown as Prisma.InputJsonValue },
-    });
+    const row = await prisma.slideDeck
+      .update({
+        where: { id: deckId, campaignId, updatedAt: deck.updatedAt },
+        data: { title: body.title, slides: slides.value as unknown as Prisma.InputJsonValue },
+      })
+      .catch((error: unknown) => {
+        if (isNotFound(error)) return null;
 
-    if (written.count === 0) return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
+        throw error;
+      });
 
-    const row = await prisma.slideDeck.findUnique({ where: { id: deckId } });
-
-    if (!row) return errorResponse(API_ERRORS.DECK_NOT_FOUND, 404);
+    if (!row) return errorResponse(API_ERRORS.DECK_CONFLICT, 409);
 
     const saved = toSlideDeck(row);
-
-    cleanupLater(campaignId, deckId, previous, saved.slides);
 
     after(async () => {
       const show = await readShowState(campaignId);
 
-      const next = show && refreshShowSlide(show, saved);
-
-      // конфлікт з командою ДМ не страшний: наступне перемикання візьме свіжий набір
-      if (next && (await writeShowState(campaignId, show, next))) await publishShow(campaignId, next);
+      await Promise.all([refreshShownDeck(campaignId, show, saved), removeUnusedFiles(campaignId, deckId, { before: previous, remaining: saved.slides }, show)]);
     });
 
     return NextResponse.json(saved);
-  } catch (error) {
-    return handleApiError(error, { action: "save deck" });
-  }
+  });
 }
 
-export async function deleteDeckHandler(campaignId: string, deckId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export function deleteDeckHandler(campaignId: string, deckId: string) {
+  return asDM(campaignId, "delete deck", async () => {
     const deck = await ownedDeck(campaignId, deckId);
 
     if (deck instanceof NextResponse) return deck;
@@ -163,20 +151,14 @@ export async function deleteDeckHandler(campaignId: string, deckId: string) {
 
     const previous = readSlides(deck.slides);
 
-    after(async () => removeUnusedFiles(campaignId, deckId, previous, [], await endShowOfDeck(campaignId, deckId)));
+    after(async () => removeUnusedFiles(campaignId, deckId, { before: previous, remaining: [] }, await endShowOfDeck(campaignId, deckId)));
 
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    return handleApiError(error, { action: "delete deck" });
-  }
+  });
 }
 
-export async function issueSlideUploadHandler(req: Request, campaignId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export function issueSlideUploadHandler(req: Request, campaignId: string) {
+  return asDM(campaignId, "issue slide upload", async () => {
     const body = await parseBody(slideUploadRequestSchema, req);
 
     if (body instanceof NextResponse) return body;
@@ -184,7 +166,5 @@ export async function issueSlideUploadHandler(req: Request, campaignId: string) 
     const ticket = await createSlideUploadTicket(campaignId, body.contentType);
 
     return ticket.ok ? NextResponse.json(ticket.value) : errorResponse(ticket.message, 500);
-  } catch (error) {
-    return handleApiError(error, { action: "issue slide upload" });
-  }
+  });
 }

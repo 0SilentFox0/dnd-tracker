@@ -35,15 +35,13 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     if (access instanceof NextResponse) return access;
 
-    const rate = await checkRateLimit({ userId: access.userId, scope: "show", battleId: campaignId, ...BATTLE_RATE_LIMITS.show });
+    const [rate, prev] = await Promise.all([checkRateLimit({ userId: access.userId, scope: "show", battleId: campaignId, ...BATTLE_RATE_LIMITS.show }), readShowState(campaignId)]);
 
     if (!rate.allowed) return rateLimitResponse(rate);
 
     const cmd = await parseBody(showCommandSchema, req);
 
     if (cmd instanceof NextResponse) return cmd;
-
-    const prev = await readShowState(campaignId);
 
     const deckId = deckIdFor(cmd, prev);
 

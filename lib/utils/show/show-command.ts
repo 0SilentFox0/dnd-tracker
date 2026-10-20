@@ -24,19 +24,23 @@ const done = (value: ShowState): Outcome => ({ ok: true, value });
 
 const EMPTY: ShowState = { deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 0 };
 
-/** Трек слайда, на який перейде команда (без застосування). */
-export function targetSlideTrack(prev: ShowState | null, cmd: ShowCommand, deck: ShowDeck | null): string | undefined {
-  if (!deck || deck.slides.length === 0) return undefined;
+type SlideCommand = Extract<ShowCommand, { action: "open" | "next" | "prev" }>;
 
-  if (cmd.action === "open") return (cmd.slideId ? deck.slides.find((s) => s.id === cmd.slideId) : deck.slides[0])?.trackId;
+const isSlideCommand = (cmd: ShowCommand): cmd is SlideCommand => cmd.action === "open" || cmd.action === "next" || cmd.action === "prev";
 
-  if (cmd.action !== "next" && cmd.action !== "prev") return undefined;
+/** -1: слайда з open.slideId немає в наборі. */
+function targetIndex(prev: ShowState | null, cmd: SlideCommand, deck: ShowDeck): number {
+  if (cmd.action === "open") return cmd.slideId ? deck.slides.findIndex((s) => s.id === cmd.slideId) : 0;
 
   const at = deck.slides.findIndex((s) => s.id === prev?.slide?.id);
 
-  if (at === -1) return deck.slides[0].trackId;
+  return at === -1 ? 0 : Math.min(Math.max(at + (cmd.action === "next" ? 1 : -1), 0), deck.slides.length - 1);
+}
 
-  return deck.slides[Math.min(Math.max(at + (cmd.action === "next" ? 1 : -1), 0), deck.slides.length - 1)].trackId;
+export function targetSlideTrack(prev: ShowState | null, cmd: ShowCommand, deck: ShowDeck | null): string | undefined {
+  if (!deck || deck.slides.length === 0 || !isSlideCommand(cmd)) return undefined;
+
+  return deck.slides[targetIndex(prev, cmd, deck)]?.trackId;
 }
 
 export function showNeedsLibrary(prev: ShowState | null, cmd: ShowCommand, deck: ShowDeck | null): boolean {
@@ -56,21 +60,10 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
   return played.ok ? played.value : audio;
 }
 
-function showSlide(prev: ShowState | null, deck: ShowDeck, index: number, ctx: Ctx): Outcome {
-  const slide = deck.slides[index];
+const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
-  return done({
-    deckId: deck.id,
-    deckTitle: deck.title,
-    slide,
-    nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null,
-    audio: autoTrack(prev?.audio ?? null, slide.trackId, ctx),
-    seq: (prev?.seq ?? 0) + 1,
-  });
-}
-
-function step(prev: ShowState | null, ctx: Ctx, dir: 1 | -1): Outcome {
-  if (!prev?.deckId) return fail(API_ERRORS.SHOW_NOT_RUNNING);
+function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
+  if (cmd.action !== "open" && !prev?.deckId) return fail(API_ERRORS.SHOW_NOT_RUNNING);
 
   const { deck } = ctx;
 
@@ -78,49 +71,36 @@ function step(prev: ShowState | null, ctx: Ctx, dir: 1 | -1): Outcome {
 
   if (deck.slides.length === 0) return fail(API_ERRORS.SHOW_DECK_EMPTY);
 
-  const at = deck.slides.findIndex((s) => s.id === prev.slide?.id);
+  const index = targetIndex(prev, cmd, deck);
 
-  if (at === -1) return showSlide(prev, deck, 0, ctx);
+  if (index === -1) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  const target = Math.min(Math.max(at + dir, 0), deck.slides.length - 1);
+  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev);
 
-  return target === at ? done(prev) : showSlide(prev, deck, target, ctx);
+  const at = slideAt(deck, index);
+
+  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), seq: (prev?.seq ?? 0) + 1 });
 }
 
-type Handlers = { [A in ShowCommand["action"]]: (prev: ShowState | null, cmd: Extract<ShowCommand, { action: A }>, ctx: Ctx) => Outcome };
-
-const handlers: Handlers = {
-  open: (prev, cmd, ctx) => {
-    const { deck } = ctx;
-
-    if (!deck) return fail(API_ERRORS.DECK_NOT_FOUND);
-
-    if (deck.slides.length === 0) return fail(API_ERRORS.SHOW_DECK_EMPTY);
-
-    const index = cmd.slideId ? deck.slides.findIndex((s) => s.id === cmd.slideId) : 0;
-
-    return index === -1 ? fail(API_ERRORS.SLIDE_NOT_FOUND) : showSlide(prev, deck, index, ctx);
-  },
-  next: (prev, _cmd, ctx) => step(prev, ctx, 1),
-  prev: (prev, _cmd, ctx) => step(prev, ctx, -1),
-  end: (prev, _cmd, ctx) => {
-    const audio = prev?.audio ?? null;
-
-    const stopped = audio?.trackId ? applyAudioCommand(audio, { action: "stop" }, ctx) : null;
-
-    return done({ ...EMPTY, audio: stopped?.ok ? stopped.value : audio, seq: (prev?.seq ?? 0) + 1 });
-  },
-  audio: (prev, cmd, ctx) => {
-    const played = applyAudioCommand(prev?.audio ?? null, cmd.command, ctx);
-
-    return played.ok ? done({ ...(prev ?? EMPTY), audio: played.value, seq: (prev?.seq ?? 0) + 1 }) : played;
-  },
-};
-
 export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: Ctx): Outcome {
-  const run = handlers[cmd.action] as (p: ShowState | null, c: ShowCommand, x: Ctx) => Outcome;
+  switch (cmd.action) {
+    case "open":
+    case "next":
+    case "prev":
+      return moveTo(prev, cmd, ctx);
+    case "end": {
+      const audio = prev?.audio ?? null;
 
-  return run(prev, cmd, ctx);
+      const stopped = audio?.trackId ? applyAudioCommand(audio, { action: "stop" }, ctx) : null;
+
+      return done({ ...EMPTY, audio: stopped?.ok ? stopped.value : audio, seq: (prev?.seq ?? 0) + 1 });
+    }
+    case "audio": {
+      const played = applyAudioCommand(prev?.audio ?? null, cmd.command, ctx);
+
+      return played.ok ? done({ ...(prev ?? EMPTY), audio: played.value, seq: (prev?.seq ?? 0) + 1 }) : played;
+    }
+  }
 }
 
 const sameSlide = (a: Slide | null, b: Slide) => !!a && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId;
@@ -133,9 +113,7 @@ export function refreshShowSlide(prev: ShowState, deck: ShowDeck): ShowState | n
 
   if (at === -1) return null;
 
-  const slide = deck.slides[at];
-
-  const nextImageUrl = deck.slides[at + 1]?.imageUrl ?? null;
+  const { slide, nextImageUrl } = slideAt(deck, at);
 
   if (sameSlide(prev.slide, slide) && nextImageUrl === prev.nextImageUrl && deck.title === prev.deckTitle) return null;
 

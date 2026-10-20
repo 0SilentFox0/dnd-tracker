@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
@@ -21,7 +22,7 @@ vi.mock("@/lib/supabase/image-storage", () => ({
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn(() => ({})) }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    slideDeck: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(async () => 0), aggregate: vi.fn(async () => ({ _max: { sortOrder: null } })), create: vi.fn(), updateMany: vi.fn(), delete: vi.fn() },
+    slideDeck: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
   },
 }));
@@ -43,14 +44,8 @@ const put = async (body: Record<string, unknown>) => {
 };
 
 const seedDeck = (old: ReturnType<typeof row>) => {
-  vi.mocked(prisma.slideDeck.findUnique)
-    .mockReset()
-    .mockResolvedValueOnce(old as never)
-    .mockImplementation((async () => {
-      const { data } = vi.mocked(prisma.slideDeck.updateMany).mock.calls[0][0] as { data: Record<string, unknown> };
-
-      return row(data.slides as unknown[], { title: data.title, updatedAt: new Date(1) });
-    }) as never);
+  vi.mocked(prisma.slideDeck.findUnique).mockReset().mockResolvedValueOnce(old as never);
+  vi.mocked(prisma.slideDeck.update).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => row(data.slides as unknown[], { title: data.title, updatedAt: new Date(1) })) as never);
 };
 
 const runAfter = () => Promise.all(afterCallbacks.map((cb) => cb()));
@@ -60,7 +55,6 @@ describe("decks API", () => {
     vi.clearAllMocks();
     afterCallbacks.length = 0;
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
-    vi.mocked(prisma.slideDeck.updateMany).mockResolvedValue({ count: 1 } as never);
   });
 
   it("гравець — 403 на список, створення, збереження, квиток", async () => {
@@ -79,7 +73,7 @@ describe("decks API", () => {
   });
 
   it("POST: ліміт наборів — 400", async () => {
-    vi.mocked(prisma.slideDeck.count).mockResolvedValueOnce(100);
+    vi.mocked(prisma.slideDeck.aggregate).mockResolvedValueOnce({ _count: 100, _max: { sortOrder: 99 } } as never);
 
     const { POST } = await import("@/app/api/campaigns/[id]/decks/route");
 
@@ -130,14 +124,14 @@ describe("decks API", () => {
     const res = await put({ title: "a", slides: [{ id: "slide-0005", imageUrl: "https://example.com/x.png" }] });
 
     expect(res.status).toBe(409);
-    expect(prisma.slideDeck.updateMany).not.toHaveBeenCalled();
+    expect(prisma.slideDeck.update).not.toHaveBeenCalled();
     await runAfter();
     expect(storage.removeSlideFiles).not.toHaveBeenCalled();
   });
 
   it("PUT: набір змінили між читанням і записом — 409, файли не стираються", async () => {
     vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(row([slide("slide-0001", "a")]) as never);
-    vi.mocked(prisma.slideDeck.updateMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(prisma.slideDeck.update).mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError("not found", { code: "P2025", clientVersion: "6" }));
 
     const res = await put({ title: "a", slides: [] });
 
