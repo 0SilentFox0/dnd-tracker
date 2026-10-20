@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Music } from "lucide-react";
 
 import { AudioPlayerPanel } from "./AudioPlayerPanel";
-import { YoutubeAudioDriver } from "./YoutubeAudioDriver";
+import { YoutubePlayer } from "./YoutubePlayer";
 
 import { useBattleAudio } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -43,7 +43,7 @@ export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }
       <div className={cn(placement === "strip" && "pointer-events-auto absolute bottom-2 left-2 z-30")}>
         <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded && "sr-only")}>
           <AudioPlayerPanel audio={audio} view={{ failed: sound.failed, onCollapse: () => setChoice(false), onUnlock: sound.unlock }}>
-            {youtubeId && <YoutubeAudioDriver videoId={youtubeId} onNeedsTap={onNeedsTap} />}
+            {youtubeId && <YoutubePlayer videoId={youtubeId} onNeedsTap={onNeedsTap} />}
           </AudioPlayerPanel>
         </div>
         {!expanded && (

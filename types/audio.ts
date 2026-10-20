@@ -1,3 +1,7 @@
+/**
+ * Термінологія: «music» — бібліотека кампанії й треки (CRUD: lib/hooks/music, components/music, dm/music);
+ * «audio» — стан відтворення в бою (BattleAudio*, lib/utils/audio, components/battle/audio).
+ */
 export type TrackKind = "file" | "youtube";
 
 export interface CampaignTrack {

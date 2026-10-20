@@ -10,7 +10,7 @@ import { TrackList } from "@/components/music/TrackList";
 import { UploadTrackButton } from "@/components/music/UploadTrackButton";
 import { Button } from "@/components/ui/button";
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "@/lib/constants/music";
-import { useMusicLibrary } from "@/lib/hooks/tracks";
+import { useMusicLibrary } from "@/lib/hooks/music";
 import type { CampaignTrack } from "@/types/audio";
 
 export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: string; initialTracks: CampaignTrack[] }) {

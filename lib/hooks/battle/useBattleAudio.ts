@@ -8,7 +8,7 @@ import { type BattleAudioControl, useBattleAudioControl } from "./useBattleAudio
 import { useBattleAudioState } from "./useBattleAudioState";
 import { useBattleScene } from "./useBattleScene";
 
-import { useRenameTrack, useTracks } from "@/lib/hooks/tracks";
+import { useRenameTrack, useTracks } from "@/lib/hooks/music";
 import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 
 export interface BattleAudioValue {
