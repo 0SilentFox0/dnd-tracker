@@ -8,12 +8,12 @@ import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import type { BattleAudioState } from "@/types/audio";
+import { audioState, fileTrack } from "@/lib/utils/audio/__tests__/fixtures";
 
 vi.mock("@/lib/api/battle-audio", () => ({ getBattleAudio: vi.fn(() => new Promise(() => undefined)), sendBattleAudio: vi.fn() }));
 vi.mock("@/lib/api/tracks", () => ({ getTracks: vi.fn(async () => []), updateTrack: vi.fn() }));
 
-const audio: BattleAudioState = { trackId: "t1", track: { title: "Бій у таверні", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 0, seq: 1 };
+const audio = audioState({ track: { ...fileTrack, title: "Бій у таверні" } });
 
 afterEach(cleanup);
 

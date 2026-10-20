@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RESYNC_AFTER_HIDDEN_MS, usePusherBattleSync } from "../usePusherBattleSync";
 
 import { getBattleVersion } from "@/lib/api/battles";
+import { audioState } from "@/lib/utils/audio/__tests__/fixtures";
 import type { BattleScene } from "@/types/api";
 
 vi.mock("@/lib/api/battles", () => ({ getBattleVersion: vi.fn() }));
@@ -304,7 +305,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
   const audioKey = ["battle-audio", campaignId, battleId];
 
-  const audioState = (seq: number) => ({ trackId: "t1", track: { title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 1_000, seq });
+  const audioAt = (seq: number) => audioState({ startedAt: 1_000, seq });
 
   it("battle-audio пише лише кеш музики: новіший seq — так, старіший — ні; сцену й версію не чіпає", async () => {
     const qc = new QueryClient();
@@ -317,10 +318,10 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
 
     await waitFor(() => expect(channelBindings.get(channelName)?.has("battle-audio")).toBe(true));
 
-    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioState(2) }));
-    expect(qc.getQueryData(audioKey)).toEqual({ audio: audioState(2), clockOffsetMs: null });
+    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(2) }));
+    expect(qc.getQueryData(audioKey)).toEqual({ audio: audioAt(2), clockOffsetMs: null });
 
-    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioState(1) }));
+    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(1) }));
     expect((qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq).toBe(2);
 
     act(() => simulateTrigger(channelName, "battle-audio", { battleId }));

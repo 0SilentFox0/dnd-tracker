@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type MediaSyncInput, useAudioElementSync } from "../useAudioElementSync";
 
-import type { BattleAudioState } from "@/types/audio";
+import { audioState, stubMediaElement } from "@/lib/utils/audio/__tests__/fixtures";
 
 let api: ReturnType<typeof useAudioElementSync>;
 
@@ -21,7 +21,7 @@ function Harness(input: MediaSyncInput) {
   return <audio ref={ref} data-testid="audio" />;
 }
 
-const state = (over: Partial<BattleAudioState> = {}): BattleAudioState => ({ trackId: "t", track: { title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 0, seq: 1, ...over });
+const state = audioState;
 
 const base: MediaSyncInput = { src: "https://s/1.mp3", state: state(), clockOffsetMs: 0, unlocked: true, volume: 0.5, muted: false };
 
@@ -36,9 +36,7 @@ function media(el: HTMLAudioElement, m: { currentTime?: number; paused?: boolean
 
 beforeEach(() => {
   vi.useFakeTimers({ now: 30_000, toFake: ["Date", "setInterval", "clearInterval"] });
-  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
-  vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
-  vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => undefined);
+  stubMediaElement();
 });
 
 afterEach(() => {

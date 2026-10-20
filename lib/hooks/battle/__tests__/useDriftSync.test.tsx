@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type DriftSyncInput, type MediaHandle, useDriftSync } from "../useDriftSync";
 
-import type { BattleAudioState } from "@/types/audio";
+import { audioState } from "@/lib/utils/audio/__tests__/fixtures";
 
-const state = (over: Partial<BattleAudioState> = {}): BattleAudioState => ({ trackId: "t", track: { title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 0, seq: 1, ...over });
+const state = audioState;
 
 function fakeMedia(over: Partial<MediaHandle> = {}): MediaHandle {
   return { ready: () => true, currentTime: () => 0, paused: () => true, duration: () => null, play: vi.fn(), pause: vi.fn(), seek: vi.fn(), ...over };

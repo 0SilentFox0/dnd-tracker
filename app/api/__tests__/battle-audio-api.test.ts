@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
-import type { BattleAudioState } from "@/types/audio";
+import { audioState, fileTrack } from "@/lib/utils/audio/__tests__/fixtures";
 
 const trigger = vi.hoisted(() => vi.fn(async () => undefined));
 
@@ -32,11 +32,11 @@ const post = async (body: unknown) => {
 };
 
 const rows = [
-  { id: "t1", title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 },
+  { id: "t1", ...fileTrack },
   { id: "t2", title: "Таверна", kind: "youtube", url: null, youtubeId: "dQw4w9WgXcQ", durationSec: null },
 ];
 
-const playing: BattleAudioState = { trackId: "t1", track: { title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 1_000, seq: 3 };
+const playing = audioState({ startedAt: 1_000, seq: 3 });
 
 describe("battle audio API", () => {
   beforeEach(() => {

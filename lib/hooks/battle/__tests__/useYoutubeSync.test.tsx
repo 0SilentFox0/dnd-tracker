@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useYoutubeSync } from "../useYoutubeSync";
 
-import type { BattleAudioState } from "@/types/audio";
+import { audioState, youtubeTrack } from "@/lib/utils/audio/__tests__/fixtures";
 
 const created = vi.hoisted(() => [] as Array<{ options: Record<string, unknown>; player: Record<string, ReturnType<typeof vi.fn>> }>);
 
@@ -36,7 +36,7 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
   })),
 }));
 
-const state: BattleAudioState = { trackId: "t", track: { title: "YT", kind: "youtube", url: null, youtubeId: "dQw4w9WgXcQ", durationSec: null }, playing: true, offsetSec: 0, startedAt: 0, seq: 1 };
+const state = audioState({ track: youtubeTrack });
 
 function Harness({ videoId }: { videoId: string | null }) {
   const { ref } = useYoutubeSync({ videoId, state, clockOffsetMs: 0, volume: 0.4, muted: false });
