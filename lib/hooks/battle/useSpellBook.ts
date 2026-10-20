@@ -26,7 +26,7 @@ import {
   withChainTargets,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
-import { isOnMap, type MapAim } from "@/lib/utils/battle/grid";
+import { isOnMap, type MapAim, type MapPick } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
@@ -95,19 +95,31 @@ export function useBonusSpells(hero: BattleParticipant): BookSpell[] {
 const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
   Object.keys(byLevel).map(Number).filter((l) => byLevel[l].length > 0);
 
-/** Поки майстер на кроці цілей шаблону, карта приймає точку наведення замість руху чи атаки; ховер віддає точку прев'ю. */
-function useSpellMapAim(
-  state: SpellFlowState,
-  dispatch: Dispatch<SpellFlowAction>,
-  ctx: { caster: BattleParticipant | null; order: BattleParticipant[]; map: BattleMapConfig | null; setMapAim(aim: MapAim | null): void },
-) {
-  const { caster, order, map, setMapAim } = ctx;
+interface MapTargetingContext {
+  caster: BattleParticipant | null;
+  order: BattleParticipant[];
+  map: BattleMapConfig | null;
+  active: boolean;
+  candidates: BattleParticipant[];
+  inRange(t: BattleParticipant): boolean;
+  setMapAim(aim: MapAim | null): void;
+  setMapPick(pick: MapPick | null): void;
+}
+
+/** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер віддає точку прев'ю, Escape скасовує. */
+function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext) {
+  const { caster, order, map, active, candidates, inRange, setMapAim, setMapPick } = ctx;
 
   const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
+
+  const pickAt = useRef<(id: string) => void>(() => undefined);
+
+  const latest = useRef({ candidates, inRange });
 
   const [hover, setHover] = useState<GridPoint | null>(null);
 
   useEffect(() => {
+    latest.current = { candidates, inRange };
     aimAt.current = (cell) => {
       if (!map || !caster || !state.pick) return;
 
@@ -117,11 +129,20 @@ function useSpellMapAim(
       // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
       dispatch({ type: "CONFIRM_TARGETS" });
     };
+    pickAt.current = (id) => {
+      const target = order.find((p) => p.basicInfo.id === id);
+
+      if (target && inRange(target)) dispatch({ type: "PICK_TARGET", id });
+    };
   });
 
   const onAim = useCallback((cell: GridPoint) => aimAt.current(cell), []);
 
-  const template = state.step === "targets" && state.pick?.targetMode === "template" ? state.pick.template : undefined;
+  const onPick = useCallback((id: string) => pickAt.current(id), []);
+
+  const template = active && state.pick?.targetMode === "template" ? state.pick.template : undefined;
+
+  const picking = active && !!state.pick && state.pick.targetMode !== "template";
 
   const range = state.pick?.range;
 
@@ -138,8 +159,22 @@ function useSpellMapAim(
     };
   }, [template, casterId, range, state.aim, onAim, setMapAim]);
 
+  const pickSignature = picking ? candidates.map((p) => `${p.basicInfo.id}${inRange(p) ? "+" : "-"}`).join(",") : "";
+
+  const pickedIds = state.targetIds.join(",");
+
   useEffect(() => {
-    if (!template) return;
+    if (!picking || !casterId) return;
+
+    const { candidates: list, inRange: reach } = latest.current;
+
+    setMapPick({ casterId, targets: list.map((p) => ({ id: p.basicInfo.id, reachable: reach(p) })), selectedIds: pickedIds ? pickedIds.split(",") : [], onPick });
+
+    return () => setMapPick(null);
+  }, [picking, casterId, pickSignature, pickedIds, onPick, setMapPick]);
+
+  useEffect(() => {
+    if (!active) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") dispatch({ type: "CLOSE" });
@@ -148,7 +183,7 @@ function useSpellMapAim(
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [template, dispatch]);
+  }, [active, dispatch]);
 
   return template ? hover : null;
 }
@@ -192,7 +227,13 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const touchedAt = (cell: GridPoint | null | undefined) => (map && caster && aimPick && cell ? spellAimTargets({ map, participants: order, caster }, aimPick, cell) : []);
 
-  const hover = useSpellMapAim(flow, dispatch, { caster, order, map, setMapAim: scene.intents.setMapAim });
+  const onMap = !!map && !!caster && isOnMap(caster);
+
+  const mapTargeting = flow.step === "targets" && onMap;
+
+  const hover = useSpellMapTargeting(flow, dispatch, {
+    caster, order, map, active: mapTargeting, candidates: targets.filter(isOnMap), inRange, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
+  });
 
   const aimPreview = hover && caster ? { targets: touchedAt(hover).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster.basicInfo.side })) } : null;
 
@@ -208,8 +249,6 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
   const universalSlot = casterUsesUniversalSlot(caster);
-
-  const onMap = !!map && !!caster && isOnMap(caster);
 
   const wideningOf = (s: BookSpell) => spellWidening(order, caster, s, onMap);
 
@@ -236,7 +275,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, aimPreview, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, aimPreview, mapTargeting, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),

@@ -53,6 +53,7 @@ export type SpellFlowAction =
   | { type: "PICK"; pick: SpellPick }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }
+  | { type: "PICK_TARGET"; id: string }
   | { type: "SET_AIM"; aim: GridPoint; targetIds: string[] }
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_SAVE"; id: string; value: number | undefined }
@@ -85,9 +86,6 @@ function previousStep(s: SpellFlowState): SpellFlowState["step"] | null {
   if (BACK_ORDER[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
 
   if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all")) i -= 1;
-
-  // клік по карті остаточний: після наведення назад до прицілу не вертаємось
-  if (BACK_ORDER[i] === "targets" && s.pick?.targetMode === "template" && s.aim) return null;
 
   return i >= 0 ? BACK_ORDER[i] : null;
 }
@@ -123,6 +121,13 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       if (s.pick?.maxTargets !== undefined && s.targetIds.length >= s.pick.maxTargets) return s;
 
       return { ...s, targetIds: [...s.targetIds, a.id] };
+    }
+    case "PICK_TARGET": {
+      if (s.step !== "targets") return s;
+
+      const next = spellFlow(s, { type: "TOGGLE_TARGET", id: a.id });
+
+      return next.pick?.targetMode === "single" && !next.pick.chain ? spellFlow(next, { type: "CONFIRM_TARGETS" }) : next;
     }
     case "SET_AIM": {
       if (s.step !== "targets" || s.pick?.targetMode !== "template") return s;

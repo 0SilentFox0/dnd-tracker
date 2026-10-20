@@ -38,7 +38,7 @@ import {
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
-import type { MapAim } from "@/lib/utils/battle/grid";
+import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
@@ -85,6 +85,9 @@ export interface BattleSceneIntents {
   /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
   mapAim: MapAim | null;
   setMapAim(aim: MapAim | null): void;
+  /** Вибір цілей заклинання на карті: клік по токену обирає ціль замість руху чи атаки */
+  mapPick: MapPick | null;
+  setMapPick(pick: MapPick | null): void;
   /** Фаза ходу поточного героя дозволяє атаку — лише тоді клік по ворогу стає наміром, а не вибором */
   attackReady: boolean;
   /** MyTurnControls повідомляє id героя, чия фаза дозволяє атаку; null — не дозволяє */
@@ -278,6 +281,8 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const [mapAim, setMapAim] = useState<MapAim | null>(null);
 
+  const [mapPick, setMapPick] = useState<MapPick | null>(null);
+
   const [attackReadyId, setAttackReady] = useState<string | null>(null);
 
   const [log, setLog] = useState<BattleLogState>({ open: false, focus: null });
@@ -390,7 +395,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     selectedId,
     select,
     clickParticipant,
-    intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim, attackReady, setAttackReady },
+    intents: { attack: attackIntent, requestAttack: setAttackIntent, clearAttack: clearAttackIntent, mapAim, setMapAim, mapPick, setMapPick, attackReady, setAttackReady },
     toast,
     result: { fx: resultFx, show: showResult },
     log: { ...log, show: openLog, close: closeLog },

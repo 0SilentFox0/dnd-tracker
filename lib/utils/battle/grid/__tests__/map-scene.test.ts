@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapSceneActor, type MapSceneInput, type MapSceneMode } from "../map-scene";
+import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapPick, type MapSceneActor, type MapSceneInput, type MapSceneMode } from "../map-scene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -352,5 +352,49 @@ describe("deriveMapScene: велика істота", () => {
     const s = deriveMapScene(input({ participants: [hero] }));
 
     expect(s.cellClick({ x: 1, y: 1 })).toEqual({ kind: "move", participantId: "h", to: { x: 1, y: 1 }, free: false });
+  });
+});
+
+describe("deriveMapScene: вибір цілей заклинання", () => {
+  const pick = (over: Partial<MapPick> = {}): MapPick => ({ casterId: "h", targets: [{ id: "e1", reachable: true }, { id: "e2", reachable: false }], selectedIds: [], onPick: () => undefined, ...over });
+
+  it("позначки: досяжні — pick, обрані — picked, поза дальністю — invalid-target; рух і ворожі підсвітки атаки вимкнені", () => {
+    const s = deriveMapScene(input({ mode: { pick: pick({ selectedIds: ["e1"] }) } }));
+
+    expect(s.view.marks?.get("1:0")).toBe("picked");
+    expect(s.view.marks?.get("5:0")).toBe("invalid-target");
+    expect([...(s.view.marks?.values() ?? [])].some((m) => typeof m === "number" || m === "target")).toBe(false);
+    expect(s.aiming).toBe(false);
+    expect(deriveMapScene(input({ mode: { pick: pick() } })).view.marks?.get("1:0")).toBe("pick");
+  });
+
+  it("клік по токену: досяжна ціль — pick, поза дальністю — reject, не з переліку — reject", () => {
+    const s = deriveMapScene(input({ mode: { pick: pick() } }));
+
+    expect(s.tokenClick("e1")).toEqual({ kind: "pick", id: "e1" });
+    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: "Поза дальністю" });
+    expect(s.tokenClick("h")).toMatchObject({ kind: "reject" });
+  });
+
+  it("клік по клітинці: зайнята кандидатом — pick, порожня — none (не ходить)", () => {
+    const s = deriveMapScene(input({ mode: { pick: pick() } }));
+
+    expect(s.cellClick({ x: 1, y: 0 })).toEqual({ kind: "pick", id: "e1" });
+    expect(s.cellClick({ x: 3, y: 3 })).toEqual({ kind: "none" });
+  });
+
+  it("лише для союзників теж працює: токен союзника в переліку", () => {
+    const ally = at("a1", { x: 2, y: 1 }, ParticipantSide.ALLY);
+
+    const s = deriveMapScene(input({ participants: [hero, ally], mode: { pick: pick({ targets: [{ id: "a1", reachable: true }] }) } }));
+
+    expect(s.tokenClick("a1")).toEqual({ kind: "pick", id: "a1" });
+  });
+
+  it("розстановка DM чи наведення шаблону мають пріоритет над вибором цілей", () => {
+    const aimed = deriveMapScene(input({ mode: { pick: pick(), aim: { template: { shape: "circle", size: 5 }, casterId: "h", onAim: () => undefined } } }));
+
+    expect(aimed.aiming).toBe(true);
+    expect(aimed.tokenClick("e1")).toMatchObject({ kind: "aim" });
   });
 });

@@ -37,7 +37,7 @@ const AURA_STRIP_LABEL = "Оберіть зону аури";
 export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip?: { onExpand: () => void } }) {
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, setAttackReady } = intents;
+  const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
 
@@ -112,7 +112,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
     </>
   );
 
-  const stripRow = strip && phase !== "countdown" && !mapAim && (
+  const stripRow = strip && phase !== "countdown" && !mapAim && !mapPick && (
     <MapStripRow onExpand={strip.onExpand}>
       <span className="hud-sc tracking-[.12em]">{phase === "acting" && zone ? AURA_STRIP_LABEL : STRIP_LABEL[phase]}</span>
     </MapStripRow>
