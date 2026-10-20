@@ -27,7 +27,7 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
         subtitle={`${library.tracks.length} з ${MAX_TRACKS_PER_CAMPAIGN} треків · ${TRACK_FORMATS_LABEL} до ${MAX_TRACK_MB} МБ`}
         actions={
           <>
-            <UploadTrackButton onFile={(file) => void library.upload(file)} pending={library.busy || full} />
+            <UploadTrackButton onFile={(file) => void library.upload(file)} pending={library.isBusy || full} />
             <Button variant="outline" onClick={() => setYoutubeOpen(true)} disabled={full} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               YouTube
@@ -35,14 +35,14 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
           </>
         }
       />
-      {library.loading && library.tracks.length === 0 ? (
+      {library.isLoading && library.tracks.length === 0 ? (
         <LoadingState rows={4} label="Завантаження треків…" />
       ) : library.tracks.length === 0 ? (
         <EmptyState icon={Music} title="Ще немає треків" description={`Завантажте ${TRACK_FORMATS_LABEL} або додайте посилання YouTube — ДМ вмикає їх у бою.`} />
       ) : (
-        <TrackList tracks={library.tracks} busy={library.busy} actions={{ onRename: library.rename, onDelete: (t) => void library.remove(t), onMove: library.move }} />
+        <TrackList tracks={library.tracks} busy={library.isBusy} actions={{ onRename: library.rename, onDelete: (t) => void library.remove(t), onMove: library.move }} />
       )}
-      <AddYoutubeTrackDialog open={youtubeOpen} onOpenChange={setYoutubeOpen} onSubmit={library.addYoutube} pending={library.busy} />
+      <AddYoutubeTrackDialog open={youtubeOpen} onOpenChange={setYoutubeOpen} onSubmit={library.addYoutube} pending={library.isBusy} />
     </HudPage>
   );
 }

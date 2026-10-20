@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { trackKeys } from "./keys";
 import { useRenameTrack } from "./useRenameTrack";
@@ -12,12 +12,13 @@ import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { useConfirm, useCrudMutation, useNotify } from "@/lib/hooks/common";
 import { moveTrack } from "@/lib/utils/audio/order";
 import { readAudioDuration } from "@/lib/utils/audio/read-duration";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { CampaignTrack } from "@/types/audio";
 
 export interface MusicLibrary {
   tracks: CampaignTrack[];
-  loading: boolean;
-  busy: boolean;
+  isLoading: boolean;
+  isBusy: boolean;
   upload(file: File): Promise<void>;
   addYoutube(data: { url: string; title?: string }): Promise<boolean>;
   rename(id: string, title: string): void;
@@ -26,8 +27,6 @@ export interface MusicLibrary {
 }
 
 const stripExtension = (name: string) => name.replace(/\.[^.]+$/, "").slice(0, TRACK_TITLE_MAX) || "Трек";
-
-const messageOf = (e: unknown) => (e instanceof Error && e.message ? e.message : "Не вдалося зберегти");
 
 // у стані бою лише знімок треку: YouTube грає далі, а файл зі сховища зникає одразу
 const DELETE_NOTE: Record<CampaignTrack["kind"], string> = {
@@ -42,43 +41,37 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const notify = useNotify();
 
-  const key = trackKeys.list(campaignId);
-
   const { data: tracks = initial, isLoading } = useTracks(campaignId, { initial });
 
-  const onError = (e: unknown) => void notify(messageOf(e));
+  const onError = useCallback((e: unknown) => void notify(errorMessage(e, "Не вдалося зберегти")), [notify]);
 
-  const invalidateKeys = [key];
+  const invalidateKeys = useMemo(() => [trackKeys.list(campaignId)], [campaignId]);
 
-  const uploadM = useCrudMutation({
+  const { mutateAsync: uploadAsync, isPending: isUploading } = useCrudMutation({
     mutationFn: async (file: File) => uploadTrackFile(campaignId, file, { title: stripExtension(file.name), durationSec: await readAudioDuration(file) }),
     invalidateKeys,
     onError,
   });
 
-  const youtubeM = useCrudMutation({ mutationFn: (data: { url: string; title?: string }) => createTrack(campaignId, { kind: "youtube", ...data }), invalidateKeys, onError });
+  const { mutateAsync: youtubeAsync, isPending: isAddingYoutube } = useCrudMutation({ mutationFn: (data: { url: string; title?: string }) => createTrack(campaignId, { kind: "youtube", ...data }), invalidateKeys, onError });
 
-  const deleteM = useCrudMutation({ mutationFn: (id: string) => deleteTrack(campaignId, id), invalidateKeys, onError });
+  const { mutate: deleteMutate } = useCrudMutation({ mutationFn: (id: string) => deleteTrack(campaignId, id), invalidateKeys, onError });
 
-  const reorderM = useMutation({
+  const { mutate: reorderMutate, isPending: isReordering } = useCrudMutation({
     mutationFn: (ids: string[]) => reorderTracks(campaignId, ids),
+    invalidateKeys: [],
     onSuccess: (list) => queryClient.setQueryData(trackKeys.list(campaignId), list),
     onError,
   });
 
-  const { mutateAsync: uploadAsync } = uploadM;
-
+  // помилку вже показав onError — сторінці лишається лише дочекатися
   const upload = useCallback(async (file: File) => {
     await uploadAsync(file).catch(() => undefined);
   }, [uploadAsync]);
 
-  const { mutateAsync: youtubeAsync } = youtubeM;
-
   const addYoutube = useCallback(async (data: { url: string; title?: string }) => youtubeAsync(data).then(() => true, () => false), [youtubeAsync]);
 
   const rename = useRenameTrack(campaignId, onError);
-
-  const { mutate: deleteMutate } = deleteM;
 
   const remove = useCallback(
     async (track: CampaignTrack) => {
@@ -89,8 +82,6 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
     [confirm, deleteMutate],
   );
 
-  const { mutate: reorderMutate } = reorderM;
-
   const move = useCallback((index: number, dir: -1 | 1) => {
     const ids = tracks.map((t) => t.id);
 
@@ -99,14 +90,10 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
     if (next !== ids) reorderMutate(next);
   }, [tracks, reorderMutate]);
 
-  return {
-    tracks,
-    loading: isLoading,
-    busy: uploadM.isPending || youtubeM.isPending || reorderM.isPending,
-    upload,
-    addYoutube,
-    rename,
-    remove,
-    move,
-  };
+  const isBusy = isUploading || isAddingYoutube || isReordering;
+
+  return useMemo(
+    () => ({ tracks, isLoading, isBusy, upload, addYoutube, rename, remove, move }),
+    [tracks, isLoading, isBusy, upload, addYoutube, rename, remove, move],
+  );
 }

@@ -8,6 +8,7 @@ import { writeAudioSnapshot } from "./audio-snapshot";
 import { sendBattleAudio } from "@/lib/api/battle-audio";
 import { ApiError } from "@/lib/api/client";
 import { battleKeys } from "@/lib/hooks/battles";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleAudioCommand } from "@/types/audio";
 
 export interface BattleAudioControl {
@@ -29,7 +30,7 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
     onError: (error) => {
       if (error instanceof ApiError && error.status === 409) void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
 
-      onFailure(error instanceof Error && error.message ? error.message : "Не вдалося керувати музикою");
+      onFailure(errorMessage(error, "Не вдалося керувати музикою"));
     },
     onSettled: () => {
       inFlight.current = false;

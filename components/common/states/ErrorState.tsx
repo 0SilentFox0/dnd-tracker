@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { errorMessage } from "@/lib/utils/common/error-message";
 
-const messageOf = (error: unknown) => (error instanceof Error && error.message ? error.message : "Щось пішло не так");
+const messageOf = (error: unknown) => errorMessage(error, "Щось пішло не так");
 
 export function ErrorState({ error, onRetry, className }: { error: unknown; onRetry?: () => void; className?: string }) {
   return (

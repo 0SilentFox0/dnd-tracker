@@ -9,6 +9,7 @@ import { useBattleAudioState } from "./useBattleAudioState";
 import { useBattleScene } from "./useBattleScene";
 
 import { useRenameTrack, useTracks } from "@/lib/hooks/music";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 
 export interface BattleAudioValue {
@@ -40,7 +41,7 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
 
   const { data: tracks = NO_TRACKS, isLoading } = useTracks(campaignId, { enabled: isDM });
 
-  const rename = useRenameTrack(campaignId, (e) => show(e instanceof Error && e.message ? e.message : "Не вдалося перейменувати трек"));
+  const rename = useRenameTrack(campaignId, (e) => show(errorMessage(e, "Не вдалося перейменувати трек")));
 
   const track = audio?.track ?? null;
 

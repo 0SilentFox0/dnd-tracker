@@ -5,6 +5,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ConfirmContext, type ConfirmOptions } from "@/lib/hooks/common/confirm-context";
+import { errorMessage } from "@/lib/utils/common/error-message";
 
 type Pending = ConfirmOptions & { resolve: (ok: boolean) => void; detach?: () => void };
 
@@ -73,7 +74,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       if (current.current !== p) return;
 
       setBusy(false);
-      setError(e instanceof Error && e.message ? e.message : "Не вдалося виконати дію");
+      setError(errorMessage(e, "Не вдалося виконати дію"));
     }
   };
 
