@@ -3,6 +3,7 @@ import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damag
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyObstacle, obstacleStep } from "../../damage/obstacle";
+import { applyWeaponFlat } from "../../damage/weapon-flat";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
 import { applyCriticalEffect } from "..";
@@ -125,6 +126,18 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     physicalDamage += extra;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
+  }
+
+  if (criticalEffectApplied?.effect.type !== "max_damage") {
+    const flat = applyWeaponFlat(physicalDamage, attack);
+
+    physicalDamage = flat.damage;
+
+    if (flat.step && flat.line) {
+      damageCalculation.breakdown.push("──────────");
+      damageCalculation.breakdown.push(flat.line);
+      damageSteps.push(flat.step);
+    }
   }
 
   const weakened = findEffectMarker(attacker, "weakened_next_hit");
