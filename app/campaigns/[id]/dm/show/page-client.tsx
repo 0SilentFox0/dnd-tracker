@@ -11,6 +11,7 @@ import { DeckCard } from "@/components/show/editor/DeckCard";
 import { NewDeckDialog } from "@/components/show/editor/NewDeckDialog";
 import { Button } from "@/components/ui/button";
 import { useNotify } from "@/lib/hooks/common";
+import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { SlideDeckSummary } from "@/types/show";
@@ -21,6 +22,8 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
   const notify = useNotify();
 
   const { data: decks = [] } = useDecks(campaignId, { initial: initialDecks });
+
+  const { data: pages = [] } = useScenarioPages(campaignId);
 
   const mutations = useDeckMutations(campaignId);
 
@@ -62,6 +65,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
               href={`${base}/dm/show/${deck.id}`}
               actions={{ start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) }}
               pending={mutations.pending || control.pending}
+              scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
             />
           ))}
         </div>
