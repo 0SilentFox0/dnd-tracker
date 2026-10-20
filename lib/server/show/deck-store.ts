@@ -15,13 +15,13 @@ import type { Slide, SlideDeck, SlideDeckSummary } from "@/types/show";
 const DECK_ORDER = [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }];
 
 export function toSlideDeck(row: DeckRow): SlideDeck {
-  return { id: row.id, title: row.title, slides: readSlides(row.slides), updatedAt: row.updatedAt.toISOString() };
+  return { id: row.id, title: row.title, scenarioPageId: row.scenarioPageId, slides: readSlides(row.slides), updatedAt: row.updatedAt.toISOString() };
 }
 
 function toDeckSummary(row: DeckRow): SlideDeckSummary {
   const slides = readSlides(row.slides);
 
-  return { id: row.id, title: row.title, slideCount: slides.length, coverUrl: slides[0]?.imageUrl ?? null, updatedAt: row.updatedAt.toISOString() };
+  return { id: row.id, title: row.title, scenarioPageId: row.scenarioPageId, slideCount: slides.length, coverUrl: slides[0]?.imageUrl ?? null, updatedAt: row.updatedAt.toISOString() };
 }
 
 export async function listDecks(campaignId: string): Promise<SlideDeckSummary[]> {

@@ -100,6 +100,8 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
 
       return played.ok ? done({ ...(prev ?? EMPTY), audio: played.value, seq: (prev?.seq ?? 0) + 1 }) : played;
     }
+    case "battle":
+      return fail(API_ERRORS.SHOW_BATTLE_NOT_ACTIVE);
   }
 }
 
