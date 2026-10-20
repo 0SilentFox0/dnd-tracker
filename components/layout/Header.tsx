@@ -118,6 +118,11 @@ export function Header({ email }: { email: string | null }) {
                         Музика
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/scenario`}>
+                        Сценарій
+                      </Link>
+                    </DropdownMenuItem>
                   </>
                 )}
                 {isPlayerPage && (
