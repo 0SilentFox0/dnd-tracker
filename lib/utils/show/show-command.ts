@@ -64,6 +64,17 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
+const withoutBattleFlag = (prev: ShowState): ShowState => {
+  const { battle: _battle, ...rest } = prev;
+
+  return { ...rest, seq: prev.seq + 1 };
+};
+
+/** null, якщо показ не вказує на цей бій. */
+export function withoutBattle(prev: ShowState | null, battleId: string): ShowState | null {
+  return prev?.battle?.id === battleId ? withoutBattleFlag(prev) : null;
+}
+
 function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
   if (cmd.action !== "open" && !prev?.deckId) return fail(API_ERRORS.SHOW_NOT_RUNNING);
 
@@ -77,7 +88,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   if (index === -1) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev);
+  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return prev.battle ? done(withoutBattleFlag(prev)) : done(prev);
 
   const at = slideAt(deck, index);
 

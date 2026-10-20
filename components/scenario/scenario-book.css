@@ -152,4 +152,6 @@
 .scenario-book .row.is-current { box-shadow: 0 0 0 2px var(--gold); }
 .scenario-book .sb-play { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 14px; }
 .scenario-book .sb-missing { font-size: 13px; color: var(--ink-soft); }
-.scenario-book .sb-show-dock { position: sticky; bottom: 0; z-index: 20; }
+.scenario-book .sb-show-dock { position: sticky; bottom: 0; z-index: 20; background: var(--page); border-top: 1px solid var(--rule); }
+.scenario-book .sb-show-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
+.scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { SHOW_STATE_EVENT, showChannelName } from "@/lib/pusher/channels";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
+import { withoutBattle } from "@/lib/utils/show/show-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { ShowBattle, ShowEvent, ShowState, Slide } from "@/types/show";
 
@@ -52,4 +53,27 @@ export function publishShow(campaignId: string, show: ShowState): Promise<void> 
   const event: ShowEvent = { campaignId, show };
 
   return safePusherTrigger(pusherServer, showChannelName(campaignId), SHOW_STATE_EVENT, event, { action: "show state" });
+}
+
+const CLEAR_BATTLE_ATTEMPTS = 3;
+
+/** Бій завершено — виклик «До бою!» для нього знімається; помилки лише логуються. */
+export async function clearShowBattle(campaignId: string, battleId: string): Promise<void> {
+  try {
+    for (let attempt = 0; attempt < CLEAR_BATTLE_ATTEMPTS; attempt++) {
+      const show = await readShowState(campaignId);
+
+      const next = withoutBattle(show, battleId);
+
+      if (!show || !next) return;
+
+      if (await writeShowState(campaignId, show, next)) {
+        await publishShow(campaignId, next);
+
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("[show] clear battle call failed", error);
+  }
 }

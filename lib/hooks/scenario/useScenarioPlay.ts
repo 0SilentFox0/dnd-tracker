@@ -6,11 +6,13 @@ import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { startBattle } from "@/lib/api/battles";
 import { ApiError } from "@/lib/api/client";
 import { getDeck } from "@/lib/api/decks";
+import { BattleStatus } from "@/lib/constants/battle";
 import { battleKeys, useBattleBriefs } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowState } from "@/lib/hooks/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { battleAction, boundDeckIds, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import type { BattleBrief } from "@/types/battle";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { Slide } from "@/types/show";
 
@@ -50,7 +52,7 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent): S
 
   deckQueries.forEach((q, i) => {
     if (q.data) decks.set(deckIds[i], q.data.slides);
-    else if (q.error instanceof ApiError && q.error.status === 404) decks.set(deckIds[i], null);
+    else if (q.error) decks.set(deckIds[i], null);
   });
 
   const battles = useMemo(() => (briefs ? new Map(briefs.map((b) => [b.id, b])) : null), [briefs]);
@@ -59,7 +61,9 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent): S
 
   const battleRun = useMutation({
     mutationFn: async (row: ScenarioRow) => {
-      const action = battleAction(rowBattleState(row, lookup));
+      const fresh = queryClient.getQueryData<BattleBrief[]>(battleKeys.briefs(campaignId));
+
+      const action = battleAction(rowBattleState(row, { ...lookup, battles: fresh ? new Map(fresh.map((b) => [b.id, b])) : lookup.battles }));
 
       if (action === "none" || !row.battleId) return;
 
@@ -67,7 +71,11 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent): S
 
       await control.send({ action: "battle", battleId: row.battleId });
     },
+    onSuccess: (_data, row) => {
+      queryClient.setQueryData<BattleBrief[]>(battleKeys.briefs(campaignId), (old) => old?.map((b) => (b.id === row.battleId && b.status === BattleStatus.PREPARED ? { ...b, status: BattleStatus.ACTIVE } : b)));
+    },
     onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: battleKeys.list(campaignId) });
       void queryClient.invalidateQueries({ queryKey: battleKeys.briefs(campaignId) });
       void queryClient.invalidateQueries({ queryKey: battleKeys.active() });
     },
@@ -77,7 +85,9 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent): S
   return {
     lookup,
     showSlide: (row) => {
-      if (row.slide && rowSlideState(row, lookup).kind === "ready") void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
+      const state = rowSlideState(row, lookup);
+
+      if (row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
     },
     runBattle: (row) => battleRun.mutate(row),
     pending: control.pending || battleRun.isPending,

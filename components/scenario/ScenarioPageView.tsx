@@ -51,7 +51,7 @@ export function ScenarioPageView({ page, campaignId, progress, play }: { page: S
                     onClick={
                       clickable
                         ? (e) => {
-                            if ((e.target as HTMLElement).closest("a, button") || window.getSelection()?.toString()) return;
+                            if (e.detail > 1 || (e.target as HTMLElement).closest("a, button") || window.getSelection()?.toString()) return;
 
                             play?.showSlide(r);
                           }

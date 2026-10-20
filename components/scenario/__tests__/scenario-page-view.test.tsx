@@ -87,6 +87,27 @@ describe("ScenarioPageView — режим гри", () => {
     expect(pl.showSlide).toHaveBeenCalledWith(row);
   });
 
+  it("клік по тілу рядка (не по кнопці) — showSlide; подвійний клік і виділення — ні", () => {
+    const pl = play();
+
+    const row = { id: "r1", story: p("Дзвони б'ють"), notes: p(""), slide: { deckId: "d1", slideId: "slide-a" } };
+
+    render(<ScenarioPageView page={pageWith([row])} campaignId="c" play={pl} />);
+
+    fireEvent.click(screen.getByText("Дзвони б'ють"));
+    expect(pl.showSlide).toHaveBeenCalledTimes(1);
+    expect(pl.showSlide).toHaveBeenCalledWith(row);
+
+    fireEvent.click(screen.getByText("Дзвони б'ють"), { detail: 2 });
+    expect(pl.showSlide).toHaveBeenCalledTimes(1);
+
+    const spy = vi.spyOn(window, "getSelection").mockReturnValue({ toString: () => "Дзвони" } as Selection);
+
+    fireEvent.click(screen.getByText("Дзвони б'ють"));
+    expect(pl.showSlide).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+
   it("активний рядок має is-current", () => {
     const base = play();
 

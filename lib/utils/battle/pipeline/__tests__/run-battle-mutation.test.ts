@@ -76,6 +76,26 @@ const req = (body: unknown = {}) =>
 
 const noop = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
 
+describe("runBattleMutation: завершення бою", () => {
+  const complete = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, scene: { status: "completed" as const, completedAt: new Date() }, events: [] }));
+
+  it("перехід у completed викликає onCompleted(campaignId, battleId)", async () => {
+    const onCompleted = vi.fn();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: complete }, deps({ onCompleted }));
+
+    expect(onCompleted).toHaveBeenCalledWith("c1", "b1");
+  });
+
+  it("звичайна дія onCompleted не викликає", async () => {
+    const onCompleted = vi.fn();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }) }, deps({ onCompleted }));
+
+    expect(onCompleted).not.toHaveBeenCalled();
+  });
+});
+
 describe("runBattleMutation", () => {
   it("rng із залежностей потрапляє в контекст мутації", async () => {
     const rng = () => 0.42;
