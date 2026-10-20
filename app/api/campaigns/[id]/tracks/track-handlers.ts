@@ -110,7 +110,7 @@ async function ownedTrack(campaignId: string, trackId: string) {
   return loadOwned(prisma.campaignTrack.findUnique({ where: { id: trackId } }), campaignId, API_ERRORS.TRACK_NOT_FOUND);
 }
 
-export async function renameTrackHandler(req: Request, campaignId: string, trackId: string) {
+export async function updateTrackHandler(req: Request, campaignId: string, trackId: string) {
   try {
     const access = await requireDM(campaignId);
 
@@ -124,9 +124,13 @@ export async function renameTrackHandler(req: Request, campaignId: string, track
 
     if (track instanceof NextResponse) return track;
 
-    return NextResponse.json(toCampaignTrack(await prisma.campaignTrack.update({ where: { id: trackId }, data: { title: body.title } })));
+    if (body.url !== undefined && track.kind !== "youtube") return errorResponse(API_ERRORS.TRACK_URL_LOCKED, 400);
+
+    const data = { title: body.title, durationSec: body.durationSec, youtubeId: body.url === undefined ? undefined : parseYoutubeId(body.url) };
+
+    return NextResponse.json(toCampaignTrack(await prisma.campaignTrack.update({ where: { id: trackId }, data })));
   } catch (error) {
-    return handleApiError(error, { action: "rename track" });
+    return handleApiError(error, { action: "update track" });
   }
 }
 

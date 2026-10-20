@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { useMusicLibrary } from "../useMusicLibrary";
 
-import { deleteTrack, reorderTracks } from "@/lib/api/tracks";
+import { deleteTrack, reorderTracks, updateTrack } from "@/lib/api/tracks";
 import { ConfirmContext } from "@/lib/hooks/common";
 import type { CampaignTrack } from "@/types/audio";
 
@@ -63,8 +63,21 @@ describe("useMusicLibrary", () => {
   it("move шле повний новий порядок", async () => {
     const { result } = renderHook(() => useMusicLibrary("c1", tracks), { wrapper: wrapper(true) });
 
-    act(() => result.current.move(0, 1));
+    act(() => result.current.move("a", 1));
 
     await waitFor(() => expect(reorderTracks).toHaveBeenCalledWith("c1", ["b", "a"]));
+  });
+
+  it("update шле лише змінені поля й повертає true", async () => {
+    const { result } = renderHook(() => useMusicLibrary("c1", tracks), { wrapper: wrapper(true) });
+
+    let ok = false;
+
+    await act(async () => {
+      ok = await result.current.update("a", { title: "Люди - Битва 1", durationSec: 90 });
+    });
+
+    expect(ok).toBe(true);
+    expect(updateTrack).toHaveBeenCalledWith("c1", "a", { title: "Люди - Битва 1", durationSec: 90 });
   });
 });

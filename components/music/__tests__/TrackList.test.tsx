@@ -11,7 +11,7 @@ afterEach(cleanup);
 const track = (id: string, kind: CampaignTrack["kind"] = "file"): CampaignTrack => ({ id, title: `Трек ${id}`, kind, url: null, youtubeId: kind === "youtube" ? "dQw4w9WgXcQ" : null, durationSec: 61, sortOrder: 0, createdAt: "" });
 
 function setup() {
-  const actions = { onRename: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
+  const actions = { onRename: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
 
   const view = render(<TrackList tracks={[{ ...track("a"), url: "https://s/camp1/a.mp3" }, track("b", "youtube"), { ...track("c"), url: "https://s/camp1/c.m4a", durationSec: null }]} busy={false} actions={actions} />);
 
@@ -30,11 +30,26 @@ describe("TrackList", () => {
     expect((getAllByRole("button", { name: "Нижче" })[2] as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("показує посилання: файл — публічний URL, YouTube — youtu.be", () => {
+    const { container } = setup();
+
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+
+    expect(hrefs).toEqual(["https://s/camp1/a.mp3", "https://youtu.be/dQw4w9WgXcQ", "https://s/camp1/c.m4a"]);
+  });
+
+  it("«Редагувати» передає трек", () => {
+    const { getAllByRole, actions } = setup();
+
+    fireEvent.click(getAllByRole("button", { name: "Редагувати" })[1]);
+    expect(actions.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+  });
+
   it("стрілка, видалення й перейменування викликають дії", () => {
     const { getAllByRole, getAllByLabelText, actions } = setup();
 
     fireEvent.click(getAllByRole("button", { name: "Нижче" })[0]);
-    expect(actions.onMove).toHaveBeenCalledWith(0, 1);
+    expect(actions.onMove).toHaveBeenCalledWith("a", 1);
 
     fireEvent.click(getAllByRole("button", { name: "Видалити" })[1]);
     expect(actions.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
