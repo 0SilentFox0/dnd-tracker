@@ -1,13 +1,13 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
+import { type ReactNode, useContext } from "react";
 import { cleanup, render, renderHook, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MazeViewProvider } from "../MazeViewProvider";
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { ModeViewContext, useModeView } from "@/lib/hooks/battle";
+import { BattleSceneContext, BattleSceneDataContext, ModeViewContext, useModeView } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
@@ -126,5 +126,46 @@ describe("маска лабіринту для гравця під MazeViewProvi
     const { result } = renderHook(() => useModeView(), { wrapper: Wrapper });
 
     expect(result.current.view).not.toBeNull();
+  });
+
+  it("неактивний провайдер віддає контексти сцени без копій, активний для гравця — маскує, не чіпаючи зовнішні", () => {
+    const useSceneContexts = () => ({ data: useContext(BattleSceneDataContext), value: useContext(BattleSceneContext) });
+
+    const ids = (list: { basicInfo: { id: string } }[] | undefined) => list?.map((p) => p.basicInfo.id);
+
+    for (const maze of [false, true]) {
+      const s = mazeScene({ maze });
+
+      const captureOuter = vi.fn<(ctx: ReturnType<typeof useSceneContexts>) => void>();
+
+      const Outer = ({ children }: { children: ReactNode }) => {
+        captureOuter(useSceneContexts());
+
+        return <>{children}</>;
+      };
+
+      const Wrapper = ({ children }: { children: ReactNode }) => (
+        <s.wrapper>
+          <Outer>
+            <MazeViewProvider>{children}</MazeViewProvider>
+          </Outer>
+        </s.wrapper>
+      );
+
+      const { result } = renderHook(useSceneContexts, { wrapper: Wrapper });
+
+      const [outer] = captureOuter.mock.lastCall ?? [];
+
+      if (!maze) {
+        expect(result.current.data).toBe(outer?.data);
+        expect(result.current.value).toBe(outer?.value);
+        continue;
+      }
+
+      expect(result.current.data).not.toBe(outer?.data);
+      expect(ids(result.current.data?.roster.enemies)).toEqual([]);
+      expect(result.current.value?.battle).toBe(result.current.data?.battle);
+      expect(ids(outer?.data?.roster.enemies)).toEqual(["gob"]);
+    }
   });
 });

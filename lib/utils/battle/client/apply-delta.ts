@@ -30,7 +30,7 @@ function mergeParticipantPatch(current: BattleParticipant, patch: BattleParticip
 }
 
 function mergeMapDelta(map: BattleScene["map"], scene: ClientBattleDelta["scene"]): BattleScene["map"] | "refetch" {
-  const modePatched = MODE_MAP_KEYS.some((key) => (scene as Record<string, unknown>)[key] !== undefined);
+  const modePatched = MODE_MAP_KEYS.some((key) => scene[key] !== undefined);
 
   if (!map) return modePatched ? "refetch" : map;
 

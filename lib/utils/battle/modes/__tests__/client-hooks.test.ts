@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { MapModeDefinition, ModeView } from "@/lib/utils/battle/modes";
 import { registerTestMode } from "@/lib/utils/battle/modes";
-import { mergeModeDeltas, modeDeltas, modeFxVisible, modeLogVisible } from "@/lib/utils/battle/modes/client";
+import { mergeModeDeltas, type ModeDeltas, modeDeltas, modeFxVisible, modeLogVisible } from "@/lib/utils/battle/modes/client";
 import type { BattleAction, BattleMapConfig } from "@/types/battle";
 
 type FakeConfig = { a: number; b: number };
@@ -49,8 +49,11 @@ describe("клієнтські хуки режиму", () => {
   it("mergeModeDeltas зливає патч; без конфігу в кеші — refetch", () => {
     off = registerTestMode(fake as MapModeDefinition<unknown>);
 
-    expect((mergeModeDeltas(map({ a: 1, b: 1 }), { fake: { b: 5 } }) as FakeMap).fake).toEqual({ a: 1, b: 5 });
-    expect(mergeModeDeltas({ cols: 5, rows: 5 } as BattleMapConfig, { fake: { b: 5 } })).toBe("refetch");
+    // фіктивного режиму немає в MapModeKey
+    const patch = { fake: { b: 5 } } as ModeDeltas;
+
+    expect((mergeModeDeltas(map({ a: 1, b: 1 }), patch) as FakeMap).fake).toEqual({ a: 1, b: 5 });
+    expect(mergeModeDeltas({ cols: 5, rows: 5 } as BattleMapConfig, patch)).toBe("refetch");
     expect(mergeModeDeltas({ cols: 5, rows: 5 } as BattleMapConfig, {})).toEqual({ cols: 5, rows: 5 });
   });
 

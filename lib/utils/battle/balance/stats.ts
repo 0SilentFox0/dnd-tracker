@@ -194,6 +194,7 @@ function bestAttack(p: BattleParticipant, type: AttackType): { avg: number; atta
 export function getCharacterStats({ participant, branchLevels, magicMainSkillIds, spellSchoolIds }: GetCharacterStatsParams): {
   dpr: number;
   hp: number;
+  level: number;
   kpi: number;
   spellDpr: number;
   toHit: number;
@@ -239,6 +240,7 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
   return {
     dpr,
     hp,
+    level: participant.abilities.level,
     kpi: hp > 0 ? dpr / hp : 0,
     spellDpr,
     toHit,

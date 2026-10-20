@@ -52,6 +52,7 @@ export interface EntityStats {
   dpr: number;
   hp: number;
   kpi: number;
+  level?: number;
   toHit?: number;
   ac?: number;
   weaponDpr?: number;
