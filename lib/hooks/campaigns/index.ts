@@ -1,4 +1,4 @@
-export { useActiveBattles } from "./useActiveBattles";
+export { useActiveSessions } from "./useActiveSessions";
 export { useCampaignMembers } from "./useCampaignMembers";
 export {
   useCreateCampaign,

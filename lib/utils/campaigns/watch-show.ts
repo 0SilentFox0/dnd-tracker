@@ -1,9 +1,6 @@
-export const showHref = (campaignId: string) => `/campaigns/${campaignId}/show`;
+import { pickActiveTarget } from "@/lib/utils/campaigns/join-battle";
+import type { ActiveShowRef } from "@/types/campaigns";
 
-export function pickWatchShow(shows: { campaignId: string }[], pathname: string | null): { campaignId: string } | null {
-  const campaignId = pathname?.match(/^\/campaigns\/([^/]+)/)?.[1];
+export const showHref = (s: ActiveShowRef) => `/campaigns/${s.campaignId}/show`;
 
-  const target = shows.find((s) => s.campaignId === campaignId) ?? shows[0] ?? null;
-
-  return target && pathname?.startsWith(showHref(target.campaignId)) ? null : target;
-}
+export const pickWatchShow = (shows: ActiveShowRef[], pathname: string | null) => pickActiveTarget(shows, pathname, showHref);

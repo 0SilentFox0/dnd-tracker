@@ -5,7 +5,7 @@ export interface DeckDraft {
   slides: Slide[];
 }
 
-export type SlidePatch = Partial<Pick<Slide, "title" | "caption" | "trackId">>;
+type SlidePatch = Partial<Pick<Slide, "title" | "caption" | "trackId">>;
 
 export type DeckDraftAction =
   | { type: "reset"; draft: DeckDraft }
@@ -14,6 +14,8 @@ export type DeckDraftAction =
   | { type: "remove"; id: string }
   | { type: "move"; id: string; dir: -1 | 1 }
   | { type: "update"; id: string; patch: SlidePatch };
+
+export const newSlideId = () => `slide-${crypto.randomUUID()}`;
 
 function patchSlide(slide: Slide, patch: SlidePatch): Slide {
   const next: Slide = { ...slide, ...patch };

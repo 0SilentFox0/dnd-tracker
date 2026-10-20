@@ -21,7 +21,7 @@ const imageUrlSchema = z
   .url()
   .refine((v) => v.startsWith("https://") || v.startsWith("http://"), "Потрібне посилання http(s)");
 
-export const slideSchema = z.object({
+const slideSchema = z.object({
   id: slideIdSchema,
   imageUrl: imageUrlSchema,
   title: optionalText(SLIDE_TITLE_MAX),

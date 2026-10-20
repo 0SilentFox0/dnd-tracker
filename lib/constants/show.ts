@@ -16,21 +16,21 @@ export const SLIDE_CAPTION_MAX = 200;
 
 export const SLIDE_MAX_EDGE_PX = 2560;
 
-export const SLIDE_CACHE_SECONDS = "31536000";
-
-/** Що клієнт вантажить напряму (після зменшення). */
-export const SLIDE_UPLOAD_FORMATS = {
+/** Бакет приймає й те, що дзеркалиться за посиланням (resolveImageForPersistence). */
+export const SLIDE_FORMATS = {
   "image/webp": "webp",
   "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
 } as const;
 
-export type SlideUploadType = keyof typeof SLIDE_UPLOAD_FORMATS;
+/** Що клієнт вантажить напряму (після зменшення). */
+export const SLIDE_UPLOAD_TYPES = ["image/webp", "image/jpeg"] as const satisfies readonly (keyof typeof SLIDE_FORMATS)[];
 
-export const SLIDE_UPLOAD_TYPES = Object.keys(SLIDE_UPLOAD_FORMATS) as [SlideUploadType, ...SlideUploadType[]];
+export type SlideUploadType = (typeof SLIDE_UPLOAD_TYPES)[number];
 
-/** Бакет приймає й те, що дзеркалиться за посиланням (resolveImageForPersistence). */
-export const SLIDE_BUCKET_TYPES = ["image/webp", "image/jpeg", "image/png", "image/gif"];
+export const SLIDE_BUCKET_TYPES = Object.keys(SLIDE_FORMATS);
 
-export const SLIDE_FILE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
+export const SLIDE_FILE_ACCEPT = SLIDE_BUCKET_TYPES.join(",");
 
 export const SLIDE_CROSSFADE_MS = 600;

@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { MAX_SLIDES_PER_DECK, SLIDE_FILE_ACCEPT } from "@/lib/constants/show";
 import { useNotify } from "@/lib/hooks/common";
 import type { useDeckEditor } from "@/lib/hooks/show";
-
-const isHttpUrl = (value: string) => URL.canParse(value) && /^https?:$/.test(new URL(value).protocol);
+import { isHttpUrl } from "@/lib/utils/common/image-url";
 
 export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useDeckEditor>["upload"]; count: number }) {
   const notify = useNotify();
@@ -20,11 +19,7 @@ export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useD
 
   const full = count >= MAX_SLIDES_PER_DECK;
 
-  const busy = upload.progress !== null;
-
-  const disabled = full || busy;
-
-  const urlValid = isHttpUrl(url.trim());
+  const disabled = full || upload.progress !== null;
 
   return (
     <div className="space-y-2">
@@ -55,7 +50,7 @@ export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useD
         <Button
           type="button"
           variant="outline"
-          disabled={disabled || !urlValid}
+          disabled={disabled || !isHttpUrl(url)}
           onClick={() => {
             upload.addUrl(url);
             setUrl("");

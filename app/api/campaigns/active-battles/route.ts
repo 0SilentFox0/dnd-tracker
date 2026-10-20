@@ -21,31 +21,22 @@ export async function GET(request: Request) {
 
     const { userId } = authResult;
 
-    const activeBattles = await prisma.battleScene.findMany({
-      where: {
-        campaign: {
-          members: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
-        status: CampaignStatus.ACTIVE,
-      },
-      select: {
-        id: true,
-        campaignId: true,
-      },
-    });
+    const withShows = new URL(request.url).searchParams.get("withShows") === "1";
 
-    if (new URL(request.url).searchParams.get("withShows") !== "1") return NextResponse.json(activeBattles);
+    const [battles, shows] = await Promise.all([
+      prisma.battleScene.findMany({
+        where: { campaign: { members: { some: { userId } } }, status: CampaignStatus.ACTIVE },
+        select: { id: true, campaignId: true },
+      }),
+      withShows
+        ? prisma.campaignShow.findMany({
+            where: { deckId: { not: null }, campaign: { members: { some: { userId } } } },
+            select: { campaignId: true },
+          })
+        : null,
+    ]);
 
-    const shows = await prisma.campaignShow.findMany({
-      where: { deckId: { not: null }, campaign: { members: { some: { userId } } } },
-      select: { campaignId: true },
-    });
-
-    return NextResponse.json({ battles: activeBattles, shows } satisfies ActiveSessions);
+    return NextResponse.json(shows ? ({ battles, shows } satisfies ActiveSessions) : battles);
   } catch (error) {
     return handleApiError(error, { action: "list active battles" });
   }

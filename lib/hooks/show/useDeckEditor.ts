@@ -10,7 +10,7 @@ import { useSlideUpload } from "./useSlideUpload";
 import { saveDeck } from "@/lib/api/decks";
 import { useNotify, useUnsavedChangesGuard } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { type DeckDraft, deckDraftReducer } from "@/lib/utils/show/deck-draft";
+import { type DeckDraft, deckDraftReducer, newSlideId } from "@/lib/utils/show/deck-draft";
 import type { SlideDeck } from "@/types/show";
 
 const draftOf = (deck: SlideDeck): DeckDraft => ({ title: deck.title, slides: deck.slides });
@@ -22,46 +22,38 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
 
   const { data: server = deck } = useDeck(campaignId, deck.id, { initial: deck });
 
-  const [saved, setSaved] = useState(() => draftOf(server));
+  const [saved, setSaved] = useState(() => ({ draft: draftOf(server), updatedAt: server.updatedAt }));
 
-  // updatedAt, на якому стоїть чернетка: PUT з ним відхилиться, якщо набір змінили деінде
-  const [base, setBase] = useState(server.updatedAt);
+  const [draft, dispatch] = useReducer(deckDraftReducer, saved.draft);
 
-  const [draft, dispatch] = useReducer(deckDraftReducer, saved);
+  const dirty = draft !== saved.draft;
 
-  const dirty = draft !== saved;
+  const adopt = (fresh: SlideDeck) => {
+    const next = { draft: draftOf(fresh), updatedAt: fresh.updatedAt };
 
-  const fail = useCallback((message: string) => void notify(message), [notify]);
+    setSaved(next);
+    dispatch({ type: "reset", draft: next.draft });
+  };
 
-  const { upload, progress, newSlideId } = useSlideUpload(campaignId, fail);
+  const { upload, progress } = useSlideUpload(campaignId, notify);
 
   const mutation = useMutation({
-    mutationFn: (data: DeckDraft) => saveDeck(campaignId, deck.id, { ...data, expectedUpdatedAt: base }),
+    mutationFn: (data: DeckDraft) => saveDeck(campaignId, deck.id, { ...data, expectedUpdatedAt: saved.updatedAt }),
     onSuccess: (fresh) => {
-      const next = draftOf(fresh);
-
-      setBase(fresh.updatedAt);
-      setSaved(next);
-      dispatch({ type: "reset", draft: next });
+      adopt(fresh);
       queryClient.setQueryData(showKeys.deck(campaignId, deck.id), fresh);
       void queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
     },
-    onError: (e) => fail(errorMessage(e, "Не вдалося зберегти набір")),
+    onError: (e) => void notify(errorMessage(e, "Не вдалося зберегти набір")),
   });
 
-  if (server.updatedAt !== base && !dirty) {
-    const next = draftOf(server);
-
-    setBase(server.updatedAt);
-    setSaved(next);
-    dispatch({ type: "reset", draft: next });
-  }
+  if (server.updatedAt !== saved.updatedAt && !dirty) adopt(server);
 
   useUnsavedChangesGuard(dirty);
 
   const addFiles = useCallback(async (files: File[]) => dispatch({ type: "add", slides: await upload(files) }), [upload]);
 
-  const addUrl = useCallback((url: string) => dispatch({ type: "add", slides: [{ id: newSlideId(), imageUrl: url.trim() }] }), [newSlideId]);
+  const addUrl = useCallback((url: string) => dispatch({ type: "add", slides: [{ id: newSlideId(), imageUrl: url.trim() }] }), []);
 
   return {
     draft,

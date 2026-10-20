@@ -11,7 +11,6 @@ export interface Slide {
 export interface SlideDeck {
   id: string;
   title: string;
-  sortOrder: number;
   slides: Slide[];
   updatedAt: string;
 }
@@ -19,7 +18,6 @@ export interface SlideDeck {
 export interface SlideDeckSummary {
   id: string;
   title: string;
-  sortOrder: number;
   slideCount: number;
   coverUrl: string | null;
   updatedAt: string;
@@ -78,8 +76,4 @@ export interface SlideUploadTicket {
   token: string;
   contentType: string;
   publicUrl: string;
-}
-
-export interface ActiveShowRef {
-  campaignId: string;
 }

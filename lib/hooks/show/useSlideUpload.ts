@@ -3,12 +3,12 @@
 import { useCallback, useState } from "react";
 
 import { uploadSlideImage } from "@/lib/api/decks";
-import { resizeSlideImage } from "@/lib/utils/show/resize-image";
+import { SLIDE_MAX_EDGE_PX } from "@/lib/constants/show";
+import { resizeImageToBlob } from "@/lib/utils/common/image-resize";
+import { newSlideId } from "@/lib/utils/show/deck-draft";
 import type { Slide } from "@/types/show";
 
 const PARALLEL = 3;
-
-const newSlideId = () => `slide-${crypto.randomUUID()}`;
 
 /** Файли вантажаться по три паралельно; невдалі пропускаються, їхні помилки — у onError. */
 export function useSlideUpload(campaignId: string, onError: (message: string) => void) {
@@ -29,7 +29,7 @@ export function useSlideUpload(campaignId: string, onError: (message: string) =>
           const i = next++;
 
           try {
-            slides[i] = { id: newSlideId(), imageUrl: await uploadSlideImage(campaignId, await resizeSlideImage(files[i])) };
+            slides[i] = { id: newSlideId(), imageUrl: await uploadSlideImage(campaignId, await resizeImageToBlob(files[i], SLIDE_MAX_EDGE_PX)) };
           } catch (e) {
             onError(`${files[i].name}: ${e instanceof Error ? e.message : "помилка"}`);
           }
@@ -48,5 +48,5 @@ export function useSlideUpload(campaignId: string, onError: (message: string) =>
     [campaignId, onError],
   );
 
-  return { upload, progress, newSlideId };
+  return { upload, progress };
 }

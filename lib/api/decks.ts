@@ -1,6 +1,6 @@
 import { campaignDelete, campaignGet, campaignPost, campaignPut } from "./client";
 
-import { SLIDE_CACHE_SECONDS } from "@/lib/constants/show";
+import { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
 import { createClient } from "@/lib/supabase/client";
 import type { CreateDeckData, SaveDeckData, SlideDeck, SlideDeckSummary, SlideUploadRequest, SlideUploadTicket } from "@/types/show";
 
@@ -20,7 +20,7 @@ export async function uploadSlideImage(campaignId: string, blob: Blob): Promise<
 
   const ticket = await campaignPost<SlideUploadTicket>(campaignId, "/decks/upload-url", request);
 
-  const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, blob, { contentType: ticket.contentType, cacheControl: SLIDE_CACHE_SECONDS });
+  const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, blob, { contentType: ticket.contentType, cacheControl: YEAR_CACHE_SECONDS });
 
   if (error) throw new Error(`Не вдалося завантажити картинку: ${error.message}`);
 
