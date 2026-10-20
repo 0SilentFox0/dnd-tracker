@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { AUDIO_DRIFT_CHECK_MS } from "@/lib/constants/music";
-import { audioPosition, planSync } from "@/lib/utils/audio/position";
+import { type MediaHandle, useDriftSync } from "./useDriftSync";
+
 import type { BattleAudioState } from "@/types/audio";
 
 export interface MediaSyncInput {
@@ -22,7 +22,24 @@ export const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAE
 
 const isBlocked = (e: unknown) => e instanceof Error && e.name === "NotAllowedError";
 
-const durationOf = (el: HTMLAudioElement, state: BattleAudioState | null) => (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : (state?.track?.durationSec ?? null));
+/** Стабільний адаптер: елемент приходить через ref-колбек, тож рендер не читає ref. */
+function elementMedia() {
+  let el: HTMLAudioElement | null = null;
+
+  const handle: MediaHandle = {
+    ready: () => !!el?.getAttribute("src"),
+    currentTime: () => el?.currentTime ?? 0,
+    paused: () => el?.paused ?? true,
+    duration: () => (el && Number.isFinite(el.duration) && el.duration > 0 ? el.duration : null),
+    play: () => el?.play(),
+    pause: () => el?.pause(),
+    seek: (sec) => {
+      if (el && el.readyState >= 1) el.currentTime = sec;
+    },
+  };
+
+  return { handle, attach: (next: HTMLAudioElement | null) => void (el = next) };
+}
 
 export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudioElement | null) => void; prime(): void; failed: boolean } {
   const node = useRef<HTMLAudioElement | null>(null);
@@ -33,39 +50,19 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
   // помилка привʼязана до src: інший трек, YouTube чи «Стоп» прибирають її без скидання в ефекті
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
-  const latest = useRef(input);
+  const [loads, setLoads] = useState(0);
 
-  useEffect(() => {
-    latest.current = input;
-  });
+  const [media] = useState(elementMedia);
 
   const ref = useCallback((el: HTMLAudioElement | null) => {
     node.current = el;
+    media.attach(el);
     setAttached(el);
-  }, []);
-
-  const sync = useCallback(() => {
-    const el = node.current;
-
-    if (!el) return;
-
-    const { state, clockOffsetMs, unlocked, src } = latest.current;
-
-    const durationSec = durationOf(el, state);
-
-    const target = state ? audioPosition(state, { now: Date.now(), clockOffsetMs, durationSec }) : 0;
-
-    const plan = planSync({ shouldPlay: unlocked && !!state?.playing && !!src && el.getAttribute("src") === src, paused: el.paused, current: el.currentTime, target, durationSec });
-
-    if (plan.pause) el.pause();
-
-    if (plan.seekTo !== null && el.readyState >= 1) el.currentTime = plan.seekTo;
-
-    if (plan.play) void el.play().catch((e: unknown) => isBlocked(e) && latest.current.onBlocked?.());
-  }, []);
+  }, [media]);
 
   const { unlocked, src, state, clockOffsetMs, volume, muted } = input;
 
+  // до useDriftSync: ефекти йдуть за порядком, тож план бачить уже виставлений src
   useEffect(() => {
     const el = node.current;
 
@@ -83,9 +80,17 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
       el.removeAttribute("src");
       el.load();
     }
+  }, [attached, unlocked, src]);
 
-    sync();
-  }, [attached, unlocked, src, state, clockOffsetMs, sync]);
+  const { onBlocked } = input;
+
+  useDriftSync(attached && media.handle, {
+    state,
+    clockOffsetMs,
+    canPlay: unlocked && !!src,
+    resyncKey: `${unlocked}|${src}|${loads}`,
+    onPlayRejected: (e) => isBlocked(e) && onBlocked?.(),
+  });
 
   useEffect(() => {
     const el = node.current;
@@ -103,7 +108,7 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
 
     const onLoaded = () => {
       setFailedSrc(null);
-      sync();
+      setLoads((n) => n + 1);
     };
 
     const onError = () => setFailedSrc(el.getAttribute("src"));
@@ -111,27 +116,22 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     el.addEventListener("loadedmetadata", onLoaded);
     el.addEventListener("error", onError);
 
-    const timer = window.setInterval(sync, AUDIO_DRIFT_CHECK_MS);
-
     return () => {
       el.removeEventListener("loadedmetadata", onLoaded);
       el.removeEventListener("error", onError);
-      window.clearInterval(timer);
     };
-  }, [attached, sync]);
+  }, [attached]);
 
   const prime = useCallback(() => {
     const el = node.current;
 
     if (!el) return;
 
-    const want = latest.current.src;
-
-    if (want && el.getAttribute("src") !== want) el.src = want;
+    if (src && el.getAttribute("src") !== src) el.src = src;
     else if (!el.getAttribute("src")) el.src = SILENT_WAV;
 
     void el.play().catch(() => undefined);
-  }, []);
+  }, [src]);
 
   return { ref, prime, failed: failedSrc !== null && failedSrc === (unlocked ? src : null) };
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { AUDIO_DRIFT_CHECK_MS, YOUTUBE_NOCOOKIE_HOST, YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
-import { audioPosition, planSync } from "@/lib/utils/audio/position";
+import { type MediaHandle, useDriftSync } from "./useDriftSync";
+
+import { YOUTUBE_NOCOOKIE_HOST, YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
 import { loadYoutubeIframeApi, YT_STATE, type YtPlayer } from "@/lib/utils/audio/youtube-iframe-api";
 import type { BattleAudioState } from "@/types/audio";
 
@@ -22,15 +23,10 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
 
   const [failed, setFailed] = useState(false);
 
-  const latest = useRef(input);
+  // PLAYING: тривалість стає відомою лише тепер — не чекаємо перевірки дрейфу
+  const [starts, setStarts] = useState(0);
 
   const tapHint = useRef<number | undefined>(undefined);
-
-  const syncRef = useRef<() => void>(() => undefined);
-
-  useEffect(() => {
-    latest.current = input;
-  });
 
   const { videoId } = input;
 
@@ -61,8 +57,7 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
               if (e.data !== YT_STATE.PLAYING) return;
 
               setNeedsTap(false);
-              // тривалість стає відомою лише з PLAYING — не чекаємо перевірки дрейфу
-              syncRef.current();
+              setStarts((n) => n + 1);
             },
             onError: () => setFailed(true),
           },
@@ -81,57 +76,42 @@ export function useYoutubeSync(input: { videoId: string | null; state: BattleAud
     };
   }, [host, videoId]);
 
-  const sync = useCallback(() => {
-    if (!player) return;
+  const media = useMemo<MediaHandle | null>(
+    () =>
+      player && {
+        ready: () => true,
+        currentTime: () => player.getCurrentTime(),
+        paused: () => player.getPlayerState() !== YT_STATE.PLAYING,
+        duration: () => player.getDuration() || null,
+        play: () => {
+          player.playVideo();
+          // iOS може проігнорувати playVideo без дотику до самого плеєра
+          window.clearTimeout(tapHint.current);
+          tapHint.current = window.setTimeout(() => setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
+        },
+        pause: () => player.pauseVideo(),
+        // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
+        seek: (sec) => {
+          if (player.getDuration()) player.seekTo(sec, true);
+        },
+      },
+    [player],
+  );
 
-    const { state, clockOffsetMs, volume, muted } = latest.current;
+  const { state, clockOffsetMs, volume, muted } = input;
+
+  useDriftSync(media, { state, clockOffsetMs, canPlay: true, resyncKey: starts });
+
+  useEffect(() => {
+    if (!player) return;
 
     player.setVolume(Math.round(volume * 100));
 
     if (muted) player.mute();
     else player.unMute();
+  }, [player, volume, muted]);
 
-    const durationSec = player.getDuration() || null;
-
-    const target = state ? audioPosition(state, { now: Date.now(), clockOffsetMs, durationSec }) : 0;
-
-    const paused = player.getPlayerState() !== YT_STATE.PLAYING;
-
-    const plan = planSync({ shouldPlay: !!state?.playing, paused, current: player.getCurrentTime(), target, durationSec });
-
-    if (plan.pause) player.pauseVideo();
-
-    // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
-    if (plan.seekTo !== null && durationSec) player.seekTo(plan.seekTo, true);
-
-    if (plan.play) {
-      player.playVideo();
-      // iOS може проігнорувати playVideo без дотику до самого плеєра
-      window.clearTimeout(tapHint.current);
-      tapHint.current = window.setTimeout(() => setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
-    }
-  }, [player]);
-
-  useEffect(() => {
-    syncRef.current = sync;
-  }, [sync]);
-
-  const { state, clockOffsetMs, volume, muted } = input;
-
-  useEffect(() => {
-    sync();
-  }, [sync, state, clockOffsetMs, volume, muted]);
-
-  useEffect(() => {
-    if (!player) return;
-
-    const timer = window.setInterval(sync, AUDIO_DRIFT_CHECK_MS);
-
-    return () => {
-      window.clearInterval(timer);
-      window.clearTimeout(tapHint.current);
-    };
-  }, [player, sync]);
+  useEffect(() => () => window.clearTimeout(tapHint.current), [player]);
 
   return { ref: setHost, needsTap, failed };
 }
