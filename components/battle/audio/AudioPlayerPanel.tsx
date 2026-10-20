@@ -5,7 +5,6 @@ import { ChevronDown, Music, Video, Volume2, VolumeX } from "lucide-react";
 
 import { DmAudioControls } from "./DmAudioControls";
 
-import { Button } from "@/components/ui/button";
 import type { BattleAudioValue } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
@@ -60,9 +59,9 @@ export function AudioPlayerPanel({ audio, view, children }: { audio: BattleAudio
           />
         </div>
       ) : (
-        <Button size="sm" className="mt-2 w-full" onClick={view.onUnlock}>
+        <button type="button" className="hud-sc mt-2 flex h-8 w-full items-center justify-center bg-[var(--enemy)] text-sm text-[var(--ink)]" onClick={view.onUnlock}>
           Увімкнути звук
-        </Button>
+        </button>
       )}
       {view.failed && (
         <p role="alert" className="mt-1 text-[var(--enemy)]">

@@ -6,7 +6,6 @@ import { Music } from "lucide-react";
 import { AudioPlayerPanel } from "./AudioPlayerPanel";
 import { YoutubeAudioDriver } from "./YoutubeAudioDriver";
 
-import { Button } from "@/components/ui/button";
 import { useBattleAudio } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -50,9 +49,9 @@ export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }
         {!expanded && (
           <div className="flex items-center gap-1.5">
             {track && !sound.unlocked && (
-              <Button size="sm" className="rounded-full" onClick={sound.unlock}>
+              <button type="button" className="hud-sc flex h-8 items-center justify-center bg-[var(--enemy)] px-3 text-sm text-[var(--ink)]" onClick={sound.unlock}>
                 Увімкнути звук
-              </Button>
+              </button>
             )}
             <button
               type="button"
