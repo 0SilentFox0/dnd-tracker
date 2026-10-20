@@ -11,7 +11,7 @@ import { battleKeys, useBattleBriefs } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowState } from "@/lib/hooks/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { battleAction, boundDeckIds, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import { battleAction, boundDeckIds, hasBattleBindings, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { BattleBrief } from "@/types/battle";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { Slide } from "@/types/show";
@@ -24,18 +24,18 @@ export interface ScenarioPlay {
   control: ShowControl;
 }
 
-export function useScenarioPlay(campaignId: string, content: ScenarioContent): ScenarioPlay {
+export function useScenarioPlay(campaignId: string, content: ScenarioContent, enabled = true): ScenarioPlay {
   const queryClient = useQueryClient();
 
   const notify = useNotify();
 
-  usePusherShowSync(campaignId);
+  usePusherShowSync(campaignId, enabled);
 
-  const { show } = useShowState(campaignId);
+  const { show } = useShowState(campaignId, enabled);
 
   const control = useShowControl(campaignId, notify);
 
-  const { data: briefs } = useBattleBriefs(campaignId);
+  const { data: briefs } = useBattleBriefs(campaignId, { enabled: enabled && hasBattleBindings(content) });
 
   const deckIds = boundDeckIds(content);
 
@@ -43,6 +43,7 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent): S
     queries: deckIds.map((deckId) => ({
       queryKey: showKeys.deck(campaignId, deckId),
       queryFn: () => getDeck(campaignId, deckId),
+      enabled,
       staleTime: 30_000,
       retry: (count: number, error: unknown) => !(error instanceof ApiError && error.status === 404) && count < 2,
     })),

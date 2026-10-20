@@ -5,6 +5,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as battlesApi from "@/lib/api/battles";
+import * as decksApi from "@/lib/api/decks";
 import { battleKeys } from "@/lib/hooks/battles";
 import { useScenarioPlay } from "@/lib/hooks/scenario";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
@@ -96,5 +97,28 @@ describe("useScenarioPlay", () => {
     await act(async () => result.current.runBattle(battleRow));
 
     expect(battlesApi.startBattle).not.toHaveBeenCalled();
+  });
+
+  it("enabled=false: ні списку боїв, ні наборів не вантажимо", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+
+    renderHook(() => useScenarioPlay("c", content, false), { wrapper });
+    await Promise.resolve();
+
+    expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
+    expect(decksApi.getDeck).not.toHaveBeenCalled();
+  });
+
+  it("без прив'язок до боїв список боїв не вантажиться", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+
+    renderHook(() => useScenarioPlay("c", { legend: [], sections: [{ id: "s", title: "S", played: false, rows: [slideRow] }] }), { wrapper });
+    await waitFor(() => expect(decksApi.getDeck).toHaveBeenCalled());
+
+    expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
   });
 });

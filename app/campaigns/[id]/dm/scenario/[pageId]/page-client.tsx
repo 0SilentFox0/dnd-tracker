@@ -25,13 +25,15 @@ export function ScenarioPageClient({ campaignId, pageId, playedPages }: { campai
 function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages }) {
   const progress = useSectionProgress(campaignId, page.id);
 
-  const play = useScenarioPlay(campaignId, page.content);
-
   const [hideNotes, setHideNotes] = useState(false);
 
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
 
   const [editBase, setEditBase] = useState<ScenarioPage | null>(null);
+
+  const playEnabled = page.kind === "scene" && !editBase;
+
+  const play = useScenarioPlay(campaignId, page.content, playEnabled);
 
   const [versionsOpen, setVersionsOpen] = useState(false);
 
@@ -74,11 +76,11 @@ function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: strin
         <ScenarioPageView
           page={page}
           campaignId={campaignId}
-          play={play}
+          play={playEnabled ? play : undefined}
           progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
         />
       )}
-      {!editBase && <ScenarioShowDock campaignId={campaignId} content={page.content} play={play} />}
+      {playEnabled && <ScenarioShowDock campaignId={campaignId} content={page.content} play={play} />}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}
     </ScenarioBook>
   );

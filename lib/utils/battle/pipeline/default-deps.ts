@@ -28,7 +28,7 @@ export const defaultPipelineDeps: PipelineDeps = {
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
   loadRecentEvents: (battleId, limit) => loadRecentEvents(prisma, battleId, limit),
   loadKnowledge: async (battleId) => summarizeKnowledge(await loadKnowledgeEvents(prisma, battleId)),
-  onCompleted(campaignId, battleId) {
+  onLeftActive(campaignId, battleId) {
     after(() => clearShowBattle(campaignId, battleId));
   },
   publish(messages) {

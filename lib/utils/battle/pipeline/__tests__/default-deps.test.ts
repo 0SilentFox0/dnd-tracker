@@ -53,12 +53,12 @@ describe("defaultPipelineDeps.publish", () => {
   });
 });
 
-describe("defaultPipelineDeps.onCompleted", () => {
+describe("defaultPipelineDeps.onLeftActive", () => {
   it("знімає виклик «До бою!» через after()", async () => {
     const { defaultPipelineDeps } = await import("@/lib/utils/battle/pipeline/default-deps");
 
     afterCallbacks.length = 0;
-    defaultPipelineDeps.onCompleted?.("c1", "b1");
+    defaultPipelineDeps.onLeftActive?.("c1", "b1");
     expect(clearShowBattle).not.toHaveBeenCalled();
     await afterCallbacks[0]();
     expect(clearShowBattle).toHaveBeenCalledWith("c1", "b1");

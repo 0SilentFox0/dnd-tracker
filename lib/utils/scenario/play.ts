@@ -19,6 +19,10 @@ export type BattleAction = "start" | "call" | "none";
 
 export const boundDeckIds = (content: ScenarioContent): string[] => [...new Set(content.sections.flatMap((s) => s.rows.flatMap((r) => (r.slide ? [r.slide.deckId] : []))))];
 
+export const hasBattleBindings = (content: ScenarioContent) => content.sections.some((s) => s.rows.some((r) => r.battleId));
+
+export const hasPlayBindings = (content: ScenarioContent) => content.sections.some((s) => s.rows.some((r) => r.slide || r.battleId));
+
 export function rowSlideState(row: ScenarioRow, lookup: PlayLookup): RowSlideState {
   if (!row.slide) return { kind: "none" };
 

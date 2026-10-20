@@ -123,7 +123,7 @@ describe("ScenarioPageView — режим гри", () => {
 
     render(<ScenarioPageView page={pageWith([{ id: "r1", story: p("А"), notes: p(""), battleId: "b1" }, { id: "r2", story: p("Б"), notes: p(""), battleId: "b3" }])} campaignId="c" play={pl} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "⚔ Почати бій «Засідка»" }));
+    fireEvent.click(screen.getByRole("button", { name: "Почати бій «Засідка»" }));
     expect(pl.runBattle).toHaveBeenCalled();
     expect((screen.getByRole("button", { name: "Бій завершено" }) as HTMLButtonElement).disabled).toBe(true);
   });

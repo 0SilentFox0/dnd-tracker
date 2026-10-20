@@ -40,4 +40,16 @@ describe("loadStoryChapters", () => {
     expect(json).toContain("Відкрито");
     expect(vi.mocked(prisma.scenarioPage.findMany).mock.calls[0][0]?.where).toEqual({ campaignId: "camp", characterId: "ch", kind: "hero" });
   });
+
+  it("прив'язки рядків (slide, battleId) не потрапляють у відповідь гравцю", async () => {
+    const bound = { ...heroContent, sections: [{ ...heroContent.sections[0], rows: [{ id: "r1", story: p("Відкрито"), notes: p(""), slide: { deckId: "deck-secret", slideId: "slide-secret" }, battleId: "battle-secret" }] }] };
+
+    vi.mocked(prisma.scenarioPage.findMany).mockResolvedValue([{ id: "hero1", content: bound }] as never);
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([] as never);
+
+    const json = JSON.stringify(await loadStoryChapters("ch", "camp"));
+
+    expect(json).toContain("Відкрито");
+    expect(json).not.toMatch(/deck-secret|slide-secret|battle-secret/);
+  });
 });

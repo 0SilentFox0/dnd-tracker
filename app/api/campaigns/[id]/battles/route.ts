@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleSchema } from "@/lib/schemas";
+import { clearShowBattle } from "@/lib/server/show/show-store";
 import { resolveMapBackgroundForPersistence } from "@/lib/supabase/battle-map-storage";
 import {
   requireCampaignAccess,
@@ -114,10 +115,16 @@ export async function DELETE(
     }
 
     // Видаляємо всі битви кампанії
+    const battles = await prisma.battleScene.findMany({ where: { campaignId: id }, select: { id: true } });
+
     const result = await prisma.battleScene.deleteMany({
       where: {
         campaignId: id,
       },
+    });
+
+    after(async () => {
+      for (const b of battles) await clearShowBattle(id, b.id);
     });
 
     return NextResponse.json({

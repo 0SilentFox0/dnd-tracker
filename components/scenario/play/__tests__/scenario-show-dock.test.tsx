@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { renderToString } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -53,5 +54,25 @@ describe("ScenarioShowDock", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Згорнути панель показу" }));
     expect(screen.queryByText("control-panel")).toBeNull();
+  });
+
+  it("стан із localStorage не читається при серверному рендері (без hydration mismatch)", () => {
+    localStorage.setItem("scenario-show-dock", "on");
+
+    expect(renderToString(<ScenarioShowDock campaignId="c" content={bound} play={play(null)} />)).not.toContain("control-panel");
+  });
+
+  it("збережене розгортання відновлюється на клієнті й переживає перемикання", () => {
+    localStorage.setItem("scenario-show-dock", "on");
+    render(<ScenarioShowDock campaignId="c" content={bound} play={play(null)} />);
+
+    expect(screen.getByText("control-panel")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Згорнути панель показу" }));
+    expect(localStorage.getItem("scenario-show-dock")).toBe("off");
+  });
+
+  it("виклик бою без показу: у заголовку назва бою", () => {
+    render(<ScenarioShowDock campaignId="c" content={empty} play={play({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 2, battle: { id: "b1", name: "Засідка" } } as unknown as ShowState)} />);
+    expect(screen.getByText("⚔ Засідка")).toBeTruthy();
   });
 });

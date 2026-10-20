@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Play, Swords } from "lucide-react";
 
+import { BattleStatus } from "@/lib/constants/battle";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import { battleAction, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { ScenarioRow } from "@/types/scenario";
@@ -27,15 +28,15 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
       {battle.kind === "missing" && <span className="sb-missing">Бій недоступний</span>}
       {battle.kind === "ready" && action !== "none" && (
         <button type="button" className="toggle" disabled={play.pending} onClick={() => play.runBattle(row)}>
-          <Swords className="size-3" /> {action === "start" ? `⚔ Почати бій «${battle.battle.name}»` : battle.called ? "Покликати ще раз" : "⚔ Покликати в бій"}
+          <Swords className="size-3" /> {action === "start" ? `Почати бій «${battle.battle.name}»` : battle.called ? "Покликати ще раз" : "Покликати в бій"}
         </button>
       )}
-      {battle.kind === "ready" && battle.battle.status === "active" && (
+      {battle.kind === "ready" && battle.battle.status === BattleStatus.ACTIVE && (
         <Link className="toggle" href={`/campaigns/${campaignId}/battles/${battle.battle.id}`} target="_blank" rel="noopener">
           Перейти до бою ↗
         </Link>
       )}
-      {battle.kind === "ready" && action === "none" && battle.battle.status === "completed" && (
+      {battle.kind === "ready" && action === "none" && battle.battle.status === BattleStatus.COMPLETED && (
         <button type="button" className="toggle" disabled>
           Бій завершено
         </button>
