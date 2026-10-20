@@ -24,19 +24,23 @@ export function battleTrackTitle(faction: string, n: number | null, note: string
   return [`${faction}${TRACK_GROUP_SEPARATOR}${BATTLE_TRACK_GROUP}`, n, note].filter(Boolean).join(" ");
 }
 
-/** Нумерація «<Раса> - Битва N» за порядком бібліотеки (номер лише коли в раси кілька битв); ідемпотентно */
+/** Нумерація за порядком бібліотеки лише серед треків з однаковою назвою (раса + примітка); ідемпотентно */
 export function planBattleTitles(tracks: BattleTrackRef[]): BattleTitleChange[] {
-  const byFaction = new Map<string, { id: string; title: string; note: string | null }[]>();
+  const byName = new Map<string, { id: string; title: string; faction: string; note: string | null }[]>();
 
   for (const t of tracks) {
     const parsed = parseBattleTitle(t.title);
 
-    if (parsed) byFaction.set(parsed.faction, [...(byFaction.get(parsed.faction) ?? []), { id: t.id, title: t.title, note: parsed.note }]);
+    if (!parsed) continue;
+
+    const key = battleTrackTitle(parsed.faction, null, parsed.note);
+
+    byName.set(key, [...(byName.get(key) ?? []), { id: t.id, title: t.title, ...parsed }]);
   }
 
-  return [...byFaction].flatMap(([faction, list]) =>
+  return [...byName.values()].flatMap((list) =>
     list.flatMap((t, i) => {
-      const to = battleTrackTitle(faction, list.length > 1 ? i + 1 : null, t.note);
+      const to = battleTrackTitle(t.faction, list.length > 1 ? i + 1 : null, t.note);
 
       return to === t.title ? [] : [{ id: t.id, from: t.title, to }];
     }),
