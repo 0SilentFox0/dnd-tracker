@@ -1,13 +1,12 @@
-import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
+import { extractRaceImmunities, type RaceImmunitySource } from "@/lib/utils/races/race-effects";
 import type { Character } from "@/types/characters";
-import type { Race, RaceFromPrisma } from "@/types/races";
 
 /**
  * Отримує всі імунітети персонажа, включаючи імунітети з раси
  */
 export function getCharacterImmunities(
   character: Character | { immunities?: string[] | null } | { immunities?: unknown } | Record<string, unknown>,
-  race: Race | RaceFromPrisma | null | undefined
+  race: RaceImmunitySource | null | undefined
 ): string[] {
   const characterImmunities = Array.isArray(character.immunities)
     ? character.immunities

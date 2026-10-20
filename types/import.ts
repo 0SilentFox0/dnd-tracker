@@ -1,4 +1,4 @@
-import { AttackType } from "@/lib/constants/battle";
+import type { UnitAttack } from "@/types/units";
 
 // Unit Import
 export interface CSVUnitRow {
@@ -55,20 +55,6 @@ export interface CSVUnitRow {
   Image?: string;
   image?: string;
   URL?: string;
-}
-
-export interface UnitAttack {
-  name: string;
-  type?: AttackType;
-  targetType?: "target" | "aoe";
-  attackBonus: number;
-  damageType: string;
-  damageDice: string;
-  range?: string;
-  properties?: string;
-  maxTargets?: number;
-  damageDistribution?: number[];
-  guaranteedDamage?: number;
 }
 
 export interface UnitSpecialAbility {

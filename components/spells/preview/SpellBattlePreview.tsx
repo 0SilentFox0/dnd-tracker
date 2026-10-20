@@ -2,7 +2,7 @@
 
 import { type ComponentProps, lazy, Suspense, useEffect, useSyncExternalStore } from "react";
 
-import { spellFx } from "@/lib/utils/battle/fx/spells";
+import { spellFx } from "@/lib/utils/battle/fx";
 
 // the battle engine and FX runtime load only when a spell is opened; React.lazy keeps next/dynamic's loader out of the entry chunk
 const Panel = lazy(() => import("./SpellBattlePreviewPanel"));

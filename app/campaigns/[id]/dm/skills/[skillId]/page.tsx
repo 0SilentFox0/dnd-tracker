@@ -1,7 +1,7 @@
 import { EditSkillClient } from "./edit-skill-client";
 
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import type { MainSkill } from "@/types/main-skills";
 
 export default async function EditSkillPage({

@@ -13,8 +13,6 @@ export function targetingLabel(t: SpellTargeting): string {
   return inline(SPELL_TARGETING_LABELS[t.kind]);
 }
 
-export const rangeLabel = (feet: number): string => `Дальність ${feet} фт`;
-
 export function resolutionLabel(r: SpellResolution): string {
   return r.kind === "auto" ? "автоматично" : `рятівний кидок ${ABILITY_LABELS[r.ability]} (${inline(SPELL_SAVE_ON_SUCCESS_LABELS[r.onSuccess])})`;
 }

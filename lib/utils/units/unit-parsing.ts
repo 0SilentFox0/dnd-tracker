@@ -1,30 +1,22 @@
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
-import type { CSVUnitRow, ImportUnit, UnitAttack, UnitSpecialAbility } from "@/types/import";
+import type { CSVUnitRow, ImportUnit, UnitSpecialAbility } from "@/types/import";
+import type { UnitAttack } from "@/types/units";
 
-/**
- * Парсить значення ability score з рядка
- * Формат: "8 (+1)" або просто "8"
- */
+// "8 (+1)" або "8"
 export function parseAbilityScore(value: string): number {
   const match = value.match(/(\d+)/);
 
   return match ? parseInt(match[1], 10) : 10;
 }
 
-/**
- * Парсить AC з рядка
- * Формат: "12" або "12 (natural armor)"
- */
+// "12" або "12 (natural armor)"
 export function parseArmorClass(value: string): number {
   const match = value.match(/(\d+)/);
 
   return match ? parseInt(match[1], 10) : 10;
 }
 
-/**
- * Парсить HP з рядка
- * Формат: "18 (4к6 + 4)" або просто "18"
- */
+// "18 (4к6 + 4)" або "18"
 export function parseMaxHp(value: string): number {
   const beforeParentheses = value.match(/^(\d+)\s*\(/);
 
@@ -32,36 +24,24 @@ export function parseMaxHp(value: string): number {
     return parseInt(beforeParentheses[1], 10);
   }
 
-  // Якщо немає дужок, шукаємо перше число
   const match = value.match(/(\d+)/);
 
   return match ? parseInt(match[1], 10) : 10;
 }
 
-/**
- * Парсить швидкість з рядка
- * Формат: "25 фт." або "30 фт." або просто "30"
- */
 export function parseSpeed(value: string): number {
   const match = value.match(/(\d+)/);
 
   return match ? parseInt(match[1], 10) : 30;
 }
 
-/**
- * Парсить рівень (Tier) з рядка
- */
 export function parseLevel(value: string): number {
   const match = value.match(/(\d+)/);
 
   return match ? parseInt(match[1], 10) : 1;
 }
 
-/**
- * Парсить атаки з рядка
- * Формат: "Укус +5, 1к6 колючий урон" або "Кігті +6, 2к6 рублячий"
- * Може бути кілька атак через кому: "Укус +5, 1к6 колючий. Кігті +6, 2к6 рублячий"
- */
+// "Укус +5, 1к6 колючий. Кігті +6, 2к6 рублячий" — атаки через крапку
 export function parseAttacks(value: string): UnitAttack[] {
   if (!value || value.trim() === "Відсутні" || value.trim() === "") {
     return [];
@@ -71,13 +51,11 @@ export function parseAttacks(value: string): UnitAttack[] {
   
   let attackStrings = value.split(/\.\s+/).map((s) => s.trim()).filter(Boolean);
   
-  // Якщо не знайшли крапок, розділяємо по комах
   if (attackStrings.length === 1 && value.includes(",")) {
     attackStrings = [value];
   }
 
   for (const attackStr of attackStrings) {
-    // Формат: "Назва +бонус, урон тип" або "Назва +бонус, урон"
     const bonusMatch = attackStr.match(/\+(\d+)/);
 
     const damageMatch = attackStr.match(/(\d+[кk]?\d+[\+\-]?\d*)/i);
@@ -129,9 +107,6 @@ export function parseAttacks(value: string): UnitAttack[] {
   return attacks;
 }
 
-/**
- * Парсить special abilities з рядка
- */
 export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   if (!value || value.trim() === "") {
     return [];
@@ -169,9 +144,6 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   return abilities;
 }
 
-/**
- * Конвертує CSV рядок юніта в формат для імпорту
- */
 export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
   const name = (row.Назва || row.name || row.Name || "").trim();
 

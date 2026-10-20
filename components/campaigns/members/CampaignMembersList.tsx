@@ -7,19 +7,11 @@ import { Button } from "@/components/ui/button";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { useRemoveCampaignMember } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
-
-interface CampaignMember {
-  id: string;
-  userId: string;
-  role: string;
-  user: {
-    displayName: string;
-  };
-}
+import type { CampaignMembership, PublicUser } from "@/types/campaigns";
 
 interface CampaignMembersListProps {
   campaignId: string;
-  members: CampaignMember[];
+  members: Array<CampaignMembership & { user: PublicUser }>;
   isDM: boolean;
 }
 

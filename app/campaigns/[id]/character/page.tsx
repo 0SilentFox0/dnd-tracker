@@ -2,11 +2,11 @@ import { readCharacterSheet } from "@/app/api/campaigns/[id]/characters/[charact
 import { CharacterProfile } from "@/components/character-profile";
 import { EmptyState } from "@/components/common/states";
 import { HudPage } from "@/components/hud/page";
-import { requireCampaignMember } from "@/lib/campaigns/access";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
+import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { CharacterSheet } from "@/types/characters";
 

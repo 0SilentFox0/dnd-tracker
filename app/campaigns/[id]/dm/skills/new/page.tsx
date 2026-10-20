@@ -1,6 +1,6 @@
 import { SkillCreateForm } from "@/components/skills/form/SkillCreateForm";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function NewSkillPage({
   params,

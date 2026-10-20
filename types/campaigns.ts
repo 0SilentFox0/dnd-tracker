@@ -7,12 +7,15 @@ export interface Campaign {
   maxLevel: number;
   allowPlayerEdit: boolean;
   status: string;
-  members?: Array<{
-    id: string;
-    userId: string;
-    role: string;
-    user?: PublicUser;
-  }>;
+  members?: CampaignMembership[];
+}
+
+/** Рядок campaign_members з user-relation (сторінка кампанії). */
+export interface CampaignMembership {
+  id: string;
+  userId: string;
+  role: string;
+  user?: PublicUser;
 }
 
 export interface PublicUser {

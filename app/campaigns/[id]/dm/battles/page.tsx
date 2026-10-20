@@ -8,9 +8,9 @@ import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
 
 const SECTIONS: { kind: BattleStatus; title: string }[] = [

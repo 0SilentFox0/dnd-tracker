@@ -1,13 +1,13 @@
 "use client";
 
 import { UNIT_FORM_TAB, type UnitFormTabId } from "./unit-form-tabs";
-import { UnitAbilityScores } from "./UnitAbilityScores";
 import { UnitAttacks } from "./UnitAttacks";
 import { UnitBasicInfo } from "./UnitBasicInfo";
 import { UnitImmunities } from "./UnitImmunities";
 import { UnitKnownSpells } from "./UnitKnownSpells";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { HudSection, type HudTab } from "@/components/hud/form";
 import type { UnitFormFieldsState } from "@/lib/hooks/units";
@@ -49,7 +49,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
             fallbackText={formData.name || "?"}
           />
           <HudSection title="Характеристики">
-            <UnitAbilityScores formData={formData} onChange={change} />
+            <AbilityScoresGrid data={formData} set={(key, value) => change({ [key]: value })} />
           </HudSection>
         </div>
       ),

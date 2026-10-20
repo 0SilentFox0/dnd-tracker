@@ -1,7 +1,7 @@
 import { PrintSkillsPageClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { withAbilitySummary } from "@/lib/utils/abilities/summary";
 
 export default async function PrintSkillsPage({

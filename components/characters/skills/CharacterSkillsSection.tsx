@@ -1,22 +1,16 @@
 import { HudSection } from "@/components/hud/form";
 import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 import { DND_SAVING_THROWS, DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
+import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 
 interface CharacterSkillsSectionProps {
-  skills: {
-    savingThrows: Record<string, boolean>;
-    skills: Record<string, boolean>;
-    handlers: {
-      toggleSavingThrow: (ability: string) => void;
-      toggleSkill: (skill: string) => void;
-    };
-  };
+  skills: CharacterFormBindings["skills"];
 }
 
 export function CharacterSkillsSection({
   skills: skillsGroup,
 }: CharacterSkillsSectionProps) {
-  const { savingThrows, skills, handlers } = skillsGroup;
+  const { data: { savingThrows, skills }, handlers } = skillsGroup;
   
   return (
     <div className="w-full">

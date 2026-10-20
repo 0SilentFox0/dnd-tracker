@@ -1,14 +1,14 @@
 import { COMMON_IMMUNITIES, IMMUNITY_PATTERNS } from "@/lib/constants/immunities";
-import type { Race, RaceFromPrisma } from "@/types/races";
+import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
-/**
- * Парсить пасивну здібність раси та витягує імунітети
- */
-export function extractRaceImmunities(race: Race | RaceFromPrisma | null | undefined): string[] {
+export type RaceImmunitySource = { passiveAbility?: unknown; abilities?: unknown };
+
+/** Імунітети з тексту пасивки — лише для рас без нових abilities. */
+export function extractRaceImmunities(race: RaceImmunitySource | null | undefined): string[] {
   if (!race?.passiveAbility) return [];
 
-  if (Array.isArray((race as { abilities?: unknown }).abilities) && ((race as { abilities: unknown[] }).abilities.length > 0)) return [];
+  if (Array.isArray(race.abilities) && race.abilities.length > 0) return [];
 
   const passiveAbility = race.passiveAbility;
 

@@ -1,10 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import type { ConversionIssue } from "@/lib/utils/abilities/schema";
-import type { Ability } from "@/lib/utils/abilities/schema";
-/**
- * Типи для системи рас
- */
+import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 
 export interface StatModifier {
   bonus?: boolean; // Дає + (бонус)
@@ -17,6 +13,16 @@ export interface SpellSlotProgression {
   slots: number; // Максимальна кількість слотів
 }
 
+export interface RacePassiveAbility {
+  name?: string;
+  icon?: string;
+  description: string;
+  appearanceDescription?: string;
+  statImprovements?: string;
+  // ключ — характеристика (strength, dexterity, …)
+  statModifiers?: Record<string, StatModifier>;
+}
+
 export interface Race {
   abilities?: Ability[];
   icon?: string | null;
@@ -27,14 +33,7 @@ export interface Race {
   name: string;
   availableSkills: string[];
   disabledSkills: string[];
-  passiveAbility?: {
-    name?: string;
-    icon?: string;
-    description: string;
-    appearanceDescription?: string;
-    statImprovements?: string;
-    statModifiers?: Record<string, StatModifier>; // Ключ - назва характеристики (strength, dexterity, etc.)
-  } | null;
+  passiveAbility?: RacePassiveAbility | null;
   spellSlotProgression?: SpellSlotProgression[];
   createdAt: Date;
   updatedAt: Date;
@@ -46,23 +45,9 @@ export interface RaceFormData {
   color?: string;
   availableSkills: string[];
   disabledSkills: string[];
-  passiveAbility?: {
-    name?: string;
-    icon?: string;
-    description: string;
-    appearanceDescription?: string;
-    statImprovements?: string;
-    statModifiers?: Record<string, StatModifier>;
-  };
+  passiveAbility?: RacePassiveAbility;
   spellSlotProgression?: SpellSlotProgression[];
   abilities: Ability[];
 }
-
-export type RaceFromPrisma = Omit<Race, "availableSkills" | "disabledSkills" | "spellSlotProgression" | "passiveAbility"> & {
-  availableSkills?: unknown;
-  disabledSkills?: unknown;
-  spellSlotProgression?: unknown;
-  passiveAbility?: unknown;
-};
 
 export type RaceRow = Prisma.RaceGetPayload<object>;

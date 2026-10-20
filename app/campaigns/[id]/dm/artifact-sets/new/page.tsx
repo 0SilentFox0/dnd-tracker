@@ -1,6 +1,6 @@
 import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { HudFormPage } from "@/components/hud/form";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function NewArtifactSetPage({
   params,

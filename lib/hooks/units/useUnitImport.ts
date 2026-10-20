@@ -5,7 +5,7 @@ import { unitWriteKeys } from "./keys";
 import { importUnits } from "@/lib/api/units";
 import { useCrudMutation, useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
-import { convertCSVRowToUnit } from "@/lib/utils/common/unit-parsing";
+import { convertCSVRowToUnit } from "@/lib/utils/units/unit-parsing";
 import type { CSVUnitRow, ImportUnit } from "@/types/import";
 
 export function useUnitImport(campaignId: string) {

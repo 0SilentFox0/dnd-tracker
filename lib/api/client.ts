@@ -1,4 +1,4 @@
-import { getCampaignApiUrl } from "@/lib/utils/api/api-helpers";
+import { getCampaignApiUrl } from "@/lib/api/api-helpers";
 
 export class ApiError extends Error {
   constructor(

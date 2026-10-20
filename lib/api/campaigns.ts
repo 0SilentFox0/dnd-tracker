@@ -6,7 +6,7 @@ import {
 } from "@/lib/api/client";
 import type { Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
 
-export type ActiveBattle = { id: string; campaignId: string };
+type ActiveBattle = { id: string; campaignId: string };
 
 /**
  * Отримує активні бої в кампаніях, де користувач є учасником.

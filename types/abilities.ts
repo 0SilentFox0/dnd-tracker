@@ -1,5 +1,5 @@
 import { AttackType } from "@/lib/constants/battle";
-import type { Ability, DamageKind, StaticEffect } from "@/lib/utils/abilities/schema";
+import type { Ability, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { GridPoint } from "@/types/battle";
 
 export type { Ability, StaticEffect };
@@ -37,8 +37,6 @@ export type AbilityEvent =
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
   | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint }
   | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint };
-
-export type AbilityDamageKind = DamageKind;
 
 export interface AbilitySourceRef {
   kind: "skill" | "race" | "artifact" | "artifactSet" | "unit";

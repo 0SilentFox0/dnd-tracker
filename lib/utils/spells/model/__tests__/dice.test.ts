@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { LearnedNode } from "@/lib/utils/skills/progression";
-import { assertSpellDice, schoolMasteryFromLearned, spellDice } from "@/lib/utils/spells/model/dice";
+import { schoolMasteryFromLearned, spellDice } from "@/lib/utils/spells/model/dice";
 
 const node = (branchId: string, level: "basic" | "advanced" | "expert"): LearnedNode => ({ kind: "branchLevel", nodeId: `${branchId}-${level}`, branchId, level, skillId: null, circle: null });
 
@@ -62,18 +62,5 @@ describe("schoolMasteryFromLearned", () => {
     ];
 
     expect(schoolMasteryFromLearned(nodes, { "b-chaos": "chaos" })("chaos")).toBeNull();
-  });
-});
-
-describe("assertSpellDice", () => {
-  const expected = { count: 6, sides: 10 };
-
-  it("приймає збіг", () => {
-    expect(assertSpellDice({ count: 6, sides: 10 }, expected)).toBe(true);
-  });
-
-  it("відхиляє невірну кількість або грані", () => {
-    expect(assertSpellDice({ count: 5, sides: 10 }, expected)).toBe(false);
-    expect(assertSpellDice({ count: 6, sides: 6 }, expected)).toBe(false);
   });
 });

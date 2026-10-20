@@ -1,5 +1,5 @@
 import { EntityIcon } from "@/components/common/EntityIcon";
-import type { RacePassiveAbility } from "@/lib/utils/races/race-summary";
+import type { RacePassiveAbility } from "@/types/races";
 
 function Described({ title, icon, description, appearance }: { title: string; icon?: string | null; description?: string; appearance?: string }) {
   return (

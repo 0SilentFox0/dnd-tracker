@@ -1,204 +1,35 @@
-import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { type CharacterTypeValue } from "@/lib/constants/characters";
-import type { AbilityKey, CharacterFormData } from "@/types/characters";
+import type { CharacterFormData } from "@/types/characters";
+
+export interface SectionBinding<S> {
+  data: S;
+  set: <K extends keyof S>(key: K, value: S[K]) => void;
+}
 
 export interface CharacterFormHandlers {
   toggleSavingThrow: (ability: string) => void;
   toggleSkill: (skill: string) => void;
 }
 
-export function buildCharacterFormBindings(
-  formData: CharacterFormData,
-  setFormData: React.Dispatch<React.SetStateAction<CharacterFormData>>,
-  handlers: CharacterFormHandlers,
-) {
-  const { toggleSavingThrow, toggleSkill } = handlers;
+type SetFormData = React.Dispatch<React.SetStateAction<CharacterFormData>>;
 
-  const basicInfo = {
-    ...formData.basicInfo,
-    setters: {
-      setName: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, name: value },
-        })),
-      setType: (value: CharacterTypeValue) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, type: value },
-        })),
-      setControlledBy: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, controlledBy: value },
-        })),
-      setLevel: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, level: value },
-        })),
-      setClass: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, class: value },
-        })),
-      setSubclass: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, subclass: value },
-        })),
-      setArchetype: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, archetype: value },
-        })),
-      setRace: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, race: value },
-        })),
-      setSubrace: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, subrace: value },
-        })),
-      setAlignment: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, alignment: value },
-        })),
-      setBackground: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, background: value },
-        })),
-      setAvatar: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          basicInfo: { ...prev.basicInfo, avatar: value },
-        })),
-    },
-  };
+type FieldSection = "basicInfo" | "abilityScores" | "combatStats" | "spellcasting" | "abilities";
 
-  const abilityScores = {
-    ...formData.abilityScores,
-    setters: {
-      setStrength: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, strength: value },
-        })),
-      setDexterity: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, dexterity: value },
-        })),
-      setConstitution: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, constitution: value },
-        })),
-      setIntelligence: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, intelligence: value },
-        })),
-      setWisdom: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, wisdom: value },
-        })),
-      setCharisma: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, charisma: value },
-        })),
-      setPrimaryAbility: (value: AbilityKey | null) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilityScores: { ...prev.abilityScores, primaryAbility: value },
-        })),
-    },
-  };
-
-  const combatStats = {
-    ...formData.combatStats,
-    setters: {
-      setArmorClass: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, armorClass: value },
-        })),
-      setInitiative: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, initiative: value },
-        })),
-      setSpeed: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, speed: value },
-        })),
-      setMinTargets: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, minTargets: value },
-        })),
-      setMaxTargets: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, maxTargets: value },
-        })),
-      setMorale: (value: number) =>
-        setFormData((prev) => ({
-          ...prev,
-          combatStats: { ...prev.combatStats, morale: value },
-        })),
-    },
-  };
-
-  const skills = {
-    ...formData.skills,
-    handlers: { toggleSavingThrow, toggleSkill },
-  };
-
-  const spellcasting = {
-    ...formData.spellcasting,
-    setters: {
-      setSpellcastingAbility: (
-        value: SpellcastingAbility | undefined,
-      ) =>
-        setFormData((prev) => ({
-          ...prev,
-          spellcasting: { ...prev.spellcasting, spellcastingAbility: value },
-        })),
-      setSpellSlots: (
-        value: Record<string, { max: number; current: number }>,
-      ) =>
-        setFormData((prev) => ({
-          ...prev,
-          spellcasting: { ...prev.spellcasting, spellSlots: value },
-        })),
-    },
-  };
-
-  const abilities = {
-    ...formData.abilities,
-    setters: {
-      setPersonalSkillId: (value: string) =>
-        setFormData((prev) => ({
-          ...prev,
-          abilities: { ...prev.abilities, personalSkillId: value },
-        })),
-    },
-  };
-
+function sectionBinding<T extends FieldSection>(formData: CharacterFormData, setFormData: SetFormData, section: T): SectionBinding<CharacterFormData[T]> {
   return {
-    basicInfo,
-    abilityScores,
-    combatStats,
-    skills,
-    spellcasting,
-    abilities,
+    data: formData[section],
+    set: (key, value) => setFormData((prev) => ({ ...prev, [section]: { ...prev[section], [key]: value } })),
   };
 }
+
+export function buildCharacterFormBindings(formData: CharacterFormData, setFormData: SetFormData, handlers: CharacterFormHandlers) {
+  return {
+    basicInfo: sectionBinding(formData, setFormData, "basicInfo"),
+    abilityScores: sectionBinding(formData, setFormData, "abilityScores"),
+    combatStats: sectionBinding(formData, setFormData, "combatStats"),
+    skills: { data: formData.skills, handlers },
+    spellcasting: sectionBinding(formData, setFormData, "spellcasting"),
+    abilities: sectionBinding(formData, setFormData, "abilities"),
+  };
+}
+
+export type CharacterFormBindings = ReturnType<typeof buildCharacterFormBindings>;

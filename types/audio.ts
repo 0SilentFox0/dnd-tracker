@@ -74,7 +74,3 @@ export type CreateTrackData =
 export interface UpdateTrackData {
   title: string;
 }
-
-export interface ReorderTracksData {
-  ids: string[];
-}
