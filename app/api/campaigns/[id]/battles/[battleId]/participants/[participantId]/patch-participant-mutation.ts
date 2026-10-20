@@ -6,7 +6,7 @@ import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
-import { advanceTurn } from "@/lib/utils/battle/turn";
+import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
 import type { BattleParticipant } from "@/types/battle";
 
 const DM_DETAILS = { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} };
@@ -48,12 +48,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
 
   // хід був на видаленому — наступний отримує повний початок ходу (а з кінця черги — новий раунд)
   if (removedIndex === current && participants.length > 0) {
-    const advanced = advanceTurn({
-      participants,
-      pending: ctx.pending,
-      scene: { ...ctx.scene, turnIndex: removedIndex - 1, pendingMoraleCheck: null },
-      map: ctx.meta.map,
-    });
+    const advanced = advanceAfterRemoval({ participants, pending: ctx.pending, scene: ctx.scene, map: ctx.meta.map, before: removedIndex });
 
     return {
       participants: advanced.participants,

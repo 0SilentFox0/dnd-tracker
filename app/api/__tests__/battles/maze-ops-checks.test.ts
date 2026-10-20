@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
-import { MAZE_OP_TEXT,type MazeAction } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { MazeActionData as MazeAction } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
 const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 7, y: 0 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over });
@@ -53,11 +54,11 @@ describe("maze ops: телепорти й вихід перевіряються 
 
 describe("maze ops: великі дії ДМ пишуть коротку подію (ціль для відкату)", () => {
   const cases: Array<[MazeAction, string]> = [
-    [{ op: "generate", difficulty: "easy", teleportPairs: 0, fogPatches: 0, exit: null }, MAZE_OP_TEXT.generate],
-    [{ op: "reshuffle", mode: "walls", teleportPairs: 0, fogPatches: 0 }, MAZE_OP_TEXT.reshuffle],
-    [{ op: "dark", on: true }, MAZE_OP_TEXT.darkOn],
-    [{ op: "dark", on: false }, MAZE_OP_TEXT.darkOff],
-    [{ op: "scatterStarts" }, MAZE_OP_TEXT.scatterStarts],
+    [{ op: "generate", difficulty: "easy", teleportPairs: 0, fogPatches: 0, exit: null }, MAZE_TEXTS.ops.generate],
+    [{ op: "reshuffle", mode: "walls", teleportPairs: 0, fogPatches: 0 }, MAZE_TEXTS.ops.reshuffle],
+    [{ op: "dark", on: true }, MAZE_TEXTS.ops.darkOn],
+    [{ op: "dark", on: false }, MAZE_TEXTS.ops.darkOff],
+    [{ op: "scatterStarts" }, MAZE_TEXTS.ops.scatterStarts],
   ];
 
   it.each(cases)("%o", (action, text) => {

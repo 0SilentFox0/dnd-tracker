@@ -8,7 +8,7 @@ import { attackBodySchema } from "@/app/api/campaigns/[id]/battles/[battleId]/at
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
-import { MAZE_DARK_ERROR, MAZE_DARK_SKIP } from "@/lib/utils/battle/maze";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import type { BattleMutationContext, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
@@ -53,7 +53,7 @@ describe("темрява в лабіринті", () => {
 
       const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedInDark: true, schema, mutate }, body);
 
-      expect(out).toEqual({ status: 422, json: { code: "action_rejected", error: MAZE_DARK_ERROR } });
+      expect(out).toEqual({ status: 422, json: { code: "action_rejected", error: MAZE_TEXTS.dark } });
       expect(mutate).not.toHaveBeenCalled();
     }
   });
@@ -72,7 +72,7 @@ describe("темрява в лабіринті", () => {
   });
 
   it("власний крок гравця в темряві — відмова; розстановка ДМ — дозволена", () => {
-    expect(() => moveMutation(ctx(mapOf()), { participantId: "hero", to: { x: 0, y: 1 } })).toThrow(expect.objectContaining({ code: "action_rejected", message: MAZE_DARK_ERROR }));
+    expect(() => moveMutation(ctx(mapOf()), { participantId: "hero", to: { x: 0, y: 1 } })).toThrow(expect.objectContaining({ code: "action_rejected", message: MAZE_TEXTS.dark }));
 
     const dm = ctx(mapOf(), { userId: "dm", isDM: true, scene: { ...context().scene, turnIndex: 1 } });
 
@@ -84,12 +84,12 @@ describe("темрява в лабіринті", () => {
   it("next-turn у темряві пише «Темрява — хід пропущено» для того, чий хід завершився", () => {
     const out = nextTurnMutation(ctx(mapOf()));
 
-    const skip = out.events.find((e) => e.resultText === MAZE_DARK_SKIP);
+    const skip = out.events.find((e) => e.resultText === MAZE_TEXTS.darkSkip);
 
     expect(skip).toMatchObject({ actorId: "hero" });
     expect(out.events[0]).toBe(skip);
 
-    expect(nextTurnMutation(ctx(mapOf({ dark: false }))).events.some((e) => e.resultText === MAZE_DARK_SKIP)).toBe(false);
+    expect(nextTurnMutation(ctx(mapOf({ dark: false }))).events.some((e) => e.resultText === MAZE_TEXTS.darkSkip)).toBe(false);
   });
 });
 

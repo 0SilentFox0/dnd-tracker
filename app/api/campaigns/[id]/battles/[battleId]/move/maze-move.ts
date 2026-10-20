@@ -1,11 +1,12 @@
 import { resolveMover } from "./resolve-mover";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import type { MazeGrid } from "@/lib/utils/battle/maze";
-import { applyMazeMove, heroEvent, MAZE_DARK_ERROR, mazePlacementError, placeInMaze, placeMazeParticipants } from "@/lib/utils/battle/maze";
+import { placeParticipants } from "@/lib/utils/battle/grid/placement";
+import { applyMazeMove, type MazeGrid, mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { actorEvent, battleActionToEvent, rejectAction } from "@/lib/utils/battle/store";
 import { advanceTurn, assertNotPanicking } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 
@@ -16,43 +17,41 @@ export interface MazeMoveBody {
   returnToStart?: true;
 }
 
-export const MAZE_NOT_READY = "Лабіринт ще не готовий";
+export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, { map: base, grid }: { map: BattleMapConfig; grid: MazeGrid }): MutationResult {
+  if (!grid.maze.exit) rejectAction(MAZE_TEXTS.notReady);
 
-export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, grid: MazeGrid): MutationResult {
-  if (!grid.maze.exit) throw new BattleRuleError("action_rejected", MAZE_NOT_READY);
+  if (data.returnToStart) rejectAction(MAZE_TEXTS.noReturnToStart);
 
-  if (data.returnToStart) throw new BattleRuleError("action_rejected", "У лабіринті повернутися на старт не можна");
-
-  const { participants, mover, ownTurn } = resolveMover(ctx, data.participantId, (ps) => placeMazeParticipants(grid, ps));
+  const { participants, mover, ownTurn } = resolveMover(ctx, data.participantId, (ps) => placeParticipants(base, ps));
 
   if (!ownTurn || (ctx.isDM && data.free === true)) {
     const error = mazePlacementError(grid, { participants, mover, to: data.to });
 
-    if (error) throw new BattleRuleError("action_rejected", error);
+    if (error) rejectAction(error);
 
     return { participants: replaceParticipant(participants, placeInMaze(grid, mover, data.to)), pending: ctx.pending, events: [] };
   }
 
-  if (grid.maze.dark) throw new BattleRuleError("action_rejected", MAZE_DARK_ERROR);
+  if (grid.maze.dark) rejectAction(MAZE_TEXTS.dark);
 
   assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 
   const step = applyMazeMove(grid, { participants, mover, to: data.to });
 
-  if ("error" in step) throw new BattleRuleError("action_rejected", step.error);
+  if ("error" in step) return rejectAction(step.error);
 
   const after = replaceParticipant(participants, step.mover);
 
   const firstStep = mover.basicInfo.side === ParticipantSide.ALLY && !grid.maze.moved;
 
-  const map: BattleMapConfig | null = firstStep && ctx.meta.map ? { ...ctx.meta.map, maze: { ...grid.maze, moved: true } } : null;
+  const map: BattleMapConfig | null = firstStep ? { ...base, maze: { ...grid.maze, moved: true } } : null;
 
   if (!step.escaped) return { participants: after, pending: ctx.pending, events: [], ...(map && { scene: { map } }) };
 
-  const escapedEvent = heroEvent(ctx.scene.round, step.mover, `${mover.basicInfo.name} вибрався з лабіринту`);
+  const escapedEvent = actorEvent(ctx.scene.round, step.mover, MAZE_TEXTS.escaped(mover.basicInfo.name));
 
   // вихід завершує хід героя тим самим рушієм, що й attack з endTurn
-  const advanced = advanceTurn({ participants: after, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: map ?? ctx.meta.map });
+  const advanced = advanceTurn({ participants: after, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: map ?? base });
 
   return {
     participants: advanced.participants,

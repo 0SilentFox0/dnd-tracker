@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { canStand } from "@/lib/utils/battle/grid/occupancy";
-import { mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
+import { enterMazeAsleep, mazeGridOf, mazePlacementError, placeInMaze } from "@/lib/utils/battle/maze";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -22,7 +22,6 @@ export const addParticipantSchema = z.object({
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
   quantity: z.number().int().min(1).max(10).optional().default(1),
   reserved: z.boolean().optional(),
-  /** клітинка для першого доданого; решту розставить карта */
   position: mapCellSchema.optional(),
 });
 
@@ -70,13 +69,13 @@ function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: Gr
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
 
-  if (!map.maze) {
+  const grid = mazeGridOf(map);
+
+  if (!grid) {
     if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
 
     return { ...first, battleData: { ...first.battleData, position: to } };
   }
-
-  const grid = { cols: map.cols, rows: map.rows, maze: map.maze };
 
   const error = mazePlacementError(grid, { participants: ctx.participants, mover: first, to });
 
@@ -85,12 +84,9 @@ function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: Gr
   return placeInMaze(grid, first, to);
 }
 
-// у лабіринті доданий ворог з'являється сплячим
 function enterMap(ctx: BattleMutationContext, added: BattleParticipant[], position: GridPoint | undefined): BattleParticipant[] {
-  const maze = !!ctx.meta.map?.maze;
-
   return added.map((p, i) => {
-    const asleep = maze && p.basicInfo.side === ParticipantSide.ENEMY ? { ...p, battleData: { ...p.battleData, dormant: true } } : p;
+    const asleep = enterMazeAsleep(ctx.meta.map, p);
 
     return i === 0 && position ? placeFirst(ctx, asleep, position) : asleep;
   });

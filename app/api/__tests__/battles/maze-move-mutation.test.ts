@@ -3,11 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { createAddParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation";
-import { MAZE_NOT_READY } from "@/app/api/campaigns/[id]/battles/[battleId]/move/maze-move";
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { revealParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_PLACEMENT_ERROR } from "@/lib/utils/battle/maze";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
@@ -54,7 +53,7 @@ describe("maze move mutation", () => {
 
     rejected(() => moveMutation(tired, { participantId: "hero", to: { x: 1, y: 2 } }));
 
-    rejected(() => moveMutation(ctx({}, { exit: null }), { participantId: "hero", to: { x: 1, y: 2 } }), MAZE_NOT_READY);
+    rejected(() => moveMutation(ctx({}, { exit: null }), { participantId: "hero", to: { x: 1, y: 2 } }), MAZE_TEXTS.notReady);
   });
 
   it("гравець не ходить у чужий хід", () => {
@@ -66,9 +65,9 @@ describe("maze move mutation", () => {
   it("розстановка ДМ до першого кроку: героя лише на край, з поглядом усередину; не на вихід і не на зайняту", () => {
     const dm = ctx({ isDM: true, userId: "dm-user", scene: { ...context().scene, turnIndex: 2 } });
 
-    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 2, y: 2 } }), MAZE_PLACEMENT_ERROR.edge);
-    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 5, y: 0 } }), MAZE_PLACEMENT_ERROR.exit);
-    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 0, y: 4 } }), MAZE_PLACEMENT_ERROR.taken);
+    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 2, y: 2 } }), MAZE_TEXTS.placement.edge);
+    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 5, y: 0 } }), MAZE_TEXTS.placement.exit);
+    rejected(() => moveMutation(dm, { participantId: "hero", to: { x: 0, y: 4 } }), MAZE_TEXTS.placement.taken);
 
     const placed = moveMutation(dm, { participantId: "hero", to: { x: 3, y: 5 } });
 

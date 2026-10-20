@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { mazeMarkMutation, mazeMarkSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation";
-import { markColor, MAZE_DARK_ERROR } from "@/lib/utils/battle/maze";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { markColor } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
@@ -61,7 +62,7 @@ describe("maze-mark mutation", () => {
     );
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(MAZE_DARK_ERROR);
+    expect((await res.json()).error).toBe(MAZE_TEXTS.dark);
     expect(mutate).not.toHaveBeenCalled();
   });
 });

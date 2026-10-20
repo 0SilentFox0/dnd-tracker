@@ -1,5 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -20,7 +20,7 @@ export function resolveMover(ctx: BattleMutationContext, participantId: string, 
 
   const mover = findParticipant(participants, participantId) ?? found;
 
-  if (!isActive(mover) || mover.battleData.reserved || mover.battleData.escaped) throw new BattleRuleError("participant_dead", "Учасник не може рухатися");
+  if (!isActive(mover) || mover.battleData.reserved || isEscaped(mover)) throw new BattleRuleError("participant_dead", "Учасник не може рухатися");
 
   if (mover.battleData.airborne) throw new BattleRuleError("action_rejected", "Учасник у повітрі — приземлиться на початку свого ходу");
 

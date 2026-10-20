@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { goblin, hero } from "./fixtures";
 
 import { mazeActionSchema, mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
-import { MAZE_OP_TEXT } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
 import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { allInteriorEdges } from "@/lib/utils/battle/maze";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
@@ -173,7 +173,7 @@ describe("maze у конвеєрі", () => {
     expect(b.meta.map?.maze?.walls).not.toEqual(walls);
     expect(b.participant("gob").battleData.position).not.toEqual({ x: 4, y: 0 });
 
-    const reshuffleSeq = b.events().find((e) => e.resultText === MAZE_OP_TEXT.reshuffle)?.seq as number;
+    const reshuffleSeq = b.events().find((e) => e.resultText === MAZE_TEXTS.ops.reshuffle)?.seq as number;
 
     expect(reshuffleSeq).toBeGreaterThan(0);
 
@@ -195,7 +195,7 @@ describe("maze у конвеєрі", () => {
 
     const seqs = b.events().map((e) => [e.resultText, e.seq] as const);
 
-    expect(seqs.map(([t]) => t)).toEqual([MAZE_OP_TEXT.darkOn, MAZE_OP_TEXT.darkOff]);
+    expect(seqs.map(([t]) => t)).toEqual([MAZE_TEXTS.ops.darkOn, MAZE_TEXTS.ops.darkOff]);
     expect(b.snapshots()).toHaveLength(2);
 
     await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: seqs[1][1] });

@@ -8,6 +8,7 @@ import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { canStand, cellKey, checkReturnToStart,hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
+import { mazeGridOf } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
@@ -27,7 +28,9 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
 
-  if (map.maze) return mazeMove(ctx, data, { cols: map.cols, rows: map.rows, maze: map.maze });
+  const grid = mazeGridOf(map);
+
+  if (grid) return mazeMove(ctx, data, { map, grid });
 
   const { participants, mover, ownTurn } = resolveMover(ctx, data.participantId, (ps) => placeParticipants(map, ps));
 

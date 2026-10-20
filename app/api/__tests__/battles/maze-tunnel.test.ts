@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
-import { MAZE_OP_TEXT } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
 import { createRollbackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
-import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { heroTunnel, mazeDistances, roomCentre } from "@/lib/utils/battle/maze";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { cellKey, mapCentre } from "@/lib/utils/battle/grid/geometry";
+import { heroTunnel, mazeDistances } from "@/lib/utils/battle/maze";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { buildSnapshotState, prepareSave } from "@/lib/utils/battle/store";
@@ -108,7 +108,7 @@ describe("перетасовка «1 тунель»", () => {
 
     const next = out.scene?.map?.maze as MazeConfig;
 
-    expect(byId(out.participants, "hero").battleData).toMatchObject({ position: roomCentre(GRID), facing: "w" });
+    expect(byId(out.participants, "hero").battleData).toMatchObject({ position: mapCentre(GRID), facing: "w" });
     expect(byId(out.participants, "hero2").battleData).toMatchObject({ position: { x: 3, y: 4 }, facing: "w" });
 
     const reach = mazeDistances({ ...GRID, maze: next }, [next.exit as GridPoint]);
@@ -126,8 +126,8 @@ describe("перетасовка «1 тунель»", () => {
   it("одна подія ДМа (прихована з журналу), перша — ціль відкату", () => {
     const out = tunnel(ctx());
 
-    expect(out.events[0]).toMatchObject({ resultText: MAZE_OP_TEXT.tunnel, details: { actionDetails: { mazeEvent: "reshuffle" } } });
-    expect(out.events.filter((e) => e.resultText === MAZE_OP_TEXT.tunnel)).toHaveLength(1);
+    expect(out.events[0]).toMatchObject({ resultText: MAZE_TEXTS.ops.tunnel, details: { actionDetails: { mazeEvent: "reshuffle" } } });
+    expect(out.events.filter((e) => e.resultText === MAZE_TEXTS.ops.tunnel)).toHaveLength(1);
   });
 
   it("хід був на ворогові, що зник — переходить до наступного, не завершуючи вдруге хід попереднього", () => {

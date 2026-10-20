@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
-import { mazeActionSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { MAZE_EXIT_ERROR } from "@/lib/utils/battle/maze";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { mazeActionSchema } from "@/lib/schemas/battles";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
@@ -87,7 +87,7 @@ describe("DM maze route", () => {
 
     expect(pos.x === 0 || pos.y === 0 || pos.x === 7 || pos.y === 7).toBe(true);
 
-    rejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_EXIT_ERROR);
+    rejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
     rejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "Лабіринт уже пройдено частково — використайте «Перетасувати»");
   });
 
@@ -138,7 +138,7 @@ describe("DM maze route", () => {
   it("exit: лише край; не замуровує", () => {
     expect(mazeMutation(ctx(), { op: "exit", cell: { x: 7, y: 3 } }).scene?.map?.maze?.exit).toEqual({ x: 7, y: 3 });
 
-    rejected(() => mazeMutation(ctx(), { op: "exit", cell: { x: 3, y: 3 } }), MAZE_EXIT_ERROR);
+    rejected(() => mazeMutation(ctx(), { op: "exit", cell: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
   });
 
   it("teleport: додає пару, прибирає за клітинкою; зайнята клітинка пари → відмова", () => {

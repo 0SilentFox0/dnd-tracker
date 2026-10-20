@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ParticipantSide } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { enterMazeAsleep } from "@/lib/utils/battle/maze/status";
 import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
@@ -29,8 +29,6 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
   const revealed: BattleParticipant[] = [];
 
-  const maze = !!ctx.meta.map?.maze;
-
   for (const id of body.participantIds) {
     const found = pending.find((p) => p.basicInfo.id === id && isReserved(p));
 
@@ -40,9 +38,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
     const clean = dropBattleFlag(found, "reserved");
 
-    const asleep = maze && clean.basicInfo.side === ParticipantSide.ENEMY;
-
-    const entering: BattleParticipant = { ...clean, battleData: { ...clean.battleData, revealPending: true, ...(asleep && { dormant: true }) } };
+    const entering = enterMazeAsleep(ctx.meta.map, { ...clean, battleData: { ...clean.battleData, revealPending: true } });
 
     order = insertAfterCurrent(order, ctx.scene.turnIndex, entering);
     revealed.push(entering);

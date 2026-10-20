@@ -1,17 +1,22 @@
-import { MAZE_OPS, type MazeAction } from "./maze-ops";
+import { MAZE_OPS, type MazeEnv } from "./maze-ops";
 
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { mazeActionSchema } from "@/lib/schemas/battles";
+import { mazeGridOf } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
-import type { MazeConfig } from "@/types/battle";
+import { rejectAction } from "@/lib/utils/battle/store";
+import type { MazeActionData } from "@/types/api";
 
-export { type MazeAction, mazeActionSchema } from "./maze-ops";
+export { mazeActionSchema };
 
-export function mazeMutation(ctx: BattleMutationContext, body: MazeAction): MutationResult {
-  const maze = ctx.meta.map?.maze;
+export function mazeMutation(ctx: BattleMutationContext, body: MazeActionData): MutationResult {
+  const map = ctx.meta.map;
 
-  if (!maze) throw new BattleRuleError("action_rejected", "Цей бій не лабіринт");
+  const grid = mazeGridOf(map);
 
-  const handler = MAZE_OPS[body.op] as (ctx: BattleMutationContext, maze: MazeConfig, body: MazeAction) => MutationResult;
+  if (!map || !grid) return rejectAction(MAZE_TEXTS.notMaze);
 
-  return handler(ctx, maze, body);
+  const handler = MAZE_OPS[body.op] as (ctx: BattleMutationContext, env: MazeEnv, body: MazeActionData) => MutationResult;
+
+  return handler(ctx, { map, grid }, body);
 }

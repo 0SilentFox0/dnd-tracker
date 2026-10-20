@@ -1,23 +1,22 @@
+import type { MazeEnv } from "./maze-ops";
+
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { heroTunnel, mazeAwareness, nearestFree, tunnelFacing } from "@/lib/utils/battle/maze";
+import { heroTunnel, isEscaped, isPlaced, mazeAwareness, nearestFree } from "@/lib/utils/battle/maze";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { battleActionToEvent, BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
-import { advanceTurn } from "@/lib/utils/battle/turn";
+import { battleActionToEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
+import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
 import { originalSide } from "@/lib/utils/battle/turn/victory";
-import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
-
-const reject = (message: string): never => {
-  throw new BattleRuleError("action_rejected", message);
-};
+import type { BattleMapConfig, BattleParticipant, MazeConfig } from "@/types/battle";
 
 const isDead = (p: BattleParticipant) => p.combatStats.status === CombatStatus.DEAD;
 
 // зачарований лишається на своєму початковому боці, як у перевірці перемоги
 const leaves = (p: BattleParticipant) => originalSide(p) === ParticipantSide.ENEMY && (!!p.basicInfo.isExtraTurnSlot || !isDead(p));
 
-const entersTunnel = (p: BattleParticipant) => originalSide(p) === ParticipantSide.ALLY && !p.basicInfo.isExtraTurnSlot && !isDead(p) && !p.battleData.escaped;
+const entersTunnel = (p: BattleParticipant) => originalSide(p) === ParticipantSide.ALLY && !p.basicInfo.isExtraTurnSlot && !isDead(p) && !isEscaped(p);
 
 // у резерві позиції немає: після «Ввести в бій» лабіринт сам поставить ворога (сплячим) на вільну клітинку
 function intoReserve(p: BattleParticipant): BattleParticipant {
@@ -33,27 +32,22 @@ function turnAfter(ctx: BattleMutationContext, remaining: BattleParticipant[], p
 
   if (kept >= 0 || remaining.length === 0) return { participants: remaining, pending, scene: { turnIndex: Math.max(0, kept) }, events: [] };
 
-  // ходив ворог, що зник — хід переходить далі, як після видалення учасника
   const before = ctx.participants.slice(0, ctx.scene.turnIndex).filter((p) => !leaves(p)).length;
 
-  const advanced = advanceTurn({ participants: remaining, pending, scene: { ...ctx.scene, turnIndex: before - 1, pendingMoraleCheck: null }, map, skipEnding: true });
+  const advanced = advanceAfterRemoval({ participants: remaining, pending, scene: ctx.scene, map, before });
 
   return { participants: advanced.participants, pending: advanced.pending, scene: advanced.scene, events: advanced.actions.map(battleActionToEvent) };
 }
 
-const tunnelError = (heroes: number) => `Тунель від центру до краю не вміщує ${heroes} героїв`;
-
 /** «1 тунель»: вороги зникають у резерв ДМа, решта карти — відкрита кімната, герої стоять рядом у прямому тунелі від центру до нового виходу на краю. */
-export function tunnelMutation(ctx: BattleMutationContext, maze: MazeConfig, event: NewBattleEvent): MutationResult {
-  const base = ctx.meta.map as BattleMapConfig;
-
+export function tunnelMutation(ctx: BattleMutationContext, { map: base, grid: current }: MazeEnv, event: NewBattleEvent): MutationResult {
   const heroes = ctx.participants.filter(entersTunnel);
 
-  const tunnel = heroTunnel(base, maze.exit, heroes.length) ?? reject(tunnelError(heroes.length));
+  const tunnel = heroTunnel(base, current.maze.exit, heroes.length) ?? rejectAction(MAZE_TEXTS.tunnelTooShort(heroes.length));
 
-  const nextMaze: MazeConfig = { ...maze, walls: tunnel.walls, exit: tunnel.exit, teleports: [], fog: [], marks: {}, moved: true };
+  const nextMaze: MazeConfig = { ...current.maze, walls: tunnel.walls, exit: tunnel.exit, teleports: [], fog: [], marks: {}, moved: true };
 
-  const grid = { cols: base.cols, rows: base.rows, maze: nextMaze };
+  const grid = { ...current, maze: nextMaze };
 
   const spotOf = new Map(heroes.map((h, i) => [h.basicInfo.id, tunnel.cells[i]]));
 
@@ -61,14 +55,14 @@ export function tunnelMutation(ctx: BattleMutationContext, maze: MazeConfig, eve
 
   const taken = new Set(inTunnel);
 
-  const stays = ctx.participants.filter((p) => !leaves(p) && !spotOf.has(p.basicInfo.id) && p.battleData.position);
+  const stays = ctx.participants.filter((p) => !leaves(p) && !spotOf.has(p.basicInfo.id)).filter(isPlaced);
 
-  stays.forEach((p) => taken.add(cellKey(p.battleData.position as GridPoint)));
+  stays.forEach((p) => taken.add(cellKey(p.battleData.position)));
 
   // тіла й вибулі, що лежали на лінії тунелю, зсуваються в кімнату поруч
   const shifted = new Map(
     stays.flatMap((p) => {
-      const at = p.battleData.position as GridPoint;
+      const at = p.battleData.position;
 
       if (!inTunnel.has(cellKey(at))) return [];
 
@@ -83,7 +77,7 @@ export function tunnelMutation(ctx: BattleMutationContext, maze: MazeConfig, eve
   const remaining = ctx.participants.filter((p) => !leaves(p)).map((p) => {
     const at = spotOf.get(p.basicInfo.id);
 
-    if (at) return { ...p, battleData: { ...p.battleData, position: at, facing: tunnelFacing(tunnel) } };
+    if (at) return { ...p, battleData: { ...p.battleData, position: at, facing: tunnel.dir } };
 
     const moved = shifted.get(p.basicInfo.id);
 

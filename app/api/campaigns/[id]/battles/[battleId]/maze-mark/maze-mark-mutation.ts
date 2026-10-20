@@ -1,37 +1,35 @@
-import { z } from "zod";
-
 import { resolveMover } from "../move/resolve-mover";
 
-import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { mazeMarkSchema } from "@/lib/schemas/battles";
+import { isDormant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { markColor,mazeBudgetLeft } from "@/lib/utils/battle/maze";
+import { markColor, mazeBudgetLeft } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleAccessError, rejectAction } from "@/lib/utils/battle/store";
 import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import type { MazeMarkData } from "@/types/api";
 
-export const mazeMarkSchema = z.object({
-  participantId: z.string(),
-  symbol: z.enum(["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"]),
-});
+export { mazeMarkSchema };
 
-export type MazeMarkBody = z.infer<typeof mazeMarkSchema>;
+export type MazeMarkBody = MazeMarkData;
 
 export function mazeMarkMutation(ctx: BattleMutationContext, data: MazeMarkBody): MutationResult {
   const map = ctx.meta.map;
 
-  if (!map?.maze) throw new BattleRuleError("action_rejected", "Цей бій не лабіринт");
+  if (!map?.maze) return rejectAction(MAZE_TEXTS.notMaze);
 
   const { participants, mover, ownTurn } = resolveMover(ctx, data.participantId, (ps) => ps);
 
-  if (!ownTurn) throw new BattleAccessError(403, "Мітку можна ставити лише у свій хід");
+  if (!ownTurn) throw new BattleAccessError(403, MAZE_TEXTS.markOwnTurn);
 
   const position = mover.battleData.position;
 
-  if (!position || mover.battleData.dormant) throw new BattleRuleError("action_rejected", "Учасник не може ставити мітку");
+  if (!position || isDormant(mover)) return rejectAction(MAZE_TEXTS.markUnable);
 
   assertNotPanicking(ctx.scene.pendingMoraleCheck, mover.basicInfo.id);
 
-  if (mazeBudgetLeft(mover) < 1) throw new BattleRuleError("action_rejected", "Не вистачає кроків для мітки");
+  if (mazeBudgetLeft(mover) < 1) rejectAction(MAZE_TEXTS.markNoSteps);
 
   const id = mover.basicInfo.id;
 

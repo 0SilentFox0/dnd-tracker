@@ -6,14 +6,12 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-// вороги стоять сплячими, доки їх не побачать; герої дивляться всередину лабіринту
-function enterMaze(map: BattleMapConfig, order: BattleParticipant[]): BattleParticipant[] {
+// вороги вже сплячі з buildStartOrder; герої дивляться всередину лабіринту
+function faceInward(map: BattleMapConfig, order: BattleParticipant[]): BattleParticipant[] {
   return order.map((p) => {
-    if (p.basicInfo.side === ParticipantSide.ENEMY) return { ...p, battleData: { ...p.battleData, dormant: true } };
-
     const at = p.battleData.position;
 
-    return at ? { ...p, battleData: { ...p.battleData, facing: inwardFacing(map, at) } } : p;
+    return at && p.basicInfo.side !== ParticipantSide.ENEMY ? { ...p, battleData: { ...p.battleData, facing: inwardFacing(map, at) } } : p;
   });
 }
 
@@ -31,7 +29,7 @@ export function createStartMutation(build = buildStartOrder) {
 
     const map = ctx.meta.map;
 
-    const participants = map?.maze ? enterMaze(map, order) : order;
+    const participants = map?.maze ? faceInward(map, order) : order;
 
     const turnIndex = map?.maze ? Math.max(0, participants.findIndex((p) => takesTurn(p, 1))) : 0;
 

@@ -1,172 +1,123 @@
-import { z } from "zod";
-
 import { tunnelMutation } from "./maze-tunnel";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { mapCellSchema } from "@/lib/schemas/battles";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
+import { cellKey, inBounds, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import {
   allReachExit,
+  featureKeys,
   generateMaze,
+  type GridSize,
   inwardFacing,
   isEdgeCell,
-  MAZE_EXIT_ERROR,
-  MAZE_SCATTER_ERROR,
   mazeAwareness,
   type MazeGrid,
+  mazeHeroes,
   mulberry32,
+  onMazeField,
+  parseEdgeKey,
   reshuffleMaze,
   type Rng,
-  scatterStarts,
+  scatterFreeStarts,
   seedFrom,
 } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError, dmEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
-import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
+import type { MazeActionData } from "@/types/api";
+import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
-const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
-
-const cellKeySchema = z.string().regex(/^\d+:\d+$/);
-
-const features = { teleportPairs: z.number().int().min(0).max(10), fogPatches: z.number().int().min(0).max(20) };
-
-export const mazeActionSchema = z.discriminatedUnion("op", [
-  z.object({ op: z.literal("generate"), difficulty: z.enum(["easy", "medium", "hard"]), ...features, exit: mapCellSchema.nullable() }),
-  z.object({ op: z.literal("reshuffle"), mode: z.enum(["walls", "scatter", "tunnel"]), ...features }),
-  z.object({ op: z.literal("walls"), add: z.array(edgeKeySchema).max(400), remove: z.array(edgeKeySchema).max(400) }),
-  z.object({ op: z.literal("exit"), cell: mapCellSchema }),
-  z.object({ op: z.literal("teleport"), pair: z.tuple([mapCellSchema, mapCellSchema]).nullable(), removeAt: mapCellSchema.optional() }),
-  z.object({ op: z.literal("fog"), cells: z.array(cellKeySchema).max(400), on: z.boolean() }),
-  z.object({ op: z.literal("dark"), on: z.boolean() }),
-  z.object({ op: z.literal("scatterStarts") }),
-]);
-
-export type MazeAction = z.infer<typeof mazeActionSchema>;
-
-type OpHandler<K extends MazeAction["op"]> = (ctx: BattleMutationContext, maze: MazeConfig, body: Extract<MazeAction, { op: K }>) => MutationResult;
-
-const MOVED_ERROR = "Лабіринт уже пройдено частково — використайте «Перетасувати»";
-
-const WALLED_IN_ERROR = "Ці стіни замурують учасника — шляху до виходу не залишиться";
-
-const reject = (message: string): never => {
-  throw new BattleRuleError("action_rejected", message);
-};
-
-const onField = (p: BattleParticipant) => p.battleData.position !== undefined && !p.battleData.reserved && !p.battleData.escaped && isActive(p);
-
-const isHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY;
-
-const positionsOf = (participants: BattleParticipant[]) => participants.filter(onField).map((p) => p.battleData.position as GridPoint);
-
-const parts = (key: string) => key.split(":");
-
-function canonicalEdge(key: string, grid: { cols: number; rows: number }): string {
-  const [x, y, dir] = parts(key);
-
-  const a = { x: Number(x), y: Number(y) };
-
-  const b = dir === "e" ? { x: a.x + 1, y: a.y } : { x: a.x, y: a.y + 1 };
-
-  if (!inBounds(grid, a) || !inBounds(grid, b)) return reject("Ребро поза картою");
-
-  return `${cellKey(a)}:${dir}`;
+export interface MazeEnv {
+  map: BattleMapConfig;
+  grid: MazeGrid;
 }
 
-function canonicalCell(key: string, grid: { cols: number; rows: number }): string {
-  const [x, y] = parts(key);
+type OpHandler<K extends MazeActionData["op"]> = (ctx: BattleMutationContext, env: MazeEnv, body: Extract<MazeActionData, { op: K }>) => MutationResult;
 
-  const cell = { x: Number(x), y: Number(y) };
+const positionsOf = (participants: BattleParticipant[]): GridPoint[] => participants.filter(onMazeField).map((p) => p.battleData.position);
 
-  return inBounds(grid, cell) ? cellKey(cell) : reject("Клітинка поза картою");
+function canonicalEdge(key: string, grid: GridSize): string {
+  const { a, b, side } = parseEdgeKey(key);
+
+  if (!inBounds(grid, a) || !inBounds(grid, b)) return rejectAction(MAZE_TEXTS.edgeOutside);
+
+  return `${cellKey(a)}:${side}`;
 }
 
-export const MAZE_OP_TEXT = {
-  generate: "ДМ згенерував лабіринт",
-  reshuffle: "ДМ перетасував лабіринт",
-  tunnel: "ДМ лишив у лабіринті один тунель",
-  darkOn: "Темрява",
-  darkOff: "Світло",
-  scatterStarts: "ДМ розкидав героїв по краях",
-} as const;
+function canonicalCell(key: string, grid: GridSize): string {
+  const cell = parseCellKey(key);
+
+  return inBounds(grid, cell) ? cellKey(cell) : rejectAction(MAZE_TEXTS.cellOutside);
+}
 
 // подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
-function mazeOpEvent(round: number, text: string, kind: "op" | "reshuffle"): NewBattleEvent {
+export function mazeOpEvent(round: number, text: string, kind: "op" | "reshuffle"): NewBattleEvent {
   const event = dmEvent(round, text);
 
   return { ...event, details: { ...event.details, actionDetails: { mazeEvent: kind } } };
 }
 
-function finish(ctx: BattleMutationContext, maze: MazeConfig, text: string, extra: Partial<MutationResult> = {}, kind: "op" | "reshuffle" = "op"): MutationResult {
-  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
+interface FinishArgs {
+  ctx: BattleMutationContext;
+  map: BattleMapConfig;
+  maze: MazeConfig;
+  text: string;
+  kind?: "op" | "reshuffle";
+  extra?: Partial<MutationResult>;
+}
 
+function finish({ ctx, map, maze, text, kind = "op", extra = {} }: FinishArgs): MutationResult {
   return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, ...extra, events: [mazeOpEvent(ctx.scene.round, text, kind), ...(extra.events ?? [])] };
 }
 
 // правки пензлем ДМа йдуть часто: без події й знімка (відкат до попередньої дії поверне й ці правки)
-function edited(ctx: BattleMutationContext, maze: MazeConfig): MutationResult {
-  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
-
+function edited(ctx: BattleMutationContext, map: BattleMapConfig, maze: MazeConfig): MutationResult {
   return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, events: [] };
 }
 
-const gridOf = (ctx: BattleMutationContext, maze: MazeConfig) => {
-  const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
-
-  return { cols: map.cols, rows: map.rows, maze };
-};
-
 const seedOf = (ctx: BattleMutationContext) => seedFrom(ctx.rng ?? Math.random);
 
-function assertReachable(ctx: BattleMutationContext, maze: MazeConfig) {
-  if (!allReachExit(gridOf(ctx, maze), positionsOf(ctx.participants))) reject(WALLED_IN_ERROR);
+function assertReachable(ctx: BattleMutationContext, grid: MazeGrid) {
+  if (!allReachExit(grid, positionsOf(ctx.participants))) rejectAction(MAZE_TEXTS.walledIn);
 }
 
-function withPositions(participants: BattleParticipant[], positions: Record<string, GridPoint>, grid: { cols: number; rows: number }): BattleParticipant[] {
+function withPositions(participants: BattleParticipant[], positions: Record<string, GridPoint>, grid: GridSize): BattleParticipant[] {
   return participants.map((p) => {
     const position = positions[p.basicInfo.id];
 
     if (!position) return p;
 
-    return { ...p, battleData: { ...p.battleData, position, ...(isHero(p) && { facing: inwardFacing(grid, position) }) } };
+    return { ...p, battleData: { ...p.battleData, position, ...(p.basicInfo.side === ParticipantSide.ALLY && { facing: inwardFacing(grid, position) }) } };
   });
 }
 
-const SCATTER_ATTEMPTS = 20;
+function heroStarts(ctx: BattleMutationContext, grid: MazeGrid, rnd: Rng, mustReachExit = false) {
+  const heroes = mazeHeroes(ctx.participants);
 
-function scatterFree(grid: MazeGrid, { heroIds, others }: { heroIds: string[]; others: BattleParticipant[] }, rnd: Rng): Record<string, GridPoint> | null {
-  const taken = new Set(positionsOf(others).map(cellKey));
+  const heroIds = new Set(heroes.map((h) => h.basicInfo.id));
 
-  for (let attempt = 0; attempt < SCATTER_ATTEMPTS; attempt++) {
-    const starts = scatterStarts(grid, heroIds, rnd);
+  const others = ctx.participants.filter((p) => !heroIds.has(p.basicInfo.id));
 
-    if (!starts) return null;
+  const scatter = () => {
+    const out = scatterFreeStarts(grid, { heroIds: [...heroIds], others: positionsOf(others), mustReachExit }, rnd);
 
-    if (!Object.values(starts).some((c) => taken.has(cellKey(c)))) return starts;
-  }
+    return "error" in out ? rejectAction(out.error) : out.starts;
+  };
 
-  return null;
+  return { heroes, heroIds, scatter };
 }
 
-const generate: OpHandler<"generate"> = (ctx, maze, body) => {
-  if (maze.moved) reject(MOVED_ERROR);
+const generate: OpHandler<"generate"> = (ctx, { map, grid: current }, body) => {
+  if (current.maze.moved) rejectAction(MAZE_TEXTS.alreadyMoved);
 
-  const grid = gridOf(ctx, { ...maze, exit: body.exit });
-
-  const heroes = ctx.participants.filter((p) => isHero(p) && !p.battleData.reserved && !p.battleData.escaped && isActive(p));
-
-  const edgeHeroes = heroes.every((h) => h.battleData.position && isEdgeCell(grid, h.battleData.position));
+  const grid = { ...current, maze: { ...current.maze, exit: body.exit } };
 
   const rnd = mulberry32(seedOf(ctx));
 
-  const scattered = edgeHeroes ? {} : scatterFree(grid, { heroIds: heroes.map((h) => h.basicInfo.id), others: ctx.participants.filter((p) => !heroes.includes(p)) }, rnd);
+  const { heroes, heroIds, scatter } = heroStarts(ctx, grid, rnd);
 
-  if (!scattered) return reject(MAZE_SCATTER_ERROR);
+  const edgeHeroes = heroes.every((h) => h.battleData.position && isEdgeCell(grid, h.battleData.position));
 
-  const participants = edgeHeroes ? ctx.participants : withPositions(ctx.participants, scattered, grid);
-
-  const heroIds = new Set(heroes.map((h) => h.basicInfo.id));
+  const participants = edgeHeroes ? ctx.participants : withPositions(ctx.participants, scatter(), grid);
 
   const generated = generateMaze({
     grid,
@@ -179,72 +130,66 @@ const generate: OpHandler<"generate"> = (ctx, maze, body) => {
     seed: seedFrom(rnd),
   });
 
-  if ("error" in generated) return reject(generated.error);
+  if ("error" in generated) return rejectAction(generated.error);
 
-  return finish({ ...ctx, participants }, { ...generated, dark: maze.dark, marks: {} }, MAZE_OP_TEXT.generate, { participants });
+  return finish({ ctx, map, maze: { ...generated, dark: current.maze.dark, marks: {} }, text: MAZE_TEXTS.ops.generate, extra: { participants } });
 };
 
-const reshuffle: OpHandler<"reshuffle"> = (ctx, maze, body) => {
-  if (body.mode === "tunnel") return tunnelMutation(ctx, maze, mazeOpEvent(ctx.scene.round, MAZE_OP_TEXT.tunnel, "reshuffle"));
+const reshuffle: OpHandler<"reshuffle"> = (ctx, env, body) => {
+  if (body.mode === "tunnel") return tunnelMutation(ctx, env, mazeOpEvent(ctx.scene.round, MAZE_TEXTS.ops.tunnel, "reshuffle"));
 
-  const grid = gridOf(ctx, maze);
+  const { map, grid } = env;
 
-  const field = ctx.participants.filter(onField);
+  const field = ctx.participants.filter(onMazeField);
 
   const result = reshuffleMaze({
     grid,
-    maze,
+    maze: grid.maze,
     mode: body.mode,
     participantIds: field.map((p) => p.basicInfo.id),
-    positions: Object.fromEntries(field.map((p) => [p.basicInfo.id, p.battleData.position as GridPoint])),
+    positions: Object.fromEntries(field.map((p) => [p.basicInfo.id, p.battleData.position])),
     teleportPairs: body.teleportPairs,
     fogPatches: body.fogPatches,
     seed: seedOf(ctx),
   });
 
-  if ("error" in result) return reject(result.error);
+  if ("error" in result) return rejectAction(result.error);
 
   const moved = body.mode === "scatter" ? withPositions(ctx.participants, result.positions, grid) : ctx.participants;
 
   const awareness = mazeAwareness({ ...grid, maze: result.maze }, { participants: moved, round: ctx.scene.round, sleep: true });
 
-  return finish(ctx, result.maze, MAZE_OP_TEXT.reshuffle, { participants: awareness.participants, events: awareness.events }, "reshuffle");
+  return finish({ ctx, map, maze: result.maze, text: MAZE_TEXTS.ops.reshuffle, kind: "reshuffle", extra: { participants: awareness.participants, events: awareness.events } });
 };
 
-const walls: OpHandler<"walls"> = (ctx, maze, body) => {
-  const grid = gridOf(ctx, maze);
-
-  const next = new Set(maze.walls);
+const walls: OpHandler<"walls"> = (ctx, { map, grid }, body) => {
+  const next = new Set(grid.maze.walls);
 
   for (const key of body.remove) next.delete(canonicalEdge(key, grid));
 
   for (const key of body.add) next.add(canonicalEdge(key, grid));
 
-  const updated = { ...maze, walls: [...next].sort() };
+  const updated = { ...grid.maze, walls: [...next].sort() };
 
-  assertReachable(ctx, updated);
+  assertReachable(ctx, { ...grid, maze: updated });
 
-  return edited(ctx, updated);
+  return edited(ctx, map, updated);
 };
 
-const exit: OpHandler<"exit"> = (ctx, maze, body) => {
-  const grid = gridOf(ctx, maze);
+const exit: OpHandler<"exit"> = (ctx, { map, grid }, body) => {
+  if (!inBounds(grid, body.cell) || !isEdgeCell(grid, body.cell)) rejectAction(MAZE_TEXTS.exitOnEdge);
 
-  if (!inBounds(grid, body.cell) || !isEdgeCell(grid, body.cell)) reject(MAZE_EXIT_ERROR);
+  if (grid.maze.teleports.flat().some((c) => cellKey(c) === cellKey(body.cell))) rejectAction(MAZE_TEXTS.exitOnTeleport);
 
-  if (maze.teleports.flat().some((c) => cellKey(c) === cellKey(body.cell))) reject("Вихід не можна ставити на телепорт");
+  const updated = { ...grid.maze, exit: body.cell };
 
-  const updated = { ...maze, exit: body.cell };
+  assertReachable(ctx, { ...grid, maze: updated });
 
-  assertReachable(ctx, updated);
-
-  return edited(ctx, updated);
+  return edited(ctx, map, updated);
 };
 
-const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
-  const grid = gridOf(ctx, maze);
-
-  let teleports = maze.teleports;
+const teleport: OpHandler<"teleport"> = (ctx, { map, grid }, body) => {
+  let teleports = grid.maze.teleports;
 
   if (body.removeAt) {
     const at = cellKey(body.removeAt);
@@ -255,26 +200,24 @@ const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
   if (body.pair) {
     const keys = body.pair.map(cellKey);
 
-    const taken = new Set([...teleports.flat().map(cellKey), ...(maze.exit ? [cellKey(maze.exit)] : []), ...positionsOf(ctx.participants).map(cellKey)]);
+    const taken = new Set([...featureKeys({ exit: grid.maze.exit, teleports }), ...positionsOf(ctx.participants).map(cellKey)]);
 
-    if (!body.pair.every((c) => inBounds(grid, c)) || keys[0] === keys[1] || keys.some((k) => taken.has(k))) reject("Телепорт не можна поставити сюди");
+    if (!body.pair.every((c) => inBounds(grid, c)) || keys[0] === keys[1] || keys.some((k) => taken.has(k))) rejectAction(MAZE_TEXTS.teleportBlocked);
 
     teleports = [...teleports, body.pair];
   } else if (!body.removeAt) {
-    reject("Вкажіть телепорт для видалення");
+    rejectAction(MAZE_TEXTS.teleportMissing);
   }
 
-  const updated = { ...maze, teleports };
+  const updated = { ...grid.maze, teleports };
 
-  assertReachable(ctx, updated);
+  assertReachable(ctx, { ...grid, maze: updated });
 
-  return edited(ctx, updated);
+  return edited(ctx, map, updated);
 };
 
-const fog: OpHandler<"fog"> = (ctx, maze, body) => {
-  const grid = gridOf(ctx, maze);
-
-  const next = new Set(maze.fog);
+const fog: OpHandler<"fog"> = (ctx, { map, grid }, body) => {
+  const next = new Set(grid.maze.fog);
 
   for (const key of body.cells) {
     const cell = canonicalCell(key, grid);
@@ -283,50 +226,18 @@ const fog: OpHandler<"fog"> = (ctx, maze, body) => {
     else next.delete(cell);
   }
 
-  return edited(ctx, { ...maze, fog: [...next] });
+  return edited(ctx, map, { ...grid.maze, fog: [...next] });
 };
 
-const dark: OpHandler<"dark"> = (ctx, maze, body) => finish(ctx, { ...maze, dark: body.on }, body.on ? MAZE_OP_TEXT.darkOn : MAZE_OP_TEXT.darkOff);
+const dark: OpHandler<"dark"> = (ctx, { map, grid }, body) =>
+  finish({ ctx, map, maze: { ...grid.maze, dark: body.on }, text: body.on ? MAZE_TEXTS.ops.darkOn : MAZE_TEXTS.ops.darkOff });
 
-const scatterStartsOp: OpHandler<"scatterStarts"> = (ctx, maze) => {
-  if (maze.moved) reject(MOVED_ERROR);
+const scatterStarts: OpHandler<"scatterStarts"> = (ctx, { map, grid }) => {
+  if (grid.maze.moved) rejectAction(MAZE_TEXTS.alreadyMoved);
 
-  const grid = gridOf(ctx, maze);
+  const { scatter } = heroStarts(ctx, grid, mulberry32(seedOf(ctx)), true);
 
-  const heroes = ctx.participants.filter((p) => isHero(p) && !p.battleData.reserved && !p.battleData.escaped && isActive(p));
-
-  const others = ctx.participants.filter((p) => !heroes.includes(p));
-
-  const rnd = mulberry32(seedOf(ctx));
-
-  const ids = heroes.map((h) => h.basicInfo.id);
-
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const starts = scatterStarts(grid, ids, rnd);
-
-    if (!starts) return reject(MAZE_SCATTER_ERROR);
-
-    const taken = new Set(positionsOf(others).map(cellKey));
-
-    if (Object.values(starts).some((c) => taken.has(cellKey(c)))) continue;
-
-    const participants = withPositions(ctx.participants, starts, grid);
-
-    if (!allReachExit(grid, positionsOf(participants))) continue;
-
-    return finish(ctx, maze, MAZE_OP_TEXT.scatterStarts, { participants });
-  }
-
-  return reject(WALLED_IN_ERROR);
+  return finish({ ctx, map, maze: grid.maze, text: MAZE_TEXTS.ops.scatterStarts, extra: { participants: withPositions(ctx.participants, scatter(), grid) } });
 };
 
-export const MAZE_OPS: { [K in MazeAction["op"]]: OpHandler<K> } = {
-  generate,
-  reshuffle,
-  walls,
-  exit,
-  teleport,
-  fog,
-  dark,
-  scatterStarts: scatterStartsOp,
-};
+export const MAZE_OPS: { [K in MazeActionData["op"]]: OpHandler<K> } = { generate, reshuffle, walls, exit, teleport, fog, dark, scatterStarts };

@@ -20,8 +20,6 @@ export interface AdvanceTurnInput {
   pending: BattleParticipant[];
   scene: BattleSceneState;
   map?: BattleMapConfig | null;
-  /** Того, хто ходив, уже немає в черзі: не завершувати хід учасника на turnIndex удруге */
-  skipEnding?: boolean;
 }
 
 export interface AdvanceTurnOutput {
@@ -31,7 +29,21 @@ export interface AdvanceTurnOutput {
   actions: BattleAction[];
 }
 
-export function advanceTurn({ participants, pending, scene, rng, map, skipEnding = false }: AdvanceTurnInput): AdvanceTurnOutput {
+export interface AdvanceAfterRemovalInput extends AdvanceTurnInput {
+  /** скільки учасників, що лишились у черзі, стояли перед прибраним */
+  before: number;
+}
+
+export function advanceTurn(input: AdvanceTurnInput): AdvanceTurnOutput {
+  return advanceFrom(input, false);
+}
+
+/** Учасника на ході прибрали з черги: хід переходить до наступного без повторного кінця ходу попереднього. */
+export function advanceAfterRemoval({ before, scene, ...input }: AdvanceAfterRemovalInput): AdvanceTurnOutput {
+  return advanceFrom({ ...input, scene: { ...scene, turnIndex: before - 1, pendingMoraleCheck: null } }, true);
+}
+
+function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInput, skipEnding: boolean): AdvanceTurnOutput {
   let order = participants;
 
   const actions: BattleAction[] = [];
