@@ -11,6 +11,7 @@ import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
+import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
@@ -21,6 +22,12 @@ import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
+
+const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
+  const flat = flatEffects(effects);
+
+  return flat.some((e) => e.kind === "heal" || e.kind === "hot") && !flat.some(isDamageEffect);
+};
 
 export interface SpellMutationDeps extends SummonDeps {
   loadSpell(spellId: string): Promise<Spell | null>;
@@ -106,7 +113,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       casterId: caster.basicInfo.id,
       sides: expected.sides,
       rolls: diceRolls,
-      heal: (result.battleAction.actionDetails.totalHealing ?? 0) > 0 && !(result.battleAction.actionDetails.totalDamage ?? 0),
+      heal: healsByDefinition(definition.effects),
       saves: result.battleAction.actionDetails.savingThrows ?? [],
       presetSaveIds: new Set(trusted.map((s) => s.participantId)),
     });

@@ -410,10 +410,6 @@ export interface DamageStep {
   icon?: string | null;
 }
 
-/**
- * Детальна дія в бою (BattleAction)
- * Кожна дія записується для історії та можливості відміни
- */
 export type DieSides = 4 | 6 | 8 | 10 | 12 | 20;
 
 export interface RolledDie {
@@ -430,6 +426,10 @@ export interface DiceRollGroup {
   dice: RolledDie[];
 }
 
+/**
+ * Детальна дія в бою (BattleAction)
+ * Кожна дія записується для історії та можливості відміни
+ */
 export interface BattleAction {
   id: string; // унікальний ідентифікатор
   battleId: string; // ID битви

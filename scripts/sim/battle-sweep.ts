@@ -52,7 +52,7 @@ import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
-import { needsMoraleCheck } from "@/lib/utils/battle/view";
+import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, writeUnlocked } from "@/lib/utils/skills/progression";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
@@ -181,7 +181,15 @@ function invariants(label: string) {
   }
 }
 
-async function call(label: string, options: any, body: any = {}, as?: string) {
+const MORALE_GATED = new Set(["move", "attack", "spell", "aura-zone", "ability", "ability-action", "maze-mark"]);
+
+const awaitsMorale = (id: string) => awaitsMoraleCheck({ participants: P(), scene: { turnIndex: state.currentTurnIndex, pendingMoraleCheck: state.pendingMoraleCheck } }, id);
+
+async function call(label: string, options: any, body: any = {}, as?: string): Promise<any> {
+  const actorId = body.participantId ?? body.attackerId ?? body.casterId;
+
+  if (MORALE_GATED.has(label) && !body.free && actorId && state && awaitsMorale(actorId)) await call("morale-check", MORALE, { participantId: actorId, d10Roll: 1 + Math.floor(rng() * 10) });
+
   actingUser = as ?? dmId;
 
   const req = new Request(`http://localhost/api/campaigns/${ctx.campaignId}/battles/${ctx.battleId}/${label}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -645,7 +653,7 @@ async function takeTurn(spells: Map<string, any>) {
 
   const id = actor.basicInfo.id;
 
-  if (alive(actor) && needsMoraleCheck(actor, P(), state.pendingMoraleCheck)) await call("morale-check", MORALE, { participantId: id, d10Roll: 1 + Math.floor(rng() * 10) });
+  if (alive(actor) && awaitsMorale(id)) await call("morale-check", MORALE, { participantId: id, d10Roll: 1 + Math.floor(rng() * 10) });
 
   const me = () => byId(id);
 
@@ -1181,7 +1189,7 @@ async function level5Check(spells: Map<string, any>) {
 
   const r2 = await call("spell", SPELL, { casterId: byName("Аграїл").basicInfo.id, spellId: sp2.id, targetIds: [byName("Аграїл").basicInfo.id], diceRolls: [] }, ag.controlledBy);
 
-  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422, `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
+  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422 && /Немає вільного слота/.test(JSON.stringify(r2.body)), `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
 
   // Аватар Маркела
   await applyRotation(0);
@@ -1292,7 +1300,7 @@ async function reserveCheck() {
 
   const r2 = await call("reveal-participant", REVEAL, { participantIds: [reserve()[0].basicInfo.id] });
 
-  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
+  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && JSON.stringify(blocked.body).includes("чекає рішення ДМ") && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
 }
 
 async function mapCheck(spells: Map<string, any>) {
@@ -1650,14 +1658,14 @@ async function mazeCheck() {
 
   const wallMove = blockedCell ? await call("move", MOVE, { participantId: hero.basicInfo.id, to: blockedCell }) : null;
 
-  if (wallMove) tcheck("Лабіринт: крок крізь стіну → 422", wallMove.status === 422, `${hero.basicInfo.name} → ${JSON.stringify(blockedCell)}: ${wallMove.status}`);
+  if (wallMove) tcheck("Лабіринт: крок крізь стіну → 422", wallMove.status === 422 && JSON.stringify(wallMove.body).includes(MAZE_TEXTS.moveBlocked), `${hero.basicInfo.name} → ${JSON.stringify(blockedCell)}: ${wallMove.status}`);
   else tskip("Лабіринт: крок крізь стіну → 422", "за стіною від героя немає клітинки без обходу ≤ 3 кроків");
 
   const dist4 = [...mazeDistances(grid, [posOf(hero) as any]).entries()].find(([k, d]) => d === MAZE_STEPS_PER_TURN + 1 && freeMazeCell(k));
 
   const far = dist4 && (await call("move", MOVE, { participantId: hero.basicInfo.id, to: parseCellKey(dist4[0]) }));
 
-  if (far) tcheck("Лабіринт: 4-й крок за хід → 422", far.status === 422, `${hero.basicInfo.name} → ${dist4[0]}: ${far.status}`);
+  if (far) tcheck("Лабіринт: 4-й крок за хід → 422", far.status === 422 && JSON.stringify(far.body).includes(MAZE_TEXTS.moveBlocked), `${hero.basicInfo.name} → ${dist4[0]}: ${far.status}`);
   else tskip("Лабіринт: 4-й крок за хід → 422", "немає клітинки на відстані 4");
 
   const mark = await call("maze-mark", MAZE_MARK, { participantId: hero.basicInfo.id, symbol: "star" });
@@ -1672,7 +1680,7 @@ async function mazeCheck() {
 
   const over = await call("move", MOVE, { participantId: hero.basicInfo.id, to: neighbors(posOf(byId(hero.basicInfo.id)) as any).find((n) => canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(byId(hero.basicInfo.id)) as any, n) && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n))) ?? { x: 0, y: 0 } });
 
-  if ((byId(hero.basicInfo.id).battleData.movementUsed ?? 0) >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422, `${over.status}`);
+  if ((byId(hero.basicInfo.id).battleData.movementUsed ?? 0) >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422 && JSON.stringify(over.body).includes(MAZE_TEXTS.moveBlocked), `${over.status} ${JSON.stringify(over.body).slice(0, 120)}`);
 
   await untilTurnOf(isMazeAlly);
 

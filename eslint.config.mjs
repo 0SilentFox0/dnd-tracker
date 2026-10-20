@@ -17,6 +17,8 @@ const DIALOG_RESTRICTED_PATHS = [
 
 const THREE_RESTRICTED_PATH = { name: "three", message: "three лише в components/battle/fx/dice/scene.ts (лінивий чанк)" };
 
+const THREE_IMPORT_PATTERN = { group: ["three/*"], message: THREE_RESTRICTED_PATH.message };
+
 const RESTRICTED_PATHS = [...DIALOG_RESTRICTED_PATHS, THREE_RESTRICTED_PATH];
 
 const API_IMPORT_PATTERN = {
@@ -158,7 +160,7 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx,js,jsx}"],
     ignores: [DICE_SCENE_FILE],
     rules: {
-      "no-restricted-imports": ["error", { paths: [THREE_RESTRICTED_PATH] }],
+      "no-restricted-imports": ["error", { paths: [THREE_RESTRICTED_PATH], patterns: [THREE_IMPORT_PATTERN] }],
     },
   },
   {
@@ -169,7 +171,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [MODE_IMPORT_PATTERN],
+          patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
       "no-restricted-globals": [
@@ -192,7 +194,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -201,7 +203,7 @@ const eslintConfig = defineConfig([
     files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
-      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS }],
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [THREE_IMPORT_PATTERN] }],
     },
   },
   {
@@ -212,7 +214,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },

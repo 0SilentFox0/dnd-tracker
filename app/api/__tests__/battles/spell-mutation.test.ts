@@ -128,6 +128,16 @@ describe("spell mutation", () => {
       expect(rolls[2]).toMatchObject({ rollerId: "gob2", dice: [{ sides: 20, value: 20, server: true }] });
     });
 
+    it("група кубиків: лікування за визначенням заклинання, а не за сумами", async () => {
+      const healRow = { ...spellRow, targeting: { kind: "ally" }, spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }] } as unknown as Spell;
+
+      const out = await mutation(healRow)(context({ participants: [caster, goblin] }), body({ targetIds: ["hero"] }) as never);
+
+      const rolls = (out.events[0].details as { actionDetails: { diceRolls: { kind: string }[] } }).actionDetails.diceRolls;
+
+      expect(rolls.map((g) => g.kind)).toEqual(["heal"]);
+    });
+
     it("нецілий кидок відхиляє схема", async () => {
       const { spellSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema");
 

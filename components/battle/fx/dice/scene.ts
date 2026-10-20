@@ -243,6 +243,7 @@ function createBackend(host: HTMLElement): Backend {
       atlases.clear();
       shadowGeometry.dispose();
       shadowMaterial.dispose();
+      renderer.forceContextLoss();
       renderer.dispose();
       renderer.domElement.remove();
     },
