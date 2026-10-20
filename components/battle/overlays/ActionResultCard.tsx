@@ -13,6 +13,9 @@ const TITLE = { hit: "Влучання", crit: "Критичне влучанн�
 
 const TONE = { hit: "text-[#e9705a]", crit: "text-[#ffd36a]", miss: "text-[#8f8f96]" } as const;
 
+// десктоп завжди рендерить картку в CornerStack, тож «fixed» — лише телефон до появи стеку сповіщень
+const PLACEMENT = { slot: "mb-1", stack: "", corner: "w-[300px]", fixed: "fixed inset-x-4 top-14 z-50 mx-auto max-w-md" } as const;
+
 type AttackFx = Exclude<ActionResultFx, { kind: "spell" }>;
 
 const strikeText = (s: { kind: "hit" | "crit" | "miss"; damage: number; downed: boolean }) =>
@@ -86,6 +89,8 @@ export function ActionResultCard() {
 
   if (!fx) return null;
 
+  const placement = slot ? "slot" : stack ? "stack" : corner ? "corner" : "fixed";
+
   const card = (
     <div
       role="status"
@@ -94,7 +99,7 @@ export function ActionResultCard() {
       className={cn(
         HUD_SURFACE,
         "relative cursor-pointer border border-white/25 bg-[#15110e]/95 py-2 pl-3 pr-9 text-[var(--ink)] animate-[hud-fade_.2s]",
-        slot ? "mb-1" : stack ? "" : corner ? "w-[300px]" : "fixed inset-x-4 top-14 z-50 mx-auto max-w-md lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-auto lg:mx-0 lg:w-[300px]",
+        PLACEMENT[placement],
       )}
     >
       {fx.kind === "spell" ? <SpellBody fx={fx} /> : <AttackBody fx={fx} />}
