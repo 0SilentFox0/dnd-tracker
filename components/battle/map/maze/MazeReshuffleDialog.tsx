@@ -13,7 +13,14 @@ import type { MazeReshuffleMode, MazeTools } from "@/lib/hooks/battle";
 const MODE_OPTIONS: { value: MazeReshuffleMode; label: string }[] = [
   { value: "walls", label: "Лише стіни" },
   { value: "scatter", label: "Стіни + розкидати всіх" },
+  { value: "tunnel", label: "1 тунель" },
 ];
+
+const DESCRIPTIONS: Record<MazeReshuffleMode, string> = {
+  walls: "Вихід лишається на місці; нікого не буде замуровано.",
+  scatter: "Вихід лишається на місці; нікого не буде замуровано.",
+  tunnel: "Одна кімната з прямим тунелем до виходу: герої збираються в центрі, вороги йдуть у резерв ДМа.",
+};
 
 interface Props {
   open: boolean;
@@ -41,7 +48,7 @@ export function MazeReshuffleDialog({ open, onOpenChange, onSubmit }: Props) {
       size="sm"
       hud
       title="Перетасувати лабіринт"
-      description="Вихід лишається на місці; нікого не буде замуровано."
+      description={DESCRIPTIONS[mode]}
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -58,7 +65,7 @@ export function MazeReshuffleDialog({ open, onOpenChange, onSubmit }: Props) {
           <Label>Режим</Label>
           <SelectField value={mode} onValueChange={(v) => setMode(v as MazeReshuffleMode)} options={MODE_OPTIONS} />
         </div>
-        <MazeCountsFields value={counts} onChange={setCounts} />
+        {mode !== "tunnel" && <MazeCountsFields value={counts} onChange={setCounts} />}
       </form>
     </ResponsiveDialog>
   );

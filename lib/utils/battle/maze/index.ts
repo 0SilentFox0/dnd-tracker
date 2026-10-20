@@ -11,5 +11,6 @@ export * from "./rng";
 export * from "./scatter";
 export * from "./sight";
 export * from "./status";
+export * from "./tunnel";
 export * from "./vision";
 export * from "./walls";

@@ -1709,6 +1709,8 @@ async function mazeCheck() {
 
   tcheck(`Лабіринт: розкидання — відстань між учасниками ≥ ${MAZE_SCATTER_MIN_GAP}`, rs.status === 200 && minGap >= MAZE_SCATTER_MIN_GAP && allReachExit(mazeGrid(), cells) && sleepS.ok, `${rs.status} мін. відстань ${minGap}; невідповідність сну: ${sleepS.detail || "немає"}${rs.status !== 200 ? ` ${JSON.stringify(rs.body).slice(0, 150)}` : ""}`);
 
+  await mazeTunnelCheck();
+
   await mazeWalkAllies(120);
 
   const allies = P().filter((p) => p.basicInfo.side === "ally" && alive(p));
@@ -1718,4 +1720,31 @@ async function mazeCheck() {
   const awaiting = checkVictoryConditions(P(), [], { maze: true }).awaiting;
 
   tcheck("Лабіринт: усі союзники вибралися → очікування рішення ДМ", escapedAll && awaiting === "victory" && state.status === "active", `вибралися ${allies.filter((p) => p.battleData.escaped).length}/${allies.length}; awaiting=${awaiting}; статус ${state.status}`);
+}
+
+/** «1 тунель»: вороги в резерві, герої біля центру, шлях до виходу є; якщо ДМ має вирішити — вводить резерв і бій триває. */
+async function mazeTunnelCheck() {
+  const reserve = () => (state.pendingSummons ?? []).filter((p: any) => p.battleData.reserved);
+
+  const leaving = P().filter((p) => p.basicInfo.side === "enemy" && p.combatStats.status !== "dead" && !p.basicInfo.isExtraTurnSlot).map((p) => p.basicInfo.id);
+
+  const rt = await call("maze", MAZE, { op: "reshuffle", mode: "tunnel", teleportPairs: 0, fogPatches: 0 });
+
+  const centre = { x: Math.floor(state.map.cols / 2), y: Math.floor(state.map.rows / 2) };
+
+  const heroes = P().filter(isMazeAlly);
+
+  const clustered = heroes.length > 0 && heroes.every((h) => cellDistance(posOf(h) as any, centre) <= 2);
+
+  const inReserve = new Set(reserve().map((p: any) => p.basicInfo.id));
+
+  const enemiesGone = leaving.every((id) => inReserve.has(id)) && !P().some((p) => p.basicInfo.side === "enemy" && onField(p));
+
+  const maze = state.map.maze;
+
+  const open = maze.teleports.length === 0 && maze.fog.length === 0;
+
+  tcheck("Лабіринт: «1 тунель» — герої біля центру, вороги в резерві, шлях до виходу", rt.status === 200 && clustered && enemiesGone && open && allReachExit(mazeGrid(), heroes.map((h) => posOf(h) as any)), `${rt.status} біля центру=${clustered} у резерві ${leaving.filter((id) => inReserve.has(id)).length}/${leaving.length} телепортів ${maze.teleports.length} туману ${maze.fog.length}${rt.status !== 200 ? ` ${JSON.stringify(rt.body).slice(0, 150)}` : ""}`);
+
+  if (checkVictoryConditions(P(), reserve(), { maze: true }).awaiting && reserve().length > 0) await call("reveal-participant", REVEAL, { participantIds: reserve().map((p: any) => p.basicInfo.id) });
 }

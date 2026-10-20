@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { tunnelMutation } from "./maze-tunnel";
+
 import { ParticipantSide } from "@/lib/constants/battle";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
@@ -31,7 +33,7 @@ const features = { teleportPairs: z.number().int().min(0).max(10), fogPatches: z
 
 export const mazeActionSchema = z.discriminatedUnion("op", [
   z.object({ op: z.literal("generate"), difficulty: z.enum(["easy", "medium", "hard"]), ...features, exit: mapCellSchema.nullable() }),
-  z.object({ op: z.literal("reshuffle"), mode: z.enum(["walls", "scatter"]), ...features }),
+  z.object({ op: z.literal("reshuffle"), mode: z.enum(["walls", "scatter", "tunnel"]), ...features }),
   z.object({ op: z.literal("walls"), add: z.array(edgeKeySchema).max(400), remove: z.array(edgeKeySchema).max(400) }),
   z.object({ op: z.literal("exit"), cell: mapCellSchema }),
   z.object({ op: z.literal("teleport"), pair: z.tuple([mapCellSchema, mapCellSchema]).nullable(), removeAt: mapCellSchema.optional() }),
@@ -83,6 +85,7 @@ function canonicalCell(key: string, grid: { cols: number; rows: number }): strin
 export const MAZE_OP_TEXT = {
   generate: "ДМ згенерував лабіринт",
   reshuffle: "ДМ перетасував лабіринт",
+  tunnel: "ДМ лишив у лабіринті один тунель",
   darkOn: "Темрява",
   darkOff: "Світло",
   scatterStarts: "ДМ розкидав героїв по краях",
@@ -182,6 +185,8 @@ const generate: OpHandler<"generate"> = (ctx, maze, body) => {
 };
 
 const reshuffle: OpHandler<"reshuffle"> = (ctx, maze, body) => {
+  if (body.mode === "tunnel") return tunnelMutation(ctx, maze, mazeOpEvent(ctx.scene.round, MAZE_OP_TEXT.tunnel, "reshuffle"));
+
   const grid = gridOf(ctx, maze);
 
   const field = ctx.participants.filter(onField);

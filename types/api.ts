@@ -194,7 +194,7 @@ export interface MapTerrainResponse {
 
 export type MazeActionData =
   | { op: "generate"; difficulty: MazeDifficulty; teleportPairs: number; fogPatches: number; exit: GridPoint | null }
-  | { op: "reshuffle"; mode: "walls" | "scatter"; teleportPairs: number; fogPatches: number }
+  | { op: "reshuffle"; mode: "walls" | "scatter" | "tunnel"; teleportPairs: number; fogPatches: number }
   | { op: "walls"; add: string[]; remove: string[] }
   | { op: "exit"; cell: GridPoint }
   | { op: "teleport"; pair: [GridPoint, GridPoint] | null; removeAt?: GridPoint }

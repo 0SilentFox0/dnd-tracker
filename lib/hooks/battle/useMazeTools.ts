@@ -33,7 +33,7 @@ export interface MazeEditing {
   picked: GridPoint | null;
 }
 
-export type MazeReshuffleMode = "walls" | "scatter";
+export type MazeReshuffleMode = "walls" | "scatter" | "tunnel";
 
 export interface MazeTools {
   enabled: boolean;
