@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { FxSpells } from "@/components/battle/fx-lab/spells/FxSpells";
-import type { SpellCardData } from "@/components/battle/fx-lab/spells/types";
+import { FxSpells } from "@/components/battle/dev/spells/FxSpells";
+import type { SpellCardData } from "@/components/battle/dev/spells/types";
 import { SPELLS } from "@/data/library/spells";
 import { iconPublicUrl } from "@/data/skill-icons";
 import { libraryPreviewSpell, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";

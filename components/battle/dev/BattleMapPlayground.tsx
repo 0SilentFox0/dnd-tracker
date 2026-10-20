@@ -1,11 +1,10 @@
 "use client";
 
-import { BattleMap } from "../BattleMap";
-import { useBattleMapPlayground } from "./useBattleMapPlayground";
-
 import "@/components/battle/hud/battle-hud.css";
+import { BattleMap } from "@/components/battle/map/BattleMap";
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useBattleMapPlayground } from "@/lib/hooks/battle/useBattleMapPlayground";
 import { cn } from "@/lib/utils";
 import { remainingMovement } from "@/lib/utils/battle/grid";
 
