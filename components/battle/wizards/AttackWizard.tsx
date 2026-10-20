@@ -1,42 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Crosshair, Loader2, Swords } from "lucide-react";
+import { Crosshair, Swords } from "lucide-react";
 
-import { HealthLabel, Portrait } from "@/components/battle/hud";
-import { AiRollButton, DamageDice, DiceGrid } from "@/components/battle/hud/DiceInput";
+import { DamageStep } from "./attack/DamageStep";
+import { RollStep } from "./attack/RollStep";
+import type { AttackWizardModel } from "./attack/shared";
+import { SummaryStep } from "./attack/SummaryStep";
+import { TargetStep } from "./attack/TargetStep";
+import { WeaponStep } from "./attack/WeaponStep";
+
 import { HUD_SURFACE } from "@/components/hud";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { AttackType } from "@/lib/constants/battle";
-import { type useAttackWizard } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import type { AttackMode } from "@/lib/utils/battle/flows";
-import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
-import { signed } from "@/lib/utils/common/format";
-
-type Wizard = ReturnType<typeof useAttackWizard>;
 
 const STEPS = ["Зброя", "Ціль", "Кидок", "Шкода", "Підсумок"] as const;
 
 const STEP_INDEX = { weapon: 0, target: 1, roll: 2, damage: 3, summary: 4, submitting: 4 } as const;
 
-const MODES: [AttackMode, string][] = [["normal", "Звичайний"], ["advantage", "Перевага"], ["disadvantage", "Недолік"]];
-
 const PICKED_LABEL = { melee: "Ближня атака", ranged: "Дальня атака" } as const;
 
 const PICKED_STEPS = new Set(["roll", "damage", "summary", "submitting"]);
 
-const btn = "hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em]";
-
-export function AttackWizard({ wizard }: { wizard: Wizard }) {
+export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
   const { state, view, actions } = wizard;
 
-  const { attack, attacks, targets, steps, estimate } = view;
-
-  const [draft, setDraft] = useState<(number | undefined)[]>([]);
-
-  const [second, setSecond] = useState<number | undefined>();
+  const { attack, targets } = view;
 
   const open = state.step !== "closed" && state.step !== "result";
 
@@ -45,6 +33,9 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
   const strike = state.strikes[state.index];
 
   const target = targets.find((t) => t.basicInfo.id === strike?.targetId) ?? null;
+
+  // кубики кроку живуть у дочірньому компоненті: новий удар чи закриття діалогу їх скидає
+  const stepKey = `${state.step}:${state.index}`;
 
   const header = (
     <div className={cn("mb-3 grid h-8 gap-1", state.weaponCount > 1 ? "grid-cols-5" : "grid-cols-4")}>
@@ -75,122 +66,11 @@ export function AttackWizard({ wizard }: { wizard: Wizard }) {
           )}
         </div>
       )}
-      {state.step === "weapon" && (
-        <div className="space-y-2">
-          {attacks.map((a) => (
-            <button key={a.id ?? a.name} type="button" onClick={() => actions.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left", (a.id ?? a.name) === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
-              {a.type === AttackType.RANGED ? <Crosshair className="size-7 shrink-0 text-[var(--gold)]" /> : <Swords className="size-7 shrink-0 text-[var(--gold)]" />}
-              <span className="min-w-0 flex-1">
-                <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
-                <span className="block text-[13px] text-[#a89c88]">{a.type === AttackType.MELEE ? "ближній" : "дальній"} · {signed(view.previews[a.id ?? a.name]?.toHit ?? a.attackBonus)} до влучання</span>
-                <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
-                  {view.previews[a.id ?? a.name]?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
-                </span>
-              </span>
-              <span className="w-[72px] text-right text-[15px]">{view.previews[a.id ?? a.name]?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {view.previews[a.id ?? a.name]?.estimate}</small></span>
-            </button>
-          ))}
-        </div>
-      )}
-      {state.step === "target" && (
-        <>
-          <div className="space-y-2">
-            {targets.map((t) => (
-              <button key={t.basicInfo.id} type="button" onClick={() => actions.toggleTarget(t.basicInfo.id)} className={cn("flex h-14 w-full items-center gap-3 border px-3 text-left", state.targetIds.includes(t.basicInfo.id) ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
-                <Portrait participant={t} size={36} />
-                <span className="hud-sc flex-1 font-bold">{t.basicInfo.name}</span>
-                <HealthLabel participant={t} />
-              </button>
-            ))}
-          </div>
-          {view.canSelectAllEnemies && (
-            <button type="button" onClick={actions.selectAllEnemies} className={cn(btn, "mt-3 w-full border-white/25")}>Усі вороги</button>
-          )}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" onClick={actions.close} className={cn(btn, "border-white/25")}>Скасувати</button>
-            <button type="button" disabled={state.targetIds.length === 0} onClick={actions.confirmTargets} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}>Далі · кидок</button>
-          </div>
-        </>
-      )}
-      {state.step === "roll" && target && (
-        <>
-          <div className="hud-sc text-xl font-bold">Кидок атаки · d20</div>
-          {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">Удар {state.index + 1} з {state.strikes.length} · {target.basicInfo.name}</div>}
-          <div className={cn("mt-3 grid h-10 grid-cols-3 border border-white/20", view.forcedMode && "opacity-60")}>
-            {MODES.map(([m, label]) => (
-              <button key={m} type="button" disabled={!!view.forcedMode} onClick={() => actions.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed", view.rollMode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
-            ))}
-          </div>
-          {view.forcedMode && <div className="mt-1.5 text-xs text-[#cdb87e]">{view.forcedMode.reason}</div>}
-          <label className="mt-2 flex h-10 cursor-pointer items-center gap-2.5 text-sm text-[#a89c88]">
-            <Checkbox checked={state.obstacle} onCheckedChange={actions.toggleObstacle} className="border-white/40" />
-            <span className={cn(state.obstacle && "font-bold text-[var(--ink)]")}>Перешкода · шкода ×0.5</span>
-          </label>
-          {view.rollMode !== "normal" && <div className="mt-2 text-xs text-[var(--hud-muted)]">Спершу перший кубик, потім другий</div>}
-          <DiceGrid
-            sides={20}
-            value={second}
-            onPick={(v) => {
-              if (view.rollMode !== "normal" && second === undefined) setSecond(v);
-              else {
-                actions.roll(second ?? v, second === undefined ? undefined : v);
-                setSecond(undefined);
-              }
-            }}
-          />
-          <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
-            <AiRollButton onClick={actions.aiRoll} />
-            <button type="button" onClick={actions.back} className={cn(btn, "border-white/25")}>Назад</button>
-          </div>
-        </>
-      )}
-      {state.step === "damage" && (
-        <>
-          <div className="hud-sc text-xl font-bold">Шкода{strike?.outcome === "crit" ? " · критичне" : ""}</div>
-          <DamageDice slots={state.diceSlots} values={draft} onChange={(i, v) => setDraft((d) => { const n = [...d];
-
- n[i] = v;
-
- return n; })} />
-          <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
-            <AiRollButton onClick={() => setDraft(state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)))} />
-            <button
-              type="button"
-              disabled={state.diceSlots.some((_, i) => draft[i] === undefined)}
-              onClick={() => {
-                actions.damage(draft as number[]);
-                setDraft([]);
-              }}
-              className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc] disabled:opacity-50")}
-            >
-              Далі · підсумок
-            </button>
-          </div>
-        </>
-      )}
-      {(state.step === "summary" || state.step === "submitting") && (
-        <>
-          {steps.map((list, k) => (
-            <div key={k} className="mt-1">
-              {list.map((s, i) => (
-                <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-hud-danger")}>
-                  <span>{s.label}</span>
-                  <span>{s.kind === "percent" ? `${signed(s.value)}%` : s.kind === "multiplier" ? `×${s.value}` : s.kind === "immunity" ? "імунітет" : s.kind === "flat" ? signed(s.value) : s.value} → {s.after}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-          {view.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
-          {steps.length > 0 && <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold"><span>Орієнтовно</span><span className="text-[26px]">{estimate}</span></div>}
-          {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" disabled={state.step === "submitting"} onClick={actions.back} className={cn(btn, "border-white/25")}>← Назад</button>
-            <button type="button" disabled={state.step === "submitting"} onClick={actions.submit} className={cn(btn, "border-[#a8473a] bg-[#7a2a1f] text-[#f3e7cc]")}>
-              {state.step === "submitting" ? <Loader2 className="size-5 animate-spin" /> : <><Swords className="size-5" />Атакувати</>}
-            </button>
-          </div>
-        </>
-      )}
+      {state.step === "weapon" && <WeaponStep wizard={wizard} />}
+      {state.step === "target" && <TargetStep wizard={wizard} />}
+      {state.step === "roll" && target && <RollStep key={stepKey} wizard={wizard} target={target} />}
+      {state.step === "damage" && <DamageStep key={stepKey} wizard={wizard} />}
+      {(state.step === "summary" || state.step === "submitting") && <SummaryStep wizard={wizard} />}
     </ResponsiveDialog>
   );
 }

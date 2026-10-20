@@ -1,8 +1,7 @@
 "use client";
 
-import { Portrait } from "@/components/battle/hud";
+import { TargetButton } from "@/components/battle/wizards/TargetButton";
 import type { AuraZoneStep } from "@/lib/hooks/battle";
-import { cn } from "@/lib/utils";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 
 export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
@@ -20,10 +19,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
       </div>
       <div className="grid gap-1.5">
         {candidates.map((t) => (
-          <button key={t.basicInfo.id} type="button" aria-pressed={selected.includes(t.basicInfo.id)} onClick={() => toggle(t.basicInfo.id)} className={cn("flex h-11 w-full items-center gap-2 border px-2 text-left", selected.includes(t.basicInfo.id) ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-white/15")}>
-            <Portrait participant={t} size={32} />
-            <span className="hud-sc min-w-0 flex-1 truncate font-bold">{t.basicInfo.name}</span>
-          </button>
+          <TargetButton key={t.basicInfo.id} participant={t} tone="gold" compact selected={selected.includes(t.basicInfo.id)} onClick={() => toggle(t.basicInfo.id)} />
         ))}
       </div>
       <button type="button" disabled={pending} onClick={() => void confirm()} className="hud-sc flex h-11 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40">

@@ -2,13 +2,15 @@
 
 import { memo } from "react";
 
+import { tokenBoxStyle } from "./token-box";
+
+import { HitFloat } from "@/components/battle/hud";
 import { useFxEnabled, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
-import { signedDelta } from "@/lib/utils/common/format";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export interface MapTokenHudProps {
@@ -71,23 +73,9 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
     <div
       data-map-hud={participant.basicInfo.id}
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
-      style={{
-        left: `${((box.cx - box.size / 2) / mapSize.width) * 100}%`,
-        top: `${((box.cy - box.size / 2) / mapSize.height) * 100}%`,
-        width: `${(box.size / mapSize.width) * 100}%`,
-        height: `${(box.size / mapSize.height) * 100}%`,
-        zIndex: raised ? 20 : 10,
-      }}
+      style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
     >
-      {change && showText && (
-        <span
-          key={`float:${change.id}`}
-          className={cn("hud-sc absolute bottom-[30%] left-1/2 z-10 -translate-x-1/2 font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}
-          style={{ ...delayStyle, fontSize: nameFont * 1.6 }}
-        >
-          {signedDelta(change.delta)}
-        </span>
-      )}
+      {showText && <HitFloat change={change} delayStyle={delayStyle} className="bottom-[30%] left-1/2 -translate-x-1/2" style={{ fontSize: nameFont * 1.6 }} />}
       {onReturn && (
         <button
           type="button"

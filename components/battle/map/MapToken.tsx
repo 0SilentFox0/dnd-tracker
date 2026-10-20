@@ -2,9 +2,11 @@
 
 import { memo } from "react";
 
+import { tokenBoxStyle } from "./token-box";
+
 import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
-import { Portrait } from "@/components/battle/hud";
+import { hitFlashClass, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { FxImpact } from "@/lib/utils/battle/fx";
@@ -34,8 +36,6 @@ export interface MapTokenProps {
 function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
-  const { width, height } = mapSize;
-
   const { change, shakeRef, delayStyle } = useHitFx<HTMLButtonElement>(participant.combatStats.currentHp, impact);
 
   const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * PORTRAIT_SHARE));
@@ -44,13 +44,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
     <div
       data-dormant={dormant || undefined}
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
-      style={{
-        left: `${((box.cx - box.size / 2) / width) * 100}%`,
-        top: `${((box.cy - box.size / 2) / height) * 100}%`,
-        width: `${(box.size / width) * 100}%`,
-        height: `${(box.size / height) * 100}%`,
-        zIndex: isDown(participant) ? 1 : 2,
-      }}
+      style={{ ...tokenBoxStyle(box, mapSize), zIndex: isDown(participant) ? 1 : 2 }}
     >
       <button
         ref={shakeRef}
@@ -72,7 +66,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
           key={`portrait:${change?.id ?? ""}`}
           data-map-token-flash={change ? (change.delta < 0 ? "damage" : "heal") : undefined}
           style={delayStyle}
-          className={cn("inline-flex rounded-full", change && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))}
+          className={cn("inline-flex rounded-full", hitFlashClass(change))}
         >
           <Portrait participant={participant} size={portraitPx} current={current} />
         </span>

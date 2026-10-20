@@ -3,7 +3,7 @@ import { Swords } from "lucide-react";
 
 import { DeleteAllBattlesButton } from "./page-client";
 
-import { BattleListCard, type BattleListKind } from "@/components/battle/list/BattleListCard";
+import { BattleListCard } from "@/components/battle/list/BattleListCard";
 import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
@@ -13,7 +13,7 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
 
-const SECTIONS: { kind: BattleListKind; title: string }[] = [
+const SECTIONS: { kind: BattleStatus; title: string }[] = [
   { kind: BattleStatus.ACTIVE, title: "Активні бої" },
   { kind: BattleStatus.PREPARED, title: "Підготовлені бої" },
   { kind: BattleStatus.COMPLETED, title: "Завершені бої" },

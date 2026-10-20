@@ -83,16 +83,15 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
       </button>}
 
       <div
+        inert={!open}
         className={cn(
           HUD_SURFACE,
-          "fixed bottom-0 top-0 z-50 flex max-w-full flex-col",
+          "fixed bottom-0 right-0 top-0 z-50 flex max-w-full flex-col",
           "border-l border-hud-line bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)]",
           "transition-transform duration-300 ease-out",
+          open ? "translate-x-0" : "translate-x-full",
         )}
-        style={{
-          width: PANEL_WIDTH,
-          right: open ? 0 : -PANEL_WIDTH,
-        }}
+        style={{ width: PANEL_WIDTH }}
       >
         <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hud-rule px-4">
           <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
