@@ -1,10 +1,12 @@
 import type { MapModeDefinition } from "../types";
 import { withMazeAwareness } from "./awareness";
+import { mazeChange } from "./delta";
 import { mazeGridOf } from "./grid";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
 import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
+import { mazeFxVisible, mazeLogVisible } from "./view";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
@@ -46,5 +48,10 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? MAZE_TEXTS.wallBetween : null),
     engages: ({ map, attacker, neighbour }) => inPlay(neighbour) && !meleeWallBetween(gridOf(map), attacker, neighbour),
   },
-  client: {},
+  client: {
+    deltaOf: mazeChange,
+    mergeDelta: (cached, patch) => ({ ...cached, ...patch }),
+    logVisible: mazeLogVisible,
+    fxVisible: mazeFxVisible,
+  },
 };

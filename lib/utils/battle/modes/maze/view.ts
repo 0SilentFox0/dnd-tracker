@@ -1,3 +1,4 @@
+import type { ModeView } from "../types";
 import { mazeGridOf } from "./grid";
 import { isMazeHero, isPlaced } from "./status";
 import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
@@ -6,28 +7,20 @@ import { edgeCells } from "./walls";
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import type { QueueEntry } from "@/lib/utils/battle/view/queue";
+import { filterQueueByView, type QueueEntry } from "@/lib/utils/battle/view/queue";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
 
-export interface MazeView {
+export interface MazeView extends ModeView {
   role: MazeRole;
-  /** null — бачить усі клітинки */
-  cells: ReadonlySet<string> | null;
   /** Лише для ДМ: що зараз бачать усі герої на полі разом */
   partyCells: ReadonlySet<string> | null;
-  visibleIds: ReadonlySet<string>;
-  /** Свої герої гравця (або герой «Очима гравця»); для ДМ і глядача порожньо */
-  ownIds: ReadonlySet<string>;
   /** Стіна на межі видимої клітинки (для гравця) */
   showWalls: (edge: string) => boolean;
   showTeleportLinks: boolean;
   showFog: boolean;
-  showDormant: boolean;
   showExit: boolean;
-  /** Для гравця: чорний екран зі своїм токеном */
-  dark: boolean;
   mazeDark: boolean;
 }
 
@@ -100,9 +93,6 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   };
 }
 
-export const filterQueue = (queue: QueueEntry[], view: MazeView): QueueEntry[] =>
-  queue.filter((e) => e.kind === "round" || view.visibleIds.has(idOf(e.participant)));
-
 export const MAZE_UNKNOWN_NAME = "невідомий";
 
 const hidesFrom = (view: MazeView | null | undefined): view is MazeView => view?.role === "player";
@@ -167,7 +157,7 @@ export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView |
   return {
     ...scene,
     battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).filter((e) => mazeLogVisible(view, e)) },
-    turn: { ...scene.turn, current: masked, queue: filterQueue(scene.turn.queue, view) },
+    turn: { ...scene.turn, current: masked, queue: filterQueueByView(scene.turn.queue, view) },
     roster: { ...scene.roster, allies: visibleParticipants(view, scene.roster.allies), enemies: visibleParticipants(view, scene.roster.enemies) },
   } as T;
 }

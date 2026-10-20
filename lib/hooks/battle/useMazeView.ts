@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 
 import { type BattleSceneData, type BattleSceneValue, useBattleScene, useBattleSceneData } from "./useBattleScene";
 
-import { deriveMazeView, maskMazeScene, mazeFxVisible, type MazeView,mazeVisible } from "@/lib/utils/battle/modes/maze";
+import { modeFxVisible } from "@/lib/utils/battle/modes/client";
+import { deriveMazeView, maskMazeScene, type MazeView,mazeVisible } from "@/lib/utils/battle/modes/maze";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -105,5 +106,5 @@ export function useMazeFxLog(): BattleAction[] {
 
   const view = state?.view ?? null;
 
-  return useMemo(() => (view?.role === "player" ? log.filter((e) => mazeFxVisible(view, e)) : log), [log, view]);
+  return useMemo(() => (view?.role === "player" ? log.filter((e) => modeFxVisible(battle.map, view, e)) : log), [log, view, battle.map]);
 }

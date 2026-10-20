@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { spellTargetCandidates } from "@/lib/utils/battle/flows/spell-flow";
-import { deriveMazeView, filterQueue, visibleParticipants } from "@/lib/utils/battle/modes/maze";
+import { deriveMazeView, visibleParticipants } from "@/lib/utils/battle/modes/maze";
 import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { turnQueue } from "@/lib/utils/battle/view";
+import { filterQueueByView } from "@/lib/utils/battle/view/queue";
 import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
 const withControl = (p: BattleParticipant, userId: string, facing: "e" | "w" = "e"): BattleParticipant => ({
@@ -110,7 +111,7 @@ describe("deriveMazeView", () => {
 
     const order = [a, behindWall, seen, outOfCone].map((p) => byId(all, p.basicInfo.id));
 
-    const ids = filterQueue(turnQueue(order, 0, 1), v).map((e) => (e.kind === "round" ? "|" : e.participant.basicInfo.id));
+    const ids = filterQueueByView(turnQueue(order, 0, 1), v).map((e) => (e.kind === "round" ? "|" : e.participant.basicInfo.id));
 
     expect(ids).toEqual(["a", "|", "a"]);
   });

@@ -1,4 +1,5 @@
 import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
+import type { ModeView } from "@/lib/utils/battle/modes/types";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -27,6 +28,9 @@ export function turnQueue(order: BattleParticipant[], turnIndex: number, round: 
 
   return all.filter(live);
 }
+
+export const filterQueueByView = (queue: QueueEntry[], view: Pick<ModeView, "visibleIds">): QueueEntry[] =>
+  queue.filter((e) => e.kind === "round" || view.visibleIds.has(e.participant.basicInfo.id));
 
 export function turnsUntil(queue: QueueEntry[], myIds: string[]): number | null {
   let count = 0;
