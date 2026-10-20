@@ -4,27 +4,27 @@ import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/u
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
-/** Стан однієї атаки: свіжий список учасників і накопичений лог умінь. */
-export interface AttackFlow {
+/** Стан однієї дії (атака, закляття): свіжий список учасників і накопичений лог умінь. */
+export interface ActionFlow {
   ps: BattleParticipant[];
   messages: string[];
   summons: SummonRequest[];
   ctx: AbilityRunContext;
 }
 
-export function getP(flow: AttackFlow, id: string): BattleParticipant {
+export function getP(flow: ActionFlow, id: string): BattleParticipant {
   const p = findParticipant(flow.ps, id);
 
-  if (!p) throw new Error(`participant ${id} missing from attack flow`);
+  if (!p) throw new Error(`participant ${id} missing from action flow`);
 
   return p;
 }
 
-export function put(flow: AttackFlow, p: BattleParticipant): void {
+export function put(flow: ActionFlow, p: BattleParticipant): void {
   flow.ps = replaceParticipant(flow.ps, p);
 }
 
-export function fire(flow: AttackFlow, event: AbilityEvent): AbilityRunResult {
+export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
   const r = runAbilities(flow.ps, event, flow.ctx);
 
   flow.ps = r.participants;
@@ -35,7 +35,7 @@ export function fire(flow: AttackFlow, event: AbilityEvent): AbilityRunResult {
 }
 
 /** Летальна шкода й вбивство для учасника, що щойно впав. */
-export function settleDowned(flow: AttackFlow, victimId: string, actorId: string | null): void {
+export function settleDowned(flow: ActionFlow, victimId: string, actorId: string | null): void {
   const victim = findParticipant(flow.ps, victimId);
 
   if (!victim || isActive(victim)) return;

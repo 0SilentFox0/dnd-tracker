@@ -1,16 +1,16 @@
-import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
-import { applyResistance } from "../../resistance";
-import type { ProcessAttackResult } from "../../types/attack-process";
-import type { AttackRollResult } from "..";
-import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { buildBattleActionForMiss } from "./actions";
 import { applyDamageToTarget } from "./damage";
 
+import { type ActionFlow, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { applyResistance } from "@/lib/utils/battle/resistance";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { BattleAttack } from "@/types/battle";
 
 export interface HandleMissParams {
-  flow: AttackFlow;
+  flow: ActionFlow;
   attackerId: string;
   targetId: string;
   attack: BattleAttack;
@@ -45,20 +45,19 @@ export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, 
     attackKind: attackKindOf(attack.type),
   });
 
-  const battleAction = buildBattleActionForMiss(
-    getP(flow, attackerId),
+  const battleAction = buildBattleActionForMiss({
+    attacker: getP(flow, attackerId),
     target,
-    getP(flow, targetId),
+    targetAfter: getP(flow, targetId),
     attack,
     d20Roll,
     attackRoll,
     targetAC,
-    actualGuaranteedDamage,
-    flow.messages,
-    [],
+    guaranteedDamage: actualGuaranteedDamage,
+    messages: flow.messages,
     battleId,
     currentRound,
-  );
+  });
 
   return {
     success: false,

@@ -2,6 +2,7 @@
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -11,7 +12,7 @@ export function applyVampirism(
   totalFinalDamage: number,
   attackType: string,
 ): { updatedAttacker: BattleParticipant | null; vampirismHeal: number } {
-  const attacker = participants.find((p) => p.basicInfo.id === attackerId);
+  const attacker = findParticipant(participants, attackerId);
 
   const isMeleeOrRanged = attackType === AttackType.MELEE || attackType === AttackType.RANGED;
 

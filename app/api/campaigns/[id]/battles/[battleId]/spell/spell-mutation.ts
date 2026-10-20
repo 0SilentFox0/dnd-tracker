@@ -5,8 +5,7 @@ import type { SpellRequestData } from "./cast-spell-schema";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { canActNow } from "@/lib/utils/battle/common/control";
+import { requireActor } from "@/lib/utils/battle/common/control";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -34,15 +33,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
   return async (ctx: BattleMutationContext, data: SpellRequestData): Promise<MutationResult> => {
     const order = ctx.participants;
 
-    const caster = order.find((p) => p.basicInfo.id === data.casterId);
-
-    if (!caster) throw new BattleAccessError(404, "Кастера немає в бою");
-
-    const current = order[ctx.scene.turnIndex];
-
-    if (!canActNow(ctx, caster, current)) throw new BattleAccessError(403, "Заклинання може кастувати лише DM або контролер поточного ходу");
-
-    if (!isActive(caster)) throw new BattleRuleError("participant_dead", "Кастер непритомний або мертвий");
+    const caster = requireActor(ctx, data.casterId, {
+      missing: "Кастера немає в бою",
+      forbidden: "Заклинання може кастувати лише DM або контролер поточного ходу",
+      inactive: { code: "participant_dead", message: "Кастер непритомний або мертвий" },
+    });
 
     // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
     const free = ctx.isDM && data.free === true;

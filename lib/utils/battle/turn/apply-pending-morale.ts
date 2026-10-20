@@ -3,6 +3,7 @@ import type { PendingMoraleCheckPayload } from "./pending-morale";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -76,28 +77,15 @@ export function applyPendingMoraleCheck(
 
   const participantForLog = findParticipant(updatedInitiativeOrder, participantId);
 
-  const moraleLogEntry: BattleAction = {
+  const moraleLogEntry = newBattleAction(participant, moraleResult.shouldSkipTurn ? "morale_skip" : "ability", { battleId, round: currentRound }, {
     id: `morale-${participant.basicInfo.id}-${Date.now()}`,
-    battleId,
-    round: currentRound,
     actionIndex: battleLogLength,
-    timestamp: new Date(),
-    actorId: participant.basicInfo.id,
-    actorName: participant.basicInfo.name,
-    actorSide: participant.basicInfo.side,
-    actionType: moraleResult.shouldSkipTurn ? "morale_skip" : "ability",
-    targets: [],
     actionDetails: {
       d10Roll,
       morale: effectiveMorale(participantForLog ?? participant, updatedInitiativeOrder).value,
     },
-    resultText: [moraleResult.message, ...triggerMessages]
-      .filter(Boolean)
-      .join(" | "),
-    hpChanges: [],
-    isCancelled: false,
-    stateBefore: undefined,
-  };
+    resultText: [moraleResult.message, ...triggerMessages].filter(Boolean).join(" | "),
+  });
 
   return { updatedInitiativeOrder, moraleLogEntry };
 }

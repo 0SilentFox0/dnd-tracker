@@ -1,251 +1,128 @@
-import type { DamageCalculationResult } from "../../types/damage-calculations";
-import type { AttackRollResult } from "..";
 import type { ComputeHitDamageResult } from "./compute";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { immunityNote } from "@/lib/utils/battle/resistance";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { lowerFirst } from "@/lib/utils/common/text";
-import type { BattleAction, BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 
 const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.id, name: effect.name, description: effect.description, type: effect.type, flavor });
 
 const critSummary = (effect: CriticalEffect, flavor: string | undefined, isFail: boolean) =>
   `${isFail ? `Критична невдача — ${effect.name}.` : `Критичне влучання — ${effect.name}!`}${flavor ? ` ${flavor}` : ""}`;
 
+const rollDetails = (attack: BattleAttack, d20Roll: number, attackRoll: AttackRollResult, targetAC: number) => ({
+  weaponName: attack.name,
+  attackKind: attackKindOf(attack.type),
+  attackRoll: d20Roll,
+  attackBonus: attackRoll.attackBonus,
+  totalAttackValue: attackRoll.totalAttackValue,
+  targetAC,
+});
 
-export function buildBattleActionForCriticalFail(
-  attacker: BattleParticipant,
-  target: BattleParticipant,
-  attack: BattleAttack,
-  d20Roll: number,
-  attackRoll: AttackRollResult,
-  targetAC: number,
-  criticalEffectApplied: CriticalEffect,
-  beforeMessages: string[],
-  afterMessages: string[],
-  battleId: string,
-  currentRound: number,
-  critFlavorText?: string,
-): BattleAction {
-  const action: BattleAction = {
-    id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
-    battleId,
-    round: currentRound,
-    actionIndex: 0,
-    timestamp: new Date(),
-    actorId: attacker.basicInfo.id,
-    actorName: attacker.basicInfo.name,
-    actorSide: attacker.basicInfo.side,
-    actionType: "attack",
-    targets: [
-      {
-        participantId: target.basicInfo.id,
-        participantName: target.basicInfo.name,
-      },
-    ],
-    actionDetails: {
-      weaponName: attack.name,
-      attackKind: attackKindOf(attack.type),
-      attackRoll: d20Roll,
-      attackBonus: attackRoll.attackBonus,
-      totalAttackValue: attackRoll.totalAttackValue,
-      targetAC,
-      isHit: false,
-      isCritical: false,
-      isCriticalFail: true,
-      criticalEffect: critDetails(criticalEffectApplied, critFlavorText),
-    },
-    resultText: [
-      `${attacker.basicInfo.name}: ${lowerFirst(critSummary(criticalEffectApplied, critFlavorText, true))}`,
-      ...beforeMessages,
-      ...afterMessages,
-    ].filter(Boolean).join(" | "),
-    hpChanges: [],
-    isCancelled: false,
-  };
+const damageRollDetails = (attack: BattleAttack, rolls: number[]) =>
+  rolls.map((roll) => ({ dice: attack.damageDice, results: [roll], total: roll, damageType: attack.damageType }));
 
-  return action;
-}
-
-export function buildBattleActionForMiss(
-  attacker: BattleParticipant,
-  target: BattleParticipant,
-  updatedTargetOnMiss: BattleParticipant,
-  attack: BattleAttack,
-  d20Roll: number,
-  attackRoll: AttackRollResult,
-  targetAC: number,
-  actualGuaranteedDamage: number,
-  beforeMessages: string[],
-  afterMessages: string[],
-  battleId: string,
-  currentRound: number,
-): BattleAction {
-  const guaranteedDamage = attack.guaranteedDamage ?? 0;
-
-  return {
-    id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
-    battleId,
-    round: currentRound,
-    actionIndex: 0,
-    timestamp: new Date(),
-    actorId: attacker.basicInfo.id,
-    actorName: attacker.basicInfo.name,
-    actorSide: attacker.basicInfo.side,
-    actionType: "attack",
-    targets: [
-      {
-        participantId: target.basicInfo.id,
-        participantName: target.basicInfo.name,
-      },
-    ],
-    actionDetails: {
-      weaponName: attack.name,
-      attackKind: attackKindOf(attack.type),
-      attackRoll: d20Roll,
-      attackBonus: attackRoll.attackBonus,
-      totalAttackValue: attackRoll.totalAttackValue,
-      targetAC,
-      isHit: false,
-      isCritical: false,
-      isCriticalFail: attackRoll.isCriticalFail,
-    },
-    resultText: [
-      `${attacker.basicInfo.name} → ${target.basicInfo.name}: промах`,
-      ...(guaranteedDamage > 0
-        ? [`гарантована шкода: ${actualGuaranteedDamage}`]
-        : []),
-      ...beforeMessages,
-      ...afterMessages,
-    ].filter(Boolean).join(" | "),
-    hpChanges:
-      actualGuaranteedDamage > 0
-        ? [
-            {
-              participantId: target.basicInfo.id,
-              participantName: target.basicInfo.name,
-              oldHp: target.combatStats.currentHp,
-              newHp: updatedTargetOnMiss.combatStats.currentHp,
-              change: actualGuaranteedDamage,
-            },
-          ]
-        : [],
-    isCancelled: false,
-  };
-}
-
-export interface BuildHitActionParams {
+interface AttackActionBase {
   attacker: BattleParticipant;
   target: BattleParticipant;
   attack: BattleAttack;
   d20Roll: number;
-  damageRolls: number[];
   attackRoll: AttackRollResult;
   targetAC: number;
-  damageCalculation: DamageCalculationResult;
-  physicalDamage: number;
-  totalFinalDamage: number;
-  resistanceResult: { finalDamage: number; breakdown: string[] };
-  criticalEffectApplied?: CriticalEffect;
-  damageSteps: DamageStep[];
-  beforeMessages: string[];
-  afterMessages: string[];
-  vampirismHeal: number;
-  oldHp: number;
+  messages: string[];
   battleId: string;
   currentRound: number;
+}
+
+export interface BuildCriticalFailActionParams extends AttackActionBase {
+  criticalEffect: CriticalEffect;
   critFlavorText?: string;
 }
 
-export function buildBattleActionForHit(params: BuildHitActionParams): BattleAction {
-  const {
-    attacker,
-    target,
-    attack,
-    d20Roll,
-    damageRolls,
-    attackRoll,
-    targetAC,
-    damageCalculation,
-    physicalDamage,
-    totalFinalDamage,
-    criticalEffectApplied,
-    damageSteps,
-    beforeMessages,
-    afterMessages,
-    vampirismHeal,
-    oldHp,
-    battleId,
-    currentRound,
-    critFlavorText,
-  } = params;
+export function buildBattleActionForCriticalFail(p: BuildCriticalFailActionParams): BattleAction {
+  const { attacker, target, criticalEffect, critFlavorText } = p;
 
-  return {
-    id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
-    battleId,
-    round: currentRound,
-    actionIndex: 0,
-    timestamp: new Date(),
-    actorId: attacker.basicInfo.id,
-    actorName: attacker.basicInfo.name,
-    actorSide: attacker.basicInfo.side,
-    actionType: "attack",
-    targets: [
-      {
-        participantId: target.basicInfo.id,
-        participantName: target.basicInfo.name,
-      },
-    ],
+  return newBattleAction(attacker, "attack", { battleId: p.battleId, round: p.currentRound, targets: [target] }, {
     actionDetails: {
-      weaponName: attack.name,
-      attackKind: attackKindOf(attack.type),
-      attackRoll: d20Roll,
-      attackBonus: attackRoll.attackBonus,
-      totalAttackValue: attackRoll.totalAttackValue,
-      targetAC,
+      ...rollDetails(p.attack, p.d20Roll, p.attackRoll, p.targetAC),
+      isHit: false,
+      isCritical: false,
+      isCriticalFail: true,
+      criticalEffect: critDetails(criticalEffect, critFlavorText),
+    },
+    resultText: [`${attacker.basicInfo.name}: ${lowerFirst(critSummary(criticalEffect, critFlavorText, true))}`, ...p.messages].filter(Boolean).join(" | "),
+  });
+}
+
+export interface BuildMissActionParams extends AttackActionBase {
+  /** Ціль після гарантованої шкоди промаху */
+  targetAfter: BattleParticipant;
+  guaranteedDamage: number;
+}
+
+export function buildBattleActionForMiss(p: BuildMissActionParams): BattleAction {
+  const { attacker, target, guaranteedDamage } = p;
+
+  return newBattleAction(attacker, "attack", { battleId: p.battleId, round: p.currentRound, targets: [target] }, {
+    actionDetails: {
+      ...rollDetails(p.attack, p.d20Roll, p.attackRoll, p.targetAC),
+      isHit: false,
+      isCritical: false,
+      isCriticalFail: p.attackRoll.isCriticalFail,
+    },
+    resultText: [
+      `${attacker.basicInfo.name} → ${target.basicInfo.name}: промах`,
+      ...((p.attack.guaranteedDamage ?? 0) > 0 ? [`гарантована шкода: ${guaranteedDamage}`] : []),
+      ...p.messages,
+    ].filter(Boolean).join(" | "),
+    hpChanges:
+      guaranteedDamage > 0
+        ? [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name, oldHp: target.combatStats.currentHp, newHp: p.targetAfter.combatStats.currentHp, change: guaranteedDamage }]
+        : [],
+  });
+}
+
+export interface BuildHitActionParams extends AttackActionBase {
+  damageRolls: number[];
+  hitDamage: ComputeHitDamageResult;
+  vampirismHeal: number;
+  critFlavorText?: string;
+}
+
+export function buildBattleActionForHit(p: BuildHitActionParams): BattleAction {
+  const { attacker, target, attack, attackRoll, vampirismHeal, critFlavorText } = p;
+
+  const { damageCalculation, physicalDamage, totalFinalDamage, criticalEffectApplied, damageSteps, oldHp } = p.hitDamage;
+
+  const critText = criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : "";
+
+  return newBattleAction(attacker, "attack", { battleId: p.battleId, round: p.currentRound, targets: [target] }, {
+    actionDetails: {
+      ...rollDetails(attack, p.d20Roll, attackRoll, p.targetAC),
       isHit: true,
       isCritical: attackRoll.isCritical,
       isCriticalFail: false,
       criticalEffect: criticalEffectApplied ? critDetails(criticalEffectApplied, critFlavorText) : undefined,
-      damageRolls: damageRolls.map((roll) => ({
-        dice: attack.damageDice,
-        results: [roll],
-        total: roll,
-        damageType: attack.damageType,
-      })),
+      damageRolls: damageRollDetails(attack, p.damageRolls),
       totalDamage: physicalDamage,
       damageBreakdown: damageCalculation.breakdown.join("; "),
       damageSteps: { [target.basicInfo.id]: damageSteps },
     },
     resultText: [
-      `${attacker.basicInfo.name} → ${target.basicInfo.name}: ${totalFinalDamage} шкоди${criticalEffectApplied ? `. ${critSummary(criticalEffectApplied, critFlavorText, false)}` : attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} +${vampirismHeal} HP` : ""}`,
+      `${attacker.basicInfo.name} → ${target.basicInfo.name}: ${totalFinalDamage} шкоди${critText}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} +${vampirismHeal} HP` : ""}`,
       totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, damageSteps) : "",
-      ...beforeMessages,
-      ...afterMessages,
+      ...p.messages,
     ].filter(Boolean).join(" | "),
     hpChanges: [
-      {
-        participantId: target.basicInfo.id,
-        participantName: target.basicInfo.name,
-        oldHp,
-        newHp: params.target.combatStats.currentHp,
-        change: totalFinalDamage,
-      },
+      { participantId: target.basicInfo.id, participantName: target.basicInfo.name, oldHp, newHp: target.combatStats.currentHp, change: totalFinalDamage },
       ...(vampirismHeal > 0
-        ? [
-            {
-              participantId: attacker.basicInfo.id,
-              participantName: attacker.basicInfo.name,
-              oldHp: attacker.combatStats.currentHp - vampirismHeal,
-              newHp: params.attacker.combatStats.currentHp,
-              change: -vampirismHeal,
-            },
-          ]
+        ? [{ participantId: attacker.basicInfo.id, participantName: attacker.basicInfo.name, oldHp: attacker.combatStats.currentHp - vampirismHeal, newHp: attacker.combatStats.currentHp, change: -vampirismHeal }]
         : []),
     ],
-    isCancelled: false,
-  };
+  });
 }
 
 /** Ціль загинула від умінь до кидка атаки. */
@@ -257,22 +134,10 @@ export function buildAbortedAttackAction(
   battleId: string,
   currentRound: number,
 ): BattleAction {
-  return {
-    id: `attack-${attacker.basicInfo.id}-${Date.now()}`,
-    battleId,
-    round: currentRound,
-    actionIndex: 0,
-    timestamp: new Date(),
-    actorId: attacker.basicInfo.id,
-    actorName: attacker.basicInfo.name,
-    actorSide: attacker.basicInfo.side,
-    actionType: "attack",
-    targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
+  return newBattleAction(attacker, "attack", { battleId, round: currentRound, targets: [target] }, {
     actionDetails: { weaponName: attack.name, attackKind: attackKindOf(attack.type), isHit: false },
     resultText: [`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages].join(" | "),
-    hpChanges: [],
-    isCancelled: false,
-  };
+  });
 }
 
 export interface BuildRetaliationParams {
@@ -303,37 +168,20 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
 
   const immune = hit && hit.hitDamage.totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, hit.hitDamage.damageSteps) : "";
 
-  return {
-    id: `retaliation-${retaliator.basicInfo.id}-${Date.now()}`,
-    battleId: p.battleId,
-    round: p.currentRound,
-    actionIndex: 0,
-    timestamp: new Date(),
-    actorId: retaliator.basicInfo.id,
-    actorName: retaliator.basicInfo.name,
-    actorSide: retaliator.basicInfo.side,
-    actionType: "retaliation",
-    targets: [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }],
+  return newBattleAction(retaliator, "retaliation", { battleId: p.battleId, round: p.currentRound, targets: [target] }, {
     actionDetails: {
-      weaponName: attack.name,
-      attackKind: attackKindOf(attack.type),
-      attackRoll: d20,
-      attackBonus: attackRoll.attackBonus,
-      totalAttackValue: attackRoll.totalAttackValue,
-      targetAC: p.targetAC,
+      ...rollDetails(attack, d20, attackRoll, p.targetAC),
       isHit: !!hit,
       isCritical: !!hit && attackRoll.isCritical,
       isCriticalFail: attackRoll.isCriticalFail,
       ...(crit && { criticalEffect: critDetails(crit, p.critFlavorText) }),
       ...(hit && {
-        damageRolls: hit.damageRolls.map((roll) => ({ dice: attack.damageDice, results: [roll], total: roll, damageType: attack.damageType })),
+        damageRolls: damageRollDetails(attack, hit.damageRolls),
         totalDamage: hit.hitDamage.physicalDamage,
         damageBreakdown: hit.hitDamage.damageCalculation.breakdown.join("; "),
         damageSteps: { [target.basicInfo.id]: hit.hitDamage.damageSteps },
       }),
     },
     resultText: [summary, immune, ...p.messages].filter(Boolean).join(" | "),
-    hpChanges: [],
-    isCancelled: false,
-  };
+  });
 }

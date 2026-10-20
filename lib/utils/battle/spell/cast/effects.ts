@@ -1,4 +1,3 @@
-import { getP, put } from "../../attack/process/ability-flow";
 import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
 import { applyResistance, immunityNote } from "../../resistance";
 import { outcomeFor } from "./outcome";
@@ -9,6 +8,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { getP, put } from "@/lib/utils/battle/common/action-flow";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;

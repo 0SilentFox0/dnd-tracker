@@ -1,4 +1,3 @@
-import { type AttackFlow, fire, getP } from "../../attack/process/ability-flow";
 import type { CastSpellParams, CastSpellResult } from "../../types/spell-process";
 import { computeSpellPower, spellSaveDc } from "../power";
 import { spellNeedsSlot, spellSlotKey } from "../slot";
@@ -9,6 +8,7 @@ import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from 
 
 import { findParticipant, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
+import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
 import type { AbilityEvent } from "@/types/abilities";
 
 export function castSpell(params: CastSpellParams): CastSpellResult {
@@ -20,7 +20,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const casterId = caster.basicInfo.id;
 
-  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map } };
+  const flow: ActionFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map } };
 
   const before = flow.ps;
 

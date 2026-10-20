@@ -4,7 +4,7 @@ import type { AttackKind } from "@/lib/utils/abilities/schema";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { rollDiceList } from "@/lib/utils/common/dice";
+import { pickOne, rollDiceList } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface HitSpellInput {
@@ -25,7 +25,7 @@ export function castHitSpell(input: HitSpellInput): { participants: BattlePartic
     .filter((f) => !f.attackKind || f.attackKind === input.attackKind)
     .flatMap((f) => f.spellIds);
 
-  const spell = ids.length > 0 ? input.spells.get(ids[Math.floor(rng() * ids.length)]) : undefined;
+  const spell = ids.length > 0 ? input.spells.get(pickOne(ids, rng)) : undefined;
 
   const target = findParticipant(participants, targetId);
 

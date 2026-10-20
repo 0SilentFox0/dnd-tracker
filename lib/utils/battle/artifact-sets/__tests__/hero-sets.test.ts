@@ -46,7 +46,7 @@ describe("Мрія лучника", () => {
     const attacker = { ...baked, battleData: { ...baked.battleData, attacks: [shot] } };
 
     const r = runAttackPhase({
-      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 2], damageRolls: [4, 4] },
       battleId: "b",
       userId: "u",
@@ -66,7 +66,7 @@ describe("Мрія лучника", () => {
       const attacker = { ...baked, combatStats: { ...baked.combatStats, maxTargets: 2 }, battleData: { ...baked.battleData, attacks: [shot] } };
 
       const r = runAttackPhase({
-        battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 15], damageRolls: [8, 4, 8, 4] },
         battleId: "b",
         userId: "u",
@@ -476,7 +476,7 @@ describe("Кігті Ігг-Шайла", () => {
       const target = { ...t, battleData: { ...t.battleData, attacks: [sword], resolvedAbilities: [counter] } };
 
       return runAttackPhase({
-        battle: { initiativeOrder: [attacker, target], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        battle: { initiativeOrder: [attacker, target], currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "raelag", targetIds: ["tgt"], d20Roll: 15, damageRolls: [3] },
         battleId: "b",
         userId: "user-1",

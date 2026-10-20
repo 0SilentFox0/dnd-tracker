@@ -1,6 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import type { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
@@ -36,7 +36,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const expanded = hitsAllEnemies || piercing;
 
-  const byId = (ids: string[]) => ids.flatMap((id) => order.find((p) => p.basicInfo.id === id) ?? []);
+  const byId = (ids: string[]) => ids.flatMap((id) => findParticipant(order, id) ?? []);
 
   const reachable = (): BattleParticipant[] => (map && attacker.battleData.position ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(attacker)));
 

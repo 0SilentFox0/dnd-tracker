@@ -1,8 +1,8 @@
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
-import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/spell/append-summoned-unit";
+import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/summon/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { pickOne } from "@/lib/utils/common/dice";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
@@ -58,7 +58,7 @@ export async function applyAbilitySummons(
   let next = order;
 
   for (const req of requests) {
-    const owner = next.find((p) => p.basicInfo.id === req.ownerId);
+    const owner = findParticipant(next, req.ownerId);
 
     const group = (req.group ?? "").trim().toLowerCase();
 

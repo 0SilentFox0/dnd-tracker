@@ -1,4 +1,3 @@
-import { appendHpChanges, fire, getP, put, settleDowned } from "../../attack/process/ability-flow";
 import { applyBalanceDamageMultiplier } from "../../damage/balance-multiplier";
 import { applyMainActionUsed } from "../../participant";
 import type { CastSpellResult } from "../../types/spell-process";
@@ -6,6 +5,7 @@ import { diffAppliedEffects } from "../applied-effects";
 import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "./state";
 
 import { findParticipant, isActive, mergeParticipants } from "@/lib/utils/abilities/engine/core/participants";
+import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import type { BattleParticipant } from "@/types/battle";
 
 export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean }): void {

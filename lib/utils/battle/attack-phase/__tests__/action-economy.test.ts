@@ -31,7 +31,7 @@ const hero = (opts: { abilities?: ReturnType<typeof resolved>[]; pending?: numbe
 const foe = (id: string, hp = 50) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp, maxHp: 50 });
 
 const attack = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", attackId: "sw", damageRolls: [6], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", attackId: "sw", damageRolls: [6], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const self = (r: ReturnType<typeof attack>) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a") as BattleParticipant;
 

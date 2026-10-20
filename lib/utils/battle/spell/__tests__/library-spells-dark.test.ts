@@ -244,7 +244,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
       const order = [find(ps, "orc"), find(ps, "mage"), find(ps, "gob")];
 
-      expect(() => runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "claw" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
+      expect(() => runAttackPhase({ battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "claw" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
     });
 
     it("сліпий ворог не може атакувати здалеку", () => {
@@ -252,7 +252,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
       const order = [find(ps, "orc"), find(ps, "mage"), find(ps, "gob")];
 
-      expect(() => runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "bow" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
+      expect(() => runAttackPhase({ battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "bow" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
     });
 
     it("сліпий ворог не може чаклувати (spell-mutation) — обидва свої ходи", async () => {

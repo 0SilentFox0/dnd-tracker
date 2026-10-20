@@ -1,8 +1,7 @@
-import { applyResistance } from "../../resistance";
-
 import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import type { AttackKind } from "@/lib/utils/abilities/schema";
+import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface ApplyDamageToTargetResult {
