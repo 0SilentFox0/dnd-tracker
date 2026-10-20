@@ -24,7 +24,8 @@ function originalSide(p: BattleParticipant): ParticipantSide {
 
 export function checkVictoryConditions(
   initiativeOrder: BattleParticipant[],
-  reserve: BattleParticipant[] = []
+  reserve: BattleParticipant[] = [],
+  opts: { maze?: boolean } = {},
 ): VictoryCheckResult {
   const reserveHas = (side: ParticipantSide) => reserve.some((p) => p.basicInfo.side === side);
 
@@ -55,6 +56,10 @@ export function checkVictoryConditions(
       awaiting: null,
       message: "🎉 Перемога! Всі вороги переможені!",
     };
+  }
+
+  if (opts.maze && allies.some((a) => a.battleData.escaped) && !allies.some((a) => a.combatStats.status === CombatStatus.ACTIVE && !a.battleData.escaped)) {
+    return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" };
   }
 
   if (allAlliesDefeated && allies.length > 0) {

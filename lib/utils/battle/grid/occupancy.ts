@@ -9,7 +9,7 @@ export function sizeOf(p: BattleParticipant): number {
 }
 
 export function occupiesCells(p: BattleParticipant): boolean {
-  return !p.battleData.reserved && !isAirborne(p) && p.combatStats.status !== CombatStatus.DEAD;
+  return !p.battleData.reserved && !p.battleData.escaped && !isAirborne(p) && p.combatStats.status !== CombatStatus.DEAD;
 }
 
 export function isOnMap(p: BattleParticipant): boolean {

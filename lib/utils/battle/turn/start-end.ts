@@ -10,6 +10,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
+import { mazeSkipsTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -71,7 +72,8 @@ export function processStartOfTurn(
   // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
-    updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
+    updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
+    !mazeSkipsTurn(updatedParticipant, currentRound)
   ) {
     const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
 
@@ -238,13 +240,21 @@ export function processEndOfTurn(
     if (
       nextParticipant &&
       nextParticipant.combatStats.status !== CombatStatus.DEAD &&
-      nextParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS
+      nextParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
+      !mazeSkipsTurn(nextParticipant, nextRound)
     ) {
       break;
     }
 
     // Якщо ми перевірили всіх і нікого живого немає - зупиняємось (безпека)
-    if (attempts >= maxAttempts) break;
+    if (attempts >= maxAttempts) {
+      // у лабіринті живі можуть не ходити (сплять, вийшли): новий раунд починається з першого живого
+      const firstLive = initiativeOrder.findIndex(isActive);
+
+      if (firstLive >= 0) nextTurnIndex = firstLive;
+
+      break;
+    }
   } while (true);
 
   return {

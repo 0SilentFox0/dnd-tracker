@@ -5,9 +5,10 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
 
-import { isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
+import { takesTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
@@ -46,7 +47,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
   // невикористані додаткові дії згорають разом із ходом
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));
 
-  if (ending && isActive(ending)) {
+  if (ending && takesTurn(ending, scene.round)) {
     const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random });
 
     order = ended.participants;
@@ -70,11 +71,11 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
     );
   }
 
-  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some(isActive);
+  const roundIsOver = endingExtraTurn || !order.slice(scene.turnIndex + 1).some((p) => takesTurn(p, scene.round));
 
   if (roundIsOver) order = order.map((p) => (p.battleData.airborne && p.actionFlags.hasExtraTurn ? { ...p, actionFlags: { ...p.actionFlags, hasExtraTurn: false } } : p));
 
-  const extraIndex = roundIsOver ? order.findIndex((p) => isActive(p) && p.actionFlags.hasExtraTurn) : -1;
+  const extraIndex = roundIsOver ? order.findIndex((p) => takesTurn(p, scene.round) && p.actionFlags.hasExtraTurn) : -1;
 
   if (extraIndex >= 0) {
     const taker = order[extraIndex];
@@ -127,6 +128,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
     currentBattleLogLength: scene.eventSeq + actions.length,
     newLogEntries,
     reserve,
+    maze: !!map?.maze,
     getStateBeforeForEntry: () => undefined,
   });
 

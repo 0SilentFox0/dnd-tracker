@@ -31,7 +31,7 @@ export function isActive(p: BattleParticipant): boolean {
 export const isAirborne = (p: BattleParticipant): boolean => !!p.battleData.airborne;
 
 export function isTargetable(p: BattleParticipant): boolean {
-  return isActive(p) && !isAirborne(p);
+  return isActive(p) && !isAirborne(p) && !p.battleData.escaped;
 }
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {

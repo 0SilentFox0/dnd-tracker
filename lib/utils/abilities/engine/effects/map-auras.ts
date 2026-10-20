@@ -17,7 +17,7 @@ export function syncMapAuras(participants: BattleParticipant[], map: BattleMapCo
   for (const owner of participants) {
     const ownerId = owner.basicInfo.id;
 
-    if (!isActive(owner)) {
+    if (!isActive(owner) || owner.battleData.dormant || owner.battleData.escaped) {
       managed.add(ownerId);
 
       continue;
