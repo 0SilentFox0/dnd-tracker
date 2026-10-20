@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { BattleMap } from "./BattleMap";
 import { MapTerrainToolbar } from "./MapTerrainToolbar";
 import { useMapToolsSlot } from "./MapToolsSlot";
+import { MazeEditPalette, MazeToolbar } from "./maze";
 
 import { useBattleMapScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,8 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
 
   const { placement, terrainTool } = scene;
 
+  const mazeTools = phone ? null : scene.mazeTools;
+
   const inRow = !phone && !!slot;
 
   const tools = placement && terrainTool && (
@@ -44,10 +47,18 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
         <ModeButton active={placement.active} onClick={placement.toggle} tall={inRow}>
           Розставити
         </ModeButton>
-        <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow}>
-          Місцевість
-        </ModeButton>
+        {!scene.map.maze && (
+          <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow}>
+            Місцевість
+          </ModeButton>
+        )}
+        {mazeTools && <MazeToolbar tools={mazeTools} tall={inRow} />}
       </div>
+      {mazeTools && mazeTools.tool !== "none" && (
+        <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
+          <MazeEditPalette tools={mazeTools} />
+        </div>
+      )}
       {terrainTool.active && (
         // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду
         <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
@@ -60,7 +71,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
   return (
     <div className={cn("relative h-full", phone && "flex flex-col")}>
       {phone && tools}
-      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
+      <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active, maze: mazeTools?.editing }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
       {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}
     </div>
   );

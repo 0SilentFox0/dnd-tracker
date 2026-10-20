@@ -7,11 +7,11 @@ import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
-import { MazeDarkScreen, MazeFeaturesLayer, MazeFogOfWar, MazeWallsLayer } from "./maze";
+import { MazeDarkScreen, MazeEdgeEditor, MazeFeaturesLayer, MazeFogOfWar, MazeWallsLayer } from "./maze";
 
 import "./battle-map.css";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { DRAG_THRESHOLD, useMapViewport } from "@/lib/hooks/battle";
+import { DRAG_THRESHOLD, type MazeEditing, useMapViewport } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import {
   blockedSet,
@@ -50,6 +50,8 @@ export interface BattleMapEditing {
   clickableBlocked?: boolean;
   showBlocked?: boolean;
   strokeTool?: boolean;
+  /** інструменти ДМ у лабіринті; null — жоден не активний */
+  maze?: MazeEditing | null;
 }
 
 const HATCH_ID = "battle-map-barrier-hatch";
@@ -317,6 +319,8 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const painting = Boolean(strokeTool && actions?.onStroke);
 
+  const mazeEditing = editing.maze ?? null;
+
   const { cols, rows } = map;
 
   const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
@@ -426,7 +430,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const scrolls = phone && fit.height > avail.height + 0.5;
 
-  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting, wheelScrolls: scrolls });
+  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || mazeEditing?.tool === "walls", wheelScrolls: scrolls });
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
@@ -538,6 +542,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
           <MazeFeaturesLayer map={map} view={maze} rotated={fit.rotated} />
           <MazeFogOfWar map={map} view={maze} />
           <MazeWallsLayer map={map} view={maze} />
+          {mazeEditing && <MazeEdgeEditor map={map} editing={mazeEditing} />}
           <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
@@ -560,7 +565,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             current={view?.currentId === p.basicInfo.id}
             onClick={onTokenClick}
             onHover={painting || !onCellHover ? undefined : onTokenHover}
-            passThrough={painting || movingId === p.basicInfo.id}
+            passThrough={painting || !!mazeEditing || movingId === p.basicInfo.id}
             impact={view?.impactFor?.(p.basicInfo.id)}
             effects={view?.effects?.get(p.basicInfo.id)}
             dormant={!!maze?.showDormant && isDormant(p)}

@@ -27,6 +27,8 @@ interface AddParticipantDialogProps {
   campaignId: string;
   onAdd: (data: AddParticipantData) => void;
   isPending?: boolean;
+  /** лабіринт: юніт не додається одразу, а чекає на клік по клітинці */
+  onPlace?: (data: AddParticipantData) => void;
 }
 
 export function AddParticipantDialog({
@@ -35,6 +37,7 @@ export function AddParticipantDialog({
   campaignId,
   onAdd,
   isPending,
+  onPlace,
 }: AddParticipantDialogProps) {
   const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
 
@@ -52,6 +55,8 @@ export function AddParticipantDialog({
 
   const { unitId } = picker;
 
+  const placing = Boolean(onPlace) && type === ParticipantSourceType.UNIT && !reserved;
+
   const handleSubmit = () => {
     if (type === ParticipantSourceType.CHARACTER && characterId) {
       onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
@@ -59,13 +64,11 @@ export function AddParticipantDialog({
       setCharacterId("");
       setReserved(false);
     } else if (type === ParticipantSourceType.UNIT && unitId) {
-      onAdd({
-        sourceId: unitId,
-        type: ParticipantSourceType.UNIT,
-        side,
-        quantity: quantity || 1,
-        reserved,
-      });
+      const data = { sourceId: unitId, type: ParticipantSourceType.UNIT, side, quantity: quantity || 1, reserved };
+
+      if (placing && onPlace) onPlace(data);
+      else onAdd(data);
+
       onOpenChange(false);
       picker.reset();
       setQuantity(1);
@@ -192,7 +195,7 @@ export function AddParticipantDialog({
         </label>
         <ConfirmCancelFooter
           onCancel={() => onOpenChange(false)}
-          confirmLabel="Додати"
+          confirmLabel={placing ? "Вибрати клітинку" : "Додати"}
           onConfirm={handleSubmit}
           confirmDisabled={!canSubmit || isPending}
           confirmLoading={isPending}

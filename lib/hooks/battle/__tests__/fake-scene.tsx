@@ -91,6 +91,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     move: mutation(),
     mapTerrain: mutation(),
     reveal: mutation(),
+    maze: mutation(),
   };
 
   const showResult = vi.fn();

@@ -26,6 +26,18 @@ export { useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
+export {
+  MAX_WALL_EDGES,
+  MAZE_EXIT_EDGE_ONLY,
+  type MazeEdgeStroke,
+  type MazeEditing,
+  type MazeGenerateInput,
+  type MazeReshuffleMode,
+  type MazeTool,
+  type MazeTools,
+  useMazeTools,
+} from "./useMazeTools";
+export { MazeToolStateProvider } from "./useMazeToolState";
 export { type MazeAsHero, MazeViewProvider, useMazeView } from "./useMazeView";
 export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";

@@ -543,4 +543,6 @@ export type AddParticipantData = {
   side: ParticipantSide;
   quantity?: number;
   reserved?: boolean;
+  /** клітинка для першого доданого */
+  position?: GridPoint;
 };

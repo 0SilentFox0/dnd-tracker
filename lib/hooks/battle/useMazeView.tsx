@@ -3,6 +3,7 @@
 import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
 
 import { useBattleSceneData } from "./useBattleScene";
+import { MazeToolStateProvider } from "./useMazeToolState";
 
 import { deriveMazeView, type MazeView } from "@/lib/utils/battle/view";
 
@@ -18,7 +19,11 @@ export function MazeViewProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({ id, set }), [id]);
 
-  return <AsHeroContext.Provider value={value}>{children}</AsHeroContext.Provider>;
+  return (
+    <AsHeroContext.Provider value={value}>
+      <MazeToolStateProvider>{children}</MazeToolStateProvider>
+    </AsHeroContext.Provider>
+  );
 }
 
 const NO_HERO: MazeAsHero = { id: null, set: () => {} };
