@@ -67,7 +67,7 @@ describe("Історія", () => {
   });
 
   it("порожня біографія — підказка", () => {
-    inProfile(withSheet({ story: { biography: null, goals: [], tokens: [] } }));
+    inProfile(withSheet({ story: { biography: null, goals: [], tokens: [], chapters: [] } }));
 
     expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
   });
@@ -92,5 +92,18 @@ describe("Історія", () => {
 
     await waitFor(() => expect(save).toHaveBeenCalled());
     expect(outer).not.toHaveBeenCalled();
+  });
+
+  it("показує відкриті глави під біографією", () => {
+    const sheet = withSheet({ story: { ...sheetFixture.story, chapters: [{ id: "h1", title: "Після собору", rows: [{ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Застібка єдинорога" }] }] }] }] } });
+
+    inProfile(sheet);
+    expect(screen.getByText("Після собору")).toBeTruthy();
+    expect(screen.getByText("Застібка єдинорога")).toBeTruthy();
+  });
+
+  it("без глав — блок не рендериться", () => {
+    inProfile(sheetFixture);
+    expect(screen.queryByText(/глави історії/i)).toBeNull();
   });
 });

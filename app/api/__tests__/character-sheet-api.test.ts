@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(async () => []) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn() } } }));
 vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler", async (orig) => ({

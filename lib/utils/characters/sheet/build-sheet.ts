@@ -12,12 +12,14 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
+import type { StoryChapter } from "@/types/scenario";
 import type { BookSpell } from "@/types/spells";
 
 export interface SheetInput {
   participant: BattleParticipant;
   viewer: CharacterSheet["viewer"];
   maxLevel: number;
+  chapters?: StoryChapter[];
   character: Record<AbilityKey, number> & {
     id: string;
     name: string;
@@ -115,7 +117,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     progression: input.progression,
-    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals),
+    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals), chapters: input.chapters ?? [],
       tokens: (c.tokens ?? []).map((t) => ({ id: t.id, color: t.color as TokenColor, label: t.label, createdAt: t.createdAt.toISOString() })),
     },
   };
