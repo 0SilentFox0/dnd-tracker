@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, createElement, type ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
 import type { AddParticipantData, GridPoint, MazeDifficulty } from "@/types/battle";
 
@@ -29,21 +29,17 @@ export interface MazeToolState {
 
 export const IDLE_MAZE_TOOL: MazeToolStateValue = { tool: "none", pendingUnit: null, pendingGenerate: null, teleportFrom: null };
 
-const MazeToolStateContext = createContext<MazeToolState | null>(null);
+/** Спільний стан інструментів: діалог «Додати» в панелі ДМ і карта — різні гілки дерева. */
+export const MazeToolStateContext = createContext<MazeToolState | null>(null);
 
-function useMazeToolStateValue(): MazeToolState {
+const NO_TOOL_STATE: MazeToolState = { state: IDLE_MAZE_TOOL, patch: () => {} };
+
+export function useMazeToolStateValue(): MazeToolState {
   const [state, setState] = useState(IDLE_MAZE_TOOL);
 
   return useMemo(() => ({ state, patch: (next) => setState((s) => ({ ...s, ...next })) }), [state]);
 }
 
-/** Спільний стан інструментів: діалог «Додати» в панелі ДМ і карта — різні гілки дерева. */
-export function MazeToolStateProvider({ children }: { children: ReactNode }) {
-  return createElement(MazeToolStateContext.Provider, { value: useMazeToolStateValue() }, children);
-}
-
 export function useMazeToolState(): MazeToolState {
-  const local = useMazeToolStateValue();
-
-  return useContext(MazeToolStateContext) ?? local;
+  return useContext(MazeToolStateContext) ?? NO_TOOL_STATE;
 }

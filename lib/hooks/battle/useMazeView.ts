@@ -1,9 +1,8 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-import { BattleSceneContext, BattleSceneDataContext, useBattleScene, useBattleSceneData } from "./useBattleScene";
-import { MazeToolStateProvider } from "./useMazeToolState";
+import { type BattleSceneData, type BattleSceneValue, useBattleScene, useBattleSceneData } from "./useBattleScene";
 
 import { deriveMazeView, maskMazeScene, mazeFxVisible, type MazeView, mazeVisible } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
@@ -14,16 +13,16 @@ export interface MazeAsHero {
   set(id: string | null): void;
 }
 
-interface MazeViewState {
+export interface MazeViewState {
   view: MazeView | null;
   asHero: MazeAsHero;
   /** Журнал до маскування — FX мають власне правило видимості */
   fullLog: BattleAction[];
 }
 
-const AsHeroContext = createContext<MazeAsHero | null>(null);
+export const MazeAsHeroContext = createContext<MazeAsHero | null>(null);
 
-const MazeViewContext = createContext<MazeViewState | null>(null);
+export const MazeViewContext = createContext<MazeViewState | null>(null);
 
 const NO_HERO: MazeAsHero = { id: null, set: () => {} };
 
@@ -42,13 +41,25 @@ function useDerivedMazeView(battle: BattleScene | null, viewer: { userId: string
   );
 }
 
-/** Під ним гравець у лабіринті отримує сцену без прихованих учасників: списки, черга, «ходить …», журнал. */
-function MazeMask({ children }: { children: ReactNode }) {
+export function useMazeAsHeroValue(): MazeAsHero {
+  const [id, set] = useState<string | null>(null);
+
+  return useMemo(() => ({ id, set }), [id]);
+}
+
+export interface MazeMaskValue {
+  state: MazeViewState;
+  data: BattleSceneData;
+  value: BattleSceneValue;
+}
+
+/** Сцена без прихованих від гравця учасників: списки, черга, «ходить …», журнал. */
+export function useMazeMaskValue(): MazeMaskValue {
   const value = useBattleScene();
 
   const data = useBattleSceneData();
 
-  const asHero = useContext(AsHeroContext) ?? NO_HERO;
+  const asHero = useContext(MazeAsHeroContext) ?? NO_HERO;
 
   const view = useDerivedMazeView(data.battle, data.viewer, asHero.id);
 
@@ -63,27 +74,7 @@ function MazeMask({ children }: { children: ReactNode }) {
     [maskedData, data, value],
   );
 
-  return (
-    <MazeViewContext.Provider value={state}>
-      <BattleSceneDataContext.Provider value={maskedData}>
-        <BattleSceneContext.Provider value={maskedValue}>
-          <MazeToolStateProvider>{children}</MazeToolStateProvider>
-        </BattleSceneContext.Provider>
-      </BattleSceneDataContext.Provider>
-    </MazeViewContext.Provider>
-  );
-}
-
-export function MazeViewProvider({ children }: { children: ReactNode }) {
-  const [id, set] = useState<string | null>(null);
-
-  const value = useMemo(() => ({ id, set }), [id]);
-
-  return (
-    <AsHeroContext.Provider value={value}>
-      <MazeMask>{children}</MazeMask>
-    </AsHeroContext.Provider>
-  );
+  return { state, data: maskedData, value: maskedValue };
 }
 
 export function useMazeView(): { view: MazeView | null; asHero: MazeAsHero } {
@@ -91,7 +82,7 @@ export function useMazeView(): { view: MazeView | null; asHero: MazeAsHero } {
 
   const { battle, viewer } = useBattleSceneData();
 
-  const asHero = useContext(AsHeroContext) ?? NO_HERO;
+  const asHero = useContext(MazeAsHeroContext) ?? NO_HERO;
 
   const fallback = useDerivedMazeView(state ? null : battle, viewer, asHero.id);
 

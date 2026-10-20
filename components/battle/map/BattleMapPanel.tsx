@@ -59,7 +59,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
           <MapTerrainToolbar tool={terrainTool} />
         </div>
       )}
-      {mazeTools && mazeTools.tool !== "none" && (
+      {mazeTools && mazeTools.state.tool !== "none" && (
         <div className={cn(inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
           <MazeEditPalette tools={mazeTools} />
         </div>

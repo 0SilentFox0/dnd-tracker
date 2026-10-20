@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
-import type { MazeReshuffleMode, MazeTools } from "@/lib/hooks/battle";
+import type { MazeReshuffleMode, MazeToolsActions } from "@/lib/hooks/battle";
 
 const MODE_OPTIONS: { value: MazeReshuffleMode; label: string }[] = [
   { value: "walls", label: "Лише стіни" },
@@ -25,7 +25,7 @@ const DESCRIPTIONS: Record<MazeReshuffleMode, string> = {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: MazeTools["reshuffle"];
+  onSubmit: MazeToolsActions["reshuffle"];
 }
 
 const FORM_ID = "maze-reshuffle-form";

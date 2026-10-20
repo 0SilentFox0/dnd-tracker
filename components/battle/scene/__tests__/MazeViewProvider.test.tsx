@@ -3,13 +3,14 @@ import type { ReactNode } from "react";
 import { cleanup, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { useAttackWizard } from "../useAttackWizard";
-import { useBattleSceneData } from "../useBattleScene";
-import { MazeViewProvider, useMazeFxLog } from "../useMazeView";
-import { fakeScene } from "./fake-scene";
+import { MazeViewProvider } from "../MazeViewProvider";
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
 import { emptyMaze, ParticipantSide } from "@/lib/constants/battle";
+import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
+import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
+import { useMazeFxLog } from "@/lib/hooks/battle/useMazeView";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleAction } from "@/types/battle";
 

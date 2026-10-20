@@ -8,7 +8,7 @@ Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointe
 
 afterEach(cleanup);
 
-describe("перетасовка «1 тунель»", () => {
+describe("MazeReshuffleDialog", () => {
   it("режим «1 тунель» ховає лічильники й надсилає mode: tunnel", async () => {
     const onSubmit = vi.fn();
 

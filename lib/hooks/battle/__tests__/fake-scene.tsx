@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi } from "vitest";
 
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
+import { MazeToolStateContext, useMazeToolStateValue } from "../useMazeToolState";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
@@ -131,11 +132,15 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, enabled: false } } });
 
+  const MazeTools = ({ children }: { children: ReactNode }) => <MazeToolStateContext.Provider value={useMazeToolStateValue()}>{children}</MazeToolStateContext.Provider>;
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <ConfirmContext.Provider value={confirm}>
         <BattleSceneDataContext.Provider value={value}>
-          <BattleSceneContext.Provider value={value}>{children}</BattleSceneContext.Provider>
+          <BattleSceneContext.Provider value={value}>
+            <MazeTools>{children}</MazeTools>
+          </BattleSceneContext.Provider>
         </BattleSceneDataContext.Provider>
       </ConfirmContext.Provider>
     </QueryClientProvider>

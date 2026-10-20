@@ -1,71 +1,58 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { useBattleScene } from "./useBattleScene";
+import { type MazeEdgeStroke, useMazeEdgeStroke } from "./useMazeEdgeStroke";
 import { IDLE_MAZE_TOOL, type MazeGenerateInput, type MazeTool, useMazeToolState } from "./useMazeToolState";
 import { type MazeAsHero, useMazeView } from "./useMazeView";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { useNotify } from "@/lib/hooks/common";
-import { cellKey } from "@/lib/utils/battle/grid";
-import { isEdgeCell, wallSet } from "@/lib/utils/battle/maze";
+import { cellKey, samePoint } from "@/lib/utils/battle/grid";
+import { isEdgeCell } from "@/lib/utils/battle/maze";
 import type { MazeActionData } from "@/types/api";
-import type { AddParticipantData, GridPoint, MazeConfig } from "@/types/battle";
+import type { GridPoint, MazeConfig } from "@/types/battle";
 
-export type { MazeGenerateInput, MazeTool };
-
-export const MAX_WALL_EDGES = 400;
-
-export const MAZE_EXIT_EDGE_ONLY = "Вихід — лише на краю карти";
-
-export interface MazeEdgeStroke {
-  begin(edge: string): void;
-  enter(edge: string): void;
-  end(): void;
-  pending: ReadonlySet<string>;
-}
+export type { MazeEdgeStroke, MazeGenerateInput, MazeTool };
 
 export interface MazeEditing {
   tool: MazeTool;
   stroke: MazeEdgeStroke;
-  /** перша клітинка пари телепортів */
   picked: GridPoint | null;
 }
 
 export type MazeReshuffleMode = "walls" | "scatter" | "tunnel";
 
-export interface MazeTools {
-  enabled: boolean;
-  canGenerate: boolean;
-  dark: boolean;
+export interface MazeToolsState {
   tool: MazeTool;
+  dark: boolean;
+  canGenerate: boolean;
+  /** «Згенерувати» чекає на клітинку виходу */
+  awaitingExit: boolean;
+  heroes: { id: string; name: string }[];
+}
+
+export interface MazeToolsActions {
   setTool(t: MazeTool): void;
-  strokeEdges: MazeEdgeStroke;
   clickCell(p: GridPoint): void;
   generate(input: MazeGenerateInput): void;
   reshuffle(mode: MazeReshuffleMode, opts: { teleportPairs: number; fogPatches: number }): void;
   toggleDark(): void;
   scatterStarts(): void;
-  placeUnit(body: AddParticipantData): void;
-  asHero: MazeAsHero;
-  heroes: { id: string; name: string }[];
-  /** «Згенерувати» чекає на клітинку виходу */
-  awaitingExit: boolean;
+}
+
+export interface MazeTools {
+  state: MazeToolsState;
+  actions: MazeToolsActions;
   /** для карти: null — інструмент не активний */
   editing: MazeEditing | null;
+  asHero: MazeAsHero;
 }
 
-const EMPTY: ReadonlySet<string> = new Set();
-
-const same = (a: GridPoint, b: GridPoint) => a.x === b.x && a.y === b.y;
-
-interface StrokeRef {
-  remove: boolean;
-  edges: Set<string>;
-}
-
-export function useMazeTools(): MazeTools {
+/** Інструменти ДМ у лабіринті; null — не ДМ або бій без лабіринту. */
+export function useMazeTools(): MazeTools | null {
   const { battle, viewer, actions } = useBattleScene();
 
   const { asHero } = useMazeView();
@@ -88,64 +75,7 @@ export function useMazeTools(): MazeTools {
 
   const setTool = useCallback((tool: MazeTool) => patch({ ...IDLE_MAZE_TOOL, tool }), [patch]);
 
-  const stroke = useRef<StrokeRef | null>(null);
-
-  const [preview, setPreview] = useState<ReadonlySet<string>>(EMPTY);
-
-  const [sent, setSent] = useState<ReadonlySet<string>>(EMPTY);
-
-  const latest = useRef({ maze, send });
-
-  useEffect(() => {
-    latest.current = { maze, send };
-  });
-
-  const strokeHandlers = useMemo(
-    () => ({
-      begin: (edge: string) => {
-        const walls = latest.current.maze ? wallSet(latest.current.maze) : EMPTY;
-
-        stroke.current = { remove: walls.has(edge), edges: new Set([edge]) };
-        setPreview(new Set([edge]));
-      },
-      enter: (edge: string) => {
-        const s = stroke.current;
-
-        if (!s || s.edges.has(edge)) return;
-
-        s.edges.add(edge);
-        setPreview(new Set(s.edges));
-      },
-      end: () => {
-        const s = stroke.current;
-
-        stroke.current = null;
-        setPreview(EMPTY);
-
-        if (!s || !latest.current.maze) return;
-
-        const walls = wallSet(latest.current.maze);
-
-        // перше ребро задає дію; решта штриха лише доповнює її
-        const edges = [...s.edges].filter((e) => walls.has(e) === s.remove);
-
-        for (let i = 0; i < edges.length; i += MAX_WALL_EDGES) {
-          const part = edges.slice(i, i + MAX_WALL_EDGES);
-
-          setSent((prev) => new Set([...prev, ...part]));
-          latest.current.send({ op: "walls", add: s.remove ? [] : part, remove: s.remove ? part : [] }, () =>
-            setSent((prev) => new Set([...prev].filter((e) => !part.includes(e)))),
-          );
-        }
-      },
-    }),
-    [],
-  );
-
-  const strokeEdges = useMemo<MazeEdgeStroke>(
-    () => ({ ...strokeHandlers, pending: sent.size === 0 ? preview : new Set([...sent, ...preview]) }),
-    [strokeHandlers, preview, sent],
-  );
+  const stroke = useMazeEdgeStroke(maze, send);
 
   const clickCell = useCallback(
     (p: GridPoint) => {
@@ -156,7 +86,7 @@ export function useMazeTools(): MazeTools {
         walls: () => undefined,
         exit: () => {
           if (!isEdgeCell(grid, p)) {
-            void notify(MAZE_EXIT_EDGE_ONLY);
+            void notify(MAZE_TEXTS.exitOnEdge);
 
             return;
           }
@@ -173,10 +103,10 @@ export function useMazeTools(): MazeTools {
         teleport: () => {
           const from = state.teleportFrom;
 
-          if (maze.teleports.some((pair) => pair.some((c) => same(c, p)))) {
+          if (maze.teleports.some((pair) => pair.some((c) => samePoint(c, p)))) {
             send({ op: "teleport", pair: null, removeAt: p });
             patch({ teleportFrom: null });
-          } else if (!from || same(from, p)) {
+          } else if (!from || samePoint(from, p)) {
             patch({ teleportFrom: from ? null : p });
           } else {
             send({ op: "teleport", pair: [from, p] });
@@ -208,15 +138,13 @@ export function useMazeTools(): MazeTools {
     [patch, send],
   );
 
-  const reshuffle = useCallback<MazeTools["reshuffle"]>((mode, opts) => send({ op: "reshuffle", mode, ...opts }), [send]);
+  const reshuffle = useCallback<MazeToolsActions["reshuffle"]>((mode, opts) => send({ op: "reshuffle", mode, ...opts }), [send]);
 
   const dark = !!maze?.dark;
 
   const toggleDark = useCallback(() => send({ op: "dark", on: !dark }), [send, dark]);
 
   const scatterStarts = useCallback(() => send({ op: "scatterStarts" }), [send]);
-
-  const placeUnit = useCallback((body: AddParticipantData) => patch({ ...IDLE_MAZE_TOOL, tool: "placeUnit", pendingUnit: body }), [patch]);
 
   const tool = enabled ? state.tool : "none";
 
@@ -242,24 +170,20 @@ export function useMazeTools(): MazeTools {
     [order],
   );
 
-  const editing = useMemo(() => (tool === "none" ? null : { tool, stroke: strokeEdges, picked: state.teleportFrom }), [tool, strokeEdges, state.teleportFrom]);
+  const editing = useMemo(() => (tool === "none" ? null : { tool, stroke, picked: state.teleportFrom }), [tool, stroke, state.teleportFrom]);
 
-  return {
-    enabled,
-    canGenerate: !maze?.moved,
-    dark,
-    tool,
-    setTool,
-    strokeEdges,
-    clickCell,
-    generate,
-    reshuffle,
-    toggleDark,
-    scatterStarts,
-    placeUnit,
-    asHero,
-    heroes,
-    awaitingExit: state.pendingGenerate !== null,
-    editing,
-  };
+  const canGenerate = !maze?.moved;
+
+  const awaitingExit = state.pendingGenerate !== null;
+
+  const toolsState = useMemo(() => ({ tool, dark, canGenerate, awaitingExit, heroes }), [tool, dark, canGenerate, awaitingExit, heroes]);
+
+  const toolsActions = useMemo(
+    () => ({ setTool, clickCell, generate, reshuffle, toggleDark, scatterStarts }),
+    [setTool, clickCell, generate, reshuffle, toggleDark, scatterStarts],
+  );
+
+  const tools = useMemo(() => ({ state: toolsState, actions: toolsActions, editing, asHero }), [toolsState, toolsActions, editing, asHero]);
+
+  return enabled ? tools : null;
 }

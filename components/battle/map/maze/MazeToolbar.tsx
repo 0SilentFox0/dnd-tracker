@@ -43,7 +43,7 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
 
   const { battle } = useBattleSceneData();
 
-  const { canGenerate, tool, setTool, dark, asHero, heroes } = tools;
+  const { state: { canGenerate, tool, dark, heroes }, actions, asHero } = tools;
 
   const editing = isEditTool(tool);
 
@@ -60,14 +60,14 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
           Перетасувати
         </ToolButton>
       )}
-      <ToolButton tall={tall} active={editing} onClick={() => setTool(editing ? "none" : "walls")}>
+      <ToolButton tall={tall} active={editing} onClick={() => actions.setTool(editing ? "none" : "walls")}>
         Правити
       </ToolButton>
-      <ToolButton tall={tall} active={dark} onClick={tools.toggleDark}>
+      <ToolButton tall={tall} active={dark} onClick={actions.toggleDark}>
         Темрява
       </ToolButton>
       {canGenerate && (
-        <ToolButton tall={tall} onClick={tools.scatterStarts}>
+        <ToolButton tall={tall} onClick={actions.scatterStarts}>
           Розкидати старти
         </ToolButton>
       )}
@@ -86,8 +86,8 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
           Вимкнути
         </ToolButton>
       )}
-      {dialog === "generate" && <MazeGenerateDialog open onOpenChange={close} difficulty={battle.map?.maze?.difficulty ?? "medium"} onSubmit={tools.generate} />}
-      {dialog === "reshuffle" && <MazeReshuffleDialog open onOpenChange={close} onSubmit={tools.reshuffle} />}
+      {dialog === "generate" && <MazeGenerateDialog open onOpenChange={close} difficulty={battle.map?.maze?.difficulty ?? "medium"} onSubmit={actions.generate} />}
+      {dialog === "reshuffle" && <MazeReshuffleDialog open onOpenChange={close} onSubmit={actions.reshuffle} />}
     </>
   );
 }
@@ -100,9 +100,8 @@ const HINTS: Partial<Record<MazeTool, string>> = {
   placeUnit: "Клацніть клітинку для юніта",
 };
 
-/** Підрежими «Правити» й підказка активного інструмента. */
 export function MazeEditPalette({ tools }: { tools: MazeTools }) {
-  const { tool, setTool, awaitingExit } = tools;
+  const { state: { tool, awaitingExit }, actions: { setTool } } = tools;
 
   if (tool === "none") return null;
 

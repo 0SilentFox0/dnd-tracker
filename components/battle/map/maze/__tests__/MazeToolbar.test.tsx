@@ -1,13 +1,18 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { MazeToolbar } from "../MazeToolbar";
 import { RO } from "./maze-fixtures";
 
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
+import { MazeViewProvider } from "@/components/battle/scene/MazeViewProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { emptyMaze } from "@/lib/constants/battle";
+import { type MazeTools, useMazeView } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { MazeConfig } from "@/types/battle";
 
 afterEach(cleanup);
@@ -132,5 +137,46 @@ describe("MazeToolbar", () => {
     fireEvent.click(container.querySelector('[data-fx-cell="3:3"]')!);
 
     expect(mutate).toHaveBeenCalledWith({ op: "fog", cells: ["3:3"], on: true }, undefined);
+  });
+});
+
+function ToolbarWithAsHero() {
+  const { asHero } = useMazeView();
+
+  const tools: MazeTools = {
+    state: { canGenerate: false, tool: "none", dark: false, awaitingExit: false, heroes: [{ id: "me", name: "Фрейда" }] },
+    actions: { setTool: vi.fn(), clickCell: vi.fn(), toggleDark: vi.fn(), scatterStarts: vi.fn(), generate: vi.fn(), reshuffle: vi.fn() },
+    editing: null,
+    asHero,
+  };
+
+  return (
+    <>
+      <span data-testid="as-hero">{asHero.id ?? "off"}</span>
+      <MazeToolbar tools={tools} tall={false} />
+      <button type="button" onClick={() => asHero.set("me")}>pick</button>
+    </>
+  );
+}
+
+describe("«Очима гравця» завжди можна вимкнути", () => {
+  it("після вибору героя є кнопка «Вимкнути», що повертає погляд ДМ", () => {
+    const s = fakeScene({ isDM: true, map: testMap(8, 6, { maze: { ...emptyMaze(), exit: { x: 7, y: 0 } } }) });
+
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <s.wrapper>
+        <MazeViewProvider>{children}</MazeViewProvider>
+      </s.wrapper>
+    );
+
+    render(<ToolbarWithAsHero />, { wrapper: Wrapper });
+
+    expect(screen.queryByRole("button", { name: "Вимкнути «Очима гравця»" })).toBeNull();
+
+    fireEvent.click(screen.getByText("pick"));
+    expect(screen.getByTestId("as-hero").textContent).toBe("me");
+
+    fireEvent.click(screen.getByRole("button", { name: "Вимкнути «Очима гравця»" }));
+    expect(screen.getByTestId("as-hero").textContent).toBe("off");
   });
 });

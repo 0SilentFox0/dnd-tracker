@@ -2,10 +2,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { useMazePlaceUnit } from "../useMazePlaceUnit";
 import { useMazeTools } from "../useMazeTools";
 import { fakeScene } from "./fake-scene";
 
 import { emptyMaze, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import type { MazeConfig } from "@/types/battle";
 
 function setup(maze: Partial<MazeConfig> = {}, isDM = true) {
@@ -15,93 +17,119 @@ function setup(maze: Partial<MazeConfig> = {}, isDM = true) {
 
   Object.assign(scene.value.actions, { maze: maze$ });
 
-  const { result } = renderHook(() => useMazeTools(), { wrapper: scene.wrapper });
+  const { result } = renderHook(() => ({ tools: useMazeTools(), placeUnit: useMazePlaceUnit() }), { wrapper: scene.wrapper });
 
-  return { result, mutate: maze$.mutate, scene };
+  const tools = () => {
+    const t = result.current.tools;
+
+    if (!t) throw new Error("інструменти вимкнені");
+
+    return t;
+  };
+
+  const stroke = () => {
+    const e = tools().editing;
+
+    if (!e) throw new Error("інструмент не активний");
+
+    return e.stroke;
+  };
+
+  const placeUnit = () => {
+    const place = result.current.placeUnit;
+
+    if (!place) throw new Error("розміщення вимкнене");
+
+    return place;
+  };
+
+  return { result, tools, stroke, placeUnit, mutate: maze$.mutate, scene };
 }
 
 describe("useMazeTools", () => {
   it("гравцеві інструменти вимкнені", () => {
-    expect(setup({}, false).result.current.enabled).toBe(false);
+    expect(setup({}, false).result.current.tools).toBeNull();
+    expect(setup({}, false).result.current.placeUnit).toBeUndefined();
   });
 
   it("canGenerate — до першого кроку", () => {
-    expect(setup().result.current.canGenerate).toBe(true);
-    expect(setup({ moved: true }).result.current.canGenerate).toBe(false);
+    expect(setup().tools().state.canGenerate).toBe(true);
+    expect(setup({ moved: true }).tools().state.canGenerate).toBe(false);
   });
 
   it("штрих по 3 ребрах — один запит add", () => {
-    const { result, mutate } = setup();
+    const { tools, stroke, mutate } = setup();
 
-    act(() => result.current.setTool("walls"));
-    act(() => result.current.strokeEdges.begin("1:1:e"));
-    act(() => result.current.strokeEdges.enter("1:2:e"));
-    act(() => result.current.strokeEdges.enter("1:3:e"));
+    act(() => tools().actions.setTool("walls"));
+    act(() => stroke().begin("1:1:e"));
+    act(() => stroke().enter("1:2:e"));
+    act(() => stroke().enter("1:3:e"));
 
-    expect(result.current.strokeEdges.pending.size).toBe(3);
+    expect(stroke().pending.size).toBe(3);
 
-    act(() => result.current.strokeEdges.end());
+    act(() => stroke().end());
 
     expect(mutate).toHaveBeenCalledTimes(1);
     expect(mutate.mock.calls[0][0]).toEqual({ op: "walls", add: ["1:1:e", "1:2:e", "1:3:e"], remove: [] });
   });
 
   it("перше ребро — стіна: штрих прибирає лише стіни", () => {
-    const { result, mutate } = setup({ walls: ["1:1:e", "1:3:e"] });
+    const { tools, stroke, mutate } = setup({ walls: ["1:1:e", "1:3:e"] });
 
-    act(() => result.current.strokeEdges.begin("1:1:e"));
-    act(() => result.current.strokeEdges.enter("1:2:e"));
-    act(() => result.current.strokeEdges.enter("1:3:e"));
-    act(() => result.current.strokeEdges.end());
+    act(() => tools().actions.setTool("walls"));
+    act(() => stroke().begin("1:1:e"));
+    act(() => stroke().enter("1:2:e"));
+    act(() => stroke().enter("1:3:e"));
+    act(() => stroke().end());
 
     expect(mutate.mock.calls[0][0]).toEqual({ op: "walls", add: [], remove: ["1:1:e", "1:3:e"] });
   });
 
   it("телепорт — два кліки дають один запит із парою", () => {
-    const { result, mutate } = setup();
+    const { tools, mutate } = setup();
 
-    act(() => result.current.setTool("teleport"));
-    act(() => result.current.clickCell({ x: 1, y: 1 }));
+    act(() => tools().actions.setTool("teleport"));
+    act(() => tools().actions.clickCell({ x: 1, y: 1 }));
 
     expect(mutate).not.toHaveBeenCalled();
-    expect(result.current.editing?.picked).toEqual({ x: 1, y: 1 });
+    expect(tools().editing?.picked).toEqual({ x: 1, y: 1 });
 
-    act(() => result.current.clickCell({ x: 6, y: 4 }));
+    act(() => tools().actions.clickCell({ x: 6, y: 4 }));
 
     expect(mutate).toHaveBeenCalledTimes(1);
     expect(mutate.mock.calls[0][0]).toEqual({ op: "teleport", pair: [{ x: 1, y: 1 }, { x: 6, y: 4 }] });
-    expect(result.current.editing?.picked).toBeNull();
+    expect(tools().editing?.picked).toBeNull();
   });
 
   it("клік по наявному телепорту прибирає пару", () => {
-    const { result, mutate } = setup({ teleports: [[{ x: 1, y: 1 }, { x: 6, y: 4 }]] });
+    const { tools, mutate } = setup({ teleports: [[{ x: 1, y: 1 }, { x: 6, y: 4 }]] });
 
-    act(() => result.current.setTool("teleport"));
-    act(() => result.current.clickCell({ x: 6, y: 4 }));
+    act(() => tools().actions.setTool("teleport"));
+    act(() => tools().actions.clickCell({ x: 6, y: 4 }));
 
     expect(mutate.mock.calls[0][0]).toEqual({ op: "teleport", pair: null, removeAt: { x: 6, y: 4 } });
   });
 
   it("вихід на некрайній клітинці — підказка без запиту", () => {
-    const { result, mutate, scene } = setup();
+    const { tools, mutate, scene } = setup();
 
-    act(() => result.current.setTool("exit"));
-    act(() => result.current.clickCell({ x: 3, y: 3 }));
+    act(() => tools().actions.setTool("exit"));
+    act(() => tools().actions.clickCell({ x: 3, y: 3 }));
 
     expect(mutate).not.toHaveBeenCalled();
-    expect(scene.confirm).toHaveBeenCalledWith(expect.objectContaining({ title: "Вихід — лише на краю карти" }));
+    expect(scene.confirm).toHaveBeenCalledWith(expect.objectContaining({ title: MAZE_TEXTS.exitOnEdge }));
 
-    act(() => result.current.clickCell({ x: 0, y: 3 }));
+    act(() => tools().actions.clickCell({ x: 0, y: 3 }));
 
     expect(mutate.mock.calls[0][0]).toEqual({ op: "exit", cell: { x: 0, y: 3 } });
   });
 
   it("туман — клік перемикає клітинку", () => {
-    const { result, mutate } = setup({ fog: ["2:2"] });
+    const { tools, mutate } = setup({ fog: ["2:2"] });
 
-    act(() => result.current.setTool("fog"));
-    act(() => result.current.clickCell({ x: 2, y: 2 }));
-    act(() => result.current.clickCell({ x: 3, y: 2 }));
+    act(() => tools().actions.setTool("fog"));
+    act(() => tools().actions.clickCell({ x: 2, y: 2 }));
+    act(() => tools().actions.clickCell({ x: 3, y: 2 }));
 
     expect(mutate.mock.calls.map((c) => c[0])).toEqual([
       { op: "fog", cells: ["2:2"], on: false },
@@ -110,40 +138,40 @@ describe("useMazeTools", () => {
   });
 
   it("генерація з виходом «Вибрати на карті» чекає на крайню клітинку", () => {
-    const { result, mutate } = setup();
+    const { tools, mutate } = setup();
 
-    act(() => result.current.generate({ difficulty: "hard", teleportPairs: 2, fogPatches: 3, exit: "pick" }));
+    act(() => tools().actions.generate({ difficulty: "hard", teleportPairs: 2, fogPatches: 3, exit: "pick" }));
 
     expect(mutate).not.toHaveBeenCalled();
-    expect(result.current.tool).toBe("exit");
+    expect(tools().state.tool).toBe("exit");
 
-    act(() => result.current.clickCell({ x: 7, y: 2 }));
+    act(() => tools().actions.clickCell({ x: 7, y: 2 }));
 
     expect(mutate.mock.calls[0][0]).toEqual({ op: "generate", difficulty: "hard", teleportPairs: 2, fogPatches: 3, exit: { x: 7, y: 2 } });
-    expect(result.current.tool).toBe("none");
+    expect(tools().state.tool).toBe("none");
   });
 
   it("юніт із діалогу ставиться кліком по клітинці", () => {
-    const { result, scene } = setup();
+    const { tools, placeUnit, scene } = setup();
 
     const body = { sourceId: "u1", type: ParticipantSourceType.UNIT, side: ParticipantSide.ENEMY, quantity: 1 };
 
-    act(() => result.current.placeUnit(body));
+    act(() => placeUnit()(body));
 
-    expect(result.current.tool).toBe("placeUnit");
+    expect(tools().state.tool).toBe("placeUnit");
 
-    act(() => result.current.clickCell({ x: 4, y: 4 }));
+    act(() => tools().actions.clickCell({ x: 4, y: 4 }));
 
     expect(scene.value.actions.addParticipant.mutate).toHaveBeenCalledWith({ ...body, position: { x: 4, y: 4 } });
-    expect(result.current.tool).toBe("none");
+    expect(tools().state.tool).toBe("none");
   });
 
   it("світло/темрява, розкидати старти, перетасувати", () => {
-    const { result, mutate } = setup({ dark: true });
+    const { tools, mutate } = setup({ dark: true });
 
-    act(() => result.current.toggleDark());
-    act(() => result.current.scatterStarts());
-    act(() => result.current.reshuffle("scatter", { teleportPairs: 1, fogPatches: 0 }));
+    act(() => tools().actions.toggleDark());
+    act(() => tools().actions.scatterStarts());
+    act(() => tools().actions.reshuffle("scatter", { teleportPairs: 1, fogPatches: 0 }));
 
     expect(mutate.mock.calls.map((c) => c[0])).toEqual([
       { op: "dark", on: false },
@@ -153,13 +181,13 @@ describe("useMazeTools", () => {
   });
 
   it("Esc вимикає інструмент", () => {
-    const { result } = setup();
+    const { tools } = setup();
 
-    act(() => result.current.setTool("fog"));
+    act(() => tools().actions.setTool("fog"));
     act(() => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     });
 
-    expect(result.current.tool).toBe("none");
+    expect(tools().state.tool).toBe("none");
   });
 });

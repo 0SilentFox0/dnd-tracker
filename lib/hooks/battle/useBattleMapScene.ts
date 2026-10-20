@@ -60,7 +60,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const mazeTools = useMazeTools();
 
-  const mazeTool = mazeTools.tool;
+  const mazeTool = mazeTools?.state.tool ?? "none";
 
   const placing = placingOn && isDM && mazeTool === "none";
 
@@ -149,7 +149,9 @@ export function useBattleMapScene(): BattleMapScene | null {
     if (current && to) move({ participantId: current.basicInfo.id, to, returnToStart: true });
   }, [move, current]);
 
-  const { clickCell: mazeClick, setTool: setMazeTool } = mazeTools;
+  const mazeClick = mazeTools?.actions.clickCell;
+
+  const setMazeTool = mazeTools?.actions.setTool;
 
   const latest = useRef({ scene, handle, anyPending, stroke: commit, returnToStart, mazeTool, mazeClick });
 
@@ -164,7 +166,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
         if (l.anyPending) return;
 
-        if (l.mazeTool !== "none") l.mazeClick(p);
+        if (l.mazeTool !== "none") l.mazeClick?.(p);
         else if (l.scene) l.handle(l.scene.cellClick(p));
       },
       onCellHover: (p) =>
@@ -192,7 +194,7 @@ export function useBattleMapScene(): BattleMapScene | null {
     setPlacingOn(!placing);
     setPlacingId(null);
     closeTerrain();
-    setMazeTool("none");
+    setMazeTool?.("none");
   }, [placing, closeTerrain, setMazeTool]);
 
   useEffect(() => {
@@ -213,5 +215,5 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, mazeTools: mazeTools.enabled ? mazeTools : null };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, mazeTools };
 }
