@@ -8,3 +8,4 @@ export {
   useUpdateCampaign,
 } from "./useCampaignMutations";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
+export { useJoinBattle } from "./useJoinBattle";

@@ -38,3 +38,8 @@ export interface CampaignSettings {
   allowPlayerEdit: boolean;
   status: string;
 }
+
+export interface ActiveBattleRef {
+  id: string;
+  campaignId: string;
+}

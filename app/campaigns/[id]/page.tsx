@@ -1,6 +1,5 @@
-import { BookOpen, Gem, GitBranch, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { BookOpen, Gem, GitBranch, Music, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
-import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
@@ -32,6 +31,7 @@ export default async function CampaignDetailPage({
     { path: "skill-trees", icon: GitBranch, title: "Дерева Прокачки", subtitle: "Налаштування дерев прокачки для рас" },
     { path: "races", icon: Shield, title: "Ігрові Раси", subtitle: "Управління расами та їх здібностями" },
     { path: "battles", icon: Swords, title: "Сцени Боїв", subtitle: "Створення та управління боями" },
+    { path: "music", icon: Music, title: "Музика бою", subtitle: "Бібліотека треків для плеєра в бою" },
   ];
 
   return (
@@ -47,7 +47,6 @@ export default async function CampaignDetailPage({
           title="Налаштування кампанії"
           action={
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <JoinBattleButton />
               {isDM && (
                 <CampaignSettingsButton
                   campaignId={id}
