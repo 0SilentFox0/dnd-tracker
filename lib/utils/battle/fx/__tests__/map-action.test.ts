@@ -7,8 +7,14 @@ import { mapAction } from "@/lib/utils/battle/fx";
 describe("mapAction", () => {
   it("melee hit with slashing → melee/physical", () => {
     expect(mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, damageRolls: [{ dice: "1d8", results: [5], total: 5, damageType: "slashing" }] } }))).toEqual([
-      { key: "b-1:0", archetype: "melee", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false },
+      { key: "b-1:0", actionId: "b-1", archetype: "melee", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false },
     ]);
+  });
+
+  it("кожна FX дії несе actionId", () => {
+    const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, diceRolls: [{ kind: "attack", rollerId: "a", dice: [{ sides: 20, value: 12 }] }] } }));
+
+    expect(specs.every((s) => s.actionId === specs[0].actionId && !!s.actionId)).toBe(true);
   });
 
   it("ranged miss keeps the archetype with hit=false", () => {

@@ -45,9 +45,7 @@ describe("useHpChange", () => {
 describe("useDamageShake", () => {
   afterEach(() => vi.useRealTimers());
 
-  it("тремтіння стартує після delayMs", () => {
-    vi.useFakeTimers();
-
+  it("тремтіння стартує одразу, без затримки", () => {
     const animate = vi.fn();
 
     const { rerender } = renderHook(
@@ -62,14 +60,6 @@ describe("useDamageShake", () => {
     );
 
     rerender({ change: { delta: -5, id: 1, impact: { element: "fire", kind: "damage", delayMs: 300 } } });
-
-    expect(animate).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(299);
-
-    expect(animate).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(1);
 
     expect(animate).toHaveBeenCalledTimes(1);
   });

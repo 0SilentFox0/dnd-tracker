@@ -33,7 +33,7 @@ function ParticipantDetailsBody({ participant }: ParticipantDetailsProps) {
 
   const impactFor = useFxImpacts();
 
-  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impactFor(participant.basicInfo.id));
+  const { change, shakeRef } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impactFor(participant.basicInfo.id));
 
   const exact = canSeeExactStats(participant, viewer);
 
@@ -49,7 +49,7 @@ function ParticipantDetailsBody({ participant }: ParticipantDetailsProps) {
     <div className="text-[var(--bone)]">
       <div ref={shakeRef} className="relative flex items-center gap-4">
         <HitFrame change={change} />
-        <HitFloat change={change} delayStyle={delayStyle} className="left-4 top-0 text-[26px]" />
+        <HitFloat change={change} className="left-4 top-0 text-[26px]" />
         <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(!change?.impact && hitFlashClass(change))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>

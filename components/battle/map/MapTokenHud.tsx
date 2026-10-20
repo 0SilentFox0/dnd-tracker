@@ -44,7 +44,7 @@ function hpView(participant: BattleParticipant, exact: boolean) {
 }
 
 function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
-  const { change, shakeRef: shake, delayStyle } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impact);
+  const { change, shakeRef: shake } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impact);
 
   const { userEnabled, motionAllowed } = useFxEnabled();
 
@@ -75,7 +75,7 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
     >
-      {showText && <HitFloat change={change} delayStyle={delayStyle} className="bottom-[30%] left-1/2 -translate-x-1/2" style={{ fontSize: nameFont * 1.6 }} />}
+      {showText && <HitFloat change={change} className="bottom-[30%] left-1/2 -translate-x-1/2" style={{ fontSize: nameFont * 1.6 }} />}
       {onReturn && (
         <button
           type="button"

@@ -19,7 +19,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
 
   const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
-  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpacts()(hero.basicInfo.id));
+  const { change, shakeRef } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpacts()(hero.basicInfo.id));
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
@@ -30,7 +30,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: 
   return (
     <div ref={shakeRef} className="relative">
       <HitFrame change={change} />
-      {change && change.delta < 0 && <div key={change.id} style={delayStyle} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
+      {change && change.delta < 0 && <div key={change.id} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">
         <PortraitFx effects={heroEffects} size={compact ? 48 : 64}>
           <ZoomablePortrait participant={hero} fx="main" size={compact ? 48 : 64} me />

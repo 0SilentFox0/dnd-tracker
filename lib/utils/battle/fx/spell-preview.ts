@@ -128,7 +128,7 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
 
     if (!result.success) return failed("заклинання не спрацювало");
 
-    const spec = mapAction(result.battleAction)[0] ?? null;
+    const spec = mapAction(result.battleAction).find((s) => s.archetype !== "dice") ?? null;
 
     const hpChanged = new Set(result.battleAction.hpChanges.filter((h) => h.oldHp !== h.newHp).map((h) => h.participantId));
 

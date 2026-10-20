@@ -6,6 +6,8 @@ export type FxElement = "fire" | "cold" | "lightning" | "poison" | "necrotic" | 
 
 export interface FxSpec {
   key: string;
+  /** Дія журналу, з якої ця FX; кадр влучання токенів чекає її удару. */
+  actionId?: string;
   archetype: FxArchetype;
   element: FxElement;
   actorId: string;
