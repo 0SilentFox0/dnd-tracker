@@ -1,11 +1,14 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { artifactSetKeys } from "./keys";
 
 import {
   type ArtifactSetCreatePayload,
   createArtifactSet,
   deleteArtifactSet,
+  getArtifactSets,
   updateArtifactSet,
 } from "@/lib/api/artifact-sets";
 import { artifactKeys } from "@/lib/hooks/artifacts/keys";
@@ -15,6 +18,10 @@ const keys = (campaignId: string) => [
   artifactSetKeys.list(campaignId),
   artifactKeys.list(campaignId),
 ];
+
+export function useArtifactSetsList(campaignId: string) {
+  return useQuery({ queryKey: artifactSetKeys.list(campaignId), queryFn: () => getArtifactSets(campaignId), enabled: !!campaignId });
+}
 
 export function useSaveArtifactSet(campaignId: string, setId?: string) {
   return useCrudMutation({

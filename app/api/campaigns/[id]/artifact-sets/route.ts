@@ -1,39 +1,27 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
+import { readArtifactSets } from "./read-artifact-sets";
 import { toArtifactSetErrorResponse } from "./route-errors";
 
 import { createArtifactSetSchema } from "@/lib/schemas/artifact-sets";
-import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import {
   insertArtifactSet,
-  listArtifactSets,
   reloadArtifactSetWithArtifacts,
-} from "@/lib/utils/artifacts/artifact-set-queries";
-import { syncArtifactSetMembers } from "@/lib/utils/artifacts/sync-artifact-set-members";
+} from "@/lib/server/artifacts/artifact-set-queries";
+import { syncArtifactSetMembers } from "@/lib/server/artifacts/sync-artifact-set-members";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
+import { requireDM } from "@/lib/utils/api/api-auth";
+import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    const { id } = await params;
+  const { id } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const sets = await listArtifactSets(id);
-
-    return NextResponse.json(sets);
-  } catch (error) {
-    return handleApiError(error, { action: "list artifact sets" });
-  }
+  return readArtifactSets({ id });
 }
 
 export async function POST(

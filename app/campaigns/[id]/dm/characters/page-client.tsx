@@ -49,11 +49,9 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
               pending={page.status.isDeletingAll}
               onConfirm={page.actions.removeAll}
             />
-            <Link href={newHref}>
-              <Button className="whitespace-nowrap">
-                + Створити персонажа
-              </Button>
-            </Link>
+            <Button className="whitespace-nowrap" asChild>
+              <Link href={newHref}>+ Створити персонажа</Link>
+            </Button>
           </>
         }
       >
@@ -77,9 +75,9 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
             title="Ще немає персонажів"
             description="Гравці або NPC-герої з'являться тут."
             action={
-              <Link href={newHref}>
-                <Button>Створити першого персонажа</Button>
-              </Link>
+              <Button asChild>
+                <Link href={newHref}>Створити першого персонажа</Link>
+              </Button>
             }
           />
         }

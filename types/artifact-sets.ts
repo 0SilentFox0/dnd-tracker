@@ -17,3 +17,12 @@ export interface ArtifactSetRow {
   artifacts?: ArtifactSetSummaryArtifact[];
   abilitySummary?: string[];
 }
+
+export interface ArtifactSetCardData {
+  id: string;
+  name: string;
+  icon: string | null;
+  description: string | null;
+  setBonus: unknown;
+  abilitySummary: string[];
+}

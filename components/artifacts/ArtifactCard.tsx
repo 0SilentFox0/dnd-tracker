@@ -20,17 +20,7 @@ import {
 import { ARTIFACT_SLOT_OPTIONS, artifactRarityLabel } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
-
-export interface ArtifactCardData {
-  id: string;
-  name: string;
-  slot: string;
-  rarity: string | null;
-  icon: string | null;
-  description: string | null;
-  abilitySummary: string[];
-  artifactSet?: { name: string } | null;
-}
+import type { ArtifactCardData } from "@/types/artifacts";
 
 interface ArtifactCardProps {
   campaignId: string;
@@ -160,14 +150,9 @@ export function ArtifactCard({
         <AbilitySummary lines={artifact.abilitySummary} />
       )}
       <div className="flex gap-2">
-        <Link
-          href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}
-          className="flex-1"
-        >
-          <Button variant="outline" size="sm" className="w-full">
-            Редагувати
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm" className="flex-1" asChild>
+          <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>Редагувати</Link>
+        </Button>
         <ArtifactDeleteButton
           campaignId={campaignId}
           artifactId={artifact.id}

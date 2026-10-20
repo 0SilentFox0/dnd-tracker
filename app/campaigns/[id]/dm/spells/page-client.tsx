@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { Printer, Wand2 } from "lucide-react";
 
@@ -11,18 +10,8 @@ import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellG
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  useDeleteAllSpells,
-  useMoveSpellToGroup,
-  useRemoveSpellFromGroup,
-  useSpellGroups,
-  useSpells,
-} from "@/lib/hooks/spells";
+import { useSpellsList } from "@/lib/hooks/spells";
 import { pluralUk } from "@/lib/utils/common/plural";
-import {
-  convertGroupedSpellsToArray,
-  groupSpellsByGroupAndLevel,
-} from "@/lib/utils/spells/spells";
 import type { Spell } from "@/types/spells";
 
 interface DMSpellsPageClientProps {
@@ -30,85 +19,55 @@ interface DMSpellsPageClientProps {
   initialSpells: Spell[];
 }
 
-export function DMSpellsPageClient({
-  campaignId,
-  initialSpells,
-}: DMSpellsPageClientProps) {
-  const { data: spells = initialSpells, isLoading: spellsLoading } = useSpells(campaignId, { initialData: initialSpells });
+export function DMSpellsPageClient({ campaignId, initialSpells }: DMSpellsPageClientProps) {
+  const list = useSpellsList(campaignId, initialSpells);
 
-  const { data: spellGroups = [] } = useSpellGroups(campaignId);
-
-  const removeSpellFromGroupMutation = useRemoveSpellFromGroup(campaignId);
-
-  const moveSpellMutation = useMoveSpellToGroup(campaignId);
-
-  const deleteAllSpellsMutation = useDeleteAllSpells(campaignId);
-
-  const handleRemoveSpellFromGroup = (spellId: string) => {
-    removeSpellFromGroupMutation.mutate(spellId);
-  };
-
-  const handleMoveSpellToGroup = (spellId: string, groupId: string | null) => {
-    moveSpellMutation.mutate({ spellId, groupId });
-  };
-
-  const sortedGroupedSpells = useMemo(() => {
-    const groupedSpellsMap = groupSpellsByGroupAndLevel(spells);
-
-    return convertGroupedSpellsToArray(groupedSpellsMap);
-  }, [spells]);
+  const count = list.spells.length;
 
   return (
     <HudPage>
       <HudPageHeader
         title="Заклинання"
-        subtitle={`База заклинань кампанії · Всього: ${spells.length}`}
+        subtitle={`База заклинань кампанії · Всього: ${count}`}
         actions={
           <>
             <CreateSpellGroupDialog campaignId={campaignId} />
-            <Link href={`/campaigns/${campaignId}/dm/spells/new`}>
-              <Button className="whitespace-nowrap text-xs sm:text-sm">+ Створити заклинання</Button>
-            </Link>
-            {spells.length > 0 && (
-              <Link href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm">
+            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+              <Link href={`/campaigns/${campaignId}/dm/spells/new`}>+ Створити заклинання</Link>
+            </Button>
+            {count > 0 && (
+              <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+                <Link href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
                   <Printer className="h-4 w-4 mr-1" />
                   Версія для друку
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
             <DeleteAllButton
-              count={spells.length}
+              count={count}
               nouns={["заклинання", "заклинання", "заклинань"]}
               label="Видалити всі заклинання"
-              description={`Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${spells.length} ${pluralUk(spells.length, ["заклинання", "заклинання", "заклинань"])}.`}
-              onConfirm={() => deleteAllSpellsMutation.mutateAsync()}
+              description={`Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${count} ${pluralUk(count, ["заклинання", "заклинання", "заклинань"])}.`}
+              onConfirm={list.actions.removeAll}
             />
           </>
         }
       />
 
-      {spellsLoading && spells.length === 0 ? (
+      {list.isLoading && count === 0 ? (
         <LoadingState rows={6} label="Завантаження заклинань…" />
-      ) : spells.length === 0 ? (
+      ) : count === 0 ? (
         <EmptyState icon={Wand2} title="Ще немає заклинань" description="Створіть перше заклинання або імпортуйте їх з файлу." />
       ) : (
-        <Accordion
-          type="multiple"
-          defaultValue={sortedGroupedSpells.map(([groupName]) => groupName)}
-          className="space-y-2"
-        >
-          {sortedGroupedSpells.map(([groupName, levels]) => (
+        <Accordion type="multiple" defaultValue={list.view.groups.map(([groupName]) => groupName)} className="space-y-2">
+          {list.view.groups.map(([groupName, levels]) => (
             <SpellGroupAccordion
               key={groupName}
               groupName={groupName}
               levels={levels}
               campaignId={campaignId}
-              spellGroups={spellGroups}
-              spellActions={{
-                onRemoveFromGroup: handleRemoveSpellFromGroup,
-                onMoveToGroup: handleMoveSpellToGroup,
-              }}
+              spellGroups={list.view.spellGroups}
+              spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
             />
           ))}
         </Accordion>

@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "@/lib/db";
 
 export class SyncArtifactSetError extends Error {

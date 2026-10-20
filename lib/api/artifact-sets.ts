@@ -29,6 +29,8 @@ const artifactSetsApi = createCampaignCrudApi<
   { success: boolean }
 >("/artifact-sets");
 
+export const getArtifactSets = (campaignId: string): Promise<ArtifactSetRow[]> => artifactSetsApi.list(campaignId);
+
 export const createArtifactSet = artifactSetsApi.create;
 export const updateArtifactSet = artifactSetsApi.update;
 export const deleteArtifactSet = artifactSetsApi.remove;

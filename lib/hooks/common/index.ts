@@ -7,7 +7,6 @@ export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";
 export { useImageSize } from "./useImageSize";
-export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { DESKTOP_QUERY } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNavigateFresh } from "./useNavigateFresh";

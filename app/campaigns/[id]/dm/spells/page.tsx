@@ -1,7 +1,7 @@
 import { DMSpellsPageClient } from "./page-client";
 
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function DMSpellsPage({
   params,
@@ -24,9 +24,5 @@ export default async function DMSpellsPage({
     },
   });
 
-  const spellsForClient = spells;
-
-  return (
-    <DMSpellsPageClient campaignId={id} initialSpells={spellsForClient} />
-  );
+  return <DMSpellsPageClient campaignId={id} initialSpells={spells} />;
 }

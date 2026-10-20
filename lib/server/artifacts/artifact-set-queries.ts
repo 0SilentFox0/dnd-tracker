@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 
+import "server-only";
 import { prisma } from "@/lib/db";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";

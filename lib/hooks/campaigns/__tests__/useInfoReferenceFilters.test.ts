@@ -2,7 +2,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { useInfoReferenceFilters } from "@/lib/hooks/common/useInfoReferenceFilters";
+import { useInfoReferenceFilters } from "@/lib/hooks/campaigns/useInfoReferenceFilters";
 import type { ArtifactForReference } from "@/types/info-reference";
 
 const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({

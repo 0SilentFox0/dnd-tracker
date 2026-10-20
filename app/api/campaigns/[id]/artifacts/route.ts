@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
+import { readArtifacts } from "./read-artifacts";
+
 import { prisma } from "@/lib/db";
 import { createArtifactSchema } from "@/lib/schemas/artifacts";
 import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
-import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/read";
-import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
-import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { requireDM } from "@/lib/utils/api/api-auth";
 import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -70,40 +70,12 @@ export async function POST(
 }
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
+  const { id } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const rows = await prisma.artifact.findMany({
-      where: {
-        campaignId: id,
-      },
-      include: {
-        artifactSet: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    const artifacts = rows.map(({ abilities, ...row }) => ({
-      ...row,
-      sheetBonuses: sheetStatBonuses(artifactAbilities({ ...row, abilities })),
-      abilitySummary: abilitySummary("artifact", { ...row, abilities }),
-    }));
-
-    return NextResponse.json(artifacts);
-  } catch (error) {
-    return handleApiError(error, { action: "list artifacts" });
-  }
+  return readArtifacts({ id });
 }
 
 export async function DELETE(

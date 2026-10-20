@@ -89,9 +89,9 @@ export default async function CampaignsPage() {
         actions={
           <>
             <JoinCampaignDialog />
-            <Link href="/campaigns/new">
-              <Button className="whitespace-nowrap">+ Нова Кампанія</Button>
-            </Link>
+            <Button className="whitespace-nowrap" asChild>
+              <Link href="/campaigns/new">+ Нова Кампанія</Link>
+            </Button>
           </>
         }
       />
@@ -130,9 +130,9 @@ export default async function CampaignsPage() {
           icon={MapIcon}
           title="У вас поки немає кампаній"
           action={
-            <Link href="/campaigns/new">
-              <Button>Створити першу кампанію</Button>
-            </Link>
+            <Button asChild>
+              <Link href="/campaigns/new">Створити першу кампанію</Link>
+            </Button>
           }
         />
       )}

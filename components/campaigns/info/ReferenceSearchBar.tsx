@@ -16,13 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SelectField } from "@/components/ui/select-field";
 import { artifactRarityLabel } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
 import type { ReferenceFilters, SectionTab } from "@/types/info-reference";
@@ -45,19 +39,16 @@ function FilterSelect({ label, allLabel, value, onChange, options }: FilterSelec
   return (
     <div className="space-y-1.5 w-full min-w-0">
       <Label className="text-xs text-hud-muted">{label}</Label>
-      <Select value={value ?? "all"} onValueChange={(v) => onChange(v === "all" ? null : v)}>
-        <SelectTrigger className="w-full h-10">
-          <SelectValue placeholder={allLabel} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{allLabel}</SelectItem>
-          {options.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SelectField
+        value={value ?? ""}
+        onValueChange={(v) => onChange(v || null)}
+        options={options}
+        placeholder={allLabel}
+        allowNone
+        noneLabel={allLabel}
+        noneValue="all"
+        triggerClassName="w-full h-10"
+      />
     </div>
   );
 }
