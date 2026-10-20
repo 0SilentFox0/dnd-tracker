@@ -1734,7 +1734,9 @@ async function mazeTunnelCheck() {
 
   const cells = heroes.map((h) => posOf(h) as any);
 
-  const inLine = cells.some((c) => cellKey(c) === cellKey(centre)) && (cells.every((c) => c.x === centre.x) || cells.every((c) => c.y === centre.y));
+  const inLine = cells.length > 0 && (cells.every((c) => c.x === centre.x) || cells.every((c) => c.y === centre.y));
+
+  const firstAtExit = cells.length > 0 && Math.abs(cells[0].x - maze.exit.x) + Math.abs(cells[0].y - maze.exit.y) === 1;
 
   const exitOnLine = !!maze.exit && (maze.exit.x === centre.x || maze.exit.y === centre.y);
 
@@ -1752,7 +1754,7 @@ async function mazeTunnelCheck() {
 
   const enemiesGone = leaving.every((id) => inReserve.has(id)) && !P().some((p) => p.basicInfo.side === "enemy" && onField(p));
 
-  tcheck("Лабіринт: «1 тунель» — герої рядом від центру, вихід у кінці тунелю, вороги в резерві", rt.status === 200 && inLine && exitOnLine && onlyTunnel && enemiesGone && maze.teleports.length === 0 && maze.fog.length === 0, `${rt.status} у ряд=${inLine} вихід ${JSON.stringify(maze.exit)} лише тунель=${onlyTunnel} у резерві ${leaving.filter((id) => inReserve.has(id)).length}/${leaving.length}${rt.status !== 200 ? ` ${JSON.stringify(rt.body).slice(0, 150)}` : ""}`);
+  tcheck("Лабіринт: «1 тунель» — герої рядом від центру, вихід у кінці тунелю, вороги в резерві", rt.status === 200 && inLine && firstAtExit && exitOnLine && onlyTunnel && enemiesGone && maze.teleports.length === 0 && maze.fog.length === 0, `${rt.status} у ряд=${inLine} вихід ${JSON.stringify(maze.exit)} лише тунель=${onlyTunnel} у резерві ${leaving.filter((id) => inReserve.has(id)).length}/${leaving.length}${rt.status !== 200 ? ` ${JSON.stringify(rt.body).slice(0, 150)}` : ""}`);
 
   if (checkVictoryConditions(P(), reserve()).awaiting && reserve().length > 0) await call("reveal-participant", REVEAL, { participantIds: reserve().map((p: any) => p.basicInfo.id) });
 }

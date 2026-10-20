@@ -6,7 +6,7 @@ import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/m
 import { createRollbackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
-import { cellKey, mapCentre } from "@/lib/utils/battle/grid/geometry";
+import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import { heroTunnel, mazeDistances } from "@/lib/utils/battle/maze";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/maze/__tests__/fixtures";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
@@ -99,13 +99,25 @@ describe("перетасовка «1 тунель»", () => {
     expect(next).toMatchObject({ exit: { x: 0, y: 4 }, teleports: [], fog: [], marks: {}, moved: true, dark: false });
   });
 
-  it("герої стоять рядом від центру, дивляться на вихід, шлях до виходу лише тунелем", () => {
+  it("перший за ініціативою поруч із клітинкою виходу, наступні далі до глухого кінця", () => {
+    const hero3 = participant("hero3", { controlledBy: "user-3", name: "Третя" });
+
+    const base = ctx();
+
+    const out = tunnel({ ...base, participants: [...base.participants, at(hero3, { x: 5, y: 5 })] });
+
+    const xs = ["hero", "hero2", "hero3"].map((id) => (byId(out.participants, id).battleData.position as GridPoint).x);
+
+    expect(xs).toEqual([1, 2, 3]);
+  });
+
+  it("перший за ініціативою біля виходу, наступні за ним, дивляться на вихід, шлях до виходу лише тунелем", () => {
     const out = tunnel(ctx());
 
     const next = out.scene?.map?.maze as MazeConfig;
 
-    expect(byId(out.participants, "hero").battleData).toMatchObject({ position: mapCentre(GRID), facing: "w" });
-    expect(byId(out.participants, "hero2").battleData).toMatchObject({ position: { x: 3, y: 4 }, facing: "w" });
+    expect(byId(out.participants, "hero").battleData).toMatchObject({ position: { x: 1, y: 4 }, facing: "w" });
+    expect(byId(out.participants, "hero2").battleData).toMatchObject({ position: { x: 2, y: 4 }, facing: "w" });
 
     const reach = mazeDistances({ ...GRID, maze: next }, [next.exit as GridPoint]);
 

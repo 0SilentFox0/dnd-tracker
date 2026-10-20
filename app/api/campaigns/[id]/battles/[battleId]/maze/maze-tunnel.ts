@@ -39,7 +39,7 @@ function turnAfter(ctx: BattleMutationContext, remaining: BattleParticipant[], p
   return { participants: advanced.participants, pending: advanced.pending, scene: advanced.scene, events: advanced.actions.map(battleActionToEvent) };
 }
 
-/** «1 тунель»: вороги зникають у резерв ДМа, решта карти — відкрита кімната, герої стоять рядом у прямому тунелі від центру до нового виходу на краю. */
+/** «1 тунель»: вороги зникають у резерв ДМа, решта карти — відкрита кімната, герої стоять рядом у прямому тунелі від центру до нового виходу на краю; перший за ініціативою — біля виходу. */
 export function tunnelMutation(ctx: BattleMutationContext, { map: base, grid: current }: MazeEnv, event: NewBattleEvent): MutationResult {
   const heroes = ctx.participants.filter(entersTunnel);
 
@@ -49,7 +49,7 @@ export function tunnelMutation(ctx: BattleMutationContext, { map: base, grid: cu
 
   const grid = { ...current, maze: nextMaze };
 
-  const spotOf = new Map(heroes.map((h, i) => [h.basicInfo.id, tunnel.cells[i]]));
+  const spotOf = new Map(heroes.map((h, i) => [h.basicInfo.id, tunnel.cells[tunnel.cells.length - 2 - i]]));
 
   const inTunnel = new Set(tunnel.cells.map(cellKey));
 
