@@ -62,7 +62,7 @@ describe("авторозстановка", () => {
     expect(cellDistance(out[1].battleData.position as GridPoint, { x: 5, y: 2 })).toBe(1);
   });
 
-  it("непритомний займає клітинку, мертвий — ні", () => {
+  it("непритомний і мертвий клітинку не займають", () => {
     const down = { ...p("d", ParticipantSide.ALLY, { position: { x: 0, y: 2 } }), combatStats: { ...p("x", "ally").combatStats, status: CombatStatus.UNCONSCIOUS, currentHp: 0 } };
 
     const dead = { ...p("k", ParticipantSide.ALLY, { position: { x: 0, y: 1 } }), combatStats: { ...p("x", "ally").combatStats, status: CombatStatus.DEAD, currentHp: 0 } };
@@ -70,8 +70,7 @@ describe("авторозстановка", () => {
     const out = placeParticipants(map, [down, dead, p("n1", ParticipantSide.ALLY, { position: { x: 0, y: 1 } }), p("n2", ParticipantSide.ALLY, { position: { x: 0, y: 2 } })]);
 
     expect(out[2].battleData.position).toEqual({ x: 0, y: 1 });
-    expect(out[3].battleData.position).not.toEqual({ x: 0, y: 2 });
-    expect(out[3].battleData.position).toBeDefined();
+    expect(out[3].battleData.position).toEqual({ x: 0, y: 2 });
   });
 
   it("позиція поза картою після зменшення — розставляється заново поблизу", () => {

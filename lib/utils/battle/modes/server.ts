@@ -48,6 +48,16 @@ export function modePlaceOne(
   return active?.mode.server.placeOne?.({ map: active.map, config: active.config, ...args }) ?? null;
 }
 
+/** undefined — режим не веде власного пошуку; null — вільних клітинок немає. */
+export function modePlaceRevived(
+  map: BattleMapConfig | null,
+  args: { participants: BattleParticipant[]; mover: BattleParticipant; from: GridPoint },
+): GridPoint | null | undefined {
+  const active = activeModeWithConfig(map);
+
+  return active?.mode.server.placeRevived?.({ map: active.map, config: active.config, ...args });
+}
+
 export function modeEnter(map: BattleMapConfig | null, participant: BattleParticipant): BattleParticipant {
   const active = activeModeWithConfig(map);
 

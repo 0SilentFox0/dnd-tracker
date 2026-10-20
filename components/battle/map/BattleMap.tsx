@@ -26,6 +26,7 @@ import {
   cellPolygon,
   centreCell,
   fitMapView,
+  isFallen,
   isMoveMark,
   mapSize,
   playableBounds,
@@ -447,7 +448,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
   const tokens = useMemo(
     () =>
       participants
-        .filter((p) => !p.battleData.reserved)
+        .filter((p) => !p.battleData.reserved && !isFallen(p))
         .filter((p) => !modeView || (!isEscaped(p) && modeView.visibleIds.has(p.basicInfo.id)))
         .flatMap((p) => {
           const box = tokenBox(p);

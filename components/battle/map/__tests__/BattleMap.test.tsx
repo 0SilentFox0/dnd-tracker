@@ -742,3 +742,17 @@ describe("BattleMap — terrain stroke", () => {
     expect(container.querySelector("[data-template-layer]")?.getAttribute("data-template-layer")).toBe("2:1/2:1");
   });
 });
+
+describe("BattleMap: полеглі", () => {
+  it("мертвий і непритомний не мають токена на карті", () => {
+    const dead = { ...at("x", 1, 1), combatStats: { ...base.combatStats, status: "dead" as const, currentHp: 0 } };
+
+    const down = { ...at("y", 2, 1), combatStats: { ...base.combatStats, status: "unconscious" as const, currentHp: 0 } };
+
+    const { container } = render(<BattleMap map={square} participants={[...people, dead, down]} />);
+
+    expect(container.querySelector('[data-fx-participant="x"]')).toBeNull();
+    expect(container.querySelector('[data-fx-participant="y"]')).toBeNull();
+    expect(container.querySelector('[data-fx-participant="h"]')).not.toBeNull();
+  });
+});
