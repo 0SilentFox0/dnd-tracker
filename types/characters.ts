@@ -233,7 +233,7 @@ export interface CharacterSheet {
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
-  story: { biography: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
+  story: { biography: string | null; notes: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
 }
 

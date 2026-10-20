@@ -1,6 +1,7 @@
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";
 export { useCharacterGoals } from "./useCharacterGoals";
+export { useCharacterNotes } from "./useCharacterNotes";
 export { useCharacterRoster } from "./useCharacterRoster";
 export { useCharacters, useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "./useCharacters";
 export { useCharacterSheet } from "./useCharacterSheet";

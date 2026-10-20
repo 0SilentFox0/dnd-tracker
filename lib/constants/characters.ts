@@ -18,6 +18,8 @@ export const MAX_GOALS = 30;
 
 export const GOAL_TEXT_MAX = 600;
 
+export const NOTES_MAX = 5000;
+
 export const GOAL_TITLE_MAX = 80;
 
 export const GoalKind = { MAIN: "main", PERSONAL: "personal", INNER: "inner", SECRET: "secret" } as const;

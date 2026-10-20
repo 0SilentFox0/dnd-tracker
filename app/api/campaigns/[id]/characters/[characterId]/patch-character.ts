@@ -67,6 +67,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
       ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
     },
     include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+    omit: { notes: true },
   });
 
   return NextResponse.json(updatedCharacter);

@@ -39,6 +39,7 @@ export interface SheetInput {
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;
+    notes?: string | null;
     tokens?: { id: string; color: string; label: string; createdAt: Date }[];
   };
   raceIcon: string | null;
@@ -117,7 +118,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,
     progression: input.progression,
-    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals), chapters: input.chapters ?? [],
+    story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals), notes: input.viewer.isOwner ? (c.notes ?? null) : null, chapters: input.chapters ?? [],
       tokens: (c.tokens ?? []).map((t) => ({ id: t.id, color: t.color as TokenColor, label: t.label, createdAt: t.createdAt.toISOString() })),
     },
   };

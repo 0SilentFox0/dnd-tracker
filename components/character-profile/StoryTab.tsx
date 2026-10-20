@@ -2,6 +2,7 @@
 
 import { BiographyText } from "./BiographyText";
 import { GoalList } from "./GoalList";
+import { PlayerNotes } from "./PlayerNotes";
 import { useProfile } from "./ProfileContext";
 import { StoryChapters } from "./StoryChapters";
 import { TokenList } from "./TokenList";
@@ -16,6 +17,7 @@ export function StoryTab() {
       <div className="lg:order-2">
         <GoalList />
         <TokenList />
+        {sheet.viewer.isOwner && <PlayerNotes />}
       </div>
       <div className="lg:order-1">
         <HudSection title="БІОГРАФІЯ">{sheet.story.biography ? <BiographyText text={sheet.story.biography} /> : <p className="text-sm text-hud-muted">Біографію ще не написано</p>}</HudSection>
