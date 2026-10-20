@@ -1744,7 +1744,9 @@ async function mazeTunnelCheck() {
 
   const reach = mazeDistances(mazeGrid(), [maze.exit as any]);
 
-  const onlyTunnel = cells.every((c) => reach.has(cellKey(c))) && [...reach.keys()].every((k) => { const [x, y] = k.split(":").map(Number); return x === maze.exit.x || y === maze.exit.y; });
+  const onExitLine = (k: string) => k.split(":").map(Number).some((v, i) => v === (i === 0 ? maze.exit.x : maze.exit.y));
+
+  const onlyTunnel = cells.every((c) => reach.has(cellKey(c))) && [...reach.keys()].every(onExitLine);
 
   const inReserve = new Set(reserve().map((p: any) => p.basicInfo.id));
 
