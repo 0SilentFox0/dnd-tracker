@@ -10,32 +10,33 @@ import { pluralUk } from "@/lib/utils/common/plural";
 interface DeleteAllButtonProps {
   count: number;
   nouns: [string, string, string];
-  description: string;
-  onConfirm: () => Promise<unknown>;
-  label?: string;
-  title?: string;
-  variant?: "solid" | "soft";
-  icon?: ReactNode;
-  pending?: boolean;
+  confirm: { description: string; title?: string; label?: string };
+  actions: { onConfirm: () => Promise<unknown> };
+  view?: { variant?: "solid" | "soft"; icon?: ReactNode };
+  status?: { isPending?: boolean };
 }
 
 const SOFT = "text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30";
 
-export function DeleteAllButton({ count, nouns, description, onConfirm, label = "Видалити всі", title, variant = "solid", icon, pending }: DeleteAllButtonProps) {
+export function DeleteAllButton({ count, nouns, confirm: texts, actions, view, status }: DeleteAllButtonProps) {
   const confirm = useConfirm();
+
+  const { description, label = "Видалити всі", title } = texts;
+
+  const { variant = "solid", icon } = view ?? {};
 
   if (count === 0) return null;
 
   const heading = title ?? `Видалити всі ${pluralUk(2, nouns)}?`;
 
-  const ask = () => confirm({ title: heading, description, confirmLabel: label, destructive: true, onConfirm });
+  const ask = () => confirm({ title: heading, description, confirmLabel: label, destructive: true, onConfirm: actions.onConfirm });
 
   return (
     <Button
       type="button"
       variant={variant === "solid" ? "destructive" : "outline"}
       className={cn("whitespace-nowrap text-xs sm:text-sm", variant === "soft" && SOFT)}
-      disabled={pending}
+      disabled={status?.isPending}
       onClick={() => void ask()}
     >
       {icon}

@@ -10,9 +10,9 @@ export function DeleteAllBattlesButton({ campaignId, battlesCount }: { campaignI
     <DeleteAllButton
       count={battlesCount}
       nouns={["битва", "битви", "битв"]}
-      description={`Ця дія видалить всі сцени бою з кампанії (${battlesCount} битв). Цю дію неможливо скасувати.`}
-      pending={deleteAll.isPending}
-      onConfirm={() => deleteAll.mutateAsync()}
+      confirm={{ description: `Ця дія видалить всі сцени бою з кампанії (${battlesCount} битв). Цю дію неможливо скасувати.` }}
+      status={{ isPending: deleteAll.isPending }}
+      actions={{ onConfirm: () => deleteAll.mutateAsync() }}
     />
   );
 }

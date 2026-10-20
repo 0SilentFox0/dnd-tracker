@@ -43,8 +43,8 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
             <DeleteAllButton
               count={skills.length}
               nouns={SKILL_NOUNS}
-              description={`Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, SKILL_NOUNS)}). Цю дію неможливо скасувати.`}
-              onConfirm={actions.removeAll}
+              confirm={{ description: `Ця дія видалить всі скіли з бібліотеки (${skills.length} ${pluralUk(skills.length, SKILL_NOUNS)}). Цю дію неможливо скасувати.` }}
+              actions={{ onConfirm: actions.removeAll }}
             />
           </>
         }

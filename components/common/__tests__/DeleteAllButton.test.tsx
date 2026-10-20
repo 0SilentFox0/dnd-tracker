@@ -11,7 +11,7 @@ afterEach(cleanup);
 
 describe("DeleteAllButton", () => {
   it("renders nothing when there is nothing to delete", () => {
-    renderWithConfirm(<DeleteAllButton count={0} nouns={nouns} description="x" onConfirm={vi.fn()} />);
+    renderWithConfirm(<DeleteAllButton count={0} nouns={nouns} confirm={{ description: "x" }} actions={{ onConfirm: vi.fn() }} />);
 
     expect(screen.queryByRole("button")).toBeNull();
   });
@@ -19,7 +19,7 @@ describe("DeleteAllButton", () => {
   it("asks for confirmation with a pluralized title and calls onConfirm", async () => {
     const onConfirm = vi.fn(async () => undefined);
 
-    renderWithConfirm(<DeleteAllButton count={3} nouns={nouns} description="Буде видалено 3 юнітів." onConfirm={onConfirm} />);
+    renderWithConfirm(<DeleteAllButton count={3} nouns={nouns} confirm={{ description: "Буде видалено 3 юнітів." }} actions={{ onConfirm }} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити всі" }));
 
@@ -35,7 +35,7 @@ describe("DeleteAllButton", () => {
   });
 
   it("uses custom label and title, and is disabled while pending", () => {
-    renderWithConfirm(<DeleteAllButton count={2} nouns={nouns} description="x" label="Видалити всіх" title="Видалити всіх персонажів?" pending onConfirm={vi.fn()} />);
+    renderWithConfirm(<DeleteAllButton count={2} nouns={nouns} confirm={{ description: "x", label: "Видалити всіх", title: "Видалити всіх персонажів?" }} status={{ isPending: true }} actions={{ onConfirm: vi.fn() }} />);
 
     expect((screen.getByRole("button", { name: "Видалити всіх" }) as HTMLButtonElement).disabled).toBe(true);
   });
