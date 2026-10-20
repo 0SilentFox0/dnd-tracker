@@ -188,3 +188,43 @@ describe("targetSlideTrack / showNeedsLibrary", () => {
     expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "play", trackId: "t1" } }, deck)).toBe(true);
   });
 });
+
+describe("команда battle", () => {
+  const battle = (status: string) => ({ id: "b1", name: "Засідка", status });
+
+  it("активний бій: battle у стані, музика зупинена, seq+1, слайд лишається", () => {
+    const next = ok(applyShowCommand(showing(1, { audio: audio() }), { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
+
+    expect(next.battle).toEqual({ id: "b1", name: "Засідка" });
+    expect(next.slide).toEqual(s(2, "t2"));
+    expect(next.audio).toMatchObject({ trackId: null, playing: false });
+    expect(next.seq).toBe(5);
+  });
+
+  it("без запущеного показу — стан без слайда з battle", () => {
+    const next = ok(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
+
+    expect(next).toMatchObject({ deckId: null, slide: null, battle: { id: "b1", name: "Засідка" }, seq: 1 });
+  });
+
+  it("бій не active — помилка", () => {
+    for (const status of ["prepared", "completed"]) {
+      expect(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle(status) })).toEqual({ ok: false, message: "Бій ще не почався або вже завершений" });
+    }
+  });
+
+  it("open / next / prev / end скидають battle", () => {
+    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
+
+    expect(ok(applyShowCommand(called, { action: "next" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(showing(1, { battle: { id: "b1", name: "Засідка" } }), { action: "prev" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(called, { action: "open", deckId: "d1", slideId: "slide-0003" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(called, { action: "end" }, ctx))).not.toHaveProperty("battle");
+  });
+
+  it("audio-команда не скидає battle", () => {
+    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
+
+    expect(ok(applyShowCommand(called, { action: "audio", command: { action: "play", trackId: "t1" } }, ctx)).battle).toEqual({ id: "b1", name: "Засідка" });
+  });
+});

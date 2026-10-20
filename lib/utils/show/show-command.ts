@@ -1,8 +1,9 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { BattleStatus } from "@/lib/constants/battle";
 import { applyAudioCommand, type AudioLibraryEntry, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { Result } from "@/types/common";
-import type { ShowCommand, ShowState, Slide } from "@/types/show";
+import type { ShowBattle, ShowCommand, ShowState, Slide } from "@/types/show";
 
 export interface ShowDeck {
   id: string;
@@ -14,6 +15,7 @@ interface Ctx {
   now: number;
   deck: ShowDeck | null;
   library: AudioLibraryEntry[];
+  battle?: (ShowBattle & { status: string }) | null;
 }
 
 type Outcome = Result<ShowState>;
@@ -82,26 +84,39 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
   return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), seq: (prev?.seq ?? 0) + 1 });
 }
 
+function stopAudio(prev: ShowState | null, ctx: Ctx): BattleAudioState | null {
+  const audio = prev?.audio ?? null;
+
+  const stopped = audio?.trackId ? applyAudioCommand(audio, { action: "stop" }, ctx) : null;
+
+  return stopped?.ok ? stopped.value : audio;
+}
+
+function callToBattle(prev: ShowState | null, battleId: string, ctx: Ctx): Outcome {
+  const battle = ctx.battle;
+
+  if (!battle || battle.id !== battleId) return fail(API_ERRORS.NOT_FOUND);
+
+  if (battle.status !== BattleStatus.ACTIVE) return fail(API_ERRORS.SHOW_BATTLE_NOT_ACTIVE);
+
+  return done({ ...(prev ?? EMPTY), audio: stopAudio(prev, ctx), battle: { id: battle.id, name: battle.name }, seq: (prev?.seq ?? 0) + 1 });
+}
+
 export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: Ctx): Outcome {
   switch (cmd.action) {
     case "open":
     case "next":
     case "prev":
       return moveTo(prev, cmd, ctx);
-    case "end": {
-      const audio = prev?.audio ?? null;
-
-      const stopped = audio?.trackId ? applyAudioCommand(audio, { action: "stop" }, ctx) : null;
-
-      return done({ ...EMPTY, audio: stopped?.ok ? stopped.value : audio, seq: (prev?.seq ?? 0) + 1 });
-    }
+    case "end":
+      return done({ ...EMPTY, audio: stopAudio(prev, ctx), seq: (prev?.seq ?? 0) + 1 });
     case "audio": {
       const played = applyAudioCommand(prev?.audio ?? null, cmd.command, ctx);
 
       return played.ok ? done({ ...(prev ?? EMPTY), audio: played.value, seq: (prev?.seq ?? 0) + 1 }) : played;
     }
     case "battle":
-      return fail(API_ERRORS.SHOW_BATTLE_NOT_ACTIVE);
+      return callToBattle(prev, cmd.battleId, ctx);
   }
 }
 

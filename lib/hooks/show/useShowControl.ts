@@ -25,7 +25,7 @@ export function useShowControl(campaignId: string, onFailure: (message: string) 
     onSuccess: (fresh, cmd) => {
       writeShowSnapshot(queryClient, campaignId, fresh);
 
-      if (cmd.action === "open" || cmd.action === "end") void queryClient.invalidateQueries({ queryKey: battleKeys.active() });
+      if (cmd.action === "open" || cmd.action === "end" || cmd.action === "battle") void queryClient.invalidateQueries({ queryKey: battleKeys.active() });
     },
     onError: (error) => {
       if (error instanceof ApiError && error.status === 409) void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
