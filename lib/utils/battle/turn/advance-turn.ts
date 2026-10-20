@@ -48,7 +48,7 @@ export function advanceTurn({ participants, pending, scene, rng, map }: AdvanceT
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));
 
   if (ending && takesTurn(ending, scene.round)) {
-    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random });
+    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random, map });
 
     order = ended.participants;
 

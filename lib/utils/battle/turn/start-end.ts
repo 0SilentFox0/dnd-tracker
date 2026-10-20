@@ -159,7 +159,7 @@ export function processStartOfTurn(
   // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
   updatedParticipant = setExtraActionPool(updatedParticipant, isActive(updatedParticipant) ? actionsPerTurnPool(updatedParticipant, allParticipants) : 0);
 
-  const ctx = { round: currentRound, rng };
+  const ctx = { round: currentRound, rng, map };
 
   let participants = allParticipants.some((p) => p.basicInfo.id === id)
     ? replaceParticipant(allParticipants, updatedParticipant)
@@ -273,6 +273,7 @@ export function processStartOfRound(
   currentRound: number,
   pendingSummons: BattleParticipant[] = [],
   rng: Rng = Math.random,
+  map?: BattleMapConfig | null,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: string;
@@ -287,7 +288,7 @@ export function processStartOfRound(
 
   const newSummonIds = new Set(summons.map((p) => p.basicInfo.id));
 
-  const ctx = { round: currentRound, rng };
+  const ctx = { round: currentRound, rng, map };
 
   const messages: string[] = [];
 

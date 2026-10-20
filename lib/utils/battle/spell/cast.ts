@@ -111,7 +111,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const casterId = caster.basicInfo.id;
 
-  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng } };
+  const flow: AttackFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map } };
 
   const before = flow.ps;
 
@@ -290,7 +290,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterId, targetIds, ...info };
 
-    resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps).forEach((id, index) => applyTo(effect, effectIndex, id, index));
+    resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps, flow.ctx.map).forEach((id, index) => applyTo(effect, effectIndex, id, index));
   });
 
   updatedCaster = getP(flow, casterId);

@@ -105,6 +105,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       saveRolls: trusted,
       isDMCast: free,
       rng,
+      map: ctx.meta.map,
     });
 
     if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");

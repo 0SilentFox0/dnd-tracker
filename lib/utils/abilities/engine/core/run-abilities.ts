@@ -63,7 +63,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
       fired.push(ability.key);
 
       for (const [effectIndex, effect] of ability.effects.entries()) {
-        const targetIds = resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps);
+        const targetIds = resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx.map);
 
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 

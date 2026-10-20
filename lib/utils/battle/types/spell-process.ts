@@ -1,6 +1,6 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
-import type { BattleAction, BattleParticipant, TerrainDamage } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
 
 export interface CastableSpell {
   id: string;
@@ -23,6 +23,7 @@ export interface CastSpellParams {
   /** DM накладає з сайдбару — не витрачати spell slot */
   isDMCast?: boolean;
   rng?: () => number;
+  map?: BattleMapConfig | null;
 }
 
 export interface CastSpellResult {

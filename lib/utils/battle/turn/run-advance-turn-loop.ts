@@ -101,7 +101,7 @@ export function runAdvanceTurnLoop(
     nextRound = turnTransition.nextRound;
 
     if (nextRound > previousRound) {
-      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng });
+      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng, map });
 
       updatedInitiativeOrder = roundEnd.participants;
 
@@ -118,6 +118,7 @@ export function runAdvanceTurnLoop(
         nextRound,
         pendingSummons,
         rng,
+        map,
       );
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;

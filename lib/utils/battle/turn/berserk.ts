@@ -49,7 +49,7 @@ function note(p: BattleParticipant, params: BerserkTurnParams, text: string): Ba
 function finishTurn(participants: BattleParticipant[], actions: BattleAction[], params: BerserkTurnParams) {
   const id = params.participantId;
 
-  const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng });
+  const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng, map: params.map });
 
   const order = updateParticipant(ended.participants, id, endTurnCleanup);
 

@@ -133,7 +133,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
 
       const option = i.effect.options[index];
 
-      const targetIds = "target" in option && option.target ? resolveTargetIds(option.target, i.ownerId, i.event, i.participants) : i.targetIds;
+      const targetIds = "target" in option && option.target ? resolveTargetIds(option.target, i.ownerId, i.event, i.participants, i.ctx.map) : i.targetIds;
 
       return applyEffect({ ...i, effect: option, targetIds });
     },
