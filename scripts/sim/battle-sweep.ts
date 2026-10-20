@@ -43,7 +43,7 @@ import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellDistance, cellKey, neighbors } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
-import { allReachExit, canStep, MAZE_DARK_ERROR, MAZE_DARK_SKIP, mazeDistances, type MazeGrid, mazeReachable, mazeVision, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
+import { allReachExit, canStep, isMazeHero, MAZE_DARK_ERROR, MAZE_DARK_SKIP, mazeDistances, type MazeGrid, mazeReachable, mazeVision, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
@@ -1515,7 +1515,7 @@ const logText = (log: any[]) => log.map((e: any) => e.resultText ?? "").join(" |
 function sleepersMatchSight() {
   const grid = mazeGrid();
 
-  const watchers = P().filter((p) => isMazeAlly(p) && p.basicInfo.sourceType !== ParticipantSourceType.UNIT && viewpointOf(p)).map((p) => ({ at: posOf(p) as any, vision: mazeVision(grid, viewpointOf(p) as any) }));
+  const watchers = P().filter((p) => isMazeHero(p) && viewpointOf(p)).map((p) => ({ at: posOf(p) as any, vision: mazeVision(grid, viewpointOf(p) as any) }));
 
   const enemies = P().filter((p) => p.basicInfo.side === "enemy" && onField(p));
 

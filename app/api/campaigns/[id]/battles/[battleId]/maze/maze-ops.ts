@@ -20,7 +20,7 @@ import {
   seedFrom,
 } from "@/lib/utils/battle/maze";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, dmEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
 import type { BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
 const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
@@ -80,10 +80,29 @@ function canonicalCell(key: string, grid: { cols: number; rows: number }): strin
   return inBounds(grid, cell) ? cellKey(cell) : reject("Клітинка поза картою");
 }
 
-function finish(ctx: BattleMutationContext, maze: MazeConfig, extra: Partial<MutationResult> = {}): MutationResult {
+export const MAZE_OP_TEXT = {
+  generate: "ДМ згенерував лабіринт",
+  reshuffle: "ДМ перетасував лабіринт",
+  walls: "ДМ змінив стіни лабіринту",
+  exit: "ДМ переніс вихід",
+  teleport: "ДМ змінив телепорти",
+  fog: "ДМ змінив туман",
+  darkOn: "Темрява",
+  darkOff: "Світло",
+  scatterStarts: "ДМ розкидав героїв по краях",
+} as const;
+
+// подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
+function mazeOpEvent(round: number, text: string): NewBattleEvent {
+  const event = dmEvent(round, text);
+
+  return { ...event, details: { ...event.details, actionDetails: { mazeEvent: "op" } } };
+}
+
+function finish(ctx: BattleMutationContext, maze: MazeConfig, text: string, extra: Partial<MutationResult> = {}): MutationResult {
   const map = ctx.meta.map as NonNullable<typeof ctx.meta.map>;
 
-  return { participants: ctx.participants, pending: ctx.pending, events: [], scene: { map: { ...map, maze } }, ...extra };
+  return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, ...extra, events: [mazeOpEvent(ctx.scene.round, text), ...(extra.events ?? [])] };
 }
 
 const gridOf = (ctx: BattleMutationContext, maze: MazeConfig) => {
@@ -156,7 +175,7 @@ const generate: OpHandler<"generate"> = (ctx, maze, body) => {
 
   if ("error" in generated) return reject(generated.error);
 
-  return finish({ ...ctx, participants }, { ...generated, dark: maze.dark, marks: {} }, { participants });
+  return finish({ ...ctx, participants }, { ...generated, dark: maze.dark, marks: {} }, MAZE_OP_TEXT.generate, { participants });
 };
 
 const reshuffle: OpHandler<"reshuffle"> = (ctx, maze, body) => {
@@ -181,7 +200,7 @@ const reshuffle: OpHandler<"reshuffle"> = (ctx, maze, body) => {
 
   const awareness = mazeAwareness({ ...grid, maze: result.maze }, { participants: moved, round: ctx.scene.round, sleep: true });
 
-  return finish(ctx, result.maze, { participants: awareness.participants, events: awareness.events });
+  return finish(ctx, result.maze, MAZE_OP_TEXT.reshuffle, { participants: awareness.participants, events: awareness.events });
 };
 
 const walls: OpHandler<"walls"> = (ctx, maze, body) => {
@@ -197,7 +216,7 @@ const walls: OpHandler<"walls"> = (ctx, maze, body) => {
 
   assertReachable(ctx, updated);
 
-  return finish(ctx, updated);
+  return finish(ctx, updated, MAZE_OP_TEXT.walls);
 };
 
 const exit: OpHandler<"exit"> = (ctx, maze, body) => {
@@ -205,11 +224,13 @@ const exit: OpHandler<"exit"> = (ctx, maze, body) => {
 
   if (!inBounds(grid, body.cell) || !isEdgeCell(grid, body.cell)) reject(MAZE_EXIT_ERROR);
 
+  if (maze.teleports.flat().some((c) => cellKey(c) === cellKey(body.cell))) reject("Вихід не можна ставити на телепорт");
+
   const updated = { ...maze, exit: body.cell };
 
   assertReachable(ctx, updated);
 
-  return finish(ctx, updated);
+  return finish(ctx, updated, MAZE_OP_TEXT.exit);
 };
 
 const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
@@ -226,7 +247,7 @@ const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
   if (body.pair) {
     const keys = body.pair.map(cellKey);
 
-    const taken = new Set([...teleports.flat().map(cellKey), ...(maze.exit ? [cellKey(maze.exit)] : [])]);
+    const taken = new Set([...teleports.flat().map(cellKey), ...(maze.exit ? [cellKey(maze.exit)] : []), ...positionsOf(ctx.participants).map(cellKey)]);
 
     if (!body.pair.every((c) => inBounds(grid, c)) || keys[0] === keys[1] || keys.some((k) => taken.has(k))) reject("Телепорт не можна поставити сюди");
 
@@ -235,7 +256,11 @@ const teleport: OpHandler<"teleport"> = (ctx, maze, body) => {
     reject("Вкажіть телепорт для видалення");
   }
 
-  return finish(ctx, { ...maze, teleports });
+  const updated = { ...maze, teleports };
+
+  assertReachable(ctx, updated);
+
+  return finish(ctx, updated, MAZE_OP_TEXT.teleport);
 };
 
 const fog: OpHandler<"fog"> = (ctx, maze, body) => {
@@ -250,10 +275,10 @@ const fog: OpHandler<"fog"> = (ctx, maze, body) => {
     else next.delete(cell);
   }
 
-  return finish(ctx, { ...maze, fog: [...next] });
+  return finish(ctx, { ...maze, fog: [...next] }, MAZE_OP_TEXT.fog);
 };
 
-const dark: OpHandler<"dark"> = (ctx, maze, body) => finish(ctx, { ...maze, dark: body.on });
+const dark: OpHandler<"dark"> = (ctx, maze, body) => finish(ctx, { ...maze, dark: body.on }, body.on ? MAZE_OP_TEXT.darkOn : MAZE_OP_TEXT.darkOff);
 
 const scatterStartsOp: OpHandler<"scatterStarts"> = (ctx, maze) => {
   if (maze.moved) reject(MOVED_ERROR);
@@ -281,7 +306,7 @@ const scatterStartsOp: OpHandler<"scatterStarts"> = (ctx, maze) => {
 
     if (!allReachExit(grid, positionsOf(participants))) continue;
 
-    return finish(ctx, maze, { participants });
+    return finish(ctx, maze, MAZE_OP_TEXT.scatterStarts, { participants });
   }
 
   return reject(WALLED_IN_ERROR);

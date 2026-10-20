@@ -2,15 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 
 import { goblin, hero } from "./fixtures";
 
+import { mazeActionSchema, mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
+import { MAZE_OP_TEXT } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
 import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { allInteriorEdges } from "@/lib/utils/battle/maze";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
-import type { BattleMutationContext, MutationResult, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMeta, BattleSceneState, SnapshotState, StoredBattleEvent, StoredParticipant } from "@/lib/utils/battle/store";
-import { buildSnapshotState, dmEvent, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
+import { buildSnapshotState, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
@@ -154,32 +156,47 @@ describe("maze у конвеєрі", () => {
     expect(applied.initiativeOrder.find((p) => p.basicInfo.id === "gob")?.battleData.dormant).toBe(false);
   });
 
-  it("відкат до перетасовки повертає стіни й сон ворога", async () => {
+  it("справжня перетасовка пише подію ДМ, і відкат до неї повертає стіни, позиції й неспання ворога", async () => {
     const walls = ["3:3:e"];
 
     const b = memoryBattle([at(hero, { x: 0, y: 0 }, { facing: "s" }), at(goblin, { x: 4, y: 0 }, { dormant: true })], mapOf({ walls, moved: true }));
 
     await step(b, { x: 1, y: 0 });
 
-    const reshuffle = (ctx: BattleMutationContext): MutationResult => ({
-      participants: ctx.participants.map((p) => (p.basicInfo.id === "gob" ? at(p, { x: 6, y: 6 }, { dormant: true }) : p)),
-      pending: ctx.pending,
-      scene: { map: { ...(ctx.meta.map as BattleMapConfig), maze: { ...(ctx.meta.map?.maze as MazeConfig), walls: ["5:5:s"] } } },
-      events: [dmEvent(ctx.scene.round, "Перетасовка")],
-    });
+    const awake = b.participant("gob").battleData;
 
-    await b.act(DM, { access: BattleAccess.DM, mutate: reshuffle });
+    expect(awake.dormant).toBe(false);
 
-    expect(b.meta.map?.maze?.walls).toEqual(["5:5:s"]);
-    expect(b.participant("gob").battleData.dormant).toBe(true);
+    await b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, { op: "reshuffle", mode: "scatter", teleportPairs: 1, fogPatches: 1 });
 
-    const reshuffleSeq = b.events().find((e) => e.resultText === "Перетасовка")?.seq as number;
+    expect(b.meta.map?.maze?.walls).not.toEqual(walls);
+    expect(b.participant("gob").battleData.position).not.toEqual({ x: 4, y: 0 });
+
+    const reshuffleSeq = b.events().find((e) => e.resultText === MAZE_OP_TEXT.reshuffle)?.seq as number;
+
+    expect(reshuffleSeq).toBeGreaterThan(0);
 
     const delta = await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: reshuffleSeq });
 
     expect(b.meta.map?.maze?.walls).toEqual(walls);
     expect(delta.scene.map?.maze?.walls).toEqual(walls);
-    expect(b.participant("gob").battleData).toMatchObject({ dormant: false, position: { x: 4, y: 0 } });
+    expect(b.participant("gob").battleData).toMatchObject({ dormant: false, position: { x: 4, y: 0 }, mazeWakeRound: awake.mazeWakeRound });
+  });
+
+  it("правка стін пише подію; відкат до неї скасовує лише її", async () => {
+    const b = memoryBattle([at(hero, { x: 0, y: 0 }, { facing: "s" })], mapOf({ walls: ["3:3:e"], moved: true }));
+
+    await b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, { op: "walls", add: ["5:5:s"], remove: [] });
+
+    await b.act(DM, { access: BattleAccess.DM, schema: mazeActionSchema, mutate: mazeMutation }, { op: "dark", on: true });
+
+    const seqs = b.events().map((e) => [e.resultText, e.seq] as const);
+
+    expect(seqs.map(([t]) => t)).toEqual([MAZE_OP_TEXT.walls, MAZE_OP_TEXT.darkOn]);
+
+    await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: seqs[1][1] });
+
+    expect(b.meta.map?.maze).toMatchObject({ walls: ["3:3:e", "5:5:s"], dark: false });
   });
 });
 

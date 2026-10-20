@@ -42,12 +42,53 @@ export function pathLength(grid: MazeGrid, from: GridPoint, to: GridPoint): numb
   return mazeDistances(grid, [from]).get(cellKey(to)) ?? null;
 }
 
-export function allReachExit(grid: MazeGrid, points: GridPoint[]): boolean {
+function warpTargets(grid: MazeGrid): Map<string, GridPoint> {
+  const out = new Map<string, GridPoint>();
+
+  for (const [a, b] of grid.maze.teleports) {
+    out.set(cellKey(a), b);
+    out.set(cellKey(b), a);
+  }
+
+  return out;
+}
+
+/** Як у русі: телепорт не пройти наскрізь — ступив на нього, і тебе переносить до пари. */
+export function reachesExit(grid: MazeGrid, from: GridPoint): boolean {
   const { exit } = grid.maze;
 
   if (!exit) return true;
 
-  const reach = mazeDistances(grid, [exit]);
+  const exitKey = cellKey(exit);
 
-  return points.every((p) => reach.has(cellKey(p)));
+  if (cellKey(from) === exitKey) return true;
+
+  const walls = wallSet(grid.maze);
+
+  const warp = warpTargets(grid);
+
+  const seen = new Set([cellKey(from)]);
+
+  const queue: GridPoint[] = [from];
+
+  for (let i = 0; i < queue.length; i++) {
+    for (const n of mazeNeighbors(grid, walls, queue[i])) {
+      const key = cellKey(n);
+
+      if (key === exitKey) return true;
+
+      const land = warp.get(key) ?? n;
+
+      if (seen.has(cellKey(land))) continue;
+
+      seen.add(cellKey(land));
+      queue.push(land);
+    }
+  }
+
+  return false;
+}
+
+export function allReachExit(grid: MazeGrid, points: GridPoint[]): boolean {
+  return points.every((p) => reachesExit(grid, p));
 }

@@ -16,3 +16,10 @@ export function mazeSkipsTurn(p: BattleParticipant, round: number): boolean {
 export const takesTurn = (p: BattleParticipant, round: number): boolean => isActive(p) && !mazeSkipsTurn(p, round);
 
 export const isMazeHero = (p: BattleParticipant): boolean => p.basicInfo.side === ParticipantSide.ALLY && inMazePlay(p) && p.battleData.position !== undefined;
+
+/** Хто стоїть на ходу, коли ніхто не ходить: перший у грі лабіринту, інакше перший живий, інакше 0. */
+export function idleTurnIndex(order: BattleParticipant[]): number {
+  const inPlay = order.findIndex(inMazePlay);
+
+  return inPlay >= 0 ? inPlay : Math.max(0, order.findIndex(isActive));
+}

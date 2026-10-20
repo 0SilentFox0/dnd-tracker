@@ -20,9 +20,11 @@ function notExit(grid: MazeGrid): (p: GridPoint) => boolean {
 
 /** null — крайніх клітинок менше, ніж героїв */
 export function scatterStarts(grid: MazeGrid, heroes: string[], rnd: Rng): Record<string, GridPoint> | null {
+  const teleports = new Set(grid.maze.teleports.flat().map(cellKey));
+
   const cells = shuffled(
     rnd,
-    allCells(grid).filter((p) => isEdgeCell(grid, p) && notExit(grid)(p)),
+    allCells(grid).filter((p) => isEdgeCell(grid, p) && notExit(grid)(p) && !teleports.has(cellKey(p))),
   );
 
   if (cells.length < heroes.length) return null;

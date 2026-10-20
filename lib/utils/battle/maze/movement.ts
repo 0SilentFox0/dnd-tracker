@@ -108,7 +108,8 @@ export function applyMazeMove(grid: MazeGrid, args: { participants: BattlePartic
 
   const teleported = partner !== null && !blocked.has(cellKey(partner));
 
-  const escaped = !!grid.maze.exit && samePoint(grid.maze.exit, to);
+  // вихід — лише для героїв; для ворогів це звичайна клітинка, інакше бій не закінчився б перемогою
+  const escaped = mover.basicInfo.side === ParticipantSide.ALLY && !!grid.maze.exit && samePoint(grid.maze.exit, to);
 
   const battleData = {
     ...mover.battleData,

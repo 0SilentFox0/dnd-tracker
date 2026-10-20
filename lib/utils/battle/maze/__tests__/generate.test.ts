@@ -103,6 +103,16 @@ describe("generateMaze", () => {
     }
   }
 
+  it("with teleports on hard/medium every start reaches the exit by real movement (warp on stepping)", () => {
+    for (const difficulty of ["hard", "medium"] as MazeDifficulty[]) {
+      for (let seed = 0; seed < 150; seed++) {
+        const inp = input(20, 12, { difficulty, seed, teleportPairs: 3 });
+
+        expect(allReachExit({ cols: 20, rows: 12, maze: ok(generateMaze(inp)) }, [...inp.positions, ...inp.starts])).toBe(true);
+      }
+    }
+  });
+
   it("keeps a DM-set exit and rejects one off the edge", () => {
     expect(ok(generateMaze(input(20, 12, { exit: p(19, 6) }))).exit).toEqual(p(19, 6));
     expect(generateMaze(input(20, 12, { exit: p(5, 5) }))).toHaveProperty("error");

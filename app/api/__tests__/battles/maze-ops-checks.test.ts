@@ -1,0 +1,72 @@
+import { describe, expect, it } from "vitest";
+
+import { context, goblin, hero } from "./fixtures";
+
+import { mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
+import { MAZE_OP_TEXT,type MazeAction } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-ops";
+import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+
+const maze = (over: Partial<MazeConfig> = {}): MazeConfig => ({ walls: [], exit: { x: 7, y: 0 }, difficulty: "medium", teleports: [], fog: [], marks: {}, dark: false, ...over });
+
+const at = (p: BattleParticipant, position: GridPoint): BattleParticipant => ({ ...p, battleData: { ...p.battleData, position } });
+
+const ctx = (mazeOver: Partial<MazeConfig> = {}, participants = [at(hero, { x: 0, y: 2 }), at(goblin, { x: 6, y: 6 })]): BattleMutationContext => {
+  const base = context({ participants, isDM: true });
+
+  const map: BattleMapConfig = { cols: 8, rows: 8, background: null, opacity: 0.3, maze: maze(mazeOver) };
+
+  return { ...base, meta: { ...base.meta, map } };
+};
+
+const rejected = (fn: () => unknown, message?: string) => expect(fn).toThrow(expect.objectContaining({ code: "action_rejected", ...(message && { message }) }));
+
+// герой у кишені (0,7)–(1,7), єдиний вихід — через (2,7); (3,3) замкнена з усіх боків
+const trap = {
+  walls: ["0:6:s", "1:6:s", "2:6:s", "2:3:e", "3:3:e", "3:2:s", "3:3:s"],
+};
+
+describe("maze ops: телепорти й вихід перевіряються так, як ходять учасники", () => {
+  it("телепорт на вузькому місці в замкнену клітинку → відмова; той самий в іншому місці — можна", () => {
+    const base = ctx(trap, [at(hero, { x: 0, y: 7 }), at(goblin, { x: 6, y: 6 })]);
+
+    rejected(() => mazeMutation(base, { op: "teleport", pair: [{ x: 2, y: 7 }, { x: 3, y: 3 }] }), "Ці стіни замурують учасника — шляху до виходу не залишиться");
+
+    expect(mazeMutation(base, { op: "teleport", pair: [{ x: 5, y: 5 }, { x: 3, y: 3 }] }).scene?.map?.maze?.teleports).toHaveLength(1);
+  });
+
+  it("телепорт на клітинку учасника → відмова", () => {
+    rejected(() => mazeMutation(ctx(), { op: "teleport", pair: [{ x: 0, y: 2 }, { x: 5, y: 5 }] }), "Телепорт не можна поставити сюди");
+  });
+
+  it("вихід на клітинку телепорта → відмова", () => {
+    rejected(() => mazeMutation(ctx({ teleports: [[{ x: 7, y: 3 }, { x: 2, y: 5 }]] }), { op: "exit", cell: { x: 7, y: 3 } }), "Вихід не можна ставити на телепорт");
+  });
+
+  it("стіни, що лишають прохід лише через телепорт у кишеню → відмова", () => {
+    const base = ctx({ walls: ["0:6:s", "2:6:s", "2:3:e", "3:3:e", "3:2:s", "3:3:s"], teleports: [[{ x: 2, y: 7 }, { x: 3, y: 3 }]] }, [at(hero, { x: 0, y: 7 }), at(goblin, { x: 6, y: 6 })]);
+
+    expect(mazeMutation(base, { op: "walls", add: ["5:5:e"], remove: [] }).scene?.map?.maze?.walls).toContain("5:5:e");
+    rejected(() => mazeMutation(base, { op: "walls", add: ["1:6:s"], remove: [] }), "Ці стіни замурують учасника — шляху до виходу не залишиться");
+  });
+});
+
+describe("maze ops: кожна дія ДМ пише коротку подію (ціль для відкату)", () => {
+  const cases: Array<[MazeAction, string]> = [
+    [{ op: "generate", difficulty: "easy", teleportPairs: 0, fogPatches: 0, exit: null }, MAZE_OP_TEXT.generate],
+    [{ op: "reshuffle", mode: "walls", teleportPairs: 0, fogPatches: 0 }, MAZE_OP_TEXT.reshuffle],
+    [{ op: "walls", add: ["3:3:e"], remove: [] }, MAZE_OP_TEXT.walls],
+    [{ op: "exit", cell: { x: 7, y: 4 } }, MAZE_OP_TEXT.exit],
+    [{ op: "teleport", pair: [{ x: 2, y: 2 }, { x: 5, y: 5 }] }, MAZE_OP_TEXT.teleport],
+    [{ op: "fog", cells: ["2:2"], on: true }, MAZE_OP_TEXT.fog],
+    [{ op: "dark", on: true }, MAZE_OP_TEXT.darkOn],
+    [{ op: "dark", on: false }, MAZE_OP_TEXT.darkOff],
+    [{ op: "scatterStarts" }, MAZE_OP_TEXT.scatterStarts],
+  ];
+
+  it.each(cases)("%o", (action, text) => {
+    const out = mazeMutation(ctx(), action);
+
+    expect(out.events[0]).toMatchObject({ actorId: "dm", resultText: text, details: { actionDetails: { mazeEvent: "op" } } });
+  });
+});

@@ -6,7 +6,7 @@ import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { systemEvent } from "@/lib/utils/battle/store/event-mapping";
 import type { NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface AwarenessResult {
   participants: BattleParticipant[];
@@ -31,14 +31,14 @@ const isEnemy = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.E
 
 const isAwakeEnemy = (p: BattleParticipant) => isEnemy(p) && inMazePlay(p);
 
-export function heroEvent(round: number, hero: BattleParticipant, resultText: string, target?: BattleParticipant): NewBattleEvent {
+export function heroEvent(round: number, hero: BattleParticipant, resultText: string, { target, actionDetails = {} }: { target?: BattleParticipant; actionDetails?: BattleAction["actionDetails"] } = {}): NewBattleEvent {
   return {
     type: "ability",
     round,
     actorId: hero.basicInfo.id,
     targets: target ? [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }] : [],
     resultText,
-    details: { actorName: hero.basicInfo.name, actorSide: hero.basicInfo.side, actionDetails: {} },
+    details: { actorName: hero.basicInfo.name, actorSide: hero.basicInfo.side, actionDetails },
   };
 }
 
@@ -61,7 +61,7 @@ export function mazeAwareness(grid: MazeGrid, { participants, round, sleep }: Aw
     const seenBy = spotter(p);
 
     if (isDormant(p) && seenBy) {
-      events.push(heroEvent(round, seenBy, `${seenBy.basicInfo.name} помітив ${p.basicInfo.name}`, p));
+      events.push(heroEvent(round, seenBy, `${seenBy.basicInfo.name} помітив ${p.basicInfo.name}`, { target: p, actionDetails: { mazeEvent: "spotted" } }));
 
       return { ...p, battleData: { ...p.battleData, dormant: false, mazeWakeRound: round + 1 } };
     }

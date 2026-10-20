@@ -4,7 +4,7 @@ import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
-import { mazeSkipsTurn, takesTurn } from "@/lib/utils/battle/maze/status";
+import { idleTurnIndex, mazeSkipsTurn, takesTurn } from "@/lib/utils/battle/maze/status";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
   processEndOfTurn,
@@ -151,7 +151,7 @@ export function runAdvanceTurnLoop(
     if (mazeSkipsTurn(nextParticipant, nextRound)) {
       // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ
       if (!updatedInitiativeOrder.some((p) => takesTurn(p, nextRound))) {
-        nextTurnIndex = Math.max(0, updatedInitiativeOrder.findIndex(isActive));
+        nextTurnIndex = idleTurnIndex(updatedInitiativeOrder);
 
         break;
       }

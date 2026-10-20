@@ -10,7 +10,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
-import { mazeSkipsTurn } from "@/lib/utils/battle/maze/status";
+import { idleTurnIndex, mazeSkipsTurn } from "@/lib/utils/battle/maze/status";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -249,9 +249,7 @@ export function processEndOfTurn(
     // Якщо ми перевірили всіх і нікого живого немає - зупиняємось (безпека)
     if (attempts >= maxAttempts) {
       // у лабіринті живі можуть не ходити (сплять, вийшли): новий раунд починається з першого живого
-      const firstLive = initiativeOrder.findIndex(isActive);
-
-      if (firstLive >= 0) nextTurnIndex = firstLive;
+      if (initiativeOrder.some(isActive)) nextTurnIndex = idleTurnIndex(initiativeOrder);
 
       break;
     }

@@ -434,6 +434,8 @@ export interface BattleAction {
   actionDetails: {
     /** Лише в записі про завершення бою: бік союзників виграв чи програв */
     battleResult?: "victory" | "defeat";
+    /** Службові записи лабіринту: «op» — зміна лабіринту ДМом, «spotted» — герой помітив ворога */
+    mazeEvent?: "op" | "spotted";
     // Для атак:
     weaponName?: string;
     /** Тип атаки: melee / ranged */
