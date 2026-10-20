@@ -6,7 +6,7 @@ import { palettesToClose } from "./modes/palettes";
 import { type ModeTools, useModeTools } from "./modes/tools";
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
-import { useFxImpacts } from "./useFxImpact";
+import { useFxImpacts } from "./useFxImpacts";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 

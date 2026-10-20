@@ -7,7 +7,7 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 const impacts = vi.hoisted(() => ({ ids: new Set<string>() }));
 
-vi.mock("@/lib/hooks/battle/useFxImpact", () => ({
+vi.mock("@/lib/hooks/battle/useFxImpacts", () => ({
   useFxImpacts: () => (id: string) => (impacts.ids.has(id) ? { element: "physical", kind: "damage", delayMs: 0 } : null),
 }));
 
