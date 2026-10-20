@@ -7,7 +7,7 @@ export function normalizeImageUrl(src: string): string {
         url.pathname.includes("/revision/latest") &&
         url.searchParams.has("path-prefix")
       ) {
-        return src; // Повертаємо оригінальний URL без змін
+        return src;
       }
 
       if (!url.pathname.includes("/revision/")) {
@@ -27,20 +27,23 @@ export function normalizeImageUrl(src: string): string {
   }
 }
 
-const SUPABASE_PUBLIC_OBJECT_PATH = "/storage/v1/object/public/";
+const PUBLIC_OBJECT_PATH = "/storage/v1/object/public/";
 
-export function isSupabaseStorageUrl(src: string): boolean {
+/** Public Supabase Storage object URL → its parsed URL and raw `{bucket}/{path}` key. */
+export function parsePublicStorageUrl(src: string): { url: URL; key: string } | null {
   try {
     const url = new URL(src);
 
-    return (
-      url.protocol === "https:" &&
-      url.hostname.endsWith(".supabase.co") &&
-      url.pathname.startsWith(SUPABASE_PUBLIC_OBJECT_PATH)
-    );
+    return url.pathname.startsWith(PUBLIC_OBJECT_PATH) ? { url, key: url.pathname.slice(PUBLIC_OBJECT_PATH.length) } : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function isSupabaseStorageUrl(src: string): boolean {
+  const url = parsePublicStorageUrl(src)?.url;
+
+  return url?.protocol === "https:" && url.hostname.endsWith(".supabase.co");
 }
 
 export function isHttpUrl(src: string): boolean {

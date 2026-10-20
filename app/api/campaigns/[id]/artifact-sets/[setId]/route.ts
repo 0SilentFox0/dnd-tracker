@@ -73,10 +73,7 @@ export async function PATCH(
     let patch = data;
 
     if (data.icon !== undefined && data.icon !== existing.icon) {
-      const raw =
-        data.icon === null ? null : String(data.icon).trim() || null;
-
-      const resolved = await resolveArtifactIconForPersistence(raw, {
+      const resolved = await resolveArtifactIconForPersistence(data.icon, {
         campaignId: id,
         objectBaseName: `${setId}-${randomUUID()}`,
       });
@@ -85,7 +82,7 @@ export async function PATCH(
         return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      patch = { ...data, icon: resolved.icon };
+      patch = { ...data, icon: resolved.value };
     }
 
     const updateData = buildArtifactSetPatchInput(patch);

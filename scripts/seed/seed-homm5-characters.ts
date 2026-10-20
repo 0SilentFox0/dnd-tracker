@@ -22,8 +22,8 @@ import { CharacterType, clampHeroInitiative, GoalAuthor, GoalKind, GoalStatus } 
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import { prisma } from "@/lib/db";
 import { characterGoalsSchema } from "@/lib/schemas/character-goals";
-import { uploadArtifactIconDataUrlToSupabase } from "@/lib/supabase/artifact-icon-storage";
 import { AVATARS_BUCKET } from "@/lib/supabase/avatar-storage";
+import { uploadImageDataUrl, YEAR_CACHE_SECONDS } from "@/lib/supabase/image-storage";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { CharacterGoal } from "@/types/characters";
 import type { SpellSlotProgression } from "@/types/races";
@@ -272,11 +272,11 @@ async function main() {
       } else {
         const hash = createHash("sha256").update(dataUrl).digest("hex").slice(0, 24);
 
-        const up = await uploadArtifactIconDataUrlToSupabase(dataUrl, { campaignId: campaign.id, objectBaseName: `${e.key}-${hash}`, bucket: AVATARS_BUCKET, cacheControl: "31536000" });
+        const up = await uploadImageDataUrl(dataUrl, { campaignId: campaign.id, objectBaseName: `${e.key}-${hash}`, bucket: AVATARS_BUCKET, cacheControl: YEAR_CACHE_SECONDS });
 
         if (!up.ok) throw new Error(`Аватар «${e.name}»: ${up.message}`);
 
-        avatar = up.publicUrl;
+        avatar = up.value;
       }
     }
 

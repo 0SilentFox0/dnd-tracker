@@ -56,10 +56,7 @@ export async function POST(
     let icon: string | null | undefined = data.icon;
 
     if (data.icon !== undefined) {
-      const raw =
-        data.icon === null ? null : String(data.icon).trim() || null;
-
-      const resolved = await resolveArtifactIconForPersistence(raw, {
+      const resolved = await resolveArtifactIconForPersistence(data.icon, {
         campaignId: id,
         objectBaseName: randomUUID(),
       });
@@ -68,7 +65,7 @@ export async function POST(
         return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      icon = resolved.icon;
+      icon = resolved.value;
     }
 
     const created = await insertArtifactSet(id, {

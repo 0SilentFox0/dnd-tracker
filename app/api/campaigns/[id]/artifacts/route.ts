@@ -3,10 +3,7 @@ import { randomUUID } from "crypto";
 
 import { prisma } from "@/lib/db";
 import { createArtifactSchema } from "@/lib/schemas/artifacts";
-import {
-  mirrorArtifactIconToSupabase,
-  shouldMirrorArtifactIconUrl,
-} from "@/lib/supabase/artifact-icon-storage";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { abilitiesJson, artifactAbilities } from "@/lib/utils/abilities/read";
 import { sheetStatBonuses } from "@/lib/utils/abilities/sheet-bonuses";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
@@ -39,19 +36,14 @@ export async function POST(
 
     let icon = data.icon;
 
-    if (shouldMirrorArtifactIconUrl(icon)) {
-      const sourceUrl = (typeof icon === "string" ? icon : "").trim();
+    if (icon !== undefined) {
+      const resolved = await resolveArtifactIconForPersistence(icon, { campaignId: id, objectBaseName: randomUUID() });
 
-      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
-        campaignId: id,
-        objectBaseName: randomUUID(),
-      });
-
-      if (!mirrored.ok) {
-        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      icon = mirrored.publicUrl;
+      icon = resolved.value;
     }
 
     const artifact = await prisma.artifact.create({

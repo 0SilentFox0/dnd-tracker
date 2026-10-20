@@ -1,6 +1,8 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_EXTENSIONS, TRACK_FORMATS,type TrackFormat } from "@/lib/constants/music";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ensureBucket } from "@/lib/supabase/buckets";
+import { parsePublicStorageUrl } from "@/lib/utils/common/image-url";
 import type { TrackUploadTicket } from "@/types/audio";
 import type { Result } from "@/types/common";
 
@@ -8,7 +10,7 @@ type Admin = ReturnType<typeof createAdminClient>;
 
 const TRACK_OBJECT = new RegExp(`^([^/]+)/[a-f0-9]{32}\\.(${TRACK_EXTENSIONS.join("|")})$`);
 
-const PUBLIC_MARKER = `/storage/v1/object/public/${BATTLE_MUSIC_BUCKET}/`;
+const BUCKET_PREFIX = `${BATTLE_MUSIC_BUCKET}/`;
 
 export function trackPathOwnedBy(path: string, campaignId: string): boolean {
   return TRACK_OBJECT.exec(path)?.[1] === campaignId;
@@ -17,16 +19,10 @@ export function trackPathOwnedBy(path: string, campaignId: string): boolean {
 type Bucket = ReturnType<Admin["storage"]["from"]>;
 
 async function musicBucket(supabase: Admin): Promise<Result<Bucket>> {
-  const { data, error } = await supabase.storage.listBuckets();
-
-  if (error) return { ok: false, message: error.message };
-
-  if (data?.some((b) => b.name === BATTLE_MUSIC_BUCKET)) return { ok: true, value: supabase.storage.from(BATTLE_MUSIC_BUCKET) };
-
   // ліміт і типи на рівні бакета: Storage сам відхилить чужий файл за підписаним URL
-  const created = await supabase.storage.createBucket(BATTLE_MUSIC_BUCKET, { public: true, fileSizeLimit: MAX_TRACK_BYTES, allowedMimeTypes: TRACK_CONTENT_TYPES });
+  const ensured = await ensureBucket(supabase, BATTLE_MUSIC_BUCKET, { public: true, fileSizeLimit: MAX_TRACK_BYTES, allowedMimeTypes: TRACK_CONTENT_TYPES });
 
-  return created.error ? { ok: false, message: created.error.message } : { ok: true, value: supabase.storage.from(BATTLE_MUSIC_BUCKET) };
+  return ensured.ok ? { ok: true, value: supabase.storage.from(BATTLE_MUSIC_BUCKET) } : ensured;
 }
 
 export async function createTrackUploadTicket(campaignId: string, format: TrackFormat): Promise<Result<TrackUploadTicket>> {
@@ -64,12 +60,12 @@ export async function verifyUploadedTrack(path: string): Promise<Result<string>>
 }
 
 export function trackObjectPath(url: string): string | null {
+  const key = parsePublicStorageUrl(url)?.key;
+
+  if (!key?.startsWith(BUCKET_PREFIX)) return null;
+
   try {
-    const { pathname } = new URL(url);
-
-    const at = pathname.indexOf(PUBLIC_MARKER);
-
-    return at === -1 ? null : decodeURIComponent(pathname.slice(at + PUBLIC_MARKER.length));
+    return decodeURIComponent(key.slice(BUCKET_PREFIX.length));
   } catch {
     return null;
   }

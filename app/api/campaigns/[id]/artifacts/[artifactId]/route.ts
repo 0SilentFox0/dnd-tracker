@@ -3,10 +3,7 @@ import { randomUUID } from "crypto";
 
 import { prisma } from "@/lib/db";
 import { patchArtifactSchema } from "@/lib/schemas/artifacts";
-import {
-  mirrorArtifactIconToSupabase,
-  shouldMirrorArtifactIconUrl,
-} from "@/lib/supabase/artifact-icon-storage";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
 import { abilitiesJson, readAbilities } from "@/lib/utils/abilities/read";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { invalidCampaignRefs } from "@/lib/utils/api/campaign-refs";
@@ -78,23 +75,17 @@ export async function PATCH(
 
     let resolvedIcon = data.icon;
 
-    if (
-      data.icon !== undefined &&
-      data.icon !== artifact.icon &&
-      shouldMirrorArtifactIconUrl(data.icon)
-    ) {
-      const sourceUrl = (typeof data.icon === "string" ? data.icon : "").trim();
-
-      const mirrored = await mirrorArtifactIconToSupabase(sourceUrl, {
+    if (data.icon !== undefined && data.icon !== artifact.icon) {
+      const resolved = await resolveArtifactIconForPersistence(data.icon, {
         campaignId: id,
         objectBaseName: `${artifactId}-${randomUUID()}`,
       });
 
-      if (!mirrored.ok) {
-        return NextResponse.json({ error: mirrored.message }, { status: 422 });
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      resolvedIcon = mirrored.publicUrl;
+      resolvedIcon = resolved.value;
     }
 
     const updatedArtifact = await prisma.artifact.update({
