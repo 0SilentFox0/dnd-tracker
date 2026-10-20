@@ -1,12 +1,12 @@
-import { type Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { parseArtifactHtml } from "./parse-artifact";
 
-import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
-import { buildSearchText } from "@/lib/utils/scenario/search-text";
+import { contentWrite } from "@/lib/server/scenario/content-write";
+import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import type { ScenarioPageKind, ScenarioPageStatus } from "@/types/scenario";
 
 type Entry = { file: string; kind: ScenarioPageKind; arc?: string; status: ScenarioPageStatus; sortOrder: number; characterName?: string };
@@ -37,7 +37,7 @@ async function main() {
 
     const data = {
       campaignId, kind: entry.kind, arc: entry.arc ?? null, title: parsed.title, subtitle: parsed.subtitle, status: entry.status, sortOrder: entry.sortOrder, characterId,
-      content: content as unknown as Prisma.InputJsonValue, searchText: buildSearchText(parsed.title, content),
+      ...contentWrite(parsed.title, content),
     };
 
     const existing = await prisma.scenarioPage.findFirst({ where: { campaignId, title: parsed.title }, select: { id: true } });
@@ -55,14 +55,9 @@ async function main() {
     if (dryRun) continue;
 
     if (existing) {
-      const current = await prisma.scenarioPage.findUnique({ where: { id: existing.id }, select: { content: true } });
-
-      await prisma.scenarioPageVersion.create({ data: { pageId: existing.id, content: current?.content ?? {}, createdBy: "import" } });
+      await snapshotIfDue(prisma, existing.id, "import", { force: true });
       await prisma.scenarioPage.update({ where: { id: existing.id }, data: { ...data, version: { increment: 1 } } });
-
-      const stale = await prisma.scenarioPageVersion.findMany({ where: { pageId: existing.id }, orderBy: { createdAt: "desc" }, skip: SCENARIO_MAX_VERSIONS, select: { id: true } });
-
-      if (stale.length) await prisma.scenarioPageVersion.deleteMany({ where: { id: { in: stale.map((v) => v.id) } } });
+      await pruneVersions(prisma, existing.id);
     } else {
       await prisma.scenarioPage.create({ data });
     }
