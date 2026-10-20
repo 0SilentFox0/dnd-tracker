@@ -26,7 +26,10 @@ export async function uploadTrackFile(campaignId: string, file: File, meta: { ti
 
   const ticket = await campaignPost<TrackUploadTicket>(campaignId, "/tracks/upload-url", request);
 
-  const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, file, { contentType: ticket.contentType, cacheControl: TRACK_CACHE_SECONDS });
+  // Storage бере MIME з частини FormData, а браузер дає для .m4a «audio/x-m4a» або "" — перетипізовуємо за квитком
+  const body = new Blob([file], { type: ticket.contentType });
+
+  const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, body, { contentType: ticket.contentType, cacheControl: TRACK_CACHE_SECONDS });
 
   if (error) throw new Error(`Не вдалося завантажити файл: ${error.message}`);
 
