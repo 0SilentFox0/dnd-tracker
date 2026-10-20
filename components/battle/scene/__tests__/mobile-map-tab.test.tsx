@@ -11,8 +11,8 @@ vi.mock("@/lib/hooks/battle", async (importOriginal) => ({ ...(await importOrigi
 
 const dockProps = vi.hoisted(() => ({ current: null as { collapseOn?: string | null; collapseTick?: number } | null }));
 
-vi.mock("@/components/battle/audio/BattleAudioDock", () => ({
-  BattleAudioDock: (props: { collapseOn?: string | null; collapseTick?: number }) => {
+vi.mock("@/components/audio/AudioDock", () => ({
+  AudioDock: (props: { collapseOn?: string | null; collapseTick?: number }) => {
     dockProps.current = props;
 
     return null;

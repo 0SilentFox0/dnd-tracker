@@ -2,15 +2,13 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_EXTENSIONS, TRACK_FORMATS,type TrackFormat } from "@/lib/constants/music";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
-import { parsePublicStorageUrl } from "@/lib/utils/common/image-url";
+import { bucketObjectPath } from "@/lib/utils/common/image-url";
 import type { TrackUploadTicket } from "@/types/audio";
 import type { Result } from "@/types/common";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
 const TRACK_OBJECT = new RegExp(`^([^/]+)/[a-f0-9]{32}\\.(${TRACK_EXTENSIONS.join("|")})$`);
-
-const BUCKET_PREFIX = `${BATTLE_MUSIC_BUCKET}/`;
 
 export function trackPathOwnedBy(path: string, campaignId: string): boolean {
   return TRACK_OBJECT.exec(path)?.[1] === campaignId;
@@ -59,17 +57,7 @@ export async function verifyUploadedTrack(path: string): Promise<Result<string>>
   return { ok: true, value: bucket.getPublicUrl(path).data.publicUrl };
 }
 
-export function trackObjectPath(url: string): string | null {
-  const key = parsePublicStorageUrl(url)?.key;
-
-  if (!key?.startsWith(BUCKET_PREFIX)) return null;
-
-  try {
-    return decodeURIComponent(key.slice(BUCKET_PREFIX.length));
-  } catch {
-    return null;
-  }
-}
+export const trackObjectPath = (url: string): string | null => bucketObjectPath(url, BATTLE_MUSIC_BUCKET);
 
 export async function removeTrackFile(url: string): Promise<void> {
   const path = trackObjectPath(url);

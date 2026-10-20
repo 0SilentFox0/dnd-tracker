@@ -1,18 +1,16 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
-
-import { ownedPage } from "../page-handlers";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { restoreScenarioVersionSchema } from "@/lib/schemas/scenario";
-import { parseContent, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
+import { loadOwnedPage } from "@/lib/server/scenario/loaders";
+import { contentWrite, OWNED_SELECT, parseContent, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
+import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { buildSearchText } from "@/lib/utils/scenario/search-text";
 
 export async function listVersionsHandler(campaignId: string, pageId: string) {
   try {
@@ -20,7 +18,7 @@ export async function listVersionsHandler(campaignId: string, pageId: string) {
 
     if (access instanceof NextResponse) return access;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
 
@@ -42,7 +40,7 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
 
     if (body instanceof NextResponse) return body;
 
-    const page = await ownedPage(campaignId, pageId);
+    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
 
@@ -50,14 +48,16 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
 
     if (!version) return errorResponse(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
 
-    if (!parseContent(version.content)) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
+    const restored = parseContent(version.content);
 
-    await snapshotIfDue(pageId, access.userId, { force: true });
-    await pruneVersions(pageId);
+    if (!restored) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
+
+    await snapshotIfDue(prisma, pageId, access.userId, { force: true });
+    await pruneVersions(prisma, pageId);
 
     const row = await prisma.scenarioPage.update({
       where: { id: pageId },
-      data: { content: version.content as Prisma.InputJsonValue, searchText: buildSearchText(page.title, readContent(version.content)), version: { increment: 1 } },
+      data: { ...contentWrite(page.title, restored), version: { increment: 1 } },
       select: { ...SUMMARY_SELECT, content: true },
     });
 

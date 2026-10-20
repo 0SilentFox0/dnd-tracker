@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES } from "@/lib/constants/scenario";
+import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
 import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const attrsSchema = z.record(z.string(), z.unknown());
@@ -39,7 +39,7 @@ const unique = (ids: string[]) => new Set(ids).size === ids.length;
 
 export const scenarioContentSchema: z.ZodType<ScenarioContent> = z
   .object({
-    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80) })).max(12),
+    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80) })).max(SCENARIO_MAX_LEGEND),
     sections: z.array(sectionSchema).max(200),
   })
   .refine((c) => unique(c.sections.map((s) => s.id)) && unique(c.sections.flatMap((s) => s.rows.map((r) => r.id))), { message: "Дубльовані id розділів або рядків" });

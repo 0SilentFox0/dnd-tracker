@@ -1,0 +1,1 @@
+export const YEAR_CACHE_SECONDS = "31536000";

@@ -1,4 +1,4 @@
-import { BookOpen, Gem, GitBranch, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
@@ -33,6 +33,7 @@ export default async function CampaignDetailPage({
     { path: "races", icon: Shield, title: "Ігрові Раси", subtitle: "Управління расами та їх здібностями" },
     { path: "battles", icon: Swords, title: "Сцени Боїв", subtitle: "Створення та управління боями" },
     { path: "music", icon: Music, title: "Музика бою", subtitle: "Бібліотека треків для плеєра в бою" },
+    { path: "show", icon: Images, title: "Показ сцен", subtitle: "Набори слайдів із музикою для гравців" },
   ];
 
   return (
@@ -103,7 +104,10 @@ export default async function CampaignDetailPage({
             <HudTile key={path} href={`/campaigns/${id}/dm/${path}`} icon={<Icon className="size-5" />} title={title} subtitle={subtitle} />
           ))}
         {!isDM && (
-          <HudTile href={`/campaigns/${id}/character`} icon={<User className="size-5" />} title="Мій персонаж" subtitle="Перегляд та редагування персонажа" />
+          <>
+            <HudTile href={`/campaigns/${id}/character`} icon={<User className="size-5" />} title="Мій персонаж" subtitle="Перегляд та редагування персонажа" />
+            <HudTile href={`/campaigns/${id}/show`} icon={<Images className="size-5" />} title="Показ" subtitle="Слайди й музику від ДМ під час гри" />
+          </>
         )}
       </div>
     </HudPage>

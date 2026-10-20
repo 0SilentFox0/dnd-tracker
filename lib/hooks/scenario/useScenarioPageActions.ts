@@ -14,12 +14,22 @@ export function useScenarioPageActions(campaignId: string) {
 
   const invalidateKeys = [scenarioKeys.list(campaignId)];
 
+  const mergeIntoPageCache = (summary: ScenarioPageSummary) =>
+    queryClient.setQueryData<ScenarioPage>(scenarioKeys.page(campaignId, summary.id), (old) => old && { ...old, ...summary, content: old.content, version: old.version });
+
   const create = useCrudMutation({ mutationFn: (data: CreateScenarioPageData) => createScenarioPage(campaignId, data), invalidateKeys, errorText: "Не вдалося створити сторінку" });
 
   const update = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateScenarioMetaData }) => updateScenarioMeta(campaignId, id, data),
     invalidateKeys,
-    onSuccess: (summary) => queryClient.setQueryData<ScenarioPage>(scenarioKeys.page(campaignId, summary.id), (old) => old && { ...old, ...summary, content: old.content, version: old.version }),
+    onSuccess: mergeIntoPageCache,
+    errorText: "Не вдалося зберегти властивості",
+  });
+
+  const reorder = useCrudMutation({
+    mutationFn: (patches: { id: string; sortOrder: number }[]) => Promise.all(patches.map(({ id, sortOrder }) => updateScenarioMeta(campaignId, id, { sortOrder }))),
+    invalidateKeys,
+    onSuccess: (summaries) => summaries.forEach(mergeIntoPageCache),
     errorText: "Не вдалося зберегти властивості",
   });
 
@@ -35,10 +45,12 @@ export function useScenarioPageActions(campaignId: string) {
 
       const current = siblings[at];
 
-      await update.mutateAsync({ id: current.id, data: { sortOrder: other.sortOrder } });
-      await update.mutateAsync({ id: other.id, data: { sortOrder: current.sortOrder === other.sortOrder ? current.sortOrder + dir * -1 : current.sortOrder } });
+      await reorder.mutateAsync([
+        { id: current.id, sortOrder: other.sortOrder },
+        { id: other.id, sortOrder: current.sortOrder === other.sortOrder ? current.sortOrder + dir * -1 : current.sortOrder },
+      ]);
     },
-    [update],
+    [reorder],
   );
 
   return {
@@ -46,6 +58,6 @@ export function useScenarioPageActions(campaignId: string) {
     updateMeta: (id: string, data: UpdateScenarioMetaData) => update.mutateAsync({ id, data }),
     remove: async (id: string) => void (await remove.mutateAsync(id)),
     move,
-    isPending: create.isPending || update.isPending || remove.isPending,
+    isPending: create.isPending || update.isPending || reorder.isPending || remove.isPending,
   };
 }

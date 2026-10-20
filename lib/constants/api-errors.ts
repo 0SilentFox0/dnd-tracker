@@ -1,4 +1,5 @@
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "./music";
+import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB } from "./show";
 
 export const API_ERRORS = {
   UNAUTHORIZED: "Потрібна авторизація",
@@ -50,6 +51,14 @@ export const API_ERRORS = {
   BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",
   BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",
   BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
+  DECK_NOT_FOUND: "Набір слайдів не знайдено",
+  DECK_CONFLICT: "Набір змінено в іншому місці — оновіть сторінку",
+  DECK_LIMIT: `У кампанії вже ${MAX_DECKS_PER_CAMPAIGN} наборів — видаліть зайві`,
+  SLIDE_NOT_FOUND: "Слайд не знайдено",
+  SLIDE_FILE_INVALID: `Потрібна картинка WebP або JPEG до ${MAX_SLIDE_MB} МБ`,
+  SHOW_DECK_EMPTY: "У наборі немає слайдів",
+  SHOW_NOT_RUNNING: "Показ не запущено",
+  SHOW_CONFLICT: "Стан показу змінився — повторіть",
   SCENARIO_NOT_FOUND: "Сторінку сценарію не знайдено",
   SCENARIO_SECTION_NOT_FOUND: "Розділ не знайдено",
   SCENARIO_VERSION_NOT_FOUND: "Версію не знайдено",

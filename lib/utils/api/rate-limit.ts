@@ -155,6 +155,8 @@ export const BATTLE_RATE_LIMITS = {
   mapWeather: { limit: 10, windowSeconds: 10 },
   /** Музика бою (ДМ): перемикання треків. */
   audio: { limit: 20, windowSeconds: 10 },
+  /** Показ слайдів (ДМ): гортання і музика. */
+  show: { limit: 30, windowSeconds: 10 },
   /** Next-turn — DM advance, рідше викликається. */
   nextTurn: { limit: 20, windowSeconds: 10 },
   /** PATCH HP / remove participant — DM-only, частіше OK. */

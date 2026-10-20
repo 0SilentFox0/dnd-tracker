@@ -40,6 +40,19 @@ export function parsePublicStorageUrl(src: string): { url: URL; key: string } | 
   }
 }
 
+/** Decoded object path inside `bucket` of a public Storage URL. */
+export function bucketObjectPath(src: string, bucket: string): string | null {
+  const key = parsePublicStorageUrl(src)?.key;
+
+  if (!key?.startsWith(`${bucket}/`)) return null;
+
+  try {
+    return decodeURIComponent(key.slice(bucket.length + 1));
+  } catch {
+    return null;
+  }
+}
+
 export function isSupabaseStorageUrl(src: string): boolean {
   const url = parsePublicStorageUrl(src)?.url;
 

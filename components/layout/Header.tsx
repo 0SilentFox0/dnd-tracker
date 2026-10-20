@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LogOut, Menu, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
+import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
@@ -26,29 +27,6 @@ export function Header({ email }: { email: string | null }) {
   const pathname = usePathname();
 
   const signOutForm = useRef<HTMLFormElement>(null);
-
-  const headerRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const el = headerRef.current;
-
-    if (!el) return;
-
-    const root = document.documentElement;
-
-    const sync = () => root.style.setProperty("--app-header-h", `${el.offsetHeight}px`);
-
-    sync();
-
-    const observer = new ResizeObserver(sync);
-
-    observer.observe(el);
-
-    return () => {
-      observer.disconnect();
-      root.style.removeProperty("--app-header-h");
-    };
-  }, []);
 
   if (
     pathname?.startsWith("/sign-in") ||
@@ -73,7 +51,7 @@ export function Header({ email }: { email: string | null }) {
   const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
+    <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
@@ -165,6 +143,7 @@ export function Header({ email }: { email: string | null }) {
 
         <div className="flex items-center gap-2">
           <JoinBattleButton />
+          <WatchShowButton />
           <AbbreviationsInfoDialog />
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">

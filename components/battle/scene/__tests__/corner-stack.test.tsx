@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CornerStack } from "../CornerStack";
 
-import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
+import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
@@ -25,7 +25,7 @@ describe("CornerStack", () => {
       <BattleAudioProvider>
         <CornerStack>
           <ActionResultCard />
-          <BattleAudioDock placement="corner" />
+          <AudioDock placement="corner" />
         </CornerStack>
       </BattleAudioProvider>,
       { wrapper },

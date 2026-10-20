@@ -25,9 +25,11 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const known = participant.spellcasting.knownSpells ?? [];
 
-  const spells = await loadBookSpellsByIds(character.campaignId, known);
-
-  const rows = await loadEquippedArtifactRows(character, context.artifactsById);
+  const [spells, rows, chapters] = await Promise.all([
+    loadBookSpellsByIds(character.campaignId, known),
+    loadEquippedArtifactRows(character, context.artifactsById),
+    loadStoryChapters(character.id, character.campaignId),
+  ]);
 
   const artifacts: SheetArtifact[] = rows.map(({ row, slot }) => ({ id: row.id, name: row.name, icon: row.icon, slot, rarity: row.rarity, description: row.description, effects: abilitySummary("artifact", row) }));
 
@@ -39,7 +41,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     participant,
     viewer,
     maxLevel,
-    chapters: await loadStoryChapters(character.id, character.campaignId),
+    chapters,
     character,
     raceIcon: race?.icon ?? null,
     immunities: getCharacterImmunities(character, race as never),

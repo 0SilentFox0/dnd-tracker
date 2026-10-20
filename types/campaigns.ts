@@ -43,3 +43,12 @@ export interface ActiveBattleRef {
   id: string;
   campaignId: string;
 }
+
+export interface ActiveShowRef {
+  campaignId: string;
+}
+
+export interface ActiveSessions {
+  battles: ActiveBattleRef[];
+  shows: ActiveShowRef[];
+}

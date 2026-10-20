@@ -17,7 +17,7 @@ type PersistOptions = ImageTarget & {
   objectBaseName?: string;
 };
 
-export const YEAR_CACHE_SECONDS = "31536000";
+export { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 

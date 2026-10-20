@@ -21,3 +21,10 @@ export const PUSHER_AUTH_ENDPOINT = "/api/pusher/auth";
 
 /** Окремо від battle-delta: музика не підвищує версію бою. */
 export const BATTLE_AUDIO_EVENT = "battle-audio";
+
+export const SHOW_CHANNEL_PREFIX = "private-show-";
+
+export const showChannelName = (campaignId: string): string => `${SHOW_CHANNEL_PREFIX}${campaignId}`;
+
+/** Повний стан показу: він малий, дельти не потрібні. */
+export const SHOW_STATE_EVENT = "show-state";

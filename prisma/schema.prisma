@@ -48,6 +48,8 @@ model Campaign {
   spellGroups     SpellGroup[]
   spells          Spell[]
   tracks          CampaignTrack[]
+  slideDecks      SlideDeck[]
+  show            CampaignShow?
   units           Unit[]
 
   @@index([dmUserId])
@@ -342,6 +344,34 @@ model CampaignTrack {
 
   @@index([campaignId, sortOrder])
   @@map("campaign_tracks")
+}
+
+model SlideDeck {
+  id         String   @id @default(cuid())
+  campaignId String
+  title      String
+  sortOrder  Int      @default(0)
+  slides     Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, sortOrder])
+  @@map("slide_decks")
+}
+
+model CampaignShow {
+  campaignId   String   @id
+  deckId       String?
+  deckTitle    String?
+  slide        Json?
+  nextImageUrl String?
+  audio        Json?
+  seq          Int      @default(0)
+  updatedAt    DateTime @updatedAt
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_shows")
 }
 
 model BattleParticipant {

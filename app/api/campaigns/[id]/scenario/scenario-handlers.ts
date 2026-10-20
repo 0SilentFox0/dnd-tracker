@@ -1,24 +1,17 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_SCENE_LEGEND } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema } from "@/lib/schemas/scenario";
-import { listPages, SUMMARY_SELECT, toSummary } from "@/lib/server/scenario/page-store";
+import { characterInCampaign } from "@/lib/server/scenario/loaders";
+import { contentWrite, listPages, SUMMARY_SELECT, toSummary } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { buildSearchText } from "@/lib/utils/scenario/search-text";
 import { newSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
-
-export async function characterInCampaign(campaignId: string, characterId: string | null | undefined): Promise<boolean> {
-  if (!characterId) return true;
-
-  return !!(await prisma.character.findFirst({ where: { id: characterId, campaignId }, select: { id: true } }));
-}
 
 export async function listScenarioHandler(campaignId: string) {
   try {
@@ -58,8 +51,7 @@ export async function createScenarioHandler(req: Request, campaignId: string) {
         characterId: body.characterId ?? null,
         status: "draft",
         sortOrder: (last._max.sortOrder ?? -1) + 1,
-        content: content as unknown as Prisma.InputJsonValue,
-        searchText: buildSearchText(body.title, content),
+        ...contentWrite(body.title, content),
       },
       select: SUMMARY_SELECT,
     });

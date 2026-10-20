@@ -11,7 +11,7 @@ import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
 import { MapStripRow, MapStripSlotContext } from "./MapStrip";
 
-import { BattleAudioDock } from "@/components/battle/audio/BattleAudioDock";
+import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleLog } from "@/components/battle/log/BattleLog";
 import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
@@ -104,7 +104,7 @@ export function MobileBattleLayout() {
             <ParticipantList side={tab} />
           </div>
         )}
-        <BattleAudioDock placement="strip" collapseOn={turnKey} collapseTick={expandTick} />
+        <AudioDock placement="strip" collapseOn={turnKey} collapseTick={expandTick} />
       </div>
       {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
       {(hero || mapTab) && (

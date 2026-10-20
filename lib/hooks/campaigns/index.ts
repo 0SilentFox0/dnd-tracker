@@ -1,4 +1,4 @@
-export { useActiveBattles } from "./useActiveBattles";
+export { useActiveSessions } from "./useActiveSessions";
 export { useCampaignMembers } from "./useCampaignMembers";
 export {
   useCreateCampaign,
@@ -9,3 +9,4 @@ export {
 } from "./useCampaignMutations";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
 export { useJoinBattle } from "./useJoinBattle";
+export { useWatchShow } from "./useWatchShow";

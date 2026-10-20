@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { CharacterSelect } from "@/components/scenario/CharacterSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
-import { LEGEND_KINDS, LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES } from "@/lib/constants/scenario";
-import { useCharacters } from "@/lib/hooks/characters";
+import { LEGEND_KINDS, LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
 import { useConfirm } from "@/lib/hooks/common";
 import { useScenarioPageActions } from "@/lib/hooks/scenario";
 import type { LegendEntry, LegendKind, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
@@ -21,13 +21,13 @@ const LEGEND_OPTIONS = LEGEND_KINDS.map((k) => ({ value: k, label: LEGEND_LABELS
 export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClose }: { campaignId: string; page: ScenarioPage; legend: LegendEntry[]; onLegend: (legend: LegendEntry[]) => void; onClose: () => void }) {
   const actions = useScenarioPageActions(campaignId);
 
-  const { data: roster = [] } = useCharacters(campaignId, { compact: true });
-
   const [form, setForm] = useState({ title: page.title, subtitle: page.subtitle ?? "", arc: page.arc ?? "", status: page.status, characterId: page.characterId ?? "" });
 
   const [items, setItems] = useState<LegendEntry[]>(legend);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((f) => ({ ...f, [key]: value }));
+
+  const patchItem = (i: number, patch: Partial<LegendEntry>) => setItems((l) => l.map((x, j) => (j === i ? { ...x, ...patch } : x)));
 
   const router = useRouter();
 
@@ -36,26 +36,28 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
   const removePage = async () => {
     if (!(await confirm({ title: `Видалити сторінку «${page.title}»?`, description: "Сторінку і всі її версії буде видалено назавжди.", confirmLabel: "Видалити" }))) return;
 
-    await actions
-      .remove(page.id)
-      .then(() => router.push(`/campaigns/${campaignId}/dm/scenario`))
-      .catch(() => {});
+    try {
+      await actions.remove(page.id);
+      router.push(`/campaigns/${campaignId}/dm/scenario`);
+    } catch {
+      // the mutation already shows the error toast
+    }
   };
 
   const submit = async () => {
-    await actions
-      .updateMeta(page.id, {
+    try {
+      await actions.updateMeta(page.id, {
         title: form.title.trim(),
         subtitle: form.subtitle.trim() || null,
         status: form.status,
         ...(page.kind === "scene" && { arc: form.arc.trim() || null }),
         ...(page.kind === "hero" && { characterId: form.characterId || null }),
-      })
-      .then(() => {
-        onLegend(items.filter((i) => i.label.trim()));
-        onClose();
-      })
-      .catch(() => {});
+      });
+      onLegend(items.filter((i) => i.label.trim()));
+      onClose();
+    } catch {
+      // the mutation already shows the error toast
+    }
   };
 
   return (
@@ -104,7 +106,7 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         {page.kind === "hero" && (
           <div className="space-y-1.5">
             <Label htmlFor="sp-character">Персонаж</Label>
-            <SelectField id="sp-character" value={form.characterId} onValueChange={(v) => set("characterId", v)} options={roster.map((c) => ({ value: c.id, label: c.name }))} allowNone noneLabel="— без прив'язки —" />
+            <CharacterSelect campaignId={campaignId} id="sp-character" value={form.characterId} onValueChange={(v) => set("characterId", v)} />
           </div>
         )}
         <div className="space-y-2">
@@ -114,17 +116,17 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
               <SelectField
                 aria-label="Колір позначки"
                 value={item.kind}
-                onValueChange={(v) => setItems((l) => l.map((x, j) => (j === i ? { ...x, kind: v as LegendKind } : x)))}
+                onValueChange={(v) => patchItem(i, { kind: v as LegendKind })}
                 options={LEGEND_OPTIONS}
                 className="w-40 shrink-0"
               />
-              <Input aria-label="Підпис позначки" value={item.label} maxLength={80} onChange={(e) => setItems((l) => l.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
+              <Input aria-label="Підпис позначки" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
               <Button type="button" variant="outline" onClick={() => setItems((l) => l.filter((_, j) => j !== i))}>
                 Прибрати
               </Button>
             </div>
           ))}
-          {items.length < 12 && (
+          {items.length < SCENARIO_MAX_LEGEND && (
             <Button type="button" variant="outline" onClick={() => setItems((l) => [...l, { kind: "read", label: LEGEND_LABELS.read }])}>
               Додати позначку
             </Button>
