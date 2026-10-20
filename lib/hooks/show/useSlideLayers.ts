@@ -1,58 +1,59 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SLIDE_CROSSFADE_MS } from "@/lib/constants/show";
 import type { Slide } from "@/types/show";
 
 export interface SlideLayer {
   slide: Slide;
-  leaving: boolean;
-  /** Залишає: повна непрозорість, поки нова картинка не проявилась; нова: після onLoad. */
-  visible: boolean;
+  /** Змінюється з кожним виходом шару нагору, щоб анімація появи починалась заново. */
+  key: string;
+  role: "top" | "under" | "ending";
+}
+
+interface Stack {
+  seq: number;
+  top: { slide: Slide; key: string } | null;
+  under: { slide: Slide; key: string } | null;
 }
 
 const SETTLE_MS = SLIDE_CROSSFADE_MS + 100;
 
-// картинка, що не завантажилась, не повинна тримати старий шар вічно
-const LOAD_TIMEOUT_MS = 8_000;
-
-export function useSlideLayers(slide: Slide | null): { layers: SlideLayer[]; onLoad: () => void } {
-  const [current, setCurrent] = useState(slide);
-
-  const [leaving, setLeaving] = useState<Slide | null>(null);
-
-  const [loaded, setLoaded] = useState(false);
-
-  if (slide?.id !== current?.id || slide?.imageUrl !== current?.imageUrl) {
-    const sameImage = slide?.imageUrl === current?.imageUrl;
-
-    setLeaving(current && !sameImage ? current : null);
-
-    if (!sameImage) setLoaded(false);
-
-    setCurrent(slide);
-  } else if (slide !== current) {
-    setCurrent(slide);
+function advance(stack: Stack, slide: Slide | null): Stack {
+  if (!slide || !stack.top) {
+    if (!slide && !stack.top) return stack;
+  } else if (slide.imageUrl === stack.top.slide.imageUrl) {
+    return slide === stack.top.slide ? stack : { ...stack, top: { slide, key: stack.top.key } };
   }
 
-  const ending = !current;
+  const seq = stack.seq + 1;
+
+  return { seq, top: slide && { slide, key: `${slide.imageUrl}#${seq}` }, under: stack.top };
+}
+
+export function useSlideLayers(slide: Slide | null): SlideLayer[] {
+  const [stack, setStack] = useState<Stack>(() => advance({ seq: 0, top: null, under: null }, slide));
+
+  const next = advance(stack, slide);
+
+  if (next !== stack) setStack(next);
+
+  const { seq } = next;
 
   useEffect(() => {
-    if (!leaving) return;
+    if (seq === 0) return;
 
-    const timer = setTimeout(() => setLeaving(null), ending || loaded ? SETTLE_MS : LOAD_TIMEOUT_MS);
+    const timer = setTimeout(() => setStack((s) => (s.seq === seq ? { ...s, under: null } : s)), SETTLE_MS);
 
     return () => clearTimeout(timer);
-  }, [leaving, ending, loaded]);
-
-  const onLoad = useCallback(() => setLoaded(true), []);
+  }, [seq]);
 
   const layers: SlideLayer[] = [];
 
-  if (leaving) layers.push({ slide: leaving, leaving: true, visible: !ending });
+  if (next.under) layers.push({ ...next.under, role: next.top ? "under" : "ending" });
 
-  if (current) layers.push({ slide: current, leaving: false, visible: loaded });
+  if (next.top) layers.push({ ...next.top, role: "top" });
 
-  return { layers, onLoad };
+  return layers;
 }

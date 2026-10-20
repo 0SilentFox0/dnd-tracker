@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { Maximize, Minimize } from "lucide-react";
 
 const subscribe = (onChange: () => void) => {
@@ -16,14 +16,14 @@ const readSupported = () => document.fullscreenEnabled;
 
 const readActive = () => !!document.fullscreenElement;
 
-export function FullscreenButton({ target }: { target: RefObject<HTMLElement | null> }) {
+export function FullscreenButton() {
   const supported = useDocument(readSupported);
 
   const active = useDocument(readActive);
 
   if (!supported) return null;
 
-  const toggle = () => void (document.fullscreenElement ? document.exitFullscreen() : target.current?.requestFullscreen());
+  const toggle = () => void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
 
   const Icon = active ? Minimize : Maximize;
 

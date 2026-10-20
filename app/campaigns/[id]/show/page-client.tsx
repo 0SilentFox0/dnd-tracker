@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
@@ -12,8 +11,6 @@ import { usePusherShowSync, useShowAudioHost, useShowControl, useShowKeys, useSh
 
 export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM: boolean }) {
   const notify = useNotify();
-
-  const pageRef = useRef<HTMLDivElement>(null);
 
   usePusherShowSync(campaignId);
 
@@ -27,11 +24,11 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
 
   return (
     <AudioPlayerProvider host={host}>
-      <div ref={pageRef} className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col [&:fullscreen]:bg-black">
+      <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
           <ShowStage show={show} />
           <div className="absolute right-3 top-3 z-20">
-            <FullscreenButton target={pageRef} />
+            <FullscreenButton />
           </div>
           <div className="absolute left-3 top-3 z-30">
             <AudioDock placement="corner" />

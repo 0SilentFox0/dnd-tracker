@@ -75,24 +75,4 @@ describe("useUnsavedChangesGuard", () => {
     expect(click(link("#top")).defaultPrevented).toBe(false);
     expect(confirm).not.toHaveBeenCalled();
   });
-
-  it("«Назад»: відмова повертає sentinel, згода робить ще один back", async () => {
-    const pushState = vi.spyOn(window.history, "pushState");
-
-    const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
-
-    renderHook(() => useUnsavedChangesGuard(true), { wrapper });
-    expect(pushState).toHaveBeenCalledTimes(1);
-
-    confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    await flush();
-    expect(pushState).toHaveBeenCalledTimes(2);
-    expect(back).not.toHaveBeenCalled();
-
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    await flush();
-    expect(back).toHaveBeenCalledTimes(1);
-  });
 });

@@ -8,74 +8,91 @@ const a = { id: "slide-000a", imageUrl: "https://x/a.webp" };
 
 const b = { id: "slide-000b", imageUrl: "https://x/b.webp" };
 
+const c = { id: "slide-000c", imageUrl: "https://x/c.webp" };
+
+type S = typeof a | null;
+
+const roles = (layers: ReturnType<typeof useSlideLayers>) => layers.map((l) => [l.slide.imageUrl, l.role]);
+
 describe("useSlideLayers", () => {
   beforeEach(() => vi.useFakeTimers());
 
   afterEach(() => vi.useRealTimers());
 
-  const setup = (slide: typeof a | null = a) => renderHook(({ slide }) => useSlideLayers(slide), { initialProps: { slide: slide as typeof a | null } });
+  const setup = (slide: S = a) => renderHook(({ slide }) => useSlideLayers(slide), { initialProps: { slide: slide as S } });
 
-  it("перший слайд проявляється після завантаження картинки", () => {
+  it("перший слайд — один верхній шар", () => {
     const { result } = setup();
 
-    expect(result.current.layers).toEqual([{ slide: a, leaving: false, visible: false }]);
-
-    act(() => result.current.onLoad());
-    expect(result.current.layers).toEqual([{ slide: a, leaving: false, visible: true }]);
+    expect(roles(result.current)).toEqual([[a.imageUrl, "top"]]);
   });
 
-  it("справжній crossfade: старий шар повністю непрозорий, нова лише проявляється; старий знімається після onLoad + часу переходу", () => {
-    const { result, rerender } = setup();
-
-    act(() => result.current.onLoad());
-    rerender({ slide: b });
-    expect(result.current.layers).toEqual([
-      { slide: a, leaving: true, visible: true },
-      { slide: b, leaving: false, visible: false },
-    ]);
-
-    act(() => vi.advanceTimersByTime(2_000));
-    expect(result.current.layers).toHaveLength(2);
-
-    act(() => result.current.onLoad());
-    expect(result.current.layers[1].visible).toBe(true);
-    expect(result.current.layers[0].visible).toBe(true);
-
-    act(() => vi.advanceTimersByTime(700));
-    expect(result.current.layers).toEqual([{ slide: b, leaving: false, visible: true }]);
-  });
-
-  it("картинка не завантажилась — старий шар знімається за запасним таймером", () => {
+  it("A→B: A лишається знизу, знімається через час переходу + 100 мс", () => {
     const { result, rerender } = setup();
 
     rerender({ slide: b });
-    act(() => vi.advanceTimersByTime(8_100));
-    expect(result.current.layers).toHaveLength(1);
+    expect(roles(result.current)).toEqual([[a.imageUrl, "under"], [b.imageUrl, "top"]]);
+
+    act(() => vi.advanceTimersByTime(699));
+    expect(result.current).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(roles(result.current)).toEqual([[b.imageUrl, "top"]]);
   });
 
-  it("той самий id з новим підписом — без переходу", () => {
+  it("A→B→A у вікні переходу: A знову зверху з новим ключем, B знизу", () => {
     const { result, rerender } = setup();
 
-    rerender({ slide: { ...a, imageUrl: a.imageUrl } });
-    expect(result.current.layers).toHaveLength(1);
+    const first = result.current[0].key;
+
+    rerender({ slide: b });
+    act(() => vi.advanceTimersByTime(300));
+    rerender({ slide: a });
+    expect(roles(result.current)).toEqual([[b.imageUrl, "under"], [a.imageUrl, "top"]]);
+    expect(result.current[1].key).not.toBe(first);
+
+    act(() => vi.advanceTimersByTime(699));
+    expect(result.current).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(roles(result.current)).toEqual([[a.imageUrl, "top"]]);
   });
 
-  it("інший id з тією ж картинкою — без нового шару", () => {
+  it("A→B→C: знизу B, таймер перезапускається", () => {
     const { result, rerender } = setup();
 
-    act(() => result.current.onLoad());
-    rerender({ slide: { ...b, imageUrl: a.imageUrl } });
-    expect(result.current.layers).toEqual([{ slide: { ...b, imageUrl: a.imageUrl }, leaving: false, visible: true }]);
+    rerender({ slide: b });
+    act(() => vi.advanceTimersByTime(400));
+    rerender({ slide: c });
+    expect(roles(result.current)).toEqual([[b.imageUrl, "under"], [c.imageUrl, "top"]]);
+
+    act(() => vi.advanceTimersByTime(699));
+    expect(result.current).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(roles(result.current)).toEqual([[c.imageUrl, "top"]]);
   });
 
-  it("кінець показу — старий шар згасає і зникає", () => {
+  it("той самий imageUrl: без нового шару, підпис оновлюється", () => {
     const { result, rerender } = setup();
 
-    act(() => result.current.onLoad());
+    const key = result.current[0].key;
+
+    const next = { ...b, imageUrl: a.imageUrl, title: "new" };
+
+    rerender({ slide: next });
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].slide).toBe(next);
+    expect(result.current[0].key).toBe(key);
+  });
+
+  it("кінець показу: шар згасає і зникає", () => {
+    const { result, rerender } = setup();
+
     rerender({ slide: null });
-    expect(result.current.layers).toEqual([{ slide: a, leaving: true, visible: false }]);
+    expect(roles(result.current)).toEqual([[a.imageUrl, "ending"]]);
 
     act(() => vi.advanceTimersByTime(700));
-    expect(result.current.layers).toEqual([]);
+    expect(result.current).toEqual([]);
   });
 });

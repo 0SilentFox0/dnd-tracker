@@ -9,7 +9,7 @@ const CONFIRM = { title: "Є незбережені зміни. Вийти бе�
 
 const MODIFIED = (e: MouseEvent) => e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
 
-/** Поки active: закриття вкладки, клік по внутрішньому посиланню і «Назад» питають підтвердження. */
+/** Поки active: закриття вкладки, і клік по внутрішньому посиланню питають підтвердження. */
 export function useUnsavedChangesGuard(active: boolean): void {
   const router = useRouter();
 
@@ -43,35 +43,12 @@ export function useUnsavedChangesGuard(active: boolean): void {
       void latest.current.confirm(CONFIRM).then((ok) => ok && latest.current.router.push(url.pathname + url.search + url.hash));
     };
 
-    // sentinel у історії: «Назад» спершу знімає його, а ми питаємо підтвердження
-    const pushSentinel = () => window.history.pushState(window.history.state, "", window.location.href);
-
-    let asking = false;
-
-    const onPopState = () => {
-      if (asking) return;
-
-      asking = true;
-
-      void latest.current.confirm(CONFIRM).then((ok) => {
-        asking = false;
-
-        if (!ok) return pushSentinel();
-
-        window.removeEventListener("popstate", onPopState);
-        window.history.back();
-      });
-    };
-
-    pushSentinel();
     window.addEventListener("beforeunload", warn);
     document.addEventListener("click", onClick, true);
-    window.addEventListener("popstate", onPopState);
 
     return () => {
       window.removeEventListener("beforeunload", warn);
       document.removeEventListener("click", onClick, true);
-      window.removeEventListener("popstate", onPopState);
     };
   }, [active]);
 }
