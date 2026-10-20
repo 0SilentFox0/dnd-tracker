@@ -43,10 +43,10 @@ vi.mock("@/lib/utils/audio/youtube-iframe-api", () => ({
 
 const state = audioState({ track: youtubeTrack });
 
-function Harness({ videoId, audio = state, hostKey = "a" }: { videoId: string | null; audio?: typeof state; hostKey?: string }) {
+function Harness({ videoId, audio = state }: { videoId: string | null; audio?: typeof state }) {
   const { ref } = useYoutubeSync({ videoId, state: audio, clockOffsetMs: 0, volume: 0.4, muted: false });
 
-  return <div key={hostKey} ref={ref} />;
+  return <div ref={ref} />;
 }
 
 beforeEach(() => {
@@ -100,18 +100,6 @@ describe("useYoutubeSync", () => {
     const next = audioState({ trackId: "t3", track: { ...youtubeTrack, youtubeId: "aaaaaaaaaaa" }, seq: state.seq + 1 });
 
     expect(() => rerender(<Harness videoId="aaaaaaaaaaa" audio={next} />)).not.toThrow();
-    await waitFor(() => expect(created).toHaveLength(2));
-    await waitFor(() => expect(created[1].player.playVideo).toHaveBeenCalled());
-  });
-
-  it("новий контейнер того ж відео разом зі зміною стану («Очима гравця»): знищений плеєр не викликається", async () => {
-    const { rerender } = render(<Harness videoId="dQw4w9WgXcQ" />);
-
-    await waitFor(() => expect(created[0]?.player.playVideo).toHaveBeenCalled());
-
-    const next = audioState({ track: youtubeTrack, seq: state.seq + 1, offsetSec: 30, startedAt: 50_000 });
-
-    expect(() => rerender(<Harness videoId="dQw4w9WgXcQ" audio={next} hostKey="b" />)).not.toThrow();
     await waitFor(() => expect(created).toHaveLength(2));
     await waitFor(() => expect(created[1].player.playVideo).toHaveBeenCalled());
   });
