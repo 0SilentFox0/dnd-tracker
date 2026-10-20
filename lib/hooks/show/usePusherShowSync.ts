@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { showKeys } from "./keys";
 import { writeShowSnapshot } from "./show-snapshot";
 
-import { usePusherChannel } from "@/lib/hooks/battle";
+import { usePusherChannel } from "@/lib/hooks/common";
 import { SHOW_STATE_EVENT, showChannelName } from "@/lib/pusher/channels";
 import type { ShowEvent } from "@/types/show";
 

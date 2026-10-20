@@ -39,7 +39,6 @@ export function ownedSlidePath(campaignId: string, url: string): string | null {
   return path?.startsWith(`${campaignId}/`) && OBJECT_NAME.test(path.slice(campaignId.length + 1)) ? path : null;
 }
 
-/** Лише об'єкти цієї кампанії в бакеті слайдів; помилки — у лог, не користувачу. */
 export async function removeSlideFiles(campaignId: string, urls: string[]): Promise<void> {
   const paths = urls.flatMap((url) => ownedSlidePath(campaignId, url) ?? []);
 

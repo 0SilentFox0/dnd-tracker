@@ -9,17 +9,16 @@ const subscribe = (onChange: () => void) => {
   return () => document.removeEventListener("fullscreenchange", onChange);
 };
 
-const useDocument = (read: () => boolean) =>
-  useSyncExternalStore(subscribe, read, () => false);
-
 const readSupported = () => document.fullscreenEnabled;
 
 const readActive = () => !!document.fullscreenElement;
 
-export function FullscreenButton() {
-  const supported = useDocument(readSupported);
+const readOnServer = () => false;
 
-  const active = useDocument(readActive);
+export function FullscreenButton() {
+  const supported = useSyncExternalStore(subscribe, readSupported, readOnServer);
+
+  const active = useSyncExternalStore(subscribe, readActive, readOnServer);
 
   if (!supported) return null;
 

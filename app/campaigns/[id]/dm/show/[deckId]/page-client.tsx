@@ -24,7 +24,7 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
 
   const editor = useDeckEditor(campaignId, deck);
 
-  const control = useShowControl(campaignId, (message) => void notify(message));
+  const control = useShowControl(campaignId, notify);
 
   const [editingId, setEditingId] = useState<string | null>(null);
 

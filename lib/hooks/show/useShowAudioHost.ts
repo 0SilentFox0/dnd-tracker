@@ -12,37 +12,28 @@ import type { AudioHost } from "@/lib/hooks/audio";
 import type { BattleAudioCommand } from "@/types/audio";
 import type { ShowSnapshot } from "@/types/show";
 
-const toAudio = (s: ShowSnapshot) => ({ audio: s.show?.audio ?? null, clockOffsetMs: s.clockOffsetMs });
-
 export function useShowAudioHost({ campaignId, isDM, onFailure }: { campaignId: string; isDM: boolean; onFailure(message: string): void }): AudioHost {
   const queryClient = useQueryClient();
 
   const { show } = useShowState(campaignId);
 
-  const queryKey = useMemo(() => showKeys.audio(campaignId), [campaignId]);
+  return useMemo(() => {
+    const apply = async (pending: Promise<ShowSnapshot>) => {
+      const fresh = await pending;
 
-  return useMemo(
-    () => ({
+      writeShowSnapshot(queryClient, campaignId, fresh);
+
+      return { audio: fresh.show?.audio ?? null, clockOffsetMs: fresh.clockOffsetMs };
+    };
+
+    return {
       campaignId,
       isDM,
-      queryKey,
+      queryKey: showKeys.audio(campaignId),
       seed: show?.audio,
-      fetch: async () => {
-        const fresh = await getShow(campaignId);
-
-        writeShowSnapshot(queryClient, campaignId, fresh);
-
-        return toAudio(fresh);
-      },
-      send: async (cmd: BattleAudioCommand) => {
-        const fresh = await sendShow(campaignId, { action: "audio", command: cmd });
-
-        writeShowSnapshot(queryClient, campaignId, fresh);
-
-        return toAudio(fresh);
-      },
+      fetch: () => apply(getShow(campaignId)),
+      send: (cmd: BattleAudioCommand) => apply(sendShow(campaignId, { action: "audio", command: cmd })),
       onFailure,
-    }),
-    [campaignId, isDM, queryKey, show?.audio, queryClient, onFailure],
-  );
+    };
+  }, [campaignId, isDM, show?.audio, queryClient, onFailure]);
 }

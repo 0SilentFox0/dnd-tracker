@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { SLIDE_CROSSFADE_MS } from "@/lib/constants/show";
 import type { Slide } from "@/types/show";
 
-export interface SlideLayer {
+interface SlideLayer {
   slide: Slide;
   /** Змінюється з кожним виходом шару нагору, щоб анімація появи починалась заново. */
   key: string;
@@ -21,11 +21,9 @@ interface Stack {
 const SETTLE_MS = SLIDE_CROSSFADE_MS + 100;
 
 function advance(stack: Stack, slide: Slide | null): Stack {
-  if (!slide || !stack.top) {
-    if (!slide && !stack.top) return stack;
-  } else if (slide.imageUrl === stack.top.slide.imageUrl) {
-    return slide === stack.top.slide ? stack : { ...stack, top: { slide, key: stack.top.key } };
-  }
+  if (!slide && !stack.top) return stack;
+
+  if (slide && stack.top && slide.imageUrl === stack.top.slide.imageUrl) return slide === stack.top.slide ? stack : { ...stack, top: { slide, key: stack.top.key } };
 
   const seq = stack.seq + 1;
 

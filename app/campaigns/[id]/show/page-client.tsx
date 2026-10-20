@@ -1,6 +1,5 @@
 "use client";
 
-
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
 import { FullscreenButton } from "@/components/show/stage/FullscreenButton";

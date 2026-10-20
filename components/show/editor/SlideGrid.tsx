@@ -1,13 +1,19 @@
 "use client";
 
 import type { Dispatch } from "react";
-import { ChevronLeft, ChevronRight, Music, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, type LucideIcon, Music, Trash2 } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { DeckDraftAction } from "@/lib/utils/show/deck-draft";
 import type { Slide } from "@/types/show";
 
-const ICON_BUTTON = "flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-30";
+function IconButton({ label, icon: Icon, disabled, onClick }: { label: string; icon: LucideIcon; disabled?: boolean; onClick(): void }) {
+  return (
+    <button type="button" aria-label={label} disabled={disabled} onClick={onClick} className="flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-30">
+      <Icon className="size-4" />
+    </button>
+  );
+}
 
 export function SlideGrid({ slides, actions }: { slides: Slide[]; actions: { dispatch: Dispatch<DeckDraftAction>; edit(id: string): void } }) {
   const { dispatch, edit } = actions;
@@ -29,15 +35,9 @@ export function SlideGrid({ slides, actions }: { slides: Slide[]; actions: { dis
             <span className="min-w-0 flex-1 truncate text-xs text-hud-bone" title={slide.title}>
               {slide.title ?? ""}
             </span>
-            <button type="button" aria-label="Посунути вліво" disabled={i === 0} onClick={() => dispatch({ type: "move", id: slide.id, dir: -1 })} className={ICON_BUTTON}>
-              <ChevronLeft className="size-4" />
-            </button>
-            <button type="button" aria-label="Посунути вправо" disabled={i === slides.length - 1} onClick={() => dispatch({ type: "move", id: slide.id, dir: 1 })} className={ICON_BUTTON}>
-              <ChevronRight className="size-4" />
-            </button>
-            <button type="button" aria-label="Видалити слайд" onClick={() => dispatch({ type: "remove", id: slide.id })} className={ICON_BUTTON}>
-              <Trash2 className="size-4" />
-            </button>
+            <IconButton label="Посунути вліво" icon={ChevronLeft} disabled={i === 0} onClick={() => dispatch({ type: "move", id: slide.id, dir: -1 })} />
+            <IconButton label="Посунути вправо" icon={ChevronRight} disabled={i === slides.length - 1} onClick={() => dispatch({ type: "move", id: slide.id, dir: 1 })} />
+            <IconButton label="Видалити слайд" icon={Trash2} onClick={() => dispatch({ type: "remove", id: slide.id })} />
           </div>
         </li>
       ))}

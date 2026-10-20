@@ -4,11 +4,11 @@ import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useBattleResync } from "./useBattleResync";
-import { usePusherChannel, usePusherConnection } from "./usePusherChannel";
 
 import { writeAudioSnapshot } from "@/lib/hooks/audio";
 import { battleKeys } from "@/lib/hooks/battles/keys";
 import { writeBattleDelta } from "@/lib/hooks/battles/write-battle-delta";
+import { usePusherChannel, usePusherConnection } from "@/lib/hooks/common";
 import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAudioEvent } from "@/types/audio";

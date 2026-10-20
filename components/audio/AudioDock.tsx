@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * corner — у CornerStack зліва внизу (desktop, лобі); strip — шар над областю карти/списку телефона, чип зліва внизу.
- * collapseOn — ідентичність ходу: нове не-null значення згортає панель (вікно ходу забирає ту саму висоту).
- * collapseTick — лічильник: кожне зростання (розгорнуте вікно ходу на телефоні) теж згортає панель.
+ * collapseOn — нове не-null значення згортає панель (у бою — новий хід: вікно ходу забирає ту саму висоту).
+ * collapseTick — кожне зростання лічильника теж згортає панель.
  */
 export function AudioDock({ placement, collapseOn = null, collapseTick = 0 }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
   const { state, sound, dm, prefs } = usePlayerAudio();

@@ -12,9 +12,11 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   const [{ isDM }, body] = await Promise.all([requireCampaignMember(id), readShow(id).then((res) => readOkJson<ShowResponse>(res))]);
 
-  const seed: ShowSnapshot | undefined = body ? { show: body.show, clockOffsetMs: null } : undefined;
+  const seed: ShowSnapshot | null = body && { show: body.show, clockOffsetMs: null };
 
-  const client = <ShowPageClient campaignId={id} isDM={isDM} />;
-
-  return seed ? <PrefetchedQuery queryKey={showKeys.state(id)} data={seed}>{client}</PrefetchedQuery> : client;
+  return (
+    <PrefetchedQuery queryKey={showKeys.state(id)} data={seed}>
+      <ShowPageClient campaignId={id} isDM={isDM} />
+    </PrefetchedQuery>
+  );
 }

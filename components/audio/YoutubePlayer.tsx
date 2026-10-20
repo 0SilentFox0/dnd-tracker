@@ -6,7 +6,7 @@ import { YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
 import { usePlayerAudio, useYoutubeSync } from "@/lib/hooks/audio";
 import { cn } from "@/lib/utils";
 
-/** Видимий YouTube-плеєр бою. Показане відео — не менше 200×200 (вимога YouTube); сховане (перемикач «Відео» чи згорнута панель) лишає iframe змонтованим, тож звук іде. */
+/** Видимий YouTube-плеєр. Показане відео — не менше 200×200 (вимога YouTube); сховане (перемикач «Відео» чи згорнута панель) лишає iframe змонтованим, тож звук іде. */
 export function YoutubePlayer({ videoId, onNeedsTap }: { videoId: string; onNeedsTap(): void }) {
   const { state, clockOffsetMs, prefs } = usePlayerAudio();
 

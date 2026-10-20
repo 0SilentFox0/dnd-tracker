@@ -29,9 +29,9 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
   };
 
   return (
-    <div className="space-y-3 border-t border-hud-rule bg-black/60 p-3">
+    <fieldset disabled={control.pending} className="min-w-0 space-y-3 border-t border-hud-rule bg-black/60 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <select aria-label="Набір" value={show?.deckId ?? ""} disabled={control.pending} onChange={(e) => e.target.value && void control.send({ action: "open", deckId: e.target.value })} className="h-9 rounded border border-hud-rule bg-black/70 px-2 text-sm text-hud-bone">
+        <select aria-label="Набір" value={show?.deckId ?? ""} onChange={(e) => e.target.value && void control.send({ action: "open", deckId: e.target.value })} className="h-9 rounded border border-hud-rule bg-black/70 px-2 text-sm text-hud-bone">
           {!show?.deckId && <option value="">Оберіть набір</option>}
           {decks?.map((d) => (
             <option key={d.id} value={d.id}>
@@ -39,15 +39,15 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
             </option>
           ))}
         </select>
-        <Button type="button" variant="outline" size="sm" disabled={control.pending} onClick={() => void control.send({ action: "prev" })}>
+        <Button type="button" variant="outline" size="sm" onClick={() => void control.send({ action: "prev" })}>
           <ChevronLeft className="size-4" />
           Попередній слайд
         </Button>
-        <Button type="button" variant="outline" size="sm" disabled={control.pending} onClick={() => void control.send({ action: "next" })}>
+        <Button type="button" variant="outline" size="sm" onClick={() => void control.send({ action: "next" })}>
           Наступний слайд
           <ChevronRight className="size-4" />
         </Button>
-        <Button type="button" variant="destructive" size="sm" disabled={control.pending || !show?.deckId} onClick={() => void end()}>
+        <Button type="button" variant="destructive" size="sm" disabled={!show?.deckId} onClick={() => void end()}>
           <Square className="size-4" />
           Завершити показ
         </Button>
@@ -64,7 +64,6 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
                 type="button"
                 aria-current={current || undefined}
                 aria-label={`Слайд ${i + 1}`}
-                disabled={control.pending}
                 onClick={() => void control.send({ action: "open", deckId: deck.id, slideId: slide.id })}
                 className={`relative shrink-0 overflow-hidden rounded border ${current ? "border-hud-gold-strong ring-2 ring-hud-gold-strong" : "border-hud-rule"}`}
               >
@@ -76,6 +75,6 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
           })}
         </div>
       )}
-    </div>
+    </fieldset>
   );
 }

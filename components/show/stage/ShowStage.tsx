@@ -14,9 +14,9 @@ import type { ShowState } from "@/types/show";
 const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
 
 export function ShowStage({ show }: { show: ShowState | null }) {
-  const layers = useSlideLayers(show?.slide ?? null);
-
   const current = show?.slide ?? null;
+
+  const layers = useSlideLayers(current);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">
@@ -29,8 +29,7 @@ export function ShowStage({ show }: { show: ShowState | null }) {
           <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority />
         </div>
       ))}
-      {current && <SlideCaption key={current.id} slide={current} />}
-      {!current && <ShowWaiting />}
+      {current ? <SlideCaption key={current.id} slide={current} /> : <ShowWaiting />}
       {show?.nextImageUrl && (
         <div data-slide-preload aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
           <Image {...imageProps(show.nextImageUrl)} alt="" loading="eager" />

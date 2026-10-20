@@ -15,8 +15,16 @@ const ARROWS: Record<string, ShowCommand> = { ArrowRight: { action: "next" }, Ar
 export function useShowKeys(control: ShowControl | null): void {
   const inFlight = useRef(false);
 
+  const latest = useRef(control);
+
+  const active = control !== null;
+
   useEffect(() => {
-    if (!control) return;
+    latest.current = control;
+  });
+
+  useEffect(() => {
+    if (!active) return;
 
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -25,13 +33,15 @@ export function useShowKeys(control: ShowControl | null): void {
 
       if (!cmd || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
 
-      if (target && (TYPING.has(target.tagName) || target.isContentEditable || target.closest?.(DIALOG))) return;
+      if (target && (TYPING.has(target.tagName) || target.isContentEditable)) return;
 
       if (document.querySelector(DIALOG)) return;
 
       e.preventDefault();
 
-      if (e.repeat || inFlight.current || control.pending) return;
+      const control = latest.current;
+
+      if (e.repeat || inFlight.current || !control || control.pending) return;
 
       inFlight.current = true;
       void control.send(cmd).finally(() => (inFlight.current = false));
@@ -40,5 +50,5 @@ export function useShowKeys(control: ShowControl | null): void {
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [control]);
+  }, [active]);
 }

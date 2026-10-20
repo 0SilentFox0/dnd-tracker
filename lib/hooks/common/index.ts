@@ -12,6 +12,7 @@ export { useMediaQuery } from "./useMediaQuery";
 export { useNavigateFresh } from "./useNavigateFresh";
 export { useNotify, useOptionalNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";
+export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
 export { useSingleFlight } from "./useSingleFlight";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";

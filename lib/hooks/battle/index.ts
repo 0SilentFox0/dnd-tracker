@@ -35,7 +35,6 @@ export { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "./useMobileB
 export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
-export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useSelectedParticipant } from "./useSelectedParticipant";
 export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";

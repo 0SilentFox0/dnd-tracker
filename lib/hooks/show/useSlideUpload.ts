@@ -10,7 +10,6 @@ import type { Slide } from "@/types/show";
 
 const PARALLEL = 3;
 
-/** Файли вантажаться по три паралельно; невдалі пропускаються, їхні помилки — у onError. */
 export function useSlideUpload(campaignId: string, onError: (message: string) => void) {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 

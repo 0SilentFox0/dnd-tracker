@@ -9,13 +9,15 @@ import { useNotify } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { SlideDeck, SlideDeckSummary } from "@/types/show";
 
+const STALE_MS = 30_000;
+
 export function useDecks(campaignId: string, options: { initial?: SlideDeckSummary[]; enabled?: boolean } = {}) {
   return useQuery<SlideDeckSummary[]>({
     queryKey: showKeys.decks(campaignId),
     queryFn: () => getDecks(campaignId),
     enabled: options.enabled ?? true,
-    staleTime: 30_000,
-    ...(options.initial && { initialData: options.initial }),
+    staleTime: STALE_MS,
+    initialData: options.initial,
   });
 }
 
@@ -24,8 +26,8 @@ export function useDeck(campaignId: string, deckId: string | null, options: { in
     queryKey: showKeys.deck(campaignId, deckId ?? ""),
     queryFn: () => getDeck(campaignId, deckId as string),
     enabled: !!deckId,
-    staleTime: 30_000,
-    ...(options.initial && { initialData: options.initial }),
+    staleTime: STALE_MS,
+    initialData: options.initial,
   });
 }
 
@@ -44,9 +46,7 @@ export function useDeckMutations(campaignId: string) {
 
   return {
     create: (title: string) => create.mutateAsync(title).catch(() => null),
-    remove: async (deckId: string) => {
-      await remove.mutateAsync(deckId).catch(() => undefined);
-    },
+    remove: (deckId: string) => remove.mutateAsync(deckId).catch(() => undefined),
     pending: create.isPending || remove.isPending,
   };
 }

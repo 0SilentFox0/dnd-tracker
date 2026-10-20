@@ -7,7 +7,9 @@ export function mergeAudio(cached: BattleAudioState | null, incoming: BattleAudi
 }
 
 /** Стан — лише за seq, годинник — лише з HTTP-відповіді; без змін повертає prev, щоб не будити спостерігачів. */
-export function mergeAudioSnapshot(prev: BattleAudioSnapshot | undefined, incoming: { audio: BattleAudioState | null | undefined; clockOffsetMs?: number | null }): BattleAudioSnapshot {
+export type AudioIncoming = { audio: BattleAudioState | null | undefined; clockOffsetMs?: number | null };
+
+export function mergeAudioSnapshot(prev: BattleAudioSnapshot | undefined, incoming: AudioIncoming): BattleAudioSnapshot {
   const audio = mergeAudio(prev?.audio ?? null, incoming.audio);
 
   const clockOffsetMs = incoming.clockOffsetMs ?? prev?.clockOffsetMs ?? null;

@@ -12,18 +12,16 @@ import type { BattleAudioCommand } from "@/types/audio";
 export function useBattleAudioHost(): AudioHost {
   const { campaignId, battleId, battle, viewer: { isDM }, toast: { show } } = useBattleScene();
 
-  const queryKey = useMemo(() => battleKeys.audio(campaignId, battleId), [campaignId, battleId]);
-
   return useMemo(
     () => ({
       campaignId,
       isDM,
-      queryKey,
+      queryKey: battleKeys.audio(campaignId, battleId),
       seed: battle.audio,
       fetch: () => getBattleAudio(campaignId, battleId),
       send: (cmd: BattleAudioCommand) => sendBattleAudio(campaignId, battleId, cmd),
       onFailure: show,
     }),
-    [campaignId, battleId, isDM, queryKey, battle.audio, show],
+    [campaignId, battleId, isDM, battle.audio, show],
   );
 }

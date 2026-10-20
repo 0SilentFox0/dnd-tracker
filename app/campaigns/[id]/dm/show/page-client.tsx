@@ -24,7 +24,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
 
   const mutations = useDeckMutations(campaignId);
 
-  const control = useShowControl(campaignId, (message) => void notify(message));
+  const control = useShowControl(campaignId, notify);
 
   const [creating, setCreating] = useState(false);
 
