@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { AudioHost } from "../host";
@@ -69,5 +69,26 @@ describe("useAudioState", () => {
 
     await waitFor(() => expect(result.current).toEqual({ audio: state(4), clockOffsetMs: -3_000 }));
     expect(getBattleAudio).toHaveBeenCalledTimes(1);
+  });
+
+  it("Pusher записав новіший seq, поки GET у польоті — GET його не затирає", async () => {
+    let resolve!: (v: { audio: BattleAudioState; clockOffsetMs: number }) => void;
+
+    vi.mocked(getBattleAudio)
+      .mockClear()
+      .mockReturnValue(new Promise((r) => (resolve = r)));
+
+    const { client, wrapper } = setup();
+
+    const { result, rerender } = renderHook(({ unlocked }) => useAudioState({ host: host(state(2)), unlocked }), { wrapper, initialProps: { unlocked: false } });
+
+    rerender({ unlocked: true });
+    await waitFor(() => expect(getBattleAudio).toHaveBeenCalled());
+
+    act(() => client.setQueryData(KEY, { audio: state(5), clockOffsetMs: null }));
+    resolve({ audio: state(4), clockOffsetMs: 900 });
+
+    await waitFor(() => expect(result.current.clockOffsetMs).toBe(900));
+    expect(result.current.audio?.seq).toBe(5);
   });
 });

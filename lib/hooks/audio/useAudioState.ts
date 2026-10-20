@@ -17,7 +17,11 @@ export function useAudioState({ host, unlocked }: { host: AudioHost; unlocked: b
 
   const { data } = useQuery<BattleAudioSnapshot>({
     queryKey,
-    queryFn: async () => mergeAudioSnapshot(queryClient.getQueryData<BattleAudioSnapshot>(queryKey), await fetch()),
+    queryFn: async () => {
+      const fresh = await fetch();
+
+      return mergeAudioSnapshot(queryClient.getQueryData<BattleAudioSnapshot>(queryKey), fresh);
+    },
     enabled: unlocked,
     // seed і Pusher пишуть кеш через setQueryData і роблять його «свіжим», а годинник міряє лише GET після розблокування
     staleTime: 0,

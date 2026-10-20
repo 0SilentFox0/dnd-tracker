@@ -45,9 +45,17 @@ export function slideObjectPath(url: string): string | null {
   }
 }
 
+const OBJECT_NAME = /^[a-f0-9]{32}\.(webp|jpg|png|gif)$/;
+
+export function ownedSlidePath(campaignId: string, path: string | null): path is string {
+  if (!path?.startsWith(`${campaignId}/`)) return false;
+
+  return OBJECT_NAME.test(path.slice(campaignId.length + 1));
+}
+
 /** Лише об'єкти цієї кампанії в бакеті слайдів; помилки — у лог, не користувачу. */
 export async function removeSlideFiles(campaignId: string, urls: string[]): Promise<void> {
-  const paths = urls.map(slideObjectPath).filter((p): p is string => !!p && p.startsWith(`${campaignId}/`));
+  const paths = urls.map(slideObjectPath).filter((p): p is string => ownedSlidePath(campaignId, p));
 
   if (paths.length === 0) return;
 
