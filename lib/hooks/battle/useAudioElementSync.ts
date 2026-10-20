@@ -10,7 +10,7 @@ export interface MediaSyncInput {
   src: string | null;
   state: BattleAudioState | null;
   clockOffsetMs: number;
-  active: boolean;
+  unlocked: boolean;
   volume: number;
   muted: boolean;
   /** play() поза жестом відхилено (новий елемент на iOS) — знову потрібна кнопка «Увімкнути звук» */
@@ -49,13 +49,13 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
 
     if (!el) return;
 
-    const { state, clockOffsetMs, active, src } = latest.current;
+    const { state, clockOffsetMs, unlocked, src } = latest.current;
 
     const durationSec = durationOf(el, state);
 
     const target = state ? audioPosition(state, { now: Date.now(), clockOffsetMs, durationSec }) : 0;
 
-    const plan = planSync({ shouldPlay: active && !!state?.playing && !!src && el.getAttribute("src") === src, paused: el.paused, current: el.currentTime, target, durationSec });
+    const plan = planSync({ shouldPlay: unlocked && !!state?.playing && !!src && el.getAttribute("src") === src, paused: el.paused, current: el.currentTime, target, durationSec });
 
     if (plan.pause) el.pause();
 
@@ -64,14 +64,14 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     if (plan.play) void el.play().catch((e: unknown) => isBlocked(e) && latest.current.onBlocked?.());
   }, []);
 
-  const { active, src, state, clockOffsetMs, volume, muted } = input;
+  const { unlocked, src, state, clockOffsetMs, volume, muted } = input;
 
   useEffect(() => {
     const el = node.current;
 
     if (!attached || !el) return;
 
-    const want = active ? src : null;
+    const want = unlocked ? src : null;
 
     const current = el.getAttribute("src");
 
@@ -85,7 +85,7 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     }
 
     sync();
-  }, [attached, active, src, state, clockOffsetMs, sync]);
+  }, [attached, unlocked, src, state, clockOffsetMs, sync]);
 
   useEffect(() => {
     const el = node.current;
@@ -133,5 +133,5 @@ export function useAudioElementSync(input: MediaSyncInput): { ref: (el: HTMLAudi
     void el.play().catch(() => undefined);
   }, []);
 
-  return { ref, prime, failed: failedSrc !== null && failedSrc === (active ? src : null) };
+  return { ref, prime, failed: failedSrc !== null && failedSrc === (unlocked ? src : null) };
 }

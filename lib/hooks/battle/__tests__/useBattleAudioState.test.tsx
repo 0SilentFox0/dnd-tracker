@@ -24,7 +24,7 @@ describe("useBattleAudioState", () => {
   it("до розблокування — стан зі сцени, без запиту; сцена з новішим seq оновлює, зі старішим — ні", () => {
     const { wrapper } = setup();
 
-    const { result, rerender } = renderHook(({ seed }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed, live: false }), { wrapper, initialProps: { seed: state(2) as BattleAudioState | null } });
+    const { result, rerender } = renderHook(({ seed }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed, unlocked: false }), { wrapper, initialProps: { seed: state(2) as BattleAudioState | null } });
 
     expect(result.current).toEqual({ audio: state(2), clockOffsetMs: null });
 
@@ -44,9 +44,9 @@ describe("useBattleAudioState", () => {
 
     const { wrapper } = setup();
 
-    const { result, rerender } = renderHook(({ live }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), live }), { wrapper, initialProps: { live: false } });
+    const { result, rerender } = renderHook(({ unlocked }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), unlocked }), { wrapper, initialProps: { unlocked: false } });
 
-    rerender({ live: true });
+    rerender({ unlocked: true });
 
     await waitFor(() => expect(result.current).toEqual({ audio: state(7), clockOffsetMs: 1_200 }));
     expect(getBattleAudio).toHaveBeenCalledTimes(1);
@@ -57,10 +57,10 @@ describe("useBattleAudioState", () => {
 
     const { client, wrapper } = setup(new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 60_000 } } }));
 
-    const { result, rerender } = renderHook(({ live }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), live }), { wrapper, initialProps: { live: false } });
+    const { result, rerender } = renderHook(({ unlocked }) => useBattleAudioState({ campaignId: "c1", battleId: "b1", seed: state(2), unlocked }), { wrapper, initialProps: { unlocked: false } });
 
     client.setQueryData(battleKeys.audio("c1", "b1"), { audio: state(3), clockOffsetMs: null });
-    rerender({ live: true });
+    rerender({ unlocked: true });
 
     await waitFor(() => expect(result.current).toEqual({ audio: state(4), clockOffsetMs: -3_000 }));
     expect(getBattleAudio).toHaveBeenCalledTimes(1);

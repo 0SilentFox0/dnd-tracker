@@ -1,31 +1,22 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ChevronDown, Music, Video, Volume2, VolumeX } from "lucide-react";
+import { ChevronDown, Video, Volume2, VolumeX } from "lucide-react";
 
 import { DmAudioControls } from "./DmAudioControls";
+import { NowPlayingLabel } from "./NowPlayingLabel";
+import { UnlockSoundButton } from "./UnlockSoundButton";
 
-import type { BattleAudioValue } from "@/lib/hooks/battle";
+import { useBattleAudio } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-export interface AudioPanelView {
-  failed: boolean;
-  onCollapse(): void;
-  onUnlock(): void;
-}
-
-export function AudioPlayerPanel({ audio, view, children }: { audio: BattleAudioValue; view: AudioPanelView; children?: ReactNode }) {
-  const { state, sound, prefs, control, library } = audio;
-
-  const title = state?.track?.title ?? "Тиша";
+export function AudioPlayerPanel({ view, children }: { view: { onCollapse(): void }; children?: ReactNode }) {
+  const { state, sound, prefs, dm } = useBattleAudio();
 
   return (
     <section aria-label="Музика бою" className="w-64 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg">
       <header className="flex items-center gap-2">
-        <Music className="size-4 shrink-0 text-hud-gold" />
-        <span className="min-w-0 flex-1 truncate" title={title}>
-          {title}
-        </span>
+        <NowPlayingLabel title={state?.track?.title ?? "Тиша"} className="min-w-0 flex-1" />
         {state?.trackId && !state.playing && <span className="text-hud-muted">пауза</span>}
         {state?.track?.kind === "youtube" && (
           <button
@@ -59,17 +50,15 @@ export function AudioPlayerPanel({ audio, view, children }: { audio: BattleAudio
           />
         </div>
       ) : (
-        <button type="button" className="hud-sc mt-2 flex h-8 w-full items-center justify-center bg-[var(--enemy)] text-sm text-[var(--ink)]" onClick={view.onUnlock}>
-          Увімкнути звук
-        </button>
+        <UnlockSoundButton className="mt-2 w-full" />
       )}
-      {view.failed && (
+      {sound.failed && (
         <p role="alert" className="mt-1 text-[var(--enemy)]">
           Трек недоступний
         </p>
       )}
       {children}
-      {control && library && <DmAudioControls audio={audio} control={control} library={library} />}
+      {dm && <DmAudioControls dm={dm} />}
     </section>
   );
 }

@@ -23,7 +23,7 @@ function Harness(input: MediaSyncInput) {
 
 const state = (over: Partial<BattleAudioState> = {}): BattleAudioState => ({ trackId: "t", track: { title: "Бій", kind: "file", url: "https://s/1.mp3", youtubeId: null, durationSec: 100 }, playing: true, offsetSec: 0, startedAt: 0, seq: 1, ...over });
 
-const base: MediaSyncInput = { src: "https://s/1.mp3", state: state(), clockOffsetMs: 0, active: true, volume: 0.5, muted: false };
+const base: MediaSyncInput = { src: "https://s/1.mp3", state: state(), clockOffsetMs: 0, unlocked: true, volume: 0.5, muted: false };
 
 function media(el: HTMLAudioElement, m: { currentTime?: number; paused?: boolean; duration?: number }) {
   let current = m.currentTime ?? 0;
@@ -49,14 +49,14 @@ afterEach(() => {
 
 describe("useAudioElementSync", () => {
   it("до розблокування — без src (egress) і без play", () => {
-    const { getByTestId } = render(<Harness {...base} active={false} />);
+    const { getByTestId } = render(<Harness {...base} unlocked={false} />);
 
     expect(getByTestId("audio").getAttribute("src")).toBeNull();
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
 
   it("prime у жесті ставить src і викликає play на тому самому елементі", () => {
-    const { getByTestId } = render(<Harness {...base} active={false} />);
+    const { getByTestId } = render(<Harness {...base} unlocked={false} />);
 
     act(() => api.prime());
 

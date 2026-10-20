@@ -6,8 +6,7 @@ import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 import { DmPlaylist } from "./DmPlaylist";
 
-import type { BattleAudioValue } from "@/lib/hooks/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { type BattleAudioDm, useBattleAudio } from "@/lib/hooks/battle";
 
 function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: ReactNode }) {
   return (
@@ -17,10 +16,10 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
   );
 }
 
-export function DmAudioControls({ audio, control, library }: { audio: Pick<BattleAudioValue, "state" | "prefs">; control: NonNullable<BattleAudioValue["control"]>; library: NonNullable<BattleAudioValue["library"]> }) {
-  const { state } = audio;
+export function DmAudioControls({ dm }: { dm: BattleAudioDm }) {
+  const { state, prefs } = useBattleAudio();
 
-  const { campaignId } = useBattleScene();
+  const { control, library } = dm;
 
   const { send, pending } = control;
 
@@ -50,12 +49,12 @@ export function DmAudioControls({ audio, control, library }: { audio: Pick<Battl
           <Square className="size-4" />
         </IconButton>
       </div>
-      {empty && !library.loading ? (
+      {empty && !library.isLoading ? (
         <p className="mt-2 text-hud-muted">
-          Бібліотека порожня — <Link href={`/campaigns/${campaignId}/dm/music`} className="underline">додайте треки</Link>.
+          Бібліотека порожня — <Link href={dm.musicHref} className="underline">додайте треки</Link>.
         </p>
       ) : (
-        <DmPlaylist state={state} playlist={audio.prefs.playlist} control={control} library={library} />
+        <DmPlaylist dm={dm} state={state} playlist={prefs.playlist} />
       )}
     </div>
   );

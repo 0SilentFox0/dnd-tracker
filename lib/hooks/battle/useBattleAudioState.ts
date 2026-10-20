@@ -10,9 +10,9 @@ import { battleKeys } from "@/lib/hooks/battles";
 import { mergeAudio, mergeAudioSnapshot } from "@/lib/utils/audio/merge";
 import type { BattleAudioSnapshot, BattleAudioState } from "@/types/audio";
 
-/** live = звук розблоковано: лише тоді GET (свіжий стан і годинник); до того — стан зі сцени й Pusher. */
-export function useBattleAudioState(args: { campaignId: string; battleId: string; seed: BattleAudioState | null | undefined; live: boolean }): BattleAudioSnapshot {
-  const { campaignId, battleId, seed, live } = args;
+/** unlocked = звук увімкнено: лише тоді GET (свіжий стан і годинник); до того — стан зі сцени й Pusher. */
+export function useBattleAudioState(args: { campaignId: string; battleId: string; seed: BattleAudioState | null | undefined; unlocked: boolean }): BattleAudioSnapshot {
+  const { campaignId, battleId, seed, unlocked } = args;
 
   const queryClient = useQueryClient();
 
@@ -23,7 +23,7 @@ export function useBattleAudioState(args: { campaignId: string; battleId: string
 
       return mergeAudioSnapshot(queryClient.getQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId)), fresh);
     },
-    enabled: live,
+    enabled: unlocked,
     // сцена й Pusher пишуть кеш через setQueryData і роблять його «свіжим», а годинник міряє лише GET після розблокування
     staleTime: 0,
     initialData: { audio: seed ?? null, clockOffsetMs: null },

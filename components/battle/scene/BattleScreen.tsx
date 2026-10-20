@@ -13,7 +13,7 @@ import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvid
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useSpellBookPrefetch } from "@/lib/hooks/battle";
-import { useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
 type DesktopLayout = ComponentType<{ onComplete: () => void }>;
@@ -31,7 +31,7 @@ function loadDesktopLayout() {
   return desktopLoad;
 }
 
-if (typeof window !== "undefined" && window.matchMedia?.("(min-width: 1024px)").matches) void loadDesktopLayout();
+if (typeof window !== "undefined" && window.matchMedia?.(DESKTOP_QUERY).matches) void loadDesktopLayout();
 
 function useDesktopLayout(wide: boolean): DesktopLayout | null {
   const [, setLoaded] = useState(desktopLayout !== null);
@@ -61,7 +61,7 @@ export function BattleScreen() {
   const { battle, viewer: { isDM }, actions } = useBattleScene();
 
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
-  const wide = useMediaQuery("(min-width: 1024px)");
+  const wide = useMediaQuery(DESKTOP_QUERY);
 
   const Desktop = useDesktopLayout(wide);
 

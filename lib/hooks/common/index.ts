@@ -9,6 +9,7 @@ export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";
 export { useImageSize } from "./useImageSize";
 export { useInfoReferenceFilters } from "./useInfoReferenceFilters";
+export { DESKTOP_QUERY } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
 export { useNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";

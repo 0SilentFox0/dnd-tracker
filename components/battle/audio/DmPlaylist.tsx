@@ -4,11 +4,9 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, Pencil } from "lucide-react";
 
 import { TrackTitleInput } from "@/components/music/TrackTitleInput";
-import type { BattleAudioValue } from "@/lib/hooks/battle";
+import type { BattleAudioDm, BattleAudioValue } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { CampaignTrack } from "@/types/audio";
-
-type Library = NonNullable<BattleAudioValue["library"]>;
 
 function TrackRow({ track, current, disabled, actions }: { track: CampaignTrack; current: boolean; disabled: boolean; actions: { play(): void; rename(title: string): void } }) {
   const [editing, setEditing] = useState(false);
@@ -38,8 +36,10 @@ function TrackRow({ track, current, disabled, actions }: { track: CampaignTrack;
   );
 }
 
-export function DmPlaylist({ state, playlist, control, library }: { state: BattleAudioValue["state"]; playlist: BattleAudioValue["prefs"]["playlist"]; control: NonNullable<BattleAudioValue["control"]>; library: Library }) {
+export function DmPlaylist({ dm, state, playlist }: { dm: BattleAudioDm; state: BattleAudioValue["state"]; playlist: BattleAudioValue["prefs"]["playlist"] }) {
   const { open, set } = playlist;
+
+  const { control, library } = dm;
 
   return (
     <div className="mt-2">

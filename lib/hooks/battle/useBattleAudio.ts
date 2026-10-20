@@ -12,14 +12,20 @@ import { useRenameTrack, useTracks } from "@/lib/hooks/music";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 
+/** Лише для ДМ: керування, бібліотека кампанії й посилання на сторінку музики. */
+export interface BattleAudioDm {
+  control: BattleAudioControl;
+  library: { tracks: CampaignTrack[]; isLoading: boolean; rename(id: string, title: string): void };
+  musicHref: string;
+}
+
 export interface BattleAudioValue {
   state: BattleAudioState | null;
   clockOffsetMs: number;
   /** failed — файл треку не завантажився */
   sound: { unlocked: boolean; unlock(): void; failed: boolean };
   prefs: AudioPrefs;
-  control: BattleAudioControl | null;
-  library: { tracks: CampaignTrack[]; loading: boolean; rename(id: string, title: string): void } | null;
+  dm: BattleAudioDm | null;
 }
 
 export const BattleAudioContext = createContext<BattleAudioValue | null>(null);
@@ -33,7 +39,7 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
   // браузери пускають звук лише після жесту: один клік на кожне відкриття сторінки
   const [unlocked, setUnlocked] = useState(false);
 
-  const { audio, clockOffsetMs } = useBattleAudioState({ campaignId, battleId, seed: battle.audio, live: unlocked });
+  const { audio, clockOffsetMs } = useBattleAudioState({ campaignId, battleId, seed: battle.audio, unlocked });
 
   const prefs = useAudioPrefs();
 
@@ -51,7 +57,7 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
     src: track?.kind === "file" ? track.url : null,
     state: audio,
     clockOffsetMs: clockOffsetMs ?? 0,
-    active: unlocked,
+    unlocked,
     volume: prefs.volume,
     muted: prefs.muted,
     onBlocked: relock,
@@ -64,16 +70,14 @@ export function useBattleAudioValue(): { value: BattleAudioValue; audioRef: (el:
     setUnlocked(true);
   }, [prime]);
 
+  const dm = useMemo(
+    () => (control ? { control, library: { tracks, isLoading, rename }, musicHref: `/campaigns/${campaignId}/dm/music` } : null),
+    [control, tracks, isLoading, rename, campaignId],
+  );
+
   const value = useMemo(
-    () => ({
-      state: audio,
-      clockOffsetMs: clockOffsetMs ?? 0,
-      sound: { unlocked, unlock, failed },
-      prefs,
-      control,
-      library: isDM ? { tracks, loading: isLoading, rename } : null,
-    }),
-    [audio, clockOffsetMs, unlocked, unlock, failed, prefs, control, isDM, tracks, isLoading, rename],
+    () => ({ state: audio, clockOffsetMs: clockOffsetMs ?? 0, sound: { unlocked, unlock, failed }, prefs, dm }),
+    [audio, clockOffsetMs, unlocked, unlock, failed, prefs, dm],
   );
 
   return { value, audioRef: media.ref };
