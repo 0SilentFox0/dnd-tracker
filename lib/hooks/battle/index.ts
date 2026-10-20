@@ -26,6 +26,7 @@ export { useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
+export { useMazeDarkAutoSkip } from "./useMazeDarkAutoSkip";
 export {
   MAX_WALL_EDGES,
   MAZE_EXIT_EDGE_ONLY,

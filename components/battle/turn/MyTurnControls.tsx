@@ -7,6 +7,7 @@ import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
 
 import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
+import { MazeMarkPicker } from "@/components/battle/map/maze";
 import { MapStripRow } from "@/components/battle/scene/MapStrip";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
@@ -105,6 +106,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
           actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
         />
       )}
+      {turn.phase === "acting" && <MazeMarkPicker hero={hero} />}
     </>
   );
 

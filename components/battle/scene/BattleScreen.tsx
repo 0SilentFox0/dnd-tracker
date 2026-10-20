@@ -9,7 +9,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { hudFontClassName } from "@/components/hud";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useFxEnabled, useSpellBookPrefetch } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled, useMazeDarkAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +67,8 @@ export function BattleScreen() {
   const [notices, setNotices] = useState<HTMLElement | null>(null);
 
   useSpellBookPrefetch();
+
+  useMazeDarkAutoSkip();
 
   const { userEnabled: fxOn } = useFxEnabled();
 
