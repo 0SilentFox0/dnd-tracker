@@ -5,6 +5,17 @@ export const TARGET_ROUNDS = 3.5;
 /** Частка HP партії, яку вороги мають зняти за `TARGET_ROUNDS`; 0.75 після того, як «+N» з `damageDice` почав наноситися (`pnpm balance-library`: перемоги L3 87 / L6 88 / L10 91 %). */
 export const HERO_EDGE = 0.75;
 
+/** Поправка цілі ворогів для партій вище L6 (уміння й ультимати високих рівнів формула сили героя не бачить): повна на L10, лінійно до L14. `pnpm balance-library` з 0.06/0.06: перемоги L3 87 / L6 88 / L10 74 % (без поправки L10 90 %; 0.2/0.2 — 51 %, обидва важелі множаться). */
+export const HIGH_LEVEL_FROM = 6;
+
+export const HIGH_LEVEL_SPAN = 4;
+
+export const HIGH_LEVEL_MAX_STEPS = 2;
+
+export const HIGH_LEVEL_DPR_BOOST = 0.06;
+
+export const HIGH_LEVEL_HP_BOOST = 0.06;
+
 /** Частка номінального DPR героїв, що реально долітає (промахи, перевбивство); підібрано за `pnpm simulate-battle`. */
 export const HIT_RATE = 0.55;
 

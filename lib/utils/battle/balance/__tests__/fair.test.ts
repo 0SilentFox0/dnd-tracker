@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { HERO_EDGE, HIT_RATE, MAX_PICK_TOTAL, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
-import { computeFairScaling, type PartyPower, pickEnemyRoster, type UnitStats } from "@/lib/utils/battle/balance";
+import { HERO_EDGE, HIGH_LEVEL_DPR_BOOST, HIGH_LEVEL_HP_BOOST, HIT_RATE, MAX_PICK_TOTAL, SCALE_MAX, SCALE_MIN, TARGET_ROUNDS } from "@/lib/constants/battle-balance";
+import { buildPartyPower, computeFairScaling, type PartyPower, pickEnemyRoster, targetEnemyPower, type UnitStats } from "@/lib/utils/battle/balance";
 import { sharedEnemyRace } from "@/lib/utils/battle/balance/setup";
 
 const unit = (unitId: string, level: number, hp: number, dpr: number, raceId: string | null = null): UnitStats => ({ unitId, name: unitId, level, hp, dpr, kpi: dpr / hp, raceId });
@@ -242,5 +242,35 @@ describe("sharedEnemyRace", () => {
     expect(sharedEnemyRace([enemy("a"), enemy("b")], stats)).toBe("undead");
     expect(sharedEnemyRace([enemy("a"), enemy("c")], stats)).toBeNull();
     expect(sharedEnemyRace([], stats)).toBeNull();
+  });
+});
+
+describe("поправка для високих рівнів", () => {
+  const party = (heroLevel?: number): PartyPower => ({ dpr: 100, hp: 400, heroCount: 4, ...(heroLevel !== undefined && { heroLevel }) });
+
+  const base = targetEnemyPower(party());
+
+  it("до L6 включно і без рівня — ціль не змінюється", () => {
+    for (const level of [3, 6]) expect(targetEnemyPower(party(level))).toEqual(base);
+  });
+
+  it("L10 — обидва важелі; вище росте до межі", () => {
+    const l10 = targetEnemyPower(party(10));
+
+    expect(l10.dpr).toBeCloseTo(base.dpr * (1 + HIGH_LEVEL_DPR_BOOST));
+    expect(l10.hp).toBeCloseTo(base.hp * (1 + HIGH_LEVEL_HP_BOOST));
+    expect(targetEnemyPower(party(20))).toEqual(targetEnemyPower(party(14)));
+    expect(targetEnemyPower(party(14)).dpr).toBeGreaterThan(l10.dpr);
+  });
+
+  it("buildPartyPower: середній рівень лише героїв", () => {
+    const p = buildPartyPower([
+      { stats: { dpr: 10, hp: 50, level: 8 }, hero: true },
+      { stats: { dpr: 10, hp: 50, level: 12 }, hero: true },
+      { stats: { dpr: 5, hp: 20, level: 1 }, quantity: 3, hero: false },
+    ]);
+
+    expect(p.heroLevel).toBe(10);
+    expect(buildPartyPower([{ stats: { dpr: 5, hp: 20 }, hero: false }]).heroLevel).toBeUndefined();
   });
 });
