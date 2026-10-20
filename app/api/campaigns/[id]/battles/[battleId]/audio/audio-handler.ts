@@ -16,17 +16,15 @@ import { applyAudioCommand, commandNeedsLibrary } from "@/lib/utils/audio/audio-
 import { loadAudioLibrary } from "@/lib/utils/audio/track-store";
 import type { BattleAudioEvent, BattleAudioResponse, BattleAudioState } from "@/types/audio";
 
-type BattleParams = { id: string; battleId: string };
+const findAudio = (campaignId: string, battleId: string) => prisma.battleScene.findFirst({ where: { id: battleId, campaignId }, select: { audio: true } });
 
-const findAudio = (p: BattleParams) => prisma.battleScene.findFirst({ where: { id: p.battleId, campaignId: p.id }, select: { audio: true } });
-
-export async function readBattleAudio(params: BattleParams): Promise<NextResponse> {
+export async function readBattleAudio(campaignId: string, battleId: string): Promise<NextResponse> {
   try {
-    const access = await requireCampaignAccess(params.id);
+    const access = await requireCampaignAccess(campaignId);
 
     if (access instanceof NextResponse) return access;
 
-    const battle = await findAudio(params);
+    const battle = await findAudio(campaignId, battleId);
 
     if (!battle) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
@@ -38,13 +36,13 @@ export async function readBattleAudio(params: BattleParams): Promise<NextRespons
   }
 }
 
-export async function commandBattleAudio(req: Request, params: BattleParams): Promise<NextResponse> {
+export async function commandBattleAudio(req: Request, campaignId: string, battleId: string): Promise<NextResponse> {
   try {
-    const access = await requireDM(params.id);
+    const access = await requireDM(campaignId);
 
     if (access instanceof NextResponse) return access;
 
-    const rate = await checkRateLimit({ userId: access.userId, scope: "audio", battleId: params.battleId, ...BATTLE_RATE_LIMITS.audio });
+    const rate = await checkRateLimit({ userId: access.userId, scope: "audio", battleId, ...BATTLE_RATE_LIMITS.audio });
 
     if (!rate.allowed) return rateLimitResponse(rate);
 
@@ -52,13 +50,13 @@ export async function commandBattleAudio(req: Request, params: BattleParams): Pr
 
     if (cmd instanceof NextResponse) return cmd;
 
-    const battle = await findAudio(params);
+    const battle = await findAudio(campaignId, battleId);
 
     if (!battle) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
     const prev = (battle.audio ?? null) as BattleAudioState | null;
 
-    const result = applyAudioCommand(prev, cmd, { now: Date.now(), library: commandNeedsLibrary(cmd) ? await loadAudioLibrary(params.id) : [] });
+    const result = applyAudioCommand(prev, cmd, { now: Date.now(), library: commandNeedsLibrary(cmd) ? await loadAudioLibrary(campaignId) : [] });
 
     if (!result.ok) return errorResponse(result.message, 422);
 
@@ -66,15 +64,15 @@ export async function commandBattleAudio(req: Request, params: BattleParams): Pr
 
     // без version і журналу; умова за seq відсікає паралельну команду з іншої вкладки ДМ
     const { count } = await prisma.battleScene.updateMany({
-      where: { id: params.battleId, campaignId: params.id, audio: prev ? { path: ["seq"], equals: prev.seq } : { equals: Prisma.DbNull } },
+      where: { id: battleId, campaignId, audio: prev ? { path: ["seq"], equals: prev.seq } : { equals: Prisma.DbNull } },
       data: { audio: next as unknown as Prisma.InputJsonValue },
     });
 
     if (count === 0) return errorResponse(API_ERRORS.BATTLE_AUDIO_CONFLICT, 409);
 
-    const event: BattleAudioEvent = { battleId: params.battleId, audio: next };
+    const event: BattleAudioEvent = { battleId, audio: next };
 
-    after(() => safePusherTrigger(pusherServer, battleChannelName(params.battleId), BATTLE_AUDIO_EVENT, event, { action: "battle audio" }));
+    after(() => safePusherTrigger(pusherServer, battleChannelName(battleId), BATTLE_AUDIO_EVENT, event, { action: "battle audio" }));
 
     return NextResponse.json({ audio: next } satisfies BattleAudioResponse);
   } catch (error) {
