@@ -241,6 +241,14 @@ async function call(label: string, options: any, body: any = {}, as?: string) {
     fullLog.push(t);
 
     if (/NaN|undefined|\[object|null\b/.test(e.resultText ?? "")) issue("error", `підозрілий текст логу: ${e.resultText}`);
+
+    const rolled = (e.actionType === "attack" && !/ціль загинула до атаки/.test(e.resultText ?? "")) || (e.actionType === "spell" && (e.actionDetails?.damageBreakdown?.includes("сума кубиків") || e.actionDetails?.savingThrows?.length)) || typeof e.actionDetails?.d10Roll === "number";
+
+    const dice = e.actionDetails?.diceRolls as Array<{ dice: Array<{ sides: number; value: number }> }> | undefined;
+
+    if (rolled && !e.isCancelled && !dice?.length) issue("error", `немає diceRolls: ${e.resultText}`);
+
+    for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${e.resultText}»`);
   }
 
   if (res.status === 200) invariants(label);
