@@ -1,5 +1,5 @@
-import { CanvasFrame } from "./canvas/CanvasFrame";
-import { frameFor } from "./canvas";
+import { CanvasFrame } from "./CanvasFrame";
+import { frameFor } from "./index";
 
 import type { FxImpact } from "@/lib/utils/battle/fx";
 

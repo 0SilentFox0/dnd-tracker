@@ -28,7 +28,6 @@ export async function POST(
 
     if (spellGroup instanceof NextResponse) return spellGroup;
 
-    // Видаляємо всі заклинання з групи
     await prisma.spell.updateMany({
       where: {
         campaignId: id,

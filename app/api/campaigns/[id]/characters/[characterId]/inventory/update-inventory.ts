@@ -5,12 +5,12 @@ import { z } from "zod";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
+import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
-import { lockCampaignArtifacts } from "@/lib/utils/artifacts/lock";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
 import type { EquippedItems } from "@/types/inventory";
 

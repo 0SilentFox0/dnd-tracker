@@ -17,7 +17,7 @@ const piercing = resolved(piercingShot());
 const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []) => placed(id, { side, at: pos, hp: 50, abilities, attacks: [bow] });
 
 const run = (order: BattleParticipant[], map: BattleMapConfig | null) =>
-  runAttackPhase({ battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", attackRoll: 15, damageRolls: [4, 4, 4, 4, 4, 4] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map });
+  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", attackRoll: 15, damageRolls: [4, 4, 4, 4, 4, 4] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map });
 
 const hpOf = (r: ReturnType<typeof run>, id: string) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 

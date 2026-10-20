@@ -5,6 +5,7 @@ import { createCharacterSchema } from "./create-character-schema";
 import { resolveCharacterOwner } from "./resolve-character-owner";
 
 import { prisma } from "@/lib/db";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -84,7 +85,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
         skillTreeProgress: {},
       },
-      include: { user: true },
+      include: { user: { select: PUBLIC_USER_SELECT } },
     });
 
     await prisma.characterInventory.create({

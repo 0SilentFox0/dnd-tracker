@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { isDmMember } from "@/lib/utils/api/is-dm";
@@ -16,7 +17,7 @@ export async function readCharacter(campaignId: string, characterId: string): Pr
   const character = await prisma.character.findUnique({
     where: { id: characterId },
     include: {
-      user: true,
+      user: { select: PUBLIC_USER_SELECT },
       inventory: true,
       campaign: { include: { members: { where: { userId } } } },
     },

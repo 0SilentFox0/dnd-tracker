@@ -1,5 +1,5 @@
 import { SpellCreateForm } from "@/components/spells/form/SpellCreateForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 
 export default async function NewSpellPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

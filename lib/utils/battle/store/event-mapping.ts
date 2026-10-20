@@ -47,12 +47,13 @@ export function actorEvent(
   };
 }
 
-export function dmEvent(round: number, resultText: string, targets?: BattleAction["targets"]): NewBattleEvent {
+export function dmEvent(round: number, resultText: string, targets?: BattleAction["targets"], hpChanges?: BattleAction["hpChanges"]): NewBattleEvent {
   return {
     type: "ability",
     round,
     actorId: DM_ACTOR.actorId,
     ...(targets && { targets }),
+    ...(hpChanges && { hpChanges }),
     resultText,
     details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {} },
   };

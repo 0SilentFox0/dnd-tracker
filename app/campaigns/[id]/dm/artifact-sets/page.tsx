@@ -5,8 +5,8 @@ import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { EmptyState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 
 export default async function DMArtifactSetsPage({

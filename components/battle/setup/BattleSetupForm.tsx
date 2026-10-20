@@ -59,14 +59,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
     {
       id: BATTLE_FORM_TAB.basic,
       label: "Основне",
-      content: (
-        <BattleFormBasicInfo
-          name={details.value.name}
-          description={details.value.description}
-          onNameChange={(value) => details.setValue((prev) => ({ ...prev, name: value }))}
-          onDescriptionChange={(value) => details.setValue((prev) => ({ ...prev, description: value }))}
-        />
-      ),
+      content: <BattleFormBasicInfo details={details} />,
     },
     { id: BATTLE_FORM_TAB.map, label: "Карта", content: <BattleFormMap editor={setup.mapEditor} /> },
     {

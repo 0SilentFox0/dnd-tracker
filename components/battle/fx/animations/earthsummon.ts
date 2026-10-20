@@ -1,13 +1,13 @@
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { figurePath, summonSpot } from "../runtime/figure";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { jaggedShape, polyPath } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { clamp01, easeOutCubic, smoothstep } from "@/components/battle/fx/runtime/easing";
+import { figurePath, summonSpot } from "@/components/battle/fx/runtime/figure";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { jaggedShape, polyPath } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const BURST_MS = 300;
@@ -78,10 +78,8 @@ function boulder(g: CanvasRenderingContext2D, b: Boulder) {
   g.stroke();
 }
 
-export const earthsummon: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const earthsummon: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { x, ground, height: H } = summonSpot(el, target);
 
     const crack: FxPoint[] = Array.from({ length: 9 }, (_, n) => ({ x: x + (n / 8 - 0.5) * H * 0.9, y: ground + rand(-1.5, 1.5) }));
@@ -146,7 +144,7 @@ export const earthsummon: FxAnimation = ({ stage, to, targetEls }) =>
 
           const pull = clamp01((t - (b.arrive - 260)) / 260);
 
-          const e = pull * pull * (3 - 2 * pull);
+          const e = smoothstep(pull);
 
           const airX = b.air.x * up;
 

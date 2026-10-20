@@ -13,7 +13,7 @@ export type ArtifactSetCreatePayload = {
   abilities?: Ability[];
 };
 
-export type ArtifactSetUpdatePayload = {
+type ArtifactSetUpdatePayload = {
   name?: string;
   description?: string | null;
   setBonus?: unknown | null;
@@ -28,6 +28,8 @@ const artifactSetsApi = createCampaignCrudApi<
   ArtifactSetUpdatePayload,
   { success: boolean }
 >("/artifact-sets");
+
+export const getArtifactSets = (campaignId: string): Promise<ArtifactSetRow[]> => artifactSetsApi.list(campaignId);
 
 export const createArtifactSet = artifactSetsApi.create;
 export const updateArtifactSet = artifactSetsApi.update;

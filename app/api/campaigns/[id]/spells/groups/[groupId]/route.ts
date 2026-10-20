@@ -72,7 +72,7 @@ export async function DELETE(
 
     if (spellGroup instanceof NextResponse) return spellGroup;
 
-    // Видаляємо групу (заклинання автоматично втратять зв'язок через onDelete: SetNull в схемі)
+    // заклинання групи лишаються: onDelete: SetNull
     await prisma.spellGroup.deleteMany({
       where: { id: groupId },
     });

@@ -57,6 +57,7 @@ describe("GET /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
+        allowPlayerEdit: true,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
@@ -140,6 +141,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
+        allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
@@ -167,6 +169,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       campaign: {
         id: "c1",
         maxLevel: 20,
+        allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });

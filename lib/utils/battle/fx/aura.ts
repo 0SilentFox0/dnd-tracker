@@ -1,6 +1,6 @@
 import { elementOf } from "./element";
 import { spellFx } from "./spells";
-import type { FxAuraKind } from "./types";
+import type { FxAuraKind, FxElement } from "./types";
 
 import type { ActiveEffect } from "@/types/battle";
 
@@ -27,24 +27,18 @@ const SHIELD_EFFECTS = new Set(["armor", "ac", "guard"]);
 
 const hasEffect = (effect: ActiveEffect, type: string) => effect.effects.some((e) => e.type === type);
 
-function elementAura(effect: ActiveEffect): FxAuraKind | null {
-  switch (elementOf(effect.fxElement, "arcane")) {
-    case "cold":
-      return hasEffect(effect, "skip_action") ? "frozen" : "frost";
-    case "lightning":
-      return "static";
-    case "fire":
-      return "burning";
-    case "poison":
-      return "plague";
-    case "necrotic":
-      return "decay";
-    case "radiant":
-      return (effect.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === "advantageForAttackers") ? "moonmark" : null;
-    default:
-      return null;
-  }
-}
+const marksAttackers = (effect: ActiveEffect) => (effect.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === "advantageForAttackers");
+
+const ELEMENT_AURA: Partial<Record<FxElement, (effect: ActiveEffect) => FxAuraKind | null>> = {
+  cold: (effect) => (hasEffect(effect, "skip_action") ? "frozen" : "frost"),
+  lightning: () => "static",
+  fire: () => "burning",
+  poison: () => "plague",
+  necrotic: () => "decay",
+  radiant: (effect) => (marksAttackers(effect) ? "moonmark" : null),
+};
+
+const elementAura = (effect: ActiveEffect) => ELEMENT_AURA[elementOf(effect.fxElement, "arcane")]?.(effect) ?? null;
 
 const isShield = (effect: ActiveEffect) =>
   effect.effects.some((e) => SHIELD_EFFECTS.has(e.type)) || (effect.abilityEffects ?? []).some((e) => e.kind === "modifyStat" && e.stat === "armor");
@@ -72,7 +66,7 @@ export function auraOf(effect: ActiveEffect): FxAuraKind | null {
 
   if (effect.hotHeal) return "regen";
 
-  if ((effect.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === "advantageForAttackers")) return "marked";
+  if (marksAttackers(effect)) return "marked";
 
   if (effect.type === "buff") return isShield(effect) ? "shield" : "blessing";
 

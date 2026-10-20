@@ -12,7 +12,7 @@ afterEach(() => {
 
 describe("animation loader", () => {
   it("every archetype loads to an animation", async () => {
-    const { loadAnimation } = await import("../animations");
+    const { loadAnimation } = await import("@/components/battle/fx/animations");
 
     for (const a of FX_ARCHETYPES) expect(typeof (await loadAnimation(a))).toBe("function");
   });
@@ -26,9 +26,9 @@ describe("animation loader", () => {
 
     vi.doMock("../animations/haste", () => new Promise((resolve) => (arrive = () => resolve({ haste: real }))));
 
-    const { animationFor } = await import("../animations");
+    const { animationFor } = await import("@/components/battle/fx/animations");
 
-    const { buff } = await import("../animations/buff");
+    const { buff } = await import("@/components/battle/fx/animations/buff");
 
     vi.useFakeTimers();
 
@@ -49,9 +49,9 @@ describe("animation loader", () => {
       throw new Error("chunk");
     });
 
-    const { animationFor } = await import("../animations");
+    const { animationFor } = await import("@/components/battle/fx/animations");
 
-    const { debuff } = await import("../animations/debuff");
+    const { debuff } = await import("@/components/battle/fx/animations/debuff");
 
     await expect(animationFor("slow", Infinity)).resolves.toBe(debuff);
   });
@@ -67,15 +67,15 @@ describe("playFx", () => {
 
     vi.doMock("../animations/haste", () => new Promise((resolve) => (arrive = () => resolve({ haste: real }))));
 
-    const { playFx } = await import("../runtime/play");
+    const { playFx } = await import("@/components/battle/fx/runtime/play");
 
-    const { cancelLayer } = await import("../runtime/stage");
+    const { cancelLayer } = await import("@/components/battle/fx/runtime/stage");
 
     const layer = document.createElement("div");
 
     document.body.append(layer);
 
-    const run = playFx(layer, { key: "k", archetype: "haste", element: "wind", actorId: "a", actorSide: "player", targetIds: [], hit: true, critical: false }, document, Infinity);
+    const run = playFx(layer, { key: "k", archetype: "haste", element: "wind", actorId: "a", actorSide: "ally", targetIds: [], hit: true, critical: false }, document, Infinity);
 
     cancelLayer(layer);
     await vi.waitFor(() => expect(arrive).toBeTypeOf("function"));

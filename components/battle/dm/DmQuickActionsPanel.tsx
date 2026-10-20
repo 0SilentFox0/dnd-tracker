@@ -1,26 +1,60 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
+import { type ReactNode, useState } from "react";
+import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, type LucideIcon, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
-import { type DmParticipantActions, DmParticipantRow } from "./DmParticipantRow";
+import { DmBattleLog } from "./DmBattleLog";
+import { DmParticipantRow } from "./DmParticipantRow";
 
-import { BattleLogPanel } from "@/components/battle/log/BattleLogPanel";
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { type BattlePageDialogs, useBattleScene, useUnitControlPanel } from "@/lib/hooks/battle";
-import { useConfirm } from "@/lib/hooks/common";
+import { type BattlePageDialogs, useBattleScene } from "@/lib/hooks/battle";
+import { useDmParticipantActions } from "@/lib/hooks/battle/useDmParticipantActions";
 import { cn } from "@/lib/utils";
 import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleParticipant } from "@/types/battle";
 
 const PANEL_WIDTH = 320;
 
-const ACTION = "hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]";
+interface QuickActionProps {
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+  closeAfter?: () => void;
+  tone?: string;
+  title?: string;
+  disabled?: boolean;
+}
+
+function QuickAction({ icon: Icon, label, onClick, closeAfter, tone = "text-[var(--gold)]", title, disabled }: QuickActionProps) {
+  return (
+    <button
+      type="button"
+      className="hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]"
+      title={title}
+      disabled={disabled}
+      onClick={() => {
+        onClick();
+        closeAfter?.();
+      }}
+    >
+      <Icon className={cn("size-4 shrink-0", tone)} />
+      {label}
+    </button>
+  );
+}
+
+function PanelSection({ title, className, children }: { title: string; className?: string; children: ReactNode }) {
+  return (
+    <section className="pt-2">
+      <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">{title}</h4>
+      <div className={className}>{children}</div>
+    </section>
+  );
+}
 
 export interface DmQuickActionsPanelProps {
   dialogs: BattlePageDialogs;
-  /** Відкрити діалог накладання заклинання (будь-яке заклинання на будь-кого) */
   onOpenCastSpell: () => void;
   /** Керований режим (мобільний): панель відкривається ззовні, бічної вкладки немає */
   panel?: { open: boolean; onOpenChange: (open: boolean) => void };
@@ -31,40 +65,21 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const [ownOpen, setOwnOpen] = useState(false);
 
-  const confirm = useConfirm();
-
-  const unitControl = useUnitControlPanel();
-
   const open = panel ? panel.open : ownOpen;
 
   const setOpen = panel ? panel.onOpenChange : setOwnOpen;
+
+  const closePanel = () => setOpen(false);
+
+  const { row, refreshSources, randomUnits } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
   const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
-  const closePanel = () => setOpen(false);
+  const isActive = battle.status === BattleStatus.ACTIVE;
 
-  const refreshSources = async () => {
-    const ok = await confirm({
-      title: "Оновити з бібліотеки?",
-      description: "Здібності, атаки, закляття і слоти учасників оновляться з бази кампанії. HP, ефекти й використані ліміти залишаться.",
-      confirmLabel: "Оновити",
-    });
-
-    if (ok) actions.refreshSources.mutate({});
-  };
-
-  const rowActions: DmParticipantActions = {
-    onChangeHp: dialogs.hp.show,
-    onTakeControl: (p) => dmControl.set(p?.basicInfo.id ?? null),
-    onRemove: (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { removeFromBattle: true } }),
-    onKill: battle.status === BattleStatus.ACTIVE ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { kill: true } }) : undefined,
-    onDone: closePanel,
-    unitControl: unitControl.row,
-  };
-
-  const canScale = battle.status === BattleStatus.ACTIVE && participants.some(isLiveScalable);
+  const canScale = isActive && participants.some(isLiveScalable);
 
   return (
     <>
@@ -83,16 +98,15 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
       </button>}
 
       <div
+        inert={!open}
         className={cn(
           HUD_SURFACE,
-          "fixed bottom-0 top-0 z-50 flex max-w-full flex-col",
+          "fixed bottom-0 right-0 top-0 z-50 flex max-w-full flex-col",
           "border-l border-hud-line bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)]",
           "transition-transform duration-300 ease-out",
+          open ? "translate-x-0" : "translate-x-full",
         )}
-        style={{
-          width: PANEL_WIDTH,
-          right: open ? 0 : -PANEL_WIDTH,
-        }}
+        style={{ width: PANEL_WIDTH }}
       >
         <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hud-rule px-4">
           <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
@@ -109,101 +123,44 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
-          <button type="button" className={ACTION} onClick={dialogs.log.show}>
-            <ScrollText className="size-4 shrink-0 text-[var(--gold)]" />
-            {dialogs.log.open ? "Лог битви відкрито нижче" : "Відкрити лог битви"}
-          </button>
+          <QuickAction icon={ScrollText} label={dialogs.log.open ? "Лог битви відкрито нижче" : "Відкрити лог битви"} onClick={dialogs.log.show} />
 
-          {dialogs.log.open && (
-            <BattleLogPanel
-              battle={battle}
-              isDM={viewer.isDM}
-              onRollback={(actionIndex) => actions.rollback.mutate({ actionIndex })}
-              open={true}
-              onOpenChange={dialogs.log.setOpen}
-              embedInSidebar
+          {dialogs.log.open && <DmBattleLog onClose={() => dialogs.log.setOpen(false)} />}
+
+          <QuickAction icon={UserPlus} label="Додати героя / юніта" onClick={dialogs.addParticipant.show} closeAfter={closePanel} />
+
+          <QuickAction icon={Sparkles} tone="text-[#8fd0e8]" label="Накласти заклинання" onClick={onOpenCastSpell} closeAfter={closePanel} />
+
+          {isActive && (
+            <QuickAction icon={RefreshCw} label="Оновити з бібліотеки" disabled={refreshSources.isPending} onClick={refreshSources.run} />
+          )}
+
+          {isActive && (
+            <QuickAction
+              icon={Dices}
+              label="Роздати юнітів випадково"
+              disabled={!randomUnits.can || randomUnits.isPending}
+              title="Вільні союзні юніти (під ДМ) розподіляються між гравцями"
+              onClick={randomUnits.run}
             />
           )}
 
-          <button
-            type="button"
-            className={ACTION}
-            onClick={() => {
-              dialogs.addParticipant.show();
-              closePanel();
-            }}
-          >
-            <UserPlus className="size-4 shrink-0 text-[var(--gold)]" />
-            Додати героя / юніта
-          </button>
-
-          <button
-            type="button"
-            className={ACTION}
-            onClick={() => {
-              onOpenCastSpell();
-              closePanel();
-            }}
-          >
-            <Sparkles className="size-4 shrink-0 text-[#8fd0e8]" />
-            Накласти заклинання
-          </button>
-
-          {battle.status === BattleStatus.ACTIVE && (
-            <button type="button" className={ACTION} disabled={actions.refreshSources.isPending} onClick={refreshSources}>
-              <RefreshCw className="size-4 shrink-0 text-[var(--gold)]" />
-              Оновити з бібліотеки
-            </button>
-          )}
-
-          {battle.status === BattleStatus.ACTIVE && (
-            <button type="button" className={ACTION} disabled={!unitControl.random.can || unitControl.random.isPending} title="Вільні союзні юніти (під ДМ) розподіляються між гравцями" onClick={unitControl.random.run}>
-              <Dices className="size-4 shrink-0 text-[var(--gold)]" />
-              Роздати юнітів випадково
-            </button>
-          )}
-
           {canScale && (
-            <section className="pt-2">
-              <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
-                Ворожі юніти (лише цей бій)
-              </h4>
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <button type="button" className={ACTION} title="HP і шкода ×1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "buff" })}>
-                  <ChevronsUp className="size-4 shrink-0 text-hud-danger" />
-                  Підсилити
-                </button>
-                <button type="button" className={ACTION} title="HP і шкода ÷1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })}>
-                  <ChevronsDown className="size-4 shrink-0 text-hud-good" />
-                  Послабити
-                </button>
-              </div>
-            </section>
+            <PanelSection title="Ворожі юніти (лише цей бій)" className="grid grid-cols-2 gap-2 pt-2">
+              <QuickAction icon={ChevronsUp} tone="text-hud-danger" label="Підсилити" title="HP і шкода ×1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+              <QuickAction icon={ChevronsDown} tone="text-hud-good" label="Послабити" title="HP і шкода ÷1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+            </PanelSection>
           )}
 
-          <section className="pt-2">
-            <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
-              Учасники бою
-            </h4>
-            <div>
-              {participants.length === 0 ? (
-                <p className="py-2 text-sm italic text-[var(--hud-muted)]">
-                  Нікого на полі
-                </p>
-              ) : (
-                participants.map((p) => (
-                  <DmParticipantRow
-                    key={p.basicInfo.id}
-                    participant={p}
-                    controlled={dmControl.id === p.basicInfo.id}
-                    actions={rowActions}
-                  />
-                ))
-              )}
-            </div>
-          </section>
+          <PanelSection title="Учасники бою">
+            {participants.length === 0 ? (
+              <p className="py-2 text-sm italic text-[var(--hud-muted)]">Нікого на полі</p>
+            ) : (
+              participants.map((p) => <DmParticipantRow key={p.basicInfo.id} participant={p} controlled={dmControl.id === p.basicInfo.id} actions={row} />)
+            )}
+          </PanelSection>
 
-          {battle.status === BattleStatus.ACTIVE && (
+          {isActive && (
             <button
               type="button"
               className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-[15px] font-bold tracking-[.08em]"

@@ -1,12 +1,12 @@
-import { easeOutCubic } from "../runtime/easing";
-import { arcControl, bezier, chance, type FxPoint, perTick, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { show, tween, wait } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { show, tween, wait } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const PIERCE_MS = 110;
@@ -77,10 +77,10 @@ function drawArrow(g: CanvasRenderingContext2D, at: FxPoint, angle: number, leng
   g.restore();
 }
 
-export const eldritch: FxAnimation = ({ stage, from, to, spec }) => {
+export const eldritch: FxAnimation = ({ stage, from, targets, spec }) => {
   const head = glow("#a040ff");
 
-  return perTarget(stage, to, 0, async (target) => {
+  return perTarget(stage, targets, 0, async ({ at: target }) => {
     const ctrl = arcControl(from, target, 34);
 
     let pos = from;

@@ -53,12 +53,12 @@ export function Header({ email }: { email: string | null }) {
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
-          <Link href="/campaigns">
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong" asChild>
+            <Link href="/campaigns">
               <Home className="h-4 w-4" />
               <span className="sr-only">На головну</span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
 
           {isCampaignPage && (
             <DropdownMenu>

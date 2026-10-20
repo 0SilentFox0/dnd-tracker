@@ -100,7 +100,7 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
 
 function meleeBy(attackerId: string, targetId: string, order: BattleParticipant[], turnIndex: number) {
   return runAttackPhase({
-    battle: { initiativeOrder: order, battleLog: [], currentRound: 1, currentTurnIndex: turnIndex },
+    battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: turnIndex },
     data: { attackerId, targetId, attackId: "claw", d20Roll: 15, damageRolls: [3] },
     battleId: "b1",
     userId: "dm",

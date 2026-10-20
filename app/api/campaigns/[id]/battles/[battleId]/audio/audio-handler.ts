@@ -7,13 +7,13 @@ import { BATTLE_AUDIO_EVENT, battleChannelName } from "@/lib/pusher/channels";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
 import { battleAudioCommandSchema } from "@/lib/schemas/music";
+import { loadAudioLibrary } from "@/lib/server/audio/track-store";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { applyAudioCommand, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
-import { loadAudioLibrary } from "@/lib/utils/audio/track-store";
 import type { BattleAudioEvent, BattleAudioResponse, BattleAudioState } from "@/types/audio";
 
 const findAudio = (campaignId: string, battleId: string) => prisma.battleScene.findFirst({ where: { id: battleId, campaignId }, select: { audio: true } });

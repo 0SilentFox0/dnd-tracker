@@ -37,8 +37,10 @@ export function BattleFxLayer() {
 
     let finished = false;
 
+    let cancelled = false;
+
     const finish = () => {
-      if (finished) return;
+      if (finished || cancelled) return;
 
       finished = true;
       done(current.key);
@@ -52,13 +54,19 @@ export function BattleFxLayer() {
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()
-      .then(() => playFx(el, current))
+      .then(() => (cancelled ? undefined : playFx(el, current)))
       .catch((e: unknown) => console.warn("battle fx", e))
       .finally(() => {
         window.clearTimeout(guard);
         finish();
       });
+
+    // StrictMode's discarded pass must not start a second run on the same stage.
+    return () => {
+      cancelled = true;
+      window.clearTimeout(guard);
+    };
   }, [current, done]);
 
-  return <div ref={layer} className="fx-layer fixed" aria-hidden />;
+  return <div ref={layer} className="fx-layer" aria-hidden />;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type Body, ParticlePool } from "../runtime/particles";
+import { type Body, ParticlePool } from "@/components/battle/fx/runtime/particles";
 
 interface Dot extends Body {
   id: number;

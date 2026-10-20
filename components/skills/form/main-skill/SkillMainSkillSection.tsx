@@ -2,23 +2,11 @@
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import type { MainSkill } from "@/types/main-skills";
+import type { IdName } from "@/types/common";
+import type { SkillFormBinding } from "@/types/skills";
 
-interface SkillMainSkillSectionProps {
-  mainSkill: {
-    mainSkillId: string | null;
-    setters: {
-      setMainSkillId: (value: string | null) => void;
-    };
-  };
-  mainSkills: Pick<MainSkill, "id" | "name">[];
-}
-
-export function SkillMainSkillSection({
-  mainSkill,
-  mainSkills,
-}: SkillMainSkillSectionProps) {
-  const { mainSkillId, setters } = mainSkill;
+export function SkillMainSkillSection({ form, mainSkills }: { form: SkillFormBinding; mainSkills: IdName[] }) {
+  const { data, set } = form;
 
   return (
     <div className="space-y-3">
@@ -26,8 +14,8 @@ export function SkillMainSkillSection({
         <Label htmlFor="skill-main-skill">Основний навик</Label>
         <SelectField
           id="skill-main-skill"
-          value={mainSkillId || ""}
-          onValueChange={(value) => setters.setMainSkillId(value || null)}
+          value={data.mainSkillId || ""}
+          onValueChange={(value) => set("mainSkillId", value || null)}
           placeholder="Без основного навику"
           options={mainSkills.map((skill) => ({ value: skill.id, label: skill.name }))}
           allowNone

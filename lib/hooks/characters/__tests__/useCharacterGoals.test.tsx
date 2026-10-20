@@ -7,9 +7,9 @@ import { describe, expect, it, vi } from "vitest";
 const api = vi.hoisted(() => ({ putCharacterGoals: vi.fn() }));
 
 vi.mock("@/lib/api/characters", () => api);
-vi.mock("@/lib/hooks/common", () => ({ useNotify: () => vi.fn() }));
 
-import { characterSheetKey, useCharacterGoals } from "@/lib/hooks/characters";
+import { useCharacterGoals } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 
 describe("useCharacterGoals", () => {
   it("після збереження кладе цілі з відповіді сервера в кеш листа", async () => {
@@ -17,7 +17,7 @@ describe("useCharacterGoals", () => {
 
     const qc = new QueryClient();
 
-    qc.setQueryData(characterSheetKey("c", "ch"), { story: { biography: null, goals: [] } });
+    qc.setQueryData(characterKeys.sheet("c", "ch"), { story: { biography: null, goals: [] } });
 
     const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 
@@ -25,7 +25,7 @@ describe("useCharacterGoals", () => {
 
     await act(() => result.current.save([{ id: "p", text: "Нова", status: "active" }]));
 
-    expect(qc.getQueryData<{ story: { goals: unknown[] } }>(characterSheetKey("c", "ch"))?.story.goals).toEqual([{ id: "p", text: "Нова", status: "active", author: "player" }]);
+    expect(qc.getQueryData<{ story: { goals: unknown[] } }>(characterKeys.sheet("c", "ch"))?.story.goals).toEqual([{ id: "p", text: "Нова", status: "active", author: "player" }]);
   });
 
   it("оновлює кеш одразу, а при помилці повертає як було", async () => {
@@ -37,7 +37,7 @@ describe("useCharacterGoals", () => {
 
     const before = { viewer: { isDM: true, isOwner: false }, story: { biography: null, goals: [{ id: "d", text: "ДМ", status: "active", author: "dm" }] } };
 
-    qc.setQueryData(characterSheetKey("c", "ch"), before);
+    qc.setQueryData(characterKeys.sheet("c", "ch"), before);
 
     const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 
@@ -49,13 +49,13 @@ describe("useCharacterGoals", () => {
       done = result.current.save([{ id: "d", text: "ДМ", status: "done", author: "dm" }]);
     });
 
-    await waitFor(() => expect(qc.getQueryData<typeof before>(characterSheetKey("c", "ch"))?.story.goals[0].status).toBe("done"));
+    await waitFor(() => expect(qc.getQueryData<typeof before>(characterKeys.sheet("c", "ch"))?.story.goals[0].status).toBe("done"));
 
     await act(async () => {
       reject(new Error("offline"));
       await done;
     });
 
-    expect(qc.getQueryData(characterSheetKey("c", "ch"))).toEqual(before);
+    expect(qc.getQueryData(characterKeys.sheet("c", "ch"))).toEqual(before);
   });
 });

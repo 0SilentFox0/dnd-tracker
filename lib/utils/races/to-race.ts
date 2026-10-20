@@ -1,11 +1,7 @@
-import type { Prisma } from "@prisma/client";
-
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
-import type { Race } from "@/types/races";
+import type { Race, RaceRow } from "@/types/races";
 
-type RaceRow = Omit<Prisma.RaceGetPayload<object>, "abilities"> & { abilities?: unknown };
-
-export function toRace(row: RaceRow, extra: { abilities?: Ability[]; abilityIssues?: ConversionIssue[] } = {}): Race {
+export function toRace(row: Omit<RaceRow, "abilities">, extra: { abilities?: Ability[]; abilityIssues?: ConversionIssue[] } = {}): Race {
   const passive = row.passiveAbility;
 
   return {

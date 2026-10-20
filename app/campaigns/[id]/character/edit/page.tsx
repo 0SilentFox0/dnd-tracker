@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
-import { requireCampaignMember } from "@/lib/campaigns/access";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { requireCampaignMember } from "@/lib/server/campaigns/access";
 
 export default async function PlayerCharacterEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

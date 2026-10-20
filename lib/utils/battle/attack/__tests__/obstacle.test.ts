@@ -126,7 +126,7 @@ describe("Перешкода в атаці", () => {
 
     const run = (obstacle: boolean) =>
       runAttackPhase({
-        battle: { initiativeOrder: [archer, enemy("e1"), enemy("e2")], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+        battle: { initiativeOrder: [archer, enemy("e1"), enemy("e2")], currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "a", targetIds: ["e1", "e2"], attackId: "bow", attackRolls: [15, 16], damageRolls: [6, 7], obstacle },
         battleId: "b",
         userId: "u",

@@ -15,25 +15,19 @@ import {
 import type { MainSkill } from "@/types/main-skills";
 
 interface SkillCardActionsMenuProps {
-  skillId: string;
   currentMainSkillId: string | null;
   mainSkills: MainSkill[];
-  onRemove?: (skillId: string) => void;
-  onDuplicate?: (skillId: string) => void;
-  onOpenDeleteDialog: () => void;
-  onUpdateMainSkill: (mainSkillId: string | null) => void;
+  actions: {
+    onSelectMainSkill: (mainSkillId: string | null) => void;
+    onDuplicate?: () => void;
+    onDelete?: () => void;
+  };
 }
 
-export function SkillCardActionsMenu({
-  skillId,
-  currentMainSkillId,
-  mainSkills,
-  onRemove,
-  onDuplicate,
-  onOpenDeleteDialog,
-  onUpdateMainSkill,
-}: SkillCardActionsMenuProps) {
-  if (!onRemove && !onDuplicate && mainSkills.length === 0) {
+export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }: SkillCardActionsMenuProps) {
+  const { onSelectMainSkill, onDuplicate, onDelete } = actions;
+
+  if (!onDelete && !onDuplicate && mainSkills.length === 0) {
     return null;
   }
 
@@ -59,7 +53,7 @@ export function SkillCardActionsMenu({
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
-                onClick={() => onUpdateMainSkill(null)}
+                onClick={() => onSelectMainSkill(null)}
               >
                 <span className="inline-flex w-4 shrink-0 justify-center mr-2">
                   {currentMainSkillId === null ? (
@@ -75,7 +69,7 @@ export function SkillCardActionsMenu({
                 .map((ms) => (
                   <DropdownMenuItem
                     key={ms.id}
-                    onClick={() => onUpdateMainSkill(ms.id)}
+                    onClick={() => onSelectMainSkill(ms.id)}
                   >
                     <span className="inline-flex w-4 shrink-0 justify-center mr-2">
                       {currentMainSkillId === ms.id ? (
@@ -94,16 +88,13 @@ export function SkillCardActionsMenu({
           </DropdownMenuSub>
         )}
         {onDuplicate && (
-          <DropdownMenuItem onClick={() => onDuplicate(skillId)}>
+          <DropdownMenuItem onClick={onDuplicate}>
             <Copy className="h-4 w-4" />
             Копіювати
           </DropdownMenuItem>
         )}
-        {onRemove && (
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={onOpenDeleteDialog}
-          >
+        {onDelete && (
+          <DropdownMenuItem variant="destructive" onClick={onDelete}>
             <Trash2 className="h-4 w-4" />
             Видалити
           </DropdownMenuItem>

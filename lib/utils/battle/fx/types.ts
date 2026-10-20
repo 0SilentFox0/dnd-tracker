@@ -7,7 +7,7 @@ export interface FxSpec {
   archetype: FxArchetype;
   element: FxElement;
   actorId: string;
-  actorSide: string;
+  actorSide: "ally" | "enemy";
   targetIds: string[];
   hit: boolean;
   critical: boolean;

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
@@ -12,8 +11,6 @@ interface DeleteAllArtifactsButtonProps {
 }
 
 export function DeleteAllArtifactsButton({ campaignId, artifactsCount }: DeleteAllArtifactsButtonProps) {
-  const router = useRouter();
-
   const deleteAll = useDeleteAllArtifacts(campaignId);
 
   return (
@@ -24,10 +21,7 @@ export function DeleteAllArtifactsButton({ campaignId, artifactsCount }: DeleteA
       icon={<Trash2 className="h-4 w-4 mr-1.5" />}
       description={`Буде видалено всі артефакти кампанії (${artifactsCount}). Сети артефактів залишаться, але стануть порожніми. Цю дію не можна скасувати.`}
       pending={deleteAll.isPending}
-      onConfirm={async () => {
-        await deleteAll.mutateAsync();
-        router.refresh();
-      }}
+      onConfirm={() => deleteAll.mutateAsync()}
     />
   );
 }

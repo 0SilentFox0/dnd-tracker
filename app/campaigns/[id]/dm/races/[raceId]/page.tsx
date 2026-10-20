@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { RaceEditForm } from "@/components/races/RaceEditForm";
-import { requireCampaignDM } from "@/lib/campaigns/access";
 import { prisma } from "@/lib/db";
+import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { toRace } from "@/lib/utils/races/to-race";
 

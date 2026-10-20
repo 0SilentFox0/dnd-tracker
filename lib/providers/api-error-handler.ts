@@ -1,4 +1,4 @@
-import type { ApiErrorPayload } from "@/lib/api";
+import type { ApiErrorPayload } from "@/lib/api/client";
 
 let redirecting = false;
 

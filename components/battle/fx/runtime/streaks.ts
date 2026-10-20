@@ -1,5 +1,6 @@
 import { type FxPoint, pick, rand } from "./geometry";
-import { show, type Stage, tween } from "./stage";
+import { integrate } from "./physics";
+import { progress, type Stage } from "./stage";
 
 interface Streak {
   x: number;
@@ -44,7 +45,7 @@ export function streakBurst(s: Stage, at: FxPoint, o: StreakOptions) {
 
   let age = 0;
 
-  const hide = show(s, (g) => {
+  return progress(s, maxLife * 1000, (g) => {
     g.globalCompositeOperation = "lighter";
     g.lineCap = "round";
 
@@ -61,16 +62,9 @@ export function streakBurst(s: Stage, at: FxPoint, o: StreakOptions) {
       g.lineTo(p.x, p.y);
       g.stroke();
     }
-  });
-
-  return tween(s, maxLife * 1000, (_, dt) => {
+  }, (_, dt) => {
     age += dt;
 
-    for (const p of list) {
-      p.vx *= 1 - (o.drag ?? 2.5) * dt;
-      p.vy = p.vy * (1 - (o.drag ?? 2.5) * dt) + (o.gravity ?? 200) * dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-    }
-  }).then(hide);
+    for (const p of list) integrate(p, dt, o.drag ?? 2.5, o.gravity ?? 200);
+  });
 }

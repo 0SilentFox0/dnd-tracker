@@ -1,21 +1,20 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, chance, rand } from "../runtime/geometry";
-import { glowPulse } from "../runtime/motion";
-import { emit, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { leafPath, twinkle } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, rand } from "@/components/battle/fx/runtime/geometry";
+import { glowPulse } from "@/components/battle/fx/runtime/motion";
+import { emit, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { leafPath, twinkle } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { HEAL_MOTES } from "@/components/battle/fx/runtime/swatches";
+import { glow, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const ARRIVE_MS = ARCHETYPE_FX.healword.impactMs - 120;
 
 const TOTAL_MS = 2300;
-
-const MOTES = ["#e8ffd8", "#9ff0a0", "#5fd27a"];
 
 const SOOTHE = glowPulse("#7fe88a", { brightness: 1.25, saturate: 1.2, peak: 0.3, blur: 5 });
 
@@ -33,10 +32,8 @@ interface Grain {
   born: number;
 }
 
-export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const healword: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const ground = target.y + h;
@@ -144,10 +141,10 @@ export const healword: FxAnimation = ({ stage, from, to, targetEls }) =>
         if (t < ARRIVE_MS && chance(0.5, dt)) {
           const p = bezier(from, ctrl, target, easeOutCubic(clamp01(t / (ARRIVE_MS - 140))));
 
-          emit(stage, p, { tints: MOTES, speed: [5, 20], life: [0.3, 0.5], scale: [0.18, 0.03] });
+          emit(stage, p, { tints: HEAL_MOTES, speed: [5, 20], life: [0.3, 0.5], scale: [0.18, 0.03] });
         }
 
-        if (t > ARCHETYPE_FX.healword.impactMs && t < TOTAL_MS - 600 && chance(0.4, dt)) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
+        if (t > ARCHETYPE_FX.healword.impactMs && t < TOTAL_MS - 600 && chance(0.4, dt)) emit(stage, { x: target.x + rand(-w, w), y: ground - rand(0, h) }, { tints: HEAL_MOTES, speed: [10, 30], angle: [-Math.PI * 0.7, -Math.PI * 0.3], life: [0.6, 1], scale: [0.2, 0.04], gravity: -25 });
       },
     );
 

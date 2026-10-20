@@ -1,24 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { skillKeys } from "./keys";
-import { useMainSkills } from "./useMainSkills";
+import { useCreateMainSkill, useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
+import { useSaveSkillTree, useSkillTrees } from "./useSkillTrees";
 
-import { createMainSkill } from "@/lib/api/main-skills";
-import { getSkillTrees, updateSkillTree } from "@/lib/api/skill-trees";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import type { CellRef, RawTree } from "@/lib/utils/skills/progression";
 import { RACIAL_BRANCH_ID } from "@/lib/utils/skills/progression";
 import * as edit from "@/lib/utils/skills/progression";
-import { getSkillMainSkillId, getSkillName } from "@/lib/utils/skills/skill-helpers";
+import type { Skill } from "@/types/skills";
 
 export function useSkillTreeEditor(campaignId: string) {
-  const queryClient = useQueryClient();
-
   const notify = useNotify();
 
   const confirm = useConfirm();
@@ -29,13 +24,15 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const { data: skills = [] } = useSkills(campaignId);
 
-  const trees = useQuery({ queryKey: skillKeys.trees(campaignId), queryFn: () => getSkillTrees(campaignId), enabled: !!campaignId });
+  const trees = useSkillTrees(campaignId);
+
+  const saveTree = useSaveSkillTree(campaignId);
+
+  const createMainSkill = useCreateMainSkill(campaignId);
 
   const [race, setRace] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<{ key: string; treeId: string; raw: RawTree } | null>(null);
-
-  const [saving, setSaving] = useState(false);
 
   const activeRace = race ?? races[0]?.name ?? null;
 
@@ -74,24 +71,17 @@ export function useSkillTreeEditor(campaignId: string) {
     [raw, mainSkills, skills],
   );
 
-  const skillIcon = (s: (typeof skills)[number]) => s.icon || (s as { basicInfo?: { icon?: string } }).basicInfo?.icon || null;
-
-  const skillName = (s: (typeof skills)[number]) => getSkillName(s) || s.id;
+  const skillName = (s: Skill) => s.name || s.id;
 
   const save = async () => {
     if (!current || !activeRace || errors.length > 0) return;
 
-    setSaving(true);
     try {
-      const saved = await updateSkillTree({ campaignId, treeId: current.treeId, race: activeRace, skills: current.raw });
+      const saved = await saveTree.mutateAsync({ treeId: current.treeId, race: activeRace, skills: current.raw });
 
       setDraft({ key: `${activeRace}:${saved.id}`, treeId: saved.id, raw: edit.readTreeJson(saved.skills) });
-      await queryClient.invalidateQueries({ queryKey: skillKeys.trees(campaignId) });
-      void queryClient.invalidateQueries({ queryKey: skillKeys.progressionOf(campaignId) });
     } catch (error) {
       await notify((error as Error).message);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -114,21 +104,21 @@ export function useSkillTreeEditor(campaignId: string) {
       race: activeRace,
       isLoading: racesPending || trees.isPending,
       dirty,
-      isSaving: saving,
+      isSaving: saveTree.isPending,
     },
     view: {
       raw,
       tree,
       errors,
       locations: raw ? edit.skillLocations(raw) : new Map<string, CellRef[]>(),
-      librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: skillIcon(s), mainSkillId: getSkillMainSkillId(s) ?? null, summary: (s as { abilitySummary?: string[] }).abilitySummary ?? [] })),
+      librarySkills: skills.map((s) => ({ id: s.id, name: skillName(s), icon: s.icon || null, mainSkillId: s.mainSkillId ?? null, summary: s.abilitySummary ?? [] })),
       availableBranches: mainSkills.filter((m) => !tree?.branches.some((b) => b.id === m.id)).map((m) => ({ id: m.id, name: m.name, color: m.color, icon: m.icon ?? null })),
     },
     actions: {
       setCell: (ref: CellRef, skillId: string | null) => {
         const skill = skillId ? skills.find((s) => s.id === skillId) : null;
 
-        update((r) => edit.setCellSkill(r, ref, skill ? { id: skill.id, name: skillName(skill), icon: skillIcon(skill) } : null));
+        update((r) => edit.setCellSkill(r, ref, skill ? { id: skill.id, name: skillName(skill), icon: skill.icon || null } : null));
       },
       addBranch: (mainSkillId: string) => {
         const m = mainSkills.find((x) => x.id === mainSkillId);
@@ -137,9 +127,8 @@ export function useSkillTreeEditor(campaignId: string) {
       },
       createBranch: async (input: { name: string; color: string; icon?: string | null }): Promise<boolean> => {
         try {
-          const created = await createMainSkill(campaignId, { name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
+          const created = await createMainSkill.mutateAsync({ name: input.name, color: input.color, ...(input.icon && { icon: input.icon }) });
 
-          await queryClient.invalidateQueries({ queryKey: skillKeys.mainSkills(campaignId) });
           update((r) => edit.addBranch(r, { id: created.id, name: created.name, color: created.color, icon: created.icon ?? null }));
 
           return true;

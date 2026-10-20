@@ -9,10 +9,10 @@ const playFx = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => fx.value }));
 vi.mock("@/components/battle/fx/runtime/play", () => ({ playFx }));
 vi.mock("@/components/battle/fx/runtime/stage", () => ({ cancelLayer: vi.fn() }));
-vi.mock("@/components/battle/fx/auras/canvas/AuraCanvas", () => ({
+vi.mock("@/components/battle/fx/auras/AuraCanvas", () => ({
   AuraCanvas: ({ kinds, still }: { kinds: string[]; still?: boolean }) => <span data-testid="aura" data-kinds={kinds.join(",")} data-still={String(!!still)} />,
 }));
-vi.mock("@/components/battle/fx/frames/canvas/CanvasFrame", () => ({ CanvasFrame: () => <span data-testid="hit-frame" /> }));
+vi.mock("@/components/battle/fx/frames/CanvasFrame", () => ({ CanvasFrame: () => <span data-testid="hit-frame" /> }));
 
 import SpellBattlePreviewPanel from "@/components/spells/preview/SpellBattlePreviewPanel";
 import { SPELLS } from "@/data/library/spells";

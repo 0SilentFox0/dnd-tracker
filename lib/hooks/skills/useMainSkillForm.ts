@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useUpdateMainSkill } from "./useMainSkills";
 
-import { useNotify } from "@/lib/hooks/common";
+import { useNavigateFresh, useNotify } from "@/lib/hooks/common";
 import { useSpellGroups } from "@/lib/hooks/spells";
 import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
@@ -13,6 +13,8 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
   const notify = useNotify();
 
   const router = useRouter();
+
+  const navigateFresh = useNavigateFresh();
 
   const update = useUpdateMainSkill(campaignId);
 
@@ -30,10 +32,10 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       await update.mutateAsync({ mainSkillId: mainSkill.id, data: formData });
-      router.push(listHref);
-      router.refresh();
+      navigateFresh(listHref);
     } catch (error) {
       console.error("Error updating main skill:", error);
       void notify("Помилка при оновленні основного навику");
@@ -41,11 +43,9 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
   };
 
   return {
-    formData,
-    patch: (patch: Partial<MainSkillFormData>) => setFormData((prev) => ({ ...prev, ...patch })),
+    form: { data: formData, set: (patch: Partial<MainSkillFormData>) => setFormData((prev) => ({ ...prev, ...patch })) },
     spellGroups,
-    isSaving: update.isPending,
-    submit,
-    cancel: () => router.push(listHref),
+    status: { isSaving: update.isPending },
+    actions: { submit, cancel: () => router.push(listHref) },
   };
 }

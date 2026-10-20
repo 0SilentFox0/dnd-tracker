@@ -35,11 +35,9 @@ export async function GET(
 
     if (unit instanceof NextResponse) return unit;
 
-    const row = unit as NonNullable<typeof unit>;
+    const { abilities, issues: abilityIssues } = readAbilities("unit", unit);
 
-    const { abilities, issues: abilityIssues } = readAbilities("unit", row);
-
-    return NextResponse.json({ ...toUnit(row), abilities, abilityIssues });
+    return NextResponse.json({ ...toUnit(unit), abilities, abilityIssues });
   } catch (error) {
     return handleApiError(error, { action: "fetch unit" });
   }

@@ -6,15 +6,11 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
 import { useMainSkills, usePersonalSkills } from "@/lib/hooks/skills";
+import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 
 interface CharacterAbilitiesSectionProps {
   campaignId: string;
-  abilities: {
-    personalSkillId: string;
-    setters: {
-      setPersonalSkillId: (value: string) => void;
-    };
-  };
+  abilities: CharacterFormBindings["abilities"];
 }
 
 export function CharacterAbilitiesSection({
@@ -35,8 +31,8 @@ export function CharacterAbilitiesSection({
         <Label htmlFor="personalSkillId">Уміння (Персональні)</Label>
         <SelectField
           id="personalSkillId"
-          value={abilities.personalSkillId}
-          onValueChange={abilities.setters.setPersonalSkillId}
+          value={abilities.data.personalSkillId}
+          onValueChange={(value) => abilities.set("personalSkillId", value)}
           options={options}
           placeholder="Виберіть скіл з групи Персональні"
           triggerClassName="w-full mt-1"

@@ -4,13 +4,14 @@ import { impactFor } from "./impact";
 import { mapAction } from "./map-action";
 import { previewParticipant } from "./preview-participant";
 import { PREVIEW_UNITS, type PreviewUnitId } from "./preview-units";
-import { effectLabel, targetingLabel } from "./spell-labels";
 import type { FxAuraKind, FxSpec } from "./types";
 
 import type { LibrarySpell } from "@/data/library/types";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
@@ -22,7 +23,7 @@ export interface SpellFxTarget {
   auras: FxAuraKind[];
 }
 
-export interface SpellFxResult {
+interface SpellFxResult {
   spec: FxSpec | null;
   /** Arena units the spell is aimed at (the caster stands apart). */
   targetIds: PreviewUnitId[];
@@ -54,38 +55,36 @@ export interface PreviewSpell {
 
 const SLOTS = Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9].map((l) => [String(l), { max: 3, current: 3 }]));
 
+const ARENA_STATS: Record<PreviewUnitId, Omit<Parameters<typeof previewParticipant>[0], "id" | "name" | "side">> = {
+  caster: { hp: 40, maxHp: 40, level: 10, spellSlots: SLOTS },
+  ally: { hp: 8, maxHp: 40 },
+  fallen: { hp: 0, maxHp: 40, status: CombatStatus.DEAD },
+  e1: { hp: 200, maxHp: 200 },
+  e2: { hp: 200, maxHp: 200 },
+};
+
 function arena(): BattleParticipant[] {
-  return [
-    previewParticipant({ id: "caster", name: "Чарівниця", side: ParticipantSide.ALLY, hp: 40, maxHp: 40, level: 10, spellSlots: SLOTS }),
-    previewParticipant({ id: "ally", name: "Воїн", side: ParticipantSide.ALLY, hp: 8, maxHp: 40 }),
-    previewParticipant({ id: "fallen", name: "Полеглий", side: ParticipantSide.ALLY, hp: 0, maxHp: 40, status: CombatStatus.DEAD }),
-    previewParticipant({ id: "e1", name: "Огр", side: ParticipantSide.ENEMY, hp: 200, maxHp: 200 }),
-    previewParticipant({ id: "e2", name: "Лич", side: ParticipantSide.ENEMY, hp: 200, maxHp: 200 }),
-  ];
+  return PREVIEW_UNITS.map(({ id, name, side }) => previewParticipant({ id, name, side: side === "ally" ? ParticipantSide.ALLY : ParticipantSide.ENEMY, ...ARENA_STATS[id] }));
 }
 
-function targetIdsFor(t: SpellTargeting): PreviewUnitId[] {
-  switch (t.kind) {
-    case "self":
-      return ["caster"];
-    case "ally":
-      return ["ally"];
-    case "allyDead":
-    case "allAlliesDead":
-      return ["fallen"];
-    case "allAllies":
-      return ["caster", "ally"];
-    case "everyone":
-      return ["caster", "ally", "e1", "e2"];
-    case "area":
-    case "template":
-      return (t.side === "ally" ? (["caster", "ally"] as const) : (["e1", "e2"] as const)).slice(0, t.maxTargets);
-    case "allEnemies":
-      return ["e1", "e2"];
-    case "enemy":
-      return ["e1"];
-  }
-}
+type TargetingOf<K extends SpellTargeting["kind"]> = Extract<SpellTargeting, { kind: K }>;
+
+const sideIds = (t: TargetingOf<"area" | "template">) => (t.side === "ally" ? (["caster", "ally"] as const) : (["e1", "e2"] as const)).slice(0, t.maxTargets);
+
+const TARGET_IDS: { [K in SpellTargeting["kind"]]: (t: TargetingOf<K>) => PreviewUnitId[] } = {
+  self: () => ["caster"],
+  ally: () => ["ally"],
+  allyDead: () => ["fallen"],
+  allAlliesDead: () => ["fallen"],
+  allAllies: () => ["caster", "ally"],
+  everyone: () => ["caster", "ally", "e1", "e2"],
+  area: sideIds,
+  template: sideIds,
+  allEnemies: () => ["e1", "e2"],
+  enemy: () => ["e1"],
+};
+
+const targetIdsFor = (t: SpellTargeting) => (TARGET_IDS[t.kind] as (t: SpellTargeting) => PreviewUnitId[])(t);
 
 export function castableOf({ id, name, level, groupId, rules }: PreviewSpell): CastableSpell {
   return { id, name, level, groupId, definition: readSpellDefinition({ id, ...rules }) };
@@ -164,7 +163,7 @@ export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
     school: spell.school,
     level: spell.level,
     description: spell.description ?? "",
-    effects: [...new Set(castable.definition.effects.map(effectLabel))],
+    effects: [...new Set(castable.definition.effects.map(describeEffect))],
     targeting: targetingLabel(castable.definition.targeting),
     ...previewCastFx(castable),
   };

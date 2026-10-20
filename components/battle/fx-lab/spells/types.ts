@@ -1,4 +1,4 @@
-import type { PreviewSpell, SpellFxPreview } from "@/lib/utils/battle/fx/spell-preview";
+import type { PreviewSpell, SpellFxPreview } from "@/lib/utils/battle/fx";
 
 export interface SpellCardData extends SpellFxPreview {
   icon: string | null;

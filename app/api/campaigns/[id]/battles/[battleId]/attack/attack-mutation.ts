@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
@@ -43,22 +44,20 @@ export const attackBodySchema = z
 
 export type AttackBody = z.infer<typeof attackBodySchema>;
 
-// атака шукається так само, як у runAttackPhase; якщо її немає — помилку дасть сама фаза атаки
 function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "endTurn">): void {
-  const attacker = ctx.participants.find((p) => p.basicInfo.id === data.attackerId);
+  const attacker = findParticipant(ctx.participants, data.attackerId);
 
-  const attack = data.attackId
-    ? attacker?.battleData.attacks.find((a) => a.id === data.attackId || a.name === data.attackId)
-    : attacker?.battleData.attacks[0];
+  const attack = attacker && findAttack(attacker, data.attackId);
 
+  // без атакуючого чи атаки помилку дасть сама фаза атаки
   if (!attacker || !attack) return;
 
-  const targetIds = data.targetIds?.length ? data.targetIds : data.targetId ? [data.targetId] : [];
+  const targetIds = requestedTargetIds(data);
 
   // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
   assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
 
-  const targets = targetIds.flatMap((id) => ctx.participants.find((p) => p.basicInfo.id === id) ?? []);
+  const targets = targetIds.flatMap((id) => findParticipant(ctx.participants, id) ?? []);
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
 
@@ -75,7 +74,7 @@ const defaultDeps: AttackMutationDeps = {
 };
 
 async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, deps: AttackMutationDeps): Promise<Map<string, CastableSpell>> {
-  const attacker = ctx.participants.find((p) => p.basicInfo.id === attackerId);
+  const attacker = findParticipant(ctx.participants, attackerId);
 
   if (!attacker) return new Map();
 
@@ -98,7 +97,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
     const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
 
     const phase = runAttackPhase({
-      battle: { initiativeOrder: ctx.participants, battleLog: [], currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
+      battle: { initiativeOrder: ctx.participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
       data,
       battleId: ctx.scene.id,
       userId: ctx.userId,

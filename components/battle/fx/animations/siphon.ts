@@ -1,14 +1,15 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { sinkingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, type FxPoint, pick, prune, rand, wavePoints } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { taperedStroke } from "../runtime/shapes";
-import { animateEl, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { sinkingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, pick, prune, rand, wavePoints } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { taperedStroke } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const LATCH_MS = ARCHETYPE_FX.siphon.impactMs;
@@ -40,10 +41,8 @@ function along(pts: FxPoint[], u: number) {
   return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * k, y: pts[i].y + (pts[i + 1].y - pts[i].y) * k };
 }
 
-export const siphon: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const siphon: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const face = faceOf(el, target);
@@ -130,7 +129,7 @@ export const siphon: FxAnimation = ({ stage, from, to, targetEls }) =>
       },
     );
 
-    const droop = animateEl(stage, el, [{ transform: "none", filter: "none" }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.35 }, { transform: "translateY(4px) scale(.965)", filter: "brightness(.68) saturate(.35)", offset: 0.85 }, { transform: "none", filter: "none" }], { duration: TOTAL_MS - LATCH_MS, delay: LATCH_MS, easing: "ease-in-out" });
+    const droop = animateEl(stage, el, holdFilter("brightness(.68) saturate(.35)", 0.35, 0.85, { transform: "translateY(4px) scale(.965)" }), { duration: TOTAL_MS - LATCH_MS, delay: LATCH_MS, easing: "ease-in-out" });
 
     await Promise.all([run, droop]);
   });

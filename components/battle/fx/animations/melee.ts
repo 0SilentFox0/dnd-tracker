@@ -1,9 +1,9 @@
-import { lungeOffset } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { playSheet, SHEETS } from "../runtime/sprites";
-import { animateEl, show, tween, wait } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { lungeOffset } from "@/components/battle/fx/runtime/geometry";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { playSheet, SHEETS } from "@/components/battle/fx/runtime/sprites";
+import { animateEl, progress, wait } from "@/components/battle/fx/runtime/stage";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 // The swing lands this long after the cut starts.
@@ -23,9 +23,7 @@ export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palet
   const cuts = (spec.critical ? [-0.6, 2.4] : [-0.6]).map(async (rot, i) => {
     await wait(stage, i * 90);
 
-    let k = 0;
-
-    const hide = show(stage, (g) => {
+    await progress(stage, 360, (g, k) => {
       const start = rot + k * 0.6;
 
       g.globalAlpha = 1 - k * k;
@@ -37,9 +35,6 @@ export const melee: FxAnimation = async ({ spec, stage, from, to, actorEl, palet
       g.arc(at.x, at.y, 52, start, start + Math.min(1, k * 2) * 2.2);
       g.stroke();
     });
-
-    await tween(stage, 360, (v) => (k = v));
-    hide();
   });
 
   await wait(stage, CUT_LEAD_MS);

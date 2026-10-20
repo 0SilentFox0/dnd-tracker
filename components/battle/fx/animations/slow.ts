@@ -1,15 +1,15 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { arcControl, bezier, chance, farSide, type FxPoint, perTick, rand } from "../runtime/geometry";
-import { motionPath } from "../runtime/motion";
-import { emit, flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { chainLink, shackle, taperedStroke } from "../runtime/shapes";
-import { animateEl, schedule, show, type Stage, timeline, tween } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { arcControl, bezier, chance, farSide, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter, motionPath } from "@/components/battle/fx/runtime/motion";
+import { emit, flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { chainLink, shackle, taperedStroke } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, show, type Stage, timeline, tween } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const TOTAL_MS = 2600;
@@ -69,11 +69,9 @@ function chainPoints(a: FxPoint, b: FxPoint, sag: number, upTo: number) {
   });
 }
 
-export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
+export const slow: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await drift(stage, from, target);
-
-    const el = targetEls[i];
 
     const { w, h } = halfSize(el);
 
@@ -205,7 +203,7 @@ export const slow: FxAnimation = ({ stage, from, to, targetEls }) =>
 
     const heavy = Promise.all([
       animateEl(stage, el, drag.keyframes, { duration: drag.duration, easing: "ease-in-out" }),
-      animateEl(stage, el, [{ filter: "none" }, { filter: "grayscale(.65) brightness(.72)", offset: 0.25 }, { filter: "grayscale(.65) brightness(.72)", offset: 0.8 }, { filter: "none" }], { duration: drag.duration }),
+      animateEl(stage, el, holdFilter("grayscale(.65) brightness(.72)", 0.25, 0.8), { duration: drag.duration }),
     ]);
 
     await Promise.all([run, heavy]);

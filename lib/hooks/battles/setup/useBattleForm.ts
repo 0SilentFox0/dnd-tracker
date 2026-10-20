@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useCreateBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
 
-import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { useConfirm, useNavigateFresh, useNotify } from "@/lib/hooks/common";
 import type { BattleMapConfig, BattlePreparationParticipant } from "@/types/battle";
 
 interface UseBattleFormParams {
@@ -22,6 +22,8 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
   const confirm = useConfirm();
 
   const router = useRouter();
+
+  const navigateFresh = useNavigateFresh();
 
   const create = useCreateBattle(campaignId);
 
@@ -45,10 +47,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
 
       if (battleId) {
         update.mutate(body, {
-          onSuccess: () => {
-            router.push(listHref);
-            router.refresh();
-          },
+          onSuccess: () => navigateFresh(listHref),
           onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при оновленні бою"),
         });
 
@@ -60,7 +59,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
         onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при створенні бою"),
       });
     },
-    [battleId, formData.name, formData.description, participants, map, router, notify, create, update, listHref],
+    [battleId, formData.name, formData.description, participants, map, router, navigateFresh, notify, create, update, listHref],
   );
 
   const handleDelete = useCallback(async () => {
@@ -69,13 +68,10 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
     if (!(await confirm({ title: "Ви впевнені, що хочете видалити цю сцену бою?", confirmLabel: "Видалити", destructive: true }))) return;
 
     remove.mutate(battleId, {
-      onSuccess: () => {
-        router.push(listHref);
-        router.refresh();
-      },
+      onSuccess: () => navigateFresh(listHref),
       onError: () => void notify("Помилка при видаленні бою"),
     });
-  }, [battleId, confirm, remove, router, listHref, notify]);
+  }, [battleId, confirm, remove, navigateFresh, listHref, notify]);
 
   return {
     status: { isSaving: battleId ? update.isPending : create.isPending, isDeleting: remove.isPending },

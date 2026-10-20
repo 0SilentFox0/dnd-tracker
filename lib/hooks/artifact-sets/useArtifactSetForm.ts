@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { useDeleteArtifactSet, useSaveArtifactSet } from "./useArtifactSets";
 
-import { abilitySaveError } from "@/lib/hooks/abilities";
+import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
-import { useConfirm } from "@/lib/hooks/common";
+import { useConfirm, useNavigateFresh } from "@/lib/hooks/common";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { filterArtifactsSelectableForSet } from "@/lib/utils/artifacts/artifact-set-form";
 
@@ -23,7 +22,7 @@ export interface ArtifactSetFormInitial {
 export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId: string; setId?: string; initial: ArtifactSetFormInitial }) {
   const confirm = useConfirm();
 
-  const router = useRouter();
+  const navigateFresh = useNavigateFresh();
 
   const save = useSaveArtifactSet(campaignId, setId);
 
@@ -42,11 +41,9 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
 
   const [selectedIds, setSelectedIds] = useState(() => new Set(initial.artifactIds ?? []));
 
-  const [abilityErrors, setAbilityErrors] = useState(0);
+  const abilities = useAbilityValidity();
 
   const [error, setError] = useState<string | null>(null);
-
-  const abilitiesValid = abilityErrors === 0;
 
   const selectableArtifacts = useMemo(() => filterArtifactsSelectableForSet(artifacts, setId), [artifacts, setId]);
 
@@ -68,7 +65,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!abilitiesValid) return;
+    if (!abilities.valid) return;
 
     setError(null);
 
@@ -81,8 +78,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
         artifactIds: [...selectedIds],
         icon: fields.icon.trim() ? fields.icon : null,
       });
-      router.push(listHref);
-      router.refresh();
+      navigateFresh(listHref);
     } catch (err) {
       setError(abilitySaveError(err, "Помилка збереження"));
     }
@@ -98,16 +94,13 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
       onConfirm: () => del.mutateAsync(setId),
     });
 
-    if (ok) {
-      router.push(listHref);
-      router.refresh();
-    }
+    if (ok) navigateFresh(listHref);
   };
 
   return {
     form: { data: fields, set: setField },
     members: { selectedIds, selectable: selectableArtifacts, toggle: toggleArtifact },
-    abilities: { errors: abilityErrors, setErrors: setAbilityErrors, valid: abilitiesValid },
+    abilities,
     status: { isBusy: save.isPending || del.isPending, error },
     actions: { submit, remove },
   };

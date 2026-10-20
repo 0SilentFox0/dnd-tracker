@@ -19,7 +19,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (role: "dm" | "player", maxLevel = 20) =>
-  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
+  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, allowPlayerEdit: true, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
 
 const CHARACTER = {
   id: "ch", campaignId: "camp", controlledBy: "owner", type: "player", race: "Ельф", level: 3, seenLevel: 3,

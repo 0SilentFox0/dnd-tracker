@@ -44,6 +44,5 @@ export const ABILITY_SCORES = [
   { key: "moral", label: "Мораль", abbreviation: "MOR" },
 ] as const;
 
-export type AbilityScore = (typeof ABILITY_SCORES)[number]["key"];
 
 export const DEFAULT_AREA_TARGETS = 3;

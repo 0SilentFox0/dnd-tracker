@@ -1,4 +1,5 @@
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
+import { pickOne } from "@/lib/utils/common/dice";
 import { calculateSpellSlotGain, type SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -37,7 +38,7 @@ export function applyLevelGain({ character, race, campaign, fromLevel, toLevel, 
 
     if (open.length === 0) break;
 
-    const key = open[Math.floor(rng() * open.length)];
+    const key = pickOne(open, rng);
 
     abilityScores[key] += 1;
     gained.push(key);

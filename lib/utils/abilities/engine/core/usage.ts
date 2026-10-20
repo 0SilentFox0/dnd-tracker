@@ -3,7 +3,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const EMPTY: AbilityUsageCounter = { battle: 0, round: 0, turn: 0 };
 
-export function usageOf(p: BattleParticipant, key: string): AbilityUsageCounter {
+function usageOf(p: BattleParticipant, key: string): AbilityUsageCounter {
   return p.battleData.abilityUsage?.[key] ?? EMPTY;
 }
 

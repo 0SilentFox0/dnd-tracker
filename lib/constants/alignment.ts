@@ -9,5 +9,3 @@ export const ALIGNMENTS = [
   "Neutral Evil",
   "Chaotic Evil",
 ] as const;
-
-export type Alignment = (typeof ALIGNMENTS)[number];

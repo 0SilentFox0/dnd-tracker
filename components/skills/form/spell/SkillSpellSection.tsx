@@ -4,28 +4,17 @@ import { SkillSpellSelector } from "./SkillSpellSelector";
 
 import { HudSection } from "@/components/hud/form";
 import type { IdName } from "@/types/common";
+import type { SkillFormBinding } from "@/types/skills";
 
-interface SkillSpellSectionProps {
-  spell: {
-    spellId: string | null;
-    grantedSpellId: string | null;
-    setters: {
-      setSpellId: (value: string | null) => void;
-      setGrantedSpellId: (value: string | null) => void;
-    };
-  };
-  spells: IdName[];
-}
-
-export function SkillSpellSection({ spell, spells }: SkillSpellSectionProps) {
-  const { spellId, grantedSpellId, setters } = spell;
+export function SkillSpellSection({ form, spells }: { form: SkillFormBinding; spells: IdName[] }) {
+  const { data, set } = form;
 
   return (
     <HudSection title="Заклинання">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
-          <SkillSpellSelector spellId={spellId} spells={spells} onSpellIdChange={setters.setSpellId} label="Пов'язане заклинання" placeholder="Не обрано" noneLabel="Не обрано" />
-          <SkillSpellSelector id="skill-granted-spell" spellId={grantedSpellId} spells={spells} onSpellIdChange={setters.setGrantedSpellId} label="Дає заклинання" placeholder="Не дає заклинання" noneLabel="Не дає заклинання" />
+          <SkillSpellSelector spellId={data.spellId} spells={spells} onSpellIdChange={(id) => set("spellId", id)} label="Пов'язане заклинання" placeholder="Не обрано" noneLabel="Не обрано" />
+          <SkillSpellSelector id="skill-granted-spell" spellId={data.grantedSpellId} spells={spells} onSpellIdChange={(id) => set("grantedSpellId", id)} label="Дає заклинання" placeholder="Не дає заклинання" noneLabel="Не дає заклинання" />
         </div>
         <p className="text-xs text-muted-foreground">
           «Дає заклинання» — герой, що вивчив цей скіл, отримує заклинання в книгу. Розширення цілей заклинань (область, усі) задаються вмінням «Цілі заклинань».

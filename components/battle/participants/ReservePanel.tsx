@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ReserveParticipantRow } from "./ReserveParticipantRow";
 
+import { SideDot } from "@/components/battle/hud";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -11,14 +12,14 @@ import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 const SIDES = [
-  { side: ParticipantSide.ALLY, label: "Союзники", color: "var(--ally)" },
-  { side: ParticipantSide.ENEMY, label: "Вороги", color: "var(--enemy)" },
+  { side: ParticipantSide.ALLY, label: "Союзники" },
+  { side: ParticipantSide.ENEMY, label: "Вороги" },
 ];
 
 function ReserveList() {
   const { roster: { reserve } } = useBattleScene();
 
-  return SIDES.map(({ side, label, color }) => {
+  return SIDES.map(({ side, label }) => {
     const list = reserve.filter((p) => p.basicInfo.side === side);
 
     if (list.length === 0) return null;
@@ -26,7 +27,7 @@ function ReserveList() {
     return (
       <div key={side}>
         <div className="hud-sc flex items-center gap-2 pt-2 text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
-          <i className="size-2 rounded-full" style={{ background: color }} />
+          <SideDot side={side} />
           {label}
         </div>
         {list.map((p) => <ReserveParticipantRow key={p.basicInfo.id} participant={p} />)}

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
-import { ConfirmCancelFooter } from "@/components/battle/dm/dialogs/ConfirmCancelFooter";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { BattleParticipant } from "@/types/battle";
+
+const FORM_ID = "change-hp-form";
 
 interface ChangeHpDialogProps {
   participant: BattleParticipant | null;
@@ -15,72 +17,27 @@ interface ChangeHpDialogProps {
   isPending?: boolean;
 }
 
-function ChangeHpFormInner({
-  participant,
-  onConfirm,
-  onClose,
-  isPending,
-}: {
-  participant: BattleParticipant;
-  onConfirm: (participantId: string, newHp: number) => void;
-  onClose: () => void;
-  isPending?: boolean;
-}) {
-  const [value, setValue] = useState(() =>
-    String(participant.combatStats.currentHp),
-  );
+/** Закриває батько в onSuccess мутації — до того видно «Зберігаємо…», а помилка не губить введене. */
+export function ChangeHpDialog({ participant, ...rest }: ChangeHpDialogProps) {
+  if (!participant) return null;
 
-  const maxHp = participant.combatStats.maxHp;
-
-  const numValue = parseInt(value, 10);
-
-  const isValid = value !== "" && !Number.isNaN(numValue);
-
-  const handleSubmit = () => {
-    const num = parseInt(value, 10);
-
-    if (Number.isNaN(num) || num < 0) return;
-
-    onConfirm(
-      participant.basicInfo.id,
-      Math.min(num, participant.combatStats.maxHp),
-    );
-    onClose();
-  };
-
-  return (
-    <div className="space-y-4 py-2">
-      <div className="space-y-2">
-        <Label>
-          Нове значення HP (0 … {maxHp})
-        </Label>
-        <Input
-          type="number"
-          min={0}
-          max={maxHp}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </div>
-      <ConfirmCancelFooter
-        onCancel={onClose}
-        confirmLabel="Зберегти"
-        onConfirm={handleSubmit}
-        confirmDisabled={!isValid}
-        confirmLoading={isPending}
-        confirmLoadingLabel="Зберігаємо…"
-      />
-    </div>
-  );
+  return <ChangeHpDialogBody key={participant.basicInfo.id} participant={participant} {...rest} />;
 }
 
-export function ChangeHpDialog({
-  participant,
-  onClose,
-  onConfirm,
-  isPending,
-}: ChangeHpDialogProps) {
-  if (!participant) return null;
+function ChangeHpDialogBody({ participant, onClose, onConfirm, isPending }: ChangeHpDialogProps & { participant: BattleParticipant }) {
+  const { currentHp, maxHp } = participant.combatStats;
+
+  const [value, setValue] = useState(() => String(currentHp));
+
+  const num = parseInt(value, 10);
+
+  const isValid = !Number.isNaN(num) && num >= 0;
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (isValid) onConfirm(participant.basicInfo.id, Math.min(num, maxHp));
+  };
 
   return (
     <ResponsiveDialog
@@ -89,20 +46,19 @@ export function ChangeHpDialog({
       size="md"
       hud
       title="Змінити HP"
-      description={
+      description={<>{participant.basicInfo.name} — поточний HP: {currentHp} / {maxHp}</>}
+      footer={
         <>
-          {participant.basicInfo.name} — поточний HP:{" "}
-          {participant.combatStats.currentHp} / {participant.combatStats.maxHp}
+          <Button type="button" variant="outline" onClick={onClose}>Скасувати</Button>
+          <Button type="submit" form={FORM_ID} disabled={!isValid || isPending}>{isPending ? "Зберігаємо…" : "Зберегти"}</Button>
         </>
       }
     >
-      <ChangeHpFormInner
-        key={participant.basicInfo.id}
-        participant={participant}
-        onConfirm={onConfirm}
-        onClose={onClose}
-        isPending={isPending}
-      />
+      {/* noValidate: значення понад max обрізається до max, а не блокується браузером */}
+      <form id={FORM_ID} noValidate onSubmit={submit} className="space-y-2 py-2">
+        <Label htmlFor="change-hp-value">Нове значення HP (0 … {maxHp})</Label>
+        <Input id="change-hp-value" type="number" min={0} max={maxHp} value={value} onChange={(e) => setValue(e.target.value)} />
+      </form>
     </ResponsiveDialog>
   );
 }

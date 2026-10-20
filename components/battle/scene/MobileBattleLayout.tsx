@@ -22,43 +22,25 @@ import { ReserveSheetButton } from "@/components/battle/participants/ReservePane
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
+import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
+import { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "@/lib/hooks/battle/useMobileBattleTabs";
+import { useSelectedParticipant } from "@/lib/hooks/battle/useSelectedParticipant";
 import { cn } from "@/lib/utils";
+import { myTurnKey } from "@/lib/utils/battle/view/my-turn-key";
 
 const ActionResultCard = dynamic(() => import("@/components/battle/overlays/ActionResultCard").then((m) => m.ActionResultCard), { ssr: false });
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
-const MAP_TAB = "map";
-
-type Tab = ParticipantSide | typeof MAP_TAB;
-
 export function MobileBattleLayout() {
-  const { battle, awaiting, viewer: { isDM }, turn: { current, isMyTurn }, roster: { hero, allies, enemies }, selectedId, select, log, intents } = useBattleScene();
+  const { battle, awaiting, viewer: { isDM }, turn: { current, isMyTurn }, roster: { hero, allies, enemies }, select, log, intents } = useBattleScene();
 
   const hasMap = !!battle.map;
 
-  const [pickedTab, setPickedTab] = useState<Tab>(MAP_TAB);
-
-  const [listTab, setListTab] = useState<ParticipantSide>(ParticipantSide.ENEMY);
-
-  const tab: Tab = hasMap && intents.mapAim ? MAP_TAB : pickedTab === MAP_TAB && !hasMap ? listTab : pickedTab;
+  const { tab, set: setTab, expand, expandTick } = useMobileBattleTabs({ hasMap, mapAim: !!intents.mapAim });
 
   const mapTab = tab === MAP_TAB;
-
-  const setTab = (next: Tab) => {
-    setPickedTab(next);
-
-    if (next !== MAP_TAB) setListTab(next);
-  };
-
-  const [expandTick, setExpandTick] = useState(0);
-
-  const expand = useCallback(() => {
-    setPickedTab(listTab);
-    setExpandTick((n) => n + 1);
-  }, [listTab]);
 
   const [slot, setSlot] = useState<HTMLDivElement | null>(null);
 
@@ -68,9 +50,9 @@ export function MobileBattleLayout() {
 
   const openLatestLog = useCallback(() => showLog(), [showLog]);
 
-  const selected = battle.initiativeOrder.find((p) => p.basicInfo.id === selectedId) ?? null;
+  const selected = useSelectedParticipant();
 
-  const tabBtn = (side: Tab, label: string, n?: number) => (
+  const tabBtn = (side: MobileBattleTab, label: string, n?: number) => (
     <button role="tab" aria-selected={tab === side} type="button" onClick={() => setTab(side)} className={cn("hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]", tab === side ? "text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]" : "text-[var(--hud-muted)]")}>
       {label} {n}
     </button>
@@ -78,7 +60,7 @@ export function MobileBattleLayout() {
 
   const completed = battle.status === BattleStatus.COMPLETED;
 
-  const myTurnKey = hero && isMyTurn ? `${hero.basicInfo.id}-${battle.currentRound}-${hero.battleData.extraTurnActive ? "x" : "n"}` : null;
+  const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
   const waitingFor = <span className="italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></span>;
 
@@ -124,14 +106,14 @@ export function MobileBattleLayout() {
             <ParticipantList side={tab} />
           </div>
         )}
-        <BattleAudioDock placement="strip" collapseOn={myTurnKey} collapseTick={expandTick} />
+        <BattleAudioDock placement="strip" collapseOn={turnKey} collapseTick={expandTick} />
       </div>
       {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
       {(hero || mapTab) && (
         <div className={cn("border-t border-white/[.22] bg-black/70 px-4", mapTab ? "pb-[max(8px,env(safe-area-inset-bottom))] pt-1" : "pb-[max(12px,env(safe-area-inset-bottom))] pt-3")}>
           {mapTab && <div ref={setSlot} data-map-strip-slot />}
           {hero && !mapTab && <MyHeroPanel hero={hero} compact={isMyTurn} />}
-          {hero && isMyTurn && <MyTurnControls key={myTurnKey} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
+          {hero && isMyTurn && <MyTurnControls key={turnKey} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
           {mapTab && !(hero && isMyTurn) && !intents.mapAim && (
             <MapStripRow onExpand={expand}>
               {completed ? <span className="hud-sc">Бій завершено</span> : awaiting ? <span className="hud-sc">{isDM ? "Бій чекає вашого рішення" : "Очікуємо рішення ДМ"}</span> : waitingFor}

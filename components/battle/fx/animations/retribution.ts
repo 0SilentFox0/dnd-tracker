@@ -1,14 +1,15 @@
-import { halfSize } from "../runtime/anchors";
-import { lightBeam } from "../runtime/beam";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, farSide, type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { burst } from "../runtime/recipes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { lightBeam } from "@/components/battle/fx/runtime/beam";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, farSide, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { burst } from "@/components/battle/fx/runtime/recipes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { GOLD } from "@/components/battle/fx/runtime/swatches";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SMITE_MS = ARCHETYPE_FX.retribution.impactMs;
@@ -26,8 +27,6 @@ const HEAD_H = 24;
 const HANDLE = 46;
 
 const FLAME = ["#ffffff", "#fff6d8", "#ffe9a0"];
-
-const GOLD = ["#ffffff", "#fff1b8", "#ffd86b", "#ffb72a"];
 
 const SLAM: Keyframe[] = [
   { transform: "none", filter: "none" },
@@ -102,12 +101,12 @@ function cracks(): FxPoint[][] {
   });
 }
 
-export const retribution: FxAnimation = async ({ stage, from, to, targetEls }) => {
+export const retribution: FxAnimation = async ({ stage, from, to, targets }) => {
   const target = to[0];
 
   if (!target) return;
 
-  const el = targetEls[0];
+  const el = targets[0].el;
 
   const { w, h } = halfSize(el);
 

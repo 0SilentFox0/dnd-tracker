@@ -1,5 +1,6 @@
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { RaceModifier, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { IdName } from "@/types/common";
 
 export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
@@ -19,10 +20,7 @@ export interface Spell {
   raceModifiers: unknown;
   stackable?: boolean;
   maxStacks?: number | null;
-  spellGroup?: {
-    id: string;
-    name: string;
-  } | null;
+  spellGroup?: IdName | null;
 }
 
 export interface SpellGroup {
@@ -65,5 +63,5 @@ export type BookSpell = SpellRules & {
   description?: string | null;
   appearanceDescription?: string | null;
   icon?: string | null;
-  spellGroup?: { id: string; name: string } | null;
+  spellGroup?: IdName | null;
 };

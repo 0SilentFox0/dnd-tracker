@@ -9,10 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import {
-  type AttackPhaseInput,
-  runAttackPhase,
-} from "../run-attack-phase";
+import { findAttack, requestedTargetIds } from "../request";
+import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -73,7 +71,6 @@ function makeInput(over: Partial<AttackPhaseInput> = {}): AttackPhaseInput {
   return {
     battle: {
       initiativeOrder: [attacker, target],
-      battleLog: [],
       currentRound: 1,
       currentTurnIndex: 0,
     },
@@ -183,7 +180,6 @@ describe("runAttackPhase — error path validation", () => {
         makeInput({
           battle: {
             initiativeOrder: [makeAttacker(), makeTarget()],
-            battleLog: [],
             currentRound: 1,
             currentTurnIndex: 1, // target's turn, не attacker
           },
@@ -212,7 +208,6 @@ describe("runAttackPhase — error path validation", () => {
         makeInput({
           battle: {
             initiativeOrder: [attacker, makeTarget()],
-            battleLog: [],
             currentRound: 1,
             currentTurnIndex: 0,
           },
@@ -235,7 +230,6 @@ describe("runAttackPhase — error path validation", () => {
         makeInput({
           battle: {
             initiativeOrder: [attacker, makeTarget()],
-            battleLog: [],
             currentRound: 1,
             currentTurnIndex: 0,
           },
@@ -262,7 +256,6 @@ describe("runAttackPhase — error path validation", () => {
         makeInput({
           battle: {
             initiativeOrder: [attacker, makeTarget()],
-            battleLog: [],
             currentRound: 1,
             currentTurnIndex: 0,
           },
@@ -290,7 +283,6 @@ describe("runAttackPhase — error path validation", () => {
         makeInput({
           battle: {
             initiativeOrder: [makeAttacker(), t1, t2],
-            battleLog: [],
             currentRound: 1,
             currentTurnIndex: 0,
           },
@@ -331,13 +323,37 @@ describe("runAttackPhase — error path validation", () => {
   });
 });
 
+describe("requestedTargetIds / findAttack", () => {
+  it("порожній targetIds падає назад на targetId", () => {
+    expect(requestedTargetIds({ targetId: "t", targetIds: [] })).toEqual(["t"]);
+    expect(requestedTargetIds({ targetId: "t", targetIds: ["a", "b"] })).toEqual(["a", "b"]);
+    expect(requestedTargetIds({})).toEqual([]);
+  });
+
+  it("атака за id або назвою, інакше перша", () => {
+    const base = makeAttacker();
+
+    const attacker = { ...base, battleData: { ...base.battleData, attacks: [meleeAttack(), meleeAttack({ id: "bow", name: "Лук" })] } };
+
+    expect(findAttack(attacker, "bow")?.id).toBe("bow");
+    expect(findAttack(attacker, "Лук")?.id).toBe("bow");
+    expect(findAttack(attacker, "ghost")?.id).toBe("atk-1");
+    expect(findAttack(attacker, undefined)?.id).toBe("atk-1");
+  });
+
+  it("{ targetId, targetIds: [] } атакує targetId, а не 404", () => {
+    const r = runAttackPhase(makeInput({ data: { ...makeInput().data, targetIds: [] } }));
+
+    expect(r.allBattleActions[0]?.targets?.[0]?.participantId).toBe("tgt");
+  });
+});
+
 describe("runAttackPhase — happy path smoke", () => {
   it("returns finalInitiativeOrder + allBattleActions без throw", () => {
     const r = runAttackPhase(makeInput());
 
     expect(r.finalInitiativeOrder).toBeDefined();
     expect(r.allBattleActions).toBeInstanceOf(Array);
-    expect(r.baseBattleLog).toEqual([]);
   });
 
   it("attackRolls per-target eq targets.length passes initial validation", () => {
@@ -366,7 +382,6 @@ describe("runAttackPhase — happy path smoke", () => {
       runAttackPhase({
         battle: {
           initiativeOrder: [attacker, t1, t2],
-          battleLog: [],
           currentRound: 1,
           currentTurnIndex: 0,
         },
@@ -396,20 +411,19 @@ const rangedCounter = resolved({ trigger: { event: "passive" }, effects: [{ kind
 
 describe("runAttackPhase — відсіч", () => {
   it("влучання по основній цілі → подія відсічі одразу після атаки", () => {
-    const r = runAttackPhase(makeInput({ battle: { initiativeOrder: [makeAttacker(), armed("tgt", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 }, rng: seq(0.85) }));
+    const r = runAttackPhase(makeInput({ battle: { initiativeOrder: [makeAttacker(), armed("tgt", [meleeAttack()])], currentRound: 1, currentTurnIndex: 0 }, rng: seq(0.85) }));
 
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
-    expect(r.allBattleActions.map((a) => a.actionIndex)).toEqual([0, 1]);
   });
 
   it("звичайний промах теж викликає відсіч; критичний промах — ні", () => {
     const order = () => [makeAttacker(), armed("tgt", [meleeAttack()])];
 
-    const miss = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 2 }, rng: seq(0.85) }));
+    const miss = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 2 }, rng: seq(0.85) }));
 
     expect(miss.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
 
-    const fumble = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), battleLog: [], currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 1 }, rng: seq(0.85) }));
+    const fumble = runAttackPhase(makeInput({ battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { ...makeInput().data, d20Roll: 1 }, rng: seq(0.85) }));
 
     expect(fumble.allBattleActions.map((a) => a.actionType)).toEqual(["attack"]);
   });
@@ -422,7 +436,7 @@ describe("runAttackPhase — відсіч", () => {
     const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
 
     const r = runAttackPhase({
-      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], d20Roll: 15, damageRolls: [3] },
       battleId: "b1",
       userId: "user-1",
@@ -450,7 +464,7 @@ describe("runAttackPhase — відсіч", () => {
     const t2 = armed("t2", [bowAttack]);
 
     const r = runAttackPhase({
-      battle: { initiativeOrder: [attacker, t1, t2], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      battle: { initiativeOrder: [attacker, t1, t2], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [12, 14], damageRolls: [4, 5] },
       battleId: "b1",
       userId: "user-1",
@@ -470,7 +484,7 @@ describe("runAttackPhase — відсіч", () => {
     const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
 
     const r = runAttackPhase({
-      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], battleLog: [], currentRound: 1, currentTurnIndex: 0 },
+      battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [15, 1], damageRolls: [3, 3] },
       battleId: "b1",
       userId: "user-1",

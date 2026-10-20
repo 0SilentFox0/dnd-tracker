@@ -1,13 +1,13 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01 } from "../runtime/easing";
-import { chance, farSide, type FxPoint, pick, rand } from "../runtime/geometry";
-import { emit, flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { hexPath } from "../runtime/shapes";
-import { timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01 } from "@/components/battle/fx/runtime/easing";
+import { chance, farSide, type FxPoint, pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { hexPath } from "@/components/battle/fx/runtime/shapes";
+import { timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FORM_MS = ARCHETYPE_FX.spellward.impactMs;
@@ -65,9 +65,9 @@ function cells(rx: number, ry: number): Cell[] {
   return out;
 }
 
-export const spellward: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { w, h } = halfSize(targetEls[i]);
+export const spellward: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { w, h } = halfSize(el);
 
     const rx = w + 16;
 
@@ -162,7 +162,6 @@ export const spellward: FxAnimation = ({ stage, from, to, targetEls }) =>
         }
       },
     );
-
 
     await run;
   });

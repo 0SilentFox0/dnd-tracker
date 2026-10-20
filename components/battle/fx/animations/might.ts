@@ -1,15 +1,16 @@
-import { halfSize } from "../runtime/anchors";
-import { type BadgeLook, risingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { rand } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { goldBlade } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { streakBurst } from "../runtime/streaks";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { type BadgeLook, risingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { goldBlade } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { streakBurst } from "@/components/battle/fx/runtime/streaks";
+import { GOLD } from "@/components/battle/fx/runtime/swatches";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FLARE_MS = ARCHETYPE_FX.might.impactMs;
@@ -17,8 +18,6 @@ const FLARE_MS = ARCHETYPE_FX.might.impactMs;
 const SWING_MS = 360;
 
 const TOTAL_MS = 2600;
-
-const GOLD = ["#ffffff", "#fff1b8", "#ffd86b", "#ffb72a"];
 
 const GOLD_BADGE: BadgeLook = { top: "#fff0b0", bottom: "#c8901e", rim: "#fff8e0", ink: "#3a2408" };
 
@@ -52,10 +51,8 @@ function wing(g: CanvasRenderingContext2D, x: number, y: number, side: number, o
   }
 }
 
-export const might: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const might: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const sig = { x: target.x, y: Math.max(40, target.y - h - 26) };

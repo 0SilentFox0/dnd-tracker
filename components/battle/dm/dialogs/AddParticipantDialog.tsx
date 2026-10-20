@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
-import { ConfirmCancelFooter } from "@/components/battle/dm/dialogs/ConfirmCancelFooter";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ParticipantSide,ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { clampUnitQuantity, DM_ADD_UNIT_QUANTITY as QUANTITY } from "@/lib/constants/battle-units";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnitPicker } from "@/lib/hooks/units";
 import type { AddParticipantData } from "@/types/battle";
+
+const FORM_ID = "add-participant-form";
 
 interface AddParticipantDialogProps {
   open: boolean;
@@ -45,7 +48,7 @@ export function AddParticipantDialog({
 
   const [characterId, setCharacterId] = useState("");
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(QUANTITY.min);
 
   const [reserved, setReserved] = useState(false);
 
@@ -57,22 +60,47 @@ export function AddParticipantDialog({
 
   const placing = Boolean(onPlace) && type === ParticipantSourceType.UNIT && !reserved;
 
-  const handleSubmit = () => {
-    if (type === ParticipantSourceType.CHARACTER && characterId) {
-      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
-      onOpenChange(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const [wasOpen, setWasOpen] = useState(open);
+
+  // батько закриває діалог в onSuccess — лише тоді скидаємо введене
+  if (open !== wasOpen) {
+    setWasOpen(open);
+
+    if (!open && submitted) {
+      setSubmitted(false);
       setCharacterId("");
-      setReserved(false);
-    } else if (type === ParticipantSourceType.UNIT && unitId) {
-      const data = { sourceId: unitId, type: ParticipantSourceType.UNIT, side, quantity: quantity || 1, reserved };
-
-      if (placing && onPlace) onPlace(data);
-      else onAdd(data);
-
-      onOpenChange(false);
       picker.reset();
-      setQuantity(1);
+      setQuantity(QUANTITY.min);
       setReserved(false);
+    }
+  }
+
+  const [wasPending, setWasPending] = useState(isPending);
+
+  // помилка: мутація скінчилась, а діалог лишився відкритим — Скасувати не має стерти введене
+  if (isPending !== wasPending) {
+    setWasPending(isPending);
+
+    if (!isPending && open && submitted) setSubmitted(false);
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (type === ParticipantSourceType.CHARACTER && characterId) {
+      setSubmitted(true);
+      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
+    } else if (type === ParticipantSourceType.UNIT && unitId) {
+      const data = { sourceId: unitId, type: ParticipantSourceType.UNIT, side, quantity: quantity || QUANTITY.min, reserved };
+
+      setSubmitted(true);
+
+      if (placing && onPlace) {
+        onPlace(data);
+        onOpenChange(false);
+      } else onAdd(data);
     }
   };
 
@@ -87,8 +115,14 @@ export function AddParticipantDialog({
       hud
       title="Додати учасника на поле"
       description="Учасник займе місце в черзі за своєю ініціативою або чекатиме в резерві."
+      footer={
+        <>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Скасувати</Button>
+          <Button type="submit" form={FORM_ID} disabled={!canSubmit || isPending}>{isPending ? "Додаємо…" : placing ? "Вибрати клітинку" : "Додати"}</Button>
+        </>
+      }
     >
-      <div className="space-y-4 py-2">
+      <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-4 py-2">
         <div className="space-y-2">
           <Label>Сторона</Label>
           <Select
@@ -177,14 +211,10 @@ export function AddParticipantDialog({
               <Label>Кількість</Label>
               <Input
                 type="number"
-                min={1}
-                max={10}
+                min={QUANTITY.min}
+                max={QUANTITY.max}
                 value={quantity}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.max(1, Math.min(10, Number(e.target.value) || 1)),
-                  )
-                }
+                onChange={(e) => setQuantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
               />
             </div>
           </>
@@ -193,15 +223,7 @@ export function AddParticipantDialog({
           <Checkbox checked={reserved} onCheckedChange={(v) => setReserved(v === true)} />
           У резерв — з&apos;явиться, коли ДМ введе в бій
         </label>
-        <ConfirmCancelFooter
-          onCancel={() => onOpenChange(false)}
-          confirmLabel={placing ? "Вибрати клітинку" : "Додати"}
-          onConfirm={handleSubmit}
-          confirmDisabled={!canSubmit || isPending}
-          confirmLoading={isPending}
-          confirmLoadingLabel="Додаємо…"
-        />
-      </div>
+      </form>
     </ResponsiveDialog>
   );
 }

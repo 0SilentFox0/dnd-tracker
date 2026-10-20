@@ -1,12 +1,13 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, cubicBezier, type FxPoint, pick, rand } from "../runtime/geometry";
-import { emit, shoot } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { leafPath, taperedStroke } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, cubicBezier, type FxPoint, pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, shoot } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { leafPath, taperedStroke } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { HEAL_MOTES } from "@/components/battle/fx/runtime/swatches";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SEED_MS = 300;
@@ -18,8 +19,6 @@ const RISE_MS = ARCHETYPE_FX.rebirth.impactMs;
 const TOTAL_MS = 2700;
 
 const BLOSSOM = ["#ffffff", "#ffd0e4", "#ffb0d0", "#fff0b0"];
-
-const MOTES = ["#e8ffd8", "#9ff0a0", "#5fd27a"];
 
 const RISE: Keyframe[] = [
   { transform: "none", filter: "none" },
@@ -72,10 +71,8 @@ function blossom(g: CanvasRenderingContext2D, at: FxPoint, size: number, color: 
   g.fill();
 }
 
-export const rebirth: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, ARCHETYPE_FX.rebirth.staggerMs, async (target, i) => {
-    const el = targetEls[i];
-
+export const rebirth: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, ARCHETYPE_FX.rebirth.staggerMs, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const ground = target.y + h;
@@ -193,12 +190,12 @@ export const rebirth: FxAnimation = ({ stage, from, to, targetEls }) =>
       },
     );
 
-    void shoot(stage, from, { x: target.x, y: ground - 4 }, SEED_MS, "#7fe88a", MOTES, 6);
+    void shoot(stage, from, { x: target.x, y: ground - 4 }, SEED_MS, "#7fe88a", HEAL_MOTES, 6);
 
     schedule(stage, RISE_MS, () => {
       void animateEl(stage, el, RISE, { duration: 900, easing: "ease-out" });
 
-      for (let k = 0; k < 18; k++) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h * 0.4, h) }, { tints: MOTES, speed: [20, 60], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
+      for (let k = 0; k < 18; k++) emit(stage, { x: target.x + rand(-w, w), y: target.y + rand(-h * 0.4, h) }, { tints: HEAL_MOTES, speed: [20, 60], angle: [-Math.PI * 0.75, -Math.PI * 0.25], life: [0.6, 1.1], scale: [0.25, 0.04], gravity: -30 });
     });
 
     await run;

@@ -2,14 +2,14 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-import type { FxSpec } from "@/lib/utils/battle/fx";
+import { ARCHETYPE_FX, type FxSpec } from "@/lib/utils/battle/fx";
 
 export interface FxRunner {
   play: (layer: HTMLElement, spec: FxSpec, root: HTMLElement) => Promise<void>;
   cancel: (layer: HTMLElement) => void;
 }
 
-/** Plays the spell animation once on mount and again on `replay`; `settled` — the cast is over, its auras stay on. */
+/** Plays the spell animation once on mount and again on `replay`; `settled` — the cast is over, its auras stay on; `hit` — the target rows' hit frame. */
 export function useSpellFxPlayback(spec: FxSpec | null, animate: boolean, runner: FxRunner) {
   const id = useId();
 
@@ -46,7 +46,7 @@ export function useSpellFxPlayback(spec: FxSpec | null, animate: boolean, runner
   return {
     arenaRef,
     layerRef,
-    token,
+    hit: animate && spec ? { token, delayMs: ARCHETYPE_FX[spec.archetype].impactMs } : null,
     settled: !animate || !spec || run.done,
     replay: () => setRun((r) => ({ token: r.token + 1, done: false })),
   };

@@ -49,7 +49,7 @@ export interface UnitRowLike {
   abilities?: unknown;
 }
 
-export function inheritSchool(abilities: Ability[], school: string | null): Ability[] {
+function inheritSchool(abilities: Ability[], school: string | null): Ability[] {
   if (!school) return abilities;
 
   return abilities.map((a) => ({
@@ -60,7 +60,7 @@ export function inheritSchool(abilities: Ability[], school: string | null): Abil
   }));
 }
 
-export function skillSource(entry: SkillEntry): AbilitySource {
+function skillSource(entry: SkillEntry): AbilitySource {
   const { row, mainSkillId, level } = entry;
 
   return {
@@ -73,7 +73,7 @@ export function skillSource(entry: SkillEntry): AbilitySource {
   };
 }
 
-export function pickSkillEntries(skills: SkillEntry[]): SkillEntry[] {
+function pickSkillEntries(skills: SkillEntry[]): SkillEntry[] {
   return pickHighestPerLine(skills.map((item) => ({ item, source: skillSource(item) }))).map((x) => x.item);
 }
 

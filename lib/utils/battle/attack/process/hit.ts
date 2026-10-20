@@ -1,5 +1,3 @@
-import type { AttackRollResult } from "../../types/attack";
-import { type AttackFlow, fire, getP, put, settleDowned } from "./ability-flow";
 import { computeHitDamage, type ComputeHitDamageResult } from "./compute";
 import { applyDamageToTarget } from "./damage";
 import { fireWaveVictims } from "./fire-wave";
@@ -10,13 +8,15 @@ import { castHitSpell } from "./hit-spell";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { type ActionFlow, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
 
 export interface ResolveHitParams {
-  flow: AttackFlow;
+  flow: ActionFlow;
   attackerId: string;
   targetId: string;
   attack: BattleAttack;
@@ -103,7 +103,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
   return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
 }
 
-function applyFireWave(flow: AttackFlow, attackerId: string, targetId: string, hitDamage: number): void {
+function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, hitDamage: number): void {
   for (const f of findFlags(flow.ps, attackerId, "fireWave")) {
     const amount = Math.floor((hitDamage * f.percent) / 100);
 

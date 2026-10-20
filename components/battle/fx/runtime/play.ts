@@ -1,9 +1,9 @@
-import { animationFor } from "../animations";
 import { resolvePoints } from "./anchors";
 import type { FxPoint } from "./geometry";
 import { PALETTE } from "./palette";
 import { layerEpoch, stageFor } from "./stage";
 
+import { animationFor } from "@/components/battle/fx/animations";
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
 /** How long a run waits for its signature chunk before playing the base fallback (battle queue only). */
@@ -16,7 +16,7 @@ export const FX_LOAD_TIMEOUT_MS = 800;
 export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document, loadTimeoutMs = FX_LOAD_TIMEOUT_MS): Promise<void> {
   const epoch = layerEpoch(layer);
 
-  // підписні анімації малюють по цілях, тож порожня зона грає базову «area»
+  // signature animations draw on their targets, so an empty zone plays the base "area"
   const animation = await animationFor(spec.targetIds.length === 0 && spec.at ? "area" : spec.archetype, loadTimeoutMs);
 
   if (layerEpoch(layer) !== epoch || !layer.isConnected) return;
@@ -29,5 +29,7 @@ export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode 
 
   const local = (p: FxPoint) => ({ x: p.x - box.left, y: p.y - box.top });
 
-  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: points.to.map(local), ...(points.at && { at: local(points.at) }), targetEls: points.targetEls, actorEl: points.actorEl, palette: PALETTE[spec.element] });
+  const targets = points.targets.map((t) => ({ at: local(t.at), el: t.el }));
+
+  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: targets.map((t) => t.at), targets, ...(points.at && { at: local(points.at) }), actorEl: points.actorEl, palette: PALETTE[spec.element] });
 }

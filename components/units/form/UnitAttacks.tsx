@@ -2,15 +2,15 @@
 
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { UnitAttack, type UnitAttackItem } from "@/components/units/form/UnitAttack";
-import type { Unit } from "@/types/units";
+import { UnitAttack as UnitAttackEditor } from "@/components/units/form/UnitAttack";
+import type { Unit, UnitAttack } from "@/types/units";
 
 interface UnitAttacksProps {
   formData: Partial<Unit>;
   onChange: (data: Partial<Unit>) => void;
 }
 
-const defaultAttack: UnitAttackItem = {
+const defaultAttack: UnitAttack = {
   name: "",
   attackBonus: 0,
   damageDice: "1d6",
@@ -18,7 +18,7 @@ const defaultAttack: UnitAttackItem = {
 };
 
 export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
-  const attacks: UnitAttackItem[] = Array.isArray(formData.attacks)
+  const attacks: UnitAttack[] = Array.isArray(formData.attacks)
     ? formData.attacks
     : [];
 
@@ -31,7 +31,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
     });
   };
 
-  const handleChange = (index: number, attack: UnitAttackItem) => {
+  const handleChange = (index: number, attack: UnitAttack) => {
     const updated = [...attacks];
 
     updated[index] = attack;
@@ -57,7 +57,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
       {attacks.length > 0 ? (
         <div className="space-y-3">
           {attacks.map((attack, index) => (
-            <UnitAttack
+            <UnitAttackEditor
               key={index}
               attack={attack}
               index={index}

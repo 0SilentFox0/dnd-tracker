@@ -1,14 +1,14 @@
-import type { ProcessAttackResult } from "../../types/attack-process";
-import type { AttackRollResult } from "..";
-import { applyCriticalEffect } from "..";
-import { type AttackFlow, fire, getP, put } from "./ability-flow";
 import { buildBattleActionForCriticalFail } from "./actions";
 
+import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
+import { type ActionFlow, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { BattleAttack } from "@/types/battle";
 
 export interface HandleCriticalFailParams {
-  flow: AttackFlow;
+  flow: ActionFlow;
   attackerId: string;
   targetId: string;
   attack: BattleAttack;
@@ -41,20 +41,19 @@ export function handleCriticalFail(params: HandleCriticalFailParams): Omit<Proce
     attackKind: attackKindOf(attack.type),
   });
 
-  const battleAction = buildBattleActionForCriticalFail(
+  const battleAction = buildBattleActionForCriticalFail({
     attacker,
-    getP(flow, targetId),
+    target: getP(flow, targetId),
     attack,
     d20Roll,
     attackRoll,
     targetAC,
-    criticalEffectApplied,
-    flow.messages,
-    [],
+    criticalEffect: criticalEffectApplied,
+    messages: flow.messages,
     battleId,
     currentRound,
     critFlavorText,
-  );
+  });
 
   return {
     success: false,

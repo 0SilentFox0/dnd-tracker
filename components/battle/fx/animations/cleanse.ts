@@ -1,14 +1,16 @@
-import { halfSize } from "../runtime/anchors";
-import { lightBeam } from "../runtime/beam";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, type Debris, type FxPoint, perTick, rand, stepBodies } from "../runtime/geometry";
-import { emit, flash, ring } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { chainLink, jaggedShape, polyPath, twinkle } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { lightBeam } from "@/components/battle/fx/runtime/beam";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, perTick, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter } from "@/components/battle/fx/runtime/motion";
+import { type Debris, stepBodies } from "@/components/battle/fx/runtime/physics";
+import { emit, flash, ring } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { chainLink, jaggedShape, polyPath, twinkle } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const WASH_AT = ARCHETYPE_FX.cleanse.impactMs;
@@ -83,10 +85,93 @@ function sigil(g: CanvasRenderingContext2D, x: number, y: number, r: number, spi
   g.restore();
 }
 
-export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
+interface Row {
+  at: FxPoint;
+  w: number;
+  h: number;
+}
 
+type Chain = ReturnType<typeof chainLinks>;
+
+/** Ink blots that grow on the row and melt away once washed. */
+function inkBlots(g: CanvasRenderingContext2D, { at }: Row, blots: Stain[], t: number, look: { taint: HTMLCanvasElement; ink: CanvasGradient }) {
+  g.globalCompositeOperation = "source-over";
+
+  for (const s of blots) {
+    const grow = easeOutCubic(clamp01((t - s.born) / 260));
+
+    const melt = clamp01((t - s.gone) / 420);
+
+    const k = grow * (1 - melt);
+
+    if (k <= 0) continue;
+
+    g.save();
+    g.translate(at.x + s.x, at.y + s.y + melt * 4);
+    g.scale(k, k * (1 - melt * 0.4));
+    sprite(g, look.taint, 0, 0, (s.r * 3) / 64, undefined, 0.8);
+    g.globalCompositeOperation = "source-over";
+    g.globalAlpha = 1;
+
+    for (const p of s.blob) {
+      g.fillStyle = look.ink;
+      g.beginPath();
+      g.arc(p.x * 0.55, p.y * 0.55, s.r * 0.7, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    g.restore();
+  }
+}
+
+/** The two chains wrapping on across the row, link by link. */
+function wrappingChains(g: CanvasRenderingContext2D, { at }: Row, chains: Chain[], angles: number[], t: number) {
+  const wrap = clamp01((t - 150) / 380);
+
+  chains.forEach((links, c) => {
+    const n = Math.floor(links.length * wrap);
+
+    for (let l = 0; l < n; l++) chainLink(g, at.x + links[l].x, at.y + links[l].y, angles[c], links[l].flat);
+  });
+}
+
+/** White water pouring out of a clear sky, wider where it lands. */
+function waterfall(g: CanvasRenderingContext2D, { at, w, h }: Row, sky: number, t: number, wash: number, halo: HTMLCanvasElement) {
+  const land = at.y + h * 0.4;
+
+  const fall = clamp01((t - WASH_AT + 220) / 220);
+
+  lightBeam(g, at.x, sky, sky + (land - sky) * fall, w * 0.55, wash * 0.85, "220,240,255");
+  sprite(g, halo, at.x, at.y, (w * 2.6) / 64, (h * 3) / 64, wash * 0.55);
+}
+
+/** Shattered links and sigil shards tumble away. */
+function tumblingShards(g: CanvasRenderingContext2D, shards: Shard[], t: number) {
+  g.globalCompositeOperation = "source-over";
+
+  for (const d of shards) {
+    g.save();
+    g.translate(d.x, d.y);
+    g.rotate(d.rot);
+    g.globalAlpha = clamp01(1 - (t - WASH_AT - 200) / 900);
+    polyPath(g, d.shape);
+    g.fillStyle = d.color;
+    g.fill();
+    g.restore();
+  }
+}
+
+/** The clean row sparkles, `clean` of the way through. */
+function sparkles(g: CanvasRenderingContext2D, { at, w, h }: Row, t: number, clean: number) {
+  for (let n = 0; n < 7; n++) {
+    const a = n * 2.4 + t / 1200;
+
+    twinkle(g, at.x + Math.cos(a) * w * (0.4 + (n % 3) * 0.25), at.y + Math.sin(a * 1.3) * h * 0.8, 5 + (n % 2) * 3, "#ffffff", Math.sin(clean * Math.PI) * (0.5 + 0.5 * Math.sin(t / 90 + n)));
+  }
+}
+
+export const cleanse: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const blots = stains(w, h);
@@ -109,7 +194,9 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
     ink.addColorStop(0.65, "rgba(24,6,36,0.8)");
     ink.addColorStop(1, "rgba(60,20,90,0)");
 
-    const taint = glow("#8a2be2");
+    const look = { taint: glow("#8a2be2"), ink };
+
+    const row: Row = { at: target, w, h };
 
     let broken = false;
 
@@ -120,43 +207,9 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
         const wash = envelope(clamp01((t - WASH_AT + 220) / 1100), 0.18, 0.4);
 
         // The dark first: blots, then the chains wrapping on, then the sigils.
-        g.globalCompositeOperation = "source-over";
+        inkBlots(g, row, blots, t, look);
 
-        for (const s of blots) {
-          const grow = easeOutCubic(clamp01((t - s.born) / 260));
-
-          const melt = clamp01((t - s.gone) / 420);
-
-          const k = grow * (1 - melt);
-
-          if (k <= 0) continue;
-
-          g.save();
-          g.translate(target.x + s.x, target.y + s.y + melt * 4);
-          g.scale(k, k * (1 - melt * 0.4));
-          sprite(g, taint, 0, 0, (s.r * 3) / 64, undefined, 0.8);
-          g.globalCompositeOperation = "source-over";
-          g.globalAlpha = 1;
-
-          for (const p of s.blob) {
-            g.fillStyle = ink;
-            g.beginPath();
-            g.arc(p.x * 0.55, p.y * 0.55, s.r * 0.7, 0, Math.PI * 2);
-            g.fill();
-          }
-
-          g.restore();
-        }
-
-        if (!broken) {
-          const wrap = clamp01((t - 150) / 380);
-
-          chains.forEach((links, c) => {
-            const n = Math.floor(links.length * wrap);
-
-            for (let l = 0; l < n; l++) chainLink(g, target.x + links[l].x, target.y + links[l].y, angles[c], links[l].flat);
-          });
-        }
+        if (!broken) wrappingChains(g, row, chains, angles, t);
 
         for (const s of sigils) {
           const k = clamp01((t - 280) / 300);
@@ -166,41 +219,13 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
           sigil(g, s.x, s.y + Math.sin(t / 220 + s.spin) * 2, s.r * easeOutCubic(k), s.spin + t / 900, k);
         }
 
-        // White water pouring out of a clear sky, wider where it lands.
-        if (wash > 0) {
-          const top = sky;
+        if (wash > 0) waterfall(g, row, sky, t, wash, halo);
 
-          const land = target.y + h * 0.4;
-
-          const fall = clamp01((t - WASH_AT + 220) / 220);
-
-          lightBeam(g, target.x, top, top + (land - top) * fall, w * 0.55, wash * 0.85, "220,240,255");
-          sprite(g, halo, target.x, target.y, (w * 2.6) / 64, (h * 3) / 64, wash * 0.55);
-        }
-
-        // Shattered links and sigil shards tumble away.
-        g.globalCompositeOperation = "source-over";
-
-        for (const d of shards) {
-          g.save();
-          g.translate(d.x, d.y);
-          g.rotate(d.rot);
-          g.globalAlpha = clamp01(1 - (t - WASH_AT - 200) / 900);
-          polyPath(g, d.shape);
-          g.fillStyle = d.color;
-          g.fill();
-          g.restore();
-        }
+        tumblingShards(g, shards, t);
 
         const clean = clamp01((t - WASH_AT - 700) / 900);
 
-        if (clean > 0 && clean < 1) {
-          for (let n = 0; n < 7; n++) {
-            const a = n * 2.4 + t / 1200;
-
-            twinkle(g, target.x + Math.cos(a) * w * (0.4 + (n % 3) * 0.25), target.y + Math.sin(a * 1.3) * h * 0.8, 5 + (n % 2) * 3, "#ffffff", Math.sin(clean * Math.PI) * (0.5 + 0.5 * Math.sin(t / 90 + n)));
-          }
-        }
+        if (clean > 0 && clean < 1) sparkles(g, row, t, clean);
       },
       (t, dt) => {
         stepBodies(shards, dt, 380);
@@ -246,12 +271,11 @@ export const cleanse: FxAnimation = ({ stage, to, targetEls }) =>
     }
 
     // The hero looks sick under the curses until the water hits.
-    const sickly = animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.35 }, { filter: "brightness(0.7) saturate(0.35)", offset: 0.85 }, { filter: "none" }], { duration: WASH_AT + 300 });
+    const sickly = animateEl(stage, el, holdFilter("brightness(0.7) saturate(0.35)", 0.35, 0.85), { duration: WASH_AT + 300 });
 
     const glowUp = animateEl(stage, el, [{ filter: "none" }, { filter: "brightness(1.6) saturate(1.15)", offset: 0.35 }, { filter: "none" }], { duration: 1100, delay: WASH_AT + 500, easing: "ease-out" });
 
     schedule(stage, WASH_AT + 650, () => void ring(stage, target, "#ffffff", 700, w * 0.9, 3, 0.45));
-
 
     await Promise.all([run, sickly, glowUp]);
   });

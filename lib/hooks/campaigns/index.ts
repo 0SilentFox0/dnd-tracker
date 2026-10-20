@@ -7,3 +7,4 @@ export {
   useRemoveCampaignMember,
   useUpdateCampaign,
 } from "./useCampaignMutations";
+export { useInfoReferenceFilters } from "./useInfoReferenceFilters";

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as api from "@/lib/api/character-progression";
 import { ApiError } from "@/lib/api/client";
-import { characterSheetKey } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { skillKeys, useProgressionActions } from "@/lib/hooks/skills";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 import type { CharacterSheet } from "@/types/characters";
@@ -15,7 +15,7 @@ vi.mock("@/lib/api/character-progression");
 
 const notify = vi.fn(async () => {});
 
-vi.mock("@/lib/hooks/common", () => ({ useNotify: () => notify }));
+vi.mock("@/lib/hooks/common", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/hooks/common")>()), useNotify: () => notify }));
 
 afterEach(cleanup);
 
@@ -41,12 +41,12 @@ describe("useProgressionActions", () => {
     const { qc, invalidate, result } = setup();
 
     qc.setQueryData(skillKeys.progression("camp", "ch"), { treeId: "t1", race: "Ельф", tree: TREE_JSON, unlocked: ["attack_basic_level"], level: 3 });
-    qc.setQueryData(characterSheetKey("camp", "ch"), { progression: { freePoints: 2, level: 3, seenLevel: null } });
+    qc.setQueryData(characterKeys.sheet("camp", "ch"), { progression: { freePoints: 2, level: 3, seenLevel: null } });
 
     await act(() => result.current.learn("o1"));
 
     expect(qc.getQueryData<{ unlocked: string[] }>(skillKeys.progression("camp", "ch"))?.unlocked).toEqual(["attack_basic_level", "o1"]);
-    expect(qc.getQueryData<CharacterSheet>(characterSheetKey("camp", "ch"))?.progression).toEqual({ freePoints: 1, level: 3, seenLevel: null });
+    expect(qc.getQueryData<CharacterSheet>(characterKeys.sheet("camp", "ch"))?.progression).toEqual({ freePoints: 1, level: 3, seenLevel: null });
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: skillKeys.progression("camp", "ch") }));
   });
 
@@ -56,7 +56,7 @@ describe("useProgressionActions", () => {
 
     const { invalidate, result } = setup();
 
-    const sheetInvalidations = () => invalidate.mock.calls.filter(([f]) => JSON.stringify(f?.queryKey) === JSON.stringify(characterSheetKey("camp", "ch"))).length;
+    const sheetInvalidations = () => invalidate.mock.calls.filter(([f]) => JSON.stringify(f?.queryKey) === JSON.stringify(characterKeys.sheet("camp", "ch"))).length;
 
     await act(() => result.current.learn("b"));
     act(() => vi.advanceTimersByTime(600));

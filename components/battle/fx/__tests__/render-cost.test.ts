@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { memo } from "@/components/battle/fx/auras/canvas/kit";
-import type { AuraCtx } from "@/components/battle/fx/auras/canvas/types";
-import { fitCanvas } from "@/components/battle/fx/runtime/canvas-size";
-import { AuraParticles } from "@/components/battle/fx/runtime/particles";
+import { memo } from "@/components/battle/fx/auras/kit";
+import { AuraParticles } from "@/components/battle/fx/auras/particles";
+import type { AuraCtx } from "@/components/battle/fx/auras/types";
 import { taperedStroke } from "@/components/battle/fx/runtime/shapes";
+import { fitCanvas } from "@/lib/utils/canvas/canvas-size";
 
 afterEach(() => vi.unstubAllGlobals());
 

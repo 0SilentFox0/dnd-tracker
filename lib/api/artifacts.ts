@@ -32,14 +32,7 @@ const artifactsApi = createCampaignCrudApi<
   void
 >("/artifacts");
 
-/** list повертає Array; додаткова guard на випадок не-array відповіді. */
-export async function getArtifacts(
-  campaignId: string,
-): Promise<ArtifactListItem[]> {
-  const data = await artifactsApi.list(campaignId);
-
-  return Array.isArray(data) ? data : [];
-}
+export const getArtifacts = (campaignId: string): Promise<ArtifactListItem[]> => artifactsApi.list(campaignId);
 
 export const createArtifact = artifactsApi.create;
 export const updateArtifact = artifactsApi.update;

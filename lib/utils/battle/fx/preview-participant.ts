@@ -2,7 +2,7 @@ import { CombatStatus, type CombatStatusType, ParticipantSide } from "@/lib/cons
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import type { BattleParticipant } from "@/types/battle";
 
-export interface PreviewParticipantOptions {
+interface PreviewParticipantOptions {
   id: string;
   name: string;
   side: ParticipantSide;

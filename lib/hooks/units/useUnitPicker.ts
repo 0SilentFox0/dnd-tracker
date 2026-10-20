@@ -11,7 +11,7 @@ import { groupUnitsByRace } from "@/lib/utils/units/group-units";
 export function useUnitPicker(campaignId: string, enabled: boolean) {
   const { data: units = [] } = useUnits(campaignId, undefined, { enabled });
 
-  const { data: races = [] } = useRaces(campaignId, undefined, { enabled });
+  const { data: races = [] } = useRaces(campaignId, { enabled });
 
   const groups = useMemo(() => groupUnitsByRace(units, races).filter((g) => g.total > 0), [units, races]);
 

@@ -1,6 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -89,7 +89,7 @@ function previewBefore(attacker: BattleParticipant, target: BattleParticipant, a
 
   const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type) }, { round, rng: CERTAIN_ONLY });
 
-  const self = r.participants.find((p) => p.basicInfo.id === attacker.basicInfo.id) ?? attacker;
+  const self = findParticipant(r.participants, attacker.basicInfo.id) ?? attacker;
 
   return { ps: r.participants, self, extra: r.actionModifiers[attacker.basicInfo.id], targetExtra: r.actionModifiers[target.basicInfo.id] };
 }

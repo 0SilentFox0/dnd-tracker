@@ -1,14 +1,14 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, fadeOut } from "../runtime/easing";
-import { pick, rand } from "../runtime/geometry";
-import { glowPulse } from "../runtime/motion";
-import { emit, shoot } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { plusSign } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, fadeOut } from "@/components/battle/fx/runtime/easing";
+import { pick, rand } from "@/components/battle/fx/runtime/geometry";
+import { glowPulse } from "@/components/battle/fx/runtime/motion";
+import { emit, shoot } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { plusSign } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const DOME_MS = 2350;
@@ -46,11 +46,9 @@ function beatAt(t: number) {
   return v;
 }
 
-export const regenerate: FxAnimation = ({ stage, from, to, targetEls, palette }) =>
-  perTarget(stage, to, 0, async (target, i) => {
+export const regenerate: FxAnimation = ({ stage, from, targets, palette }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await shoot(stage, from, target, ARCHETYPE_FX.regenerate.impactMs, palette.core, palette.tints);
-
-    const el = targetEls[i];
 
     const { w, h } = halfSize(el);
 

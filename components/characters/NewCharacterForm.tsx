@@ -21,7 +21,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   const create = useCreateCharacter(id);
 
-  const { members, loading: membersLoading } = useCampaignMembers(id);
+  const { members, isLoading: membersLoading } = useCampaignMembers(id);
 
   const { data: races = [] } = useRaces(id);
 

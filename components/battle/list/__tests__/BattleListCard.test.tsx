@@ -20,6 +20,7 @@ describe("BattleListCard", () => {
     expect(screen.getByText("На тракті")).toBeTruthy();
     expect(hrefOf("Перейти до бою")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
   it("prepared: учасники, редагування й запуск", () => {

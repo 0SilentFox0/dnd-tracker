@@ -7,14 +7,18 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api/characters", () => ({
   updateCharacter: vi.fn(async () => ({})),
   levelUpCharacter: vi.fn(async () => ({})),
-  createCharacter: vi.fn(),
-  deleteCharacter: vi.fn(),
-  deleteAllCharacters: vi.fn(),
+  createCharacter: vi.fn(async () => ({})),
+  deleteCharacter: vi.fn(async () => undefined),
+  deleteAllCharacters: vi.fn(async () => ({ success: true, deleted: 0 })),
   getCharacter: vi.fn(),
   getCharacters: vi.fn(),
 }));
 
-import { characterSheetKey, useLevelUpCharacter, useUpdateCharacter } from "@/lib/hooks/characters";
+import { useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "@/lib/hooks/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
+import { useDeleteAllCharacters, useDeleteCharacter } from "@/lib/hooks/characters/useCharacters";
+
+const run = (mutation: { mutateAsync: (vars: never) => Promise<unknown> }) => mutation.mutateAsync as (vars: unknown) => Promise<unknown>;
 
 function setup() {
   const qc = new QueryClient();
@@ -34,7 +38,7 @@ describe("мутації персонажа інвалідують баланс 
 
     await act(() => result.current.mutateAsync({} as never));
 
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance", "c"] }));
   });
 
   it("підняття рівня", async () => {
@@ -44,8 +48,23 @@ describe("мутації персонажа інвалідують баланс 
 
     await act(() => result.current.mutateAsync("ch"));
 
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance", "c"] }));
     // бейдж і оверлей нового рівня читають лист: він не має чекати staleTime
-    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: characterSheetKey("c") }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: characterKeys.sheet("c") }));
+  });
+
+  it.each([
+    ["створення", () => run(useCreateCharacter("c")), {}],
+    ["видалення", () => run(useDeleteCharacter("c")), "ch"],
+    ["видалення всіх", () => run(useDeleteAllCharacters("c")), undefined],
+  ] as const)("%s — ще й ростер героїв", async (_name, hook, vars) => {
+    const { invalidate, wrapper } = setup();
+
+    const { result } = renderHook(hook, { wrapper });
+
+    await act(() => result.current(vars));
+
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance", "c"] }));
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: characterKeys.roster("c") }));
   });
 });

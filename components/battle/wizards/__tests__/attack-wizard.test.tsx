@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
@@ -16,8 +16,21 @@ function Harness({ attacker, preset }: { attacker: Parameters<typeof useAttackWi
 
   useEffect(() => wizard.actions.open(preset?.targetId, preset?.attackId), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <AttackWizard wizard={wizard} />;
+  return (
+    <>
+      <button type="button" onClick={wizard.actions.close}>test-close</button>
+      <button type="button" onClick={() => wizard.actions.open(preset?.targetId, preset?.attackId)}>test-open</button>
+      <AttackWizard wizard={wizard} />
+    </>
+  );
 }
+
+afterEach(cleanup);
+
+const reopen = () => {
+  fireEvent.click(screen.getByRole("button", { name: "test-close", hidden: true }));
+  fireEvent.click(screen.getByRole("button", { name: "test-open", hidden: true }));
+};
 
 describe("AttackWizard", () => {
   it("ціль → сітка d20 → шкода → підсумок «Атакувати» → мутація", async () => {
@@ -90,5 +103,38 @@ describe("AttackWizard", () => {
 
     expect(await screen.findByText("Дальня атака")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Змінити зброю" })).toBeNull();
+  });
+
+  it("закриття й повторне відкриття не залишає старих кубиків шкоди", async () => {
+    const { wrapper, me } = fakeScene();
+
+    render(<Harness attacker={me} preset={{ targetId: "gob", attackId: "rapier" }} />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: "14" }));
+    fireEvent.change(screen.getByLabelText("Кубик 1 (d8)"), { target: { value: "6" } });
+
+    expect((screen.getByRole("button", { name: "Далі · підсумок" }) as HTMLButtonElement).disabled).toBe(false);
+
+    reopen();
+    fireEvent.click(await screen.findByRole("button", { name: "14" }));
+
+    expect((screen.getByLabelText("Кубик 1 (d8)") as HTMLInputElement).value).toBe("");
+    expect((screen.getByRole("button", { name: "Далі · підсумок" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("перший кубик переваги не переживає закриття діалогу", async () => {
+    const { wrapper, me, mutateAsync } = fakeScene();
+
+    render(<Harness attacker={me} preset={{ targetId: "gob", attackId: "rapier" }} />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Перевага" }));
+    fireEvent.click(screen.getByRole("button", { name: "14" }));
+
+    reopen();
+    fireEvent.click(await screen.findByRole("button", { name: "Перевага" }));
+    fireEvent.click(screen.getByRole("button", { name: "3" }));
+
+    expect(screen.getByText("Кидок атаки · d20")).toBeTruthy();
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 });

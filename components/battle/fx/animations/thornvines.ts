@@ -1,12 +1,12 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic } from "../runtime/easing";
-import { chance, type FxPoint, rand } from "../runtime/geometry";
-import { emit, shoot } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { dropPath } from "../runtime/shapes";
-import { animateEl, schedule, timeline } from "../runtime/stage";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, shoot } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { dropPath } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, schedule, timeline } from "@/components/battle/fx/runtime/stage";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const SEED_MS = 300;
@@ -34,10 +34,8 @@ interface Drop extends FxPoint {
   size: number;
 }
 
-export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const thornvines: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const ground = target.y + h;
@@ -98,6 +96,34 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
       }
     };
 
+    // Thorns along the front turns, beaded with yellow sap once the vines bind.
+    const thornsWithSap = (g: CanvasRenderingContext2D, grown: number, t: number) => {
+      for (const th of thorns) {
+        if (th.u > grown) continue;
+
+        const p = at(vines[th.vine], th.u);
+
+        if (p.depth <= 0) continue;
+
+        const len = (th.vine === 2 ? 4.5 : 7) * clamp01((grown - th.u) / 0.08);
+
+        g.fillStyle = "#16260c";
+        g.beginPath();
+        g.moveTo(p.x - 2.4, p.y);
+        g.lineTo(p.x + th.side * 2, p.y - th.side * len);
+        g.lineTo(p.x + 2.4, p.y);
+        g.closePath();
+        g.fill();
+
+        if (t > BIND_MS) {
+          g.fillStyle = "#f2e24a";
+          g.beginPath();
+          g.arc(p.x + th.side * 0.8, p.y - th.side * len * 0.75, 1.3, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+    };
+
     const run = timeline(
       stage,
       TOTAL_MS,
@@ -116,31 +142,7 @@ export const thornvines: FxAnimation = ({ stage, from, to, targetEls }) =>
 
         for (const v of vines) drawVine(g, v, grown, true);
 
-        // Thorns along the front turns, beaded with yellow sap.
-        for (const th of thorns) {
-          if (th.u > grown) continue;
-
-          const p = at(vines[th.vine], th.u);
-
-          if (p.depth <= 0) continue;
-
-          const len = (th.vine === 2 ? 4.5 : 7) * clamp01((grown - th.u) / 0.08);
-
-          g.fillStyle = "#16260c";
-          g.beginPath();
-          g.moveTo(p.x - 2.4, p.y);
-          g.lineTo(p.x + th.side * 2, p.y - th.side * len);
-          g.lineTo(p.x + 2.4, p.y);
-          g.closePath();
-          g.fill();
-
-          if (t > BIND_MS) {
-            g.fillStyle = "#f2e24a";
-            g.beginPath();
-            g.arc(p.x + th.side * 0.8, p.y - th.side * len * 0.75, 1.3, 0, Math.PI * 2);
-            g.fill();
-          }
-        }
+        thornsWithSap(g, grown, t);
 
         for (const d of drops) {
           g.fillStyle = "#e8d030";

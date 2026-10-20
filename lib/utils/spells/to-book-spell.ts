@@ -1,14 +1,15 @@
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
+import type { IdName } from "@/types/common";
 import type { BookSpell, SpellDefinition, SpellRules } from "@/types/spells";
 
-export interface SpellRow {
+interface BookSpellRow {
   id: string;
   name: string;
   level: number;
   description: string | null;
   appearanceDescription?: string | null;
   icon: string | null;
-  spellGroup: { id: string; name: string } | null;
+  spellGroup: IdName | null;
   dice?: number;
   cost?: string;
   targeting?: unknown;
@@ -30,7 +31,7 @@ export function spellRules(def: SpellDefinition): SpellRules {
   };
 }
 
-export function toBookSpell(row: SpellRow): BookSpell {
+export function toBookSpell(row: BookSpellRow): BookSpell {
   const { id, name, level, description, appearanceDescription, icon, spellGroup } = row;
 
   return { id, name, level, description, appearanceDescription, icon, spellGroup, ...spellRules(readSpellDefinition(row)) };

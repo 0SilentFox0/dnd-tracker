@@ -5,20 +5,20 @@ import { toArtifactSetErrorResponse } from "../route-errors";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { patchArtifactSetSchema } from "@/lib/schemas/artifact-sets";
-import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
-import { readAbilities } from "@/lib/utils/abilities/read";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import {
   buildArtifactSetPatchInput,
   deleteArtifactSetAndClearArtifacts,
   findArtifactSetInCampaign,
   reloadArtifactSetDetail,
   updateArtifactSetRow,
-} from "@/lib/utils/artifacts/artifact-set-queries";
-import { syncArtifactSetMembers } from "@/lib/utils/artifacts/sync-artifact-set-members";
+} from "@/lib/server/artifacts/artifact-set-queries";
+import { syncArtifactSetMembers } from "@/lib/server/artifacts/sync-artifact-set-members";
+import { resolveArtifactIconForPersistence } from "@/lib/supabase/artifact-icon-storage";
+import { readAbilities } from "@/lib/utils/abilities/read";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
+import { handleApiError } from "@/lib/utils/api/error-handler";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function GET(
   _request: Request,
@@ -73,10 +73,7 @@ export async function PATCH(
     let patch = data;
 
     if (data.icon !== undefined && data.icon !== existing.icon) {
-      const raw =
-        data.icon === null ? null : String(data.icon).trim() || null;
-
-      const resolved = await resolveArtifactIconForPersistence(raw, {
+      const resolved = await resolveArtifactIconForPersistence(data.icon, {
         campaignId: id,
         objectBaseName: `${setId}-${randomUUID()}`,
       });
@@ -85,7 +82,7 @@ export async function PATCH(
         return NextResponse.json({ error: resolved.message }, { status: 422 });
       }
 
-      patch = { ...data, icon: resolved.icon };
+      patch = { ...data, icon: resolved.value };
     }
 
     const updateData = buildArtifactSetPatchInput(patch);

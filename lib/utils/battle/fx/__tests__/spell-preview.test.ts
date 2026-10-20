@@ -50,7 +50,7 @@ describe("previewSpellFx", () => {
 
     expect(p.spec).toMatchObject({ archetype: "entangle", element: "nature" });
     expect(p.auras).toEqual(["roots"]);
-    expect(p.effects).toContain("стан: без ближніх атак");
+    expect(p.effects).toContain("без ближніх атак × 1 р.");
   });
 
   it("avatar is its own necrotic summon on the caster", () => {
@@ -58,7 +58,7 @@ describe("previewSpellFx", () => {
 
     expect(p.spec).toMatchObject({ archetype: "avatar", element: "necrotic", targetIds: ["caster"] });
     expect(p.targets).toEqual([]);
-    expect(p.effects).toEqual(["призов"]);
+    expect(p.effects).toEqual(["прикликати 1× обраного юніта"]);
   });
 
   it("resurrection heals the fallen ally with the heal frame", () => {

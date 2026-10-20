@@ -3,12 +3,11 @@
 import type { ReactNode } from "react";
 
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
-import { EffectIcon, HealthBar, HealthLabel, ZoomablePortrait } from "@/components/battle/hud";
+import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, ZoomablePortrait } from "@/components/battle/hud";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
-import { signedDelta } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -50,12 +49,8 @@ function ParticipantDetailsBody({ participant }: ParticipantDetailsProps) {
     <div className="text-[var(--bone)]">
       <div ref={shakeRef} className="relative flex items-center gap-4">
         <HitFrame change={change} />
-        {change && (
-          <span key={`float:${change.id}`} style={delayStyle} className={cn("hud-sc pointer-events-none absolute left-4 top-0 z-10 text-[26px] font-extrabold opacity-0 [text-shadow:0_2px_6px_#000] animate-[hud-float_1.1s_ease-out]", change.delta < 0 ? "text-[#ff6a4d]" : "text-[#8fd07a]")}>
-            {signedDelta(change.delta)}
-          </span>
-        )}
-        <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(change && !change.impact && (change.delta < 0 ? "animate-[hud-flash-red_.5s]" : "animate-[hud-flash-green_.7s]"))} />
+        <HitFloat change={change} delayStyle={delayStyle} className="left-4 top-0 text-[26px]" />
+        <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(!change?.impact && hitFlashClass(change))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
           {exact ? <div className="text-sm text-[#d6cbb7]">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}

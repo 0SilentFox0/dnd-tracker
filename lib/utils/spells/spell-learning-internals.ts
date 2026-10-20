@@ -1,23 +1,6 @@
 import { SkillLevel, type SkillLevelType } from "@/types/skill-tree";
-import type { Skill } from "@/types/skills";
 
-type SkillLike = Skill & {
-  spellData?: { spellGroupId?: string };
-  basicInfo?: { name?: string };
-  spellGroup?: { id: string; name?: string } | null;
-};
-
-function getSkillSpellGroupId(skill: SkillLike): string | null | undefined {
-  return (
-    skill.spellGroupId ??
-    skill.spellData?.spellGroupId ??
-    skill.spellGroup?.id
-  );
-}
-
-function getSkillGrantedSpellId(skill: SkillLike): string | null | undefined {
-  return skill.grantedSpellId;
-}
+type SkillLike = { spellGroupId?: string | null; grantedSpellId?: string | null };
 
 export const SKILL_LEVEL_ORDER: Record<SkillLevelType, number> = {
   [SkillLevel.BASIC]: 1,
@@ -45,5 +28,5 @@ export function getSpellLevelsForSkillLevel(skillLevel: SkillLevelType): number[
 export interface SpellSkillInfo { spellGroupId: string | null; grantedSpellId: string | null }
 
 export function toSpellSkillInfo(skill: SkillLike): SpellSkillInfo {
-  return { spellGroupId: getSkillSpellGroupId(skill) ?? null, grantedSpellId: getSkillGrantedSpellId(skill) ?? null };
+  return { spellGroupId: skill.spellGroupId ?? null, grantedSpellId: skill.grantedSpellId ?? null };
 }

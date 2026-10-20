@@ -77,7 +77,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: "Бій",
             content: (
               <div className="space-y-6">
-                <CharacterAbilityScores abilityScores={abilityScores} primary={{ value: abilityScores.primaryAbility, onChange: abilityScores.setters.setPrimaryAbility }} />
+                <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
                 <CharacterCombatParams combatStats={combatStats} />
                 <CharacterSkillsSection skills={skills} />
               </div>
@@ -102,8 +102,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
                   <SelectField
                     id="spellcastingAbility"
-                    value={spellcasting.spellcastingAbility ?? ""}
-                    onValueChange={(v) => spellcasting.setters.setSpellcastingAbility(toSpellcastingAbility(v))}
+                    value={spellcasting.data.spellcastingAbility ?? ""}
+                    onValueChange={(v) => spellcasting.set("spellcastingAbility", toSpellcastingAbility(v))}
                     options={SPELL_ABILITY_OPTIONS}
                     allowNone
                     noneLabel="Немає"
@@ -141,7 +141,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-6">
                 <GoalList />
-                <BiographyEditor value={formData.basicInfo.background ?? ""} onChange={(v) => form.actions.setFormData((prev) => ({ ...prev, basicInfo: { ...prev.basicInfo, background: v } }))} />
+                <BiographyEditor value={formData.basicInfo.background ?? ""} onChange={(v) => form.basicInfo.set("background", v)} />
               </div>
             ),
           },

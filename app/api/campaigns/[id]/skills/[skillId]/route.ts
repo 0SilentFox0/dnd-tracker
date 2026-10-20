@@ -7,6 +7,7 @@ import { updateSkillSchema } from "./update-skill-schema";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { invalidCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -61,6 +62,14 @@ export async function PATCH(
     const data = await parseBody(updateSkillSchema, request);
 
     if (data instanceof NextResponse) return data;
+
+    const foreignRef = await invalidCampaignRefs(id, {
+      spell: [data.spellData?.spellId, data.spellData?.grantedSpellId],
+      spellGroup: data.spellData?.spellGroupId,
+      mainSkill: data.mainSkillData?.mainSkillId,
+    });
+
+    if (foreignRef) return foreignRef;
 
     const updateData = buildSkillUpdateData(data);
 

@@ -8,8 +8,8 @@ import { createRain } from "../rain";
 import { createStorm, FLASH_SEC, nextFlashIn } from "../storm";
 import { particleCount, type WeatherSim } from "../types";
 
-import { type RecordedCall, recordingContext } from "@/components/battle/fx/__tests__/recording-canvas";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
+import { type RecordedCall, recordingContext } from "@/lib/utils/canvas/__tests__/recording-canvas";
 import type { WeatherKind } from "@/types/battle";
 
 const size = { width: 800, height: 600 };

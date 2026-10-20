@@ -9,11 +9,11 @@ import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { AttackKind } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 
-export function isPhysicalDamageType(dt: string): boolean {
+function isPhysicalDamageType(dt: string): boolean {
   return PHYSICAL_DAMAGE_TYPES.includes(dt.toLowerCase());
 }
 
-export function getResistanceSkillsHighestOnly(
+function getResistanceSkillsHighestOnly(
   target: BattleParticipant,
   damageType: string,
   participants: BattleParticipant[] = [target],

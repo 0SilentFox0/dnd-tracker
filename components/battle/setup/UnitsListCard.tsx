@@ -1,6 +1,7 @@
 "use client";
 
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { SetupEntityCard } from "./SetupEntityCard";
+
 import { HudSection } from "@/components/hud/form";
 import {
   Accordion,
@@ -11,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { clampUnitQuantity, UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
 import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
@@ -20,7 +22,7 @@ interface UnitsListCardProps {
   units: SetupUnit[];
   entityStats: Record<string, EntityStats> | null;
   selection: ParticipantSelection;
-  actions: Pick<ParticipantActions, "toggle" | "addToSide" | "setQuantity">;
+  actions: Pick<ParticipantActions, "cycleUnit" | "addToSide" | "setQuantity">;
 }
 
 interface UnitRowProps {
@@ -33,106 +35,43 @@ interface UnitRowProps {
 function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
   const { isSelected, side, quantity } = state;
 
-  const isAlly = side === ParticipantSide.ALLY;
-
   const isEnemy = side === ParticipantSide.ENEMY;
 
+  const badge = isEnemy ? (
+    <span className="text-xs font-medium text-red-600 dark:text-red-400">Ворог</span>
+  ) : side === ParticipantSide.ALLY ? (
+    <span className="text-xs font-medium text-primary">Союзник</span>
+  ) : null;
+
   return (
-    <div
-      className={`flex flex-col gap-3 rounded-xl border-2 transition-all overflow-hidden ${
-        isSelected
-          ? isEnemy
-            ? "border-red-500/70 bg-red-500/5 shadow-sm"
-            : "border-primary bg-primary/10 shadow-sm"
-          : "border-border hover:border-primary/50 hover:bg-accent/50"
-      }`}
+    <SetupEntityCard
+      entity={unit}
+      fallbackIcon="⚔️"
+      title={<span className="font-normal text-muted-foreground"> · tier {unit.level ?? 1}</span>}
+      stats={stats}
+      state={{ isSelected, isEnemy, badge }}
+      onToggle={actions.onToggle}
     >
-      <button
-        type="button"
-        onClick={actions.onToggle}
-        className="w-full text-left flex items-center gap-4 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-xl"
-      >
-        <EntityIcon src={unit.avatar} name={unit.name} alt={unit.name} size={56} className="size-14 rounded-lg" fallback={<span className="text-xl text-muted-foreground">⚔️</span>} />
-        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-          <span className="text-base font-semibold truncate">
-            {unit.name}
-            <span className="text-muted-foreground font-normal">
-              {" "}
-              · tier {unit.level ?? 1}
-            </span>
-          </span>
-          {stats && (
-            <span className="text-sm text-muted-foreground">
-              DPR {Math.round(stats.dpr * 10) / 10} · HP {stats.hp} · KPI {stats.kpi}
-            </span>
-          )}
+      <div className="flex flex-wrap items-center gap-3 border-t border-border/50 px-4 pb-4 pt-0">
+        <div className="flex items-center gap-2">
+          <label htmlFor={`quantity-${unit.id}`} className="whitespace-nowrap text-sm text-muted-foreground">
+            Кількість:
+          </label>
+          <Input
+            id={`quantity-${unit.id}`}
+            type="number"
+            min={UNIT_QUANTITY.min}
+            max={UNIT_QUANTITY.max}
+            value={quantity}
+            onChange={(e) => actions.onQuantityChange(clampUnitQuantity(parseInt(e.target.value, 10)))}
+            className="h-8 w-20"
+          />
         </div>
-        {isSelected && (
-          <div className="shrink-0 flex items-center gap-2" aria-hidden>
-            {isAlly && (
-              <span className="text-xs font-medium text-primary">Союзник</span>
-            )}
-            {isEnemy && (
-              <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                Ворог
-              </span>
-            )}
-            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-              <svg
-                className="w-3.5 h-3.5 text-primary-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-          </div>
-        )}
-      </button>
-      {isSelected && (
-        <div
-          className="px-4 pb-4 pt-0 flex flex-wrap items-center gap-3 border-t border-border/50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor={`quantity-${unit.id}`}
-              className="text-sm text-muted-foreground whitespace-nowrap"
-            >
-              Кількість:
-            </label>
-            <Input
-              id={`quantity-${unit.id}`}
-              type="number"
-              min={1}
-              max={20}
-              value={quantity}
-              onChange={(e) =>
-                actions.onQuantityChange(
-                  Math.max(1, parseInt(e.target.value, 10) || 1),
-                )
-              }
-              className="w-20 h-8"
-            />
-          </div>
-          <Button
-            type="button"
-            variant={isEnemy ? "secondary" : "outline"}
-            size="sm"
-            onClick={actions.onAddToEnemies}
-            disabled={isEnemy}
-          >
-            {isEnemy ? "Вже ворог" : "До ворогів"}
-          </Button>
-        </div>
-      )}
-    </div>
+        <Button type="button" variant={isEnemy ? "secondary" : "outline"} size="sm" onClick={actions.onAddToEnemies} disabled={isEnemy}>
+          {isEnemy ? "Вже ворог" : "До ворогів"}
+        </Button>
+      </div>
+    </SetupEntityCard>
   );
 }
 
@@ -191,15 +130,7 @@ export function UnitsListCard({ units, entityStats, selection, actions }: UnitsL
                         stats={entityStats?.[unit.id]}
                         state={{ isSelected, side, quantity }}
                         actions={{
-                          onToggle: () => {
-                            if (!isSelected) {
-                              actions.toggle(unit.id, ParticipantSourceType.UNIT, true);
-                            } else if (side === ParticipantSide.ALLY) {
-                              actions.toggle(unit.id, ParticipantSourceType.UNIT, false);
-                            } else {
-                              actions.addToSide(unit.id, ParticipantSourceType.UNIT, ParticipantSide.ALLY);
-                            }
-                          },
+                          onToggle: () => actions.cycleUnit(unit.id),
                           onAddToEnemies: () => {
                             if (side !== ParticipantSide.ENEMY) actions.addToSide(unit.id, ParticipantSourceType.UNIT, ParticipantSide.ENEMY, quantity);
                           },

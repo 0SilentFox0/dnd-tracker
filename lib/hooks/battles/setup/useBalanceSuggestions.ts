@@ -68,7 +68,7 @@ export function useBalanceSuggestions({
   }, [participants, suggestedEnemies, setParticipants]);
 
   return {
-    loading: balance.isPending,
+    isLoading: balance.isPending,
     suggested: suggestedEnemies,
     done: suggestDone,
     race: balanceRace,

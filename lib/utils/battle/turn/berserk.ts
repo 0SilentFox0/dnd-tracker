@@ -1,12 +1,11 @@
 import { AttackType } from "@/lib/constants/battle";
-import { isActive, isTargetable, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isTargetable, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
-import { rollDiceList } from "@/lib/utils/common/dice";
-import { rollDie } from "@/lib/utils/common/dice";
+import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
@@ -53,7 +52,7 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 
   const order = updateParticipant(ended.participants, id, endTurnCleanup);
 
-  const turnEnd = ended.messages.length > 0 ? [{ ...note(order.find((p) => p.basicInfo.id === id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, `Кінець ходу: ${ended.messages.join("; ")}`) }] : [];
+  const turnEnd = ended.messages.length > 0 ? [{ ...note(findParticipant(order, id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, `Кінець ходу: ${ended.messages.join("; ")}`) }] : [];
 
   return { participants: order, actions: [...actions, ...turnEnd] };
 }
@@ -61,7 +60,7 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 export function runBerserkTurn(params: BerserkTurnParams): { participants: BattleParticipant[]; actions: BattleAction[] } {
   const { participants, participantId, rng } = params;
 
-  const berserker = participants.find((p) => p.basicInfo.id === participantId);
+  const berserker = findParticipant(participants, participantId);
 
   if (!berserker || !isActive(berserker)) return { participants, actions: [] };
 
@@ -81,7 +80,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     return finishTurn(participants, [note(berserker, params, `🤬 Шал: ${berserker.basicInfo.name} ${reason}`)], params);
   }
 
-  const target = victims[Math.min(victims.length - 1, Math.floor(rng() * victims.length))];
+  const target = pickOne(victims, rng);
 
   const result = processAttack({
     attacker: berserker,

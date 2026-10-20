@@ -1,14 +1,15 @@
-import { faceOf, halfSize } from "../runtime/anchors";
-import { sinkingBadge } from "../runtime/badge";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { chance, type FxPoint, perTick, prune, rand } from "../runtime/geometry";
-import { emit } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { cloudPath } from "../runtime/shapes";
-import { animateEl, timeline } from "../runtime/stage";
-import { glow, sprite, spritePx } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { faceOf, halfSize } from "@/components/battle/fx/runtime/anchors";
+import { sinkingBadge } from "@/components/battle/fx/runtime/badge";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { chance, type FxPoint, perTick, prune, rand } from "@/components/battle/fx/runtime/geometry";
+import { holdFilter } from "@/components/battle/fx/runtime/motion";
+import { emit } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { cloudPath } from "@/components/battle/fx/runtime/shapes";
+import { animateEl, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite, spritePx } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const RAIN_MS = ARCHETYPE_FX.raincloud.impactMs;
@@ -28,10 +29,8 @@ interface Drop extends FxPoint {
   len: number;
 }
 
-export const raincloud: FxAnimation = ({ stage, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const el = targetEls[i];
-
+export const raincloud: FxAnimation = ({ stage, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
     const face = faceOf(el, target);
@@ -144,8 +143,7 @@ export const raincloud: FxAnimation = ({ stage, to, targetEls }) =>
       },
     );
 
-    const gloomOver = animateEl(stage, el, [{ filter: "none", transform: "none" }, { filter: "saturate(.3) brightness(.78) sepia(.25) hue-rotate(175deg)", transform: "translateY(3px)", offset: 0.3 }, { filter: "saturate(.3) brightness(.78) sepia(.25) hue-rotate(175deg)", transform: "translateY(3px)", offset: 0.8 }, { filter: "none", transform: "none" }], { duration: TOTAL_MS - RAIN_MS, delay: RAIN_MS, easing: "ease-in-out" });
-
+    const gloomOver = animateEl(stage, el, holdFilter("saturate(.3) brightness(.78) sepia(.25) hue-rotate(175deg)", 0.3, 0.8, { transform: "translateY(3px)" }), { duration: TOTAL_MS - RAIN_MS, delay: RAIN_MS, easing: "ease-in-out" });
 
     await Promise.all([run, gloomOver]);
   });

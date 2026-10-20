@@ -1,19 +1,13 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { MoraleCheckInput } from "@/lib/schemas";
-import { canActNow } from "@/lib/utils/battle/common/control";
+import { requireActor } from "@/lib/utils/battle/common/control";
 import { checkMorale } from "@/lib/utils/battle/morale/check";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 
 export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleCheckInput): MutationResult {
-  const participant = ctx.participants.find((p) => p.basicInfo.id === data.participantId);
-
-  if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
-
-  if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) {
-    throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
-  }
+  const participant = requireActor(ctx, data.participantId, { missing: "Учасника немає в бою", forbidden: API_ERRORS.FORBIDDEN });
 
   const pending = ctx.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null;
 

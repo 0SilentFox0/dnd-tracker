@@ -1,9 +1,4 @@
-/**
- * Клієнт для запитів до API.
- * Усі виклики fetch проходять через request() і обробляються глобальним обробником помилок.
- */
-
-import { getCampaignApiUrl } from "@/lib/utils/api/api-helpers";
+import { getCampaignApiUrl } from "@/lib/api/api-helpers";
 
 export class ApiError extends Error {
   constructor(
@@ -22,7 +17,7 @@ const issueMessage = (issue: unknown): string =>
     ? (issue as { message: string }).message
     : JSON.stringify(issue);
 
-export function errorMessage(body: unknown, fallback: string): string {
+export function bodyErrorMessage(body: unknown, fallback: string): string {
   const { error, issues } = (body ?? {}) as { error?: unknown; issues?: unknown };
 
   const details = Array.isArray(issues) ? issues.map(issueMessage).join("; ") : "";
@@ -51,19 +46,11 @@ let globalErrorHandler: GlobalErrorHandler = (payload) => {
   }
 };
 
-/**
- * Встановити глобальний обробник помилок API (наприклад, тост або редірект на логін).
- * Викликати при ініціалізації додатку (наприклад, у layout або _app).
- */
 export function setGlobalApiErrorHandler(handler: GlobalErrorHandler): void {
   globalErrorHandler = handler;
 }
 
-/**
- * Виконати запит до API з єдиною обробкою помилок.
- * При !response.ok викликається globalErrorHandler і кидається ApiError.
- */
-export type RequestOptions = RequestInit & {
+type RequestOptions = RequestInit & {
   parseResponse?: "json" | "text" | "none";
   /** сира відповідь до розбору тіла — для заголовків (Date) */
   onResponse?: (response: Response) => void;
@@ -95,7 +82,7 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
   }
 
   if (!response.ok) {
-    let message = errorMessage(body, response.statusText);
+    let message = bodyErrorMessage(body, response.statusText);
 
     if (!message.trim()) {
       message = `Помилка ${response.status}`;
@@ -120,13 +107,9 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
   return (body ?? null) as T;
 }
 
-export type CampaignRequestOptions = Omit<RequestOptions, "body"> & { body?: unknown };
+type CampaignRequestOptions = Omit<RequestOptions, "body"> & { body?: unknown };
 
-/**
- * Запит до campaign-scoped API: будує URL через getCampaignApiUrl і викликає request().
- * path — шлях після campaignId, наприклад "/races" або "/battles/123".
- * Залишати для рідкісних кейсів (інший method, body для DELETE, спеціальні опції).
- */
+// for rare cases: another method, a DELETE body, special options
 export async function campaignRequest<T>(
   campaignId: string,
   path: string,
@@ -142,9 +125,6 @@ export async function campaignRequest<T>(
   });
 }
 
-/**
- * GET до campaign API (без body).
- */
 export async function campaignGet<T>(
   campaignId: string,
   path: string,
@@ -153,9 +133,6 @@ export async function campaignGet<T>(
   return campaignRequest<T>(campaignId, path, { ...options, method: "GET" });
 }
 
-/**
- * POST до campaign API; тіло — третій аргумент.
- */
 export async function campaignPost<T>(
   campaignId: string,
   path: string,
@@ -165,9 +142,6 @@ export async function campaignPost<T>(
   return campaignRequest<T>(campaignId, path, { ...options, method: "POST", body });
 }
 
-/**
- * PATCH до campaign API; тіло — третій аргумент.
- */
 export async function campaignPatch<T>(
   campaignId: string,
   path: string,
@@ -177,9 +151,6 @@ export async function campaignPatch<T>(
   return campaignRequest<T>(campaignId, path, { ...options, method: "PATCH", body });
 }
 
-/**
- * PUT до campaign API; тіло — третій аргумент.
- */
 export async function campaignPut<T>(
   campaignId: string,
   path: string,
@@ -189,10 +160,6 @@ export async function campaignPut<T>(
   return campaignRequest<T>(campaignId, path, { ...options, method: "PUT", body });
 }
 
-/**
- * DELETE до campaign API (без body).
- * Якщо потрібен body (наприклад delete-by-level), використовуй campaignRequest.
- */
 export async function campaignDelete<T>(
   campaignId: string,
   path: string,
@@ -201,11 +168,8 @@ export async function campaignDelete<T>(
   return campaignRequest<T>(campaignId, path, { ...options, method: "DELETE" });
 }
 
-/**
- * CRUD-фабрика для campaign-scoped ресурсу з єдиним `basePath` ("/races"); у `lib/api/<domain>.ts` її методи — однорядкові re-export.
- * Нестандартні кеші — `options.listCache` / `getCache`, нестандартний результат DELETE — 3-й generic `TDeleteResult`.
- */
-export interface CampaignCrudApi<
+// CRUD for a campaign resource under one basePath; the 4th generic is the DELETE result
+interface CampaignCrudApi<
   TEntity,
   TCreate,
   TUpdate = Partial<TCreate>,

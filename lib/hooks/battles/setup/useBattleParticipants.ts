@@ -23,6 +23,43 @@ export interface ParticipantActions {
   remove: (participantId: string) => void;
   setQuantity: (participantId: string, quantity: number) => void;
   setReserve: (participantId: string, reserved: number) => void;
+  /** Юніт: не вибраний → союзник, союзник → прибрати, ворог → союзник. */
+  cycleUnit: (participantId: string) => void;
+}
+
+function placeOnSide(
+  prev: BattlePreparationParticipant[],
+  participantId: string,
+  type: ParticipantSourceTypeValue,
+  side: ParticipantSide,
+  quantity?: number,
+): BattlePreparationParticipant[] {
+  const existing = prev.find((p) => p.id === participantId);
+
+  if (existing) {
+    return prev.map((p) =>
+      p.id === participantId
+        ? {
+            ...p,
+            side,
+            ...(type === ParticipantSourceType.UNIT && {
+              quantity: quantity ?? p.quantity ?? 1,
+              ...(p.reserved !== undefined && { reserved: Math.min(p.reserved, quantity ?? p.quantity ?? 1) }),
+            }),
+          }
+        : p,
+    );
+  }
+
+  return [
+    ...prev,
+    {
+      id: participantId,
+      type,
+      side,
+      ...(type === ParticipantSourceType.UNIT && { quantity: quantity ?? 1 }),
+    },
+  ];
 }
 
 export function useBattleParticipants(initial: BattlePreparationParticipant[] = []) {
@@ -33,35 +70,7 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
       toggle: (participantId, type, checked) =>
         setList((prev) => (checked ? [...prev, { id: participantId, type, side: ParticipantSide.ALLY }] : prev.filter((p) => p.id !== participantId))),
       setSide: (participantId, side) => setList((prev) => prev.map((p) => (p.id === participantId ? { ...p, side } : p))),
-      addToSide: (participantId, type, side, quantity) =>
-        setList((prev) => {
-          const existing = prev.find((p) => p.id === participantId);
-
-          if (existing) {
-            return prev.map((p) =>
-              p.id === participantId
-                ? {
-                    ...p,
-                    side,
-                    ...(type === ParticipantSourceType.UNIT && {
-                      quantity: quantity ?? p.quantity ?? 1,
-                      ...(p.reserved !== undefined && { reserved: Math.min(p.reserved, quantity ?? p.quantity ?? 1) }),
-                    }),
-                  }
-                : p,
-            );
-          }
-
-          return [
-            ...prev,
-            {
-              id: participantId,
-              type,
-              side,
-              ...(type === ParticipantSourceType.UNIT && { quantity: quantity ?? 1 }),
-            },
-          ];
-        }),
+      addToSide: (participantId, type, side, quantity) => setList((prev) => placeOnSide(prev, participantId, type, side, quantity)),
       remove: (participantId) => setList((prev) => prev.filter((p) => p.id !== participantId)),
       setQuantity: (participantId, quantity) =>
         setList((prev) =>
@@ -69,6 +78,16 @@ export function useBattleParticipants(initial: BattlePreparationParticipant[] = 
         ),
       setReserve: (participantId, reserved) =>
         setList((prev) => prev.map((p) => (p.id === participantId ? { ...p, reserved: Math.max(0, Math.min(reserved, p.quantity ?? 1)) } : p))),
+      cycleUnit: (participantId) =>
+        setList((prev) => {
+          const existing = prev.find((p) => p.id === participantId);
+
+          if (!existing) return [...prev, { id: participantId, type: ParticipantSourceType.UNIT, side: ParticipantSide.ALLY }];
+
+          if (existing.side === ParticipantSide.ALLY) return prev.filter((p) => p.id !== participantId);
+
+          return placeOnSide(prev, participantId, ParticipantSourceType.UNIT, ParticipantSide.ALLY);
+        }),
     }),
     [],
   );

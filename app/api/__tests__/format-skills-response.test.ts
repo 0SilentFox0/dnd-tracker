@@ -10,18 +10,17 @@ const row = {
 };
 
 describe("formatSkillsListResponse", () => {
-  it("згруповані поля будуються з пласких колонок", () => {
+  it("пласкі колонки скіла, як у Skill", () => {
     const [s] = formatSkillsListResponse([row]);
 
-    expect(s.basicInfo).toEqual({ name: "Скіл", description: "", icon: "https://x/i.png" });
-    expect(s.spellData).toEqual({ spellId: "sp1", spellGroupId: undefined, grantedSpellId: undefined });
-    expect(s.mainSkillData).toEqual({ mainSkillId: "attack" });
+    expect(s).toMatchObject({ name: "Скіл", description: null, icon: "https://x/i.png", spellId: "sp1", spellGroupId: null, grantedSpellId: null, mainSkillId: "attack" });
+    expect(s.abilitySummary).toEqual([]);
   });
 
-  it("legacy-полів у відповіді немає", () => {
+  it("у списку немає важких і legacy-полів", () => {
     const [s] = formatSkillsListResponse([row]);
 
-    for (const key of ["bonuses", "combatStats", "skillTriggers"]) expect(s).not.toHaveProperty(key);
+    for (const key of ["abilities", "damageAffinity", "basicInfo", "bonuses", "combatStats", "skillTriggers", "spellNewSpellId"]) expect(s).not.toHaveProperty(key);
   });
 });
 
@@ -31,6 +30,6 @@ describe("formatSkillResponse", () => {
 
     expect(s.abilities).toEqual([]);
     expect(s.abilityIssues).toEqual([]);
-    expect(s.basicInfo.name).toBe("Скіл");
+    expect(s.name).toBe("Скіл");
   });
 });

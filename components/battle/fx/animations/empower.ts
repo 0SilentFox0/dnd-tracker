@@ -1,13 +1,13 @@
-import { halfSize } from "../runtime/anchors";
-import { clamp01, easeOutCubic, envelope } from "../runtime/easing";
-import { bezier, chance, farSide, type FxPoint, rand } from "../runtime/geometry";
-import { emit, flash } from "../runtime/primitives";
-import { perTarget } from "../runtime/recipes";
-import { sword, twinkle } from "../runtime/shapes";
-import { schedule, timeline } from "../runtime/stage";
-import { glow, sprite } from "../runtime/texture";
 import type { FxAnimation } from "./types";
 
+import { halfSize } from "@/components/battle/fx/runtime/anchors";
+import { clamp01, easeOutCubic, envelope } from "@/components/battle/fx/runtime/easing";
+import { bezier, chance, farSide, type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
+import { emit, flash } from "@/components/battle/fx/runtime/primitives";
+import { perTarget } from "@/components/battle/fx/runtime/recipes";
+import { sword, twinkle } from "@/components/battle/fx/runtime/shapes";
+import { schedule, timeline } from "@/components/battle/fx/runtime/stage";
+import { glow, sprite } from "@/components/battle/fx/runtime/texture";
 import { ARCHETYPE_FX } from "@/lib/utils/battle/fx";
 
 const FILL_MS = ARCHETYPE_FX.empower.impactMs;
@@ -27,9 +27,9 @@ interface Stream {
   delay: number;
 }
 
-export const empower: FxAnimation = ({ stage, from, to, targetEls }) =>
-  perTarget(stage, to, 0, async (target, i) => {
-    const { w, h } = halfSize(targetEls[i]);
+export const empower: FxAnimation = ({ stage, from, targets }) =>
+  perTarget(stage, targets, 0, async ({ at: target, el }) => {
+    const { w, h } = halfSize(el);
 
     // The weapon is held on the side facing the enemies.
     const dir = farSide(target, from, stage.layer.clientWidth);
@@ -159,7 +159,6 @@ export const empower: FxAnimation = ({ stage, from, to, targetEls }) =>
     );
 
     schedule(stage, FILL_MS, () => void flash(stage, tip, "#fff6d8", 90, 360));
-
 
     await run;
   });

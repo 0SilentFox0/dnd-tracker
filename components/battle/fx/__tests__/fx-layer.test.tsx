@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { StrictMode } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -56,5 +57,48 @@ describe("BattleFxLayer", () => {
     expect(h.done).toHaveBeenCalledTimes(1);
     expect(h.cancelLayer).not.toHaveBeenCalled();
     expect(h.preloadAnimation).toHaveBeenCalledWith("haste");
+  });
+
+  it("StrictMode's discarded effect pass plays once and leaves no guard behind", async () => {
+    h.playFx.mockResolvedValue(undefined);
+    render(
+      <StrictMode>
+        <BattleFxLayer />
+      </StrictMode>,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(MAX_FX_MS * 2);
+    });
+    expect(h.playFx).toHaveBeenCalledTimes(1);
+    expect(h.done).toHaveBeenCalledTimes(1);
+  });
+
+  it("unmounting before the run starts cancels it and its guard", async () => {
+    h.playFx.mockReturnValue(new Promise(() => undefined));
+
+    const { unmount } = render(<BattleFxLayer />);
+
+    unmount();
+    h.cancelLayer.mockClear();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(MAX_FX_MS * 2);
+    });
+    expect(h.playFx).not.toHaveBeenCalled();
+    expect(h.cancelLayer).not.toHaveBeenCalled();
+    expect(h.done).not.toHaveBeenCalled();
+  });
+
+  it("a remount after unmount plays its own run", async () => {
+    h.playFx.mockResolvedValue(undefined);
+    render(<BattleFxLayer />).unmount();
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(MAX_FX_MS * 2);
+    });
+    expect(h.playFx).toHaveBeenCalledTimes(1);
+    expect(h.done).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useCharacterForm } from "@/lib/hooks/characters";
@@ -12,8 +12,7 @@ describe("useCharacterForm", () => {
       expect(result.current).not.toHaveProperty(key);
     }
 
-    expect(result.current.spellcasting).not.toHaveProperty("handlers");
-    expect(result.current.spellcasting.setters).not.toHaveProperty("setKnownSpells");
+    expect(Object.keys(result.current.spellcasting)).toEqual(["data", "set"]);
     expect(result.current.formData.roleplay).toEqual({ languages: [], proficiencies: {}, immunities: [] });
   });
 
@@ -22,5 +21,16 @@ describe("useCharacterForm", () => {
 
     expect(result.current.formData.basicInfo.type).toBe("npc_hero");
     expect(result.current.formData.spellcasting.spellSlots).toEqual({});
+  });
+
+  it("set секції оновлює лише свій ключ", () => {
+    const { result } = renderHook(() => useCharacterForm({ onSubmit: vi.fn() }));
+
+    act(() => result.current.abilityScores.set("strength", 17));
+    act(() => result.current.basicInfo.set("name", "Ліра"));
+
+    expect(result.current.formData.abilityScores.strength).toBe(17);
+    expect(result.current.formData.abilityScores.dexterity).toBe(10);
+    expect(result.current.basicInfo.data.name).toBe("Ліра");
   });
 });

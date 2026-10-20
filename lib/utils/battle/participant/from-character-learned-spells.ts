@@ -6,10 +6,6 @@ import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/ski
 import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";
 import { schoolMasteryFromLearned } from "@/lib/utils/spells/model/dice";
 
-export async function resolveLearnedSpellsFromCharacter(character: CharacterFromPrisma, baseKnownSpells: string[], context?: CampaignSpellContext): Promise<string[]> {
-  return (await resolveLearnedSpellsAndMastery(character, baseKnownSpells, context)).knownSpells;
-}
-
 // персональне вміння не лежить у дереві, тож його закляття додаємо окремо
 async function personalSpellIds(character: CharacterFromPrisma, context?: CampaignSpellContext): Promise<string[]> {
   const id = character.personalSkillId?.trim();
@@ -18,7 +14,7 @@ async function personalSpellIds(character: CharacterFromPrisma, context?: Campai
 
   const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findUnique({ where: { id } });
 
-  const spellId = skill ? toSpellSkillInfo(skill as never).grantedSpellId : null;
+  const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
 
   return spellId ? [spellId] : [];
 }
@@ -61,7 +57,7 @@ export async function resolveLearnedSpellsAndMastery(
 
     const fromTree = learnedSpellIdsFromNodes(learned, {
       branchSpellGroup,
-      skills: Object.fromEntries(skills.map((s) => [s.id, toSpellSkillInfo(s as never)])),
+      skills: Object.fromEntries(skills.map((s) => [s.id, toSpellSkillInfo(s)])),
       spells,
     });
 

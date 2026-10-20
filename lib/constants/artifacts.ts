@@ -110,7 +110,6 @@ export const ARTIFACT_GRID_9 = [
 ] as const;
 
 export type ArtifactGridSlotKey = (typeof ARTIFACT_GRID_9)[number]["key"];
-export type ArtifactSlotType = (typeof ARTIFACT_GRID_9)[number]["slotType"];
 
 // ─── Модифікатори артефактів (зброя тощо) ──────────────────────────────────
 

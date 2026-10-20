@@ -14,7 +14,7 @@ export function starPath(g: CanvasRenderingContext2D, x: number, y: number, oute
   g.closePath();
 }
 
-// Four-point twinkle drawn additively; k ∈ [0, 1] is its life.
+/** A four-point twinkle, drawn additively. */
 export function twinkle(g: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, alpha: number) {
   g.globalCompositeOperation = "lighter";
   g.globalAlpha = Math.max(0, alpha);
@@ -254,14 +254,25 @@ export function stonePlate(g: CanvasRenderingContext2D, pts: FxPoint[], size: nu
 }
 
 /** A «+» centred on (x, y), `size` px across. */
-export function plusSign(g: CanvasRenderingContext2D, x: number, y: number, size: number, fill: string) {
+/** A `size` wide plus whose bars are `bar` × size thick; `round` softens their ends. */
+export function plusSign(g: CanvasRenderingContext2D, x: number, y: number, size: number, fill: string, { bar = 0.36, round = false } = {}) {
   const h = size / 2;
 
-  const w = h * 0.36;
+  const w = h * bar;
 
   g.fillStyle = fill;
-  g.fillRect(x - w, y - h, w * 2, h * 2);
-  g.fillRect(x - h, y - w, h * 2, w * 2);
+
+  if (!round) {
+    g.fillRect(x - w, y - h, w * 2, h * 2);
+    g.fillRect(x - h, y - w, h * 2, w * 2);
+
+    return;
+  }
+
+  g.beginPath();
+  g.roundRect(x - h, y - w, h * 2, w * 2, w);
+  g.roundRect(x - w, y - h, w * 2, h * 2, w);
+  g.fill();
 }
 
 /** A sword along the x axis: pommel at the origin, tip at `len`. Fills the blade with `blade`, hilt and guard with `hilt`. */

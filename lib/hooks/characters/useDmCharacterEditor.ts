@@ -24,14 +24,14 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
 
   const remove = () =>
     confirm({
-      title: `Видалити персонажа: ${editor.form.basicInfo.name}?`,
+      title: `Видалити персонажа: ${editor.form.basicInfo.data.name}?`,
       description: "Персонаж, його інвентар і прогрес зникнуть назавжди.",
       confirmLabel: "Видалити",
       onConfirm: () => deleteMutation.mutateAsync(characterId),
     });
 
   const levelUp = async () => {
-    const { name, level } = editor.form.basicInfo;
+    const { name, level } = editor.form.basicInfo.data;
 
     let details: { abilityIncreased?: string | null } | undefined;
 
