@@ -6,7 +6,7 @@ import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/
 import { requireActor } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
-import { assertNotPanicking } from "@/lib/utils/battle/turn";
+import { assertCanAct } from "@/lib/utils/battle/turn";
 
 export const auraZoneSchema = z.object({
   participantId: z.string(),
@@ -27,7 +27,7 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
 
   if (!aura) throw new BattleRuleError("action_rejected", "У учасника немає такої аури");
 
-  assertNotPanicking(ctx.scene.pendingMoraleCheck, owner.basicInfo.id);
+  assertCanAct(ctx, owner.basicInfo.id);
 
   if (!ctx.isDM && owner.battleData.auraZones?.[aura.id] === ctx.scene.round) throw new BattleRuleError("action_used", "Зону цієї аури вже обрано в цьому раунді");
 
