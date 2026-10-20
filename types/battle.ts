@@ -167,8 +167,9 @@ export interface SpellTemplate {
   hollow?: boolean;
 }
 
+export type WeatherKind = "rain" | "storm" | "snow" | "blizzard" | "fog" | "embers" | "crypt";
+
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
-export type WeatherKind = "rain" | "storm" | "snow" | "blizzard" | "fog" | "embers";
 
 export interface BattleMapConfig {
   cols: number;

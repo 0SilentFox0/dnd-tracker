@@ -28,6 +28,8 @@ describe("weather constants", () => {
   it("кожен вид має український підпис, «Ясно» — для null", () => {
     expect(Object.keys(WEATHER_LABELS).sort()).toEqual([...WEATHER_KINDS].sort());
     expect(WEATHER_LABELS.embers).toBe("Вогонь");
+    expect(WEATHER_LABELS.crypt).toBe("Гробниця");
+    expect(WEATHER_KINDS.at(-1)).toBe("crypt");
     expect(CLEAR_WEATHER_LABEL).toBe("Ясно");
   });
 });
@@ -36,6 +38,7 @@ describe("map-weather schema", () => {
   it("weather — вид або null; поле обовʼязкове", () => {
     expect(mapWeatherSchema.safeParse({ weather: "storm" }).success).toBe(true);
     expect(mapWeatherSchema.safeParse({ weather: null }).success).toBe(true);
+    expect(mapWeatherSchema.safeParse({ weather: "crypt" }).success).toBe(true);
     expect(mapWeatherSchema.safeParse({}).success).toBe(false);
     expect(mapWeatherSchema.safeParse({ weather: "hail" }).success).toBe(false);
   });

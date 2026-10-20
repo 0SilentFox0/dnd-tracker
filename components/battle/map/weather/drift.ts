@@ -14,12 +14,20 @@ export interface DriftOptions {
   /** радіус — частка більшої сторони рамки */
   minR: number;
   maxR: number;
+  /** смуга висоти [від, до] у частках рамки; без неї — уся рамка */
+  band?: [number, number];
 }
 
 export function createDrift(size: WeatherSize, count: number, rand: Rand, o: DriftOptions): WeatherSim {
   const span = Math.max(size.width, size.height);
 
-  const puffs: Puff[] = Array.from({ length: count }, () => ({ x: rand() * size.width, y: rand() * size.height, r: span * (o.minR + rand() * (o.maxR - o.minR)) }));
+  const [from, to] = o.band ?? [0, 1];
+
+  const puffs: Puff[] = Array.from({ length: count }, () => ({
+    x: rand() * size.width,
+    y: (from + rand() * (to - from)) * size.height,
+    r: span * (o.minR + rand() * (o.maxR - o.minR)),
+  }));
 
   return {
     step(dt) {

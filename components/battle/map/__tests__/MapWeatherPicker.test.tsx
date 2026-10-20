@@ -46,15 +46,18 @@ describe("Погода в інструментах карти", () => {
     expect(queryByRole("button", { name: "Погода" })).toBeNull();
   });
 
-  it("ДМ відкриває палітру: «Ясно» + 6 ефектів, поточний позначено", () => {
+  it("ДМ відкриває палітру: «Ясно» + 7 ефектів, поточний позначено", () => {
     const { getByRole } = panel(true, { cols: 10, rows: 5, background: null, opacity: 0.3, weather: "rain" });
 
     fireEvent.click(getByRole("button", { name: "Погода" }));
 
-    for (const label of ["Ясно", "Дощ", "Гроза", "Сніг", "Хуртовина", "Туман", "Вогонь"]) {
+    for (const label of ["Ясно", "Дощ", "Гроза", "Сніг", "Хуртовина", "Туман", "Вогонь", "Гробниця"]) {
       expect(getByRole("button", { name: label })).toBeTruthy();
     }
 
+    const labels = Array.from(getByRole("group", { name: "Погода" }).querySelectorAll("button"), (b) => b.textContent);
+
+    expect(labels.indexOf("Гробниця")).toBe(labels.indexOf("Вогонь") + 1);
     expect(getByRole("button", { name: "Дощ" }).getAttribute("aria-pressed")).toBe("true");
     expect(getByRole("button", { name: "Ясно" }).getAttribute("aria-pressed")).toBe("false");
   });

@@ -12,13 +12,16 @@ export interface RainOptions {
   minSpeed: number;
   maxSpeed: number;
   color: string;
+  lineWidth: number;
+  /** затемнення під краплями: без нього тонкі струмені губляться на світлому фоні */
+  haze: string;
 }
 
 export function createRain(size: WeatherSize, count: number, rand: Rand, o: RainOptions): WeatherSim {
   const drops: Drop[] = Array.from({ length: count }, () => ({
     x: rand() * size.width,
     y: rand() * size.height,
-    len: 10 + rand() * 12,
+    len: 14 + rand() * 18,
     speed: o.minSpeed + rand() * (o.maxSpeed - o.minSpeed),
   }));
 
@@ -37,8 +40,11 @@ export function createRain(size: WeatherSize, count: number, rand: Rand, o: Rain
       }
     },
     draw(g) {
+      g.fillStyle = o.haze;
+      g.fillRect(0, 0, size.width, size.height);
       g.strokeStyle = o.color;
-      g.lineWidth = 1;
+      g.lineWidth = o.lineWidth;
+      g.lineCap = "round";
       g.beginPath();
 
       for (const d of drops) {
@@ -52,9 +58,10 @@ export function createRain(size: WeatherSize, count: number, rand: Rand, o: Rain
 }
 
 export const rain: WeatherEffect = {
-  tint: "rgba(60,80,120,.22)",
-  opacity: 0.75,
-  density: 320,
-  cap: 320,
-  create: (size, count, rand) => createRain(size, count, rand, { wind: 60, minSpeed: 650, maxSpeed: 950, color: "rgba(190,210,255,.55)" }),
+  tint: "rgba(45,65,105,.3)",
+  opacity: 0.85,
+  density: 520,
+  cap: 520,
+  create: (size, count, rand) =>
+    createRain(size, count, rand, { wind: 80, minSpeed: 700, maxSpeed: 1000, color: "rgba(205,222,255,.85)", lineWidth: 1.6, haze: "rgba(30,45,80,.14)" }),
 };

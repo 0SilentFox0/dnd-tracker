@@ -6,7 +6,7 @@ export const FLASH_SEC = 0.25;
 export const nextFlashIn = (rand: Rand) => 6 + rand() * 9;
 
 export function createStorm(size: WeatherSize, count: number, rand: Rand): WeatherSim {
-  const rainSim = createRain(size, count, rand, { wind: 140, minSpeed: 900, maxSpeed: 1300, color: "rgba(200,215,255,.6)" });
+  const rainSim = createRain(size, count, rand, { wind: 180, minSpeed: 1000, maxSpeed: 1500, color: "rgba(215,228,255,.9)", lineWidth: 2, haze: "rgba(8,12,32,.36)" });
 
   let untilFlash = nextFlashIn(rand);
 
@@ -34,4 +34,4 @@ export function createStorm(size: WeatherSize, count: number, rand: Rand): Weath
   };
 }
 
-export const storm: WeatherEffect = { tint: "rgba(30,40,70,.35)", opacity: 0.8, density: 420, cap: 420, create: createStorm };
+export const storm: WeatherEffect = { tint: "rgba(12,18,42,.42)", opacity: 0.85, density: 700, cap: 700, create: createStorm };

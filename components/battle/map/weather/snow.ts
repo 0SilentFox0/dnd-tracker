@@ -15,7 +15,12 @@ export interface SnowOptions {
   maxSpeed: number;
   color: string;
   haze?: string;
+  /** пориви: до wind додається до ±gust px/с, що повільно змінюється в часі */
+  gust?: number;
 }
+
+/** Сила пориву −1..1: дві несинхронні хвилі, щоб вітер не був рівномірним. */
+export const gustAt = (t: number) => Math.sin(t * 0.55) * (0.6 + 0.4 * Math.sin(t * 1.7 + 1));
 
 export function createSnow(size: WeatherSize, count: number, rand: Rand, o: SnowOptions): WeatherSim {
   const flakes: Flake[] = Array.from({ length: count }, () => ({
@@ -26,12 +31,18 @@ export function createSnow(size: WeatherSize, count: number, rand: Rand, o: Snow
     phase: rand() * Math.PI * 2,
   }));
 
+  let t = 0;
+
   return {
     step(dt) {
+      t += dt;
+
+      const wind = o.wind + (o.gust ?? 0) * gustAt(t);
+
       for (const f of flakes) {
         f.phase += dt * 1.5;
         f.y += f.speed * dt;
-        f.x = wrap(f.x + (o.wind + Math.sin(f.phase) * o.sway) * dt, size.width);
+        f.x = wrap(f.x + (wind + Math.sin(f.phase) * o.sway) * dt, size.width);
 
         if (f.y - f.r > size.height) {
           f.y = -f.r;

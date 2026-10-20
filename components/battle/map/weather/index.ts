@@ -1,3 +1,4 @@
+import { crypt } from "./crypt";
 import { embers } from "./embers";
 import { fog } from "./fog";
 import { rain } from "./rain";
@@ -7,4 +8,4 @@ import type { WeatherEffect } from "./types";
 
 import type { WeatherKind } from "@/types/battle";
 
-export const WEATHER_EFFECTS: Record<WeatherKind, WeatherEffect> = { rain, storm, snow, blizzard, fog, embers };
+export const WEATHER_EFFECTS: Record<WeatherKind, WeatherEffect> = { rain, storm, snow, blizzard, fog, embers, crypt };
