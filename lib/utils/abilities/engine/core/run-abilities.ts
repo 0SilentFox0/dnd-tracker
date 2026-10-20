@@ -1,4 +1,4 @@
-import { findParticipant, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
+import { findParticipant, inMazePlay, isActive, replaceParticipant, resolvedAbilitiesOf, updateParticipant } from "./participants";
 import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
@@ -19,9 +19,8 @@ function applyUsageResets(ps: BattleParticipant[], event: AbilityEvent): BattleP
   return ps;
 }
 
-// сплячий у лабіринті й вибулий з нього не діють: їхні вміння не спрацьовують
 function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
-  return (isActive(owner) && !owner.battleData.dormant && !owner.battleData.escaped) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
+  return inMazePlay(owner) || (event.type === "lethalDamage" && event.targetId === owner.basicInfo.id);
 }
 
 export function runAbilities(participants: BattleParticipant[], event: AbilityEvent, ctx: AbilityRunContext): AbilityRunResult {
@@ -64,7 +63,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
       fired.push(ability.key);
 
       for (const [effectIndex, effect] of ability.effects.entries()) {
-        const targetIds = resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx.map);
+        const targetIds = resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx);
 
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 

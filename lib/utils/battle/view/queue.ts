@@ -1,3 +1,4 @@
+import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -9,7 +10,7 @@ const item = (kind: "turn" | "extra", participant: BattleParticipant, current = 
   kind, participant, current, down: isDown(participant),
 });
 
-const inMazeLimbo = (p: BattleParticipant) => !!p.battleData.dormant || !!p.battleData.escaped;
+const inMazeLimbo = (p: BattleParticipant) => isDormant(p) || isEscaped(p);
 
 export function turnQueue(order: BattleParticipant[], turnIndex: number, round: number): QueueEntry[] {
   const current = order[turnIndex];

@@ -33,17 +33,18 @@ import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/c
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/unit-control/unit-control-mutation";
-import { BATTLE_LOG_RECENT_EVENTS, emptyMaze, MAZE_SCATTER_MIN_GAP, ParticipantSourceType } from "@/lib/constants/battle";
+import { BATTLE_LOG_RECENT_EVENTS, emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
+import { MAZE_TEXTS } from "@/lib/constants/maze-texts";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { cellDistance, cellKey, neighbors } from "@/lib/utils/battle/grid/geometry";
+import { cellDistance, cellKey, inBounds, mapCentre, neighbors, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
-import { allReachExit, canStep, isMazeHero, MAZE_DARK_ERROR, MAZE_DARK_SKIP, mazeDistances, type MazeGrid, mazeReachable, mazeVision, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
+import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDistances, type MazeGrid, mazeGridOf, mazeReachable, mazeVision, onMazeField, seesParticipant, viewpointOf, wallSet } from "@/lib/utils/battle/maze";
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
@@ -1501,13 +1502,16 @@ main().catch(async (e) => { console.error(e); await removeTestBattles().catch(()
 
 
 // ---------- лабіринт ----------
-const mazeGrid = (): MazeGrid => ({ cols: state.map.cols, rows: state.map.rows, maze: state.map.maze });
+const mazeGrid = (): MazeGrid => mazeGridOf(state.map) as MazeGrid;
 
 const posOf = (p: any) => p.battleData.position as { x: number; y: number } | undefined;
 
-const onField = (p: any) => !!posOf(p) && !p.battleData.reserved && !p.battleData.escaped && alive(p);
+const onField = (p: any) => onMazeField(p);
 
 const isMazeAlly = (p: any) => p.basicInfo.side === "ally" && onField(p);
+
+/** Вільна для кроку клітинка: не зайнята учасником на полі, не вихід і не телепорт. */
+const freeMazeCell = (key: string) => !featureKeys(mazeGrid().maze).has(key) && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === key);
 
 const logText = (log: any[]) => log.map((e: any) => e.resultText ?? "").join(" | ");
 
@@ -1540,15 +1544,11 @@ async function mazeClearBlocker(mover: any) {
 
   const blocker = neighbors(at).filter((n) => canStep(grid, walls, at, n) && (exitDist.get(cellKey(n)) ?? Infinity) < here).map((n) => occupied.get(cellKey(n))).find(Boolean);
 
-  const special = new Set([cellKey(grid.maze.exit as any), ...grid.maze.teleports.flat().map(cellKey)]);
-
-  const spot = [...exitDist.entries()].filter(([k]) => !occupied.has(k) && !special.has(k)).sort((a, b) => b[1] - a[1])[0];
+  const spot = [...exitDist.entries()].filter(([k]) => freeMazeCell(k)).sort((a, b) => b[1] - a[1])[0];
 
   if (!blocker || !spot) return false;
 
-  const [x, y] = spot[0].split(":").map(Number);
-
-  return (await call("move", MOVE, { participantId: blocker.basicInfo.id, to: { x, y }, free: true })).status === 200;
+  return (await call("move", MOVE, { participantId: blocker.basicInfo.id, to: parseCellKey(spot[0]), free: true })).status === 200;
 }
 
 async function mazeStepToExit(mover: any, retry = true): Promise<Awaited<ReturnType<typeof call>> | null> {
@@ -1558,7 +1558,7 @@ async function mazeStepToExit(mover: any, retry = true): Promise<Awaited<ReturnT
 
   const teleports = new Set(grid.maze.teleports.flat().map(cellKey));
 
-  const reach = [...mazeReachable(grid, { participants: P(), mover, budget: 3 - (mover.battleData.movementUsed ?? 0) }).entries()].filter(([k]) => exitDist.has(k));
+  const reach = [...mazeReachable(grid, { participants: P(), mover, budget: mazeBudgetLeft(mover) }).entries()].filter(([k]) => exitDist.has(k));
 
   const here = exitDist.get(cellKey(posOf(mover) as any)) ?? Infinity;
 
@@ -1566,9 +1566,7 @@ async function mazeStepToExit(mover: any, retry = true): Promise<Awaited<ReturnT
 
   if (!best || (exitDist.get(best[0]) as number) >= here) return retry && (await mazeClearBlocker(mover)) ? mazeStepToExit(byId(mover.basicInfo.id), false) : null;
 
-  const [x, y] = best[0].split(":").map(Number);
-
-  return call("move", MOVE, { participantId: mover.basicInfo.id, to: { x, y } });
+  return call("move", MOVE, { participantId: mover.basicInfo.id, to: parseCellKey(best[0]) });
 }
 
 async function mazeWalkAllies(maxTurns: number) {
@@ -1619,9 +1617,7 @@ async function mazeCheck() {
 
   const sleeper = enemies().find((e) => e.battleData.dormant && posOf(e));
 
-  const taken = new Set(P().filter(onField).map((p) => cellKey(posOf(p) as any)));
-
-  const nearCell = watcher && neighbors(posOf(watcher) as any).find((n) => n.x >= 0 && n.y >= 0 && n.x < 14 && n.y < 10 && !taken.has(cellKey(n)) && canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(watcher) as any, n) && cellKey(n) !== cellKey(maze.exit) && !maze.teleports.flat().some((t: any) => cellKey(t) === cellKey(n)));
+  const nearCell = watcher && neighbors(posOf(watcher) as any).find((n) => inBounds(state.map, n) && freeMazeCell(cellKey(n)) && canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(watcher) as any, n));
 
   const home = sleeper && posOf(sleeper);
 
@@ -1641,16 +1637,16 @@ async function mazeCheck() {
 
   const fromHero = mazeDistances(grid, [posOf(hero) as any]);
 
-  const blockedCell = neighbors(posOf(hero) as any).find((n) => n.x >= 0 && n.y >= 0 && n.x < 14 && n.y < 10 && !canStep(grid, walls, posOf(hero) as any, n) && (fromHero.get(cellKey(n)) ?? Infinity) > 3 && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n)));
+  const blockedCell = neighbors(posOf(hero) as any).find((n) => inBounds(state.map, n) && !canStep(grid, walls, posOf(hero) as any, n) && (fromHero.get(cellKey(n)) ?? Infinity) > MAZE_STEPS_PER_TURN && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n)));
 
   const wallMove = blockedCell ? await call("move", MOVE, { participantId: hero.basicInfo.id, to: blockedCell }) : null;
 
   if (wallMove) tcheck("Лабіринт: крок крізь стіну → 422", wallMove.status === 422, `${hero.basicInfo.name} → ${JSON.stringify(blockedCell)}: ${wallMove.status}`);
   else tskip("Лабіринт: крок крізь стіну → 422", "за стіною від героя немає клітинки без обходу ≤ 3 кроків");
 
-  const dist4 = [...mazeDistances(grid, [posOf(hero) as any]).entries()].find(([k, d]) => d === 4 && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === k) && cellKey(maze.exit) !== k && !maze.teleports.flat().some((t: any) => cellKey(t) === k));
+  const dist4 = [...mazeDistances(grid, [posOf(hero) as any]).entries()].find(([k, d]) => d === MAZE_STEPS_PER_TURN + 1 && freeMazeCell(k));
 
-  const far = dist4 && (await call("move", MOVE, { participantId: hero.basicInfo.id, to: { x: Number(dist4[0].split(":")[0]), y: Number(dist4[0].split(":")[1]) } }));
+  const far = dist4 && (await call("move", MOVE, { participantId: hero.basicInfo.id, to: parseCellKey(dist4[0]) }));
 
   if (far) tcheck("Лабіринт: 4-й крок за хід → 422", far.status === 422, `${hero.basicInfo.name} → ${dist4[0]}: ${far.status}`);
   else tskip("Лабіринт: 4-й крок за хід → 422", "немає клітинки на відстані 4");
@@ -1685,7 +1681,7 @@ async function mazeCheck() {
 
   const darkNext = await call("next-turn", NEXT);
 
-  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_DARK_ERROR) && darkNext.status === 200 && logText(darkNext.log).includes(MAZE_DARK_SKIP), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
+  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_TEXTS.dark) && darkNext.status === 200 && logText(darkNext.log).includes(MAZE_TEXTS.darkSkip), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
 
   const darkOff = await call("maze", MAZE, { op: "dark", on: false });
 
@@ -1730,7 +1726,7 @@ async function mazeTunnelCheck() {
 
   const rt = await call("maze", MAZE, { op: "reshuffle", mode: "tunnel", teleportPairs: 0, fogPatches: 0 });
 
-  const centre = { x: Math.floor(state.map.cols / 2), y: Math.floor(state.map.rows / 2) };
+  const centre = mapCentre(state.map);
 
   const maze = state.map.maze;
 
@@ -1744,7 +1740,11 @@ async function mazeTunnelCheck() {
 
   const reach = mazeDistances(mazeGrid(), [maze.exit as any]);
 
-  const onExitLine = (k: string) => k.split(":").map(Number).some((v, i) => v === (i === 0 ? maze.exit.x : maze.exit.y));
+  const onExitLine = (k: string) => {
+    const c = parseCellKey(k);
+
+    return c.x === maze.exit.x || c.y === maze.exit.y;
+  };
 
   const onlyTunnel = cells.every((c) => reach.has(cellKey(c))) && [...reach.keys()].every(onExitLine);
 

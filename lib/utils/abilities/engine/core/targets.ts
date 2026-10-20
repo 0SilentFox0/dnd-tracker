@@ -1,20 +1,20 @@
 import { eventActorId, eventTargetIds } from "./events";
-import { findParticipant, isTargetable } from "./participants";
+import { findParticipant, isDormant, isTargetable } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
-import { mazeGridOf, seesTarget } from "@/lib/utils/battle/maze/sight";
+import { mazeGridOf } from "@/lib/utils/battle/maze/grid";
+import { seesTarget } from "@/lib/utils/battle/maze/sight";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-// сплячий у лабіринті ворог «заморожений»: масові вміння його не зачіпають
-const inPlay = (p: BattleParticipant) => isTargetable(p) && !p.battleData.dormant;
+const inPlay = (p: BattleParticipant) => isTargetable(p) && !isDormant(p);
 
 export function resolveTargetIds(
   target: AbilityTarget | undefined,
   ownerId: string,
   event: AbilityEvent,
   ps: BattleParticipant[],
-  map?: BattleMapConfig | null,
+  { map }: { map?: BattleMapConfig | null } = {},
 ): string[] {
   const owner = findParticipant(ps, ownerId);
 

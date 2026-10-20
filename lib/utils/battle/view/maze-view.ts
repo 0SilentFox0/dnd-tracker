@@ -3,7 +3,7 @@ import type { QueueEntry } from "./queue";
 import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { inMazePlay, isEscaped, isMazeHero, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
+import { edgeCells, inMazePlay, isEscaped, isMazeHero, isPlaced, mazeGridOf, seesParticipant, unionVision, type Viewpoint, viewpointOf } from "@/lib/utils/battle/maze";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
@@ -40,31 +40,19 @@ const always = () => true;
 
 const NO_IDS: ReadonlySet<string> = new Set();
 
-const edgeCells = (edge: string): string[] => {
-  const [x, y, side] = edge.split(":");
-
-  const nx = Number(x) + (side === "e" ? 1 : 0);
-
-  const ny = Number(y) + (side === "s" ? 1 : 0);
-
-  return [`${x}:${y}`, `${nx}:${ny}`];
-};
-
 const idOf = (p: BattleParticipant) => p.basicInfo.id;
 
-const onField = (p: BattleParticipant) => p.battleData.position !== undefined;
-
-const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && isActive(p) && !isEscaped(p) && onField(p);
+const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && isActive(p) && !isEscaped(p) && isPlaced(p);
 
 // непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
-const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && onField(p);
+const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && isPlaced(p);
 
 export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: DeriveArgs): MazeView | null {
-  const maze = map.maze;
+  const grid = mazeGridOf(map);
 
-  if (!maze) return null;
+  if (!grid) return null;
 
-  const grid = { cols: map.cols, rows: map.rows, maze };
+  const { maze } = grid;
 
   const viewersOf = (list: BattleParticipant[]) => list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
 
@@ -77,7 +65,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
 
   if (own.length === 0) {
-    const visible = participants.filter((p) => onField(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inMazePlay(p))));
+    const visible = participants.filter((p) => isPlaced(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inMazePlay(p))));
 
     return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
   }
@@ -89,11 +77,9 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   const visibleIds = new Set(own.map(idOf));
 
   for (const p of participants) {
-    if (visibleIds.has(idOf(p)) || !onField(p) || isEscaped(p)) continue;
+    if (visibleIds.has(idOf(p)) || !isPlaced(p) || isEscaped(p)) continue;
 
-    const target = p.battleData.position!;
-
-    if (viewers.some((v) => seesParticipant(grid, cells, v.position, target))) visibleIds.add(idOf(p));
+    if (viewers.some((v) => seesParticipant(grid, cells, v.position, p.battleData.position))) visibleIds.add(idOf(p));
   }
 
   return {
@@ -102,7 +88,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     cells,
     visibleIds,
     ownIds: new Set(own.map(idOf)),
-    showWalls: (edge) => edgeCells(edge).some((c) => cells.has(c)),
+    showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
     showTeleportLinks: false,
     showFog: true,
     showDormant: true,
@@ -113,8 +99,6 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
 
 export const filterQueue = (queue: QueueEntry[], view: MazeView): QueueEntry[] =>
   queue.filter((e) => e.kind === "round" || view.visibleIds.has(idOf(e.participant)));
-
-export const mazeCellVisible = (view: MazeView, x: number, y: number): boolean => view.cells === null || view.cells.has(cellKey({ x, y }));
 
 export const MAZE_UNKNOWN_NAME = "невідомий";
 

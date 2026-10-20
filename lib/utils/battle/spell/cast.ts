@@ -290,7 +290,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterId, targetIds, ...info };
 
-    resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps, flow.ctx.map).forEach((id, index) => applyTo(effect, effectIndex, id, index));
+    resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps, flow.ctx).forEach((id, index) => applyTo(effect, effectIndex, id, index));
   });
 
   updatedCaster = getP(flow, casterId);

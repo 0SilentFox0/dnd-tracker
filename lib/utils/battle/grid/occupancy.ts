@@ -1,7 +1,7 @@
 import { cellKey, cellsByDistance, footprint, isPlayable } from "./geometry";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { isAirborne } from "@/lib/utils/abilities/engine/core/participants";
+import { isAirborne, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export function sizeOf(p: BattleParticipant): number {
@@ -9,7 +9,7 @@ export function sizeOf(p: BattleParticipant): number {
 }
 
 export function occupiesCells(p: BattleParticipant): boolean {
-  return !p.battleData.reserved && !p.battleData.escaped && !isAirborne(p) && p.combatStats.status !== CombatStatus.DEAD;
+  return !p.battleData.reserved && !isEscaped(p) && !isAirborne(p) && p.combatStats.status !== CombatStatus.DEAD;
 }
 
 export function isOnMap(p: BattleParticipant): boolean {

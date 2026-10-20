@@ -23,17 +23,17 @@ const event = { type: "action" as const, actorId: "me", abilityKey: "k" };
 
 describe("resolveTargetIds у лабіринті", () => {
   it("«усі вороги» — лише вороги в полі зору власника", () => {
-    expect(resolveTargetIds("allEnemies", "me", event, ps, maze)).toEqual(["seen"]);
-    expect(resolveTargetIds("everyone", "me", event, ps, maze)).toEqual(["me", "seen"]);
+    expect(resolveTargetIds("allEnemies", "me", event, ps, { map: maze })).toEqual(["seen"]);
+    expect(resolveTargetIds("everyone", "me", event, ps, { map: maze })).toEqual(["me", "seen"]);
   });
 
   it("без лабіринту — усі вороги, як раніше", () => {
-    expect(resolveTargetIds("allEnemies", "me", event, ps, testMap(12, 12))).toEqual(["seen", "hidden"]);
+    expect(resolveTargetIds("allEnemies", "me", event, ps, { map: testMap(12, 12) })).toEqual(["seen", "hidden"]);
     expect(resolveTargetIds("allEnemies", "me", event, ps)).toEqual(["seen", "hidden"]);
   });
 
   it("герой, що вийшов з лабіринту, не отримує ефектів «усі союзники»", () => {
-    expect(resolveTargetIds("allAllies", "me", event, ps, maze)).toEqual(["me"]);
+    expect(resolveTargetIds("allAllies", "me", event, ps, { map: maze })).toEqual(["me"]);
     expect(resolveTargetIds("allAllies", "me", event, ps)).toEqual(["me"]);
   });
 });
