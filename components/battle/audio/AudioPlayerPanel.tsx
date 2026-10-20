@@ -10,12 +10,16 @@ import { UnlockSoundButton } from "./UnlockSoundButton";
 import { useBattleAudio } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-export function AudioPlayerPanel({ view, children }: { view: { onCollapse(): void }; children?: ReactNode }) {
+/** capped — висота не більше пів екрана з прокруткою, заголовок липкий */
+export function AudioPlayerPanel({ view, children }: { view: { onCollapse(): void; capped?: boolean }; children?: ReactNode }) {
   const { state, sound, prefs, dm } = useBattleAudio();
 
   return (
-    <section aria-label="Музика бою" className="w-64 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg">
-      <header className="flex items-center gap-2">
+    <section
+      aria-label="Музика бою"
+      className={cn("w-64 rounded-lg border border-hud-rule bg-black/85 p-2 text-xs text-hud-bone shadow-lg", view.capped && "max-h-[50dvh] min-h-0 overflow-y-auto overscroll-contain pt-0")}
+    >
+      <header data-audio-header className={cn("flex items-center gap-2", view.capped && "sticky top-0 z-10 bg-black pt-2")}>
         <NowPlayingLabel title={state?.track?.title ?? "Тиша"} className="min-w-0 flex-1" />
         {state?.trackId && !state.playing && <span className="text-hud-muted">пауза</span>}
         {state?.track?.kind === "youtube" && (

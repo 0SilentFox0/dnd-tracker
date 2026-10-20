@@ -8,7 +8,16 @@ vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => false 
 const aura = vi.hoisted(() => ({ step: null as unknown }));
 
 vi.mock("@/lib/hooks/battle", async (importOriginal) => ({ ...(await importOriginal<object>()), useAuraZones: () => aura.step }));
-vi.mock("@/components/battle/audio/BattleAudioDock", () => ({ BattleAudioDock: () => null }));
+
+const dockProps = vi.hoisted(() => ({ current: null as { collapseOn?: string | null } | null }));
+
+vi.mock("@/components/battle/audio/BattleAudioDock", () => ({
+  BattleAudioDock: (props: { collapseOn?: string | null }) => {
+    dockProps.current = props;
+
+    return null;
+  },
+}));
 
 import { MapStripSlotContext } from "@/components/battle/scene/MapStrip";
 import { MobileBattleLayout } from "@/components/battle/scene/MobileBattleLayout";
@@ -163,5 +172,16 @@ describe("SpellAimPanel", () => {
     render(<SpellAimPanel book={book} spellName="Вогняна куля" />);
 
     expect(screen.getByRole("region", { name: "Наведення заклинання" }).className).toContain("fixed");
+  });
+});
+
+describe("MobileBattleLayout — музика", () => {
+  it("мій хід передає доку ідентичність ходу (згортає панель); чужий хід — null", () => {
+    render(<MobileBattleLayout />, { wrapper: fakeScene({ isMyTurn: true, map: MAP }).wrapper });
+    expect(dockProps.current?.collapseOn).toEqual(expect.any(String));
+    cleanup();
+
+    render(<MobileBattleLayout />, { wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper });
+    expect(dockProps.current?.collapseOn).toBeNull();
   });
 });

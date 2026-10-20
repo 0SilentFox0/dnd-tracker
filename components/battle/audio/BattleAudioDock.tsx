@@ -11,8 +11,11 @@ import { useBattleAudio } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
-/** corner — у CornerStack зліва внизу (desktop, лобі); strip — рядок нульової висоти над смугою ходу телефона, чип зліва. */
-export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }) {
+/**
+ * corner — у CornerStack зліва внизу (desktop, лобі); strip — шар над областю карти/списку телефона, чип зліва внизу.
+ * collapseOn — ідентичність ходу: нове не-null значення згортає панель (вікно ходу забирає ту саму висоту).
+ */
+export function BattleAudioDock({ placement, collapseOn = null }: { placement: "corner" | "strip"; collapseOn?: string | null }) {
   const { state, sound, dm, prefs } = useBattleAudio();
 
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -20,7 +23,17 @@ export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }
   // на телефоні панель закрила б третину карти — стартує згорнутою
   const [choice, setChoice] = useState<boolean | null>(null);
 
+  const [seenCollapseOn, setSeenCollapseOn] = useState(collapseOn);
+
+  if (collapseOn !== seenCollapseOn) {
+    setSeenCollapseOn(collapseOn);
+
+    if (collapseOn !== null) setChoice(false);
+  }
+
   const expanded = choice ?? (placement === "corner" && wide);
+
+  const strip = placement === "strip";
 
   const showVideo = prefs.video.set;
 
@@ -38,10 +51,11 @@ export function BattleAudioDock({ placement }: { placement: "corner" | "strip" }
   const youtubeId = sound.unlocked && track?.kind === "youtube" ? track.youtubeId : null;
 
   return (
-    <div data-battle-audio={placement} className={cn(placement === "strip" && "pointer-events-none relative h-0 shrink-0")}>
-      <div className={cn(placement === "strip" && "pointer-events-auto absolute bottom-2 left-2 z-30")}>
-        <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded && "sr-only")}>
-          <AudioPlayerPanel view={{ onCollapse: () => setChoice(false) }}>
+    // strip: панель стискається до висоти шару й гортається, тож заголовок із «Згорнути» не виходить за верх
+    <div data-battle-audio={placement} className={cn(strip && "pointer-events-none absolute inset-2 z-30 flex flex-col items-start justify-end")}>
+      <div className={cn(strip && "pointer-events-auto flex min-h-0 flex-col")}>
+        <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded ? "sr-only" : strip && "flex min-h-0 flex-col")}>
+          <AudioPlayerPanel view={{ onCollapse: () => setChoice(false), capped: strip }}>
             {youtubeId && <YoutubePlayer videoId={youtubeId} onNeedsTap={onNeedsTap} />}
           </AudioPlayerPanel>
         </div>

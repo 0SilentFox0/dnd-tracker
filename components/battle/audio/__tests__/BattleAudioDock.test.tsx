@@ -22,8 +22,8 @@ const fileState = audioState({ track: { ...fileTrack, title: "Бій у таве
 
 const ytState = audioState({ trackId: "t2", track: youtubeTrack });
 
-function Screen({ show = true, placement = "corner" }: { show?: boolean; placement?: "corner" | "strip" }) {
-  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} />}</BattleAudioProvider>;
+function Screen({ show = true, placement = "corner", collapseOn = null }: { show?: boolean; placement?: "corner" | "strip"; collapseOn?: string | null }) {
+  return <BattleAudioProvider>{show && <BattleAudioDock placement={placement} collapseOn={collapseOn} />}</BattleAudioProvider>;
 }
 
 function dock(opts: { isDM?: boolean; audio?: BattleAudioState | null; placement?: "corner" | "strip" }) {
@@ -350,10 +350,70 @@ describe("BattleAudioDock — розташування", () => {
 
     const { container } = dock({ audio: fileState, placement: "strip" });
 
-    const inner = container.querySelector("[data-battle-audio=strip]")?.firstElementChild;
+    const layer = container.querySelector("[data-battle-audio=strip]");
 
-    expect(inner?.className).toContain("left-2");
-    expect(inner?.className).not.toContain("right-2");
+    expect(layer?.className).toContain("inset-2");
+    expect(layer?.className).toContain("items-start");
+    expect(layer?.className).toContain("justify-end");
+  });
+
+  it("телефон: розгорнута панель обмежена за висотою й гортається, заголовок із «Відео» і «Згорнути» липкий", () => {
+    setWide(false);
+
+    const { getByRole, container } = dock({ isDM: true, audio: ytState, placement: "strip" });
+
+    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+
+    const panel = getByRole("region", { name: "Музика бою" });
+
+    expect(panel.className).toContain("max-h-[50dvh]");
+    expect(panel.className).toContain("overflow-y-auto");
+    expect(container.querySelector("[data-audio-panel]")?.className).toContain("min-h-0");
+
+    const header = panel.querySelector("[data-audio-header]") as HTMLElement;
+
+    expect(header.className).toContain("sticky");
+    expect(header.contains(getByRole("button", { name: "Згорнути плеєр" }))).toBe(true);
+    expect(header.contains(getByRole("button", { name: "Відео" }))).toBe(true);
+  });
+
+  it("кут (desktop): висота панелі не обмежена, заголовок звичайний", () => {
+    const { getByRole } = dock({ audio: fileState });
+
+    const panel = getByRole("region", { name: "Музика бою" });
+
+    expect(panel.className).not.toContain("max-h-[50dvh]");
+    expect(panel.querySelector("[data-audio-header]")?.className).not.toContain("sticky");
+  });
+
+  it("телефон: початок свого ходу згортає панель, але <audio> і YouTube-iframe лишаються (звук іде)", () => {
+    setWide(false);
+
+    const { container, getByRole, rerender } = render(<Screen placement="strip" />, { wrapper: fakeScene({ audio: ytState }).wrapper });
+
+    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
+
+    const audio = container.querySelector("audio");
+
+    const player = container.querySelector("[data-youtube-player]");
+
+    rerender(<Screen placement="strip" collapseOn="h1-1-n" />);
+
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
+    expect(container.querySelector("audio")).toBe(audio);
+    expect(container.querySelector("[data-youtube-player]")).toBe(player);
+
+    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    rerender(<Screen placement="strip" collapseOn="h1-1-n" />);
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
+
+    rerender(<Screen placement="strip" collapseOn={null} />);
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
+
+    rerender(<Screen placement="strip" collapseOn="h1-2-n" />);
+    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
   });
 
   it("кут: сам не fixed — позицію дає CornerStack", () => {
