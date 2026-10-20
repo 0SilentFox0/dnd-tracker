@@ -100,7 +100,8 @@ export function BattleFxLayer() {
 
   return (
     <>
-      <div ref={layer} className="fx-layer" aria-hidden />
+      {/* «fixed» обходить .battle-hud > :not(.fixed) { position: relative }, інакше шар стоїть під екраном */}
+      <div ref={layer} className="fx-layer fixed" aria-hidden />
       <DiceStage ref={dice} />
     </>
   );

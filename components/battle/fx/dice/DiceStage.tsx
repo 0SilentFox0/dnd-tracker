@@ -66,5 +66,5 @@ export const DiceStage = forwardRef<DiceStageHandle>(function DiceStage(_, ref) 
     [],
   );
 
-  return <div ref={host} className="fx-dice-layer" aria-hidden />;
+  return <div ref={host} className="fx-dice-layer fixed" aria-hidden />;
 });
