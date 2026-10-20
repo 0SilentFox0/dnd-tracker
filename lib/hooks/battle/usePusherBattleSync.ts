@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { writeAudioSnapshot } from "./audio-snapshot";
+
 import { getBattleVersion } from "@/lib/api/battles";
 import { battleKeys, battleQueryKey } from "@/lib/hooks/battles";
 import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
-import { mergeAudio } from "@/lib/utils/audio/merge";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
-import type { BattleAudioEvent, BattleAudioSnapshot } from "@/types/audio";
+import type { BattleAudioEvent } from "@/types/audio";
 
 export type PusherConnectionState = "connected" | "disconnected" | "connecting" | "unavailable" | null;
 
@@ -149,10 +150,7 @@ export function usePusherBattleSync(
 
         if (!audio || typeof audio.seq !== "number") return;
 
-        queryClient.setQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId), (prev) => ({
-          audio: mergeAudio(prev?.audio ?? null, audio),
-          clockOffsetMs: prev?.clockOffsetMs ?? null,
-        }));
+        writeAudioSnapshot(queryClient, { campaignId, battleId }, { audio });
       };
 
       const updateConnectionState = () => {

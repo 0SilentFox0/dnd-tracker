@@ -1,4 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { audioPosition } from "@/lib/utils/audio/position";
 import type { BattleAudioCommand, BattleAudioState, BattleAudioTrack } from "@/types/audio";
 
 export interface AudioLibraryEntry {
@@ -15,14 +16,6 @@ interface Ctx {
 type Result = BattleAudioState | { error: string };
 
 export const commandNeedsLibrary = (cmd: BattleAudioCommand) => cmd.action === "play" || cmd.action === "next" || cmd.action === "prev";
-
-function positionAt(prev: BattleAudioState, now: number): number {
-  const raw = prev.offsetSec + Math.max(0, now - prev.startedAt) / 1000;
-
-  const duration = prev.track?.durationSec;
-
-  return duration ? raw % duration : raw;
-}
 
 const start = (entry: AudioLibraryEntry, ctx: Ctx): BattleAudioState => ({ trackId: entry.id, track: entry.track, playing: true, offsetSec: 0, startedAt: ctx.now, seq: ctx.seq });
 
@@ -49,7 +42,7 @@ const handlers: Handlers = {
   pause: (prev, _cmd, ctx) => {
     if (!prev?.trackId) return { error: API_ERRORS.BATTLE_AUDIO_NO_TRACK };
 
-    return prev.playing ? { ...prev, playing: false, offsetSec: positionAt(prev, ctx.now), startedAt: ctx.now, seq: ctx.seq } : { ...prev, seq: ctx.seq };
+    return prev.playing ? { ...prev, playing: false, offsetSec: audioPosition(prev, { now: ctx.now, clockOffsetMs: 0, durationSec: prev.track?.durationSec ?? null }), startedAt: ctx.now, seq: ctx.seq } : { ...prev, seq: ctx.seq };
   },
   resume: (prev, _cmd, ctx) => {
     if (!prev?.trackId) return { error: API_ERRORS.BATTLE_AUDIO_NO_TRACK };

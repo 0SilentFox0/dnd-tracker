@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mergeAudio } from "../merge";
+import { mergeAudio, mergeAudioSnapshot } from "../merge";
 
 import type { BattleAudioState } from "@/types/audio";
 
@@ -22,5 +22,26 @@ describe("mergeAudio", () => {
     expect(mergeAudio(state(1), null)?.seq).toBe(1);
     expect(mergeAudio(state(1), undefined)?.seq).toBe(1);
     expect(mergeAudio(null, state(1))?.seq).toBe(1);
+  });
+});
+
+describe("mergeAudioSnapshot", () => {
+  it("порожній кеш — новий знімок; годинник лише з відповіді", () => {
+    expect(mergeAudioSnapshot(undefined, { audio: state(1) })).toEqual({ audio: state(1), clockOffsetMs: null });
+    expect(mergeAudioSnapshot(undefined, { audio: state(1), clockOffsetMs: 40 }).clockOffsetMs).toBe(40);
+  });
+
+  it("стан за seq, годинник без відповіді лишається з кешу", () => {
+    const prev = { audio: state(2), clockOffsetMs: 15 };
+
+    expect(mergeAudioSnapshot(prev, { audio: state(3) })).toEqual({ audio: state(3), clockOffsetMs: 15 });
+    expect(mergeAudioSnapshot(prev, { audio: state(1), clockOffsetMs: 30 })).toEqual({ audio: prev.audio, clockOffsetMs: 30 });
+  });
+
+  it("нічого не змінилося — той самий обʼєкт", () => {
+    const prev = { audio: state(2), clockOffsetMs: 15 };
+
+    expect(mergeAudioSnapshot(prev, { audio: state(2) })).toBe(prev);
+    expect(mergeAudioSnapshot(prev, { audio: null, clockOffsetMs: 15 })).toBe(prev);
   });
 });

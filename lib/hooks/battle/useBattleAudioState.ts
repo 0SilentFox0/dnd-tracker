@@ -3,9 +3,11 @@
 import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { writeAudioSnapshot } from "./audio-snapshot";
+
 import { getBattleAudio } from "@/lib/api/battle-audio";
 import { battleKeys } from "@/lib/hooks/battles";
-import { mergeAudio } from "@/lib/utils/audio/merge";
+import { mergeAudio, mergeAudioSnapshot } from "@/lib/utils/audio/merge";
 import type { BattleAudioSnapshot, BattleAudioState } from "@/types/audio";
 
 /** live = звук розблоковано: лише тоді GET (свіжий стан і годинник); до того — стан зі сцени й Pusher. */
@@ -19,9 +21,7 @@ export function useBattleAudioState(args: { campaignId: string; battleId: string
     queryFn: async () => {
       const fresh = await getBattleAudio(campaignId, battleId);
 
-      const prev = queryClient.getQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId));
-
-      return { audio: mergeAudio(prev?.audio ?? null, fresh.audio), clockOffsetMs: fresh.clockOffsetMs ?? prev?.clockOffsetMs ?? null };
+      return mergeAudioSnapshot(queryClient.getQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId)), fresh);
     },
     enabled: live,
     // сцена й Pusher пишуть кеш через setQueryData і роблять його «свіжим», а годинник міряє лише GET після розблокування
@@ -36,11 +36,7 @@ export function useBattleAudioState(args: { campaignId: string; battleId: string
   useEffect(() => {
     if (!seed) return;
 
-    queryClient.setQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId), (prev) => {
-      const audio = mergeAudio(prev?.audio ?? null, seed);
-
-      return prev && audio === prev.audio ? prev : { audio, clockOffsetMs: prev?.clockOffsetMs ?? null };
-    });
+    writeAudioSnapshot(queryClient, { campaignId, battleId }, { audio: seed });
   }, [queryClient, campaignId, battleId, seed]);
 
   // кеш читається синхронно: сповіщення спостерігача приходять пізніше за рендер

@@ -3,11 +3,12 @@
 import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { writeAudioSnapshot } from "./audio-snapshot";
+
 import { sendBattleAudio } from "@/lib/api/battle-audio";
 import { ApiError } from "@/lib/api/client";
 import { battleKeys } from "@/lib/hooks/battles";
-import { mergeAudio } from "@/lib/utils/audio/merge";
-import type { BattleAudioCommand, BattleAudioSnapshot } from "@/types/audio";
+import type { BattleAudioCommand } from "@/types/audio";
 
 export interface BattleAudioControl {
   send(cmd: BattleAudioCommand): void;
@@ -24,11 +25,7 @@ export function useBattleAudioControl(args: { campaignId: string; battleId: stri
 
   const { mutate, isPending } = useMutation({
     mutationFn: (cmd: BattleAudioCommand) => sendBattleAudio(campaignId, battleId, cmd),
-    onSuccess: (fresh) =>
-      queryClient.setQueryData<BattleAudioSnapshot>(battleKeys.audio(campaignId, battleId), (prev) => ({
-        audio: mergeAudio(prev?.audio ?? null, fresh.audio),
-        clockOffsetMs: fresh.clockOffsetMs ?? prev?.clockOffsetMs ?? null,
-      })),
+    onSuccess: (fresh) => writeAudioSnapshot(queryClient, { campaignId, battleId }, fresh),
     onError: (error) => {
       if (error instanceof ApiError && error.status === 409) void queryClient.invalidateQueries({ queryKey: battleKeys.audio(campaignId, battleId) });
 
