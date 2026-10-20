@@ -18,17 +18,18 @@
 
 ## Модель даних (міграція expand-only)
 
-- `slide_decks.scenario_page_id TEXT NULL` → FK на `scenario_pages(id)` `ON DELETE SET NULL`, індекс. Prisma: `SlideDeck.scenarioPageId`, зворотне `ScenarioPage.decks`.
-- `campaign_shows.battle JSONB NULL` — `{ id, name }` бою, до якого кличуть гравців.
+- `slide_decks."scenarioPageId" TEXT NULL` → FK на `scenario_pages(id)` `ON DELETE SET NULL`, індекс. Prisma: `SlideDeck.scenarioPageId`, зворотне `ScenarioPage.decks`.
+- `campaign_shows."battle" JSONB NULL` — `{ id, name }` бою, до якого кличуть гравців.
 - Нові таблиці не створюються (RLS-тест не зачіпається).
 
 Типи:
 - `types/scenario.ts`: `ScenarioRowSlide { deckId: string; slideId: string }`; `ScenarioRow.slide?: ScenarioRowSlide`, `ScenarioRow.battleId?: string`.
-- `types/show.ts`: `ShowBattle { id: string; name: string }`; `ShowState.battle: ShowBattle | null`; `ShowCommand` + `{ action: "battle"; battleId: string }`; `SlideDeck`/`SlideDeckSummary`/`SaveDeckData` + `scenarioPageId: string | null`.
+- `types/show.ts`: `ShowBattle { id: string; name: string }`; `ShowState.battle?: ShowBattle` (відсутнє = нікого не кличемо); `ShowCommand` + `{ action: "battle"; battleId: string }`; `SlideDeck`/`SlideDeckSummary` + `scenarioPageId: string | null`; `BattleBrief { id, name, status }` у `types/battle.ts`.
 
 Схеми:
 - `lib/schemas/scenario.ts`: рядок — `slide` (`{ deckId: idSchema, slideId: idSchema }`) і `battleId` (`idSchema`), обидва optional.
-- `lib/schemas/show.ts`: команда `battle`; збереження набору — `scenarioPageId` (nullable). Сервер перевіряє, що сторінка належить кампанії і має `kind = "scene"`, інакше 400.
+- `lib/schemas/show.ts`: команда `battle`; `deckSceneSchema` для окремого `PATCH /decks/[deckId]` `{ scenarioPageId: string | null }` — сцена зберігається одразу при виборі і не чіпає `updatedAt` (інакше відкритий редактор набору ловив би 409). Сервер перевіряє, що сторінка належить кампанії і має `kind = "scene"`, інакше 400.
+- `GET /battles?brief=1` → `BattleBrief[]` (без лобі `participants` — менше egress).
 
 Гравцям прив'язки не потрапляють: сторінки сценарію читає лише DM, а `openChapters` (історія героя) віддає тільки `story` рядка — це фіксує тест.
 
@@ -54,7 +55,7 @@
 - Рядок із `slide` клікабельний (курсор, рамка на hover); кліки по посиланнях-згадках і кнопках усередині рядка не перехоплюються. Клік → `show open { deckId, slideId }`. Трек слайда вмикається наявною логікою `autoTrack`.
 - Активний рядок (його `slide` = поточний слайд показу) підсвічений.
 - Рядок із `battleId` має кнопку за статусом бою:
-  - `prepared` → «⚔ Почати бій»: `POST …/battles/[battleId]/start`, потім команда показу `battle`, потім відкрити бій у новій вкладці;
+  - `prepared` → «⚔ Почати бій»: `POST …/battles/[battleId]/start`, потім команда показу `battle`; після успіху рядок переходить у стан `active` з посиланням «Перейти до бою ↗» (`target=_blank`; автоматичний `window.open` після `await` блокують браузери);
   - `active` → «⚔ Покликати в бій» (лише команда `battle`) і посилання «Перейти до бою»;
   - `completed` → неактивне «Бій завершено».
 - Висяче посилання (набору/слайда/бою немає) → бейдж «недоступно» замість дії, без запиту.
@@ -68,7 +69,7 @@
 ## Тестування
 
 - `show-command`: команда `battle` (активний / не активний / без показу), скидання `battle` на `open`/`next`/`prev`/`end`, зупинка музики.
-- API: збереження набору з `scenarioPageId` (своя сцена / чужа / не scene), команда `battle` (404, 422, успіх, публікація), схема контенту з `slide`/`battleId`.
+- API: `PATCH` набору з `scenarioPageId` (своя сцена / чужа / не scene), команда `battle` (404, 422, успіх, публікація), схема контенту з `slide`/`battleId`.
 - `openChapters` не віддає `slide`/`battleId`.
 - Компоненти (happy-dom): клік по рядку шле `open`, клік по згадці — ні; кнопка бою за статусами; чип прив'язки в редакторі; кнопка «До бою!» на показі.
 - Ручна перевірка в браузері на локальній prodcopy: DM у сценарії + гравець на показі.
