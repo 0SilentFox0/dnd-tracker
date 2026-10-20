@@ -1,12 +1,13 @@
 import { pickAttack } from "./attack-reach";
-import { cellKey } from "./geometry";
+import { cellKey, parseCellKey } from "./geometry";
 import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { apexOf, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { MAZE_AIM_OUT_OF_SIGHT, mazeAimHidden } from "@/lib/utils/battle/maze";
+import { MAZE_AIM_OUT_OF_SIGHT, mazeAimHidden, mazeBudgetLeft, mazeReachable } from "@/lib/utils/battle/maze";
+import type { MazeView } from "@/lib/utils/battle/view/maze-view";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -44,6 +45,7 @@ export interface MapSceneInput {
   selectedId: string | null;
   actor: MapSceneActor;
   mode: MapSceneMode;
+  maze?: MazeView | null;
 }
 
 export type MapClick =
@@ -120,7 +122,22 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
   return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: hollow ? null : at, pulseFrom };
 }
 
-export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSceneInput): MapScene {
+/** Лабіринт: кроки лише крізь видимі клітинки й повз видимих учасників — прихованих гравець не має вгадувати з зони ходу. */
+function mazeMoveSteps(map: BattleMapConfig, seen: BattleParticipant[], mover: BattleParticipant, view: MazeView | null | undefined) {
+  const maze = map.maze;
+
+  const steps = new Map<string, { anchor: GridPoint; cost: number }>();
+
+  if (!maze || maze.dark) return steps;
+
+  const reach = mazeReachable({ cols: map.cols, rows: map.rows, maze }, { participants: seen, mover, budget: mazeBudgetLeft(mover), limit: view?.cells ?? undefined });
+
+  for (const [key, { cost }] of reach) steps.set(key, { anchor: parseCellKey(key), cost });
+
+  return steps;
+}
+
+export function deriveMapScene({ map, selectedId, actor, mode, maze, ...input }: MapSceneInput): MapScene {
   const { current, viewer, canAct, isDM, attackReady } = actor;
 
   const { placingId } = mode;
@@ -147,12 +164,17 @@ export function deriveMapScene({ map, selectedId, actor, mode, ...input }: MapSc
 
   const moveOpts = { dmUserId: isDM ? viewer.userId : null };
 
-  const steps = !aim && !placing && !tool && canAct && current?.battleData.position ? moveSteps(map, participants, current, moveOpts) : null;
+  const seen = map.maze && maze ? participants.filter((p) => maze.visibleIds.has(p.basicInfo.id)) : participants;
+
+  const canMove = !aim && !placing && !tool && canAct && current?.battleData.position;
+
+  const steps = canMove && current ? (map.maze ? mazeMoveSteps(map, seen, current, maze) : moveSteps(map, participants, current, moveOpts)) : null;
 
   if (steps && current) {
-    for (const [key, cost] of moveZoneMarks(map, participants, current, { ...moveOpts, steps })) marks.set(key, cost);
+    if (map.maze) for (const [key, { cost }] of steps) marks.set(key, cost);
+    else for (const [key, cost] of moveZoneMarks(map, participants, current, { ...moveOpts, steps })) marks.set(key, cost);
 
-    if (canAttack) for (const [key, mark] of targetMarks(map, participants, current, attacks)) marks.set(key, mark);
+    if (canAttack) for (const [key, mark] of targetMarks(map, seen, current, attacks)) marks.set(key, mark);
   }
 
   const hud: NonNullable<BattleMapView["hud"]> = new Map();

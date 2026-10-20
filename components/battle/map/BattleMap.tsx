@@ -7,6 +7,7 @@ import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
+import { MazeDarkScreen, MazeFeaturesLayer, MazeFogOfWar, MazeWallsLayer } from "./maze";
 
 import "./battle-map.css";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
@@ -29,6 +30,7 @@ import {
   tokenBox,
   UNIT,
 } from "@/lib/utils/battle/grid";
+import { isDormant, isEscaped } from "@/lib/utils/battle/maze";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
@@ -432,16 +434,19 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const gridScene = useMemo(() => ({ round, rotated: fit.rotated }), [round, fit.rotated]);
 
+  const maze = view?.maze;
+
   const tokens = useMemo(
     () =>
       participants
         .filter((p) => !p.battleData.reserved)
+        .filter((p) => !maze || (!isEscaped(p) && maze.visibleIds.has(p.basicInfo.id)))
         .flatMap((p) => {
           const box = tokenBox(p);
 
           return box ? [{ p, box }] : [];
         }),
-    [participants],
+    [participants, maze],
   );
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
@@ -530,6 +535,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
             onStrokeStart={painting ? onStrokeStart : undefined}
             scene={gridScene}
           />
+          <MazeFeaturesLayer map={map} view={maze} rotated={fit.rotated} />
+          <MazeFogOfWar map={map} view={maze} />
+          <MazeWallsLayer map={map} view={maze} />
           <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
@@ -555,6 +563,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             passThrough={painting || movingId === p.basicInfo.id}
             impact={view?.impactFor?.(p.basicInfo.id)}
             effects={view?.effects?.get(p.basicInfo.id)}
+            dormant={!!maze?.showDormant && isDormant(p)}
           />
         ))}
         {tokens.map(({ p, box }) => {
@@ -581,6 +590,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
       </div>
       </div>
       </div>
+      {maze?.dark && <MazeDarkScreen own={participants.filter((p) => maze.ownIds.has(p.basicInfo.id))} />}
     </div>
     </div>
   );

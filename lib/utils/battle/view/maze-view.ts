@@ -13,6 +13,8 @@ export interface MazeView {
   /** null — бачить усі клітинки */
   cells: ReadonlySet<string> | null;
   visibleIds: ReadonlySet<string>;
+  /** Свої герої гравця (або герой «Очима гравця»); для ДМ і глядача порожньо */
+  ownIds: ReadonlySet<string>;
   /** Стіна на межі видимої клітинки (для гравця) */
   showWalls: (edge: string) => boolean;
   showTeleportLinks: boolean;
@@ -33,6 +35,8 @@ interface DeriveArgs {
 }
 
 const always = () => true;
+
+const NO_IDS: ReadonlySet<string> = new Set();
 
 const edgeCells = (edge: string): string[] => {
   const [x, y, side] = edge.split(":");
@@ -60,7 +64,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   const base = { mazeDark: maze.dark };
 
   if (isDM && !asHeroId) {
-    return { ...base, role: "dm", cells: null, visibleIds: new Set(participants.map(idOf)), showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
+    return { ...base, role: "dm", cells: null, visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
   }
 
   const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isLiveHero(p));
@@ -68,7 +72,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   if (own.length === 0) {
     const visible = participants.filter((p) => onField(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inMazePlay(p))));
 
-    return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
+    return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
   }
 
   const viewers = own.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
@@ -90,6 +94,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     role: "player",
     cells,
     visibleIds,
+    ownIds: new Set(own.map(idOf)),
     showWalls: (edge) => edgeCells(edge).some((c) => cells.has(c)),
     showTeleportLinks: false,
     showFog: true,

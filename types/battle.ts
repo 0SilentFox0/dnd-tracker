@@ -4,6 +4,7 @@ import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type CombatStatusType, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxImpact } from "@/lib/utils/battle/fx";
+import type { MazeView } from "@/lib/utils/battle/view/maze-view";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -260,6 +261,8 @@ export interface BattleMapView {
   impactFor?: (participantId: string) => FxImpact | null;
   /** Ефекти для аур на токенах (той самий набір, що й у списку) */
   effects?: ReadonlyMap<string, readonly ActiveEffect[]>;
+  /** Що з лабіринту бачить глядач карти; null — не лабіринт */
+  maze?: MazeView | null;
 }
 
 export interface BattleMapActions {

@@ -25,11 +25,13 @@ export interface MapTokenProps {
   impact?: FxImpact | null;
   /** анімовані аури станів, як на портреті в списку; іконок на карті немає */
   effects?: readonly ActiveEffect[];
+  /** лабіринт: сплячий ворог — напівпрозорий із «z» */
+  dormant?: boolean;
   onClick?: (id: string) => void;
   onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, onClick, onHover }: MapTokenProps) {
+function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
   const { width, height } = mapSize;
@@ -40,6 +42,7 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
 
   return (
     <div
+      data-dormant={dormant || undefined}
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{
         left: `${((box.cx - box.size / 2) / width) * 100}%`,
@@ -75,6 +78,11 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
         </span>
         <StatusAuras effects={effects} size={portraitPx} />
       </button>
+      {dormant && (
+        <span aria-hidden className="map-token-z" style={{ fontSize: Math.max(9, Math.round(portraitPx * 0.35)) }}>
+          z
+        </span>
+      )}
     </div>
   );
 }

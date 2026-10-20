@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { useFxImpacts } from "./useFxImpact";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
+import { useMazeView } from "./useMazeView";
 
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -69,9 +70,11 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const mode = useMemo<MapSceneMode>(() => ({ placing, placingId, toolActive, aim: mapAim }), [placing, placingId, toolActive, mapAim]);
 
+  const { view: maze } = useMazeView();
+
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode }) : null),
-    [map, order, selectedId, actor, mode],
+    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode, maze }) : null),
+    [map, order, selectedId, actor, mode, maze],
   );
 
   const { pending: pendingStroke } = terrainTool;
@@ -110,8 +113,9 @@ export function useBattleMapScene(): BattleMapScene | null {
       impactFor,
       effects,
       round: currentRound,
+      maze,
     };
-  }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound]);
+  }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, maze]);
 
   const { mutate: move } = actions.move;
 
