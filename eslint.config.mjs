@@ -15,6 +15,17 @@ const DIALOG_RESTRICTED_PATHS = [
   { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
 ];
 
+const THREE_RESTRICTED_PATH = { name: "three", message: "three лише в components/battle/fx/dice/scene.ts (лінивий чанк)" };
+
+const RESTRICTED_PATHS = [...DIALOG_RESTRICTED_PATHS, THREE_RESTRICTED_PATH];
+
+const API_IMPORT_PATTERN = {
+  group: ["@/lib/api", "@/lib/api/*"],
+  message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
+};
+
+const DICE_SCENE_FILE = "components/battle/fx/dice/scene.ts";
+
 const MODE_IMPORT_PATTERN = {
   group: ["@/lib/utils/battle/modes/maze*", "@/lib/hooks/battle/modes/maze*", "@/components/battle/modes/maze*"],
   message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
@@ -144,13 +155,20 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    ignores: [DICE_SCENE_FILE],
+    rules: {
+      "no-restricted-imports": ["error", { paths: [THREE_RESTRICTED_PATH] }],
+    },
+  },
+  {
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
-          paths: DIALOG_RESTRICTED_PATHS,
+          paths: RESTRICTED_PATHS,
           patterns: [MODE_IMPORT_PATTERN],
         },
       ],
@@ -173,14 +191,8 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [
-            {
-              group: ["@/lib/api", "@/lib/api/*"],
-              message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
-            },
-            MODE_IMPORT_PATTERN,
-          ],
+          paths: RESTRICTED_PATHS,
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
         },
       ],
     },
@@ -189,7 +201,7 @@ const eslintConfig = defineConfig([
     files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
-      "no-restricted-imports": ["error", { paths: DIALOG_RESTRICTED_PATHS }],
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS }],
     },
   },
   {
@@ -199,13 +211,20 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": [
         "error",
         {
+          paths: RESTRICTED_PATHS,
+          patterns: [API_IMPORT_PATTERN],
+        },
+      ],
+    },
+  },
+  {
+    files: [DICE_SCENE_FILE],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
           paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [
-            {
-              group: ["@/lib/api", "@/lib/api/*"],
-              message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
-            },
-          ],
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
         },
       ],
     },

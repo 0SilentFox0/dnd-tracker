@@ -1,17 +1,34 @@
 // @vitest-environment happy-dom
-import { StrictMode } from "react";
+import { forwardRef, StrictMode, useImperativeHandle } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const h = vi.hoisted(() => ({ current: { key: "k1", archetype: "haste" }, done: vi.fn(), cancelLayer: vi.fn(), playFx: vi.fn(), preloadAnimation: vi.fn() }));
+const h = vi.hoisted(() => ({
+  current: { key: "k1", archetype: "haste" } as { key: string; archetype: string; dice?: unknown },
+  active: true,
+  done: vi.fn(),
+  cancelLayer: vi.fn(),
+  playFx: vi.fn(),
+  preloadAnimation: vi.fn(),
+  dicePlay: vi.fn(),
+  diceCancel: vi.fn(),
+}));
 
 vi.mock("@/components/battle/fx/fx.css", () => ({}));
 vi.mock("@/components/battle/fx/runtime/play", () => ({ playFx: h.playFx, FX_LOAD_TIMEOUT_MS: 800 }));
 vi.mock("@/components/battle/fx/animations", () => ({ preloadAnimation: h.preloadAnimation }));
 vi.mock("@/components/battle/fx/runtime/stage", () => ({ cancelLayer: h.cancelLayer }));
+vi.mock("@/components/battle/fx/dice/DiceStage", () => ({
+  DICE_TOTAL_MS: 2800,
+  DiceStage: forwardRef(function DiceStage(_, ref) {
+    useImperativeHandle(ref, () => ({ play: h.dicePlay, cancel: h.diceCancel }));
+
+    return null;
+  }),
+}));
 vi.mock("@/lib/hooks/battle", () => ({
   useFxEnabled: () => ({ enabled: true }),
-  useBattleFxQueue: () => ({ current: h.current, queue: [h.current], done: h.done, active: true }),
+  useBattleFxQueue: () => ({ current: h.current, queue: [h.current], done: h.done, active: h.active }),
 }));
 
 import { BattleFxLayer } from "@/components/battle/fx/BattleFxLayer";
@@ -22,6 +39,10 @@ beforeEach(() => {
   h.done.mockClear();
   h.cancelLayer.mockClear();
   h.playFx.mockReset();
+  h.dicePlay.mockReset();
+  h.diceCancel.mockReset();
+  h.current = { key: "k1", archetype: "haste" };
+  h.active = true;
 });
 
 afterEach(() => {
@@ -100,5 +121,50 @@ describe("BattleFxLayer", () => {
     });
     expect(h.playFx).toHaveBeenCalledTimes(1);
     expect(h.done).toHaveBeenCalledTimes(1);
+  });
+
+  it("a dice throw plays on the dice stage and finishes when it lands", async () => {
+    let land = () => undefined as void;
+
+    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [], caption: "", extraSaves: 0 } };
+    h.dicePlay.mockReturnValue(new Promise<void>((resolve) => (land = resolve)));
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(h.dicePlay).toHaveBeenCalledWith(h.current.dice);
+    expect(h.playFx).not.toHaveBeenCalled();
+    expect(h.done).not.toHaveBeenCalled();
+
+    await act(async () => {
+      land();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(h.done).toHaveBeenCalledWith("d1");
+    expect(h.diceCancel).not.toHaveBeenCalled();
+  });
+
+  it("a dice throw that never lands is cancelled and the queue moves on", async () => {
+    h.current = { key: "d1", archetype: "dice", dice: { seed: 1, groups: [], caption: "", extraSaves: 0 } };
+    h.dicePlay.mockReturnValue(new Promise(() => undefined));
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(800 + 2800);
+    });
+    expect(h.diceCancel).toHaveBeenCalled();
+    expect(h.done).toHaveBeenCalledWith("d1");
+  });
+
+  it("turning FX off cancels the dice stage", async () => {
+    h.dicePlay.mockReturnValue(new Promise(() => undefined));
+
+    const view = render(<BattleFxLayer />);
+
+    h.active = false;
+    view.rerender(<BattleFxLayer />);
+    expect(h.diceCancel).toHaveBeenCalledTimes(1);
+    expect(h.cancelLayer).toHaveBeenCalledTimes(1);
   });
 });
