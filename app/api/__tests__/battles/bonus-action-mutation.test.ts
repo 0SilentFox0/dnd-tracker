@@ -26,6 +26,22 @@ describe("bonusActionMutation", () => {
     expect(r.events[0]).toMatchObject({ type: "ability", details: { actionDetails: { abilityKey: rally.key, skillName: rally.name } } });
   });
 
+  it("мітка «атакуючі мають перевагу» — лише на ворога; союзник → invalid_target", async () => {
+    const mark = resolved({ id: "m", trigger: { event: "bonusAction" }, effects: [{ kind: "flag", flag: "advantageForAttackers", target: "eventTarget", duration: { rounds: 1 } }] });
+
+    const hunter = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [mark] } };
+
+    const ally = participant("ally", {}, {});
+
+    await expect(bonusActionMutation(context({ participants: [hunter, ally, goblin] }), { participantId: "hero", abilityKey: mark.key, targetParticipantId: "ally" })).rejects.toThrow(
+      expect.objectContaining({ code: "invalid_target" }),
+    );
+
+    const r = await bonusActionMutation(context({ participants: [hunter, ally, goblin] }), { participantId: "hero", abilityKey: mark.key, targetParticipantId: goblin.basicInfo.id });
+
+    expect(r.events[0]).toMatchObject({ type: "ability" });
+  });
+
   it("ліміт вичерпано → ability_limit", async () => {
     const used = { ...heroWith, battleData: { ...heroWith.battleData, abilityUsage: { [rally.key]: { battle: 1, round: 1, turn: 1 } } } };
 

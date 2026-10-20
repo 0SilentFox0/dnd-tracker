@@ -42,6 +42,19 @@ describe("refreshFromSource", () => {
     expect(out.battleData.damageMultiplier).toBe(1.2);
   });
 
+  it("takes grid size from the library (battles started before units got gridSize)", () => {
+    const live = makeParticipant({ id: "p", hp: 7 });
+
+    const fresh = makeParticipant({ id: "p", hp: 99 });
+
+    fresh.combatStats = { ...fresh.combatStats, gridSize: 2 };
+
+    const out = refreshFromSource(live, fresh);
+
+    expect(out.combatStats.gridSize).toBe(2);
+    expect(out.combatStats.currentHp).toBe(7);
+  });
+
   describe("spell slots", () => {
     const run = (live: Record<string, { max: number; current: number }>, fresh: Record<string, { max: number; current: number }>) =>
       refreshFromSource(withSlots(makeParticipant({ id: "p" }), live), withSlots(makeParticipant({ id: "p" }), fresh)).spellcasting.spellSlots;

@@ -1,8 +1,9 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { ParticipantSide } from "@/lib/constants/battle";
 import { findParticipant, isActive, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
-import { needsBonusTarget } from "@/lib/utils/battle/view";
+import { bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -33,6 +34,11 @@ export function assertAbilityTargets(ability: ResolvedAbility, ps: BattlePartici
 
       if (t && !isEligibleDeadTarget(rules, t, owner)) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TARGET_INVALID);
     }
+  }
+
+  // UI пропонує лише ворогів; без цього застарілий клієнт міг повісити «Мисливця» на союзника
+  if (!rules.requiresDead && owner && bonusTargetSide(ability) === ParticipantSide.ENEMY && targets.some((t) => t && t.basicInfo.side === owner.basicInfo.side)) {
+    throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TARGET_INVALID);
   }
 
   return targetIds;
