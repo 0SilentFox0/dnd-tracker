@@ -37,6 +37,7 @@ export const API_ERRORS = {
   TRACK_LIMIT: "У бібліотеці вже 40 треків — видаліть зайві",
   TRACK_FILE_INVALID: "Потрібен файл MP3 або M4A до 10 МБ",
   TRACK_UPLOAD_MISSING: "Файл не завантажено — спробуйте ще раз",
+  TRACK_DUPLICATE: "Цей файл уже є в бібліотеці",
   TRACK_ORDER_MISMATCH: "Порядок має містити всі треки кампанії",
   YOUTUBE_URL_INVALID: "Не вдалося розпізнати посилання YouTube",
   BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",

@@ -73,6 +73,9 @@ async function fileSource(campaignId: string, body: { path: string; title: strin
 
   if (!verified.ok) return { error: verified.message };
 
+  // спільний обʼєкт у двох рядках: видалення одного стерло б файл іншого
+  if (await prisma.campaignTrack.findFirst({ where: { campaignId, url: verified.url }, select: { id: true } })) return { error: API_ERRORS.TRACK_DUPLICATE };
+
   return { kind: "file", title: body.title, url: verified.url, youtubeId: null, durationSec: body.durationSec ?? null };
 }
 

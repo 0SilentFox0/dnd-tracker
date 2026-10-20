@@ -27,6 +27,12 @@ const stripExtension = (name: string) => name.replace(/\.[^.]+$/, "").slice(0, 1
 
 const messageOf = (e: unknown) => (e instanceof Error && e.message ? e.message : "Не вдалося зберегти");
 
+// у стані бою лише знімок треку: YouTube грає далі, а файл зі сховища зникає одразу
+const DELETE_NOTE: Record<CampaignTrack["kind"], string> = {
+  file: "Трек зникне з бібліотеки, а файл — зі сховища. Якщо він зараз грає в бою, музика зупиниться для всіх.",
+  youtube: "Трек зникне з бібліотеки.",
+};
+
 export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): MusicLibrary {
   const queryClient = useQueryClient();
 
@@ -78,7 +84,7 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const remove = useCallback(
     async (track: CampaignTrack) => {
-      if (await confirm({ title: `Видалити «${track.title}»?`, description: "Трек зникне з бібліотеки; у боях, де він грає, музика зупиниться після перемикання.", confirmLabel: "Видалити", destructive: true })) {
+      if (await confirm({ title: `Видалити «${track.title}»?`, description: DELETE_NOTE[track.kind], confirmLabel: "Видалити", destructive: true })) {
         deleteMutate(track.id);
       }
     },

@@ -13,20 +13,21 @@ const track = (id: string, kind: CampaignTrack["kind"] = "file"): CampaignTrack 
 function setup() {
   const actions = { onRename: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
 
-  const view = render(<TrackList tracks={[track("a"), track("b", "youtube")]} busy={false} actions={actions} />);
+  const view = render(<TrackList tracks={[{ ...track("a"), url: "https://s/camp1/a.mp3" }, track("b", "youtube"), { ...track("c"), url: "https://s/camp1/c.m4a", durationSec: null }]} busy={false} actions={actions} />);
 
   return { ...view, actions };
 }
 
 describe("TrackList", () => {
-  it("назва, тип і тривалість; крайні стрілки вимкнені", () => {
+  it("назва, формат файлу з посилання (MP3, M4A) і тривалість; крайні стрілки вимкнені", () => {
     const { getByText, getByDisplayValue, getAllByRole } = setup();
 
     expect(getByDisplayValue("Трек a")).toBeTruthy();
     expect(getByText("MP3 · 1:01")).toBeTruthy();
+    expect(getByText("M4A")).toBeTruthy();
     expect(getByText("YouTube")).toBeTruthy();
     expect((getAllByRole("button", { name: "Вище" })[0] as HTMLButtonElement).disabled).toBe(true);
-    expect((getAllByRole("button", { name: "Нижче" })[1] as HTMLButtonElement).disabled).toBe(true);
+    expect((getAllByRole("button", { name: "Нижче" })[2] as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("стрілка, видалення й перейменування викликають дії", () => {

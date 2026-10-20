@@ -19,9 +19,11 @@ const duration = (sec: number | null) => (sec ? `${Math.floor(sec / 60)}:${Strin
 function kindLabel(t: CampaignTrack) {
   if (t.kind === "youtube") return "YouTube";
 
+  const format = t.url?.match(/\.(mp3|m4a)$/i)?.[1].toUpperCase() ?? "Файл";
+
   const d = duration(t.durationSec);
 
-  return d ? `MP3 · ${d}` : "MP3";
+  return d ? `${format} · ${d}` : format;
 }
 
 function TrackTitle({ track, onRename }: { track: CampaignTrack; onRename: TrackListActions["onRename"] }) {

@@ -17,7 +17,7 @@ vi.mock("@/lib/utils/audio/youtube-oembed", () => ({ fetchYoutubeTitle: vi.fn(as
 vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/server")>()), after: (cb: () => unknown) => cb() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    campaignTrack: { count: vi.fn(), findMany: vi.fn(), create: vi.fn(), aggregate: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    campaignTrack: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), aggregate: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
     $transaction: vi.fn(async (ops: unknown[]) => ops),
   },
 }));
@@ -43,6 +43,7 @@ describe("tracks API", () => {
     vi.clearAllMocks();
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
     vi.mocked(prisma.campaignTrack.count).mockResolvedValue(3);
+    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.campaignTrack.aggregate).mockResolvedValue({ _max: { sortOrder: 2 } } as never);
     vi.mocked(prisma.campaignTrack.create).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => row({ ...data, id: "new" })) as never);
     vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: true, url: "https://s/battle-music/x.mp3" });
@@ -77,6 +78,19 @@ describe("tracks API", () => {
 
     vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: false, message: "Потрібен файл MP3 або M4A до 10 МБ" });
     expect((await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params())).status).toBe(400);
+    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+  });
+
+  it("файл: шлях, уже зареєстрований у бібліотеці, — 400 без другого рядка (видалення одного зламало б інший)", async () => {
+    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(row() as never);
+
+    const { POST } = await tracksRoute();
+
+    const res = await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params());
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Цей файл уже є в бібліотеці" });
+    expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({ where: { campaignId: "camp1", url: "https://s/battle-music/x.mp3" }, select: { id: true } });
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
   });
 

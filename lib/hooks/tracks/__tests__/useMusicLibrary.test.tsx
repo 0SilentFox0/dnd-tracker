@@ -21,10 +21,12 @@ vi.mock("@/lib/api/tracks", () => ({
 
 const tracks = ["a", "b"].map((id, i) => ({ id, title: id, kind: "file", url: null, youtubeId: null, durationSec: null, sortOrder: i, createdAt: "" })) as CampaignTrack[];
 
+const confirm = vi.fn(async () => false);
+
 function wrapper(answer: boolean) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-  const confirm = vi.fn(async () => answer);
+  confirm.mockImplementation(async () => answer);
 
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>
@@ -46,6 +48,16 @@ describe("useMusicLibrary", () => {
 
     await act(() => yes.result.current.remove(tracks[0]));
     await waitFor(() => expect(deleteTrack).toHaveBeenCalledWith("c1", "a"));
+  });
+
+  it("підтвердження видалення файлу каже, що музика зупиниться для всіх; YouTube — лише зникне з бібліотеки", async () => {
+    const { result } = renderHook(() => useMusicLibrary("c1", tracks), { wrapper: wrapper(false) });
+
+    await act(() => result.current.remove(tracks[0]));
+    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: expect.stringContaining("зупиниться для всіх") }));
+
+    await act(() => result.current.remove({ ...tracks[1], kind: "youtube", youtubeId: "dQw4w9WgXcQ" }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "Трек зникне з бібліотеки." }));
   });
 
   it("move шле повний новий порядок", async () => {
