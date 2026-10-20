@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { AudioPlayerPanel } from "./AudioPlayerPanel";
 import { NowPlayingLabel } from "./NowPlayingLabel";
+import { PlayerErrorBoundary } from "./PlayerErrorBoundary";
 import { UnlockSoundButton } from "./UnlockSoundButton";
 import { YoutubePlayer } from "./YoutubePlayer";
 
@@ -60,7 +61,11 @@ export function BattleAudioDock({ placement, collapseOn = null, collapseTick = 0
       <div className={cn(strip && "pointer-events-auto flex min-h-0 flex-col")}>
         <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded ? "sr-only" : strip && "flex min-h-0 flex-col")}>
           <AudioPlayerPanel view={{ onCollapse: () => setChoice(false), capped: strip }}>
-            {youtubeId && <YoutubePlayer videoId={youtubeId} onNeedsTap={onNeedsTap} />}
+            {youtubeId && (
+              <PlayerErrorBoundary resetKey={youtubeId}>
+                <YoutubePlayer videoId={youtubeId} onNeedsTap={onNeedsTap} />
+              </PlayerErrorBoundary>
+            )}
           </AudioPlayerPanel>
         </div>
         {!expanded && (
