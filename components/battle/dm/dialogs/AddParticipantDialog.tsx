@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
-import { clampUnitQuantity, DM_ADD_UNIT_QUANTITY as QUANTITY } from "@/lib/constants/battle-units";
+import { clampUnitQuantity, UNIT_QUANTITY as QUANTITY } from "@/lib/constants/battle-units";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useUnitPicker } from "@/lib/hooks/units";
 import type { AddParticipantData } from "@/types/battle";
@@ -30,6 +30,7 @@ interface AddParticipantDialogProps {
   campaignId: string;
   onAdd: (data: AddParticipantData) => void;
   isPending?: boolean;
+  isError?: boolean;
   /** лабіринт: юніт не додається одразу, а чекає на клік по клітинці */
   onPlace?: (data: AddParticipantData) => void;
 }
@@ -40,6 +41,7 @@ export function AddParticipantDialog({
   campaignId,
   onAdd,
   isPending,
+  isError,
   onPlace,
 }: AddParticipantDialogProps) {
   const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
@@ -77,14 +79,8 @@ export function AddParticipantDialog({
     }
   }
 
-  const [wasPending, setWasPending] = useState(isPending);
-
-  // помилка: мутація скінчилась, а діалог лишився відкритим — Скасувати не має стерти введене
-  if (isPending !== wasPending) {
-    setWasPending(isPending);
-
-    if (!isPending && open && submitted) setSubmitted(false);
-  }
+  // помилка: діалог лишився відкритим — Скасувати не має стерти введене
+  if (isError && submitted) setSubmitted(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

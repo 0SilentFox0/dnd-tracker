@@ -97,14 +97,14 @@ describe("AddParticipantDialog", () => {
     fireEvent.change(screen.getAllByTestId("select")[2], { target: { value: "h1" } });
     fireEvent.click(screen.getByRole("button", { name: "Додати" }));
     rerender(<AddParticipantDialog open isPending {...props} />);
-    rerender(<AddParticipantDialog open isPending={false} {...props} />);
-    rerender(<AddParticipantDialog open={false} isPending={false} {...props} />);
-    rerender(<AddParticipantDialog open isPending={false} {...props} />);
+    rerender(<AddParticipantDialog open isError {...props} />);
+    rerender(<AddParticipantDialog open={false} isError {...props} />);
+    rerender(<AddParticipantDialog open isError {...props} />);
 
     expect((screen.getAllByTestId("select")[2] as HTMLSelectElement).value).toBe("h1");
   });
 
-  it("кількість юнітів обмежена лімітом сервера (10)", () => {
+  it("кількість юнітів обмежена лімітом налаштування бою (20)", () => {
     vi.mocked(useUnitPicker).mockReturnValue(picker({ raceKey: "r1", unitId: "u1", tiers: [{ level: 1, units: [{ id: "u1", name: "Біс" }] }] }) as never);
 
     const onAdd = vi.fn();
@@ -112,10 +112,10 @@ describe("AddParticipantDialog", () => {
     render(<AddParticipantDialog open onOpenChange={vi.fn()} campaignId="c" onAdd={onAdd} />);
 
     fireEvent.change(screen.getAllByTestId("select")[1], { target: { value: "unit" } });
-    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "20" } });
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "Додати" }));
 
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ quantity: 10 }));
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ quantity: 20 }));
   });
 
   it("юніти обраної раси згруповані за рівнями", () => {

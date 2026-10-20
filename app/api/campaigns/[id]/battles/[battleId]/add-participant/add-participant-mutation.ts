@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { prisma } from "@/lib/db";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -20,7 +21,7 @@ export const addParticipantSchema = z.object({
   sourceId: z.string(),
   type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
   side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
-  quantity: z.number().int().min(1).max(10).optional().default(1),
+  quantity: z.number().int().min(UNIT_QUANTITY.min).max(UNIT_QUANTITY.max).optional().default(1),
   reserved: z.boolean().optional(),
   position: mapCellSchema.optional(),
 });

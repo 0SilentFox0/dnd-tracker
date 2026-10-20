@@ -26,7 +26,7 @@ export function DmPanel({ panel }: { panel?: { open: boolean; onOpenChange: (ope
   return (
     <>
       <DmQuickActionsPanel dialogs={dialogs} panel={panel} onOpenCastSpell={() => setPickCaster(true)} />
-      <AddParticipantDialog open={dialogs.addParticipant.open} onOpenChange={dialogs.addParticipant.setOpen} campaignId={campaignId} isPending={actions.addParticipant.isPending}
+      <AddParticipantDialog open={dialogs.addParticipant.open} onOpenChange={dialogs.addParticipant.setOpen} campaignId={campaignId} isPending={actions.addParticipant.isPending} isError={actions.addParticipant.isError}
         onAdd={(data) => actions.addParticipant.mutate(data, { onSuccess: () => dialogs.addParticipant.setOpen(false) })}
         onPlace={onPlace} />
       <ChangeHpDialog participant={dialogs.hp.target} onClose={dialogs.hp.close} isPending={actions.updateParticipant.isPending}
