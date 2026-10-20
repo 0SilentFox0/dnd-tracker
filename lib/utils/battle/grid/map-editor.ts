@@ -48,18 +48,6 @@ export function inferMargins(map: BattleMapConfig): Margins {
   };
 }
 
-export function toggleBlocked(map: BattleMapConfig, p: GridPoint): BattleMapConfig {
-  if (!inBounds(map, p)) return map;
-
-  const key = cellKey(p);
-
-  const set = new Set(map.blocked ?? []);
-
-  if (!set.delete(key)) set.add(key);
-
-  return withBlocked(map, set);
-}
-
 export type SetupTool = "blocked" | "wall" | "hazard" | "erase";
 
 export function paintCells(map: BattleMapConfig, cells: GridPoint[], tool: SetupTool, hazard: Pick<TerrainCell, "label" | "damage"> = {}): BattleMapConfig {

@@ -15,7 +15,7 @@ export interface SetupBalanceStats {
   unitStats: Record<string, Omit<UnitStats, "unitId">>;
 }
 
-export function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitStats[] {
+function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitStats[] {
   return Object.entries(unitStats).map(([unitId, u]) => ({
     unitId,
     name: u.name,
@@ -33,7 +33,7 @@ export function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]):
   }));
 }
 
-export function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats): PartyPower {
+function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats): PartyPower {
   const members: Parameters<typeof buildPartyPower>[0] = [];
 
   for (const p of participants) {

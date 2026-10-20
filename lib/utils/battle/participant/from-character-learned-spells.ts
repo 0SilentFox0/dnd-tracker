@@ -6,10 +6,6 @@ import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/ski
 import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";
 import { schoolMasteryFromLearned } from "@/lib/utils/spells/model/dice";
 
-export async function resolveLearnedSpellsFromCharacter(character: CharacterFromPrisma, baseKnownSpells: string[], context?: CampaignSpellContext): Promise<string[]> {
-  return (await resolveLearnedSpellsAndMastery(character, baseKnownSpells, context)).knownSpells;
-}
-
 // персональне вміння не лежить у дереві, тож його закляття додаємо окремо
 async function personalSpellIds(character: CharacterFromPrisma, context?: CampaignSpellContext): Promise<string[]> {
   const id = character.personalSkillId?.trim();

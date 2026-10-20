@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cellKey } from "../geometry";
-import { applyMargins, clampMargins, hasPlayableArea, inferMargins, isPreviewSafeBackground, marginsBlocked, paintCells, resizeMap, toggleBlocked } from "../map-editor";
+import { applyMargins, clampMargins, hasPlayableArea, inferMargins, isPreviewSafeBackground, marginsBlocked, paintCells, resizeMap } from "../map-editor";
 import { hazardDamage } from "../terrain";
 
 import type { BattleMapConfig } from "@/types/battle";
@@ -24,17 +23,10 @@ describe("map-editor", () => {
     expect(inferMargins(base)).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
   });
 
-  it("toggleBlocked додає і знімає", () => {
-    const on = toggleBlocked(base, { x: 5, y: 5 });
-
-    expect(on.blocked).toEqual([cellKey({ x: 5, y: 5 })]);
-    expect(toggleBlocked(on, { x: 5, y: 5 }).blocked).toBeUndefined();
-  });
-
   it("resizeMap відкидає blocked поза сіткою", () => {
     const map = applyMargins(base, { top: 0, right: 0, bottom: 0, left: 0 });
 
-    const painted = toggleBlocked(toggleBlocked(map, { x: 15, y: 2 }), { x: 2, y: 2 });
+    const painted = paintCells(map, [{ x: 15, y: 2 }, { x: 2, y: 2 }], "blocked");
 
     expect(resizeMap(painted, 10, 10).blocked).toEqual(["2:2"]);
   });
@@ -51,7 +43,7 @@ describe("map-editor", () => {
   });
 
   it("applyMargins зберігає намальовані клітинки поза полями", () => {
-    const painted = toggleBlocked(applyMargins(base, m3, { top: 0, right: 0, bottom: 0, left: 0 }), { x: 10, y: 6 });
+    const painted = paintCells(applyMargins(base, m3, { top: 0, right: 0, bottom: 0, left: 0 }), [{ x: 10, y: 6 }], "blocked");
 
     const next = applyMargins(painted, { top: 1, right: 1, bottom: 1, left: 1 }, m3);
 

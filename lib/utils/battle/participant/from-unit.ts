@@ -3,8 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { UnitFromPrisma } from "../types/participant";
 import { loadUnitRace } from "./load-race";
 
-import { AttackType, CombatStatus,ParticipantSourceType } from "@/lib/constants/battle";
-import { ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { UNIT_SPELL_SLOTS } from "@/lib/constants/battle-balance";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";

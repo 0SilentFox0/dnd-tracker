@@ -1,5 +1,6 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { pickOne } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
@@ -33,7 +34,7 @@ const withController = (p: BattleParticipant, controlledBy: string): BattleParti
 export type SetControllerResult = { participants: BattleParticipant[]; unit: BattleParticipant } | { error: string };
 
 export function setUnitController(order: BattleParticipant[], unitId: string, controlledBy: string, dmUserId: string): SetControllerResult {
-  const target = order.find((p) => p.basicInfo.id === unitId);
+  const target = findParticipant(order, unitId);
 
   if (!target || !isAssignableUnit(target)) return { error: "Цим юнітом не можна керувати гравцю" };
 

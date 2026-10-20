@@ -29,7 +29,7 @@ const clash = (xs: Axis[], ys: Axis[]) => xs.some((x) => ys.some((y) => x.axis =
 const spellFamily = (timedKey: string) => timedKey.split("#")[0];
 
 /** Протилежні заклинання (Поспіх ↔ Сповільнення, Кам'яна шкіра ↔ Немічність…) не складаються: нове знімає з цілі ефект іншого заклинання на тому ж статі з протилежним знаком. */
-export function dropOpposingSpellEffects(p: BattleParticipant, abilityKey: string, effects: readonly StaticEffect[]): { participant: BattleParticipant; removed: ActiveEffect[] } {
+function dropOpposingSpellEffects(p: BattleParticipant, abilityKey: string, effects: readonly StaticEffect[]): { participant: BattleParticipant; removed: ActiveEffect[] } {
   if (!abilityKey.startsWith(SPELL_KEY)) return { participant: p, removed: [] };
 
   const incoming = axesOf(effects);

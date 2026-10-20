@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import { cellDistance } from "../geometry";
 import { placeParticipants } from "../placement";
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { CombatStatus } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 

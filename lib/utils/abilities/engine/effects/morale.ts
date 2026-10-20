@@ -4,7 +4,7 @@ import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participa
 import type { FlagKey } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
-export const clampMorale = (v: number) => Math.max(-3, Math.min(3, v));
+const clampMorale = (v: number) => Math.max(-3, Math.min(3, v));
 
 export function ownTimedMoraleFlat(p: BattleParticipant, ps?: BattleParticipant[]): number {
   let sum = 0;

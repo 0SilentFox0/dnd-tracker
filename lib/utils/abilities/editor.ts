@@ -159,7 +159,3 @@ export function withFreshIds(list: Ability[], taken: string[]): Ability[] {
     return { ...a, id };
   });
 }
-
-export function newAbility(taken: string[]): Ability {
-  return withFreshIds([{ id: "", name: "Нове вміння", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] }], taken)[0];
-}

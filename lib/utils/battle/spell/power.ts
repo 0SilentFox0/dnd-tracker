@@ -7,7 +7,7 @@ import { rollDie } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
-export function spellcastingModifier(p: BattleParticipant): { mod: number; label: string } {
+function spellcastingModifier(p: BattleParticipant): { mod: number; label: string } {
   const ability = p.spellcasting?.spellcastingAbility;
 
   if (!ability) return { mod: 0, label: "" };

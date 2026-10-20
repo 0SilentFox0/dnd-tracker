@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { resolveLearnedSpellsFromCharacter } from "../from-character-learned-spells";
+import { resolveLearnedSpellsAndMastery } from "../from-character-learned-spells";
 
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
@@ -15,17 +15,17 @@ const context = {
   allSkills: [],
 } as never;
 
-describe("resolveLearnedSpellsFromCharacter", () => {
+describe("resolveLearnedSpellsAndMastery", () => {
   it("рівень гілки зі школою магії додає заклинання до knownSpells", async () => {
     const character = { id: "c", race: "Ельф", campaignId: "camp", skillTreeProgress: { "row-tree": { unlockedSkills: ["light_basic_level"] } } } as never;
 
-    expect(await resolveLearnedSpellsFromCharacter(character, ["k"], context)).toEqual(["k", "s1"]);
+    expect((await resolveLearnedSpellsAndMastery(character, ["k"], context)).knownSpells).toEqual(["k", "s1"]);
   });
 
   it("без дерева — лише knownSpells", async () => {
     const character = { id: "c", race: "Гном", campaignId: "camp", skillTreeProgress: {} } as never;
 
-    expect(await resolveLearnedSpellsFromCharacter(character, ["k"], { ...(context as object), skillTreeByRace: {} } as never)).toEqual(["k"]);
+    expect((await resolveLearnedSpellsAndMastery(character, ["k"], { ...(context as object), skillTreeByRace: {} } as never)).knownSpells).toEqual(["k"]);
   });
 
   it("персональне вміння додає своє закляття навіть без дерева", async () => {
@@ -33,6 +33,6 @@ describe("resolveLearnedSpellsFromCharacter", () => {
 
     const ctx = { ...(context as object), skillTreeByRace: {}, allSkills: [{ id: "ps", grantedSpellId: "avatar" }] } as never;
 
-    expect(await resolveLearnedSpellsFromCharacter(character, ["k"], ctx)).toEqual(["k", "avatar"]);
+    expect((await resolveLearnedSpellsAndMastery(character, ["k"], ctx)).knownSpells).toEqual(["k", "avatar"]);
   });
 });

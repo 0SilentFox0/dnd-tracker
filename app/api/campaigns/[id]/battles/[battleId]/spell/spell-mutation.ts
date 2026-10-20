@@ -5,6 +5,7 @@ import type { SpellRequestData } from "./cast-spell-schema";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -103,7 +104,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
     if (serverRolled.length > 0) {
-      result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => order.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
+      result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
     }
 
     if (data.preview) {
