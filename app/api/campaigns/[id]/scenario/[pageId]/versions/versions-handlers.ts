@@ -7,7 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { restoreScenarioVersionSchema } from "@/lib/schemas/scenario";
-import { pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
+import { parseContent, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -49,6 +49,8 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
     const version = await prisma.scenarioPageVersion.findFirst({ where: { id: body.versionId, pageId } });
 
     if (!version) return errorResponse(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
+
+    if (!parseContent(version.content)) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
 
     await snapshotIfDue(pageId, access.userId, { force: true });
     await pruneVersions(pageId);

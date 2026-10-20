@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS, SCENARIO_VERSION_INTERVAL_MS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
@@ -11,10 +12,28 @@ export const SUMMARY_SELECT = { id: true, kind: true, arc: true, title: true, su
 
 type SummaryRow = Prisma.ScenarioPageGetPayload<{ select: typeof SUMMARY_SELECT }>;
 
-export function readContent(json: unknown): ScenarioContent {
+export class InvalidScenarioContentError extends Error {
+  constructor() {
+    super(API_ERRORS.SCENARIO_CONTENT_INVALID);
+  }
+}
+
+export function parseContent(json: unknown): ScenarioContent | null {
   const parsed = scenarioContentSchema.safeParse(json);
 
-  return parsed.success ? parsed.data : emptyContent();
+  return parsed.success ? parsed.data : null;
+}
+
+// lenient: read-only consumers (player chapters, search text) treat broken content as empty
+export const readContent = (json: unknown): ScenarioContent => parseContent(json) ?? emptyContent();
+
+// strict: anything that feeds the editor or writes content back must not turn broken content into an empty page
+export function readContentStrict(json: unknown): ScenarioContent {
+  const content = parseContent(json);
+
+  if (!content) throw new InvalidScenarioContentError();
+
+  return content;
 }
 
 // explicit pick: rows may carry content/searchText, which must not leak into summaries (egress)
@@ -25,7 +44,7 @@ export function toSummary(row: SummaryRow): ScenarioPageSummary {
 }
 
 export function toPage(row: SummaryRow & { content: unknown }): ScenarioPage {
-  return { ...toSummary(row), content: readContent(row.content) };
+  return { ...toSummary(row), content: readContentStrict(row.content) };
 }
 
 export const OWNED_SELECT = { id: true, campaignId: true, version: true, title: true } as const;
@@ -65,4 +84,13 @@ export async function pruneVersions(pageId: string): Promise<void> {
   const stale = await prisma.scenarioPageVersion.findMany({ where: { pageId }, orderBy: { createdAt: "desc" }, skip: SCENARIO_MAX_VERSIONS, select: { id: true } });
 
   if (stale.length) await prisma.scenarioPageVersion.deleteMany({ where: { id: { in: stale.map((v) => v.id) } } });
+}
+
+// only played section ids leave the DB — scene pages are large and these lookups run on every sheet / hero page view
+export async function loadPlayedSections(campaignId: string, pageIds: string[]): Promise<{ id: string; played: string[] }[]> {
+  if (!pageIds.length) return [];
+
+  return prisma.$queryRaw<{ id: string; played: string[] }[]>`
+    SELECT id, COALESCE(jsonb_path_query_array(content, '$.sections[*] ? (@.played == true).id'), '[]'::jsonb) AS played
+    FROM scenario_pages WHERE "campaignId" = ${campaignId} AND id = ANY(${pageIds}::text[])`;
 }

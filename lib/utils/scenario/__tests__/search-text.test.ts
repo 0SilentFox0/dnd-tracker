@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSearchText, findSnippet } from "@/lib/utils/scenario/search-text";
+import { buildSearchText, snippetFromWindow } from "@/lib/utils/scenario/search-text";
 
 const p = (text: string) => ({ type: "doc" as const, content: [{ type: "paragraph" as const, content: [{ type: "text" as const, text }] }] });
 
@@ -19,15 +19,10 @@ describe("search text", () => {
     expect(text.split("\n")).toEqual(["Монастир Світла", "§s10\tСобор Дзвони обриваються Біара знає про тавро", "§s11\tМонастир Беатріс біля брами"]);
   });
 
-  it("findSnippet знаходить розділ без урахування регістру", () => {
-    const hit = findSnippet(buildSearchText("Монастир Світла", content), "БЕАТРІС");
-
-    expect(hit).toMatchObject({ sectionId: "s11" });
-    expect(hit?.snippet).toContain("Беатріс");
-  });
-
-  it("збіг у назві сторінки — sectionId null; немає збігу — null", () => {
-    expect(findSnippet(buildSearchText("Монастир Світла", content), "світла")?.sectionId).toBeNull();
-    expect(findSnippet(buildSearchText("Монастир Світла", content), "дракон")).toBeNull();
+  it("snippetFromWindow: обрізає по рядку, додає … з боків", () => {
+    expect(snippetFromWindow({ win: "Собор Дзвони обриваються", at: 6, cutBefore: false, needleLength: 6 })).toBe("Собор Дзвони обриваються");
+    expect(snippetFromWindow({ win: "ний Дзвони обриваються\n§s11\tМонастир", at: 4, cutBefore: true, needleLength: 6 })).toBe("…ний Дзвони обриваються");
+    expect(snippetFromWindow({ win: `Дзвони ${"а".repeat(80)}`, at: 0, cutBefore: false, needleLength: 6 })).toBe(`Дзвони ${"а".repeat(59)}…`);
+    expect(snippetFromWindow({ win: "x", at: -1, cutBefore: false, needleLength: 1 })).toBeNull();
   });
 });

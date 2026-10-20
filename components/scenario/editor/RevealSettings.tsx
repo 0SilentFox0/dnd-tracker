@@ -1,42 +1,60 @@
 "use client";
 
+import { useState } from "react";
+
+import { SelectField } from "@/components/ui/select-field";
 import { useScenarioPage, useScenarioPages } from "@/lib/hooks/scenario";
 import type { RevealRule } from "@/types/scenario";
+
+type Mode = "manual" | "afterSection";
+
+const MODE_OPTIONS = [
+  { value: "manual", label: "Вручну" },
+  { value: "afterSection", label: "Після зіграного розділу" },
+];
 
 export function RevealSettings({ campaignId, rule, revealed, onChange, onToggleRevealed }: { campaignId: string; rule: RevealRule | undefined; revealed: boolean; onChange: (rule: RevealRule) => void; onToggleRevealed: () => void }) {
   const { data: pages = [] } = useScenarioPages(campaignId);
 
-  const target = rule?.mode === "afterSection" ? rule : null;
-
-  const { data: targetPage } = useScenarioPage(campaignId, target?.pageId ?? null);
+  const [local, setLocal] = useState<{ mode: Mode; pageId: string }>({ mode: rule?.mode === "afterSection" ? "afterSection" : "manual", pageId: rule?.mode === "afterSection" ? rule.pageId : "" });
 
   const scenes = pages.filter((p) => p.kind === "scene");
 
+  const pageId = local.pageId || scenes[0]?.id || "";
+
+  const sectionId = rule?.mode === "afterSection" && rule.pageId === pageId ? rule.sectionId : "";
+
+  const { data: targetPage } = useScenarioPage(campaignId, local.mode === "afterSection" ? pageId || null : null);
+
+  const changeMode = (mode: Mode) => {
+    setLocal((l) => ({ ...l, mode }));
+
+    if (mode === "manual") onChange({ mode: "manual" });
+  };
+
+  const changeScene = (next: string) => {
+    setLocal({ mode: "afterSection", pageId: next });
+    onChange({ mode: "manual" });
+  };
+
   return (
     <div className="sans" style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 14, margin: "8px 0" }}>
-      <select aria-label="Коли відкрити гравцеві" value={target ? "afterSection" : "manual"} onChange={(e) => onChange(e.target.value === "manual" ? { mode: "manual" } : { mode: "afterSection", pageId: scenes[0]?.id ?? "", sectionId: "" })}>
-        <option value="manual">Вручну</option>
-        <option value="afterSection" disabled={!scenes.length}>
-          Після зіграного розділу
-        </option>
-      </select>
-      {target && (
+      <SelectField
+        value={local.mode}
+        onValueChange={(v) => changeMode(v as Mode)}
+        options={scenes.length ? MODE_OPTIONS : MODE_OPTIONS.map((o) => ({ ...o, disabled: o.value === "afterSection" }))}
+        className="w-auto min-w-48"
+      />
+      {local.mode === "afterSection" && (
         <>
-          <select aria-label="Сцена" value={target.pageId} onChange={(e) => onChange({ mode: "afterSection", pageId: e.target.value, sectionId: "" })}>
-            {scenes.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
-          <select aria-label="Розділ сцени" value={target.sectionId} onChange={(e) => onChange({ ...target, sectionId: e.target.value })}>
-            <option value="">— оберіть розділ —</option>
-            {targetPage?.content.sections.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
+          <SelectField value={pageId} onValueChange={changeScene} options={scenes.map((s) => ({ value: s.id, label: s.title }))} placeholder="Сцена" className="w-auto min-w-40" />
+          <SelectField
+            value={sectionId}
+            onValueChange={(v) => onChange({ mode: "afterSection", pageId, sectionId: v })}
+            options={(targetPage?.content.sections ?? []).map((s) => ({ value: s.id, label: s.title }))}
+            placeholder="— оберіть розділ —"
+            className="w-auto min-w-40"
+          />
         </>
       )}
       <button type="button" className="toggle" aria-pressed={revealed} onClick={onToggleRevealed}>

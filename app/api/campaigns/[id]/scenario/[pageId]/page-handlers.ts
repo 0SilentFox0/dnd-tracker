@@ -7,7 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
-import { OWNED_SELECT, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
+import { InvalidScenarioContentError, OWNED_SELECT, pruneVersions, readContent, snapshotIfDue, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -30,6 +30,8 @@ export async function getScenarioPageHandler(campaignId: string, pageId: string)
 
     return page instanceof NextResponse ? page : NextResponse.json(toPage(page));
   } catch (error) {
+    if (error instanceof InvalidScenarioContentError) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
+
     return handleApiError(error, { action: "get scenario page" });
   }
 }

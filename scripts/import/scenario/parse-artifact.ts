@@ -31,7 +31,7 @@ function inline(node: HtmlNode, marks: RichMark[]): RichNode[] {
 
   if (tag === "br") return [{ type: "hardBreak" }];
 
-  if (tag === "span" && (has(node, "g") || has(node, "r"))) return [{ type: "token", attrs: { color: has(node, "g") ? "green" : "red" } }];
+  if (tag === "span" && (has(node, "g") || has(node, "r"))) return [{ type: "token", attrs: { color: has(node, "g") ? "green" : "red" }, ...(marks.length > 0 && { marks }) }];
 
   return node.childNodes.flatMap((c) => inline(c, withMarks(node, marks)));
 }
@@ -126,7 +126,11 @@ function block(el: HTMLElement): RichNode[] {
 
   if (tag === "table") return [table(el)];
 
-  if (has(el, "read")) return [{ type: "readAloud", content: kids(el, "p").map(paragraph) }];
+  if (has(el, "read")) {
+    const paragraphs = kids(el, "p").map(paragraph);
+
+    return [{ type: "readAloud", content: paragraphs.length ? paragraphs : [paragraph(el)] }];
+  }
 
   if (has(el, "mark")) return [callout(el, CALLOUT_KINDS.find((k) => has(el, k)) ?? "event", kids(el).find((c) => has(c, "tag")) ?? null)];
 

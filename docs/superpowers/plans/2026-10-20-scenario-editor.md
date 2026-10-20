@@ -5345,12 +5345,16 @@ Mobile (375 px): індекс, «Гра» (рядки в одну колонку
 
 Міграцію застосовує Vercel-білд з `main`. Потім:
 
+Скрипт `pnpm import-scenario` не читає жоден env-файл сам: `DATABASE_URL` задається явно. Локально (спільна БД з `.env.local`) — `pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts <manifest> <campaignId> [--dry-run] [--force]` або `DATABASE_URL=… pnpm import-scenario …`. Проти проду — той самий виклик з `--env-file=.env.production-db.local`:
+
 ```bash
-pnpm import-scenario .scenario-import/manifest.json cmuylhk0c0001ia06lg5eommv --dry-run  # з DATABASE_URL прод-пулера з .env.production-db.local
-pnpm import-scenario .scenario-import/manifest.json cmuylhk0c0001ia06lg5eommv
+M=.scenario-import/manifest.json; C=cmuylhk0c0001ia06lg5eommv
+RUN="pnpm exec tsx --env-file=.env.production-db.local --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts"
+$RUN $M $C --dry-run
+$RUN $M $C
 ```
 
-Запуск: `node --env-file=.env.production-db.local node_modules/.bin/tsx --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts …` (як інші прод-сіди). Глави біографій імпортуються закритими — відкриває DM.
+`--force` перед перезаписом зберігає версію й лишає останні 50. Глави біографій імпортуються закритими — відкриває DM.
 
 - [ ] **Step 4: Прибирання**
 

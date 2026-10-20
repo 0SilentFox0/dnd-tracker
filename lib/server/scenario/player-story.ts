@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import { readContent } from "@/lib/server/scenario/page-store";
+import { loadPlayedSections, readContent } from "@/lib/server/scenario/page-store";
 import { openChapters, playedLookup, revealTargets } from "@/lib/utils/scenario/reveal";
 import type { StoryChapter } from "@/types/scenario";
 
@@ -13,12 +13,7 @@ export async function loadStoryChapters(characterId: string, campaignId: string)
 
   const ids = [...new Set(contents.flatMap((c) => revealTargets(c.sections).map((t) => t.pageId)))];
 
-  // only played section ids leave the DB — scene pages are large and the sheet is read often
-  const played = ids.length
-    ? await prisma.$queryRaw<{ id: string; played: string[] }[]>`
-        SELECT id, COALESCE(jsonb_path_query_array(content, '$.sections[*] ? (@.played == true).id'), '[]'::jsonb) AS played
-        FROM scenario_pages WHERE "campaignId" = ${campaignId} AND id = ANY(${ids}::text[])`
-    : [];
+  const played = await loadPlayedSections(campaignId, ids);
 
   const lookup = playedLookup(played);
 

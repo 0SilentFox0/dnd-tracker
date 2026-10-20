@@ -44,8 +44,11 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
     if (await confirm({ title: `Видалити ${title}?`, description: "Зміну можна відкотити через «Версії».", confirmLabel: "Видалити" })) apply();
   };
 
-  const setReveal = (sectionId: string, rule: RevealRule) =>
-    draft.setContent((c) => updateSection(c, sectionId, { reveal: rule.mode === "afterSection" && !rule.sectionId ? { mode: "manual" } : rule }));
+  const setReveal = (sectionId: string, rule: RevealRule) => draft.setContent((c) => updateSection(c, sectionId, { reveal: rule }));
+
+  const finish = async () => {
+    if ((await draft.flush()) || (await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти" }))) onExit();
+  };
 
   const cell = (sectionId: string, rowId: string, column: "story" | "notes", doc: RichDoc) => {
     const isActive = active?.rowId === rowId && active.column === column;
@@ -70,18 +73,11 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
       <div className="sb-toolbar-wrap">
         <ScenarioToolbar editor={active ? editor : null} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
-          <SaveStatus state={draft.state} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} />
+          <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>
             Властивості
           </button>
-          <button
-            type="button"
-            className="toggle"
-            onClick={async () => {
-              await draft.flush();
-              onExit();
-            }}
-          >
+          <button type="button" className="toggle" onClick={() => void finish()}>
             Готово
           </button>
           {toolbarActions}
@@ -134,7 +130,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
           Додати розділ
         </button>
       </main>
-      {propsOpen && <PagePropertiesDialog campaignId={campaignId} page={page} legend={draft.content.legend} onLegend={(legend) => draft.setContent((c) => ({ ...c, legend }))} onClose={() => setPropsOpen(false)} />}
+      {propsOpen && <PagePropertiesDialog campaignId={campaignId} page={live} legend={draft.content.legend} onLegend={(legend) => draft.setContent((c) => ({ ...c, legend }))} onClose={() => setPropsOpen(false)} />}
     </>
   );
 }

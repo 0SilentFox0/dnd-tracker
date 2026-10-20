@@ -80,6 +80,17 @@ describe("scenario pages API", () => {
     expect((await GET(req("GET"), params({ pageId: "p1" }))).status).toBe(403);
   });
 
+  it("GET з пошкодженим вмістом — 500 з українським текстом, а не порожня сторінка", async () => {
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(row({ content: { legend: [], sections: [{ id: "s1", rows: "bad" }] } }) as never);
+
+    const { GET } = await pageRoute();
+
+    const res = await GET(req("GET"), params({ pageId: "p1" }));
+
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toMatch(/пошкоджено/);
+  });
+
   it("PUT з правильною версією: знімок, version+1, searchText перераховано", async () => {
     const { PUT } = await pageRoute();
 

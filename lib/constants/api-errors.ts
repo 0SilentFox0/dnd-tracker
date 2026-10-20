@@ -55,5 +55,6 @@ export const API_ERRORS = {
   SCENARIO_VERSION_NOT_FOUND: "Версію не знайдено",
   SCENARIO_CONFLICT: "Сторінку змінено в іншій вкладці — перезавантажте її",
   SCENARIO_TOO_LARGE: "Сторінка завелика (понад 512 КБ) — розділіть її на кілька",
+  SCENARIO_CONTENT_INVALID: "Вміст сторінки пошкоджено й не може бути відкритий — відновіть попередню версію або зверніться до підтримки",
   SCENARIO_CHARACTER_INVALID: "Персонажа не знайдено в цій кампанії",
 } as const;

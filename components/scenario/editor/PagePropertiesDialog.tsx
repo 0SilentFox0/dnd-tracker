@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { SelectField } from "@/components/ui/select-field";
 import { LEGEND_KINDS, LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES } from "@/lib/constants/scenario";
 import { useCharacters } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { useScenarioPageActions } from "@/lib/hooks/scenario";
 import type { LegendEntry, LegendKind, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
 
-const SELECT = "h-10 w-full rounded-md border bg-transparent px-3";
+const STATUS_OPTIONS = PAGE_STATUSES.map((s) => ({ value: s, label: PAGE_STATUS_LABELS[s] }));
+
+const LEGEND_OPTIONS = LEGEND_KINDS.map((k) => ({ value: k, label: LEGEND_LABELS[k] }));
 
 export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClose }: { campaignId: string; page: ScenarioPage; legend: LegendEntry[]; onLegend: (legend: LegendEntry[]) => void; onClose: () => void }) {
   const actions = useScenarioPageActions(campaignId);
@@ -96,38 +99,24 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         )}
         <div className="space-y-1.5">
           <Label htmlFor="sp-status">Статус</Label>
-          <select id="sp-status" className={SELECT} value={form.status} onChange={(e) => set("status", e.target.value as ScenarioPageStatus)}>
-            {PAGE_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {PAGE_STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
+          <SelectField id="sp-status" value={form.status} onValueChange={(v) => set("status", v as ScenarioPageStatus)} options={STATUS_OPTIONS} />
         </div>
         {page.kind === "hero" && (
           <div className="space-y-1.5">
             <Label htmlFor="sp-character">Персонаж</Label>
-            <select id="sp-character" className={SELECT} value={form.characterId} onChange={(e) => set("characterId", e.target.value)}>
-              <option value="">— без прив&apos;язки —</option>
-              {roster.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <SelectField id="sp-character" value={form.characterId} onValueChange={(v) => set("characterId", v)} options={roster.map((c) => ({ value: c.id, label: c.name }))} allowNone noneLabel="— без прив'язки —" />
           </div>
         )}
         <div className="space-y-2">
           <Label>Легенда</Label>
           {items.map((item, i) => (
             <div key={i} className="flex gap-2">
-              <select aria-label="Колір позначки" className={`${SELECT} w-40`} value={item.kind} onChange={(e) => setItems((l) => l.map((x, j) => (j === i ? { ...x, kind: e.target.value as LegendKind } : x)))}>
-                {LEGEND_KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {LEGEND_LABELS[k]}
-                  </option>
-                ))}
-              </select>
+              <SelectField
+                value={item.kind}
+                onValueChange={(v) => setItems((l) => l.map((x, j) => (j === i ? { ...x, kind: v as LegendKind } : x)))}
+                options={LEGEND_OPTIONS}
+                className="w-40 shrink-0"
+              />
               <Input aria-label="Підпис позначки" value={item.label} maxLength={80} onChange={(e) => setItems((l) => l.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
               <Button type="button" variant="outline" onClick={() => setItems((l) => l.filter((_, j) => j !== i))}>
                 Прибрати

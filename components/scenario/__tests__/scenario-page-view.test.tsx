@@ -39,4 +39,17 @@ describe("ScenarioPageView", () => {
     fireEvent.click(screen.getByRole("button", { name: /Відкрити гравцеві/ }));
     expect(onRevealed).toHaveBeenCalledWith("s10", true);
   });
+
+  it("глава, відкрита зіграним розділом, показує «Відкрито (після розділу)»", () => {
+    const hero = page("hero");
+
+    hero.content.sections[0].reveal = { mode: "afterSection", pageId: "sc1", sectionId: "x1" };
+
+    const onRevealed = vi.fn();
+
+    render(<ScenarioPageView page={hero} campaignId="c" progress={{ onPlayed: vi.fn(), onRevealed, pending: false, played: (p, s) => p === "sc1" && s === "x1" }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "✓ Відкрито (після розділу)" }));
+    expect(onRevealed).toHaveBeenCalledWith("s10", true);
+  });
 });

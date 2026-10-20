@@ -6,6 +6,7 @@ import * as apiAuth from "@/lib/utils/api/api-auth";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $queryRaw: vi.fn(),
     scenarioPage: { findUnique: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), findMany: vi.fn(async () => []), create: vi.fn(), deleteMany: vi.fn() },
     unit: { findMany: vi.fn(async () => [{ id: "u1", name: "Біс" }]) },
@@ -92,7 +93,7 @@ describe("scenario aux API", () => {
   });
 
   it("пошук: короткий запит — []; інакше хіти з розділом", async () => {
-    vi.mocked(prisma.scenarioPage.findMany).mockResolvedValue([{ id: "p1", title: "Монастир", searchText: "Монастир\n§s1\tСобор Дзвони обриваються" }] as never);
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ id: "p1", title: "Монастир", sectionId: "s1", win: "Собор Дзвони обриваються\n§s2\tІнше", at: 6, cutBefore: false }] as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/scenario/search/route");
 
@@ -101,7 +102,13 @@ describe("scenario aux API", () => {
     const hits = await (await GET(req("GET", undefined, "http://x?q=дзвони"), params())).json();
 
     expect(hits).toEqual([{ pageId: "p1", pageTitle: "Монастир", sectionId: "s1", snippet: "Собор Дзвони обриваються" }]);
-    expect(vi.mocked(prisma.scenarioPage.findMany).mock.calls[0][0]?.where).toEqual({ campaignId: "camp1", searchText: { contains: "дзвони", mode: "insensitive" } });
+
+    const [strings, ...values] = vi.mocked(prisma.$queryRaw).mock.calls[0] as unknown as [string[], ...unknown[]];
+
+    expect(values).toContain("camp1");
+    expect(values).toContain("дзвони");
+    expect(strings.join("")).not.toContain("дзвони");
+    expect(vi.mocked(prisma.$queryRaw)).toHaveBeenCalledTimes(1);
   });
 
   it("mentions: збирає типи, фільтр за кампанією", async () => {

@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { parseArtifactHtml } from "./parse-artifact";
 
+import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
 import type { ScenarioPageKind, ScenarioPageStatus } from "@/types/scenario";
@@ -58,6 +59,10 @@ async function main() {
 
       await prisma.scenarioPageVersion.create({ data: { pageId: existing.id, content: current?.content ?? {}, createdBy: "import" } });
       await prisma.scenarioPage.update({ where: { id: existing.id }, data: { ...data, version: { increment: 1 } } });
+
+      const stale = await prisma.scenarioPageVersion.findMany({ where: { pageId: existing.id }, orderBy: { createdAt: "desc" }, skip: SCENARIO_MAX_VERSIONS, select: { id: true } });
+
+      if (stale.length) await prisma.scenarioPageVersion.deleteMany({ where: { id: { in: stale.map((v) => v.id) } } });
     } else {
       await prisma.scenarioPage.create({ data });
     }

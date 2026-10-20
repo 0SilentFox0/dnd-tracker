@@ -4,7 +4,7 @@ import type { ScenarioContent } from "@/types/scenario";
 
 const SECTION_PREFIX = "§";
 
-const SNIPPET_RADIUS = 60;
+export const SNIPPET_RADIUS = 60;
 
 const oneLine = (s: string) => s.replace(/\s+/g, " ").trim();
 
@@ -18,26 +18,21 @@ export function buildSearchText(title: string, content: ScenarioContent): string
   return [oneLine(title), ...lines].join("\n");
 }
 
-export function findSnippet(searchText: string, query: string): { sectionId: string | null; snippet: string } | null {
-  const needle = query.trim().toLocaleLowerCase("uk");
+export type SearchWindow = { win: string; at: number; cutBefore: boolean; needleLength: number };
 
-  if (!needle) return null;
+// `win` is a slice of one section line cut in SQL: `at` is the match offset inside it
+export function snippetFromWindow({ win, at, cutBefore, needleLength }: SearchWindow): string | null {
+  if (at < 0 || at > win.length) return null;
 
-  for (const line of searchText.split("\n")) {
-    const tab = line.startsWith(SECTION_PREFIX) ? line.indexOf("\t") : -1;
+  const head = win.slice(0, at);
 
-    const text = tab >= 0 ? line.slice(tab + 1) : line;
+  const afterAll = win.slice(at + needleLength, at + needleLength + SNIPPET_RADIUS + 1);
 
-    const at = text.toLocaleLowerCase("uk").indexOf(needle);
+  const nl = afterAll.indexOf("\n");
 
-    if (at < 0) continue;
+  const tail = nl >= 0 ? afterAll.slice(0, nl) : afterAll.slice(0, SNIPPET_RADIUS);
 
-    const start = Math.max(0, at - SNIPPET_RADIUS);
+  const more = nl < 0 && afterAll.length > SNIPPET_RADIUS;
 
-    const end = Math.min(text.length, at + needle.length + SNIPPET_RADIUS);
-
-    return { sectionId: tab >= 0 ? line.slice(1, tab) : null, snippet: `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}` };
-  }
-
-  return null;
+  return `${cutBefore ? "…" : ""}${head}${win.slice(at, at + needleLength)}${tail}${more ? "…" : ""}`;
 }

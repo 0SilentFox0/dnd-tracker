@@ -19,7 +19,7 @@
     "sync-env:vercel": "node scripts/sync-env-to-vercel.mjs",
     "redistribute-character-spell-slots": "tsx scripts/db/redistribute-character-spell-slots.ts",
     "upload-assets-to-supabase": "tsx scripts/assets/upload-assets-to-supabase.ts",
-    "import-scenario": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts",
+    "import-scenario": "tsx --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts",
     "import-units": "tsx scripts/import/import-units.ts",
     "seed-artifacts": "tsx scripts/seed/seed-artifacts.ts",
     "import-skills-library": "tsx scripts/import/import-skills-library.ts",

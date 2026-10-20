@@ -33,7 +33,7 @@ const Say = Node.create({
 const Callout = Node.create({
   name: "callout",
   group: "block",
-  content: "(paragraph|bulletList|orderedList)+",
+  content: "(paragraph|bulletList|orderedList|readAloud|say|table)+",
   defining: true,
   addAttributes: () => ({ kind: { default: "event" }, tag: { default: "" } }),
   parseHTML: () => [{ tag: "div.mark" }],

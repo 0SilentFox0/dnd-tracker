@@ -1,6 +1,6 @@
 export { scenarioKeys } from "./keys";
 export { useMentionSearch } from "./useMentionSearch";
-export { type DraftState, useScenarioDraft } from "./useScenarioDraft";
+export { type DraftError, type DraftState, useScenarioDraft } from "./useScenarioDraft";
 export { useScenarioPage } from "./useScenarioPage";
 export { useScenarioPageActions } from "./useScenarioPageActions";
 export { useScenarioPages } from "./useScenarioPages";

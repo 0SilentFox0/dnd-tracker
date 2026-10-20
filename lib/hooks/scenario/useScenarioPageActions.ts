@@ -1,21 +1,25 @@
 "use client";
 
 import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { scenarioKeys } from "./keys";
 
 import { createScenarioPage, deleteScenarioPage, updateScenarioMeta } from "@/lib/api/scenario";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { CreateScenarioPageData, ScenarioPageSummary, UpdateScenarioMetaData } from "@/types/scenario";
+import type { CreateScenarioPageData, ScenarioPage, ScenarioPageSummary, UpdateScenarioMetaData } from "@/types/scenario";
 
 export function useScenarioPageActions(campaignId: string) {
+  const queryClient = useQueryClient();
+
   const invalidateKeys = [scenarioKeys.list(campaignId)];
 
   const create = useCrudMutation({ mutationFn: (data: CreateScenarioPageData) => createScenarioPage(campaignId, data), invalidateKeys, errorText: "Не вдалося створити сторінку" });
 
   const update = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateScenarioMetaData }) => updateScenarioMeta(campaignId, id, data),
-    invalidateKeys: (_d, { id }) => [scenarioKeys.list(campaignId), scenarioKeys.page(campaignId, id)],
+    invalidateKeys,
+    onSuccess: (summary) => queryClient.setQueryData<ScenarioPage>(scenarioKeys.page(campaignId, summary.id), (old) => old && { ...old, ...summary, content: old.content, version: old.version }),
     errorText: "Не вдалося зберегти властивості",
   });
 

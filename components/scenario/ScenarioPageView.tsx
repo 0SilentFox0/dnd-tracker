@@ -4,9 +4,10 @@ import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
 
 import { isDocEmpty } from "@/lib/utils/scenario/doc";
+import { isChapterOpen, type PlayedLookup } from "@/lib/utils/scenario/reveal";
 import type { ScenarioPage } from "@/types/scenario";
 
-type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean };
+type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean; played?: PlayedLookup };
 
 export function ScenarioPageView({ page, campaignId, progress }: { page: ScenarioPage; campaignId: string; progress?: Progress }) {
   const isHero = page.kind === "hero";
@@ -20,15 +21,17 @@ export function ScenarioPageView({ page, campaignId, progress }: { page: Scenari
       </header>
       <main>
         {page.content.sections.map((s) => {
-          const done = isHero ? !!s.revealedAt : s.played;
+          const byPlay = isHero && !s.revealedAt && !!progress?.played && isChapterOpen(s, progress.played);
+
+          const done = isHero ? !!s.revealedAt || byPlay : s.played;
 
           return (
             <section key={s.id} id={`sec-${s.id}`} className={done ? "is-played" : undefined}>
               <h2>
                 {s.title}
                 {progress && (
-                  <button type="button" className="toggle played" aria-pressed={done} disabled={progress.pending} onClick={() => (isHero ? progress.onRevealed(s.id, !done) : progress.onPlayed(s.id, !done))}>
-                    {isHero ? (done ? "✓ Відкрито гравцеві" : "Відкрити гравцеві") : done ? "✓ Зіграно" : "Зіграно"}
+                  <button type="button" className="toggle played" aria-pressed={done} disabled={progress.pending} onClick={() => (isHero ? progress.onRevealed(s.id, !s.revealedAt) : progress.onPlayed(s.id, !done))}>
+                    {isHero ? (byPlay ? "✓ Відкрито (після розділу)" : done ? "✓ Відкрито гравцеві" : "Відкрити гравцеві") : done ? "✓ Зіграно" : "Зіграно"}
                   </button>
                 )}
               </h2>

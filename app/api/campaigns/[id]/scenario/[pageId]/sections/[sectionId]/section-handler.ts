@@ -6,7 +6,7 @@ import { ownedPageWithContent } from "../../page-handlers";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { scenarioSectionPatchSchema } from "@/lib/schemas/scenario";
-import { readContent } from "@/lib/server/scenario/page-store";
+import { InvalidScenarioContentError, readContentStrict } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -27,7 +27,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     if (page instanceof NextResponse) return page;
 
-    const content = readContent(page.content);
+    const content = readContentStrict(page.content);
 
     if (!content.sections.some((s) => s.id === sectionId)) return errorResponse(API_ERRORS.SCENARIO_SECTION_NOT_FOUND, 404);
 
@@ -42,6 +42,8 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     return NextResponse.json({ version: page.version + 1, section: next.sections.find((s) => s.id === sectionId) });
   } catch (error) {
+    if (error instanceof InvalidScenarioContentError) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
+
     return handleApiError(error, { action: "patch scenario section" });
   }
 }

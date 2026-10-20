@@ -71,8 +71,14 @@ describe("useScenarioDraft", () => {
 
     act(() => result.current.setContent(rename("ab")));
     await act(async () => vi.advanceTimersByTimeAsync(3000));
-    await act(async () => result.current.flush());
 
+    let flushed: boolean | undefined;
+
+    await act(async () => {
+      flushed = await result.current.flush();
+    });
+
+    expect(flushed).toBe(false);
     expect(api.saveScenarioContent).toHaveBeenCalledTimes(1);
     expect(result.current.content.legend[0].label).toBe("ab");
   });
@@ -112,7 +118,43 @@ describe("useScenarioDraft", () => {
     await act(async () => vi.advanceTimersByTimeAsync(1500));
     expect(result.current.state).toBe("error");
 
-    await act(async () => result.current.flush());
+    let flushed: boolean | undefined;
+
+    await act(async () => {
+      flushed = await result.current.flush();
+    });
+
+    expect(flushed).toBe(true);
     expect(result.current.state).toBe("saved");
+  });
+
+  it("flush повертає false, якщо повторне збереження знову не вдалось", async () => {
+    vi.mocked(api.saveScenarioContent).mockRejectedValue(new Error("net"));
+
+    const { result } = renderHook(() => useScenarioDraft("c", page), { wrapper });
+
+    act(() => result.current.setContent(rename("a")));
+
+    let flushed: boolean | undefined;
+
+    await act(async () => {
+      flushed = await result.current.flush();
+    });
+
+    expect(flushed).toBe(false);
+    expect(result.current.state).toBe("error");
+    expect(result.current.error).toEqual({ message: "Не збережено", retryable: true });
+  });
+
+  it("413 → повідомлення сервера без повтору", async () => {
+    vi.mocked(api.saveScenarioContent).mockRejectedValue(new ApiError("Сторінка завелика", 413, "/x"));
+
+    const { result } = renderHook(() => useScenarioDraft("c", page), { wrapper });
+
+    act(() => result.current.setContent(rename("a")));
+    await act(async () => vi.advanceTimersByTimeAsync(1500));
+
+    expect(result.current.state).toBe("error");
+    expect(result.current.error).toEqual({ message: "Сторінка завелика", retryable: false });
   });
 });

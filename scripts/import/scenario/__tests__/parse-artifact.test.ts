@@ -1,5 +1,8 @@
+// @vitest-environment happy-dom
+import { getSchema } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
+import { buildExtensions } from "@/components/scenario/editor/extensions";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { parseArtifactHtml } from "@/scripts/import/scenario/parse-artifact";
 
@@ -25,6 +28,13 @@ const hero = `<html><body><header class="title"><h1>Лорд Годрик</h1><p
 <main class="wrap"><section><h2>Історія</h2><p>Ти паладин.</p></section>
 <section><h2>На що звертати увагу</h2><div class="key"><b>Обов'язок</b>Віра абсолютна.</div><div class="goal"><b>Ціль</b>Захистити.</div><div class="secretbox"><b class="t">Тавро</b><p>Пече.</p></div></section>
 <section><h2>Люди</h2><table class="people"><tr><td>Ніколас</td><td>Учень.</td></tr></table><ul class="prio"><li>Обов'язок.</li></ul></section></main></body></html>`;
+
+const edge = `<html><body><header class="title"><h1>Крайні випадки</h1></header><main><section><h2>1</h2>
+<div class="row"><div class="story">
+<div class="mark event"><span class="tag">Подія</span><div class="read"><p>Вголос.</p></div><p class="say">«Репліка»</p></div>
+<div class="read">Без абзаців</div>
+</div><aside class="notes"><p class="secret"><span class="g"></span> жетон <span class="r"></span></p></aside></div>
+</section></main></body></html>`;
 
 const types = (nodes: { type: string }[] | undefined) => (nodes ?? []).map((n) => n.type);
 
@@ -83,5 +93,34 @@ describe("parseArtifactHtml", () => {
   it("результат проходить схему", () => {
     expect(scenarioContentSchema.safeParse(parseArtifactHtml(scene, "scene").content).success).toBe(true);
     expect(scenarioContentSchema.safeParse(parseArtifactHtml(hero, "hero").content).success).toBe(true);
+  });
+
+  it("жетон усередині .secret лишається секретним", () => {
+    const notes = parseArtifactHtml(edge, "scene").content.sections[0].rows[0].notes.content;
+
+    const tokens = (notes[0].content ?? []).filter((n) => n.type === "token");
+
+    expect(tokens).toHaveLength(2);
+    expect(tokens.every((t) => t.marks?.some((m) => m.type === "secret"))).toBe(true);
+  });
+
+  it("порожній div.read не дає порожнього readAloud", () => {
+    const story = parseArtifactHtml(edge, "scene").content.sections[0].rows[0].story.content;
+
+    expect(story[1]).toEqual({ type: "readAloud", content: [{ type: "paragraph", content: [{ type: "text", text: "Без абзаців" }] }] });
+  });
+
+  it("усі story/notes документи валідні для схеми ProseMirror редактора", () => {
+    const schema = getSchema(buildExtensions(async () => []));
+
+    for (const [html, kind] of [[scene, "scene"], [hero, "hero"], [edge, "scene"]] as const) {
+      for (const section of parseArtifactHtml(html, kind).content.sections) {
+        for (const row of section.rows) {
+          for (const doc of [row.story, row.notes]) {
+            if (doc.content.length) expect(() => schema.nodeFromJSON(doc).check()).not.toThrow();
+          }
+        }
+      }
+    }
   });
 });

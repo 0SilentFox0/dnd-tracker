@@ -8,11 +8,12 @@ import { LoadingState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioPageView } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { useScenarioPage, useSectionProgress } from "@/lib/hooks/scenario";
+import { playedLookup } from "@/lib/utils/scenario/reveal";
 import type { ScenarioPage } from "@/types/scenario";
 
 const ScenarioEditor = dynamic(() => import("@/components/scenario/editor"), { ssr: false, loading: () => <LoadingState /> });
 
-export function ScenarioPageClient({ campaignId, initialPage }: { campaignId: string; initialPage: ScenarioPage }) {
+export function ScenarioPageClient({ campaignId, initialPage, playedPages }: { campaignId: string; initialPage: ScenarioPage; playedPages: { id: string; played: string[] }[] }) {
   const { data: page = initialPage } = useScenarioPage(campaignId, initialPage.id, initialPage);
 
   const progress = useSectionProgress(campaignId, page.id);
@@ -61,7 +62,7 @@ export function ScenarioPageClient({ campaignId, initialPage }: { campaignId: st
         <ScenarioPageView
           page={page}
           campaignId={campaignId}
-          progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending }}
+          progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
         />
       )}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}

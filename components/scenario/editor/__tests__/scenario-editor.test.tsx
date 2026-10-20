@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => {}), reload: vi.fn() }));
+const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => true), reload: vi.fn() }));
 
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioDraft: (_c: string, page: { content: unknown }) => ({ content: page.content, state: "saved", ...draft }),
@@ -68,6 +68,36 @@ describe("ScenarioEditor", () => {
 
   it("на героєві є налаштування відкриття глави", () => {
     renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} />);
-    expect(screen.getByLabelText("Коли відкрити гравцеві")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Відкрити гравцеві зараз" })).toBeTruthy();
+  });
+
+  it("«Готово» виходить після успішного збереження", async () => {
+    const onExit = vi.fn();
+
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    await waitFor(() => expect(onExit).toHaveBeenCalled());
+  });
+
+  it("«Готово» з незбереженими змінами питає і лишається, якщо відмовитись", async () => {
+    draft.flush.mockResolvedValueOnce(false);
+
+    const onExit = vi.fn();
+
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    expect(await screen.findByText(/Є незбережені зміни/)).toBeTruthy();
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("«Готово» з незбереженими змінами виходить після підтвердження", async () => {
+    draft.flush.mockResolvedValueOnce(false);
+
+    const onExit = vi.fn();
+
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Вийти" }));
+    await waitFor(() => expect(onExit).toHaveBeenCalled());
   });
 });
