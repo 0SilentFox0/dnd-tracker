@@ -128,7 +128,8 @@ function mazeMoveSteps(map: BattleMapConfig, seen: BattleParticipant[], mover: B
 
   const steps = new Map<string, { anchor: GridPoint; cost: number }>();
 
-  if (!maze || maze.dark) return steps;
+  // без виходу лабіринт ще не готовий — сервер відхилить будь-який крок
+  if (!maze || maze.dark || !maze.exit) return steps;
 
   const reach = mazeReachable({ cols: map.cols, rows: map.rows, maze }, { participants: seen, mover, budget: mazeBudgetLeft(mover), limit: view?.cells ?? undefined });
 

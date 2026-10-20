@@ -20,10 +20,11 @@ const isEditTool = (t: MazeTool) => EDIT_TOOLS.some((e) => e.value === t);
 
 const NO_HERO = "none";
 
-function ToolButton({ active, onClick, tall, children }: { active?: boolean; onClick: () => void; tall: boolean; children: ReactNode }) {
+function ToolButton({ active, onClick, tall, label, children }: { active?: boolean; onClick: () => void; tall: boolean; label?: string; children: ReactNode }) {
   return (
     <button
       type="button"
+      aria-label={label}
       aria-pressed={active}
       onClick={onClick}
       className={cn(
@@ -79,6 +80,12 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
           className={cn(tall ? "h-8" : "h-7", "w-32 px-2 text-xs")}
         />
       </label>
+      {/* вихід із погляду гравця не залежить від того, чи вміщується список під тригером */}
+      {asHero.id && (
+        <ToolButton tall={tall} onClick={() => asHero.set(null)} label="Вимкнути «Очима гравця»">
+          Вимкнути
+        </ToolButton>
+      )}
       {dialog === "generate" && <MazeGenerateDialog open onOpenChange={close} difficulty={battle.map?.maze?.difficulty ?? "medium"} onSubmit={tools.generate} />}
       {dialog === "reshuffle" && <MazeReshuffleDialog open onOpenChange={close} onSubmit={tools.reshuffle} />}
     </>

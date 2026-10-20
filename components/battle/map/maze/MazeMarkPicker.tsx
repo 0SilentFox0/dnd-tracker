@@ -24,7 +24,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
 
   const [open, setOpen] = useState(false);
 
-  if (!battle.map?.maze || !view || view.dark || mazeBudgetLeft(hero) <= 0) return null;
+  if (!battle.map?.maze || !view || battle.map.maze.dark || mazeBudgetLeft(hero) <= 0) return null;
 
   const place = (symbol: MazeMarkSymbol) => {
     actions.mazeMark.mutate({ participantId: hero.basicInfo.id, symbol });

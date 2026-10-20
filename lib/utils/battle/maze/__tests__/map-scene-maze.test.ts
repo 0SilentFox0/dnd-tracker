@@ -12,7 +12,7 @@ const hero = (at: GridPoint, facing: Direction8): BattleParticipant => {
   return { ...p, basicInfo: { ...p.basicInfo, controlledBy: "u" }, battleData: { ...p.battleData, facing } };
 };
 
-const mazeMap = (walls: string[] = []): BattleMapConfig => testMap(8, 8, { maze: { ...emptyMaze(), walls } });
+const mazeMap = (walls: string[] = []): BattleMapConfig => testMap(8, 8, { maze: { ...emptyMaze(), exit: { x: 7, y: 7 }, walls } });
 
 function scene(map: BattleMapConfig, participants: BattleParticipant[], isDM: boolean) {
   const current = participants[0];
