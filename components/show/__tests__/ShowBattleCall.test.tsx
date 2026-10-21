@@ -15,4 +15,13 @@ describe("ShowBattleCall", () => {
     expect(link.getAttribute("href")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getByText("Засідка")).toBeTruthy();
   });
+
+  it("посилання повністю непрозоре: пульсує лише ореол", () => {
+    render(<ShowBattleCall campaignId="c1" battle={{ id: "b1", name: "Засідка" }} />);
+
+    const link = screen.getByRole("link", { name: /До бою!/ });
+
+    expect(link.className).not.toContain("animate-pulse");
+    expect(link.querySelector(".animate-pulse")).toBeTruthy();
+  });
 });

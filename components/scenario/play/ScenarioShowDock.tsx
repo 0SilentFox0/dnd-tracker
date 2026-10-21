@@ -46,12 +46,14 @@ function DockBody({ campaignId, play }: { campaignId: string; play: ScenarioPlay
           </button>
         </div>
         {expanded && (
-          <>
-            <div className="flex items-end gap-2 p-2">
+          <div className="sb-show-body">
+            <div className="sb-show-audio">
               <AudioDock placement="corner" />
             </div>
-            <ShowControlPanel campaignId={campaignId} show={show} control={play.control} />
-          </>
+            <div className="sb-show-controls">
+              <ShowControlPanel campaignId={campaignId} show={show} control={play.control} />
+            </div>
+          </div>
         )}
       </div>
     </AudioPlayerProvider>

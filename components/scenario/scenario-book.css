@@ -154,4 +154,12 @@
 .scenario-book .sb-missing { font-size: 13px; color: var(--ink-soft); }
 .scenario-book .sb-show-dock { position: sticky; bottom: 0; z-index: 20; background: var(--page); border-top: 1px solid var(--rule); }
 .scenario-book .sb-show-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
+.scenario-book .sb-show-body { display: flex; flex-direction: column; max-height: 45vh; overflow-y: auto; overscroll-behavior: contain; }
+.scenario-book .sb-show-audio { padding: 8px; }
+.scenario-book .sb-show-controls { min-width: 0; }
+@media (min-width: 1024px) {
+  .scenario-book .sb-show-body { flex-direction: row; align-items: flex-start; }
+  .scenario-book .sb-show-audio { flex: 0 0 276px; }
+  .scenario-book .sb-show-controls { flex: 1; }
+}
 .scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
