@@ -79,10 +79,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
+  const chain = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "chainShot").length > 0;
+
   const describe = (a: BattleAttack) => {
     const onMap = !!scene.battle.map && !!attacker?.battleData.position;
 
-    const maxTargets = attacker ? attackMaxTargets(attacker, a, { chain: false, onMap }) : 1;
+    const maxTargets = attacker ? attackMaxTargets(attacker, a, { chain, onMap }) : 1;
 
     return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
   };

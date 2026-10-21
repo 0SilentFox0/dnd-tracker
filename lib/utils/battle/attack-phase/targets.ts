@@ -8,7 +8,7 @@ import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-type AttackFlags = ReturnType<typeof findFlagsMany<"attackHitsAllEnemies" | "piercingShot" | "multiTargetFalloff">>;
+type AttackFlags = ReturnType<typeof findFlagsMany<"attackHitsAllEnemies" | "piercingShot" | "multiTargetFalloff" | "chainShot">>;
 
 export interface AttackTargetsInput {
   order: BattleParticipant[];
@@ -29,6 +29,10 @@ export interface AttackTargets {
   falloff: number;
   /** З цього індексу d20 і кубики шкоди кидає сервер (автоцілі розщеплення). */
   serverRolledFrom: number;
+  chain: boolean;
+  /** Частка шкоди попереднього пострілу на кожен стрибок. */
+  chainPercent: number;
+  chainJumps: number;
 }
 
 const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t);
@@ -52,7 +56,9 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(attacker)));
 
-  const limit = attackMaxTargets(attacker, attack, { chain: false, onMap });
+  const chain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
+
+  const limit = attackMaxTargets(attacker, attack, { chain, onMap });
 
   if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${limit}`);
 
@@ -66,7 +72,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   if (targets.length === 0) throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
 
-  const volley = expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1);
+  const volley = !chain && (expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
 
   const falloffPercents = expanded ? [] : flags.multiTargetFalloff.map((f) => f.percent);
 
@@ -77,5 +83,8 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
     volley,
     falloff: falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1,
     serverRolledFrom: cleave ? 1 : targets.length,
+    chain,
+    chainPercent: (flags.chainShot[0]?.percent ?? 100) / 100,
+    chainJumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)),
   };
 }

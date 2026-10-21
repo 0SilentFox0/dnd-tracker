@@ -5,7 +5,7 @@ import { resolveAttackTargets } from "../targets";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 
-const none = { attackHitsAllEnemies: [], piercingShot: [], multiTargetFalloff: [] };
+const none = { attackHitsAllEnemies: [], piercingShot: [], multiTargetFalloff: [], chainShot: [] };
 
 const ranged = { ...CLAWS, type: AttackType.RANGED };
 
@@ -41,5 +41,14 @@ describe("resolveAttackTargets", () => {
     const flags = { ...none, multiTargetFalloff: [{ kind: "flag" as const, flag: "multiTargetFalloff" as const, percent: 50 }, { kind: "flag" as const, flag: "multiTargetFalloff" as const, percent: 30 }] };
 
     expect(resolveAttackTargets({ ...base, chosen: [e1], flags }).falloff).toBe(0.3);
+  });
+
+  it("chain shot keeps one chosen target, full damage first, exposes jumps and fraction", () => {
+    const flags = { ...none, chainShot: [{ kind: "flag" as const, flag: "chainShot" as const, jumps: 2, percent: 50 }] };
+
+    const r = resolveAttackTargets({ ...base, attack: ranged, chosen: [e1], flags });
+
+    expect(r).toMatchObject({ targets: [e1], chain: true, chainJumps: 2, chainPercent: 0.5, volley: false });
+    expect(() => resolveAttackTargets({ ...base, attack: ranged, chosen: [e1, e2], targetIds: ["e1", "e2"], flags })).toThrow("Максимум: 1");
   });
 });

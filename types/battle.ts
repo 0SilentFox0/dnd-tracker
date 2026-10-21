@@ -461,6 +461,8 @@ export interface BattleAction {
     weaponName?: string;
     /** Тип атаки: melee / ranged */
     attackKind?: AttackType;
+    /** Стрибок ланцюгового пострілу: від кого летить снаряд */
+    chainFromId?: string;
     attackRoll?: number;
     attackBonus?: number;
     totalAttackValue?: number;
