@@ -35,6 +35,10 @@ export async function listProposals(campaignId: string, filter: { pageId?: strin
   return rows.map(toProposal);
 }
 
+export async function listProposalSummaries(campaignId: string, filter: { pageId?: string; status?: AiProposalStatus }): Promise<Pick<AiProposal, "id" | "status">[]> {
+  return prisma.aiProposal.findMany({ where: { campaignId, ...filter }, select: { id: true, status: true }, orderBy: { createdAt: "desc" }, take: 50 }) as Promise<Pick<AiProposal, "id" | "status">[]>;
+}
+
 type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 404 | 409 | 413; error: string };
 
 export async function applyProposal(campaignId: string, userId: string, proposalId: string): Promise<ApplyResult> {

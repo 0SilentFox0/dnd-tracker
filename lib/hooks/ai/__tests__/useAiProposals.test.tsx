@@ -11,6 +11,7 @@ import { showKeys } from "@/lib/hooks/show/keys";
 
 vi.mock("@/lib/api/ai", () => ({
   getAiProposals: vi.fn(async () => [{ id: "ap1", status: "pending" }]),
+  getAiProposalSummaries: vi.fn(async () => [{ id: "ap1", status: "pending" }, { id: "ap2", status: "pending" }]),
   applyAiProposal: vi.fn(async () => ({ id: "p1", version: 4, content: { legend: [], sections: [] } })),
   rejectAiProposal: vi.fn(),
 }));
@@ -82,5 +83,35 @@ describe("useAiProposals addSlide", () => {
     expect(beforeApply).not.toHaveBeenCalled();
     expect(onApplied).not.toHaveBeenCalled();
     expect(spy).toHaveBeenCalledWith({ queryKey: showKeys.decks("camp1") });
+  });
+});
+
+describe("useAiProposals egress", () => {
+  it("панель закрита: лише легкий список для бейджа, повний не тягнеться", async () => {
+    vi.mocked(aiApi.getAiProposals).mockClear();
+
+    const { result } = setup({ full: false });
+
+    await waitFor(() => expect(result.current.pendingCount).toBe(2));
+    expect(aiApi.getAiProposalSummaries).toHaveBeenCalledWith("camp1", { pageId: "p1", status: "pending" });
+    expect(aiApi.getAiProposals).not.toHaveBeenCalled();
+  });
+
+  it("enabled: false — жодного запиту", async () => {
+    vi.mocked(aiApi.getAiProposals).mockClear();
+    vi.mocked(aiApi.getAiProposalSummaries).mockClear();
+
+    const { result } = setup({ enabled: false, full: true });
+
+    await new Promise((r) => setTimeout(r, 20));
+    expect(aiApi.getAiProposals).not.toHaveBeenCalled();
+    expect(aiApi.getAiProposalSummaries).not.toHaveBeenCalled();
+    expect(result.current.pendingCount).toBe(0);
+  });
+
+  it("панель відкрита: повний список і лічильник із нього", async () => {
+    const { result } = setup({ full: true });
+
+    await waitFor(() => expect(result.current.pendingCount).toBe(1));
   });
 });

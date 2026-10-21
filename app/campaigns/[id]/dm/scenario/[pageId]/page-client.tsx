@@ -55,6 +55,8 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   }, []);
 
   const proposals = useAiProposals(campaignId, page.id, {
+    enabled: aiEnabled,
+    full: aiOpen,
     beforeApply: async () => (editBase && draftRef.current ? draftRef.current.flush() : true),
     // remount the editor from the applied page so its draft carries the new version — no 409 on the next autosave
     onApplied: (next) => setEditBase((cur) => (cur ? next : cur)),
@@ -92,7 +94,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           <button type="button" className="toggle" onClick={() => openAi(false)}>
             AI
           </button>
-          <AiProposalBadge count={proposals.pending.length} onClick={() => openAi(true)} />
+          <AiProposalBadge count={proposals.pendingCount} onClick={() => openAi(true)} />
         </>
       )}
       <Link className="toggle" href={`/campaigns/${campaignId}/dm/scenario`}>

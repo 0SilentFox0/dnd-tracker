@@ -5,24 +5,30 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { aiKeys } from "./keys";
 
-import { applyAiProposal, getAiProposals, rejectAiProposal } from "@/lib/api/ai";
+import { applyAiProposal, getAiProposals, getAiProposalSummaries, rejectAiProposal } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import { scenarioKeys } from "@/lib/hooks/scenario/keys";
 import { showKeys } from "@/lib/hooks/show/keys";
 import type { ScenarioPage } from "@/types/scenario";
 
-type Options = { beforeApply?: () => Promise<boolean>; onApplied?: (page: ScenarioPage) => void };
+type Options = { enabled?: boolean; full?: boolean; beforeApply?: () => Promise<boolean>; onApplied?: (page: ScenarioPage) => void };
 
-export function useAiProposals(campaignId: string, pageId: string, { beforeApply, onApplied }: Options = {}) {
+export function useAiProposals(campaignId: string, pageId: string, { enabled = true, full = true, beforeApply, onApplied }: Options = {}) {
   const queryClient = useQueryClient();
 
   const notify = useOptionalNotify();
 
   const key = aiKeys.proposals(campaignId, pageId);
 
-  const query = useQuery({ queryKey: key, queryFn: () => getAiProposals(campaignId, { pageId }) });
+  const summaryKey = aiKeys.proposalSummaries(campaignId, pageId);
 
-  const invalidate = useCallback(() => queryClient.invalidateQueries({ queryKey: key }), [queryClient, key]);
+  const query = useQuery({ queryKey: key, queryFn: () => getAiProposals(campaignId, { pageId }), enabled: enabled && full });
+
+  const summary = useQuery({ queryKey: summaryKey, queryFn: () => getAiProposalSummaries(campaignId, { pageId, status: "pending" }), enabled: enabled && !full });
+
+  const invalidate = useCallback(async () => {
+    await Promise.all([queryClient.invalidateQueries({ queryKey: key }), queryClient.invalidateQueries({ queryKey: summaryKey })]);
+  }, [queryClient, key, summaryKey]);
 
   const applyMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -59,9 +65,12 @@ export function useAiProposals(campaignId: string, pageId: string, { beforeApply
 
   const all = query.data ?? [];
 
+  const pending = all.filter((p) => p.status === "pending");
+
   return {
     all,
-    pending: all.filter((p) => p.status === "pending"),
+    pending,
+    pendingCount: full ? pending.length : (summary.data ?? []).length,
     byId: (id: string) => all.find((p) => p.id === id),
     apply: (id: string) => applyMutation.mutateAsync(id).then(() => undefined, () => undefined),
     reject: (id: string) => rejectMutation.mutateAsync(id).then(() => undefined, () => undefined),

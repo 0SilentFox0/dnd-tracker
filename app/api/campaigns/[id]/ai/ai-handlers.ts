@@ -6,9 +6,9 @@ import { isAiConfigured } from "@/lib/ai/crypto";
 import { discardGeneratedImage } from "@/lib/ai/generated-images";
 import { guarded } from "@/lib/ai/guarded";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
-import { applyProposal, listProposals, rejectProposal } from "@/lib/ai/proposals";
+import { applyProposal, listProposals, listProposalSummaries, rejectProposal } from "@/lib/ai/proposals";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
-import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
+import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel,slimToolOutputs } from "@/lib/ai/threads";
 import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
@@ -23,7 +23,7 @@ export async function aiGuard(campaignId: string) {
   return requireDM(campaignId);
 }
 
-const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional() });
+const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional() });
 
 export const listProposalsHandler = (req: Request, campaignId: string) =>
   guarded("list ai proposals", () => aiGuard(campaignId), async () => {
@@ -31,7 +31,9 @@ export const listProposalsHandler = (req: Request, campaignId: string) =>
 
     if (!query.success) return errorResponse(API_ERRORS.INVALID_QUERY, 400, query.error.issues);
 
-    return NextResponse.json(await listProposals(campaignId, query.data));
+    const { summary, ...filter } = query.data;
+
+    return NextResponse.json(summary ? await listProposalSummaries(campaignId, filter) : await listProposals(campaignId, filter));
   });
 
 export const applyProposalHandler = (campaignId: string, proposalId: string) =>
@@ -99,7 +101,7 @@ export const listMessagesHandler = (campaignId: string, threadId: string) =>
 
     if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-    return NextResponse.json({ thread, messages: await loadMessages(threadId, AI_LIMITS.historyMessages * 2) });
+    return NextResponse.json({ thread, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
   });
 
 export const getSettingsHandler = (campaignId: string) =>

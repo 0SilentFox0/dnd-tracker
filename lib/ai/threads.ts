@@ -59,6 +59,17 @@ export async function loadMessages(threadId: string, limit: number = AI_LIMITS.h
   return rows.reverse().map((r) => ({ id: r.id, role: r.role as "user" | "assistant", parts: r.parts as unknown[], metadata: r.metadata as AiMessageMetadata }));
 }
 
+const SLIM_OUTPUT_CHARS = 2000;
+
+// the panel renders tool chips and proposal ids, never big raw outputs: older ones stay out of the response
+export function slimToolOutputs(messages: AiChatMessage[]): AiChatMessage[] {
+  const keepFrom = messages.length - AI_LIMITS.fullToolResultsInLast;
+
+  const slim = (p: unknown) => (p && typeof p === "object" && typeof (p as { output?: unknown }).output === "string" && (p as { output: string }).output.length > SLIM_OUTPUT_CHARS ? { ...p, output: "[результат інструменту стиснуто]" } : p);
+
+  return messages.map((m, i) => (i >= keepFrom ? m : { ...m, parts: m.parts.map(slim) }));
+}
+
 const textOf = (parts: unknown[]) => parts.map((p) => (p && typeof p === "object" && (p as { type?: string }).type === "text" ? String((p as { text?: string }).text ?? "") : "")).join(" ").trim();
 
 export async function appendMessage(threadId: string, message: { id?: string; role: "user" | "assistant"; parts: unknown[]; metadata?: AiMessageMetadata }): Promise<void> {

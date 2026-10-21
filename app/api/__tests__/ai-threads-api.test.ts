@@ -83,4 +83,18 @@ describe("AI threads API", () => {
 
     expect((await GET(req("GET"), params({ threadId: "t9" }))).status).toBe(404);
   });
+
+  it("повідомлення: старі великі виводи інструментів стиснуті", async () => {
+    vi.mocked(prisma.aiThread.findFirst).mockResolvedValue(threadRow() as never);
+
+    const rows = Array.from({ length: 10 }, (_, i) => ({ id: `m${i}`, role: "assistant", seq: 10 - i, parts: [{ type: "tool-read_scenario_page", output: "y".repeat(5000) }], metadata: {} }));
+
+    vi.mocked(prisma.aiMessage.findMany).mockResolvedValue(rows as never);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/ai/threads/[threadId]/messages/route");
+
+    const body = await (await GET(req("GET"), params({ threadId: "t1" }))).json();
+
+    expect(JSON.stringify(body.messages).length).toBeLessThan(5000 * 7);
+  });
 });

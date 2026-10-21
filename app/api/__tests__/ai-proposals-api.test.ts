@@ -9,7 +9,7 @@ import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => {
   const tx = {
-    aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    aiProposal: { findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
   };
@@ -102,5 +102,16 @@ describe("AI proposals API", () => {
     vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(null);
 
     expect((await apply()).status).toBe(404);
+  });
+
+  it("GET ?summary=1 вибирає лише id і status, без ops", async () => {
+    vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([{ id: "ap1", status: "pending" }] as never);
+
+    const { GET } = await import("@/app/api/campaigns/[id]/ai/proposals/route");
+
+    const res = await GET(new Request("http://x?pageId=p1&status=pending&summary=1"), { params: Promise.resolve({ id: "camp1" }) } as never);
+
+    expect(await res.json()).toEqual([{ id: "ap1", status: "pending" }]);
+    expect(vi.mocked(prisma.aiProposal.findMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp1", pageId: "p1", status: "pending" }, select: { id: true, status: true } });
   });
 });

@@ -2,12 +2,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const proposals = { all: [], pending: [{ id: "a" }, { id: "b" }], byId: vi.fn(), apply: vi.fn(), reject: vi.fn(), isApplying: false, refresh: vi.fn() };
+const proposals = { all: [], pending: [{ id: "a" }, { id: "b" }], pendingCount: 2, byId: vi.fn(), apply: vi.fn(), reject: vi.fn(), isApplying: false, refresh: vi.fn() };
 
 const page = { id: "p1", kind: "info", title: "Сторінка", version: 1, content: { legend: [], sections: [] } };
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
-vi.mock("@/lib/hooks/ai", () => ({ useAiProposals: () => proposals }));
+const useAiProposals = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/hooks/ai", () => ({ useAiProposals }));
 vi.mock("@/components/ai", () => ({
   AiPanel: () => <div data-testid="ai-panel" />,
   AiProposalCard: () => null,
@@ -25,19 +27,24 @@ vi.mock("@/lib/hooks/scenario", () => ({
 
 import { ScenarioPageClient } from "../[pageId]/page-client";
 
+useAiProposals.mockReturnValue(proposals);
+
 afterEach(cleanup);
 
 describe("ScenarioPageClient AI", () => {
   it("aiEnabled=false: без кнопки AI", () => {
     render(<ScenarioPageClient campaignId="c1" pageId="p1" playedPages={[]} aiEnabled={false} />);
     expect(screen.queryByRole("button", { name: "AI" })).toBeNull();
+    expect(useAiProposals).toHaveBeenLastCalledWith("c1", "p1", expect.objectContaining({ enabled: false }));
   });
 
   it("aiEnabled=true: кнопка відкриває панель, бейдж показує кількість", () => {
     render(<ScenarioPageClient campaignId="c1" pageId="p1" playedPages={[]} aiEnabled />);
     expect(screen.getByText("бейдж 2")).toBeTruthy();
+    expect(useAiProposals).toHaveBeenLastCalledWith("c1", "p1", expect.objectContaining({ enabled: true, full: false }));
     expect(screen.queryByTestId("ai-panel")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "AI" }));
     expect(screen.getByTestId("ai-panel")).toBeTruthy();
+    expect(useAiProposals).toHaveBeenLastCalledWith("c1", "p1", expect.objectContaining({ enabled: true, full: true }));
   });
 });

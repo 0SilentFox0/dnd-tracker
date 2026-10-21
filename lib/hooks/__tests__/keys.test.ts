@@ -21,6 +21,7 @@ const allKeys: ReadonlyArray<readonly unknown[]> = [
   aiKeys.threads(C, "p1"),
   aiKeys.messages(C, "t1"),
   aiKeys.proposals(C, "p1"),
+  aiKeys.proposalSummaries(C, "p1"),
   aiKeys.apiTokens(C),
   aiKeys.settings(C),
   artifactSetKeys.list(C),

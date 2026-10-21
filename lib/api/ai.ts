@@ -42,6 +42,9 @@ export const getAiProposals = (campaignId: string, filter: { pageId?: string; st
     { cache: "no-store" },
   );
 
+export const getAiProposalSummaries = (campaignId: string, filter: { pageId: string; status: AiProposalStatus }) =>
+  campaignGet<Pick<AiProposal, "id" | "status">[]>(campaignId, `/ai/proposals?${new URLSearchParams({ ...filter, summary: "1" })}`, { cache: "no-store" });
+
 export const applyAiProposal = (campaignId: string, proposalId: string) => campaignPost<ScenarioPage | { deck: SlideDeck }>(campaignId, `/ai/proposals/${proposalId}/apply`, {});
 
 export const rejectAiProposal = (campaignId: string, proposalId: string) => campaignPost<AiProposal>(campaignId, `/ai/proposals/${proposalId}/reject`, {});
