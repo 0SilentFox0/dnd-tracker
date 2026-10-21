@@ -21,7 +21,7 @@ describe("resolveAttackTargets", () => {
   const base = { order, attacker: a, attack: CLAWS, targetIds: ["e1"], map: testMap(), flags: none };
 
   it("keeps the chosen target for a normal attack", () => {
-    expect(resolveAttackTargets({ ...base, chosen: [e1] })).toMatchObject({ targets: [e1], expanded: false, isMultiTargetRanged: false, falloff: 1 });
+    expect(resolveAttackTargets({ ...base, chosen: [e1] })).toMatchObject({ targets: [e1], expanded: false, volley: false, falloff: 1 });
   });
 
   it("rejects more targets than the attacker may hit", () => {

@@ -5,9 +5,9 @@ import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { diceCount, diceSlots, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-// multi-target ranged: основна ціль — повна шкода, додаткові — за falloff; інакше — damageDistribution або порівну
-export function damageFractions(targets: BattleParticipant[], attack: BattleAttack, multi: { isMultiTargetRanged: boolean; falloff: number }): number[] {
-  if (multi.isMultiTargetRanged) return targets.map((_, i) => (i === 0 ? 1 : multi.falloff));
+// volley: основна ціль — повна шкода, додаткові — за falloff; інакше — damageDistribution або порівну
+export function damageFractions(targets: BattleParticipant[], attack: BattleAttack, multi: { volley: boolean; falloff: number }): number[] {
+  if (multi.volley) return targets.map((_, i) => (i === 0 ? 1 : multi.falloff));
 
   const even = () => targets.map(() => 1 / targets.length);
 

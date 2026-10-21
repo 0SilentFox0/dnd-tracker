@@ -11,6 +11,7 @@ import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -48,9 +49,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const { targets, expanded, isMultiTargetRanged, falloff } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, volley, falloff, serverRolledFrom } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
-  const fractions = damageFractions(targets, attack, { isMultiTargetRanged, falloff });
+  const fractions = damageFractions(targets, attack, { volley, falloff });
 
   let currentAttacker = { ...attacker };
 
@@ -60,7 +61,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const summons: SummonRequest[] = [];
 
-  const damageFormula = isMultiTargetRanged && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
+  const damageFormula = volley && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
 
   const dice = damageDiceCursor(data.damageRolls, damageFormula, rng);
 
@@ -73,7 +74,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const strike = strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = i >= serverRolledFrom ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
     const strikeDice = dice.next();
 

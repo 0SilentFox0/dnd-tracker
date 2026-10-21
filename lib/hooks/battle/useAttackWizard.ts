@@ -9,6 +9,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
+import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
@@ -80,7 +81,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
   const describe = (a: BattleAttack) => {
-    const maxTargets = Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1);
+    const onMap = !!scene.battle.map && !!attacker?.battleData.position;
+
+    const maxTargets = attacker ? attackMaxTargets(attacker, a, { chain: false, onMap }) : 1;
 
     return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
   };
