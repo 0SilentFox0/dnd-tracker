@@ -16,6 +16,10 @@ vi.mock("next/server", async (importOriginal) => ({
   after: (cb: () => unknown) => afterCallbacks.push(cb),
 }));
 
+const clearShowBattle = vi.fn(async () => undefined);
+
+vi.mock("@/lib/server/show/show-store", () => ({ clearShowBattle }));
+
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger } }));
 
 describe("defaultPipelineDeps.publish", () => {
@@ -46,5 +50,17 @@ describe("defaultPipelineDeps.publish", () => {
     expect(done).toBe(true);
     expect(trigger).toHaveBeenCalledWith("private-battle-b1", "battle-delta", {});
     expect(trigger).toHaveBeenCalledWith("private-user-u1", "turn-started", {});
+  });
+});
+
+describe("defaultPipelineDeps.onLeftActive", () => {
+  it("знімає виклик «До бою!» через after()", async () => {
+    const { defaultPipelineDeps } = await import("@/lib/utils/battle/pipeline/default-deps");
+
+    afterCallbacks.length = 0;
+    defaultPipelineDeps.onLeftActive?.("c1", "b1");
+    expect(clearShowBattle).not.toHaveBeenCalled();
+    await afterCallbacks[0]();
+    expect(clearShowBattle).toHaveBeenCalledWith("c1", "b1");
   });
 });

@@ -19,6 +19,7 @@ const allKeys: ReadonlyArray<readonly unknown[]> = [
   artifactKeys.list(C),
   battleKeys.scene(C, "b1"),
   battleKeys.list(C),
+  battleKeys.briefs(C),
   battleKeys.active(),
   battleKeys.balance(C),
   battleKeys.balanceAll(),

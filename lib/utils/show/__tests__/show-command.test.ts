@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack } from "../show-command";
+import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack, withoutBattle } from "../show-command";
 
 import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioState } from "@/types/audio";
@@ -186,5 +186,84 @@ describe("targetSlideTrack / showNeedsLibrary", () => {
     expect(showNeedsLibrary(showing(0, { audio: audio({ trackId: "t2" }) }), { action: "next" }, deck)).toBe(false);
     expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "pause" } }, deck)).toBe(false);
     expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "play", trackId: "t1" } }, deck)).toBe(true);
+  });
+});
+
+describe("команда battle", () => {
+  const battle = (status: string) => ({ id: "b1", name: "Засідка", status });
+
+  it("активний бій: battle у стані, музика зупинена, seq+1, слайд лишається", () => {
+    const next = ok(applyShowCommand(showing(1, { audio: audio() }), { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
+
+    expect(next.battle).toEqual({ id: "b1", name: "Засідка" });
+    expect(next.slide).toEqual(s(2, "t2"));
+    expect(next.audio).toMatchObject({ trackId: null, playing: false });
+    expect(next.seq).toBe(5);
+  });
+
+  it("без запущеного показу — стан без слайда з battle", () => {
+    const next = ok(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
+
+    expect(next).toMatchObject({ deckId: null, slide: null, battle: { id: "b1", name: "Засідка" }, seq: 1 });
+  });
+
+  it("бій не active — помилка", () => {
+    for (const status of ["prepared", "completed"]) {
+      expect(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle(status) })).toEqual({ ok: false, message: "Бій ще не почався або вже завершений" });
+    }
+  });
+
+  it("open / next / prev / end скидають battle", () => {
+    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
+
+    expect(ok(applyShowCommand(called, { action: "next" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(showing(1, { battle: { id: "b1", name: "Засідка" } }), { action: "prev" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(called, { action: "open", deckId: "d1", slideId: "slide-0003" }, ctx))).not.toHaveProperty("battle");
+    expect(ok(applyShowCommand(called, { action: "end" }, ctx))).not.toHaveProperty("battle");
+  });
+
+  it("audio-команда не скидає battle", () => {
+    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
+
+    expect(ok(applyShowCommand(called, { action: "audio", command: { action: "play", trackId: "t1" } }, ctx)).battle).toEqual({ id: "b1", name: "Засідка" });
+  });
+});
+
+describe("виклик battle на межі набору", () => {
+  const called = { id: "b1", name: "Засідка" };
+
+  it("next на останньому і prev на першому слайді скидають battle (seq+1)", () => {
+    const last = ok(applyShowCommand(showing(2, { battle: called }), { action: "next" }, ctx));
+
+    expect(last).not.toHaveProperty("battle");
+    expect(last).toMatchObject({ seq: 5, slide: deck.slides[2] });
+
+    const first = ok(applyShowCommand(showing(0, { battle: called }), { action: "prev" }, ctx));
+
+    expect(first).not.toHaveProperty("battle");
+    expect(first.seq).toBe(5);
+  });
+
+  it("без battle на межі стан не змінюється", () => {
+    const prev = showing(2);
+
+    expect(ok(applyShowCommand(prev, { action: "next" }, ctx))).toBe(prev);
+  });
+});
+
+describe("withoutBattle", () => {
+  const called = { id: "b1", name: "Засідка" };
+
+  it("знімає виклик цього бою, seq+1, решту лишає", () => {
+    const next = withoutBattle(showing(1, { battle: called }), "b1");
+
+    expect(next).not.toHaveProperty("battle");
+    expect(next).toMatchObject({ deckId: "d1", seq: 5, slide: deck.slides[1] });
+  });
+
+  it("null, якщо показу немає, виклику немає або він про інший бій", () => {
+    expect(withoutBattle(null, "b1")).toBeNull();
+    expect(withoutBattle(showing(0), "b1")).toBeNull();
+    expect(withoutBattle(showing(0, { battle: called }), "b2")).toBeNull();
   });
 });

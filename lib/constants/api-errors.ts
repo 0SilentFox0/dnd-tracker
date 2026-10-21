@@ -59,6 +59,8 @@ export const API_ERRORS = {
   SHOW_DECK_EMPTY: "У наборі немає слайдів",
   SHOW_NOT_RUNNING: "Показ не запущено",
   SHOW_CONFLICT: "Стан показу змінився — повторіть",
+  SHOW_BATTLE_NOT_ACTIVE: "Бій ще не почався або вже завершений",
+  DECK_SCENE_INVALID: "Набір можна прив'язати лише до сцени цієї кампанії",
   SCENARIO_NOT_FOUND: "Сторінку сценарію не знайдено",
   SCENARIO_SECTION_NOT_FOUND: "Розділ не знайдено",
   SCENARIO_VERSION_NOT_FOUND: "Версію не знайдено",

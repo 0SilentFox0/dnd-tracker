@@ -26,13 +26,21 @@ const revealSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("afterSection"), pageId: z.string().min(1), sectionId: z.string().min(1) }),
 ]);
 
+const rowSchema = z.object({
+  id: idSchema,
+  story: docSchema,
+  notes: docSchema,
+  slide: z.object({ deckId: idSchema, slideId: z.string().min(1).max(64) }).optional(),
+  battleId: idSchema.optional(),
+});
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string().max(200),
   played: z.boolean(),
   reveal: revealSchema.optional(),
   revealedAt: z.string().nullable().optional(),
-  rows: z.array(z.object({ id: idSchema, story: docSchema, notes: docSchema })).max(200),
+  rows: z.array(rowSchema).max(200),
 });
 
 const unique = (ids: string[]) => new Set(ids).size === ids.length;

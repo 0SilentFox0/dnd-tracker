@@ -142,3 +142,24 @@
 @media (max-width: 860px) { .scenario-book .sb-toolbar { padding-left: 16px; padding-right: 16px; overflow-x: auto; flex-wrap: nowrap; } }
 .scenario-book .sb-toolbar-wrap { position: sticky; top: calc(var(--app-header-h, 89px) + var(--sb-bar-h, 49px)); z-index: 4; background: var(--page); border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-toolbar-wrap .sb-toolbar { position: static; max-width: 1180px; margin: 0 auto; border-bottom: 0; }
+
+.scenario-book .sb-bindings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.scenario-book .sb-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 6px; font-size: 12px; color: var(--ink); }
+.scenario-book .sb-chip button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink-soft); }
+
+.scenario-book .row.is-slide { cursor: pointer; border-radius: 6px; transition: box-shadow 0.15s; }
+.scenario-book .row.is-slide:hover { box-shadow: 0 0 0 1px var(--gold); }
+.scenario-book .row.is-current { box-shadow: 0 0 0 2px var(--gold); }
+.scenario-book .sb-play { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 14px; }
+.scenario-book .sb-missing { font-size: 13px; color: var(--ink-soft); }
+.scenario-book .sb-show-dock { position: sticky; bottom: 0; z-index: 20; background: var(--page); border-top: 1px solid var(--rule); }
+.scenario-book .sb-show-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
+.scenario-book .sb-show-body { display: flex; flex-direction: column; max-height: 45vh; overflow-y: auto; overscroll-behavior: contain; }
+.scenario-book .sb-show-audio { padding: 8px; }
+.scenario-book .sb-show-controls { min-width: 0; }
+@media (min-width: 1024px) {
+  .scenario-book .sb-show-body { flex-direction: row; align-items: center; }
+  .scenario-book .sb-show-audio { flex: 0 0 276px; }
+  .scenario-book .sb-show-controls { flex: 1; }
+}
+.scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }

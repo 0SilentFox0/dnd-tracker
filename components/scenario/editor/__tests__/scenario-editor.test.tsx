@@ -12,6 +12,8 @@ vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPageActions: () => ({ updateMeta: vi.fn(), isPending: false }),
   useScenarioVersions: () => ({ versions: [], isLoading: false, restore: vi.fn(), isRestoring: false }),
 }));
+vi.mock("@/lib/hooks/show", () => ({ useDeck: () => ({ data: undefined }), useDecks: () => ({ data: [] }) }));
+vi.mock("@/lib/hooks/battles", () => ({ useBattleBriefs: () => ({ data: [] }) }));
 vi.mock("@/components/scenario/editor/RichTextEditor", () => ({ RichTextEditor: ({ label }: { label: string }) => <div data-testid="tiptap">{label}</div> }));
 
 import ScenarioEditor from "@/components/scenario/editor";

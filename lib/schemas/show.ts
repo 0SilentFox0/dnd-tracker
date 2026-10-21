@@ -51,7 +51,10 @@ export const showCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("prev") }),
   z.object({ action: z.literal("end") }),
   z.object({ action: z.literal("audio"), command: battleAudioCommandSchema }),
+  z.object({ action: z.literal("battle"), battleId: z.string().min(1).max(64) }),
 ]);
+
+export const deckSceneSchema = z.object({ scenarioPageId: z.string().min(1).max(64).nullable() });
 
 export function readSlides(json: unknown): Slide[] {
   const parsed = slidesSchema.safeParse(json);

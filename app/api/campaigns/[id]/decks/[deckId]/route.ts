@@ -1,4 +1,4 @@
-import { deleteDeckHandler, getDeckHandler, saveDeckHandler } from "../deck-handlers";
+import { deleteDeckHandler, getDeckHandler, saveDeckHandler, setDeckSceneHandler } from "../deck-handlers";
 
 type Params = { params: Promise<{ id: string; deckId: string }> };
 
@@ -18,4 +18,10 @@ export async function DELETE(_req: Request, { params }: Params) {
   const { id, deckId } = await params;
 
   return deleteDeckHandler(id, deckId);
+}
+
+export async function PATCH(req: Request, { params }: Params) {
+  const { id, deckId } = await params;
+
+  return setDeckSceneHandler(req, id, deckId);
 }

@@ -155,7 +155,7 @@ model Unit {
   morale           Int      @default(0)
   maxTargets       Int      @default(1)
   minTargets       Int      @default(1)
-  abilities        Json   @default("[]")
+  abilities        Json     @default("[]")
   levelScaling     Json?
   campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
@@ -240,7 +240,7 @@ model Artifact {
   setId       String?
   icon        String?
   createdAt   DateTime     @default(now())
-  abilities   Json   @default("[]")
+  abilities   Json         @default("[]")
   campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
 
@@ -256,7 +256,7 @@ model ArtifactSet {
   setBonus    Json?
   icon        String?
   createdAt   DateTime   @default(now())
-  abilities   Json   @default("[]")
+  abilities   Json       @default("[]")
   campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifacts   Artifact[]
 
@@ -348,15 +348,18 @@ model CampaignTrack {
 }
 
 model SlideDeck {
-  id         String   @id @default(cuid())
-  campaignId String
-  title      String
-  sortOrder  Int      @default(0)
-  slides     Json     @default("[]")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  campaignId     String
+  title          String
+  sortOrder      Int           @default(0)
+  slides         Json          @default("[]")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  scenarioPageId String?
+  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
 
+  @@index([scenarioPageId])
   @@index([campaignId, sortOrder])
   @@map("slide_decks")
 }
@@ -368,6 +371,7 @@ model CampaignShow {
   slide        Json?
   nextImageUrl String?
   audio        Json?
+  battle       Json?
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -465,7 +469,7 @@ model Skill {
   grantedSpellId          String? // скіл додає це заклинання персонажу
   spellEnhancementData    Json        @default("{}")
   appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
-  abilities               Json   @default("[]")
+  abilities               Json        @default("[]")
   campaign                Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   mainSkill               MainSkill?  @relation(fields: [mainSkillId], references: [id])
   spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id])
@@ -488,7 +492,7 @@ model Race {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   spellSlotProgression Json     @default("[]")
-  abilities            Json   @default("[]")
+  abilities            Json     @default("[]")
   icon                 String?
   color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -547,6 +551,7 @@ model ScenarioPage {
   campaign    Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   character   Character?            @relation(fields: [characterId], references: [id], onDelete: SetNull)
   versions    ScenarioPageVersion[]
+  decks       SlideDeck[]
 
   @@index([campaignId, sortOrder])
   @@index([characterId])

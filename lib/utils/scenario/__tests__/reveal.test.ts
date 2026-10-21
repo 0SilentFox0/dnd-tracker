@@ -34,4 +34,16 @@ describe("reveal", () => {
     expect(JSON.stringify(chapters)).not.toContain("нотатка DM");
     expect(chapters[2].rows).toEqual([]);
   });
+
+  it("openChapters: прив'язки рядків (slide, battleId) ніколи не потрапляють до гравців", () => {
+    const bound: ScenarioContent = {
+      legend: [],
+      sections: [{ id: "h1", title: "Історія", played: false, revealedAt: "2026-10-20T00:00:00Z", rows: [{ id: "r1", story: p("Відкрито"), notes: p("нотатка"), slide: { deckId: "deck-secret", slideId: "slide-secret" }, battleId: "battle-secret" }] }],
+    };
+
+    const json = JSON.stringify(openChapters(bound, playedLookup([])));
+
+    expect(json).toContain("Відкрито");
+    expect(json).not.toMatch(/deck-secret|slide-secret|battle-secret|slide|battleId/);
+  });
 });

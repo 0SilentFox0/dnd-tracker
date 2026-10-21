@@ -47,7 +47,7 @@ export function ShowControlPanel({ campaignId, show, control }: { campaignId: st
           Наступний слайд
           <ChevronRight className="size-4" />
         </Button>
-        <Button type="button" variant="destructive" size="sm" disabled={!show?.deckId} onClick={() => void end()}>
+        <Button type="button" variant="destructive" size="sm" disabled={!show?.deckId && !show?.battle} onClick={() => void end()}>
           <Square className="size-4" />
           Завершити показ
         </Button>

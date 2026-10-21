@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
 
-import { createDeck, deleteDeck, getDeck, getDecks } from "@/lib/api/decks";
+import { createDeck, deleteDeck, getDeck, getDecks, setDeckScene } from "@/lib/api/decks";
 import { useNotify } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { SlideDeck, SlideDeckSummary } from "@/types/show";
@@ -49,4 +49,21 @@ export function useDeckMutations(campaignId: string) {
     remove: (deckId: string) => remove.mutateAsync(deckId).catch(() => undefined),
     pending: create.isPending || remove.isPending,
   };
+}
+
+export function useDeckScene(campaignId: string, deckId: string) {
+  const queryClient = useQueryClient();
+
+  const notify = useNotify();
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (scenarioPageId: string | null) => setDeckScene(campaignId, deckId, { scenarioPageId }),
+    onSuccess: (deck) => {
+      queryClient.setQueryData(showKeys.deck(campaignId, deckId), deck);
+      void queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
+    },
+    onError: (error) => void notify(errorMessage(error, "Не вдалося прив'язати набір до сцени")),
+  });
+
+  return { set: (scenarioPageId: string | null) => mutateAsync(scenarioPageId).then(() => undefined, () => undefined), pending: isPending };
 }

@@ -29,7 +29,7 @@ export function ShowStage({ show }: { show: ShowState | null }) {
           <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority />
         </div>
       ))}
-      {current ? <SlideCaption key={current.id} slide={current} /> : <ShowWaiting />}
+      {current ? <SlideCaption key={current.id} slide={current} /> : !show?.battle && <ShowWaiting />}
       {show?.nextImageUrl && (
         <div data-slide-preload aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
           <Image {...imageProps(show.nextImageUrl)} alt="" loading="eager" />
