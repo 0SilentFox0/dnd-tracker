@@ -3,8 +3,10 @@ import type { Prisma } from "@prisma/client";
 import "server-only";
 import type { AiToolContext } from "@/lib/ai/tools/define";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
-import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContent, toPage } from "@/lib/server/scenario/page-store";
+import { scenarioContentSchema } from "@/lib/schemas/scenario";
+import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContentStrict, toPage } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
 import type { AiProposal, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
@@ -28,7 +30,7 @@ export async function listProposals(campaignId: string, filter: { pageId?: strin
   return rows.map(toProposal);
 }
 
-type ApplyResult = { ok: true; page: ScenarioPage } | { ok: false; status: 404 | 409; error: string };
+type ApplyResult = { ok: true; page: ScenarioPage } | { ok: false; status: 400 | 404 | 409 | 413; error: string };
 
 export async function applyProposal(campaignId: string, userId: string, proposalId: string): Promise<ApplyResult> {
   return prisma.$transaction(async (tx): Promise<ApplyResult> => {
@@ -42,13 +44,17 @@ export async function applyProposal(campaignId: string, userId: string, proposal
 
     if (!page) return { ok: false, status: 404, error: API_ERRORS.SCENARIO_NOT_FOUND };
 
-    const applied = applyAiOps(readContent(page.content), proposal.ops as unknown as ScenarioAiOp[]);
+    const applied = applyAiOps(readContentStrict(page.content), proposal.ops as unknown as ScenarioAiOp[]);
 
     if (!applied.ok) {
       await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
 
       return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
     }
+
+    if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+
+    if (Buffer.byteLength(JSON.stringify(applied.content)) > SCENARIO_MAX_CONTENT_BYTES) return { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE };
 
     await snapshotIfDue(tx, page.id, userId, { force: true });
     await pruneVersions(tx, page.id);
