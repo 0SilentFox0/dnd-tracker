@@ -17,6 +17,7 @@ model User {
   campaignMembers CampaignMember[]
   dmCampaigns     Campaign[]       @relation("DMCampaigns")
   characters      Character[]
+  aiCredentials   AiCredential[]
 
   @@map("users")
 }
@@ -51,6 +52,9 @@ model Campaign {
   slideDecks      SlideDeck[]
   show            CampaignShow?
   units           Unit[]
+  aiThreads       AiThread[]
+  aiProposals     AiProposal[]
+  apiTokens       ApiToken[]
 
   @@index([dmUserId])
   @@map("campaigns")
@@ -552,6 +556,8 @@ model ScenarioPage {
   character   Character?            @relation(fields: [characterId], references: [id], onDelete: SetNull)
   versions    ScenarioPageVersion[]
   decks       SlideDeck[]
+  aiThreads   AiThread[]
+  aiProposals AiProposal[]
 
   @@index([campaignId, sortOrder])
   @@index([characterId])
@@ -568,4 +574,92 @@ model ScenarioPageVersion {
 
   @@index([pageId, createdAt])
   @@map("scenario_page_versions")
+}
+
+model AiCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String
+  ciphertext   String
+  iv           String
+  authTag      String
+  keyVersion   Int      @default(1)
+  last4        String
+  defaultModel String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@map("ai_credentials")
+}
+
+model AiThread {
+  id             String        @id @default(cuid())
+  campaignId     String
+  userId         String
+  mode           String
+  scenarioPageId String?
+  title          String
+  provider       String
+  model          String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
+  messages       AiMessage[]
+  proposals      AiProposal[]
+
+  @@index([campaignId, userId, updatedAt])
+  @@map("ai_threads")
+}
+
+model AiMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  seq       Int
+  role      String
+  parts     Json
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  thread    AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, seq])
+  @@map("ai_messages")
+}
+
+model AiProposal {
+  id             String       @id @default(cuid())
+  campaignId     String
+  threadId       String?
+  pageId         String
+  summary        String
+  ops            Json
+  status         String       @default("pending")
+  appliedVersion Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  thread         AiThread?    @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  page           ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, status])
+  @@map("ai_proposals")
+}
+
+model ApiToken {
+  id         String    @id @default(cuid())
+  campaignId String
+  userId     String
+  name       String
+  tokenHash  String    @unique
+  prefix     String
+  scopes     String[]
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("api_tokens")
 }
