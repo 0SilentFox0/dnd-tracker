@@ -9,6 +9,8 @@ export interface SpellFx {
 }
 
 export const SPELL_FX: Record<string, SpellFx> = {
+  "Блискавка": { archetype: "skystrike", element: "lightning" },
+  "Крижаний болт": { archetype: "icefall", element: "cold" },
   "Рій ос": { archetype: "swarm", element: "nature", aura: "stings" },
   "Землетрус": { archetype: "quake", element: "earth", aura: "dust" },
   "Корені": { archetype: "entangle", element: "nature", aura: "roots" },

@@ -203,3 +203,12 @@ describe("mapAction dice", () => {
     expect(new Set(specs.map((s) => s.key)).size).toBe(3);
   });
 });
+
+describe("signature 2D strikes", () => {
+  it("«Блискавка» → skystrike, «Крижаний болт» → icefall", () => {
+    const cast = (spellName: string) => mapAction(action({ actionType: "spell", actionDetails: { spellName, totalDamage: 12 } })).find((s) => s.archetype !== "dice");
+
+    expect(cast("Блискавка")).toMatchObject({ archetype: "skystrike", element: "lightning" });
+    expect(cast("Крижаний болт")).toMatchObject({ archetype: "icefall", element: "cold" });
+  });
+});
