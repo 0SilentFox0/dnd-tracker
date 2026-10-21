@@ -29,6 +29,14 @@
 
 Перед реалізацією звірити API AI SDK зі встановленою версією (`node_modules/ai/docs/`), а не з пам'яттю: AI SDK 7 вимагає Node ≥ 22 і ESM.
 
+## Що перевикористовується
+
+- Доступ і помилки: `requireDM`, `requireAuth`, `parseBody`, `errorResponse` + `API_ERRORS`, `handleApiError` (`lib/utils/api`).
+- Сценарій: `readContent`/`contentWrite`/`toPage`/`listPages` (`lib/server/scenario/page-store.ts`), `snapshotIfDue`/`pruneVersions` (`versions.ts`), `scenarioContentSchema`, `newId`, `docText`, `EMPTY_DOC`; SQL-пошук сценарію виноситься з маршруту в `lib/server/scenario/search.ts`, щоб його викликали і маршрут, і інструмент.
+- Показ: `readShowState`; бій: `loadBattle` (`lib/utils/battle/store`), `BattleStatus`; довідник: `getCachedUnits`/`getCachedSpells`/`getCachedRaces`.
+- Клієнт: `campaignGet/Post/Patch/…` (`lib/api/client.ts`), `useOptionalNotify`/`useConfirm`, `QueryState`/`EmptyState`/`LoadingState`, `HudPage`/`HudCard`/`HudPanel`, `ResponsiveDialog`, `ScenarioRichText` для «було → стало».
+- Нове, бо аналогів немає: шифрування секретів, адаптер провайдерів, реєстр інструментів, markdown-діалект (наявний `docText` дає лише плоский текст і губить розмітку), операції пропозицій.
+
 ## Модель даних (міграція expand-only)
 
 Нові таблиці, у кожній `ALTER TABLE … ENABLE ROW LEVEL SECURITY` (`prisma/__tests__/migrations-rls.test.ts`).

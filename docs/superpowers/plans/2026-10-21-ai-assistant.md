@@ -3008,7 +3008,7 @@ export async function threadUsage(threadId: string): Promise<AiUsage> {
 
 ```ts
 // додати імпорти: createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread з "@/lib/ai/threads";
-// createThreadSchema, patchThreadSchema з "@/lib/schemas/ai"; isKnownModel, AI_LIMITS з "@/lib/constants/ai"; prisma з "@/lib/db"; parseBody з "@/lib/utils/api/parse-body"
+// createThreadSchema, patchThreadSchema з "@/lib/schemas/ai"; AI_LIMITS, defaultModelFor, isKnownModel з "@/lib/constants/ai"; prisma з "@/lib/db"; parseBody з "@/lib/utils/api/parse-body"
 
 export async function listThreadsHandler(req: Request, campaignId: string) {
   try {
@@ -3060,13 +3060,12 @@ export async function patchThreadHandler(req: Request, campaignId: string, threa
 
     const provider = body.provider ?? current.provider;
 
-    const model = body.model ?? (body.provider && body.provider !== current.provider ? undefined : current.model);
+    // switching provider without a model picks that provider's default for the thread mode
+    const model = body.model ?? (provider === current.provider ? current.model : defaultModelFor(provider, current.mode));
 
-    if (model && !isKnownModel(provider, model)) return errorResponse(API_ERRORS.AI_MODEL_UNKNOWN, 400);
+    if (!isKnownModel(provider, model)) return errorResponse(API_ERRORS.AI_MODEL_UNKNOWN, 400);
 
-    const { defaultModelFor } = await import("@/lib/constants/ai");
-
-    return NextResponse.json(await patchThread(campaignId, access.userId, threadId, { ...body, provider, model: model ?? defaultModelFor(provider, current.mode) }));
+    return NextResponse.json(await patchThread(campaignId, access.userId, threadId, { ...body, provider, model }));
   } catch (error) {
     return handleApiError(error, { action: "patch ai thread" });
   }
@@ -3100,8 +3099,6 @@ export async function listMessagesHandler(campaignId: string, threadId: string) 
   }
 }
 ```
-
-(`defaultModelFor` імпортувати статично разом з `isKnownModel` — динамічний імпорт вище лише ілюстрація, замінити на статичний.)
 
 Маршрути: `threads/route.ts` (GET → `listThreadsHandler(req, id)`, POST → `createThreadHandler`), `threads/[threadId]/route.ts` (PATCH, DELETE), `threads/[threadId]/messages/route.ts` (GET) — тонкі, як у Task 9.
 
@@ -4237,7 +4234,7 @@ describe("AiProposalCard", () => {
 });
 ```
 
-- [ ] **Step 2: `AiProposalCard`** — для `replaceRow`: дві колонки «Було» / «Стало» для кожного зміненого поля (`story`/`notes`) через `ScenarioRichText`; `insertRow` — «Новий рядок» зі `story`/`notes`; `addSection` — «Новий розділ «{title}»» з рядками; `renameSection` — ««{before.title}» → «{title}»». Статуси: `pending` → «Застосувати» / «Відхилити»; `stale` → «Фрагмент змінився після пропозиції» + «Переробити» / «Відхилити»; `applied` → «Застосовано»; `rejected` → «Відхилено». `onRedo` у панелі надсилає в чат текст `Пропозиція «${summary}» застаріла — прочитай сторінку заново й переroби її.` — точний текст: `Пропозиція «${summary}» застаріла: перечитай сторінку й запропонуй її заново.`
+- [ ] **Step 2: `AiProposalCard`** — для `replaceRow`: дві колонки «Було» / «Стало» для кожного зміненого поля (`story`/`notes`) через `ScenarioRichText`; `insertRow` — «Новий рядок» зі `story`/`notes`; `addSection` — «Новий розділ «{title}»» з рядками; `renameSection` — ««{before.title}» → «{title}»». Статуси: `pending` → «Застосувати» / «Відхилити»; `stale` → «Фрагмент змінився після пропозиції» + «Переробити» / «Відхилити»; `applied` → «Застосовано»; `rejected` → «Відхилено». `onRedo` у панелі надсилає в чат текст `Пропозиція «${summary}» застаріла: перечитай сторінку й запропонуй її заново.`
 
 - [ ] **Step 3: `ScenarioEditor` віддає `flush`**
 
@@ -4301,5 +4298,11 @@ describe("AiProposalCard", () => {
   6. Телефонна ширина (390 px): панель відкривається bottom sheet.
 - [ ] **Step 5: Прибрати** тестові треди/токени з `aiassistant` (не обов'язково — локальна БД); переконатися, що в git немає `.env.local`.
 - [ ] **Step 6: Commit** будь-яких виправлень з перевірки окремими комітами `fix(ai): …`.
+- [ ] **Step 7: `/simplify`** на diff гілки проти `main` (правило `CLAUDE.md`), виправлення — окремим комітом.
+- [ ] **Step 8: Документація** (українською):
+  - створити `docs/architecture/ai.md`: шари (`lib/ai/*`, реєстр інструментів і два адаптери, пропозиції з `before`, markdown-діалект, автоконтекст), правила, які не можна ламати (ключ ніколи не виходить із сервера; правки сценарію лише через `ai_proposals` + `apply`; новий інструмент = файл у `lib/ai/tools` + рядок у `AI_TOOLS`; `/api/mcp` поза CSRF-перевіркою і лише Bearer), env `AI_KEYS_SECRET`/`AI_KEYS_SECRET_PREV` і процедура ротації (`UPDATE ai_credentials SET "keyVersion" = 0` → старий секрет у `_PREV` → новий у `AI_KEYS_SECRET`);
+  - рядок про `ai.md` в індексі `docs/architecture/README.md` і в розділі «Subsystems» `CLAUDE.md` (одне речення-правило з посиланням);
+  - `docs/STATUS.md`: рядок AI-асистента — стан; у «Домовленості» — `api_tokens` і `/api/mcp` уже є, етап 2 «Конструктора» розширює їх (scopes, OpenAPI), а не створює заново.
+- [ ] **Step 9: Commit** `docs(ai): architecture note, status`.
 
-Розгортання (після мержу, з підтвердження користувача): `AI_KEYS_SECRET` у Vercel Production і Preview (`openssl rand -base64 32` → `vercel env add AI_KEYS_SECRET production` / `preview`), потім merge у `main` — міграція застосується продакшн-білдом.
+Розгортання (після мержу, з підтвердження користувача): `AI_KEYS_SECRET` у Vercel Production і Preview (`openssl rand -base64 32` → `vercel env add AI_KEYS_SECRET production` / `preview`), потім merge у `main` — міграція застосується продакшн-білдом; у коміті злиття `git mv` спеки й плану в `docs/archive/superpowers/`.
