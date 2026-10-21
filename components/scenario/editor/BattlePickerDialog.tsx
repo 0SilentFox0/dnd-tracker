@@ -5,10 +5,8 @@ import { Swords } from "lucide-react";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { BattleStatus } from "@/lib/constants/battle";
+import { BATTLE_STATUS_LABEL, BattleStatus } from "@/lib/constants/battle";
 import { useBattleBriefs } from "@/lib/hooks/battles";
-
-const STATUS_LABEL: Record<BattleStatus, string> = { [BattleStatus.PREPARED]: "підготовлений", [BattleStatus.ACTIVE]: "йде", [BattleStatus.COMPLETED]: "завершений" };
 
 export function BattlePickerDialog({ campaignId, open, onOpenChange, onPick }: { campaignId: string; open: boolean; onOpenChange(open: boolean): void; onPick(battleId: string): void }) {
   const { data: briefs = [], isLoading } = useBattleBriefs(campaignId, { enabled: open });
@@ -34,7 +32,7 @@ export function BattlePickerDialog({ campaignId, open, onOpenChange, onPick }: {
                 onOpenChange(false);
               }}
             >
-              {b.name} · {STATUS_LABEL[b.status] ?? b.status}
+              {b.name} · {BATTLE_STATUS_LABEL[b.status as BattleStatus] ?? b.status}
             </Button>
           ))}
         </div>

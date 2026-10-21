@@ -64,15 +64,41 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
-const withoutBattleFlag = (prev: ShowState): ShowState => {
-  const { battle: _battle, ...rest } = prev;
+/** Прибирає поле стану й піднімає seq. */
+function without(prev: ShowState, ...keys: ("battle" | "curtain" | "cover")[]): ShowState {
+  const next = { ...prev, seq: prev.seq + 1 };
 
-  return { ...rest, seq: prev.seq + 1 };
-};
+  for (const key of keys) delete next[key];
+
+  return next;
+}
+
+const keepCover = (prev: ShowState | null) => (prev?.cover ? { cover: prev.cover } : {});
+
+/** on не задано — перемикання. */
+function setCurtain(prev: ShowState | null, on = !prev?.curtain): Outcome {
+  const base = prev ?? EMPTY;
+
+  if (!!base.curtain === on) return prev ? done(prev) : fail(API_ERRORS.SHOW_NOT_RUNNING);
+
+  return done(on ? { ...base, curtain: true, seq: base.seq + 1 } : without(base, "curtain"));
+}
+
+function setCover(prev: ShowState | null, slideId: string, deck: ShowDeck | null): Outcome {
+  if (!deck) return fail(API_ERRORS.DECK_NOT_FOUND);
+
+  const found = deck.slides.find((s) => s.id === slideId);
+
+  if (!found) return fail(API_ERRORS.SLIDE_NOT_FOUND);
+
+  const { trackId: _trackId, ...slide } = found;
+
+  return done({ ...(prev ?? EMPTY), cover: { deckId: deck.id, slide }, seq: (prev?.seq ?? 0) + 1 });
+}
 
 /** null, якщо показ не вказує на цей бій. */
 export function withoutBattle(prev: ShowState | null, battleId: string): ShowState | null {
-  return prev?.battle?.id === battleId ? withoutBattleFlag(prev) : null;
+  return prev?.battle?.id === battleId ? without(prev, "battle") : null;
 }
 
 function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
@@ -88,11 +114,11 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   if (index === -1) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return prev.battle ? done(withoutBattleFlag(prev)) : done(prev);
+  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev.battle || prev.curtain ? without(prev, "battle", "curtain") : prev);
 
   const at = slideAt(deck, index);
 
-  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), seq: (prev?.seq ?? 0) + 1 });
+  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), seq: (prev?.seq ?? 0) + 1 });
 }
 
 function stopAudio(prev: ShowState | null, ctx: Ctx): BattleAudioState | null {
@@ -120,7 +146,7 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
     case "prev":
       return moveTo(prev, cmd, ctx);
     case "end":
-      return done({ ...EMPTY, audio: stopAudio(prev, ctx), seq: (prev?.seq ?? 0) + 1 });
+      return done({ ...EMPTY, audio: stopAudio(prev, ctx), ...keepCover(prev), seq: (prev?.seq ?? 0) + 1 });
     case "audio": {
       const played = applyAudioCommand(prev?.audio ?? null, cmd.command, ctx);
 
@@ -128,6 +154,14 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
     }
     case "battle":
       return callToBattle(prev, cmd.battleId, ctx);
+    case "curtain":
+      return setCurtain(prev, cmd.on);
+    case "setCover":
+      return setCover(prev, cmd.slideId, ctx.deck);
+    case "clearCover":
+      if (!prev) return fail(API_ERRORS.SHOW_NOT_RUNNING);
+
+      return done(prev.cover ? without(prev, "cover") : prev);
   }
 }
 

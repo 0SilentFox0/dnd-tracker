@@ -24,4 +24,27 @@ describe("ShowStage", () => {
 
     expect(screen.getByText("ДМ ще не почав показ")).toBeTruthy();
   });
+
+  it("заглушка ввімкнена — картинка заглушки замість слайда, наступна все одно вантажиться", () => {
+    const cover = { deckId: "d2", slide: { id: "slide-0009", imageUrl: "https://x.supabase.co/cover.webp", title: "Перерва" } };
+
+    const { container } = render(<ShowStage show={show({ curtain: true, cover })} />);
+
+    expect(screen.getByText("Перерва")).toBeTruthy();
+    expect(screen.queryByText("Корчма «Гриф»")).toBeNull();
+    expect(container.querySelector("[data-slide-preload] img")).toBeTruthy();
+  });
+
+  it("показ не йде, але заглушку задано — її картинка", () => {
+    render(<ShowStage show={show({ deckId: null, slide: null, nextImageUrl: null, cover: { deckId: "d2", slide: { id: "slide-0009", imageUrl: "https://x.supabase.co/cover.webp", title: "Скоро" } } })} />);
+
+    expect(screen.getByText("Скоро")).toBeTruthy();
+    expect(screen.queryByText("ДМ ще не почав показ")).toBeNull();
+  });
+
+  it("заглушка без картинки — стандартний екран перерви", () => {
+    render(<ShowStage show={show({ curtain: true })} />);
+
+    expect(screen.getByText("Перерва — скоро продовжимо")).toBeTruthy();
+  });
 });
