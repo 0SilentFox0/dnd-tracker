@@ -26,6 +26,15 @@ describe("AiProposalCard", () => {
     expect(a.onReject).toHaveBeenCalled();
   });
 
+  it("replaceRow, що втрачає виноски, — попередження", () => {
+    const callout = { type: "callout", attrs: { kind: "check", tag: "" }, content: [doc("x").content[0]] };
+
+    const op = { ...base.ops[0], before: { story: { type: "doc", content: [callout, callout, callout] }, notes: doc("") } };
+
+    render(<AiProposalCard proposal={{ ...base, ops: [op], status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
+    expect(screen.getByText("Увага: правка видаляє 3 виноски")).toBeTruthy();
+  });
+
   it("stale: пояснення і «Переробити»", () => {
     const a = actions();
 

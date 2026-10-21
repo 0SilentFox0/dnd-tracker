@@ -44,6 +44,48 @@ describe("resolveAiOps", () => {
     expect(!r.ok && r.error).toContain("вручну");
   });
 
+  describe("втрата структурних блоків", () => {
+    const rich = (): ScenarioContent => {
+      const c = content();
+
+      const callout = { type: "callout", attrs: { kind: "check", tag: "" }, content: [doc("DC").content[0]] };
+
+      const secret = { type: "paragraph", content: [{ type: "text", text: "таємниця", marks: [{ type: "secret" }] }] };
+
+      c.sections[0].rows[0].story = { type: "doc", content: [doc("a").content[0], callout, callout, callout, secret] } as RichDoc;
+
+      return c;
+    };
+
+    it("втрата виносок і секрету — помилка з кількостями", () => {
+      const r = resolveAiOps(rich(), [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Коротко" }]);
+
+      expect(r.ok).toBe(false);
+      expect(!r.ok && r.error).toContain("3 виноски");
+      expect(!r.ok && r.error).toContain("1 секрет");
+    });
+
+    it("allowRemoval: true дозволяє", () => {
+      expect(resolveAiOps(rich(), [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Коротко", allowRemoval: true }]).ok).toBe(true);
+    });
+
+    it("збережені блоки (рівно або більше) — ok", () => {
+      const md = "a\n\n:::callout kind=\"check\" tag=\"\"\nDC\n:::\n\n:::callout kind=\"check\" tag=\"\"\nDC\n:::\n\n:::callout kind=\"check\" tag=\"\"\nDC\n:::\n\n||таємниця||\n\n:::say\nпривіт\n:::";
+
+      expect(resolveAiOps(rich(), [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: md }]).ok).toBe(true);
+    });
+
+    it("втрата лише секрету виявляється", () => {
+      const c = content();
+
+      c.sections[0].rows[0].notes = { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "s", marks: [{ type: "secret" }] }] }] } as RichDoc;
+
+      const r = resolveAiOps(c, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", notes: "відкрито" }]);
+
+      expect(!r.ok && r.error).toContain("1 секрет");
+    });
+  });
+
   it("insertRow і addSection генерують нові унікальні id", () => {
     const { ops } = ok(resolveAiOps(content(), [{ op: "insertRow", sectionId: "s1", afterRowId: "r1", story: "Новий" }, { op: "addSection", afterSectionId: "s1", title: "Двір", rows: [{ story: "Сніг" }] }]));
 

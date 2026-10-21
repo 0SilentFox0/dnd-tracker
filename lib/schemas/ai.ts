@@ -23,7 +23,7 @@ export const aiFocusSchema = z.object({ pageId: id, sectionId: id.optional(), ro
 export const chatRequestSchema = z.object({ text: z.string().trim().min(1).max(AI_LIMITS.messageChars), focus: aiFocusSchema.optional() });
 
 export const scenarioAiOpInputSchema = z.discriminatedUnion("op", [
-  z.object({ op: z.literal("replaceRow"), sectionId: id, rowId: id, story: markdown.optional(), notes: markdown.optional() }).refine((o) => o.story !== undefined || o.notes !== undefined, { message: "replaceRow: потрібне story або notes" }),
+  z.object({ op: z.literal("replaceRow"), sectionId: id, rowId: id, story: markdown.optional(), notes: markdown.optional(), allowRemoval: z.boolean().optional() }).refine((o) => o.story !== undefined || o.notes !== undefined, { message: "replaceRow: потрібне story або notes" }),
   z.object({ op: z.literal("insertRow"), sectionId: id, afterRowId: id.optional(), story: markdown, notes: markdown.optional() }),
   z.object({ op: z.literal("addSection"), afterSectionId: id.optional(), title: z.string().trim().min(1).max(200), rows: z.array(z.object({ story: markdown, notes: markdown.optional() })).min(1).max(30) }),
   z.object({ op: z.literal("renameSection"), sectionId: id, title: z.string().trim().min(1).max(200) }),

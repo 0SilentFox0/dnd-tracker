@@ -49,7 +49,7 @@ export interface AiFocus {
 }
 
 export type ScenarioAiOpInput =
-  | { op: "replaceRow"; sectionId: string; rowId: string; story?: string; notes?: string }
+  | { op: "replaceRow"; sectionId: string; rowId: string; story?: string; notes?: string; allowRemoval?: boolean }
   | { op: "insertRow"; sectionId: string; afterRowId?: string; story: string; notes?: string }
   | { op: "addSection"; afterSectionId?: string; title: string; rows: { story: string; notes?: string }[] }
   | { op: "renameSection"; sectionId: string; title: string };

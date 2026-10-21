@@ -1,3 +1,4 @@
+import { describeLost, lostBlocks } from "./block-inventory";
 import { EMPTY_DOC } from "./doc";
 import { canonicalJson, isLosslessDoc, markdownToDoc } from "./markdown";
 import { newId } from "./structure";
@@ -49,6 +50,14 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
     const touched = [input.story !== undefined && row.story, input.notes !== undefined && row.notes].filter((d) => d !== false);
 
     if (touched.some((d) => !isLosslessDoc(d))) return { ok: false, error: `Рядок ${row.id} містить розмітку, яку AI не може відтворити без втрат (вкладені списки чи складні таблиці) — редагуйте його вручну` };
+
+    if (!input.allowRemoval) {
+      const lost = { story: input.story !== undefined ? lostBlocks(row.story, md(input.story)) : {}, notes: input.notes !== undefined ? lostBlocks(row.notes, md(input.notes)) : {} };
+
+      const parts = (["story", "notes"] as const).filter((f) => Object.keys(lost[f]).length > 0).map((f) => describeLost(lost[f]));
+
+      if (parts.length > 0) return { ok: false, error: `Правка видаляє з рядка ${row.id}: ${parts.join("; ")}. replaceRow замінює все поле — перенеси ці блоки в новий текст без змін, або передай allowRemoval: true, лише якщо ДМ прямо просив їх прибрати.` };
+    }
 
     ops.push({
       op: "replaceRow",

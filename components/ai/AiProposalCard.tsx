@@ -2,6 +2,7 @@
 
 import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import { Button } from "@/components/ui/button";
+import { describeLost, lostBlocks } from "@/lib/utils/scenario/block-inventory";
 import type { AiProposal } from "@/types/ai";
 import type { RichDoc, ScenarioRow } from "@/types/scenario";
 
@@ -48,11 +49,21 @@ function Diff({ label, before, after, campaignId }: { label: string; before: Ric
   );
 }
 
+function LossWarning({ before, after }: { before: RichDoc; after: RichDoc }) {
+  const lost = lostBlocks(before, after);
+
+  if (Object.keys(lost).length === 0) return null;
+
+  return <p className="text-sm font-medium text-destructive">Увага: правка видаляє {describeLost(lost)}</p>;
+}
+
 function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   if (op.op === "replaceRow") {
     return (
       <div className="space-y-2">
+        {op.story ? <LossWarning before={op.before.story} after={op.story} /> : null}
         {op.story ? <Diff label="історія" before={op.before.story} after={op.story} campaignId={campaignId} /> : null}
+        {op.notes ? <LossWarning before={op.before.notes} after={op.notes} /> : null}
         {op.notes ? <Diff label="нотатки" before={op.before.notes} after={op.notes} campaignId={campaignId} /> : null}
       </div>
     );
