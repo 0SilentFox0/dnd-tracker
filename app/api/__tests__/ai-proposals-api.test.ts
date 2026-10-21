@@ -9,7 +9,7 @@ import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => {
   const tx = {
-    aiProposal: { findFirst: vi.fn(), update: vi.fn() },
+    aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
   };
@@ -45,6 +45,7 @@ describe("AI proposals API", () => {
     vi.stubEnv("AI_KEYS_SECRET", randomBytes(32).toString("base64"));
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
     vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(proposal() as never);
+    vi.mocked(prisma.aiProposal.updateMany).mockResolvedValue({ count: 1 } as never);
     vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(page() as never);
     vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(page() as never);
     vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 1 } as never);
@@ -94,6 +95,7 @@ describe("AI proposals API", () => {
 
     expect((await apply()).status).toBe(404);
     expect(prisma.aiProposal.update).not.toHaveBeenCalled();
+    expect(prisma.aiProposal.updateMany).toHaveBeenLastCalledWith({ where: { id: "ap1" }, data: { status: "pending" } });
   });
 
   it("чужа кампанія — 404", async () => {
