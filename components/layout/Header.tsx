@@ -124,6 +124,11 @@ export function Header({ email }: { email: string | null }) {
                         Сценарій
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/ai`}>
+                        AI і API
+                      </Link>
+                    </DropdownMenuItem>
                   </>
                 )}
                 {isPlayerPage && (
