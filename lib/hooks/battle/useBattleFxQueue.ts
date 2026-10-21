@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useModeView } from "./modes/useModeView";
+import { fireFxImpact } from "./fx-impact";
 import { moraleDiceDone } from "./morale-dice";
 import { useBattleSceneData } from "./useBattleScene";
 
@@ -10,6 +11,8 @@ import { usePageHidden } from "@/lib/hooks/common";
 import { advanceFxQueue, INITIAL_FX_QUEUE, isMoraleFx, shiftFxQueue } from "@/lib/utils/battle/fx";
 import { moraleThrowOf } from "@/lib/utils/battle/fx/dice";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
+
+const RECENT_LOG = 12;
 
 /** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */
 export function useBattleFxQueue(enabled: boolean) {
@@ -34,6 +37,13 @@ export function useBattleFxQueue(enabled: boolean) {
   const [state, setState] = useState(INITIAL_FX_QUEUE);
 
   if (state.log !== log || state.morale !== (morale?.key ?? null) || (!active && state.queue.length)) setState(advanceFxQueue(state, { log, morale }, active));
+
+  // дія, якої в черзі немає (вже зіграна, пропущена, обрізана, до відкриття сторінки, FX вимкнено), не тримає кадр влучання
+  useEffect(() => {
+    const queued = new Set(state.queue.map((s) => s.actionId));
+
+    for (const action of log.slice(-RECENT_LOG)) if (!queued.has(action.id)) fireFxImpact(action.id);
+  }, [log, state.queue]);
 
   const done = useCallback((key: string) => {
     if (isMoraleFx(key)) moraleDiceDone();

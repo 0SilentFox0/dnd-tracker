@@ -2,7 +2,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
-import { HARMFUL_FLAGS } from "@/lib/utils/abilities/engine/effects/effect-nature";
+import { HARMFUL_FLAGS } from "@/lib/utils/abilities/engine/effects/harmful-flags";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
