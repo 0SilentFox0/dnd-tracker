@@ -12,9 +12,10 @@ interface Params {
   thread: AiThread;
   initialMessages: AiChatMessage[];
   getFocus: () => AiFocus | undefined;
+  onFinish?: () => void;
 }
 
-export function useAiChat({ campaignId, thread, initialMessages, getFocus }: Params) {
+export function useAiChat({ campaignId, thread, initialMessages, getFocus, onFinish }: Params) {
   const focusRef = useRef(getFocus);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus }: Par
   // eslint-disable-next-line react-hooks/refs
   const transport = useMemo(() => createAiChatTransport(campaignId, thread.id, () => focusRef.current()), [campaignId, thread.id]);
 
-  const chat = useChat({ id: thread.id, messages: initialMessages as unknown as UIMessage[], transport });
+  const chat = useChat({ id: thread.id, messages: initialMessages as unknown as UIMessage[], transport, onFinish: () => onFinish?.() });
 
   return { messages: chat.messages, send: (text: string) => chat.sendMessage({ text }), stop: chat.stop, status: chat.status, error: chat.error };
 }
