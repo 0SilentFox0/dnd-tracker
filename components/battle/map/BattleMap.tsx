@@ -85,6 +85,8 @@ function markFill(mark: MarkValue): string {
 
   if (mark === "picked") return "rgba(240,200,70,.5)";
 
+  if (mark === "out-of-range") return "rgba(0,0,0,.45)";
+
   return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
 }
 

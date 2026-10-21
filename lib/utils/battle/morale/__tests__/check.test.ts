@@ -29,28 +29,17 @@ describe("checkMorale з прапорцями", () => {
     expect(r.message).toContain("мораль не діє");
   });
 
-  it("moraleChance: додає шанс додаткового ходу; невдалий d10 добирається другим кидком, мінус не страждає", () => {
+  it("moraleChance: кожні повні 10 % знижують поріг d10 на грань, без прихованого кидка; мінус не страждає", () => {
     const lead: FlagEffect = { kind: "flag", flag: "moraleChance", percent: 15 };
 
-    expect(checkMorale(p(1, lead), 1, undefined, () => 0).hasExtraTurn).toBe(true);
-    expect(checkMorale(p(1, lead), 1, undefined, () => 0.99).hasExtraTurn).toBe(false);
-    expect(checkMorale(p(1, lead), 1, undefined, () => 0.99).message).toContain("бонус лідерства +15% не спрацював");
-    expect(checkMorale(p(1), 1, undefined, () => 0.99).message).not.toContain("лідерства");
-    expect(checkMorale(p(1), 1, undefined, () => 0).hasExtraTurn).toBe(false);
-    expect(checkMorale(p(-2, lead), 3, undefined, () => 0).shouldSkipTurn).toBe(false);
-    expect(checkMorale(p(-2, lead), 2, undefined, () => 0).shouldSkipTurn).toBe(true);
-  });
-
-  it("moraleChance: сумарний шанс = мораль·10 % + бонус", () => {
-    const lead: FlagEffect = { kind: "flag", flag: "moraleChance", percent: 15 };
-
-    const rolls = Array.from({ length: 10 }, (_, i) => i + 1);
-
-    const draws = Array.from({ length: 100 }, (_, i) => (i + 0.5) / 100);
-
-    const hits = rolls.flatMap((r) => draws.map((d) => checkMorale(p(1, lead), r, undefined, () => d).hasExtraTurn)).filter(Boolean).length;
-
-    expect(hits / 1000).toBeCloseTo(0.25, 2);
+    expect(checkMorale(p(1, lead), 9).hasExtraTurn).toBe(true);
+    expect(checkMorale(p(1, lead), 8).hasExtraTurn).toBe(false);
+    expect(checkMorale(p(1, lead), 8).message).toContain("лідерство +15%, кидок: 8, потрібно: >=9");
+    expect(checkMorale(p(1), 9).hasExtraTurn).toBe(false);
+    expect(checkMorale(p(1), 9).message).not.toContain("лідерство");
+    expect(checkMorale(p(1, { kind: "flag", flag: "moraleChance", percent: 5 }), 9).hasExtraTurn).toBe(false);
+    expect(checkMorale(p(-2, lead), 3).shouldSkipTurn).toBe(false);
+    expect(checkMorale(p(-2, lead), 2).shouldSkipTurn).toBe(true);
   });
 
   it("moraleChance з аурою allAllies діє на союзників лідера, не на ворогів", () => {
@@ -62,7 +51,7 @@ describe("checkMorale з прапорцями", () => {
 
     const foe = { ...makeParticipant({ id: "f", side: ParticipantSide.ENEMY }), combatStats: { ...makeParticipant({ id: "f" }).combatStats, morale: 1 } };
 
-    expect(checkMorale(ally, 1, [leader, ally, foe], () => 0).hasExtraTurn).toBe(true);
-    expect(checkMorale(foe, 1, [leader, ally, foe], () => 0).hasExtraTurn).toBe(false);
+    expect(checkMorale(ally, 9, [leader, ally, foe]).hasExtraTurn).toBe(true);
+    expect(checkMorale(foe, 9, [leader, ally, foe]).hasExtraTurn).toBe(false);
   });
 });
