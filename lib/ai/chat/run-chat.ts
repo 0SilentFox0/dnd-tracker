@@ -1,4 +1,4 @@
-import { convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
+import { APICallError, convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
 
 import "server-only";
 import { buildInstructions } from "@/lib/ai/context/prompt";
@@ -58,6 +58,7 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
     tools,
     stopWhen: isStepCount(AI_LIMITS.maxSteps),
     abortSignal,
+    onError: ({ error: e }) => console.error("[ai chat]", APICallError.isInstance(e) ? e.statusCode : e instanceof Error ? e.name : "unknown"),
   });
 
   let usage: AiMessageMetadata["usage"];

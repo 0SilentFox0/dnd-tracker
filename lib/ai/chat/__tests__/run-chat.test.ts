@@ -96,6 +96,22 @@ describe("runChat", () => {
     expect(body).not.toContain("sk-test");
   });
 
+  it("логи помилки провайдера не містять тексту оригіналу", async () => {
+    const { APICallError } = await import("ai");
+
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const failing = new MockLanguageModelV4({ doStream: async () => { throw new APICallError({ message: "invalid x-api-key sk-test", url: "u", requestBodyValues: {}, statusCode: 401, isRetryable: false }); } });
+
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    await (await runChat(args, { model: failing })).text();
+
+    expect(spy).toHaveBeenCalledWith("[ai chat]", 401);
+    expect(JSON.stringify(spy.mock.calls)).not.toContain("sk-test");
+    spy.mockRestore();
+  });
+
   it("compactHistory стискає старі результати інструментів", async () => {
     const { compactHistory } = await import("@/lib/ai/chat/run-chat");
 
