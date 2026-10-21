@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { QueryState } from "@/components/common/states";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene, useFxBusy } from "@/lib/hooks/battle";
 import { useBattleSummary } from "@/lib/hooks/battles";
 import { cn } from "@/lib/utils";
 import { HERO_STATUS_LABEL, resolveOutcome } from "@/lib/utils/battle/view";
@@ -48,7 +48,9 @@ export function BattleResultScreen() {
 
   const summary = useBattleSummary(campaignId, battleId, resultScreen.open);
 
-  if (!resultScreen.open) return null;
+  const fxBusy = useFxBusy();
+
+  if (!resultScreen.open || fxBusy) return null;
 
   const outcome = summary.data?.outcome ?? resolveOutcome(battle.battleLog ?? [], battle.initiativeOrder);
 

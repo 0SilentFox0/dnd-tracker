@@ -100,22 +100,22 @@ async function strike({ stage, palette, spec }: Parameters<FxAnimation>[0], targ
 
       const leave = 1 - clamp01((t - 1050) / 450);
 
-      // темне небо: прозоре полотно лише притемнює карту, а не сірить її
-      // небо й хмара — один раз на запуск, не на кожну ціль
+      g.globalCompositeOperation = "source-over";
+
+      // темне небо одне на каст (цілі б'ються разом): кілька шарів дали б майже чорний екран
       if (first) {
-        g.globalCompositeOperation = "source-over";
         g.globalAlpha = 0.32 * gather * leave;
         g.fillStyle = "#04060e";
         g.fillRect(0, 0, g.canvas.width, g.canvas.height);
-
-        g.globalAlpha = 0.85 * gather * leave;
-        g.fillStyle = "#151b2e";
-        cloudPath(g, at.x, cloudY, 220);
-        g.fill();
-        g.fillStyle = "#222b45";
-        cloudPath(g, at.x + 40, cloudY - 18, 160);
-        g.fill();
       }
+
+      g.globalAlpha = 0.85 * gather * leave;
+      g.fillStyle = "#151b2e";
+      cloudPath(g, at.x, cloudY, 220);
+      g.fill();
+      g.fillStyle = "#222b45";
+      cloudPath(g, at.x + 40, cloudY - 18, 160);
+      g.fill();
 
       if (t < STRIKE_MS && Math.floor(t / 70) % 3 === 0) sprite(g, halo, at.x + rand(-60, 60), cloudY, 2.2, 1.2, 0.6);
 
