@@ -11,7 +11,7 @@ import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
-import { useScenarioPage, useScenarioPlay, useSectionProgress } from "@/lib/hooks/scenario";
+import { useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus } from "@/types/ai";
@@ -29,6 +29,8 @@ export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled 
 
 function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean }) {
   const progress = useSectionProgress(campaignId, page.id);
+
+  const collapse = useSectionCollapse();
 
   const [hideNotes, setHideNotes] = useState(false);
 
@@ -121,7 +123,19 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           page={page}
           campaignId={campaignId}
           play={playEnabled ? play : undefined}
-          progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
+          progress={{
+            onPlayed: (id, v) => {
+              collapse.expand(id);
+              void progress.setPlayed(id, v).catch(() => {});
+            },
+            onRevealed: (id, v) => {
+              collapse.expand(id);
+              void progress.setRevealed(id, v).catch(() => {});
+            },
+            pending: progress.isPending,
+            played: playedLookup(playedPages),
+          }}
+          collapse={collapse}
         />
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}

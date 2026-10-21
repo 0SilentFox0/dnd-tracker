@@ -7,5 +7,6 @@ export { useScenarioPages } from "./useScenarioPages";
 export { type ScenarioPlay, useScenarioPlay } from "./useScenarioPlay";
 export { useScenarioSearch } from "./useScenarioSearch";
 export { useScenarioVersions } from "./useScenarioVersions";
+export { type SectionCollapse, useSectionCollapse } from "./useSectionCollapse";
 export { useSectionProgress } from "./useSectionProgress";
 export { useShowDockExpanded } from "./useShowDockExpanded";
