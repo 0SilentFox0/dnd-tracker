@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { runChat } from "@/lib/ai/chat/run-chat";
 import { isAiConfigured } from "@/lib/ai/crypto";
+import { discardGeneratedImage } from "@/lib/ai/generated-images";
 import { guarded } from "@/lib/ai/guarded";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
 import { applyProposal, listProposals, rejectProposal } from "@/lib/ai/proposals";
@@ -11,7 +12,7 @@ import { createThread, deleteThread, listThreads, loadMessages, loadThread, patc
 import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { aiSettingsSchema, chatRequestSchema, createThreadSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { aiSettingsSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -137,4 +138,15 @@ export const generateSlideImageHandler = (req: Request, campaignId: string) =>
 
       throw error;
     }
+  });
+
+export const discardGeneratedImageHandler = (req: Request, campaignId: string) =>
+  guarded("discard generated image", () => requireDM(campaignId), async () => {
+    const body = await parseBody(discardGeneratedImageSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    const outcome = await discardGeneratedImage(campaignId, body.url);
+
+    return outcome === "foreign" ? errorResponse(API_ERRORS.AI_IMAGE_NOT_OWNED, 400) : NextResponse.json({ removed: outcome === "removed" });
   });

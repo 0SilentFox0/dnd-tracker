@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { discardSlideFiles } from "@/lib/ai/proposals";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/ai/proposals", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -157,5 +159,6 @@ describe("scenario pages API", () => {
 
     expect(await (await DELETE(req("DELETE"), params({ pageId: "p1" }))).json()).toEqual({ ok: true });
     expect(prisma.scenarioPage.delete).toHaveBeenCalledWith({ where: { id: "p1" } });
+    expect(discardSlideFiles).toHaveBeenCalledWith("camp1", ["https://x/orphan.webp"]);
   });
 });

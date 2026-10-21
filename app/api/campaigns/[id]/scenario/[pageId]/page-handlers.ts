@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { discardSlideFiles, pendingSlideUrls } from "@/lib/ai/proposals";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
@@ -103,7 +104,10 @@ export async function deleteScenarioPageHandler(campaignId: string, pageId: stri
 
     if (page instanceof NextResponse) return page;
 
+    const orphanUrls = await pendingSlideUrls(campaignId, pageId);
+
     await prisma.scenarioPage.delete({ where: { id: pageId } });
+    await discardSlideFiles(campaignId, orphanUrls);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

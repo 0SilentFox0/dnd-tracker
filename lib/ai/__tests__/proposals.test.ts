@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const tx = vi.hoisted(() => ({
-  aiProposal: { findFirst: vi.fn(), update: vi.fn() },
+  aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   scenarioPage: { findFirst: vi.fn(), updateMany: vi.fn() },
 }));
 
@@ -48,5 +48,20 @@ describe("applyProposal", () => {
     expect(res).toEqual({ ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID });
     expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
     expect(tx.aiProposal.update).not.toHaveBeenCalled();
+  });
+
+  it("паралельне застосування: програвший claim → 409, сторінка не пишеться", async () => {
+    tx.aiProposal.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    const res = await run(content);
+
+    expect(res).toEqual({ ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE });
+    expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("невдалий запис повертає claim у pending", async () => {
+    await run({ sections: "oops" });
+
+    expect(tx.aiProposal.updateMany).toHaveBeenLastCalledWith({ where: { id: "pr" }, data: { status: "pending" } });
   });
 });

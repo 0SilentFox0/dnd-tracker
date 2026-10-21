@@ -7,7 +7,7 @@ import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { DECK_TITLE_MAX, MAX_DECKS_PER_CAMPAIGN, MAX_SLIDES_PER_DECK } from "@/lib/constants/show";
 import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
-import { readSlides } from "@/lib/schemas/show";
+import { slidesSchema } from "@/lib/schemas/show";
 import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContentStrict, toPage } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { toSlideDeck, urlsUsedElsewhere } from "@/lib/server/show/deck-store";
@@ -45,39 +45,56 @@ export async function applyProposal(campaignId: string, userId: string, proposal
 
     if (proposal.status !== "pending") return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
 
-    const ops = proposal.ops as unknown as AiProposalOp[];
+    const claimed = await tx.aiProposal.updateMany({ where: { id: proposalId, campaignId, status: "pending" }, data: { status: "applied" } });
 
-    const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === "addSlide");
+    if (claimed.count === 0) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
 
-    if (slideOps.length > 0) return slideOps.length === ops.length ? applySlideOps(tx, campaignId, proposal, slideOps) : { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+    const result = await applyClaimed(tx, campaignId, userId, proposal);
 
-    const page = await tx.scenarioPage.findFirst({ where: { id: proposal.pageId, campaignId }, select: OWNED_WITH_CONTENT_SELECT });
+    if (!result.ok && !KEEPS_STATUS.has(result.error)) await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
 
-    if (!page) return { ok: false, status: 404, error: API_ERRORS.SCENARIO_NOT_FOUND };
-
-    const applied = applyAiOps(readContentStrict(page.content), ops as ScenarioAiOp[]);
-
-    if (!applied.ok) {
-      await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
-
-      return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
-    }
-
-    if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
-
-    if (Buffer.byteLength(JSON.stringify(applied.content)) > SCENARIO_MAX_CONTENT_BYTES) return { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE };
-
-    await snapshotIfDue(tx, page.id, userId, { force: true });
-    await pruneVersions(tx, page.id);
-
-    const { count } = await tx.scenarioPage.updateMany({ where: { id: page.id, version: page.version }, data: { ...contentWrite(page.title, applied.content), version: { increment: 1 } } });
-
-    if (count === 0) return { ok: false, status: 409, error: API_ERRORS.SCENARIO_CONFLICT };
-
-    await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "applied", appliedVersion: page.version + 1 } });
-
-    return { ok: true, page: toPage({ ...page, content: applied.content, version: page.version + 1, updatedAt: new Date() }) };
+    return result;
   });
+}
+
+// these outcomes persist their own status (stale); any other failure hands the claim back
+const KEEPS_STATUS = new Set<string>([API_ERRORS.AI_PROPOSAL_STALE, API_ERRORS.AI_PROPOSAL_STALE_DECK]);
+
+async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal: Row): Promise<ApplyResult> {
+  const proposalId = proposal.id;
+
+  const ops = proposal.ops as unknown as AiProposalOp[];
+
+  const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === "addSlide");
+
+  if (slideOps.length > 0) return slideOps.length === ops.length ? applySlideOps(tx, campaignId, proposal, slideOps) : { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+
+  const page = await tx.scenarioPage.findFirst({ where: { id: proposal.pageId, campaignId }, select: OWNED_WITH_CONTENT_SELECT });
+
+  if (!page) return { ok: false, status: 404, error: API_ERRORS.SCENARIO_NOT_FOUND };
+
+  const applied = applyAiOps(readContentStrict(page.content), ops as ScenarioAiOp[]);
+
+  if (!applied.ok) {
+    await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
+
+    return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
+  }
+
+  if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+
+  if (Buffer.byteLength(JSON.stringify(applied.content)) > SCENARIO_MAX_CONTENT_BYTES) return { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE };
+
+  await snapshotIfDue(tx, page.id, userId, { force: true });
+  await pruneVersions(tx, page.id);
+
+  const { count } = await tx.scenarioPage.updateMany({ where: { id: page.id, version: page.version }, data: { ...contentWrite(page.title, applied.content), version: { increment: 1 } } });
+
+  if (count === 0) return { ok: false, status: 409, error: API_ERRORS.SCENARIO_CONFLICT };
+
+  await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "applied", appliedVersion: page.version + 1 } });
+
+  return { ok: true, page: toPage({ ...page, content: applied.content, version: page.version + 1, updatedAt: new Date() }) };
 }
 
 type Tx = Prisma.TransactionClient;
@@ -111,7 +128,11 @@ async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id
     deck = await tx.slideDeck.create({ data: { campaignId, title: page.title.slice(0, DECK_TITLE_MAX) || "Сцена", scenarioPageId: proposal.pageId, sortOrder: (existing._max.sortOrder ?? -1) + 1 } });
   }
 
-  const merged = [...readSlides(deck.slides), ...slides];
+  const stored = slidesSchema.safeParse(deck.slides);
+
+  if (!stored.success) return { ok: false, status: 409, error: API_ERRORS.DECK_CORRUPT };
+
+  const merged = [...stored.data, ...slides];
 
   if (merged.length > MAX_SLIDES_PER_DECK) return { ok: false, status: 409, error: API_ERRORS.DECK_SLIDES_LIMIT };
 
@@ -124,14 +145,21 @@ async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id
   return { ok: true, deck: toSlideDeck(await tx.slideDeck.findUniqueOrThrow({ where: { id: deck.id } })) };
 }
 
-async function discardSlideFiles(campaignId: string, ops: AiProposalOp[]): Promise<void> {
-  const urls = ops.flatMap((o) => (o.op === "addSlide" ? [o.slide.imageUrl] : []));
+const slideUrls = (ops: AiProposalOp[]) => ops.flatMap((o) => (o.op === "addSlide" ? [o.slide.imageUrl] : []));
 
+export async function discardSlideFiles(campaignId: string, urls: string[]): Promise<void> {
   if (urls.length === 0) return;
 
   const used = await urlsUsedElsewhere(campaignId, "");
 
   await removeSlideFiles(campaignId, urls.filter((u) => !used.has(u)));
+}
+
+/** Read before the page is deleted: its proposals cascade away with it. */
+export async function pendingSlideUrls(campaignId: string, pageId: string): Promise<string[]> {
+  const rows = await prisma.aiProposal.findMany({ where: { campaignId, pageId, status: { in: ["pending", "stale"] } }, select: { ops: true } });
+
+  return rows.flatMap((r) => slideUrls(r.ops as unknown as AiProposalOp[]));
 }
 
 export async function rejectProposal(campaignId: string, proposalId: string): Promise<AiProposal | null> {
@@ -141,7 +169,7 @@ export async function rejectProposal(campaignId: string, proposalId: string): Pr
 
   const row = await prisma.aiProposal.findUnique({ where: { id: proposalId }, select: SELECT });
 
-  if (row) await discardSlideFiles(campaignId, row.ops as unknown as AiProposalOp[]);
+  if (row) await discardSlideFiles(campaignId, slideUrls(row.ops as unknown as AiProposalOp[]));
 
   return row && toProposal(row);
 }

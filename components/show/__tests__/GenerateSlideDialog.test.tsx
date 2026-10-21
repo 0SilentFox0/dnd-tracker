@@ -7,11 +7,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AddSlidesBar } from "../editor/AddSlidesBar";
 import { GenerateSlideDialog } from "../editor/GenerateSlideDialog";
 
-import { generateSlideImage } from "@/lib/api/ai";
+import { discardGeneratedImage, generateSlideImage } from "@/lib/api/ai";
 import { aiKeys } from "@/lib/hooks/ai/keys";
 import { ConfirmContext } from "@/lib/hooks/common";
 
-vi.mock("@/lib/api/ai", () => ({ generateSlideImage: vi.fn(), getAiCredentials: vi.fn(async () => []), getAiSettings: vi.fn(async () => ({ instructions: "" })) }));
+vi.mock("@/lib/api/ai", () => ({ generateSlideImage: vi.fn(), discardGeneratedImage: vi.fn(async () => ({ removed: true })), getAiCredentials: vi.fn(async () => []), getAiSettings: vi.fn(async () => ({ instructions: "" })) }));
 
 const wrap = (credentials: unknown[]) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
@@ -80,5 +80,46 @@ describe("генерація слайда", () => {
     fireEvent.click(screen.getByRole("button", { name: "Згенерувати" }));
 
     await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("фільтр безпеки"));
+  });
+
+  describe("прибирання непотрібних зображень", () => {
+    const generate = async (onAdd = vi.fn(), onOpenChange = vi.fn()) => {
+      vi.mocked(generateSlideImage).mockResolvedValueOnce({ url: "https://x/1.webp" }).mockResolvedValueOnce({ url: "https://x/2.webp" });
+
+      render(<GenerateSlideDialog campaignId="c1" open onOpenChange={onOpenChange} onAdd={onAdd} />, { wrapper: wrap(openai) });
+
+      fireEvent.change(screen.getByLabelText("Опис зображення"), { target: { value: "Таверна" } });
+      fireEvent.click(screen.getByRole("button", { name: "Згенерувати" }));
+      await waitFor(() => expect(screen.getByAltText("Згенероване зображення")).toBeTruthy());
+    };
+
+    it("«Ще раз» видаляє попереднє зображення", async () => {
+      await generate();
+      fireEvent.click(screen.getByRole("button", { name: "Ще раз" }));
+
+      await waitFor(() => expect(discardGeneratedImage).toHaveBeenCalledWith("c1", "https://x/1.webp"));
+      await waitFor(() => expect((screen.getByAltText("Згенероване зображення") as HTMLImageElement).src).toBe("https://x/2.webp"));
+    });
+
+    it("«Скасувати» після генерації видаляє зображення", async () => {
+      await generate();
+      fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+
+      expect(discardGeneratedImage).toHaveBeenCalledWith("c1", "https://x/1.webp");
+    });
+
+    it("«Додати слайд» нічого не видаляє", async () => {
+      await generate();
+      fireEvent.click(screen.getByRole("button", { name: "Додати слайд" }));
+
+      expect(discardGeneratedImage).not.toHaveBeenCalled();
+    });
+
+    it("закриття без генерації нічого не видаляє", () => {
+      render(<GenerateSlideDialog campaignId="c1" open onOpenChange={vi.fn()} onAdd={vi.fn()} />, { wrapper: wrap(openai) });
+      fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+
+      expect(discardGeneratedImage).not.toHaveBeenCalled();
+    });
   });
 });

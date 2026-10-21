@@ -1,7 +1,7 @@
 import { DefaultChatTransport, type UIMessage } from "ai";
 
 import { getCampaignApiUrl } from "./api-helpers";
-import { campaignDelete, campaignGet, campaignPatch, campaignPost, campaignPut, request } from "./client";
+import { campaignDelete, campaignGet, campaignPatch, campaignPost, campaignPut, campaignRequest, request } from "./client";
 
 import type { AiImageAspect, AiProvider } from "@/lib/constants/ai";
 import type {
@@ -72,3 +72,6 @@ export const createAiChatTransport = (campaignId: string, threadId: string, getF
 export type GenerateSlideImageBody = { prompt: string; provider: AiProvider; model: string; aspect: AiImageAspect; useCampaignStyle: boolean };
 
 export const generateSlideImage = (campaignId: string, body: GenerateSlideImageBody) => campaignPost<{ url: string }>(campaignId, "/decks/generate-image", body);
+
+export const discardGeneratedImage = (campaignId: string, url: string) =>
+  campaignRequest<{ removed: boolean }>(campaignId, "/decks/generated-image", { method: "DELETE", body: { url } });

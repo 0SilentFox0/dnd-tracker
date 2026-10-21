@@ -23,7 +23,7 @@ const SECRET = "лиходій — абат";
 type Args = { omit?: { aiInstructions?: boolean } };
 
 // mimics Prisma: a column in `omit` is not returned
-const honoringOmit = <T extends object>(row: T) => async (args: Args) => {
+const honoringOmit = <T extends Record<string, unknown>>(row: T) => async (args: Args) => {
   const copy: Record<string, unknown> = { ...row };
 
   if (args?.omit?.aiInstructions) delete copy.aiInstructions;

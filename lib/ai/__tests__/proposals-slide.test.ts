@@ -28,6 +28,7 @@ const proposal = (deckId: string | null, status = "pending") => ({ id: "pr", pag
 describe("applyProposal addSlide", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    h.tx.aiProposal.updateMany.mockResolvedValue({ count: 1 });
     h.tx.slideDeck.updateMany.mockResolvedValue({ count: 1 });
     h.tx.slideDeck.findUniqueOrThrow.mockImplementation(async () => deckRow([...stored(1), slide]));
   });
@@ -42,7 +43,25 @@ describe("applyProposal addSlide", () => {
 
     expect(res).toMatchObject({ ok: true, deck: { id: "d1" } });
     expect(h.tx.slideDeck.updateMany.mock.calls[0][0].data.slides).toEqual([...stored(1), slide]);
-    expect(h.tx.aiProposal.update).toHaveBeenCalledWith({ where: { id: "pr" }, data: { status: "applied" } });
+    expect(h.tx.aiProposal.updateMany).toHaveBeenCalledWith({ where: { id: "pr", campaignId: "camp", status: "pending" }, data: { status: "applied" } });
+  });
+
+  it("паралельне застосування без deckId не створює другий набір", async () => {
+    h.tx.aiProposal.findFirst.mockResolvedValue(proposal(null));
+    h.tx.aiProposal.updateMany.mockResolvedValue({ count: 0 });
+
+    expect(await apply()).toEqual({ ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE });
+    expect(h.tx.slideDeck.create).not.toHaveBeenCalled();
+    expect(h.tx.slideDeck.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("пошкоджені слайди набору не затираються → 409, пропозиція знову pending", async () => {
+    h.tx.aiProposal.findFirst.mockResolvedValue(proposal("d1"));
+    h.tx.slideDeck.findFirst.mockResolvedValue(deckRow([{ id: "x", imageUrl: 5 }]));
+
+    expect(await apply()).toEqual({ ok: false, status: 409, error: API_ERRORS.DECK_CORRUPT });
+    expect(h.tx.slideDeck.updateMany).not.toHaveBeenCalled();
+    expect(h.tx.aiProposal.updateMany).toHaveBeenLastCalledWith({ where: { id: "pr" }, data: { status: "pending" } });
   });
 
   it("без deckId створює набір з назвою сторінки", async () => {
@@ -60,7 +79,7 @@ describe("applyProposal addSlide", () => {
     h.tx.slideDeck.findFirst.mockResolvedValue(deckRow(stored(MAX_SLIDES_PER_DECK)));
 
     expect(await apply()).toEqual({ ok: false, status: 409, error: API_ERRORS.DECK_SLIDES_LIMIT });
-    expect(h.tx.aiProposal.update).not.toHaveBeenCalled();
+    expect(h.tx.aiProposal.updateMany).toHaveBeenLastCalledWith({ where: { id: "pr" }, data: { status: "pending" } });
   });
 
   it("набір видалено → stale", async () => {
@@ -75,6 +94,7 @@ describe("applyProposal addSlide", () => {
     h.tx.aiProposal.findFirst.mockResolvedValue(proposal("d1", "applied"));
 
     expect(await apply()).toEqual({ ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE });
+    expect(h.tx.aiProposal.updateMany).not.toHaveBeenCalled();
     expect(h.tx.slideDeck.updateMany).not.toHaveBeenCalled();
   });
 

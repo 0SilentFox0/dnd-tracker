@@ -34,12 +34,16 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
   const run = async () => {
     if (!option || !model) return;
 
+    if (result) gen.discard(result);
+
     setResult(null);
     setResult(await gen.generate({ prompt: prompt.trim(), provider: option.provider, model: model.id, aspect, useCampaignStyle }));
   };
 
-  const close = (next: boolean) => {
+  const close = (next: boolean, added = false) => {
     if (!next) {
+      if (result && !added) gen.discard(result);
+
       setResult(null);
       gen.reset();
     }
@@ -68,7 +72,7 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
                 onClick={() => {
                   onAdd(result);
                   setPrompt("");
-                  close(false);
+                  close(false, true);
                 }}
               >
                 Додати слайд

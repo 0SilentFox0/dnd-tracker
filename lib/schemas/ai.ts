@@ -42,3 +42,5 @@ export const generateSlideImageSchema = z.object({
   aspect: z.enum(AI_IMAGE_ASPECTS),
   useCampaignStyle: z.boolean(),
 });
+
+export const discardGeneratedImageSchema = z.object({ url: z.string().url().max(2048) });
