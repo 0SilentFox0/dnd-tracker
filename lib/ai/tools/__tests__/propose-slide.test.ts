@@ -127,4 +127,32 @@ describe("propose_scene_slide", () => {
     });
     await expect(run({})).rejects.toThrow("збережіть ключ заново");
   });
+
+  it("паралельні виклики з одним лічильником: одна генерація, одна відмова", async () => {
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+
+    const { proposeSceneSlideTool } = await import("@/lib/ai/tools/propose-slide");
+
+    const withUsage = { ...ctx, usage: { images: 0 } };
+
+    const input = { pageId: "p1", prompt: "x", aspect: "16:9" } as never;
+
+    const results = await Promise.allSettled([proposeSceneSlideTool.handler(withUsage, input), proposeSceneSlideTool.handler(withUsage, input)]);
+
+    expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
+    expect((results.find((r) => r.status === "rejected") as PromiseRejectedResult).reason.message).toBe("За один запит — одна картинка");
+    expect(h.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("помилка до генерації повертає квоту", async () => {
+    h.loadApiKey.mockResolvedValue(null);
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+
+    const { proposeSceneSlideTool } = await import("@/lib/ai/tools/propose-slide");
+
+    const withUsage = { ...ctx, usage: { images: 0 } };
+
+    await expect(proposeSceneSlideTool.handler(withUsage, { pageId: "p1", prompt: "x", aspect: "16:9" } as never)).rejects.toThrow("Немає ключа");
+    expect(withUsage.usage.images).toBe(0);
+  });
 });

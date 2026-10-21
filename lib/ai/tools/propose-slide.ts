@@ -65,15 +65,29 @@ export const proposeSceneSlideTool = defineTool({
     "Generate an image for a scene and propose adding it as a slide to that scene's show deck; the DM previews it and applies or rejects it. Describe the visual concretely in the prompt (setting, light, mood, characters). Generation costs money on the DM's own key — call only when the DM asks for an image. deckId is optional: by default the scene's first deck is used (or a new one is created on apply).",
   input: proposeSlideSchema,
   handler: async (ctx, { pageId, prompt, title, aspect, deckId }) => {
-    if (ctx.usage && ctx.usage.images >= 1) throw new AiToolError(API_ERRORS.AI_ONE_IMAGE_PER_REQUEST);
+    if (ctx.usage) {
+      if (ctx.usage.images >= 1) throw new AiToolError(API_ERRORS.AI_ONE_IMAGE_PER_REQUEST);
 
-    const page = await loadPageForAi(ctx.campaignId, pageId);
+      ctx.usage.images += 1;
+    }
 
-    const deck = await resolveDeck(ctx.campaignId, page.id, deckId);
+    let page: Awaited<ReturnType<typeof loadPageForAi>>;
 
-    const { provider, model } = await pickImageModel(ctx.userId);
+    let deck: Awaited<ReturnType<typeof resolveDeck>>;
 
-    if (ctx.usage) ctx.usage.images += 1;
+    let picked: Awaited<ReturnType<typeof pickImageModel>>;
+
+    try {
+      page = await loadPageForAi(ctx.campaignId, pageId);
+      deck = await resolveDeck(ctx.campaignId, page.id, deckId);
+      picked = await pickImageModel(ctx.userId);
+    } catch (error) {
+      if (ctx.usage) ctx.usage.images -= 1;
+
+      throw error;
+    }
+
+    const { provider, model } = picked;
 
     let url: string;
 
