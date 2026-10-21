@@ -111,18 +111,20 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                 <div className="story">{renderCell(s.id, r.id, "story", r.story)}</div>
                 <aside className="notes" style={{ display: "block" }}>
                   {renderCell(s.id, r.id, "notes", r.notes)}
-                  <RowBindings
-                    campaignId={campaignId}
-                    pageId={page.id}
-                    row={r}
-                    onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
-                  />
-                  <div className="sans" style={{ display: "flex", gap: 4, marginTop: 10, justifyContent: "flex-end" }}>
-                    <OrderButtons
-                      labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
-                      onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
-                      onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                  <div className="sb-row-foot sans">
+                    <RowBindings
+                      campaignId={campaignId}
+                      pageId={page.id}
+                      row={r}
+                      onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
                     />
+                    <div className="sb-row-order">
+                      <OrderButtons
+                        labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
+                        onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
+                        onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                      />
+                    </div>
                   </div>
                 </aside>
               </div>
