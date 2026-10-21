@@ -45,4 +45,36 @@ describe("ScenarioToc", () => {
     fireEvent.click(screen.getByRole("link", { name: /Підготовка/ }));
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("у висувній панелі перехід робиться після закриття (iOS vaul повертає прокрутку), панель — темна", () => {
+    const onOpenChange = vi.fn();
+
+    const target = document.createElement("section");
+
+    target.id = "sec-s2";
+    target.scrollIntoView = vi.fn();
+    document.body.appendChild(target);
+
+    const raf = vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
+      cb(0);
+
+      return 0;
+    });
+
+    render(<ScenarioToc items={tocItems(sections, false)} inline={false} drawer={{ open: true, onOpenChange }} onPick={vi.fn()} />);
+
+    expect(document.querySelector(".sb-toc-drawer")?.getAttribute("data-theme")).toBe("dark");
+
+    const link = screen.getByRole("link", { name: /2\.0 Два листи/ });
+
+    const notPrevented = fireEvent.click(link);
+
+    expect(notPrevented).toBe(false);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(target.scrollIntoView).toHaveBeenCalled();
+    expect(location.hash).toBe("#sec-s2");
+
+    raf.mockRestore();
+    target.remove();
+  });
 });

@@ -38,7 +38,8 @@ const sectionSchema = z.object({
   id: idSchema,
   title: z.string().max(200),
   played: z.boolean(),
-  icon: z.enum(SECTION_ICON_KEYS).optional(),
+  // схема спільна для читання й збереження: ключ із новішого релізу (після відкату) не має ламати сторінку
+  icon: z.enum(SECTION_ICON_KEYS).optional().catch(undefined),
   reveal: revealSchema.optional(),
   revealedAt: z.string().nullable().optional(),
   rows: z.array(rowSchema).max(200),

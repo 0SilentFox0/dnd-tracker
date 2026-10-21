@@ -13,7 +13,10 @@ describe("sectionSchema.icon", () => {
     expect(scenarioContentSchema.safeParse(content()).success).toBe(true);
   });
 
-  it("відхиляє невідомий ключ", () => {
-    expect(scenarioContentSchema.safeParse(content("bogus")).success).toBe(false);
+  it("невідомий ключ (новіший реліз, відкат) не ламає читання — іконка стає автоматичною", () => {
+    const parsed = scenarioContentSchema.safeParse(content("bogus"));
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.sections[0].icon).toBeUndefined();
   });
 });
