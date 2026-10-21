@@ -3,8 +3,10 @@ import type { UIMessage } from "ai";
 
 import { AiToolChip, toolName } from "./AiToolChip";
 
+import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { markdownToDoc } from "@/lib/utils/scenario/markdown";
 
 interface AiMessageListProps {
   messages: UIMessage[];
@@ -31,6 +33,36 @@ function proposalIdOf(output: unknown): string | null {
   return typeof id === "string" ? id : null;
 }
 
+function PlainText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\n{2,}/).map((para, j) => (
+        <p key={j} className="whitespace-pre-wrap">{para}</p>
+      ))}
+    </>
+  );
+}
+
+function toDoc(text: string) {
+  try {
+    return markdownToDoc(text);
+  } catch {
+    return null;
+  }
+}
+
+function AssistantText({ text }: { text: string }) {
+  const doc = toDoc(text);
+
+  if (!doc) return <PlainText text={text} />;
+
+  return (
+    <div className="scenario-book scenario-book--inline">
+      <ScenarioRichText doc={doc} campaignId="" />
+    </div>
+  );
+}
+
 const errorOf = (m: UIMessage) => (m.metadata as { error?: string } | undefined)?.error;
 
 export function AiMessageList({ messages, error, renderProposal, onRedo }: AiMessageListProps) {
@@ -44,9 +76,7 @@ export function AiMessageList({ messages, error, renderProposal, onRedo }: AiMes
 
               return (
                 <div key={i} className={cn("max-w-[92%] space-y-2 rounded-lg px-3 py-2 text-sm", m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                  {part.text.split(/\n{2,}/).map((para, j) => (
-                    <p key={j} className="whitespace-pre-wrap">{para}</p>
-                  ))}
+                  {m.role === "user" ? <PlainText text={part.text} /> : <AssistantText text={part.text} />}
                 </div>
               );
             }

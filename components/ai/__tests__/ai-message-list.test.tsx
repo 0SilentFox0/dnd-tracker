@@ -23,6 +23,20 @@ describe("AiMessageList", () => {
     expect(screen.getByText("Ліміт провайдера, спробуйте за хвилину")).toBeTruthy();
   });
 
+  it("markdown асистента рендериться, а текст користувача лишається простим", () => {
+    const { container } = render(
+      <AiMessageList
+        messages={[
+          { id: "1", role: "user", parts: [{ type: "text", text: "**не жирний**" }] },
+          { id: "2", role: "assistant", parts: [{ type: "text", text: "Це **Ізабель**" }] },
+        ] as never}
+      />,
+    );
+
+    expect(container.querySelector("strong")?.textContent).toBe("Ізабель");
+    expect(screen.getByText("**не жирний**")).toBeTruthy();
+  });
+
   it("proposalId зі string-виводу інструмента віддає renderProposal", () => {
     render(
       <AiMessageList
