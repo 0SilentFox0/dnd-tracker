@@ -2,6 +2,7 @@ export { showKeys } from "./keys";
 export { writeShowSnapshot } from "./show-snapshot";
 export { useDeckEditor } from "./useDeckEditor";
 export { useDeck, useDeckMutations, useDecks, useDeckScene } from "./useDecks";
+export { useGenerateSlide } from "./useGenerateSlide";
 export { usePusherShowSync } from "./usePusherShowSync";
 export { useShowAudioHost } from "./useShowAudioHost";
 export { type ShowControl, useShowControl } from "./useShowControl";

@@ -3,7 +3,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { getCampaignApiUrl } from "./api-helpers";
 import { campaignDelete, campaignGet, campaignPatch, campaignPost, campaignPut, request } from "./client";
 
-import type { AiProvider } from "@/lib/constants/ai";
+import type { AiImageAspect, AiProvider } from "@/lib/constants/ai";
 import type {
   AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiSettings, AiThread, AiThreadMode, ApiTokenSummary, CreatedApiToken,
 } from "@/types/ai";
@@ -67,3 +67,7 @@ export const createAiChatTransport = (campaignId: string, threadId: string, getF
       return { body: { text, focus: getFocus() } };
     },
   });
+
+export type GenerateSlideImageBody = { prompt: string; provider: AiProvider; model: string; aspect: AiImageAspect; useCampaignStyle: boolean };
+
+export const generateSlideImage = (campaignId: string, body: GenerateSlideImageBody) => campaignPost<{ url: string }>(campaignId, "/decks/generate-image", body);

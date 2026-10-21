@@ -4,13 +4,14 @@ import { z } from "zod";
 import { runChat } from "@/lib/ai/chat/run-chat";
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { guarded } from "@/lib/ai/guarded";
+import { AiImageError, generateSlideImage } from "@/lib/ai/images";
 import { applyProposal, listProposals, rejectProposal } from "@/lib/ai/proposals";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
 import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
-import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownModel } from "@/lib/constants/ai";
+import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { aiSettingsSchema, chatRequestSchema, createThreadSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { aiSettingsSchema, chatRequestSchema, createThreadSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -119,4 +120,21 @@ export const chatHandler = (req: Request, campaignId: string, threadId: string) 
     if (body instanceof NextResponse) return body;
 
     return runChat({ campaignId, userId: access.userId, threadId, text: body.text, focus: body.focus, abortSignal: req.signal });
+  });
+
+export const generateSlideImageHandler = (req: Request, campaignId: string) =>
+  guarded("generate slide image", () => aiGuard(campaignId), async (access) => {
+    const body = await parseBody(generateSlideImageSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    if (!isKnownImageModel(body.provider, body.model)) return errorResponse(API_ERRORS.AI_MODEL_UNKNOWN, 400);
+
+    try {
+      return NextResponse.json(await generateSlideImage({ ...body, campaignId, userId: access.userId }));
+    } catch (error) {
+      if (error instanceof AiImageError) return errorResponse(error.message, error.status);
+
+      throw error;
+    }
   });

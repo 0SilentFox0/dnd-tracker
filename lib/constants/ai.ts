@@ -30,6 +30,29 @@ export const AI_MODELS: Record<AiProvider, AiModelOption[]> = {
   ],
 };
 
+export const AI_IMAGE_ASPECTS = ["16:9", "1:1", "9:16"] as const;
+export type AiImageAspect = (typeof AI_IMAGE_ASPECTS)[number];
+
+export const AI_IMAGE_PROMPT_MAX = 2000;
+
+export const AI_IMAGE_STYLE_MAX = 1000;
+
+export type AiImageModelOption = { id: string; label: string };
+
+// Anthropic has no image models; Google Imagen is no longer supported by @ai-sdk/google
+export const AI_IMAGE_MODELS: Partial<Record<AiProvider, AiImageModelOption[]>> = {
+  openai: [
+    { id: "gpt-image-2", label: "GPT Image 2" },
+    { id: "gpt-image-1-mini", label: "GPT Image 1 mini" },
+  ],
+  google: [
+    { id: "gemini-2.5-flash-image", label: "Gemini 2.5 Flash Image" },
+    { id: "gemini-3.1-flash-image-preview", label: "Gemini 3.1 Flash Image" },
+  ],
+};
+
+export const isKnownImageModel = (provider: AiProvider, id: string) => AI_IMAGE_MODELS[provider]?.some((m) => m.id === id) ?? false;
+
 export function defaultModelFor(provider: AiProvider, mode: AiThreadMode): string {
   const tier = mode === "live" ? "fast" : "smart";
 

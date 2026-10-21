@@ -1,17 +1,23 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, Sparkles } from "lucide-react";
+
+import { GenerateSlideDialog } from "./GenerateSlideDialog";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX_SLIDES_PER_DECK, SLIDE_FILE_ACCEPT } from "@/lib/constants/show";
 import { useNotify } from "@/lib/hooks/common";
-import type { useDeckEditor } from "@/lib/hooks/show";
+import { type useDeckEditor, useGenerateSlide } from "@/lib/hooks/show";
 import { isHttpUrl } from "@/lib/utils/common/image-url";
 
-export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useDeckEditor>["upload"]; count: number }) {
+export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string; upload: ReturnType<typeof useDeckEditor>["upload"]; count: number }) {
   const notify = useNotify();
+
+  const { providers } = useGenerateSlide(campaignId);
+
+  const [generating, setGenerating] = useState(false);
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -58,7 +64,14 @@ export function AddSlidesBar({ upload, count }: { upload: ReturnType<typeof useD
         >
           Додати
         </Button>
+        {providers.length > 0 && (
+          <Button type="button" variant="outline" disabled={disabled} onClick={() => setGenerating(true)} className="flex items-center gap-2">
+            <Sparkles className="size-4" />
+            Згенерувати
+          </Button>
+        )}
       </div>
+      <GenerateSlideDialog campaignId={campaignId} open={generating} onOpenChange={setGenerating} onAdd={upload.addUrl} />
       {full && <p className="text-xs text-hud-muted">Максимум {MAX_SLIDES_PER_DECK} слайдів</p>}
       {upload.progress && (
         <p className="text-xs text-hud-muted">

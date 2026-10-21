@@ -1,7 +1,7 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
-import type { LanguageModel } from "ai";
+import type { ImageModel, LanguageModel } from "ai";
 
 import "server-only";
 import type { AiProvider } from "@/lib/constants/ai";
@@ -12,6 +12,14 @@ export function createModel(provider: AiProvider, apiKey: string, modelId: strin
   if (provider === "openai") return createOpenAI({ apiKey })(modelId);
 
   return createGoogleGenerativeAI({ apiKey })(modelId);
+}
+
+export function createImageModel(provider: AiProvider, apiKey: string, modelId: string): ImageModel {
+  if (provider === "openai") return createOpenAI({ apiKey }).image(modelId);
+
+  if (provider === "google") return createGoogleGenerativeAI({ apiKey }).image(modelId);
+
+  throw new Error(`No image models for ${provider}`);
 }
 
 // listing models is free on all three providers and fails fast on a bad key
