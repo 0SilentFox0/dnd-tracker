@@ -1,6 +1,8 @@
 import { ARCHETYPE_FX } from "./archetypes";
 import type { FxElement, FxSpec } from "./types";
 
+import type { BattleAction } from "@/types/battle";
+
 export interface FxImpact {
   element: FxElement;
   kind: "damage" | "heal";
@@ -24,4 +26,13 @@ export function impactFor(spec: FxSpec | undefined, participantId: string): FxIm
   if (spec.archetype === "melee" || spec.archetype === "ranged") impact.attack = spec.archetype;
 
   return impact;
+}
+
+/** Жертви дії, яких немає серед цілей головного FX: вогняна хвиля, стріла сили. */
+export function splashTargetIds(action: BattleAction, main: FxSpec | undefined): string[] {
+  if (!main || (main.archetype !== "melee" && main.archetype !== "ranged")) return [];
+
+  const ids = action.hpChanges.filter((h) => h.change > 0 && h.participantId !== action.actorId && !main.targetIds.includes(h.participantId)).map((h) => h.participantId);
+
+  return [...new Set(ids)];
 }

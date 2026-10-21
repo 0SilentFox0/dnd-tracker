@@ -6,20 +6,17 @@ import { useBattleSceneData } from "./useBattleScene";
 import { useFxEnabled } from "./useFxEnabled";
 
 import { usePageHidden } from "@/lib/hooks/common";
-import { type FxImpact, impactFor, mapAction, MAX_FX_MS } from "@/lib/utils/battle/fx";
+import { type FxImpact, impactFor, mapAction, MAX_FX_BATCH, MAX_FX_MS, splashTargetIds } from "@/lib/utils/battle/fx";
 import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
 import type { BattleAction } from "@/types/battle";
 
 const FX_IMPACT_SLACK_MS = 1500;
 
-// одна дельта може нести кілька дій (атака + відповідний удар)
-const RECENT_ACTIONS = 6;
-
 function recentActions(log: BattleAction[]): BattleAction[] {
   return log
     .filter((a) => !a.isCancelled)
     .sort((a, b) => a.actionIndex - b.actionIndex)
-    .slice(-RECENT_ACTIONS);
+    .slice(-MAX_FX_BATCH);
 }
 
 /** Рядки отримують вплив пропом, щоб не підписуватись на контекст сцени; об'єкти стабільні між рендерами. */
@@ -62,6 +59,12 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
 
         // прихована вкладка = FX-черга неактивна: показ без очікування сигналу
         result.set(id, hidden ? impact : { ...impact, actionId: action.id, waitMs: waitFrom(i) });
+      }
+
+      for (const id of splashTargetIds(action, main)) {
+        const impact = impactFor(main && { ...main, targetIds: [id] }, id);
+
+        if (impact) result.set(id, hidden ? impact : { ...impact, actionId: action.id, waitMs: waitFrom(i) });
       }
     });
 

@@ -12,6 +12,8 @@ export interface FxSpec {
   element: FxElement;
   actorId: string;
   actorSide: "ally" | "enemy";
+  /** Звідки летить снаряд, якщо не від актора (стрибок ланцюга, сплеш від цілі). */
+  originId?: string;
   targetIds: string[];
   hit: boolean;
   critical: boolean;

@@ -24,7 +24,28 @@ const moraleFx = ({ key, spec }: MoraleThrow): FxSpec => ({ key: `morale:${key}`
 
 export const INITIAL_FX_QUEUE: FxQueueState = { log: null, seen: null, queue: [] };
 
-export const MAX_FX_QUEUE = 12;
+export const MAX_FX_QUEUE = 32;
+
+/** Голова може саме грати — лишається; решта обрізається найстарішими діями цілком, щоб залп не втратив середину. */
+export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
+  if (queue.length <= max) return queue;
+
+  const [head, ...rest] = queue;
+
+  const groupOf = (s: FxSpec) => s.actionId ?? s.key;
+
+  let tail = rest;
+
+  while (tail.length > max - 1) {
+    const oldest = groupOf(tail[0]);
+
+    const dropped = tail.filter((s) => groupOf(s) !== oldest);
+
+    tail = dropped.length === tail.length ? tail.slice(1) : dropped;
+  }
+
+  return [head, ...tail];
+}
 
 /** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */
 export function advanceFxQueue(state: FxQueueState, { log, morale }: FxQueueInput, active: boolean): FxQueueState {
@@ -40,8 +61,7 @@ export function advanceFxQueue(state: FxQueueState, { log, morale }: FxQueueInpu
 
   const queue = [...state.queue, ...moraleSpec, ...actions.flatMap(mapAction)];
 
-  // the head may be playing right now, so trimming keeps it
-  return { log, seen, queue: queue.length > MAX_FX_QUEUE ? [queue[0], ...queue.slice(1 - MAX_FX_QUEUE)] : queue, morale: moraleKey };
+  return { log, seen, queue: trimFxQueue(queue, MAX_FX_QUEUE), morale: moraleKey };
 }
 
 /** Знімає голову лише якщо це та сама анімація: запізнілий `done` після очищення черги нічого не пропускає. */

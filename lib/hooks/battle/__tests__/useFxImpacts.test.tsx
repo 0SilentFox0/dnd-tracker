@@ -60,4 +60,13 @@ describe("useFxImpacts", () => {
     expect(impact).not.toBeNull();
     expect(impact?.actionId).toBeUndefined();
   });
+
+  it("вторинна жертва отримує вплив тієї ж дії", () => {
+    h.log = [action({ id: "fw", actionIndex: 1, actionType: "attack", targets: [{ participantId: "t", participantName: "T" }], actionDetails: { attackKind: AttackType.RANGED, isHit: true }, hpChanges: [{ participantId: "t", participantName: "T", oldHp: 50, newHp: 42, change: 8 }, { participantId: "s", participantName: "S", oldHp: 50, newHp: 46, change: 4 }] })];
+
+    const { result } = renderHook(() => useFxImpacts());
+
+    expect(result.current("s")?.actionId).toBe("fw");
+    expect(result.current("s")?.actionId).toBe(result.current("t")?.actionId);
+  });
 });
