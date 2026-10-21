@@ -1,5 +1,5 @@
 import type { LibraryUnit } from "../types";
-import { alliesAura, charmOnHit, critRange, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, fireBurst, firstStrike, magicResist, noRetaliation, rage, rangedRetaliation, stun, summonGroupOnce } from "../unit-abilities";
+import { alliesAura, chainShot, charmOnHit, critRange, dot, drainMana, elementResist, extraDamage, falloff, fearAura, finisher, fireBurst, firstStrike, magicResist, noRetaliation, rage, rangedRetaliation, stun, summonGroupOnce } from "../unit-abilities";
 
 const base = { raceKey: "demons" } as const;
 
@@ -18,7 +18,7 @@ export const DEMON_UNITS: LibraryUnit[] = [
   { ...base, key: "demons-cerberus", name: "Цербер", tier: 3, role: "upgrade", speed: 40, hp: 62, ac: 14, attackBonus: 7, initiative: 13, attacks: [{ name: "Три голови", type: "melee", dice: "2d6+2", damageType: "piercing", targets: 3 }], abilities: cerberus() },
   { ...base, key: "demons-fire-cerberus", name: "Вогняний цербер", tier: 3, role: "alt", speed: 40, hp: 60, ac: 14, attackBonus: 7, initiative: 13, attacks: [{ name: "Три голови", type: "melee", dice: "2d6+2", damageType: "fire", targets: 3 }], abilities: [falloff("Триголова"), fireImmunity(), dot("Опік", "1d6", "fire", 2)] },
   { ...base, key: "demons-succubus", name: "Суккуб", tier: 4, role: "base", speed: 20, hp: 66, ac: 13, attackBonus: 7, initiative: 10, attacks: [{ name: "Темний постріл", type: "ranged", dice: "2d6+4", damageType: "necrotic" }], abilities: [rangedRetaliation("Відповідний постріл")] },
-  { ...base, key: "demons-demoness", name: "Демониця", tier: 4, role: "upgrade", speed: 20, hp: 74, ac: 14, attackBonus: 8, initiative: 10, attacks: [{ name: "Ланцюговий постріл", type: "ranged", dice: "2d6+5", damageType: "necrotic", targets: 3 }], abilities: [falloff("Ланцюговий постріл"), rangedRetaliation("Відповідний постріл")] },
+  { ...base, key: "demons-demoness", name: "Демониця", tier: 4, role: "upgrade", speed: 20, hp: 74, ac: 14, attackBonus: 8, initiative: 10, attacks: [{ name: "Ланцюговий постріл", type: "ranged", dice: "2d6+5", damageType: "necrotic" }], abilities: [chainShot("Ланцюговий постріл"), rangedRetaliation("Відповідний постріл")] },
   { ...base, key: "demons-temptress", name: "Спокусниця", tier: 4, role: "alt", speed: 20, hp: 73, ac: 14, attackBonus: 8, initiative: 9, attacks: [{ name: "Темний постріл", type: "ranged", dice: "2d6+5", damageType: "necrotic" }], abilities: [charmOnHit("Спокуса", 30), rangedRetaliation("Відповідний постріл")] },
   { ...base, key: "demons-nightmare", gridSize: 2, name: "Кошмар", tier: 5, role: "base", speed: 35, hp: 107, ac: 15, attackBonus: 7, initiative: 16, attacks: [{ name: "Копита", type: "melee", dice: "3d8+6", damageType: "bludgeoning" }], abilities: [fearAura()] },
   { ...base, key: "demons-hell-nightmare", gridSize: 2, name: "Пекельний кошмар", tier: 5, role: "upgrade", speed: 40, hp: 119, ac: 16, attackBonus: 8, initiative: 16, attacks: [{ name: "Копита", type: "melee", dice: "3d8+7", damageType: "bludgeoning" }], abilities: [fearAura(), stun("Жахливий удар", 25)] },

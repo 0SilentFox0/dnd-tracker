@@ -32,6 +32,14 @@ One engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack wi
 
 Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows` driven by hooks in `lib/hooks/battle`. What a player may see (health states instead of enemy HP, AC known from attacks, observed traits from `actionDetails.damageSteps`, turn queue with morale extra turns) is `lib/utils/battle/view`. Hiding is client-side.
 
+## Attack: cover, chain shot, cleave
+
+- **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
+- **Target limit**: `attack/max-targets.ts`, shared by client and server; auto-targets (chain, cleave, piercing, hits-all) are outside it.
+- **Chain shot**: ability flag `chainShot` (`attack/process/chain.ts`) — the player picks one target, the server jumps to the nearest enemy in range (`grid/nearest.ts`) from the previous target's cell.
+- **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits enemies adjacent to both attacker and target; the server rolls d20/damage for them (`attack-phase/targets.ts`).
+- **FX**: `originId` on a spec is where the projectile starts (chain jumps); secondary victims get a splash spec (`fx/impact.ts`); the queue is trimmed by whole actions. The result card lists every target (`view/volley-results.ts`).
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

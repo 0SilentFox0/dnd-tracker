@@ -2,6 +2,7 @@ import { eventActorId, eventTargetIds } from "./events";
 import { findParticipant, isDormant, isTargetable } from "./participants";
 
 import type { AbilityTarget } from "@/lib/utils/abilities/schema";
+import { nearestTo } from "@/lib/utils/battle/grid/nearest";
 import { modeSees } from "@/lib/utils/battle/modes/engine";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -35,12 +36,15 @@ export function resolveTargetIds(
       return actor ? [actor] : [];
     }
     case "otherEnemy": {
-      // без сітки поля «ворог за ціллю» — перший за ініціативою живий ворог, окрім цілі події
-      const taken = new Set(eventTargetIds(event));
+      const taken = eventTargetIds(event);
 
-      const other = ps.find((p) => isTargetable(p) && p.basicInfo.side !== side && !taken.has(p.basicInfo.id));
+      const others = ps.filter((p) => p.basicInfo.side !== side && !taken.includes(p.basicInfo.id) && reachable(p));
 
-      return other ? [other.basicInfo.id] : [];
+      const from = findParticipant(ps, taken[0] ?? "");
+
+      const pick = from ? nearestTo(from, others) : others[0];
+
+      return pick ? [pick.basicInfo.id] : [];
     }
     // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
     case "allAllies":

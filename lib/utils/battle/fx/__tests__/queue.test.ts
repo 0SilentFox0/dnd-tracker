@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
+import type { FxSpec } from "@/lib/utils/battle/fx";
 import type { MoraleThrow } from "@/lib/utils/battle/fx/dice";
-import { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, MAX_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx/queue";
+import { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, MAX_FX_QUEUE, shiftFxQueue, trimFxQueue } from "@/lib/utils/battle/fx/queue";
 import type { BattleAction } from "@/types/battle";
 
 const adv = (s: FxQueueState, log: BattleAction[], active: boolean, morale: MoraleThrow | null = null) => advanceFxQueue(s, { log, morale }, active);
@@ -71,12 +72,39 @@ describe("advanceFxQueue", () => {
 
     expect(head).toBe("b-1:0");
 
-    s = adv(s, range(0, 12), true);
-    s = adv(s, range(0, 18), true);
+    s = adv(s, range(0, 16), true);
+    s = adv(s, range(0, 32), true);
+    s = adv(s, range(0, 48), true);
 
-    expect(s.queue).toHaveLength(MAX_FX_QUEUE);
+    expect(s.queue.length).toBeLessThanOrEqual(MAX_FX_QUEUE);
     expect(s.queue[0].key).toBe(head);
-    expect(s.queue.at(-1)?.key).toBe("b-18:0");
+    expect(s.queue.at(-1)?.key).toBe("b-48:0");
+  });
+
+  it("переповнена черга відкидає найстаріші дії цілком, голову не чіпає", () => {
+    const spec = (actionId: string, n: number): FxSpec => ({ key: `${actionId}:${n}`, actionId, archetype: "ranged", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false });
+
+    const queue = [spec("head", 0), ...Array.from({ length: 20 }, (_, i) => [spec(`x${i}`, 0), spec(`x${i}`, 1)]).flat()];
+
+    const trimmed = trimFxQueue(queue, MAX_FX_QUEUE);
+
+    expect(trimmed[0].key).toBe("head:0");
+    expect(trimmed.length).toBeLessThanOrEqual(MAX_FX_QUEUE);
+
+    const kept = new Set(trimmed.slice(1).map((s) => s.actionId));
+
+    for (const id of kept) expect(trimmed.filter((s) => s.actionId === id)).toHaveLength(2);
+  });
+
+  it("голова обрізання — уся її дія, а не лише перший спек", () => {
+    const spec = (actionId: string, n: number): FxSpec => ({ key: `${actionId}:${n}`, actionId, archetype: "ranged", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false });
+
+    const queue = [spec("head", 0), spec("head", 1), spec("head", 2), ...Array.from({ length: 20 }, (_, i) => [spec(`x${i}`, 0), spec(`x${i}`, 1)]).flat()];
+
+    const trimmed = trimFxQueue(queue, MAX_FX_QUEUE);
+
+    expect(trimmed.slice(0, 3).map((s) => s.key)).toEqual(["head:0", "head:1", "head:2"]);
+    expect(trimmed.length).toBeLessThanOrEqual(MAX_FX_QUEUE);
   });
 
   it("a stale done (another key) does not shift the queue", () => {

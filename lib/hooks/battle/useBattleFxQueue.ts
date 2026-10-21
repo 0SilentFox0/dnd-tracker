@@ -9,11 +9,9 @@ import { moraleDiceDone } from "./morale-dice";
 import { useBattleSceneData } from "./useBattleScene";
 
 import { usePageHidden } from "@/lib/hooks/common";
-import { advanceFxQueue, INITIAL_FX_QUEUE, isMoraleFx, shiftFxQueue } from "@/lib/utils/battle/fx";
+import { advanceFxQueue, INITIAL_FX_QUEUE, isMoraleFx, MAX_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
 import { moraleThrowOf } from "@/lib/utils/battle/fx/dice";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
-
-const RECENT_LOG = 12;
 
 /** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */
 export function useBattleFxQueue(enabled: boolean) {
@@ -43,7 +41,7 @@ export function useBattleFxQueue(enabled: boolean) {
   useEffect(() => {
     const queued = new Set(state.queue.map((s) => s.actionId));
 
-    for (const action of log.slice(-RECENT_LOG)) if (!queued.has(action.id)) fireFxImpact(action.id);
+    for (const action of log.slice(-MAX_FX_QUEUE)) if (!queued.has(action.id)) fireFxImpact(action.id);
   }, [log, state.queue]);
 
   const busy = active && state.queue.length > 0;
