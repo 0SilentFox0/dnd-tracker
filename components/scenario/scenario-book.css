@@ -28,6 +28,10 @@
 .scenario-book .sb-bar-toc { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .scenario-book .sb-bar-more { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .scenario-book .sb-bar .toggle.is-primary { border-color: var(--blood); color: var(--blood); font-weight: 700; }
+@media (max-width: 640px) {
+  .scenario-book .sb-bar strong, .scenario-book .sb-bar-toc-label, .scenario-book .sb-hide-sm { display: none; }
+  .scenario-book .sb-bar-btns { margin-left: auto; scrollbar-width: none; }
+}
 .scenario-book .toggle { font: inherit; background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
 .scenario-book .toggle[aria-pressed="true"] { border-color: var(--blood); color: var(--blood); }
 
@@ -65,11 +69,11 @@
   .scenario-book .sb-rows[hidden] { display: block !important; }
 }
 .scenario-book h3 { font-size: 21px; font-weight: 700; margin: 0 0 8px; }
-.scenario-book .row { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; padding: 22px 0; border-bottom: 1px solid var(--rule); }
+.scenario-book .row { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; padding: 22px 0; border-bottom: 1px solid var(--rule); }
 .scenario-book .row:last-child { border-bottom: none; }
 .scenario-book .story { max-width: 68ch; }
 .scenario-book .story p { margin: 0 0 14px; }
-.scenario-book .notes { background: var(--margin); border-radius: 3px; padding: 14px 16px; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 15.5px; line-height: 1.5; color: var(--ink-soft); align-self: start; }
+.scenario-book .notes { background: var(--margin); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 15.5px; line-height: 1.5; color: var(--ink-soft); align-self: start; }
 .scenario-book .notes p { margin: 0 0 10px; }
 .scenario-book .notes p:last-child { margin-bottom: 0; }
 .scenario-book .notes strong { color: var(--ink); font-weight: 700; }
@@ -160,7 +164,7 @@
 .scenario-book .sb-empty { color: var(--ink-soft); font-style: italic; font-size: 15px; }
 @media (max-width: 860px) { .scenario-book .sb-toolbar { padding-left: 16px; padding-right: 16px; overflow-x: auto; flex-wrap: nowrap; } }
 .scenario-book .sb-toolbar-wrap { position: sticky; top: calc(var(--app-header-h, 89px) + var(--sb-bar-h, 49px)); z-index: 4; background: var(--page); border-bottom: 1px solid var(--rule); }
-.scenario-book .sb-toolbar-wrap .sb-toolbar { position: static; max-width: 1180px; margin: 0 auto; border-bottom: 0; }
+.scenario-book .sb-toolbar-wrap .sb-toolbar { position: static; max-width: 1460px; margin: 0 auto; border-bottom: 0; }
 
 .scenario-book .sb-row-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
 .scenario-book .sb-bindings { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; }
@@ -225,3 +229,13 @@
 @media print { .scenario-book .sb-toc { display: none; } }
 .scenario-book .sb-sec-edit { display: flex; gap: 12px; align-items: center; font-size: 30px; font-weight: 500; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-icon-pick { width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--gold); flex: none; }
+
+.scenario-book { background-image: radial-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px); background-size: 3px 3px; }
+.scenario-book--inline { background-image: none; }
+.scenario-book .read > p:first-child::first-letter { float: left; font-size: 3.1em; line-height: 0.85; margin: 0.06em 0.08em 0 0; color: var(--blood); font-style: normal; font-weight: 500; }
+.scenario-book section + section::before { content: "· ❖ ·"; display: block; text-align: center; color: var(--ink-soft); opacity: 0.55; letter-spacing: 0.5em; margin: -28px 0 28px; font-size: 16px; }
+.scenario-book section.is-collapsed + section::before, .scenario-book section + section.is-collapsed::before { content: none; }
+@media print {
+  .scenario-book { background-image: none; }
+  .scenario-book section + section::before { content: "· ❖ ·"; }
+}

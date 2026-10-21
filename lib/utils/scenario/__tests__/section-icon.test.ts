@@ -45,9 +45,10 @@ describe("sectionIcon", () => {
     expect(sectionIcon(section({ title: "підготовка до сесії" }))).toBe("prep");
   });
 
-  it("пріоритет: бій > таємниця > вибір > підготовка", () => {
-    expect(sectionIcon(section({ title: "Підготовка" }, [{ battleId: "b", story: doc(callout("shadow"), callout("choice")) }]))).toBe("battle");
-    expect(sectionIcon(section({ title: "Підготовка" }, [{ story: doc(callout("choice"), callout("shadow")) }]))).toBe("secret");
+  it("пріоритет: назва «Підготовка» > бій > таємниця > вибір", () => {
+    expect(sectionIcon(section({ title: "Підготовка" }, [{ battleId: "b", story: doc(callout("shadow"), callout("choice")) }]))).toBe("prep");
+    expect(sectionIcon(section({}, [{ battleId: "b", story: doc(callout("shadow"), callout("choice")) }]))).toBe("battle");
+    expect(sectionIcon(section({}, [{ story: doc(callout("choice"), callout("shadow")) }]))).toBe("secret");
   });
 
   it("ручний вибір ДМ перекриває все; невідомий ключ ігнорується", () => {

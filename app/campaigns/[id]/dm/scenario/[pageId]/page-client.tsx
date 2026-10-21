@@ -55,6 +55,10 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
   const tocInline = wide && !(aiEnabled && aiOpen);
 
+  const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
+
+  const dark = theme ? theme === "dark" : systemDark;
+
   const [pendingShown, setPendingShown] = useState(false);
 
   const [focusCleared, setFocusCleared] = useState(false);
@@ -92,7 +96,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
             Редагувати
           </button>
-          <Link className="toggle" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
+          <Link className="toggle sb-hide-sm" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
             Екран показу ↗
           </Link>
         </>
@@ -109,7 +113,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   );
 
   const menu: ActionsMenuItem[] = [
-    { label: theme === "dark" ? "Світла тема" : "Темна тема", icon: theme === "dark" ? Sun : Moon, onSelect: () => setTheme((t) => (t === "dark" ? "light" : "dark")) },
+    { label: dark ? "Світла тема" : "Темна тема", icon: dark ? Sun : Moon, onSelect: () => setTheme(dark ? "light" : "dark") },
     ...(editBase ? [] : [{ label: "Версії", icon: History, onSelect: () => setVersionsOpen(true) }]),
     { label: collapse.showPlayed ? "Згорнути зіграні" : "Розгорнути зіграні", icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
     { label: "До змісту", icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
