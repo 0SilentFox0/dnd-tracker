@@ -155,8 +155,6 @@ export interface AttackData {
   disadvantageRoll?: number;
   /** Вибір гравця «Перевага/Недолік»; сервер застосовує, лише коли навички не задають режим */
   rollMode?: "normal" | "advantage" | "disadvantage";
-  /** «Перешкода»: шкода кожного влучання ×0.5 */
-  obstacle?: boolean;
   damageRolls: number[];
   attackId?: string;
 }

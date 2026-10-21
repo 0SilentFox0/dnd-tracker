@@ -29,7 +29,6 @@ export const attackBodySchema = z
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-    obstacle: z.boolean().default(false),
     damageRolls: z.array(z.number()).default([]),
     endTurn: z.boolean().default(false),
   })

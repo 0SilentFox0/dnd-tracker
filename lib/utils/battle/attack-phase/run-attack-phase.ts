@@ -3,13 +3,16 @@ import { type AttackRequest, validateAttackRequest } from "./request";
 import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
+import { AttackType } from "@/lib/constants/battle";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -49,7 +52,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const { targets, expanded, volley, falloff, serverRolledFrom } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, piercing, volley, falloff, serverRolledFrom } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
   const fractions = damageFractions(targets, attack, { volley, falloff });
 
@@ -69,6 +72,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const heldBack: ActiveEffect[] = [];
 
+  const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
+
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
 
@@ -80,9 +85,14 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const second = data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll;
 
+    const victim = findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target;
+
+    // пробивний летить крізь цілі: штраф лише на першу
+    const obstacle = isRanged && !(piercing && i > 0) && lineOfFire(input.map, currentInitiativeOrder, currentAttacker, victim).blocked;
+
     const attackResult = processAttack({
       attacker: currentAttacker,
-      target: findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target,
+      target: victim,
       attack,
       d20Roll: strike.value,
       advantageRoll: second,
@@ -94,7 +104,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       currentRound: battle.currentRound,
       battleId,
       damageMultiplier: targets.length > 1 ? fractions[i] : undefined,
-      obstacle: data.obstacle,
+      obstacle,
       map: input.map,
       hitSpells: input.hitSpells,
       rng,

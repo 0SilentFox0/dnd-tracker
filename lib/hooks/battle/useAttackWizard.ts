@@ -14,7 +14,6 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
 import { attackFlow, type AttackMode, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
@@ -57,11 +56,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
         const shown = hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer), scene.battle.knowledge);
 
-        return state.obstacle ? [...shown, obstacleStep(shown.at(-1)?.after ?? 0)] : shown;
+        return shown;
       });
     // byId читає order, який уже в deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attacker, attack, state.step, state.strikes, state.obstacle, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer]);
+  }, [attacker, attack, state.step, state.strikes, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer]);
 
   const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
 
@@ -257,7 +256,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
-    toggleObstacle: () => dispatch({ type: "TOGGLE_OBSTACLE" }),
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {
       const d20 = rollDie(20, cryptoRandom);
