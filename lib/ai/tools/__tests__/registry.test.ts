@@ -36,7 +36,6 @@ describe("AI tool registry", () => {
       title: "x",
       description: "x",
       input: z.object({}),
-      kind: "read",
       handler: async () => {
         throw new AiToolError("нема");
       },

@@ -2,7 +2,7 @@ import { Loader2, Wrench } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export const TOOL_LABELS: Record<string, (input: Record<string, unknown>) => string> = {
+const TOOL_LABELS: Record<string, (input: Record<string, unknown>) => string> = {
   read_scenario_page: () => "Читаю сторінку…",
   search_reference: (input) => `Шукаю в довіднику: ${String(input.query ?? "")}`,
   get_battle_state: () => "Дивлюся бій…",

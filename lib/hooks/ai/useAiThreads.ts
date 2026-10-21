@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { aiKeys } from "./keys";
 
-import { createAiThread, deleteAiThread, getAiThreads, patchAiThread } from "@/lib/api/ai";
+import { createAiThread, getAiThreads, patchAiThread } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import type { AiThread } from "@/types/ai";
 
@@ -30,13 +30,10 @@ export function useAiThreads(campaignId: string, pageId?: string) {
 
   const patchMutation = useMutation({ mutationFn: ({ threadId, body }: { threadId: string; body: PatchBody }) => patchAiThread(campaignId, threadId, body), ...options });
 
-  const removeMutation = useMutation({ mutationFn: (threadId: string) => deleteAiThread(campaignId, threadId), ...options });
-
   return {
     query,
     threads: query.data ?? [],
     create: (body: CreateBody) => createMutation.mutateAsync(body),
     patch: (threadId: string, body: PatchBody) => patchMutation.mutateAsync({ threadId, body }).then(() => true, () => false),
-    remove: (threadId: string) => removeMutation.mutateAsync(threadId).then(() => true, () => false),
   };
 }

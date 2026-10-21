@@ -40,7 +40,7 @@ export async function createThread(campaignId: string, userId: string, input: { 
 export async function loadThread(campaignId: string, userId: string, threadId: string): Promise<AiThread | null> {
   const row = await prisma.aiThread.findFirst({ where: { id: threadId, campaignId, userId }, select: SELECT });
 
-  return row ? toThread(row, await threadUsage(threadId)) : null;
+  return row ? toThread(row, (await usageByThread([threadId])).get(threadId) ?? ZERO) : null;
 }
 
 export async function patchThread(campaignId: string, userId: string, threadId: string, data: { title?: string; provider?: AiProvider; model?: string }): Promise<AiThread | null> {
@@ -89,8 +89,4 @@ async function usageByThread(threadIds: string[]): Promise<Map<string, AiUsage>>
   }
 
   return totals;
-}
-
-export async function threadUsage(threadId: string): Promise<AiUsage> {
-  return (await usageByThread([threadId])).get(threadId) ?? ZERO;
 }

@@ -30,7 +30,6 @@ export const createAiThread = (campaignId: string, body: { mode: AiThreadMode; s
 export const patchAiThread = (campaignId: string, threadId: string, body: { title?: string; provider?: AiProvider; model?: string }) =>
   campaignPatch<AiThread>(campaignId, `/ai/threads/${threadId}`, body);
 
-export const deleteAiThread = (campaignId: string, threadId: string) => campaignDelete<{ ok: true }>(campaignId, `/ai/threads/${threadId}`);
 
 export const getAiThreadMessages = (campaignId: string, threadId: string) =>
   campaignGet<{ thread: AiThread; messages: AiChatMessage[] }>(campaignId, `/ai/threads/${threadId}/messages`, { cache: "no-store" });

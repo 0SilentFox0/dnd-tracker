@@ -19,9 +19,3 @@ export function aiErrorMessage(error: unknown): string {
 
   return API_ERRORS.AI_PROVIDER_DOWN;
 }
-
-export function aiErrorStatus(error: unknown): number {
-  const status = statusOf(error);
-
-  return status === 401 || status === 403 ? 400 : status === 429 ? 429 : 502;
-}

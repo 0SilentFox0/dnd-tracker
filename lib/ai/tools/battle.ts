@@ -13,7 +13,6 @@ export const getBattleStateTool = defineTool({
   title: "Стан бою",
   description: "State of a battle (the active one when battleId is omitted): round, turn order, participants with side, HP, AC, status, and the last events.",
   input: z.object({ battleId: z.string().min(1).optional() }),
-  kind: "read",
   handler: async (ctx, { battleId }) => {
     const id =
       battleId ??

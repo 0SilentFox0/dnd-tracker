@@ -21,7 +21,6 @@ export const getPartyTool = defineTool({
   title: "Партія",
   description: "Player heroes of the campaign: id, name, level, class, race, AC, DM notes.",
   input: z.object({}),
-  kind: "read",
   handler: async (ctx) => partySummary(ctx.campaignId),
 });
 
@@ -30,7 +29,6 @@ export const readCharacterTool = defineTool({
   title: "Лист персонажа",
   description: "Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario.",
   input: z.object({ id: z.string().min(1) }),
-  kind: "read",
   handler: async (ctx, { id }) => {
     const c = await prisma.character.findFirst({
       where: { id, campaignId: ctx.campaignId },

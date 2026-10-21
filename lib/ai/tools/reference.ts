@@ -39,7 +39,6 @@ export const searchReferenceTool = defineTool({
   title: "Пошук у довіднику",
   description: "Search the campaign reference by name: units, spells, races, skills, artifacts. Returns id and name; use read_reference for details.",
   input: z.object({ kind: kindSchema, query: z.string().trim().min(1).max(60) }),
-  kind: "read",
   handler: async (ctx, { kind, query }) => {
     const q = query.toLocaleLowerCase("uk");
 
@@ -55,7 +54,6 @@ export const readReferenceTool = defineTool({
   title: "Запис довідника",
   description: "Full reference entry (unit stats and abilities, spell effects, race traits, skill or artifact description) by kind and id.",
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
-  kind: "read",
   handler: async (ctx, { kind, id }) => {
     const entry = await findEntry(ctx.campaignId, kind, id);
 

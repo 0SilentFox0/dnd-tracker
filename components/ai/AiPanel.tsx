@@ -14,6 +14,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AI_MODE_LABELS, type AiProvider, type AiThreadMode } from "@/lib/constants/ai";
 import { useAiChat, useAiCredentials, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
+import { pluralUk } from "@/lib/utils/common/plural";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 
@@ -32,7 +33,7 @@ interface AiPanelProps {
   actions: { onClose: () => void; onClearFocus: () => void };
 }
 
-const rowWord = (n: number) => (n === 1 ? "рядок" : n >= 2 && n <= 4 ? "рядки" : "рядків");
+const rowWord = (n: number) => pluralUk(n, ["рядок", "рядки", "рядків"]);
 
 function focusLabelOf(page: ScenarioPage, focus: AiFocus | undefined): string | null {
   if (!focus || focus.pageId !== page.id) return null;

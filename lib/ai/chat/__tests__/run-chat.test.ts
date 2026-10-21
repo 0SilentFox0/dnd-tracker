@@ -29,9 +29,13 @@ describe("runChat", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    const { loadThread } = await import("@/lib/ai/threads");
+    const { loadThread, appendMessage, loadMessages } = await import("@/lib/ai/threads");
+
+    const stored: unknown[] = [];
 
     vi.mocked(loadThread).mockResolvedValue(thread as never);
+    vi.mocked(appendMessage).mockImplementation(async (_id, m) => void stored.push(m));
+    vi.mocked(loadMessages).mockImplementation(async () => stored as never);
   });
 
   it("стрімить відповідь, зберігає повідомлення користувача ДО стріму і відповідь з usage", async () => {

@@ -13,6 +13,7 @@ import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { useScenarioPage, useScenarioPlay, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
+import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 
@@ -61,7 +62,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
   const aiMode: AiThreadMode = playEnabled ? "live" : "scenario";
 
-  const currentSection = playEnabled && !focusCleared ? page.content.sections.find((s) => !s.played) : undefined;
+  const currentSection = playEnabled && !focusCleared ? pickLiveSection(page.content) ?? undefined : undefined;
 
   const focus: AiFocus = { pageId: page.id, sectionId: currentSection?.id };
 
@@ -137,7 +138,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
             const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
 
-            return <AiProposalCard proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
+            return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
           }}
           actions={{ onClose: () => setAiOpen(false), onClearFocus: () => setFocusCleared(true) }}
         />

@@ -12,7 +12,6 @@ export type AiToolDef = {
   title: string;
   description: string;
   input: z.ZodType;
-  kind: "read" | "propose";
   handler: (ctx: AiToolContext, input: unknown) => Promise<unknown>;
 };
 

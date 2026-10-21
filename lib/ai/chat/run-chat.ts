@@ -43,13 +43,14 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
 
   await appendMessage(threadId, userMessage);
 
-  const stored = await loadMessages(threadId, AI_LIMITS.historyMessages);
-
-  const history = compactHistory(stored.some((m) => m.id === userMessage.id) ? stored : [...stored, userMessage]) as unknown as UIMessage[];
-
   const tools = toAiSdkTools({ campaignId, userId, threadId });
 
-  const instructions = await buildInstructions({ campaignId, mode: thread.mode, pageId: focus?.pageId ?? thread.scenarioPageId, focus });
+  const [stored, instructions] = await Promise.all([
+    loadMessages(threadId, AI_LIMITS.historyMessages),
+    buildInstructions({ campaignId, mode: thread.mode, pageId: focus?.pageId ?? thread.scenarioPageId, focus }),
+  ]);
+
+  const history = compactHistory(stored) as unknown as UIMessage[];
 
   const result = streamText({
     model,

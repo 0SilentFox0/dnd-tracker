@@ -16,7 +16,7 @@ describe("AiProposalCard", () => {
   it("pending: було → стало, застосувати/відхилити", () => {
     const a = actions();
 
-    render(<AiProposalCard proposal={{ ...base, status: "pending" } as never} actions={a} busy={false} />);
+    render(<AiProposalCard proposal={{ ...base, status: "pending" } as never} actions={a} busy={false} campaignId="c1" />);
     expect(screen.getByText("Похмуріший вхід")).toBeTruthy();
     expect(screen.getByText("Дзвони б'ють")).toBeTruthy();
     expect(screen.getByText("Дзвони мовчать")).toBeTruthy();
@@ -29,7 +29,7 @@ describe("AiProposalCard", () => {
   it("stale: пояснення і «Переробити»", () => {
     const a = actions();
 
-    render(<AiProposalCard proposal={{ ...base, status: "stale" } as never} actions={a} busy={false} />);
+    render(<AiProposalCard proposal={{ ...base, status: "stale" } as never} actions={a} busy={false} campaignId="c1" />);
     expect(screen.getByText("Фрагмент змінився після пропозиції")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Переробити" }));
     expect(a.onRedo).toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe("AiProposalCard", () => {
   });
 
   it("applied: лише статус", () => {
-    render(<AiProposalCard proposal={{ ...base, status: "applied", appliedVersion: 4 } as never} actions={actions()} busy={false} />);
+    render(<AiProposalCard proposal={{ ...base, status: "applied", appliedVersion: 4 } as never} actions={actions()} busy={false} campaignId="c1" />);
     expect(screen.getByText("Застосовано")).toBeTruthy();
     expect(screen.queryByRole("button")).toBeNull();
   });

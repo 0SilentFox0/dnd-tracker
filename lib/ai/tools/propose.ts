@@ -12,7 +12,6 @@ export const proposeScenarioEditTool = defineTool({
   description:
     "Propose edits to a scenario page; the DM reviews and applies them. Never paste full rewritten rows into the chat — use this tool. Ops: replaceRow (story and/or notes), insertRow (afterRowId omitted = top of section), addSection (afterSectionId omitted = top of page), renameSection. Text uses the scenario markdown dialect: **bold**, _italic_, ||DM secret||, - lists, ### heading, :::read … ::: (read aloud), :::say … :::, :::callout kind=\"check\" tag=\"Перевірка\" … :::, [@Name](character:id) mentions, {{token:red}}. Read the page first to get section and row ids.",
   input: proposeScenarioEditSchema,
-  kind: "propose",
   handler: async (ctx, { pageId, summary, ops }) => {
     const page = await loadPageForAi(ctx.campaignId, pageId);
 

@@ -9,6 +9,7 @@ interface AiProposalCardProps {
   proposal: AiProposal;
   actions: { onApply: () => void; onReject: () => void; onRedo: () => void };
   busy: boolean;
+  campaignId: string;
 }
 
 type Op = AiProposal["ops"][number];
@@ -84,10 +85,8 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   );
 }
 
-export function AiProposalCard({ proposal, actions, busy }: AiProposalCardProps) {
+export function AiProposalCard({ proposal, actions, busy, campaignId }: AiProposalCardProps) {
   const { status } = proposal;
-
-  const campaignId = "";
 
   return (
     <div className="space-y-2 rounded-lg border bg-card p-3 text-card-foreground" data-slot="ai-proposal-card">

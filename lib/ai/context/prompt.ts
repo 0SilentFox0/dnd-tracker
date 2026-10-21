@@ -4,8 +4,9 @@ import { contentToMarkdown, loadPageForAi, sectionToMarkdown } from "@/lib/ai/to
 import { showSummary } from "@/lib/ai/tools/show";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
+import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus } from "@/types/ai";
-import type { ScenarioContent, ScenarioSection } from "@/types/scenario";
+import type { ScenarioContent } from "@/types/scenario";
 
 const MODE_RULES: Record<AiThreadMode, string> = {
   scenario: [
@@ -23,8 +24,6 @@ const MODE_RULES: Record<AiThreadMode, string> = {
 
 const clipTo = (text: string, max: number) => (text.length > max ? `${text.slice(0, max)}\n…[обрізано]` : text);
 
-export const pickLiveSection = (content: ScenarioContent): ScenarioSection | null => content.sections.find((s) => !s.played) ?? null;
-
 function liveScene(title: string, content: ScenarioContent): string {
   const current = pickLiveSection(content);
 
@@ -34,7 +33,14 @@ function liveScene(title: string, content: ScenarioContent): string {
 }
 
 export async function buildInstructions({ campaignId, mode, pageId, focus }: { campaignId: string; mode: AiThreadMode; pageId: string | null; focus?: AiFocus }): Promise<string> {
-  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { name: true, description: true, aiInstructions: true } });
+  const pageForContext = pageId ? loadPageForAi(campaignId, pageId).catch(() => null) : Promise.resolve(null);
+
+  const [campaign, party, show, page] = await Promise.all([
+    prisma.campaign.findUnique({ where: { id: campaignId }, select: { name: true, description: true, aiInstructions: true } }),
+    partySummary(campaignId),
+    mode === "live" ? showSummary(campaignId) : Promise.resolve(null),
+    pageForContext,
+  ]);
 
   const role = [
     `Ти — помічник Майстра (ДМ) у настільній рольовій кампанії «${campaign?.name ?? ""}».`,
@@ -45,17 +51,9 @@ export async function buildInstructions({ campaignId, mode, pageId, focus }: { c
 
   const standing = campaign?.aiInstructions?.trim() ? `Постійні інструкції ДМ для цієї кампанії (дотримуйся їх; вони мають пріоритет над стилем за замовчуванням, але не над правилами режиму щодо інструментів):\n${campaign.aiInstructions.trim()}` : "";
 
-  const [party, show] = await Promise.all([partySummary(campaignId), mode === "live" ? showSummary(campaignId) : Promise.resolve(null)]);
-
   const partyText = party.length ? `Партія:\n${party.map((p) => `- ${p.name} [${p.id}]: рів. ${p.level}, ${p.race}, ${p.class}, AC ${p.armorClass}${p.notes ? `; нотатки: ${p.notes}` : ""}`).join("\n")}` : "";
 
-  let sceneText = "";
-
-  if (pageId) {
-    const page = await loadPageForAi(campaignId, pageId).catch(() => null);
-
-    if (page) sceneText = mode === "live" ? liveScene(page.title, page.content) : `Сторінка, яку редагує ДМ (id ${page.id}):\n\n${contentToMarkdown(page.title, page.content)}`;
-  }
+  const sceneText = page ? (mode === "live" ? liveScene(page.title, page.content) : `Сторінка, яку редагує ДМ (id ${page.id}):\n\n${contentToMarkdown(page.title, page.content)}`) : "";
 
   const focusText = focus ? `Фокус ДМ: сторінка ${focus.pageId}${focus.sectionId ? `, розділ ${focus.sectionId}` : ""}${focus.rowIds?.length ? `, рядки ${focus.rowIds.join(", ")}` : ""}.` : "";
 

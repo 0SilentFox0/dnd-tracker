@@ -1,7 +1,7 @@
 import { APICallError, RetryError } from "ai";
 import { describe, expect, it } from "vitest";
 
-import { aiErrorMessage, aiErrorStatus } from "@/lib/ai/errors";
+import { aiErrorMessage } from "@/lib/ai/errors";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const callError = (statusCode: number, body = "") => new APICallError({ message: `boom sk-ant-SECRET ${body}`, url: "https://api", requestBodyValues: {}, statusCode, responseBody: body, isRetryable: false });
@@ -28,13 +28,6 @@ describe("aiErrorMessage", () => {
     const wrap = (e: APICallError) => new RetryError({ message: "Failed after 3 attempts", reason: "maxRetriesExceeded", errors: [e] });
 
     expect(aiErrorMessage(wrap(callError(429)))).toBe(API_ERRORS.AI_RATE_LIMIT);
-    expect(aiErrorStatus(wrap(callError(429)))).toBe(429);
     expect(aiErrorMessage(wrap(callError(401)))).toBe(API_ERRORS.AI_KEY_INVALID);
-  });
-
-  it("aiErrorStatus мапить коди", () => {
-    expect(aiErrorStatus(callError(401))).toBe(400);
-    expect(aiErrorStatus(callError(429))).toBe(429);
-    expect(aiErrorStatus(callError(500))).toBe(502);
   });
 });

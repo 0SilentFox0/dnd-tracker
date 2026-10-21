@@ -20,6 +20,5 @@ export const getShowStateTool = defineTool({
   title: "Поточний показ",
   description: "What the players currently see on the show screen: deck, slide title and caption, battle call.",
   input: z.object({}),
-  kind: "read",
   handler: async (ctx) => (await showSummary(ctx.campaignId)) ?? "Показ зараз не запущено",
 });
