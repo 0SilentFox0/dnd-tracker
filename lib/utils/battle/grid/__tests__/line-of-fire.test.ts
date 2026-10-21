@@ -9,7 +9,7 @@ import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 const MAP = testMap();
 
-const at = (id: string, pos: GridPoint, side = ParticipantSide.ENEMY, size?: number) => placed(id, { side, at: pos, hp: 20, size });
+const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY, size?: number) => placed(id, { side, at: pos, hp: 20, size });
 
 const shooter = at("s", { x: 0, y: 5 }, ParticipantSide.ALLY);
 
