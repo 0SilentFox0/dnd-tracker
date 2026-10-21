@@ -27,9 +27,14 @@ function useImpactReveal(change: HpChange | null): HpChange | null {
   return !actionId || revealed === change.id ? change : null;
 }
 
+/** Зміна HP, показана в момент удару анімації цієї дії. */
+export function useHitChange(hp: number, impact: FxImpact | null): HpChange | null {
+  return useImpactReveal(useHpChange(hp, impact));
+}
+
 /** Зміна HP → декорації удару (спалах, число, струс) у момент удару анімації цієї дії. */
 export function useHitFx<T extends HTMLElement>(hp: number, impact: FxImpact | null) {
-  const change = useImpactReveal(useHpChange(hp, impact));
+  const change = useHitChange(hp, impact);
 
   const shakeRef = useDamageShake<T>(change);
 

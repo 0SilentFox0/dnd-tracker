@@ -4,8 +4,7 @@ import { memo } from "react";
 
 import { tokenBoxStyle } from "./token-box";
 
-import { HitFloat } from "@/components/battle/hud";
-import { useFxEnabled, useHitFx } from "@/lib/hooks/battle";
+import { useDamageShake, useFxEnabled, useHitChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { sizeOf } from "@/lib/utils/battle/grid";
@@ -44,7 +43,7 @@ function hpView(participant: BattleParticipant, exact: boolean) {
 }
 
 function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
-  const { change, shakeRef: shake } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impact);
+  const shake = useDamageShake<HTMLDivElement>(useHitChange(participant.combatStats.currentHp, impact));
 
   const { userEnabled, motionAllowed } = useFxEnabled();
 
@@ -75,7 +74,6 @@ function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, 
       className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
       style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
     >
-      {showText && <HitFloat change={change} className="bottom-[30%] left-1/2 -translate-x-1/2" style={{ fontSize: nameFont * 1.6 }} />}
       {onReturn && (
         <button
           type="button"

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMap } from "@/components/battle/map";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -754,5 +755,36 @@ describe("BattleMap: полеглі", () => {
     expect(container.querySelector('[data-fx-participant="x"]')).toBeNull();
     expect(container.querySelector('[data-fx-participant="y"]')).toBeNull();
     expect(container.querySelector('[data-fx-participant="h"]')).not.toBeNull();
+  });
+});
+
+describe("спливне число шкоди", () => {
+  const hit = (p: BattleParticipant, currentHp: number, status = p.combatStats.status) => ({ ...p, combatStats: { ...p.combatStats, currentHp, status } });
+
+  it("над жетоном з'являється «−N» червоним і «+N» при лікуванні", () => {
+    const h = at("h", 0, 0);
+
+    const { container, rerender } = render(<BattleMap map={square} participants={[h]} />);
+
+    expect(container.querySelector('[data-map-hit-float="h"]')).toBeNull();
+
+    rerender(<BattleMap map={square} participants={[hit(h, h.combatStats.currentHp - 7)]} />);
+
+    expect(container.querySelector('[data-map-hit-float="h"]')?.textContent).toBe("−7");
+
+    rerender(<BattleMap map={square} participants={[hit(h, h.combatStats.currentHp - 2)]} />);
+
+    expect(container.querySelector('[data-map-hit-float="h"]')?.textContent).toBe("+5");
+  });
+
+  it("смертельний удар показує число, хоча жетон зникає", () => {
+    const h = at("h", 0, 0);
+
+    const { container, rerender } = render(<BattleMap map={square} participants={[h]} />);
+
+    rerender(<BattleMap map={square} participants={[hit(h, 0, CombatStatus.DEAD)]} />);
+
+    expect(container.querySelector('[data-map-hud="h"]')).toBeNull();
+    expect(container.querySelector('[data-map-hit-float="h"]')?.textContent).toBe(`−${h.combatStats.currentHp}`);
   });
 });
