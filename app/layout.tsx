@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 
 import "./globals.css";
-import { hudFontClassName } from "@/components/hud";
+import "./fonts.css";
+import { HUD_PRELOAD_FONTS, hudFontClassName } from "@/components/hud";
 import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ScreenBackground } from "@/components/layout/screen-background";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { createClient } from "@/lib/supabase/server";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin", "cyrillic"],
-  preload: false,
-});
 
 export const metadata: Metadata = {
   title: "D&D Combat Tracker",
@@ -38,7 +32,12 @@ export default async function RootLayout({
 
   return (
     <html lang="uk" className="dark">
-      <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
+      <head>
+        {HUD_PRELOAD_FONTS.map((href) => (
+          <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
+        ))}
+      </head>
+      <body className={`font-geist ${hudFontClassName} antialiased`}>
         <ScreenBackground />
         <QueryProvider>
           <ConfirmProvider>

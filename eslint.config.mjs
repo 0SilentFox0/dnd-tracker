@@ -19,7 +19,10 @@ const THREE_RESTRICTED_PATH = { name: "three", message: "three лише в compo
 
 const THREE_IMPORT_PATTERN = { group: ["three/*"], message: THREE_RESTRICTED_PATH.message };
 
-const RESTRICTED_PATHS = [...DIALOG_RESTRICTED_PATHS, THREE_RESTRICTED_PATH];
+// next/font/google тягне шрифти з мережі під час збірки й ламає деплой
+const GOOGLE_FONT_RESTRICTED_PATH = { name: "next/font/google", message: "Шрифти локальні: додайте файл у public/fonts і @font-face в app/fonts.css" };
+
+const RESTRICTED_PATHS = [...DIALOG_RESTRICTED_PATHS, THREE_RESTRICTED_PATH, GOOGLE_FONT_RESTRICTED_PATH];
 
 const API_IMPORT_PATTERN = {
   group: ["@/lib/api", "@/lib/api/*"],
