@@ -1,9 +1,13 @@
-import { APICallError } from "ai";
+import { APICallError, RetryError } from "ai";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 
-const statusOf = (error: unknown) => (APICallError.isInstance(error) ? error.statusCode : undefined);
+const statusOf = (error: unknown) => {
+  const base = RetryError.isInstance(error) ? error.lastError : error;
+
+  return APICallError.isInstance(base) ? base.statusCode : undefined;
+};
 
 // never echo provider error text: it may quote the request, including the key
 export function aiErrorMessage(error: unknown): string {

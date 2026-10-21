@@ -112,6 +112,42 @@ describe("runChat", () => {
     spy.mockRestore();
   });
 
+  it("скасування клієнтом зберігає часткову відповідь", async () => {
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    const { appendMessage } = await import("@/lib/ai/threads");
+
+    const hanging = new MockLanguageModelV4({
+      doStream: async () => ({
+        stream: new ReadableStream({
+          start(c) {
+            c.enqueue({ type: "text-start", id: "1" });
+            c.enqueue({ type: "text-delta", id: "1", delta: "Часткова відповідь" });
+          },
+        }),
+      }),
+    });
+
+    const controller = new AbortController();
+
+    const res = await runChat({ ...args, abortSignal: controller.signal }, { model: hanging });
+
+    const reader = (res.body as ReadableStream<Uint8Array>).getReader();
+
+    let seen = "";
+
+    while (!seen.includes("Часткова відповідь")) seen += new TextDecoder().decode((await reader.read()).value);
+
+    await reader.cancel();
+    controller.abort();
+
+    await vi.waitFor(() => expect(vi.mocked(appendMessage).mock.calls.some((c) => c[1].role === "assistant")).toBe(true));
+
+    const assistant = vi.mocked(appendMessage).mock.calls.find((c) => c[1].role === "assistant")?.[1];
+
+    expect(JSON.stringify(assistant?.parts)).toContain("Часткова відповідь");
+  });
+
   it("compactHistory стискає старі результати інструментів", async () => {
     const { compactHistory } = await import("@/lib/ai/chat/run-chat");
 

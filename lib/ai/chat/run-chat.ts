@@ -1,4 +1,4 @@
-import { APICallError, convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
+import { APICallError, consumeStream, convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
 
 import "server-only";
 import { buildInstructions } from "@/lib/ai/context/prompt";
@@ -85,5 +85,6 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
         await appendMessage(threadId, { id: responseMessage.id, role: "assistant", parts: responseMessage.parts, metadata: { usage, model: thread.model, ...(error && { error }) } });
       },
     }),
+    consumeSseStream: consumeStream,
   });
 }

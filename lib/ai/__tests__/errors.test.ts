@@ -1,4 +1,4 @@
-import { APICallError } from "ai";
+import { APICallError, RetryError } from "ai";
 import { describe, expect, it } from "vitest";
 
 import { aiErrorMessage, aiErrorStatus } from "@/lib/ai/errors";
@@ -22,6 +22,14 @@ describe("aiErrorMessage", () => {
 
     expect(msg).toBe(API_ERRORS.AI_PROVIDER_DOWN);
     expect(msg).not.toContain("SECRET");
+  });
+
+  it("429 у RetryError → ліміт провайдера; 401 теж розгортається", () => {
+    const wrap = (e: APICallError) => new RetryError({ message: "Failed after 3 attempts", reason: "maxRetriesExceeded", errors: [e] });
+
+    expect(aiErrorMessage(wrap(callError(429)))).toBe(API_ERRORS.AI_RATE_LIMIT);
+    expect(aiErrorStatus(wrap(callError(429)))).toBe(429);
+    expect(aiErrorMessage(wrap(callError(401)))).toBe(API_ERRORS.AI_KEY_INVALID);
   });
 
   it("aiErrorStatus мапить коди", () => {
