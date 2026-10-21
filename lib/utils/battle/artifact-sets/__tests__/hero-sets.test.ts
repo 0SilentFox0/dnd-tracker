@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { LIBRARY_ARTIFACT_SETS } from "@/data/library/artifacts";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { bakePassives } from "@/lib/utils/abilities/build/bake";
+import { applyBakedAuras, bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
@@ -307,10 +307,10 @@ describe("Дух лева", () => {
     });
   });
 
-  it("корона: +5 % до шансу додаткового ходу", () => {
+  it("корона: мораль +1", () => {
     const ps = [godric(pieces["lion-crown"])];
 
-    expect(findFlags(ps, "godric", "moraleChance").map((f) => f.percent)).toEqual([5]);
+    expect(bakePassives(ps[0]).combatStats.morale - ps[0].combatStats.morale).toBe(1);
   });
 
   it("намисто: смертельний удар раз за бій, 25 %", () => {
@@ -347,11 +347,12 @@ describe("Регалії світанку", () => {
 
   const roundStart = { type: "roundStart" } as const;
 
-  it("корона: союзники +5 % до шансу додаткового ходу", () => {
+  it("корона: мораль +1 власнику й союзникам", () => {
     const ps = [isabel(pieces["crown-of-leadership"]), ally()];
 
-    expect(findFlags(ps, "ally", "moraleChance").map((f) => f.percent)).toEqual([5]);
-    expect(findFlags(ps, "isabel", "moraleChance").map((f) => f.percent)).toEqual([5]);
+    const baked = applyBakedAuras(ps.map(bakePassives), new Set(ps.map((p) => p.basicInfo.id)));
+
+    expect(baked.map((p, i) => p.combatStats.morale - ps[i].combatStats.morale)).toEqual([1, 1]);
   });
 
   it("намисто: вбивство союзником дає мораль усім, раз за раунд", () => {
