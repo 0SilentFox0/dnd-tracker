@@ -46,6 +46,14 @@ function cubeCells(r: number, aim: GridPoint): GridPoint[] {
   return out;
 }
 
+function crossCells(r: number, aim: GridPoint): GridPoint[] {
+  const out: GridPoint[] = [aim];
+
+  for (let d = 1; d <= r; d++) out.push({ x: aim.x + d, y: aim.y }, { x: aim.x - d, y: aim.y }, { x: aim.x, y: aim.y + d }, { x: aim.x, y: aim.y - d });
+
+  return out;
+}
+
 function coneCells(r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
   const ax = aim.x - apex.x;
 
@@ -99,6 +107,7 @@ export function templateCells(map: BattleMapConfig, template: SpellTemplate, ori
 
   if (template.shape === "circle") raw = circleCells(areaRadiusCells(template.size), aim).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
   else if (template.shape === "cube") raw = cubeCells(r, aim);
+  else if (template.shape === "cross") raw = crossCells(r, aim);
   else if (origin.length === 0) raw = [];
   else {
     const apex = apexOf(origin, aim);
@@ -121,7 +130,7 @@ export function participantsInCells(participants: BattleParticipant[], cells: st
     .map((x) => x.p);
 }
 
-const centered = (t: SpellTemplate) => t.shape === "circle" || t.shape === "cube";
+export const isCenteredTemplate = (t: SpellTemplate) => t.shape === "circle" || t.shape === "cube" || t.shape === "cross";
 
 /** Клітинка шаблону, найближча до його центроїда. */
 export function areaCentre(cells: string[]): GridPoint | undefined {
@@ -136,14 +145,14 @@ export function areaCentre(cells: string[]): GridPoint | undefined {
   return points.reduce((best, p) => (Math.hypot(p.x - cx, p.y - cy) < Math.hypot(best.x - cx, best.y - cy) ? p : best));
 }
 
-/** Центр для FX: у кола й куба — точка прицілу, у конуса й лінії вона лише напрямок. */
+/** Центр для FX: у кола, куба й хреста — точка прицілу, у конуса й лінії вона лише напрямок. */
 export function templateCentre(template: SpellTemplate, aim: GridPoint, cells: string[]): GridPoint | undefined {
-  return centered(template) ? aim : areaCentre(cells);
+  return isCenteredTemplate(template) ? aim : areaCentre(cells);
 }
 
-/** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола й куба. */
+/** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола, куба й хреста. */
 export function templateAimAllowed(origin: GridPoint[], template: SpellTemplate, aim: GridPoint, rangeFeet: number | undefined): boolean {
-  return !centered(template) || aimInRange(origin, aim, rangeFeet);
+  return !isCenteredTemplate(template) || aimInRange(origin, aim, rangeFeet);
 }
 
 export function templateArea(map: BattleMapConfig, participants: BattleParticipant[], caster: BattleParticipant, template: SpellTemplate, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
@@ -151,7 +160,7 @@ export function templateArea(map: BattleMapConfig, participants: BattleParticipa
 
   const cells = templateCells(map, template, origin, aim);
 
-  return { cells, targets: participantsInCells(participants, cells, centered(template) || origin.length === 0 ? aim : apexOf(origin, aim)) };
+  return { cells, targets: participantsInCells(participants, cells, isCenteredTemplate(template) || origin.length === 0 ? aim : apexOf(origin, aim)) };
 }
 
 export function aimInRange(origin: GridPoint[], aim: GridPoint, rangeFeet: number | undefined): boolean {

@@ -38,6 +38,11 @@ describe("areaRadiusCells", () => {
 });
 
 describe("templateCells", () => {
+  it("хрест 5 фт — центр і чотири сусіди, з дальністю як у кола", () => {
+    expect(templateCells(map, { shape: "cross", size: 5 }, [{ x: 0, y: 0 }], { x: 5, y: 5 }).sort()).toEqual([k(5, 5), k(6, 5), k(4, 5), k(5, 6), k(5, 4)].sort());
+    expect(templateCentre({ shape: "cross", size: 5 }, { x: 5, y: 5 }, [])).toEqual({ x: 5, y: 5 });
+  });
+
   it("Вогняна куля (коло 10 фт) у (5,5): рівно 3×3 — x і y від 4 до 6", () => {
     const cells = templateCells(map, { shape: "circle", size: 10 }, [{ x: 0, y: 0 }], { x: 5, y: 5 });
 

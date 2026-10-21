@@ -88,4 +88,10 @@ describe("createBattleParticipantFromUnit + raceId", () => {
     expect(raceAbilities(p)).toEqual([]);
     expect(findFirst).not.toHaveBeenCalled();
   });
+
+  it("СК заклинань юніта = 8 + майстерність + тір", async () => {
+    const p = await createBattleParticipantFromUnit(unit({ level: 6, proficiencyBonus: 4, raceId: null }), "b1", ParticipantSide.ENEMY, 1);
+
+    expect(p.spellcasting.spellSaveDC).toBe(18);
+  });
 });
