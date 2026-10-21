@@ -1,5 +1,6 @@
 import { pickAttack } from "./attack-reach";
 import { cellKey } from "./geometry";
+import { lineOfFire } from "./line-of-fire";
 import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { aimInRange, apexOf, isCenteredTemplate, templateAimAllowed, templateArea } from "./template";
@@ -108,7 +109,11 @@ export function deriveTrajectory({ map, participants, marks, current }: Trajecto
 
   if (!target || !attack) return null;
 
-  return { fromId: current.basicInfo.id, targetId: target.basicInfo.id, to: hover, kind: attackKindOf(attack.type) === AttackType.MELEE ? "melee" : "ranged" };
+  const kind = attackKindOf(attack.type) === AttackType.MELEE ? "melee" : "ranged";
+
+  const line = kind === "ranged" ? lineOfFire(map, participants, current, target) : null;
+
+  return { fromId: current.basicInfo.id, targetId: target.basicInfo.id, to: hover, kind, ...(line?.blocked && { cover: line.cells }) };
 }
 
 export interface AimScene {

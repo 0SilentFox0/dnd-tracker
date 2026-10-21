@@ -248,8 +248,8 @@ export interface BattleMapView {
   currentId?: string | null;
   /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */
   marks?: Map<string, BattleMapMark | number>;
-  /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі */
-  trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged" } | null;
+  /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі; cover — клітинки перешкоди (порожньо — заважає стіна лабіринту), відсутній — лінія вільна */
+  trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged"; cover?: string[] } | null;
   /** Точка наведення шаблону заклинання */
   aim?: GridPoint | null;
   /** Звідки біжить хвиля пульсу превʼю шаблону */
