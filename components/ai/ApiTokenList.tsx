@@ -74,7 +74,7 @@ export function ApiTokenList({ tokens, actions }: ApiTokenListProps) {
         open={open}
         onOpenChange={(next) => !next && close()}
         title={created ? "Токен створено" : "Новий токен"}
-        description={created ? "Скопіюйте токен зараз — пізніше його не буде видно." : undefined}
+        description={created ? "Скопіюйте токен зараз — пізніше його не буде видно." : "Дайте токену назву, щоб відрізняти клієнтів."}
         footer={
           created ? (
             <>
@@ -97,7 +97,7 @@ export function ApiTokenList({ tokens, actions }: ApiTokenListProps) {
             <label htmlFor="api-token-name" className="text-sm text-hud-muted">
               Назва
             </label>
-            <Input id="api-token-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="off" />
+            <Input id="api-token-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} autoComplete="off" />
           </form>
         )}
       </ResponsiveDialog>
