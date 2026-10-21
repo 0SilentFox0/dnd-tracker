@@ -1,6 +1,6 @@
 # AI-асистент (BYOK-чат, пропозиції правок, MCP)
 
-Спека: `docs/superpowers/specs/2026-10-21-ai-assistant-design.md`. Лише для ДМ; гравці AI не бачать.
+Спека: `docs/archive/superpowers/specs/2026-10-21-ai-assistant-design.md`. Лише для ДМ; гравці AI не бачать.
 
 ## Шари
 
