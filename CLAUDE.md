@@ -18,6 +18,9 @@ pnpm test                      # vitest watch
 pnpm test:run                  # vitest run (single pass, used in CI)
 pnpm test:run path/to/file.test.ts   # run a single test file
 pnpm test:run -t "name pattern"      # filter by test name
+pnpm test:changed              # only tests affected by uncommitted changes (vitest module graph)
+pnpm test:changed main         # only tests affected by the branch vs main
+pnpm test:related lib/a.ts lib/b.ts  # only tests that import these files
 ```
 
 Prisma:
@@ -114,6 +117,8 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 - **`postinstall`** is `node scripts/postinstall.mjs`, which skips `prisma generate` when `VERCEL` env is set (build runs it explicitly with the placeholder URL).
 
 ## Testing
+
+- **Don't run the full suite after every step** (~5k tests, ~50 s, heavy CPU). While working — `pnpm test:changed` / `pnpm test:related <files>`; the full `pnpm test:run` once before merge/push (and in a subagent-driven run — once at the end, not per task). Fall back to the full suite when changing `vitest.config.mts`, `vitest-setup.ts`, shared test helpers, or `package.json` deps — the module graph can't see those.
 
 - **Vitest** with `environment: "node"` (not jsdom by default) — UI tests that need a DOM should set `// @vitest-environment happy-dom` or jsdom at the top of the file. `happy-dom` and `jsdom` are both available.
 - Tests live in sibling `__tests__/` folders next to the code they cover (`lib/utils/battle/__tests__`, `lib/hooks/battle/__tests__`, `app/api/__tests__`, `components/skills/__tests__`, etc.). Match this convention rather than adding a top-level `tests/` dir.
