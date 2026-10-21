@@ -1,4 +1,5 @@
 export { AiComposer } from "./AiComposer";
+export { AiInstructionsEditor } from "./AiInstructionsEditor";
 export { AiMessageList } from "./AiMessageList";
 export { AiPanel } from "./AiPanel";
 export { AiProposalBadge } from "./AiProposalBadge";

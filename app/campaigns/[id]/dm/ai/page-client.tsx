@@ -3,10 +3,10 @@
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
 
-import { ApiTokenList } from "@/components/ai";
+import { AiInstructionsEditor, ApiTokenList } from "@/components/ai";
 import { QueryState } from "@/components/common/states";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
-import { useApiTokens } from "@/lib/hooks/ai";
+import { useAiSettings, useApiTokens } from "@/lib/hooks/ai";
 
 const snippets = (origin: string) => [
   {
@@ -24,12 +24,18 @@ const subscribeNothing = () => () => {};
 export function DmAiPageClient({ campaignId }: { campaignId: string }) {
   const tokens = useApiTokens(campaignId);
 
+  const settings = useAiSettings(campaignId);
+
   const origin = useSyncExternalStore(subscribeNothing, () => window.location.origin, () => "");
 
   return (
     <HudPage>
       <HudPageHeader title="AI і API" subtitle="Токени для зовнішніх AI-клієнтів і підключення MCP." />
       <div className="space-y-4">
+        <HudPanel>
+          <h2 className="mb-3 font-semibold text-hud-ink">Інструкції для асистента</h2>
+          <QueryState query={settings.query}>{() => <AiInstructionsEditor value={settings.instructions} onSave={settings.save} pending={settings.isPending} />}</QueryState>
+        </HudPanel>
         <HudPanel>
           <h2 className="mb-1 font-semibold text-hud-ink">Ключі провайдерів</h2>
           <p className="text-sm text-hud-muted">

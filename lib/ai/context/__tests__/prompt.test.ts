@@ -64,4 +64,42 @@ describe("buildInstructions", () => {
     expect(out).toContain("Годрик");
     expect(prisma.scenarioPage.findFirst).not.toHaveBeenCalled();
   });
+
+  describe("постійні інструкції", () => {
+    const withInstructions = (text: string | null) => vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ name: "Асхан", description: "Темне фентезі", aiInstructions: text } as never);
+
+    it.each(["live", "scenario"] as const)("%s: блок стоїть перед правилами режиму", async (mode) => {
+      withInstructions("Говори архаїчно");
+
+      const { buildInstructions } = await import("@/lib/ai/context/prompt");
+
+      const out = await buildInstructions({ campaignId: "camp1", mode, pageId: null });
+
+      expect(out).toContain("Постійні інструкції ДМ для цієї кампанії");
+      expect(out.indexOf("Говори архаїчно")).toBeGreaterThan(out.indexOf("Відповідай українською"));
+      expect(out.indexOf("Говори архаїчно")).toBeLessThan(out.indexOf("Режим:"));
+    });
+
+    it("не обрізаються разом зі сценою", async () => {
+      const text = "правило ".repeat(900).trim();
+
+      withInstructions(text);
+      vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "p1", title: "М", kind: "scene", content: { legend: [], sections: Array.from({ length: 80 }, (_, i) => section(`x${i}`, false, "слово ".repeat(200))) } } as never);
+
+      const { buildInstructions } = await import("@/lib/ai/context/prompt");
+
+      const out = await buildInstructions({ campaignId: "camp1", mode: "scenario", pageId: "p1" });
+
+      expect(out).toContain(text);
+      expect(out).toContain("[обрізано]");
+    });
+
+    it.each([null, "   "])("порожні (%j) — блоку немає", async (value) => {
+      withInstructions(value);
+
+      const { buildInstructions } = await import("@/lib/ai/context/prompt");
+
+      expect(await buildInstructions({ campaignId: "camp1", mode: "live", pageId: null })).not.toContain("Постійні інструкції");
+    });
+  });
 });

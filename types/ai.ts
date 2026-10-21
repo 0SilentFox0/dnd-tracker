@@ -71,6 +71,10 @@ export interface AiProposal {
   createdAt: string;
 }
 
+export interface AiSettings {
+  instructions: string | null;
+}
+
 export interface ApiTokenSummary {
   id: string;
   name: string;

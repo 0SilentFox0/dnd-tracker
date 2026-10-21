@@ -3,11 +3,12 @@ import { z } from "zod";
 
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { applyProposal, listProposals, rejectProposal } from "@/lib/ai/proposals";
+import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
 import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
 import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { createThreadSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { aiSettingsSchema, createThreadSchema, patchThreadSchema } from "@/lib/schemas/ai";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -151,5 +152,33 @@ export async function listMessagesHandler(campaignId: string, threadId: string) 
     return NextResponse.json({ thread, messages: await loadMessages(threadId, AI_LIMITS.historyMessages * 2) });
   } catch (error) {
     return handleApiError(error, { action: "list ai messages" });
+  }
+}
+
+export async function getSettingsHandler(campaignId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    return NextResponse.json(await getAiSettings(campaignId));
+  } catch (error) {
+    return handleApiError(error, { action: "get ai settings" });
+  }
+}
+
+export async function putSettingsHandler(req: Request, campaignId: string) {
+  try {
+    const access = await requireDM(campaignId);
+
+    if (access instanceof NextResponse) return access;
+
+    const body = await parseBody(aiSettingsSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    return NextResponse.json(await saveAiSettings(campaignId, body.instructions.trim() || null));
+  } catch (error) {
+    return handleApiError(error, { action: "save ai settings" });
   }
 }

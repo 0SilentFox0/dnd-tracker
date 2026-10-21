@@ -1,11 +1,11 @@
 import { DefaultChatTransport, type UIMessage } from "ai";
 
 import { getCampaignApiUrl } from "./api-helpers";
-import { campaignDelete, campaignGet, campaignPatch, campaignPost, request } from "./client";
+import { campaignDelete, campaignGet, campaignPatch, campaignPost, campaignPut, request } from "./client";
 
 import type { AiProvider } from "@/lib/constants/ai";
 import type {
-  AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiThread, AiThreadMode, ApiTokenSummary, CreatedApiToken,
+  AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiSettings, AiThread, AiThreadMode, ApiTokenSummary, CreatedApiToken,
 } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 
@@ -45,6 +45,10 @@ export const getAiProposals = (campaignId: string, filter: { pageId?: string; st
 export const applyAiProposal = (campaignId: string, proposalId: string) => campaignPost<ScenarioPage>(campaignId, `/ai/proposals/${proposalId}/apply`, {});
 
 export const rejectAiProposal = (campaignId: string, proposalId: string) => campaignPost<AiProposal>(campaignId, `/ai/proposals/${proposalId}/reject`, {});
+
+export const getAiSettings = (campaignId: string) => campaignGet<AiSettings>(campaignId, "/ai/settings", { cache: "no-store" });
+
+export const saveAiSettings = (campaignId: string, body: { instructions: string }) => campaignPut<AiSettings>(campaignId, "/ai/settings", body);
 
 export const getApiTokens = (campaignId: string) => campaignGet<ApiTokenSummary[]>(campaignId, "/api-tokens", { cache: "no-store" });
 

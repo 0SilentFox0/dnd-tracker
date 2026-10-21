@@ -31,4 +31,6 @@ export const scenarioAiOpInputSchema = z.discriminatedUnion("op", [
 
 export const proposeScenarioEditSchema = z.object({ pageId: id, summary: z.string().trim().min(1).max(300), ops: z.array(scenarioAiOpInputSchema).min(1).max(30) });
 
+export const aiSettingsSchema = z.object({ instructions: z.string().max(AI_LIMITS.instructionsChars) });
+
 export const createApiTokenSchema = z.object({ name: z.string().trim().min(1).max(60) });

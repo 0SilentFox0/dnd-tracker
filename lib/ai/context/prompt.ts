@@ -34,7 +34,7 @@ function liveScene(title: string, content: ScenarioContent): string {
 }
 
 export async function buildInstructions({ campaignId, mode, pageId, focus }: { campaignId: string; mode: AiThreadMode; pageId: string | null; focus?: AiFocus }): Promise<string> {
-  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { name: true, description: true } });
+  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { name: true, description: true, aiInstructions: true } });
 
   const role = [
     `Ти — помічник Майстра (ДМ) у настільній рольовій кампанії «${campaign?.name ?? ""}».`,
@@ -42,6 +42,8 @@ export async function buildInstructions({ campaignId, mode, pageId, focus }: { c
     "Відповідай українською. Ти говориш лише з ДМ: нотатки і ||секрети|| можна обговорювати відкрито, гравці цього чату не бачать.",
     "Текст сценарію записаний markdown-діалектом: **жирний**, _курсив_, ||секрет ДМ||, :::read … ::: (читати вголос), :::say … :::, :::callout … :::, [@Ім'я](character:id).",
   ].filter(Boolean).join("\n");
+
+  const standing = campaign?.aiInstructions?.trim() ? `Постійні інструкції ДМ для цієї кампанії (дотримуйся їх; вони мають пріоритет над стилем за замовчуванням, але не над правилами режиму щодо інструментів):\n${campaign.aiInstructions.trim()}` : "";
 
   const [party, show] = await Promise.all([partySummary(campaignId), mode === "live" ? showSummary(campaignId) : Promise.resolve(null)]);
 
@@ -57,7 +59,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus }: { c
 
   const focusText = focus ? `Фокус ДМ: сторінка ${focus.pageId}${focus.sectionId ? `, розділ ${focus.sectionId}` : ""}${focus.rowIds?.length ? `, рядки ${focus.rowIds.join(", ")}` : ""}.` : "";
 
-  const fixed = [role, MODE_RULES[mode], partyText, show && `Показ:\n${show}`, focusText].filter(Boolean).join("\n\n");
+  const fixed = [role, standing, MODE_RULES[mode], partyText, show && `Показ:\n${show}`, focusText].filter(Boolean).join("\n\n");
 
   return [fixed, sceneText && clipTo(sceneText, Math.max(0, AI_LIMITS.contextChars - fixed.length))].filter(Boolean).join("\n\n");
 }

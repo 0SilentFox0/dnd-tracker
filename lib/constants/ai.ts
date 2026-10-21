@@ -47,6 +47,7 @@ export const AI_LIMITS = {
   battleEvents: 10,
   searchHits: 20,
   threadTitleChars: 80,
+  instructionsChars: 8000,
 } as const;
 
 export const API_TOKEN_PREFIX = "dndt_";

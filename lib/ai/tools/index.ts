@@ -3,6 +3,7 @@ import { tool, type ToolSet } from "ai";
 import type { z } from "zod";
 
 import { getBattleStateTool } from "./battle";
+import { getCampaignBriefTool } from "./campaign";
 import { type AiToolContext, type AiToolDef, runTool } from "./define";
 import { getPartyTool, readCharacterTool } from "./party";
 import { proposeScenarioEditTool } from "./propose";
@@ -12,7 +13,7 @@ import { getShowStateTool } from "./show";
 
 import "server-only";
 
-export const AI_TOOLS: AiToolDef[] = [listScenarioPagesTool, readScenarioPageTool, searchScenarioTool,
+export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesTool, readScenarioPageTool, searchScenarioTool,
   getPartyTool,
   readCharacterTool,
   getShowStateTool,
