@@ -111,8 +111,8 @@ describe("previewCastFx for campaign spells", () => {
 
     const fromBook = previewCastFx(castableOf({ id: book.id, name: book.name, level: book.level, groupId: null, rules: book }));
 
-    // spec.key carries the cast timestamp
-    const stable = (p: typeof fromBook) => ({ ...p, spec: p.spec && { ...p.spec, key: "" } });
+    // spec.key and spec.actionId carry the cast timestamp
+    const stable = (p: typeof fromBook) => ({ ...p, spec: p.spec && { ...p.spec, key: "", actionId: "" } });
 
     expect(stable(fromReference)).toEqual(stable(fromBook));
   });
