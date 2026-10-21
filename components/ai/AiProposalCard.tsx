@@ -57,7 +57,20 @@ function LossWarning({ before, after }: { before: RichDoc; after: RichDoc }) {
   return <p className="text-sm font-medium text-destructive">Увага: правка видаляє {describeLost(lost)}</p>;
 }
 
+function SlideView({ op }: { op: Extract<Op, { op: "addSlide" }> }) {
+  return (
+    <div className="space-y-1 rounded border border-primary/40 p-2">
+      {/* eslint-disable-next-line @next/next/no-img-element -- AI preview from storage, not a layout image */}
+      <img src={op.slide.imageUrl} alt={op.slide.title ?? "Слайд"} className="max-h-60 w-full rounded object-contain" />
+      <p className="text-xs text-muted-foreground">{op.deckId && op.deckTitle ? `У набір «${op.deckTitle}»` : "Новий набір для сцени"}</p>
+      {op.slide.title ? <p className="text-sm">{op.slide.title}</p> : null}
+    </div>
+  );
+}
+
 function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
+  if (op.op === "addSlide") return <SlideView op={op} />;
+
   if (op.op === "replaceRow") {
     return (
       <div className="space-y-2">
@@ -109,7 +122,7 @@ export function AiProposalCard({ proposal, actions, busy, campaignId }: AiPropos
         <div className="flex gap-2">
           {status === "pending" ? (
             <Button type="button" size="sm" disabled={busy} onClick={actions.onApply}>
-              Застосувати
+              {proposal.ops.some((o) => o.op === "addSlide") ? "Додати слайд" : "Застосувати"}
             </Button>
           ) : (
             <Button type="button" size="sm" disabled={busy} onClick={actions.onRedo}>

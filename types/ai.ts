@@ -1,5 +1,6 @@
 import type { AiProvider, AiThreadMode } from "@/lib/constants/ai";
 import type { RichDoc, ScenarioRow, ScenarioSection } from "@/types/scenario";
+import type { Slide } from "@/types/show";
 
 export type { AiProvider, AiThreadMode };
 
@@ -60,12 +61,16 @@ export type ScenarioAiOp =
   | { op: "addSection"; afterSectionId: string | null; section: ScenarioSection }
   | { op: "renameSection"; sectionId: string; title: string; before: { title: string } };
 
+export type AddSlideAiOp = { op: "addSlide"; deckId: string | null; deckTitle?: string; slide: Slide };
+
+export type AiProposalOp = ScenarioAiOp | AddSlideAiOp;
+
 export interface AiProposal {
   id: string;
   pageId: string;
   threadId: string | null;
   summary: string;
-  ops: ScenarioAiOp[];
+  ops: AiProposalOp[];
   status: AiProposalStatus;
   appliedVersion: number | null;
   createdAt: string;

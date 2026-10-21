@@ -17,6 +17,8 @@ interface AiMessageListProps {
 
 type Part = { type: string; text?: string; state?: string; input?: unknown; output?: unknown; toolCallId?: string };
 
+const PROPOSAL_TOOLS = new Set(["propose_scenario_edit", "propose_scene_slide"]);
+
 function proposalIdOf(output: unknown): string | null {
   let value = output;
 
@@ -83,7 +85,7 @@ export function AiMessageList({ messages, error, renderProposal, onRedo }: AiMes
 
             if (!part.type.startsWith("tool-")) return null;
 
-            const proposalId = toolName(part.type) === "propose_scenario_edit" && part.state === "output-available" ? proposalIdOf(part.output) : null;
+            const proposalId = PROPOSAL_TOOLS.has(toolName(part.type)) && part.state === "output-available" ? proposalIdOf(part.output) : null;
 
             return proposalId && renderProposal ? <div key={part.toolCallId ?? i} className="w-full">{renderProposal(proposalId)}</div> : <AiToolChip key={part.toolCallId ?? i} part={part} />;
           })}

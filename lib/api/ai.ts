@@ -8,6 +8,7 @@ import type {
   AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiSettings, AiThread, AiThreadMode, ApiTokenSummary, CreatedApiToken,
 } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
+import type { SlideDeck } from "@/types/show";
 
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
 
@@ -41,7 +42,7 @@ export const getAiProposals = (campaignId: string, filter: { pageId?: string; st
     { cache: "no-store" },
   );
 
-export const applyAiProposal = (campaignId: string, proposalId: string) => campaignPost<ScenarioPage>(campaignId, `/ai/proposals/${proposalId}/apply`, {});
+export const applyAiProposal = (campaignId: string, proposalId: string) => campaignPost<ScenarioPage | { deck: SlideDeck }>(campaignId, `/ai/proposals/${proposalId}/apply`, {});
 
 export const rejectAiProposal = (campaignId: string, proposalId: string) => campaignPost<AiProposal>(campaignId, `/ai/proposals/${proposalId}/reject`, {});
 

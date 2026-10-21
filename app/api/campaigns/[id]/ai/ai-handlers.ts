@@ -37,7 +37,7 @@ export const applyProposalHandler = (campaignId: string, proposalId: string) =>
   guarded("apply ai proposal", () => aiGuard(campaignId), async (access) => {
     const result = await applyProposal(campaignId, access.userId, proposalId);
 
-    return result.ok ? NextResponse.json(result.page) : errorResponse(result.error, result.status);
+    return result.ok ? NextResponse.json("deck" in result ? { deck: result.deck } : result.page) : errorResponse(result.error, result.status);
   });
 
 export const rejectProposalHandler = (campaignId: string, proposalId: string) =>

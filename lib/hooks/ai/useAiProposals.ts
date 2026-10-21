@@ -8,6 +8,7 @@ import { aiKeys } from "./keys";
 import { applyAiProposal, getAiProposals, rejectAiProposal } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import { scenarioKeys } from "@/lib/hooks/scenario/keys";
+import { showKeys } from "@/lib/hooks/show/keys";
 import type { ScenarioPage } from "@/types/scenario";
 
 type Options = { beforeApply?: () => Promise<boolean>; onApplied?: (page: ScenarioPage) => void };
@@ -25,12 +26,23 @@ export function useAiProposals(campaignId: string, pageId: string, { beforeApply
 
   const applyMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (beforeApply && !(await beforeApply())) return null;
+      const slideOnly = (query.data ?? []).find((p) => p.id === id)?.ops?.some((o) => o.op === "addSlide");
+
+      if (!slideOnly && beforeApply && !(await beforeApply())) return null;
 
       return applyAiProposal(campaignId, id);
     },
-    onSuccess: (page) => {
-      if (!page) return;
+    onSuccess: (result) => {
+      if (!result) return;
+
+      if ("deck" in result) {
+        queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
+        queryClient.invalidateQueries({ queryKey: showKeys.deck(campaignId, result.deck.id) });
+
+        return;
+      }
+
+      const page = result;
 
       queryClient.setQueryData(scenarioKeys.page(campaignId, pageId), page);
       onApplied?.(page);

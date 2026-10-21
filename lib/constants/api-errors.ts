@@ -1,5 +1,5 @@
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "./music";
-import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB } from "./show";
+import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB, MAX_SLIDES_PER_DECK } from "./show";
 
 export const API_ERRORS = {
   UNAUTHORIZED: "Потрібна авторизація",
@@ -53,6 +53,7 @@ export const API_ERRORS = {
   BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
   DECK_NOT_FOUND: "Набір слайдів не знайдено",
   DECK_CONFLICT: "Набір змінено в іншому місці — оновіть сторінку",
+  DECK_SLIDES_LIMIT: `У наборі вже ${MAX_SLIDES_PER_DECK} слайдів — оберіть інший набір`,
   DECK_LIMIT: `У кампанії вже ${MAX_DECKS_PER_CAMPAIGN} наборів — видаліть зайві`,
   SLIDE_NOT_FOUND: "Слайд не знайдено",
   SLIDE_FILE_INVALID: `Потрібна картинка WebP або JPEG до ${MAX_SLIDE_MB} МБ`,
@@ -80,6 +81,7 @@ export const API_ERRORS = {
   AI_PROPOSAL_NOT_FOUND: "Пропозицію не знайдено",
   AI_PROPOSAL_STALE: "Фрагмент змінився після пропозиції — попросіть AI переробити її",
   AI_PROPOSAL_INVALID: "Результат пропозиції порушує обмеження сторінки (наприклад, забагато рядків у розділі) — попросіть AI переробити її",
+  AI_PROPOSAL_STALE_DECK: "Набір, до якого AI пропонував слайд, видалено — попросіть AI зробити нову пропозицію",
   AI_PROPOSAL_DONE: "Пропозицію вже застосовано або відхилено",
   API_TOKEN_NOT_FOUND: "Токен не знайдено",
 } as const;

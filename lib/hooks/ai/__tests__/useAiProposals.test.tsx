@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import * as aiApi from "@/lib/api/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { scenarioKeys } from "@/lib/hooks/scenario/keys";
+import { showKeys } from "@/lib/hooks/show/keys";
 
 vi.mock("@/lib/api/ai", () => ({
   getAiProposals: vi.fn(async () => [{ id: "ap1", status: "pending" }]),
@@ -59,5 +60,27 @@ describe("useAiProposals", () => {
     await act(() => result.current.apply("ap1"));
 
     expect(aiApi.applyAiProposal).not.toHaveBeenCalled();
+  });
+});
+
+describe("useAiProposals addSlide", () => {
+  it("слайд: без beforeApply, інвалідує набори, сторінку не чіпає", async () => {
+    vi.mocked(aiApi.getAiProposals).mockResolvedValueOnce([{ id: "ap2", status: "pending", ops: [{ op: "addSlide", deckId: null, slide: {} }] }] as never);
+    vi.mocked(aiApi.applyAiProposal).mockResolvedValueOnce({ deck: { id: "d1" } } as never);
+
+    const beforeApply = vi.fn(async () => true);
+
+    const onApplied = vi.fn();
+
+    const { qc, result } = setup({ beforeApply, onApplied });
+
+    const spy = vi.spyOn(qc, "invalidateQueries");
+
+    await waitFor(() => expect(result.current.pending).toHaveLength(1));
+    await act(() => result.current.apply("ap2"));
+
+    expect(beforeApply).not.toHaveBeenCalled();
+    expect(onApplied).not.toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith({ queryKey: showKeys.decks("camp1") });
   });
 });

@@ -7,6 +7,7 @@ import { getCampaignBriefTool } from "./campaign";
 import { type AiToolContext, type AiToolDef, runTool } from "./define";
 import { getPartyTool, readCharacterTool } from "./party";
 import { proposeScenarioEditTool } from "./propose";
+import { proposeSceneSlideTool } from "./propose-slide";
 import { readReferenceTool, searchReferenceTool } from "./reference";
 import { listScenarioPagesTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
 import { getShowStateTool } from "./show";
@@ -21,6 +22,7 @@ export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesToo
   searchReferenceTool,
   readReferenceTool,
   proposeScenarioEditTool,
+  proposeSceneSlideTool,
 ];
 
 export function toAiSdkTools(ctx: AiToolContext): ToolSet {

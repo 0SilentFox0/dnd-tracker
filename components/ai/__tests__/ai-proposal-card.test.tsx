@@ -35,6 +35,25 @@ describe("AiProposalCard", () => {
     expect(screen.getByText("Увага: правка видаляє 3 виноски")).toBeTruthy();
   });
 
+  it("addSlide: прев'ю, ціль і «Додати слайд»", () => {
+    const a = actions();
+
+    const ops = [{ op: "addSlide", deckId: "d1", deckTitle: "Собор", slide: { id: "s", imageUrl: "https://x/i.webp", title: "Вхід" } }];
+
+    render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={a} busy={false} campaignId="c1" />);
+    expect(screen.getByRole("img").getAttribute("src")).toBe("https://x/i.webp");
+    expect(screen.getByText("У набір «Собор»")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Додати слайд" }));
+    expect(a.onApply).toHaveBeenCalled();
+  });
+
+  it("addSlide без набору: новий набір для сцени", () => {
+    const ops = [{ op: "addSlide", deckId: null, slide: { id: "s", imageUrl: "https://x/i.webp" } }];
+
+    render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
+    expect(screen.getByText("Новий набір для сцени")).toBeTruthy();
+  });
+
   it("stale: пояснення і «Переробити»", () => {
     const a = actions();
 

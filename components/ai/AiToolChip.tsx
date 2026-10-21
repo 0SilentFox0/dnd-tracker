@@ -8,6 +8,7 @@ const TOOL_LABELS: Record<string, (input: Record<string, unknown>) => string> = 
   get_battle_state: () => "Дивлюся бій…",
   get_party: () => "Дивлюся партію…",
   propose_scenario_edit: () => "Готую пропозицію…",
+  propose_scene_slide: () => "Малюю картинку…",
 };
 
 interface ToolPart {
