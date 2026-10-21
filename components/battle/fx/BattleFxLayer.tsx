@@ -104,6 +104,10 @@ export function BattleFxLayer() {
       .catch((e: unknown) => console.warn("battle fx", e))
       .finally(() => {
         window.clearTimeout(guard);
+
+        // play() міг повернутись без onStart (інша епоха шару, немає якорів): без сигналу декорації чекали б запобіжник
+        if (!cancelled && current.actionId && !NO_IMPACT.has(current.archetype)) fireFxImpact(current.actionId);
+
         finish();
       });
 

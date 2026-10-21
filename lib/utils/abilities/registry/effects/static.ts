@@ -5,7 +5,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { staticEffectNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
+import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
@@ -42,7 +42,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
 
-  const nature = staticEffectNature(stripped);
+  const nature = abilityNature(ability.effects);
 
   const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
 

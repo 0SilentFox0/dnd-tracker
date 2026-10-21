@@ -51,3 +51,22 @@ describe("fx impact signal", () => {
     expect(cb).not.toHaveBeenCalled();
   });
 });
+
+describe("fx impact listeners", () => {
+  it("відписка старого підписника не скидає набір новішого", () => {
+    const a = vi.fn();
+
+    const b = vi.fn();
+
+    const offA = onFxImpact("e1", 5000, a);
+
+    offA();
+
+    const offB = onFxImpact("e1", 5000, b);
+
+    offA();
+    fireFxImpact("e1");
+    expect(b).toHaveBeenCalledTimes(1);
+    offB();
+  });
+});

@@ -78,7 +78,7 @@ function drawCrystal(g: CanvasRenderingContext2D, x: number, y: number, s: numbe
   }
 }
 
-async function fall({ stage, palette, spec }: Parameters<FxAnimation>[0], target: FxTarget) {
+async function fall({ stage, palette, spec }: Parameters<FxAnimation>[0], target: FxTarget, first: boolean) {
   const at = target.at;
 
   const ground = at.y + 16;
@@ -113,10 +113,12 @@ async function fall({ stage, palette, spec }: Parameters<FxAnimation>[0], target
 
       const leave = 1 - clamp01((t - 1150) / 450);
 
-      g.globalCompositeOperation = "source-over";
-      g.globalAlpha = 0.22 * clamp01(t / 300) * leave;
-      g.fillStyle = "#021019";
-      g.fillRect(0, 0, g.canvas.width, g.canvas.height);
+      if (first) {
+        g.globalCompositeOperation = "source-over";
+        g.globalAlpha = 0.22 * clamp01(t / 300) * leave;
+        g.fillStyle = "#021019";
+        g.fillRect(0, 0, g.canvas.width, g.canvas.height);
+      }
 
       if (!landed) {
         const near = clamp01((t - APPEAR_MS) / (IMPACT_MS - APPEAR_MS));
@@ -242,4 +244,4 @@ async function fall({ stage, palette, spec }: Parameters<FxAnimation>[0], target
 }
 
 /** Крижаний болт: над ціллю збирається іній, кристал падає згори й меншає (віддаляється вглиб), удар — спалах, струс, уламки, шипи з землі, хвиля інею. */
-export const icefall: FxAnimation = (run) => perTarget(run.stage, run.targets, ARCHETYPE_FX.icefall.staggerMs, (target) => fall(run, target));
+export const icefall: FxAnimation = (run) => perTarget(run.stage, run.targets, ARCHETYPE_FX.icefall.staggerMs, (target, i) => fall(run, target, i === 0));

@@ -26,7 +26,7 @@ export function onFxImpact(actionId: string, waitMs: number, cb: () => void): ()
     clearTimeout(timer);
     set.delete(finish);
 
-    if (!set.size) listeners.delete(actionId);
+    if (!set.size && listeners.get(actionId) === set) listeners.delete(actionId);
   };
 
   function finish() {

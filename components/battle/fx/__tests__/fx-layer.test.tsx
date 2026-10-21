@@ -74,6 +74,17 @@ describe("BattleFxLayer", () => {
     expect(h.fire).toHaveBeenCalledWith("act1");
   });
 
+  it("playFx без виклику onStart усе одно шле сигнал по завершенню", async () => {
+    h.current = { key: "act3:0", archetype: "bolt", actionId: "act3" } as typeof h.current;
+    h.playFx.mockResolvedValue(undefined);
+    render(<BattleFxLayer />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(h.fire).toHaveBeenCalledWith("act3");
+  });
+
   it("смерть і кубики сигналу не шлють", async () => {
     h.current = { key: "act2:death:t", archetype: "death", actionId: "act2" } as typeof h.current;
     h.playFx.mockImplementation((_l: unknown, _s: unknown, _r: unknown, _t: unknown, onStart?: () => void) => {
