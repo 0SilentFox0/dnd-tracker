@@ -7,6 +7,7 @@ const proposals = { all: [], pending: [{ id: "a" }, { id: "b" }], pendingCount: 
 const page = { id: "p1", kind: "info", title: "Сторінка", version: 1, content: { legend: [], sections: [] } };
 
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
+
 const useAiProposals = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/hooks/ai", () => ({ useAiProposals }));
