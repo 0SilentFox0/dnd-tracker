@@ -42,3 +42,9 @@ export function mazeTargetHidden(map: BattleMapConfig | null | undefined, caster
 
   return !!grid && targets.some((t) => !seesTarget(grid, caster, t));
 }
+
+export function mazeLineBlocked(grid: MazeGrid, line: GridPoint[]): boolean {
+  const walls = wallSet(grid.maze);
+
+  return line.some((c, i) => i > 0 && !canStep(grid, walls, line[i - 1], c));
+}

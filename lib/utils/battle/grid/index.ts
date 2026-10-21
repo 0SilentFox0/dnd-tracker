@@ -3,6 +3,7 @@ export * from "./background";
 export * from "./geometry";
 export * from "./hazard";
 export * from "./layout";
+export * from "./line-of-fire";
 export * from "./map-editor";
 export * from "./map-scene";
 export * from "./map-view";
