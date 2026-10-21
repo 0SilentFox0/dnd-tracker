@@ -3,7 +3,7 @@ import { BookOpen, Compass, KeyRound, type LucideIcon, MessagesSquare, ScrollTex
 import { SECTION_ICON_LABELS } from "@/lib/constants/scenario";
 import type { SectionIconKey } from "@/types/scenario";
 
-export const SECTION_ICON_COMPONENTS: Record<SectionIconKey, LucideIcon> = {
+const SECTION_ICON_COMPONENTS: Record<SectionIconKey, LucideIcon> = {
   scene: ScrollText, battle: Swords, secret: KeyRound, choice: Split, journey: Compass, dialogue: MessagesSquare, rest: Tent, prep: BookOpen,
 };
 

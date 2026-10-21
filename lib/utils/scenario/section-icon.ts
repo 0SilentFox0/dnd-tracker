@@ -1,4 +1,3 @@
-import { SECTION_ICON_KEYS } from "@/lib/constants/scenario";
 import type { RichNode, ScenarioSection, SectionIconKey } from "@/types/scenario";
 
 function hasCallout(nodes: RichNode[] | undefined, kinds: readonly string[]): boolean {
@@ -8,7 +7,7 @@ function hasCallout(nodes: RichNode[] | undefined, kinds: readonly string[]): bo
 const storyHas = (section: ScenarioSection, kinds: readonly string[]) => section.rows.some((r) => hasCallout(r.story.content, kinds));
 
 export function sectionIcon(section: ScenarioSection): SectionIconKey {
-  if (section.icon && (SECTION_ICON_KEYS as readonly string[]).includes(section.icon)) return section.icon;
+  if (section.icon) return section.icon;
 
   if (/^підготов/i.test(section.title.trim())) return "prep";
 

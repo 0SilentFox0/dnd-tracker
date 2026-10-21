@@ -7,4 +7,4 @@ export { ScenarioLegend } from "./ScenarioLegend";
 export { ScenarioPageView } from "./ScenarioPageView";
 export { ScenarioRichText } from "./ScenarioRichText";
 export { ScenarioSearch } from "./ScenarioSearch";
-export { ScenarioToc, type TocItem, tocItems } from "./ScenarioToc";
+export { ScenarioToc, type TocControl, type TocItem, tocItems } from "./ScenarioToc";

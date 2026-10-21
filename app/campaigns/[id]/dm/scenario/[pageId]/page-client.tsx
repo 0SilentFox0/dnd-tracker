@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
@@ -8,7 +8,7 @@ import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
-import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, tocItems } from "@/components/scenario";
+import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import type { AiThreadMode } from "@/lib/constants/ai";
@@ -54,6 +54,10 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   const wide = useMediaQuery("(min-width: 1200px)");
 
   const tocInline = wide && !(aiEnabled && aiOpen);
+
+  const toc: TocControl = { inline: tocInline, drawer: { open: tocOpen, onOpenChange: setTocOpen } };
+
+  const played = useMemo(() => playedLookup(playedPages), [playedPages]);
 
   const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
 
@@ -129,29 +133,29 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
         menu={menu}
       />
       {editBase ? (
-        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} toc={{ inline: tocInline, drawer: { open: tocOpen, onOpenChange: setTocOpen } }} />
+        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} toc={toc} />
       ) : (
         <ScenarioLayout
-          toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", playedLookup(playedPages))} inline={tocInline} drawer={{ open: tocOpen, onOpenChange: setTocOpen }} onPick={collapse.expand} />}
+          toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", played)} {...toc} onPick={collapse.expand} />}
         >
-        <ScenarioPageView
-          page={page}
-          campaignId={campaignId}
-          play={playEnabled ? play : undefined}
-          progress={{
-            onPlayed: (id, v) => {
-              collapse.expand(id);
-              void progress.setPlayed(id, v).catch(() => {});
-            },
-            onRevealed: (id, v) => {
-              collapse.expand(id);
-              void progress.setRevealed(id, v).catch(() => {});
-            },
-            pending: progress.isPending,
-            played: playedLookup(playedPages),
-          }}
-          collapse={collapse}
-        />
+          <ScenarioPageView
+            page={page}
+            campaignId={campaignId}
+            play={playEnabled ? play : undefined}
+            progress={{
+              onPlayed: (id, v) => {
+                collapse.expand(id);
+                void progress.setPlayed(id, v).catch(() => {});
+              },
+              onRevealed: (id, v) => {
+                collapse.expand(id);
+                void progress.setRevealed(id, v).catch(() => {});
+              },
+              pending: progress.isPending,
+              played,
+            }}
+            collapse={collapse}
+          />
         </ScenarioLayout>
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}

@@ -52,15 +52,16 @@
 .scenario-book .sb-sec-orn::before, .scenario-book .sb-sec-orn::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--rule)); }
 .scenario-book .sb-sec-orn::after { background: linear-gradient(90deg, var(--rule), transparent); }
 .scenario-book .sb-sec-icon { width: 22px; height: 22px; stroke-width: 1.5; flex: none; }
-.scenario-book .sb-sec-head h2 { font-size: 30px; font-weight: 500; margin: 6px 0 0; }
-.scenario-book .sb-sec-head .played { position: absolute; right: 0; top: 0; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; background: var(--page); }
+.scenario-book .sb-sec-head h2, .scenario-book .sb-sec-edit { font-size: 30px; font-weight: 500; }
+.scenario-book .sb-sec-head h2 { margin: 6px 0 0; }
+.scenario-book section .played { font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; }
+.scenario-book .sb-sec-head .played { position: absolute; right: 0; top: 0; background: var(--page); }
 .scenario-book section.is-played .sb-sec-head h2 { color: var(--ink-soft); }
 @media (max-width: 640px) { .scenario-book .sb-sec-head .played { position: static; margin-top: 8px; } }
 .scenario-book .sb-sec-collapsed { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-sec-expand { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; font: inherit; font-size: 20px; color: var(--ink-soft); cursor: pointer; text-align: left; }
 .scenario-book .sb-sec-expand:hover { color: var(--ink); }
 .scenario-book .sb-sec-expand .sb-sec-icon { width: 18px; height: 18px; color: var(--gold); }
-.scenario-book .sb-sec-collapsed .played { position: static; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; }
 .scenario-book section.is-collapsed { margin-top: 20px; }
 .scenario-book section.is-collapsed .sb-sec-head { display: none; }
 @media print {
@@ -227,7 +228,7 @@
 .scenario-book .sb-toc-done { color: var(--gold); font-weight: 700; }
 .scenario-book.sb-toc-drawer { background: transparent; background-image: none; font-size: 16px; }
 @media print { .scenario-book .sb-toc { display: none; } }
-.scenario-book .sb-sec-edit { display: flex; gap: 12px; align-items: center; font-size: 30px; font-weight: 500; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.scenario-book .sb-sec-edit { display: flex; gap: 12px; align-items: center; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-icon-pick { width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--gold); flex: none; }
 
 .scenario-book { background-image: radial-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px); background-size: 3px 3px; }

@@ -60,36 +60,36 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                 {!collapsed && playedButton}
               </div>
               <div className="sb-rows" hidden={collapsed}>
-              {s.rows.map((r) => {
-                const slideState = play ? rowSlideState(r, play.lookup) : null;
+                {s.rows.map((r) => {
+                  const slideState = play ? rowSlideState(r, play.lookup) : null;
 
-                const clickable = slideState?.kind === "ready";
+                  const clickable = slideState?.kind === "ready";
 
-                return (
-                  <div
-                    key={r.id}
-                    id={`row-${r.id}`}
-                    className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.current && "is-current")}
-                    title={clickable ? "Подвійний клік — показати слайд" : undefined}
-                    onDoubleClick={
-                      clickable
-                        ? (e) => {
-                            if ((e.target as HTMLElement).closest("a, button")) return;
+                  return (
+                    <div
+                      key={r.id}
+                      id={`row-${r.id}`}
+                      className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.current && "is-current")}
+                      title={clickable ? "Подвійний клік — показати слайд" : undefined}
+                      onDoubleClick={
+                        clickable
+                          ? (e) => {
+                              if ((e.target as HTMLElement).closest("a, button")) return;
 
-                            window.getSelection()?.removeAllRanges();
-                            play?.showSlide(r);
-                          }
-                        : undefined
-                    }
-                  >
-                    <div className="story">
-                      {play && <RowPlayControls campaignId={campaignId} row={r} play={play} />}
-                      <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
+                              window.getSelection()?.removeAllRanges();
+                              play?.showSlide(r);
+                            }
+                          : undefined
+                      }
+                    >
+                      <div className="story">
+                        {play && <RowPlayControls campaignId={campaignId} row={r} play={play} />}
+                        <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
+                      </div>
+                      <aside className="notes">{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
                     </div>
-                    <aside className="notes">{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </section>
           );

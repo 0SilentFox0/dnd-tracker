@@ -23,7 +23,9 @@ export function tocItems(sections: ScenarioSection[], isHero: boolean, played?: 
   return sections.map((s) => ({ id: s.id, title: s.title, icon: sectionIcon(s), done: sectionDone(s, isHero, played).done }));
 }
 
-type Props = { items: TocItem[]; inline: boolean; drawer: { open: boolean; onOpenChange: (open: boolean) => void }; onPick?: (id: string) => void };
+export type TocControl = { inline: boolean; drawer: { open: boolean; onOpenChange: (open: boolean) => void } };
+
+type Props = TocControl & { items: TocItem[]; onPick?: (id: string) => void };
 
 function TocList({ items, onPick }: { items: TocItem[]; onPick: (id: string, event: MouseEvent<HTMLAnchorElement>) => void }) {
   const active = useActiveSection(items.map((i) => i.id));

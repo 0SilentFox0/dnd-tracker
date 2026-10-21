@@ -51,9 +51,8 @@ describe("sectionIcon", () => {
     expect(sectionIcon(section({}, [{ story: doc(callout("choice"), callout("shadow")) }]))).toBe("secret");
   });
 
-  it("ручний вибір ДМ перекриває все; невідомий ключ ігнорується", () => {
+  it("ручний вибір ДМ перекриває все", () => {
     expect(sectionIcon(section({ icon: "rest" }, [{ battleId: "b" }]))).toBe("rest");
-    expect(sectionIcon(section({ icon: "bogus" as never }, [{ battleId: "b" }]))).toBe("battle");
   });
 
   it("розділ без рядків — сцена", () => {
