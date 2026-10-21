@@ -7,7 +7,7 @@ import { tokenBoxStyle } from "./token-box";
 import { useDamageShake, useFxEnabled, useHitChange } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
-import { sizeOf } from "@/lib/utils/battle/grid";
+import { isFallen, sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
@@ -42,14 +42,18 @@ function hpView(participant: BattleParticipant, exact: boolean) {
   return { ratio: healthSegments(state) / 4, text: HEALTH_LABEL[state] };
 }
 
-function MapTokenHudImpl({ participant, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
-  const shake = useDamageShake<HTMLDivElement>(useHitChange(participant.combatStats.currentHp, impact));
+function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+  const { change, shown: participant } = useHitChange(live, impact);
+
+  const shake = useDamageShake<HTMLDivElement>(change);
 
   const { userEnabled, motionAllowed } = useFxEnabled();
 
   const motifs = userEnabled ? hudMotifsOf(effects) : [];
 
   const down = isDown(participant);
+
+  if (isFallen(participant)) return null;
 
   const showText = pxPerUnit * 100 >= TEXT_MIN_CELL;
 

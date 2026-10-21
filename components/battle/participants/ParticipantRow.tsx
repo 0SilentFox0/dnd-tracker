@@ -12,7 +12,7 @@ import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, impact, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, current, impact, onSelect }: {
   participant: BattleParticipant;
   effects: readonly ActiveEffect[];
   exact: boolean;
@@ -21,9 +21,9 @@ export const ParticipantRow = memo(function ParticipantRow({ participant, effect
   impact: FxImpact | null;
   onSelect: (id: string) => void;
 }) {
-  const { currentHp, maxHp } = participant.combatStats;
+  const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impact);
 
-  const { change, shakeRef } = useHitFx<HTMLDivElement>(currentHp, impact);
+  const { currentHp, maxHp } = participant.combatStats;
 
   const down = isDown(participant);
 

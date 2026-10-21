@@ -28,12 +28,12 @@ export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
   return <ParticipantDetailsBody key={participant.basicInfo.id} participant={participant} />;
 }
 
-function ParticipantDetailsBody({ participant }: ParticipantDetailsProps) {
+function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) {
   const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
   const impactFor = useFxImpacts();
 
-  const { change, shakeRef } = useHitFx<HTMLDivElement>(participant.combatStats.currentHp, impactFor(participant.basicInfo.id));
+  const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impactFor(live.basicInfo.id));
 
   const exact = canSeeExactStats(participant, viewer);
 

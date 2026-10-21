@@ -22,7 +22,7 @@ const clamp = (min: number, value: number, max: number) => Math.min(max, Math.ma
 
 /** «−N/+N» над жетоном; окремо від HUD, бо смертельний удар прибирає жетон із карти. */
 function MapHitFloatImpl({ participant, box, mapSize, pxPerUnit, impact = null }: MapHitFloatProps) {
-  const change = useHitChange(participant.combatStats.currentHp, impact);
+  const { change } = useHitChange(participant, impact);
 
   if (!change) return null;
 

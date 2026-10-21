@@ -10,6 +10,7 @@ import { hitFlashClass, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import type { FxImpact } from "@/lib/utils/battle/fx";
+import { isFallen } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { NO_EFFECTS } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
@@ -33,10 +34,12 @@ export interface MapTokenProps {
   onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
+function MapTokenImpl({ participant: live, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
+  const { change, shown: participant, shakeRef } = useHitFx<HTMLButtonElement>(live, impact);
+
   const { id, name } = participant.basicInfo;
 
-  const { change, shakeRef } = useHitFx<HTMLButtonElement>(participant.combatStats.currentHp, impact);
+  if (isFallen(participant)) return null;
 
   const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * PORTRAIT_SHARE));
 

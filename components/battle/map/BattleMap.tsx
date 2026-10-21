@@ -452,7 +452,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const modeView = view?.mode;
 
-  // полеглі лишаються тут, щоб показати число смертельного удару
+  // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
   const placed = useMemo(
     () =>
       participants
@@ -566,7 +566,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
         </svg>
         {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
         <div data-map-tokens className={cn(fit.rotated && "*:-rotate-90")} style={painting ? { opacity: 0.35 } : undefined}>
-        {tokens.map(({ p, box }) => (
+        {placed.map(({ p, box }) => (
           <MapToken
             key={p.basicInfo.id}
             participant={p}
@@ -583,7 +583,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             dormant={!!modeView?.showDormant && isDormant(p)}
           />
         ))}
-        {tokens.map(({ p, box }) => {
+        {placed.map(({ p, box }) => {
           const id = p.basicInfo.id;
 
           const hud = view?.hud?.get(id);
