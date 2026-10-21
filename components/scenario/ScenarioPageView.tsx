@@ -48,7 +48,7 @@ export function ScenarioPageView({ page, campaignId, progress, play }: { page: S
                   <div
                     key={r.id}
                     id={`row-${r.id}`}
-                    className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.active && "is-current")}
+                    className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.current && "is-current")}
                     title={clickable ? "Подвійний клік — показати слайд" : undefined}
                     onDoubleClick={
                       clickable

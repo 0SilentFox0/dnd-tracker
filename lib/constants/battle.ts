@@ -30,6 +30,8 @@ export const BattleStatus = {
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
+export const BATTLE_STATUS_LABEL: Record<BattleStatus, string> = { [BattleStatus.PREPARED]: "підготовлений", [BattleStatus.ACTIVE]: "йде", [BattleStatus.COMPLETED]: "завершений" };
+
 export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
 
 export const SYSTEM_ACTOR = { actorId: "system", actorName: "Система", actorSide: ParticipantSide.ALLY } as const;

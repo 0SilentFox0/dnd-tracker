@@ -22,7 +22,7 @@ const empty: ScenarioContent = { legend: [], sections: [{ id: "s", title: "S", p
 
 const bound: ScenarioContent = { legend: [], sections: [{ id: "s", title: "S", played: false, rows: [{ id: "r", story: p, notes: p, battleId: "b1" }] }] };
 
-const play = (show: ShowState | null): ScenarioPlay => ({ lookup: { decks: new Map(), battles: null, show }, showSlide: vi.fn(), activeRow: null, nextRow: null, showNextRow: vi.fn(() => null), runBattle: vi.fn(), pending: false, control: { send: vi.fn(), pending: false } }) as unknown as ScenarioPlay;
+const play = (show: ShowState | null): ScenarioPlay => ({ lookup: { decks: new Map(), battles: null, show }, showSlide: vi.fn(), currentRow: null, nextRow: null, runBattle: vi.fn(), pending: false, control: { send: vi.fn(), pending: false } }) as unknown as ScenarioPlay;
 
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);

@@ -305,6 +305,11 @@ describe("заглушка (curtain / cover)", () => {
     expect(off.slide).toEqual(deck.slides[1]);
   });
 
+  it("без on — перемикання; без показу вмикається з порожнього стану", () => {
+    expect(ok(applyShowCommand(showing(0, { curtain: true }), { action: "curtain" }, ctx))).not.toHaveProperty("curtain");
+    expect(ok(applyShowCommand(null, { action: "curtain" }, ctx))).toMatchObject({ curtain: true, deckId: null, seq: 1 });
+  });
+
   it("повтор того самого стану нічого не змінює", () => {
     const prev = showing(0, { curtain: true });
 

@@ -4,40 +4,27 @@ import { useEffect, useRef } from "react";
 
 import type { ShowControl } from "./useShowControl";
 
-import type { ShowCommand, ShowState } from "@/types/show";
+import type { ShowCommand } from "@/types/show";
 
 const TYPING = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
 const DIALOG = '[role="dialog"]';
 
-const ARROWS: Record<string, ShowCommand> = { ArrowRight: { action: "next" }, ArrowLeft: { action: "prev" } };
+const ARROWS: Partial<Record<string, ShowCommand>> = { ArrowRight: { action: "next" }, ArrowLeft: { action: "prev" } };
 
-export interface ShowKeysOptions {
-  show?: ShowState | null;
-  /** N — показати слайд наступного рядка сценарію. */
-  onNextRow?: () => void;
-}
+/** Літери за e.code: на українській розкладці e.key для B — «и». */
+const LETTERS: Partial<Record<string, ShowCommand>> = { KeyB: { action: "curtain" } };
 
-/** Літери за e.code: на українській розкладці e.key для N — «т». */
-function commandFor(e: KeyboardEvent, opts: ShowKeysOptions): ShowCommand | (() => void) | null {
-  if (ARROWS[e.key]) return ARROWS[e.key];
-
-  if (e.code === "KeyB") return { action: "curtain", on: !opts.show?.curtain };
-
-  if (e.code === "KeyN" && opts.onNextRow) return opts.onNextRow;
-
-  return null;
-}
-
-export function useShowKeys(control: ShowControl | null, options: ShowKeysOptions = {}): void {
+/** extraKeys — додаткові дії за e.code (сценарій: KeyN — наступний рядок). */
+export function useShowKeys(control: ShowControl | null, extraKeys: Record<string, () => void> = {}): void {
   const inFlight = useRef(false);
 
-  const latest = useRef({ control, options });
+  const latest = useRef({ control, extraKeys });
 
   const active = control !== null;
 
   useEffect(() => {
-    latest.current = { control, options };
+    latest.current = { control, extraKeys };
   });
 
   useEffect(() => {
@@ -46,9 +33,9 @@ export function useShowKeys(control: ShowControl | null, options: ShowKeysOption
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
 
-      const { control, options } = latest.current;
+      const { control, extraKeys } = latest.current;
 
-      const cmd = commandFor(e, options);
+      const cmd: ShowCommand | (() => void) | undefined = ARROWS[e.key] ?? LETTERS[e.code] ?? extraKeys[e.code];
 
       if (!cmd || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
 

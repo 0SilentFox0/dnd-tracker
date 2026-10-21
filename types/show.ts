@@ -72,7 +72,7 @@ export type ShowCommand =
   | { action: "end" }
   | { action: "audio"; command: BattleAudioCommand }
   | { action: "battle"; battleId: string }
-  | { action: "curtain"; on: boolean }
+  | { action: "curtain"; on?: boolean }
   | { action: "setCover"; deckId: string; slideId: string }
   | { action: "clearCover" };
 

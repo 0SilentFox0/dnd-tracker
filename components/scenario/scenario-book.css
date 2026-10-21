@@ -154,7 +154,7 @@
 .scenario-book .sb-bind { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 4px 6px 4px 4px; border: 1px solid var(--rule); border-radius: 6px; background: var(--tint-gold); }
 .scenario-book .sb-bind[data-on-screen] { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
 .scenario-book .sb-bind[data-battle] { background: var(--tint-blood); padding-left: 8px; }
-.scenario-book .sb-bind-thumb { width: 64px; height: 36px; border-radius: 4px; object-fit: cover; flex: none; }
+.scenario-book .sb-thumb { width: 64px; height: 36px; border-radius: 4px; object-fit: cover; flex: none; }
 .scenario-book .sb-bind-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scenario-book .sb-bind-name small { color: var(--ink-soft); font-size: 12px; }
 .scenario-book .sb-bind-live { color: var(--gold); font-weight: 700; white-space: nowrap; }
@@ -164,7 +164,7 @@
 .scenario-book .sb-show-bar { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 6px 16px; font-size: 14px; overflow-x: auto; }
 .scenario-book .sb-show-now { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 260px; }
 .scenario-book .sb-show-now[data-curtain] .sb-show-title { color: var(--ink-soft); font-style: italic; }
-.scenario-book .sb-show-thumb { width: 64px; height: 36px; border-radius: 4px; object-fit: cover; flex: none; }
+.scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 .scenario-book .sb-show-thumb-empty { display: inline-flex; align-items: center; justify-content: center; border: 1px dashed var(--rule); color: var(--ink-soft); }
 .scenario-book .sb-show-thumb-sm { width: 48px; height: 27px; border-radius: 3px; object-fit: cover; opacity: 0.8; }
 .scenario-book .sb-show-next { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
@@ -176,4 +176,3 @@
   .scenario-book .sb-show-now { flex: 1 1 100%; }
   .scenario-book .sb-show-body { padding: 4px 12px 8px; max-height: 32vh; }
 }
-.scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }

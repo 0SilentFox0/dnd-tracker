@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 export const SHOW_TONE = {
   rule: "border-[var(--show-rule,var(--color-hud-rule))]",
   accent: "border-[var(--show-accent,var(--color-hud-gold-strong))] ring-2 ring-[var(--show-accent,var(--color-hud-gold-strong))]",
-  accentText: "text-[var(--show-accent,var(--color-hud-gold-strong))]",
   muted: "text-[var(--show-muted,var(--color-hud-muted))]",
 };
 

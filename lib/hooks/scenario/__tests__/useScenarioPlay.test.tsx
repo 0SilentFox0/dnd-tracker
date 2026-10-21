@@ -126,7 +126,7 @@ describe("useScenarioPlay", () => {
 describe("useScenarioPlay — наступний рядок і заглушка", () => {
   const shown = (over: Partial<ShowState> = {}): ShowState => ({ deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1, ...over });
 
-  it("showSlide активного рядка під заглушкою знімає заглушку", async () => {
+  it("showSlide поточного рядка під заглушкою шле open (сервер знімає заглушку)", async () => {
     show = shown({ curtain: true });
 
     const { result } = setup();
@@ -134,25 +134,21 @@ describe("useScenarioPlay — наступний рядок і заглушка"
     await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
     act(() => result.current.showSlide(slideRow));
 
-    expect(send).toHaveBeenCalledWith({ action: "curtain", on: false });
+    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
   });
 
-  it("showNextRow без показу відкриває перший рядок; далі нічого — null", async () => {
+  it("nextRow: без показу — перший рядок; рядок на екрані — далі нічого; під заглушкою — поточний", async () => {
     const { result, rerender } = setup();
 
-    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-
-    let row: ScenarioRow | null = null;
-
-    act(() => void (row = result.current.showNextRow()));
-    expect(row).toBe(slideRow);
-    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
+    await waitFor(() => expect(result.current.nextRow).toBe(slideRow));
 
     show = shown();
     rerender();
-    send.mockClear();
-    act(() => void (row = result.current.showNextRow()));
-    expect(row).toBeNull();
-    expect(send).not.toHaveBeenCalled();
+    expect(result.current.nextRow).toBeNull();
+    expect(result.current.currentRow).toBe(slideRow);
+
+    show = shown({ curtain: true });
+    rerender();
+    expect(result.current.nextRow).toBe(slideRow);
   });
 });

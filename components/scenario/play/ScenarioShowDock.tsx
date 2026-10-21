@@ -12,6 +12,7 @@ import { useNotify } from "@/lib/hooks/common";
 import { type ScenarioPlay, useShowDockExpanded } from "@/lib/hooks/scenario";
 import { useShowAudioHost, useShowKeys } from "@/lib/hooks/show";
 import { hasPlayBindings } from "@/lib/utils/scenario/play";
+import { showsCover, visibleSlide } from "@/lib/utils/show/player-view";
 import type { ScenarioContent } from "@/types/scenario";
 import type { ShowState } from "@/types/show";
 
@@ -27,15 +28,15 @@ export function ScenarioShowDock({ campaignId, pageId, content, play }: { campai
 
 /** Що зараз бачать гравці. */
 function OnScreen({ show }: { show: ShowState | null }) {
-  const curtain = !!show?.curtain || (!show?.slide && !show?.battle);
+  const cover = showsCover(show);
 
-  const image = curtain ? show?.cover?.slide.imageUrl : show?.slide?.imageUrl;
+  const image = visibleSlide(show)?.imageUrl;
 
-  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : curtain ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
+  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
 
   return (
-    <div className="sb-show-now" data-curtain={(curtain && !!show?.deckId) || undefined}>
-      {image ? <OptimizedImage src={image} alt="" width={64} height={36} className="sb-show-thumb" /> : <span className="sb-show-thumb sb-show-thumb-empty">{curtain && <EyeOff className="size-4" />}</span>}
+    <div className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined}>
+      {image ? <OptimizedImage src={image} alt="" width={64} height={36} className="sb-thumb" /> : <span className="sb-thumb sb-show-thumb-empty">{cover && <EyeOff className="size-4" />}</span>}
       <span className="sb-show-title">{label}</span>
     </div>
   );
@@ -51,12 +52,15 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
   const { show } = play.lookup;
 
   const nextRow = () => {
-    const row = play.showNextRow();
+    if (!play.nextRow) return;
 
-    if (row) scrollToRow(row.id);
+    play.showSlide(play.nextRow);
+    scrollToRow(play.nextRow.id);
   };
 
-  useShowKeys(play.control, { show, onNextRow: nextRow });
+  const current = play.currentRow;
+
+  useShowKeys(play.control, { KeyN: nextRow });
 
   return (
     <AudioPlayerProvider host={host}>
@@ -71,14 +75,14 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
             <SkipForward className="size-4" />
             <span className="max-md:sr-only">Наступний рядок</span>
           </ShowButton>
-          {play.activeRow && (
-            <ShowButton aria-label="До рядка зі слайдом" title="До рядка зі слайдом" onClick={() => play.activeRow && scrollToRow(play.activeRow.id)}>
+          {current && (
+            <ShowButton aria-label="До рядка зі слайдом" title="До рядка зі слайдом" onClick={() => scrollToRow(current.id)}>
               <Crosshair className="size-4" />
             </ShowButton>
           )}
           {show?.nextImageUrl && (
             <span className="sb-show-next" title="Наступний слайд набору">
-              далі <OptimizedImage src={show.nextImageUrl} alt="" width={48} height={27} className="sb-show-thumb-sm" />
+              далі <OptimizedImage src={show.nextImageUrl} alt="" width={64} height={36} className="sb-show-thumb-sm" />
             </span>
           )}
           <ShowButton className="ml-auto" aria-expanded={expanded} aria-label={expanded ? "Згорнути панель показу" : "Розгорнути панель показу"} onClick={() => setExpanded(!expanded)}>

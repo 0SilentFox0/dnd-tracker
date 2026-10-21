@@ -64,26 +64,24 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
-const withoutBattleFlag = (prev: ShowState): ShowState => {
-  const { battle: _battle, ...rest } = prev;
+/** Прибирає поле стану й піднімає seq. */
+function without(prev: ShowState, ...keys: ("battle" | "curtain" | "cover")[]): ShowState {
+  const next = { ...prev, seq: prev.seq + 1 };
 
-  return { ...rest, seq: prev.seq + 1 };
-};
+  for (const key of keys) delete next[key];
 
-const withoutCurtain = (prev: ShowState): ShowState => {
-  const { curtain: _curtain, ...rest } = prev;
-
-  return rest;
-};
+  return next;
+}
 
 const keepCover = (prev: ShowState | null) => (prev?.cover ? { cover: prev.cover } : {});
 
-function setCurtain(prev: ShowState | null, on: boolean): Outcome {
-  if (!!prev?.curtain === on) return prev ? done(prev) : fail(API_ERRORS.SHOW_NOT_RUNNING);
-
+/** on не задано — перемикання. */
+function setCurtain(prev: ShowState | null, on = !prev?.curtain): Outcome {
   const base = prev ?? EMPTY;
 
-  return done({ ...(on ? { ...base, curtain: true } : withoutCurtain(base)), seq: base.seq + 1 });
+  if (!!base.curtain === on) return prev ? done(prev) : fail(API_ERRORS.SHOW_NOT_RUNNING);
+
+  return done(on ? { ...base, curtain: true, seq: base.seq + 1 } : without(base, "curtain"));
 }
 
 function setCover(prev: ShowState | null, slideId: string, deck: ShowDeck | null): Outcome {
@@ -98,17 +96,9 @@ function setCover(prev: ShowState | null, slideId: string, deck: ShowDeck | null
   return done({ ...(prev ?? EMPTY), cover: { deckId: deck.id, slide }, seq: (prev?.seq ?? 0) + 1 });
 }
 
-function clearCover(prev: ShowState | null): Outcome {
-  if (!prev?.cover) return prev ? done(prev) : fail(API_ERRORS.SHOW_NOT_RUNNING);
-
-  const { cover: _cover, ...rest } = prev;
-
-  return done({ ...rest, seq: prev.seq + 1 });
-}
-
 /** null, якщо показ не вказує на цей бій. */
 export function withoutBattle(prev: ShowState | null, battleId: string): ShowState | null {
-  return prev?.battle?.id === battleId ? withoutBattleFlag(prev) : null;
+  return prev?.battle?.id === battleId ? without(prev, "battle") : null;
 }
 
 function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
@@ -124,7 +114,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   if (index === -1) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return prev.battle || prev.curtain ? done(withoutCurtain(withoutBattleFlag(prev))) : done(prev);
+  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev.battle || prev.curtain ? without(prev, "battle", "curtain") : prev);
 
   const at = slideAt(deck, index);
 
@@ -169,7 +159,9 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
     case "setCover":
       return setCover(prev, cmd.slideId, ctx.deck);
     case "clearCover":
-      return clearCover(prev);
+      if (!prev) return fail(API_ERRORS.SHOW_NOT_RUNNING);
+
+      return done(prev.cover ? without(prev, "cover") : prev);
   }
 }
 

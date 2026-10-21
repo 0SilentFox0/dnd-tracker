@@ -12,10 +12,12 @@ import type { ShowState, SlideDeckSummary } from "@/types/show";
 
 const SELECT = "h-8 min-w-0 max-w-64 rounded border bg-transparent px-2 text-sm [&>*]:bg-neutral-900 [&>*]:text-neutral-100";
 
-function DeckOptions({ decks, sceneId }: { decks: SlideDeckSummary[]; sceneId?: string }) {
-  const own = sceneId ? decks.filter((d) => d.scenarioPageId === sceneId) : [];
+const inScene = (sceneId?: string) => (d: SlideDeckSummary) => !!sceneId && d.scenarioPageId === sceneId;
 
-  const rest = decks.filter((d) => !own.includes(d));
+function DeckOptions({ decks, sceneId }: { decks: SlideDeckSummary[]; sceneId?: string }) {
+  const own = decks.filter(inScene(sceneId));
+
+  const rest = decks.filter((d) => !inScene(sceneId)(d));
 
   const options = (list: SlideDeckSummary[]) =>
     list.map((d) => (
@@ -38,7 +40,7 @@ function DeckOptions({ decks, sceneId }: { decks: SlideDeckSummary[]; sceneId?: 
 export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaignId: string; show: ShowState | null; control: ShowControl; sceneId?: string }) {
   const { data: decks } = useDecks(campaignId);
 
-  const deckId = show?.deckId ?? decks?.find((d) => sceneId && d.scenarioPageId === sceneId)?.id ?? null;
+  const deckId = show?.deckId ?? decks?.find(inScene(sceneId))?.id ?? null;
 
   const { data: deck } = useDeck(campaignId, deckId);
 
@@ -82,7 +84,7 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
             const isCover = cover?.deckId === deck.id && cover.slide.id === slide.id;
 
             return (
-              <li key={slide.id} ref={current ? currentRef : undefined} className="relative w-40 shrink-0">
+              <li key={slide.id} ref={current ? currentRef : undefined} className="relative w-32 shrink-0">
                 <button
                   type="button"
                   aria-current={current || undefined}
@@ -90,7 +92,7 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
                   onClick={() => void control.send({ action: "open", deckId: deck.id, slideId: slide.id })}
                   className={cn("block w-full overflow-hidden rounded border text-left", current ? SHOW_TONE.accent : SHOW_TONE.rule)}
                 >
-                  <OptimizedImage src={slide.imageUrl} alt="" width={160} height={90} className="h-[90px] w-40 object-cover" />
+                  <OptimizedImage src={slide.imageUrl} alt="" width={128} height={72} className="h-[72px] w-32 object-cover" />
                   <span className="block truncate px-1.5 py-0.5 text-xs">
                     {i + 1}. {slide.title ?? "Без назви"}
                   </span>

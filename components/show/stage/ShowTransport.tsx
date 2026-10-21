@@ -27,11 +27,11 @@ export function ShowTransport({ campaignId, show, control }: { campaignId: strin
       <ShowButton aria-label="Попередній слайд (←)" title="Попередній слайд (←)" disabled={!running || control.pending || at === 0} onClick={() => void control.send({ action: "prev" })}>
         <ChevronLeft className="size-4" />
       </ShowButton>
-      <span className={cn("min-w-12 text-center text-sm tabular-nums", SHOW_TONE.muted)}>{at >= 0 && deck ? `${at + 1} / ${deck.slides.length}` : "— / —"}</span>
+      <span className={cn("min-w-12 text-center text-sm tabular-nums", SHOW_TONE.muted)}>{at >= 0 ? `${at + 1} / ${deck?.slides.length}` : "— / —"}</span>
       <ShowButton aria-label="Наступний слайд (→)" title="Наступний слайд (→)" disabled={!running || control.pending || (!!deck && at === deck.slides.length - 1)} onClick={() => void control.send({ action: "next" })}>
         <ChevronRight className="size-4" />
       </ShowButton>
-      <ShowButton aria-pressed={!!show?.curtain} title="Заглушка замість слайда (B)" disabled={control.pending} onClick={() => void control.send({ action: "curtain", on: !show?.curtain })}>
+      <ShowButton aria-pressed={!!show?.curtain} title="Заглушка замість слайда (B)" disabled={control.pending} onClick={() => void control.send({ action: "curtain" })}>
         <EyeOff className="size-4" />
         <span className="max-sm:sr-only">Заглушка</span>
       </ShowButton>

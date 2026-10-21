@@ -3,7 +3,8 @@ import type { BattleBrief } from "@/types/battle";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
 
-export type RowSlideState = { kind: "none" } | { kind: "loading" } | { kind: "missing" } | { kind: "ready"; slide: Slide; active: boolean };
+/** current — позиція показу на цьому слайді; active — і гравці його бачать (не під заглушкою). */
+export type RowSlideState = { kind: "none" } | { kind: "loading" } | { kind: "missing" } | { kind: "ready"; slide: Slide; current: boolean; active: boolean };
 
 export type RowBattleState = { kind: "none" } | { kind: "loading" } | { kind: "missing" } | { kind: "ready"; battle: BattleBrief; called: boolean };
 
@@ -34,7 +35,9 @@ export function rowSlideState(row: ScenarioRow, lookup: PlayLookup): RowSlideSta
 
   if (!slide) return { kind: "missing" };
 
-  return { kind: "ready", slide, active: lookup.show?.deckId === deckId && lookup.show.slide?.id === slideId };
+  const current = lookup.show?.deckId === deckId && lookup.show.slide?.id === slideId;
+
+  return { kind: "ready", slide, current, active: current && !lookup.show?.curtain };
 }
 
 export function rowBattleState(row: ScenarioRow, lookup: PlayLookup): RowBattleState {
@@ -59,24 +62,24 @@ export function battleAction(state: RowBattleState): BattleAction {
 
 const slideRows = (content: ScenarioContent) => content.sections.flatMap((s) => s.rows.filter((r) => r.slide));
 
-/** Рядок, чий слайд зараз на екрані (перший, якщо таких кілька). */
-export const activeSlideRow = (content: ScenarioContent, lookup: PlayLookup): ScenarioRow | null => slideRows(content).find((r) => isActive(r, lookup)) ?? null;
-
-const isActive = (row: ScenarioRow, lookup: PlayLookup) => {
+const slideState = (row: ScenarioRow, lookup: PlayLookup) => {
   const state = rowSlideState(row, lookup);
 
-  return state.kind === "ready" && state.active;
+  return state.kind === "ready" ? state : null;
 };
 
-/** Наступний за порядком сценарію рядок із доступним слайдом після поточного; без поточного — перший. */
+/** Рядок, на чиєму слайді стоїть показ (перший, якщо таких кілька). */
+export const currentSlideRow = (content: ScenarioContent, lookup: PlayLookup): ScenarioRow | null => slideRows(content).find((r) => slideState(r, lookup)?.current) ?? null;
+
+/** Перший невидимий гравцям доступний рядок, починаючи з поточного: під заглушкою — сам поточний. */
 export function nextSlideRow(content: ScenarioContent, lookup: PlayLookup): ScenarioRow | null {
   const rows = slideRows(content);
 
-  let from = -1;
+  const from = rows.findLastIndex((r) => slideState(r, lookup)?.current);
 
-  rows.forEach((r, i) => {
-    if (isActive(r, lookup)) from = i;
-  });
+  return rows.slice(Math.max(from, 0)).find((r) => {
+    const state = slideState(r, lookup);
 
-  return rows.slice(from + 1).find((r) => rowSlideState(r, lookup).kind === "ready" && !isActive(r, lookup)) ?? null;
+    return state && !state.active;
+  }) ?? null;
 }

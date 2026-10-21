@@ -115,7 +115,7 @@ describe("ScenarioPageView — режим гри", () => {
 
     expect(story?.firstElementChild?.classList.contains("sb-play")).toBe(true);
     expect(screen.getByText("Слайд")).toBeTruthy();
-    expect(screen.getByText(/підготовлено/)).toBeTruthy();
+    expect(screen.getByText(/підготовлений/)).toBeTruthy();
   });
 
   it("слайд на екрані — «На екрані» замість кнопки; під заглушкою — знову кнопка", () => {
