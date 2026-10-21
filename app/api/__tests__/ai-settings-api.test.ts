@@ -39,6 +39,7 @@ describe("AI settings API", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ instructions: "Темне фентезі" });
+    expect(prisma.campaign.findUnique).toHaveBeenCalledWith(expect.objectContaining({ select: { aiInstructions: true } }));
   });
 
   it("PUT обрізає пробіли і зберігає", async () => {

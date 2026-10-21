@@ -13,6 +13,9 @@ import { prisma } from "@/lib/db";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import type { PublicUser } from "@/types/campaigns";
 
+// aiInstructions is DM-only and always omitted from page reads
+type PublicCampaign = Omit<Campaign, "aiInstructions">;
+
 type SlimMembership = {
   userId: string;
   role: string;
@@ -28,7 +31,7 @@ type FullMembership = CampaignMember & { user: PublicUser };
  * не потрібен повний список members.
  */
 export async function requireCampaignMember(campaignId: string): Promise<{
-  campaign: Campaign;
+  campaign: PublicCampaign;
   userId: string;
   role: string;
   isDM: boolean;
@@ -45,6 +48,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
         where: { userId },
       },
     },
+    omit: { aiInstructions: true },
   });
 
   if (!campaign) redirect("/campaigns");
@@ -56,7 +60,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
   return {
     // members не повертаємо — це лише slim access-check map.
     // Споживачі, яким треба список members, кличуть requireCampaignWithMembers.
-    campaign: campaign as Campaign,
+    campaign,
     userId,
     role: member.role,
     isDM: member.role === CampaignRole.DM,
@@ -69,7 +73,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
  * Не-DM → redirect(`/campaigns/${id}`).
  */
 export async function requireCampaignDM(campaignId: string): Promise<{
-  campaign: Campaign;
+  campaign: PublicCampaign;
   userId: string;
   authUser: Awaited<ReturnType<typeof getAuthUser>>;
 }> {
@@ -93,7 +97,7 @@ export async function requireCampaignDM(campaignId: string): Promise<{
 export async function requireCampaignWithMembers(
   campaignId: string,
 ): Promise<{
-  campaign: Campaign & {
+  campaign: PublicCampaign & {
     members: FullMembership[];
     dm: PublicUser | null;
   };
@@ -115,6 +119,7 @@ export async function requireCampaignWithMembers(
       },
       dm: { select: PUBLIC_USER_SELECT },
     },
+    omit: { aiInstructions: true },
   });
 
   if (!campaign) redirect("/campaigns");
