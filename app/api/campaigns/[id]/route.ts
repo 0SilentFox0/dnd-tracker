@@ -16,6 +16,9 @@ const CAMPAIGN_INCLUDE = {
   dm: { select: PUBLIC_USER_SELECT },
 } as const;
 
+// DM-only; never returned to members
+const CAMPAIGN_OMIT = { aiInstructions: true } as const;
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -34,6 +37,7 @@ export async function GET(
     const campaign = await prisma.campaign.findUnique({
       where: { id },
       include: CAMPAIGN_INCLUDE,
+      omit: CAMPAIGN_OMIT,
     });
 
     if (!campaign) {
@@ -78,6 +82,7 @@ export async function PATCH(
         status: data.status,
       },
       include: CAMPAIGN_INCLUDE,
+      omit: CAMPAIGN_OMIT,
     });
 
     await invalidateCampaignLists(updatedCampaign.members.map((m) => m.userId));

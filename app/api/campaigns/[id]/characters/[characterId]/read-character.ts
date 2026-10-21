@@ -19,7 +19,7 @@ export async function readCharacter(campaignId: string, characterId: string): Pr
     include: {
       user: { select: PUBLIC_USER_SELECT },
       inventory: true,
-      campaign: { include: { members: { where: { userId } } } },
+      campaign: { omit: { aiInstructions: true }, include: { members: { where: { userId } } } },
     },
   });
 

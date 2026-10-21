@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LogOut, Menu, User } from "lucide-react";
+import { Home, LogOut, Menu, Sparkles, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -124,6 +124,11 @@ export function Header({ email }: { email: string | null }) {
                         Сценарій
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/ai`}>
+                        AI і API
+                      </Link>
+                    </DropdownMenuItem>
                   </>
                 )}
                 {isPlayerPage && (
@@ -166,6 +171,12 @@ export function Header({ email }: { email: string | null }) {
                   <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuItem asChild>
+                <Link href="/settings/ai">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI-ключі
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Вийти

@@ -1,5 +1,5 @@
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "./music";
-import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB } from "./show";
+import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB, MAX_SLIDES_PER_DECK } from "./show";
 
 export const API_ERRORS = {
   UNAUTHORIZED: "Потрібна авторизація",
@@ -53,6 +53,7 @@ export const API_ERRORS = {
   BATTLE_AUDIO_CONFLICT: "Стан музики змінився — повторіть",
   DECK_NOT_FOUND: "Набір слайдів не знайдено",
   DECK_CONFLICT: "Набір змінено в іншому місці — оновіть сторінку",
+  DECK_SLIDES_LIMIT: `У наборі вже ${MAX_SLIDES_PER_DECK} слайдів — оберіть інший набір`,
   DECK_LIMIT: `У кампанії вже ${MAX_DECKS_PER_CAMPAIGN} наборів — видаліть зайві`,
   SLIDE_NOT_FOUND: "Слайд не знайдено",
   SLIDE_FILE_INVALID: `Потрібна картинка WebP або JPEG до ${MAX_SLIDE_MB} МБ`,
@@ -68,4 +69,23 @@ export const API_ERRORS = {
   SCENARIO_TOO_LARGE: "Сторінка завелика (понад 512 КБ) — розділіть її на кілька",
   SCENARIO_CONTENT_INVALID: "Вміст сторінки пошкоджено й не може бути відкритий — відновіть попередню версію або зверніться до підтримки",
   SCENARIO_CHARACTER_INVALID: "Персонажа не знайдено в цій кампанії",
+  AI_NOT_CONFIGURED: "AI-асистент не налаштований на сервері",
+  AI_KEY_INVALID: "Ключ недійсний або відкликаний",
+  AI_MODEL_FORBIDDEN: "Немає доступу до цієї моделі з вашим ключем — оберіть іншу модель або перевірте тариф провайдера",
+  AI_KEY_UNREADABLE: "Збережений ключ не вдається прочитати (змінився секрет сервера) — збережіть ключ заново в «AI-ключі»",
+  AI_KEY_MISSING: "Додайте ключ цього провайдера в «Налаштування → AI»",
+  AI_RATE_LIMIT: "Ліміт провайдера, спробуйте за хвилину",
+  AI_PROVIDER_DOWN: "Провайдер недоступний, спробуйте пізніше",
+  AI_MODEL_UNKNOWN: "Невідома модель для цього провайдера",
+  AI_IMAGE_REJECTED: "Провайдер відхилив запит (фільтр безпеки) — змініть опис",
+  AI_ONE_IMAGE_PER_REQUEST: "За один запит — одна картинка",
+  AI_THREAD_NOT_FOUND: "Тред не знайдено",
+  AI_PROPOSAL_NOT_FOUND: "Пропозицію не знайдено",
+  AI_PROPOSAL_STALE: "Фрагмент змінився після пропозиції — попросіть AI переробити її",
+  AI_PROPOSAL_INVALID: "Результат пропозиції порушує обмеження сторінки (наприклад, забагато рядків у розділі) — попросіть AI переробити її",
+  AI_PROPOSAL_STALE_DECK: "Набір, до якого AI пропонував слайд, видалено — попросіть AI зробити нову пропозицію",
+  DECK_CORRUPT: "Слайди набору пошкоджені й не можуть бути доповнені — відкрийте набір і збережіть його знову",
+  AI_IMAGE_NOT_OWNED: "Це зображення не належить кампанії",
+  AI_PROPOSAL_DONE: "Пропозицію вже застосовано або відхилено",
+  API_TOKEN_NOT_FOUND: "Токен не знайдено",
 } as const;

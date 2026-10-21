@@ -177,3 +177,5 @@
   .scenario-book .sb-show-now { flex: 1 1 100%; }
   .scenario-book .sb-show-body { padding: 4px 12px 8px; max-height: 32vh; }
 }
+
+@media (min-width: 1024px) { .scenario-book.sb-with-ai { padding-right: var(--ai-panel-w, 420px); } }

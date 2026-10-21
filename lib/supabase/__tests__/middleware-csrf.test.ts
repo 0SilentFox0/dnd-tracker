@@ -131,4 +131,14 @@ describe("rejectCrossOriginMutation", () => {
 
     expect(r?.status).toBe(403);
   });
+
+  it("exempts /api/mcp (bearer-only) from the Origin check", () => {
+    expect(rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/mcp", origin: "https://evil.example" }))).toBeNull();
+  });
+
+  it("still rejects a foreign Origin on other AI routes", () => {
+    const r = rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/campaigns/x/ai/threads", origin: "https://evil.example" }));
+
+    expect(r?.status).toBe(403);
+  });
 });

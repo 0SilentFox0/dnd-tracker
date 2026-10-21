@@ -29,6 +29,8 @@ const mapSection = (c: ScenarioContent, sectionId: string, fn: (s: ScenarioSecti
   sections: c.sections.map((s) => (s.id === sectionId ? fn(s) : s)),
 });
 
+export const pickLiveSection = (c: ScenarioContent): ScenarioSection | null => c.sections.find((s) => !s.played) ?? null;
+
 export const addSection = (c: ScenarioContent, title: string): ScenarioContent => ({ ...c, sections: [...c.sections, newSection(title)] });
 
 export const updateSection = (c: ScenarioContent, sectionId: string, patch: Partial<Omit<ScenarioSection, "id" | "rows">>): ScenarioContent =>

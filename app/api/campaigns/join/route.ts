@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     const campaign = await prisma.campaign.findUnique({
       where: { inviteCode },
       include: { members: { select: { userId: true } } },
+      omit: { aiInstructions: true },
     });
 
     if (!campaign) {
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
         role: CampaignRole.PLAYER,
       },
       include: {
-        campaign: true,
+        campaign: { omit: { aiInstructions: true } },
         user: { select: PUBLIC_USER_SELECT },
       },
     });
