@@ -6,11 +6,12 @@ import Link from "next/link";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import { LoadingState, QueryState } from "@/components/common/states";
-import { ScenarioBar, ScenarioBook, ScenarioPageView } from "@/components/scenario";
+import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
+import { useMediaQuery } from "@/lib/hooks/common";
 import { useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
@@ -45,6 +46,12 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   const [versionsOpen, setVersionsOpen] = useState(false);
 
   const [aiOpen, setAiOpen] = useState(false);
+
+  const [tocOpen, setTocOpen] = useState(false);
+
+  const wide = useMediaQuery("(min-width: 1200px)");
+
+  const tocInline = wide && !(aiEnabled && aiOpen);
 
   const [pendingShown, setPendingShown] = useState(false);
 
@@ -119,6 +126,9 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
       {editBase ? (
         <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} />
       ) : (
+        <ScenarioLayout
+          toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", playedLookup(playedPages))} inline={tocInline} drawer={{ open: tocOpen, onOpenChange: setTocOpen }} onPick={collapse.expand} />}
+        >
         <ScenarioPageView
           page={page}
           campaignId={campaignId}
@@ -137,6 +147,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           }}
           collapse={collapse}
         />
+        </ScenarioLayout>
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}
       {aiEnabled && aiOpen && (

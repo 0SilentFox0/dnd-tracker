@@ -1,4 +1,5 @@
 export { scenarioKeys } from "./keys";
+export { useActiveSection } from "./useActiveSection";
 export { useMentionSearch } from "./useMentionSearch";
 export { type DraftError, type DraftState, useScenarioDraft } from "./useScenarioDraft";
 export { useScenarioPage } from "./useScenarioPage";
