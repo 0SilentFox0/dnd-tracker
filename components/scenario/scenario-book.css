@@ -39,7 +39,10 @@
 .scenario-book .legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
 
 .scenario-book main { max-width: 1180px; margin: 0 auto; padding: 0 24px 120px; }
-.scenario-book section { margin-top: 56px; scroll-margin-top: 72px; }
+.scenario-book section { margin-top: 56px; scroll-margin-top: calc(var(--app-header-h, 89px) + var(--sb-bar-h, 49px) + var(--sb-toolbar-h, 0px) + 16px); }
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.scenario-book) { scroll-behavior: smooth; }
+}
 .scenario-book section > h2 { font-size: 30px; font-weight: 500; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); display: flex; gap: 12px; align-items: baseline; }
 .scenario-book section > h2 .played { margin-left: auto; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; }
 .scenario-book section.is-played > h2 { color: var(--ink-soft); }
