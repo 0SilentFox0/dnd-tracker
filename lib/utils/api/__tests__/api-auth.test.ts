@@ -76,9 +76,10 @@ describe("api-auth", () => {
 
       await requireCampaignAccess("c1");
 
-      expect(findCampaign).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: "c1" }, include: { members: { where: { userId: "u1" } } } }),
-      );
+      expect(findCampaign).toHaveBeenCalledWith({
+        where: { id: "c1" },
+        select: { id: true, maxLevel: true, allowPlayerEdit: true, members: { where: { userId: "u1" }, select: { userId: true, role: true } } },
+      });
     });
 
     it("неіснуюча кампанія — 404", async () => {
