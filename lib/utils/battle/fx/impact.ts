@@ -32,7 +32,11 @@ export function impactFor(spec: FxSpec | undefined, participantId: string): FxIm
 export function splashTargetIds(action: BattleAction, main: FxSpec | undefined): string[] {
   if (!main || (main.archetype !== "melee" && main.archetype !== "ranged")) return [];
 
-  const ids = action.hpChanges.filter((h) => h.change > 0 && h.participantId !== action.actorId && !main.targetIds.includes(h.participantId)).map((h) => h.participantId);
+  return splashVictimIds(action, [action.actorId, ...main.targetIds]);
+}
+
+export function splashVictimIds(action: BattleAction, exclude: string[]): string[] {
+  const ids = action.hpChanges.filter((h) => h.change > 0 && !exclude.includes(h.participantId)).map((h) => h.participantId);
 
   return [...new Set(ids)];
 }

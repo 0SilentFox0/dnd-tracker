@@ -1,4 +1,7 @@
+import { damageTaken } from "./damage-taken";
+
 import type { AttackOutcomeSummary } from "@/lib/utils/battle/flows";
+import { splashVictimIds } from "@/lib/utils/battle/fx/impact";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -8,8 +11,6 @@ export function volleyResults(log: BattleAction[], seen: ReadonlySet<number>, at
 
     return !!p && !isUp(p);
   };
-
-  const damageTo = (a: BattleAction, id: string) => a.hpChanges.filter((h) => h.participantId === id).reduce((sum, h) => sum + Math.max(0, h.change), 0);
 
   return log
     .filter((a) => !seen.has(a.actionIndex) && !a.isCancelled && a.actorId === attackerId && a.actionType === "attack")
@@ -23,10 +24,10 @@ export function volleyResults(log: BattleAction[], seen: ReadonlySet<number>, at
 
       const kind = d.isHit === false || d.isCriticalFail ? "miss" : d.isCritical ? "crit" : "hit";
 
-      const main: AttackOutcomeSummary = { kind, targetId, damage: damageTo(a, targetId), downed: downed(targetId) };
+      const main: AttackOutcomeSummary = { kind, targetId, damage: damageTaken(a, targetId), downed: downed(targetId) };
 
-      const splash = [...new Set(a.hpChanges.filter((h) => h.change > 0 && h.participantId !== targetId && h.participantId !== attackerId).map((h) => h.participantId))].map(
-        (id): AttackOutcomeSummary => ({ kind: "hit", targetId: id, damage: damageTo(a, id), downed: downed(id), splash: true }),
+      const splash = splashVictimIds(a, [targetId, attackerId]).map(
+        (id): AttackOutcomeSummary => ({ kind: "hit", targetId: id, damage: damageTaken(a, id), downed: downed(id), splash: true }),
       );
 
       return [main, ...splash];

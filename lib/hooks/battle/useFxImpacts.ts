@@ -52,18 +52,10 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
     };
 
     actions.forEach(({ action, main }, i) => {
-      for (const id of main?.targetIds ?? []) {
-        const impact = impactFor(main, id);
-
-        if (!impact) continue;
-
-        // прихована вкладка = FX-черга неактивна: показ без очікування сигналу
-        result.set(id, hidden ? impact : { ...impact, actionId: action.id, waitMs: waitFrom(i) });
-      }
-
-      for (const id of splashTargetIds(action, main)) {
+      for (const id of [...(main?.targetIds ?? []), ...splashTargetIds(action, main)]) {
         const impact = impactFor(main && { ...main, targetIds: [id] }, id);
 
+        // прихована вкладка = FX-черга неактивна: показ без очікування сигналу
         if (impact) result.set(id, hidden ? impact : { ...impact, actionId: action.id, waitMs: waitFrom(i) });
       }
     });

@@ -48,7 +48,7 @@ describe("resolveAttackTargets", () => {
 
     const r = resolveAttackTargets({ ...base, attack: ranged, chosen: [e1], flags });
 
-    expect(r).toMatchObject({ targets: [e1], chain: true, chainJumps: 2, chainPercent: 0.5, volley: false });
+    expect(r).toMatchObject({ targets: [e1], chain: { jumps: 2, percent: 0.5 }, volley: false });
     expect(() => resolveAttackTargets({ ...base, attack: ranged, chosen: [e1, e2], targetIds: ["e1", "e2"], flags })).toThrow("Максимум: 1");
   });
 });

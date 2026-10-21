@@ -46,14 +46,14 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const map = scene.battle.map;
 
   const cover = useMemo(() => {
-    if (!attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();
+    if (state.step === "closed" || !attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();
 
     const seen = order.filter((p) => p === attacker || visible(p));
 
     const candidates = seen.filter((p) => p !== attacker && isUp(p));
 
     return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
-  }, [attacker, attack, map, order, visible]);
+  }, [state.step, attacker, attack, map, order, visible]);
 
   const steps = useMemo<DamageStep[][]>(() => {
     if (!attacker || !attack || state.step !== "summary") return [];
@@ -164,7 +164,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const d20 = effectiveD20(strike, strikeMode(state, strike));
 
-      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, ...(r.splash && { splash: true }) })) : undefined;
+      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
 
       if (first.kind === "miss" || crit?.type === "fail") {
         const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));

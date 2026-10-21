@@ -4,6 +4,7 @@ import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core
 import { attackMaxTargets, isCleave } from "@/lib/utils/battle/attack/max-targets";
 import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
 import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -29,10 +30,8 @@ export interface AttackTargets {
   falloff: number;
   /** З цього індексу d20 і кубики шкоди кидає сервер (автоцілі розщеплення). */
   serverRolledFrom: number;
-  chain: boolean;
-  /** Частка шкоди попереднього пострілу на кожен стрибок. */
-  chainPercent: number;
-  chainJumps: number;
+  /** `percent` — частка шкоди попереднього пострілу на кожен стрибок. */
+  chain: { jumps: number; percent: number } | null;
 }
 
 const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t);
@@ -40,7 +39,7 @@ const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.bas
 export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags }: AttackTargetsInput): AttackTargets {
   const isAoe = attack.targetType === "aoe";
 
-  const isRanged = attack.type === AttackType.RANGED;
+  const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
 
   const hitsAllEnemies = flags.attackHitsAllEnemies.length > 0;
 
@@ -56,9 +55,9 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(attacker)));
 
-  const chain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
+  const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 
-  const limit = attackMaxTargets(attacker, attack, { chain, onMap });
+  const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
 
   if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${limit}`);
 
@@ -72,7 +71,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   if (targets.length === 0) throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
 
-  const volley = !chain && (expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
+  const volley = !isChain && (expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
 
   const falloffPercents = expanded ? [] : flags.multiTargetFalloff.map((f) => f.percent);
 
@@ -83,8 +82,6 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
     volley,
     falloff: falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1,
     serverRolledFrom: cleave ? 1 : targets.length,
-    chain,
-    chainPercent: (flags.chainShot[0]?.percent ?? 100) / 100,
-    chainJumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)),
+    chain: isChain ? { jumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)), percent: (flags.chainShot[0]?.percent ?? 100) / 100 } : null,
   };
 }

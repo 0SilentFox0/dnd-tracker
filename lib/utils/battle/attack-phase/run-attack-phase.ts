@@ -53,7 +53,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff", "chainShot"]);
 
-  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain, chainPercent, chainJumps } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
   const fractions = damageFractions(targets, attack, { volley, falloff });
 
@@ -75,16 +75,18 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
 
-  const strikeAt = (target: BattleParticipant, i: number, opts: { serverD20: boolean; multiplier?: number; cover: boolean; hop?: boolean }) => {
+  const live = (p: BattleParticipant) => findParticipant(currentInitiativeOrder, p.basicInfo.id) ?? p;
+
+  const strikeAt = (target: BattleParticipant, i: number, opts: { serverRolled: boolean; multiplier?: number; cover: boolean }) => {
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const strike = opts.serverD20 ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = opts.serverRolled ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
     const strikeDice = dice.next();
 
-    const second = opts.hop ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+    const second = opts.serverRolled ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
-    const victim = findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target;
+    const victim = live(target);
 
     const obstacle = opts.cover && lineOfFire(input.map, currentInitiativeOrder, currentAttacker, victim).blocked;
 
@@ -155,31 +157,35 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     return attackResult;
   };
 
+  let firstHit = false;
+
   for (let i = 0; i < targets.length; i++) {
     // пробивний летить крізь цілі: штраф лише на першу
-    strikeAt(targets[i], i, { serverD20: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0), hop: i >= serverRolledFrom });
+    const result = strikeAt(targets[i], i, { serverRolled: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0) });
+
+    if (i === 0) firstHit = result.success;
 
     if (!isActive(currentAttacker)) break;
   }
 
-  if (chain && allBattleActions.find((e) => e.actionType === "attack")?.actionDetails.isHit) {
+  if (chain && firstHit) {
     const hit = new Set([targets[0].basicInfo.id]);
 
-    let from = findParticipant(currentInitiativeOrder, targets[0].basicInfo.id) ?? targets[0];
+    let from = live(targets[0]);
 
-    for (let jump = 1; jump <= chainJumps && isActive(currentAttacker); jump++) {
+    for (let jump = 1; jump <= chain.jumps && isActive(currentAttacker); jump++) {
       const next = nextChainTarget({ map: input.map, order: currentInitiativeOrder, attacker: currentAttacker, attack, from, hit });
 
       if (!next) break;
 
-      const result = strikeAt(next, jump, { serverD20: true, multiplier: chainPercent ** jump, cover: false, hop: true });
+      const result = strikeAt(next, jump, { serverRolled: true, multiplier: chain.percent ** jump, cover: false });
 
       result.battleAction.actionDetails.chainFromId = from.basicInfo.id;
       hit.add(next.basicInfo.id);
 
       if (!result.success) break;
 
-      from = findParticipant(currentInitiativeOrder, next.basicInfo.id) ?? next;
+      from = live(next);
     }
   }
 

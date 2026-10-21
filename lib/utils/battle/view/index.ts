@@ -1,5 +1,6 @@
 export * from "./crit-outcome";
 export * from "./damage-step";
+export * from "./damage-taken";
 export * from "./downed-heroes";
 export * from "./effect-summary";
 export * from "./health";

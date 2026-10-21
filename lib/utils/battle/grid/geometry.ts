@@ -97,7 +97,7 @@ export function blockedSet(map: Pick<BattleMapConfig, "blocked">): ReadonlySet<s
 
 const impassableCache = new WeakMap<Record<string, TerrainCell>, Set<string>>();
 
-function impassableSet(map: Pick<BattleMapConfig, "terrain">): ReadonlySet<string> {
+export function impassableSet(map: Pick<BattleMapConfig, "terrain">): ReadonlySet<string> {
   const terrain = map.terrain;
 
   if (!terrain) return EMPTY_SET;

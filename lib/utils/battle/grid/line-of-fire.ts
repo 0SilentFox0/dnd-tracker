@@ -1,4 +1,4 @@
-import { blockedSet, cellKey, cellLine, closestCell, inBounds } from "./geometry";
+import { blockedSet, cellKey, cellLine, closestCell, impassableSet, inBounds } from "./geometry";
 import { bothOnMap, cellsOf, occupiedBy } from "./occupancy";
 
 import { isAirborne } from "@/lib/utils/abilities/engine/core/participants";
@@ -33,15 +33,15 @@ export function lineOfFire(map: BattleMapConfig | null | undefined, participants
 
   const blocked = blockedSet(map);
 
+  const impassable = impassableSet(map);
+
   const cells = line
     .filter((c) => {
       const key = cellKey(c);
 
       if (own.has(key)) return false;
 
-      const kind = map.terrain?.[key]?.kind;
-
-      return !inBounds(map, c) || blocked.has(key) || kind === "wall" || kind === "barrier" || occupied.has(key);
+      return !inBounds(map, c) || blocked.has(key) || impassable.has(key) || occupied.has(key);
     })
     .map(cellKey);
 

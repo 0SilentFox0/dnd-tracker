@@ -10,5 +10,18 @@ export function nearestTo(from: BattleParticipant, candidates: BattleParticipant
 
   const distance = (p: BattleParticipant) => (isOnMap(p) ? footprintDistance(origin, cellsOf(p)) : Infinity);
 
-  return candidates.reduce<BattleParticipant | undefined>((best, p) => (!best || distance(p) < distance(best) ? p : best), undefined);
+  let best: BattleParticipant | undefined;
+
+  let bestDistance = Infinity;
+
+  for (const p of candidates) {
+    const d = distance(p);
+
+    if (!best || d < bestDistance) {
+      best = p;
+      bestDistance = d;
+    }
+  }
+
+  return best;
 }
