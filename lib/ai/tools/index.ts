@@ -5,6 +5,7 @@ import type { z } from "zod";
 import { getBattleStateTool } from "./battle";
 import { type AiToolContext, type AiToolDef, runTool } from "./define";
 import { getPartyTool, readCharacterTool } from "./party";
+import { proposeScenarioEditTool } from "./propose";
 import { readReferenceTool, searchReferenceTool } from "./reference";
 import { listScenarioPagesTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
 import { getShowStateTool } from "./show";
@@ -18,6 +19,7 @@ export const AI_TOOLS: AiToolDef[] = [listScenarioPagesTool, readScenarioPageToo
   getBattleStateTool,
   searchReferenceTool,
   readReferenceTool,
+  proposeScenarioEditTool,
 ];
 
 export function toAiSdkTools(ctx: AiToolContext): ToolSet {
