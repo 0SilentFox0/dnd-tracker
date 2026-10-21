@@ -13,7 +13,9 @@ const statusOf = (error: unknown) => {
 export function aiErrorMessage(error: unknown): string {
   const status = statusOf(error);
 
-  if (status === 401 || status === 403) return API_ERRORS.AI_KEY_INVALID;
+  if (status === 401) return API_ERRORS.AI_KEY_INVALID;
+
+  if (status === 403 || status === 404) return API_ERRORS.AI_MODEL_FORBIDDEN;
 
   if (status === 429) return API_ERRORS.AI_RATE_LIMIT;
 

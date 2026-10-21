@@ -25,6 +25,7 @@ export const AI_MODELS: Record<AiProvider, AiModelOption[]> = {
   ],
   google: [
     { id: "gemini-3.5-flash-lite", label: "Gemini 3.5 Flash-Lite", tier: "fast" },
+    { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", tier: "smart" },
     { id: "gemini-3.8-flash", label: "Gemini 3.8 Flash", tier: "smart" },
   ],
 };

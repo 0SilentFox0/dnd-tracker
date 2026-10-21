@@ -9,7 +9,8 @@ const callError = (statusCode: number, body = "") => new APICallError({ message:
 describe("aiErrorMessage", () => {
   it.each([
     [401, API_ERRORS.AI_KEY_INVALID],
-    [403, API_ERRORS.AI_KEY_INVALID],
+    [403, API_ERRORS.AI_MODEL_FORBIDDEN],
+    [404, API_ERRORS.AI_MODEL_FORBIDDEN],
     [429, API_ERRORS.AI_RATE_LIMIT],
     [500, API_ERRORS.AI_PROVIDER_DOWN],
     [529, API_ERRORS.AI_PROVIDER_DOWN],
@@ -29,5 +30,6 @@ describe("aiErrorMessage", () => {
 
     expect(aiErrorMessage(wrap(callError(429)))).toBe(API_ERRORS.AI_RATE_LIMIT);
     expect(aiErrorMessage(wrap(callError(401)))).toBe(API_ERRORS.AI_KEY_INVALID);
+    expect(aiErrorMessage(wrap(callError(403)))).toBe(API_ERRORS.AI_MODEL_FORBIDDEN);
   });
 });
