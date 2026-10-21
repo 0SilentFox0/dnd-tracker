@@ -7,6 +7,7 @@ export * from "./line-of-fire";
 export * from "./map-editor";
 export * from "./map-scene";
 export * from "./map-view";
+export * from "./nearest";
 export * from "./occupancy";
 export * from "./path";
 export * from "./placement";
