@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioPageView } from "@/components/scenario";
-import type { ScenarioPlay } from "@/lib/hooks/scenario";
+import type { ScenarioPlay, SectionCollapse } from "@/lib/hooks/scenario";
 import type { ScenarioPage, ScenarioRow } from "@/types/scenario";
 
 afterEach(cleanup);
@@ -16,6 +16,69 @@ const page = (kind: ScenarioPage["kind"]): ScenarioPage => ({
 });
 
 describe("ScenarioPageView", () => {
+  const collapse = (over: Partial<SectionCollapse> = {}): SectionCollapse => ({ showPlayed: false, setShowPlayed: vi.fn(), isExpanded: () => false, expand: vi.fn(), ...over });
+
+  it("зіграний розділ згорнутий у рядок; клік розгортає; незіграний не згортається", () => {
+    const pg = page("scene");
+
+    pg.content.sections[0].played = true;
+    pg.content.sections.push({ id: "s11", title: "1.1 Далі", played: false, rows: [{ id: "r2", story: p("Наступне"), notes: p("") }] });
+
+    const c = collapse();
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" collapse={c} />);
+
+    expect(container.querySelector("#sec-s10 .sb-rows")?.hasAttribute("hidden")).toBe(true);
+    expect(container.querySelector("#sec-s11 .sb-rows")?.hasAttribute("hidden")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: /1\.0 Собор/ }));
+    expect(c.expand).toHaveBeenCalledWith("s10");
+  });
+
+  it("розгорнутий через collapse зіграний розділ показує рядки", () => {
+    const pg = page("scene");
+
+    pg.content.sections[0].played = true;
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" collapse={collapse({ isExpanded: () => true })} />);
+
+    expect(container.querySelector("#sec-s10 .sb-rows")?.hasAttribute("hidden")).toBe(false);
+    expect(container.querySelector("#sec-s10 .sb-sec-collapsed")).toBeNull();
+  });
+
+  it("герой: глава з revealedAt згортається", () => {
+    const pg = page("hero");
+
+    pg.content.sections[0].revealedAt = "2026-10-21";
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" collapse={collapse()} />);
+
+    expect(container.querySelector("#sec-s10 .sb-rows")?.hasAttribute("hidden")).toBe(true);
+  });
+
+  it("без collapse зігране не згортається", () => {
+    const pg = page("scene");
+
+    pg.content.sections[0].played = true;
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" />);
+
+    expect(container.querySelector("#sec-s10 .sb-rows")?.hasAttribute("hidden")).toBe(false);
+  });
+
+  it("заголовок розділу з іконкою за типом і ручною іконкою", () => {
+    const pg = page("scene");
+
+    pg.content.sections.push({ id: "s11", title: "1.1 Бій", played: false, rows: [{ id: "r2", story: p("x"), notes: p(""), battleId: "b1" }] });
+    pg.content.sections.push({ id: "s12", title: "1.2 Привал", played: false, icon: "rest", rows: [] });
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" />);
+
+    expect(container.querySelector("#sec-s10 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("scene");
+    expect(container.querySelector("#sec-s11 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("battle");
+    expect(container.querySelector("#sec-s12 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("rest");
+    expect(container.querySelector("#sec-s10 h2")?.textContent).toBe("1.0 Собор");
+  });
+
   it("заголовок, легенда, розділ з якорем, story і notes", () => {
     const { container } = render(<ScenarioPageView page={page("scene")} campaignId="c" />);
 
