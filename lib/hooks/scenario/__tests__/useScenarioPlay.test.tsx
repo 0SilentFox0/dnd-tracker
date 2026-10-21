@@ -122,3 +122,37 @@ describe("useScenarioPlay", () => {
     expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
   });
 });
+
+describe("useScenarioPlay — наступний рядок і заглушка", () => {
+  const shown = (over: Partial<ShowState> = {}): ShowState => ({ deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1, ...over });
+
+  it("showSlide активного рядка під заглушкою знімає заглушку", async () => {
+    show = shown({ curtain: true });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+    act(() => result.current.showSlide(slideRow));
+
+    expect(send).toHaveBeenCalledWith({ action: "curtain", on: false });
+  });
+
+  it("showNextRow без показу відкриває перший рядок; далі нічого — null", async () => {
+    const { result, rerender } = setup();
+
+    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+
+    let row: ScenarioRow | null = null;
+
+    act(() => void (row = result.current.showNextRow()));
+    expect(row).toBe(slideRow);
+    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
+
+    show = shown();
+    rerender();
+    send.mockClear();
+    act(() => void (row = result.current.showNextRow()));
+    expect(row).toBeNull();
+    expect(send).not.toHaveBeenCalled();
+  });
+});

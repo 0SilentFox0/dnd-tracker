@@ -56,3 +56,27 @@ export function battleAction(state: RowBattleState): BattleAction {
 
   return state.battle.status === BattleStatus.ACTIVE ? "call" : "none";
 }
+
+const slideRows = (content: ScenarioContent) => content.sections.flatMap((s) => s.rows.filter((r) => r.slide));
+
+/** Рядок, чий слайд зараз на екрані (перший, якщо таких кілька). */
+export const activeSlideRow = (content: ScenarioContent, lookup: PlayLookup): ScenarioRow | null => slideRows(content).find((r) => isActive(r, lookup)) ?? null;
+
+const isActive = (row: ScenarioRow, lookup: PlayLookup) => {
+  const state = rowSlideState(row, lookup);
+
+  return state.kind === "ready" && state.active;
+};
+
+/** Наступний за порядком сценарію рядок із доступним слайдом після поточного; без поточного — перший. */
+export function nextSlideRow(content: ScenarioContent, lookup: PlayLookup): ScenarioRow | null {
+  const rows = slideRows(content);
+
+  let from = -1;
+
+  rows.forEach((r, i) => {
+    if (isActive(r, lookup)) from = i;
+  });
+
+  return rows.slice(from + 1).find((r) => rowSlideState(r, lookup).kind === "ready" && !isActive(r, lookup)) ?? null;
+}

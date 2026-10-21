@@ -372,6 +372,8 @@ model CampaignShow {
   nextImageUrl String?
   audio        Json?
   battle       Json?
+  cover        Json?
+  curtain      Boolean  @default(false)
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)

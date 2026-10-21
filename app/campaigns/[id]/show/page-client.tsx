@@ -18,7 +18,7 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
 
   const control = useShowControl(campaignId, notify);
 
-  useShowKeys(isDM ? control : null);
+  useShowKeys(isDM ? control : null, { show });
 
   const host = useShowAudioHost({ campaignId, isDM, onFailure: notify });
 

@@ -17,14 +17,14 @@ const press = (init: KeyboardEventInit & { key: string }, target: EventTarget = 
   return event;
 };
 
-const setup = (pending = false) => {
+const setup = (pending = false, options = {}) => {
   let finish!: (ok: boolean) => void;
 
   const send = vi.fn(() => new Promise<boolean>((r) => (finish = r)));
 
   const control: ShowControl = { send, pending };
 
-  renderHook(() => useShowKeys(control));
+  renderHook(() => useShowKeys(control, options));
 
   return { send, finish: (ok = true) => finish(ok) };
 };
@@ -74,6 +74,24 @@ describe("useShowKeys", () => {
 
     dialog.setAttribute("role", "dialog");
     press({ key: "ArrowRight" });
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("B перемикає заглушку за поточним станом (e.code — працює і на українській розкладці)", () => {
+    const { send, finish } = setup(false, { show: { curtain: true } });
+
+    press({ key: "и", code: "KeyB" });
+    expect(send).toHaveBeenLastCalledWith({ action: "curtain", on: false });
+    finish();
+  });
+
+  it("N — колбек наступного рядка, без команди", () => {
+    const onNextRow = vi.fn();
+
+    const { send } = setup(false, { onNextRow });
+
+    press({ key: "т", code: "KeyN" });
+    expect(onNextRow).toHaveBeenCalledOnce();
     expect(send).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { battleAction, boundDeckIds, type PlayLookup, rowBattleState, rowSlideState } from "../play";
+import { activeSlideRow, battleAction, boundDeckIds, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "../play";
 
 import type { RichDoc, ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
@@ -60,5 +60,29 @@ describe("boundDeckIds", () => {
     const content: ScenarioContent = { legend: [], sections: [{ id: "s", title: "", played: false, rows: [row({ slide: { deckId: "d1", slideId: "a" } }), row({ id: "r2", slide: { deckId: "d1", slideId: "b" } }), row({ id: "r3", slide: { deckId: "d2", slideId: "c" } }), row({ id: "r4" })] }] };
 
     expect(boundDeckIds(content)).toEqual(["d1", "d2"]);
+  });
+});
+
+describe("activeSlideRow / nextSlideRow", () => {
+  const content = (rows: ScenarioRow[][]): ScenarioContent => ({ legend: [], sections: rows.map((r, i) => ({ id: `s${i}`, title: `Розділ ${i}`, rows: r })) }) as unknown as ScenarioContent;
+
+  const a = row({ id: "ra", slide: { deckId: "d1", slideId: "slide-a" } });
+
+  const b = row({ id: "rb", slide: { deckId: "d1", slideId: "slide-b" } });
+
+  const gone = row({ id: "rg", slide: { deckId: "gone", slideId: "x" } });
+
+  it("поточний рядок — той, чий слайд на екрані", () => {
+    expect(activeSlideRow(content([[row(), a], [b]]), lookup())?.id).toBe("ra");
+    expect(activeSlideRow(content([[b]]), lookup())).toBeNull();
+  });
+
+  it("наступний — через розділи, пропускаючи недоступні", () => {
+    expect(nextSlideRow(content([[a, gone], [row(), b]]), lookup())?.id).toBe("rb");
+  });
+
+  it("без поточного — перший доступний; після останнього — null", () => {
+    expect(nextSlideRow(content([[gone, b, a]]), lookup({ show: null }))?.id).toBe("rb");
+    expect(nextSlideRow(content([[b, a]]), lookup())).toBeNull();
   });
 });

@@ -47,20 +47,23 @@ export function ScenarioPageView({ page, campaignId, progress, play }: { page: S
                 return (
                   <div
                     key={r.id}
+                    id={`row-${r.id}`}
                     className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.active && "is-current")}
-                    onClick={
+                    title={clickable ? "Подвійний клік — показати слайд" : undefined}
+                    onDoubleClick={
                       clickable
                         ? (e) => {
-                            if (e.detail > 1 || (e.target as HTMLElement).closest("a, button") || window.getSelection()?.toString()) return;
+                            if ((e.target as HTMLElement).closest("a, button")) return;
 
+                            window.getSelection()?.removeAllRanges();
                             play?.showSlide(r);
                           }
                         : undefined
                     }
                   >
                     <div className="story">
-                      <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
                       {play && <RowPlayControls campaignId={campaignId} row={r} play={play} />}
+                      <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
                     </div>
                     <aside className="notes">{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
                   </div>

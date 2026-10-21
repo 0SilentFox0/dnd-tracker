@@ -14,7 +14,11 @@ import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/uti
 import { applyShowCommand, showNeedsLibrary } from "@/lib/utils/show/show-command";
 import type { ShowCommand, ShowResponse, ShowState } from "@/types/show";
 
-const deckIdFor = (cmd: ShowCommand, prev: ShowState | null) => (cmd.action === "open" ? cmd.deckId : cmd.action === "next" || cmd.action === "prev" ? prev?.deckId ?? null : null);
+function deckIdFor(cmd: ShowCommand, prev: ShowState | null): string | null {
+  if (cmd.action === "open" || cmd.action === "setCover") return cmd.deckId;
+
+  return cmd.action === "next" || cmd.action === "prev" ? (prev?.deckId ?? null) : null;
+}
 
 export async function readShow(campaignId: string): Promise<NextResponse> {
   try {

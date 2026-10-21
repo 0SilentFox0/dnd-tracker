@@ -11,7 +11,7 @@ import { battleKeys, useBattleBriefs } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowState } from "@/lib/hooks/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { battleAction, boundDeckIds, hasBattleBindings, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import { activeSlideRow, battleAction, boundDeckIds, hasBattleBindings, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { BattleBrief } from "@/types/battle";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { Slide } from "@/types/show";
@@ -19,6 +19,12 @@ import type { Slide } from "@/types/show";
 export interface ScenarioPlay {
   lookup: PlayLookup;
   showSlide(row: ScenarioRow): void;
+  /** Рядок, чий слайд на екрані. */
+  activeRow: ScenarioRow | null;
+  /** Рядок, який покаже «Наступний рядок»; null — далі слайдів немає. */
+  nextRow: ScenarioRow | null;
+  /** Показує слайд nextRow і повертає його, щоб UI прокрутив до нього. */
+  showNextRow(): ScenarioRow | null;
   runBattle(row: ScenarioRow): void;
   pending: boolean;
   control: ShowControl;
@@ -83,12 +89,29 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
     onError: (error) => void notify(errorMessage(error, "Не вдалося почати бій")),
   });
 
+  const activeRow = activeSlideRow(content, lookup);
+
+  // під заглушкою «наступний» спершу відкриває поточний рядок
+  const nextRow = show?.curtain && activeRow ? activeRow : nextSlideRow(content, lookup);
+
+  const showSlide = (row: ScenarioRow) => {
+    const state = rowSlideState(row, lookup);
+
+    if (!row.slide || state.kind !== "ready") return;
+
+    if (!state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
+    else if (show?.curtain) void control.send({ action: "curtain", on: false });
+  };
+
   return {
     lookup,
-    showSlide: (row) => {
-      const state = rowSlideState(row, lookup);
+    showSlide,
+    activeRow,
+    nextRow,
+    showNextRow: () => {
+      if (nextRow) showSlide(nextRow);
 
-      if (row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
+      return nextRow;
     },
     runBattle: (row) => battleRun.mutate(row),
     pending: control.pending || battleRun.isPending,

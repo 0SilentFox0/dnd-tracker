@@ -80,7 +80,7 @@ function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: strin
           progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
         />
       )}
-      {playEnabled && <ScenarioShowDock campaignId={campaignId} content={page.content} play={play} />}
+      {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}
     </ScenarioBook>
   );
