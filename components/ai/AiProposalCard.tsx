@@ -36,7 +36,7 @@ function Row({ row, campaignId }: { row: Pick<ScenarioRow, "story" | "notes">; c
 
 function Diff({ label, before, after, campaignId }: { label: string; before: RichDoc; after: RichDoc; campaignId: string }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2 @[560px]:grid-cols-2">
       <div className="rounded border p-2">
         <p className="mb-1 text-xs text-muted-foreground">Було · {label}</p>
         <Doc doc={before} campaignId={campaignId} />

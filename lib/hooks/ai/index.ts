@@ -1,6 +1,7 @@
 export * from "./keys";
 export * from "./useAiChat";
 export * from "./useAiCredentials";
+export * from "./useAiPanelWidth";
 export * from "./useAiProposals";
 export * from "./useAiSettings";
 export * from "./useAiThreadMessages";

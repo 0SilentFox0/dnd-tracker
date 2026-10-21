@@ -164,4 +164,4 @@
 }
 .scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 
-@media (min-width: 1024px) { .scenario-book.sb-with-ai { padding-right: 420px; } }
+@media (min-width: 1024px) { .scenario-book.sb-with-ai { padding-right: var(--ai-panel-w, 420px); } }

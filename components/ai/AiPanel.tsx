@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { KeyRound } from "lucide-react";
 
@@ -12,7 +12,7 @@ import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AI_MODE_LABELS, type AiProvider, type AiThreadMode } from "@/lib/constants/ai";
-import { useAiChat, useAiCredentials, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
+import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
@@ -91,8 +91,49 @@ function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLab
   );
 }
 
+function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) {
+  const drag = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    drag.current = { startX: e.clientX, startWidth: panel.width };
+  };
+
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag.current) panel.setWidth(drag.current.startWidth + drag.current.startX - e.clientX);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+    e.preventDefault();
+    panel.setWidth(panel.width + (e.key === "ArrowLeft" ? AI_PANEL_WIDTH.step : -AI_PANEL_WIDTH.step));
+  };
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Ширина панелі AI"
+      aria-valuenow={panel.width}
+      aria-valuemin={AI_PANEL_WIDTH.min}
+      aria-valuemax={panel.max}
+      tabIndex={0}
+      className="absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize touch-none hover:bg-primary/30 focus-visible:bg-primary/40 focus-visible:outline-none"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={() => (drag.current = null)}
+      onPointerCancel={() => (drag.current = null)}
+      onDoubleClick={panel.reset}
+      onKeyDown={onKeyDown}
+    />
+  );
+}
+
 export function AiPanel({ campaignId, page, mode, focus, proposals, showPending = false, renderProposal, actions }: AiPanelProps) {
   const desktop = useMediaQuery(DESKTOP_QUERY);
+
+  const panel = useAiPanelWidth();
 
   const { query: credentialsQuery, credentials } = useAiCredentials();
 
@@ -182,7 +223,13 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
   }
 
   return (
-    <aside data-slot="ai-panel" aria-label="AI-помічник" className="fixed inset-y-0 right-0 z-40 flex w-[420px] flex-col border-l bg-background p-3 shadow-xl">
+    <aside
+      data-slot="ai-panel"
+      aria-label="AI-помічник"
+      style={{ "--ai-panel-w": `${panel.width}px`, width: "var(--ai-panel-w)" } as CSSProperties}
+      className="@container fixed inset-y-0 right-0 z-40 flex flex-col border-l bg-background p-3 shadow-xl"
+    >
+      <ResizeHandle panel={panel} />
       {content}
     </aside>
   );
