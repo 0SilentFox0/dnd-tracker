@@ -10,7 +10,7 @@ import { type ShowControl, useDeck, useDecks } from "@/lib/hooks/show";
 import { cn } from "@/lib/utils";
 import type { ShowState, SlideDeckSummary } from "@/types/show";
 
-const SELECT = "h-8 min-w-0 max-w-64 rounded border bg-transparent px-2 text-sm [&>*]:bg-neutral-900 [&>*]:text-neutral-100";
+const SELECT = "h-7 min-w-0 max-w-56 rounded bg-transparent pr-1 text-xs opacity-75 hover:opacity-100 [&>*]:bg-neutral-900 [&>*]:text-neutral-100";
 
 const inScene = (sceneId?: string) => (d: SlideDeckSummary) => !!sceneId && d.scenarioPageId === sceneId;
 
@@ -56,25 +56,20 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
 
   return (
     <div className="min-w-0 space-y-2">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <select aria-label="Набір" value={deckId ?? ""} onChange={(e) => e.target.value && void control.send({ action: "open", deckId: e.target.value })} className={cn(SELECT, SHOW_TONE.rule)}>
+      <div className="flex items-center gap-2">
+        <select aria-label="Набір" value={deckId ?? ""} onChange={(e) => e.target.value && void control.send({ action: "open", deckId: e.target.value })} className={SELECT}>
           {!deckId && <option value="">Оберіть набір</option>}
           {decks && <DeckOptions decks={decks} sceneId={sceneId} />}
         </select>
-        <span className={cn("ml-auto flex min-w-0 items-center gap-1.5", SHOW_TONE.muted)}>
-          Заглушка:
-          {cover ? (
-            <>
-              <OptimizedImage src={cover.slide.imageUrl} alt="" width={48} height={27} className="h-[27px] w-12 shrink-0 rounded object-cover" />
-              <span className="truncate">{cover.slide.title ?? "без назви"}</span>
-              <ShowButton aria-label="Прибрати картинку заглушки" className="h-6 px-1" onClick={() => void control.send({ action: "clearCover" })}>
-                <X className="size-3" />
-              </ShowButton>
-            </>
-          ) : (
-            <span>стандартна — ☆ на слайді робить його заглушкою</span>
-          )}
-        </span>
+        {cover && (
+          <span className={cn("ml-auto flex items-center gap-1 text-xs", SHOW_TONE.muted)} title={`Заглушка: ${cover.slide.title ?? "без назви"}`}>
+            <Star className="size-3 fill-current" />
+            <OptimizedImage src={cover.slide.imageUrl} alt="Заглушка" width={64} height={36} className="h-[18px] w-8 rounded-sm object-cover" />
+            <ShowButton aria-label="Прибрати заглушку" className="h-6 min-w-6 px-1" onClick={() => void control.send({ action: "clearCover" })}>
+              <X className="size-3" />
+            </ShowButton>
+          </span>
+        )}
       </div>
       {deck && (
         <ol className="flex gap-2 overflow-x-auto pb-1">
@@ -84,27 +79,28 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
             const isCover = cover?.deckId === deck.id && cover.slide.id === slide.id;
 
             return (
-              <li key={slide.id} ref={current ? currentRef : undefined} className="relative w-32 shrink-0">
+              <li key={slide.id} ref={current ? currentRef : undefined} className="group relative w-28 shrink-0">
                 <button
                   type="button"
                   aria-current={current || undefined}
                   aria-label={`Слайд ${i + 1}${slide.title ? `: ${slide.title}` : ""}`}
                   onClick={() => void control.send({ action: "open", deckId: deck.id, slideId: slide.id })}
-                  className={cn("block w-full overflow-hidden rounded border text-left", current ? SHOW_TONE.accent : SHOW_TONE.rule)}
+                  title={slide.title}
+                  className={cn("relative block w-full overflow-hidden rounded transition", current ? SHOW_TONE.accent : "opacity-60 hover:opacity-100")}
                 >
-                  <OptimizedImage src={slide.imageUrl} alt="" width={128} height={72} className="h-[72px] w-32 object-cover" />
-                  <span className="block truncate px-1.5 py-0.5 text-xs">
+                  <OptimizedImage src={slide.imageUrl} alt="" width={128} height={72} className="h-[63px] w-28 object-cover" />
+                  <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
                     {i + 1}. {slide.title ?? "Без назви"}
                   </span>
                 </button>
-                {slide.trackId && <Music aria-label="Слайд з треком" className="absolute right-1.5 top-1.5 size-3.5 text-amber-300 drop-shadow" />}
+                {slide.trackId && <Music aria-label="Слайд з треком" className="absolute right-1 top-1 size-3 text-white drop-shadow" />}
                 <button
                   type="button"
                   aria-pressed={isCover}
                   aria-label={isCover ? "Це заглушка" : "Зробити заглушкою"}
                   title={isCover ? "Це заглушка" : "Зробити заглушкою"}
                   onClick={() => void control.send(isCover ? { action: "clearCover" } : { action: "setCover", deckId: deck.id, slideId: slide.id })}
-                  className="absolute left-1 top-1 rounded bg-black/70 p-1 text-amber-300"
+                  className={cn("absolute left-0.5 top-0.5 rounded p-0.5 text-amber-300 drop-shadow transition", !isCover && "opacity-0 focus-visible:opacity-100 group-hover:opacity-100")}
                 >
                   <Star className={cn("size-3", isCover && "fill-current")} />
                 </button>

@@ -44,7 +44,7 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
           </span>
           {action !== "none" && (
             <button type="button" className="toggle" disabled={play.pending} onClick={() => play.runBattle(row)}>
-              {action === "start" ? `Почати бій «${battle.battle.name}»` : battle.called ? "Покликати ще раз" : "Покликати в бій"}
+              {action === "start" ? "Почати бій" : battle.called ? "Покликати ще раз" : "Покликати в бій"}
             </button>
           )}
           {battle.battle.status === BattleStatus.ACTIVE && (
