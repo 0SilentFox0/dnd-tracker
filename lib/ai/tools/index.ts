@@ -2,12 +2,23 @@ import type { McpServer } from "@modelcontextprotocol/server";
 import { tool, type ToolSet } from "ai";
 import type { z } from "zod";
 
+import { getBattleStateTool } from "./battle";
 import { type AiToolContext, type AiToolDef, runTool } from "./define";
+import { getPartyTool, readCharacterTool } from "./party";
+import { readReferenceTool, searchReferenceTool } from "./reference";
 import { listScenarioPagesTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
+import { getShowStateTool } from "./show";
 
 import "server-only";
 
-export const AI_TOOLS: AiToolDef[] = [listScenarioPagesTool, readScenarioPageTool, searchScenarioTool];
+export const AI_TOOLS: AiToolDef[] = [listScenarioPagesTool, readScenarioPageTool, searchScenarioTool,
+  getPartyTool,
+  readCharacterTool,
+  getShowStateTool,
+  getBattleStateTool,
+  searchReferenceTool,
+  readReferenceTool,
+];
 
 export function toAiSdkTools(ctx: AiToolContext): ToolSet {
   return Object.fromEntries(AI_TOOLS.map((def) => [def.name, tool({ description: def.description, inputSchema: def.input, execute: (input: unknown) => runTool(def, ctx, input) })]));
