@@ -5,6 +5,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { staticEffectNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
@@ -41,6 +42,8 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
 
+  const nature = staticEffectNature(stripped);
+
   const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
 
   for (const id of targetIds.filter((t) => !blocked.includes(t))) {
@@ -51,7 +54,8 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
           timedKey,
           source: effectSource(owner, ability),
           name: ability.name,
-          type: target.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff",
+          // дебафф області на союзнику лишається дебаффом: інакше Очищення його не знімає, а токен світиться як бафф
+          type: nature ?? (target.basicInfo.side === owner?.basicInfo.side ? "buff" : "debuff"),
           rounds,
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
