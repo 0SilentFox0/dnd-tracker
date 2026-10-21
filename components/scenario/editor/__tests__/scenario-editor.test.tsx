@@ -7,6 +7,7 @@ const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => 
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioDraft: (_c: string, page: { content: unknown }) => ({ content: page.content, state: "saved", ...draft }),
   useMentionSearch: () => async () => [],
+  useActiveSection: () => null,
   useScenarioPages: () => ({ data: [] }),
   useScenarioPage: () => ({ data: undefined }),
   useScenarioPageActions: () => ({ updateMeta: vi.fn(), isPending: false }),
@@ -38,9 +39,11 @@ const apply = () => {
   return fn(page().content);
 };
 
+const toc = { inline: true, drawer: { open: false, onOpenChange: vi.fn() } };
+
 describe("ScenarioEditor", () => {
   it("комірка відкриває Tiptap лише по кліку; одночасно один редактор", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
 
     expect(screen.queryByTestId("tiptap")).toBeNull();
     fireEvent.click(screen.getByText("Дзвони"));
@@ -48,7 +51,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("назва розділу, новий рядок, новий розділ — через setContent", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
 
     fireEvent.change(screen.getByLabelText("Назва розділу"), { target: { value: "1.0 Собор" } });
     expect(apply().sections[0].title).toBe("1.0 Собор");
@@ -61,7 +64,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("видалення розділу питає підтвердження", async () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити розділ: Собор" }));
     expect(await screen.findByText(/Видалити розділ «Собор»/)).toBeTruthy();
@@ -69,14 +72,14 @@ describe("ScenarioEditor", () => {
   });
 
   it("на героєві є налаштування відкриття глави", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} toc={toc} />);
     expect(screen.getByRole("button", { name: "Відкрити гравцеві зараз" })).toBeTruthy();
   });
 
   it("«Готово» виходить після успішного збереження", async () => {
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     await waitFor(() => expect(onExit).toHaveBeenCalled());
   });
@@ -86,7 +89,7 @@ describe("ScenarioEditor", () => {
 
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     expect(await screen.findByText(/Є незбережені зміни/)).toBeTruthy();
     expect(onExit).not.toHaveBeenCalled();
@@ -97,7 +100,7 @@ describe("ScenarioEditor", () => {
 
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     fireEvent.click(await screen.findByRole("button", { name: "Вийти" }));
     await waitFor(() => expect(onExit).toHaveBeenCalled());

@@ -12,7 +12,9 @@ import { type CellColumn, ScenarioCell } from "./ScenarioCell";
 import { ScenarioToolbar } from "./ScenarioToolbar";
 import { SectionHeaderEditor } from "./SectionHeaderEditor";
 
+import { ScenarioLayout } from "@/components/scenario/ScenarioLayout";
 import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
+import { ScenarioToc, tocItems } from "@/components/scenario/ScenarioToc";
 import { useConfirm, useCssVarHeight } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
 import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
@@ -20,7 +22,9 @@ import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; column: CellColumn } | null;
 
-export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean> }) => void }) {
+type TocProps = { inline: boolean; drawer: { open: boolean; onOpenChange: (open: boolean) => void } };
+
+export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady, toc }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean> }) => void; toc: TocProps }) {
   const draft = useScenarioDraft(campaignId, page);
 
   useEffect(() => {
@@ -84,6 +88,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
           {toolbarActions}
         </div>
       </div>
+      <ScenarioLayout toc={<ScenarioToc items={tocItems(draft.content.sections, isHero)} inline={toc.inline} drawer={toc.drawer} />}>
       <header className="title">
         <h1>{live.title}</h1>
         {live.subtitle && <p>{live.subtitle}</p>}
@@ -96,6 +101,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
               section={s}
               actions={{
                 onTitle: (title) => draft.setContent((c) => updateSection(c, s.id, { title })),
+                onIcon: (icon) => draft.setContent((c) => updateSection(c, s.id, { icon })),
                 onMove: (dir) => draft.setContent((c) => moveSection(c, s.id, dir)),
                 onRemove: () => void removeWithConfirm(`розділ «${s.title}»`, () => draft.setContent((c) => removeSection(c, s.id))),
               }}
@@ -142,6 +148,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
           Додати розділ
         </button>
       </main>
+      </ScenarioLayout>
       {propsOpen && <PagePropertiesDialog campaignId={campaignId} page={live} legend={draft.content.legend} onLegend={(legend) => draft.setContent((c) => ({ ...c, legend }))} onClose={() => setPropsOpen(false)} />}
     </>
   );

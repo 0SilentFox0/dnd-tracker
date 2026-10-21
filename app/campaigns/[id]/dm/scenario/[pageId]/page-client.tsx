@@ -125,7 +125,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
         menu={menu}
       />
       {editBase ? (
-        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} />
+        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} toc={{ inline: tocInline, drawer: { open: tocOpen, onOpenChange: setTocOpen } }} />
       ) : (
         <ScenarioLayout
           toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", playedLookup(playedPages))} inline={tocInline} drawer={{ open: tocOpen, onOpenChange: setTocOpen }} onPick={collapse.expand} />}
