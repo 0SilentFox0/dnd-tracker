@@ -21,6 +21,8 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus }: Par
     focusRef.current = getFocus;
   }, [getFocus]);
 
+  // the ref is read only when a message is sent, never during render
+  // eslint-disable-next-line react-hooks/refs
   const transport = useMemo(() => createAiChatTransport(campaignId, thread.id, () => focusRef.current()), [campaignId, thread.id]);
 
   const chat = useChat({ id: thread.id, messages: initialMessages as unknown as UIMessage[], transport });
