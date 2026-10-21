@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 import { useModeView } from "./modes/useModeView";
+import { setFxBusy } from "./fx-busy";
 import { fireFxImpact } from "./fx-impact";
 import { moraleDiceDone } from "./morale-dice";
 import { useBattleSceneData } from "./useBattleScene";
@@ -44,6 +45,13 @@ export function useBattleFxQueue(enabled: boolean) {
 
     for (const action of log.slice(-RECENT_LOG)) if (!queued.has(action.id)) fireFxImpact(action.id);
   }, [log, state.queue]);
+
+  const busy = active && state.queue.length > 0;
+
+  // до відмальовування: екран підсумку в тому ж кадрі ще не встигає показатися поверх кидка
+  useLayoutEffect(() => setFxBusy(busy), [busy]);
+
+  useEffect(() => () => setFxBusy(false), []);
 
   const done = useCallback((key: string) => {
     if (isMoraleFx(key)) moraleDiceDone();
