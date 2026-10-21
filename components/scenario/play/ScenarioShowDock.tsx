@@ -48,7 +48,7 @@ function DockBody({ campaignId, play }: { campaignId: string; play: ScenarioPlay
         {expanded && (
           <div className="sb-show-body">
             <div className="sb-show-audio">
-              <AudioDock placement="corner" />
+              <AudioDock placement="corner" defaultExpanded={false} />
             </div>
             <div className="sb-show-controls">
               <ShowControlPanel campaignId={campaignId} show={show} control={play.control} />

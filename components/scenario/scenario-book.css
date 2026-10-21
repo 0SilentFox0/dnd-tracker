@@ -158,7 +158,7 @@
 .scenario-book .sb-show-audio { padding: 8px; }
 .scenario-book .sb-show-controls { min-width: 0; }
 @media (min-width: 1024px) {
-  .scenario-book .sb-show-body { flex-direction: row; align-items: flex-start; }
+  .scenario-book .sb-show-body { flex-direction: row; align-items: center; }
   .scenario-book .sb-show-audio { flex: 0 0 276px; }
   .scenario-book .sb-show-controls { flex: 1; }
 }
