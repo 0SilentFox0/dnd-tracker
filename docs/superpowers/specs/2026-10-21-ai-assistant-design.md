@@ -21,7 +21,7 @@
 
 ## Підхід: Vercel AI SDK + прямі провайдери з ключем ДМ
 
-Пакети `ai`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google`, `mcp-handler` (+ `@modelcontextprotocol/sdk` як його peer). На кожен запит сервер розшифровує ключ ДМ і створює провайдера (`createAnthropic({ apiKey })` тощо), `streamText` з інструментами, на клієнті `useChat`.
+Пакети `ai`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google`, `@ai-sdk/react`, `mcp-handler` 2.x (+ `@modelcontextprotocol/server` 2.x як його peer). На кожен запит сервер розшифровує ключ ДМ і створює провайдера (`createAnthropic({ apiKey })` тощо), `streamText` з інструментами, на клієнті `useChat`.
 
 Відкинуто:
 - **Vercel AI Gateway з BYOK** — BYOK налаштовується на команду Vercel, а не на окремого ДМ; зайвий посередник для моделі «кожен ДМ платить своїм ключем».
@@ -62,7 +62,7 @@
 - `GET/POST /api/campaigns/[id]/api-tokens`, `DELETE …/api-tokens/[tokenId]` (ставить `revokedAt`).
 
 MCP:
-- `app/api/mcp/[transport]/route.ts` через `mcp-handler`. Шлях `/api/mcp/` виключається з CSRF-перевірки `rejectCrossOriginMutation` (`lib/supabase/middleware.ts`): він не читає cookie, авторизація лише Bearer-токеном, а браузерні MCP-клієнти шлють чужий `Origin`. `Authorization: Bearer <token>` → пошук за хешем, перевірка `revokedAt` і що власник токена досі ДМ кампанії, оновлення `lastUsedAt` (не частіше раза на хвилину). Невалідний → 401.
+- `app/api/mcp/route.ts` (URL `/api/mcp`) через `mcp-handler` 2.x (`@modelcontextprotocol/server` 2.x, stateless Streamable HTTP; обробник створюється на кожен запит із замиканням на контекст токена). Шлях `/api/mcp/` виключається з CSRF-перевірки `rejectCrossOriginMutation` (`lib/supabase/middleware.ts`): він не читає cookie, авторизація лише Bearer-токеном, а браузерні MCP-клієнти шлють чужий `Origin`. `Authorization: Bearer <token>` → пошук за хешем, перевірка `revokedAt` і що власник токена досі ДМ кампанії, оновлення `lastUsedAt` (не частіше раза на хвилину). Невалідний → 401.
 
 Клієнтські обгортки — `lib/api/ai.ts` (включно з `createChatTransport` для `useChat`, щоб компоненти не робили fetch); хуки — `lib/hooks/ai/` (`useAiCredentials`, `useAiThreads`, `useAiChat`, `useAiProposals`, `useApiTokens`; ключі в `keys.ts`).
 
@@ -114,7 +114,7 @@ MCP:
 
 **Відкритий редактор.** `useScenarioDraft` тримає `expectedVersion` і на 409 зупиняє автозбереження до перезавантаження, тож серверне застосування під відкритим редактором зламало б його. Тому:
 - у режимі перегляду/гри (редактор закритий) — просто `apply` і оновлення кешу сторінки відповіддю;
-- у режимі редагування — `useAiProposals.apply` спершу чекає на `flush()` чернетки (той самий шлях, що «Готово»), потім `apply`, потім `useScenarioDraft.rebase(page)` — нова функція, що замінює вміст і `version` чернетки сторінкою з відповіді (редактор перемонтовує клітинки за `version`). Поки `apply` в польоті, редактор у режимі «лише читання».
+- у режимі редагування — `useAiProposals.apply` спершу чекає на `flush()` чернетки (той самий шлях, що «Готово»), потім `apply`, потім сторінка-клієнт перемонтовує `ScenarioEditor` з новою сторінкою з відповіді (`key` = `version`), тож чернетка стартує з актуальних `content`/`version`. Редактор віддає свій `flush` назовні через проп `onDraftReady`.
 
 Клієнт надсилає лише `proposalId`; застосовуються тільки збережені `ops`.
 
@@ -143,7 +143,7 @@ MCP:
 ## UI
 
 - **`app/settings/ai`** (новий сегмент верхнього рівня; сторінка за `getClaims`, без сесії — `/sign-in`, як решта сторінок у `proxy.ts`; `HudPage`): картка `HudCard` на провайдера — поле ключа, «Перевірити і зберегти», `…a1b2`, модель за замовчуванням, «Видалити». Посилання з меню користувача й з AI-панелі, коли ключа немає.
-- **`app/campaigns/[id]/dm/ai`** (`HudPage`): API-токени — список (назва, префікс, останнє використання), «Створити» (`ResponsiveDialog hud`, токен показується один раз з копіюванням), «Відкликати» (`useConfirm`), фрагмент конфігу для Claude Desktop (через `mcp-remote` з заголовком `Authorization`) і Cursor (нативно, `headers`) з URL `/api/mcp/mcp`. Конектори claude.ai web вимагають OAuth — поза межами першої версії. Посилання з DM-дашборду.
+- **`app/campaigns/[id]/dm/ai`** (`HudPage`): API-токени — список (назва, префікс, останнє використання), «Створити» (`ResponsiveDialog hud`, токен показується один раз з копіюванням), «Відкликати» (`useConfirm`), фрагмент конфігу для Claude Desktop (через `mcp-remote` з заголовком `Authorization`) і Cursor (нативно, `headers`) з URL `/api/mcp`. Конектори claude.ai web вимагають OAuth — поза межами першої версії. Посилання з DM-дашборду.
 - **AI-панель** (`components/ai`): кнопка «AI» у `ScenarioBar` (редагування й гра). Десктоп — права бічна панель ~420 px поряд із книгою сценарію; телефон — `ResponsiveDialog` (bottom sheet). Вміст:
   - шапка: вибір треду (новий / попередні для сторінки), провайдер і модель, лічильник токенів;
   - стрічка: markdown-повідомлення, виклики інструментів компактними чипами («Читаю сторінку…», «Шукаю в довіднику: Фенікс»);
@@ -157,7 +157,7 @@ MCP:
 - `crypto`: повний цикл, підробка `authTag`/`iv` → помилка, `keyVersion` з `AI_KEYS_SECRET_PREV`.
 - `markdown.ts`: повний цикл для кожного вузла й марки (`secret`, `readAloud`, `say`, `callout`, `token`, таблиці, згадки); фікстури з реальних сторінок prodcopy дають ідентичний `RichDoc`.
 - `ai-ops.ts`: кожна операція, `before`-перевірка → `stale`, зниклий рядок, нові id.
-- `apply-proposal`: примусовий знімок версії до правки; `useScenarioDraft.rebase` після `flush` — наступне автозбереження йде з новою `version` без 409.
+- `apply-proposal`: примусовий знімок версії до правки; після `flush` і перемонтування наступне автозбереження йде з новою `version` без 409.
 - CSRF: `/api/mcp/*` з чужим `Origin` пропускається, інші `/api/*` — як раніше.
 - Збирач контексту: бюджет і обрізання, нотатки ДМ присутні лише в AI-контексті ДМ.
 - Кожен інструмент на моках prisma/кешу, ліміт розміру результату.
