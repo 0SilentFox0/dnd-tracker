@@ -19,13 +19,16 @@ import type { ScenarioPage } from "@/types/scenario";
 
 type Proposals = ReturnType<typeof useAiProposals>;
 
+export type RenderProposal = (proposalId: string, helpers: { send?: (text: string) => void }) => ReactNode;
+
 interface AiPanelProps {
   campaignId: string;
   page: ScenarioPage;
   mode: AiThreadMode;
   focus: AiFocus | undefined;
   proposals: Proposals;
-  renderProposal?: (proposalId: string) => ReactNode;
+  showPending?: boolean;
+  renderProposal?: RenderProposal;
   actions: { onClose: () => void; onClearFocus: () => void };
 }
 
@@ -48,7 +51,7 @@ interface ThreadChatProps {
   thread: AiThread;
   focus: AiFocus | undefined;
   focusLabel: string | null;
-  renderProposal?: (proposalId: string) => ReactNode;
+  renderProposal?: RenderProposal;
   actions: { onFinish: () => void; onClearFocus: () => void };
 }
 
@@ -80,14 +83,14 @@ function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLab
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto py-2">
-        <AiMessageList messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal} onRedo={redo} />
+        <AiMessageList messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal && ((id) => renderProposal(id, { send: chat.send }))} onRedo={redo} />
       </div>
       <AiComposer mode={thread.mode} busy={busy} focusLabel={focusLabel} actions={{ onSend: chat.send, onStop: chat.stop, onClearFocus: actions.onClearFocus }} />
     </>
   );
 }
 
-export function AiPanel({ campaignId, page, mode, focus, proposals, renderProposal, actions }: AiPanelProps) {
+export function AiPanel({ campaignId, page, mode, focus, proposals, showPending = false, renderProposal, actions }: AiPanelProps) {
   const desktop = useMediaQuery(DESKTOP_QUERY);
 
   const { query: credentialsQuery, credentials } = useAiCredentials();
@@ -156,6 +159,14 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, renderPropos
             onClose: actions.onClose,
           }}
         />
+      ) : null}
+      {showPending && renderProposal && proposals.pending.length ? (
+        <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label="Пропозиції AI">
+          <h3 className="text-sm font-medium">Пропозиції AI</h3>
+          {proposals.pending.map((p) => (
+            <div key={p.id}>{renderProposal(p.id, {})}</div>
+          ))}
+        </section>
       ) : null}
       {body}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import type { Editor } from "@tiptap/core";
 
 import { OrderButtons } from "./OrderButtons";
@@ -20,8 +20,12 @@ import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; column: CellColumn } | null;
 
-export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode }) {
+export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean> }) => void }) {
   const draft = useScenarioDraft(campaignId, page);
+
+  useEffect(() => {
+    onDraftReady?.({ flush: draft.flush });
+  }, [onDraftReady, draft.flush]);
 
   const searchMentions = useMentionSearch(campaignId);
 
