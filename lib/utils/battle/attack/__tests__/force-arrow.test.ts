@@ -63,6 +63,15 @@ describe("Стріла сили", () => {
     expect(hp("far")).toBe(100);
   });
 
+  it("ціль загинула від влучання — бонус іде в найближчого, а не першого за ініціативою", () => {
+    const dying = { ...enemy("t", { position: { x: 3, y: 5 } }), combatStats: { ...enemy("t").combatStats, currentHp: 1 } };
+
+    const { hp } = setup({ map: testMap(), enemies: [dying, enemy("far", { position: { x: 9, y: 9 } }), enemy("near", { position: { x: 4, y: 5 } })] });
+
+    expect(hp("near")).toBeLessThan(100);
+    expect(hp("far")).toBe(100);
+  });
+
   it("без карти дрімаючий ворог пропускається", () => {
     const { hp } = setup({ enemies: [enemy("t"), enemy("sleeper", { dormant: true }), enemy("next")] });
 

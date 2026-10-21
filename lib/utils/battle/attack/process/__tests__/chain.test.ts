@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { nextChainTarget } from "../chain";
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleAttack, GridPoint } from "@/types/battle";
 
@@ -36,8 +36,8 @@ describe("nextChainTarget", () => {
   });
 
   it("попередня ціль мертва — відстань від її клітинки", () => {
-    const dead = { ...first, combatStats: { ...first.combatStats, currentHp: 0 } };
+    const dead = { ...first, combatStats: { ...first.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
 
-    expect(nextChainTarget({ map: testMap(20), order: [demoness, dead, at("near", { x: 6, y: 5 }), at("far", { x: 1, y: 1 })], attacker: demoness, attack: bow, from: dead, hit: new Set(["t"]) })?.basicInfo.id).toBe("near");
+    expect(nextChainTarget({ map: testMap(20), order: [demoness, dead, at("far", { x: 1, y: 1 }), at("near", { x: 6, y: 5 })], attacker: demoness, attack: bow, from: dead, hit: new Set(["t"]) })?.basicInfo.id).toBe("near");
   });
 });

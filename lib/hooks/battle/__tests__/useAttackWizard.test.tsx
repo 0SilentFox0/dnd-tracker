@@ -67,6 +67,16 @@ describe("useAttackWizard", () => {
     await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss" })));
   });
 
+  it("у логу немає нових записів — картка бере прогнозований результат ударів, а не «промах»", async () => {
+    const { result, showResult } = start([]);
+
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
+
+    await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 0 })));
+  });
+
   it("помилка мутації — підсумок із текстом помилки", async () => {
     const { result, mutateAsync } = start();
 

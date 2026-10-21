@@ -96,6 +96,17 @@ describe("advanceFxQueue", () => {
     for (const id of kept) expect(trimmed.filter((s) => s.actionId === id)).toHaveLength(2);
   });
 
+  it("голова обрізання — уся її дія, а не лише перший спек", () => {
+    const spec = (actionId: string, n: number): FxSpec => ({ key: `${actionId}:${n}`, actionId, archetype: "ranged", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false });
+
+    const queue = [spec("head", 0), spec("head", 1), spec("head", 2), ...Array.from({ length: 20 }, (_, i) => [spec(`x${i}`, 0), spec(`x${i}`, 1)]).flat()];
+
+    const trimmed = trimFxQueue(queue, MAX_FX_QUEUE);
+
+    expect(trimmed.slice(0, 3).map((s) => s.key)).toEqual(["head:0", "head:1", "head:2"]);
+    expect(trimmed.length).toBeLessThanOrEqual(MAX_FX_QUEUE);
+  });
+
   it("a stale done (another key) does not shift the queue", () => {
     const s = adv(adv(INITIAL_FX_QUEUE, [melee(1)], true), range(1, 3), true);
 

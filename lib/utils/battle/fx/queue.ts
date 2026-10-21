@@ -26,17 +26,21 @@ export const INITIAL_FX_QUEUE: FxQueueState = { log: null, seen: null, queue: []
 
 export const MAX_FX_QUEUE = 32;
 
-/** Голова може саме грати — лишається; решта обрізається найстарішими діями цілком, щоб залп не втратив середину. */
+/** Дія, що грає (усі її спеки), лишається; решта обрізається найстарішими діями цілком, щоб залп не втратив середину. */
 export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
   if (queue.length <= max) return queue;
 
-  const [head, ...rest] = queue;
+  const headId = queue[0].actionId;
+
+  const isHead = (s: FxSpec, i: number) => i === 0 || (headId !== undefined && s.actionId === headId);
+
+  const head = queue.filter(isHead);
+
+  let tail = queue.filter((s, i) => !isHead(s, i));
 
   const groupOf = (s: FxSpec) => s.actionId ?? s.key;
 
-  let tail = rest;
-
-  while (tail.length > max - 1) {
+  while (tail.length > 0 && head.length + tail.length > max) {
     const oldest = groupOf(tail[0]);
 
     const dropped = tail.filter((s) => groupOf(s) !== oldest);
@@ -44,7 +48,7 @@ export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
     tail = dropped.length === tail.length ? tail.slice(1) : dropped;
   }
 
-  return [head, ...tail];
+  return [...head, ...tail];
 }
 
 /** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */

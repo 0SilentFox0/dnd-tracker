@@ -157,7 +157,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   for (let i = 0; i < targets.length; i++) {
     // пробивний летить крізь цілі: штраф лише на першу
-    strikeAt(targets[i], i, { serverD20: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0) });
+    strikeAt(targets[i], i, { serverD20: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0), hop: i >= serverRolledFrom });
 
     if (!isActive(currentAttacker)) break;
   }

@@ -48,10 +48,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const cover = useMemo(() => {
     if (!attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();
 
-    const candidates = order.filter((p) => p !== attacker && isUp(p));
+    const seen = order.filter((p) => p === attacker || visible(p));
 
-    return new Set(candidates.filter((t) => lineOfFire(map, order, attacker, t).blocked).map((t) => t.basicInfo.id));
-  }, [attacker, attack, map, order]);
+    const candidates = seen.filter((p) => p !== attacker && isUp(p));
+
+    return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
+  }, [attacker, attack, map, order, visible]);
 
   const steps = useMemo<DamageStep[][]>(() => {
     if (!attacker || !attack || state.step !== "summary") return [];
@@ -144,7 +146,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const fromLog = volleyResults(log, seen, attacker.basicInfo.id, after);
 
-      const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: "miss" as const, targetId: s.targetId, damage: 0, downed: false }));
+      const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
 
       dispatch({ type: "SUCCESS", results });
 

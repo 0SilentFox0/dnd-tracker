@@ -132,6 +132,23 @@ describe("multi-target advantage resolution", () => {
     expect(dmg("y")).toBeLessThanOrEqual(dmg("t"));
   });
 
+  it("melee cleave: server-rolled heads do not reuse the player's second die", () => {
+    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
+
+    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite] });
+
+    const hindered = (id: string, at: { x: number; y: number }) => placed(id, { at, hp: 50, abilities: [hindering] });
+
+    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), hindered("x", { x: 6, y: 4 }), hindered("y", { x: 6, y: 6 })];
+
+    const r = runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, disadvantageRoll: 1, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
+
+    const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
+
+    expect(attacks.map((e) => e.targets[0].participantId)).toEqual(["t", "x", "y"]);
+    expect(attacks.slice(1).map((e) => e.actionDetails.isHit)).toEqual([true, true]);
+  });
+
   it("melee cleave on the map rejects a second chosen target", () => {
     const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
 
