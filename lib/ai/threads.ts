@@ -16,17 +16,21 @@ const toThread = (r: Row, usage: AiUsage = ZERO): AiThread => ({ ...r, mode: r.m
 export async function listThreads(campaignId: string, userId: string, pageId?: string): Promise<AiThread[]> {
   const rows = await prisma.aiThread.findMany({ where: { campaignId, userId, ...(pageId && { scenarioPageId: pageId }) }, select: SELECT, orderBy: { updatedAt: "desc" }, take: 30 });
 
-  return rows.map((r) => toThread(r));
+  if (!rows.length) return [];
+
+  const usage = await usageByThread(rows.map((r) => r.id));
+
+  return rows.map((r) => toThread(r, usage.get(r.id)));
+}
+
+export async function resolveDefaultModel(userId: string, provider: AiProvider, mode: AiThreadMode): Promise<string> {
+  const cred = await prisma.aiCredential.findUnique({ where: { userId_provider: { userId, provider } }, select: { defaultModel: true } });
+
+  return cred?.defaultModel && isKnownModel(provider, cred.defaultModel) ? cred.defaultModel : defaultModelFor(provider, mode);
 }
 
 export async function createThread(campaignId: string, userId: string, input: { mode: AiThreadMode; scenarioPageId?: string | null; provider: AiProvider; model?: string }): Promise<AiThread> {
-  let model = input.model;
-
-  if (!model) {
-    const cred = await prisma.aiCredential.findUnique({ where: { userId_provider: { userId, provider: input.provider } }, select: { defaultModel: true } });
-
-    model = cred?.defaultModel && isKnownModel(input.provider, cred.defaultModel) ? cred.defaultModel : defaultModelFor(input.provider, input.mode);
-  }
+  const model = input.model ?? (await resolveDefaultModel(userId, input.provider, input.mode));
 
   const row = await prisma.aiThread.create({ data: { campaignId, userId, mode: input.mode, scenarioPageId: input.scenarioPageId ?? null, provider: input.provider, model, title: "Новий тред" }, select: SELECT });
 
@@ -69,12 +73,24 @@ export async function appendMessage(threadId: string, message: { id?: string; ro
   });
 }
 
-export async function threadUsage(threadId: string): Promise<AiUsage> {
-  const rows = await prisma.aiMessage.findMany({ where: { threadId, role: "assistant" }, select: { metadata: true } });
+async function usageByThread(threadIds: string[]): Promise<Map<string, AiUsage>> {
+  const rows = await prisma.aiMessage.findMany({ where: { threadId: { in: threadIds }, role: "assistant" }, select: { threadId: true, metadata: true } });
 
-  return rows.reduce<AiUsage>((acc, r) => {
+  const totals = new Map<string, AiUsage>();
+
+  for (const r of rows) {
     const u = (r.metadata as AiMessageMetadata | null)?.usage;
 
-    return u ? { inputTokens: acc.inputTokens + u.inputTokens, outputTokens: acc.outputTokens + u.outputTokens } : acc;
-  }, ZERO);
+    if (!u) continue;
+
+    const acc = totals.get(r.threadId) ?? ZERO;
+
+    totals.set(r.threadId, { inputTokens: acc.inputTokens + u.inputTokens, outputTokens: acc.outputTokens + u.outputTokens });
+  }
+
+  return totals;
+}
+
+export async function threadUsage(threadId: string): Promise<AiUsage> {
+  return (await usageByThread([threadId])).get(threadId) ?? ZERO;
 }

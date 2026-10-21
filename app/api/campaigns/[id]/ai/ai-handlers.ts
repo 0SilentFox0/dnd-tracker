@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { applyProposal, listProposals, rejectProposal } from "@/lib/ai/proposals";
-import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread } from "@/lib/ai/threads";
-import { AI_LIMITS, AI_PROPOSAL_STATUSES, defaultModelFor, isKnownModel } from "@/lib/constants/ai";
+import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
+import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createThreadSchema, patchThreadSchema } from "@/lib/schemas/ai";
@@ -115,8 +115,8 @@ export async function patchThreadHandler(req: Request, campaignId: string, threa
 
     const provider = body.provider ?? current.provider;
 
-    // switching provider without a model picks that provider's default for the thread mode
-    const model = body.model ?? (provider === current.provider ? current.model : defaultModelFor(provider, current.mode));
+    // switching provider without a model picks the key's default model, else the mode default
+    const model = body.model ?? (provider === current.provider ? current.model : await resolveDefaultModel(access.userId, provider, current.mode));
 
     if (!isKnownModel(provider, model)) return errorResponse(API_ERRORS.AI_MODEL_UNKNOWN, 400);
 

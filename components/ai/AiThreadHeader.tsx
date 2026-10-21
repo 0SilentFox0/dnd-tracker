@@ -4,14 +4,14 @@ import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
-import { AI_MODE_LABELS, AI_MODELS, AI_PROVIDER_LABELS, type AiProvider, defaultModelFor } from "@/lib/constants/ai";
+import { AI_MODE_LABELS, AI_MODELS, AI_PROVIDER_LABELS, type AiProvider } from "@/lib/constants/ai";
 import type { AiThread } from "@/types/ai";
 
 interface AiThreadHeaderProps {
   threads: AiThread[];
   thread: AiThread | null;
   providers: AiProvider[];
-  actions: { onSelect: (threadId: string) => void; onCreate: () => void; onChangeModel: (provider: AiProvider, model: string) => void; onClose: () => void };
+  actions: { onSelect: (threadId: string) => void; onCreate: () => void; onChangeModel: (provider: AiProvider, model?: string) => void; onClose: () => void };
 }
 
 export function AiThreadHeader({ threads, thread, providers, actions }: AiThreadHeaderProps) {
@@ -36,7 +36,7 @@ export function AiThreadHeader({ threads, thread, providers, actions }: AiThread
               aria-label="Провайдер"
               className="flex-1"
               value={thread.provider}
-              onValueChange={(p) => actions.onChangeModel(p as AiProvider, defaultModelFor(p as AiProvider, thread.mode))}
+              onValueChange={(p) => actions.onChangeModel(p as AiProvider)}
               options={providerOptions}
             />
             <SelectField

@@ -11,7 +11,7 @@ import { AiThreadHeader } from "./AiThreadHeader";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { AI_MODE_LABELS, type AiProvider, type AiThreadMode, defaultModelFor } from "@/lib/constants/ai";
+import { AI_MODE_LABELS, type AiProvider, type AiThreadMode } from "@/lib/constants/ai";
 import { useAiChat, useAiCredentials, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
@@ -110,7 +110,7 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
 
     if (!provider) return;
 
-    const created = await create({ mode, scenarioPageId: page.id, provider, model: defaultModelFor(provider, mode) });
+    const created = await create({ mode, scenarioPageId: page.id, provider });
 
     setSelectedId(created.id);
   };
@@ -155,7 +155,7 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
           actions={{
             onSelect: setSelectedId,
             onCreate: createThread,
-            onChangeModel: (provider: AiProvider, model: string) => thread && patch(thread.id, { provider, model }),
+            onChangeModel: (provider: AiProvider, model?: string) => thread && patch(thread.id, { provider, model }),
             onClose: actions.onClose,
           }}
         />
