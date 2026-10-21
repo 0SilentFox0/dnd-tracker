@@ -25,6 +25,8 @@ export interface AttackOutcomeSummary {
   targetId: string;
   damage: number;
   downed: boolean;
+  /** Вторинна шкода (вогняна хвиля, стріла сили), не удар */
+  splash?: boolean;
 }
 
 export interface AttackFlowState {

@@ -15,3 +15,4 @@ export * from "./scene-maps";
 export * from "./summary";
 export * from "./turn-exhausted";
 export * from "./visibility";
+export * from "./volley-results";

@@ -7,10 +7,13 @@ import { fakeScene } from "./fake-scene";
 
 import type { BattleAction } from "@/types/battle";
 
-function start() {
-  const scene = fakeScene();
+const hitLog = (changes: { participantId: string; change: number }[]) =>
+  [{ actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: changes.map((c) => ({ ...c, participantName: c.participantId, oldHp: 20, newHp: 20 - c.change })), actionDetails: { isHit: true } }] as unknown as BattleAction[];
 
-  scene.mutateAsync.mockResolvedValue({ hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }] });
+function start(afterLog: BattleAction[] = hitLog([{ participantId: "gob", change: 9 }])) {
+  const scene = fakeScene({ afterLog });
+
+  scene.mutateAsync.mockResolvedValue(undefined);
 
   const onDone = vi.fn();
 
@@ -44,14 +47,7 @@ describe("useAttackWizard", () => {
   });
 
   it("шкода — з hpChanges відповіді по цілі, а не з різниці кешу; відсіч по атакувальнику не рахується", async () => {
-    const { result, mutateAsync, showResult } = start();
-
-    mutateAsync.mockResolvedValueOnce({
-      hpChanges: [
-        { participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 13, change: 7 },
-        { participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 },
-      ],
-    });
+    const { result, showResult } = start(hitLog([{ participantId: "gob", change: 7 }, { participantId: "me", change: 4 }]));
 
     act(() => result.current.actions.roll(14));
     act(() => result.current.actions.damage([6]));
@@ -61,7 +57,9 @@ describe("useAttackWizard", () => {
   });
 
   it("промах — відправка одразу, результат «miss»", async () => {
-    const { result, mutateAsync, showResult } = start();
+    const missLog = [{ actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: [], actionDetails: { isHit: false } }] as unknown as BattleAction[];
+
+    const { result, mutateAsync, showResult } = start(missLog);
 
     act(() => result.current.actions.roll(2));
 
@@ -89,7 +87,8 @@ describe("useAttackWizard", () => {
 
   it("відсіч цілі потрапляє в результат", async () => {
     const afterLog = [
-      { actionIndex: 9, actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], hpChanges: [{ participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 }], actionDetails: { isHit: true } },
+      ...hitLog([{ participantId: "gob", change: 9 }]),
+      { actionIndex: 10, actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], hpChanges: [{ participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 }], actionDetails: { isHit: true } },
     ] as unknown as BattleAction[];
 
     const scene = fakeScene({ afterLog });

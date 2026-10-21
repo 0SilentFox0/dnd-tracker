@@ -22,6 +22,7 @@ export function RollStep({ wizard: { state, view, actions }, target }: { wizard:
     <>
       <div className="hud-sc text-xl font-bold">Кидок атаки · d20</div>
       {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">Удар {state.index + 1} з {state.strikes.length} · {target.basicInfo.name}</div>}
+      {view.cover.has(target.basicInfo.id) && <div className="mt-2 text-sm text-[#e0a050]">🧱 Перешкода на лінії · шкода ×0.5</div>}
       <div className={cn("mt-3 grid h-10 grid-cols-3 border border-white/20", view.forcedMode && "opacity-60")}>
         {MODES.map(([m, label]) => (
           <button key={m} type="button" disabled={!!view.forcedMode} onClick={() => actions.setMode(m)} className={cn("border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed", view.rollMode === m ? "bg-white/10 font-bold text-[var(--ink)]" : "text-[#a89c88]")}>{label}</button>
