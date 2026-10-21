@@ -2,6 +2,7 @@ import type { LibrarySpell } from "./types";
 
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
+import type { TemplateShape } from "@/types/battle";
 
 const LIGHT = "Світло";
 
@@ -34,7 +35,7 @@ const ALL_ENEMIES: Targeting = { kind: "allEnemies" };
 const enemies = (maxTargets: number, range?: number, extra: { chain?: true } = {}): Targeting => ({ kind: "area", side: "enemy", maxTargets, range, ...extra });
 
 const template = (
-  shape: "circle" | "cube" | "cone" | "line",
+  shape: TemplateShape,
   size: number,
   side: "ally" | "enemy",
   maxTargets: number,
@@ -428,10 +429,10 @@ export const SPELLS: LibrarySpell[] = [
     name: "Кам'яні шипи",
     school: CHAOS,
     level: 1,
-    description: `Лінія завдовжки 30 фт від заклинателя: кожна істота в ній, включно із союзниками, отримує ${power(2, "дробильної шкоди")}. Без карти — до 2 ворогів на вибір.`,
+    description: `Хрест із променями по 5 фт (центр і чотири сусідні клітинки) у межах 60 фт: кожна істота в ньому, включно із союзниками, отримує ${power(2, "дробильної шкоди")}. Без карти — до 3 ворогів на вибір.`,
     appearanceDescription:
       "Земля під ворогами здригається, і з неї вистрибують гострі кам'яні шпилі, мов зуби величезного звіра. Уламки скель розлітаються, лишаючи по собі хмари пилу.",
-    definition: def(2, template("line", 30, "enemy", 2), [damage("bludgeoning")]),
+    definition: def(2, template("cross", 5, "enemy", 3, { range: 60 }), [damage("bludgeoning")]),
     raceModifiers: [],
   },
   {

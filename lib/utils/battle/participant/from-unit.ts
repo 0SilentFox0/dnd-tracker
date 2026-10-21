@@ -133,7 +133,8 @@ export async function createBattleParticipantFromUnit(
     },
     spellcasting: {
       spellcastingAbility: undefined,
-      spellSaveDC: undefined,
+      // юніти без заклинальної характеристики: СК росте з тіром (level = тір)
+      spellSaveDC: 8 + unit.proficiencyBonus + unit.level,
       spellAttackBonus: undefined,
       spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],
