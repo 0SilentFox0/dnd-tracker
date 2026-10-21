@@ -16,6 +16,20 @@ const page = (kind: ScenarioPage["kind"]): ScenarioPage => ({
 });
 
 describe("ScenarioPageView", () => {
+  it("заголовок розділу з іконкою за типом і ручною іконкою", () => {
+    const pg = page("scene");
+
+    pg.content.sections.push({ id: "s11", title: "1.1 Бій", played: false, rows: [{ id: "r2", story: p("x"), notes: p(""), battleId: "b1" }] });
+    pg.content.sections.push({ id: "s12", title: "1.2 Привал", played: false, icon: "rest", rows: [] });
+
+    const { container } = render(<ScenarioPageView page={pg} campaignId="c" />);
+
+    expect(container.querySelector("#sec-s10 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("scene");
+    expect(container.querySelector("#sec-s11 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("battle");
+    expect(container.querySelector("#sec-s12 [data-section-icon]")?.getAttribute("data-section-icon")).toBe("rest");
+    expect(container.querySelector("#sec-s10 h2")?.textContent).toBe("1.0 Собор");
+  });
+
   it("заголовок, легенда, розділ з якорем, story і notes", () => {
     const { container } = render(<ScenarioPageView page={page("scene")} campaignId="c" />);
 

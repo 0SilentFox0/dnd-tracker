@@ -3,12 +3,14 @@
 import { RowPlayControls } from "./play/RowPlayControls";
 import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
+import { SectionIcon } from "./SectionIcon";
 
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import { cn } from "@/lib/utils";
 import { isDocEmpty } from "@/lib/utils/scenario/doc";
 import { rowSlideState } from "@/lib/utils/scenario/play";
 import { type PlayedLookup, sectionDone } from "@/lib/utils/scenario/reveal";
+import { sectionIcon } from "@/lib/utils/scenario/section-icon";
 import type { ScenarioPage } from "@/types/scenario";
 
 type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean; played?: PlayedLookup };
@@ -29,14 +31,17 @@ export function ScenarioPageView({ page, campaignId, progress, play }: { page: S
 
           return (
             <section key={s.id} id={`sec-${s.id}`} className={done ? "is-played" : undefined}>
-              <h2>
-                {s.title}
+              <div className="sb-sec-head">
+                <div className="sb-sec-orn">
+                  <SectionIcon name={sectionIcon(s)} className="sb-sec-icon" />
+                </div>
+                <h2>{s.title}</h2>
                 {progress && (
                   <button type="button" className="toggle played" aria-pressed={done} disabled={progress.pending} onClick={() => (isHero ? progress.onRevealed(s.id, !s.revealedAt) : progress.onPlayed(s.id, !done))}>
                     {isHero ? (byPlay ? "✓ Відкрито (після розділу)" : done ? "✓ Відкрито гравцеві" : "Відкрити гравцеві") : done ? "✓ Зіграно" : "Зіграно"}
                   </button>
                 )}
-              </h2>
+              </div>
               {s.rows.map((r) => {
                 const slideState = play ? rowSlideState(r, play.lookup) : null;
 

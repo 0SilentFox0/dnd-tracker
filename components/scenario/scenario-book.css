@@ -43,9 +43,15 @@
 @media (prefers-reduced-motion: no-preference) {
   html:has(.scenario-book) { scroll-behavior: smooth; }
 }
-.scenario-book section > h2 { font-size: 30px; font-weight: 500; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); display: flex; gap: 12px; align-items: baseline; }
-.scenario-book section > h2 .played { margin-left: auto; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; }
-.scenario-book section.is-played > h2 { color: var(--ink-soft); }
+.scenario-book .sb-sec-head { position: relative; text-align: center; margin: 0 0 10px; }
+.scenario-book .sb-sec-orn { display: flex; align-items: center; gap: 14px; color: var(--gold); }
+.scenario-book .sb-sec-orn::before, .scenario-book .sb-sec-orn::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--rule)); }
+.scenario-book .sb-sec-orn::after { background: linear-gradient(90deg, var(--rule), transparent); }
+.scenario-book .sb-sec-icon { width: 22px; height: 22px; stroke-width: 1.5; flex: none; }
+.scenario-book .sb-sec-head h2 { font-size: 30px; font-weight: 500; margin: 6px 0 0; }
+.scenario-book .sb-sec-head .played { position: absolute; right: 0; top: 0; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; background: var(--page); }
+.scenario-book section.is-played .sb-sec-head h2 { color: var(--ink-soft); }
+@media (max-width: 640px) { .scenario-book .sb-sec-head .played { position: static; margin-top: 8px; } }
 .scenario-book h3 { font-size: 21px; font-weight: 700; margin: 0 0 8px; }
 .scenario-book .row { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; padding: 22px 0; border-bottom: 1px solid var(--rule); }
 .scenario-book .row:last-child { border-bottom: none; }
