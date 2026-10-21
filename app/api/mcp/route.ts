@@ -2,10 +2,11 @@ import { createMcpHandler } from "mcp-handler";
 
 import { verifyApiToken } from "@/lib/ai/api-tokens";
 import { registerMcpTools } from "@/lib/ai/tools";
+import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // stateless: a handler per request, closed over the token's campaign
 async function handler(req: Request): Promise<Response> {
@@ -15,7 +16,7 @@ async function handler(req: Request): Promise<Response> {
 
   if (!auth) return errorResponse(API_ERRORS.UNAUTHORIZED, 401);
 
-  const mcp = createMcpHandler((server) => registerMcpTools(server, { campaignId: auth.campaignId, userId: auth.userId, threadId: null }), {
+  const mcp = createMcpHandler((server) => registerMcpTools(server, { campaignId: auth.campaignId, userId: auth.userId, threadId: null, abortSignal: AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), req.signal]) }), {
     serverInfo: { name: "dnd-tracker", version: "1.0.0" },
   });
 

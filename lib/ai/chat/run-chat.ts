@@ -2,7 +2,7 @@ import { APICallError, consumeStream, convertToModelMessages, createUIMessageStr
 
 import "server-only";
 import { buildInstructions } from "@/lib/ai/context/prompt";
-import { loadApiKey } from "@/lib/ai/credentials";
+import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { createModel } from "@/lib/ai/providers";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
@@ -32,7 +32,15 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
   let model = deps.model;
 
   if (!model) {
-    const apiKey = await loadApiKey(userId, thread.provider);
+    let apiKey: string | null;
+
+    try {
+      apiKey = await loadApiKey(userId, thread.provider);
+    } catch (error) {
+      if (error instanceof AiKeyUnreadableError) return errorResponse(API_ERRORS.AI_KEY_UNREADABLE, 400);
+
+      throw error;
+    }
 
     if (!apiKey) return errorResponse(API_ERRORS.AI_KEY_MISSING, 400);
 
@@ -43,7 +51,9 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
 
   await appendMessage(threadId, userMessage);
 
-  const tools = toAiSdkTools({ campaignId, userId, threadId });
+  const toolSignal = AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), ...(abortSignal ? [abortSignal] : [])]);
+
+  const tools = toAiSdkTools({ campaignId, userId, threadId, abortSignal: toolSignal });
 
   const [stored, instructions] = await Promise.all([
     loadMessages(threadId, AI_LIMITS.historyMessages),

@@ -25,11 +25,15 @@ export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesToo
   proposeSceneSlideTool,
 ];
 
-export function toAiSdkTools(ctx: AiToolContext): ToolSet {
+export function toAiSdkTools(base: AiToolContext): ToolSet {
+  const ctx = { ...base, usage: { images: 0 } };
+
   return Object.fromEntries(AI_TOOLS.map((def) => [def.name, tool({ description: def.description, inputSchema: def.input, execute: (input: unknown) => runTool(def, ctx, input) })]));
 }
 
-export function registerMcpTools(server: McpServer, ctx: AiToolContext): void {
+export function registerMcpTools(server: McpServer, base: AiToolContext): void {
+  const ctx = { ...base, usage: { images: 0 } };
+
   for (const def of AI_TOOLS) {
     server.registerTool(def.name, { title: def.title, description: def.description, inputSchema: def.input as z.ZodObject }, async (input: unknown) => ({
       content: [{ type: "text" as const, text: await runTool(def, ctx, input) }],

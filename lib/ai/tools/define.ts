@@ -3,7 +3,7 @@ import type { z } from "zod";
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
 
-export type AiToolContext = { campaignId: string; userId: string; threadId: string | null };
+export type AiToolContext = { campaignId: string; userId: string; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
 
 export class AiToolError extends Error {}
 

@@ -12,7 +12,11 @@ const upload = vi.fn();
 const generateImageModel = vi.hoisted(() => ({ model: null as unknown }));
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/ai/credentials", () => ({ loadApiKey: vi.fn(async () => "sk-SECRET-key") }));
+vi.mock("@/lib/ai/credentials", () => {
+  class AiKeyUnreadableError extends Error {}
+
+  return { AiKeyUnreadableError, loadApiKey: vi.fn(async () => "sk-SECRET-key") };
+});
 vi.mock("@/lib/ai/settings", () => ({ getAiSettings: vi.fn(async () => ({ instructions: "Темне фентезі" })) }));
 vi.mock("@/lib/ai/providers", () => ({ createImageModel: vi.fn(() => generateImageModel.model) }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ensureSlidesBucket: vi.fn(async () => ({ ok: true })) }));
@@ -110,6 +114,33 @@ describe("generateSlideImage", () => {
     });
 
     expect((await generateSlideImage(input).catch((e) => e)).message).toBe(API_ERRORS.AI_IMAGE_REJECTED);
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it("ключ не розшифровується → 400 AI_KEY_UNREADABLE, генерації немає", async () => {
+    const { AiKeyUnreadableError, loadApiKey } = await import("@/lib/ai/credentials");
+
+    vi.mocked(loadApiKey).mockRejectedValueOnce(new AiKeyUnreadableError());
+    generateImageModel.model = modelReturning([]);
+
+    const error = await generateSlideImage(input).catch((e) => e);
+
+    expect(error.status).toBe(400);
+    expect(error.message).toBe(API_ERRORS.AI_KEY_UNREADABLE);
+  });
+
+  it("abort під час генерації → помилка, файл не завантажується", async () => {
+    const controller = new AbortController();
+
+    generateImageModel.model = new MockImageModelV4({
+      doGenerate: async () => {
+        controller.abort();
+
+        return { images: [new Uint8Array(png)], warnings: [], response: { timestamp: new Date(), modelId: "m", headers: {} } } as never;
+      },
+    });
+
+    await expect(generateSlideImage({ ...input, abortSignal: controller.signal })).rejects.toThrow();
     expect(upload).not.toHaveBeenCalled();
   });
 });

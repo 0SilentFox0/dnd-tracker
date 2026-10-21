@@ -2,10 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 
-const h = vi.hoisted(() => ({ loadApiKey: vi.fn(), generate: vi.fn() }));
+const h = vi.hoisted(() => ({ loadApiKey: vi.fn(), generate: vi.fn(), remove: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findFirst: vi.fn() }, slideDeck: { findFirst: vi.fn() }, aiProposal: { create: vi.fn() } } }));
-vi.mock("@/lib/ai/credentials", () => ({ loadApiKey: h.loadApiKey }));
+vi.mock("@/lib/ai/credentials", () => {
+  class AiKeyUnreadableError extends Error {}
+
+  return { AiKeyUnreadableError, loadApiKey: h.loadApiKey };
+});
+vi.mock("@/lib/supabase/scene-slide-storage", () => ({ removeSlideFiles: h.remove }));
 vi.mock("@/lib/ai/images", () => {
   class AiImageError extends Error {
     constructor(message: string, readonly status: number) {
@@ -71,5 +76,55 @@ describe("propose_scene_slide", () => {
     h.generate.mockRejectedValue(new AiImageError("Фільтр безпеки", 422));
     await expect(run({})).rejects.toBeInstanceOf(AiToolError);
     expect(prisma.aiProposal.create).not.toHaveBeenCalled();
+  });
+
+  it("створення пропозиції впало після генерації → файл видаляється", async () => {
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.aiProposal.create).mockRejectedValueOnce(new Error("db"));
+
+    await expect(run({})).rejects.toThrow("db");
+    expect(h.remove).toHaveBeenCalledWith("camp1", ["https://x/img.webp"]);
+  });
+
+  it("сигнал запиту передається в генерацію", async () => {
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+
+    const abortSignal = new AbortController().signal;
+
+    await (await import("@/lib/ai/tools/propose-slide")).proposeSceneSlideTool.handler({ ...ctx, abortSignal }, { pageId: "p1", prompt: "x", aspect: "16:9" } as never);
+    expect(h.generate).toHaveBeenCalledWith(expect.objectContaining({ abortSignal }));
+  });
+
+  it("друга картинка в тому ж запиті → AiToolError, генерація одна", async () => {
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+
+    const { proposeSceneSlideTool } = await import("@/lib/ai/tools/propose-slide");
+
+    const withUsage = { ...ctx, usage: { images: 0 } };
+
+    const input = { pageId: "p1", prompt: "x", aspect: "16:9" } as never;
+
+    await proposeSceneSlideTool.handler(withUsage, input);
+    await expect(proposeSceneSlideTool.handler(withUsage, input)).rejects.toThrow("одна картинка");
+    expect(h.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("нечитабельний ключ OpenAI не блокує робочий Google; якщо робочого немає — підказка", async () => {
+    const { AiKeyUnreadableError } = await import("@/lib/ai/credentials");
+
+    vi.mocked(prisma.slideDeck.findFirst).mockResolvedValue(null);
+    h.loadApiKey.mockImplementation(async (_u: string, provider: string) => {
+      if (provider === "openai") throw new AiKeyUnreadableError();
+
+      return provider === "google" ? "g" : null;
+    });
+
+    await run({});
+    expect(h.generate).toHaveBeenCalledWith(expect.objectContaining({ provider: "google" }));
+
+    h.loadApiKey.mockImplementation(async () => {
+      throw new AiKeyUnreadableError();
+    });
+    await expect(run({})).rejects.toThrow("збережіть ключ заново");
   });
 });

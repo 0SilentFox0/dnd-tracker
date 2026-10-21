@@ -2,7 +2,7 @@ import { APICallError, generateImage, NoImageGeneratedError, RetryError } from "
 import sharp from "sharp";
 
 import "server-only";
-import { loadApiKey } from "@/lib/ai/credentials";
+import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { createImageModel } from "@/lib/ai/providers";
 import { getAiSettings } from "@/lib/ai/settings";
@@ -34,6 +34,7 @@ export type GenerateSlideImageInput = {
   model: string;
   aspect: AiImageAspect;
   useCampaignStyle: boolean;
+  abortSignal?: AbortSignal;
 };
 
 function failure(error: unknown): AiImageError {
@@ -59,7 +60,15 @@ export async function composeImagePrompt(campaignId: string, prompt: string, use
 }
 
 export async function generateSlideImage(input: GenerateSlideImageInput): Promise<{ url: string }> {
-  const apiKey = await loadApiKey(input.userId, input.provider);
+  let apiKey: string | null;
+
+  try {
+    apiKey = await loadApiKey(input.userId, input.provider);
+  } catch (error) {
+    if (error instanceof AiKeyUnreadableError) throw new AiImageError(API_ERRORS.AI_KEY_UNREADABLE, 400);
+
+    throw error;
+  }
 
   if (!apiKey) throw new AiImageError(API_ERRORS.AI_KEY_MISSING, 400);
 
@@ -73,13 +82,15 @@ export async function generateSlideImage(input: GenerateSlideImageInput): Promis
       prompt,
       n: 1,
       ...(input.provider === "openai" ? { size: OPENAI_SIZES[input.aspect] as `${number}x${number}` } : { aspectRatio: input.aspect }),
-      abortSignal: AbortSignal.timeout(110_000),
+      abortSignal: AbortSignal.any([AbortSignal.timeout(110_000), ...(input.abortSignal ? [input.abortSignal] : [])]),
     });
 
     bytes = image.uint8Array;
   } catch (error) {
     throw failure(error);
   }
+
+  if (input.abortSignal?.aborted) throw new AiImageError(API_ERRORS.AI_PROVIDER_DOWN, 502);
 
   const webp = await sharp(bytes).rotate().resize({ width: SLIDE_MAX_EDGE_PX, height: SLIDE_MAX_EDGE_PX, fit: "inside", withoutEnlargement: true }).webp({ quality: WEBP_QUALITY }).toBuffer();
 

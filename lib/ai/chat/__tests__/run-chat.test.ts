@@ -3,7 +3,11 @@ import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/ai/threads", () => ({ loadThread: vi.fn(), loadMessages: vi.fn(async () => []), appendMessage: vi.fn() }));
-vi.mock("@/lib/ai/credentials", () => ({ loadApiKey: vi.fn(async () => "sk-test") }));
+vi.mock("@/lib/ai/credentials", () => {
+  class AiKeyUnreadableError extends Error {}
+
+  return { AiKeyUnreadableError, loadApiKey: vi.fn(async () => "sk-test") };
+});
 vi.mock("@/lib/ai/context/prompt", () => ({ buildInstructions: vi.fn(async () => "ІНСТРУКЦІЇ") }));
 vi.mock("@/lib/ai/tools", () => ({ toAiSdkTools: vi.fn(() => ({})) }));
 
@@ -54,6 +58,35 @@ describe("runChat", () => {
     expect(assistant?.metadata?.usage).toEqual({ inputTokens: 10, outputTokens: 5 });
   });
 
+  it("ключ не розшифровується → 400 з підказкою, не 500", async () => {
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    const { AiKeyUnreadableError, loadApiKey } = await import("@/lib/ai/credentials");
+
+    vi.mocked(loadApiKey).mockRejectedValueOnce(new AiKeyUnreadableError());
+
+    const res = await runChat(args);
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("збережіть ключ заново");
+  });
+
+  it("інструменти отримують сигнал, що спрацьовує разом із клієнтським abort", async () => {
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    const { toAiSdkTools } = await import("@/lib/ai/tools");
+
+    const controller = new AbortController();
+
+    await (await runChat({ ...args, abortSignal: controller.signal }, { model: textModel("ok") })).text();
+
+    const signal = vi.mocked(toAiSdkTools).mock.calls[0][0].abortSignal!;
+
+    expect(signal.aborted).toBe(false);
+    controller.abort();
+    expect(signal.aborted).toBe(true);
+  });
+
   it("лише текст → жодної пропозиції (propose не викликано)", async () => {
     const { runChat } = await import("@/lib/ai/chat/run-chat");
 
@@ -61,7 +94,7 @@ describe("runChat", () => {
 
     const { toAiSdkTools } = await import("@/lib/ai/tools");
 
-    expect(toAiSdkTools).toHaveBeenCalledWith({ campaignId: "camp1", userId: "dm", threadId: "t1" });
+    expect(toAiSdkTools).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "camp1", userId: "dm", threadId: "t1" }));
   });
 
   it("чужий тред — 404", async () => {

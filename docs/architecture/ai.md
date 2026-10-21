@@ -26,18 +26,18 @@
 - `campaigns.aiInstructions` — лише для ДМ: у всіх читаннях кампанії для членів (`GET /api/campaigns`, `/api/campaigns/[id]`, `join`, `requireCampaign*`, `character.campaign`) стоїть `omit: { aiInstructions: true }`; читають його лише `lib/ai/settings.ts`, `buildInstructions` і `get_campaign_brief` через явний `select`. Нове читання `campaign` з відповіддю клієнту — з `omit`. (Глобальний `omit` у `lib/db.ts` ламає типізацію `BattleDb`.)
 - Зміни сценарію й нові слайди в наборах лише через `ai_proposals` + `apply`; жоден інструмент не пише у `scenario_pages`/`slide_decks` напряму.
 - Новий інструмент = файл у `lib/ai/tools` + рядок у `AI_TOOLS`; він автоматично доступний в обох каналах (чат і MCP). Окремо під канал не реєструвати.
+- `/api/mcp` має `maxDuration = 300`; запит несе дедлайн `AI_LIMITS.requestDeadlineMs` (270 с) і `req.signal` у `ctx.abortSignal` — генерація зображення зупиняється до ліміту функції, завантаження — лише після успішної генерації; якщо пропозицію створити не вдалося, файл видаляється. За один запит чату/MCP — одна згенерована картинка (`ctx.usage`).
 - `/api/mcp` звільнений від CSRF-перевірки (`lib/supabase/middleware.ts`: браузерні MCP-клієнти шлють чужий `Origin`) і приймає лише Bearer із `api_tokens`; cookie-сесію не читає.
 - Кожен маршрут — лише ДМ і в межах кампанії (`requireDM` через `guarded()`; кожен запит до БД фільтрується за `campaignId`, а треди — ще й за `userId`); маршрути ключів — `requireAuth` (ключ належить користувачеві).
 - `AI_KEYS_SECRET`/`_PREV` не логувати й не комітити.
 
 ## Env і ротація ключа
 
-`AI_KEYS_SECRET` (`openssl rand -base64 32`) — Vercel Production і Preview, `.env.local`; `AI_KEYS_SECRET_PREV` — лише під час ротації. Ротація:
+`AI_KEYS_SECRET` (`openssl rand -base64 32`) — **одне й те саме значення** в кожному середовищі, що ділить БД: Vercel Production, Preview і будь-який `.env.local`, націлений на прод-БД. Різні значення = ключ, збережений в одному середовищі, не читається в іншому (`loadApiKey` → `AiKeyUnreadableError` → 400 `AI_KEY_UNREADABLE` «збережіть ключ заново» у чаті, генерації зображень і MCP-інструментах; у `propose_scene_slide` нечитабельний ключ одного провайдера не блокує інший). `AI_KEYS_SECRET_PREV` — лише під час ротації. Ротація:
 
-1. `UPDATE ai_credentials SET "keyVersion" = 0;` — записи тепер читаються ключем `_PREV`.
-2. Старе значення `AI_KEYS_SECRET` → `AI_KEYS_SECRET_PREV`.
-3. Новий секрет → `AI_KEYS_SECRET`; деплой.
-4. Записи перешифровуються поточним ключем (`keyVersion` = 1) при наступному збереженні ключа користувачем; після того як усі користувачі пересохранили (або їх перепросили), `_PREV` можна прибрати.
+1. Старе значення `AI_KEYS_SECRET` → `AI_KEYS_SECRET_PREV`, новий секрет → `AI_KEYS_SECRET`; деплой.
+2. Після деплою: `UPDATE ai_credentials SET "keyVersion" = 0;` — записи тепер читаються ключем `_PREV`.
+3. Записи перешифровуються поточним ключем (`keyVersion` = 1) при наступному збереженні ключа користувачем; після того як усі користувачі пересохранили (або їх перепросили), `_PREV` можна прибрати.
 
 ## Підключення зовнішнього MCP-клієнта
 

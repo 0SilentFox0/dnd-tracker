@@ -1,5 +1,5 @@
 import "server-only";
-import { decryptSecret, encryptSecret } from "@/lib/ai/crypto";
+import { AiNotConfiguredError, decryptSecret, encryptSecret } from "@/lib/ai/crypto";
 import type { AiProvider } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
 import type { AiCredentialSummary } from "@/types/ai";
@@ -43,8 +43,23 @@ export async function deleteCredential(userId: string, provider: AiProvider): Pr
   await prisma.aiCredential.deleteMany({ where: { userId, provider } });
 }
 
+export class AiKeyUnreadableError extends Error {
+  constructor() {
+    super("stored AI key cannot be decrypted");
+    this.name = "AiKeyUnreadableError";
+  }
+}
+
 export async function loadApiKey(userId: string, provider: AiProvider): Promise<string | null> {
   const row = await prisma.aiCredential.findUnique({ where: { userId_provider: { userId, provider } }, select: { ciphertext: true, iv: true, authTag: true, keyVersion: true } });
 
-  return row ? decryptSecret(row) : null;
+  if (!row) return null;
+
+  try {
+    return decryptSecret(row);
+  } catch (error) {
+    if (error instanceof AiNotConfiguredError) throw error;
+
+    throw new AiKeyUnreadableError();
+  }
 }

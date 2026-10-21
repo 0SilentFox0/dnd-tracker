@@ -65,6 +65,7 @@ export const AI_LIMITS = {
   messageChars: 8000,
   historyMessages: 30,
   fullToolResultsInLast: 6,
+  requestDeadlineMs: 270_000,
   toolResultChars: 24_000,
   contextChars: 40_000,
   maxSteps: 8,
