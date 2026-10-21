@@ -25,3 +25,12 @@ export function openChapters(content: ScenarioContent, played: PlayedLookup): St
     .filter((s) => isChapterOpen(s, played))
     .map((s) => ({ id: s.id, title: s.title, rows: s.rows.map((r) => stripSecrets(r.story)).filter((d) => !isDocEmpty(d)) }));
 }
+
+/** Зіграний розділ сцени або відкрита глава героя — те саме правило для кнопки, змісту і згортання. */
+export function sectionDone(section: ScenarioSection, isHero: boolean, played?: PlayedLookup): { done: boolean; byPlay: boolean } {
+  if (!isHero) return { done: section.played, byPlay: false };
+
+  const byPlay = !section.revealedAt && !!played && isChapterOpen(section, played);
+
+  return { done: !!section.revealedAt || byPlay, byPlay };
+}

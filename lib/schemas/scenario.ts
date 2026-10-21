@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
+import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
 import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const attrsSchema = z.record(z.string(), z.unknown());
@@ -38,6 +38,7 @@ const sectionSchema = z.object({
   id: idSchema,
   title: z.string().max(200),
   played: z.boolean(),
+  icon: z.enum(SECTION_ICON_KEYS).optional(),
   reveal: revealSchema.optional(),
   revealedAt: z.string().nullable().optional(),
   rows: z.array(rowSchema).max(200),

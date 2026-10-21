@@ -8,7 +8,7 @@ import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import { cn } from "@/lib/utils";
 import { isDocEmpty } from "@/lib/utils/scenario/doc";
 import { rowSlideState } from "@/lib/utils/scenario/play";
-import { isChapterOpen, type PlayedLookup } from "@/lib/utils/scenario/reveal";
+import { type PlayedLookup, sectionDone } from "@/lib/utils/scenario/reveal";
 import type { ScenarioPage } from "@/types/scenario";
 
 type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean; played?: PlayedLookup };
@@ -25,9 +25,7 @@ export function ScenarioPageView({ page, campaignId, progress, play }: { page: S
       </header>
       <main>
         {page.content.sections.map((s) => {
-          const byPlay = isHero && !s.revealedAt && !!progress?.played && isChapterOpen(s, progress.played);
-
-          const done = isHero ? !!s.revealedAt || byPlay : s.played;
+          const { done, byPlay } = sectionDone(s, isHero, progress?.played);
 
           return (
             <section key={s.id} id={`sec-${s.id}`} className={done ? "is-played" : undefined}>
