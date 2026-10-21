@@ -67,7 +67,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <div className="w-[420px] shrink-0"><LastActionTicker /></div>
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
-        <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5">
+        <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
           {hero && <MyHeroPanel hero={hero} />}
           {isMyTurn && hero && <MyTurnControls key={myTurnKey(hero, battle.currentRound)} hero={hero} />}
           {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
