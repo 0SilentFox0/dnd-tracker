@@ -22,12 +22,12 @@
 .scenario-book .sans { font-family: var(--font-scenario-sans), system-ui, sans-serif; }
 
 .scenario-book .sb-bar { position: sticky; top: var(--app-header-h, 89px); z-index: 5; background: var(--page); border-bottom: 1px solid var(--rule); }
-.scenario-book .sb-bar-in { max-width: 1180px; margin: 0 auto; padding: 10px 24px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 15px; }
-.scenario-book .sb-bar strong { font-size: 17px; margin-right: auto; font-family: var(--font-scenario-serif), serif; }
-.scenario-book .sb-bar nav { display: flex; gap: 14px; flex-wrap: wrap; }
-.scenario-book .sb-bar-btns { display: contents; }
-.scenario-book .sb-bar nav a { text-decoration: none; color: var(--ink-soft); }
-.scenario-book .sb-bar nav a:hover { color: var(--blood); }
+.scenario-book .sb-bar-in { max-width: 1460px; margin: 0 auto; padding: 8px 24px; display: flex; gap: 12px; align-items: center; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 15px; }
+.scenario-book .sb-bar strong { font-size: 17px; margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-scenario-serif), serif; }
+.scenario-book .sb-bar-btns { display: flex; gap: 8px; align-items: center; flex: none; }
+.scenario-book .sb-bar-toc { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.scenario-book .sb-bar-more { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.scenario-book .sb-bar .toggle.is-primary { border-color: var(--blood); color: var(--blood); font-weight: 700; }
 .scenario-book .toggle { font: inherit; background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
 .scenario-book .toggle[aria-pressed="true"] { border-color: var(--blood); color: var(--blood); }
 
@@ -112,14 +112,12 @@
   .scenario-book { font-size: 18px; }
   .scenario-book .row { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .scenario-book .read, .scenario-book .say { font-size: 19.5px; }
-  .scenario-book .sb-bar-in { gap: 6px 12px; padding-top: 6px; padding-bottom: 6px; font-size: 14px; }
-  .scenario-book .sb-bar strong { font-size: 16px; }
-  .scenario-book .sb-bar nav { width: 100%; overflow-x: auto; flex-wrap: nowrap; gap: 12px; }
-  .scenario-book .sb-bar nav a { white-space: nowrap; }
-  .scenario-book .sb-bar-btns { display: flex; gap: 8px; width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .scenario-book .sb-bar-in { gap: 8px; padding: 6px 16px; font-size: 14px; }
+  .scenario-book .sb-bar-btns { overflow-x: auto; flex: 0 1 auto; min-width: 0; }
   .scenario-book .sb-bar-btns > * { flex: none; white-space: nowrap; }
   .scenario-book .sb-bar-btns .toggle { padding: 2px 8px; font-size: 13px; }
-  .scenario-book .sb-bar-in, .scenario-book header.title, .scenario-book main { padding-left: 16px; padding-right: 16px; }
+  .scenario-book .sb-bar strong { font-size: 16px; }
+  .scenario-book header.title, .scenario-book main { padding-left: 16px; padding-right: 16px; }
 }
 @media print { .scenario-book .sb-bar { display: none; } .scenario-book .row { break-inside: avoid; } }
 

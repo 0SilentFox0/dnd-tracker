@@ -3,8 +3,10 @@
 import { useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
+import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
@@ -87,11 +89,8 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
     <>
       {!editBase && (
         <>
-          <button type="button" className="toggle" onClick={() => setEditBase(page)}>
+          <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
             Редагувати
-          </button>
-          <button type="button" className="toggle" onClick={() => setVersionsOpen(true)}>
-            Версії
           </button>
           <Link className="toggle" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
             Екран показу ↗
@@ -106,22 +105,24 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           <AiProposalBadge count={proposals.pendingCount} onClick={() => openAi(true)} />
         </>
       )}
-      <Link className="toggle" href={`/campaigns/${campaignId}/dm/scenario`}>
-        До змісту
-      </Link>
     </>
   );
+
+  const menu: ActionsMenuItem[] = [
+    { label: theme === "dark" ? "Світла тема" : "Темна тема", icon: theme === "dark" ? Sun : Moon, onSelect: () => setTheme((t) => (t === "dark" ? "light" : "dark")) },
+    ...(editBase ? [] : [{ label: "Версії", icon: History, onSelect: () => setVersionsOpen(true) }]),
+    { label: collapse.showPlayed ? "Згорнути зіграні" : "Розгорнути зіграні", icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
+    { label: "До змісту", icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
+  ];
 
   return (
     <ScenarioBook hideNotes={hideNotes && !editBase} theme={theme} withAi={aiEnabled && aiOpen}>
       <ScenarioBar
         title={page.title}
-        sections={page.content.sections}
-        hideNotes={hideNotes}
-        onToggleNotes={() => setHideNotes((v) => !v)}
-        theme={theme}
-        onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+        notes={{ hidden: hideNotes, toggle: () => setHideNotes((v) => !v) }}
+        toc={tocInline ? undefined : { onOpen: () => setTocOpen(true) }}
         actions={actions}
+        menu={menu}
       />
       {editBase ? (
         <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} />
