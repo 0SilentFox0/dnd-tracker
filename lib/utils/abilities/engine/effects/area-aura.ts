@@ -1,3 +1,4 @@
+import { abilityNature } from "./effect-nature";
 import { effectSource } from "./timed-effects";
 
 import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
@@ -79,16 +80,18 @@ export function auraZoneEffect(owner: BattleParticipant, aura: AreaAura, round: 
 
   const id = zoneEffectId(ownerId, aura.id);
 
+  const abilityEffects = aura.effects.map((e) => resolvedEffect(e, owner));
+
   return {
     id,
     name: aura.ability.name,
-    type: aura.target === "nearbyEnemies" ? "debuff" : "buff",
+    type: abilityNature(abilityEffects) ?? (aura.target === "nearbyEnemies" ? "debuff" : "buff"),
     duration: 1,
     permanent: true,
     appliedAt: { round, timestamp: new Date() },
     effects: [],
     abilityKey: id,
-    abilityEffects: aura.effects.map((e) => resolvedEffect(e, owner)),
+    abilityEffects,
     source: effectSource(owner, aura.ability),
     zone: { ownerId, key: `${auraKey(aura.ability)}:${aura.target}` },
   };
