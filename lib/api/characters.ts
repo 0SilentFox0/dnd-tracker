@@ -5,11 +5,11 @@ import {
   campaignPost,
   campaignPut,
 } from "@/lib/api/client";
-import { type CharacterTypeValue } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, RosterHero } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, DraftInput, RosterHero } from "@/types/characters";
 
 export async function getCharacter(
   campaignId: string,
@@ -108,3 +108,12 @@ export async function deleteAllCharacters(
 }
 
 export const getCharacterRoster = (campaignId: string) => campaignGet<RosterHero[]>(campaignId, "/characters/roster");
+
+export const createDraft = (campaignId: string, body: DraftInput) => campaignPost<Character>(campaignId, "/characters/draft", body);
+
+export const updateDraft = (campaignId: string, characterId: string, body: DraftInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
+
+export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ available: boolean }>(campaignId, "/characters/draft/backstory");
+
+export const generateBackstory = (campaignId: string, body: { name: string; race: string; archetype: string; class: string; background?: string }) =>
+  campaignPost<{ background: string; goals: Array<{ text: string; kind: GoalKind }> }>(campaignId, "/characters/draft/backstory", body);
