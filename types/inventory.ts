@@ -1,3 +1,7 @@
+import type { Coin, InventoryLogKindValue } from "@/lib/constants/inventory";
+
+export type { Coin };
+
 export interface InventoryItem {
   name: string;
   quantity?: number;
@@ -41,4 +45,30 @@ export interface Inventory {
   copper: number;
   items: InventoryItem[];
   updatedAt: string;
+}
+
+export interface SpecialItem {
+  id: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  consumable: boolean;
+}
+
+export type Purse = Record<Coin, number>;
+
+export interface StashState {
+  equipped: EquippedItems;
+  stash: string[];
+  items: SpecialItem[];
+  purse: Purse;
+}
+
+export interface InventoryLogEntry {
+  id: string;
+  kind: InventoryLogKindValue;
+  delta: Record<string, unknown>;
+  note: string | null;
+  createdAt: string;
+  actor: { id: string; displayName: string | null };
 }
