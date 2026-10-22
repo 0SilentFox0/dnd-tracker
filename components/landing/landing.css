@@ -1,0 +1,105 @@
+/* the landing paints its own backgrounds: skip the tavern download and the page fade that delays LCP */
+body:has([data-landing])::before,
+body:has([data-landing])::after { display: none; }
+.page-transition:has([data-landing]) { animation: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-landing]) { scroll-behavior: smooth; }
+
+  @supports (animation-timeline: view()) {
+    .landing-reveal { animation: ld-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+  }
+}
+
+@keyframes ld-reveal { from { transform: translateY(32px) scale(0.98); } }
+
+/* Hero session demo: one 8s loop, every element keys off the same percentages */
+.ld-demo { --ld-t: 8s; }
+.ld-demo :is(.ld-tap, .ld-ripple, .ld-die, .ld-die-roll, .ld-die-result, .ld-check, .ld-orb, .ld-blast, .ld-ring, .ld-dmg-a, .ld-dmg-b, .ld-fall, .ld-hp-a, .ld-hp-b, .ld-turn-a, .ld-turn-b, .ld-log, .ld-step-1, .ld-step-2, .ld-step-3, .ld-step-4, .ld-progress) {
+  animation-duration: var(--ld-t);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+.ld-tap { animation-name: ld-tap; }
+.ld-ripple { animation-name: ld-ripple; opacity: 0; }
+.ld-die { animation-name: ld-die; opacity: 0; }
+.ld-die-roll { animation-name: ld-die-roll; }
+.ld-die-result { animation-name: ld-die-result; opacity: 0; }
+.ld-check { animation-name: ld-check; opacity: 0; }
+.ld-orb { animation-name: ld-orb; opacity: 0; animation-timing-function: ease-in; }
+.ld-blast { animation-name: ld-blast; opacity: 0; }
+.ld-ring { animation-name: ld-ring; opacity: 0; }
+.ld-dmg-a { animation-name: ld-dmg; opacity: 0; }
+.ld-dmg-b { animation-name: ld-dmg; opacity: 0; animation-delay: 0.15s; }
+.ld-fall { animation-name: ld-fall; }
+.ld-hp-a { animation-name: ld-hp-a; }
+.ld-hp-b { animation-name: ld-hp-b; }
+.ld-turn-a { animation-name: ld-turn-a; }
+.ld-turn-b { animation-name: ld-turn-b; opacity: 0; }
+.ld-log { animation-name: ld-log; opacity: 0; }
+.ld-step-1 { animation-name: ld-step-1; }
+.ld-step-2 { animation-name: ld-step-2; }
+.ld-step-3 { animation-name: ld-step-3; }
+.ld-step-4 { animation-name: ld-step-4; }
+
+@keyframes ld-tap {
+  0%, 6% { transform: none; box-shadow: 0 0 0 0 rgba(255, 140, 60, 0); }
+  8% { box-shadow: 0 0 0 4px rgba(255, 140, 60, 0.45); }
+  10% { transform: scale(0.93); filter: brightness(1.5); }
+  13%, 60% { transform: none; filter: none; box-shadow: 0 0 0 2px #ff9a4d; }
+  66%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 60, 0); }
+}
+@keyframes ld-ripple { 0%, 9% { opacity: 0; transform: scale(0.2); } 10% { opacity: 0.8; } 18%, 100% { opacity: 0; transform: scale(2.4); } }
+@keyframes ld-die {
+  0%, 13% { opacity: 0; transform: translate(-50%, -50%) translateY(-40px) rotate(-260deg) scale(0.5); }
+  15% { opacity: 1; }
+  22% { transform: translate(-50%, -50%) rotate(0) scale(1.15); }
+  25%, 48% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  54%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+@keyframes ld-die-roll { 0%, 21% { opacity: 1; } 22%, 100% { opacity: 0; } }
+@keyframes ld-die-result { 0%, 21% { opacity: 0; } 22%, 100% { opacity: 1; } }
+@keyframes ld-check { 0%, 23% { opacity: 0; transform: translate(-50%, 6px); } 26%, 50% { opacity: 1; transform: translate(-50%, 0); } 55%, 100% { opacity: 0; } }
+@keyframes ld-orb {
+  0%, 25% { opacity: 0; left: 15.625%; top: 45%; transform: translate(-50%, -50%) scale(0.4); }
+  26% { opacity: 1; }
+  35% { opacity: 1; left: 68.75%; top: 55%; transform: translate(-50%, -50%) scale(1.1); }
+  36%, 100% { opacity: 0; left: 68.75%; top: 55%; }
+}
+@keyframes ld-blast { 0%, 35% { opacity: 0; } 36%, 46% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes ld-ring { 0%, 35% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); } 38% { opacity: 0.9; } 44% { transform: translate(-50%, -50%) scale(1); } 58%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
+@keyframes ld-dmg { 0%, 38% { opacity: 0; transform: translate(-50%, 0) scale(0.6); } 40% { opacity: 1; transform: translate(-50%, -6px) scale(1.35); } 44% { transform: translate(-50%, -8px) scale(1); } 58% { opacity: 1; } 64%, 100% { opacity: 0; transform: translate(-50%, -28px); } }
+@keyframes ld-fall { 0%, 44% { opacity: 1; filter: none; transform: translate(-50%, -50%); } 50%, 94% { opacity: 0.45; filter: grayscale(1); transform: translate(-50%, -50%) rotate(80deg) scale(0.85); } 100% { opacity: 1; filter: none; transform: translate(-50%, -50%); } }
+@keyframes ld-hp-a { 0%, 39% { width: 100%; } 44%, 94% { width: 0; } 100% { width: 100%; } }
+@keyframes ld-hp-b { 0%, 39% { width: 100%; } 44%, 94% { width: 45%; } 100% { width: 100%; } }
+@keyframes ld-turn-a { 0%, 68% { opacity: 1; } 72%, 96% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes ld-turn-b { 0%, 68% { opacity: 0; } 72%, 96% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ld-log { 0%, 46% { opacity: 0; transform: translateY(6px); } 50%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ld-step-1 { 0%, 14% { color: #ffe08a; } 16%, 100% { color: #b3a893; } }
+@keyframes ld-step-2 { 0%, 14% { color: #b3a893; } 16%, 32% { color: #ffe08a; } 34%, 100% { color: #b3a893; } }
+@keyframes ld-step-3 { 0%, 32% { color: #b3a893; } 34%, 62% { color: #ffe08a; } 64%, 100% { color: #b3a893; } }
+@keyframes ld-step-4 { 0%, 62% { color: #b3a893; } 64%, 98% { color: #ffe08a; } 100% { color: #b3a893; } }
+.ld-progress { animation: ld-progress var(--ld-t) linear infinite; transform-origin: left; }
+@keyframes ld-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Gothicvania Magic Pack 9 sprite strips (CC0), one frame wide */
+.ld-sprite { background-repeat: no-repeat; image-rendering: pixelated; animation: ld-frames var(--ld-sd, 0.7s) steps(var(--ld-n)) infinite; }
+@keyframes ld-frames { to { background-position-x: calc(var(--ld-w) * var(--ld-n) * -1); } }
+.ld-sprite-explosion { --ld-n: 7; --ld-w: 64px; width: 64px; height: 64px; background-image: url("/fx/sprites/explosion.png"); }
+.ld-sprite-lightning { --ld-n: 5; --ld-w: 128px; width: 128px; height: 128px; background-image: url("/fx/sprites/lightning.png"); }
+.ld-sprite-dark-bolt { --ld-n: 8; --ld-w: 88px; width: 88px; height: 88px; background-image: url("/fx/sprites/dark-bolt.png"); }
+.ld-sprite-rings { --ld-n: 7; --ld-w: 64px; width: 64px; height: 64px; background-image: url("/fx/sprites/rings.png"); }
+.ld-sprite-spark { --ld-n: 7; --ld-w: 32px; width: 32px; height: 32px; background-image: url("/fx/sprites/spark.png"); }
+
+.landing-flicker { animation: ld-flicker 2.6s ease-in-out infinite alternate; transform-origin: center; transform-box: fill-box; }
+@keyframes ld-flicker { 0% { opacity: 0.75; transform: scale(0.96); } 40% { opacity: 1; } 70% { opacity: 0.85; transform: scale(1.04); } 100% { opacity: 1; } }
+
+.ld-d20-spin { animation: ld-d20 3.2s cubic-bezier(.2, .7, .2, 1) infinite; }
+@keyframes ld-d20 { 0% { transform: rotate(-540deg) scale(0.6); } 45%, 100% { transform: rotate(0) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ld-demo *, .ld-sprite, .landing-flicker, .ld-d20-spin { animation: none !important; }
+}
+
+/* below-the-fold sections render (and fetch their backgrounds/sprites) only near the viewport */
+.ld-lazy { content-visibility: auto; contain-intrinsic-size: auto 900px; }

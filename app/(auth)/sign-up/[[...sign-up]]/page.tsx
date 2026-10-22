@@ -1,5 +1,9 @@
-import { GoogleAuthForm } from "@/components/auth/GoogleAuthForm";
+import type { Metadata } from "next";
+
+import { SignUpScreen } from "@/components/auth/AuthScreens";
+
+export const metadata: Metadata = { title: "Реєстрація — D&D Combat Tracker" };
 
 export default function SignUpPage() {
-  return <GoogleAuthForm mode="sign-up" />;
+  return <SignUpScreen />;
 }

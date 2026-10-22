@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LogOut, Menu, Sparkles, User } from "lucide-react";
+import { Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -19,22 +19,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
+import { useSessionEmail } from "@/lib/hooks/auth";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
-export function Header({ email }: { email: string | null }) {
+export function Header() {
   const pathname = usePathname();
 
-  const signOutForm = useRef<HTMLFormElement>(null);
+  const email = useSessionEmail();
 
-  if (
-    pathname?.startsWith("/sign-in") ||
-    pathname?.startsWith("/sign-up") ||
-    pathname === "/"
-  ) {
-    return null;
-  }
+  const signOutForm = useRef<HTMLFormElement>(null);
 
   const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
@@ -171,6 +166,12 @@ export function Header({ email }: { email: string | null }) {
                   <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuItem asChild>
+                <Link href="/settings/password">
+                  <KeyRound className="h-4 w-4 mr-2" />
+                  Пароль
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings/ai">
                   <Sparkles className="h-4 w-4 mr-2" />

@@ -58,6 +58,20 @@ export async function updateSession(request: NextRequest) {
   // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
   if (request.nextUrl.pathname.startsWith('/api/') || request.nextUrl.pathname === SIGN_OUT_PATH) return NextResponse.next()
 
+  if (request.nextUrl.pathname === '/') {
+    // Supabase falls back to the Site URL when a redirectTo isn't allow-listed: finish the auth link anyway
+    if (request.nextUrl.searchParams.has('code') || request.nextUrl.searchParams.has('token_hash')) {
+      const url = request.nextUrl.clone()
+
+      url.pathname = '/auth/callback'
+
+      return NextResponse.redirect(url)
+    }
+
+    // the landing is static and session-agnostic: no Supabase round trip in front of the CDN
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -98,7 +112,7 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims?.sub ?? null
 
-  const publicPaths = ['/sign-in', '/sign-up', '/auth/callback', ...(process.env.NODE_ENV === 'development' ? ['/dev/'] : [])]
+  const publicPaths = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/auth/callback', ...(process.env.NODE_ENV === 'development' ? ['/dev/'] : [])]
 
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
   
