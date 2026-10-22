@@ -9,6 +9,7 @@ import { createDraft, generateBackstory, getBackstoryAvailability, updateDraft }
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { HERO_ARCHETYPE_KEYS, HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
+import { useOptionalNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import {
   type AbilityMethod,
@@ -47,6 +48,8 @@ export interface PlayerDraftFormOptions {
 export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerDraftFormOptions) {
   const router = useRouter();
 
+  const notify = useOptionalNotify();
+
   const queryClient = useQueryClient();
 
   const { data: raceList } = useRaces(campaignId);
@@ -59,7 +62,13 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const set = useCallback(<K extends keyof DraftInput>(key: K, value: DraftInput[K]) => setValues((prev) => ({ ...prev, [key]: value })), []);
 
-  const setScore = useCallback((key: AbilityKey, value: number) => setValues((prev) => ({ ...prev, [key]: value })), []);
+  const setScore = useCallback((key: AbilityKey, value: number) => {
+    setValues((prev) => {
+      const holder = prev.method === "standard" ? ABILITY_KEYS.find((k) => k !== key && prev[k] === value) : undefined;
+
+      return { ...prev, [key]: value, ...(holder && { [holder]: prev[key] }) };
+    });
+  }, []);
 
   const setMethod = useCallback((method: AbilityMethod) => {
     setValues((prev) => ({ ...prev, method, ...(method === "pointBuy" ? Object.fromEntries(ABILITY_KEYS.map((k) => [k, 8])) : standardScores()) }));
@@ -125,10 +134,11 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     reveal.start([backgroundStep(next.background)]);
   }, [reveal, values.archetype, values.name, values.race]);
 
-  const availability = useQuery({ queryKey: ["draft-backstory-available", campaignId], queryFn: () => getBackstoryAvailability(campaignId), staleTime: 5 * 60_000 });
+  const availability = useQuery({ queryKey: characterKeys.backstoryAvailability(campaignId), queryFn: () => getBackstoryAvailability(campaignId), staleTime: 5 * 60_000 });
 
   const aiMutation = useMutation({
     mutationFn: () => generateBackstory(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class, background: values.background || undefined }),
+    onError: (error) => notify(error.message || "Не вдалося згенерувати передісторію"),
     onSuccess: (res) => {
       setValues((prev) => ({ ...prev, background: res.background, goals: res.goals }));
       reveal.start([backgroundStep(res.background)]);

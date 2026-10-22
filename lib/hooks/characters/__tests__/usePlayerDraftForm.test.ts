@@ -56,6 +56,18 @@ describe("usePlayerDraftForm", () => {
     expect(result.current.scoreStatus.spent).toBe(0);
   });
 
+  it("standard mode: choosing a taken value swaps it with its holder", () => {
+    const { result } = setup();
+
+    const { strength, dexterity } = result.current.form.values;
+
+    act(() => result.current.form.setScore("strength", dexterity));
+
+    expect(result.current.form.values.strength).toBe(dexterity);
+    expect(result.current.form.values.dexterity).toBe(strength);
+    expect(result.current.scoreStatus.valid).toBe(true);
+  });
+
   it("flags over-budget point-buy", () => {
     const { result } = setup();
 

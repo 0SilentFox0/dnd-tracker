@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
 
 import { deriveCharacterDefaults, EMPTY_INVENTORY } from "../derive-character-defaults";
+import { draftFields } from "./draft-data";
 import { draftRejection } from "./draft-rules";
 import { draftSchema } from "./draft-schema";
 
-import { CharacterStatus, CharacterType, GoalAuthor, GoalStatus } from "@/lib/constants/characters";
+import { CharacterStatus, CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -23,42 +24,32 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   const role = access.campaign.members.find((m) => m.userId === access.userId)?.role ?? "";
 
-  const existing = await prisma.character.count({ where: { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER } });
-
-  const rejection = draftRejection({ role, existing, method: data.method, scores: data });
-
-  if (rejection) return errorResponse(rejection, 400);
-
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
   const { spellSlots } = await deriveCharacterDefaults(campaignId, { level: 1, race: data.race });
 
-  const character = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
+    await lockPlayerDrafts(tx, campaignId, access.userId);
+
+    const existing = await tx.character.count({ where: { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER } });
+
+    const rejection = draftRejection({ role, existing, method: data.method, scores: data });
+
+    if (rejection) return errorResponse(rejection, 400);
+
     const created = await tx.character.create({
       data: {
+        ...draftFields(data),
         campaignId,
         type: CharacterType.PLAYER,
         status: CharacterStatus.PENDING,
         controlledBy: access.userId,
         level: 1,
-        name: data.name,
-        race: data.race,
-        class: data.class,
-        archetype: data.archetype,
-        alignment: data.alignment,
-        background: data.background,
+        initiative: HERO_INITIATIVE.DEFAULT,
         avatar: avatar.avatar ?? undefined,
-        strength: data.strength,
-        dexterity: data.dexterity,
-        constitution: data.constitution,
-        intelligence: data.intelligence,
-        wisdom: data.wisdom,
-        charisma: data.charisma,
-        primaryAbility: data.primaryAbility ?? null,
         spellSlots,
-        goals: (data.goals ?? []).map((g) => ({ id: randomUUID(), text: g.text, kind: g.kind, status: GoalStatus.ACTIVE, author: GoalAuthor.PLAYER })),
         skillTreeProgress: {},
       },
     });
@@ -68,5 +59,5 @@ export async function createDraft(request: Request, campaignId: string): Promise
     return created;
   });
 
-  return NextResponse.json(character);
+  return result instanceof NextResponse ? result : NextResponse.json(result);
 }

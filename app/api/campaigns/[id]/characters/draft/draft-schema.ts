@@ -9,10 +9,10 @@ const score = z.number().int();
 
 export const draftSchema = z.object({
   name: z.string().trim().min(1).max(100),
-  race: z.string().min(1),
+  race: z.string().min(1).max(100),
   class: z.string().min(1).max(100),
   archetype: z.enum(HERO_ARCHETYPE_KEYS),
-  alignment: z.string().optional(),
+  alignment: z.string().max(100).optional(),
   background: z.string().max(4000).optional(),
   avatar: z.string().optional(),
   method: z.enum(["standard", "pointBuy"]),

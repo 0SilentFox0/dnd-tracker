@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { revealSchedule } from "@/lib/utils/characters/generate/reveal";
 
@@ -84,5 +84,5 @@ export function useRollReveal<K extends string>() {
 
   useEffect(() => clear, [clear]);
 
-  return { display, settled, rolling, start, skip: finish };
+  return useMemo(() => ({ display, settled, rolling, start, skip: finish }), [display, settled, rolling, start, finish]);
 }

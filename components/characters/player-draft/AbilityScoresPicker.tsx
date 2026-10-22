@@ -27,8 +27,6 @@ const CELL = "hud-roll-field flex items-center justify-between gap-2 rounded-lg 
 export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScoresPickerProps) {
   const { values, setScore, method, setMethod } = form;
 
-  const taken = new Set<number>(ABILITY_KEYS.map((k) => values[k]));
-
   const shown = (key: AbilityKey) => (reveal.rolling && !reveal.settled.has(key) && key in reveal.display ? reveal.display[key] : values[key]);
 
   return (
@@ -42,7 +40,7 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
       )}
       {method === "standard" && !scoreStatus.valid && <p className="text-sm text-[#f0b4a6]">Кожне значення масиву — рівно один раз</p>}
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-3">
         {ABILITY_KEYS.map((key) => {
           const spinning = reveal.rolling && !reveal.settled.has(key) && key in reveal.display;
 
@@ -63,7 +61,7 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
                   className="h-9 w-16 rounded-md border border-input bg-transparent px-2 text-base tabular-nums"
                 >
                   {STANDARD_ARRAY.map((n) => (
-                    <option key={n} value={n} disabled={taken.has(n) && values[key] !== n}>
+                    <option key={n} value={n}>
                       {n}
                     </option>
                   ))}

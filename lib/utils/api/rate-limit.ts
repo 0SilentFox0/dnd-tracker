@@ -162,3 +162,6 @@ export const BATTLE_RATE_LIMITS = {
   /** PATCH HP / remove participant — DM-only, частіше OK. */
   participantPatch: { limit: 60, windowSeconds: 10 },
 } as const;
+
+/** AI на ключі DM, який викликають гравці (передісторія, портрет): 10 викликів / 10 хв на користувача й кампанію. */
+export const AI_PLAYER_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;

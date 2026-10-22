@@ -5,11 +5,14 @@ import { z } from "zod";
 import { pickDmTextModel } from "@/lib/ai/dm-model";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { GoalKind } from "@/lib/constants/characters";
+import { CampaignRole } from "@/lib/constants/campaigns";
+import { ACTIVE_CHARACTER, GoalKind } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS, heroArchetype } from "@/lib/constants/hero-archetypes";
+import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { AI_PLAYER_RATE_LIMIT, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 const requestSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -40,9 +43,21 @@ export async function generateBackstory(request: Request, campaignId: string): P
 
   if (access instanceof NextResponse) return access;
 
+  if (!access.isDM) {
+    const role = access.campaign.members.find((m) => m.userId === access.userId)?.role;
+
+    const hasActive = await prisma.character.count({ where: { campaignId, controlledBy: access.userId, ...ACTIVE_CHARACTER } });
+
+    if (role !== CampaignRole.PLAYER || hasActive > 0) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+  }
+
   const data = await parseBody(requestSchema, request);
 
   if (data instanceof NextResponse) return data;
+
+  const limit = await checkRateLimit({ userId: access.userId, scope: "draft-backstory", battleId: campaignId, ...AI_PLAYER_RATE_LIMIT });
+
+  if (!limit.allowed) return rateLimitResponse(limit);
 
   const model = await pickDmTextModel(campaignId);
 

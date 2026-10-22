@@ -36,10 +36,15 @@ export function ReviewActions({ campaignId, characterId, name }: { campaignId: s
 
   const sendBack = async (e: FormEvent) => {
     e.preventDefault();
-    await review.returnWithNote(note.trim());
-    setOpen(false);
-    setNote("");
-    void notify("Чернетку повернуто гравцю");
+
+    try {
+      await review.returnWithNote(note.trim());
+      setOpen(false);
+      setNote("");
+      void notify("Чернетку повернуто гравцю");
+    } catch (error) {
+      void notify(error instanceof Error && error.message ? error.message : "Не вдалося повернути чернетку");
+    }
   };
 
   return (
@@ -57,7 +62,7 @@ export function ReviewActions({ campaignId, characterId, name }: { campaignId: s
           </div>
         }
       >
-        <p className="text-sm text-hud-muted">Відредагуйте персонажа за потреби, потім схваліть або поверніть гравцю. Видалити чернетку можна у списку персонажів.</p>
+        <p className="text-sm text-hud-muted">Відредагуйте персонажа за потреби, потім схваліть або поверніть гравцю. Видалити чернетку можна у вкладці «Основне» редактора.</p>
       </HudSection>
       <ResponsiveDialog
         open={open}
