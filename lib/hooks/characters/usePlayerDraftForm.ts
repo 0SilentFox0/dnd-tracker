@@ -62,6 +62,8 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const reveal = useRollReveal<RollKey>();
 
+  const { start } = reveal;
+
   const set = useCallback(<K extends keyof DraftInput>(key: K, value: DraftInput[K]) => setValues((prev) => ({ ...prev, [key]: value })), []);
 
   const setScore = useCallback((key: AbilityKey, value: number) => {
@@ -84,9 +86,11 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const backgroundStep = (background: string): RollStep<RollKey> => ({ key: "background", pool: () => "", final: background });
 
-  const portraitPool = useCallback((race: string) => queryClient.getQueryData<string[]>(characterKeys.draftPortraits(campaignId, race)) ?? [], [queryClient, campaignId]);
+  const portraitPools = useDraftPortraits(campaignId);
 
-  useDraftPortraits(campaignId, values.race);
+  const portraitPool = useCallback((race: string) => queryClient.getQueryData<Record<string, string[]>>(characterKeys.draftPortraits(campaignId))?.[race] ?? [], [queryClient, campaignId]);
+
+  const canReroll = (portraitPools.data?.[values.race]?.length ?? 0) > 0;
 
   const avatarStep = (url: string, pool: string[]): RollStep<RollKey> => ({ key: "avatar", pool: () => pick(Math.random, pool), final: url });
 
@@ -101,8 +105,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
     if (!pool.length && g.race) {
       queryClient
-        .fetchQuery(draftPortraitsQuery(campaignId, g.race))
-        .then((loaded) => loaded.length && setValues((prev) => (prev.race === g.race ? { ...prev, avatar: pick(createRng(seed), loaded) } : prev)))
+        .fetchQuery(draftPortraitsQuery(campaignId))
+        .then((pools) => {
+          const loaded = pools[g.race] ?? [];
+
+          if (loaded.length) setValues((prev) => (prev.race === g.race ? { ...prev, avatar: pick(createRng(seed), loaded) } : prev));
+        })
         .catch(() => undefined);
     }
 
@@ -121,7 +129,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       ...(portrait && { avatar: portrait }),
     }));
 
-    reveal.start([
+    start([
       raceStep(g.race),
       ...(portrait ? [avatarStep(portrait, pool)] : []),
       { key: "archetype", pool: () => ARCHETYPE_LABEL[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: ARCHETYPE_LABEL[g.archetype] },
@@ -131,31 +139,31 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       ...scoreSteps(g.scores),
       backgroundStep(g.background),
     ]);
-  }, [raceNames, raceStep, reveal, portraitPool, queryClient, campaignId]);
+  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId]);
 
   const name = useCallback(() => {
     const next = generateName(values.race, Math.random);
 
     setValues((prev) => ({ ...prev, name: next }));
 
-    reveal.start([nameStep(next, values.race)]);
-  }, [reveal, values.race]);
+    start([nameStep(next, values.race)]);
+  }, [start, values.race]);
 
   const scores = useCallback(() => {
     const next = assignStandardArray(values.archetype, Math.random);
 
     setValues((prev) => ({ ...prev, method: "standard", ...next, primaryAbility: ARCHETYPE_PRIMARY[prev.archetype][0] }));
 
-    reveal.start(scoreSteps(next));
-  }, [reveal, values.archetype]);
+    start(scoreSteps(next));
+  }, [start, values.archetype]);
 
   const backstory = useCallback(() => {
     const next = generateLocalBackstory({ name: values.name || "Герой", raceName: values.race, archetype: values.archetype }, Math.random);
 
     setValues((prev) => ({ ...prev, ...next }));
 
-    reveal.start([backgroundStep(next.background)]);
-  }, [reveal, values.archetype, values.name, values.race]);
+    start([backgroundStep(next.background)]);
+  }, [start, values.archetype, values.name, values.race]);
 
   const portrait = useCallback(() => {
     const pool = portraitPool(values.race);
@@ -167,8 +175,8 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     const next = pick(createRng(seedNow()), options);
 
     setValues((prev) => ({ ...prev, avatar: next }));
-    reveal.start([avatarStep(next, pool)]);
-  }, [portraitPool, reveal, values.race, values.avatar]);
+    start([avatarStep(next, pool)]);
+  }, [portraitPool, start, values.race, values.avatar]);
 
   const availability = useQuery({ queryKey: characterKeys.backstoryAvailability(campaignId), queryFn: () => getBackstoryAvailability(campaignId), staleTime: 5 * 60_000 });
 
@@ -177,7 +185,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     onError: (error) => notify(error.message || "Не вдалося згенерувати передісторію"),
     onSuccess: (res) => {
       setValues((prev) => ({ ...prev, background: res.background, goals: res.goals }));
-      reveal.start([backgroundStep(res.background)]);
+      start([backgroundStep(res.background)]);
     },
   });
 
@@ -202,12 +210,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   const autoGenerated = useRef(false);
 
   useEffect(() => {
-    if (initial !== "generate" || autoGenerated.current || raceList === undefined) return;
+    if (initial !== "generate" || autoGenerated.current || raceList === undefined || portraitPools.isPending) return;
 
     autoGenerated.current = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot generation once the races have loaded
     all();
-  }, [initial, raceList, all]);
+  }, [initial, raceList, portraitPools.isPending, all]);
 
   const scoreStatus = useMemo(() => {
     const scoreValues = scoresOf(values);
@@ -217,7 +225,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   return {
     form: { values, set, setScore, method: values.method, setMethod },
-    generate: { all, name, scores, backstory, portrait },
+    generate: { all, name, scores, backstory, portrait, canPortrait: canReroll },
     ai: {
       available: availability.data?.available === true,
       run: () => aiMutation.mutate(),

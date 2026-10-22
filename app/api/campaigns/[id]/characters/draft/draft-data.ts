@@ -1,20 +1,20 @@
 import { randomUUID } from "node:crypto";
+import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 
 import type { draftSchema } from "./draft-schema";
 
 import { GoalAuthor, GoalStatus } from "@/lib/constants/characters";
+import type { CharacterGoal } from "@/types/characters";
 
 type DraftData = z.infer<typeof draftSchema>;
 
-export const buildDraftGoals = (goals: DraftData["goals"]) =>
+const buildDraftGoals = (goals: DraftData["goals"]) =>
   (goals ?? []).map((g) => ({ id: randomUUID(), text: g.text, kind: g.kind, status: GoalStatus.ACTIVE, author: GoalAuthor.PLAYER }));
 
-type StoredGoal = ReturnType<typeof buildDraftGoals>[number];
-
 /** Keeps ids of unchanged player goals and every DM-authored goal; only new texts get fresh ids. */
-export function mergeDraftGoals(stored: unknown, incoming: DraftData["goals"]): StoredGoal[] {
-  const existing = Array.isArray(stored) ? (stored as StoredGoal[]) : [];
+function mergeDraftGoals(stored: unknown, incoming: DraftData["goals"]): CharacterGoal[] {
+  const existing = Array.isArray(stored) ? (stored as CharacterGoal[]) : [];
 
   const dmGoals = existing.filter((g) => g.author === GoalAuthor.DM);
 
@@ -43,5 +43,5 @@ export const draftFields = (data: DraftData, storedGoals?: unknown) => ({
   wisdom: data.wisdom,
   charisma: data.charisma,
   primaryAbility: data.primaryAbility ?? null,
-  goals: storedGoals === undefined ? buildDraftGoals(data.goals) : mergeDraftGoals(storedGoals, data.goals),
+  goals: mergeDraftGoals(storedGoals, data.goals) as unknown as Prisma.InputJsonValue,
 });

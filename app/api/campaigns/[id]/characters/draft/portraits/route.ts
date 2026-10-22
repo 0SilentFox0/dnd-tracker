@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: CampaignRouteContext) {
   try {
     const { id } = await params;
 
-    return await readDraftPortraits(id, new URL(request.url).searchParams.get("race")?.trim() ?? "");
+    return await readDraftPortraits(id, new URL(request.url).searchParams.get("race")?.trim() || undefined);
   } catch (error) {
     return handleApiError(error, { action: "read draft portraits" });
   }

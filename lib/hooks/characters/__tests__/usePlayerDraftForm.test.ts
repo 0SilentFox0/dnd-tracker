@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDraftPortraits } from "@/lib/api/characters";
+import { getDraftPortraitPools } from "@/lib/api/characters";
 import { usePlayerDraftForm } from "@/lib/hooks/characters/usePlayerDraftForm";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -15,7 +15,7 @@ vi.mock("@/lib/api/characters", () => ({
   generateBackstory: vi.fn(),
   generateDraftAvatar: vi.fn(),
   getBackstoryAvailability: vi.fn().mockResolvedValue({ available: false, image: false }),
-  getDraftPortraits: vi.fn(),
+  getDraftPortraitPools: vi.fn(),
 }));
 
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [{ name: "Люди" }, { name: "Орки" }] }) }));
@@ -31,6 +31,7 @@ const setup = (initial?: "generate") => {
 describe("usePlayerDraftForm", () => {
   beforeEach(() => {
     vi.stubGlobal("matchMedia", () => ({ matches: true }));
+    vi.mocked(getDraftPortraitPools).mockReset().mockResolvedValue({ pools: {} });
   });
 
   it("generate.all fills the form with a valid standard array", () => {
@@ -44,10 +45,10 @@ describe("usePlayerDraftForm", () => {
     expect(result.current.scoreStatus.valid).toBe(true);
   });
 
-  it("auto-generates once with initial=generate", () => {
+  it("auto-generates once with initial=generate after the portrait pools load", async () => {
     const { result } = setup("generate");
 
-    expect(result.current.form.values.name).not.toBe("");
+    await waitFor(() => expect(result.current.form.values.name).not.toBe(""));
   });
 
   it("setMethod(pointBuy) resets scores to 8", () => {
@@ -81,12 +82,25 @@ describe("usePlayerDraftForm", () => {
   });
 
   describe("generate.portrait", () => {
-    it("picks a portrait from the race pool", async () => {
-      vi.mocked(getDraftPortraits).mockResolvedValue({ portraits: ["https://x/a.webp", "https://x/b.webp"] });
+    it("generate.all includes the avatar once pools are prefetched", async () => {
+      vi.mocked(getDraftPortraitPools).mockResolvedValue({ pools: { Люди: ["https://x/a.webp"], Орки: ["https://x/b.webp"] } });
 
       const { result } = setup();
 
       act(() => result.current.form.set("race", "Люди"));
+      await waitFor(() => expect(result.current.generate.canPortrait).toBe(true));
+      act(() => result.current.generate.all());
+
+      expect(result.current.form.values.avatar).toMatch(/^https:\/\/x\/[ab]\.webp$/);
+    });
+
+    it("picks a portrait from the race pool", async () => {
+      vi.mocked(getDraftPortraitPools).mockResolvedValue({ pools: { Люди: ["https://x/a.webp", "https://x/b.webp"] } });
+
+      const { result } = setup();
+
+      act(() => result.current.form.set("race", "Люди"));
+      await waitFor(() => expect(result.current.generate.canPortrait).toBe(true));
       await waitFor(() => {
         act(() => result.current.generate.portrait());
         expect(result.current.form.values.avatar).toMatch(/^https:\/\/x\/[ab]\.webp$/);
@@ -94,13 +108,14 @@ describe("usePlayerDraftForm", () => {
     });
 
     it("empty pool leaves the avatar unchanged", async () => {
-      vi.mocked(getDraftPortraits).mockResolvedValue({ portraits: [] });
+      vi.mocked(getDraftPortraitPools).mockResolvedValue({ pools: {} });
 
       const { result } = setup();
 
       act(() => result.current.form.set("avatar", "https://x/own.png"));
       act(() => result.current.form.set("race", "Люди"));
-      await waitFor(() => expect(getDraftPortraits).toHaveBeenCalled());
+      await waitFor(() => expect(getDraftPortraitPools).toHaveBeenCalled());
+      expect(result.current.generate.canPortrait).toBe(false);
       act(() => result.current.generate.portrait());
 
       expect(result.current.form.values.avatar).toBe("https://x/own.png");

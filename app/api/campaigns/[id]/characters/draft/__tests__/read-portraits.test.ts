@@ -24,11 +24,16 @@ describe("readDraftPortraits", () => {
     expect(vi.mocked(prisma.unit.findMany).mock.calls[0][0]).toMatchObject({ where: { avatar: { not: "" }, race: { campaignId: "c1", name: "Орки" } }, take: 50 });
   });
 
-  it("empty race skips the query", async () => {
-    const res = await readDraftPortraits("c1", "");
+  it("no race returns pools for every campaign race, capped per race", async () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({ avatar: `https://x/o${i}.webp`, race: { name: "Орки" } }));
 
-    expect(await res.json()).toEqual({ portraits: [] });
-    expect(prisma.unit.findMany).not.toHaveBeenCalled();
+    vi.mocked(prisma.unit.findMany).mockResolvedValue([{ avatar: "https://x/h.webp", race: { name: "Люди" } }, { avatar: null, race: { name: "Люди" } }, ...many] as never);
+
+    const { pools } = await (await readDraftPortraits("c1")).json();
+
+    expect(pools["Люди"]).toEqual(["https://x/h.webp"]);
+    expect(pools["Орки"]).toHaveLength(50);
+    expect(vi.mocked(prisma.unit.findMany).mock.calls[0][0]).toMatchObject({ where: { avatar: { not: "" }, race: { campaignId: "c1" } } });
   });
 
   it("passes through an access error", async () => {

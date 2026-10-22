@@ -46,15 +46,17 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
   const busy = reveal.rolling;
 
+  const { skip } = reveal;
+
   useEffect(() => {
     if (!busy) return;
 
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && reveal.skip();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && skip();
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [busy, reveal]);
+  }, [busy, skip]);
 
   const goals = values.goals ?? [];
 
@@ -138,7 +140,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                     <ImageUpload label="Фото персонажа" value={values.avatar ?? ""} onChange={(v) => set("avatar", v)} fallbackText={values.name} maxSide={1200} />
                   )}
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <Button type="button" size="sm" variant="outline" disabled={busy || !values.race} onClick={generate.portrait}>
+                    <Button type="button" size="sm" variant="outline" disabled={busy || !generate.canPortrait} onClick={generate.portrait}>
                       🎲 Інший портрет
                     </Button>
                     {ai.avatar.available && (
