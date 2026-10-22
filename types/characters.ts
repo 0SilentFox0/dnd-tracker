@@ -149,7 +149,7 @@ export interface Character {
 export type CharacterListItem = Pick<
   Character,
   "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative"
-> & { user?: { displayName: string } | null };
+> & { user?: { displayName: string } | null; reviewNote?: string | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 
@@ -209,6 +209,7 @@ export interface SetProgress {
 
 export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
+  review: { pending: boolean; note: string | null };
   maxLevel: number;
   identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];

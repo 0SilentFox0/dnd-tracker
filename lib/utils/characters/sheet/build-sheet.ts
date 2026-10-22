@@ -2,6 +2,7 @@ import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from 
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { CharacterStatus } from "@/lib/constants/characters";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { parseGoals } from "@/lib/schemas/character-goals";
@@ -40,6 +41,8 @@ export interface SheetInput {
     background: string | null;
     goals: unknown;
     notes?: string | null;
+    status?: string;
+    reviewNote?: string | null;
     tokens?: { id: string; color: string; label: string; createdAt: Date }[];
   };
   raceIcon: string | null;
@@ -90,6 +93,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   return {
     viewer: input.viewer,
+    review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),

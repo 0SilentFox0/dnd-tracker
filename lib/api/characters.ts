@@ -37,11 +37,13 @@ export const getCharacterSheet = (campaignId: string, characterId: string) => ca
 
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; status?: "pending"; compact?: boolean },
 ): Promise<CharacterListItem[]> {
   const params = new URLSearchParams();
 
   if (opts?.type) params.set("type", opts.type);
+
+  if (opts?.status) params.set("status", opts.status);
 
   if (opts?.compact) params.set("compact", "1");
 
