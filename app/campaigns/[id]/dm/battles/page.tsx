@@ -7,6 +7,7 @@ import { BattleListCard } from "@/components/battle/list/BattleListCard";
 import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
@@ -52,6 +53,7 @@ export default async function DMBattlesPage({
           </>
         }
       />
+      <OnboardingHint id="dm.battles" />
 
       {SECTIONS.map(({ kind, title }) => {
         const list = battles.filter((b) => b.status === kind);

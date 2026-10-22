@@ -3,13 +3,14 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
+import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -144,6 +145,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <JoinBattleButton />
           <WatchShowButton />
+          {email && <WhatsNewButton />}
           <AbbreviationsInfoDialog />
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">
@@ -166,6 +168,12 @@ export function Header() {
                   <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuItem asChild>
+                <Link href="/help">
+                  <CircleHelp className="h-4 w-4 mr-2" />
+                  Довідка
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings/password">
                   <KeyRound className="h-4 w-4 mr-2" />

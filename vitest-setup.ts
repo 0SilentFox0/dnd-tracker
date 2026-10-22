@@ -11,5 +11,8 @@ vi.mock("next/font/google", () => ({
   EB_Garamond: () => ({ variable: "" }),
 }));
 
+// підказки онбордингу тягнуть TanStack Query й мережу; у тестах екранів вони не потрібні (власний тест робить vi.unmock)
+vi.mock("@/components/onboarding/OnboardingHint", () => ({ OnboardingHint: () => null, PlayerSheetHint: () => null }));
+
 // lib/db створює PrismaClient під час імпорту; без URL падають навіть тести, що не ходять у БД
 process.env.DATABASE_URL ??= "postgresql://test:test@127.0.0.1:1/test";

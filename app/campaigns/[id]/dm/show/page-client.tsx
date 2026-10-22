@@ -7,6 +7,7 @@ import { Images, Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { DeckCard } from "@/components/show/editor/DeckCard";
 import { NewDeckDialog } from "@/components/show/editor/NewDeckDialog";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
           </>
         }
       />
+      <OnboardingHint id="dm.show" />
       {decks.length === 0 ? (
         <EmptyState icon={Images} title="Ще немає наборів" description="Створіть набір слайдів із картинок і музики та покажіть його гравцям." />
       ) : (
