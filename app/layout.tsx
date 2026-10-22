@@ -3,33 +3,25 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./fonts.css";
 import { HUD_PRELOAD_FONTS, hudFontClassName } from "@/components/hud";
-import { Header } from "@/components/layout/Header";
+import { HeaderGate } from "@/components/layout/HeaderGate";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ScreenBackground } from "@/components/layout/screen-background";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { SITE_INDEXING, SITE_URL } from "@/lib/constants/site";
 import { QueryProvider } from "@/lib/providers/query-provider";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "D&D Combat Tracker",
-  description: "Combat tracker for D&D 5e campaigns",
+  description: "Помічник ДМ для кампаній D&D 5e",
+  robots: SITE_INDEXING ? undefined : { index: false, follow: false },
 };
 
-async function getSessionEmail(): Promise<string | null> {
-  const supabase = await createClient();
-
-  const { data } = await supabase.auth.getClaims();
-
-  return data?.claims?.email ?? null;
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const email = await getSessionEmail();
-
   return (
     <html lang="uk" className="dark">
       <head>
@@ -41,7 +33,7 @@ export default async function RootLayout({
         <ScreenBackground />
         <QueryProvider>
           <ConfirmProvider>
-            <Header email={email} />
+            <HeaderGate />
             <PageTransition>{children}</PageTransition>
           </ConfirmProvider>
         </QueryProvider>
