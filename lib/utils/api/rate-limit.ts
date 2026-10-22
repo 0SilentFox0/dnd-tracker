@@ -1,6 +1,6 @@
 /**
  * Rate limiting через `@upstash/ratelimit` (sliding window).
- * Fail-open: без Upstash (немає env vars) запит пропускається — недоступність кешу не блокує користувачів.
+ * Fail-open: без Upstash запит пропускається, крім викликів з `memoryFallback` — вони рахуються в пам'яті інстанса.
  */
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -19,6 +19,8 @@ export interface RateLimitInput {
   limit: number;
   /** Тривалість вікна (секунди). */
   windowSeconds: number;
+  /** Без Redis рахувати вікно в пам'яті інстанса замість fail-open (для платних викликів). */
+  memoryFallback?: boolean;
 }
 
 export interface RateLimitResult {
@@ -58,10 +60,42 @@ function getRatelimiter(limit: number, windowSeconds: number): Ratelimit | null 
   return limiter;
 }
 
+const MEMORY_MAX_KEYS = 5000;
+
+const memoryHits = new Map<string, number[]>();
+
+function checkMemoryLimit(identifier: string, limit: number, windowSeconds: number): RateLimitResult {
+  const now = Date.now();
+
+  const windowMs = windowSeconds * 1000;
+
+  const hits = (memoryHits.get(identifier) ?? []).filter((t) => now - t < windowMs);
+
+  const allowed = hits.length < limit;
+
+  if (allowed) hits.push(now);
+
+  memoryHits.delete(identifier);
+  memoryHits.set(identifier, hits);
+
+  if (memoryHits.size > MEMORY_MAX_KEYS) {
+    const oldest = memoryHits.keys().next().value;
+
+    if (oldest !== undefined) memoryHits.delete(oldest);
+  }
+
+  return {
+    allowed,
+    count: hits.length,
+    limit,
+    retryAfterSeconds: allowed ? windowSeconds : Math.max(1, Math.ceil((hits[0] + windowMs - now) / 1000)),
+  };
+}
+
 export async function checkRateLimit(
   input: RateLimitInput,
 ): Promise<RateLimitResult> {
-  const { userId, scope, battleId, limit, windowSeconds } = input;
+  const { userId, scope, battleId, limit, windowSeconds, memoryFallback } = input;
 
   const result: RateLimitResult = {
     allowed: true,
@@ -72,14 +106,13 @@ export async function checkRateLimit(
 
   const limiter = getRatelimiter(limit, windowSeconds);
 
-  if (!limiter) {
-    // Fail-open: Redis недоступний — пропускаємо.
-    return result;
-  }
-
   const identifier = battleId
     ? `${userId}:${battleId}:${scope}`
     : `${userId}:${scope}`;
+
+  if (!limiter) {
+    return memoryFallback ? checkMemoryLimit(identifier, limit, windowSeconds) : result;
+  }
 
   try {
     const { success, limit: lim, remaining, reset } =
@@ -104,7 +137,7 @@ export async function checkRateLimit(
       error: String(err),
     });
 
-    return result;
+    return memoryFallback ? checkMemoryLimit(identifier, limit, windowSeconds) : result;
   }
 }
 

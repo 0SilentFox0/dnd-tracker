@@ -26,7 +26,7 @@ export async function guardDraftAi(campaignId: string): Promise<NextResponse | {
 }
 
 export async function limitDraftAi(campaignId: string, userId: string, scope: string): Promise<NextResponse | null> {
-  const limit = await checkRateLimit({ userId, scope, battleId: campaignId, ...AI_PLAYER_RATE_LIMIT });
+  const limit = await checkRateLimit({ userId, scope, battleId: campaignId, ...AI_PLAYER_RATE_LIMIT, memoryFallback: true });
 
   return limit.allowed ? null : rateLimitResponse(limit);
 }

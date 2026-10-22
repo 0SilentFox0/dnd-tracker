@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { checkRateLimit, rateLimitResponse } from "../rate-limit";
 
@@ -168,5 +168,45 @@ describe("rateLimitResponse", () => {
 
     expect(body.error).toBe("Забагато запитів, спробуйте трохи згодом");
     expect(body.retryAfterSeconds).toBe(7);
+  });
+});
+
+describe("checkRateLimit memoryFallback", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.mocked(getRedisClient).mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const input = (userId: string) => ({ userId, scope: "mem", battleId: "c1", limit: 2, windowSeconds: 10, memoryFallback: true });
+
+  it("блокує після ліміту й відпускає після вікна", async () => {
+    expect((await checkRateLimit(input("m1"))).allowed).toBe(true);
+    expect((await checkRateLimit(input("m1"))).allowed).toBe(true);
+
+    const blocked = await checkRateLimit(input("m1"));
+
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.retryAfterSeconds).toBeGreaterThan(0);
+
+    vi.advanceTimersByTime(10_001);
+
+    expect((await checkRateLimit(input("m1"))).allowed).toBe(true);
+  });
+
+  it("ключ розділяє користувачів", async () => {
+    await checkRateLimit(input("m2"));
+    await checkRateLimit(input("m2"));
+
+    expect((await checkRateLimit(input("m3"))).allowed).toBe(true);
+  });
+
+  it("без memoryFallback лишається fail-open", async () => {
+    const plain = { ...input("m4"), memoryFallback: undefined };
+
+    for (let i = 0; i < 5; i++) expect((await checkRateLimit(plain)).allowed).toBe(true);
   });
 });
