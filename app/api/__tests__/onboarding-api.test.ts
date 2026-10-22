@@ -50,6 +50,17 @@ describe("GET /api/onboarding", () => {
     expect(prisma.userOnboardingFlag.upsert).not.toHaveBeenCalled();
   });
 
+  it("запис першого візиту впав (немає рядка users) — GET однаково 200", async () => {
+    vi.mocked(prisma.userOnboardingFlag.upsert).mockRejectedValueOnce(new Error("Foreign key constraint violated"));
+
+    const { GET } = await import("@/app/api/onboarding/route");
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).flags["whats-new"]).toBe(WHATS_NEW[0].id);
+  });
+
   it("без сесії — 401", async () => {
     vi.mocked(apiAuth.requireAuth).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 401 }));
 

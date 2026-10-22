@@ -23,7 +23,8 @@ export async function readOnboardingFlags(userId: string): Promise<OnboardingFla
 
   // перший візит: старі новини не мають горіти бейджем
   if (!(WHATS_NEW_KEY in flags) && WHATS_NEW[0]) {
-    await setOnboardingFlag(userId, WHATS_NEW_KEY, WHATS_NEW[0].id);
+    // best-effort: без рядка users (сесія старша за БД) запис падає, а відповідь має лишитися 200
+    await setOnboardingFlag(userId, WHATS_NEW_KEY, WHATS_NEW[0].id).catch(() => undefined);
     flags[WHATS_NEW_KEY] = WHATS_NEW[0].id;
   }
 
