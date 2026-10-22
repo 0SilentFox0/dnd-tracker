@@ -112,7 +112,7 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
           <Label>Легенда</Label>
           {items.map((item, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-              <LegendColorPicker value={item.kind} onChange={(kind) => patchItem(i, { kind })} />
+              <LegendColorPicker entry={item} onChange={(color) => patchItem(i, { color })} />
               <Input aria-label="Підпис позначки" className="min-w-0 flex-1" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
               <Button type="button" variant="outline" onClick={() => setItems((l) => l.filter((_, j) => j !== i))}>
                 Прибрати

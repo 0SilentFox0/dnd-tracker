@@ -7,16 +7,23 @@ import { LegendColorPicker } from "@/components/scenario/editor/LegendColorPicke
 afterEach(cleanup);
 
 describe("LegendColorPicker", () => {
-  it("marks the current colour and reports the picked one", () => {
+  it("starts from the kind colour and reports any picked colour", () => {
     const onChange = vi.fn();
 
-    render(<LegendColorPicker value="token" onChange={onChange} />);
+    render(<LegendColorPicker entry={{ kind: "token", label: "Жетон" }} onChange={onChange} />);
 
-    expect(screen.getAllByRole("radio")).toHaveLength(7);
-    expect(screen.getByRole("radio", { name: "Зелений" }).getAttribute("aria-checked")).toBe("true");
+    const input = screen.getByLabelText("Колір позначки") as HTMLInputElement;
 
-    fireEvent.click(screen.getByRole("radio", { name: "Золотий" }));
+    expect(input.value).toBe("#79b8a4");
 
-    expect(onChange).toHaveBeenCalledWith("artifact");
+    fireEvent.input(input, { target: { value: "#ff00aa" } });
+
+    expect(onChange).toHaveBeenCalledWith("#ff00aa");
+  });
+
+  it("shows a saved custom colour", () => {
+    render(<LegendColorPicker entry={{ kind: "read", label: "Х", color: "#123456" }} onChange={vi.fn()} />);
+
+    expect((screen.getByLabelText("Колір позначки") as HTMLInputElement).value).toBe("#123456");
   });
 });
