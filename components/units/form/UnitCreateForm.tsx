@@ -5,7 +5,7 @@ import Link from "next/link";
 import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { UnitFormError, unitFormTabs } from "@/components/units/form/UnitFormFields";
+import { unitFormTabs } from "@/components/units/form/UnitFormFields";
 import { useUnitCreateForm } from "@/lib/hooks/units";
 
 export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
@@ -13,7 +13,6 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
 
   return (
     <HudFormPage title="Новий юніт" aside="Заповніть характеристики, расу й атаки">
-      <UnitFormError error={editor.status.error} />
       <HudForm
         id="unit-form"
         onSubmit={editor.actions.submit}
@@ -23,6 +22,11 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
             <Button type="button" variant="outline" asChild>
               <Link href={editor.listHref}>Скасувати</Link>
             </Button>
+            {editor.status.error && (
+              <p role="alert" className="w-full text-sm text-destructive">
+                {editor.status.error.message || "Помилка"}
+              </p>
+            )}
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
               {editor.status.isSaving ? "Створення..." : withAbilityErrors("Створити юніта", editor.abilities.errors)}
             </Button>

@@ -56,8 +56,8 @@ export function CreateScenarioPageDialog({ open, onOpenChange, campaignId, pendi
           <SelectField id="scenario-kind" value={kind} onValueChange={(v) => setKind(v as ScenarioPageKind)} options={KIND_OPTIONS} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="scenario-title">Назва</Label>
-          <Input id="scenario-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
+          <Label htmlFor="scenario-title">Назва *</Label>
+          <Input id="scenario-title" required value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
         </div>
         {kind === "scene" && (
           <div className="space-y-1.5">

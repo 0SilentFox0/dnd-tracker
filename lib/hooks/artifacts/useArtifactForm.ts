@@ -35,7 +35,13 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!fields.name.trim() || !abilities.valid) return;
+    if (!abilities.valid) return;
+
+    if (!fields.name.trim()) {
+      setError("Вкажіть назву");
+
+      return;
+    }
 
     setIsSaving(true);
     setError(null);

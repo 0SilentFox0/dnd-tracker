@@ -6,6 +6,7 @@ import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRaceForm } from "@/lib/hooks/races";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import { getInitialRaceFormData } from "@/lib/utils/races/race-form";
 import type { Race } from "@/types/races";
 
@@ -27,6 +28,11 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
             <Button type="button" variant="outline" onClick={editor.actions.cancel}>
               Скасувати
             </Button>
+            {editor.status.error != null && (
+              <p role="alert" className="w-full text-sm text-destructive">
+                {errorMessage(editor.status.error, "Не вдалося зберегти расу")}
+              </p>
+            )}
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
               {editor.status.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", editor.abilities.errors)}
             </Button>

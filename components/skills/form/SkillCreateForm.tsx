@@ -62,15 +62,11 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
       title={isEdit ? "Редагувати скіл" : "Створити скіл"}
       aside={isEdit ? "Оновіть інформацію про скіл" : "Додайте новий скіл з його характеристиками та ефектами"}
     >
-      {error && (
-        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {error}
-        </p>
-      )}
       <HudForm
         id="skill-form"
         onSubmit={actions.submit}
         tabs={tabs}
+        error={error}
         actions={
           <>
             <Button type="button" variant="outline" onClick={actions.cancel} disabled={isSaving}>

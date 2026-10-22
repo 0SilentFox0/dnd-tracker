@@ -4,6 +4,7 @@ import { IconUrlField } from "@/components/common/IconUrlField";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
+import { SKILL_NAME_MAX } from "@/lib/constants/skills";
 import type { SkillFormBinding } from "@/types/skills";
 
 export function SkillBasicInfo({ form }: { form: SkillFormBinding }) {
@@ -18,6 +19,7 @@ export function SkillBasicInfo({ form }: { form: SkillFormBinding }) {
         onChange={(e) => set("name", e.target.value)}
         placeholder="Наприклад: Майстерність з мечем"
         required
+        maxLength={SKILL_NAME_MAX}
       />
 
       <div className="space-y-2">

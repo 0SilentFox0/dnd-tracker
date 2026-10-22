@@ -1,12 +1,13 @@
 import { z } from "zod";
 
+import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
 const spellFields = {
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(SPELL_NAME_MAX),
   level: z.number().int().min(0).max(5),
   groupId: z.string().nullable(),
   icon: nullableString,
@@ -45,11 +46,11 @@ export const updateSpellSchema = z.object(spellFields).partial();
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 
 export const createSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(SPELL_NAME_MAX),
 });
 
 export const updateSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
+  name: z.string().min(1).max(SPELL_NAME_MAX).optional(),
 });
 
 export const deleteSpellsByLevelSchema = z.object({

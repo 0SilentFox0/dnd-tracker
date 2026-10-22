@@ -5,7 +5,7 @@ import { unitWriteKeys } from "./keys";
 import { importUnits } from "@/lib/api/units";
 import { useCrudMutation, useFileImport } from "@/lib/hooks/common";
 import { parseCSVFile, parseJSONFile } from "@/lib/utils/common/file-import";
-import { convertCSVRowToUnit } from "@/lib/utils/units/unit-parsing";
+import { convertCSVRowsToUnits } from "@/lib/utils/units/unit-parsing";
 import type { CSVUnitRow, ImportUnit } from "@/types/import";
 
 export function useUnitImport(campaignId: string) {
@@ -25,7 +25,7 @@ export function useUnitImport(campaignId: string) {
         warnings: unknownRaces.length > 0 ? [`Раси не знайдено — юніти створено без раси: ${unknownRaces.join(", ")}`] : [],
       };
     },
-    parseCSV: async (file) => (await parseCSVFile<CSVUnitRow>(file, ";")).map(convertCSVRowToUnit),
+    parseCSV: async (file) => convertCSVRowsToUnits(await parseCSVFile<CSVUnitRow>(file, ";")),
     parseJSON: (file) => parseJSONFile<ImportUnit>(file),
   });
 }

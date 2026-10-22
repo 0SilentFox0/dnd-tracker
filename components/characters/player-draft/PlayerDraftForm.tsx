@@ -61,16 +61,14 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
   const goals = values.goals ?? [];
 
+  const disabledReason = busy ? "Зачекайте, поки завершиться анімація" : !scoreStatus.valid ? "Виправте характеристики" : null;
+
   return (
     <HudFormPage title={characterId ? "Чернетка персонажа" : "Новий персонаж"} aside="Після відправки чернетку розгляне DM">
       <OnboardingHint id="player.draft" className="mb-3" />
-      {submit.error && (
-        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          <strong>Помилка:</strong> {submit.error}
-        </p>
-      )}
       <HudForm
         id="player-draft"
+        error={submit.error ?? disabledReason}
         onSubmit={(e) => {
           e.preventDefault();
           submit.run();
@@ -119,6 +117,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
                 <RollingField id="draft-race" label="Раса *" spinning={spinning("race")} settled={settled("race")} display={shown("race")}>
                   <SelectField id="draft-race" value={values.race} onValueChange={(v) => set("race", v)} placeholder="Виберіть расу" options={races.map((r) => ({ value: r.name, label: r.name }))} required triggerClassName="w-full" />
+                  {races.length === 0 && <p className="mt-1 text-xs text-hud-muted">У кампанії ще немає рас - попросіть DM створити расу.</p>}
                 </RollingField>
 
                 <RollingField id="draft-archetype" label="Архетип" spinning={spinning("archetype")} settled={settled("archetype")} display={archetypeLabel(shown("archetype"))}>

@@ -42,7 +42,7 @@ export function LabeledInput({ label, labelExtra, description, error, required =
 
   return (
     <FormField label={label} htmlFor={inputId} required={required} description={description} error={error} labelExtra={labelExtra} labelClassName={labelClassName} className={containerClassName}>
-      <Input id={inputId} className={className} {...inputProps} />
+      <Input id={inputId} required={required} className={className} {...inputProps} />
     </FormField>
   );
 }

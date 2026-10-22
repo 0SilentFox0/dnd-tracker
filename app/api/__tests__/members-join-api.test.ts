@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CampaignRole } from "@/lib/constants/campaigns";
 
 const db = vi.hoisted(() => ({
-  campaign: { findUnique: vi.fn() },
+  campaign: { findFirst: vi.fn() },
   campaignMember: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   user: { upsert: vi.fn() },
 }));
@@ -75,7 +75,7 @@ describe("POST /campaigns/join", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auth.requireAuthUser.mockResolvedValue({ userId: "u1", authUser: { id: "u1", email: "u1@x.y" } });
-    db.campaign.findUnique.mockResolvedValue({ id: "c1", status: "active", members: [{ userId: "dm" }] });
+    db.campaign.findFirst.mockResolvedValue({ id: "c1", status: "active", members: [{ userId: "dm" }] });
     db.campaignMember.create.mockResolvedValue({ id: "m9" });
   });
 
@@ -87,13 +87,13 @@ describe("POST /campaigns/join", () => {
   });
 
   it("невідомий код — 404", async () => {
-    db.campaign.findUnique.mockResolvedValue(null);
+    db.campaign.findFirst.mockResolvedValue(null);
 
     expect((await joinWith("nope")).status).toBe(404);
   });
 
   it("вже учасник — 400 без дубля", async () => {
-    db.campaign.findUnique.mockResolvedValue({ id: "c1", status: "active", members: [{ userId: "u1" }] });
+    db.campaign.findFirst.mockResolvedValue({ id: "c1", status: "active", members: [{ userId: "u1" }] });
 
     expect((await joinWith("code")).status).toBe(400);
     expect(db.campaignMember.create).not.toHaveBeenCalled();

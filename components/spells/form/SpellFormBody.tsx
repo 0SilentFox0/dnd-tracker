@@ -58,15 +58,11 @@ export function SpellFormBody({
 
   return (
     <>
-      {submit.error && (
-        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          <strong>Помилка:</strong> {submit.error}
-        </p>
-      )}
       <HudForm
         id="spell-form"
         onSubmit={submit.onSubmit}
         tabs={tabs}
+        error={submit.error}
         actions={
           <>
             <Button type="submit" disabled={submit.isPending}>

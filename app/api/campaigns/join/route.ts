@@ -27,8 +27,9 @@ export async function POST(request: Request) {
 
     const { inviteCode } = parsedBody;
 
-    const campaign = await prisma.campaign.findUnique({
-      where: { inviteCode },
+    // codes are uppercase, but phone keyboards often send lowercase
+    const campaign = await prisma.campaign.findFirst({
+      where: { inviteCode: { equals: inviteCode, mode: "insensitive" } },
       include: { members: { select: { userId: true } } },
       omit: { aiInstructions: true },
     });

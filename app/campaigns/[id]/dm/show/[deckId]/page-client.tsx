@@ -56,13 +56,14 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
     >
       <HudForm
         id="deck-editor-form"
+        error={draft.title.trim() ? null : "Вкажіть назву набору"}
         onSubmit={(e) => {
           e.preventDefault();
           void editor.save();
         }}
         actions={
           <>
-            <Button type="submit" disabled={!dirty || saving}>
+            <Button type="submit" disabled={!dirty || saving || !draft.title.trim()}>
               Зберегти
             </Button>
             <Button type="button" variant="outline" disabled={saving || control.pending || draft.slides.length === 0} onClick={() => void startShow()}>

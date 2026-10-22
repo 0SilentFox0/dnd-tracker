@@ -53,7 +53,19 @@ describe("форма заклинання", () => {
   it("помилку дає невалідний ефект", () => {
     const form = { ...defaultSpellForm(), name: "Іскра", spellEffects: [{ kind: "teleport" } as never] };
 
-    expect(spellFormError(form)).toContain("effects");
+    expect(spellFormError(form)).toContain("Ефекти");
+  });
+
+  it("spellFormError ловить усе, що відхилить схема, з назвою поля", () => {
+    const base = { ...defaultSpellForm(), name: "Іскра" };
+
+    const message = spellFormError({ ...base, targeting: { kind: "enemy", range: 1 } as never });
+
+    expect(message).toMatch(/^Дальність: /);
+    expect(message).not.toContain("targeting");
+    expect(spellFormError({ ...base, name: "а".repeat(101) })).toMatch(/^Назва: /);
+    expect(spellFormError({ ...base, stackable: true, maxStacks: 99 })).toMatch(/^Макс\. накопичень: /);
+    expect(() => formToPayload({ ...base, targeting: { kind: "enemy", range: 1 } as never })).toThrow();
   });
 
   it("зіпсовані колонки рядка не ламають редактор", () => {

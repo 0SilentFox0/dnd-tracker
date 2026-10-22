@@ -30,9 +30,10 @@ export function RaceEditFormSpellSlots({
             <div className="text-xs leading-tight">Рівень {level}</div>
             <Input
               type="number"
-              value={progression?.slots || 0}
+              min={0}
+              value={progression?.slots ?? 0}
               onChange={(e) => {
-                const slots = parseInt(e.target.value, 10) || 0;
+                const slots = Math.max(0, parseInt(e.target.value, 10) || 0);
 
                 setFormData((prev) => {
                   const current = prev.spellSlotProgression || [];

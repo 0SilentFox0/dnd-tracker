@@ -29,6 +29,7 @@ export function useCreateMainSkill(campaignId: string) {
   return useCrudMutation({
     mutationFn: (data: MainSkillFormData) => createMainSkill(campaignId, data),
     invalidateKeys: [skillKeys.mainSkills(campaignId)],
+    awaitInvalidation: true,
   });
 }
 
