@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { createCharacterSchema } from "./create-character-schema";
+import { deriveCharacterDefaults } from "./derive-character-defaults";
 import { resolveCharacterOwner } from "./resolve-character-owner";
 
 import { prisma } from "@/lib/db";
@@ -10,8 +11,6 @@ import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
-import type { SpellSlotProgression } from "@/types/races";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
@@ -33,13 +32,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
-  let spellSlots = data.spellSlots;
-
-  if (!spellSlots || typeof spellSlots !== "object" || Object.keys(spellSlots).length === 0) {
-    const race = await prisma.race.findFirst({ where: { campaignId, name: data.race }, select: { spellSlotProgression: true } });
-
-    spellSlots = fullSpellSlots(data.level, Array.isArray(race?.spellSlotProgression) ? (race.spellSlotProgression as unknown as SpellSlotProgression[]) : null);
-  }
+  const { spellSlots } = await deriveCharacterDefaults(campaignId, data);
 
   try {
     const character = await prisma.character.create({

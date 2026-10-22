@@ -93,4 +93,10 @@ export const API_ERRORS = {
   AI_IMAGE_NOT_OWNED: "Це зображення не належить кампанії",
   AI_PROPOSAL_DONE: "Пропозицію вже застосовано або відхилено",
   API_TOKEN_NOT_FOUND: "Токен не знайдено",
+  DRAFT_PLAYERS_ONLY: "Створити персонажа може лише гравець кампанії",
+  DRAFT_ALREADY_EXISTS: "У вас уже є персонаж у цій кампанії",
+  DRAFT_INVALID_SCORES: "Характеристики мають відповідати стандартному масиву або point-buy (27)",
+  DRAFT_NOT_PENDING: "Персонаж уже схвалений — редагує DM",
+  REVIEW_NOT_PENDING: "Персонаж не очікує схвалення",
+  AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;

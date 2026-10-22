@@ -7,6 +7,7 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
+import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 
 export type { AbilityKey };
 
@@ -244,4 +245,23 @@ export interface RosterHero {
   avatar: string | null;
   type: CharacterTypeValue;
   equipped: Record<string, { id: string; name: string }>;
+}
+
+export interface DraftInput {
+  name: string;
+  race: string;
+  class: string;
+  archetype: HeroArchetypeKey;
+  alignment?: string;
+  background?: string;
+  avatar?: string;
+  method: "standard" | "pointBuy";
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  primaryAbility?: AbilityKey;
+  goals?: Array<{ text: string; kind: GoalKind }>;
 }
