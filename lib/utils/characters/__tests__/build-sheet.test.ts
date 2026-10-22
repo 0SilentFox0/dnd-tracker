@@ -40,6 +40,11 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
 }
 
 describe("buildCharacterSheet", () => {
+  it("review: чернетка з приміткою, активний без", () => {
+    expect(buildCharacterSheet(lira({ status: "pending", reviewNote: "додай ціль" })).review).toEqual({ pending: true, note: "додай ціль" });
+    expect(buildCharacterSheet(lira({ status: "active", reviewNote: "стара" })).review).toEqual({ pending: false, note: null });
+  });
+
   it("майстерність від рівня і модифікатори характеристик", () => {
     const s = buildCharacterSheet(lira());
 

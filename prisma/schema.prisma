@@ -56,6 +56,7 @@ model Campaign {
   aiThreads       AiThread[]
   aiProposals     AiProposal[]
   apiTokens       ApiToken[]
+  inventoryLog    InventoryLog[]
 
   @@index([dmUserId])
   @@map("campaigns")
@@ -122,6 +123,9 @@ model Character {
   archetype           String?
   meleeMultiplier     Float?
   rangedMultiplier    Float?
+  status              String              @default("active")
+  reviewNote          String?
+  inventoryLog        InventoryLog[]
   inventory           CharacterInventory?
   characterSkills     CharacterSkills[]
   scenarioPages       ScenarioPage[]
@@ -278,10 +282,27 @@ model CharacterInventory {
   silver      Int       @default(0)
   copper      Int       @default(0)
   items       Json      @default("[]")
+  stash       Json      @default("[]")
   updatedAt   DateTime  @updatedAt
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("character_inventories")
+}
+
+model InventoryLog {
+  id          String    @id @default(cuid())
+  campaignId  String
+  characterId String
+  actorUserId String
+  kind        String
+  delta       Json      @default("{}")
+  note        String?
+  createdAt   DateTime  @default(now())
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@index([characterId, createdAt(sort: Desc)])
+  @@map("inventory_log")
 }
 
 model SkillTree {

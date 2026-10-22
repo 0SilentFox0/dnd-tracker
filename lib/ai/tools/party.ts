@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AiToolError, defineTool } from "./define";
 
 import "server-only";
-import { CharacterType } from "@/lib/constants/characters";
+import { ACTIVE_CHARACTER, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { readContent } from "@/lib/server/scenario/page-store";
 import { docText } from "@/lib/utils/scenario/doc";
@@ -13,7 +13,7 @@ const PARTY_SELECT = { id: true, name: true, level: true, class: true, race: tru
 export type PartyMember = { id: string; name: string; level: number; class: string; race: string; armorClass: number; notes: string | null };
 
 export async function partySummary(campaignId: string): Promise<PartyMember[]> {
-  return prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER }, select: PARTY_SELECT, orderBy: { name: "asc" } });
+  return prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER, ...ACTIVE_CHARACTER }, select: PARTY_SELECT, orderBy: { name: "asc" } });
 }
 
 export const getPartyTool = defineTool({
@@ -31,7 +31,7 @@ export const readCharacterTool = defineTool({
   input: z.object({ id: z.string().min(1) }),
   handler: async (ctx, { id }) => {
     const c = await prisma.character.findFirst({
-      where: { id, campaignId: ctx.campaignId },
+      where: { id, campaignId: ctx.campaignId, ...ACTIVE_CHARACTER },
       select: {
         ...PARTY_SELECT,
         type: true,

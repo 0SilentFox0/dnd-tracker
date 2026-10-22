@@ -4,10 +4,10 @@ import { AiToolError, defineTool } from "./define";
 import { loadPageForAi } from "./scenario-read";
 
 import "server-only";
-import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
+import { type ImageModelChoice, pickUserImageModel } from "@/lib/ai/image-model";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
 import { createProposal } from "@/lib/ai/proposals";
-import { AI_IMAGE_ASPECTS, AI_IMAGE_MODELS, AI_IMAGE_PROMPT_MAX, type AiProvider } from "@/lib/constants/ai";
+import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DECK_TITLE_MAX, SLIDE_TITLE_MAX } from "@/lib/constants/show";
 import { prisma } from "@/lib/db";
@@ -26,22 +26,12 @@ const proposeSlideSchema = z.object({
   deckId: z.string().min(1).max(40).optional(),
 });
 
-async function pickImageModel(userId: string): Promise<{ provider: AiProvider; model: string }> {
-  let unreadable = false;
+async function pickImageModel(userId: string): Promise<ImageModelChoice> {
+  const { choice, unreadable } = await pickUserImageModel(userId);
 
-  for (const [provider, models] of Object.entries(AI_IMAGE_MODELS) as [AiProvider, { id: string }[]][]) {
-    if (models.length === 0) continue;
+  if (!choice) throw new AiToolError(unreadable ? API_ERRORS.AI_KEY_UNREADABLE : NO_IMAGE_KEY);
 
-    try {
-      if (await loadApiKey(userId, provider)) return { provider, model: models[0].id };
-    } catch (error) {
-      if (!(error instanceof AiKeyUnreadableError)) throw error;
-
-      unreadable = true;
-    }
-  }
-
-  throw new AiToolError(unreadable ? API_ERRORS.AI_KEY_UNREADABLE : NO_IMAGE_KEY);
+  return choice;
 }
 
 async function resolveDeck(campaignId: string, pageId: string, deckId: string | undefined) {

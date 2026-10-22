@@ -4,6 +4,7 @@ const line = (label: string, value: string) => ({ label, value });
 
 export const sheetFixture: CharacterSheet = {
   viewer: { isDM: false, isOwner: true },
+  review: { pending: false, note: null },
   maxLevel: 30,
   identity: { id: "lira", name: "Ліра", avatar: null, level: 30, className: "Слідопит", archetype: "Лучник", subclass: null, race: "Ельф", raceIcon: null, alignment: null },
   abilities: [

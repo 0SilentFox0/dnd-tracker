@@ -7,6 +7,7 @@ import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
 import { isReservedSlot, partitionReserve } from "./start-reserve";
 
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -55,7 +56,7 @@ export async function buildStartOrder(
   const [characters, units] = await Promise.all([
     charIds.length > 0
       ? prisma.character.findMany({
-          where: { id: { in: charIds } },
+          where: { id: { in: charIds }, ...ACTIVE_CHARACTER },
           include: {
             inventory: true,
           },

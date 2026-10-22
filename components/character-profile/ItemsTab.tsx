@@ -11,11 +11,19 @@ import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ARTIFACT_GRID_9, ARTIFACT_RARITY_COLOR } from "@/lib/constants/artifacts";
+import { useStashAction } from "@/lib/hooks/characters";
+import { useNotify } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { SheetArtifact } from "@/types/characters";
 
 export function ItemsTab() {
-  const { sheet } = useProfile();
+  const { sheet, campaignId, characterId } = useProfile();
+
+  const stash = useStashAction(campaignId, characterId);
+
+  const notify = useNotify();
+
+  const canAct = (sheet.viewer.isDM || sheet.viewer.isOwner) && !sheet.review.pending;
 
   const [shown, setShown] = useState<SheetArtifact | null>(null);
 
@@ -27,6 +35,12 @@ export function ItemsTab() {
     setShown(a);
     setOpen(true);
   };
+
+  const unequip = (slot: string) =>
+    stash.mutateAsync({ action: "stash", slot }).then(
+      () => setOpen(false),
+      (e: Error) => notify(e.message || "Не вдалося зняти артефакт"),
+    );
 
   return (
     <>
@@ -67,15 +81,22 @@ export function ItemsTab() {
         onOpenChange={setOpen}
         title={shown?.name ?? ""}
         footer={
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-              setTransferOpen(true);
-            }}
-          >
-            Передати
-          </Button>
+          <>
+            {canAct && shown && (
+              <Button variant="outline" disabled={stash.isPending} onClick={() => void unequip(shown.slot)}>
+                Зняти в підсумок
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setTransferOpen(true);
+              }}
+            >
+              Передати
+            </Button>
+          </>
         }
       >
         {shown?.description && <p className="text-sm">{shown.description}</p>}
@@ -89,7 +110,7 @@ export function ItemsTab() {
           <p className="mt-2 text-sm text-muted-foreground">Без ефектів.</p>
         )}
       </ResponsiveDialog>
-      <TransferArtifactDialog artifact={shown} open={transferOpen} onOpenChange={setTransferOpen} />
+      <TransferArtifactDialog artifact={shown} source={{ slot: shown?.slot ?? "" }} open={transferOpen} onOpenChange={setTransferOpen} />
     </>
   );
 }

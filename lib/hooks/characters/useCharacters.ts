@@ -22,10 +22,10 @@ export type { Character };
 // compact — без важких JSON/інвентаря (менший egress)
 export function useCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; compact?: boolean; enabled?: boolean },
+  opts?: { type?: CharacterTypeValue; status?: "pending"; compact?: boolean; enabled?: boolean },
 ) {
   return useQuery<CharacterListItem[]>({
-    queryKey: characterKeys.list(campaignId, opts?.type ?? "all", !!opts?.compact),
+    queryKey: characterKeys.list(campaignId, opts?.status ?? opts?.type ?? "all", !!opts?.compact),
     queryFn: () => getCharacters(campaignId, opts),
     staleTime: ENTITY_STALE_MS,
     enabled: !!campaignId && (opts?.enabled ?? true),

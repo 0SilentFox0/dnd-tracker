@@ -6,6 +6,7 @@ import { loadRaceProgression } from "./load-race-progression";
 import { updateCharacterSchema } from "./update-character-schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
@@ -28,6 +29,8 @@ export async function patchCharacter(request: Request, campaignId: string, chara
   const isOwner = character.controlledBy === userId;
 
   if (!isDM && !(isOwner && campaign.allowPlayerEdit)) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+
+  if (!isDM && character.status === CharacterStatus.PENDING) return errorResponse(API_ERRORS.DRAFT_EDIT_VIA_DRAFT, 403);
 
   const parsed = await parseBody(updateCharacterSchema, request);
 
