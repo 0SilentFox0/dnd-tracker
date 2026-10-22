@@ -72,3 +72,19 @@ export interface InventoryLogEntry {
   createdAt: string;
   actor: { id: string; displayName: string | null };
 }
+
+export interface StashArtifact {
+  id: string;
+  name: string;
+  icon: string | null;
+  rarity: string | null;
+  slot: string;
+  description: string | null;
+}
+
+export interface StashView {
+  purse: Purse;
+  items: SpecialItem[];
+  artifacts: StashArtifact[];
+  freeArtifacts?: StashArtifact[];
+}
