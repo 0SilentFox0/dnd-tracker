@@ -18,6 +18,7 @@ model User {
   dmCampaigns     Campaign[]       @relation("DMCampaigns")
   characters      Character[]
   aiCredentials   AiCredential[]
+  onboardingFlags UserOnboardingFlag[]
 
   @@map("users")
 }
@@ -686,4 +687,16 @@ model ApiToken {
 
   @@index([campaignId])
   @@map("api_tokens")
+}
+
+model UserOnboardingFlag {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  value     String?
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@map("user_onboarding_flags")
 }
