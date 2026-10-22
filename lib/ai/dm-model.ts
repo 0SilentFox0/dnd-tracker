@@ -4,7 +4,7 @@ import "server-only";
 import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { type ImageModelChoice, pickUserImageModel } from "@/lib/ai/image-model";
 import { createModel } from "@/lib/ai/providers";
-import { AI_MODELS, AI_PROVIDERS } from "@/lib/constants/ai";
+import { AI_IMAGE_MODELS, AI_MODELS, AI_PROVIDERS } from "@/lib/constants/ai";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
@@ -37,4 +37,20 @@ export async function pickDmImageModel(campaignId: string): Promise<(ImageModelC
   const { choice } = await pickUserImageModel(dm.userId);
 
   return choice && { ...choice, userId: dm.userId };
+}
+
+/** Key presence only (no decryption): one DM lookup and one credentials query for both flags. */
+export async function readDmAiAvailability(campaignId: string): Promise<{ text: boolean; image: boolean }> {
+  const dm = await prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
+
+  if (!dm) return { text: false, image: false };
+
+  const keys = await prisma.aiCredential.findMany({ where: { userId: dm.userId }, select: { provider: true } });
+
+  const has = new Set(keys.map((k) => k.provider));
+
+  return {
+    text: AI_PROVIDERS.some((p) => has.has(p) && AI_MODELS[p].some((m) => m.tier === "fast")),
+    image: Object.entries(AI_IMAGE_MODELS).some(([p, models]) => has.has(p) && models.length > 0),
+  };
 }

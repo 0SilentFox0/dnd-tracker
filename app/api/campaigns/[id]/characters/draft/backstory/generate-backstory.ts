@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { guardDraftAi, limitDraftAi } from "../draft-ai-guard";
 
-import { pickDmImageModel, pickDmTextModel } from "@/lib/ai/dm-model";
+import { pickDmTextModel, readDmAiAvailability } from "@/lib/ai/dm-model";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { GoalKind } from "@/lib/constants/characters";
@@ -34,7 +34,9 @@ export async function readBackstoryAvailability(campaignId: string): Promise<Nex
 
   if (access instanceof NextResponse) return access;
 
-  return NextResponse.json({ available: !!(await pickDmTextModel(campaignId)), image: !!(await pickDmImageModel(campaignId)) });
+  const { text, image } = await readDmAiAvailability(campaignId);
+
+  return NextResponse.json({ available: text, image });
 }
 
 export async function generateBackstory(request: Request, campaignId: string): Promise<NextResponse> {
