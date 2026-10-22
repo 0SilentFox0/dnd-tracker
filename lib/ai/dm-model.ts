@@ -8,9 +8,11 @@ import { AI_IMAGE_MODELS, AI_MODELS, AI_PROVIDERS } from "@/lib/constants/ai";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
+const findDm = (campaignId: string) => prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
+
 // keys belong to users; a player's request runs on the campaign DM's key (fast model)
 export async function pickDmTextModel(campaignId: string): Promise<LanguageModel | null> {
-  const dm = await prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
+  const dm = await findDm(campaignId);
 
   if (!dm) return null;
 
@@ -30,7 +32,7 @@ export async function pickDmTextModel(campaignId: string): Promise<LanguageModel
 }
 
 export async function pickDmImageModel(campaignId: string): Promise<(ImageModelChoice & { userId: string }) | null> {
-  const dm = await prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
+  const dm = await findDm(campaignId);
 
   if (!dm) return null;
 
@@ -41,7 +43,7 @@ export async function pickDmImageModel(campaignId: string): Promise<(ImageModelC
 
 /** Key presence only (no decryption): one DM lookup and one credentials query for both flags. */
 export async function readDmAiAvailability(campaignId: string): Promise<{ text: boolean; image: boolean }> {
-  const dm = await prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
+  const dm = await findDm(campaignId);
 
   if (!dm) return { text: false, image: false };
 

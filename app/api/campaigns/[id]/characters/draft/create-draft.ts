@@ -24,11 +24,13 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   const role = access.campaign.members.find((m) => m.userId === access.userId)?.role ?? "";
 
-  const preCount = await prisma.character.count({ where: { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER } });
+  const ownDrafts = { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER };
 
-  const preRejection = draftRejection({ role, existing: preCount, method: data.method, scores: data });
+  const reject = (existing: number) => draftRejection({ role, existing, method: data.method, scores: data });
 
-  if (preRejection) return errorResponse(preRejection, 400);
+  const early = reject(await prisma.character.count({ where: ownDrafts }));
+
+  if (early) return errorResponse(early, 400);
 
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
@@ -39,9 +41,7 @@ export async function createDraft(request: Request, campaignId: string): Promise
   const result = await prisma.$transaction(async (tx) => {
     await lockPlayerDrafts(tx, campaignId, access.userId);
 
-    const existing = await tx.character.count({ where: { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER } });
-
-    const rejection = draftRejection({ role, existing, method: data.method, scores: data });
+    const rejection = reject(await tx.character.count({ where: ownDrafts }));
 
     if (rejection) return errorResponse(rejection, 400);
 
