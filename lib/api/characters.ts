@@ -117,3 +117,8 @@ export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ av
 
 export const generateBackstory = (campaignId: string, body: { name: string; race: string; archetype: string; class: string; background?: string }) =>
   campaignPost<{ background: string; goals: Array<{ text: string; kind: GoalKind }> }>(campaignId, "/characters/draft/backstory", body);
+
+export type ReviewBody = { action: "approve" } | { action: "return"; note: string };
+
+export const reviewCharacter = (campaignId: string, characterId: string, body: ReviewBody) =>
+  campaignPost<{ id: string; status: string; reviewNote: string | null }>(campaignId, `/characters/${characterId}/review`, body);

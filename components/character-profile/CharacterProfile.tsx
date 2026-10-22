@@ -16,6 +16,7 @@ import { StoryTab } from "./StoryTab";
 
 import "@/components/hud/hud.css";
 import { DraftBanner } from "@/components/characters/player-draft/DraftBanner";
+import { ReviewActions } from "@/components/characters/review/ReviewActions";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
@@ -104,6 +105,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                   }
                 />
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
+                {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>

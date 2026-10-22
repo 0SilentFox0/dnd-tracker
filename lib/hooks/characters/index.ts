@@ -10,6 +10,7 @@ export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEd
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useEquipArtifact } from "./useEquipArtifact";
 export { type PlayerDraftFormOptions, type RollKey, usePlayerDraftForm } from "./usePlayerDraftForm";
+export { useReviewCharacter } from "./useReviewCharacter";
 export { useRollReveal } from "./useRollReveal";
 export { useSpellBrowser } from "./useSpellBrowser";
 export { useInventoryLog, useStash, useStashAction } from "./useStash";

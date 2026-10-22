@@ -6,6 +6,8 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
 import { CampaignStatus } from "@/lib/constants/campaigns";
+import { CharacterStatus } from "@/lib/constants/characters";
+import { prisma } from "@/lib/db";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
 import { pluralUk } from "@/lib/utils/common/plural";
 
@@ -22,9 +24,11 @@ export default async function CampaignDetailPage({
 
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
+  const pendingDrafts = isDM ? await prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0;
+
   const dmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
-    { path: "characters", icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців" },
+    { path: "characters", icon: Users, title: "Персонажі", subtitle: pendingDrafts ? `Управління персонажами гравців · ${pendingDrafts} на схваленні` : "Управління персонажами гравців" },
     { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
     { path: "spells", icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії" },
     { path: "artifacts", icon: Gem, title: "Артефакти", subtitle: "Управління артефактами та сетами" },
