@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import Link from "next/link";
 import { Skull } from "lucide-react";
 
@@ -58,6 +60,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
           />
         )}
       </HudPageHeader>
+      <OnboardingHint id="dm.units" />
 
       {list.isLoading && list.units.length === 0 ? (
         <LoadingState rows={6} label="Завантаження юнітів…" />

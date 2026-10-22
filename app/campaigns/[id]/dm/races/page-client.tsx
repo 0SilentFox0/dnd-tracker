@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import { Dna, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
@@ -27,6 +29,7 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
           </Button>
         }
       />
+      <OnboardingHint id="dm.races" />
 
       {list.isLoading && races.length === 0 ? (
         <LoadingState rows={6} label="Завантаження рас…" />

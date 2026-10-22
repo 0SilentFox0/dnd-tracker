@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -104,6 +106,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     ) : null
                   }
                 />
+                {sheet.viewer.isOwner && !sheet.viewer.isDM && <OnboardingHint id="player.character" className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />

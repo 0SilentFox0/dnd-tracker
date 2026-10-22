@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import { useEffect } from "react";
 import Link from "next/link";
 
@@ -62,6 +64,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
   return (
     <HudFormPage title={characterId ? "Чернетка персонажа" : "Новий персонаж"} aside="Після відправки чернетку розгляне DM">
+      <OnboardingHint id="player.draft" className="mb-3" />
       {submit.error && (
         <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
           <strong>Помилка:</strong> {submit.error}

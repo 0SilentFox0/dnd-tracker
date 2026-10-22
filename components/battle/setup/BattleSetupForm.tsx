@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import Link from "next/link";
 
 import { AutopickCard } from "./AutopickCard";
@@ -108,6 +110,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       aside={isEdit ? "Оновіть учасників та їх ролі в битві" : "Оберіть учасників та розподіліть їх на союзників та ворогів"}
       className={PAGE_CLASS}
     >
+      <OnboardingHint id="dm.battle-setup" className="mb-3" />
       <HudForm
         id={isEdit ? "battle-edit-form" : "battle-form"}
         onSubmit={form.actions.submit}

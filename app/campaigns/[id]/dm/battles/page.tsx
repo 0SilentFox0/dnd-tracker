@@ -1,3 +1,4 @@
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import Link from "next/link";
 import { Swords } from "lucide-react";
 
@@ -52,6 +53,7 @@ export default async function DMBattlesPage({
           </>
         }
       />
+      <OnboardingHint id="dm.battles" />
 
       {SECTIONS.map(({ kind, title }) => {
         const list = battles.filter((b) => b.status === kind);

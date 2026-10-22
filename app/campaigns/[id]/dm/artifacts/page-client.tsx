@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import Link from "next/link";
 import { Gem } from "lucide-react";
 
@@ -36,6 +38,7 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
           </>
         }
       />
+      <OnboardingHint id="dm.artifacts" />
 
       {catalog.isLoading && catalog.isEmpty ? (
         <LoadingState rows={6} label="Завантаження артефактів…" />

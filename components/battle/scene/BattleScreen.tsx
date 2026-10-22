@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -107,6 +109,7 @@ export function BattleScreen() {
           {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
           <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
             <BattleToast />
+            <OnboardingHint id={isDM ? "dm.battle-scene" : "player.battle"} />
           </div>
           {Desktop && (
             <CornerStack>

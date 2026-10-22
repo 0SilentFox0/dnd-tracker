@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import Link from "next/link";
 import { Printer, Wand2 } from "lucide-react";
 
@@ -49,6 +51,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
           </>
         }
       />
+      <OnboardingHint id="dm.spells" />
 
       {list.isLoading && count === 0 ? (
         <LoadingState rows={6} label="Завантаження заклинань…" />

@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
 
@@ -49,6 +51,7 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
           </>
         }
       />
+      <OnboardingHint id="dm.skills" />
 
       {isLoading && skills.length === 0 ? (
         <LoadingState rows={6} label="Завантаження скілів…" />

@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -54,6 +56,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
           </>
         }
       />
+      <OnboardingHint id="dm.show" />
       {decks.length === 0 ? (
         <EmptyState icon={Images} title="Ще немає наборів" description="Створіть набір слайдів із картинок і музики та покажіть його гравцям." />
       ) : (
