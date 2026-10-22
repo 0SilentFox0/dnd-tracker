@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
+import { StashTab } from "./stash/StashTab";
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
-const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story"];
+const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "stash", "story"];
 
 function viewTabs(): ProfileTab[] {
   return [
@@ -31,6 +32,7 @@ function viewTabs(): ProfileTab[] {
     { id: "skills", label: "Вміння", content: <SkillsTab /> },
     { id: "magic", label: "Магія", content: <MagicTab /> },
     { id: "items", label: "Речі", content: <ItemsTab /> },
+    { id: "stash", label: "Підсумок", content: <StashTab /> },
     { id: "story", label: "Історія", content: <StoryTab /> },
   ];
 }
