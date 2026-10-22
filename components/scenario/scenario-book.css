@@ -5,7 +5,8 @@
   background: var(--page); color: var(--ink);
   font-family: var(--font-scenario-serif), Georgia, "Times New Roman", serif; font-size: 19px; line-height: 1.62;
 }
-.scenario-book[data-theme="dark"] {
+.scenario-book[data-theme="dark"],
+.scenario-palette {
   --page: #1f1c19; --ink: #e5ddcf; --ink-soft: #ada192; --margin: #27231f; --rule: #4a433b;
   --blood: #d4706a; --verdigris: #79b8a4; --rust: #e08a6a; --gold: #d3b060; --night: #a9aed8; --shade: #b79bd6;
   --tint-blood: #d4706a1a; --tint-verd: #79b8a41a; --tint-gold: #d3b0601a; --tint-night: #a9aed81a; --tint-shade: #b79bd61a; --tint-rust: #e08a6a1a;
