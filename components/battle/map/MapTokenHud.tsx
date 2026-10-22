@@ -24,7 +24,11 @@ export interface MapTokenHudProps {
   onReturn?: () => void;
 }
 
-const TEXT_MIN_CELL = 28;
+// портрет займає верхні 70% рамки; плашка може трохи зайти на його низ, але не закрити
+const HUD_MAX_SHARE = 0.42;
+
+// рамка 1px + відступи плашки
+const PLAQUE_CHROME = { text: 6, bar: 4 };
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -55,8 +59,6 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
 
   if (isFallen(participant)) return null;
 
-  const showText = pxPerUnit * 100 >= TEXT_MIN_CELL;
-
   const boxPx = box.size * pxPerUnit;
 
   const small = sizeOf(participant) === 1;
@@ -65,8 +67,19 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
 
   const nameFont = small ? clamp(6, boxPx * 0.1, 9) : clamp(7, boxPx * 0.075, 14);
 
-  // з текстом смуга вміщує число; без тексту — тонка, але не тонша за 4 px на телефоні
-  const barPx = showText ? Math.round(hpFont * 1.45) : clamp(4, Math.round(boxPx * 0.08), 8);
+  const textBarPx = Math.round(hpFont * 1.45);
+
+  const thinBarPx = clamp(4, Math.round(boxPx * 0.08), 8);
+
+  const fits = (px: number) => px <= boxPx * HUD_MAX_SHARE;
+
+  const showText = fits(nameFont * 1.25 + 1 + textBarPx + PLAQUE_CHROME.text);
+
+  const showHud = showText || fits(thinBarPx + PLAQUE_CHROME.bar);
+
+  if (!showHud && !onReturn) return null;
+
+  const barPx = showText ? textBarPx : thinBarPx;
 
   const { ratio, text } = hpView(participant, exact);
 
@@ -92,30 +105,32 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
           Повернутися
         </button>
       )}
-      <div
-        ref={shake}
-        data-map-hud-strip
-        data-hud-rim={motifs[0]}
-        className={cn("map-hud-plaque absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end", showText ? "px-[3px] py-[2px]" : "p-px", motionAllowed && "map-hud-anim", down && "opacity-40")}
-      >
-        {motifs.map((m) => (
-          <i key={m} aria-hidden data-hud-fx={m} className="map-hud-fx" />
-        ))}
-        {showText && (
-          <div data-map-hud-name className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
-            {participant.basicInfo.name}
-          </div>
-        )}
-        <div data-map-hud-bar data-hp-tone={down ? "down" : hpTone(ratio)} className={cn("map-hud-bar relative shrink-0", showText && "mt-px")} style={{ height: barPx }}>
-          <i data-map-hud-trail className="map-hud-trail" style={{ width }} />
-          <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
+      {showHud && (
+        <div
+          ref={shake}
+          data-map-hud-strip
+          data-hud-rim={motifs[0]}
+          className={cn("map-hud-plaque absolute bottom-0 left-[3%] flex w-[94%] max-h-full flex-col justify-end", showText ? "px-[3px] py-[2px]" : "p-px", motionAllowed && "map-hud-anim", down && "opacity-40")}
+        >
+          {motifs.map((m) => (
+            <i key={m} aria-hidden data-hud-fx={m} className="map-hud-fx" />
+          ))}
           {showText && (
-            <span className={cn("map-hud-text", exact ? "font-sans font-semibold" : "hud-sc italic", down && "line-through")} style={{ fontSize: hpFont, lineHeight: `${barPx}px` }}>
-              {text}
-            </span>
+            <div data-map-hud-name className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
+              {participant.basicInfo.name}
+            </div>
           )}
+          <div data-map-hud-bar data-hp-tone={down ? "down" : hpTone(ratio)} className={cn("map-hud-bar relative shrink-0", showText && "mt-px")} style={{ height: barPx }}>
+            <i data-map-hud-trail className="map-hud-trail" style={{ width }} />
+            <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
+            {showText && (
+              <span className={cn("map-hud-text", exact ? "font-sans font-semibold" : "hud-sc italic", down && "line-through")} style={{ fontSize: hpFont, lineHeight: `${barPx}px` }}>
+                {text}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { BattleMap } from "@/components/battle/map";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CombatStatus } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { MIN_TAP_CELL_PX } from "@/lib/utils/battle/grid";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 afterEach(() => {
@@ -74,12 +75,28 @@ describe("BattleMap", () => {
   it("fits a tall map into the container height", () => {
     avail = { width: 1000, height: 500 };
 
-    const { container } = render(<BattleMap map={{ ...square, cols: 20, rows: 40 }} participants={[]} />);
+    const { container } = render(<BattleMap map={{ ...square, cols: 10, rows: 15 }} participants={[]} />);
 
     const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
 
     expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(500);
-    expect(parseFloat(clip.style.width)).toBeCloseTo(250);
+    expect(parseFloat(clip.style.width)).toBeCloseTo(1000 / 3);
+  });
+
+  it("дрібні клітинки — карта росте до мінімальної клітинки й прокручується в обидва боки від краю", () => {
+    avail = { width: 1000, height: 500 };
+
+    const { container } = render(<BattleMap map={{ ...square, cols: 20, rows: 40 }} participants={[]} />);
+
+    const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
+
+    const outer = clip.parentElement as HTMLElement;
+
+    expect(parseFloat(clip.style.width)).toBe(20 * MIN_TAP_CELL_PX);
+    expect(parseFloat(clip.style.height)).toBe(40 * MIN_TAP_CELL_PX);
+    expect(outer.className).toContain("overflow-auto");
+    expect(outer.className).toContain("items-start");
+    expect(outer.className).toContain("justify-center");
   });
 
   describe("hud footprint", () => {
@@ -507,7 +524,7 @@ describe("BattleMap — телефон: прокрутка, дотик, коле
 
     expect(clip(container).className).toContain("touch-none");
     expect(clip(container).className).not.toContain("touch-pan-y");
-    expect(outer(container).className).toContain("overflow-y-auto");
+    expect(outer(container).className).toContain("overflow-auto");
     expect(outer(container).className).toContain("[scrollbar-gutter:stable]");
   });
 
@@ -571,7 +588,7 @@ describe("BattleMap — телефон: прокрутка, дотик, коле
     expect(parseFloat(cropped.style.left)).toBe(0);
     expect(parseFloat(cropped.style.top)).toBe(0);
     expect(parseFloat(cropped.style.width)).toBeCloseTo(parseFloat(clip(container).style.width), 3);
-    expect(outer(container).className).not.toContain("overflow-y-auto");
+    expect(outer(container).className).not.toContain("overflow-auto");
   });
 
   it("на початку ходу прокручує до поточного токена, якщо він за краєм", () => {
@@ -592,7 +609,7 @@ describe("BattleMap — телефон: прокрутка, дотик, коле
 
     rerender(<BattleMap map={tall} participants={people} view={{ currentId: "e" }} phone />);
 
-    expect(box.scrollBy).toHaveBeenCalledWith({ top: 550, behavior: "smooth" });
+    expect(box.scrollBy).toHaveBeenCalledWith({ top: 550, left: 0, behavior: "smooth" });
   });
 });
 
