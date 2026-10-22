@@ -4,8 +4,10 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
+import { writeInventoryLog } from "@/lib/server/inventory/log";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
@@ -51,8 +53,15 @@ export async function updateInventory(request: Request, campaignId: string, char
 
     let nextEquipped: EquippedItems | undefined = data.equipped as EquippedItems | undefined;
 
+    let displaced: string | undefined;
+
     if (data.equipSlot) {
-      nextEquipped = buildEquipped((current?.equipped ?? {}) as EquippedItems, data.equipSlot.slot, data.equipSlot.artifactId);
+      const equippedNow = (current?.equipped ?? {}) as EquippedItems;
+
+      const occupant = equippedNow[data.equipSlot.slot] as string | undefined;
+
+      displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
+      nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
     }
 
     if (nextEquipped) {
@@ -87,7 +96,7 @@ export async function updateInventory(request: Request, campaignId: string, char
       ...(data.silver !== undefined && { silver: data.silver }),
       ...(data.copper !== undefined && { copper: data.copper }),
       ...(nextEquipped && { equipped: nextEquipped as Prisma.InputJsonValue }),
-      ...(data.equipSlot?.artifactId && { stash: normalizeStash(current?.stash).filter((id) => id !== data.equipSlot?.artifactId) }),
+      ...(data.equipSlot && { stash: [...normalizeStash(current?.stash).filter((id) => id !== data.equipSlot?.artifactId && id !== displaced), ...(displaced ? [displaced] : [])] }),
       ...(data.backpack && { backpack: data.backpack as Prisma.InputJsonValue }),
       ...(data.items && { items: data.items as Prisma.InputJsonValue }),
     };
@@ -97,6 +106,19 @@ export async function updateInventory(request: Request, campaignId: string, char
       update: scalars,
       create: { characterId, equipped: {}, backpack: [], items: [], stash: [], ...scalars },
     });
+
+    if (data.equipSlot && displaced) {
+      await writeInventoryLog(tx, [
+        {
+          campaignId,
+          characterId,
+          actorUserId: accessResult.userId,
+          kind: InventoryLogKind.ARTIFACT_EQUIP,
+          delta: { artifactId: data.equipSlot.artifactId, slot: data.equipSlot.slot, swappedArtifactId: displaced },
+          note: null,
+        },
+      ]);
+    }
 
     return NextResponse.json(inventory);
   });
