@@ -181,12 +181,11 @@ export function UnitAttack({
                   onChange={(e) => {
                     const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0));
 
-                    const prev = attack.damageDistribution ?? [];
+                    const count = attack.maxTargets ?? 3;
 
-                    const next = [...prev];
+                    const next = Array.from({ length: count }, (_, k) => attack.damageDistribution?.[k] ?? Math.round(100 / count));
 
                     next[i] = val;
-                    while (next.length > (attack.maxTargets ?? 3)) next.pop();
                     onChange({ ...attack, damageDistribution: next });
                   }}
                 />

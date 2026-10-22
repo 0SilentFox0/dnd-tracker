@@ -85,8 +85,8 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         }}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="sp-title">Назва</Label>
-          <Input id="sp-title" value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} />
+          <Label htmlFor="sp-title">Назва *</Label>
+          <Input id="sp-title" required value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="sp-subtitle">Підзаголовок</Label>

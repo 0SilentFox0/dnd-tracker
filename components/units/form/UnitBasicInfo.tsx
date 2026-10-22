@@ -7,16 +7,18 @@ import type { Unit } from "@/types/units";
 
 type NumericKey = "level" | "armorClass" | "maxHp" | "speed" | "initiative" | "proficiencyBonus" | "minTargets" | "maxTargets";
 
-const NUMBER_FIELDS: Array<{ key: NumericKey; label: string; required?: boolean }> = [
-  { key: "level", label: "Рівень", required: true },
-  { key: "armorClass", label: "Клас броні (AC)", required: true },
-  { key: "maxHp", label: "Максимальне HP", required: true },
-  { key: "speed", label: "Швидкість", required: true },
+const NUMBER_FIELDS: Array<{ key: NumericKey; label: string; required?: boolean; min?: number; max?: number }> = [
+  { key: "level", label: "Рівень", required: true, min: 1, max: 30 },
+  { key: "armorClass", label: "Клас броні (AC)", required: true, min: 0 },
+  { key: "maxHp", label: "Максимальне HP", required: true, min: 1 },
+  { key: "speed", label: "Швидкість", required: true, min: 0 },
   { key: "initiative", label: "Ініціатива" },
-  { key: "proficiencyBonus", label: "Бонус майстерності" },
-  { key: "minTargets", label: "Мін. цілей" },
-  { key: "maxTargets", label: "Макс. цілей" },
+  { key: "proficiencyBonus", label: "Бонус майстерності", min: 0 },
+  { key: "minTargets", label: "Мін. цілей", min: 1 },
+  { key: "maxTargets", label: "Макс. цілей", min: 1 },
 ];
+
+const clamp = (value: number | undefined, min = -Infinity, max = Infinity) => (value === undefined ? value : Math.min(max, Math.max(min, value)));
 
 const GRID_SIZE_OPTIONS = [
   { value: "1", label: "1×1 — звичайна" },
@@ -35,7 +37,7 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
     <div className="grid gap-4 md:grid-cols-2">
       <div>
         <Label htmlFor="name">Назва юніта *</Label>
-        <Input id="name" value={formData.name || ""} onChange={(e) => onChange({ name: e.target.value })} required placeholder="Назва юніта" />
+        <Input id="name" value={formData.name || ""} onChange={(e) => onChange({ name: e.target.value })} required maxLength={100} placeholder="Назва юніта" />
       </div>
 
       <div>
@@ -61,8 +63,10 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
             <NumberInput
               id={field.key}
               value={formData[field.key]}
-              onChange={(value) => onChange({ [field.key]: value } as Partial<Unit>)}
+              onChange={(value) => onChange({ [field.key]: clamp(value, field.min, field.max) } as Partial<Unit>)}
               required={field.required}
+              min={field.min}
+              max={field.max}
               inputMode={field.key === "initiative" ? "text" : "numeric"}
             />
           </div>

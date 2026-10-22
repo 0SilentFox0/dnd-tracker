@@ -16,10 +16,11 @@ interface HudFormProps<T extends string> {
   onTabChange?: (tab: T) => void;
   children?: ReactNode;
   actions: ReactNode;
+  error?: string | null;
   className?: string;
 }
 
-export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, className }: HudFormProps<T>) {
+export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, error, className }: HudFormProps<T>) {
   const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
   const active = tab ?? innerTab ?? tabs?.[0]?.id;
@@ -34,7 +35,7 @@ export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange
   return (
     <form id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-1 flex-col", className)}>
       {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} keepMounted /> : <div className="px-4 py-3">{children}</div>}
-      <ActionBar className="mt-auto flex-wrap [&>*]:min-w-fit border-hud-rule bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
+      <ActionBar error={error} className="mt-auto flex-wrap [&>*]:min-w-fit border-hud-rule bg-[#110e0b]/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
     </form>
   );
 }

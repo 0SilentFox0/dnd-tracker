@@ -63,3 +63,5 @@ export function getMainSkillNameVariants(canonicalName: string): string[] {
 
   return [canonicalName, ...aliases];
 }
+
+export const MAIN_SKILL_NAME_MAX = 100;

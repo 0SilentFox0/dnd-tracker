@@ -47,6 +47,7 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
         onOpenChange={list.createDialog.setOpen}
         campaignId={campaignId}
         onCreateRace={list.actions.createRace}
+        status={list.createDialog.status}
       />
     </HudPage>
   );
