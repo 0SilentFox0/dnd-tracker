@@ -59,6 +59,15 @@ describe("TrackGroups", () => {
     expect(queryByDisplayValue("Ельфи - Битва")).toBeNull();
   });
 
+  it("«Згорнути всі» ховає всі групи, повторне натискання розгортає", () => {
+    const { getByRole, queryAllByRole } = setup();
+
+    fireEvent.click(getByRole("button", { name: "Згорнути всі" }));
+    expect(queryAllByRole("listitem")).toHaveLength(0);
+    fireEvent.click(getByRole("button", { name: "Розгорнути всі" }));
+    expect(queryAllByRole("listitem")).toHaveLength(4);
+  });
+
   it("пошук звужує список", () => {
     const { getByLabelText, queryByRole } = setup();
 
