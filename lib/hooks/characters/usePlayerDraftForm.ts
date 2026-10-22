@@ -3,9 +3,10 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
+import { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 import { type RollStep, useRollReveal } from "./useRollReveal";
 
-import { createDraft, generateBackstory, getBackstoryAvailability, updateDraft } from "@/lib/api/characters";
+import { createDraft, generateBackstory, generateDraftAvatar, getBackstoryAvailability, updateDraft } from "@/lib/api/characters";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { HERO_ARCHETYPE_KEYS, HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
@@ -17,6 +18,7 @@ import {
   ARCHETYPE_CLASS,
   ARCHETYPE_PRIMARY,
   assignStandardArray,
+  createRng,
   generateBackstory as generateLocalBackstory,
   generateCharacter,
   generateName,
@@ -27,7 +29,7 @@ import {
 } from "@/lib/utils/characters/generate";
 import type { DraftInput } from "@/types/characters";
 
-export type RollKey = "race" | "archetype" | "class" | "alignment" | "name" | "background" | AbilityKey;
+export type RollKey = "race" | "avatar" | "archetype" | "class" | "alignment" | "name" | "background" | AbilityKey;
 
 const standardScores = (): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k, i) => [k, STANDARD_ARRAY[i]])) as AbilityScores;
 
@@ -82,8 +84,27 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const backgroundStep = (background: string): RollStep<RollKey> => ({ key: "background", pool: () => "", final: background });
 
+  const portraitPool = useCallback((race: string) => queryClient.getQueryData<string[]>(characterKeys.draftPortraits(campaignId, race)) ?? [], [queryClient, campaignId]);
+
+  useDraftPortraits(campaignId, values.race);
+
+  const avatarStep = (url: string, pool: string[]): RollStep<RollKey> => ({ key: "avatar", pool: () => pick(Math.random, pool), final: url });
+
   const all = useCallback(() => {
-    const g = generateCharacter({ races: raceNames, seed: seedNow() });
+    const seed = seedNow();
+
+    const g = generateCharacter({ races: raceNames, seed });
+
+    const pool = portraitPool(g.race);
+
+    const portrait = pool.length ? pick(createRng(seed), pool) : undefined;
+
+    if (!pool.length && g.race) {
+      queryClient
+        .fetchQuery(draftPortraitsQuery(campaignId, g.race))
+        .then((loaded) => loaded.length && setValues((prev) => (prev.race === g.race ? { ...prev, avatar: pick(createRng(seed), loaded) } : prev)))
+        .catch(() => undefined);
+    }
 
     setValues((prev) => ({
       ...prev,
@@ -97,10 +118,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       primaryAbility: g.primaryAbility,
       background: g.background,
       goals: g.goals,
+      ...(portrait && { avatar: portrait }),
     }));
 
     reveal.start([
       raceStep(g.race),
+      ...(portrait ? [avatarStep(portrait, pool)] : []),
       { key: "archetype", pool: () => ARCHETYPE_LABEL[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: ARCHETYPE_LABEL[g.archetype] },
       { key: "class", pool: () => ARCHETYPE_CLASS[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: g.class },
       { key: "alignment", pool: () => pick(Math.random, ALIGNMENTS), final: g.alignment },
@@ -108,7 +131,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       ...scoreSteps(g.scores),
       backgroundStep(g.background),
     ]);
-  }, [raceNames, raceStep, reveal]);
+  }, [raceNames, raceStep, reveal, portraitPool, queryClient, campaignId]);
 
   const name = useCallback(() => {
     const next = generateName(values.race, Math.random);
@@ -134,6 +157,19 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     reveal.start([backgroundStep(next.background)]);
   }, [reveal, values.archetype, values.name, values.race]);
 
+  const portrait = useCallback(() => {
+    const pool = portraitPool(values.race);
+
+    const options = pool.length > 1 ? pool.filter((url) => url !== values.avatar) : pool;
+
+    if (!options.length) return;
+
+    const next = pick(createRng(seedNow()), options);
+
+    setValues((prev) => ({ ...prev, avatar: next }));
+    reveal.start([avatarStep(next, pool)]);
+  }, [portraitPool, reveal, values.race, values.avatar]);
+
   const availability = useQuery({ queryKey: characterKeys.backstoryAvailability(campaignId), queryFn: () => getBackstoryAvailability(campaignId), staleTime: 5 * 60_000 });
 
   const aiMutation = useMutation({
@@ -143,6 +179,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       setValues((prev) => ({ ...prev, background: res.background, goals: res.goals }));
       reveal.start([backgroundStep(res.background)]);
     },
+  });
+
+  const avatarMutation = useMutation({
+    mutationFn: () => generateDraftAvatar(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class }),
+    onError: (error) => notify(error.message || "Не вдалося згенерувати аватар"),
+    onSuccess: (res) => setValues((prev) => ({ ...prev, avatar: res.url })),
   });
 
   const submitMutation = useMutation({
@@ -175,8 +217,13 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   return {
     form: { values, set, setScore, method: values.method, setMethod },
-    generate: { all, name, scores, backstory },
-    ai: { available: availability.data?.available === true, run: () => aiMutation.mutate(), isPending: aiMutation.isPending },
+    generate: { all, name, scores, backstory, portrait },
+    ai: {
+      available: availability.data?.available === true,
+      run: () => aiMutation.mutate(),
+      isPending: aiMutation.isPending,
+      avatar: { available: availability.data?.image === true, run: () => avatarMutation.mutate(), isPending: avatarMutation.isPending },
+    },
     submit: { run: () => submitMutation.mutate(), isPending: submitMutation.isPending, error: submitMutation.error instanceof Error ? submitMutation.error.message : null },
     scoreStatus,
     reveal,

@@ -113,7 +113,11 @@ export const createDraft = (campaignId: string, body: DraftInput) => campaignPos
 
 export const updateDraft = (campaignId: string, characterId: string, body: DraftInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
 
-export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ available: boolean }>(campaignId, "/characters/draft/backstory");
+export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ available: boolean; image: boolean }>(campaignId, "/characters/draft/backstory");
+
+export const getDraftPortraits = (campaignId: string, race: string) => campaignGet<{ portraits: string[] }>(campaignId, `/characters/draft/portraits?race=${encodeURIComponent(race)}`);
+
+export const generateDraftAvatar = (campaignId: string, body: { name: string; race: string; archetype: string; class: string }) => campaignPost<{ url: string }>(campaignId, "/characters/draft/avatar", body);
 
 export const generateBackstory = (campaignId: string, body: { name: string; race: string; archetype: string; class: string; background?: string }) =>
   campaignPost<{ background: string; goals: Array<{ text: string; kind: GoalKind }> }>(campaignId, "/characters/draft/backstory", body);

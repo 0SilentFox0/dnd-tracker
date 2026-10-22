@@ -8,6 +8,7 @@ export { useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterTokens } from "./useCharacterTokens";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
+export { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 export { useEquipArtifact } from "./useEquipArtifact";
 export { type PlayerDraftFormOptions, type RollKey, usePlayerDraftForm } from "./usePlayerDraftForm";
 export { useReviewCharacter } from "./useReviewCharacter";

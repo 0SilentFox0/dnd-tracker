@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import { createElement, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getDraftPortraits } from "@/lib/api/characters";
 import { usePlayerDraftForm } from "@/lib/hooks/characters/usePlayerDraftForm";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -12,7 +13,9 @@ vi.mock("@/lib/api/characters", () => ({
   createDraft: vi.fn(),
   updateDraft: vi.fn(),
   generateBackstory: vi.fn(),
-  getBackstoryAvailability: vi.fn().mockResolvedValue({ available: false }),
+  generateDraftAvatar: vi.fn(),
+  getBackstoryAvailability: vi.fn().mockResolvedValue({ available: false, image: false }),
+  getDraftPortraits: vi.fn(),
 }));
 
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [{ name: "Люди" }, { name: "Орки" }] }) }));
@@ -75,5 +78,32 @@ describe("usePlayerDraftForm", () => {
     act(() => result.current.form.setScore("strength", 16));
 
     expect(result.current.scoreStatus.valid).toBe(false);
+  });
+
+  describe("generate.portrait", () => {
+    it("picks a portrait from the race pool", async () => {
+      vi.mocked(getDraftPortraits).mockResolvedValue({ portraits: ["https://x/a.webp", "https://x/b.webp"] });
+
+      const { result } = setup();
+
+      act(() => result.current.form.set("race", "Люди"));
+      await waitFor(() => {
+        act(() => result.current.generate.portrait());
+        expect(result.current.form.values.avatar).toMatch(/^https:\/\/x\/[ab]\.webp$/);
+      });
+    });
+
+    it("empty pool leaves the avatar unchanged", async () => {
+      vi.mocked(getDraftPortraits).mockResolvedValue({ portraits: [] });
+
+      const { result } = setup();
+
+      act(() => result.current.form.set("avatar", "https://x/own.png"));
+      act(() => result.current.form.set("race", "Люди"));
+      await waitFor(() => expect(getDraftPortraits).toHaveBeenCalled());
+      act(() => result.current.generate.portrait());
+
+      expect(result.current.form.values.avatar).toBe("https://x/own.png");
+    });
   });
 });

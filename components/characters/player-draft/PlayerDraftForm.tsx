@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AbilityScoresPicker } from "./AbilityScoresPicker";
 import { RollingField } from "./RollingField";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -129,7 +130,23 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                 </RollingField>
 
                 <div className="sm:col-span-2">
-                  <ImageUpload label="Фото персонажа" value={values.avatar ?? ""} onChange={(v) => set("avatar", v)} fallbackText={values.name} maxSide={1200} />
+                  {spinning("avatar") ? (
+                    <div aria-hidden data-rolling className="hud-roll-field">
+                      <EntityIcon src={String(shown("avatar"))} name={values.name} size={64} className="size-16 rounded-lg border text-xl" />
+                    </div>
+                  ) : (
+                    <ImageUpload label="Фото персонажа" value={values.avatar ?? ""} onChange={(v) => set("avatar", v)} fallbackText={values.name} maxSide={1200} />
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button type="button" size="sm" variant="outline" disabled={busy || !values.race} onClick={generate.portrait}>
+                      🎲 Інший портрет
+                    </Button>
+                    {ai.avatar.available && (
+                      <Button type="button" size="sm" variant="outline" disabled={busy || ai.avatar.isPending || !values.name || !values.race} onClick={ai.avatar.run}>
+                        {ai.avatar.isPending ? "Малюю..." : "🎨 Згенерувати аватар (AI)"}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </HudSection>
