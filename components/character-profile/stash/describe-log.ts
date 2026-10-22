@@ -4,6 +4,7 @@ import type { InventoryLogEntry, Purse } from "@/types/inventory";
 const ARTIFACT_VERB: Record<string, string> = {
   artifact_stash: "знято в підсумок",
   artifact_equip: "вдягнено",
+  artifact_unequip: "знято в підсумок (DM)",
   artifact_grant: "отримано від DM",
   artifact_revoke: "забрано DM",
   artifact_transfer: "передано",

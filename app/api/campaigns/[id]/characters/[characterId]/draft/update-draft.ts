@@ -19,7 +19,7 @@ export async function updateDraft(request: Request, campaignId: string, characte
 
   if (access instanceof NextResponse) return access;
 
-  const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true, controlledBy: true, status: true, race: true } }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
+  const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true, controlledBy: true, status: true, race: true, goals: true } }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
 
   if (character instanceof NextResponse) return character;
 
@@ -43,7 +43,7 @@ export async function updateDraft(request: Request, campaignId: string, characte
 
   const updated = await prisma.character.update({
     where: { id: characterId },
-    data: { ...draftFields(data), avatar: avatar.avatar ?? undefined, ...(slots && { spellSlots: slots }) },
+    data: { ...draftFields(data, character.goals), avatar: avatar.avatar, ...(slots && { spellSlots: slots }) },
   });
 
   return NextResponse.json(updated);

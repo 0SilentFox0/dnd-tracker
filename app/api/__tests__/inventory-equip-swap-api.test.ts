@@ -47,6 +47,17 @@ describe("DM equip via inventory PATCH", () => {
     });
   });
 
+  it("clearing a slot moves the occupant to the stash and logs an unequip", async () => {
+    await patch({ equipSlot: { slot: "helmet", artifactId: null } });
+
+    const { update } = tx.characterInventory.upsert.mock.calls[0][0];
+
+    expect(update.stash).toEqual(["s1", "h1"]);
+    expect(tx.inventoryLog.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({ kind: "artifact_unequip", delta: { artifactId: "h1", slot: "helmet" } })],
+    });
+  });
+
   it("an empty slot displaces nothing and writes no log", async () => {
     await patch({ equipSlot: { slot: "boots", artifactId: "s1" } });
 

@@ -16,6 +16,7 @@ export const InventoryLogKind = {
   ITEM_REMOVE: "item_remove",
   ARTIFACT_STASH: "artifact_stash",
   ARTIFACT_EQUIP: "artifact_equip",
+  ARTIFACT_UNEQUIP: "artifact_unequip",
   ARTIFACT_GRANT: "artifact_grant",
   ARTIFACT_REVOKE: "artifact_revoke",
   ARTIFACT_TRANSFER: "artifact_transfer",

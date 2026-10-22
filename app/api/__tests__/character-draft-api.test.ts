@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
@@ -48,6 +49,7 @@ describe("player draft API", () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u1", "player"));
     vi.mocked(apiAuth.requireDM).mockResolvedValue(access("dm", "dm"));
     tx.character.count.mockResolvedValue(0);
+    vi.mocked(prisma.character.count).mockResolvedValue(0);
     tx.character.create.mockImplementation(async ({ data }: { data: object }) => ({ id: "new", ...data }));
     gen.checkRateLimit.mockResolvedValue({ allowed: true, count: 1, limit: 10, retryAfterSeconds: 600 });
   });
@@ -70,6 +72,15 @@ describe("player draft API", () => {
       expect(res.status).toBe(400);
       expect((await res.json()).error).toBe(API_ERRORS.DRAFT_ALREADY_EXISTS);
       expect(tx.character.create).not.toHaveBeenCalled();
+    });
+
+    it("відмова до завантаження аватара: другий персонаж не лишає файлів", async () => {
+      vi.mocked(prisma.character.count).mockResolvedValue(1);
+
+      const res = await (await createRoute()).POST(json({ ...draft, avatar: "data:image/png;base64,AAAA" }), { params: Promise.resolve({ id: "camp" }) });
+
+      expect(res.status).toBe(400);
+      expect(resolveAvatarForPersistence).not.toHaveBeenCalled();
     });
 
     it("характеристики 18/18/18 — 400", async () => {
@@ -106,6 +117,37 @@ describe("player draft API", () => {
       expect(data.alignment).toBeNull();
       expect(data.background).toBeNull();
       expect(data).not.toHaveProperty("spellSlots");
+    });
+
+    it("зберігає id незмінених цілей і цілі DM, нові отримують свіжі id", async () => {
+      vi.mocked(prisma.character.findUnique).mockResolvedValue({
+        id: "a",
+        campaignId: "camp",
+        controlledBy: "u1",
+        status: "pending",
+        race: "Ельф",
+        goals: [
+          { id: "g1", text: "Помста", kind: "main", status: "active", author: "player" },
+          { id: "g2", text: "Знайти брата", kind: "personal", status: "active", author: "dm" },
+        ],
+      } as never);
+
+      await patchDraft({ ...draft, goals: [{ text: "Помста", kind: "main" }, { text: "Нова", kind: "inner" }] });
+
+      const goals = (vi.mocked(prisma.character.update).mock.calls[0][0].data as { goals: Array<{ id: string; text: string; author: string }> }).goals;
+
+      expect(goals.map((g) => [g.text, g.author])).toEqual([["Помста", "player"], ["Нова", "player"], ["Знайти брата", "dm"]]);
+      expect(goals[0].id).toBe("g1");
+      expect(goals[1].id).not.toBe("g1");
+      expect(goals[2].id).toBe("g2");
+    });
+
+    it("порожній avatar очищає, відсутній — не чіпає", async () => {
+      await patchDraft({ ...draft, avatar: "" });
+      expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toHaveProperty("avatar", "");
+
+      await patchDraft(draft);
+      expect(vi.mocked(prisma.character.update).mock.calls[1][0].data.avatar).toBeUndefined();
     });
 
     it("зміна раси перераховує слоти заклинань", async () => {

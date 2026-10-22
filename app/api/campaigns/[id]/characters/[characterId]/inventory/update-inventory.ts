@@ -113,8 +113,10 @@ export async function updateInventory(request: Request, campaignId: string, char
           campaignId,
           characterId,
           actorUserId: accessResult.userId,
-          kind: InventoryLogKind.ARTIFACT_EQUIP,
-          delta: { artifactId: data.equipSlot.artifactId, slot: data.equipSlot.slot, swappedArtifactId: displaced },
+          kind: data.equipSlot.artifactId ? InventoryLogKind.ARTIFACT_EQUIP : InventoryLogKind.ARTIFACT_UNEQUIP,
+          delta: data.equipSlot.artifactId
+            ? { artifactId: data.equipSlot.artifactId, slot: data.equipSlot.slot, swappedArtifactId: displaced }
+            : { artifactId: displaced, slot: data.equipSlot.slot },
           note: null,
         },
       ]);

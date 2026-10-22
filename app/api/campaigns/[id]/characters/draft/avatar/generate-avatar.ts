@@ -37,7 +37,7 @@ export async function generateDraftAvatar(request: Request, campaignId: string):
   const prompt = `Fantasy character portrait in the style of Heroes of Might and Magic V: ${data.name}, a ${data.race} ${data.class} (${heroArchetype(data.archetype).name}). Head-and-shoulders bust, dramatic painterly lighting, no text, no letters, no watermark.`;
 
   try {
-    return NextResponse.json(await generateAvatarImage({ campaignId, userId: picked.userId, prompt, provider: picked.provider, model: picked.model }));
+    return NextResponse.json(await generateAvatarImage({ campaignId, userId: picked.userId, prompt, provider: picked.provider, model: picked.model, abortSignal: request.signal }));
   } catch (error) {
     if (error instanceof AiImageError) return errorResponse(error.message, error.status);
 

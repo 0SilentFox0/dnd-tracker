@@ -189,7 +189,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const submitMutation = useMutation({
     mutationFn: () => {
-      const body: DraftInput = { ...values, alignment: values.alignment || undefined, background: values.background || undefined, avatar: values.avatar || undefined };
+      const body: DraftInput = { ...values, alignment: values.alignment || undefined, background: values.background || undefined, avatar: values.avatar };
 
       return characterId ? updateDraft(campaignId, characterId, body) : createDraft(campaignId, body);
     },

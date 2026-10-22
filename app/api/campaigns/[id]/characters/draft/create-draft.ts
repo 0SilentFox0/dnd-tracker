@@ -24,6 +24,12 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   const role = access.campaign.members.find((m) => m.userId === access.userId)?.role ?? "";
 
+  const preCount = await prisma.character.count({ where: { campaignId, controlledBy: access.userId, type: CharacterType.PLAYER } });
+
+  const preRejection = draftRejection({ role, existing: preCount, method: data.method, scores: data });
+
+  if (preRejection) return errorResponse(preRejection, 400);
+
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
