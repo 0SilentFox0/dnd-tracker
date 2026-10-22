@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { campaignIdFromChecklistKey, checklistKey, FLAG_KEY_RE, HIDE_ALL_HINTS_KEY, hintKey, WHATS_NEW_KEY } from "@/lib/onboarding/flag-keys";
+import { campaignIdFromChecklistKey, checklistKey, FLAG_KEY_RE, HIDE_ALL_HINTS_KEY, hintKey, PLAYER_SHEET_SEEN_KEY, WHATS_NEW_KEY } from "@/lib/onboarding/flag-keys";
 
 describe("flag keys", () => {
   it("дозволені ключі", () => {
-    for (const key of [hintKey("dm.races"), HIDE_ALL_HINTS_KEY, WHATS_NEW_KEY, checklistKey("cmabc123")]) expect(FLAG_KEY_RE.test(key)).toBe(true);
+    for (const key of [hintKey("dm.races"), HIDE_ALL_HINTS_KEY, WHATS_NEW_KEY, PLAYER_SHEET_SEEN_KEY, checklistKey("cmabc123")]) expect(FLAG_KEY_RE.test(key)).toBe(true);
   });
 
   it("сміття відхиляється", () => {

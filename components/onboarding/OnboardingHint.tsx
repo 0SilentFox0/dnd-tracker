@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Lightbulb, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useOnboardingHint } from "@/lib/hooks/onboarding";
+import { useMarkPlayerSheetSeen, useOnboardingHint } from "@/lib/hooks/onboarding";
 import { HINTS } from "@/lib/onboarding/hints";
 import { cn } from "@/lib/utils";
 
@@ -32,4 +32,11 @@ export function OnboardingHint({ id, className }: { id: string; className?: stri
       </Button>
     </aside>
   );
+}
+
+/** Owner of an approved hero: the hint plus the «sheet seen» step of the player checklist. */
+export function PlayerSheetHint({ className }: { className?: string }) {
+  useMarkPlayerSheetSeen();
+
+  return <OnboardingHint id="player.character" className={className} />;
 }

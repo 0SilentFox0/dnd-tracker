@@ -1,6 +1,5 @@
 import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
-import { readCampaignOnboarding } from "@/app/api/campaigns/[id]/onboarding/read-onboarding";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
@@ -13,9 +12,8 @@ import { prisma } from "@/lib/db";
 import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
-import { readOkJson } from "@/lib/utils/api/read-json";
+import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
 import { pluralUk } from "@/lib/utils/common/plural";
-import type { CampaignOnboardingResponse } from "@/types/onboarding";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
 
@@ -32,9 +30,8 @@ export default async function CampaignDetailPage({
 
   const [pendingDrafts, onboarding] = await Promise.all([
     isDM ? prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0,
-    readCampaignOnboarding({ id, known: { userId: user.id, isDM } }).then((res) => readOkJson<CampaignOnboardingResponse>(res))
-      // онбординг не має валити сторінку кампанії
-      .catch(() => null),
+    // онбординг не має валити сторінку кампанії
+    readCampaignOnboarding(id, user.id, isDM).catch(() => null),
   ]);
 
   const dmTiles = [

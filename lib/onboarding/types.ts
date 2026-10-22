@@ -19,7 +19,7 @@ export interface DmFacts {
 export interface PlayerFacts {
   ownCharacter: "none" | "pending" | "active";
   sheetSeen: boolean;
-  inActiveBattle: boolean;
+  joinedBattle: boolean;
 }
 
 export type OnboardingFacts = { role: "dm"; dm: DmFacts } | { role: "player"; player: PlayerFacts };
@@ -28,7 +28,7 @@ export interface OnboardingStep<F> {
   id: string;
   title: string;
   description: string | ((facts: F) => string);
-  href: (campaignId: string) => string;
+  href?: (campaignId: string) => string;
   helpSlug?: string;
   optional?: boolean;
   informational?: boolean;

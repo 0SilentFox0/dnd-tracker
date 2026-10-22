@@ -38,7 +38,7 @@ describe("DM_STEPS", () => {
 });
 
 describe("PLAYER_STEPS", () => {
-  const base: PlayerFacts = { ownCharacter: "none", sheetSeen: false, inActiveBattle: false };
+  const base: PlayerFacts = { ownCharacter: "none", sheetSeen: false, joinedBattle: false };
 
   it("чернетка на схваленні — крок героя ще не виконано, опис про очікування", () => {
     const step = PLAYER_STEPS.find((s) => s.id === "character")!;
@@ -49,7 +49,15 @@ describe("PLAYER_STEPS", () => {
   });
 
   it("аркуш і бій", () => {
-    expect(done(PLAYER_STEPS, { ownCharacter: "active", sheetSeen: true, inActiveBattle: true })).toEqual(["character", "sheet", "battle"]);
+    expect(done(PLAYER_STEPS, { ownCharacter: "active", sheetSeen: true, joinedBattle: true })).toEqual(["character", "sheet", "battle"]);
+  });
+
+  it("герой уже бився — аркуш вважається переглянутим", () => {
+    expect(done(PLAYER_STEPS, { ownCharacter: "active", sheetSeen: false, joinedBattle: true })).toEqual(["character", "sheet", "battle"]);
+  });
+
+  it("крок бою без «Перейти» — кнопка бою з'являється в хедері сама", () => {
+    expect(PLAYER_STEPS.find((s) => s.id === "battle")?.href).toBeUndefined();
   });
 
   it("показ — інформаційний, не рахується", () => {

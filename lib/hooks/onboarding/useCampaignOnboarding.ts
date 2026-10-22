@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { onboardingKeys } from "./keys";
-import { useOnboardingFlags } from "./useOnboardingFlags";
+import { useSetOnboardingFlag } from "./useOnboardingFlags";
 
 import { getCampaignOnboarding } from "@/lib/api/onboarding";
 import { CHECKLIST_HIDDEN, checklistKey } from "@/lib/onboarding/flag-keys";
@@ -14,7 +14,7 @@ import type { CampaignOnboardingResponse } from "@/types/onboarding";
 export function useCampaignOnboarding(campaignId: string) {
   const qc = useQueryClient();
 
-  const { setFlag } = useOnboardingFlags();
+  const setFlag = useSetOnboardingFlag();
 
   const { data } = useQuery({ queryKey: onboardingKeys.campaign(campaignId), queryFn: () => getCampaignOnboarding(campaignId), staleTime: ENTITY_STALE_MS, retry: false });
 

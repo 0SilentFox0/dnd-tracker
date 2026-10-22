@@ -1,32 +1,23 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createWrapper } from "@/components/onboarding/__tests__/onboarding-test-utils";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import * as api from "@/lib/api/onboarding";
 
-vi.mock("@/lib/api/onboarding", () => ({
-  getOnboardingFlags: vi.fn(async () => ({ flags: {}, audiences: ["dm"] })),
-  setOnboardingFlag: vi.fn(async () => ({ ok: true })),
-  resetOnboarding: vi.fn(),
-  getCampaignOnboarding: vi.fn(),
-}));
+vi.mock("@/lib/api/onboarding", async () => (await import("@/components/onboarding/__tests__/onboarding-test-utils")).onboardingApiMock());
 
 const step = (id: string, done: boolean, optional = false) => ({ id, title: `Крок ${id}`, description: "опис", href: `/campaigns/c/${id}`, helpSlug: "dm-quickstart", optional, informational: false, done });
 
-const renderIt = () => {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-  const Wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-
-  return render(<OnboardingChecklist campaignId="c" />, { wrapper: Wrapper });
-};
+const renderIt = () => render(<OnboardingChecklist campaignId="c" />, { wrapper: createWrapper() });
 
 afterEach(cleanup);
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(api.getOnboardingFlags).mockResolvedValue({ flags: {}, audiences: ["dm"] });
+});
 
 describe("OnboardingChecklist", () => {
   it("open — прогрес, кроки, «Як це?» веде в довідку", async () => {
@@ -38,6 +29,14 @@ describe("OnboardingChecklist", () => {
     expect(screen.getByText("Більше можливостей")).toBeTruthy();
     expect(screen.getAllByRole("link", { name: "Як це?" })[0].getAttribute("href")).toBe("/help/dm-quickstart");
     expect(screen.getAllByRole("link", { name: "Перейти" })[0].getAttribute("href")).toBe("/campaigns/c/b");
+  });
+
+  it("крок без href — без «Перейти»", async () => {
+    vi.mocked(api.getCampaignOnboarding).mockResolvedValue({ role: "player", state: "open", steps: [{ ...step("battle", false), href: undefined }], requiredDone: 0, requiredTotal: 1 });
+    renderIt();
+
+    expect(await screen.findByText("Крок battle")).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Перейти" })).toBeNull();
   });
 
   it("collapsed — один рядок", async () => {

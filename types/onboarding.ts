@@ -1,5 +1,8 @@
+import type { z } from "zod";
+
 import type { StepStatus } from "@/lib/onboarding/progress";
 import type { ChecklistState, OnboardingFlags, OnboardingRole } from "@/lib/onboarding/types";
+import type { resetOnboardingSchema, setOnboardingFlagSchema } from "@/lib/schemas/onboarding";
 
 export interface OnboardingFlagsResponse {
   flags: OnboardingFlags;
@@ -14,6 +17,6 @@ export interface CampaignOnboardingResponse {
   requiredTotal: number;
 }
 
-export type SetFlagBody = { key: string; value?: string | null };
+export type SetFlagBody = z.input<typeof setOnboardingFlagSchema>;
 
-export type ResetScope = "hints" | "checklists";
+export type ResetScope = z.infer<typeof resetOnboardingSchema>["scope"];

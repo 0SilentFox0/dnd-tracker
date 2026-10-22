@@ -1,27 +1,16 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createWrapper } from "@/components/onboarding/__tests__/onboarding-test-utils";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import * as api from "@/lib/api/onboarding";
 import { HINTS } from "@/lib/onboarding/hints";
 
-vi.mock("@/lib/api/onboarding", () => ({
-  getOnboardingFlags: vi.fn(),
-  setOnboardingFlag: vi.fn(async () => ({ ok: true })),
-  resetOnboarding: vi.fn(),
-  getCampaignOnboarding: vi.fn(),
-}));
+vi.unmock("@/components/onboarding/OnboardingHint");
+vi.mock("@/lib/api/onboarding", async () => (await import("@/components/onboarding/__tests__/onboarding-test-utils")).onboardingApiMock());
 
-const renderIt = (id = "dm.races") => {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-  const Wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-
-  return render(<OnboardingHint id={id} />, { wrapper: Wrapper });
-};
+const renderIt = (id = "dm.races") => render(<OnboardingHint id={id} />, { wrapper: createWrapper() });
 
 afterEach(cleanup);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DM_STEPS, PLAYER_SHEET_HINT_ID, PLAYER_STEPS } from "@/lib/onboarding/checklists";
+import { DM_STEPS, PLAYER_STEPS } from "@/lib/onboarding/checklists";
 import { FLAG_KEY_RE, hintKey } from "@/lib/onboarding/flag-keys";
 import { getHelpArticle, HELP_ARTICLES } from "@/lib/onboarding/help";
 import { HINTS } from "@/lib/onboarding/hints";
@@ -27,10 +27,6 @@ describe("onboarding registry", () => {
     const slugs = [...DM_STEPS, ...PLAYER_STEPS, ...Object.values(HINTS)].map((x) => x.helpSlug).filter((s): s is string => !!s);
 
     for (const slug of slugs) expect(getHelpArticle(slug), slug).toBeDefined();
-  });
-
-  it("підказка аркуша гравця існує — від неї залежить крок чекліста", () => {
-    expect(HINTS[PLAYER_SHEET_HINT_ID]?.audience).toBe("player");
   });
 
   it("«Що нового» відсортовано від новіших", () => {

@@ -5,9 +5,8 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import { PLAYER_SHEET_HINT_ID } from "@/lib/onboarding/checklists";
-import { HIDE_ALL_HINTS_KEY, hintKey } from "@/lib/onboarding/flag-keys";
-import type { DmFacts, OnboardingFacts } from "@/lib/onboarding/types";
+import { PLAYER_SHEET_SEEN_KEY } from "@/lib/onboarding/flag-keys";
+import type { DmFacts, OnboardingFacts, OnboardingFlags } from "@/lib/onboarding/types";
 
 // один запит замість 11 count: на Vercel connection_limit = 1, тож окремі count ішли б послідовно
 async function readDmFacts(campaignId: string, userId: string): Promise<DmFacts> {
@@ -29,7 +28,7 @@ async function readDmFacts(campaignId: string, userId: string): Promise<DmFacts>
   return row;
 }
 
-type PlayerRow = { activeCharacter: number; pendingCharacter: number; inActiveBattle: number };
+type PlayerRow = { activeCharacter: number; pendingCharacter: number; joinedBattle: number };
 
 async function readPlayerRow(campaignId: string, userId: string): Promise<PlayerRow> {
   const [row] = await prisma.$queryRaw<PlayerRow[]>(Prisma.sql`
@@ -37,13 +36,13 @@ async function readPlayerRow(campaignId: string, userId: string): Promise<Player
       (SELECT count(*)::int FROM characters WHERE "campaignId" = ${campaignId} AND "controlledBy" = ${userId} AND type = ${CharacterType.PLAYER} AND status = ${CharacterStatus.ACTIVE}) AS "activeCharacter",
       (SELECT count(*)::int FROM characters WHERE "campaignId" = ${campaignId} AND "controlledBy" = ${userId} AND status = ${CharacterStatus.PENDING}) AS "pendingCharacter",
       (SELECT count(*)::int FROM battle_participants p JOIN battle_scenes b ON b.id = p."battleId"
-        WHERE b."campaignId" = ${campaignId} AND b.status = ${BattleStatus.ACTIVE} AND p."controlledBy" = ${userId}) AS "inActiveBattle"
+        WHERE b."campaignId" = ${campaignId} AND b.status IN (${BattleStatus.ACTIVE}, ${BattleStatus.COMPLETED}) AND p."controlledBy" = ${userId}) AS "joinedBattle"
   `);
 
   return row;
 }
 
-export async function readOnboardingFacts(campaignId: string, userId: string, isDM: boolean, flagKeys: Set<string>): Promise<OnboardingFacts> {
+export async function readOnboardingFacts(campaignId: string, userId: string, isDM: boolean, flags: OnboardingFlags): Promise<OnboardingFacts> {
   if (isDM) return { role: "dm", dm: await readDmFacts(campaignId, userId) };
 
   const row = await readPlayerRow(campaignId, userId);
@@ -52,8 +51,8 @@ export async function readOnboardingFacts(campaignId: string, userId: string, is
     role: "player",
     player: {
       ownCharacter: row.activeCharacter > 0 ? "active" : row.pendingCharacter > 0 ? "pending" : "none",
-      sheetSeen: flagKeys.has(hintKey(PLAYER_SHEET_HINT_ID)) || flagKeys.has(HIDE_ALL_HINTS_KEY),
-      inActiveBattle: row.inActiveBattle > 0,
+      sheetSeen: PLAYER_SHEET_SEEN_KEY in flags,
+      joinedBattle: row.joinedBattle > 0,
     },
   };
 }

@@ -3,7 +3,6 @@ import { renderToString } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/onboarding/OnboardingHint", () => ({ OnboardingHint: () => null }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 const media = vi.hoisted(() => ({ wide: false }));

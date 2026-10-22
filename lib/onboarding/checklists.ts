@@ -1,7 +1,5 @@
 import type { DmFacts, OnboardingStep, PlayerFacts } from "@/lib/onboarding/types";
 
-export const PLAYER_SHEET_HINT_ID = "player.character";
-
 const dm = (campaignId: string, path: string) => `/campaigns/${campaignId}/dm/${path}`;
 
 export const DM_STEPS: OnboardingStep<DmFacts>[] = [
@@ -17,7 +15,7 @@ export const DM_STEPS: OnboardingStep<DmFacts>[] = [
     isDone: (f) => f.activePlayerCharacters > 0,
   },
   { id: "battle-prepare", title: "Підготуй бій", description: "Збери сцену бою: сторони, юніти, мапа. Баланс підкаже, чи бій чесний.", href: (c) => dm(c, "battles"), helpSlug: "dm-battle", isDone: (f) => f.battles > 0 },
-  { id: "battle-run", title: "Проведи перший бій", description: "Запусти бій — гравці побачать кнопку «Приєднатися» в хедері.", href: (c) => dm(c, "battles"), helpSlug: "dm-battle", isDone: (f) => f.battlesStarted > 0 },
+  { id: "battle-run", title: "Проведи перший бій", description: "Запусти бій — у гравців у хедері з'явиться кнопка бою.", href: (c) => dm(c, "battles"), helpSlug: "dm-battle", isDone: (f) => f.battlesStarted > 0 },
   { id: "scenario", title: "Напиши сценарій", description: "Сцени, нотатки майстра й біографії героїв в одному рукописі.", href: (c) => dm(c, "scenario"), helpSlug: "dm-scenario-show", optional: true, isDone: (f) => f.scenarioPages > 0 },
   { id: "show", title: "Підготуй показ сцен", description: "Слайди з музикою, які гравці бачать на своїх екранах.", href: (c) => dm(c, "show"), helpSlug: "dm-scenario-show", optional: true, isDone: (f) => f.decks > 0 },
   { id: "music", title: "Додай музику бою", description: "Бібліотека треків для плеєра в бою.", href: (c) => dm(c, "music"), helpSlug: "dm-battle", optional: true, isDone: (f) => f.tracks > 0 },
@@ -33,7 +31,7 @@ export const PLAYER_STEPS: OnboardingStep<PlayerFacts>[] = [
     helpSlug: "player-quickstart",
     isDone: (f) => f.ownCharacter === "active",
   },
-  { id: "sheet", title: "Ознайомся з аркушем героя", description: "Характеристики, скіли, заклинання, артефакти й прокачка.", href: (c) => `/campaigns/${c}/character`, helpSlug: "player-quickstart", isDone: (f) => f.sheetSeen },
-  { id: "battle", title: "Приєднайся до бою", description: "ДМ запустить бій — кнопка «Приєднатися» з'явиться в хедері.", href: (c) => `/campaigns/${c}`, helpSlug: "player-battle", isDone: (f) => f.inActiveBattle },
+  { id: "sheet", title: "Ознайомся з аркушем героя", description: "Характеристики, скіли, заклинання, артефакти й прокачка.", href: (c) => `/campaigns/${c}/character`, helpSlug: "player-quickstart", isDone: (f) => f.sheetSeen || f.joinedBattle },
+  { id: "battle", title: "Приєднайся до бою", description: "ДМ запустить бій — у хедері з'явиться кнопка бою.", helpSlug: "player-battle", isDone: (f) => f.joinedBattle },
   { id: "show", title: "Показ сцен", description: "Коли ДМ показує сцену, вона відкриється в розділі «Показ».", href: (c) => `/campaigns/${c}/show`, optional: true, informational: true, isDone: () => false },
 ];

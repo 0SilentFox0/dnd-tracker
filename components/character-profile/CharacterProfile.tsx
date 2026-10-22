@@ -19,7 +19,7 @@ import { DraftBanner } from "@/components/characters/player-draft/DraftBanner";
 import { ReviewActions } from "@/components/characters/review/ReviewActions";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+import { PlayerSheetHint } from "@/components/onboarding/OnboardingHint";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
@@ -105,7 +105,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     ) : null
                   }
                 />
-                {sheet.viewer.isOwner && !sheet.viewer.isDM && <OnboardingHint id="player.character" className="mx-3 my-2" />}
+                {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />

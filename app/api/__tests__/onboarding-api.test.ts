@@ -9,8 +9,8 @@ vi.mock("@/lib/utils/api/api-auth", () => ({ requireAuth: vi.fn(), requireCampai
 vi.mock("@/lib/db", () => ({
   prisma: {
     $queryRaw: vi.fn(),
-    userOnboardingFlag: { findMany: vi.fn(), upsert: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
-    campaignMember: { findMany: vi.fn(), findUnique: vi.fn() },
+    userOnboardingFlag: { findMany: vi.fn(), upsert: vi.fn(), createMany: vi.fn(), deleteMany: vi.fn() },
+    campaignMember: { findMany: vi.fn() },
   },
 }));
 
@@ -24,7 +24,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(apiAuth.requireAuth).mockResolvedValue({ userId: "u1" });
   vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([]);
-  vi.mocked(prisma.userOnboardingFlag.create).mockResolvedValue({} as never);
+  vi.mocked(prisma.userOnboardingFlag.createMany).mockResolvedValue({ count: 1 });
   vi.mocked(prisma.campaignMember.findMany).mockResolvedValue([{ role: "dm" }] as never);
 });
 
@@ -82,12 +82,13 @@ describe("PUT /api/onboarding/flags", () => {
     const { PUT } = await import("@/app/api/onboarding/flags/route");
 
     expect((await PUT(json({ key: "anything" }))).status).toBe(400);
-    expect((await PUT(json({ key: "hint:x", value: "v".repeat(101) }))).status).toBe(400);
+    expect((await PUT(json({ key: "hint:dm.races", value: "v".repeat(101) }))).status).toBe(400);
+    expect((await PUT(json({ key: "hint:not-a-real-hint" }))).status).toBe(400);
     expect(prisma.userOnboardingFlag.upsert).not.toHaveBeenCalled();
   });
 
   it("чекліст чужої кампанії — 403", async () => {
-    vi.mocked(prisma.campaignMember.findUnique).mockResolvedValue(null);
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }));
 
     const { PUT } = await import("@/app/api/onboarding/flags/route");
 
@@ -96,7 +97,7 @@ describe("PUT /api/onboarding/flags", () => {
   });
 
   it("чекліст своєї кампанії — 200", async () => {
-    vi.mocked(prisma.campaignMember.findUnique).mockResolvedValue({ id: "m" } as never);
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
 
     const { PUT } = await import("@/app/api/onboarding/flags/route");
 
@@ -134,12 +135,12 @@ describe("GET /api/campaigns/[id]/onboarding", () => {
 
     expect(body.role).toBe("dm");
     expect(body.state).toBe("collapsed");
-    expect(prisma.userOnboardingFlag.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ key: "checklist:camp" }) }));
+    expect(prisma.userOnboardingFlag.createMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ key: "checklist:camp" }), skipDuplicates: true }));
   });
 
   it("гравець отримує лише кроки гравця", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
-    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ activeCharacter: 0, pendingCharacter: 1, inActiveBattle: 0 }]);
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ activeCharacter: 0, pendingCharacter: 1, joinedBattle: 0 }]);
 
     const body = await (await get()).json();
 
@@ -147,17 +148,33 @@ describe("GET /api/campaigns/[id]/onboarding", () => {
     expect(body.steps.map((s: { id: string }) => s.id)).toEqual(["character", "sheet", "battle", "show"]);
     expect(body.steps[0].description).toContain("схвален");
     expect(body.state).toBe("open");
-    expect(prisma.userOnboardingFlag.create).not.toHaveBeenCalled();
+    expect(prisma.userOnboardingFlag.createMany).not.toHaveBeenCalled();
   });
 
-  it("закрита підказка аркуша — крок «аркуш» виконано", async () => {
+  it("аркуш переглянуто — крок «аркуш» виконано; сховані підказки на це не впливають", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
-    vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "hint:player.character", value: null }] as never);
-    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ activeCharacter: 1, pendingCharacter: 0, inActiveBattle: 0 }]);
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ activeCharacter: 1, pendingCharacter: 0, joinedBattle: 0 }]);
 
-    const body = await (await get()).json();
+    vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "seen:player-sheet", value: null }] as never);
+    expect((await (await get()).json()).steps.find((s: { id: string }) => s.id === "sheet").done).toBe(true);
 
-    expect(body.steps.find((s: { id: string }) => s.id === "sheet").done).toBe(true);
+    vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "hint:*", value: null }] as never);
+    expect((await (await get()).json()).steps.find((s: { id: string }) => s.id === "sheet").done).toBe(false);
+  });
+
+  it("нинішній гравець, що вже бився, — чекліст одразу згорнутий", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
+    vi.mocked(prisma.$queryRaw).mockResolvedValue([{ activeCharacter: 1, pendingCharacter: 0, joinedBattle: 1 }]);
+
+    expect((await (await get()).json()).state).toBe("collapsed");
+  });
+
+  it("прихований чекліст — без запиту фактів", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm"));
+    vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "checklist:camp", value: "hidden" }] as never);
+
+    expect((await (await get()).json()).state).toBe("hidden");
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });
 
   it("не член кампанії — статус від requireCampaignAccess", async () => {

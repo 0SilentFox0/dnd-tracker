@@ -13,7 +13,6 @@ const api = vi.hoisted(() => ({ createBattle: vi.fn(), updateBattle: vi.fn(), de
 
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 
-vi.mock("@/components/onboarding/OnboardingHint", () => ({ OnboardingHint: () => null }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("@/lib/api/battles", async (orig) => {

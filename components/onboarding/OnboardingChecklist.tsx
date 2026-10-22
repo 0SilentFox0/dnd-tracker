@@ -26,7 +26,7 @@ function StepRow({ step }: { step: StepStatus }) {
             <Link href={`/help/${step.helpSlug}`}>Як це?</Link>
           </Button>
         )}
-        {!step.done && !step.informational && (
+        {!step.done && step.href && (
           <Button variant="outline" size="sm" asChild>
             <Link href={step.href}>Перейти</Link>
           </Button>

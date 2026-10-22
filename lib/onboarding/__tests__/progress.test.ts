@@ -16,7 +16,7 @@ describe("checklistProgress", () => {
   });
 
   it("гравцю — лише кроки гравця", () => {
-    const p = checklistProgress({ role: "player", player: { ownCharacter: "active", sheetSeen: true, inActiveBattle: true } }, "c1");
+    const p = checklistProgress({ role: "player", player: { ownCharacter: "active", sheetSeen: true, joinedBattle: true } }, "c1");
 
     expect(p.steps.map((s) => s.id)).toEqual(["character", "sheet", "battle", "show"]);
     expect(p.allRequiredDone).toBe(true);
@@ -37,6 +37,10 @@ describe("checklistState", () => {
   it("виконано < 7 днів тому — collapsed, ≥ 7 — hidden", () => {
     expect(checklistState("2026-10-20T12:00:00.000Z", true, now)).toBe("collapsed");
     expect(checklistState("2026-10-15T12:00:00.000Z", true, now)).toBe("hidden");
+  });
+
+  it("дата завершення вже є, а факти регресували — лишається згорнутим", () => {
+    expect(checklistState("2026-10-20T12:00:00.000Z", false, now)).toBe("collapsed");
   });
 
   it("виконано, але дати ще немає — collapsed", () => {
