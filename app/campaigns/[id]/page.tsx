@@ -1,15 +1,21 @@
 import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
+import { readCampaignOnboarding } from "@/app/api/campaigns/[id]/onboarding/read-onboarding";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { CampaignStatus } from "@/lib/constants/campaigns";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
+import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
+import { readOkJson } from "@/lib/utils/api/read-json";
 import { pluralUk } from "@/lib/utils/common/plural";
+import type { CampaignOnboardingResponse } from "@/types/onboarding";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
 
@@ -24,7 +30,12 @@ export default async function CampaignDetailPage({
 
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
-  const pendingDrafts = isDM ? await prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0;
+  const [pendingDrafts, onboarding] = await Promise.all([
+    isDM ? prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0,
+    readCampaignOnboarding({ id, known: { userId: user.id, isDM } }).then((res) => readOkJson<CampaignOnboardingResponse>(res))
+      // онбординг не має валити сторінку кампанії
+      .catch(() => null),
+  ]);
 
   const dmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
@@ -47,6 +58,10 @@ export default async function CampaignDetailPage({
         subtitle={campaign.description}
         actions={<span className="self-center break-all text-sm text-hud-muted">{user.email}</span>}
       />
+
+      <PrefetchedQuery queryKey={onboardingKeys.campaign(id)} data={onboarding}>
+        <OnboardingChecklist campaignId={id} />
+      </PrefetchedQuery>
 
       <HudPanel>
         <HudSection
@@ -73,7 +88,7 @@ export default async function CampaignDetailPage({
               <p className={LABEL}>Макс. рівень</p>
               <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
             </div>
-            <div>
+            <div id="invite" className="scroll-mt-20">
               <p className={`${LABEL} mb-2`}>Код запрошення</p>
               <InviteCodeDisplay inviteCode={campaign.inviteCode} />
             </div>
