@@ -10,4 +10,5 @@ export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEd
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useEquipArtifact } from "./useEquipArtifact";
 export { useSpellBrowser } from "./useSpellBrowser";
+export { useInventoryLog, useStash, useStashAction } from "./useStash";
 export { useTransferArtifact } from "./useTransferArtifact";
