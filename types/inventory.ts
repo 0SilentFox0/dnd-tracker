@@ -82,9 +82,10 @@ export interface StashArtifact {
   description: string | null;
 }
 
+export type FreeArtifact = Omit<StashArtifact, "description">;
+
 export interface StashView {
   purse: Purse;
   items: SpecialItem[];
   artifacts: StashArtifact[];
-  freeArtifacts?: StashArtifact[];
 }

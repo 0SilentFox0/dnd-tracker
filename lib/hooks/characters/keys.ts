@@ -8,6 +8,9 @@ export const characterKeys = {
   roster: (campaignId: string) => ["character-roster", campaignId] as const,
   stash: (campaignId: string, characterId: string) => ["character-stash", campaignId, characterId] as const,
   stashes: (campaignId: string) => ["character-stash", campaignId] as const,
+  freeArtifacts: (campaignId: string) => ["free-artifacts", campaignId] as const,
+  backstoryAvailability: (campaignId: string) => ["draft-backstory-available", campaignId] as const,
+  inventoryLogs: (campaignId: string) => ["inventory-log", campaignId] as const,
   inventoryLog: (campaignId: string, characterId: string) => ["inventory-log", campaignId, characterId] as const,
   sheet: (campaignId: string, characterId?: string) => (characterId ? (["character-sheet", campaignId, characterId] as const) : (["character-sheet", campaignId] as const)),
 };

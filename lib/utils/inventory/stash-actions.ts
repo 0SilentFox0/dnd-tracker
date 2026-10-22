@@ -24,6 +24,7 @@ export type StashActionName = StashAction["action"];
 
 export const StashError = {
   NOT_ENOUGH_MONEY: "NOT_ENOUGH_MONEY",
+  MONEY_OVERFLOW: "MONEY_OVERFLOW",
   ITEM_NOT_FOUND: "ITEM_NOT_FOUND",
   SLOT_EMPTY: "SLOT_EMPTY",
   UNKNOWN_SLOT: "UNKNOWN_SLOT",
@@ -36,6 +37,10 @@ export type StashErrorCode = (typeof StashError)[keyof typeof StashError];
 type Log = { kind: InventoryLogKindValue; delta: Record<string, unknown>; note: string | null };
 
 export type StashResult = { ok: true; state: StashState; log: Log } | { ok: false; error: StashErrorCode };
+
+const INT4_MAX = 2_147_483_647;
+
+const overflows = (p: Purse) => p.gp > INT4_MAX || p.sp > INT4_MAX || p.cp > INT4_MAX;
 
 const diff = (a: Purse, b: Purse) => ({ gp: b.gp - a.gp, sp: b.sp - a.sp, cp: b.cp - a.cp });
 
@@ -59,10 +64,14 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
     case "spend": {
       const purse = spendCoins(s.purse, a.amount, a.coin);
 
-      return purse ? ok({ ...s, purse }, InventoryLogKind.MONEY_SPEND, diff(s.purse, purse), a.note) : fail(StashError.NOT_ENOUGH_MONEY);
+      if (!purse) return fail(StashError.NOT_ENOUGH_MONEY);
+
+      return overflows(purse) ? fail(StashError.MONEY_OVERFLOW) : ok({ ...s, purse }, InventoryLogKind.MONEY_SPEND, diff(s.purse, purse), a.note);
     }
     case "gain": {
       const purse = gainCoins(s.purse, a.amount, a.coin);
+
+      if (overflows(purse)) return fail(StashError.MONEY_OVERFLOW);
 
       return ok({ ...s, purse }, InventoryLogKind.MONEY_GAIN, diff(s.purse, purse), a.note ?? null);
     }
@@ -88,7 +97,7 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
     case "useItem": {
       const item = s.items.find((i) => i.id === a.itemId);
 
-      if (!item) return fail(StashError.ITEM_NOT_FOUND);
+      if (!item?.consumable) return fail(StashError.ITEM_NOT_FOUND);
 
       const items =
         item.quantity > 1 ? s.items.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i)) : s.items.filter((i) => i.id !== item.id);

@@ -22,6 +22,7 @@ import type { EquippedItems, StashState } from "@/types/inventory";
 
 const STASH_ERROR_TEXT: Record<StashErrorCode, string> = {
   [StashError.NOT_ENOUGH_MONEY]: API_ERRORS.NOT_ENOUGH_MONEY,
+  [StashError.MONEY_OVERFLOW]: API_ERRORS.MONEY_OVERFLOW,
   [StashError.ITEM_NOT_FOUND]: API_ERRORS.ITEM_NOT_FOUND,
   [StashError.SLOT_EMPTY]: API_ERRORS.ARTIFACT_SLOT_EMPTY,
   [StashError.UNKNOWN_SLOT]: API_ERRORS.ARTIFACT_UNKNOWN_SLOT,
@@ -106,6 +107,6 @@ export async function applyStash(request: Request, campaignId: string, character
 
     await writeInventoryLog(tx, [{ campaignId, characterId, actorUserId: userId, ...result.log }]);
 
-    return NextResponse.json(await buildStashView(tx, campaignId, saved, isDM));
+    return NextResponse.json(await buildStashView(tx, campaignId, saved));
   });
 }

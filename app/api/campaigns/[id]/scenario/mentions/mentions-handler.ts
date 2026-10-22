@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { SCENARIO_MENTION_LIMIT } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -19,7 +20,7 @@ export async function searchMentionsHandler(req: Request, campaignId: string) {
     const [unit, artifact, character, spell, battle] = await Promise.all([
       prisma.unit.findMany(args),
       prisma.artifact.findMany(args),
-      prisma.character.findMany(args),
+      prisma.character.findMany({ ...args, where: { ...args.where, ...ACTIVE_CHARACTER } }),
       prisma.spell.findMany(args),
       prisma.battleScene.findMany(args),
     ]);

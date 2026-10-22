@@ -23,7 +23,7 @@ export function ItemsTab() {
 
   const notify = useNotify();
 
-  const canAct = sheet.viewer.isDM || sheet.viewer.isOwner;
+  const canAct = (sheet.viewer.isDM || sheet.viewer.isOwner) && !sheet.review.pending;
 
   const [shown, setShown] = useState<SheetArtifact | null>(null);
 

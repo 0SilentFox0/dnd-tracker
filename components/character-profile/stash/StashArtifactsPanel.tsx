@@ -73,7 +73,7 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
         <p className="mt-2 text-xs text-hud-muted">Зміни під час бою діють з наступного бою.</p>
       </HudSection>
       <TransferArtifactDialog artifact={transfer} source={{ artifactId: transfer?.id ?? "" }} open={!!transfer} onOpenChange={(o) => !o && setTransfer(null)} />
-      {isDM && <GrantArtifactDialog artifacts={view.freeArtifacts ?? []} open={grantOpen} onOpenChange={setGrantOpen} />}
+      {isDM && <GrantArtifactDialog open={grantOpen} onOpenChange={setGrantOpen} />}
     </HudPanel>
   );
 }

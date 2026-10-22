@@ -6,20 +6,22 @@ import { EntityIcon } from "@/components/common/EntityIcon";
 import { EmptyState } from "@/components/common/states";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { artifactSlotLabel } from "@/lib/constants/artifacts";
-import { useStashAction } from "@/lib/hooks/characters";
+import { useFreeArtifacts, useStashAction } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
-import type { StashArtifact } from "@/types/inventory";
 
 interface GrantArtifactDialogProps {
-  artifacts: StashArtifact[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function GrantArtifactDialog({ artifacts, open, onOpenChange }: GrantArtifactDialogProps) {
+export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogProps) {
   const { campaignId, characterId } = useProfile();
 
   const action = useStashAction(campaignId, characterId);
+
+  const free = useFreeArtifacts(campaignId, characterId, open);
+
+  const artifacts = free.data ?? [];
 
   const notify = useNotify();
 
@@ -31,7 +33,9 @@ export function GrantArtifactDialog({ artifacts, open, onOpenChange }: GrantArti
 
   return (
     <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title="Видати артефакт">
-      {artifacts.length === 0 ? (
+      {free.isLoading ? (
+        <p className="text-sm text-hud-muted">Завантаження…</p>
+      ) : artifacts.length === 0 ? (
         <EmptyState title="Немає вільних артефактів" />
       ) : (
         <ul>

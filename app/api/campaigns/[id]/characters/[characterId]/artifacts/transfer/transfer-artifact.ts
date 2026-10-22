@@ -47,6 +47,8 @@ export async function transferArtifact(request: Request, campaignId: string, cha
 
   if (to instanceof NextResponse) return to;
 
+  if (to.status === CharacterStatus.PENDING) return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
 

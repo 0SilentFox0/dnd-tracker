@@ -13,5 +13,5 @@ export { type PlayerDraftFormOptions, type RollKey, usePlayerDraftForm } from ".
 export { useReviewCharacter } from "./useReviewCharacter";
 export { useRollReveal } from "./useRollReveal";
 export { useSpellBrowser } from "./useSpellBrowser";
-export { useInventoryLog, useStash, useStashAction } from "./useStash";
+export { useFreeArtifacts, useInventoryLog, useStash, useStashAction } from "./useStash";
 export { useTransferArtifact } from "./useTransferArtifact";

@@ -1,6 +1,6 @@
 import { campaignGet, campaignPatch, campaignPost } from "@/lib/api/client";
 import type { StashAction } from "@/lib/utils/inventory/stash-actions";
-import type { Inventory, InventoryFormData, InventoryLogEntry, StashView } from "@/types/inventory";
+import type { FreeArtifact, Inventory, InventoryFormData, InventoryLogEntry, StashView } from "@/types/inventory";
 
 /**
  * Оновлює інвентар персонажа
@@ -21,6 +21,9 @@ export const transferArtifact = (campaignId: string, characterId: string, body: 
   campaignPost<{ from: Inventory; to: Inventory }>(campaignId, `/characters/${characterId}/artifacts/transfer`, body);
 
 export const getStash = (campaignId: string, characterId: string) => campaignGet<StashView>(campaignId, `/characters/${characterId}/stash`);
+
+export const getFreeArtifacts = (campaignId: string, characterId: string) =>
+  campaignGet<FreeArtifact[]>(campaignId, `/characters/${characterId}/stash/free-artifacts`);
 
 export const postStashAction = (campaignId: string, characterId: string, action: StashAction) =>
   campaignPost<StashView>(campaignId, `/characters/${characterId}/stash`, action);
