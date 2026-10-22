@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import Link from "next/link";
 
 import { AutopickCard } from "./AutopickCard";
@@ -15,6 +13,7 @@ import { UnitsListCard } from "./UnitsListCard";
 import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/setup/battle-form-tabs";
 import { LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { type BattleSetupInitial, useBattleSetup, useBattleSetupInitial } from "@/lib/hooks/battles";

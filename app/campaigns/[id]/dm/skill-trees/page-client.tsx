@@ -1,5 +1,5 @@
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { HudPage } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { SkillTreeEditor } from "@/components/skill-tree/editor";
 
 export function SkillTreePageClient({ campaignId }: { campaignId: string }) {

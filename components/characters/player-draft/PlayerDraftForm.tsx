@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { useEffect } from "react";
 import Link from "next/link";
 
@@ -10,6 +8,7 @@ import { RollingField } from "./RollingField";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ImageUpload } from "@/components/ui/image-upload";

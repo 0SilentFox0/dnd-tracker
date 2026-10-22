@@ -1,11 +1,10 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { Dna, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { Button } from "@/components/ui/button";

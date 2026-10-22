@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -13,6 +11,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";

@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -21,6 +19,7 @@ import { DraftBanner } from "@/components/characters/player-draft/DraftBanner";
 import { ReviewActions } from "@/components/characters/review/ReviewActions";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";

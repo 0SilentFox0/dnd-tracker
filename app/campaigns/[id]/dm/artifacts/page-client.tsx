@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import Link from "next/link";
 import { Gem } from "lucide-react";
 
@@ -11,6 +9,7 @@ import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifa
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

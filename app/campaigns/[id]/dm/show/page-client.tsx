@@ -1,7 +1,5 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +7,7 @@ import { Images, Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { DeckCard } from "@/components/show/editor/DeckCard";
 import { NewDeckDialog } from "@/components/show/editor/NewDeckDialog";
 import { Button } from "@/components/ui/button";

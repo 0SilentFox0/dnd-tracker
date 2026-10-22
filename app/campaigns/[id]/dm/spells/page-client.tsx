@@ -1,13 +1,12 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import Link from "next/link";
 import { Printer, Wand2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";

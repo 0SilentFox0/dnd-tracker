@@ -1,12 +1,11 @@
 "use client";
 
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateScenarioPageDialog, ScenarioBook, ScenarioIndex, ScenarioSearch } from "@/components/scenario";
 import { Button } from "@/components/ui/button";
 import { useScenarioPageActions, useScenarioPages } from "@/lib/hooks/scenario";
