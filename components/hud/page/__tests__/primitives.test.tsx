@@ -22,6 +22,12 @@ describe("HUD page primitives", () => {
     expect(screen.getByRole("button", { name: "Створити" }).parentElement?.className).toContain("flex-wrap");
   });
 
+  it("HudPageHeader keeps a block subtitle (nav) out of a <p> to avoid a hydration mismatch", () => {
+    render(<HudPageHeader title="Карта світу" subtitle={<nav aria-label="Шлях">x</nav>} />);
+
+    expect(screen.getByRole("navigation").closest("p")).toBeNull();
+  });
+
   it("HudCard applies tone and accent", () => {
     const { container } = render(<HudCard tone="active" accent="#ff0000">x</HudCard>);
 

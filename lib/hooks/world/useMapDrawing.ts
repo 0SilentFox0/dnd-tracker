@@ -17,6 +17,9 @@ const POINT_DEBOUNCE_MS = 400;
 
 const POINT_DEBOUNCE_DIST = 0.02;
 
+// the Ukrainian letters sit on the same physical keys
+export const TOOL_HOTKEYS: Record<string, WorldTool> = { v: "select", м: "select", p: "point", з: "point", z: "zone", я: "zone", e: "entry", у: "entry" };
+
 const isTyping = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 
 export function useMapDrawing(actions: Actions) {
@@ -45,19 +48,23 @@ export function useMapDrawing(actions: Actions) {
   }, [draft, actions]);
 
   useEffect(() => {
-    if (tool !== "zone") return;
-
     const onKey = (e: KeyboardEvent) => {
-      if (isTyping(e.target)) return;
+      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
 
-      if (e.key === "Escape") cancel();
-      else if (e.key === "Backspace") undoVertex();
+      if (e.target instanceof Element && e.target.closest("[role=dialog]")) return;
+
+      const hotkey = TOOL_HOTKEYS[e.key.toLowerCase()];
+
+      if (hotkey) setTool(hotkey);
+      else if (e.key === "Escape" && tool === "zone" && draft.length) cancel();
+      else if (e.key === "Escape" && tool !== "select") setTool("select");
+      else if (e.key === "Backspace" && tool === "zone") undoVertex();
     };
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [tool, cancel, undoVertex]);
+  }, [tool, draft.length, cancel, undoVertex, setTool]);
 
   const handlers = useMemo<{ onMapClick(p: MapPoint): void; onMapDoubleClick(p: MapPoint): void }>(
     () => ({

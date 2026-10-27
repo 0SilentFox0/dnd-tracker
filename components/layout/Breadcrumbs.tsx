@@ -26,6 +26,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   "skill-trees": "Дерева прокачки",
   info: "Довідник",
   print: "Друк",
+  world: "Карта світу",
+  show: "Показ",
+  scenario: "Сценарій",
 };
 
 const ID_LABELS_BY_PARENT: Record<string, string> = {

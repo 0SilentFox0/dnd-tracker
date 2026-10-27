@@ -105,6 +105,43 @@ describe("useMapDrawing", () => {
     area.remove();
   });
 
+  it("V/P/Z/E switch tools, also on the Ukrainian layout", () => {
+    const { result } = setup();
+
+    key("p");
+
+    expect(result.current.tool).toBe("point");
+
+    key("я");
+
+    expect(result.current.tool).toBe("zone");
+
+    key("e");
+
+    expect(result.current.tool).toBe("entry");
+
+    key("Escape");
+
+    expect(result.current.tool).toBe("select");
+
+    key("z");
+    key("v");
+
+    expect(result.current.tool).toBe("select");
+  });
+
+  it("hotkeys are ignored while typing", () => {
+    const { result } = setup();
+
+    const input = document.body.appendChild(document.createElement("input"));
+
+    key("p", input);
+
+    expect(result.current.tool).toBe("select");
+
+    input.remove();
+  });
+
   it("changing the tool resets the draft", () => {
     const { result } = setup();
 
