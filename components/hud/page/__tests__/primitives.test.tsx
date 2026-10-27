@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { HudCard, HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
+import { HudCard, HudChipTabs, HudPage, HudPageHeader, HudTile } from "@/components/hud/page";
 
 afterEach(cleanup);
 
@@ -45,5 +45,12 @@ describe("HUD page primitives", () => {
     fireEvent.click(screen.getByRole("button", { name: "Гобліни · 1" }));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.getByRole("link", { name: "NPC-герої" }).getAttribute("aria-current")).toBe("page");
+  });
+
+  it("HudTile compact hides the subtitle", () => {
+    render(<HudTile href="/x" title="Юніти" subtitle="Опис" compact />);
+
+    expect(screen.getByText("Юніти")).toBeTruthy();
+    expect(screen.queryByText("Опис")).toBeNull();
   });
 });
