@@ -1,5 +1,6 @@
 import { UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { groupBy } from "@/lib/utils/common/collections";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
@@ -33,9 +34,9 @@ function toTiers(units: Unit[]): UnitTier[] {
 }
 
 export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: R[], query = ""): UnitRaceGroup<R>[] {
-  const q = query.trim().toLocaleLowerCase("uk");
+  const q = query.trim();
 
-  const matches = (unit: Unit) => !q || unit.name.toLocaleLowerCase("uk").includes(q);
+  const matches = (unit: Unit) => matchesQuery([unit.name], q);
 
   const known = new Set(races.map((r) => r.id));
 
