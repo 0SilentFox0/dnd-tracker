@@ -3,8 +3,8 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import { CombatTab } from "./CombatTab";
 import { InventoryTab } from "./inventory/InventoryTab";
+import { CombatTab } from "./CombatTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
 import { ProfileProvider } from "./ProfileContext";
