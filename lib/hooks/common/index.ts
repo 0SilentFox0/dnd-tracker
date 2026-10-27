@@ -19,3 +19,4 @@ export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./us
 export { useReducedMotion } from "./useReducedMotion";
 export { useSingleFlight } from "./useSingleFlight";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
+export { DRAG_THRESHOLD, useViewport, type ViewportOptions } from "./useViewport";

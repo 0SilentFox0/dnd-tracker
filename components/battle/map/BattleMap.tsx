@@ -13,7 +13,8 @@ import { MapTokenHud } from "./MapTokenHud";
 import "./battle-map.css";
 import { modeUiOf } from "@/components/battle/modes";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { DRAG_THRESHOLD, type ModeTools, useMapViewport } from "@/lib/hooks/battle";
+import { type ModeTools } from "@/lib/hooks/battle";
+import { DRAG_THRESHOLD, useViewport } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import {
@@ -448,7 +449,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const scrolls = scrollsX || scrollsY;
 
-  const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || !!modeTools?.panLocked, wheelScrolls: scrolls });
+  const { zoom, offset, bind, containerRef, wasDragged } = useViewport({ panLocked: painting || !!modeTools?.panLocked, wheelScrolls: scrolls });
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
