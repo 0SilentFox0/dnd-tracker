@@ -3,17 +3,11 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { HudSection } from "@/components/hud/form";
 import { HudPanel } from "@/components/hud/page";
 import { CampaignStatus } from "@/lib/constants/campaigns";
+import type { CampaignSettings } from "@/types/campaigns";
 
 const LABEL = "text-sm text-hud-muted";
 
-interface CampaignSummary {
-  name: string;
-  description: string | null;
-  maxLevel: number;
-  allowPlayerEdit: boolean;
-  status: string;
-  inviteCode: string;
-}
+type CampaignSummary = CampaignSettings & { inviteCode: string };
 
 export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignId: string; campaign: CampaignSummary; isDM: boolean }) {
   return (
@@ -29,7 +23,7 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignI
                 description: campaign.description || null,
                 maxLevel: campaign.maxLevel,
                 allowPlayerEdit: campaign.allowPlayerEdit,
-                status: campaign.status as CampaignStatus,
+                status: campaign.status,
               }}
             />
           ) : undefined
