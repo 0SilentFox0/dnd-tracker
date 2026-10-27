@@ -49,8 +49,8 @@ export function WorldMapView({ detail, selectedId, draft, handlers = {}, overlay
   return (
     <div className={cn("relative h-full min-h-[16rem] w-full overflow-hidden rounded-xl border border-hud-rule bg-black/40", className)}>
       <div ref={outerRef} className="absolute inset-0">
-        {size.width > 0 ? (
-          <div
+        {/* container is always mounted so useViewport can attach its wheel listener on the first commit */}
+        <div
             ref={containerRef}
             data-testid="world-map-box"
             className="absolute overflow-hidden"
@@ -61,6 +61,7 @@ export function WorldMapView({ detail, selectedId, draft, handlers = {}, overlay
             onPointerCancel={bind.onPointerCancel}
             onDoubleClick={(e) => handlers.onMapDoubleClick?.(pointAt(e.clientX, e.clientY))}
           >
+            {size.width > 0 ? (
             <div className="absolute inset-0" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: "0 0" }}>
               <Image src={map.imageUrl} alt={map.name} fill priority draggable={false} sizes={`${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`} className="pointer-events-none select-none object-fill" />
               <WorldZones markers={markers} selectedId={selectedId} draft={draft} />
@@ -85,8 +86,8 @@ export function WorldMapView({ detail, selectedId, draft, handlers = {}, overlay
               />
               {overlay}
             </div>
+            ) : null}
           </div>
-        ) : null}
       </div>
       <div className="absolute right-2 bottom-2 flex flex-col gap-1">
         <Button type="button" size="icon" variant="secondary" aria-label="Наблизити" onClick={() => zoomBy(ZOOM_STEP)}>

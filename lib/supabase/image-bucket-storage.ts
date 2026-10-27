@@ -1,6 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
+import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
 import { bucketObjectPath } from "@/lib/utils/common/image-url";
 import type { Result } from "@/types/common";
 import type { SlideUploadTicket } from "@/types/show";
@@ -40,6 +41,8 @@ export function imageBucketStorage<T extends string>({ bucket, maxBytes, formats
   }
 
   function ownedPath(campaignId: string, url: string): string | null {
+    if (!isHostedOnProjectStorage(url)) return null;
+
     const path = bucketObjectPath(url, bucket);
 
     return path?.startsWith(`${campaignId}/`) && objectName.test(path.slice(campaignId.length + 1)) ? path : null;

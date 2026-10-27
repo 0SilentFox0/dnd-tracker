@@ -85,4 +85,23 @@ describe("WorldMarkerPanel", () => {
 
     expect(screen.getByLabelText("Колір зони")).toBeTruthy();
   });
+
+  it("flushes the pending colour save on unmount", () => {
+    vi.useFakeTimers();
+
+    const { unmount } = renderPanel(marker({ kind: "zone", polygon: [[0, 0], [1, 0], [1, 1], [0, 0]], icon: null }));
+
+    fireEvent.change(screen.getByLabelText("Колір зони"), { target: { value: "#112233" } });
+
+    expect(update).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(update).toHaveBeenCalledWith({ id: "k1", data: { color: "#112233" } });
+
+    vi.advanceTimersByTime(1000);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
 });

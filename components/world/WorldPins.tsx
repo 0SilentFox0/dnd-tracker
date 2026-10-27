@@ -68,11 +68,11 @@ export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDra
               if (moved) onDragMove(m.id, e.clientX, e.clientY);
             }}
             onPointerUp={(e) => {
-              e.stopPropagation();
-
               const startX = e.currentTarget.dataset.startX;
 
               if (startX === undefined) return;
+
+              e.stopPropagation();
 
               const moved = draggable && Math.hypot(e.clientX - Number(startX), e.clientY - Number(e.currentTarget.dataset.startY)) > DRAG_THRESHOLD;
 

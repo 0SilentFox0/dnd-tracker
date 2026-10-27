@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { closePolygon } from "@/lib/utils/world/geometry";
 import type { MapPoint, Polygon } from "@/types/world";
@@ -13,6 +13,10 @@ interface Actions {
   onEntry(p: MapPoint): void;
 }
 
+const POINT_DEBOUNCE_MS = 400;
+
+const POINT_DEBOUNCE_DIST = 0.02;
+
 const isTyping = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 
 export function useMapDrawing(actions: Actions) {
@@ -24,6 +28,8 @@ export function useMapDrawing(actions: Actions) {
     setToolState(t);
     setDraft([]);
   }, []);
+
+  const lastPoint = useRef<{ p: MapPoint; at: number } | null>(null);
 
   const undoVertex = useCallback(() => setDraft((d) => d.slice(0, -1)), []);
 
@@ -56,7 +62,18 @@ export function useMapDrawing(actions: Actions) {
   const handlers = useMemo<{ onMapClick(p: MapPoint): void; onMapDoubleClick(p: MapPoint): void }>(
     () => ({
       onMapClick: (p) => {
-        if (tool === "point") actions.onPoint(p);
+        if (tool === "point") {
+          const last = lastPoint.current;
+
+          const now = Date.now();
+
+          lastPoint.current = { p, at: now };
+
+          // a double-click/tap fires two clicks: create only one marker
+          if (last && now - last.at < POINT_DEBOUNCE_MS && Math.hypot(p.x - last.p.x, p.y - last.p.y) < POINT_DEBOUNCE_DIST) return;
+
+          actions.onPoint(p);
+        }
         else if (tool === "zone") setDraft((d) => [...d, p]);
         else if (tool === "entry") {
           setTool("select");

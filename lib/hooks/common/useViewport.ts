@@ -145,6 +145,8 @@ export function useViewport({ panLocked = false, wheelScrolls = false, minZoom =
     if (!d.active && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > DRAG_THRESHOLD) {
       d.active = true;
       dragged.current = true;
+      // captured only once panning starts: capturing on down would retarget the child click
+      e.currentTarget.setPointerCapture?.(e.pointerId);
     }
 
     if (!d.active) return;

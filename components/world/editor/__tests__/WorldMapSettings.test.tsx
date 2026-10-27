@@ -69,4 +69,17 @@ describe("WorldMapSettings", () => {
 
     expect(update).toHaveBeenCalledWith({ id: "m1", data: { fogEnabled: false } });
   });
+
+  it("commits the radius once for pointerup followed by blur", () => {
+    renderSettings();
+
+    const slider = screen.getByRole("slider");
+
+    fireEvent.change(slider, { target: { value: "0.1" } });
+    fireEvent.pointerUp(slider);
+    fireEvent.blur(slider);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({ id: "m1", data: { revealRadius: 0.1 } });
+  });
 });

@@ -33,6 +33,7 @@ const url = (path: string, bucket = "test-bucket") => `https://p.supabase.co/sto
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://p.supabase.co");
   listBuckets.mockResolvedValue({ data: [{ name: "test-bucket" }], error: null });
   createBucket.mockResolvedValue({ error: null });
   createSignedUploadUrl.mockImplementation(async (path: string) => ({ data: { path, token: "t" }, error: null }));
@@ -56,6 +57,7 @@ describe("imageBucketStorage", () => {
     expect(store.ownedPath("c1", url(`c2/${id}.webp`))).toBeNull();
     expect(store.ownedPath("c1", url(`c1/${id}.webp`, "other"))).toBeNull();
     expect(store.ownedPath("c1", url("c1/../c2/x.webp"))).toBeNull();
+    expect(store.ownedPath("c1", `https://evil.supabase.co/storage/v1/object/public/test-bucket/c1/${id}.webp`)).toBeNull();
   });
 
   it("remove передає лише власні шляхи і ковтає помилку", async () => {

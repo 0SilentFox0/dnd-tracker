@@ -25,6 +25,7 @@ const del = async (body: unknown) => {
 describe("DELETE /decks/generated-image", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://x.supabase.co");
     vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "u1", isDM: true } as never);
     h.used.mockResolvedValue(new Set());
     vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([]);

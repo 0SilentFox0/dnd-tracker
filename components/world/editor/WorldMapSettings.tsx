@@ -33,6 +33,8 @@ export function WorldMapSettings() {
 
   const [radius, setRadius] = useState(detail?.map.revealRadius ?? REVEAL_RADIUS_RANGE.min);
 
+  const lastRadius = useRef(detail?.map.revealRadius ?? REVEAL_RADIUS_RANGE.min);
+
   if (!detail) return null;
 
   const { map } = detail;
@@ -47,7 +49,10 @@ export function WorldMapSettings() {
   };
 
   const commitRadius = () => {
-    if (radius !== map.revealRadius) void save({ revealRadius: radius });
+    if (radius === lastRadius.current) return;
+
+    lastRadius.current = radius;
+    void save({ revealRadius: radius });
   };
 
   const replaceImage = async (file: File) => {

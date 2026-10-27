@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldMapView } from "../WorldMapView";
@@ -115,5 +115,36 @@ describe("WorldMapView", () => {
     const { container } = render(<WorldMapView detail={detail([])} draft={[{ x: 0.1, y: 0.1 }, { x: 0.3, y: 0.2 }]} />);
 
     expect(container.querySelector("polyline")).toBeTruthy();
+  });
+
+  it("wheel zoom works although the box mounts only after the size is known", () => {
+    render(<WorldMapView detail={detail([])} />);
+
+    const scaled = () => (box().firstElementChild as HTMLElement).style.transform;
+
+    expect(scaled()).toContain("scale(1)");
+
+    act(() => void box().dispatchEvent(new WheelEvent("wheel", { deltaY: -100, clientX: 400, clientY: 300, cancelable: true, bubbles: true })));
+
+    expect(scaled()).not.toContain("scale(1)");
+  });
+
+  it("a pan that ends over a pin still ends the gesture", () => {
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town" })])} />);
+    fireEvent.click(screen.getByRole("button", { name: "Наблизити" }));
+
+    const offset = () => (box().firstElementChild as HTMLElement).style.transform;
+
+    const pin = screen.getByRole("button", { name: "Town" });
+
+    fireEvent.pointerDown(box(), { pointerId: 1, clientX: 200, clientY: 150 });
+    fireEvent.pointerMove(box(), { pointerId: 1, clientX: 240, clientY: 150 });
+    fireEvent.pointerUp(pin, { pointerId: 1, clientX: 240, clientY: 150 });
+
+    const after = offset();
+
+    fireEvent.pointerMove(box(), { pointerId: 1, clientX: 300, clientY: 150 });
+
+    expect(offset()).toBe(after);
   });
 });

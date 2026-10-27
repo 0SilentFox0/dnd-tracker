@@ -1,35 +1,35 @@
 #!/usr/bin/env tsx
 /**
  * Створює у кампанії корінь «Ashan» із зонами королівств, містами та вкладеними картами-фрагментами.
- * Ідемпотентно: стара коренева карта «Ashan» (з піддеревом і файлами) видаляється й створюється наново. Лише локальна БД без --allow-remote.
+ * Відмовляє, якщо у кампанії вже є будь-яка коренева карта; з --replace видаляє наявні корені (з піддеревом і файлами). Лише локальна БД без --allow-remote.
  *
- *   pnpm seed-world-map <campaignId> [--dry-run] [--allow-remote]
+ *   pnpm seed-world-map <campaignId> [--dry-run] [--replace] [--allow-remote]
  */
 import sharp from "sharp";
 
 import { assertSeedTarget } from "./seed-library-lib";
 import { ASHAN_CITIES, ASHAN_IMAGE_URL, ASHAN_KINGDOMS, cropPixels, targetSize } from "./world-map-ashan";
+import { describeRoot, type ExistingRoot, rootsToReplace } from "./world-map-roots";
 
 import { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
 import { WORLD_MAPS_BUCKET } from "@/lib/constants/world";
 import { prisma } from "@/lib/db";
-import { orphanedImagesOfSubtree } from "@/lib/server/world/map-store";
+import { listWorldMaps, orphanedImagesOfSubtree } from "@/lib/server/world/map-store";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createWorldMapUploadTicket, removeWorldMapFiles } from "@/lib/supabase/world-map-storage";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
+import { subtreeMapIds } from "@/lib/utils/world/tree";
 
 const ROOT_NAME = "Ashan";
-
-const LEGACY_ROOT_NAMES = [ROOT_NAME, "Ашан"];
 
 function parseArgs(argv: string[]) {
   const flags = new Set(argv.filter((a) => a.startsWith("--")));
 
   const [campaignId] = argv.filter((a) => !a.startsWith("--"));
 
-  if (!campaignId) throw new Error("Вкажіть campaignId: pnpm seed-world-map <campaignId> [--dry-run] [--allow-remote]");
+  if (!campaignId) throw new Error("Вкажіть campaignId: pnpm seed-world-map <campaignId> [--dry-run] [--replace] [--allow-remote]");
 
-  return { campaignId, dryRun: flags.has("--dry-run"), allowRemote: flags.has("--allow-remote") };
+  return { campaignId, dryRun: flags.has("--dry-run"), replace: flags.has("--replace"), allowRemote: flags.has("--allow-remote") };
 }
 
 async function upload(campaignId: string, buf: Buffer) {
@@ -44,27 +44,41 @@ async function upload(campaignId: string, buf: Buffer) {
   return ticket.value.publicUrl;
 }
 
-async function removeExistingRoots(campaignId: string) {
-  const roots = await prisma.worldMap.findMany({ where: { campaignId, parentMarkerId: null, name: { in: LEGACY_ROOT_NAMES } }, select: { id: true } });
+async function findRoots(campaignId: string): Promise<ExistingRoot[]> {
+  const all = await listWorldMaps(campaignId);
 
+  return Promise.all(
+    all
+      .filter((m) => m.parentMapId === null)
+      .map(async (m) => {
+        const ids = subtreeMapIds(all, m.id);
+
+        return { id: m.id, name: m.name, maps: ids.length, markers: await prisma.worldMarker.count({ where: { mapId: { in: ids } } }) };
+      }),
+  );
+}
+
+async function removeRoots(campaignId: string, roots: ExistingRoot[]) {
   for (const root of roots) {
     const urls = await orphanedImagesOfSubtree(campaignId, root.id);
 
     await prisma.worldMap.delete({ where: { id: root.id } });
     await removeWorldMapFiles(campaignId, urls);
   }
-
-  return roots.length;
 }
 
 async function main() {
-  const { campaignId, dryRun, allowRemote } = parseArgs(process.argv.slice(2));
+  const { campaignId, dryRun, replace, allowRemote } = parseArgs(process.argv.slice(2));
 
   const host = assertSeedTarget(process.env.DATABASE_URL, allowRemote);
 
   console.info(`БД: ${host}${dryRun ? " (dry-run)" : ""}`);
 
+  const roots = await findRoots(campaignId);
+
   if (dryRun) {
+    console.info(roots.length === 0 ? "Кореневих карт немає" : `Наявні корені: ${roots.map(describeRoot).join(", ")}${replace ? " — будуть видалені" : " — без --replace сід відмовить"}`);
+
     for (const k of ASHAN_KINGDOMS) {
       const px = cropPixels(k.crop);
 
@@ -78,6 +92,8 @@ async function main() {
 
   if (!(await prisma.campaign.findUnique({ where: { id: campaignId }, select: { id: true } }))) throw new Error(`Кампанію ${campaignId} не знайдено`);
 
+  const stale = rootsToReplace(roots, replace);
+
   const res = await fetch(ASHAN_IMAGE_URL);
 
   if (!res.ok) throw new Error(`Ashan image: HTTP ${res.status}`);
@@ -86,7 +102,9 @@ async function main() {
 
   const meta = await sharp(source).metadata();
 
-  const removed = await removeExistingRoots(campaignId);
+  for (const r of stale) console.info(`Видаляю корінь ${describeRoot(r)}`);
+
+  await removeRoots(campaignId, stale);
 
   const rootImage = await sharp(source).webp({ quality: 88 }).toBuffer();
 
@@ -115,7 +133,7 @@ async function main() {
     console.info(`${k.name}: ${size.width}x${size.height}`);
   }
 
-  console.info(`Готово (замінено старих коренів: ${removed}). http://localhost:3000/campaigns/${campaignId}/dm/world`);
+  console.info(`Готово (замінено старих коренів: ${stale.length}). http://localhost:3000/campaigns/${campaignId}/dm/world`);
 }
 
 main()

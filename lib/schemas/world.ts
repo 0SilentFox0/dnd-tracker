@@ -16,7 +16,10 @@ const coord = z.number().min(0, "Координата поза межами ка
 const polygonSchema = z
   .array(z.tuple([coord, coord]))
   .min(3, "Зона має мати щонайменше 3 вершини")
-  .max(POLYGON_MAX_VERTICES, `Забагато вершин (максимум ${POLYGON_MAX_VERTICES})`);
+  .max(POLYGON_MAX_VERTICES, `Забагато вершин (максимум ${POLYGON_MAX_VERTICES})`)
+  .superRefine((poly, ctx) => {
+    if (new Set(poly.map(([x, y]) => `${x},${y}`)).size < 3) ctx.addIssue({ code: "custom", message: "Зона має мати щонайменше 3 різні вершини" });
+  });
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір має бути у форматі #rrggbb");
 

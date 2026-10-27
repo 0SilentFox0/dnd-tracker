@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MapPinned, PenLine, Trash2 } from "lucide-react";
 
 import { NewWorldMapDialog } from "./NewWorldMapDialog";
@@ -43,9 +43,28 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
   const colorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => () => clearTimeout(colorTimer.current), []);
-
   const save = (data: UpdateWorldMarkerData) => editor.marker.update.mutateOk({ id: marker.id, data });
+
+  const pendingColor = useRef<string | null>(null);
+
+  const saveRef = useRef(save);
+
+  useEffect(() => {
+    saveRef.current = save;
+  });
+
+  const flushColor = useCallback(() => {
+    clearTimeout(colorTimer.current);
+
+    if (pendingColor.current === null) return;
+
+    const color = pendingColor.current;
+
+    pendingColor.current = null;
+    void saveRef.current({ color });
+  }, []);
+
+  useEffect(() => flushColor, [flushColor]);
 
   const commitName = () => {
     const next = name.trim();
@@ -63,7 +82,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
   const pickColor = (c: string) => {
     setColor(c);
     clearTimeout(colorTimer.current);
-    colorTimer.current = setTimeout(() => void save({ color: c }), COLOR_DEBOUNCE_MS);
+    pendingColor.current = c;
+    colorTimer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
   };
 
   const remove = async () => {

@@ -116,10 +116,13 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                         <WorldToolbar drawing={drawing} />
                         <div className="h-[60dvh] lg:h-[calc(100dvh-14rem)]">
                         <WorldMapView
+                          key={d.map.id}
                           detail={d}
                           selectedId={selectedId}
                           draft={drawing.draft}
-                          handlers={{ ...drawing.handlers, onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)), onMarkerClick: (id) => (tool === "select" || tool === "zone" ? select(id) : undefined) }}
+                          handlers={{ ...drawing.handlers, onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)), onMarkerClick: (id) => (tool === "select" || tool === "zone" ? select(id) : undefined),
+                            onMarkerDrag: tool === "select" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
+                          }}
                           overlay={<span className="pointer-events-none absolute rounded-full border-2 border-[var(--gold)] bg-[var(--gold)]/40" style={{ ...ENTRY_DOT, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
                         />
                         </div>

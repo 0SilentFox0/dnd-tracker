@@ -31,6 +31,24 @@ describe("useMapDrawing", () => {
     expect(result.current.tool).toBe("point");
   });
 
+  it("a double click on the point tool creates one marker, a later click another", () => {
+    vi.useFakeTimers();
+
+    const { result, actions } = setup();
+
+    act(() => result.current.setTool("point"));
+    click(result, 0.2, 0.3);
+    click(result, 0.2, 0.3);
+
+    expect(actions.onPoint).toHaveBeenCalledTimes(1);
+
+    act(() => void vi.advanceTimersByTime(1000));
+    click(result, 0.2, 0.3);
+
+    expect(actions.onPoint).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
   it("closes a zone of 3 vertices on double click despite the duplicated last click", () => {
     const { result, actions } = setup();
 
