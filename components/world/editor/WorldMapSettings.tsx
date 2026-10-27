@@ -25,7 +25,7 @@ export function WorldMapSettings() {
 
   const notify = useNotify();
 
-  const { upload } = useWorldMapUpload(campaignId);
+  const { upload, discard } = useWorldMapUpload(campaignId);
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -70,11 +70,17 @@ export function WorldMapSettings() {
 
     if (!ok) return;
 
+    let image;
+
     try {
-      await save({ ...(await upload(file)) });
+      image = await upload(file);
     } catch (err) {
       void notify(errorMessage(err, "Не вдалося завантажити картинку"));
+
+      return;
     }
+
+    if (!(await save({ ...image }))) void discard(image.imageUrl);
   };
 
   const remove = async () => {

@@ -97,3 +97,5 @@ export const worldUploadRequestSchema = z.object({
   size: z.number().int().min(1).max(MAX_WORLD_MAP_BYTES, "Файл завеликий"),
   contentType: z.enum(WORLD_MAP_UPLOAD_TYPES),
 });
+
+export const worldDiscardUploadSchema = z.object({ imageUrl: z.string().url().max(2048) });

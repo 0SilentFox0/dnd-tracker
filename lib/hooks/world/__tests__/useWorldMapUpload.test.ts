@@ -26,7 +26,7 @@ describe("useWorldMapUpload", () => {
   });
 
   it("downscales a large image to 6000px on the long edge", async () => {
-    bitmap(8000, 4000);
+    bitmap(8000, 2000);
 
     const { result } = renderHook(() => useWorldMapUpload("c1"));
 
@@ -36,8 +36,22 @@ describe("useWorldMapUpload", () => {
       out = await result.current.upload(image());
     });
 
-    expect(out).toEqual({ imageUrl: "https://x/m.webp", width: 6000, height: 3000 });
-    expect(resizeImageToBlob).toHaveBeenCalledWith(expect.any(File), 6000);
+    expect(out).toEqual({ imageUrl: "https://x/m.webp", width: 6000, height: 1500 });
+    expect(resizeImageToBlob).toHaveBeenCalledWith(expect.any(File), 6000, undefined, 16_000_000);
+  });
+
+  it("caps a huge square image by area", async () => {
+    bitmap(6000, 6000);
+
+    const { result } = renderHook(() => useWorldMapUpload("c1"));
+
+    let out = { width: 0, height: 0 };
+
+    await act(async () => {
+      out = await result.current.upload(image());
+    });
+
+    expect(out.width * out.height).toBeLessThanOrEqual(16_000_000);
   });
 
   it("keeps a small image as is", async () => {

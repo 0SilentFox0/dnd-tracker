@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { uploadWorldMapImage } from "@/lib/api/world";
-import { WORLD_MAP_MAX_EDGE_PX } from "@/lib/constants/world";
+import { discardWorldMapUpload, uploadWorldMapImage } from "@/lib/api/world";
+import { WORLD_MAP_MAX_EDGE_PX, WORLD_MAP_MAX_PIXELS } from "@/lib/constants/world";
 import { fitWithin, resizeImageToBlob } from "@/lib/utils/common/image-resize";
 
 export function useWorldMapUpload(campaignId: string) {
@@ -18,11 +18,11 @@ export function useWorldMapUpload(campaignId: string) {
       try {
         const bitmap = await createImageBitmap(file);
 
-        const { width, height } = fitWithin(bitmap.width, bitmap.height, WORLD_MAP_MAX_EDGE_PX);
+        const { width, height } = fitWithin(bitmap.width, bitmap.height, WORLD_MAP_MAX_EDGE_PX, WORLD_MAP_MAX_PIXELS);
 
         bitmap.close();
 
-        const imageUrl = await uploadWorldMapImage(campaignId, await resizeImageToBlob(file, WORLD_MAP_MAX_EDGE_PX));
+        const imageUrl = await uploadWorldMapImage(campaignId, await resizeImageToBlob(file, WORLD_MAP_MAX_EDGE_PX, undefined, WORLD_MAP_MAX_PIXELS));
 
         return { imageUrl, width, height };
       } finally {
@@ -32,5 +32,7 @@ export function useWorldMapUpload(campaignId: string) {
     [campaignId],
   );
 
-  return { upload, uploading };
+  const discard = useCallback((imageUrl: string) => discardWorldMapUpload(campaignId, imageUrl).catch(() => undefined), [campaignId]);
+
+  return { upload, discard, uploading };
 }

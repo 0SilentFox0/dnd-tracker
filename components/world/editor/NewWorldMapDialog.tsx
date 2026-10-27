@@ -29,7 +29,7 @@ export function NewWorldMapDialog(props: Props) {
 function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
   const { campaignId, editor, openMap } = useWorldEditorContext();
 
-  const { upload, uploading } = useWorldMapUpload(campaignId);
+  const { upload, discard, uploading } = useWorldMapUpload(campaignId);
 
   const notify = useNotify();
 
@@ -60,7 +60,7 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       onOpenChange(false);
       openMap(created.id);
     } catch {
-      // create's errorText already notified
+      void discard(image.imageUrl);
     }
   };
 

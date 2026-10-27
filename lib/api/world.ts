@@ -44,3 +44,6 @@ export async function uploadWorldMapImage(campaignId: string, blob: Blob): Promi
 
   return ticket.publicUrl;
 }
+
+/** Best-effort: прибирає щойно завантажений файл, якщо створення/оновлення карти не вдалося. */
+export const discardWorldMapUpload = (campaignId: string, imageUrl: string) => campaignPost<{ ok: true }>(campaignId, "/world/discard-upload", { imageUrl });

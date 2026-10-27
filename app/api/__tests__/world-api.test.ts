@@ -191,6 +191,41 @@ describe("world API", () => {
     });
   });
 
+  describe("POST map: race on the root", () => {
+    it("P2002 без parentMarkerId — 409 про корінь", async () => {
+      const { Prisma } = await import("@prisma/client");
+
+      vi.mocked(prisma.worldMap.findFirst).mockResolvedValue(null);
+      vi.mocked(prisma.worldMap.create).mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError("dup", { code: "P2002", clientVersion: "x" }));
+
+      const res = await (await maps()).POST(json("POST", { name: "Світ", imageUrl: img("a"), width: 100, height: 100 }), ctx());
+
+      expect(res.status).toBe(409);
+      expect((await res.json()).error).toBe("Коренева карта вже є");
+    });
+  });
+
+  describe("POST discard-upload", () => {
+    const discard = () => import("@/app/api/campaigns/[id]/world/discard-upload/route");
+
+    it("видаляє файл, на який не посилається жодна карта", async () => {
+      expect((await (await discard()).POST(json("POST", { imageUrl: img("z") }), ctx())).status).toBe(200);
+      expect(storage.removeWorldMapFiles).toHaveBeenCalledWith("c1", [img("z")]);
+    });
+
+    it("не чіпає файл, який використовує карта", async () => {
+      vi.mocked(prisma.worldMap.count).mockResolvedValue(1);
+
+      expect((await (await discard()).POST(json("POST", { imageUrl: img("a") }), ctx())).status).toBe(200);
+      expect(storage.removeWorldMapFiles).not.toHaveBeenCalled();
+    });
+
+    it("чужий шлях — 400", async () => {
+      expect((await (await discard()).POST(json("POST", { imageUrl: "https://x/world-maps/other/a.webp" }), ctx())).status).toBe(400);
+      expect(storage.removeWorldMapFiles).not.toHaveBeenCalled();
+    });
+  });
+
   describe("PATCH map", () => {
     it("зміна imageUrl — старий файл видаляється в after", async () => {
       vi.mocked(prisma.worldMap.findUnique).mockResolvedValue(mapRow() as never);
