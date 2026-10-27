@@ -75,6 +75,19 @@ describe("WorldMarkerPanel", () => {
     expect(remove).not.toHaveBeenCalled();
   });
 
+  it("picks the icon from a button grid and groups fields into sections", () => {
+    renderPanel(marker({ icon: "city" }));
+
+    expect(screen.getByRole("heading", { name: "Основне" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Для майстра" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Вкладена карта" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Місто" }).getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Замок" }));
+
+    expect(update).toHaveBeenCalledWith({ id: "k1", data: { icon: "castle" } });
+  });
+
   it("shows the colour only for zones", () => {
     renderPanel(marker({ kind: "point" }));
 

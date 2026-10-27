@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Crosshair, ImageUp, Trash2 } from "lucide-react";
+import { type CSSProperties, useRef, useState } from "react";
+import { ChevronRight, Crosshair, ImageUp, Map as MapIcon } from "lucide-react";
 
 import { useWorldEditorContext } from "./WorldEditorContext";
+import { QuietDeleteButton, WorldPanelHeader } from "./WorldPanelHeader";
 
+import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Switch } from "@/components/ui/switch";
@@ -38,6 +40,10 @@ export function WorldMapSettings() {
   if (!detail) return null;
 
   const { map } = detail;
+
+  const children = maps.filter((m) => m.parentMapId === map.id);
+
+  const fill = ((radius - REVEAL_RADIUS_RANGE.min) / (REVEAL_RADIUS_RANGE.max - REVEAL_RADIUS_RANGE.min)) * 100;
 
   const save = (data: Parameters<typeof editor.map.update.mutateOk>[0]["data"]) => editor.map.update.mutateOk({ id: map.id, data });
 
@@ -97,33 +103,65 @@ export function WorldMapSettings() {
   };
 
   return (
-    <div className="space-y-4">
-      <LabeledInput label="Назва" maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
-      <label className="flex items-center justify-between gap-3 text-sm">
-        Туман війни
-        <Switch checked={map.fogEnabled} onCheckedChange={(v) => void save({ fogEnabled: v })} />
-      </label>
-      <label className="block space-y-1 text-sm">
-        Радіус огляду: {Math.round(radius * 100)}%
-        <input
-          type="range"
-          min={REVEAL_RADIUS_RANGE.min}
-          max={REVEAL_RADIUS_RANGE.max}
-          step={RADIUS_STEP}
-          value={radius}
-          onChange={(e) => setRadius(Number(e.target.value))}
-          onPointerUp={commitRadius}
-          onKeyUp={commitRadius}
-          onBlur={commitRadius}
-          className="w-full accent-[var(--gold)]"
-        />
-      </label>
-      <div className="flex flex-col gap-2">
-        <Button type="button" variant={tool === "entry" ? "default" : "outline"} onClick={() => setTool(tool === "entry" ? "select" : "entry")} className="gap-2">
+    <div>
+      <WorldPanelHeader badge={<MapIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={map.name} subtitle={map.parentMapId ? "Вкладена карта" : "Коренева карта"} />
+      <HudSection title="Основне">
+        <LabeledInput label="Назва" maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
+      </HudSection>
+      <HudSection title="Туман війни">
+        <div className="space-y-2">
+          <label className="flex items-center justify-between gap-3 text-sm">
+            Приховувати невідкриті ділянки
+            <Switch checked={map.fogEnabled} onCheckedChange={(v) => void save({ fogEnabled: v })} />
+          </label>
+          <label className="block space-y-1 text-sm">
+            <span className="flex items-center justify-between">
+              Радіус огляду
+              <span className="font-mono text-hud-gold-bright">{Math.round(radius * 100)}%</span>
+            </span>
+            <input
+              type="range"
+              className="hud-range"
+              style={{ "--fill": `${fill}%` } as CSSProperties}
+              min={REVEAL_RADIUS_RANGE.min}
+              max={REVEAL_RADIUS_RANGE.max}
+              step={RADIUS_STEP}
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+              onPointerUp={commitRadius}
+              onKeyUp={commitRadius}
+              onBlur={commitRadius}
+            />
+          </label>
+        </div>
+      </HudSection>
+      <HudSection title="Точка входу">
+        <Button type="button" variant={tool === "entry" ? "default" : "outline"} onClick={() => setTool(tool === "entry" ? "select" : "entry")} className="w-full gap-2">
           <Crosshair className="size-4" />
           {tool === "entry" ? "Клікніть по карті…" : "Поставити точку входу"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => fileInput.current?.click()} className="gap-2">
+      </HudSection>
+      <HudSection title={`Вкладені карти · ${children.length}`}>
+        {children.length ? (
+          <ul className="space-y-1">
+            {children.map((m) => (
+              <li key={m.id}>
+                <button type="button" onClick={() => openMap(m.id)} className="flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]">
+                  <span className="truncate">{m.name}</span>
+                  <ChevronRight className="size-4 shrink-0 text-hud-muted" aria-hidden />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-hud-muted">Оберіть маркер і створіть для нього вкладену карту.</p>
+        )}
+      </HudSection>
+      <HudSection title="Картинка">
+        <p className="mb-2 text-xs text-hud-muted">
+          {map.width}×{map.height} px
+        </p>
+        <Button type="button" variant="outline" onClick={() => fileInput.current?.click()} className="w-full gap-2">
           <ImageUp className="size-4" />
           Замінити картинку
         </Button>
@@ -140,11 +178,8 @@ export function WorldMapSettings() {
             if (file) void replaceImage(file);
           }}
         />
-        <Button type="button" variant="destructive" onClick={() => void remove()} className="gap-2">
-          <Trash2 className="size-4" />
-          Видалити карту
-        </Button>
-      </div>
+      </HudSection>
+      <QuietDeleteButton label="Видалити карту" onClick={() => void remove()} />
     </div>
   );
 }

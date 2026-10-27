@@ -44,6 +44,16 @@ afterEach(() => {
 });
 
 describe("WorldMapSettings", () => {
+  it("lists nested maps with a link to open each", () => {
+    renderSettings();
+
+    expect(screen.getByRole("heading", { name: "Вкладені карти · 1" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Місто" }));
+
+    expect(ctx.openMap).toHaveBeenCalledWith("m2");
+  });
+
   it("does not delete when the confirmation is declined", async () => {
     renderSettings();
     fireEvent.click(screen.getByRole("button", { name: /Видалити карту/ }));
