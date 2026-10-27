@@ -106,5 +106,7 @@ export const API_ERRORS = {
   WORLD_NESTED_EXISTS: "У маркера вже є вкладена карта",
   WORLD_MAPS_LIMIT: "Забагато карт",
   WORLD_MARKERS_LIMIT: "Забагато маркерів на карті",
+  WORLD_IMAGE_FOREIGN: "Картинка карти має бути завантажена у сховище цієї кампанії",
+  WORLD_POLYGON_INVALID: "Контур можна задати лише для зони",
   AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;
