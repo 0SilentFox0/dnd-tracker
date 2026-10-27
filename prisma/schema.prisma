@@ -9,16 +9,18 @@ datasource db {
 }
 
 model User {
-  id              String           @id
-  email           String           @unique
+  id              String               @id
+  email           String               @unique
   displayName     String
   avatar          String?
-  createdAt       DateTime         @default(now())
+  createdAt       DateTime             @default(now())
   campaignMembers CampaignMember[]
-  dmCampaigns     Campaign[]       @relation("DMCampaigns")
+  dmCampaigns     Campaign[]           @relation("DMCampaigns")
   characters      Character[]
   aiCredentials   AiCredential[]
   onboardingFlags UserOnboardingFlag[]
+  worldNotes      WorldNote[]
+  worldTravelLog  WorldTravelLog[]
 
   @@map("users")
 }
@@ -58,6 +60,9 @@ model Campaign {
   aiProposals     AiProposal[]
   apiTokens       ApiToken[]
   inventoryLog    InventoryLog[]
+  worldMaps       WorldMap[]
+  worldPositions  WorldPosition[]
+  worldTravelLog  WorldTravelLog[]
 
   @@index([dmUserId])
   @@map("campaigns")
@@ -133,6 +138,9 @@ model Character {
   tokens              CharacterToken[]
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
+  worldPosition       WorldPosition?
+  worldReveals        WorldReveal[]
+  worldNotes          WorldNote[]
 
   @@index([campaignId])
   @@index([controlledBy])
@@ -401,6 +409,7 @@ model CampaignShow {
   battle       Json?
   cover        Json?
   curtain      Boolean  @default(false)
+  world        Json?
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -699,4 +708,118 @@ model UserOnboardingFlag {
 
   @@unique([userId, key])
   @@map("user_onboarding_flags")
+}
+
+model WorldMap {
+  id             String           @id @default(cuid())
+  campaignId     String
+  parentMarkerId String?          @unique
+  name           String
+  imageUrl       String
+  width          Int
+  height         Int
+  fogEnabled     Boolean          @default(true)
+  revealRadius   Float            @default(0.04)
+  entryX         Float            @default(0.5)
+  entryY         Float            @default(0.5)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  campaign       Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  parentMarker   WorldMarker?     @relation("NestedMap", fields: [parentMarkerId], references: [id], onDelete: Cascade)
+  markers        WorldMarker[]    @relation("MapMarkers")
+  positions      WorldPosition[]
+  reveals        WorldReveal[]
+  travelLog      WorldTravelLog[]
+
+  @@index([campaignId])
+  @@map("world_maps")
+}
+
+model WorldMarker {
+  id            String           @id @default(cuid())
+  mapId         String
+  kind          String
+  x             Float
+  y             Float
+  polygon       Json?
+  name          String
+  icon          String?
+  color         String?
+  dmNote        String?
+  alwaysVisible Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  map           WorldMap         @relation("MapMarkers", fields: [mapId], references: [id], onDelete: Cascade)
+  childMap      WorldMap?        @relation("NestedMap")
+  notes         WorldNote[]
+  arrivals      WorldTravelLog[]
+
+  @@index([mapId, sortOrder])
+  @@map("world_markers")
+}
+
+model WorldPosition {
+  characterId String    @id
+  campaignId  String
+  mapId       String
+  x           Float
+  y           Float
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  map         WorldMap  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("world_positions")
+}
+
+model WorldReveal {
+  id          String    @id @default(cuid())
+  mapId       String
+  characterId String
+  shape       Json
+  createdAt   DateTime  @default(now())
+  map         WorldMap  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@index([mapId, characterId])
+  @@map("world_reveals")
+}
+
+model WorldTravelLog {
+  id           String       @id @default(cuid())
+  campaignId   String
+  mapId        String
+  characterIds String[]
+  from         Json?
+  to           Json
+  toMarkerId   String?
+  rest         String       @default("none")
+  byUserId     String?
+  createdAt    DateTime     @default(now())
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  map          WorldMap     @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  toMarker     WorldMarker? @relation(fields: [toMarkerId], references: [id], onDelete: SetNull)
+  byUser       User?        @relation(fields: [byUserId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId, createdAt])
+  @@map("world_travel_log")
+}
+
+model WorldNote {
+  id           String      @id @default(cuid())
+  markerId     String
+  authorUserId String
+  characterId  String?
+  visibility   String
+  text         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  marker       WorldMarker @relation(fields: [markerId], references: [id], onDelete: Cascade)
+  author       User        @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  character    Character?  @relation(fields: [characterId], references: [id], onDelete: SetNull)
+
+  @@index([markerId])
+  @@map("world_notes")
 }

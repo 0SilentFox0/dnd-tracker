@@ -2,9 +2,9 @@
 
 import { type PointerEvent, useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 
-const MIN_ZOOM = 1;
+const DEFAULT_MIN_ZOOM = 1;
 
-const MAX_ZOOM = 3;
+const DEFAULT_MAX_ZOOM = 3;
 
 const WHEEL_STEP = 1.1;
 
@@ -18,16 +18,21 @@ interface Viewport {
 
 const INITIAL: Viewport = { zoom: 1, x: 0, y: 0 };
 
-function clampZoom(z: number): number {
-  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+interface ZoomBounds {
+  min: number;
+  max: number;
+}
+
+function clampZoom(z: number, { min, max }: ZoomBounds): number {
+  return Math.min(max, Math.max(min, z));
 }
 
 function clampOffset(o: number, zoom: number, size: number): number {
   return Math.min(0, Math.max(-(zoom - 1) * size, o));
 }
 
-function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h: number): Viewport {
-  const next = clampZoom(zoom);
+function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h: number, bounds: ZoomBounds): Viewport {
+  const next = clampZoom(zoom, bounds);
 
   const cx = (px - v.x) / v.zoom;
 
@@ -36,14 +41,16 @@ function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h:
   return { zoom: next, x: clampOffset(px - cx * next, next, w), y: clampOffset(py - cy * next, next, h) };
 }
 
-interface MapViewportOptions {
+export interface ViewportOptions {
   /** один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
   panLocked?: boolean;
   /** контейнер карти прокручується: без зуму колесо гортає його, а масштабує лише з Ctrl/⌘ */
   wheelScrolls?: boolean;
+  minZoom?: number;
+  maxZoom?: number;
 }
 
-export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapViewportOptions = {}) {
+export function useViewport({ panLocked = false, wheelScrolls = false, minZoom = DEFAULT_MIN_ZOOM, maxZoom = DEFAULT_MAX_ZOOM }: ViewportOptions = {}) {
   const [view, setView] = useState<Viewport>(INITIAL);
 
   const locked = useRef(panLocked);
@@ -51,6 +58,12 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
   useEffect(() => {
     locked.current = panLocked;
   }, [panLocked]);
+
+  const bounds = useRef<ZoomBounds>({ min: minZoom, max: maxZoom });
+
+  useEffect(() => {
+    bounds.current = { min: minZoom, max: maxZoom };
+  }, [minZoom, maxZoom]);
 
   const pointers = useRef(new Map<number, { x: number; y: number }>());
 
@@ -71,7 +84,7 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
 
     const factor = e.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
 
-    setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height));
+    setView((v) => zoomAt(v, v.zoom * factor, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height, bounds.current));
   });
 
   useEffect(() => {
@@ -119,7 +132,7 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
 
         const my = (a.y + b.y) / 2 - rect.top;
 
-        setView((v) => zoomAt(v, v.zoom * (dist / last), mx, my, rect.width, rect.height));
+        setView((v) => zoomAt(v, v.zoom * (dist / last), mx, my, rect.width, rect.height, bounds.current));
       }
 
       return;
@@ -132,6 +145,8 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
     if (!d.active && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > DRAG_THRESHOLD) {
       d.active = true;
       dragged.current = true;
+      // captured only once panning starts: capturing on down would retarget the child click
+      e.currentTarget.setPointerCapture?.(e.pointerId);
     }
 
     if (!d.active) return;
@@ -153,6 +168,18 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
 
   const reset = useCallback(() => setView(INITIAL), []);
 
+  const zoomBy = useCallback((factor: number) => {
+    const el = containerRef.current;
+
+    const rect = el?.getBoundingClientRect();
+
+    const w = rect?.width ?? 0;
+
+    const h = rect?.height ?? 0;
+
+    setView((v) => zoomAt(v, v.zoom * factor, w / 2, h / 2, w, h, bounds.current));
+  }, []);
+
   return {
     zoom: view.zoom,
     offset: { x: view.x, y: view.y },
@@ -160,5 +187,6 @@ export function useMapViewport({ panLocked = false, wheelScrolls = false }: MapV
     wasDragged,
     bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
     reset,
+    zoomBy,
   };
 }

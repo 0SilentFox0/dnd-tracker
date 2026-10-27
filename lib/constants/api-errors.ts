@@ -100,5 +100,13 @@ export const API_ERRORS = {
   DRAFT_EDIT_VIA_DRAFT: "Чернетку редагують через форму чернетки, а не загальне збереження",
   DRAFT_NOT_PENDING: "Персонаж уже схвалений — редагує DM",
   REVIEW_NOT_PENDING: "Персонаж не очікує схвалення",
+  WORLD_MAP_NOT_FOUND: "Карту не знайдено",
+  WORLD_MARKER_NOT_FOUND: "Маркер не знайдено",
+  WORLD_ROOT_EXISTS: "Коренева карта вже є",
+  WORLD_NESTED_EXISTS: "У маркера вже є вкладена карта",
+  WORLD_MAPS_LIMIT: "Забагато карт",
+  WORLD_MARKERS_LIMIT: "Забагато маркерів на карті",
+  WORLD_IMAGE_FOREIGN: "Картинка карти має бути завантажена у сховище цієї кампанії",
+  WORLD_POLYGON_INVALID: "Контур можна задати лише для зони",
   AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;

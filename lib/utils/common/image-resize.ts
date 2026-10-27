@@ -1,19 +1,28 @@
-export function fitWithin(w: number, h: number, maxSide: number): { width: number; height: number } {
-  const k = Math.min(1, maxSide / Math.max(w, h));
+export function fitWithin(w: number, h: number, maxSide: number, maxPixels = Infinity): { width: number; height: number } {
+  const k = Math.min(1, maxSide / Math.max(w, h), Math.sqrt(maxPixels / (w * h)));
 
   return { width: Math.round(w * k), height: Math.round(h * k) };
 }
 
-async function drawResized(file: File, maxSide: number): Promise<HTMLCanvasElement> {
+async function drawResized(file: File, maxSide: number, maxPixels?: number): Promise<HTMLCanvasElement> {
   const bitmap = await createImageBitmap(file);
 
-  const { width, height } = fitWithin(bitmap.width, bitmap.height, maxSide);
+  const { width, height } = fitWithin(bitmap.width, bitmap.height, maxSide, maxPixels);
 
   const canvas = document.createElement("canvas");
 
   canvas.width = width;
   canvas.height = height;
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, width, height);
+
+  const ctx = canvas.getContext("2d");
+
+  // iOS Safari returns a null context once the canvas exceeds its memory limit
+  if (!ctx) {
+    bitmap.close();
+    throw new Error("Картинка завелика для обробки в браузері");
+  }
+
+  ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
   return canvas;
@@ -30,8 +39,8 @@ export async function resizeImageToDataUrl(file: File, maxSide: number, quality 
 
 const toBlob = (canvas: HTMLCanvasElement, type: string, quality: number) => new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
 
-export async function resizeImageToBlob(file: File, maxSide: number, quality = 0.85): Promise<Blob> {
-  const canvas = await drawResized(file, maxSide);
+export async function resizeImageToBlob(file: File, maxSide: number, quality = 0.85, maxPixels?: number): Promise<Blob> {
+  const canvas = await drawResized(file, maxSide, maxPixels);
 
   const webp = await toBlob(canvas, "image/webp", quality);
 

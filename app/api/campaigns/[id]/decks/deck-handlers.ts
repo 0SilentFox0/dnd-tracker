@@ -8,9 +8,8 @@ import { createDeckSchema, deckSceneSchema, readSlides, saveDeckSchema, slideUpl
 import { listDecks, persistSlideImages, toSlideDeck, urlsUsedElsewhere } from "@/lib/server/show/deck-store";
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
 import { createSlideUploadTicket, removeSlideFiles } from "@/lib/supabase/scene-slide-storage";
-import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { withDM } from "@/lib/utils/api/as-dm";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { removedSlideUrls } from "@/lib/utils/show/deck-files";
@@ -18,18 +17,6 @@ import { applyShowCommand, refreshShowSlide } from "@/lib/utils/show/show-comman
 import type { ShowState, Slide, SlideDeck } from "@/types/show";
 
 const ownedDeck = (campaignId: string, deckId: string) => loadOwned(prisma.slideDeck.findUnique({ where: { id: deckId } }), campaignId, API_ERRORS.DECK_NOT_FOUND);
-
-async function asDM(campaignId: string, action: string, run: () => Promise<NextResponse>): Promise<NextResponse> {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
-    return await run();
-  } catch (error) {
-    return handleApiError(error, { action });
-  }
-}
 
 /** Картинка на екрані і картинки інших наборів лишаються. */
 async function removeUnusedFiles(campaignId: string, deckId: string, slides: { before: Slide[]; remaining: Slide[] }, show: ShowState | null) {
@@ -82,11 +69,11 @@ async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowSt
 const isNotFound = (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
 
 export function getDecksHandler(campaignId: string) {
-  return asDM(campaignId, "list decks", async () => NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } }));
+  return withDM(campaignId, "list decks", async () => NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } }));
 }
 
 export function createDeckHandler(req: Request, campaignId: string) {
-  return asDM(campaignId, "create deck", async () => {
+  return withDM(campaignId, "create deck", async () => {
     const body = await parseBody(createDeckSchema, req);
 
     if (body instanceof NextResponse) return body;
@@ -102,7 +89,7 @@ export function createDeckHandler(req: Request, campaignId: string) {
 }
 
 export function getDeckHandler(campaignId: string, deckId: string) {
-  return asDM(campaignId, "get deck", async () => {
+  return withDM(campaignId, "get deck", async () => {
     const deck = await ownedDeck(campaignId, deckId);
 
     if (deck instanceof NextResponse) return deck;
@@ -112,7 +99,7 @@ export function getDeckHandler(campaignId: string, deckId: string) {
 }
 
 export function saveDeckHandler(req: Request, campaignId: string, deckId: string) {
-  return asDM(campaignId, "save deck", async () => {
+  return withDM(campaignId, "save deck", async () => {
     const body = await parseBody(saveDeckSchema, req);
 
     if (body instanceof NextResponse) return body;
@@ -162,7 +149,7 @@ export function saveDeckHandler(req: Request, campaignId: string, deckId: string
 }
 
 export function setDeckSceneHandler(req: Request, campaignId: string, deckId: string) {
-  return asDM(campaignId, "set deck scene", async () => {
+  return withDM(campaignId, "set deck scene", async () => {
     const body = await parseBody(deckSceneSchema, req);
 
     if (body instanceof NextResponse) return body;
@@ -185,7 +172,7 @@ export function setDeckSceneHandler(req: Request, campaignId: string, deckId: st
 }
 
 export function deleteDeckHandler(campaignId: string, deckId: string) {
-  return asDM(campaignId, "delete deck", async () => {
+  return withDM(campaignId, "delete deck", async () => {
     const deck = await ownedDeck(campaignId, deckId);
 
     if (deck instanceof NextResponse) return deck;
@@ -201,7 +188,7 @@ export function deleteDeckHandler(campaignId: string, deckId: string) {
 }
 
 export function issueSlideUploadHandler(req: Request, campaignId: string) {
-  return asDM(campaignId, "issue slide upload", async () => {
+  return withDM(campaignId, "issue slide upload", async () => {
     const body = await parseBody(slideUploadRequestSchema, req);
 
     if (body instanceof NextResponse) return body;

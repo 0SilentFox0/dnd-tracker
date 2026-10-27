@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ownedSlidePath } from "../scene-slide-storage";
 
@@ -9,6 +9,8 @@ const id = "a".repeat(32);
 const url = (path: string) => `https://p.supabase.co/storage/v1/object/public/scene-slides/${path}`;
 
 describe("ownedSlidePath", () => {
+  beforeEach(() => void vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://p.supabase.co"));
+
   it("приймає імена зі завантаження і дзеркала цієї кампанії", () => {
     for (const ext of ["webp", "jpg", "png", "gif"]) expect(ownedSlidePath("c1", url(`c1/${id}.${ext}`))).toBe(`c1/${id}.${ext}`);
   });
