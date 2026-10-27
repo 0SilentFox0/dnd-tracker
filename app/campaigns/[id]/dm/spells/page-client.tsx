@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Printer, Wand2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
+import { SearchEmptyState } from "@/components/common/SearchEmptyState";
+import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -18,6 +20,8 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
   const list = useSpellsList(campaignId);
 
   const count = list.spells.length;
+
+  const groupNames = list.view.groups.map(([groupName]) => groupName);
 
   return (
     <HudPage>
@@ -57,18 +61,30 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
       ) : count === 0 ? (
         <EmptyState icon={Wand2} title="Ще немає заклинань" description="Створіть перше заклинання або імпортуйте їх з файлу." />
       ) : (
-        <Accordion type="multiple" defaultValue={list.view.groups.map(([groupName]) => groupName)} className="space-y-2">
-          {list.view.groups.map(([groupName, levels]) => (
-            <SpellGroupAccordion
-              key={groupName}
-              groupName={groupName}
-              levels={levels}
-              campaignId={campaignId}
-              spellGroups={list.view.spellGroups}
-              spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
-            />
-          ))}
-        </Accordion>
+        <>
+          <SearchInput value={list.search.query.value} onChange={list.search.query.set} label="Пошук заклинань" />
+          {list.view.groups.length === 0 ? (
+            <SearchEmptyState query={list.search.query.value} onClear={() => list.search.query.set("")} />
+          ) : (
+            <Accordion
+              key={list.search.isActive ? groupNames.join("|") : "all"}
+              type="multiple"
+              defaultValue={groupNames}
+              className="space-y-2"
+            >
+              {list.view.groups.map(([groupName, levels]) => (
+                <SpellGroupAccordion
+                  key={groupName}
+                  groupName={groupName}
+                  levels={levels}
+                  campaignId={campaignId}
+                  spellGroups={list.view.spellGroups}
+                  spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
+                />
+              ))}
+            </Accordion>
+          )}
+        </>
       )}
     </HudPage>
   );

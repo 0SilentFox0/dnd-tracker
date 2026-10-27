@@ -1,3 +1,4 @@
+import { normalizeSearchText } from "@/lib/utils/common/text-search";
 import type { TrackKind } from "@/types/audio";
 
 export const TRACK_GROUP_SEPARATOR = " - ";
@@ -55,17 +56,15 @@ export function listTrackGroups(tracks: { title: string }[]): string[] {
   return [...names.filter((n) => n !== OTHER_TRACK_GROUP), ...names.filter((n) => n === OTHER_TRACK_GROUP)];
 }
 
-const normalize = (s: string) => s.toLocaleLowerCase("uk").replace(/\s+/g, " ").trim();
-
 export function filterTracks<T extends { title: string; kind: TrackKind }>(tracks: T[], filter: PlaylistFilter): T[] {
-  const words = normalize(filter.query).split(" ").filter(Boolean);
+  const words = normalizeSearchText(filter.query).split(" ").filter(Boolean);
 
   return tracks.filter((t) => {
     if (filter.kind && t.kind !== filter.kind) return false;
 
     if (filter.group && trackGroupName(t.title) !== filter.group) return false;
 
-    const title = normalize(t.title);
+    const title = normalizeSearchText(t.title);
 
     return words.every((w) => title.includes(w));
   });

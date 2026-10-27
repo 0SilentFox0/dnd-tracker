@@ -6,6 +6,8 @@ import { Gem } from "lucide-react";
 import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifactsButton";
+import { SearchEmptyState } from "@/components/common/SearchEmptyState";
+import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
@@ -17,6 +19,12 @@ import { useArtifactsCatalog } from "@/lib/hooks/artifact-sets";
 
 export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
   const catalog = useArtifactsCatalog(campaignId);
+
+  const { search } = catalog;
+
+  const noResults = search.isActive && catalog.view.sets.length === 0 && catalog.view.bySlot.length === 0;
+
+  const slotKeys = catalog.view.bySlot.map((g) => g.slot).join("|");
 
   const newHref = `/campaigns/${campaignId}/dm/artifacts/new`;
 
@@ -54,6 +62,8 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
         />
       ) : (
         <>
+          <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук артефактів" placeholder="Пошук за назвою або сетом" />
+          {noResults && <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />}
           {catalog.view.sets.length > 0 && (
             <HudPanel>
               <HudSection title="Сети артефактів">
@@ -66,31 +76,33 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
             </HudPanel>
           )}
 
-          <HudPanel>
-            <HudSection title="Артефакти без сету">
-              <Accordion type="multiple" className="w-full space-y-2">
-                {catalog.view.bySlot.map(({ slot, label, artifacts }) => (
-                  <AccordionItem key={slot} value={slot} className="rounded-lg border last:border-b">
-                    <AccordionTrigger className="px-4 hover:no-underline">
-                      <span className="flex items-center gap-2">
-                        {label}
-                        <Badge variant="secondary" className="text-xs">
-                          {artifacts.length}
-                        </Badge>
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-3">
-                      <div className="grid gap-3 pt-2 md:grid-cols-2 lg:grid-cols-3">
-                        {artifacts.map((artifact) => (
-                          <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="full" />
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </HudSection>
-          </HudPanel>
+          {catalog.view.bySlot.length > 0 && (
+            <HudPanel>
+              <HudSection title="Артефакти без сету">
+                <Accordion key={search.isActive ? slotKeys : "all"} type="multiple" defaultValue={search.isActive ? catalog.view.bySlot.map((g) => g.slot) : []} className="w-full space-y-2">
+                  {catalog.view.bySlot.map(({ slot, label, artifacts }) => (
+                    <AccordionItem key={slot} value={slot} className="rounded-lg border last:border-b">
+                      <AccordionTrigger className="px-4 hover:no-underline">
+                        <span className="flex items-center gap-2">
+                          {label}
+                          <Badge variant="secondary" className="text-xs">
+                            {artifacts.length}
+                          </Badge>
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-3">
+                        <div className="grid gap-3 pt-2 md:grid-cols-2 lg:grid-cols-3">
+                          {artifacts.map((artifact) => (
+                            <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="full" />
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </HudSection>
+            </HudPanel>
+          )}
         </>
       )}
     </HudPage>

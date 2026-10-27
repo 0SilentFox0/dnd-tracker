@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Printer, Sparkles } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
+import { SearchEmptyState } from "@/components/common/SearchEmptyState";
+import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -16,7 +18,9 @@ import { pluralUk } from "@/lib/utils/common/plural";
 const SKILL_NOUNS: [string, string, string] = ["скіл", "скіли", "скілів"];
 
 export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
-  const { skills, isLoading, groups, actions } = useSkillsList(campaignId);
+  const { skills, isLoading, search, groups, actions } = useSkillsList(campaignId);
+
+  const groupNames = groups.map((g) => g.name);
 
   const newSkillHref = `/campaigns/${campaignId}/dm/skills/new`;
 
@@ -66,19 +70,26 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
           }
         />
       ) : (
-        <Accordion type="multiple" defaultValue={groups.map((g) => g.name)} className="space-y-2">
-          {groups.map((group) => (
-            <SkillGroupAccordion
-              key={group.name}
-              groupName={group.name}
-              skills={group.skills}
-              campaignId={campaignId}
-              spellGroups={[]}
-              mainSkillColor={group.color}
-              actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
-            />
-          ))}
-        </Accordion>
+        <>
+          <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук скілів" placeholder="Пошук за назвою або навиком" />
+          {groups.length === 0 ? (
+            <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
+          ) : (
+            <Accordion key={search.isActive ? groupNames.join("|") : "all"} type="multiple" defaultValue={groupNames} className="space-y-2">
+              {groups.map((group) => (
+                <SkillGroupAccordion
+                  key={group.name}
+                  groupName={group.name}
+                  skills={group.skills}
+                  campaignId={campaignId}
+                  spellGroups={[]}
+                  mainSkillColor={group.color}
+                  actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
+                />
+              ))}
+            </Accordion>
+          )}
+        </>
       )}
     </HudPage>
   );

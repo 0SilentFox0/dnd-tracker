@@ -1,11 +1,11 @@
 "use client";
 
-import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 
 import { TrackList, type TrackListActions } from "./TrackList";
 
+import { SearchInput } from "@/components/common/SearchInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { usePlaylistView } from "@/lib/hooks/audio";
 import { useTrackPreview } from "@/lib/hooks/music";
 import type { CampaignTrack } from "@/types/audio";
@@ -22,10 +22,7 @@ export function TrackGroups({ tracks, busy, actions }: { tracks: CampaignTrack[]
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <div className="relative min-w-0 flex-1">
-          <Search aria-hidden className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-hud-muted" />
-          <Input type="search" aria-label="Пошук треку" placeholder="Пошук…" value={data.query} onChange={(e) => set({ query: e.target.value })} className="pl-8" />
-        </div>
+        <SearchInput value={data.query} onChange={(query) => set({ query })} label="Пошук треку" placeholder="Пошук…" className="min-w-0 flex-1" />
         {grouped && (
           <Button variant="outline" size="sm" disabled={!!data.query.trim()} onClick={view.collapsed.toggleAll} className="flex shrink-0 items-center gap-1.5">
             {view.collapsed.all ? <ChevronsUpDown className="size-4" /> : <ChevronsDownUp className="size-4" />}

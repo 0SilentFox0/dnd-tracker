@@ -3,8 +3,12 @@
 import { useCharacters, useDeleteAllCharacters, useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { useConfirm, useNotify, useSearch } from "@/lib/hooks/common";
 import type { CharacterListItem } from "@/types/characters";
+
+const EMPTY: CharacterListItem[] = [];
+
+const characterFields = (character: CharacterListItem) => [character.name, character.user?.displayName];
 
 export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValue) {
   const confirm = useConfirm();
@@ -12,6 +16,8 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
   const notify = useNotify();
 
   const query = useCharacters(campaignId, type ? { type } : undefined);
+
+  const search = useSearch(query.data ?? EMPTY, characterFields);
 
   const deleteAll = useDeleteAllCharacters(campaignId);
 
@@ -35,6 +41,7 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
 
   return {
     query,
+    search,
     actions: { levelUp, confirmDelete, removeAll },
     status: { isDeletingAll: deleteAll.isPending, levelingUpId: levelUpMutation.isPending ? levelUpMutation.variables : undefined },
   };

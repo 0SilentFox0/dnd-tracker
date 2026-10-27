@@ -17,5 +17,6 @@ export { useNotify, useOptionalNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
+export { type SearchState, useSearch } from "./useSearch";
 export { useSingleFlight } from "./useSingleFlight";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";

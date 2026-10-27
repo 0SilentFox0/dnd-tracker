@@ -1,24 +1,14 @@
 import Link from "next/link";
-import { Swords } from "lucide-react";
 
 import { DeleteAllBattlesButton } from "./page-client";
 
-import { BattleListCard } from "@/components/battle/list/BattleListCard";
-import { EmptyState } from "@/components/common/states";
-import { HudSection } from "@/components/hud/form";
-import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { BattleSections } from "@/components/battle/list/BattleSections";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
-import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
-
-const SECTIONS: { kind: BattleStatus; title: string }[] = [
-  { kind: BattleStatus.ACTIVE, title: "Активні бої" },
-  { kind: BattleStatus.PREPARED, title: "Підготовлені бої" },
-  { kind: BattleStatus.COMPLETED, title: "Завершені бої" },
-];
 
 export default async function DMBattlesPage({
   params,
@@ -55,36 +45,7 @@ export default async function DMBattlesPage({
       />
       <OnboardingHint id="dm.battles" />
 
-      {SECTIONS.map(({ kind, title }) => {
-        const list = battles.filter((b) => b.status === kind);
-
-        if (list.length === 0) return null;
-
-        return (
-          <HudPanel key={kind}>
-            <HudSection title={title}>
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {list.map((battle) => (
-                  <BattleListCard key={battle.id} battle={battle} campaignId={id} kind={kind} />
-                ))}
-              </div>
-            </HudSection>
-          </HudPanel>
-        );
-      })}
-
-      {battles.length === 0 && (
-        <EmptyState
-          className="bg-hud-panel"
-          icon={Swords}
-          title="Поки немає сцен боїв"
-          action={
-            <Link href={`/campaigns/${id}/dm/battles/new`}>
-              <Button>Створити першу сцену бою</Button>
-            </Link>
-          }
-        />
-      )}
+      <BattleSections battles={battles} campaignId={id} />
     </HudPage>
   );
 }
