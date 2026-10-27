@@ -16,6 +16,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
 
   const character = await prisma.character.findFirst({
     where: { campaignId: id, controlledBy: userId, type: CharacterType.PLAYER },
+    orderBy: { createdAt: "desc" },
     select: { id: true },
   });
 
