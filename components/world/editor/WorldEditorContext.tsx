@@ -2,10 +2,10 @@
 
 import { createContext, useContext } from "react";
 
-import type { useWorldEditor } from "@/lib/hooks/world";
+import type { useWorldEditor, WorldTool } from "@/lib/hooks/world";
 import type { WorldMapDetail, WorldMapSummary } from "@/types/world";
 
-export type WorldTool = "select" | "entry";
+export type { WorldTool };
 
 export interface WorldEditorCtx {
   campaignId: string;
@@ -17,6 +17,8 @@ export interface WorldEditorCtx {
   openMap(mapId: string | null): void;
   tool: WorldTool;
   setTool(tool: WorldTool): void;
+  redrawId: string | null;
+  redraw(markerId: string | null): void;
 }
 
 export const WorldEditorContext = createContext<WorldEditorCtx | null>(null);
