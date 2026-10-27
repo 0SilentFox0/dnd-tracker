@@ -78,6 +78,8 @@
 
 ### Task A2: Піни, зони, підписи (`WorldPins`, `WorldZones`, `marker-icons`)
 
+**Напрям — B «Атлас/пергамент» (вибір користувача 2026-10-28); деталі в розділі «Рішення користувача» брифу `specs/2026-10-28-world-map-ui-polish.md`; критерії «готово» — розділ (в) брифу.** Нові стилі — `components/world/world-atlas.css` (токени `--atlas-*`).
+
 **Files:** `components/world/{WorldPins,WorldZones,marker-icons}.ts(x)`, тести `components/world/__tests__/`.
 
 - [ ] Піни: круглий «жетон» з іконкою замість пілюлі з текстом; підпис — окремим елементом, показується при hover/selected/zoom ≥ порога (для зон — по центру контуру, з обводкою тексту для читабельності на будь-якій картинці). Підписи не ловлять pointer.
@@ -215,6 +217,7 @@ useWorldNotes(cid, mapId) // { create, update, remove } з оптимістич�
 
 **Рішення (неочевидне):**
 - `WorldMapView` отримує `fog?: { shapes: RevealShape[]; radius: number }` і `heroes?: WorldHero[]` (у `detail`-стилі, обидва опційні → ДМ-редактор без змін).
+- Колір туману — токен `--atlas-fog` (не чорний), див. бриф.
 - `WorldFog` — `<canvas>` **поза** трансформованим шаром, у `box`-розмірі, `pointer-events: none`; малює: заливка `rgba(8,6,4,.92)`, далі `globalCompositeOperation = "destination-out"`: для `p` — радіальний градієнт (рівно `radius·box.width·zoom`, м'який край 25 %), для `s` — капсула (лінія з `lineCap: round`, `lineWidth = 2·r`, `shadowBlur` для м'якості). Координати — через `(x·box.width·zoom + offset.x, y·box.height·zoom + offset.y)`. Перемальовка в `requestAnimationFrame` при зміні shapes/zoom/offset/size; DPR ≤ 2; на `prefers-reduced-motion` без анімації появи нових відкриттів (інакше 400 мс fade).
 - `WorldHeroes`: аватарка/ініціал-жетон, `scale(1/zoom)` як піни; свій — золота обводка; клік → `handlers.onHeroClick?.(id)`.
 - Тести (`happy-dom` без canvas → мок `getContext`): викликів `arc/stroke` стільки, скільки shapes; `fog` відсутній → canvas не рендериться; героїв рендерить N; `zoom` змінює `lineWidth`.
