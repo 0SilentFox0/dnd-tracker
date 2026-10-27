@@ -71,6 +71,6 @@ describe("useArtifactsCatalog", () => {
 
     await waitFor(() => expect(result.current.view.sets).toEqual([]));
 
-    expect(result.current.view.bySlot.map((g) => g.slot)).toEqual(["ring"]);
+    expect(result.current.view.bySlot.map((g) => g.slot)).toEqual(["amulet"]);
   });
 });
