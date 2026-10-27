@@ -4,11 +4,11 @@ import type { InventoryModel } from "@/lib/hooks/characters";
 import { type DragPayload, dropAction, type DropTarget } from "@/lib/utils/inventory/backpack";
 
 export const dragProps = (inv: InventoryModel, payload: DragPayload) =>
-  inv.access.canAct
+  inv.access.canAct && !inv.isPending
     ? {
         draggable: true,
         onDragStart: (e: DragEvent) => {
-          e.dataTransfer?.setData("text/plain", "inventory");
+          e.dataTransfer?.setData("application/x-dnd-inventory", "1");
 
           if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
 

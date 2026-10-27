@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { artifactRarityLabel, ArtifactSlot,artifactSlotLabel } from "@/lib/constants/artifacts";
+import { artifactRarityLabel, ArtifactSlot, artifactSlotLabel } from "@/lib/constants/artifacts";
 import type { InventoryModel, InventorySelection } from "@/lib/hooks/characters";
 import type { SpecialItem } from "@/types/inventory";
 

@@ -60,7 +60,7 @@ describe("таби профілю", () => {
     expect(slot.compareDocumentPosition(book) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("Інвентар: список по артефактах з ефектами і сетом have/total; тап — шторка", () => {
+  it("Інвентар: деталі артефакта з ефектами; тап — шторка", () => {
     mockMatchMedia(true);
     inProfile(<InventoryTab />);
 

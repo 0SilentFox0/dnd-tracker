@@ -98,6 +98,24 @@ describe("InventoryTab", () => {
     fireEvent.drop(screen.getByLabelText("Зілля лікування"));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "stash", slot: "armor" }));
+    expect(mocks.mutateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("порожній слот приймає drop: не disabled, без pointer-events-none", async () => {
+    renderTab();
+
+    const slot = screen.getByLabelText("Перстень, порожньо");
+
+    expect((slot as HTMLButtonElement).disabled).toBe(false);
+    expect(slot.className).not.toContain("pointer-events-none");
+    expect(slot.getAttribute("aria-disabled")).toBe("true");
+    expect(slot.getAttribute("tabindex")).toBe("-1");
+
+    fireEvent.dragStart(screen.getByLabelText("Перстень сили"));
+    fireEvent.drop(slot);
+
+    await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "equip", artifactId: "r1" }));
+    expect(mocks.mutateAsync).toHaveBeenCalledTimes(1);
   });
 
   it("перегляд без прав: деталі без дій, без «Додати» і «Витратити»", async () => {

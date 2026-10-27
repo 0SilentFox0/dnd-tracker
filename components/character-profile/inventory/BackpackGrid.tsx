@@ -1,6 +1,7 @@
 import { dragProps, dropProps } from "./dnd";
 import { InventoryCell } from "./InventoryCell";
 
+import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
 
@@ -18,18 +19,16 @@ export function BackpackGrid({ inv, onAdd }: { inv: InventoryModel; onAdd: () =>
   return (
     <div role="group" aria-label="Рюкзак" {...drop} className={cn("grid grid-cols-5 gap-1.5 rounded-lg p-1 lg:grid-cols-6", receiving && "bg-hud-gold-strong/10 ring-1 ring-hud-gold-strong/50")}>
       {inv.backpack.cells.map((cell) => {
-        const state = { selected: false, drop: null };
-
         if (cell.kind === "artifact") {
           const { artifact } = cell;
 
           return (
             <InventoryCell
               key={cell.key}
-              label={`${artifact.name}`}
+              label={artifact.name}
               thing={{ name: artifact.name, icon: artifact.icon, rarity: artifact.rarity }}
-              state={{ ...state, selected: selectedId === artifact.id }}
-              dnd={{ ...dragProps(inv, { from: "backpack", artifactId: artifact.id, slotType: artifact.slot }), ...drop }}
+              state={{ selected: selectedId === artifact.id, drop: null }}
+              dnd={artifact.slot === ArtifactSlot.ITEM ? { draggable: false } : dragProps(inv, { from: "backpack", artifactId: artifact.id, slotType: artifact.slot })}
               onClick={() => selection.set({ kind: "artifact", id: artifact.id })}
             />
           );
@@ -45,16 +44,16 @@ export function BackpackGrid({ inv, onAdd }: { inv: InventoryModel; onAdd: () =>
               key={cell.key}
               label={item.name}
               thing={{ name: item.name, icon: null, rarity: null, badge }}
-              state={{ ...state, selected: selectedId === item.id }}
-              dnd={{ draggable: false, ...drop }}
+              state={{ selected: selectedId === item.id, drop: null }}
+              dnd={{ draggable: false }}
               onClick={() => selection.set({ kind: "item", id: item.id })}
             />
           );
         }
 
-        if (cell.kind === "add") return <InventoryCell key={cell.key} label="Додати" placeholder={<span className="text-2xl leading-none">+</span>} state={state} dnd={{ draggable: false, ...drop }} onClick={onAdd} />;
+        if (cell.kind === "add") return <InventoryCell key={cell.key} label="Додати" placeholder={<span className="text-2xl leading-none">+</span>} state={{ selected: false, drop: null }} dnd={{ draggable: false }} onClick={onAdd} />;
 
-        return <InventoryCell key={cell.key} label="Порожня клітинка" state={state} dnd={{ draggable: false, ...drop }} />;
+        return <InventoryCell key={cell.key} label="Порожня клітинка" state={{ selected: false, drop: null }} dnd={{ draggable: false }} />;
       })}
     </div>
   );

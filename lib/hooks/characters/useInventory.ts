@@ -31,7 +31,7 @@ export interface InventoryModel {
   backpack: { cells: BackpackCell[]; query: UseQueryResult<StashView> } | null;
   purse: Purse | null;
   access: { canAct: boolean; isDM: boolean; pending: boolean };
-  layout: { desktop: boolean; columns: 5 | 6 };
+  layout: { desktop: boolean };
   selection: { value: InventorySelection | null; set: (key: SelectionKey | null) => void };
   drag: { value: DragPayload | null; set: (p: DragPayload | null) => void };
   actions: {
@@ -121,6 +121,8 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
 
   const drop = useCallback(
     async (target: DropTarget) => {
+      if (isPending) return;
+
       const payload = drag;
 
       setDrag(null);
@@ -129,7 +131,7 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
 
       if (action) await run(action, true);
     },
-    [drag, run],
+    [drag, run, isPending],
   );
 
   const ask = useCallback(
@@ -146,7 +148,7 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
     backpack: pending ? null : { cells, query },
     purse: view?.purse ?? null,
     access: { canAct, isDM, pending },
-    layout: { desktop, columns },
+    layout: { desktop },
     selection: { value: selection, set: setSelectedKey },
     drag: { value: drag, set: setDrag },
     actions: {

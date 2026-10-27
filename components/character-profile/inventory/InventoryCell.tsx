@@ -20,6 +20,8 @@ interface InventoryCellProps {
 }
 
 export function InventoryCell({ label, thing, placeholder, state, dnd, onClick }: InventoryCellProps) {
+  const inert = !thing && !onClick;
+
   const title = thing ? (thing.rarity ? `${thing.name} · ${artifactRarityLabel(thing.rarity)}` : thing.name) : undefined;
 
   return (
@@ -27,7 +29,8 @@ export function InventoryCell({ label, thing, placeholder, state, dnd, onClick }
       type="button"
       aria-label={label}
       title={title}
-      disabled={!thing && !onClick}
+      aria-disabled={inert || undefined}
+      tabIndex={inert ? -1 : undefined}
       data-drop={state.drop ?? undefined}
       draggable={dnd?.draggable}
       onDragStart={dnd?.onDragStart}
@@ -36,7 +39,7 @@ export function InventoryCell({ label, thing, placeholder, state, dnd, onClick }
       onDrop={dnd?.onDrop}
       onClick={onClick}
       className={cn(
-        "relative flex aspect-square disabled:pointer-events-none min-h-11 items-center justify-center overflow-hidden rounded-md text-hud-muted transition",
+        "relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-md text-hud-muted transition",
         thing
           ? cn("border-2 bg-hud-field shadow-[inset_0_2px_6px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(255,255,255,0.04)]", ARTIFACT_RARITY_COLOR[thing.rarity ?? ""] ?? "border-hud-line")
           : "border border-dashed border-hud-rule bg-black/30 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]",
