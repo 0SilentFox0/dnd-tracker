@@ -95,7 +95,7 @@ describe("SignInScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Увійти через Google" }));
 
     await waitFor(() =>
-      expect(auth.signInWithOAuth).toHaveBeenCalledWith({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } }),
+      expect(auth.signInWithOAuth).toHaveBeenCalledWith({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: "select_account" } } }),
     );
   });
 

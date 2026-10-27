@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
+import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
-import { useSessionEmail } from "@/lib/hooks/auth";
+import { useSessionEmail, useSwitchGoogleAccount } from "@/lib/hooks/auth";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
@@ -29,6 +29,8 @@ export function Header() {
   const pathname = usePathname();
 
   const email = useSessionEmail();
+
+  const switchAccount = useSwitchGoogleAccount();
 
   const signOutForm = useRef<HTMLFormElement>(null);
 
@@ -185,6 +187,10 @@ export function Header() {
                   <Sparkles className="h-4 w-4 mr-2" />
                   AI-ключі
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => void switchAccount.start()}>
+                <UserRoundCog className="h-4 w-4 mr-2" />
+                Змінити акаунт
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
