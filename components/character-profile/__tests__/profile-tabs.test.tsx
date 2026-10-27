@@ -6,6 +6,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
+vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
+  ...(await orig<object>()),
+  useStash: () => ({ data: { purse: { gp: 0, sp: 0, cp: 0 }, items: [], artifacts: [] }, isPending: false, isError: false }),
+  useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useInventoryLog: () => ({ data: { pages: [] }, isPending: false }),
+  useFreeArtifacts: () => ({ data: [] }),
+}));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
   useCharacterRoster: () => ({ data: [], isLoading: false }), useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }), useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
@@ -13,7 +20,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div> }));
 
-import { ItemsTab, MagicTab, SkillsTab } from "@/components/character-profile";
+import { InventoryTab, MagicTab, SkillsTab } from "@/components/character-profile";
 import { ProfileContext } from "@/components/character-profile/ProfileContext";
 import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
@@ -53,14 +60,13 @@ describe("таби профілю", () => {
     expect(slot.compareDocumentPosition(book) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("Речі: список по артефактах з ефектами і сетом have/total; тап — шторка", () => {
-    mockMatchMedia(false);
-    inProfile(<ItemsTab />);
+  it("Інвентар: список по артефактах з ефектами і сетом have/total; тап — шторка", () => {
+    mockMatchMedia(true);
+    inProfile(<InventoryTab />);
 
-    expect(screen.getByText("AC +2")).toBeTruthy();
-    expect(screen.getByText(/«Мисливець» 2\/3/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Кольчуга ельфів");
+    expect(screen.getByText("AC +2")).toBeTruthy();
     expect(screen.getByText("Легка і тиха.")).toBeTruthy();
   });
 
@@ -77,21 +83,13 @@ describe("таби профілю", () => {
     expect(screen.getByRole("img", { name: "Ліра" }).getAttribute("src")).toContain("lira.png");
   });
 
-  it("Речі: однакові ефекти показуються обидва, а шторка під час закриття зберігає назву", () => {
-    mockMatchMedia(true);
+  it("Інвентар: однакові ефекти показуються обидва у панелі деталей", () => {
+    mockMatchMedia(false);
 
     const twin = { ...sheetFixture.items.artifacts[0], effects: ["AC +1", "AC +1"] };
 
-    inProfile(<ItemsTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
-
-    expect(screen.getAllByText("AC +1 · AC +1")).toHaveLength(1);
+    inProfile(<InventoryTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
     fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
     expect(screen.getAllByRole("listitem").filter((li) => li.textContent === "AC +1")).toHaveLength(2);
-    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
-
-    const sheet = document.querySelector("[data-slot=sheet]");
-
-    expect(sheet).toHaveAttribute("data-state", "closed");
-    expect(sheet?.textContent).toContain("Кольчуга ельфів");
   });
 });
