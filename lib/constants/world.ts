@@ -27,3 +27,7 @@ export const WORLD_MARKER_ICONS: Record<string, { label: string }> = {
   landmark: { label: "Визначне місце" },
   battle: { label: "Битва" },
 };
+
+export const WORLD_LABEL_ZOOM = 2.5;
+export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;
+export const WORLD_ZONE_LABEL_CONFLICT = 0.06;

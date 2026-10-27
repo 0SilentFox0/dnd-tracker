@@ -111,6 +111,104 @@ describe("WorldMapView", () => {
     expect(onMarkerClick).not.toHaveBeenCalled();
   });
 
+  it("dragging a pin in point mode moves it without creating a marker", () => {
+    const onMarkerDrag = vi.fn();
+
+    const onMapClick = vi.fn();
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town" })])} tool="point" handlers={{ onMarkerDrag, onMapClick }} />);
+
+    const pin = screen.getByRole("button", { name: "Town" });
+
+    fireEvent.pointerDown(pin, { pointerId: 1, clientX: 400, clientY: 300 });
+    fireEvent.pointerMove(pin, { pointerId: 1, clientX: 480, clientY: 300 });
+    fireEvent.pointerUp(box(), { pointerId: 1, clientX: 480, clientY: 300 });
+
+    expect(onMapClick).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(pin, { pointerId: 1, clientX: 400, clientY: 300 });
+    fireEvent.pointerMove(pin, { pointerId: 1, clientX: 480, clientY: 300 });
+    fireEvent.pointerUp(pin, { pointerId: 1, clientX: 480, clientY: 300 });
+
+    expect(onMarkerDrag).toHaveBeenCalledTimes(1);
+    expect(onMapClick).not.toHaveBeenCalled();
+  });
+
+  it("a plain click on a pin in point mode does not create a point", () => {
+    const onMapClick = vi.fn();
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town" })])} tool="point" handlers={{ onMapClick }} />);
+
+    const pin = screen.getByRole("button", { name: "Town" });
+
+    fireEvent.pointerDown(pin, { pointerId: 1, clientX: 400, clientY: 300 });
+    fireEvent.pointerUp(pin, { pointerId: 1, clientX: 400, clientY: 300 });
+
+    expect(onMapClick).not.toHaveBeenCalled();
+  });
+
+  it("without onMarkerDrag a pin is not draggable and its click is ignored", () => {
+    const onMarkerClick = vi.fn();
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town" })])} tool="zone" handlers={{ onMarkerClick: undefined }} />);
+
+    const pin = screen.getByRole("button", { name: "Town" });
+
+    fireEvent.pointerDown(pin, { pointerId: 1, clientX: 400, clientY: 300 });
+    fireEvent.pointerMove(pin, { pointerId: 1, clientX: 480, clientY: 300 });
+    fireEvent.pointerUp(pin, { pointerId: 1, clientX: 480, clientY: 300 });
+
+    expect(onMarkerClick).not.toHaveBeenCalled();
+    expect(pin.dataset.dragging).toBe("false");
+  });
+
+  it("clicking a zone area in select mode selects it, not in point mode", () => {
+    const onMarkerClick = vi.fn();
+
+    const zone = marker({ id: "z", kind: "zone", name: "Forest", polygon: ring([[0.1, 0.1], [0.4, 0.1], [0.2, 0.4]]) });
+
+    const { container, rerender } = render(<WorldMapView detail={detail([zone])} tool="select" handlers={{ onMarkerClick }} />);
+
+    const poly = container.querySelector("polygon")!;
+
+    fireEvent.pointerDown(poly, { pointerId: 1, clientX: 200, clientY: 150 });
+    fireEvent.pointerUp(poly, { pointerId: 1, clientX: 200, clientY: 150 });
+
+    expect(onMarkerClick).toHaveBeenCalledWith("z");
+    expect(poly.getAttribute("data-interactive")).toBe("true");
+
+    rerender(<WorldMapView detail={detail([zone])} tool="point" handlers={{ onMarkerClick }} />);
+
+    expect(container.querySelector("polygon")!.getAttribute("data-interactive")).toBe("false");
+  });
+
+  it("shows the pin label state for selected pins and hides zone labels at high zoom", () => {
+    const zone = marker({ id: "z", kind: "zone", name: "Forest", x: 0.8, y: 0.8, polygon: ring([[0.7, 0.7], [0.9, 0.7], [0.8, 0.9]]) });
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town", x: 0.1, y: 0.1 }), zone])} selectedId="p" />);
+
+    expect(screen.getByRole("button", { name: "Town" }).dataset.selected).toBe("true");
+    expect(screen.getByRole("button", { name: "Forest" })).toBeTruthy();
+
+    for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole("button", { name: "Наблизити" }));
+
+    expect(screen.queryByRole("button", { name: "Forest" })).toBeNull();
+  });
+
+  it("hides a zone label that clashes with a pin", () => {
+    const zone = marker({ id: "z", kind: "zone", name: "Forest", polygon: ring([[0.4, 0.4], [0.6, 0.4], [0.5, 0.6]]) });
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town", x: 0.5, y: 0.47 }), zone])} />);
+
+    expect(screen.queryByRole("button", { name: "Forest" })).toBeNull();
+  });
+
+  it("highlights the first draft vertex once the zone can be closed", () => {
+    const { container } = render(<WorldMapView detail={detail([])} tool="zone" draft={[{ x: 0.1, y: 0.1 }, { x: 0.3, y: 0.2 }, { x: 0.2, y: 0.4 }]} />);
+
+    expect(container.querySelectorAll('.atlas-draft-dot[data-closable="true"]')).toHaveLength(1);
+  });
+
   it("draws an open draft as a polyline", () => {
     const { container } = render(<WorldMapView detail={detail([])} draft={[{ x: 0.1, y: 0.1 }, { x: 0.3, y: 0.2 }]} />);
 

@@ -13,12 +13,13 @@ import { WorldEditorContext, type WorldEditorCtx } from "@/components/world/edit
 import { WorldMapSettings } from "@/components/world/editor/WorldMapSettings";
 import { WorldMarkerPanel } from "@/components/world/editor/WorldMarkerPanel";
 import { WorldToolbar } from "@/components/world/editor/WorldToolbar";
+import { CompassRose } from "@/components/world/marker-icons";
 import { WorldMapView } from "@/components/world/WorldMapView";
 import { useMapDrawing, useWorldEditor, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
 
-const ENTRY_DOT = { width: "1.6%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
+const ENTRY_COMPASS = { width: "3.2%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
 
 export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const router = useRouter();
@@ -120,10 +121,11 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                           detail={d}
                           selectedId={selectedId}
                           draft={drawing.draft}
-                          handlers={{ ...drawing.handlers, onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)), onMarkerClick: (id) => (tool === "select" || tool === "zone" ? select(id) : undefined),
-                            onMarkerDrag: tool === "select" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
+                          tool={tool}
+                          handlers={{ ...drawing.handlers, onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)), onMarkerClick: (id) => (tool === "select" ? select(id) : undefined),
+                            onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
                           }}
-                          overlay={<span className="pointer-events-none absolute rounded-full border-2 border-[var(--gold)] bg-[var(--gold)]/40" style={{ ...ENTRY_DOT, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
+                          overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
                         />
                         </div>
                       </div>

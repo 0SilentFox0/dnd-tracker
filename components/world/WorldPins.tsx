@@ -2,8 +2,8 @@ import { MapPin } from "lucide-react";
 
 import { MARKER_ICON } from "./marker-icons";
 
+import { WORLD_LABEL_ZOOM, WORLD_ZONE_LABEL_CONFLICT, WORLD_ZONE_LABEL_HIDE_ZOOM } from "@/lib/constants/world";
 import { DRAG_THRESHOLD } from "@/lib/hooks/common";
-import { cn } from "@/lib/utils";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { MapPoint, WorldMarker } from "@/types/world";
 
@@ -25,35 +25,51 @@ interface WorldPinsProps {
 const anchor = (m: WorldMarker): MapPoint => (m.kind === "zone" && m.polygon ? polygonCentroid(m.polygon) : { x: m.x, y: m.y });
 
 export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDragMove, onDragEnd }: WorldPinsProps) {
+  const points = markers.filter((m) => m.kind !== "zone");
+
   return (
     <>
       {markers.map((m) => {
         const spot = dragging?.id === m.id ? dragging.point : anchor(m);
 
-        const isZone = m.kind === "zone";
+        if (m.kind === "zone") {
+          const clashes = points.some((p) => Math.hypot(p.x - spot.x, p.y - spot.y) < WORLD_ZONE_LABEL_CONFLICT);
+
+          if (zoom > WORLD_ZONE_LABEL_HIDE_ZOOM || clashes) return null;
+
+          return (
+            <span
+              key={m.id}
+              aria-label={m.name}
+              role="button"
+              tabIndex={-1}
+              className="atlas-zone-label"
+              style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%`, transform: `translate(-50%, -50%) scale(${1 / zoom})` }}
+            >
+              {m.name}
+            </span>
+          );
+        }
 
         const Icon = (m.icon && MARKER_ICON[m.icon]) || MapPin;
 
-        const draggable = !isZone && !!handlers.onMarkerDrag;
+        const draggable = !!handlers.onMarkerDrag;
 
         return (
           <button
             key={m.id}
             type="button"
             aria-label={m.name}
-            title={m.name}
+            data-selected={m.id === selectedId}
+            data-labels={zoom >= WORLD_LABEL_ZOOM}
+            data-dragging={dragging?.id === m.id}
             style={{
               left: `${spot.x * 100}%`,
               top: `${spot.y * 100}%`,
-              transform: `translate(-50%, ${isZone ? "-50%" : "-100%"}) scale(${1 / zoom})`,
-              transformOrigin: isZone ? "50% 50%" : "50% 100%",
+              transform: `translate(-50%, -50%) scale(${1 / zoom})`,
               touchAction: "none",
             }}
-            className={cn(
-              "absolute flex items-center gap-1 whitespace-nowrap rounded-full border px-1.5 py-0.5 text-xs shadow",
-              isZone ? "border-hud-rule bg-black/60 text-hud-ink" : "border-hud-rule bg-[rgba(17,14,11,.85)] text-hud-ink",
-              m.id === selectedId && "ring-2 ring-[var(--gold)]",
-            )}
+            className="atlas-pin absolute"
             onPointerDown={(e) => {
               e.stopPropagation();
               e.currentTarget.dataset.startX = String(e.clientX);
@@ -84,8 +100,10 @@ export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDra
             }}
             onDoubleClick={(e) => e.stopPropagation()}
           >
-            {isZone ? null : <Icon className="size-4" aria-hidden />}
-            <span>{m.name}</span>
+            <span className="atlas-seal">
+              <Icon className="size-4" aria-hidden />
+            </span>
+            <span className="atlas-label">{m.name}</span>
           </button>
         );
       })}
