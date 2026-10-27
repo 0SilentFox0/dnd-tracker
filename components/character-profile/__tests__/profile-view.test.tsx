@@ -10,6 +10,13 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null }));
 vi.mock("@/lib/hooks/skills", () => ({ useCharacterProgression: () => ({ view: null }) }));
+vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
+  ...(await orig<object>()),
+  useStash: () => ({ data: { purse: { gp: 0, sp: 0, cp: 0 }, items: [], artifacts: [] }, isPending: false, isError: false }),
+  useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useInventoryLog: () => ({ data: { pages: [] }, isPending: false }),
+  useFreeArtifacts: () => ({ data: [] }),
+}));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
   useCharacterRoster: () => ({ data: [], isLoading: false }),
@@ -60,10 +67,17 @@ describe("CharacterProfile — перегляд", () => {
     const replaceState = vi.spyOn(window.history, "replaceState");
 
     expect(screen.getByRole("tab", { name: "Магія" })).toHaveAttribute("data-state", "active");
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Речі" }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Інвентар" }));
     expect(replaceState).toHaveBeenCalledWith(null, "", expect.stringMatching(/\?tab=items$/));
-    expect(screen.getByRole("tab", { name: "Речі" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
     expect(h.replace).not.toHaveBeenCalled();
+  });
+
+  it("старе ?tab=stash відкриває «Інвентар»; вкладки «Підсумок» немає", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="stash" />);
+
+    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
+    expect(screen.queryByRole("tab", { name: "Підсумок" })).toBeNull();
   });
 
   it("атака: влучання і середня шкода, розкладка за тапом", () => {

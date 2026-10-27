@@ -3,9 +3,8 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import { StashTab } from "./stash/StashTab";
+import { InventoryTab } from "./inventory/InventoryTab";
 import { CombatTab } from "./CombatTab";
-import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
 import { ProfileProvider } from "./ProfileContext";
@@ -27,15 +26,14 @@ import { cn } from "@/lib/utils";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
-const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "stash", "story"];
+const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story"];
 
 function viewTabs(): ProfileTab[] {
   return [
     { id: "combat", label: "Бій", content: <CombatTab /> },
     { id: "skills", label: "Вміння", content: <SkillsTab /> },
     { id: "magic", label: "Магія", content: <MagicTab /> },
-    { id: "items", label: "Речі", content: <ItemsTab /> },
-    { id: "stash", label: "Підсумок", content: <StashTab /> },
+    { id: "items", label: "Інвентар", content: <InventoryTab /> },
     { id: "story", label: "Історія", content: <StoryTab /> },
   ];
 }
@@ -64,7 +62,11 @@ export function ProfileShell({ children }: { children: ReactNode }) {
   return <div className={cn(HUD_SURFACE, "mx-auto min-h-dvh max-w-3xl pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] lg:max-w-5xl bg-[radial-gradient(120%_60%_at_50%_0%,#2a221a,#110e0b_70%)]")}>{children}</div>;
 }
 
-const asTab = (v: string | undefined): ProfileTabId => (v && (VIEW_TABS as string[]).includes(v) ? (v as ProfileTabId) : "combat");
+const asTab = (v: string | undefined): ProfileTabId => {
+  const id = v === "stash" ? "items" : v;
+
+  return id && (VIEW_TABS as string[]).includes(id) ? (id as ProfileTabId) : "combat";
+};
 
 export function CharacterProfile({ campaignId, characterId, canEdit, initialTab }: { campaignId: string; characterId: string; canEdit: boolean; initialTab?: string }) {
   const query = useCharacterSheet(campaignId, characterId);
