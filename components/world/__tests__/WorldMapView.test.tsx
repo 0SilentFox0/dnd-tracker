@@ -179,7 +179,7 @@ describe("WorldMapView", () => {
 
     rerender(<WorldMapView detail={detail([zone])} tool="point" handlers={{ onMarkerClick }} />);
 
-    expect(container.querySelector("polygon") as Element.getAttribute("data-interactive")).toBe("false");
+    expect((container.querySelector("polygon") as Element).getAttribute("data-interactive")).toBe("false");
   });
 
   it("shows the pin label state for selected pins and hides zone labels at high zoom", () => {
