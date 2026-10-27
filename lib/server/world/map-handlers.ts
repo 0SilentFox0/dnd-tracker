@@ -62,7 +62,7 @@ export function createWorldMapHandler(req: Request, campaignId: string) {
 
       return NextResponse.json(toWorldMap(created), { status: 201 });
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return errorResponse(API_ERRORS.WORLD_NESTED_EXISTS, 409);
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return errorResponse(body.parentMarkerId ? API_ERRORS.WORLD_NESTED_EXISTS : API_ERRORS.WORLD_ROOT_EXISTS, 409);
 
       throw e;
     }
