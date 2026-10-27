@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useSearch } from "@/lib/hooks/common";
 
-export const BATTLE_SECTIONS: { kind: BattleStatus; title: string }[] = [
+const BATTLE_SECTIONS: { kind: BattleStatus; title: string }[] = [
   { kind: BattleStatus.ACTIVE, title: "Активні бої" },
   { kind: BattleStatus.PREPARED, title: "Підготовлені бої" },
   { kind: BattleStatus.COMPLETED, title: "Завершені бої" },

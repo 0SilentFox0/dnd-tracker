@@ -11,6 +11,7 @@ _Оновлено: 2026-10-22._
 | Конструктор кампаній, етап 1 (правила + шаблони) | `feat/constructor`, `../dnd-tracker-constructor`, локальна БД `constructor` | 1a готово; 1b (правила кампанії) у роботі; далі 1c (шаблони). Злиття в `main` одне, наприкінці етапу 1 |
 | Лендінг + вхід email/паролем | `feat/landing` | Код, тести й документація готові (`docs/architecture/landing-auth.md`); не злито в `main`. Перед продом: власний SMTP і Redirect URLs у Supabase Auth, `SITE_INDEXING=1` у Vercel — лише після публічного запуску |
 | Механіка стрільби | `feat/ranged-combat`, `../dnd-tracker-shooting` | Авто-перешкода, ланцюговий постріл, розщеплення ближніх, FX сплешу; після деплою перезасіяти юнітів бібліотеки на проді — Демониця отримує `chainShot` |
+| Пошук у списках ДМ | `feat/library-search`, `../dnd-tracker-search` | Спільний пошук (`useSearch`, `matchesQuery`, `SearchInput`, `SearchEmptyState`) на сторінках заклинань, рас, артефактів, сетів, головних навичок, навичок, героїв і боїв; юніти переведено на нього ж. Чекає злиття |
 | Підсумок героя + чернетки гравця | `feat/stash-and-player-drafts`, `../dnd-tracker-stash`, локальна БД `stash` | Код і документація готові (`docs/architecture/characters.md`), лишається браузерна перевірка й злиття. Міграція (`stash`, `inventory_log`, `status`) піде на прод при деплої; Upstash на проді не налаштований — ліміт AI для гравців працює в пам'яті інстанса |
 
 ## Домовленості
