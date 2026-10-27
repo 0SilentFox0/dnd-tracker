@@ -98,7 +98,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">{body}</div>
-        {footer ? <DialogFooter className={cn(hud && "border-hud-rule bg-[#110e0b]/95")}>{footer}</DialogFooter> : null}
+        {footer ? <DialogFooter className={cn(hud && "border-hud-rule")}>{footer}</DialogFooter> : null}
       </DialogContent>
     </Dialog>
   );

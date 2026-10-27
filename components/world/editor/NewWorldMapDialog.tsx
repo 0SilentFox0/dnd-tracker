@@ -2,10 +2,11 @@
 
 import { type FormEvent, useState } from "react";
 
+import { MapFileDropzone } from "./MapFileDropzone";
 import { useWorldEditorContext } from "./WorldEditorContext";
 
 import { Button } from "@/components/ui/button";
-import { LabeledInput } from "@/components/ui/labeled-input";
+import { FormField, LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { WORLD_NAME_MAX } from "@/lib/constants/world";
 import { useNotify } from "@/lib/hooks/common";
@@ -37,6 +38,8 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
 
   const [file, setFile] = useState<File | null>(null);
 
+  const [error, setError] = useState<string | null>(null);
+
   const busy = uploading || editor.map.create.isPending;
 
   const submit = async (e: FormEvent) => {
@@ -45,6 +48,8 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
     if (!file || !name.trim()) return;
 
     let image;
+
+    setError(null);
 
     try {
       image = await upload(file);
@@ -59,7 +64,8 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
 
       onOpenChange(false);
       openMap(created.id);
-    } catch {
+    } catch (err) {
+      setError(errorMessage(err, "Не вдалося створити карту"));
       void discard(image.imageUrl);
     }
   };
@@ -70,6 +76,7 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       title={parentMarker ? "Карта для маркера" : "Нова карта"}
+      description={parentMarker ? `Вкладена карта для «${parentMarker.name}»: відкриється, коли герої зайдуть у це місце.` : "Назва й картинка карти. Маркери, зони та вкладені карти додаються в редакторі."}
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -82,8 +89,10 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       }
     >
       <form id={FORM_ID} onSubmit={(e) => void submit(e)} className="space-y-3">
-        <LabeledInput label="Назва" required maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} />
-        <LabeledInput label="Картинка" required type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <LabeledInput label="Назва" required maxLength={WORLD_NAME_MAX} value={name} error={error ?? undefined} onChange={(e) => setName(e.target.value)} />
+        <FormField label="Картинка" required>
+          <MapFileDropzone file={file} onFile={setFile} />
+        </FormField>
       </form>
     </ResponsiveDialog>
   );

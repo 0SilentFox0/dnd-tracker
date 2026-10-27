@@ -13,7 +13,7 @@ const notify = vi.fn();
 
 vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useNotify: () => notify }));
 
-vi.mock("@/lib/hooks/world", () => ({ useWorldMapUpload: () => ({ upload, uploading: false }) }));
+vi.mock("@/lib/hooks/world", () => ({ useWorldMapUpload: () => ({ upload, discard: vi.fn(), uploading: false }) }));
 
 const create = vi.fn();
 
@@ -51,6 +51,45 @@ afterEach(() => {
 });
 
 describe("NewWorldMapDialog", () => {
+  it("renders without Radix a11y warnings, a native file input label or an empty footer block", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    renderDialog();
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Choose File/i)).toBeNull();
+    expect(screen.getByText(/JPG, PNG або WebP/)).toBeTruthy();
+  });
+
+  it("accepts a dropped image and rejects other files", () => {
+    renderDialog();
+
+    const zone = screen.getByText(/Перетягніть картинку/).closest("label") as HTMLElement;
+
+    fireEvent.drop(zone, { dataTransfer: { files: [new File(["x"], "notes.txt", { type: "text/plain" })] } });
+
+    expect(screen.getByText(/Оберіть картинку у форматі/)).toBeTruthy();
+
+    fireEvent.drop(zone, { dataTransfer: { files: [new File(["x"], "world.png", { type: "image/png" })] } });
+
+    expect(screen.getByText("world.png")).toBeTruthy();
+    expect(screen.queryByText(/Оберіть картинку у форматі/)).toBeNull();
+  });
+
+  it("shows WORLD_ROOT_EXISTS (409) in the name field", async () => {
+    create.mockRejectedValue(new Error("Коренева карта вже є"));
+
+    renderDialog();
+    fireEvent.change(screen.getByLabelText(/Назва/), { target: { value: "Світ" } });
+    pickFile();
+    submit();
+
+    expect(await screen.findByText("Коренева карта вже є")).toBeTruthy();
+  });
+
   it("blocks submit until a file is chosen", () => {
     renderDialog({ id: "m1", name: "Місто" });
 
