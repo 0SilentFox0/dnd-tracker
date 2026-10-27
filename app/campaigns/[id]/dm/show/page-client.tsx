@@ -11,6 +11,7 @@ import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { DeckCard } from "@/components/show/editor/DeckCard";
 import { NewDeckDialog } from "@/components/show/editor/NewDeckDialog";
 import { Button } from "@/components/ui/button";
+import { WorldMapLink } from "@/components/world/WorldMapLink";
 import { useNotify } from "@/lib/hooks/common";
 import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
@@ -52,6 +53,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
             <Button asChild variant="outline">
               <Link href={`${base}/show`}>Відкрити показ</Link>
             </Button>
+            <WorldMapLink campaignId={campaignId} variant="button" />
           </>
         }
       />
