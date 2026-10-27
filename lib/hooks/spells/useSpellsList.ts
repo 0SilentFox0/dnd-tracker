@@ -4,7 +4,11 @@ import { useMemo } from "react";
 
 import { useDeleteAllSpells, useMoveSpellToGroup, useRemoveSpellFromGroup, useSpellGroups, useSpells } from "./useSpells";
 
+import { useSearch } from "@/lib/hooks/common";
 import { convertGroupedSpellsToArray, groupSpellsByGroupAndLevel } from "@/lib/utils/spells/spells";
+import type { Spell } from "@/types/spells";
+
+const spellFields = (spell: Spell) => [spell.name, spell.spellGroup?.name];
 
 export function useSpellsList(campaignId: string) {
   const { data: spells = [], isLoading } = useSpells(campaignId);
@@ -17,11 +21,14 @@ export function useSpellsList(campaignId: string) {
 
   const deleteAll = useDeleteAllSpells(campaignId);
 
-  const groups = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(spells)), [spells]);
+  const search = useSearch(spells, spellFields);
+
+  const groups = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(search.items)), [search.items]);
 
   return {
     spells,
     isLoading,
+    search,
     view: { groups, spellGroups },
     actions: {
       removeFromGroup: (spellId: string) => removeFromGroup.mutate(spellId),

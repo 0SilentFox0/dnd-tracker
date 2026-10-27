@@ -6,6 +6,8 @@ import { Trash2, Users } from "lucide-react";
 import { DmCharacterCard } from "@/components/characters/list/DmCharacterCard";
 import { PendingDraftsPanel } from "@/components/characters/review/PendingDraftsPanel";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
+import { SearchEmptyState } from "@/components/common/SearchEmptyState";
+import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -87,18 +89,25 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
           />
         }
       >
-        {(characters) => (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {characters.map((character) => (
-              <DmCharacterCard
-                key={character.id}
-                character={character}
-                campaignId={campaignId}
-                busy={page.status.levelingUpId === character.id}
-                actions={{ onLevelUp: character.level < maxLevel ? () => page.actions.levelUp(character) : undefined, onDelete: () => void page.actions.confirmDelete(character) }}
-              />
-            ))}
-          </div>
+        {() => (
+          <>
+            <SearchInput value={page.search.query.value} onChange={page.search.query.set} label="Пошук персонажів" placeholder="Пошук за ім'ям або гравцем" />
+            {page.search.items.length === 0 ? (
+              <SearchEmptyState query={page.search.query.value} onClear={() => page.search.query.set("")} />
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {page.search.items.map((character) => (
+                  <DmCharacterCard
+                    key={character.id}
+                    character={character}
+                    campaignId={campaignId}
+                    busy={page.status.levelingUpId === character.id}
+                    actions={{ onLevelUp: character.level < maxLevel ? () => page.actions.levelUp(character) : undefined, onDelete: () => void page.actions.confirmDelete(character) }}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </QueryState>
     </HudPage>

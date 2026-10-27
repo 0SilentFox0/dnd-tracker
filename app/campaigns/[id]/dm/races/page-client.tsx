@@ -2,6 +2,8 @@
 
 import { Dna, Plus } from "lucide-react";
 
+import { SearchEmptyState } from "@/components/common/SearchEmptyState";
+import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -16,11 +18,13 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
 
   const { races } = list;
 
+  const total = list.total;
+
   return (
     <HudPage>
       <HudPageHeader
         title="Ігрові Раси"
-        subtitle={`${races.length} ${pluralUk(races.length, ["раса", "раси", "рас"])}`}
+        subtitle={`${total} ${pluralUk(total, ["раса", "раси", "рас"])}`}
         actions={
           <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -30,16 +34,23 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
       />
       <OnboardingHint id="dm.races" />
 
-      {list.isLoading && races.length === 0 ? (
+      {list.isLoading && total === 0 ? (
         <LoadingState rows={6} label="Завантаження рас…" />
-      ) : races.length === 0 ? (
+      ) : total === 0 ? (
         <EmptyState icon={Dna} title="Ще немає рас" description="Створіть першу расу." />
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {races.map((race) => (
-            <RaceCard key={race.id} race={race} campaignId={campaignId} onDelete={list.actions.deleteRace} />
-          ))}
-        </div>
+        <>
+          <SearchInput value={list.search.query.value} onChange={list.search.query.set} label="Пошук рас" />
+          {races.length === 0 ? (
+            <SearchEmptyState query={list.search.query.value} onClear={() => list.search.query.set("")} />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {races.map((race) => (
+                <RaceCard key={race.id} race={race} campaignId={campaignId} onDelete={list.actions.deleteRace} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <CreateRaceDialog

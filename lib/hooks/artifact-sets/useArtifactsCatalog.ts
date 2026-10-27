@@ -6,12 +6,16 @@ import { useArtifactSetsList } from "./useArtifactSets";
 
 import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
+import { useSearch } from "@/lib/hooks/common";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { ArtifactSetCardData, ArtifactSetRow } from "@/types/artifact-sets";
 import type { ArtifactCardData, ArtifactListItem } from "@/types/artifacts";
 
 const EMPTY_ARTIFACTS: ArtifactListItem[] = [];
 
 const EMPTY_SETS: ArtifactSetRow[] = [];
+
+const artifactFields = (a: ArtifactListItem) => [a.name, a.artifactSet?.name];
 
 const toCard = (a: ArtifactListItem): ArtifactCardData => ({
   id: a.id,
@@ -43,22 +47,31 @@ export function useArtifactsCatalog(campaignId: string) {
 
   const sets = setsQuery.data ?? EMPTY_SETS;
 
+  const search = useSearch(artifacts, artifactFields);
+
+  const { items: shown, isActive } = search;
+
+  const query = search.query.value;
+
   const view = useMemo(() => {
-    const cards = artifacts.map(toCard);
+    const cards = shown.map(toCard);
 
-    const bySet = sets.map((set) => ({ set: toSetCard(set), artifacts: cards.filter((_, i) => artifacts[i].setId === set.id) }));
+    const bySet = sets
+      .map((set) => ({ set: toSetCard(set), artifacts: cards.filter((_, i) => shown[i].setId === set.id) }))
+      .filter(({ set, artifacts: own }) => !isActive || own.length > 0 || matchesQuery([set.name], query));
 
-    const ungrouped = cards.filter((_, i) => !artifacts[i].setId);
+    const ungrouped = cards.filter((_, i) => !shown[i].setId);
 
     const bySlot = ARTIFACT_SLOT_OPTIONS.map(({ value, label }) => ({ slot: value, label, artifacts: ungrouped.filter((a) => a.slot === value) })).filter((g) => g.artifacts.length > 0);
 
     return { sets: bySet, bySlot };
-  }, [artifacts, sets]);
+  }, [shown, sets, isActive, query]);
 
   return {
     count: artifacts.length,
     isEmpty: artifacts.length === 0 && sets.length === 0,
     isLoading: artifactsQuery.isLoading || setsQuery.isLoading,
+    search,
     view,
   };
 }
