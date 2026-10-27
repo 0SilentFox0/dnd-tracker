@@ -23,7 +23,7 @@ export function WorldMapLink({ campaignId, variant, newTab }: WorldMapLinkProps)
 
   if (variant === "toggle") {
     return (
-      <Link className="toggle sb-hide-sm" href={href} {...target}>
+      <Link className="toggle sb-hide-sm inline-flex items-center gap-1.5 whitespace-nowrap" href={href} {...target}>
         {content}
       </Link>
     );

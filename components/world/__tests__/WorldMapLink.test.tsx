@@ -17,6 +17,7 @@ describe("WorldMapLink", () => {
     render(<WorldMapLink campaignId="c1" variant="toggle" />);
 
     expect(screen.getByRole("link").className).toContain("toggle");
+    expect(screen.getByRole("link").className).toContain("inline-flex");
   });
 
   it("opens in a new tab on request", () => {
