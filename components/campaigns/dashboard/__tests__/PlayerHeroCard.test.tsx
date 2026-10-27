@@ -29,6 +29,12 @@ describe("PlayerHeroCard", () => {
     expect(screen.queryByText("До бою")).toBeNull();
   });
 
+  it("empty avatar string falls back to the initial", () => {
+    render(<PlayerHeroCard campaignId="c1" data={data({ avatar: "" })} />);
+
+    expect(screen.getByText("З")).toBeTruthy();
+  });
+
   it("pending without note is awaiting approval", () => {
     render(<PlayerHeroCard campaignId="c1" data={data({ status: CharacterStatus.PENDING })} />);
 

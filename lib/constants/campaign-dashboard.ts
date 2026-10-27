@@ -30,7 +30,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "show", href: dm("show"), icon: Images, title: "Показ", subtitle: "Набори слайдів із музикою для гравців", keywords: ["слайди"], group: "game" },
   { key: "music", href: dm("music"), icon: Music, title: "Музика", subtitle: "Бібліотека треків для плеєра в бою", keywords: ["треки", "плеєр"], group: "game" },
   { key: "characters", href: dm("characters"), icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців", keywords: ["герої", "гравці", "схвалення"], group: "heroes" },
-  { key: "info", href: info, icon: BookOpen, title: "Довідник", subtitle: "Правила та довідкова інформація", keywords: ["інформація", "правила"], group: "heroes" },
+  { key: "info", href: info, icon: BookOpen, title: "Довідник", subtitle: "Скіли, заклинання й артефакти: як діють і в кого що.", keywords: ["довідка", "інформація", "правила"], group: "heroes" },
   { key: "units", href: dm("units"), icon: Skull, title: "Юніти", subtitle: "Управління мобами та юнітами", keywords: ["моби", "npc", "монстри", "вороги"], group: "libraries" },
   { key: "spells", href: dm("spells"), icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії", keywords: ["закл", "магія"], group: "libraries" },
   { key: "artifacts", href: dm("artifacts"), icon: Gem, title: "Артефакти", subtitle: "Управління артефактами та сетами", keywords: ["предмети", "речі", "сети"], group: "libraries" },
@@ -42,7 +42,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
 export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "my-character", href: (id) => `/campaigns/${id}/character`, icon: User, title: "Мій персонаж", subtitle: "Перегляд та редагування персонажа", keywords: ["герой", "лист"], group: "player" },
   { key: "player-show", href: (id) => `/campaigns/${id}/show`, icon: Images, title: "Показ", subtitle: "Слайди й музику від ДМ під час гри", keywords: ["слайди"], group: "player" },
-  { key: "info", href: info, icon: BookOpen, title: "Довідник", subtitle: "Правила та довідкова інформація", keywords: ["інформація", "правила"], group: "player" },
+  { key: "info", href: info, icon: BookOpen, title: "Довідник", subtitle: "Скіли, заклинання й артефакти: як діють і в кого що.", keywords: ["довідка", "інформація", "правила"], group: "player" },
 ];
 
 export const COMPACT_GROUPS: ReadonlySet<DashboardGroupKey> = new Set<DashboardGroupKey>(["libraries"]);

@@ -80,7 +80,7 @@ describe("readPlayerDashboard", () => {
     const res = await readPlayerDashboard("c1", "u1");
 
     expect(res.activeBattle).toEqual({ battleId: "b1", hp: { current: 5, max: 20, temp: 3 } });
-    expect(db.battleParticipant.findFirst.mock.calls[0][0].where).toEqual({ sourceId: "h1", battle: { campaignId: "c1", status: "active" } });
+    expect(db.battleParticipant.findFirst.mock.calls[0][0].where).toEqual({ sourceId: "h1", sourceType: "character", battle: { campaignId: "c1", status: "active" } });
     selectsOf().forEach((s) => FORBIDDEN.forEach((k) => expect(s).not.toHaveProperty(k)));
   });
 });

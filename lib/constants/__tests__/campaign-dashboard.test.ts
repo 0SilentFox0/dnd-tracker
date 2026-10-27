@@ -28,5 +28,6 @@ describe("dashboard sections", () => {
     expect(find("моби")).toContain("units");
     expect(find("закл")).toContain("spells");
     expect(find("  СХВАЛ ")).toContain("characters");
+    expect(find("довідка")).toContain("info");
   });
 });

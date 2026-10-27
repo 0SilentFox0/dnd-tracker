@@ -12,7 +12,7 @@ const fieldsOf = (s: DashboardSection) => [s.title, ...s.keywords];
 
 const GROUP_ORDER: DashboardGroupKey[] = ["game", "heroes", "libraries"];
 
-const GRID = "grid gap-2 sm:grid-cols-2 xl:grid-cols-3";
+const GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3";
 
 const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
 

@@ -1,5 +1,5 @@
 import "server-only";
-import { BattleStatus } from "@/lib/constants/battle";
+import { BattleStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import type { DmDashboardData, PlayerDashboardData } from "@/types/campaigns";
@@ -31,7 +31,8 @@ export async function readPlayerDashboard(campaignId: string, userId: string): P
   if (!hero) return { hero: null, activeBattle: null };
 
   const participant = await prisma.battleParticipant.findFirst({
-    where: { sourceId: hero.id, battle: { campaignId, status: BattleStatus.ACTIVE } },
+    where: { sourceId: hero.id, sourceType: ParticipantSourceType.CHARACTER, battle: { campaignId, status: BattleStatus.ACTIVE } },
+    orderBy: { battle: { createdAt: "desc" } },
     select: { battleId: true, currentHp: true, maxHp: true, tempHp: true },
   });
 

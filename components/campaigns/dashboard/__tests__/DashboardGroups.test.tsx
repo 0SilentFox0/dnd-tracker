@@ -66,6 +66,18 @@ describe("DashboardGroups", () => {
     expect(await screen.findAllByRole("link")).toHaveLength(12);
   });
 
+  it("Enter with a padded uppercase query navigates to the match", async () => {
+    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+
+    type("  ЗАКЛ ");
+
+    await screen.findByText("Заклинання");
+
+    fireEvent.submit(screen.getByLabelText("Пошук розділу").closest("form")!);
+
+    expect(push).toHaveBeenCalledWith("/campaigns/c1/dm/spells");
+  });
+
   it("Enter navigates to the first match, and does nothing without one", async () => {
     render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
