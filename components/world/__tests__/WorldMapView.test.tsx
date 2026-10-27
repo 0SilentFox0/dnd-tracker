@@ -169,7 +169,7 @@ describe("WorldMapView", () => {
 
     const { container, rerender } = render(<WorldMapView detail={detail([zone])} tool="select" handlers={{ onMarkerClick }} />);
 
-    const poly = container.querySelector("polygon")!;
+    const poly = container.querySelector("polygon") as Element;
 
     fireEvent.pointerDown(poly, { pointerId: 1, clientX: 200, clientY: 150 });
     fireEvent.pointerUp(poly, { pointerId: 1, clientX: 200, clientY: 150 });
@@ -179,7 +179,7 @@ describe("WorldMapView", () => {
 
     rerender(<WorldMapView detail={detail([zone])} tool="point" handlers={{ onMarkerClick }} />);
 
-    expect(container.querySelector("polygon")!.getAttribute("data-interactive")).toBe("false");
+    expect(container.querySelector("polygon") as Element.getAttribute("data-interactive")).toBe("false");
   });
 
   it("shows the pin label state for selected pins and hides zone labels at high zoom", () => {
