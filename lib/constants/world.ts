@@ -31,3 +31,5 @@ export const WORLD_MARKER_ICONS: Record<string, { label: string }> = {
 export const WORLD_LABEL_ZOOM = 2.5;
 export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;
 export const WORLD_ZONE_LABEL_CONFLICT = 0.06;
+export const WORLD_LABEL_ZOOM_COMPACT = 4;
+export const WORLD_ZONE_LABEL_CONFLICT_COMPACT = 0.14;

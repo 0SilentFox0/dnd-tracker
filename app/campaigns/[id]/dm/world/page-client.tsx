@@ -7,24 +7,31 @@ import { Map as MapIcon } from "lucide-react";
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { NewWorldMapDialog } from "@/components/world/editor/NewWorldMapDialog";
 import { WorldBreadcrumbs } from "@/components/world/editor/WorldBreadcrumbs";
 import { WorldEditorContext, type WorldEditorCtx } from "@/components/world/editor/WorldEditorContext";
 import { WorldMapSettings } from "@/components/world/editor/WorldMapSettings";
 import { WorldMarkerPanel } from "@/components/world/editor/WorldMarkerPanel";
-import { WorldToolbar } from "@/components/world/editor/WorldToolbar";
+import { WorldToolbar, WorldToolHint } from "@/components/world/editor/WorldToolbar";
 import { CompassRose } from "@/components/world/marker-icons";
 import { WorldMapView } from "@/components/world/WorldMapView";
+import { useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
 import { useMapDrawing, useWorldEditor, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
 
 const ENTRY_COMPASS = { width: "3.2%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
 
+const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-5.5rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-8.5rem)]";
+
 export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const router = useRouter();
 
   const pathname = usePathname();
+
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
   const maps = useWorldMaps(campaignId);
 
@@ -35,6 +42,8 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
   const [selectedId, select] = useState<string | null>(null);
 
   const [creating, setCreating] = useState(false);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [redrawId, setRedrawId] = useState<string | null>(null);
 
@@ -81,6 +90,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
   const openMap = useCallback(
     (id: string | null) => {
       select(null);
+      setSettingsOpen(false);
       setRedrawId(null);
       setTool("select");
       router.replace(id ? `${pathname}?map=${id}` : pathname);
@@ -93,51 +103,84 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
     [campaignId, detail.data, maps.data, editor, selectedId, openMap, tool, setTool, redrawId, redraw],
   );
 
-  const empty = (
-    <EmptyState
-      icon={MapIcon}
-      title="Завантажте карту континенту"
-      description="З неї почнеться подорож: на ній ставляться міста, зони й входи у вкладені карти."
-      action={<Button onClick={() => setCreating(true)}>Завантажити карту</Button>}
-    />
+  const emptyView = (
+    <>
+      <HudPageHeader title="Карта світу" subtitle={campaignName} />
+      <EmptyState
+        icon={MapIcon}
+        title="Завантажте карту континенту"
+        description="З неї почнеться подорож: на ній ставляться міста, зони й входи у вкладені карти."
+        action={<Button onClick={() => setCreating(true)}>Завантажити карту</Button>}
+      />
+    </>
   );
 
   return (
     <WorldEditorContext.Provider value={ctx}>
       <HudPage>
-        <QueryState query={maps} empty={empty}>
+        <QueryState query={maps} empty={emptyView}>
           {() =>
             mapId ? (
               <QueryState query={detail}>
-                {(d) => (
-                  <>
-                    <HudPageHeader title={d.map.name} subtitle={<WorldBreadcrumbs mapId={d.map.id} />} actions={<span className="text-sm text-hud-muted">{campaignName}</span>} />
-                    <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
-                      <div className="flex flex-col gap-2">
-                        <WorldToolbar drawing={drawing} />
-                        <div className="h-[60dvh] lg:h-[calc(100dvh-14rem)]">
-                        <WorldMapView
-                          key={d.map.id}
-                          detail={d}
-                          selectedId={selectedId}
-                          draft={drawing.draft}
-                          tool={tool}
-                          handlers={{ ...drawing.handlers, onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)), onMarkerClick: (id) => (tool === "select" ? select(id) : undefined),
-                            onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
-                          }}
-                          overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
-                        />
+                {(d) => {
+                  const marker = selectedId ? d.markers.find((m) => m.id === selectedId) : undefined;
+
+                  const panel = marker ? <WorldMarkerPanel /> : <WorldMapSettings key={d.map.id} />;
+
+                  const sheetOpen = !isDesktop && tool === "select" && (!!marker || settingsOpen);
+
+                  return (
+                    <>
+                      <HudPageHeader
+                        title="Карта світу"
+                        subtitle={<WorldBreadcrumbs mapId={d.map.id} />}
+                        actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>}
+                        className="max-md:p-2 max-md:[&_h1]:sr-only"
+                      />
+                      <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
+                        <div className={MAP_HEIGHT}>
+                          <WorldMapView
+                            key={d.map.id}
+                            detail={d}
+                            selectedId={selectedId}
+                            draft={drawing.draft}
+                            tool={tool}
+                            compact={!isDesktop}
+                            toolbar={<WorldToolbar drawing={drawing} onSettings={isDesktop ? undefined : () => setSettingsOpen(true)} />}
+                            hint={<WorldToolHint tool={tool} vertices={drawing.draft.length} />}
+                            handlers={{
+                              ...drawing.handlers,
+                              onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)),
+                              onMarkerClick: (id) => (tool === "select" ? select(id) : undefined),
+                              onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
+                            }}
+                            overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
+                          />
                         </div>
+                        {isDesktop ? <HudPanel className={`${MAP_HEIGHT} overflow-y-auto`}>{panel}</HudPanel> : null}
                       </div>
-                      <HudPanel>
-                        {selectedId && d.markers.some((m) => m.id === selectedId) ? <WorldMarkerPanel /> : <WorldMapSettings key={d.map.id} />}
-                      </HudPanel>
-                    </div>
-                  </>
-                )}
+                      {isDesktop ? null : (
+                        <ResponsiveDialog
+                          hud
+                          open={sheetOpen}
+                          onOpenChange={(open) => {
+                            if (open) return;
+
+                            select(null);
+                            setSettingsOpen(false);
+                          }}
+                          title={marker?.name ?? d.map.name}
+                          description={marker ? "Параметри маркера" : "Параметри карти"}
+                        >
+                          {panel}
+                        </ResponsiveDialog>
+                      )}
+                    </>
+                  );
+                }}
               </QueryState>
             ) : (
-              empty
+              emptyView
             )
           }
         </QueryState>

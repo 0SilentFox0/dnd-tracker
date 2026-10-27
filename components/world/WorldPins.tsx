@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 
 import { MARKER_ICON } from "./marker-icons";
 
-import { WORLD_LABEL_ZOOM, WORLD_ZONE_LABEL_CONFLICT, WORLD_ZONE_LABEL_HIDE_ZOOM } from "@/lib/constants/world";
+import { WORLD_LABEL_ZOOM, WORLD_LABEL_ZOOM_COMPACT, WORLD_ZONE_LABEL_CONFLICT, WORLD_ZONE_LABEL_CONFLICT_COMPACT, WORLD_ZONE_LABEL_HIDE_ZOOM } from "@/lib/constants/world";
 import { DRAG_THRESHOLD } from "@/lib/hooks/common";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { MapPoint, WorldMarker } from "@/types/world";
@@ -15,6 +15,7 @@ export interface PinHandlers {
 interface WorldPinsProps {
   markers: WorldMarker[];
   zoom: number;
+  compact?: boolean;
   selectedId?: string | null;
   dragging: { id: string; point: MapPoint } | null;
   handlers: PinHandlers;
@@ -24,8 +25,10 @@ interface WorldPinsProps {
 
 const anchor = (m: WorldMarker): MapPoint => (m.kind === "zone" && m.polygon ? polygonCentroid(m.polygon) : { x: m.x, y: m.y });
 
-export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDragMove, onDragEnd }: WorldPinsProps) {
+export function WorldPins({ markers, zoom, compact = false, selectedId, dragging, handlers, onDragMove, onDragEnd }: WorldPinsProps) {
   const points = markers.filter((m) => m.kind !== "zone");
+
+  const shownZoneLabels: MapPoint[] = [];
 
   return (
     <>
@@ -35,7 +38,11 @@ export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDra
         if (m.kind === "zone") {
           const clashes = points.some((p) => Math.hypot(p.x - spot.x, p.y - spot.y) < WORLD_ZONE_LABEL_CONFLICT);
 
-          if (zoom > WORLD_ZONE_LABEL_HIDE_ZOOM || clashes) return null;
+          const overlaps = compact && shownZoneLabels.some((p) => Math.hypot(p.x - spot.x, p.y - spot.y) < WORLD_ZONE_LABEL_CONFLICT_COMPACT);
+
+          if (zoom > WORLD_ZONE_LABEL_HIDE_ZOOM || clashes || overlaps) return null;
+
+          shownZoneLabels.push(spot);
 
           return (
             <span
@@ -61,7 +68,7 @@ export function WorldPins({ markers, zoom, selectedId, dragging, handlers, onDra
             type="button"
             aria-label={m.name}
             data-selected={m.id === selectedId}
-            data-labels={zoom >= WORLD_LABEL_ZOOM}
+            data-labels={zoom >= (compact ? WORLD_LABEL_ZOOM_COMPACT : WORLD_LABEL_ZOOM)}
             data-dragging={dragging?.id === m.id}
             style={{
               left: `${spot.x * 100}%`,
