@@ -1,0 +1,68 @@
+// @vitest-environment happy-dom
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ClassProgressionMap } from "@/components/classes/progression";
+import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
+import type { GameClassData } from "@/types/classes";
+
+const cls = {
+  id: "f",
+  name: "Fighter",
+  color: "#c33",
+  features: [{ level: 4, abilities: [], choices: [{ id: "asi4", label: "ASI", level: 4, count: 1, kind: "feat" }] }],
+  subclassLevel: 3,
+  subclasses: [
+    { id: "champ", name: "Champion", features: [] },
+    { id: "bm", name: "Battle Master", features: [] },
+  ],
+} as unknown as GameClassData;
+
+const sheet = () => buildClassProgression(cls, { classId: "f", level: 4 });
+
+describe("ClassProgressionMap", () => {
+  afterEach(cleanup);
+
+  it("renders 20 rows plus header with state markers", () => {
+    const { container } = render(<ClassProgressionMap progression={sheet()} mode="sheet" />);
+
+    expect(screen.getAllByRole("row")).toHaveLength(21);
+    expect(container.querySelector('tr[data-state="current"]')).toHaveTextContent("4");
+    expect(container.querySelector('tr[data-state="next"]')).toHaveTextContent("5");
+  });
+
+  it("calls onPick for an open pick and onChooseSubclass for the subclass marker", () => {
+    const onPick = vi.fn();
+
+    const onChooseSubclass = vi.fn();
+
+    render(<ClassProgressionMap progression={sheet()} mode="sheet" actions={{ onPick, onChooseSubclass }} />);
+    fireEvent.click(screen.getAllByRole("button", { name: /ASI/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Оберіть підклас/ })[0]);
+
+    expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ key: "asi4" }), 4);
+    expect(onChooseSubclass).toHaveBeenCalledTimes(1);
+  });
+
+  it("dm mode without actions: nothing clickable breaks", () => {
+    render(<ClassProgressionMap progression={buildClassProgression(cls)} mode="dm" />);
+
+    expect(screen.queryAllByRole("button", { name: /Оберіть підклас/ })).toEqual([]);
+    expect(screen.getAllByRole("row")).toHaveLength(21);
+  });
+
+  it("omits subclass columns when there are none and shows chips otherwise", () => {
+    const none = buildClassProgression({ ...cls, subclasses: [], subclassLevel: null });
+
+    const { unmount } = render(<ClassProgressionMap progression={none} mode="dm" />);
+
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.queryByRole("navigation", { name: "Підклас" })).toBeNull();
+    unmount();
+
+    render(<ClassProgressionMap progression={sheet()} mode="sheet" />);
+
+    expect(screen.getByRole("button", { name: "Champion" })).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(5);
+  });
+});
