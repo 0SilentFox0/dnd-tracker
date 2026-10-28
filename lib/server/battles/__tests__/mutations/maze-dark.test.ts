@@ -52,7 +52,7 @@ describe("темрява в лабіринті", () => {
 
       const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedByMode: true, schema, mutate }, body);
 
-      expect(out).toEqual({ status: 422, json: { code: "action_rejected", error: MAZE_TEXTS.dark } });
+      expect(out).toMatchObject({ status: 422, json: { code: "action_rejected", error: MAZE_TEXTS.dark } });
       expect(mutate).not.toHaveBeenCalled();
     }
   });

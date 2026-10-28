@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { contentSchema, EFFECT_KINDS } from "@/lib/server/content/tool-schemas";
 
@@ -60,7 +61,7 @@ describe("contentSchema", () => {
   });
 
   it("невідомий effectKind → помилка з переліком", () => {
-    expect(() => contentSchema({ kind: "abilities", effectKind: "nope" })).toThrow(/modifyStat/);
+    expect(() => contentSchema({ kind: "abilities", effectKind: "nope" })).toThrow(expect.objectContaining({ message: API_ERRORS.ASSISTANT_EFFECT_KIND_UNKNOWN, params: expect.objectContaining({ kind: "nope", kinds: expect.stringContaining("modifyStat") }) }));
   });
 
   it("listFields оголошені для кожного ресурсу", () => {

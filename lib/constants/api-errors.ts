@@ -1,4 +1,4 @@
-import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "./music";
+import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL, TRACK_TITLE_MAX } from "./music";
 import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB, MAX_SLIDES_PER_DECK } from "./show";
 
 export const API_ERRORS = {
@@ -372,13 +372,31 @@ export const API_ERRORS = {
   BATTLE_ITEM_UPCAST_LEVEL_INVALID: "Недозволений рівень підсилення заклинання предмета",
   BATTLE_NO_FREE_SLOT_TO_CAST: "Немає вільного слота для накладання",
   SCENARIO_SLIDE_UNAVAILABLE: "Слайд недоступний",
+  ARTIFACT_HELD_BY_OTHER_DETAIL: "Артефакт уже носить інший герой: {detail}",
+  INITIATIVE_OUT_OF_RANGE_DETAIL: "Ініціатива героя виходить за межі, дозволені правилами кампанії ({min}–{max})",
+  ORIGIN_FEAT_FROM_BACKGROUND: "Передісторія вже визначає рису походження",
+  ASSISTANT_CONTEXT_UNAVAILABLE: "Контекст недоступний",
+  ASSISTANT_CONTEXT_DM_SESSION_ONLY: "Контекст доступний лише ДМ у застосунку",
+  ASSISTANT_EXECUTION_POLICY_UNAVAILABLE: "Політика виконання недоступна",
+  ASSISTANT_NOTE_SELECTION_REQUIRED: "Потрібен явний вибір приміток у застосунку",
+  ASSISTANT_EFFECT_KIND_UNKNOWN: "Невідомий вид ефекту «{kind}». Допустимі: {kinds}",
+  TRACK_TITLE_TOO_LONG: "Група й назва разом — до {max} символів",
+  TRACK_DURATION_INVALID: "Ціле число секунд від 1 до 86400",
+  ITEM_TEMPLATE_NEEDS_BASE: "Шаблон має містити {base}",
+  ITEM_PARAMETER_DUPLICATE: "Параметр має бути унікальним",
+  ITEM_SPELLS_NEED_CHARGES: "Заклинання предмета потребують зарядів або ознаки витратного предмета",
+  ITEM_SPELL_DUPLICATE: "Заклинання предмета не може дублюватися",
+  ITEM_UPCAST_NEEDS_CAST_LEVEL: "Для підсилення потрібен рівень касту",
+  ITEM_UPCAST_MAX_BELOW_BASE: "Максимальний рівень має перевищувати базовий",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
 
 export type ErrorParams = Record<string, string | number>;
 
-export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {};
+export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
+  [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
+};
 
 export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
 

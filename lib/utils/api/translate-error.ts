@@ -59,11 +59,13 @@ export function translateErrorBody(t: Translator, body: { error: string; issues?
   return { error: t(body.error, params), errorKey: body.error, ...issues };
 }
 
+export async function requestTranslator(): Promise<Translator> {
+  return getTranslator(await getRequestLocale().catch(() => DEFAULT_LOCALE));
+}
+
 async function translateInRequest(body: { error: string; issues?: unknown; params?: ErrorParams }): Promise<ApiErrorBody> {
   try {
-    const locale = await getRequestLocale().catch(() => DEFAULT_LOCALE);
-
-    return translateErrorBody(await getTranslator(locale), body);
+    return translateErrorBody(await requestTranslator(), body);
   } catch {
     return { error: body.error, ...(body.issues !== undefined && { issues: body.issues }) };
   }

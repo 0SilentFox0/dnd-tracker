@@ -40,7 +40,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
   if (parsed.initiative !== undefined) {
     const { heroMin, heroMax } = campaign.rules.initiative;
 
-    if (parsed.initiative < heroMin || parsed.initiative > heroMax) throw new ContentError(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
+    if (parsed.initiative < heroMin || parsed.initiative > heroMax) throw new ContentError(API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, 400, undefined, { min: heroMin, max: heroMax });
   }
 
   const data = isDM

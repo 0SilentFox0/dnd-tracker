@@ -1,4 +1,5 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { abilityPicksOf, abilityScoreDelta, applyDelta, capIssues } from "@/lib/utils/characters/choices/ability";
 import { lineageName } from "@/lib/utils/characters/choices/picks";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
@@ -39,7 +40,7 @@ export function planChoices(input: PlanInput): PlanResult {
 
   if (after.backgroundId && (!classMode || !background)) return failWith(422, [choiceIssue("backgroundId", !classMode ? "CHOICES_NEED_CLASSES" : "CHOICE_UNKNOWN")]);
 
-  if (background && after.feats.some((f) => f.source === "origin")) return failWith(422, [choiceIssue("feats", "ORIGIN_FEAT_ONLY_ONE", "Передісторія вже визначає рису походження")]);
+  if (background && after.feats.some((f) => f.source === "origin")) return failWith(422, [choiceIssue("feats", "ORIGIN_FEAT_ONLY_ONE", API_ERRORS.ORIGIN_FEAT_FROM_BACKGROUND)]);
 
   const dmFeats = (s: ChoicesState) => s.feats.filter((f) => f.source === "dm");
 

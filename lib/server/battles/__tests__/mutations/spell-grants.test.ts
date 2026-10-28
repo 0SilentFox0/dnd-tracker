@@ -291,6 +291,6 @@ describe("monster spell grants", () => {
     });
 
     expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ code: "action_rejected", error });
+    expect(await response.json()).toMatchObject({ code: "action_rejected", error });
   });
 });

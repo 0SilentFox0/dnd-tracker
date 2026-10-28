@@ -46,5 +46,11 @@
     "form": "Loading form…",
     "character": "Loading character…",
     "generic": "Loading…"
+  },
+  "joinErrors": {
+    "campaignNotFound": "Campaign not found. Check the invite code.",
+    "alreadyMember": "You are already a member of this campaign.",
+    "campaignNotActive": "The campaign is not active.",
+    "failed": "Failed to join the campaign"
   }
 }

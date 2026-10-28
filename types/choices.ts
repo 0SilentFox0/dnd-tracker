@@ -139,6 +139,7 @@ export interface ChoiceIssue {
   path: string;
   code: ChoiceErrorCode;
   message: string;
+  params?: { detail: string };
 }
 
 export interface ChoicesBody {

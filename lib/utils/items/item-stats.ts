@@ -14,7 +14,7 @@ const PropertySchema = z.object({
     armorCategories: z.array(z.enum(ARMOR_CATEGORIES)).min(1).optional(),
     bases: z.array(z.string().trim().min(1).max(100)).min(1).max(ITEM_LIMITS.bases).optional(),
   }),
-  nameTemplate: z.string().trim().max(100).refine((t) => t.includes("{base}"), "Шаблон має містити {base}").optional(),
+  nameTemplate: z.string().trim().max(100).refine((t) => t.includes("{base}"), API_ERRORS.ITEM_TEMPLATE_NEEDS_BASE).optional(),
   overrides: z
     .object({
       stealthDisadvantage: z.literal(false).optional(),
@@ -41,7 +41,7 @@ export const ItemParameterSchema = z.object({
   const keys = new Set<string>();
 
   parameter.options.forEach((option, index) => {
-    if (keys.has(option.key)) ctx.addIssue({ code: "custom", path: ["options", index, "key"], message: "Параметр має бути унікальним" });
+    if (keys.has(option.key)) ctx.addIssue({ code: "custom", path: ["options", index, "key"], message: API_ERRORS.ITEM_PARAMETER_DUPLICATE });
 
     keys.add(option.key);
   });
@@ -58,18 +58,18 @@ export const ItemStatsSchema = z
     parameter: ItemParameterSchema.optional(),
   })
   .superRefine((s, ctx) => {
-    if (s.spells?.some((spell) => spell.cost > 0 || spell.upcast) && !s.charges && !s.consumable) ctx.addIssue({ code: "custom", path: ["spells"], message: "Заклинання предмета потребують зарядів або ознаки витратного предмета" });
+    if (s.spells?.some((spell) => spell.cost > 0 || spell.upcast) && !s.charges && !s.consumable) ctx.addIssue({ code: "custom", path: ["spells"], message: API_ERRORS.ITEM_SPELLS_NEED_CHARGES });
 
     const ids = new Set<string>();
 
     for (const [index, spell] of (s.spells ?? []).entries()) {
-      if (ids.has(spell.spellId)) ctx.addIssue({ code: "custom", path: ["spells", index, "spellId"], message: "Заклинання предмета не може дублюватися" });
+      if (ids.has(spell.spellId)) ctx.addIssue({ code: "custom", path: ["spells", index, "spellId"], message: API_ERRORS.ITEM_SPELL_DUPLICATE });
 
       ids.add(spell.spellId);
 
-      if (spell.upcast && spell.castLevel === undefined) ctx.addIssue({ code: "custom", path: ["spells", index, "upcast"], message: "Для підсилення потрібен рівень касту" });
+      if (spell.upcast && spell.castLevel === undefined) ctx.addIssue({ code: "custom", path: ["spells", index, "upcast"], message: API_ERRORS.ITEM_UPCAST_NEEDS_CAST_LEVEL });
 
-      if (spell.upcast && spell.upcast.maxLevel <= (spell.castLevel ?? 0)) ctx.addIssue({ code: "custom", path: ["spells", index, "upcast", "maxLevel"], message: "Максимальний рівень має перевищувати базовий" });
+      if (spell.upcast && spell.upcast.maxLevel <= (spell.castLevel ?? 0)) ctx.addIssue({ code: "custom", path: ["spells", index, "upcast", "maxLevel"], message: API_ERRORS.ITEM_UPCAST_MAX_BELOW_BASE });
     }
   })
   .refine((s) => !s.consumable || (!s.property && !s.charges?.rest), { message: API_ERRORS.ITEM_CONSUMABLE_CONFLICT, path: ["consumable"] })

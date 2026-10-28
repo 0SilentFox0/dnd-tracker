@@ -18,7 +18,7 @@ export interface PickContext {
   featCounts: ReadonlyMap<string, number>;
 }
 
-export const choiceIssue = (path: string, code: ChoiceErrorCode, detail?: string): ChoiceIssue => ({ path, code, message: detail ? `${API_ERRORS[code]}: ${detail}` : API_ERRORS[code] });
+export const choiceIssue = (path: string, code: ChoiceErrorCode, detail?: string): ChoiceIssue => ({ path, code, message: API_ERRORS[code], ...(detail && { params: { detail } }) });
 
 export function featPrerequisiteMet(feat: FeatData, ctx: { totalLevel: number; scores: Readonly<Record<AbilityKey, number>> }): boolean {
   const { level, scores } = feat.prerequisite;

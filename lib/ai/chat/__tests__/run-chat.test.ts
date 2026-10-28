@@ -10,6 +10,11 @@ vi.mock("@/lib/ai/credentials", () => {
 });
 vi.mock("@/lib/ai/context/prompt", () => ({ buildInstructions: vi.fn(async () => "ІНСТРУКЦІЇ") }));
 vi.mock("@/lib/ai/tools", () => ({ toAiSdkTools: vi.fn(() => ({})) }));
+vi.mock("@/lib/utils/api/translate-error", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/utils/api/translate-error")>();
+
+  return { ...actual, requestTranslator: vi.fn(actual.requestTranslator) };
+});
 
 vi.mock("@/lib/server/assistant/runs", async () => ({
   createRunSignal: (await import("@/lib/ai/chat/run-signal")).createRunSignal,
@@ -202,6 +207,26 @@ describe("runChat", () => {
 
     expect(body).toContain("Ключ недійсний");
     expect(body).not.toContain("sk-test");
+  });
+
+  it("метадані з помилкою провайдера зберігають результат перекладу, не ключ", async () => {
+    const { APICallError } = await import("ai");
+
+    const { requestTranslator } = await import("@/lib/utils/api/translate-error");
+
+    const { appendMessage } = await import("@/lib/ai/threads");
+
+    vi.mocked(requestTranslator).mockResolvedValueOnce(Object.assign((key: string) => `T(${key})`, { has: () => true, raw: () => ({}) }));
+
+    const failing = new MockLanguageModelV4({ doStream: async () => { throw new APICallError({ message: "bad", url: "u", requestBodyValues: {}, statusCode: 401, isRetryable: false }); } });
+
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    await (await runChat(args, { model: failing })).text();
+
+    const saved = vi.mocked(appendMessage).mock.calls.map((c) => c[1]).find((m) => m.role === "assistant");
+
+    expect((saved?.metadata as { error?: string }).error).toMatch(/^T\(.+\)$/);
   });
 
   it("логи помилки провайдера не містять тексту оригіналу", async () => {

@@ -118,7 +118,7 @@ async function updateInventoryCore({ access, character }: Gate, data: z.infer<ty
           if (holderId) {
             const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
 
-            throw new ContentError(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${holderName}`, 409);
+            throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: holderName });
           }
         }
       }
