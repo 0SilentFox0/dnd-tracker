@@ -65,7 +65,7 @@ describe("generic compendium adapters", () => {
   it("automates only a complete simple attack template, retaining complex actions as text", () => {
     const result = adaptCompendium({ monster: [{ ...source, ac: [12], hp: { average: 9 }, str: 10, dex: 12, con: 11, int: 8, wis: 10, cha: 6, action: [{ name: "Poke", entries: ["{@atk mw} {@hit 4} to hit, reach 5 ft., one target. {@h}6 ({@damage 1d6 + 3}) piercing damage."] }, { name: "Special", entries: ["A fictional effect that needs manual resolution."] }] }] });
 
-    expect(result.entries[0].body.attacks).toMatchObject([{ name: "Poke", attackBonus: 4, damageDice: "1d6 + 3", damageType: "piercing" }]);
+    expect(result.entries[0].body.attacks).toMatchObject([{ name: "Poke", attackBonus: 4, damageDice: "1d6+3", damageType: "piercing" }]);
     expect(result.entries[0].notes).toContain("Special");
   });
 
