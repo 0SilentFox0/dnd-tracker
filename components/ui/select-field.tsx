@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import {
   Select,
@@ -47,7 +48,7 @@ export function SelectField({
   "aria-label": ariaLabel,
   value,
   onValueChange,
-  placeholder = "Виберіть опцію",
+  placeholder,
   options = [],
   groups,
   disabled = false,
@@ -55,10 +56,12 @@ export function SelectField({
   triggerClassName,
   required = false,
   allowNone = false,
-  noneLabel = "Без вибору",
+  noneLabel,
   noneValue = "none",
   children,
 }: SelectFieldProps) {
+  const t = useTranslations("common");
+
   const displayValue = value || (allowNone ? noneValue : "");
 
   const handleValueChange = (newValue: string) => {
@@ -77,7 +80,7 @@ export function SelectField({
       required={required}
     >
       <SelectTrigger id={id} aria-label={ariaLabel} className={cn(triggerClassName, className)}>
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={placeholder ?? t("ui.selectPlaceholder")} />
       </SelectTrigger>
       <SelectContent>
         {children ? (
@@ -85,7 +88,7 @@ export function SelectField({
         ) : (
           <>
             {allowNone && (
-              <SelectItem value={noneValue}>{noneLabel}</SelectItem>
+              <SelectItem value={noneValue}>{noneLabel ?? t("ui.noneLabel")}</SelectItem>
             )}
             {groups && groups.length > 0
               ? groups.map((group, groupIndex) => (

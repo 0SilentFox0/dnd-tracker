@@ -94,7 +94,7 @@ it("does not navigate on failure and enables another save", async () => {
   expect(updateBackground).toHaveBeenCalledTimes(1);
   expect(push).not.toHaveBeenCalled();
   expect(refresh).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Зрозуміло" }));
+  fireEvent.click(screen.getByRole("button", { name: "common.notify.gotIt" }));
   await waitFor(() => expect((screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement).disabled).toBe(false));
 });
 

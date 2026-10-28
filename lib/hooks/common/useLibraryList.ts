@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useConfirm } from "./useConfirm";
 import { useNotify } from "./useNotify";
@@ -27,6 +28,8 @@ interface UseLibraryListArgs<T, TCreate> {
 const NO_ITEMS: never[] = [];
 
 export function useLibraryList<T, TCreate>({ query, create, remove, texts }: UseLibraryListArgs<T, TCreate>) {
+  const t = useTranslations("common");
+
   const confirm = useConfirm();
 
   const notify = useNotify();
@@ -40,7 +43,7 @@ export function useLibraryList<T, TCreate>({ query, create, remove, texts }: Use
     create: (data: TCreate) =>
       create.mutate(data, { onSuccess: () => setCreateOpen(false), onError: (error) => void notify(errorMessage(error, texts.createError)) }),
     remove: async (id: string) => {
-      if (!(await confirm({ title: texts.confirmDelete, confirmLabel: "Видалити", destructive: true }))) return;
+      if (!(await confirm({ title: texts.confirmDelete, confirmLabel: t("confirm.delete"), destructive: true }))) return;
 
       remove.mutate(id, { onError: (error) => void notify(errorMessage(error, texts.deleteError)) });
     },

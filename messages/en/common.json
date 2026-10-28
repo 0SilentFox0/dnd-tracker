@@ -1,1 +1,50 @@
-{ "app": { "name": "D&D Combat Tracker" } }
+{
+  "app": {
+    "name": "D&D Combat Tracker"
+  },
+  "confirm": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "failed": "Could not complete the action",
+    "unsavedTitle": "You have unsaved changes. Leave without saving?",
+    "leave": "Leave",
+    "delete": "Delete"
+  },
+  "notify": {
+    "title": "Notice",
+    "gotIt": "Got it"
+  },
+  "ui": {
+    "close": "Close",
+    "imageLabel": "Image",
+    "imageTooLarge": "File is too large. Maximum {mb} MB.",
+    "imageProcessFailed": "Could not process the image",
+    "or": "or",
+    "uploadFromComputer": "Upload from computer",
+    "fromFile": "(uploaded from file)",
+    "commaPlaceholder": "Comma-separated",
+    "selectPlaceholder": "Select an option",
+    "noneLabel": "None",
+    "target": "Target",
+    "hasErrors": "has errors"
+  },
+  "import": {
+    "unsupportedType": "Only CSV and JSON files are supported",
+    "pickFile": "Choose a file to import",
+    "noParsers": "No parsing functions provided",
+    "csvUnsupported": "CSV parsing is not supported",
+    "jsonUnsupported": "JSON parsing is not supported",
+    "unsupportedFormat": "Unsupported file format",
+    "failed": "Import failed"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "home": "Home"
+  },
+  "loading": {
+    "battle": "Loading battle…",
+    "form": "Loading form…",
+    "character": "Loading character…",
+    "generic": "Loading…"
+  }
+}

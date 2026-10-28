@@ -1,1 +1,50 @@
-{ "app": { "name": "D&D Combat Tracker" } }
+{
+  "app": {
+    "name": "D&D Combat Tracker"
+  },
+  "confirm": {
+    "cancel": "Скасувати",
+    "confirm": "Підтвердити",
+    "failed": "Не вдалося виконати дію",
+    "unsavedTitle": "Є незбережені зміни. Вийти без збереження?",
+    "leave": "Вийти",
+    "delete": "Видалити"
+  },
+  "notify": {
+    "title": "Повідомлення",
+    "gotIt": "Зрозуміло"
+  },
+  "ui": {
+    "close": "Закрити",
+    "imageLabel": "Картинка",
+    "imageTooLarge": "Файл завеликий. Максимум {mb} МБ.",
+    "imageProcessFailed": "Не вдалося обробити зображення",
+    "or": "або",
+    "uploadFromComputer": "Завантажити з комп'ютера",
+    "fromFile": "(завантажено з файлу)",
+    "commaPlaceholder": "Через кому",
+    "selectPlaceholder": "Виберіть опцію",
+    "noneLabel": "Без вибору",
+    "target": "Ціль",
+    "hasErrors": "є помилки"
+  },
+  "import": {
+    "unsupportedType": "Підтримуються тільки CSV та JSON файли",
+    "pickFile": "Виберіть файл для імпорту",
+    "noParsers": "Не вказано функції парсингу",
+    "csvUnsupported": "CSV парсинг не підтримується",
+    "jsonUnsupported": "JSON парсинг не підтримується",
+    "unsupportedFormat": "Непідтримуваний формат файлу",
+    "failed": "Помилка при імпорті"
+  },
+  "notFound": {
+    "title": "Сторінку не знайдено",
+    "home": "На головну"
+  },
+  "loading": {
+    "battle": "Завантаження бою…",
+    "form": "Завантаження форми…",
+    "character": "Завантаження персонажа…",
+    "generic": "Завантаження…"
+  }
+}

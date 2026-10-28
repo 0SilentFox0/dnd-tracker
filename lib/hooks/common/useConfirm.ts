@@ -5,7 +5,7 @@ import { ConfirmContext,type ConfirmFn } from "./confirm-context";
 export function useConfirm(): ConfirmFn {
   const confirm = useContext(ConfirmContext);
 
-  if (!confirm) throw new Error("useConfirm потребує ConfirmProvider (підключений в app/layout.tsx)");
+  if (!confirm) throw new Error("useConfirm requires ConfirmProvider (mounted in app/layout.tsx)");
 
   return confirm;
 }

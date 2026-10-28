@@ -2,23 +2,24 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useConfirm } from "./useConfirm";
-
-const CONFIRM = { title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти", destructive: true };
 
 const MODIFIED = (e: MouseEvent) => e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
 
 /** Поки active: закриття вкладки, і клік по внутрішньому посиланню питають підтвердження. */
 export function useUnsavedChangesGuard(active: boolean): void {
+  const t = useTranslations("common");
+
   const router = useRouter();
 
   const confirm = useConfirm();
 
-  const latest = useRef({ router, confirm });
+  const latest = useRef({ router, confirm, t });
 
   useEffect(() => {
-    latest.current = { router, confirm };
+    latest.current = { router, confirm, t };
   });
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export function useUnsavedChangesGuard(active: boolean): void {
       e.preventDefault();
       e.stopPropagation();
 
-      void latest.current.confirm(CONFIRM).then((ok) => ok && latest.current.router.push(url.pathname + url.search + url.hash));
+      void latest.current.confirm({ title: latest.current.t("confirm.unsavedTitle"), confirmLabel: latest.current.t("confirm.leave"), destructive: true }).then((ok) => ok && latest.current.router.push(url.pathname + url.search + url.hash));
     };
 
     window.addEventListener("beforeunload", warn);
