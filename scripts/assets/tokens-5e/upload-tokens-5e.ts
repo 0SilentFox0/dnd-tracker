@@ -1,12 +1,13 @@
 #!/usr/bin/env tsx
 // pnpm assets:tokens-5e <templateId> [--dir <v2>] [--dry-run] [--allow-remote]
+import { createHash } from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
 import { assertSeedTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
-import { ASSET_BUCKET, objectPath } from "../attach-lib";
+import { ASSET_BUCKET } from "../attach-lib";
 import { mapToTemplate, parseCatalog, TOKEN_SIZE, type TokenKind } from "./catalog";
 import { toWebp } from "./convert";
 import { readIcons, writeIcons } from "./icons-file";
@@ -91,7 +92,7 @@ async function main() {
       ensured.add(kind);
     }
 
-    const objectName = objectPath(templateId, kind, slug, webp, ".webp");
+    const objectName = `${templateId}/${kind}/${slug}-${createHash("sha1").update(webp).digest("hex").slice(0, 8)}.webp`;
 
     const { error } = await admin.storage.from(bucket).upload(objectName, webp, staticAssetUploadOptions("image/webp"));
 
