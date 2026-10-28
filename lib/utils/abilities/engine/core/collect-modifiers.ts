@@ -22,6 +22,7 @@ export interface ModifierEntry {
   sourceType: AbilitySource["type"] | "effect" | "action";
   flat: number;
   percent: number;
+  atLeast?: number;
   flag?: FlagEffect;
   icon?: string | null;
   /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
@@ -34,6 +35,7 @@ type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source" 
 export interface ModifierResult {
   flat: number;
   percent: number;
+  atLeast?: number;
   flags: FlagEffect[];
   entries: ModifierEntry[];
 }
@@ -105,6 +107,9 @@ export function collectModifiers(
 
     result.flat += entry.flat;
     result.percent += entry.percent;
+
+    if (entry.atLeast !== undefined) result.atLeast = Math.max(result.atLeast ?? 0, entry.atLeast);
+
     result.entries.push(entry);
   };
 
@@ -127,7 +132,7 @@ export function collectModifiers(
 
     const percent = (effect.percent !== undefined ? resolveFlat(effect.percent, owner) : 0) * multiplier;
 
-    return { ...meta, flat, percent };
+    return { ...meta, flat, percent, ...(effect.kind === "modifyStat" && effect.atLeast !== undefined && { atLeast: effect.atLeast }) };
   };
 
   const add = (effect: StaticEffect, owner: BattleParticipant, meta: EntryMeta) => {
@@ -207,7 +212,9 @@ export function statWithModifiers(
 ): number {
   const m = collectModifiers(participants, id, { stat, attackKind: opts.attackKind }, opts.extra);
 
-  return Math.floor(base + m.flat + (base * m.percent) / 100);
+  const value = Math.floor(base + m.flat + (base * m.percent) / 100);
+
+  return m.atLeast === undefined ? value : Math.max(value, m.atLeast);
 }
 
 export function findFlags<F extends FlagKey>(

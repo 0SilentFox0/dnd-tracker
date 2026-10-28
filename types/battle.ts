@@ -149,6 +149,7 @@ export interface BattleParticipantBasicInfo {
  */
 export interface BattleParticipantAbilities {
   creatureType?: string;
+  cr?: number;
   damageModel?: "5e";
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)

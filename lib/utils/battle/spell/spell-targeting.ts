@@ -13,6 +13,7 @@ import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCent
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -132,13 +133,20 @@ const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
 
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
-function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
+interface FilterLevel {
+  spellLevel: number;
+  castLevel?: number;
+}
+
+function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined, level: FilterLevel): SpellTargetResolution {
+  const passing = (targets: BattleParticipant[]) => targets.filter((p) => matchesTargetFilter(p, targeting.filter, level)).map((p) => p.basicInfo.id);
+
   if (targeting.shape === "emanation") {
     const centre = cellsOf(caster)[0];
 
     const { cells, targets } = templateArea(map, ps, caster, targeting, centre);
 
-    return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre };
+    return { ok: true, targetIds: passing(targets), cells, centre };
   }
 
   if (!aim) return fail("Оберіть точку на карті");
@@ -159,7 +167,7 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
 
-  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
+  return { ok: true, targetIds: passing(targets), cells, centre: templateCentre(targeting, aim, cells) };
 }
 
 function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
@@ -198,7 +206,7 @@ function resolveRaw(
 
   const map = mapCtx?.map && isOnMap(caster) ? mapCtx.map : null;
 
-  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell);
+  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell, { spellLevel: spell.level, castLevel: mapCtx?.castLevel });
 
   if (targeting.kind === "ally" || targeting.kind === "enemy") {
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
@@ -268,6 +276,8 @@ function resolveRaw(
       if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
         return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
       }
+
+      if (picked.some((p) => !matchesTargetFilter(p, targeting.filter, { spellLevel: spell.level, castLevel: mapCtx?.castLevel }))) return fail(API_ERRORS.BATTLE_SPELL_TARGET_FILTER);
 
       if (map && targeting.kind === "area" && targeting.chain) {
         if (picked.length !== 1) return fail("Оберіть одну першу ціль ланцюга");

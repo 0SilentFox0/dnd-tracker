@@ -21,13 +21,24 @@ const rangeField = z.number().int().min(5).max(600).optional();
 
 export const SpellZoneSchema = z.object({ rounds: z.number().int().min(1).max(10), label: z.string().max(60).optional() });
 
+export const SpellTargetFilterSchema = z.object({
+  creatureTypes: z.array(z.string().trim().min(1).max(40)).min(1).max(10).optional(),
+  maxCr: z.number().min(0).max(30).optional(),
+  maxCrPerLevel: z.number().min(0).max(5).optional(),
+  movement: z.literal("fly").optional(),
+});
+
+const filterField = SpellTargetFilterSchema.optional();
+
+export type SpellTargetFilter = z.infer<typeof SpellTargetFilterSchema>;
+
 export const SpellTargetingSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("self") }),
-  z.object({ kind: z.literal("ally"), range: rangeField }),
-  z.object({ kind: z.literal("enemy"), range: rangeField }),
+  z.object({ kind: z.literal("ally"), range: rangeField, filter: filterField }),
+  z.object({ kind: z.literal("enemy"), range: rangeField, filter: filterField }),
   z.object({ kind: z.literal("allyDead"), range: rangeField }),
   z.object({ kind: z.literal("allAlliesDead") }),
-  z.object({ kind: z.literal("area"), side: z.enum(["ally", "enemy"]), maxTargets: z.number().int().min(1).max(20), range: rangeField, chain: z.boolean().optional() }),
+  z.object({ kind: z.literal("area"), side: z.enum(["ally", "enemy"]), maxTargets: z.number().int().min(1).max(20), range: rangeField, chain: z.boolean().optional(), filter: filterField }),
   z.object({
     kind: z.literal("template"),
     shape: z.enum(TEMPLATE_SHAPES),
@@ -38,6 +49,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     zone: SpellZoneSchema.optional(),
     hollow: z.boolean().optional(),
     exact: z.boolean().optional(),
+    filter: filterField,
   }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "Точна площа доступна лише для кола", path: ["exact"] }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),

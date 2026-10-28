@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS, type StatKey } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { DND_SKILLS } from "@/lib/constants/skills";
@@ -25,7 +25,15 @@ const target = { target: AbilityTargetSchema.optional() };
 
 const timed = { ...target, duration: DurationSchema.optional() };
 
+const AT_LEAST_TIMED = ["armor", "speed"] as const;
+
 const hasValue = (e: { flat?: unknown; percent?: unknown }) => e.flat !== undefined || e.percent !== undefined;
+
+function atLeastAllowed(e: { stat: StatKey; atLeast?: number; duration?: unknown }): boolean {
+  if ((ABILITY_KEYS as readonly string[]).includes(e.stat)) return (e.atLeast ?? 0) <= 30;
+
+  return (AT_LEAST_TIMED as readonly string[]).includes(e.stat) && e.duration !== undefined;
+}
 
 const ModifyStatSchema = z
   .object({
@@ -33,14 +41,15 @@ const ModifyStatSchema = z
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
     percent: FlatSchema.optional(),
-    atLeast: z.number().int().min(1).max(30).optional(),
+    atLeast: z.number().int().min(1).max(120).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     ...timed,
   })
   .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })
-  .refine((e) => e.atLeast === undefined || ((ABILITY_KEYS as readonly string[]).includes(e.stat) && e.flat === undefined && e.percent === undefined), {
-    message: "atLeast — лише для характеристик і без flat/percent",
+  .refine((e) => e.atLeast === undefined || (e.flat === undefined && e.percent === undefined), { message: "atLeast — без flat/percent", path: ["atLeast"] })
+  .refine((e) => e.atLeast === undefined || atLeastAllowed(e), {
+    message: "atLeast — для характеристик (до 30) або для броні й швидкості з тривалістю",
     path: ["atLeast"],
   });
 

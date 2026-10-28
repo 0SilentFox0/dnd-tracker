@@ -88,7 +88,7 @@ const VALUE_FIELDS: readonly FieldMeta[] = [
 export const modifyStatFields: readonly FieldMeta[] = [
   { name: "stat", label: "Стат", input: "select", options: Object.entries(STAT_LABELS).map(([value, label]) => ({ value, label })) },
   ...VALUE_FIELDS,
-  { name: "atLeast", label: "Не менше (значення характеристики)", input: "number", optional: true, visibleWhen: (e) => (ABILITY_KEYS as readonly string[]).includes(String(e.stat)) },
+  { name: "atLeast", label: "Не менше (характеристика, броня, швидкість)", input: "number", optional: true, visibleWhen: (e) => [...ABILITY_KEYS, "armor", "speed"].includes(String(e.stat)) },
   { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,

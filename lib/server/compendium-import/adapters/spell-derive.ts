@@ -1,3 +1,4 @@
+import { withTargetFilter } from "./spell-patterns/target-filter";
 import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
@@ -30,7 +31,7 @@ export interface DerivedSpell {
 
 export type SpellDerivation = { native: DerivedSpell } | { blocker: SpellBlocker; detail?: string };
 
-const SIGNAL_TEXT = /\bhit points\b|\bspeed\b[^.]{0,30}\b(?:reduced|increases?|decreases?)\b|\b(?:reduces?|increases?)\b[^.]{0,30}\bspeed\b|\bArmor Class\b|\badvantage\b|\bdisadvantage\b|\bspell attack\b|\bsaving throw\b/i;
+const SIGNAL_TEXT = /\bhit points\b|\bspeed\b[^.]{0,30}\b(?:reduced|increases?|decreases?|at least)\b|\b(?:reduces?|increases?)\b[^.]{0,30}\bspeed\b|\bArmor Class\b|\badvantage\b|\bdisadvantage\b|\bspell attack\b|\bsaving throw\b/i;
 
 const WEAPON = /\bweapon attacks?\b|\bammunition\b|\b(?:simple or martial|simple|martial) weapons?\b|\bweapons? of your choice\b|\bas a (?:melee |ranged )?weapon\b/i;
 
@@ -236,7 +237,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
       narrative: false,
       riders,
       fields: {
-        targeting,
+        targeting: withTargetFilter(targeting, text, higher),
         resolution: spellResolution(facts, kind, targeting),
         spellEffects: spellEffects(facts, kind),
         dice: dice?.count ?? 0,

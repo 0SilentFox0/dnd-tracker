@@ -1,4 +1,5 @@
 import type { SkillRadius, SpellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import type { SpellTargetFilter } from "@/lib/utils/spells/model/schema";
 import type { GridPoint, SpellTemplate } from "@/types/battle";
 
 export type SpellTargetMode = "none" | "single" | "multi" | "all" | "template";
@@ -19,6 +20,9 @@ export interface SpellPick {
   skillRadius?: SkillRadius;
   /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
   chain?: SpellChain;
+  /** обмеження цілей (тип, CR, політ) разом із колом, від якого рахується CR */
+  filter?: SpellTargetFilter;
+  castLevel?: number;
   needsSaves: boolean;
   needsAttackRolls?: boolean;
   diceSlots: number[];

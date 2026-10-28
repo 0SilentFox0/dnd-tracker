@@ -42,6 +42,7 @@ import { isOnMap } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -108,7 +109,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide).filter(visible), [order, caster, pickSide, visible]);
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
