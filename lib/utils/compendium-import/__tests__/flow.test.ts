@@ -34,3 +34,15 @@ it("projects only selected chapters while retaining book identity", () => {
 
   expect(JSON.parse(projectInput(root, ["bookData"], {}, ["bookData[0].data[1]"]).json)).toEqual({ bookData: [{ id: "b", data: [{ name: "one" }] }] });
 });
+
+describe("projectInput record size", () => {
+  const big = { name: "x", entries: Array.from({ length: 4 }, () => "x".repeat(100_000)) };
+
+  it("ignores oversized records outside the selection and in book material", () => {
+    expect(() => projectInput({ monster: [big], bookData: [{ id: "B", data: [big, big] }] }, ["bookData"])).not.toThrow();
+  });
+
+  it("rejects an oversized record in a selected category", () => {
+    expect(() => projectInput({ monster: [big] }, ["monster"])).toThrow("RECORD_SIZE: monster");
+  });
+});

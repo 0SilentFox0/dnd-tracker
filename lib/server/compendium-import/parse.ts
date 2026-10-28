@@ -1,4 +1,4 @@
-import { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, type JsonRecord } from "@/lib/constants/compendium-import";
+import { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, type JsonRecord, oversizedRecordKind } from "@/lib/constants/compendium-import";
 import { isRecord } from "@/lib/utils/common/is-record";
 
 export { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, type JsonRecord };
@@ -133,7 +133,7 @@ function scan(text: string) {
   if (at !== text.length) fail("INVALID_JSON");
 }
 
-export function parseCompendium(input: string | Uint8Array): Compendium {
+export function parseCompendium(input: string | Uint8Array, options: { checkRecordSize?: boolean } = {}): Compendium {
   if ((typeof input === "string" ? byteLength(input) : input.byteLength) > COMPENDIUM_LIMITS.bytes) throw new CompendiumError("FILE_SIZE");
 
   let text: string;
@@ -175,11 +175,16 @@ export function parseCompendium(input: string | Uint8Array): Compendium {
 
     if (Array.isArray(rows)) {
       count += rows.length;
-      for (const row of rows) if (byteLength(JSON.stringify(row)) > COMPENDIUM_LIMITS.recordBytes) throw new CompendiumError("RECORD_SIZE", kind);
     }
   }
 
   if (count > COMPENDIUM_LIMITS.records) throw new CompendiumError("RECORDS");
+
+  if (options.checkRecordSize !== false) {
+    const oversized = oversizedRecordKind(root);
+
+    if (oversized) throw new CompendiumError("RECORD_SIZE", oversized);
+  }
 
   return root;
 }

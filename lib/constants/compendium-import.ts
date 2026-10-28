@@ -23,3 +23,17 @@ export const COMPENDIUM_ERROR_TEXT: Record<string, string> = {
 export const COMPENDIUM_REF_KINDS: Record<string, string> = { spell: "spells", feat: "feats", class: "classes", race: "races", monster: "units", background: "backgrounds", item: "artifacts", spellSchool: "spell-groups" };
 
 export const COMPENDIUM_CHAPTER_KINDS = ["bookData", "adventureData"] as const;
+
+export const COMPENDIUM_MATERIAL_KINDS = ["book", "adventure", ...COMPENDIUM_CHAPTER_KINDS] as const;
+
+export const recordSizeLimited = (kind: string) => (COMPENDIUM_KINDS as readonly string[]).includes(kind) && !(COMPENDIUM_MATERIAL_KINDS as readonly string[]).includes(kind);
+
+export function oversizedRecordKind(root: JsonRecord, kinds: Iterable<string> = Object.keys(root)): string | undefined {
+  for (const kind of kinds) {
+    const rows = root[kind];
+
+    if (recordSizeLimited(kind) && Array.isArray(rows) && rows.some((row) => byteLength(JSON.stringify(row)) > COMPENDIUM_LIMITS.recordBytes)) return kind;
+  }
+
+  return undefined;
+}

@@ -45,6 +45,20 @@ describe("bounded compendium parsing", () => {
     rejectsWith(JSON.stringify({ feat: [{ ...row, b: row.b + "y" }] }), "RECORD_SIZE");
   });
 
+  it("does not apply the record limit to book/adventure material or unsupported categories", () => {
+    const big = { id: "B", data: Array.from({ length: 3 }, () => ({ name: "c", entries: Array.from({ length: 2 }, () => "x".repeat(COMPENDIUM_LIMITS.stringBytes - 1)) })) };
+
+    expect(byteLength(JSON.stringify(big))).toBeGreaterThan(COMPENDIUM_LIMITS.recordBytes);
+    expect(() => parseCompendium(JSON.stringify({ bookData: [big], adventure: [big], foundryItem: [big] }))).not.toThrow();
+  });
+
+  it("can skip the record limit for the pre-selection worker pass", () => {
+    const row = { a: "x".repeat(COMPENDIUM_LIMITS.stringBytes), b: "y".repeat(COMPENDIUM_LIMITS.stringBytes), c: "z".repeat(1) };
+
+    expect(() => parseCompendium(JSON.stringify({ monster: [row] }))).toThrow(expect.objectContaining({ code: "RECORD_SIZE" }));
+    expect(() => parseCompendium(JSON.stringify({ monster: [row] }), { checkRecordSize: false })).not.toThrow();
+  });
+
   it("accepts exact node budget and rejects one over", () => {
     // root + _meta + custom array = three nodes; metadata is not a record category.
     const text = (count: number) => '{"_meta":{"custom":[' + Array(count - 3).fill("null").join(",") + "]}}";

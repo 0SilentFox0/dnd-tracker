@@ -1,8 +1,8 @@
 import { ApiError } from "@/lib/api/client";
-import { byteLength, COMPENDIUM_ERROR_TEXT, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord } from "@/lib/constants/compendium-import";
+import { byteLength, COMPENDIUM_ERROR_TEXT, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_MATERIAL_KINDS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord, oversizedRecordKind } from "@/lib/constants/compendium-import";
 import type { CompendiumGraphRow, CompendiumOptions, ImportInput, ImportIssue } from "@/types/compendium-import";
 
-export const MATERIAL_KINDS = new Set(["book", "bookData", "adventure", "adventureData"]);
+export const MATERIAL_KINDS = new Set<string>(COMPENDIUM_MATERIAL_KINDS);
 export const CATEGORY_LABELS: Record<string, string> = { spell: "Заклинання", monster: "Юніти", item: "Предмети", baseitem: "Базові предмети", race: "Раси", subrace: "Підраси", background: "Передісторії", feat: "Риси", class: "Класи", classFeature: "Вміння класів", subclass: "Підкласи", subclassFeature: "Вміння підкласів", optionalfeature: "Опційні вміння", book: "Маніфести книг", bookData: "Сторінки книг", adventure: "Маніфести пригод", adventureData: "Сторінки пригод", table: "Таблиці", reward: "Нагороди", condition: "Стани", skill: "Навички", language: "Мови", itemProperty: "Властивості предметів", itemType: "Типи предметів" };
 export function categoryInventory(root: JsonRecord) {
   return Object.entries(root).filter(([kind]) => kind !== "_meta").map(([kind, value]) => ({ kind, count: Array.isArray(value) ? value.length : 1, supported: (COMPENDIUM_KINDS as readonly string[]).includes(kind), selected: (COMPENDIUM_KINDS as readonly string[]).includes(kind) && !MATERIAL_KINDS.has(kind) }));
@@ -19,6 +19,10 @@ export function projectInput(root: JsonRecord, categories: string[], options: Om
 
   for (const row of unsupported) root[row.kind] = Array.from({ length: row.count }, () => ({}));
   categories = [...new Set([...categories, ...unsupported.map(row => row.kind)])];
+
+  const oversized = oversizedRecordKind(root, categories);
+
+  if (oversized) throw new Error(`RECORD_SIZE: ${oversized}`);
 
   const input = { ...options, categories, json: JSON.stringify(Object.fromEntries(Object.entries(root).filter(([key]) => key === "_meta" || categories.includes(key)))) };
 
