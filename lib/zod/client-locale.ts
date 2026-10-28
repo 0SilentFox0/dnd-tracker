@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- client forms still read the Ukrainian localeError until their domains move to translateIssue */
 import { z } from "zod";
 import uk from "zod/v4/locales/uk.js";
 

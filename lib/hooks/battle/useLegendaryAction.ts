@@ -5,9 +5,9 @@ import { useMemo } from "react";
 import { useBattleScene } from "./useBattleScene";
 import { useSendCoreAction } from "./useCoreActions";
 
-import { useTranslator } from "@/lib/i18n/use-translator";
 import { useSpellsByIds } from "@/lib/hooks/spells";
 import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
