@@ -98,11 +98,11 @@ export function applyPuzzleCommand(prev: ShowState | null, cmd: PuzzleCommand, c
     return commit(prev, patchPiece(puzzle, cmd.pieceId, { correct: false, holder: { userId: user.id, name: user.name, until: now + PUZZLE_HOLD_MS } }));
   }
 
-  if (!mine) return fail(API_ERRORS.PUZZLE_NOT_HOLDER);
+  if (!piece.holder || !mine) return fail(API_ERRORS.PUZZLE_NOT_HOLDER);
 
   switch (cmd.action) {
     case "puzzleKeepAlive":
-      return commit(prev, patchPiece(puzzle, cmd.pieceId, { holder: { userId: user.id, name: user.name, until: now + PUZZLE_HOLD_MS } }));
+      return commit(prev, patchPiece(puzzle, cmd.pieceId, { holder: { ...piece.holder, until: now + PUZZLE_HOLD_MS } }));
     case "puzzleReturn":
       return commit(prev, patchPiece(puzzle, cmd.pieceId, { place: "tray", correct: false }, ["holder"]));
     case "puzzleDrop": {
