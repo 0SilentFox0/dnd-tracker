@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { adaptCompendium } from "../adapt";
+import { spellCast } from "../adapters/spell-cast";
+import { deriveSpell } from "../adapters/spell-derive";
 
 import { createSpellSchema } from "@/lib/schemas/spells";
 
@@ -88,8 +90,85 @@ describe("native spell mechanics", () => {
     expect(codes(spell)).toEqual(["SPELL_RIDER_MANUAL"]);
   });
 
+  describe("narrative without engine changes", () => {
+    const reasonOf = (row: Record<string, unknown>) => {
+      const full = { ...base, ...row } as Record<string, unknown>;
+
+      const derived = deriveSpell(full, (row.entries as string[]).join(" ").replace(/\{@\w+ ([^}|]*)[^}]*\}/g, "$1"), "", spellCast(full));
+
+      return "native" in derived && derived.native.narrative ? derived.native.narrativeReason : "mechanical";
+    };
+
+    const rest = { entries: ["You mark a stop on a ticket. If a creature takes a short rest while traveling and regains hit points by spending Hit Dice, it regains an extra {@dice 1d10} hit points."] };
+
+    const objectInvisible = { entries: ["An object you can see within range becomes {@condition invisible} until the spell ends. It is no larger than a 5-foot cube."] };
+
+    it("treats hit points that only appear around rests as out of combat", () => {
+      expect(reasonOf(rest)).toBe("outOfCombat");
+      expect(reasonOf({ entries: ["The target regains {@dice 2d8} hit points."] })).toBe("mechanical");
+      expect(reasonOf({ ...rest, entries: [`${rest.entries[0]} The target also regains {@dice 1d8} hit points right away.`] })).toBe("mechanical");
+    });
+
+    it("treats a condition on an object as narrative but keeps creatures mechanical", () => {
+      expect(reasonOf(objectInvisible)).toBe("objectOnly");
+      expect(reasonOf({ entries: ["A creature or object you touch becomes {@condition invisible} until the spell ends."], miscTags: ["SGT"] })).toBe("mechanical");
+      expect(reasonOf({ entries: ["The target becomes {@condition invisible} for a minute."] })).toBe("mechanical");
+    });
+
+    it("treats created plain objects and summons without stats as narrative", () => {
+      expect(reasonOf({ entries: ["Five mundane weapons materialize in an open space. The weapons vanish when the spell ends."] })).toBe("createdObject");
+      expect(reasonOf({ entries: ["You summon a cast iron pot on the ground."], miscTags: ["SMN"] })).toBe("createdObject");
+      expect(reasonOf({ entries: ["You summon a spirit with an Armor Class of 15 and 100 hit points."], miscTags: ["SMN"] })).toBe("mechanical");
+      expect(reasonOf({ entries: ["You summon a bicycle with a walking speed of 60 feet."], miscTags: ["SMN"] })).toBe("mechanical");
+      expect(reasonOf({ entries: ["You summon a {@creature wolf}."], miscTags: ["SMN"] })).toBe("mechanical");
+    });
+
+    it("treats a long cast with a day-long buff as out of combat", () => {
+      const feast = { time: [{ number: 10, unit: "minute" }], entries: ["The feast takes 1 hour. A creature that partakes gains a +2 bonus to Dexterity saving throws. The benefits last for 24 hours."], savingThrow: ["dexterity"] };
+
+      expect(reasonOf(feast)).toBe("outOfCombat");
+      expect(reasonOf({ ...feast, damageInflict: ["fire"] })).toBe("mechanical");
+      expect(reasonOf({ ...feast, time: [{ number: 1, unit: "action" }] })).toBe("mechanical");
+    });
+  });
+
+  describe("composed cores", () => {
+    it("derives immobilized with a save and a target cap from suspension text", () => {
+      const { spell } = adapt({ level: 5, duration: [{ type: "timed", duration: { type: "minute", amount: 10 }, concentration: true }], savingThrow: ["constitution"], entries: ["Six creatures of your choice that you can see within range rise vertically and remain suspended. An unwilling creature that succeeds on a Constitution saving throw is unaffected.", "A target can move only by pushing or pulling against a fixed object."] });
+
+      expect(spell.body).toMatchObject({ executionMode: "native", targeting: { kind: "area", maxTargets: 6, range: 60 }, resolution: { kind: "save", ability: "constitution", onSuccess: "none" }, spellEffects: [{ kind: "applyCondition", condition: "immobilized", duration: { rounds: 99 } }] });
+      expect(codes(spell)).toEqual(["SPELL_RIDER_MANUAL"]);
+      expect(createSpellSchema.safeParse(spell.body).success).toBe(true);
+    });
+
+    it("keeps an instantaneous enclosure with size-capped targets immobilized until dispelled", () => {
+      const { spell } = adapt({ savingThrow: ["dexterity"], entries: ["A shell rapidly grows around up to four Medium or smaller creatures within range. An unwilling creature can make a Dexterity saving throw, leaping outside on a success. The shell has 100 hit points."] });
+
+      expect(spell.body).toMatchObject({ executionMode: "native", targeting: { kind: "area", maxTargets: 4 }, spellEffects: [{ kind: "applyCondition", condition: "immobilized", duration: { rounds: 99 } }] });
+    });
+
+    it("moves a movement-only trigger into riders and derives the speed bonus", () => {
+      const { spell } = adapt({ level: 2, duration: [{ type: "timed", duration: { type: "hour", amount: 1 } }], entries: ["You and up to three other willing creatures within range form a bond. For the duration, each target's speed increases by 5 feet, and whenever an affected creature ends its turn, other targets can use their reaction to move up to half their speed."], entriesHigherLevel: [{ type: "entries", entries: ["When you cast this spell using a spell slot of 3rd level or higher, you can target one additional creature for each slot level above 2nd."] }] });
+
+      expect(spell.body).toMatchObject({ executionMode: "native", targeting: { kind: "area", side: "ally", maxTargets: 4 }, upcastTargets: 1, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: 5, duration: { rounds: 99 } }] });
+      expect(spell.issues.find((i) => i.code === "SPELL_RIDER_MANUAL")?.action).toContain("рух за реакцією");
+    });
+
+    it("does not read one option of a choice as the whole effect", () => {
+      const { spell } = adapt({ entries: ["You gain one of the following effects of your choice: you regain {@dice 1d4} hit points; your speed increases by 15 feet until the end of your next turn."] });
+
+      expect(spell.body.spellEffects).not.toContainEqual(expect.objectContaining({ stat: "speed" }));
+    });
+
+    it("keeps a trigger that deals damage as a zone blocker", () => {
+      const { spell } = adapt({ damageInflict: ["fire"], entries: ["Whenever a creature ends its turn there, it takes {@damage 1d6} fire damage and can move up to 10 feet."] });
+
+      expect(codes(spell)).toEqual(["MANUAL_SPELL_ZONE_OR_TRIGGER"]);
+    });
+  });
+
   it.each([
-    ["SUMMON", { entries: ["You summon a pot."], miscTags: ["SMN"] }],
+    ["SUMMON", { entries: ["You summon a guardian with an Armor Class of 15 and 100 hit points."], miscTags: ["SMN"] }],
     ["UNSUPPORTED_CONDITION", { entries: ["The target must make a Wisdom saving throw or be {@condition pacified|Book}."], savingThrow: ["wisdom"] }],
     ["VARIABLE_DAMAGE", { entries: ["Make a ranged spell attack. On a hit the target takes damage by distance. 1-10 feet: {@dice 5d6} 11-60 feet: {@dice 4d6}"], damageInflict: ["cold"], spellAttack: ["R"] }],
     ["WEAPON", { entries: ["Three weapons of your choice become enveloped by water."] }],
