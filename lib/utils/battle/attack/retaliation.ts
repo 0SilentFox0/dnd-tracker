@@ -8,6 +8,7 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -28,6 +29,7 @@ export interface RetaliationInput {
   round: number;
   battleId: string;
   rng: Rng;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
   rules?: Ruleset;
 }
@@ -79,7 +81,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!weapon) return null;
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules: input.rules } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules: input.rules, crit: input.crit } };
 
   if (!provoked && !unlimited) {
     put(flow, {

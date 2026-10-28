@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { SAVE_SUCCESS_EFFECTS } from "@/lib/constants/save-critical-effects";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
@@ -9,7 +11,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
 const withPool = (p: BattleParticipant, pending: number): BattleParticipant => ({ ...p, battleData: { ...p.battleData, pendingExtraActions: pending } });
@@ -63,5 +65,20 @@ describe("unused extra actions expire at the end of the turn", () => {
 
     expect(out.scene.turnIndex).toBe(0);
     expect(pool(out.participants)).toBe(1);
+  });
+
+  it.each(["extra_action"] as const)("%s зі спаска: бонусна дія доживає до власного ходу цілі й згасає після нього", (type) => {
+    const crit = SAVE_SUCCESS_EFFECTS.find((e) => e.effect.type === type)!;
+
+    const target = applyCriticalEffect(makeParticipant({ id: "gob", side: ParticipantSide.ENEMY }), crit, 1, { offTurn: true });
+
+    const toTarget = advanceTurn({ participants: [hero(0), target], pending: [], scene });
+
+    expect(pool(toTarget.participants, "gob")).toBe(1);
+
+    const after = advanceTurn({ participants: toTarget.participants, pending: [], scene: { ...scene, ...toTarget.scene } });
+
+    expect(pool(after.participants, "gob")).toBe(0);
+    expect(after.participants.find((p) => p.basicInfo.id === "gob")?.battleData.activeEffects).toHaveLength(0);
   });
 });

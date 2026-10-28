@@ -19,59 +19,65 @@ model User {
   characters      Character[]
   aiCredentials   AiCredential[]
   onboardingFlags UserOnboardingFlag[]
+  worldNotes      WorldNote[]
+  worldTravelLog  WorldTravelLog[]
 
   @@map("users")
 }
 
 model Campaign {
-  id              String              @id @default(cuid())
-  sourceSync      CampaignSourceSync?
-  name            String
-  description     String?
-  inviteCode      String              @unique
-  dmUserId        String
-  maxLevel        Int                 @default(20)
-  xpMultiplier    Float               @default(2.5)
-  allowPlayerEdit Boolean             @default(true)
-  status          String              @default("active")
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  friendlyFire    Boolean             @default(false)
-  rules           Json                @default("{}")
-  kind            String              @default("campaign")
-  visibility      String              @default("private")
-  createdFromId   String?
-  aiInstructions  String?
-  credits         String?
-  artifactSets    ArtifactSet[]
-  artifacts       Artifact[]
-  battles         BattleScene[]
-  members         CampaignMember[]
-  dm              User                @relation("DMCampaigns", fields: [dmUserId], references: [id])
-  characters      Character[]
-  mainSkills      MainSkill[]
-  races           Race[]
-  classes         GameClass[]
-  backgrounds     Background[]
-  feats           Feat[]
-  scenarioPages   ScenarioPage[]
-  skillTrees      SkillTree[]
-  skills          Skill[]
-  spellGroups     SpellGroup[]
-  spells          Spell[]
-  tracks          CampaignTrack[]
-  slideDecks      SlideDeck[]
-  show            CampaignShow?
-  units           Unit[]
-  assistantIntents AssistantIntent[]
-  aiThreads       AiThread[]
-  aiProposals     AiProposal[]
-  apiTokens       ApiToken[]
+  id                String                @id @default(cuid())
+  sourceSync        CampaignSourceSync?
+  name              String
+  description       String?
+  inviteCode        String                @unique
+  dmUserId          String
+  maxLevel          Int                   @default(20)
+  xpMultiplier      Float                 @default(2.5)
+  allowPlayerEdit   Boolean               @default(true)
+  critChoiceByDm    Boolean               @default(false)
+  status            String                @default("active")
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  friendlyFire      Boolean               @default(false)
+  rules             Json                  @default("{}")
+  kind              String                @default("campaign")
+  visibility        String                @default("private")
+  createdFromId     String?
+  aiInstructions    String?
+  credits           String?
+  artifactSets      ArtifactSet[]
+  artifacts         Artifact[]
+  battles           BattleScene[]
+  members           CampaignMember[]
+  dm                User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
+  characters        Character[]
+  mainSkills        MainSkill[]
+  races             Race[]
+  classes           GameClass[]
+  backgrounds       Background[]
+  feats             Feat[]
+  scenarioPages     ScenarioPage[]
+  skillTrees        SkillTree[]
+  skills            Skill[]
+  spellGroups       SpellGroup[]
+  spells            Spell[]
+  tracks            CampaignTrack[]
+  slideDecks        SlideDeck[]
+  show              CampaignShow?
+  units             Unit[]
+  assistantIntents  AssistantIntent[]
+  aiThreads         AiThread[]
+  aiProposals       AiProposal[]
+  apiTokens         ApiToken[]
   compendiumSources CompendiumSource[]
   compendiumEntries CompendiumEntry[]
   compendiumRuns    CompendiumImportRun[]
-  inventoryLog    InventoryLog[]
-  characterLog    CharacterLog[]
+  inventoryLog      InventoryLog[]
+  characterLog      CharacterLog[]
+  worldMaps         WorldMap[]
+  worldPositions    WorldPosition[]
+  worldTravelLog    WorldTravelLog[]
 
   @@index([dmUserId])
   @@index([kind, visibility])
@@ -158,6 +164,9 @@ model Character {
   tokens              CharacterToken[]
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
+  worldPosition       WorldPosition?
+  worldReveals        WorldReveal[]
+  worldNotes          WorldNote[]
 
   @@index([backgroundId])
   @@index([campaignId])
@@ -416,6 +425,7 @@ model BattleScene {
   currentRound       Int                 @default(1)
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
+  pendingCritChoice  Json?
   map                Json?
   audio              Json?
   rules              Json?
@@ -478,6 +488,7 @@ model CampaignShow {
   battle       Json?
   cover        Json?
   curtain      Boolean  @default(false)
+  world        Json?
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -662,22 +673,22 @@ model Feat {
 }
 
 model Background {
-  id                  String    @id @default(cuid())
-  campaignId          String
-  name                String
-  icon                String?
-  description         String?
-  choices             Json      @default("[]")
-  skillProficiencies  Json      @default("[]")
-  toolProficiencies   Json      @default("[]")
-  originFeatId        String?
-  equipmentText       String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  sourceId            String?
-  sourceHash          String?
-  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  characters          Character[]
+  id                 String      @id @default(cuid())
+  campaignId         String
+  name               String
+  icon               String?
+  description        String?
+  choices            Json        @default("[]")
+  skillProficiencies Json        @default("[]")
+  toolProficiencies  Json        @default("[]")
+  originFeatId       String?
+  equipmentText      String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  sourceId           String?
+  sourceHash         String?
+  campaign           Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  characters         Character[]
 
   @@index([campaignId, name])
   @@index([originFeatId])
@@ -826,23 +837,23 @@ model AiCredential {
 }
 
 model AiThread {
-  id             String        @id @default(cuid())
-  campaignId     String
-  userId         String
-  mode           String
-  scenarioPageId String?
-  executionMode  String        @default("review")
+  id               String            @id @default(cuid())
+  campaignId       String
+  userId           String
+  mode             String
+  scenarioPageId   String?
+  executionMode    String            @default("review")
   assistantIntents AssistantIntent[]
-  assistantRuns AssistantRun[]
-  title          String
-  provider       String
-  model          String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
-  messages       AiMessage[]
-  proposals      AiProposal[]
+  assistantRuns    AssistantRun[]
+  title            String
+  provider         String
+  model            String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  scenarioPage     ScenarioPage?     @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
+  messages         AiMessage[]
+  proposals        AiProposal[]
 
   @@index([campaignId, userId, updatedAt])
   @@map("ai_threads")
@@ -882,19 +893,19 @@ model AiProposal {
 }
 
 model ApiToken {
-  id         String    @id @default(cuid())
-  campaignId String
-  userId     String
-  executionMode String @default("review")
+  id               String            @id @default(cuid())
+  campaignId       String
+  userId           String
+  executionMode    String            @default("review")
   assistantIntents AssistantIntent[]
-  name       String
-  tokenHash  String    @unique
-  prefix     String
-  scopes     String[]
-  lastUsedAt DateTime?
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name             String
+  tokenHash        String            @unique
+  prefix           String
+  scopes           String[]
+  lastUsedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime          @default(now())
+  campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
   @@map("api_tokens")
@@ -925,7 +936,7 @@ model UserOnboardingFlag {
 
 // Intent content follows campaign lifetime; receipts intentionally do not.
 model AssistantIntent {
-  id               String @id @default(cuid())
+  id               String    @id @default(cuid())
   campaignId       String
   userId           String
   channel          String
@@ -938,17 +949,17 @@ model AssistantIntent {
   requestHash      String
   actionId         String
   summary          String
-  targets          Json @default("[]")
+  targets          Json      @default("[]")
   payload          Json
   preview          Json
   expected         Json
-  status           String @default("pending")
+  status           String    @default("pending")
   expiresAt        DateTime
   redactedAt       DateTime?
-  legacyProposalId String? @unique
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  legacyProposalId String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   thread           AiThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
   token            ApiToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
 
@@ -961,8 +972,8 @@ model AssistantIntent {
 }
 
 model AssistantReceipt {
-  id            String @id @default(cuid())
-  intentId      String @unique
+  id            String   @id @default(cuid())
+  intentId      String   @unique
   campaignId    String
   userId        String
   originTokenId String?
@@ -972,8 +983,8 @@ model AssistantReceipt {
   actionId      String
   status        String
   result        Json
-  effects       Json @default("[]")
-  effectsStatus String @default("pending")
+  effects       Json     @default("[]")
+  effectsStatus String   @default("pending")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -984,15 +995,15 @@ model AssistantReceipt {
 }
 
 model AssistantRun {
-  id             String @id @default(cuid())
+  id             String   @id @default(cuid())
   threadId       String
   requestId      String
   requestHash    String
-  activeThreadId String? @unique
-  status         String @default("running")
+  activeThreadId String?  @unique
+  status         String   @default("running")
   expiresAt      DateTime
-  abortRequested Boolean @default(false)
-  resultRefs     Json @default("[]")
+  abortRequested Boolean  @default(false)
+  resultRefs     Json     @default("[]")
   errorCode      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -1001,4 +1012,118 @@ model AssistantRun {
   @@unique([threadId, requestId])
   @@index([status, expiresAt])
   @@map("assistant_runs")
+}
+
+model WorldMap {
+  id             String           @id @default(cuid())
+  campaignId     String
+  parentMarkerId String?          @unique
+  name           String
+  imageUrl       String
+  width          Int
+  height         Int
+  fogEnabled     Boolean          @default(true)
+  revealRadius   Float            @default(0.04)
+  entryX         Float            @default(0.5)
+  entryY         Float            @default(0.5)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  campaign       Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  parentMarker   WorldMarker?     @relation("NestedMap", fields: [parentMarkerId], references: [id], onDelete: Cascade)
+  markers        WorldMarker[]    @relation("MapMarkers")
+  positions      WorldPosition[]
+  reveals        WorldReveal[]
+  travelLog      WorldTravelLog[]
+
+  @@index([campaignId])
+  @@map("world_maps")
+}
+
+model WorldMarker {
+  id            String           @id @default(cuid())
+  mapId         String
+  kind          String
+  x             Float
+  y             Float
+  polygon       Json?
+  name          String
+  icon          String?
+  color         String?
+  dmNote        String?
+  alwaysVisible Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  map           WorldMap         @relation("MapMarkers", fields: [mapId], references: [id], onDelete: Cascade)
+  childMap      WorldMap?        @relation("NestedMap")
+  notes         WorldNote[]
+  arrivals      WorldTravelLog[]
+
+  @@index([mapId, sortOrder])
+  @@map("world_markers")
+}
+
+model WorldPosition {
+  characterId String    @id
+  campaignId  String
+  mapId       String
+  x           Float
+  y           Float
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  map         WorldMap  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("world_positions")
+}
+
+model WorldReveal {
+  id          String    @id @default(cuid())
+  mapId       String
+  characterId String
+  shape       Json
+  createdAt   DateTime  @default(now())
+  map         WorldMap  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@index([mapId, characterId])
+  @@map("world_reveals")
+}
+
+model WorldTravelLog {
+  id           String       @id @default(cuid())
+  campaignId   String
+  mapId        String
+  characterIds String[]
+  from         Json?
+  to           Json
+  toMarkerId   String?
+  rest         String       @default("none")
+  byUserId     String?
+  createdAt    DateTime     @default(now())
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  map          WorldMap     @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  toMarker     WorldMarker? @relation(fields: [toMarkerId], references: [id], onDelete: SetNull)
+  byUser       User?        @relation(fields: [byUserId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId, createdAt])
+  @@map("world_travel_log")
+}
+
+model WorldNote {
+  id           String      @id @default(cuid())
+  markerId     String
+  authorUserId String
+  characterId  String?
+  visibility   String
+  text         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  marker       WorldMarker @relation(fields: [markerId], references: [id], onDelete: Cascade)
+  author       User        @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  character    Character?  @relation(fields: [characterId], references: [id], onDelete: SetNull)
+
+  @@index([markerId])
+  @@map("world_notes")
 }

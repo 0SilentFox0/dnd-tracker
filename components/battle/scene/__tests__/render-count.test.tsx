@@ -77,7 +77,7 @@ const order = [
 const battle = {
   id: "b1", campaignId: "c1", name: "Засідка", status: "active", participants: [], currentRound: 1, currentTurnIndex: 0,
   initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: false,
-  campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null,
+  campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: null,
 } as unknown as BattleScene;
 
 const hit = { actionIndex: 1, round: 1, actorId: "me", actorName: "me", actionType: "attack", actionDetails: {}, targets: [{ participantId: "gob1", participantName: "gob1" }], resultText: "me влучає", hpChanges: [{ participantId: "gob1", participantName: "gob1", oldHp: 20, newHp: 13, change: 7 }] } as unknown as BattleAction;
@@ -85,7 +85,7 @@ const hit = { actionIndex: 1, round: 1, actorId: "me", actorName: "me", actionTy
 const delta: ClientBattleDelta = {
   battleId: "b1",
   version: 6,
-  scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null },
+  scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null },
   upserted: [],
   patched: [
     { id: "gob1", combatStats: { currentHp: 13 } },

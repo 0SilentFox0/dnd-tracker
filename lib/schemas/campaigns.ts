@@ -7,6 +7,7 @@ export const createCampaignSchema = z.object({
   description: z.string().optional(),
   maxLevel: z.number().min(1).max(30).optional(),
   allowPlayerEdit: z.boolean().optional(),
+  critChoiceByDm: z.boolean().default(false),
   templateId: z.string().min(1).optional(),
 });
 
@@ -15,6 +16,7 @@ export const updateCampaignSchema = z.object({
   description: z.string().optional().nullable(),
   maxLevel: z.number().min(1).max(30).optional(),
   allowPlayerEdit: z.boolean().optional(),
+  critChoiceByDm: z.boolean().optional(),
   status: z.enum([CampaignStatus.ACTIVE, CampaignStatus.ARCHIVED]).optional(),
   visibility: z.enum([CampaignVisibility.PRIVATE, CampaignVisibility.OFFICIAL]).optional(),
 });

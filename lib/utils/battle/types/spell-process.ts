@@ -1,4 +1,5 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
@@ -33,6 +34,7 @@ export interface CastSpellParams {
   castLevel?: number;
   grant?: SpellGrant;
   rng?: () => number;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
   rules?: Ruleset;
 }

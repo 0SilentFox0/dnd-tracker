@@ -13,7 +13,8 @@ import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { damageDiceSlots,heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
+import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
@@ -32,6 +33,7 @@ export type AttackPhaseInput = {
   isDM: boolean;
   rng?: Rng;
   serverRolls?: boolean;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
   rules?: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
@@ -117,6 +119,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       rules: input.rules,
       hitSpells: input.hitSpells,
       rng,
+      crit: input.crit,
       recordDice: true,
       serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
     });
@@ -147,6 +150,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         round: battle.currentRound,
         battleId,
         rng,
+        crit: input.crit,
         map: input.map,
         rules: input.rules,
       });

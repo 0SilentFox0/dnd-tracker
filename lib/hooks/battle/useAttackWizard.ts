@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
+import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -144,72 +145,102 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return r.crit ? "crit" : r.critFail ? "critFail" : r.hit ? "hit" : "miss";
   };
 
+  const finish = (attackerId: string, seen: Set<number>) => {
+    const current = scene.readBattle();
+
+    const log = current?.battleLog ?? [];
+
+    const after = current?.initiativeOrder ?? order;
+
+    const fromLog = volleyResults(log, seen, attackerId, after);
+
+    const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
+
+    dispatch({ type: "SUCCESS", results });
+
+    const first = results[0];
+
+    const strike = state.strikes[0];
+
+    const target = byId(first.targetId);
+
+    const retaliation = retaliationOutcome(log, seen);
+
+    const crit = critOutcome(log, seen, attackerId, first.targetId);
+
+    const targetName = target?.basicInfo.name ?? "";
+
+    const d20 = effectiveD20(strike, strikeMode(state, strike));
+
+    const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
+
+    if (first.kind === "miss" || crit?.type === "fail") {
+      const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
+
+      scene.result.show({
+        kind: "miss",
+        targetName,
+        d20,
+        known,
+        ...(strikes && { strikes }),
+        ...(retaliation && { retaliation }),
+        ...(crit?.type === "fail" && { critFail: crit }),
+      });
+    } else {
+      scene.result.show({
+        kind: first.kind,
+        targetName,
+        damage: results.reduce((s, r) => s + r.damage, 0),
+        downed: first.downed,
+        d20,
+        weapon: attack?.name,
+        ...(strikes && { strikes }),
+        ...(retaliation && { retaliation }),
+        ...(crit?.type === "success" && { critEffect: crit }),
+      });
+    }
+
+    onDone?.();
+  };
+
+  const settle = (attackerId: string, seen: Set<number>) => {
+    try {
+      finish(attackerId, seen);
+    } catch (e) {
+      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
+    }
+  };
+
+  const pauseCrit = useCritPause({
+    waiting: state.waitingCrit,
+    actorId: attacker?.basicInfo.id,
+    onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
+    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
+  });
+
   const send = useEffectEvent(async () => {
     if (!attacker) return;
 
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
+    let res: Awaited<ReturnType<typeof scene.actions.attack.mutateAsync>>;
+
     try {
-      await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
-
-      const current = scene.readBattle();
-
-      const log = current?.battleLog ?? [];
-
-      const after = current?.initiativeOrder ?? order;
-
-      const fromLog = volleyResults(log, seen, attacker.basicInfo.id, after);
-
-      const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
-
-      dispatch({ type: "SUCCESS", results });
-
-      const first = results[0];
-
-      const strike = state.strikes[0];
-
-      const target = byId(first.targetId);
-
-      const retaliation = retaliationOutcome(log, seen);
-
-      const crit = critOutcome(log, seen, attacker.basicInfo.id, first.targetId);
-
-      const targetName = target?.basicInfo.name ?? "";
-
-      const d20 = effectiveD20(strike, strikeMode(state, strike));
-
-      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
-
-      if (first.kind === "miss" || crit?.type === "fail") {
-        const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
-
-        scene.result.show({
-          kind: "miss",
-          targetName,
-          d20,
-          known,
-          ...(strikes && { strikes }),
-          ...(retaliation && { retaliation }),
-          ...(crit?.type === "fail" && { critFail: crit }),
-        });
-      } else {
-        scene.result.show({
-          kind: first.kind,
-          targetName,
-          damage: results.reduce((s, r) => s + r.damage, 0),
-          downed: first.downed,
-          d20,
-          weapon: attack?.name,
-          ...(strikes && { strikes }),
-          ...(retaliation && { retaliation }),
-          ...(crit?.type === "success" && { critEffect: crit }),
-        });
-      }
-
-      onDone?.();
+      res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
+
+      return;
     }
+
+    if (res?.pendingCritChoice) {
+      pauseCrit(seen);
+      dispatch({ type: "WAIT_CRIT" });
+
+      return;
+    }
+
+    settle(attacker.basicInfo.id, seen);
   });
 
   useEffect(() => {

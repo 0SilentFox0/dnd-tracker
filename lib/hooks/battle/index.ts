@@ -24,6 +24,7 @@ export {
 } from "./useBattleScene";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
 export { canReadiedAttack, type CoreActionChoice, useCoreActions, useReadiedAttack } from "./useCoreActions";
+export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";
 export { useDmCaster } from "./useDmCaster";
 export { type DmParticipantActions, useDmParticipantActions } from "./useDmParticipantActions";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";
@@ -33,7 +34,6 @@ export { useHitChange, useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { type LegendaryChoice, useLegendaryAction } from "./useLegendaryAction";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
-export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
 export { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 export { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "./useMobileBattleTabs";
 export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";

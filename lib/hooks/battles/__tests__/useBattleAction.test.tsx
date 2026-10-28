@@ -14,7 +14,7 @@ const key = ["battle", "c1", "b1"];
 const base = { id: "b1", status: "active", initiativeOrder: [], battleLog: [], participants: [], currentRound: 1, currentTurnIndex: 0, version: 5 } as unknown as BattleScene;
 
 const delta = (version: number): ClientBattleDelta => ({
-  battleId: "b1", version, scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null }, upserted: [], removed: [], log: [],
+  battleId: "b1", version, scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log: [],
 });
 
 function setup() {
@@ -198,7 +198,7 @@ describe("useBattleAction — retryOnConflict", () => {
 
     const spy = vi.spyOn(qc, "invalidateQueries");
 
-    const done: ClientBattleDelta = { ...delta(6), scene: { status: "completed", round: 1, turnIndex: 0, pendingMoraleCheck: null } };
+    const done: ClientBattleDelta = { ...delta(6), scene: { status: "completed", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null } };
 
     const { result } = renderHook(() => useBattleAction("c1", "b1", async () => ({ delta: done })), { wrapper });
 

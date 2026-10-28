@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { HudCard, HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
+import { HudCard, HudChipTabs, HudPage, HudPageHeader, HudTile } from "@/components/hud/page";
 
 afterEach(cleanup);
 
@@ -20,6 +20,12 @@ describe("HUD page primitives", () => {
     expect(screen.getByRole("heading", { name: "Юніти" })).toBeTruthy();
     expect(screen.getByText("Всього: 3")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Створити" }).parentElement?.className).toContain("flex-wrap");
+  });
+
+  it("HudPageHeader keeps a block subtitle (nav) out of a <p> to avoid a hydration mismatch", () => {
+    render(<HudPageHeader title="Карта світу" subtitle={<nav aria-label="Шлях">x</nav>} />);
+
+    expect(screen.getByRole("navigation").closest("p")).toBeNull();
   });
 
   it("HudCard applies tone and accent", () => {
@@ -45,5 +51,12 @@ describe("HUD page primitives", () => {
     fireEvent.click(screen.getByRole("button", { name: "Гобліни · 1" }));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.getByRole("link", { name: "NPC-герої" }).getAttribute("aria-current")).toBe("page");
+  });
+
+  it("HudTile compact hides the subtitle", () => {
+    render(<HudTile href="/x" title="Юніти" subtitle="Опис" compact />);
+
+    expect(screen.getByText("Юніти")).toBeTruthy();
+    expect(screen.queryByText("Опис")).toBeNull();
   });
 });

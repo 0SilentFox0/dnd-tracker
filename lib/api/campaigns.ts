@@ -37,6 +37,7 @@ export async function createCampaign(data: {
   maxLevel?: number;
   allowPlayerEdit?: boolean;
   templateId?: string;
+  critChoiceByDm?: boolean;
 }): Promise<CampaignWithWarnings> {
   return request<CampaignWithWarnings>("/api/campaigns", {
     method: "POST",

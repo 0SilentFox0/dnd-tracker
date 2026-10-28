@@ -1,5 +1,6 @@
 "use client";
 
+import { ColorSwatch } from "@/components/common/ColorSwatch";
 import type { LegendEntry, LegendKind } from "@/types/scenario";
 
 // hex twins of the dark book palette, the starting colour for entries saved before free colours
@@ -8,15 +9,5 @@ const KIND_HEX: Record<LegendKind, string> = {
 };
 
 export function LegendColorPicker({ entry, onChange }: { entry: LegendEntry; onChange: (color: string) => void }) {
-  const color = entry.color ?? KIND_HEX[entry.kind];
-
-  return (
-    <label
-      title="Обрати колір"
-      className="relative size-9 shrink-0 cursor-pointer rounded-md border border-input focus-within:ring-2 focus-within:ring-ring"
-      style={{ background: color }}
-    >
-      <input type="color" aria-label="Колір позначки" value={color} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 size-full cursor-pointer opacity-0" />
-    </label>
-  );
+  return <ColorSwatch color={entry.color ?? KIND_HEX[entry.kind]} label="Колір позначки" onChange={onChange} />;
 }

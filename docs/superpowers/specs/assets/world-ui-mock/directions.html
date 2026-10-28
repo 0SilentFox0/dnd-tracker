@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Карта світу — напрямки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --gold: #c9b37a; --gold-bright: #ffe08a; --ink: #efe5d2; --bone: #e6dccb; --muted: #8f8473;
+    --rule: #3a2e22; --line: #4a3c2c; --panel: rgba(17, 14, 11, .82); --field: #1a140f;
+    --m1: #8a6414; --m2: #e6c25a; --mt: #2a1d05;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b0908; color: var(--bone); font-family: "Alegreya Sans", system-ui, sans-serif; padding: 24px 16px 48px; }
+  h1, h2, h3 { font-family: "Alegreya SC", serif; letter-spacing: .04em; color: var(--ink); font-weight: 500; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 16px; color: var(--gold); margin: 32px 0 8px; }
+  p.note { color: var(--muted); font-size: 13px; max-width: 820px; margin: 0 0 12px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .card { border: 1px solid var(--rule); background: var(--panel); border-radius: 12px; padding: 12px; }
+  .card h3 { font-size: 14px; margin: 0 0 8px; }
+  .map { position: relative; height: 300px; border-radius: 8px; overflow: hidden;
+    background:
+      radial-gradient(60% 50% at 30% 40%, #6f9a3c 0, #8daa52 45%, transparent 70%),
+      radial-gradient(40% 40% at 72% 55%, #c9a24a 0, #b78f3d 50%, transparent 72%),
+      radial-gradient(30% 30% at 60% 25%, #8a7f6a 0, #6e6452 60%, transparent 75%),
+      linear-gradient(180deg, #4d7ea8, #3d6f9b); }
+  .map.parchment { filter: sepia(.45) saturate(.8) brightness(.95); }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tag { position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; }
+  ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--bone); }
+  li { margin: 2px 0; }
+
+  /* A — HUD tactical */
+  .a-pin { position: absolute; width: 30px; height: 30px; transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #3a2d20, #120d09 70%); border: 2px solid var(--line);
+    box-shadow: 0 2px 6px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,236,200,.12); display: grid; place-items: center; color: var(--gold); }
+  .a-pin.sel { border-color: var(--gold-bright); box-shadow: 0 0 0 3px rgba(230,194,90,.35), 0 0 16px 4px rgba(230,194,90,.45); }
+  .a-pin.hover { border-color: var(--gold); transform: translate(-50%, -50%) scale(1.12); }
+  .a-label { font: 600 11px "Alegreya Sans"; color: var(--ink); padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(201,179,122,.55);
+    background: linear-gradient(180deg, rgba(36,28,20,.86), rgba(10,8,6,.9)); }
+  .a-zone-label { font: 500 13px "Alegreya SC"; color: var(--gold-bright); letter-spacing: .08em; text-shadow: 0 1px 2px #000, 0 0 6px #000; }
+
+  /* B — atlas / parchment */
+  .b-pin { position: absolute; width: 24px; height: 24px; transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #b5362a, #6e1810 75%); box-shadow: 0 2px 3px rgba(0,0,0,.5), inset 0 -2px 3px rgba(0,0,0,.35);
+    display: grid; place-items: center; color: #f6dfc0; }
+  .b-pin.sel { box-shadow: 0 0 0 2px #2a1a0c, 0 0 0 4px #f2e2bd, 0 2px 4px rgba(0,0,0,.5); }
+  .b-label { font: italic 600 12px "Alegreya Sans"; color: #24170c; text-shadow: 0 0 3px #f3e6c8, 0 0 3px #f3e6c8, 0 0 6px #f3e6c8; }
+  .b-zone-label { font: 700 15px "Alegreya SC"; color: #3a1d0c; letter-spacing: .22em; text-shadow: 0 0 4px #f3e6c8, 0 0 8px #f3e6c8; opacity: .9; }
+
+  /* toolbar + panel mock */
+  .toolbar { display: inline-flex; gap: 2px; padding: 4px; border-radius: 10px; border: 1px solid var(--rule); background: rgba(0,0,0,.7); }
+  .tool { width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); border: 1px solid transparent; position: relative; }
+  .tool.on { color: var(--mt); background: linear-gradient(135deg, var(--m1), var(--m2) 55%, var(--m1)); }
+  .tool:hover:not(.on) { color: var(--gold); border-color: var(--line); }
+  .tool kbd { position: absolute; right: 2px; bottom: 1px; font-size: 9px; color: inherit; opacity: .7; font-family: inherit; }
+  .sep { width: 1px; background: var(--rule); margin: 6px 4px; }
+  .hint { display: inline-flex; gap: 10px; align-items: center; margin-top: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(201,179,122,.45);
+    background: rgba(10,8,6,.85); font-size: 12px; color: var(--bone); }
+  .hint b { color: var(--gold-bright); font-weight: 500; }
+  .panel { width: 300px; border: 1px solid var(--rule); background: var(--panel); border-radius: 12px; overflow: hidden; }
+  .panel-head { display: flex; gap: 10px; align-items: center; padding: 12px; border-bottom: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(201,179,122,.08), transparent); }
+  .panel-head .a-pin { position: static; transform: none; flex: none; }
+  .panel-head .t { font: 500 15px "Alegreya SC"; color: var(--ink); }
+  .panel-head .s { font-size: 11px; color: var(--muted); }
+  .sec { padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+  .sec h4 { margin: 0 0 6px; font: 500 12px "Alegreya SC"; letter-spacing: .06em; color: var(--gold); }
+  .field { height: 32px; border-radius: 6px; border: 1px solid var(--line); background: var(--field); padding: 6px 8px; font-size: 13px; color: var(--ink); }
+  .icons { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .icons span { aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 12px; }
+  .icons span.on { border-color: var(--gold); color: var(--gold-bright); background: rgba(230,194,90,.1); }
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 4px 0; }
+  .link { display: flex; justify-content: space-between; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); font-size: 13px; margin-top: 4px; }
+  .link:hover { border-color: var(--gold); }
+  .danger { color: #d0705c; font-size: 12px; padding: 10px 12px; }
+  .slider { position: relative; height: 6px; border-radius: 999px; background: rgba(0,0,0,.62); box-shadow: inset 0 1px 2px #000, 0 0 0 1px rgba(255,255,255,.07); margin: 10px 0 4px; }
+  .slider i { position: absolute; left: 0; top: 0; bottom: 0; width: 22%; border-radius: inherit; background: linear-gradient(90deg, var(--m1), var(--m2)); }
+  .slider b { position: absolute; left: 22%; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%,-50%); background: linear-gradient(135deg, var(--m1), var(--m2)); box-shadow: 0 0 0 2px #120d09; }
+  @media (prefers-reduced-motion: no-preference) { .a-pin, .b-pin { transition: transform .12s ease-out, box-shadow .12s; } }
+</style>
+</head>
+<body>
+<h1>Карта світу — три напрямки</h1>
+<p class="note">Статичний мокап до брифу <code>2026-10-28-world-map-ui-polish.md</code>. Фон — умовний «намальований» рельєф; на реальній карті Ашану контраст вищий. Кольори й шрифти — з <code>components/hud/hud.css</code> і <code>app/globals.css</code> (Alegreya SC = <code>hud-sc</code>).</p>
+
+<h2>Піни, зони, підписи</h2>
+<div class="grid">
+  <div class="card">
+    <h3>A · HUD-тактична карта</h3>
+    <div class="map">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points="8,20 40,12 46,48 20,60 6,42" fill="#5a8fd0" fill-opacity=".14" stroke="#5a8fd0" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        <polygon points="55,30 92,26 96,62 70,78 52,60" fill="#d0662a" fill-opacity=".26" stroke="#ffe08a" stroke-width="3" vector-effect="non-scaling-stroke" />
+        <polygon points="55,30 92,26 96,62 70,78 52,60" fill="none" stroke="#d0662a" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+      </svg>
+      <span class="tag a-zone-label" style="left:25%;top:36%">Irollan</span>
+      <span class="tag a-zone-label" style="left:75%;top:50%">Ranaar</span>
+      <span class="a-pin" style="left:30%;top:28%">♜</span>
+      <span class="a-pin hover" style="left:40%;top:72%">⌂</span>
+      <span class="tag a-label" style="left:40%;top:82%">Al Safir</span>
+      <span class="a-pin sel" style="left:66%;top:40%">♜</span>
+      <span class="tag a-label" style="left:66%;top:50%">Talonguard</span>
+    </div>
+    <ul>
+      <li>Пін — металевий жетон 28–32 px з іконкою (як токен бою + <code>.map-hud-plaque</code>).</li>
+      <li>Підпис піна — плашка під жетоном, лише hover / selected / zoom ≥ 1.6.</li>
+      <li>Зона: обране — подвійна обводка (світле золото + колір зони), hover — fill-opacity .28 → .4.</li>
+      <li>Ризик: на яскравій карті «ігровий» HUD сперечається з малюнком.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>B · Атлас / пергамент</h3>
+    <div class="map parchment">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points="8,20 40,12 46,48 20,60 6,42" fill="#3a5a2a" fill-opacity=".08" stroke="#3a2a14" stroke-width="1.2" stroke-dasharray="5 3" vector-effect="non-scaling-stroke" />
+        <polygon points="55,30 92,26 96,62 70,78 52,60" fill="#7a2a14" fill-opacity=".14" stroke="#5a1a08" stroke-width="2.4" vector-effect="non-scaling-stroke" />
+      </svg>
+      <span class="tag b-zone-label" style="left:25%;top:36%">IROLLAN</span>
+      <span class="tag b-zone-label" style="left:75%;top:50%">RANAAR</span>
+      <span class="b-pin" style="left:30%;top:28%">♜</span>
+      <span class="b-pin" style="left:40%;top:72%">⌂</span>
+      <span class="tag b-label" style="left:40%;top:81%">Al Safir</span>
+      <span class="b-pin sel" style="left:66%;top:40%">♜</span>
+      <span class="tag b-label" style="left:66%;top:49%">Talonguard</span>
+    </div>
+    <ul>
+      <li>Пін — «сургучна печатка»; підпис — курсив чорнилом з ореолом, без плашки.</li>
+      <li>Зони — пунктир «кордону» чорнилом, назва розрядкою, як на старих мапах.</li>
+      <li>Сильно пасує до HOMM-карти, але чужий для решти HUD (бій, Показ) і погано читається на темних/синіх ділянках.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>C · Гібрид (рекомендовано)</h3>
+    <div class="map">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points="8,20 40,12 46,48 20,60 6,42" fill="#5a8fd0" fill-opacity=".16" stroke="#5a8fd0" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        <polygon points="55,30 92,26 96,62 70,78 52,60" fill="#d0662a" fill-opacity=".3" stroke="#1a120b" stroke-width="5" stroke-opacity=".55" vector-effect="non-scaling-stroke" />
+        <polygon points="55,30 92,26 96,62 70,78 52,60" fill="none" stroke="#ffe08a" stroke-width="2.2" vector-effect="non-scaling-stroke" />
+      </svg>
+      <span class="tag a-zone-label" style="left:25%;top:36%;font-size:14px;letter-spacing:.18em;color:#f6ead0">IROLLAN</span>
+      <span class="tag a-zone-label" style="left:75%;top:50%;font-size:14px;letter-spacing:.18em">RANAAR</span>
+      <span class="a-pin" style="left:30%;top:28%">♜</span>
+      <span class="a-pin hover" style="left:40%;top:72%">⌂</span>
+      <span class="tag a-label" style="left:40%;top:82%">Al Safir</span>
+      <span class="a-pin sel" style="left:66%;top:40%">♜</span>
+      <span class="tag a-label" style="left:66%;top:50%">Talonguard</span>
+    </div>
+    <ul>
+      <li>Що «належить карті» (зони, їхні назви) — картографічно: розрядка <code>hud-sc</code>, текст з обводкою, без плашки.</li>
+      <li>Що «належить застосунку» (піни, вибір, інструменти) — HUD: жетони, золото, metal-gold.</li>
+      <li>Обране — золотий контур + темна підкладка під ним (читається на будь-якому кольорі).</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Тулбар і підказка кроку (усі напрямки)</h2>
+<div class="card" style="max-width:820px">
+  <div class="toolbar" role="group" aria-label="Інструменти">
+    <span class="tool on" title="Вибір (V)">⬉<kbd>V</kbd></span>
+    <span class="tool" title="Точка (P)">⌖<kbd>P</kbd></span>
+    <span class="tool" title="Зона (Z)">⬠<kbd>Z</kbd></span>
+    <span class="tool" title="Точка входу (E)">◎<kbd>E</kbd></span>
+    <span class="sep"></span>
+    <span class="tool" title="Шари: зони / підписи">≡</span>
+  </div>
+  <div><span class="hint"><b>Зона</b> Клікайте вершини · двічі клікніть, щоб замкнути · <b>Esc</b> — скасувати · <b>⌫</b> — крок назад</span></div>
+  <ul>
+    <li>Сегментована група іконок (lucide: <code>MousePointer2</code>, <code>MapPin</code>, <code>Pentagon</code>, <code>LogIn</code>) з tooltip і гарячою клавішею; активна — <code>metal-gold metal-fill</code>.</li>
+    <li>Тулбар лежить поверх карти (top-left, як <code>MapTerrainToolbar</code>), підказка — плашка над картою по центру, лише в режимах малювання.</li>
+  </ul>
+</div>
+
+<h2>Бокова панель маркера (напрямок C)</h2>
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 340px))">
+  <div class="panel">
+    <div class="panel-head"><span class="a-pin sel">♜</span><div><div class="t">Talonguard</div><div class="s">Замок · Holy Griffin Empire</div></div></div>
+    <div class="sec"><h4>Основне</h4><div class="field">Talonguard</div>
+      <div style="height:8px"></div>
+      <div class="icons"><span class="on">♜</span><span>▦</span><span>⌂</span><span>☠</span><span>✧</span><span>⛺</span><span>⛫</span><span>⚔</span></div></div>
+    <div class="sec"><h4>Для майстра</h4><div class="field" style="height:56px;color:var(--muted)">Нотатка ДМ…</div>
+      <div class="row" style="margin-top:6px">Відома гравцям <span style="color:var(--gold)">●</span></div></div>
+    <div class="sec"><h4>Вкладена карта</h4><div class="link">Holy Griffin Empire <span style="color:var(--gold)">→</span></div></div>
+    <div class="danger">Видалити маркер</div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span style="width:30px;height:30px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;color:var(--gold)">🗺</span><div><div class="t">Ashan</div><div class="s">Коренева карта · 1600×1066</div></div></div>
+    <div class="sec"><h4>Туман війни</h4><div class="row">Увімкнено <span style="color:var(--gold)">●</span></div>
+      <div class="row" style="color:var(--muted)">Радіус огляду <span style="color:var(--ink)">4%</span></div><div class="slider"><i></i><b></b></div></div>
+    <div class="sec"><h4>Точка входу</h4><div class="link">Поставити на карті <span>◎</span></div></div>
+    <div class="sec"><h4>Вкладені карти · 8</h4>
+      <div class="link">Holy Griffin Empire <span>→</span></div><div class="link">Irollan <span>→</span></div><div class="link" style="color:var(--muted)">ще 6…</div></div>
+    <div class="sec"><h4>Картинка</h4><div class="link">Замінити <span>⇪</span></div></div>
+    <div class="danger">Видалити карту</div>
+  </div>
+</div>
+</body>
+</html>

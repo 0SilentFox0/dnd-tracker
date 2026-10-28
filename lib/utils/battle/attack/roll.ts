@@ -6,6 +6,7 @@ import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { rollDie } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -16,7 +17,7 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean; crit?: CritPicker } = {},
 ): AttackRollResult {
   const c = (opts.rules ?? DEFAULT_RULES).criticals;
 
@@ -65,9 +66,9 @@ export function calculateAttackRoll(
   let criticalEffect: CriticalEffect | undefined;
 
   if (c.effects && isCritical) {
-    criticalEffect = getRandomCriticalEffect("success", opts.rng, c.disabledSuccess);
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "success", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("success", opts.rng, c.disabledSuccess);
   } else if (c.effects && isCriticalFail) {
-    criticalEffect = getRandomCriticalEffect("fail", opts.rng, c.disabledFail);
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "fail", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("fail", opts.rng, c.disabledFail);
   }
 
   return {

@@ -15,9 +15,9 @@ const hero = createMockParticipant();
 const before: LoadedBattle = {
   scene: {
     id: "b1", campaignId: "c1", status: "active", round: 2, turnIndex: 0, version: 3,
-    eventSeq: 4, pendingMoraleCheck: null, startedAt: null, completedAt: null,
+    eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
   },
-  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map, createdAt: new Date() },
+  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map, createdAt: new Date() },
   participants: [hero],
   pending: [],
   isDM: true,

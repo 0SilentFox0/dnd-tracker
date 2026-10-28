@@ -1,3 +1,4 @@
+import type { BattleStatus } from "@/lib/constants/battle";
 import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
 
 export interface Campaign {
@@ -8,6 +9,7 @@ export interface Campaign {
   dmUserId: string;
   maxLevel: number;
   allowPlayerEdit: boolean;
+  critChoiceByDm: boolean;
   status: string;
   kind?: "campaign" | "template";
   members?: CampaignMembership[];
@@ -65,6 +67,7 @@ export interface CampaignSettings {
   description: string | null;
   maxLevel: number;
   allowPlayerEdit: boolean;
+  critChoiceByDm: boolean;
   status: string;
 }
 
@@ -111,3 +114,34 @@ export type SourceDiffItem = {
 export type SourceDiff = { source: { id: string; name: string; kind: string }; syncedAt: string | null; items: SourceDiffItem[] };
 
 export type SourceApplyResult = { applied: number; ignored: number; autoAdded: Array<{ scope: SourceSyncScope; key: string; name: string }>; warnings: string[] };
+
+export interface DmDashboardData {
+  pendingDrafts: number;
+  scenarioPages: { id: string; title: string }[];
+  battles: { id: string; name: string; status: BattleStatus }[];
+}
+
+export interface DashboardHero {
+  id: string;
+  name: string;
+  level: number;
+  race: string;
+  class: string;
+  avatar: string | null;
+  armorClass: number;
+  speed: number;
+  status: string;
+  reviewNote: string | null;
+  seenLevel: number | null;
+}
+
+export interface HeroHpValue {
+  current: number;
+  max: number;
+  temp: number;
+}
+
+export interface PlayerDashboardData {
+  hero: DashboardHero | null;
+  activeBattle: { battleId: string; hp: HeroHpValue } | null;
+}

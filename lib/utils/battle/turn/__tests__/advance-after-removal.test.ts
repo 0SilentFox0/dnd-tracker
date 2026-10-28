@@ -9,7 +9,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 1, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
 const burn = resolved({ trigger: { event: "turnEnd" }, effects: [{ kind: "dealDamage", amount: 3, target: "self" }] });

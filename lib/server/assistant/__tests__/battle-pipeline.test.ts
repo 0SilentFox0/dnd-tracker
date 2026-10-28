@@ -25,11 +25,11 @@ const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().bas
 const enemy = createMockParticipant({ basicInfo: { ...hero.basicInfo, id: "enemy", side: "enemy", controlledBy: "other" } });
 
 function loaded(): LoadedBattle & { isMember: boolean } {
-  return { scene: { id: "b", campaignId: "c", status: "active", round: 1, turnIndex: 0, version: 3, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null }, meta: { name: "Battle", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date() }, participants: [hero, enemy], pending: [], isDM: false, isMember: true };
+  return { scene: { id: "b", campaignId: "c", status: "active", round: 1, turnIndex: 0, version: 3, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null }, meta: { name: "Battle", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, rules: DEFAULT_RULES, map: null, createdAt: new Date() }, participants: [hero, enemy], pending: [], isDM: false, isMember: true };
 }
 
 function deps(row = loaded()): PipelineDeps {
-  return { getUserId: async () => "u", rateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 1 })), loadBattle: vi.fn(async () => row), saveBattle: vi.fn(async () => ({ battleId: "b", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null }, upserted: [], fullIds: [], removed: [], events: [] })), publish: vi.fn(), loadRecentEvents: async () => [] };
+  return { getUserId: async () => "u", rateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 1 })), loadBattle: vi.fn(async () => row), saveBattle: vi.fn(async () => ({ battleId: "b", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], fullIds: [], removed: [], events: [] })), publish: vi.fn(), loadRecentEvents: async () => [] };
 }
 
 const request = () => new Request("http://local/irrelevant", { method: "POST", body: JSON.stringify({ expectedVersion: 3 }) });

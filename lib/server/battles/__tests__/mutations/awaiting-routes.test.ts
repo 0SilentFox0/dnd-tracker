@@ -16,20 +16,26 @@ function routes(dir: string): string[] {
   });
 }
 
+async function allowing(flag: "allowWhileAwaitingDm" | "allowWhileCritPending"): Promise<string[]> {
+  const found = await Promise.all(routes(ROOT).map(async (file) => {
+    const operation = /operation: "([^"]+)"/.exec(readFileSync(file, "utf8"))?.[1];
+
+    if (!operation) return null;
+
+    const definition = await getBattleOperation(operation, { id: "campaign", battleId: "battle", participantId: "participant" });
+
+    return definition[flag] ? relative(ROOT, join(file, "..")) : null;
+  }));
+
+  return found.filter((name): name is string => name !== null).sort();
+}
+
 describe("allowWhileAwaitingDm", () => {
   it("лише рішення щодо резерву, адмінка та morale-check працюють під час очікування ДМ", async () => {
-    const definitions = await Promise.all(routes(ROOT).map(async file => {
-      const operation = /operation: "([^"]+)"/.exec(readFileSync(file, "utf8"))?.[1];
+    expect(await allowing("allowWhileAwaitingDm")).toEqual(["add-participant", "complete", "crit-choice", "morale-check", "participants/[participantId]", "refresh-sources", "reset", "reveal-participant", "rollback"]);
+  });
 
-      if (!operation) return null;
-
-      const definition = await getBattleOperation(operation, { id: "campaign", battleId: "battle", participantId: "participant" });
-
-      return definition.allowWhileAwaitingDm ? relative(ROOT, join(file, "..")) : null;
-    }));
-
-    const allowed = definitions.filter((name): name is string => name !== null).sort();
-
-    expect(allowed).toEqual(["add-participant", "complete", "morale-check", "participants/[participantId]", "refresh-sources", "reset", "reveal-participant", "rollback"]);
+  it("allowWhileCritPending: лише вибір крита, завершення, скидання й відкат", async () => {
+    expect(await allowing("allowWhileCritPending")).toEqual(["complete", "crit-choice", "reset", "rollback"]);
   });
 });

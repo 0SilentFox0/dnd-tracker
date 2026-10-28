@@ -1,3 +1,4 @@
+import { CritWaitingNote } from "@/components/battle/crit-choice/CritWaitingNote";
 import type { SpellFlowState } from "@/lib/utils/battle/flows";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BattleParticipant } from "@/types/battle";
@@ -23,6 +24,7 @@ export function SpellSummary({ spell, state, targets, formula, targeting, slotCo
         <p className="mt-2 text-sm italic text-[var(--hud-muted)]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
         {slotCost && <p className="text-sm italic text-[var(--hud-muted)]">{slotCost}</p>}
       </div>
+      {state.waitingCrit && <CritWaitingNote />}
       {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
     </>
   );

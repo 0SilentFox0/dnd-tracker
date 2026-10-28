@@ -18,8 +18,8 @@ const hero = (id: string, sourceId: string, stats: Partial<BattleParticipant["co
 const RULES: Ruleset = { ...DEFAULT_RULES, outOfCombat: { ...DEFAULT_RULES.outOfCombat, persistResources: true, inspiration: true } };
 
 const loaded = (rules: Ruleset, participants: BattleParticipant[], pending: BattleParticipant[] = []): LoadedBattle => ({
-  scene: { id: "b1", campaignId: "c1", status: BattleStatus.ACTIVE, round: 3, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null },
-  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules, map: null, createdAt: new Date() },
+  scene: { id: "b1", campaignId: "c1", status: BattleStatus.ACTIVE, round: 3, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, rules, map: null, createdAt: new Date() },
   participants,
   pending,
   isDM: true,

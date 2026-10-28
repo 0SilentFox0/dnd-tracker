@@ -15,6 +15,8 @@ import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { dropConcentration } from "@/lib/utils/battle/concentration";
+import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
+import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -51,7 +53,7 @@ const defaultDeps: SpellMutationDeps = {
 };
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
-  return async (ctx: BattleMutationContext, data: SpellRequestData): Promise<MutationResult> => {
+  return async (ctx: BattleMutationContext, data: SpellRequestData, resume?: CritResume): Promise<MutationResult> => {
     let order = ctx.participants;
 
     const spellRow = await deps.loadSpell(data.spellId);
@@ -131,81 +133,89 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
-    const rng = ctx.rng ?? Math.random;
-
     const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
 
-    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
+    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, ctx.rng ?? Math.random) : data.diceRolls;
 
     assertSpellRolls(expected, diceRolls);
 
     const { trusted, serverRolled } = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const result = castSpell({
-      caster,
-      spell,
-      targetIds: resolution.targetIds,
-      allParticipants: order,
-      currentRound: ctx.scene.round,
-      battleId: ctx.scene.id,
-      diceRolls,
-      saveRolls: trusted,
-      attackRolls: data.attackRolls,
-      dice: expected,
-      isDMCast: free,
-      isLegendaryCast: !!legendaryAbility,
-      grant,
-      castLevel,
-      ...(chosen?.ok && { slotKey: data.slotKey }),
-      rng,
-      map: ctx.meta.map,
-      rules: ctx.meta.rules,
+    return runWithCritChoice(ctx, {
+      action: "spell",
+      actorId: data.casterId,
+      request: data,
+      enabled: ctx.meta.critChoiceByDm && !data.preview,
+      resume,
+      run: async ({ rng, crit }) => {
+        const result = castSpell({
+          caster,
+          spell,
+          targetIds: resolution.targetIds,
+          allParticipants: order,
+          currentRound: ctx.scene.round,
+          battleId: ctx.scene.id,
+          diceRolls,
+          saveRolls: trusted,
+          attackRolls: data.attackRolls,
+          dice: expected,
+          isDMCast: free,
+          isLegendaryCast: !!legendaryAbility,
+          grant,
+          castLevel,
+          ...(chosen?.ok && { slotKey: data.slotKey }),
+          rng,
+          crit,
+          map: ctx.meta.map,
+          rules: ctx.meta.rules,
+        });
+
+        if (!result.success) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT);
+
+        const groups = spellDiceRolls({
+          casterId: caster.basicInfo.id,
+          sides: expected.sides,
+          rolls: diceRolls,
+          heal: healsByDefinition(definition.effects),
+          saves: result.battleAction.actionDetails.savingThrows ?? [],
+          presetSaveIds: new Set(trusted.map((s) => s.participantId)),
+        });
+
+        if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
+
+        if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
+
+        if (serverRolled.length > 0) {
+          result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
+        }
+
+        if (data.preview) {
+          return {
+            participants: order,
+            pending: ctx.pending,
+            events: [],
+            response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined }, ...(resolution.cells && { cells: resolution.cells }) },
+          };
+        }
+
+        const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
+
+        if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
+          const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);
+
+          return legendaryAbility.limits?.lair ? spendLair(used, ctx.scene.round, legendaryAbility.key) : spendLegendary(used, legendaryCostOf(legendaryAbility));
+        });
+
+        if (legendaryAbility) result.battleAction.resultText = `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — ${result.battleAction.resultText}`;
+
+        const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
+
+        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration });
+
+        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
+      },
     });
-
-    if (!result.success) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT);
-
-    const groups = spellDiceRolls({
-      casterId: caster.basicInfo.id,
-      sides: expected.sides,
-      rolls: diceRolls,
-      heal: healsByDefinition(definition.effects),
-      saves: result.battleAction.actionDetails.savingThrows ?? [],
-      presetSaveIds: new Set(trusted.map((s) => s.participantId)),
-    });
-
-    if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
-
-    if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
-
-    if (serverRolled.length > 0) {
-      result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
-    }
-
-    if (data.preview) {
-      return {
-        participants: order,
-        pending: ctx.pending,
-        events: [],
-        response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined }, ...(resolution.cells && { cells: resolution.cells }) },
-      };
-    }
-
-    const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
-
-    if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
-      const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);
-
-      return legendaryAbility.limits?.lair ? spendLair(used, ctx.scene.round, legendaryAbility.key) : spendLegendary(used, legendaryCostOf(legendaryAbility));
-    });
-
-    if (legendaryAbility) result.battleAction.resultText = `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — ${result.battleAction.resultText}`;
-
-    const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
-
-    const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration });
-
-    return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
   };
 }

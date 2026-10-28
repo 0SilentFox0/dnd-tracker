@@ -5,6 +5,7 @@ export { type ParticipantActions, type ParticipantSelection } from "./setup/useB
 export { type BattleSetup, type BattleSetupInitial, useBattleSetup, useBattleSetupInitial } from "./setup/useBattleSetup";
 export { type BattleActionOptions, useBattleAction } from "./useBattleAction";
 export { useBattleBriefs } from "./useBattleBriefs";
+export { useBattleListSections } from "./useBattleListSections";
 export {
   useAbilityAction,
   useAddBattleParticipant,
@@ -16,6 +17,7 @@ export {
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
+  useCritChoice,
   useDeleteAllBattles,
   useMapTerrain,
   useMapWeather,

@@ -7,6 +7,7 @@ export { useCrudMutation } from "./useCrudMutation";
 export { useCssVarHeight } from "./useCssVarHeight";
 export { useDebouncedValue } from "./useDebouncedValue";
 export { type DiceRollerPick, type DiceRollResult, ROLLER_MAX_COUNT, ROLLER_SIDES, useDiceRoller } from "./useDiceRoller";
+export { useElementSize } from "./useElementSize";
 export { useErrorTotals } from "./useErrorTotals";
 export { useExpiry } from "./useExpiry";
 export type { UseFileImportReturn } from "./useFileImport";
@@ -23,5 +24,7 @@ export { offsetPager, type Pager, type PagerControls, usePager } from "./usePage
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
 export { useRowKeys } from "./useRowKeys";
+export { type SearchState, useSearch } from "./useSearch";
 export { useSingleFlight } from "./useSingleFlight";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
+export { DRAG_THRESHOLD, useViewport, type ViewportOptions } from "./useViewport";

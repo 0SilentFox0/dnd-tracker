@@ -515,6 +515,17 @@ describe("шаблон і дальність", () => {
     expect(spellTargetInRange(map, hero, foe, undefined)).toBe(true);
     expect(spellTargetInRange(map, hero, placed("x", ParticipantSide.ENEMY), 5)).toBe(true);
   });
+
+  it("WAIT_CRIT: відправка → очікування вибору ДМ → результат; поза відправкою ігнорується", () => {
+    const submitting = run({ type: "OPEN", casterId: "me", level: 3 }, { type: "PICK", pick: aura }, { type: "TO_TARGETS" }, { type: "SUBMIT" });
+
+    const waiting = spellFlow(submitting, { type: "WAIT_CRIT" });
+
+    expect(waiting).toMatchObject({ step: "submitting", waitingCrit: true });
+    expect(spellFlow(waiting, { type: "SUCCESS" })).toMatchObject({ step: "result", waitingCrit: false });
+    expect(spellFlow(waiting, { type: "FAIL", error: "x" }).waitingCrit).toBe(false);
+    expect(spellFlow(run({ type: "OPEN", casterId: "me", level: 3 }), { type: "WAIT_CRIT" }).waitingCrit).toBeFalsy();
+  });
 });
 
 describe("SET_SLOT", () => {

@@ -4,13 +4,17 @@ import { useState } from "react";
 
 import { useCreateRace, useDeleteRace, useRaces } from "./useRaces";
 
-import { useConfirm } from "@/lib/hooks/common";
-import type { RaceFormData } from "@/types/races";
+import { useConfirm, useSearch } from "@/lib/hooks/common";
+import type { Race, RaceFormData } from "@/types/races";
+
+const raceFields = (race: Race) => [race.name];
 
 export function useRacesList(campaignId: string) {
   const confirm = useConfirm();
 
-  const { data: races = [], isLoading } = useRaces(campaignId);
+  const { data: allRaces = [], isLoading } = useRaces(campaignId);
+
+  const search = useSearch(allRaces, raceFields);
 
   const create = useCreateRace(campaignId);
 
@@ -39,8 +43,10 @@ export function useRacesList(campaignId: string) {
   };
 
   return {
-    races,
+    races: search.items,
+    total: allRaces.length,
     isLoading,
+    search,
     createDialog: { open: createOpen, setOpen, status: { isPending: create.isPending, error: create.error } },
     actions: { createRace, deleteRace },
   };

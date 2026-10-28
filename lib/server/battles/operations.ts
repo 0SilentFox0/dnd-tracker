@@ -76,6 +76,25 @@ export async function getBattleOperation(operation: string, params: BattleOperat
         mutate: bonusActionMutation,
       });
     }
+    case "crit-choice": {
+      const { createCritChoiceMutation } = await import("@/lib/server/battles/mutations/crit-choice/crit-choice-mutation");
+
+      const { attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
+
+      const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
+
+      const { critChoiceSchema } = await import("@/lib/schemas");
+
+      return define({
+        access: "dm",
+        requireStatus: BattleStatus.ACTIVE,
+        allowWhileAwaitingDm: true,
+        allowWhileCritPending: true,
+        schema: critChoiceSchema,
+        respond: "wrapped",
+        mutate: createCritChoiceMutation({ attack: attackMutation, spell: createSpellMutation() }),
+      });
+    }
     case "complete": {
       const { completeBattleSchema, completeMutation } = await import("@/lib/server/battles/mutations/complete/complete-mutation");
 
@@ -83,6 +102,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
         access: "dm",
         requireStatus: BattleStatus.ACTIVE,
         allowWhileAwaitingDm: true,
+        allowWhileCritPending: true,
         schema: completeBattleSchema,
         mutate: completeMutation,
       });
@@ -211,7 +231,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       const { resetMutation } = await import("@/lib/server/battles/mutations/reset/reset-mutation");
 
       return define({
-        access: "dm", allowWhileAwaitingDm: true, mutate: resetMutation });
+        access: "dm", allowWhileAwaitingDm: true, allowWhileCritPending: true, mutate: resetMutation });
     }
     case "reveal-participant": {
       const { revealParticipantMutation, revealParticipantSchema } = await import("@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation");
@@ -230,7 +250,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       const mutate = createRollbackMutation();
 
       return define({
-        access: "dm", allowWhileAwaitingDm: true, schema: rollbackSchema, mutate });
+        access: "dm", allowWhileAwaitingDm: true, allowWhileCritPending: true, schema: rollbackSchema, mutate });
     }
     case "scale-units": {
       const { scaleUnitsMutation, scaleUnitsSchema } = await import("@/lib/server/battles/mutations/scale-units/scale-units-mutation");

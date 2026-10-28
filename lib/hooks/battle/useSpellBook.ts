@@ -5,6 +5,7 @@ import { useEffect, useEffectEvent, useMemo, useReducer, useState } from "react"
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 import { useBattleSpellLibrary } from "./useBattleSpellLibrary";
+import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
 import { useSpellMapTargeting } from "./useSpellMapTargeting";
 
 export { useBonusSpells, useReactionSpells,useSpellBookPrefetch } from "./useBattleSpellLibrary";
@@ -71,6 +72,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const [finishLong, setFinishLong] = useState(false);
 
   const [flow, dispatch] = useReducer(spellFlow, initialSpellFlow);
+
 
   const isOpen = flow.step !== "closed" && !!caster;
 
@@ -175,15 +177,39 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const castLevelOptions = castLevelOptionsOf(caster, selectedGrant);
 
+  const finish = (changes: { participantId: string; participantName: string; change: number }[]) => {
+    dispatch({ type: "SUCCESS" });
+    scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(changes), targetCount: state.targetIds.length });
+    options.onDone?.();
+  };
+
+  const pauseCrit = useCritPause({
+    waiting: state.waitingCrit,
+    actorId: caster?.basicInfo.id,
+    onResolved: (seen) => {
+      const log = scene.readBattle()?.battleLog ?? [];
+
+      finish(log.filter((e) => !seen.has(e.actionIndex) && e.actorId === caster?.basicInfo.id).flatMap((e) => e.hpChanges ?? []));
+    },
+    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
+  });
+
   const send = useEffectEvent(async () => {
     if (!caster) return;
+
+    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
       const res = await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }), ...(special && { legendaryKey: special.abilityKey }), ...(finishLong && caster.battleData.pendingCast && { castingRounds: caster.battleData.pendingCast.remainingRounds }) });
 
-      dispatch({ type: "SUCCESS" });
-      scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(res?.hpChanges ?? []), targetCount: state.targetIds.length });
-      options.onDone?.();
+      if (res?.pendingCritChoice) {
+        pauseCrit(seen);
+        dispatch({ type: "WAIT_CRIT" });
+
+        return;
+      }
+
+      finish(res?.hpChanges ?? []);
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося застосувати заклинання" });
     }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAbilitySources, useCopyOwnerAbilities } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { AbilitySourceRef } from "@/types/abilities";
 
 const KIND_LABELS: Record<AbilitySourceRef["kind"], string> = {
@@ -25,9 +26,7 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
 
   const copy = useCopyOwnerAbilities(campaignId);
 
-  const q = query.trim().toLowerCase();
-
-  const sources = (data?.sources ?? []).filter((s) => !q || s.name.toLowerCase().includes(q));
+  const sources = (data?.sources ?? []).filter((s) => matchesQuery([s.name], query));
 
   const pick = (s: AbilitySourceRef) => copy.mutate(s, { onSuccess: onPick });
 

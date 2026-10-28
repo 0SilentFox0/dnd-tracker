@@ -33,7 +33,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const unhidden = removeEffects(caster, (e) => e.effects.some((x) => x.type === HIDDEN_MARKER));
 
-  const flow: ActionFlow = { ps: withSelf(allParticipants, unhidden.participant), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules } };
+  const flow: ActionFlow = { ps: withSelf(allParticipants, unhidden.participant), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules, crit: params.crit } };
 
   const before = flow.ps;
 
@@ -78,6 +78,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
     saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility, (params.rules ?? DEFAULT_RULES).formulas.saveDcBase),
     attackBonus: params.grant?.attackBonus,
+    battleId,
     actionModifiers,
     rng,
     saveRolls,

@@ -12,6 +12,7 @@ import { LoadingState, QueryState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
+import { WorldMapLink } from "@/components/world/WorldMapLink";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -104,6 +105,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           <Link className="toggle sb-hide-sm" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
             Екран показу ↗
           </Link>
+          <WorldMapLink campaignId={campaignId} variant="toggle" />
         </>
       )}
       {aiEnabled && (

@@ -26,6 +26,7 @@ interface CreateFromBundleInput {
   visibility?: "private" | "official";
   createdFromId?: string | null;
   settings?: Partial<Bundle["settings"]>;
+  critChoiceByDm?: boolean;
 }
 
 const defined = <T extends object>(obj: T) => Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
@@ -45,6 +46,7 @@ function campaignData(input: CreateFromBundleInput): Prisma.CampaignCreateInput 
     ...(s.xpMultiplier !== undefined && { xpMultiplier: s.xpMultiplier }),
     ...(s.allowPlayerEdit !== undefined && { allowPlayerEdit: s.allowPlayerEdit }),
     ...(s.friendlyFire !== undefined && { friendlyFire: s.friendlyFire }),
+    ...(input.critChoiceByDm !== undefined && { critChoiceByDm: input.critChoiceByDm }),
     ...(input.bundle && { rules: parseRules(input.bundle.rules) as Prisma.InputJsonObject }),
     ...(input.bundle?.credits !== undefined && { credits: input.bundle.credits }),
     members: { create: { userId: input.userId, role: CampaignRole.DM } },
@@ -102,7 +104,7 @@ export async function loadTemplateForUser(
   return canReadSource(template.visibility, template.members) ? { ok: true, template } : { ok: false, status: 403 };
 }
 
-type CreateCampaignData = { name: string; description?: string | null; templateId?: string; maxLevel?: number; allowPlayerEdit?: boolean };
+type CreateCampaignData = { name: string; description?: string | null; templateId?: string; maxLevel?: number; allowPlayerEdit?: boolean; critChoiceByDm?: boolean };
 
 type CampaignSource = { bundle: Bundle; id: string };
 
@@ -124,6 +126,7 @@ export async function createCampaignForUser(userId: string, data: CreateCampaign
     bundle: source?.bundle ?? null,
     createdFromId: source?.id ?? null,
     settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
+    critChoiceByDm: data.critChoiceByDm,
   });
 
   const invalidate = () => invalidateCampaignLists([userId]);

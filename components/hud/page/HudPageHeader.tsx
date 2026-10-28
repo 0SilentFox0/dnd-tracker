@@ -8,7 +8,7 @@ export function HudPageHeader({ title, subtitle, actions, children, className }:
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between md:gap-4">
         <div className="min-w-0 md:min-w-[14rem] md:flex-1">
           <h1 className="hud-sc text-xl text-hud-ink">{title}</h1>
-          {subtitle && <p className="text-sm text-hud-muted">{subtitle}</p>}
+          {subtitle && <div className="text-sm text-hud-muted">{subtitle}</div>}
         </div>
         {actions && <div className="flex flex-wrap gap-2 md:justify-end">{actions}</div>}
       </div>

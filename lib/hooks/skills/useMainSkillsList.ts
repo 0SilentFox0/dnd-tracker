@@ -4,15 +4,19 @@ import { useState } from "react";
 
 import { useDeleteMainSkill, useMainSkills } from "./useMainSkills";
 
-import { useConfirm } from "@/lib/hooks/common";
+import { useConfirm, useSearch } from "@/lib/hooks/common";
 import type { MainSkill } from "@/types/main-skills";
+
+const mainSkillFields = (mainSkill: MainSkill) => [mainSkill.name];
 
 export function useMainSkillsList(campaignId: string, initialMainSkills: MainSkill[]) {
   const confirm = useConfirm();
 
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data: mainSkills = initialMainSkills } = useMainSkills(campaignId, { initialData: initialMainSkills });
+  const { data: allMainSkills = initialMainSkills } = useMainSkills(campaignId, { initialData: initialMainSkills });
+
+  const search = useSearch(allMainSkills, mainSkillFields);
 
   const deleteMainSkill = useDeleteMainSkill(campaignId);
 
@@ -27,7 +31,9 @@ export function useMainSkillsList(campaignId: string, initialMainSkills: MainSki
   };
 
   return {
-    mainSkills,
+    mainSkills: search.items,
+    total: allMainSkills.length,
+    search,
     createDialog: { open: createOpen, setOpen: setCreateOpen },
     actions: { remove },
   };

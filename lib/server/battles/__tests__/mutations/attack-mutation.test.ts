@@ -24,7 +24,7 @@ const goblin = createMockParticipant({
 });
 
 const ctx = {
-  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, startedAt: null, completedAt: null },
+  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
   participants: [hero, goblin],
   pending: [],
   meta: { map: null },

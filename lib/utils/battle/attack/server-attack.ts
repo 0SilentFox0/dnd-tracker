@@ -46,7 +46,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const second = rollDie(20, rng);
 
-  const roll = calculateAttackRoll(getP(flow, attackerId), attack, first, second, second, { participants: flow.ps, targetId, rng, rules: flow.ctx.rules, map: flow.ctx.map });
+  const roll = calculateAttackRoll(getP(flow, attackerId), attack, first, second, second, { participants: flow.ps, targetId, rng, rules: flow.ctx.rules, map: flow.ctx.map, crit: flow.ctx.crit });
 
   if (roll.secondRoll) flow.messages.push(`🎲 ${LABELS[label].noun}, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
 

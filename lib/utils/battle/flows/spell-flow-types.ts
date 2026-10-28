@@ -46,6 +46,8 @@ export interface SpellFlowState {
   castLevel?: number;
   damage: (number | undefined)[];
   error?: string;
+  /** сервер зупинив каст: ДМ обирає ефект крита */
+  waitingCrit?: boolean;
 }
 
 export type SpellFlowAction =
@@ -67,6 +69,7 @@ export type SpellFlowAction =
   | { type: "TO_SUMMARY" }
   | { type: "BACK" }
   | { type: "SUBMIT" }
+  | { type: "WAIT_CRIT" }
   | { type: "SUCCESS" }
   | { type: "FAIL"; error: string }
   | { type: "CLOSE" };

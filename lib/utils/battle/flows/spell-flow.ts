@@ -133,12 +133,14 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SUBMIT":
 
       return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;
+    case "WAIT_CRIT":
+      return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
     case "SUCCESS":
 
-      return { ...s, step: "result" };
+      return { ...s, step: "result", waitingCrit: false };
     case "FAIL":
 
-      return { ...s, step: "summary", error: a.error };
+      return { ...s, step: "summary", error: a.error, waitingCrit: false };
     case "CLOSE":
 
       return initialSpellFlow;

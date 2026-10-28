@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useMainSkills } from "./useMainSkills";
 import { useDeleteAllSkills, useDeleteSkill, useDuplicateSkill, useSkills } from "./useSkills";
 
+import { useSearch } from "@/lib/hooks/common";
 import { convertGroupedSkillsToArray, groupSkillsByMainSkill } from "@/lib/utils/skills/skills";
 import type { Skill } from "@/types/skills";
 
@@ -25,19 +26,24 @@ export function useSkillsList(campaignId: string) {
 
   const duplicate = useDuplicateSkill(campaignId);
 
+  const fieldsOf = useCallback((skill: Skill) => [skill.name, mainSkills.find((ms) => ms.id === skill.mainSkillId)?.name], [mainSkills]);
+
+  const search = useSearch(skills, fieldsOf);
+
   const groups = useMemo<SkillListGroup[]>(
     () =>
-      convertGroupedSkillsToArray(groupSkillsByMainSkill(skills, mainSkills)).map(([name, groupSkills]) => ({
+      convertGroupedSkillsToArray(groupSkillsByMainSkill(search.items, mainSkills)).map(([name, groupSkills]) => ({
         name,
         skills: groupSkills,
         color: mainSkills.find((ms) => ms.name === name)?.color,
       })),
-    [skills, mainSkills],
+    [search.items, mainSkills],
   );
 
   return {
     skills,
     isLoading,
+    search,
     groups,
     actions: {
       deleteSkill: (skillId: string) => deleteOne.mutateAsync(skillId),

@@ -29,14 +29,14 @@ const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => maz
 
 const scene0: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
 };
 
 /** Сховище в пам'яті з тими самими split/join, prepareSave і знімками, що й saveBattle, плюс карта бою */
 function memoryBattle(participants: BattleParticipant[], map: BattleMapConfig) {
   let scene = { ...scene0 };
 
-  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map, createdAt: new Date() };
+  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map, createdAt: new Date() };
 
   let rows: StoredParticipant[] = wire(participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })));
 
@@ -210,7 +210,7 @@ describe("дельта лабіринту", () => {
   const bigMap: BattleMapConfig = { ...big, rows: 30, maze: { ...(big.maze as MazeConfig), walls: allInteriorEdges({ cols: 40, rows: 30 }) } };
 
   const args = (map: BattleMapConfig) => ({
-    before: { scene: scene0, meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: bigMap, createdAt: new Date() }, participants: [], pending: [] },
+    before: { scene: scene0, meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: bigMap, createdAt: new Date() }, participants: [], pending: [] },
     after: { ...scene0, version: 2 },
     participants: [],
     pending: [],
@@ -246,7 +246,7 @@ describe("дельта лабіринту", () => {
 
     const marks = { "2:2": { symbol: "cross" as const, color: "#22c55e", by: "hero" } };
 
-    const delta = { battleId: "b1", version: 2, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, maze: { marks, dark: true } }, upserted: [], removed: [], log: [] } as BattleMutationResponse["delta"];
+    const delta = { battleId: "b1", version: 2, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, maze: { marks, dark: true } }, upserted: [], removed: [], log: [] } as BattleMutationResponse["delta"];
 
     const out = applyBattleDelta(cached, delta) as BattleScene;
 

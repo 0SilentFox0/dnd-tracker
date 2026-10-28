@@ -8,13 +8,13 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 const base = createMockParticipant();
 
 const ctx = {
-  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, startedAt: null, completedAt: null },
+  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
   participants: [
     createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero" } }),
     createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" } }),
   ],
   pending: [],
-  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() },
+  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date() },
   userId: "user-1",
   isDM: false,
 } as unknown as BattleMutationContext;

@@ -12,6 +12,8 @@ export interface Outcome {
   factor: number;
   raceMultiplier: number;
   critExtra?: number;
+  /** крит рятівного кидка: статуси заклинання на ціль не накладаються */
+  negateEffects?: boolean;
 }
 
 export interface SpellCastState {
@@ -30,6 +32,7 @@ export interface SpellCastState {
   power: SpellPower;
   saveDc: number;
   attackBonus?: number;
+  battleId: string;
   actionModifiers: Record<string, StaticEffect[]>;
   rng: () => number;
   saveRolls: Array<{ participantId: string; roll: number }>;

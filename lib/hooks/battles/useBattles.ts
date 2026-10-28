@@ -15,6 +15,7 @@ import {
   castSpell,
   completeBattle,
   createBattle,
+  critChoice,
   deleteAllBattles,
   deleteBattle,
   getBattle,
@@ -47,6 +48,7 @@ import type {
   BattleMutationResponse,
   BattleScene,
   BonusActionData,
+  CritChoiceData,
   MapTerrainData,
   MapTerrainResponse,
   MapWeatherData,
@@ -152,15 +154,23 @@ export const useNextTurn = (c: string, b: string, o: ActionOpts = {}) =>
 
 export interface AttackResponse {
   hpChanges: BattleAction["hpChanges"];
+  /** дію зупинено: ефект крита обирає ДМ, результат прийде пізніше */
+  pendingCritChoice?: true;
 }
 
-const withHpChanges = (res: BattleMutationResponse) => ({ ...res, response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []) } });
+const withHpChanges = (res: BattleMutationResponse) => ({
+  ...res,
+  response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []), ...(res.response?.pendingCritChoice === true && { pendingCritChoice: true as const }) },
+});
 
 export const useAttack = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AttackData & { endTurn?: boolean }, AttackResponse>(c, b, async (data) => withHpChanges(await attack(c, b, data)), { ...o, invalidate: ["battles"] });
 
 export const useMoraleCheck = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<MoraleCheckData, { moraleResult: MoraleCheckResult }>(c, b, (data) => moraleCheck(c, b, data), o);
+
+export const useCritChoice = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<CritChoiceData>(c, b, (data) => critChoice(c, b, data), o);
 
 export const useAbilityAction = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AbilityActionData>(c, b, (data) => abilityAction(c, b, data), o);

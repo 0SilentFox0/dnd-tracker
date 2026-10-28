@@ -3,6 +3,7 @@ import { useState } from "react";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { CellRef } from "@/lib/utils/skills/progression";
 
 type LibrarySkill = { id: string; name: string; icon: string | null; mainSkillId: string | null; summary: string[] };
@@ -33,7 +34,7 @@ export function SlotPicker({ target, current, skills, usedAt, onPick, onClose }:
     return s.mainSkillId === ref.branchId;
   };
 
-  const list = skills.filter(byScope).filter((s) => s.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const list = skills.filter(byScope).filter((s) => matchesQuery([s.name], query));
 
   return (
     <ResponsiveDialog

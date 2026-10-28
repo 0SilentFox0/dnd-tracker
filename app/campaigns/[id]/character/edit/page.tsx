@@ -9,7 +9,7 @@ export default async function PlayerCharacterEditPage({ params }: { params: Prom
 
   const { userId, isDM } = await requireCampaignMember(id);
 
-  const character = isDM ? await prisma.character.findFirst({ where: { campaignId: id, controlledBy: userId, type: CharacterType.PLAYER }, select: { id: true } }) : null;
+  const character = isDM ? await prisma.character.findFirst({ where: { campaignId: id, controlledBy: userId, type: CharacterType.PLAYER }, orderBy: { createdAt: "desc" }, select: { id: true } }) : null;
 
   redirect(character ? `/campaigns/${id}/dm/characters/${character.id}` : `/campaigns/${id}/character`);
 }

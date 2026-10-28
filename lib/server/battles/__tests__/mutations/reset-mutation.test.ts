@@ -10,7 +10,7 @@ describe("reset mutation", () => {
 
     expect(out.participants).toEqual([]);
     expect(out.pending).toEqual([]);
-    expect(out.scene).toEqual({ status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null });
+    expect(out.scene).toEqual({ status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null });
     expect(out.history).toEqual({ clear: true });
   });
 

@@ -15,7 +15,7 @@ export function completeMutation(ctx: BattleMutationContext, body: z.infer<typeo
   return {
     participants: updatedParticipants,
     pending: ctx.pending,
-    scene: { status: BattleStatus.COMPLETED, completedAt: new Date() },
+    scene: { status: BattleStatus.COMPLETED, completedAt: new Date(), pendingCritChoice: null },
     events: [battleActionToEvent(battleAction)],
   };
 }

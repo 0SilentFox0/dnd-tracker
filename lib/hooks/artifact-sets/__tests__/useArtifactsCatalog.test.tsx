@@ -55,4 +55,22 @@ describe("useArtifactsCatalog", () => {
 
     await waitFor(() => expect(result.current.catalog.view.bySlot.map((g) => g.slot)).toEqual(["amulet"]));
   });
+
+  it("пошук шукає за назвою артефакта й сету, ховає порожні групи", async () => {
+    const { result } = renderHook(() => useArtifactsCatalog("c1"), { wrapper });
+
+    await waitFor(() => expect(result.current.view.sets).toHaveLength(1));
+
+    act(() => result.current.search.query.set("луска"));
+
+    await waitFor(() => expect(result.current.view.bySlot).toEqual([]));
+
+    expect(result.current.view.sets[0].artifacts.map((a) => a.id)).toEqual(["a2"]);
+
+    act(() => result.current.search.query.set("кільце"));
+
+    await waitFor(() => expect(result.current.view.sets).toEqual([]));
+
+    expect(result.current.view.bySlot.map((g) => g.slot)).toEqual(["amulet"]);
+  });
 });

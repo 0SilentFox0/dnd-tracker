@@ -132,7 +132,7 @@ describe("healing", () => {
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
 const gob = () => {
