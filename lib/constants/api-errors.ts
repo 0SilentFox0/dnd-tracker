@@ -24,6 +24,24 @@ export const API_ERRORS = {
   SUBCLASS_NOT_FOUND: "Підклас не знайдено в цьому класі",
   SUBCLASS_ALREADY_SET: "Підклас уже обрано — змінити його при підвищенні рівня не можна",
   CONVERT_TO_CLASSES_FIRST: "Спершу переведіть персонажа на класи",
+  FEAT_NOT_FOUND: "Рису не знайдено",
+  FEAT_IN_USE: "Рису мають персонажі — спершу приберіть її з їхніх виборів",
+  CHOICE_UNKNOWN: "Вибір не знайдено",
+  CHOICE_COUNT: "Забагато виборів",
+  CHOICE_DUPLICATE: "Вибір повторюється",
+  CHOICE_LOCKED: "Цей вибір відкривається на вищому рівні — його не можна змінити",
+  CHOICE_MIN_LEVEL: "Опція доступна з вищого рівня",
+  CHOICE_REQUIRES: "Опція потребує іншої опції",
+  FEAT_TYPE: "Риса цього типу тут недоступна",
+  FEAT_PREREQUISITE: "Передумови риси не виконано",
+  FEAT_NOT_REPEATABLE: "Цю рису не можна взяти двічі",
+  SKILL_NOT_ALLOWED: "Навичка не входить у список вибору",
+  EXPERTISE_NEEDS_PROFICIENCY: "Експертиза — лише в навичці з майстерністю",
+  SPELL_NOT_IN_LIST: "Заклинання не входить у список або коло недоступне",
+  ABILITY_SCORE_CAP: "Характеристика перевищить межу",
+  CHOICES_NEED_CLASSES: "Риси й вибори класу — лише в режимі класів",
+  ORIGIN_FEAT_ONLY_ONE: "Риса походження — лише одна",
+  DM_FEAT_ONLY_DM: "Риси, видані ДМ, змінює лише ДМ",
   SKILL_NOT_FOUND: "Навик не знайдено",
   MEMBER_NOT_FOUND: "Учасника не знайдено",
   BATTLE_RESERVE_NOT_FOUND: "Учасника резерву не знайдено",
@@ -176,6 +194,8 @@ export const API_ERRORS = {
 } as const;
 
 export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
+
+export const featNameTakenMessage = (name: string) => `Риса «${name}» уже є в кампанії`;
 
 export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;
 

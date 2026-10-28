@@ -8,6 +8,8 @@ import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { pactSlot, slotLevels } from "@/lib/utils/battle/view";
+import { describeFeatPicks } from "@/lib/utils/characters/choices/describe";
+import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections";
 import { hitDiceLabel } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
@@ -29,6 +31,7 @@ export interface SheetInput {
   classes?: ResolvedClassEntry[];
   chapters?: StoryChapter[];
   attunement?: { used: number; limit: number } | null;
+  choices?: { selections: ChoiceSelections; pending: number; canEdit?: boolean };
   character: Record<AbilityKey, number> & {
     id: string;
     name: string;
@@ -37,6 +40,7 @@ export interface SheetInput {
     class: string;
     subclass: string | null;
     race: string;
+    subrace?: string | null;
     alignment: string | null;
     armorClass: number;
     savingThrows: unknown;
@@ -86,10 +90,18 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const skillFlags = flags(c.skills);
 
+  const fromChoices = new Set<string>(input.choices?.selections.skills ?? []);
+
+  const expert = new Set<string>(input.choices?.selections.expertise ?? []);
+
   const skills = DND_SKILLS.map((key) => {
     const meta = DND_SKILL_META[key];
 
-    return { key, label: meta.label, ability: meta.ability, proficient: !!skillFlags[key], bonus: checkBonus(scores[meta.ability], !!skillFlags[key], prof) };
+    const proficient = !!skillFlags[key] || fromChoices.has(key);
+
+    const expertise = proficient && expert.has(key);
+
+    return { key, label: meta.label, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
   });
 
   const passive = (key: string) => 10 + (skills.find((s) => s.key === key)?.bonus ?? 0);
@@ -97,6 +109,8 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
   const attacks = p.battleData.attacks.map((a) => attackSheet(p, a));
 
   const classEntries = input.classes?.some((e) => e.class) ? input.classes : null;
+
+  const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
   const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling) });
 
@@ -110,7 +124,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     viewer: input.viewer,
     review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
-    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
+    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
     proficiency: prof,
@@ -144,5 +158,16 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals), notes: input.viewer.isOwner ? (c.notes ?? null) : null, chapters: input.chapters ?? [],
       tokens: (c.tokens ?? []).map((t) => ({ id: t.id, color: t.color as TokenColor, label: t.label, createdAt: t.createdAt.toISOString() })),
     },
+    ...(input.choices && {
+      choices: {
+        pending: input.choices.pending,
+        ...(input.choices.canEdit !== undefined && { canEdit: input.choices.canEdit }),
+        lineage: input.choices.selections.lineage,
+        feats: input.choices.selections.feats.map((f) => ({ key: f.key, id: f.feat.id, name: f.feat.name, type: f.feat.type, from: f.from, picks: describeFeatPicks(f.feat, f.picks) })),
+        options: input.choices.selections.options,
+        spellSources: Object.fromEntries(input.choices.selections.spells.map((sp) => [sp.spellId, sp.label])),
+        expertise: input.choices.selections.expertise,
+      },
+    }),
   };
 }

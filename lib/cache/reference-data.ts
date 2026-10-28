@@ -66,6 +66,17 @@ export async function getCachedClasses(campaignId: string) {
   )();
 }
 
+export async function getCachedFeats(campaignId: string) {
+  return unstable_cache(
+    async () => prisma.feat.findMany({ where: { campaignId }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
+    [cacheTags.feats(campaignId)],
+    {
+      tags: [cacheTags.feats(campaignId)],
+      revalidate: REFERENCE_REVALIDATE_SECONDS,
+    },
+  )();
+}
+
 export async function getCachedMainSkills(campaignId: string) {
   return unstable_cache(
     async () =>

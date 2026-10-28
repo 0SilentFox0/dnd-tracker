@@ -52,6 +52,7 @@ model Campaign {
   mainSkills      MainSkill[]
   races           Race[]
   classes         GameClass[]
+  feats           Feat[]
   scenarioPages   ScenarioPage[]
   skillTrees      SkillTree[]
   skills          Skill[]
@@ -130,6 +131,8 @@ model Character {
   primaryAbility      String?
   goals               Json                @default("[]")
   classes             Json                @default("[]")
+  feats               Json                @default("[]")
+  raceChoices         Json                @default("{}")
   resources           Json                @default("{}")
   inspiration         Boolean             @default(false)
   hpMultiplier        Float?
@@ -238,6 +241,7 @@ model Spell {
   upcastDice            Int?
   upcastTargets         Int?
   addAbilityMod         Boolean?
+  lists                 Json        @default("[]")
   summonUnitId          String?
   summonUnit            Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
   skills                Skill[]
@@ -581,6 +585,7 @@ model Race {
   updatedAt            DateTime @updatedAt
   spellSlotProgression Json     @default("[]")
   abilities            Json     @default("[]")
+  choices              Json     @default("[]")
   icon                 String?
   color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -608,6 +613,7 @@ model GameClass {
   subclassLevel       Int?
   subclasses          Json     @default("[]")
   columns             Json     @default("[]")
+  spellList           String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   sourceId            String?
@@ -616,6 +622,27 @@ model GameClass {
 
   @@index([campaignId, name])
   @@map("classes")
+}
+
+model Feat {
+  id           String   @id @default(cuid())
+  campaignId   String
+  name         String
+  icon         String?
+  type         String   @default("general")
+  prerequisite Json     @default("{}")
+  repeatable   Boolean  @default(false)
+  description  String?
+  abilities    Json     @default("[]")
+  choices      Json     @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sourceId     String?
+  sourceHash   String?
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, name])
+  @@map("feats")
 }
 
 model MainSkill {

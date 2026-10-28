@@ -51,6 +51,20 @@ export function MagicTab() {
           </div>
         </HudSection>
       )}
+      {sheet.choices && sheet.spells.some((s) => sheet.choices?.spellSources[s.id]) && (
+        <HudSection title="ЗАКЛИНАННЯ З ВИБОРІВ">
+          <ul className="space-y-1 text-sm">
+            {sheet.spells
+              .filter((s) => sheet.choices?.spellSources[s.id])
+              .map((s) => (
+                <li key={s.id} className="flex justify-between gap-2">
+                  <span>{s.name}</span>
+                  <span className="text-xs text-hud-muted">{sheet.choices?.spellSources[s.id]}</span>
+                </li>
+              ))}
+          </ul>
+        </HudSection>
+      )}
       {sheet.spells.length > 0 ? (
         <>
           <Button type="button" className="hud-sc mt-4 h-12 w-full gap-2 bg-[#7a2a1f] text-[#f3e7cc] hover:bg-[#8a3427]" onClick={() => setOpen(true)}>

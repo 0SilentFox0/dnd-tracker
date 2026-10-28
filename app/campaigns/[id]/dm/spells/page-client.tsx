@@ -6,7 +6,7 @@ import { Printer, Wand2 } from "lucide-react";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
-import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
@@ -53,6 +53,15 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
         }
       />
       <OnboardingHint id="dm.spells" />
+      {list.listFilter.tags.length > 0 && (
+        <HudChipTabs
+          ariaLabel="Список заклинань"
+          items={[
+            { key: "all", label: "Усі", active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
+            ...list.listFilter.tags.map((tag) => ({ key: tag, label: tag, active: list.listFilter.value === tag, onSelect: () => list.listFilter.set(tag) })),
+          ]}
+        />
+      )}
 
       {list.isLoading && count === 0 ? (
         <LoadingState rows={6} label="Завантаження заклинань…" />

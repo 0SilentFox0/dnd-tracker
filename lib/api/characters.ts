@@ -10,6 +10,7 @@ import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
 import type { AwardXpBody, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult } from "@/types/characters";
+import type { ChoicesBody } from "@/types/choices";
 import type { ClassLevelUpPick } from "@/types/classes";
 
 export async function getCharacter(
@@ -143,3 +144,5 @@ export const patchResources = (campaignId: string, characterId: string, body: Re
 
 export const getCharacterLog = (campaignId: string, characterId: string, cursor?: string) =>
   campaignGet<{ entries: CharacterLogEntry[]; nextCursor: string | null }>(campaignId, `/characters/${characterId}/log${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`);
+
+export const putCharacterChoices = (campaignId: string, characterId: string, body: ChoicesBody) => campaignPut<Character>(campaignId, `/characters/${characterId}/choices`, body);

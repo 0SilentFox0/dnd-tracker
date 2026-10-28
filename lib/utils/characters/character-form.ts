@@ -77,6 +77,9 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
+    ...((character.raceChoices && Object.keys(character.raceChoices).length > 0) || (character.feats?.length ?? 0) > 0
+      ? { choices: { raceChoices: character.raceChoices ?? {}, feats: character.feats ?? [] } }
+      : {}),
   };
 }
 
@@ -142,5 +145,6 @@ export function formDataToCharacter(
     immunities: formData.roleplay.immunities,
     morale: formData.combatStats.morale,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
+    ...(formData.choices && { raceChoices: formData.choices.raceChoices, feats: formData.choices.feats }),
   };
 }

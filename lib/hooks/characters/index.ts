@@ -1,11 +1,13 @@
+export { useCharacterChoices } from "./useCharacterChoices";
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";
 export { useCharacterGoals } from "./useCharacterGoals";
 export { useCharacterNotes } from "./useCharacterNotes";
 export { useCharacterRoster } from "./useCharacterRoster";
-export { useCharacters, useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "./useCharacters";
+export { useCharacter, useCharacters, useCreateCharacter, useLevelUpCharacter, useUpdateCharacter } from "./useCharacters";
 export { useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterTokens } from "./useCharacterTokens";
+export { type ChoiceRefsView, useChoiceRefs } from "./useChoiceRefs";
 export { useClassLevelUp } from "./useClassLevelUp";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";

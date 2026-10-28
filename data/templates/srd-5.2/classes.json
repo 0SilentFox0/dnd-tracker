@@ -212,23 +212,40 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "primal-knowledge-3",
+            "label": "Primal Knowledge",
+            "description": "You gain proficiency in another skill of your choice from the skill list available to Barbarians at level 1.\n\nIn addition, while your Rage is active, you can channel primal power when you attempt certain tasks; whenever you make an ability check using one of the following skills, you can make it as a Strength check even if it normally uses a different ability: Acrobatics, Intimidation, Perception, Stealth, or Survival. When you use this ability, your Strength represents primal power coursing through you, honing your agility, bearing, and senses.",
+            "level": 3,
+            "count": 1,
+            "kind": "skill",
+            "skills": [
+              "animalHandling",
+              "athletics",
+              "intimidation",
+              "nature",
+              "perception",
+              "survival"
+            ]
+          }
         ]
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -311,19 +328,18 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -383,19 +399,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -440,19 +455,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -497,19 +511,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Irresistible Offense is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -807,25 +821,45 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Bard"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Bard"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
+          }
         ]
       },
       {
         "level": 2,
         "abilities": [
-          {
-            "id": "expertise-2",
-            "name": "Expertise",
-            "description": "You gain Expertise (see \"Rules Glossary\") in two of your skill proficiencies of your choice. Performance and Persuasion are recommended if you have proficiency in them.\n\nAt Bard level 9, you gain Expertise in two more of your skill proficiencies of your choice.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Expertise"
-              }
-            ]
-          },
           {
             "id": "jack-of-all-trades-2",
             "name": "Jack of All Trades",
@@ -839,6 +873,16 @@
                 "text": "Jack of All Trades"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "expertise-2",
+            "label": "Expertise",
+            "description": "You gain Expertise (see \"Rules Glossary\") in two of your skill proficiencies of your choice. Performance and Persuasion are recommended if you have proficiency in them.\n\nAt Bard level 9, you gain Expertise in two more of your skill proficiencies of your choice.",
+            "level": 2,
+            "count": 2,
+            "kind": "expertise"
           }
         ]
       },
@@ -863,19 +907,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Bard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -920,20 +963,32 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Bard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "abilities": [],
+        "choices": [
+          {
+            "id": "expertise-9",
+            "label": "Expertise",
+            "level": 9,
+            "count": 2,
+            "kind": "expertise"
           }
         ]
       },
@@ -958,38 +1013,36 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Bard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Bard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -1015,19 +1068,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Spell Recall is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -1062,20 +1115,6 @@
             "level": 3,
             "abilities": [
               {
-                "id": "bonus-proficiencies-3",
-                "name": "Bonus Proficiencies",
-                "description": "You gain proficiency with three skills of your choice.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
-                  {
-                    "kind": "note",
-                    "text": "Bonus Proficiencies"
-                  }
-                ]
-              },
-              {
                 "id": "cutting-words-3",
                 "name": "Cutting Words",
                 "description": "You learn to use your wit to supernaturally distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of yourself makes a damage roll or succeeds on an ability check or attack roll, you can take a Reaction to expend one use of your Bardic Inspiration; roll your Bardic Inspiration die, and subtract the number rolled from the creature's roll, reducing the damage or potentially turning the success into a failure.",
@@ -1089,24 +1128,38 @@
                   }
                 ]
               }
+            ],
+            "choices": [
+              {
+                "id": "bonus-proficiencies-3",
+                "label": "Bonus Proficiencies",
+                "description": "You gain proficiency with three skills of your choice.",
+                "level": 3,
+                "count": 3,
+                "kind": "skill"
+              }
             ]
           },
           {
             "level": 6,
-            "abilities": [
+            "abilities": [],
+            "choices": [
               {
                 "id": "magical-discoveries-6",
-                "name": "Magical Discoveries",
+                "label": "Magical Discoveries",
                 "description": "You learn two spells of your choice. These spells can come from the Cleric, Druid, or Wizard spell list or any combination thereof (see a class's section for its spell list). A spell you choose must be a cantrip or a spell for which you have spell slots, as shown in the Bard Features table.\n\nYou always have the chosen spells prepared, and whenever you gain a Bard level, you can replace one of the spells with another spell that meets these requirements.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
-                  {
-                    "kind": "note",
-                    "text": "Magical Discoveries"
-                  }
-                ]
+                "level": 6,
+                "count": 2,
+                "kind": "spell",
+                "spells": {
+                  "lists": [
+                    "Cleric",
+                    "Druid",
+                    "Wizard"
+                  ],
+                  "minLevel": 0,
+                  "maxLevel": "slots"
+                }
               }
             ]
           },
@@ -1211,7 +1264,8 @@
           "22"
         ]
       }
-    ]
+    ],
+    "spellList": "Bard"
   },
   {
     "slug": "srd-2024_cleric",
@@ -1247,20 +1301,6 @@
         "level": 1,
         "abilities": [
           {
-            "id": "divine-order-1",
-            "name": "Divine Order",
-            "description": "You have dedicated yourself to one of the following sacred roles of your choice.\n\n**Protector.** Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.\n\n**Thaumaturge.** You know one extra cantrip from the Cleric spell list. In addition, your mystical connection to the divine gives you a bonus to your Intelligence (Arcana or Religion) checks. The bonus equals your Wisdom modifier (minimum of +1).",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Divine Order"
-              }
-            ]
-          },
-          {
             "id": "spellcasting-1",
             "name": "Spellcasting",
             "description": "You have learned to cast spells through prayer and meditation. See \"Spells\" for the rules on spellcasting. The information below details how you use those rules with Cleric spells, which appear on the Cleric spell list later in the class's description.\n\n**Cantrips.** You know three cantrips of your choice from the Cleric spell list. *Guidance*, *Sacred Flame*, and *Thaumaturgy* are recommended.\n\nWhenever you gain a Cleric level, you can replace one of your cantrips with another cantrip of your choice from the Cleric spell list.\n\nWhen you reach Cleric levels 4 and 10, you learn another cantrip of your choice from the Cleric spell list, as shown in the Cantrips column of the Cleric Features table.\n\n**Spell Slots.** The Cleric Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\n\n**Prepared Spells of Level 1+.** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose four level 1 spells from the Cleric spell list. *Bless*, *Cure Wounds*, *Guiding Bolt*, and *Shield of Faith* are recommended.\n\nThe number of spells on your list increases as you gain Cleric levels, as shown in the Prepared Spells column of the Cleric Features table. Whenever that number increases, choose additional spells from the Cleric spell list until the number of spells on your list matches the number on the table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 3 Cleric, your list of prepared spells can include six spells of levels 1 and 2 in any combination.\n\nIf another Cleric feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Cleric spells for you.\n\n**Changing Your Prepared Spells.** Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells there with other Cleric spells for which you have spell slots.\n\n**Spellcasting Ability.** Wisdom is your spellcasting ability for your Cleric spells.\n\n**Spellcasting Focus.** You can use a Holy Symbol as a Spellcasting Focus for your Cleric spells.",
@@ -1273,6 +1313,92 @@
                 "text": "Spellcasting"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "divine-order-1",
+            "label": "Divine Order",
+            "description": "You have dedicated yourself to one of the following sacred roles of your choice.\n\n**Protector.** Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.\n\n**Thaumaturge.** You know one extra cantrip from the Cleric spell list. In addition, your mystical connection to the divine gives you a bonus to your Intelligence (Arcana or Religion) checks. The bonus equals your Wisdom modifier (minimum of +1).",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "options": [
+              {
+                "id": "protector",
+                "name": "Protector",
+                "description": "Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.",
+                "abilities": [
+                  {
+                    "id": "protector",
+                    "name": "Protector",
+                    "description": "Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Protector"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "thaumaturge",
+                "name": "Thaumaturge",
+                "description": "You know one extra cantrip from the Cleric spell list. In addition, your mystical connection to the divine gives you a bonus to your Intelligence (Arcana or Religion) checks. The bonus equals your Wisdom modifier (minimum of +1).",
+                "abilities": [
+                  {
+                    "id": "thaumaturge",
+                    "name": "Thaumaturge",
+                    "description": "You know one extra cantrip from the Cleric spell list. In addition, your mystical connection to the divine gives you a bonus to your Intelligence (Arcana or Religion) checks. The bonus equals your Wisdom modifier (minimum of +1).",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Thaumaturge"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Cleric"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Cleric"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
           }
         ]
       },
@@ -1352,19 +1478,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Cleric levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -1390,18 +1515,63 @@
       },
       {
         "level": 7,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "blessed-strikes-7",
-            "name": "Blessed Strikes",
+            "label": "Blessed Strikes",
             "description": "Divine power infuses you in battle. You gain one of the following options of your choice (if you get either option from a Cleric subclass in an older book, use only the option you choose for this feature).\n\n**Divine Strike.** Once on each of your turns when you hit a creature with an attack roll using a weapon, you can cause the target to take an extra 1d8 Necrotic or Radiant damage (your choice).\n\n**Potent Spellcasting.** Add your Wisdom modifier to the damage you deal with any Cleric cantrip.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
+            "level": 7,
+            "count": 1,
+            "kind": "option",
+            "options": [
               {
-                "kind": "note",
-                "text": "Blessed Strikes"
+                "id": "divine-strike",
+                "name": "Divine Strike",
+                "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon, you can cause the target to take an extra 1d8 Necrotic or Radiant damage (your choice).",
+                "abilities": [
+                  {
+                    "id": "divine-strike",
+                    "name": "Divine Strike",
+                    "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon, you can cause the target to take an extra 1d8 Necrotic or Radiant damage (your choice).",
+                    "trigger": {
+                      "event": "hit",
+                      "role": "attacker"
+                    },
+                    "limits": {
+                      "perTurn": 1
+                    },
+                    "effects": [
+                      {
+                        "kind": "dealDamage",
+                        "amount": "1d8",
+                        "damageType": "radiant",
+                        "target": "eventTarget"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "potent-spellcasting",
+                "name": "Potent Spellcasting",
+                "description": "Add your Wisdom modifier to the damage you deal with any Cleric cantrip.",
+                "abilities": [
+                  {
+                    "id": "potent-spellcasting",
+                    "name": "Potent Spellcasting",
+                    "description": "Add your Wisdom modifier to the damage you deal with any Cleric cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Potent Spellcasting"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -1409,19 +1579,18 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Cleric levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -1447,19 +1616,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Cleric levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -1485,38 +1653,37 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Cleric levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Fate is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -1752,7 +1919,8 @@
           "22"
         ]
       }
-    ]
+    ],
+    "spellList": "Cleric"
   },
   {
     "slug": "srd-2024_druid",
@@ -1807,20 +1975,6 @@
             ]
           },
           {
-            "id": "primal-order-1",
-            "name": "Primal Order",
-            "description": "You have dedicated yourself to one of the following sacred roles of your choice.\n\n**Magician.** You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).\n\n**Warden.** Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Primal Order"
-              }
-            ]
-          },
-          {
             "id": "spellcasting-1",
             "name": "Spellcasting",
             "description": "You have learned to cast spells through studying the mystical forces of nature. See \"Spells\" for the rules on spellcasting. The information below details how you use those rules with Druid spells, which appear on the Druid spell list later in the class's description.\n\n**Cantrips.** You know two cantrips of your choice from the Druid spell list. *Druidcraft* and *Produce Flame* are recommended.\n\nWhenever you gain a Druid level, you can replace one of your cantrips with another cantrip of your choice from the Druid spell list.\n\nWhen you reach Druid levels 4 and 10, you learn another cantrip of your choice from the Druid spell list, as shown in the Cantrips column of the Druid Features table.\n\n**Spell Slots.** The Druid Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\n\n**Prepared Spells of Level 1+.** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose four level 1 spells from the Druid spell list. *Animal Friendship*, *Cure Wounds*, *Faerie Fire*, and *Thunderwave* are recommended.\n\nThe number of spells on your list increases as you gain Druid levels, as shown in the Prepared Spells column of the Druid Features table. Whenever that number increases, choose additional spells from the Druid spell list until the number of spells on your list matches the number on the table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 3 Druid, your list of prepared spells can include six spells of levels 1 and 2 in any combination.\n\nIf another Druid feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Druid spells for you.\n\n**Changing Your Prepared Spells.** Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells with other Druid spells for which you have spell slots.\n\n**Spellcasting Ability.** Wisdom is your spellcasting ability for your Druid spells.\n\n**Spellcasting Focus.** You can use a Druidic Focus as a Spellcasting Focus for your Druid spells.",
@@ -1833,6 +1987,92 @@
                 "text": "Spellcasting"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "primal-order-1",
+            "label": "Primal Order",
+            "description": "You have dedicated yourself to one of the following sacred roles of your choice.\n\n**Magician.** You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).\n\n**Warden.** Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.",
+            "level": 1,
+            "count": 1,
+            "kind": "option",
+            "options": [
+              {
+                "id": "magician",
+                "name": "Magician",
+                "description": "You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).",
+                "abilities": [
+                  {
+                    "id": "magician",
+                    "name": "Magician",
+                    "description": "You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Magician"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warden",
+                "name": "Warden",
+                "description": "Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.",
+                "abilities": [
+                  {
+                    "id": "warden",
+                    "name": "Warden",
+                    "description": "Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Druid"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Druid"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
           }
         ]
       },
@@ -1909,19 +2149,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Druid levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -1947,18 +2186,63 @@
       },
       {
         "level": 7,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "elemental-fury-7",
-            "name": "Elemental Fury",
+            "label": "Elemental Fury",
             "description": "The might of the elements flows through you. You gain one of the following options of your choice.\n\n**Potent Spellcasting.** Add your Wisdom modifier to the damage you deal with any Druid cantrip.\n\n**Primal Strike.** Once on each of your turns when you hit a creature with an attack roll using a weapon or a Beast form's attack in Wild Shape, you can cause the target to take an extra 1d8 Cold, Fire, Lightning, or Thunder damage (choose when you hit).",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
+            "level": 7,
+            "count": 1,
+            "kind": "option",
+            "options": [
               {
-                "kind": "note",
-                "text": "Elemental Fury"
+                "id": "potent-spellcasting",
+                "name": "Potent Spellcasting",
+                "description": "Add your Wisdom modifier to the damage you deal with any Druid cantrip.",
+                "abilities": [
+                  {
+                    "id": "potent-spellcasting",
+                    "name": "Potent Spellcasting",
+                    "description": "Add your Wisdom modifier to the damage you deal with any Druid cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Potent Spellcasting"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "primal-strike",
+                "name": "Primal Strike",
+                "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon or a Beast form's attack in Wild Shape, you can cause the target to take an extra 1d8 Cold, Fire, Lightning, or Thunder damage (choose when you hit).",
+                "abilities": [
+                  {
+                    "id": "primal-strike",
+                    "name": "Primal Strike",
+                    "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon or a Beast form's attack in Wild Shape, you can cause the target to take an extra 1d8 Cold, Fire, Lightning, or Thunder damage (choose when you hit).",
+                    "trigger": {
+                      "event": "hit",
+                      "role": "attacker"
+                    },
+                    "limits": {
+                      "perTurn": 1
+                    },
+                    "effects": [
+                      {
+                        "kind": "dealDamage",
+                        "amount": "1d8",
+                        "damageType": "fire",
+                        "target": "eventTarget"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -1966,38 +2250,36 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Druid levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Druid levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2023,19 +2305,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Druid levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2061,19 +2342,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -2265,7 +2546,8 @@
           "4"
         ]
       }
-    ]
+    ],
+    "spellList": "Druid"
   },
   {
     "slug": "srd-2024_fighter",
@@ -2304,20 +2586,6 @@
       {
         "level": 1,
         "abilities": [
-          {
-            "id": "fighting-style-1",
-            "name": "Fighting Style",
-            "description": "You have honed your martial prowess and gain a Fighting Style feat of your choice (see \"Feats\"). Defense is recommended.\n\nWhenever you gain a Fighter level, you can replace the feat you chose with a different Fighting Style feat.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Fighting Style"
-              }
-            ]
-          },
           {
             "id": "second-wind-1",
             "name": "Second Wind",
@@ -2360,6 +2628,19 @@
                 "kind": "note",
                 "text": "Weapon Mastery"
               }
+            ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "fighting-style-1",
+            "label": "Fighting Style",
+            "description": "You have honed your martial prowess and gain a Fighting Style feat of your choice (see \"Feats\"). Defense is recommended.\n\nWhenever you gain a Fighter level, you can replace the feat you chose with a different Fighting Style feat.",
+            "level": 1,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "fightingStyle"
             ]
           }
         ]
@@ -2426,19 +2707,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2479,38 +2759,36 @@
       },
       {
         "level": 6,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-6",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 6,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2570,19 +2848,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2622,38 +2899,36 @@
       },
       {
         "level": 14,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-14",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 14,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -2679,19 +2954,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Combat Prowess is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -2762,19 +3037,17 @@
           },
           {
             "level": 7,
-            "abilities": [
+            "abilities": [],
+            "choices": [
               {
                 "id": "additional-fighting-style-7",
-                "name": "Additional Fighting Style",
+                "label": "Additional Fighting Style",
                 "description": "You gain another Fighting Style feat of your choice.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
-                  {
-                    "kind": "note",
-                    "text": "Additional Fighting Style"
-                  }
+                "level": 7,
+                "count": 1,
+                "kind": "feat",
+                "featTypes": [
+                  "fightingStyle"
                 ]
               }
             ]
@@ -3199,20 +3472,6 @@
         "level": 4,
         "abilities": [
           {
-            "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
-            "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
-            ]
-          },
-          {
             "id": "slow-fall-4",
             "name": "Slow Fall",
             "description": "You can take a Reaction when you fall to reduce any damage you take from the fall by an amount equal to five times your Monk level.",
@@ -3224,6 +3483,20 @@
                 "kind": "note",
                 "text": "Slow Fall"
               }
+            ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "ability-score-improvement-4",
+            "label": "Ability Score Improvement",
+            "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.",
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -3302,19 +3575,18 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -3373,19 +3645,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -3457,19 +3728,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -3605,19 +3875,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Irresistible Offense is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -3912,25 +4182,29 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Paladin"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
+          }
         ]
       },
       {
         "level": 2,
         "abilities": [
-          {
-            "id": "fighting-style-2",
-            "name": "Fighting Style",
-            "description": "You gain a Fighting Style feat of your choice (see \"Feats\" for feats). Instead of choosing one of those feats, you can choose the option below.\n\n**Blessed Warrior.** You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). *Guidance* and *Sacred Flame* are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Fighting Style"
-              }
-            ]
-          },
           {
             "id": "paladins-smite-2",
             "name": "Paladin's Smite",
@@ -3942,6 +4216,42 @@
               {
                 "kind": "note",
                 "text": "Paladin's Smite"
+              }
+            ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "fighting-style-2",
+            "label": "Fighting Style",
+            "description": "You gain a Fighting Style feat of your choice (see \"Feats\" for feats). Instead of choosing one of those feats, you can choose the option below.\n\n**Blessed Warrior.** You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). *Guidance* and *Sacred Flame* are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.",
+            "level": 2,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "fightingStyle"
+            ],
+            "options": [
+              {
+                "id": "blessed-warrior",
+                "name": "Blessed Warrior",
+                "description": "You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). *Guidance* and *Sacred Flame* are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.",
+                "abilities": [
+                  {
+                    "id": "blessed-warrior",
+                    "name": "Blessed Warrior",
+                    "description": "You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). *Guidance* and *Sacred Flame* are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Blessed Warrior"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -3988,19 +4298,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4064,19 +4373,18 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4148,19 +4456,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4186,19 +4493,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4224,19 +4530,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Truesight is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -4443,7 +4749,8 @@
           "15"
         ]
       }
-    ]
+    ],
+    "spellList": "Paladin"
   },
   {
     "slug": "srd-2024_ranger",
@@ -4523,6 +4830,24 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Ranger"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
+          }
         ]
       },
       {
@@ -4541,18 +4866,48 @@
                 "text": "Deft Explorer"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "deft-explorer-2",
+            "label": "Deft Explorer",
+            "description": "Thanks to your travels, you gain the following benefits.\n\n**Expertise.** Choose one of your skill proficiencies with which you lack Expertise. You gain Expertise in that skill.\n\n**Languages.** You know two languages of your choice from the language tables in \"Character Creation.\"",
+            "level": 2,
+            "count": 1,
+            "kind": "expertise"
           },
           {
             "id": "fighting-style-2",
-            "name": "Fighting Style",
+            "label": "Fighting Style",
             "description": "You gain a Fighting Style feat of your choice (see \"Feats\"). Instead of choosing one of those feats, you can choose the option below.\n\n**Druidic Warrior.** You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). *Guidance* and *Starry Wisp* are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
+            "level": 2,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "fightingStyle"
+            ],
+            "options": [
               {
-                "kind": "note",
-                "text": "Fighting Style"
+                "id": "druidic-warrior",
+                "name": "Druidic Warrior",
+                "description": "You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). *Guidance* and *Starry Wisp* are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.",
+                "abilities": [
+                  {
+                    "id": "druidic-warrior",
+                    "name": "Druidic Warrior",
+                    "description": "You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). *Guidance* and *Starry Wisp* are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Druidic Warrior"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -4579,19 +4934,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4638,39 +4992,33 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 9,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "expertise-9",
-            "name": "Expertise",
+            "label": "Expertise",
             "description": "Choose two of your skill proficiencies with which you lack Expertise. You gain Expertise in those skills.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Expertise"
-              }
-            ]
+            "level": 9,
+            "count": 2,
+            "kind": "expertise"
           }
         ]
       },
@@ -4695,19 +5043,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4752,19 +5099,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -4809,19 +5155,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -4868,18 +5214,68 @@
                     "text": "Hunter's Lore"
                   }
                 ]
-              },
+              }
+            ],
+            "choices": [
               {
                 "id": "hunters-prey-3",
-                "name": "Hunter's Prey",
+                "label": "Hunter's Prey",
                 "description": "You gain one of the following feature options of your choice. Whenever you finish a Short or Long Rest, you can replace the chosen option with the other one.\n\n**Colossus Slayer.** Your tenacity can wear down even the most resilient foes. When you hit a creature with a weapon, the weapon deals an extra 1d8 damage to the target if it's missing any of its Hit Points. You can deal this extra damage only once per turn.\n\n**Horde Breaker.** Once on each of your turns when you make an attack with a weapon, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target, that is within the weapon's range, and that you haven't attacked this turn.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
+                "level": 3,
+                "count": 1,
+                "kind": "option",
+                "options": [
                   {
-                    "kind": "note",
-                    "text": "Hunter's Prey"
+                    "id": "colossus-slayer",
+                    "name": "Colossus Slayer",
+                    "description": "Your tenacity can wear down even the most resilient foes. When you hit a creature with a weapon, the weapon deals an extra 1d8 damage to the target if it's missing any of its Hit Points. You can deal this extra damage only once per turn.",
+                    "abilities": [
+                      {
+                        "id": "colossus-slayer",
+                        "name": "Colossus Slayer",
+                        "description": "Your tenacity can wear down even the most resilient foes. When you hit a creature with a weapon, the weapon deals an extra 1d8 damage to the target if it's missing any of its Hit Points. You can deal this extra damage only once per turn.",
+                        "trigger": {
+                          "event": "hit",
+                          "role": "attacker"
+                        },
+                        "condition": {
+                          "type": "hpBelow",
+                          "who": "eventTarget",
+                          "percent": 100
+                        },
+                        "limits": {
+                          "perTurn": 1
+                        },
+                        "effects": [
+                          {
+                            "kind": "dealDamage",
+                            "amount": "1d8",
+                            "target": "eventTarget"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "horde-breaker",
+                    "name": "Horde Breaker",
+                    "description": "Once on each of your turns when you make an attack with a weapon, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target, that is within the weapon's range, and that you haven't attacked this turn.",
+                    "abilities": [
+                      {
+                        "id": "horde-breaker",
+                        "name": "Horde Breaker",
+                        "description": "Once on each of your turns when you make an attack with a weapon, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target, that is within the weapon's range, and that you haven't attacked this turn.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "note",
+                            "text": "Horde Breaker"
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -4887,18 +5283,57 @@
           },
           {
             "level": 7,
-            "abilities": [
+            "abilities": [],
+            "choices": [
               {
                 "id": "defensive-tactics-7",
-                "name": "Defensive Tactics",
+                "label": "Defensive Tactics",
                 "description": "You gain one of the following feature options of your choice. Whenever you finish a Short or Long Rest, you can replace the chosen option with the other one.\n\n**Escape the Horde.** Opportunity Attacks have Disadvantage against you.\n\n**Multiattack Defense.** When a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you this turn.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
+                "level": 7,
+                "count": 1,
+                "kind": "option",
+                "options": [
                   {
-                    "kind": "note",
-                    "text": "Defensive Tactics"
+                    "id": "escape-the-horde",
+                    "name": "Escape the Horde",
+                    "description": "Opportunity Attacks have Disadvantage against you.",
+                    "abilities": [
+                      {
+                        "id": "escape-the-horde",
+                        "name": "Escape the Horde",
+                        "description": "Opportunity Attacks have Disadvantage against you.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "note",
+                            "text": "Escape the Horde"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "multiattack-defense",
+                    "name": "Multiattack Defense",
+                    "description": "When a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you this turn.",
+                    "abilities": [
+                      {
+                        "id": "multiattack-defense",
+                        "name": "Multiattack Defense",
+                        "description": "When a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you this turn.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "note",
+                            "text": "Multiattack Defense"
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -4998,7 +5433,8 @@
           "15"
         ]
       }
-    ]
+    ],
+    "spellList": "Ranger"
   },
   {
     "slug": "srd-2024_rogue",
@@ -5041,20 +5477,6 @@
       {
         "level": 1,
         "abilities": [
-          {
-            "id": "expertise-1",
-            "name": "Expertise",
-            "description": "You gain Expertise in two of your skill proficiencies of your choice. Sleight of Hand and Stealth are recommended if you have proficiency in them.\n\nAt Rogue level 6, you gain Expertise in two more of your skill proficiencies of your choice.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Expertise"
-              }
-            ]
-          },
           {
             "id": "sneak-attack-1",
             "name": "Sneak Attack",
@@ -5128,6 +5550,16 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "expertise-1",
+            "label": "Expertise",
+            "description": "You gain Expertise in two of your skill proficiencies of your choice. Sleight of Hand and Stealth are recommended if you have proficiency in them.\n\nAt Rogue level 6, you gain Expertise in two more of your skill proficiencies of your choice.",
+            "level": 1,
+            "count": 2,
+            "kind": "expertise"
+          }
         ]
       },
       {
@@ -5184,19 +5616,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -5244,20 +5675,15 @@
       },
       {
         "level": 6,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "expertise-6",
-            "name": "Expertise",
+            "label": "Expertise",
             "description": "You gain Expertise in two of your skill proficiencies of your choice. Sleight of Hand and Stealth are recommended if you have proficiency in them.\n\nAt Rogue level 6, you gain Expertise in two more of your skill proficiencies of your choice.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Expertise"
-              }
-            ]
+            "level": 6,
+            "count": 2,
+            "kind": "expertise"
           }
         ]
       },
@@ -5296,38 +5722,36 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 10,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-10",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 10,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -5353,19 +5777,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -5414,19 +5837,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -5452,19 +5874,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of the Night Spirit is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -5687,6 +6109,40 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Sorcerer"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Sorcerer"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
+          }
         ]
       },
       {
@@ -5712,32 +6168,207 @@
                 "target": "self"
               }
             ]
-          },
+          }
+        ],
+        "choices": [
           {
-            "id": "metamagic-2",
-            "name": "Metamagic",
+            "id": "metamagic",
+            "label": "Metamagic",
             "description": "Because your magic flows from within, you can alter your spells to suit your needs; you gain two Metamagic options of your choice from \"Metamagic Options\" later in this class's description. You use the chosen options to temporarily modify spells you cast. To use an option, you must spend the number of Sorcery Points that it costs.\n\nYou can use only one Metamagic option on a spell when you cast it unless otherwise noted in one of those options.\n\nWhenever you gain a Sorcerer level, you can replace one of your Metamagic options with one you don't know. You gain two more options at Sorcerer level 10 and two more at Sorcerer level 17.",
-            "trigger": {
-              "event": "passive"
+            "level": 2,
+            "count": {
+              "scale": "metamagic"
             },
-            "effects": [
+            "kind": "option",
+            "options": [
               {
-                "kind": "note",
-                "text": "Metamagic"
-              }
-            ]
-          },
-          {
-            "id": "metamagic-options-2",
-            "name": "Metamagic Options",
-            "description": "The following options are available to your Metamagic feature. The options are presented in alphabetical order.\n\n### Careful Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, spend 1 Sorcery Point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell, and it takes no damage if it would normally take half damage on a successful save.\n\n### Distant Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a range of at least 5 feet, you can spend 1 Sorcery Point to double the spell's range. Or when you cast a spell that has a range of Touch, you can spend 1 Sorcery Point to make the spell's range 30 feet.\n\n### Empowered Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you roll damage for a spell, you can spend 1 Sorcery Point to reroll a number of the damage dice up to your Charisma modifier (minimum of one), and you must use the new rolls. You can use Empowered Spell even if you've already used a different Metamagic option during the casting of the spell.\n\n### Extended Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a duration of 1 minute or longer, you can spend 1 Sorcery Point to double its duration to a maximum duration of 24 hours. If the affected spell requires Concentration, you have Advantage on any saving throw you make to maintain that Concentration.\n\n### Heightened Spell\n\n*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that forces a creature to make a saving throw, you can spend 2 Sorcery Points to give one target of the spell Disadvantage on saves against the spell.\n\n### Quickened Spell\n\n*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that has a casting time of an action, you can spend 2 Sorcery Points to change the casting time to a Bonus Action for this casting. You can't modify a spell in this way if you've already cast a level 1+ spell on the current turn, nor can you cast a level 1+ spell on this turn after modifying a spell in this way.\n\n### Seeking Spell\n\n*Cost: 1 Sorcery Point*\n\nIf you make an attack roll for a spell and miss, you can spend 1 Sorcery Point to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you've already used a different Metamagic option during the casting of the spell.\n\n Subtle Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, you can spend 1 Sorcery Point to cast it without any Verbal, Somatic, or Material components, except Material components that are consumed by the spell or that have a cost specified in the spell.\n\n### Transmuted Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that deals a type of damage from the following list, you can spend 1 Sorcery Point to change that damage type to one of the other listed types: Acid, Cold, Fire, Lightning, Poison, Thunder.\n\n### Twinned Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, such as *Charm Person*, that can be cast with a higher-level spell slot to target an additional creature, you can spend 1 Sorcery Point to increase the spell's effective level by 1.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
+                "id": "careful-spell",
+                "name": "Careful Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, spend 1 Sorcery Point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell, and it takes no damage if it would normally take half damage on a successful save.",
+                "abilities": [
+                  {
+                    "id": "careful-spell",
+                    "name": "Careful Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, spend 1 Sorcery Point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell, and it takes no damage if it would normally take half damage on a successful save.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Careful Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
               {
-                "kind": "note",
-                "text": "Metamagic Options"
+                "id": "distant-spell",
+                "name": "Distant Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a range of at least 5 feet, you can spend 1 Sorcery Point to double the spell's range. Or when you cast a spell that has a range of Touch, you can spend 1 Sorcery Point to make the spell's range 30 feet.",
+                "abilities": [
+                  {
+                    "id": "distant-spell",
+                    "name": "Distant Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a range of at least 5 feet, you can spend 1 Sorcery Point to double the spell's range. Or when you cast a spell that has a range of Touch, you can spend 1 Sorcery Point to make the spell's range 30 feet.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Distant Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "empowered-spell",
+                "name": "Empowered Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you roll damage for a spell, you can spend 1 Sorcery Point to reroll a number of the damage dice up to your Charisma modifier (minimum of one), and you must use the new rolls. You can use Empowered Spell even if you've already used a different Metamagic option during the casting of the spell.",
+                "abilities": [
+                  {
+                    "id": "empowered-spell",
+                    "name": "Empowered Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you roll damage for a spell, you can spend 1 Sorcery Point to reroll a number of the damage dice up to your Charisma modifier (minimum of one), and you must use the new rolls. You can use Empowered Spell even if you've already used a different Metamagic option during the casting of the spell.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Empowered Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "extended-spell",
+                "name": "Extended Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a duration of 1 minute or longer, you can spend 1 Sorcery Point to double its duration to a maximum duration of 24 hours. If the affected spell requires Concentration, you have Advantage on any saving throw you make to maintain that Concentration.",
+                "abilities": [
+                  {
+                    "id": "extended-spell",
+                    "name": "Extended Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that has a duration of 1 minute or longer, you can spend 1 Sorcery Point to double its duration to a maximum duration of 24 hours. If the affected spell requires Concentration, you have Advantage on any saving throw you make to maintain that Concentration.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Extended Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "heightened-spell",
+                "name": "Heightened Spell",
+                "description": "*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that forces a creature to make a saving throw, you can spend 2 Sorcery Points to give one target of the spell Disadvantage on saves against the spell.",
+                "abilities": [
+                  {
+                    "id": "heightened-spell",
+                    "name": "Heightened Spell",
+                    "description": "*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that forces a creature to make a saving throw, you can spend 2 Sorcery Points to give one target of the spell Disadvantage on saves against the spell.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Heightened Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quickened-spell",
+                "name": "Quickened Spell",
+                "description": "*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that has a casting time of an action, you can spend 2 Sorcery Points to change the casting time to a Bonus Action for this casting. You can't modify a spell in this way if you've already cast a level 1+ spell on the current turn, nor can you cast a level 1+ spell on this turn after modifying a spell in this way.",
+                "abilities": [
+                  {
+                    "id": "quickened-spell",
+                    "name": "Quickened Spell",
+                    "description": "*Cost: 2 Sorcery Points*\n\nWhen you cast a spell that has a casting time of an action, you can spend 2 Sorcery Points to change the casting time to a Bonus Action for this casting. You can't modify a spell in this way if you've already cast a level 1+ spell on the current turn, nor can you cast a level 1+ spell on this turn after modifying a spell in this way.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quickened Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "seeking-spell",
+                "name": "Seeking Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nIf you make an attack roll for a spell and miss, you can spend 1 Sorcery Point to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you've already used a different Metamagic option during the casting of the spell.\n\n Subtle Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, you can spend 1 Sorcery Point to cast it without any Verbal, Somatic, or Material components, except Material components that are consumed by the spell or that have a cost specified in the spell.",
+                "abilities": [
+                  {
+                    "id": "seeking-spell",
+                    "name": "Seeking Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nIf you make an attack roll for a spell and miss, you can spend 1 Sorcery Point to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you've already used a different Metamagic option during the casting of the spell.\n\n Subtle Spell\n\n*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, you can spend 1 Sorcery Point to cast it without any Verbal, Somatic, or Material components, except Material components that are consumed by the spell or that have a cost specified in the spell.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Seeking Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "transmuted-spell",
+                "name": "Transmuted Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that deals a type of damage from the following list, you can spend 1 Sorcery Point to change that damage type to one of the other listed types: Acid, Cold, Fire, Lightning, Poison, Thunder.",
+                "abilities": [
+                  {
+                    "id": "transmuted-spell",
+                    "name": "Transmuted Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell that deals a type of damage from the following list, you can spend 1 Sorcery Point to change that damage type to one of the other listed types: Acid, Cold, Fire, Lightning, Poison, Thunder.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Transmuted Spell"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "twinned-spell",
+                "name": "Twinned Spell",
+                "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, such as *Charm Person*, that can be cast with a higher-level spell slot to target an additional creature, you can spend 1 Sorcery Point to increase the spell's effective level by 1.",
+                "abilities": [
+                  {
+                    "id": "twinned-spell",
+                    "name": "Twinned Spell",
+                    "description": "*Cost: 1 Sorcery Point*\n\nWhen you cast a spell, such as *Charm Person*, that can be cast with a higher-level spell slot to target an additional creature, you can spend 1 Sorcery Point to increase the spell's effective level by 1.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Twinned Spell"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -5764,19 +6395,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -5821,95 +6451,77 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 10,
-        "abilities": [
-          {
-            "id": "metamagic-10",
-            "name": "Metamagic",
-            "description": "Because your magic flows from within, you can alter your spells to suit your needs; you gain two Metamagic options of your choice from \"Metamagic Options\" later in this class's description. You use the chosen options to temporarily modify spells you cast. To use an option, you must spend the number of Sorcery Points that it costs.\n\nYou can use only one Metamagic option on a spell when you cast it unless otherwise noted in one of those options.\n\nWhenever you gain a Sorcerer level, you can replace one of your Metamagic options with one you don't know. You gain two more options at Sorcerer level 10 and two more at Sorcerer level 17.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Metamagic"
-              }
-            ]
-          }
-        ]
+        "abilities": []
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -6001,18 +6613,125 @@
           },
           {
             "level": 6,
-            "abilities": [
+            "abilities": [],
+            "choices": [
               {
                 "id": "elemental-affinity-6",
-                "name": "Elemental Affinity",
+                "label": "Elemental Affinity",
                 "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
+                "level": 6,
+                "count": 1,
+                "kind": "option",
+                "options": [
                   {
-                    "kind": "note",
-                    "text": "Elemental Affinity"
+                    "id": "acid",
+                    "name": "Acid",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Acid)",
+                        "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "acid",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "cold",
+                    "name": "Cold",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Cold)",
+                        "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "cold",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "fire",
+                    "name": "Fire",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Fire)",
+                        "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "fire",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "lightning",
+                    "name": "Lightning",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Lightning)",
+                        "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "lightning",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "poison",
+                    "name": "Poison",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Poison)",
+                        "description": "Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.\n\nYou have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "poison",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -6087,6 +6806,32 @@
         ]
       },
       {
+        "key": "metamagic",
+        "label": "Metamagic",
+        "values": [
+          "",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "2",
+          "4",
+          "4",
+          "4",
+          "4",
+          "4",
+          "4",
+          "4",
+          "6",
+          "6",
+          "6",
+          "6"
+        ]
+      },
+      {
         "key": "prepared-spells",
         "label": "Prepared Spells",
         "values": [
@@ -6141,7 +6886,8 @@
           "rest": "long"
         }
       }
-    ]
+    ],
+    "spellList": "Sorcerer"
   },
   {
     "slug": "srd-2024_warlock",
@@ -6179,34 +6925,6 @@
         "level": 1,
         "abilities": [
           {
-            "id": "eldritch-invocation-options-1",
-            "name": "Eldritch Invocation Options",
-            "description": "Eldritch Invocation options appear in alphabetical order.\n\n### Agonizing Blast\n\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage*\n\nChoose one of your known Warlock cantrips that deals damage. You can add your Charisma modifier to that spell's damage rolls.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\n\n### Armor of Shadows\n\nYou can cast *Mage Armor* on yourself without expending a spell slot.\n\n### Ascendant Step\n\n*Prerequisite: Level 5+ Warlock*\n\nYou can cast *Levitate* on yourself without expending a spell slot.\n\n### Devil's Sight\n\n*Prerequisite: Level 2+ Warlock*\n\nYou can see normally in Dim Light and Darkness both magical and nonmagical—within 120 feet of yourself.\n\n### Devouring Blade\n\n*Prerequisite: Level 12+ Warlock, Thirsting Blade Invocation*\n\nThe Extra Attack of your Thirsting Blade invocation confers two extra attacks rather than one.\n\n### Eldritch Mind\n\nYou have Advantage on Constitution saving throws that you make to maintain Concentration.\n\n### Eldritch Smite\n\n*Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation*\n\nOnce per turn when you hit a creature with your pact weapon, you can expend a Pact Magic spell slot to deal an extra 1d8 Force damage to the target, plus another 1d8 per level of the spell slot, and you can give the target the Prone condition if it is Huge or smaller.\n\n### Eldritch Spear\n\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage*\n\nChoose one of your known Warlock cantrips that deals damage and has a range of 10+ feet. When you cast that spell, its range increases by a number of feet equal to 30 times your Warlock level.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\n\n### Fiendish Vigor\n\n*Prerequisite: Level 2+ Warlock*\n\nYou can cast *False Life* on yourself without expending a spell slot. When you cast the spell with this feature, you don't roll the die for the Temporary Hit Points; you automatically get the highest number on the die.\n\n### Gaze of Two Minds\n\n*Prerequisite: Level 5+ Warlock*\n\nYou can use a Bonus Action to touch a willing creature and perceive through its senses until the end of your next turn. As long as the creature is on the same plane of existence as you, you can take a Bonus Action on subsequent turns to maintain this connection, extending the duration until the end of your next turn. The connection ends if you don't maintain it in this way.\n\nWhile perceiving through the other creature's senses, you benefit from any special senses possessed by that creature, and you can cast spells as if you were in your space or the other creature's space if the two of you are within 60 feet of each other.\n\n### Gift of the Depths\n\n*Prerequisite: Level 5+ Warlock*\n\nYou can breathe underwater, and you gain a Swim Speed equal to your Speed.\n\nYou can also cast *Water Breathing* once without expending a spell slot. You regain the ability to cast it in this way again when you finish a Long Rest.\n\n### Gift of the Protectors\n\n*Prerequisite: Level 9+ Warlock, Pact of the Tome Invocation*\n\nA new page appears in your *Book of Shadows* when you conjure it. With your permission, a creature can take an action to write its name on that page, which can contain a number of names equal to your Charisma modifier (minimum of one name).\n\nWhen any creature whose name is on the page is reduced to 0 Hit Points but not killed outright, the creature magically drops to 1 Hit Point instead. Once this magic is triggered, no creature can benefit from it until you finish a Long Rest.\n\nAs a Magic action, you can erase a name on the page by touching it.\n\n### Investment of the Chain Master\n\n*Prerequisite: Level 5+ Warlock, Pact of the Chain Invocation*\n\nWhen you cast *Find Familiar*, you infuse the summoned familiar with a measure of your eldritch power, granting the creature the following benefits.\n\n**Aerial or Aquatic.** The familiar gains either a Fly Speed or a Swim Speed (your choice) of 40 feet.\n\n**Quick Attack.** As a Bonus Action, you can command the familiar to take the Attack action.\n\n**Necrotic or Radiant Damage.** Whenever the familiar deals Bludgeoning, Piercing, or Slashing damage, you can make it deal Necrotic or Radiant damage instead.\n\n**Your Save DC.** If the familiar forces a creature to make a saving throw, it uses your spell save DC.\n\n**Resistance.** When the familiar takes damage, you can take a Reaction to grant it Resistance against that damage.\n\n### **Lessons of the First Ones**\n\n*Prerequisite: Level 2+ Warlock*\n\nYou have received knowledge from an elder entity of the multiverse, allowing you to gain one Origin feat of your choice (see \"Feats\").\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different Origin feat.\n\n### Lifedrinker\n\n*Prerequisite: Level 9+ Warlock, Pact of the Blade Invocation*\n\nOnce per turn when you hit a creature with your pact weapon, you can deal an extra 1d6 Necrotic, Psychic, or Radiant damage (your choice) to the creature, and you can expend one of your Hit Point Dice to roll it and regain a number of Hit Points equal to the roll plus your Constitution modifier (minimum of 1 Hit Point).\n\n### Mask of Many Faces\n\n*Prerequisite: Level 2+ Warlock*\n\nYou can cast *Disguise Self* without expending a spell slot.\n\n### Master of Myriad Forms\n\n*Prerequisite: Level 5+ Warlock*\n\nYou can cast *Alter Self* without expending a spell slot.\n\n### Misty Visions\n\n*Prerequisite: Level 2+ Warlock*\n\nYou can cast *Silent Image* without expending a spell slot.\n\n### One with Shadows\n\n*Prerequisite: Level 5+ Warlock*\n\nWhile you're in an area of Dim Light or Darkness, you can cast *Invisibility* on yourself without expending a spell slot.\n\n### Otherworldly Leap\n\n*Prerequisite: Level 2+ Warlock*\n\nYou can cast *Jump* on yourself without expending a spell slot.\n\n### Pact of the Blade\n\nAs a Bonus Action, you can conjure a pact weapon in your hand—a Simple or Martial Melee weapon of your choice with which you bond—or create a bond with a magic weapon you touch; you can't bond with a magic weapon if someone else is attuned to it or another Warlock is bonded with it. Until the bond ends, you have proficiency with the weapon, and you can use it as a Spellcasting Focus.\n\nWhenever you attack with the bonded weapon, you can use your Charisma modifier for the attack and damage rolls instead of using Strength or Dexterity; and you can cause the weapon to deal Necrotic, Psychic, or Radiant damage or its normal damage type.\n\nYour bond with the weapon ends if you use this feature's Bonus Action again, if the weapon is more than 5 feet away from you for 1 minute or more, or if you die. A conjured weapon disappears when the bond ends.\n\n### Pact of the Chain\n\nYou learn the *Find Familiar* spell and can cast it as a Magic action without expending a spell slot.\n\nWhen you cast the spell, you choose one of the normal forms for your familiar or one of the following special forms: **Imp, Pseudodragon, Quasit, Skeleton, Sphinx of Wonder, Sprite,** or **Venomous Snake** (see \"Monsters\" for the familiar's stat block).\n\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its Reaction.\n\n### Pact of the Tome\n\nStitching together strands of shadow, you conjure forth a book in your hand at the end of a Short or Long Rest. This *Book of Shadows* (you determine its appearance) contains eldritch magic that only you can access, granting you the benefits below. The book disappears if you conjure another book with this feature or if you die.\n\n**Cantrips and Rituals.** When the book appears, choose three cantrips, and choose two level 1 spells that have the Ritual tag. The spells can be from any class's spell list, and they must be spells you don't already have prepared. While the book is on your person, you have the chosen spells prepared, and they function as Warlock spells for you.\n\n**Spellcasting Focus.** You can use the book as a Spellcasting Focus.\n\n### Repelling Blast\n\n*Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage via an Attack Roll*\n\nChoose one of your known Warlock cantrips that requires an attack roll. When you hit a Large or smaller creature with that cantrip, you can push the creature up to 10 feet straight away from you.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.\n\n### Thirsting Blade\n\n*Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation*\n\nYou gain the Extra Attack feature for your pact weapon only. With that feature, you can attack twice with the weapon instead of once when you take the Attack action on your turn.\n\n### Visions of Distant Realms\n\n*Prerequisite: Level 9+ Warlock*\n\nYou can cast *Arcane Eye* without expending a spell slot.\n\n### Whispers of the Grave\n\n*Prerequisite: Level 7+ Warlock*\n\nYou can cast *Speak with Dead* without expending a spell slot.\n\n### Witch Sight\n\n*Prerequisite: Level 15+ Warlock*\n\nYou have Truesight with a range of 30 feet.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Eldritch Invocation Options"
-              }
-            ]
-          },
-          {
-            "id": "eldritch-invocations-1",
-            "name": "Eldritch Invocations",
-            "description": "You have unearthed Eldritch Invocations, pieces of forbidden knowledge that imbue you with an abiding magical ability or other lessons. You gain one invocation of your choice, such as Pact of the Tome. Invocations are described in the \"Eldritch Invocation Options\" section later in this class's description.\n\n**Prerequisites.** If an invocation has a prerequisite, you must meet it to learn that invocation. For example, if an invocation requires you to be a level 5+ Warlock, you can select the invocation once you reach Warlock level 5.\n\n**Replacing and Gaining Invocations.** Whenever you gain a Warlock level, you can replace one of your invocations with another one for which you qualify. You can't replace an invocation if it's a prerequisite for another invocation that you have.\n\nWhen you gain certain Warlock levels, you gain more invocations of your choice, as shown in the Invocations column of the Warlock Features table.\n\nYou can't pick the same invocation more than once unless its description says otherwise.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Eldritch Invocations"
-              }
-            ]
-          },
-          {
             "id": "pact-magic-1",
             "name": "Pact Magic",
             "description": "Through occult ceremony, you have formed a pact with a mysterious entity to gain magical powers. The entity is a voice in the shadows—its identity unclear—but its boon to you is concrete: the ability to cast spells. See \"Spells\" for the rules on spellcasting. The information below details how you use those rules with Warlock spells, which appear in the Warlock spell list later in the class's description.\n\n**Cantrips.** You know two Warlock cantrips of your choice. *Eldritch Blast* and *Prestidigitation* are recommended. Whenever you gain a Warlock level, you can replace one of your cantrips from this feature with another Warlock cantrip of your choice.\n\nWhen you reach Warlock levels 4 and 10, you learn another Warlock cantrip of your choice, as shown in the Cantrips column of the Warlock Features table.\n\n**Spell Slots.** The Warlock Features table shows how many spell slots you have to cast your Warlock spells of levels 1–5. The table also shows the level of those slots, all of which are the same level. You regain all expended Pact Magic spell slots when you finish a Short or Long Rest.\n\nFor example, when you're a level 5 Warlock, you have two level 3 spell slots. To cast the level 1 spell *Charm Person*, you must spend one of those slots, and you cast it as a level 3 spell.\n\n**Prepared Spells of Level 1+.** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Warlock spells. *Charm Person* and *Hex* are recommended.\n\nThe number of spells on your list increases as you gain Warlock levels, as shown in the Prepared Spells column of the Warlock Features table. Whenever that number increases, choose additional Warlock spells until the number of spells on your list matches the number in the table. The chosen spells must be of a level no higher than what's shown in the table's Slot Level column for your level. When you reach level 6, for example, you learn a new Warlock spell, which can be of levels 1–3.\n\nIf another Warlock feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Warlock spells for you.\n\n**Changing Your Prepared Spells.** Whenever you gain a Warlock level, you can replace one spell on your list with another Warlock spell of an eligible level.\n\n**Spellcasting Ability.** Charisma is the spellcasting ability for your Warlock spells.\n\n**Spellcasting Focus.** You can use an Arcane Focus as a Spellcasting Focus for your Warlock spells.",
@@ -6219,6 +6937,685 @@
                 "text": "Pact Magic"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "eldritch-invocations",
+            "label": "Eldritch Invocations",
+            "description": "You have unearthed Eldritch Invocations, pieces of forbidden knowledge that imbue you with an abiding magical ability or other lessons. You gain one invocation of your choice, such as Pact of the Tome. Invocations are described in the \"Eldritch Invocation Options\" section later in this class's description.\n\n**Prerequisites.** If an invocation has a prerequisite, you must meet it to learn that invocation. For example, if an invocation requires you to be a level 5+ Warlock, you can select the invocation once you reach Warlock level 5.\n\n**Replacing and Gaining Invocations.** Whenever you gain a Warlock level, you can replace one of your invocations with another one for which you qualify. You can't replace an invocation if it's a prerequisite for another invocation that you have.\n\nWhen you gain certain Warlock levels, you gain more invocations of your choice, as shown in the Invocations column of the Warlock Features table.\n\nYou can't pick the same invocation more than once unless its description says otherwise.",
+            "level": 1,
+            "count": {
+              "scale": "eldritch-invocation-count"
+            },
+            "kind": "option",
+            "options": [
+              {
+                "id": "agonizing-blast",
+                "name": "Agonizing Blast",
+                "description": "Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage\n\nChoose one of your known Warlock cantrips that deals damage. You can add your Charisma modifier to that spell's damage rolls.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "agonizing-blast",
+                    "name": "Agonizing Blast",
+                    "description": "Choose one of your known Warlock cantrips that deals damage. You can add your Charisma modifier to that spell's damage rolls.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Agonizing Blast"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "armor-of-shadows",
+                "name": "Armor of Shadows",
+                "description": "You can cast *Mage Armor* on yourself without expending a spell slot.",
+                "abilities": [
+                  {
+                    "id": "armor-of-shadows",
+                    "name": "Armor of Shadows",
+                    "description": "You can cast *Mage Armor* on yourself without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Armor of Shadows"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "ascendant-step",
+                "name": "Ascendant Step",
+                "description": "Prerequisite: Level 5+ Warlock\n\nYou can cast *Levitate* on yourself without expending a spell slot.",
+                "minLevel": 5,
+                "abilities": [
+                  {
+                    "id": "ascendant-step",
+                    "name": "Ascendant Step",
+                    "description": "You can cast *Levitate* on yourself without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Ascendant Step"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "devil-s-sight",
+                "name": "Devil's Sight",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou can see normally in Dim Light and Darkness both magical and nonmagical—within 120 feet of yourself.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "devil-s-sight",
+                    "name": "Devil's Sight",
+                    "description": "You can see normally in Dim Light and Darkness both magical and nonmagical—within 120 feet of yourself.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Devil's Sight"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "devouring-blade",
+                "name": "Devouring Blade",
+                "description": "Prerequisite: Level 12+ Warlock, Thirsting Blade Invocation\n\nThe Extra Attack of your Thirsting Blade invocation confers two extra attacks rather than one.",
+                "minLevel": 12,
+                "requires": [
+                  "thirsting-blade"
+                ],
+                "abilities": [
+                  {
+                    "id": "devouring-blade",
+                    "name": "Devouring Blade",
+                    "description": "The Extra Attack of your Thirsting Blade invocation confers two extra attacks rather than one.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Devouring Blade"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "eldritch-mind",
+                "name": "Eldritch Mind",
+                "description": "You have Advantage on Constitution saving throws that you make to maintain Concentration.",
+                "abilities": [
+                  {
+                    "id": "eldritch-mind",
+                    "name": "Eldritch Mind",
+                    "description": "You have Advantage on Constitution saving throws that you make to maintain Concentration.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "flag",
+                        "flag": "saveAdvantage",
+                        "abilities": [
+                          "constitution"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "eldritch-smite",
+                "name": "Eldritch Smite",
+                "description": "Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation\n\nOnce per turn when you hit a creature with your pact weapon, you can expend a Pact Magic spell slot to deal an extra 1d8 Force damage to the target, plus another 1d8 per level of the spell slot, and you can give the target the Prone condition if it is Huge or smaller.",
+                "minLevel": 5,
+                "requires": [
+                  "pact-of-the-blade"
+                ],
+                "abilities": [
+                  {
+                    "id": "eldritch-smite",
+                    "name": "Eldritch Smite",
+                    "description": "Once per turn when you hit a creature with your pact weapon, you can expend a Pact Magic spell slot to deal an extra 1d8 Force damage to the target, plus another 1d8 per level of the spell slot, and you can give the target the Prone condition if it is Huge or smaller.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Eldritch Smite"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "eldritch-spear",
+                "name": "Eldritch Spear",
+                "description": "Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage\n\nChoose one of your known Warlock cantrips that deals damage and has a range of 10+ feet. When you cast that spell, its range increases by a number of feet equal to 30 times your Warlock level.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "eldritch-spear",
+                    "name": "Eldritch Spear",
+                    "description": "Choose one of your known Warlock cantrips that deals damage and has a range of 10+ feet. When you cast that spell, its range increases by a number of feet equal to 30 times your Warlock level.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Eldritch Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "fiendish-vigor",
+                "name": "Fiendish Vigor",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou can cast *False Life* on yourself without expending a spell slot. When you cast the spell with this feature, you don't roll the die for the Temporary Hit Points; you automatically get the highest number on the die.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "fiendish-vigor",
+                    "name": "Fiendish Vigor",
+                    "description": "You can cast *False Life* on yourself without expending a spell slot. When you cast the spell with this feature, you don't roll the die for the Temporary Hit Points; you automatically get the highest number on the die.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Fiendish Vigor"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "gaze-of-two-minds",
+                "name": "Gaze of Two Minds",
+                "description": "Prerequisite: Level 5+ Warlock\n\nYou can use a Bonus Action to touch a willing creature and perceive through its senses until the end of your next turn. As long as the creature is on the same plane of existence as you, you can take a Bonus Action on subsequent turns to maintain this connection, extending the duration until the end of your next turn. The connection ends if you don't maintain it in this way.\n\nWhile perceiving through the other creature's senses, you benefit from any special senses possessed by that creature, and you can cast spells as if you were in your space or the other creature's space if the two of you are within 60 feet of each other.",
+                "minLevel": 5,
+                "abilities": [
+                  {
+                    "id": "gaze-of-two-minds",
+                    "name": "Gaze of Two Minds",
+                    "description": "You can use a Bonus Action to touch a willing creature and perceive through its senses until the end of your next turn. As long as the creature is on the same plane of existence as you, you can take a Bonus Action on subsequent turns to maintain this connection, extending the duration until the end of your next turn. The connection ends if you don't maintain it in this way.\n\nWhile perceiving through the other creature's senses, you benefit from any special senses possessed by that creature, and you can cast spells as if you were in your space or the other creature's space if the two of you are within 60 feet of each other.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Gaze of Two Minds"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "gift-of-the-depths",
+                "name": "Gift of the Depths",
+                "description": "Prerequisite: Level 5+ Warlock\n\nYou can breathe underwater, and you gain a Swim Speed equal to your Speed.\n\nYou can also cast *Water Breathing* once without expending a spell slot. You regain the ability to cast it in this way again when you finish a Long Rest.",
+                "minLevel": 5,
+                "abilities": [
+                  {
+                    "id": "gift-of-the-depths",
+                    "name": "Gift of the Depths",
+                    "description": "You can breathe underwater, and you gain a Swim Speed equal to your Speed.\n\nYou can also cast *Water Breathing* once without expending a spell slot. You regain the ability to cast it in this way again when you finish a Long Rest.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Gift of the Depths"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "gift-of-the-protectors",
+                "name": "Gift of the Protectors",
+                "description": "Prerequisite: Level 9+ Warlock, Pact of the Tome Invocation\n\nA new page appears in your *Book of Shadows* when you conjure it. With your permission, a creature can take an action to write its name on that page, which can contain a number of names equal to your Charisma modifier (minimum of one name).\n\nWhen any creature whose name is on the page is reduced to 0 Hit Points but not killed outright, the creature magically drops to 1 Hit Point instead. Once this magic is triggered, no creature can benefit from it until you finish a Long Rest.\n\nAs a Magic action, you can erase a name on the page by touching it.",
+                "minLevel": 9,
+                "requires": [
+                  "pact-of-the-tome"
+                ],
+                "abilities": [
+                  {
+                    "id": "gift-of-the-protectors",
+                    "name": "Gift of the Protectors",
+                    "description": "A new page appears in your *Book of Shadows* when you conjure it. With your permission, a creature can take an action to write its name on that page, which can contain a number of names equal to your Charisma modifier (minimum of one name).\n\nWhen any creature whose name is on the page is reduced to 0 Hit Points but not killed outright, the creature magically drops to 1 Hit Point instead. Once this magic is triggered, no creature can benefit from it until you finish a Long Rest.\n\nAs a Magic action, you can erase a name on the page by touching it.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Gift of the Protectors"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "investment-of-the-chain-master",
+                "name": "Investment of the Chain Master",
+                "description": "Prerequisite: Level 5+ Warlock, Pact of the Chain Invocation\n\nWhen you cast *Find Familiar*, you infuse the summoned familiar with a measure of your eldritch power, granting the creature the following benefits.\n\n**Aerial or Aquatic.** The familiar gains either a Fly Speed or a Swim Speed (your choice) of 40 feet.\n\n**Quick Attack.** As a Bonus Action, you can command the familiar to take the Attack action.\n\n**Necrotic or Radiant Damage.** Whenever the familiar deals Bludgeoning, Piercing, or Slashing damage, you can make it deal Necrotic or Radiant damage instead.\n\n**Your Save DC.** If the familiar forces a creature to make a saving throw, it uses your spell save DC.\n\n**Resistance.** When the familiar takes damage, you can take a Reaction to grant it Resistance against that damage.",
+                "minLevel": 5,
+                "requires": [
+                  "pact-of-the-chain"
+                ],
+                "abilities": [
+                  {
+                    "id": "investment-of-the-chain-master",
+                    "name": "Investment of the Chain Master",
+                    "description": "When you cast *Find Familiar*, you infuse the summoned familiar with a measure of your eldritch power, granting the creature the following benefits.\n\n**Aerial or Aquatic.** The familiar gains either a Fly Speed or a Swim Speed (your choice) of 40 feet.\n\n**Quick Attack.** As a Bonus Action, you can command the familiar to take the Attack action.\n\n**Necrotic or Radiant Damage.** Whenever the familiar deals Bludgeoning, Piercing, or Slashing damage, you can make it deal Necrotic or Radiant damage instead.\n\n**Your Save DC.** If the familiar forces a creature to make a saving throw, it uses your spell save DC.\n\n**Resistance.** When the familiar takes damage, you can take a Reaction to grant it Resistance against that damage.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Investment of the Chain Master"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lessons-of-the-first-ones",
+                "name": "Lessons of the First Ones",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou have received knowledge from an elder entity of the multiverse, allowing you to gain one Origin feat of your choice (see \"Feats\").\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different Origin feat.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "lessons-of-the-first-ones",
+                    "name": "Lessons of the First Ones",
+                    "description": "You have received knowledge from an elder entity of the multiverse, allowing you to gain one Origin feat of your choice (see \"Feats\").\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different Origin feat.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lessons of the First Ones"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lifedrinker",
+                "name": "Lifedrinker",
+                "description": "Prerequisite: Level 9+ Warlock, Pact of the Blade Invocation\n\nOnce per turn when you hit a creature with your pact weapon, you can deal an extra 1d6 Necrotic, Psychic, or Radiant damage (your choice) to the creature, and you can expend one of your Hit Point Dice to roll it and regain a number of Hit Points equal to the roll plus your Constitution modifier (minimum of 1 Hit Point).",
+                "minLevel": 9,
+                "requires": [
+                  "pact-of-the-blade"
+                ],
+                "abilities": [
+                  {
+                    "id": "lifedrinker",
+                    "name": "Lifedrinker",
+                    "description": "Once per turn when you hit a creature with your pact weapon, you can deal an extra 1d6 Necrotic, Psychic, or Radiant damage (your choice) to the creature, and you can expend one of your Hit Point Dice to roll it and regain a number of Hit Points equal to the roll plus your Constitution modifier (minimum of 1 Hit Point).",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lifedrinker"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mask-of-many-faces",
+                "name": "Mask of Many Faces",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou can cast *Disguise Self* without expending a spell slot.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "mask-of-many-faces",
+                    "name": "Mask of Many Faces",
+                    "description": "You can cast *Disguise Self* without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mask of Many Faces"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "master-of-myriad-forms",
+                "name": "Master of Myriad Forms",
+                "description": "Prerequisite: Level 5+ Warlock\n\nYou can cast *Alter Self* without expending a spell slot.",
+                "minLevel": 5,
+                "abilities": [
+                  {
+                    "id": "master-of-myriad-forms",
+                    "name": "Master of Myriad Forms",
+                    "description": "You can cast *Alter Self* without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Master of Myriad Forms"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "misty-visions",
+                "name": "Misty Visions",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou can cast *Silent Image* without expending a spell slot.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "misty-visions",
+                    "name": "Misty Visions",
+                    "description": "You can cast *Silent Image* without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Misty Visions"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "one-with-shadows",
+                "name": "One with Shadows",
+                "description": "Prerequisite: Level 5+ Warlock\n\nWhile you're in an area of Dim Light or Darkness, you can cast *Invisibility* on yourself without expending a spell slot.",
+                "minLevel": 5,
+                "abilities": [
+                  {
+                    "id": "one-with-shadows",
+                    "name": "One with Shadows",
+                    "description": "While you're in an area of Dim Light or Darkness, you can cast *Invisibility* on yourself without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "One with Shadows"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "otherworldly-leap",
+                "name": "Otherworldly Leap",
+                "description": "Prerequisite: Level 2+ Warlock\n\nYou can cast *Jump* on yourself without expending a spell slot.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "otherworldly-leap",
+                    "name": "Otherworldly Leap",
+                    "description": "You can cast *Jump* on yourself without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Otherworldly Leap"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pact-of-the-blade",
+                "name": "Pact of the Blade",
+                "description": "As a Bonus Action, you can conjure a pact weapon in your hand—a Simple or Martial Melee weapon of your choice with which you bond—or create a bond with a magic weapon you touch; you can't bond with a magic weapon if someone else is attuned to it or another Warlock is bonded with it. Until the bond ends, you have proficiency with the weapon, and you can use it as a Spellcasting Focus.\n\nWhenever you attack with the bonded weapon, you can use your Charisma modifier for the attack and damage rolls instead of using Strength or Dexterity; and you can cause the weapon to deal Necrotic, Psychic, or Radiant damage or its normal damage type.\n\nYour bond with the weapon ends if you use this feature's Bonus Action again, if the weapon is more than 5 feet away from you for 1 minute or more, or if you die. A conjured weapon disappears when the bond ends.",
+                "abilities": [
+                  {
+                    "id": "pact-of-the-blade",
+                    "name": "Pact of the Blade",
+                    "description": "As a Bonus Action, you can conjure a pact weapon in your hand—a Simple or Martial Melee weapon of your choice with which you bond—or create a bond with a magic weapon you touch; you can't bond with a magic weapon if someone else is attuned to it or another Warlock is bonded with it. Until the bond ends, you have proficiency with the weapon, and you can use it as a Spellcasting Focus.\n\nWhenever you attack with the bonded weapon, you can use your Charisma modifier for the attack and damage rolls instead of using Strength or Dexterity; and you can cause the weapon to deal Necrotic, Psychic, or Radiant damage or its normal damage type.\n\nYour bond with the weapon ends if you use this feature's Bonus Action again, if the weapon is more than 5 feet away from you for 1 minute or more, or if you die. A conjured weapon disappears when the bond ends.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pact of the Blade"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pact-of-the-chain",
+                "name": "Pact of the Chain",
+                "description": "You learn the *Find Familiar* spell and can cast it as a Magic action without expending a spell slot.\n\nWhen you cast the spell, you choose one of the normal forms for your familiar or one of the following special forms: **Imp, Pseudodragon, Quasit, Skeleton, Sphinx of Wonder, Sprite,** or **Venomous Snake** (see \"Monsters\" for the familiar's stat block).\n\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its Reaction.",
+                "abilities": [
+                  {
+                    "id": "pact-of-the-chain",
+                    "name": "Pact of the Chain",
+                    "description": "You learn the *Find Familiar* spell and can cast it as a Magic action without expending a spell slot.\n\nWhen you cast the spell, you choose one of the normal forms for your familiar or one of the following special forms: **Imp, Pseudodragon, Quasit, Skeleton, Sphinx of Wonder, Sprite,** or **Venomous Snake** (see \"Monsters\" for the familiar's stat block).\n\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its Reaction.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pact of the Chain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pact-of-the-tome",
+                "name": "Pact of the Tome",
+                "description": "Stitching together strands of shadow, you conjure forth a book in your hand at the end of a Short or Long Rest. This *Book of Shadows* (you determine its appearance) contains eldritch magic that only you can access, granting you the benefits below. The book disappears if you conjure another book with this feature or if you die.\n\n**Cantrips and Rituals.** When the book appears, choose three cantrips, and choose two level 1 spells that have the Ritual tag. The spells can be from any class's spell list, and they must be spells you don't already have prepared. While the book is on your person, you have the chosen spells prepared, and they function as Warlock spells for you.\n\n**Spellcasting Focus.** You can use the book as a Spellcasting Focus.",
+                "abilities": [
+                  {
+                    "id": "pact-of-the-tome",
+                    "name": "Pact of the Tome",
+                    "description": "Stitching together strands of shadow, you conjure forth a book in your hand at the end of a Short or Long Rest. This *Book of Shadows* (you determine its appearance) contains eldritch magic that only you can access, granting you the benefits below. The book disappears if you conjure another book with this feature or if you die.\n\n**Cantrips and Rituals.** When the book appears, choose three cantrips, and choose two level 1 spells that have the Ritual tag. The spells can be from any class's spell list, and they must be spells you don't already have prepared. While the book is on your person, you have the chosen spells prepared, and they function as Warlock spells for you.\n\n**Spellcasting Focus.** You can use the book as a Spellcasting Focus.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pact of the Tome"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "repelling-blast",
+                "name": "Repelling Blast",
+                "description": "Prerequisite: Level 2+ Warlock, a Warlock Cantrip That Deals Damage via an Attack Roll\n\nChoose one of your known Warlock cantrips that requires an attack roll. When you hit a Large or smaller creature with that cantrip, you can push the creature up to 10 feet straight away from you.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                "minLevel": 2,
+                "abilities": [
+                  {
+                    "id": "repelling-blast",
+                    "name": "Repelling Blast",
+                    "description": "Choose one of your known Warlock cantrips that requires an attack roll. When you hit a Large or smaller creature with that cantrip, you can push the creature up to 10 feet straight away from you.\n\n**Repeatable.** You can gain this invocation more than once. Each time you do so, choose a different eligible cantrip.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Repelling Blast"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "thirsting-blade",
+                "name": "Thirsting Blade",
+                "description": "Prerequisite: Level 5+ Warlock, Pact of the Blade Invocation\n\nYou gain the Extra Attack feature for your pact weapon only. With that feature, you can attack twice with the weapon instead of once when you take the Attack action on your turn.",
+                "minLevel": 5,
+                "requires": [
+                  "pact-of-the-blade"
+                ],
+                "abilities": [
+                  {
+                    "id": "thirsting-blade",
+                    "name": "Thirsting Blade",
+                    "description": "You gain the Extra Attack feature for your pact weapon only. With that feature, you can attack twice with the weapon instead of once when you take the Attack action on your turn.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "modifyStat",
+                        "stat": "attacksPerAction",
+                        "flat": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "visions-of-distant-realms",
+                "name": "Visions of Distant Realms",
+                "description": "Prerequisite: Level 9+ Warlock\n\nYou can cast *Arcane Eye* without expending a spell slot.",
+                "minLevel": 9,
+                "abilities": [
+                  {
+                    "id": "visions-of-distant-realms",
+                    "name": "Visions of Distant Realms",
+                    "description": "You can cast *Arcane Eye* without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Visions of Distant Realms"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whispers-of-the-grave",
+                "name": "Whispers of the Grave",
+                "description": "Prerequisite: Level 7+ Warlock\n\nYou can cast *Speak with Dead* without expending a spell slot.",
+                "minLevel": 7,
+                "abilities": [
+                  {
+                    "id": "whispers-of-the-grave",
+                    "name": "Whispers of the Grave",
+                    "description": "You can cast *Speak with Dead* without expending a spell slot.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whispers of the Grave"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "witch-sight",
+                "name": "Witch Sight",
+                "description": "Prerequisite: Level 15+ Warlock\n\nYou have Truesight with a range of 30 feet.",
+                "minLevel": 15,
+                "abilities": [
+                  {
+                    "id": "witch-sight",
+                    "name": "Witch Sight",
+                    "description": "You have Truesight with a range of 30 feet.",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Witch Sight"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
           }
         ]
       },
@@ -6262,38 +7659,36 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -6338,19 +7733,18 @@
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -6395,19 +7789,18 @@
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Warlock levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -6433,19 +7826,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Fate is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -6530,18 +7923,279 @@
           },
           {
             "level": 10,
-            "abilities": [
+            "abilities": [],
+            "choices": [
               {
                 "id": "fiendish-resilience-10",
-                "name": "Fiendish Resilience",
+                "label": "Fiendish Resilience",
                 "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
-                "trigger": {
-                  "event": "passive"
-                },
-                "effects": [
+                "level": 10,
+                "count": 1,
+                "kind": "option",
+                "options": [
                   {
-                    "kind": "note",
-                    "text": "Fiendish Resilience"
+                    "id": "acid",
+                    "name": "Acid",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Acid)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "acid",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "bludgeoning",
+                    "name": "Bludgeoning",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Bludgeoning)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "bludgeoning",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "cold",
+                    "name": "Cold",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Cold)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "cold",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "fire",
+                    "name": "Fire",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Fire)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "fire",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "lightning",
+                    "name": "Lightning",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Lightning)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "lightning",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "necrotic",
+                    "name": "Necrotic",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Necrotic)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "necrotic",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "piercing",
+                    "name": "Piercing",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Piercing)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "piercing",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "poison",
+                    "name": "Poison",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Poison)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "poison",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "psychic",
+                    "name": "Psychic",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Psychic)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "psychic",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "radiant",
+                    "name": "Radiant",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Radiant)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "radiant",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "slashing",
+                    "name": "Slashing",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Slashing)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "slashing",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "thunder",
+                    "name": "Thunder",
+                    "abilities": [
+                      {
+                        "id": "resistance",
+                        "name": "Resistance (Thunder)",
+                        "description": "Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You have Resistance to that damage type until you choose a different one with this feature.",
+                        "trigger": {
+                          "event": "passive"
+                        },
+                        "effects": [
+                          {
+                            "kind": "flag",
+                            "flag": "resistance",
+                            "damageType": "thunder",
+                            "percent": 50
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -6648,7 +8302,8 @@
           "15"
         ]
       }
-    ]
+    ],
+    "spellList": "Warlock"
   },
   {
     "slug": "srd-2024_wizard",
@@ -6725,23 +8380,60 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "cantrips",
+            "label": "Cantrips",
+            "level": 1,
+            "count": {
+              "scale": "cantrips"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Wizard"
+              ],
+              "minLevel": 0,
+              "maxLevel": 0
+            }
+          },
+          {
+            "id": "prepared-spells",
+            "label": "Prepared Spells",
+            "level": 1,
+            "count": {
+              "scale": "prepared-spells"
+            },
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Wizard"
+              ],
+              "minLevel": 1,
+              "maxLevel": "slots"
+            }
+          }
         ]
       },
       {
         "level": 2,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "scholar-2",
-            "name": "Scholar",
+            "label": "Scholar",
             "description": "While studying magic, you also specialized in another field of study. Choose one of the following skills in which you have proficiency: Arcana, History, Investigation, Medicine, Nature, or Religion. You have Expertise in the chosen skill.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Scholar"
-              }
+            "level": 2,
+            "count": 1,
+            "kind": "expertise",
+            "skills": [
+              "arcana",
+              "history",
+              "investigation",
+              "medicine",
+              "nature",
+              "religion"
             ]
           }
         ]
@@ -6767,19 +8459,18 @@
       },
       {
         "level": 4,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-4",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Wizard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 4,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -6805,57 +8496,54 @@
       },
       {
         "level": 8,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-8",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Wizard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 8,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 12,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-12",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Wizard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 12,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
       },
       {
         "level": 16,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "ability-score-improvement-16",
-            "name": "Ability Score Improvement",
+            "label": "Ability Score Improvement",
             "description": "You gain the Ability Score Improvement feat (see \"Feats\") or another feat of your choice for which you qualify. You gain this feature again at Wizard levels 8, 12, and 16.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Ability Score Improvement"
-              }
+            "level": 16,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general"
             ]
           }
         ]
@@ -6881,19 +8569,19 @@
       },
       {
         "level": 19,
-        "abilities": [
+        "abilities": [],
+        "choices": [
           {
             "id": "epic-boon-19",
-            "name": "Epic Boon",
+            "label": "Epic Boon",
             "description": "You gain an Epic Boon feat (see \"Feats\") or another feat of your choice for which you qualify. Boon of Spell Recall is recommended.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Epic Boon"
-              }
+            "level": 19,
+            "count": 1,
+            "kind": "feat",
+            "featTypes": [
+              "origin",
+              "general",
+              "epicBoon"
             ]
           }
         ]
@@ -7076,6 +8764,7 @@
           "25"
         ]
       }
-    ]
+    ],
+    "spellList": "Wizard"
   }
 ]

@@ -76,6 +76,40 @@ function resolveRefs(record: ImportRecord, fields: readonly ImportField[], refs:
   }
 }
 
+function resolveNestedRefs(record: ImportRecord, fields: readonly ImportField[], refs: Map<ImportKind, NameIndex>, issues: ImportIssue[]) {
+  for (const field of fields) {
+    const nested = field.nestedRef;
+
+    const value = record[field.key];
+
+    if (!nested || value === undefined) continue;
+
+    const index = refs.get(nested.kind);
+
+    const kindLabel = IMPORT_SPECS[nested.kind].label;
+
+    const walk = (v: unknown): unknown => {
+      if (Array.isArray(v)) return v.map(walk);
+
+      if (!isRecord(v)) return v;
+
+      return Object.fromEntries(
+        Object.entries(v).map(([k, x]) => {
+          if (k !== nested.key || typeof x !== "string") return [k, walk(x)];
+
+          const id = index?.ids.has(x) ? x : index?.byName.get(nameKey(x))?.[0];
+
+          if (!id) issues.push({ field: field.key, level: "error", message: `${field.label}: не знайдено «${x}» (${kindLabel})` });
+
+          return [k, id ?? x];
+        }),
+      );
+    };
+
+    record[field.key] = walk(value);
+  }
+}
+
 function zodIssues(error: { issues: Array<{ path: PropertyKey[]; message: string }> }): ImportIssue[] {
   return error.issues.map((i) => err(i.message, i.path.map(String).join(".") || undefined));
 }
@@ -110,6 +144,8 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
   if (matches.length > 1) issues.push({ level: "warning", message: `Кілька записів «${name}» — оновлено перший` });
 
   resolveRefs(record, ctx.spec.fields, ctx.refs, issues, op);
+
+  resolveNestedRefs(record, ctx.spec.fields, ctx.refs, issues);
 
   if (hasError(issues)) return { row, name, status: "error", issues };
 

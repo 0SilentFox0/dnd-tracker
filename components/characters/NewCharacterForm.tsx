@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,13 +10,16 @@ import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "@/components/charac
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { CharacterChoicesTab } from "@/components/choices/CharacterChoicesTab";
 import { HudForm, HudFormPage, HudSection, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
-import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
+import type { ChoiceRefsView } from "@/lib/hooks/characters";
+import { useCharacterForm, useChoiceRefs, useCreateCharacter } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
+import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
 
 export function NewCharacterForm({ campaignId: id, characterType }: { campaignId: string; characterType: CharacterTypeValue }) {
   const router = useRouter();
@@ -28,21 +32,34 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   const classMode = useClassMode(id);
 
+  const refsRef = useRef<ChoiceRefsView | null>(null);
+
   const {
     status: { isLoading, error },
+    formData,
     basicInfo,
     abilityScores,
     combatStats,
     skills,
     abilities,
-    actions: { handleSubmit },
+    actions: { handleSubmit, setFormData },
   } = useCharacterForm({
     type: characterType,
     onSubmit: async (data) => {
-      await create.mutateAsync(data);
+      await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
       router.push(`/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`);
     },
   });
+
+  const refs = useChoiceRefs(id, basicInfo.data.race);
+
+  useEffect(() => {
+    refsRef.current = refs;
+  }, [refs]);
+
+  const raceHasChoices = (races.find((r) => r.name === basicInfo.data.race)?.choices?.length ?? 0) > 0;
+
+  const heroClassMode = classMode.enabled && (basicInfo.data.classes ?? []).some((e) => e.classId);
 
   const tabs: HudTab<CharacterFormTabId>[] = [
     {
@@ -76,6 +93,9 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
         </>
       ),
     },
+    ...(raceHasChoices || heroClassMode
+      ? [{ id: CHARACTER_FORM_TAB.choices, label: "Вибори", content: <CharacterChoicesTab campaignId={id} form={{ data: formData, set: setFormData }} classesEnabled={classMode.enabled} /> }]
+      : []),
   ];
 
   return (

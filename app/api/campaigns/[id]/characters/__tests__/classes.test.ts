@@ -13,7 +13,13 @@ vi.mock("@/lib/cache/reference-data", () => ({
   ]),
 }));
 vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async () => ({ ok: true, avatar: undefined })) }));
-vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() }, race: { findFirst: vi.fn(async () => null) } } }));
+vi.mock("@/lib/db", () => {
+  const prisma: Record<string, unknown> = { $queryRaw: vi.fn(async () => []), character: { findUnique: vi.fn(), update: vi.fn() }, race: { findFirst: vi.fn(async () => null) } };
+
+  prisma.$transaction = vi.fn(async (fn: (tx: unknown) => unknown) => fn(prisma));
+
+  return { prisma };
+});
 
 const campaign = (classesEnabled: boolean) => ({ id: "camp", maxLevel: 20, allowPlayerEdit: true, rules: { ...DEFAULT_RULES, classes: { enabled: classesEnabled } } });
 

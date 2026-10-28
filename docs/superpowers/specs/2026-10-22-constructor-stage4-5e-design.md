@@ -29,8 +29,8 @@
 | **4f-1. Конвеєр і базовий шаблон SRD** | Конвертер Open5e (SRD 5.2) → файли даних у репо → `importContent` → офіційний шаблон «5e SRD 5.2»; `campaigns.credits` (атрибуція CC-BY); заклинання, монстри, зброя, щит, раси, класи в межах наявних моделей; запасні значки шкіл; `assets:attach`. **Детально нижче.** |
 | **4f-2. Броня 5e і числа класів** | Модель броні (база КЗ, ліміт Спр, вимога Сили, перешкода скритності); значення вмінь, що ростуть з рівнем класу (Лють, Підступна атака, кубик Натхнення, очки ці/чаклунства) → ~40 частково механізованих умінь (за дизайном — 34; решта потребує механізмів 4f-4/4f-5). **Детально нижче.** |
 | **4f-3. Магічні предмети** | Артефакт-властивість + базовий предмет (вибір зброї/броні при видачі), неунікальне спорядження, налаштування (≤ 3), заряди з відновленням на відпочинку, витратні предмети; 248 унікальних + 32 властивості SRD (з 513 варіантів). **Детально нижче.** |
-| 4f-4. Вибір при створенні й рівні | Лінії рас (Ельф, Гном, Тифлінг, Драконороджений, Голіаф), тип контенту «Риси» (17 SRD), вибір умінь класу на рівні (стиль бою, метамагія, закляття, експертиза), фільтр заклинань за класом |
-| 4f-5. Монстри повністю | Подих і дії з рятівним як пов'язані заклинання/вміння (186), заклинання монстрів (`knownSpells`), легендарні дії з посиланням на атаку, чуття, мови, режими руху, механізм дій лігва |
+| **4f-4. Вибір при створенні й рівні** | Спільна модель «вибір N з набору» (опції, риси, навички, експертиза, характеристики, заклинання) для рас, класів і рис; лінії рас (Ельф, Гном, Тифлінг, Драконороджений, Голіаф — 24 опції), тип контенту «Риси» (17 SRD, ASI з межею 20), ~100 виборів класів (ASI/Epic Boon, стиль бою, метамагія, закляття, експертиза), списки заклинань тегами й фільтр за класом. **Детально нижче.** |
+| 4f-5. Монстри повністю | Подих і дії з рятівним як пов'язані заклинання/вміння (186), заклинання монстрів (`knownSpells`), легендарні дії з посиланням на атаку, чуття, мови, режими руху, механізм дій лігва; з 4f-3/4f-4: заклинання з предметів і безкоштовний каст без слота (лінії, Magic Initiate, Mystic Arcanum), вибір параметра предмета при видачі (тип опору, велетня, дракона), умови за типом істоти, Breath Weapon драконороджених |
 
 Порядок 4a → 4e → 4f-0 → 4f-1 → 4f-5 (рішення користувача 2026-10-22: максимальний обсяг SRD з розширеннями рушія); після 4f-5 — етап 6 (AI), потім злиття.
 
@@ -1063,7 +1063,7 @@ ItemStats = {
 
 ### 9. Поза обсягом 4f-3
 
-Заклинання з предметів (Wand of Magic Missiles, посохи, Spell Scroll; каст із пулу зарядів без слота, власний або фіксований СК) — **4f-5** разом із заклинаннями монстрів; вибір параметра при видачі (тип опору, тип велетня, дракона) — **4f-4** разом з іншими виборами; кидок відновлення зарядів і знищення на останньому заряді; умови за типом істоти («проти Undead/Giant»); перемикачі предметів бонусною дією (запалити Flame Tongue, Boots of Speed — райдер діє завжди); вартість і вага; набої як ресурс; прокляття; спорядження з `Item.json` поза зброєю/бронею/зіллями лікування; примірники з власним станом (`character_items`); AI-контекст предметів (`ai/tools/party.ts`).
+Заклинання з предметів (Wand of Magic Missiles, посохи, Spell Scroll; каст із пулу зарядів без слота, власний або фіксований СК) — **4f-5** разом із заклинаннями монстрів; вибір параметра при видачі (тип опору, тип велетня, дракона) — ~~4f-4~~ **4f-5** (рішення 4f-4 §9); кидок відновлення зарядів і знищення на останньому заряді; умови за типом істоти («проти Undead/Giant»); перемикачі предметів бонусною дією (запалити Flame Tongue, Boots of Speed — райдер діє завжди); вартість і вага; набої як ресурс; прокляття; спорядження з `Item.json` поза зброєю/бронею/зіллями лікування; примірники з власним станом (`character_items`); AI-контекст предметів (`ai/tools/party.ts`).
 
 ### 10. Перевірка 4f-3
 
@@ -1076,6 +1076,175 @@ ItemStats = {
 ### 11. Обсяг плану (орієнтовно 16 задач)
 
 1 секція `rules.items` (схема, реєстр, вкладка, хеш); 2 модель `item` і `damageBonus` (схема, `modifiers`, ресурс, імпорт/експорт, OpenAPI); 3 `lib/utils/items/` — ref, `matchesAppliesTo`, `composeItemRow`, `resolveItemRows`, `activeItemRefs`; 4 ref-орієнтований `findHolder`, дублікати неунікальних, довідник; 5 переведення всіх читачів `equipped`/`stash` на `resolveItemRows` (бій, атаки, друга рука, сети, сховище, ростер, передача); 6 міграція `attuned`, дії `grant` з базою/кількістю і `attune`/`unattune`, зняття при передачі; 7 пул предмета (`pool:item:<ref>`, `battleData.pools`, ресурси, проблеми редактора); 8 витратні (`SpecialItem.artifactId`, пул кількості, списання в `saveBattle`); 9 рушій: `damageBonus`, `attackSourceId` + `withThisItem`, `critImmunity`, `atLeast`; 10 ДМ-правка зарядів і лист; 11 UI форми артефакта й бібліотеки; 12 UI діалогу видачі з кроком «База»; 13 UI сховища/сітки/бою (налаштування, заряди, носіння); 14 конвертер властивостей і звичайного спорядження; 15 конвертер унікальних (слоти, бази, заряди, витратні, регулярки, зілля лікування); 16 цілісність, регенерація даних, перезаливка шаблону, документи й живий прогін. Більше — у 4f-4/4f-5 (§9).
+
+## 4f-4. Дизайн: вибір при створенні й рівні
+
+Розвідка (2026-10-23):
+- **Персонаж.** `Character.race` — назва раси (не id), `subrace`/`background` — вільний текст (`background` насправді біографія). `Character.classes [{ classId, subclassId?, level }]` змінює лише ДМ; `level-up` у режимі класів приймає `{ classId, subclassId? }` (`class-level-up.ts`) і випадкове «+1 до характеристики» не застосовує; характеристики героя ДМ правит у формі, HOMM-шлях (`applyLevelGain`) пише їх прямо в колонки. Сховища рис і виборів немає.
+- **Вміння.** `collectCharacterAbilities` збирає скіли, расу, класи (`classResolved` з `applyClassScale`), артефакти, сети й витратні; джерела `race`/`class`/…, типу `feat` немає. Фічі класу — `{ level, abilities }`; усі вміння з вибором у шаблоні — нотатки (ASI ×51, Epic Boon ×12, Fighting Style ×3, Expertise ×4, Metamagic, Invocations, Divine/Primal Order, Weapon Mastery). Колонки класів уже мають `eldritch-invocation-count`, `weapon-mastery-count`, `cantrips`, `prepared-spells`.
+- **Навички.** `rollCheck` дає майстерність з `abilities.skillProficiencies` або прапорця `skillProficiency` (через `collectModifiers`); експертизи (подвійна майстерність) немає.
+- **Заклинання героя.** Бій бере `Character.knownSpells` + персональні + з дерева скілів (`resolveLearnedSpellsAndMastery`); редактора відомих заклинань персонажа в UI немає (лише API), `SpellMultiSelect` живе в полях умінь. Зв'язку «заклинання ↔ клас» у моделі немає; `HP` (`classHp`) читає сирий `character.constitution`, а не запечений.
+- **Бандл і синхронізація** ремаплять будь-який id усередині JSON (`remapIds` — глибока заміна рядків), тож id у нових JSON-полях переносяться без окремого коду; імпортер має `ref`/`refList`/`json`.
+- **Дані SRD.** Риси 17 (`Feat.type`: Origin 4, General 2, Fighting Style 4, Epic Boon 7; `prerequisite` — текст «Level 4+», «Level 4+, Strength or Dexterity 13+», «Fighting Style Feature», «Level 19+, Spellcasting Feature») + 35 `FeatBenefit` (назва + текст; «Repeatable» — окремий рядок у ASI, Skilled, Magic Initiate). Лінії лише в прозі `SpeciesTrait`: Elven Lineage (таблиця 3 × рівні 1/3/5), Gnomish Lineage (2 жирні абзаци), Fiendish Legacy (таблиця 3 × 1/3/5), Draconic Ancestry (таблиця 10 драконів → тип шкоди), Giant Ancestry (список 6) — разом **24 опції**, 22 посилання на заклинання SRD. Інші вибори рас: Keen Senses (1 з 3 навичок), Skillful (будь-яка навичка), Versatile (риса походження). Вибори класів: Metamagic (9 опцій у `sorcerer_metamagic-options`, 2/4/6 на 2/10/17), Eldritch Invocations (28 опцій з `*Prerequisite: Level N+ Warlock[, X Invocation]*`, кількість — колонка), бінарні опції в жирних абзацах (Divine Order, Primal Order, Blessed Strikes, Elemental Fury, Hunter's Prey, Defensive Tactics), Elemental Affinity (5 типів), Fiendish Resilience (тип, крім Force). `Spell.classes` заповнений для всіх 339 (wizard 218, sorcerer 140, bard 130, druid 124, cleric 109, warlock 72, ranger 48, paladin 38). Передісторії 4 (`BackgroundBenefit`: 3 характеристики, 2 навички, інструмент, спорядження, риса походження).
+
+### 1. Правила
+
+Нової секції немає (рекомендоване; користувач спав — переглянути): риси й вибори класів діють лише в режимі класів (`rules.classes.enabled` і непорожні `classes`), як 4c-1/4f-2; вибори раси (лінії) — властивість контенту раси й діють для будь-якого героя (у HOMM-расах їх немає — нульова зміна). Сторінка «Риси» в меню ДМ — коли `classes.enabled`.
+- Альтернатива: `rules.classes.feats: boolean` — зайва вісь; кампанія без рис просто не має контенту `feats`, і вибори типу `feat` тоді порожні.
+
+### 2. Вибір — спільна модель (`lib/utils/characters/choices/`)
+
+Один механізм для ліній рас, виборів раси, виборів класу й вкладених виборів рис (рекомендоване; користувач спав — переглянути):
+
+```ts
+Choice = {
+  id: string,                        // kebab-case, стабільний у межах власника (раси / класу / риси)
+  label: string,                     // "Elven Lineage", "Fighting Style", "Metamagic"
+  level: number,                     // 1–20: рівень у класі (клас/підклас) або загальний рівень (раса); у рисі ігнорується
+  count: number | { scale: string }, // 1–30 або колонка класу ({ scale } — лише у класі, як 4f-2)
+  lineage?: true,                    // лише раса, ≤ 1 на расу: назва обраної опції → Character.subrace
+  kind: "option" | "feat" | "skill" | "expertise" | "abilityScore" | "spell",
+  options?: ChoiceOption[],          // option; у feat — додаткові вбудовані опції (Blessed Warrior)
+  featTypes?: FeatType[],            // feat: які типи рис пропонуються
+  skills?: DndSkill[],               // skill/expertise: порожньо — будь-яка (expertise — будь-яка з майстерністю)
+  abilities?: AbilityKey[], points?: number, max?: number,   // abilityScore: з яких, скільки +1, межа (20 / 30)
+  spells?: { lists: string[], minLevel: number, maxLevel: number | "slots" },  // spell: списки, кола; "slots" — найвище коло слотів цього класу
+}
+ChoiceOption = {
+  id, name, description?,
+  minLevel?: number,                 // рівень власника (у класі — рівень у класі)
+  requires?: string[],               // id інших опцій цього ж вибору (Thirsting Blade → Pact of the Blade)
+  abilities: Ability[],              // як у раси/класу; нотатки дозволені
+  spells?: { level: number, spellId: string }[],   // завжди відомі з загального рівня N (лінії рас)
+}
+Pick = { id: string, picks?: Record<choiceId, string[]> }   // id опції / риси / навички / характеристики / заклинання; picks — вкладені вибори риси
+Picks = Record<choiceId, Pick[]>
+```
+
+- **Кількість** `{ scale }` розв'язується `applyClassScale`-логікою 4f-2 на рівні в класі; вибір відкривається на `level` і росте разом з колонкою (Invocations 1→10, Metamagic через синтетичну колонку `metamagic` 2/4/6). Так опції не дублюються по рівнях.
+- **`abilityScore`**: `picks` — масив ключів довжиною `points` (повтор = +2): ASI `{ points: 2, max: 20 }`, Grappler `{ abilities: [str, dex], points: 1, max: 20 }`, Epic Boon `{ points: 1, max: 30 }`.
+- **Вкладені вибори** — лише в рисі й без `kind: "feat"` (Zod), тож рекурсія на один рівень.
+- **Чисті функції:** `resolveChoiceCount`, `pendingChoices(owner, level, picks)` (невибрані й дообрані слоти), `validatePicks(ctx)` (опція існує, `minLevel`, `requires`, без повторів, кількість ≤ розв'язаної, навичка зі списку / з майстерністю для експертизи, риса: тип у `featTypes`, `prerequisite`, `repeatable`; заклинання: є тег зі `lists`, коло в межах; характеристика: результат ≤ `max`), `abilityScoreDelta(before, after)`. Модуль без zod у рантаймі (типи — `import type`), бо збирання учасника потрапляє в клієнтський чанк бою.
+- Альтернатива: окремі механізми для ліній (`races.lineages`), рис і виборів класу — три редактори й три валідатори для однієї ідеї «обрати N з набору».
+- Альтернатива: вибір = прив'язка до умінь класу (`ability.choiceGroup`) — не покриває рис, навичок, характеристик і заклинань.
+
+### 3. Дані
+
+Одна міграція (лише розширює):
+- таблиця `feats` (`id`, `campaignId`, `name`, `icon?`, `type`, `prerequisite Json`, `repeatable`, `description?`, `abilities Json`, `choices Json`, `sourceId`/`sourceHash`, часові мітки; індекс `(campaignId, name)`; каскад від кампанії; **`ENABLE ROW LEVEL SECURITY`**);
+- `races.choices Json @default("[]")`; `spells.lists Json @default("[]")`; `classes.spell_list text NULL`;
+- `characters.feats Json @default("[]")`, `characters.race_choices Json @default("{}")`.
+
+**3.1. Риси — тип контенту `feats`** (рекомендоване; користувач спав — переглянути). Повний шлях 4c-1: `CONTENT_RESOURCES`, `ContentKind`, роути колекції, `ReferenceKind.FEATS`, `BUNDLE_TABLES`/`SYNC_TABLE_SCOPES`, поля імпорту 4f-0 й експорт CSV, OpenAPI (оновити `app/api/openapi.json`), MCP — автоматично з ресурсу.
+
+```ts
+{
+  name, icon?, description?,
+  type: "origin" | "general" | "fightingStyle" | "epicBoon",
+  prerequisite: { level?: number, scores?: { abilities: AbilityKey[], min: number }, text?: string },  // scores — «будь-яка з»
+  repeatable: boolean,
+  abilities: Ability[],
+  choices: Choice[],                 // ASI, Skilled, Magic Initiate, Grappler, бусти
+}
+```
+
+Видалення риси, яку тримає персонаж (будь-яке джерело), — 409 (`FEAT_IN_USE`, як клас); синхронізація видаляє рядок напряму → невідома риса пропускається, форма показує «Рису не знайдено». Порядок імпорту шаблону: spell-groups → spells → races → classes → **feats** → units → artifacts.
+- Альтернатива: риси як скіли або артефакти (звіт мапінгу) — чужі поля (дерева, слоти), немає типу й передумов.
+- Альтернатива: Fighting Style лише як вбудовані опції класу — дублюються в 4 класах, а ASI-«або риса» все одно потребує каталогу.
+
+**3.2. Раса:** `choices: Choice[]` (Zod: `count` число, `level` — загальний рівень, ≤ 1 `lineage`, унікальні id опцій). Посилання `spells[].spellId` у файлі шаблону — назвами; імпортер розв'язує їх як `refList` у вкладеному JSON (новий резолвер у полях імпорту `races`, якщо загального ще немає — перевірити в плані); бандл/синхронізація ремаплять id самі.
+
+**3.3. Клас:** фіча `{ level, abilities, choices?: Choice[] }` у `features` і підкласах (JSON, без міграції); Zod класу перевіряє `{ scale }` у `count` як посилання на колонку (`columnRefIssues`). Нова колонка `spellList: string | null` — тег списку заклинань класу (за замовчуванням у формі — назва класу).
+
+**3.4. Списки заклинань — теги на заклинанні** `Spell.lists: string[]` (≤ 20, рядки ≤ 40) (рекомендоване; користувач спав — переглянути). Клас посилається тегом (`spellList`), вибір `spell` — списком тегів (Magic Initiate: Cleric/Druid/Wizard; High Elf — Wizard). Без id: порядок імпорту, синхронізація й перейменування класу не ламають зв'язок; кілька класів можуть ділити список.
+- Альтернатива: `classes.spellList: spellId[]` — ~1000 id у рядках класів (egress списку класів, уже відкладений у 4f-2) і клас мусить імпортуватись після заклинань.
+- Альтернатива: `Spell.classes: classId[]` — заклинання імпортуються до класів (потрібен другий прохід), список прив'язаний до конкретного рядка класу.
+
+**3.5. Вибори персонажа** (рекомендоване; користувач спав — переглянути):
+- клас: `Character.classes[i].choices?: Picks` (JSON, без міграції) — вибори класу й підкласу, включно з рисами з ASI/Fighting Style/Epic Boon (`Pick.id` = id риси, `picks` — її вкладені вибори);
+- раса: `Character.raceChoices: Picks` (лінія — звичайний вибір з `lineage`); сервер пише назву обраної лінії в `subrace` (для показу, AI й наявної картки ДМ — як текст `class` у 4c-1);
+- `Character.feats: { id, picks?, source: "origin" | "dm" }[]` — риса походження при створенні й риси, видані ДМ поза виборами.
+- `characterFeats(character, refs)` збирає риси з усіх трьох місць (для листа, `repeatable` і 409 видалення).
+- Альтернатива: усі риси лише в `Character.feats` з посиланням на вибір — два джерела правди (вибір класу і запис у списку).
+- Альтернатива: колонка `characters.lineage` — окремий шлях для одного з виборів раси, а Keen Senses/Skillful/Versatile однаково потребують `raceChoices`.
+
+**3.6. Покращення характеристик (ASI)** пишеться в базові колонки `strength…charisma` при збереженні вибору: `abilityScoreDelta(старі picks, нові)` у тій самій транзакції; зміна чи зняття вибору відкочує свою дельту (рекомендоване; користувач спав — переглянути). Межа 20 (30 для бустів) — на результат. Так HP (`classHp` з сирої Тіл), КЗ, форма, друк і AI бачать нові значення без змін, а HOMM уже пише рівневий приріст так само.
+- Альтернатива: синтетичне `modifyStat <ability>` з вибору (запікання) — повністю похідне, але `classHp` і форма читають сирі характеристики; довелося б переносити HP після запікання.
+
+### 4. Сервер
+
+- **Створення** (`create-character-schema.ts`): `raceChoices`, `feats` (лише `source: "origin"`, тип `origin`, ≤ 1, коли в кампанії є риси походження) і `classes[].choices` — валідація `validatePicks` з контекстом (раса, класи, риси, заклинання кампанії). Так само для чернеток гравця.
+- **Підвищення рівня**: тіло `{ classId, subclassId?, choices?: Picks }` — вибори піднятого класу; невибране дозволене (рекомендоване; користувач спав — переглянути): лист показує «Невибрані вибори: N», доступні з кнопки «Обрати». Альтернатива: обов'язкові вибори (422) — ДМ не може підняти рівень, поки гравець думає над рисою.
+- **Правка виборів** `PUT /api/campaigns/[id]/characters/[characterId]/choices` (ДМ або власник при `allowPlayerEdit`; `source: "dm"` — лише ДМ): `{ raceChoices?, feats?, classChoices?: Record<classId, Picks> }` → `validatePicks`, дельта ASI, `subrace`, запис журналу 4d `choices_edit`; 409, поки герой в активному бою (`battle-lock.ts`). Тексти помилок — `api-errors.ts` (`CHOICE_UNKNOWN`, `CHOICE_COUNT`, `FEAT_PREREQUISITE`, `FEAT_NOT_REPEATABLE`, `SPELL_NOT_IN_LIST`, `ABILITY_SCORE_CAP`). Класовий PATCH (`classes` лише ДМ) зберігає наявні `choices` записів; рівень класу нижче за рівень вибору — вибір лишається, але не діє (як вміння вищих рівнів).
+- `lib/api/characters.ts` + хук `useCharacterChoices` (інвалідує лист і список персонажів).
+
+### 5. Рушій і похідні
+
+- **Вміння з виборів** (`collectCharacterAbilities`, нова гілка `choiceResolved`): обрані опції раси — джерело `race` («Elf: Wood Elf»), опції класу/підкласу — джерело `class` («Sorcerer: Metamagic — Quickened Spell», `applyClassScale` діє), риси — нове `AbilitySource.type: "feat"` (вміння риси + її вкладених опцій); вибір `skill` → синтетичне пасивне `flag skillProficiency`, `expertise` → `flag skillExpertise`. Далі як зараз (`resolveAbilities`, `bakePassives`, snapshot з `snapshotHash`). Вибір вищий за поточний рівень у класі/загальний рівень — не діє.
+- **Прапорець `skillExpertise { skills }`** (`abilities.md`, реєстр прапорців): `checkBonus` подвоює майстерність навички (лише коли майстерність є); лист показує «×2».
+- **Додані заклинання** (`grantedSpellIds`): заклинання опцій раси з `level ≤` загального рівня + вибори `spell` (класи, риси) зливаються з `knownSpells` у `resolveLearnedSpellsAndMastery` і в листі. Каст — як зараз (слоти; кантрип без слота). Безкоштовний каст «1 / довгий» — поза обсягом (§9).
+- **Нічого нового в snapshot** — вибори перетворюються на вміння й заклинання при збиранні; `refresh-from-source` бере те саме.
+
+### 6. Фільтр заклинань за класом
+
+- Вибори `spell` класу (кантрипи `count {scale: cantrips}`, `maxLevel 0`; підготовлені `count {scale: prepared-spells}`, `minLevel 1`, `maxLevel "slots"`) — єдине місце, де застосовується список: пікер показує лише заклинання з тегом зі `lists` і колом у межах, лічильник «4 / 6»; сервер відмовляє 422 `SPELL_NOT_IN_LIST`. `"slots"` = найвище коло, яке дає цей клас сам (`classSpellSlots` одного запису; пакт — коло пакту) (рекомендоване; користувач спав — переглянути).
+- `Character.knownSpells` лишається вільним списком ДМ (персональні, з предметів, домашні правила) без перевірки — HOMM і ручні випадки не ламаються. Альтернатива: перевіряти й `knownSpells` за об'єднанням списків — ламає наявних героїв і домашні правила.
+- Бібліотека заклинань ДМ: чип-фільтр за тегом списку; форма заклинання — поле «Списки» (чипи з підказками наявних тегів).
+
+### 7. Конвертер і шаблон
+
+- **Риси** (`convert/feats.ts`, `overrides/feats.ts`): 17 рядків; опис = `FeatBenefit` як «**Name.** text» (без рядка «Repeatable» → `repeatable: true`); тип з `type`; передумови регуляркою (`Level N+` → `level`, `<A> or <B> 13+` → `scores`, решта → `text`). Механіка:
+
+| Риса | Механізовано | Текст |
+|---|---|---|
+| Ability Score Improvement | `abilityScore { points 2, max 20 }` | — |
+| Grappler | `abilityScore { str/dex, 1, 20 }` | Punch and Grab, Attack Advantage, Fast Wrestler |
+| 7 Epic Boons | `abilityScore { 1, 30 }` | основна вигода (Truesight, Fate…) |
+| Skilled | `skill` × 3 | інструменти |
+| Magic Initiate | `spell` 2 кантрипи + 1 коло 1, `lists` Cleric/Druid/Wizard | вибір одного списку, безкоштовний каст |
+| Alert | `modifyStat initiative` формула `prof` (якщо запікання приймає формулу — перевірити в плані; інакше нотатка) | Initiative Swap |
+| Archery / Defense / Two-Weapon Fighting | `attackBonus +2` дальня / `armor +1` з `armorWorn light/medium/heavy` / `flag twoWeaponFighting` | — |
+| Great Weapon Fighting, Savage Attacker | — | повністю |
+
+- **Лінії й вибори рас** (`convert/races.ts`, `overrides/races.ts`): розбір прози — markdown-таблиці (Elf, Tiefling: рівень 1 / 3 / 5; Dragonborn: дракон → тип), жирні абзаци (Gnome), список (Goliath); назви заклинань — «know the X cantrip», курсив, клітинки рівнів 3/5. Таблиця механіки за slug опції:
+
+| Раса | Опції | Механізовано |
+|---|---|---|
+| Elf (Elven Lineage) | Drow, High Elf, Wood Elf | 9 заклинань за рівнями 1/3/5; Wood Elf `speed +5` |
+| Gnome (Gnomish Lineage) | Forest, Rock | 4 заклинання |
+| Tiefling (Fiendish Legacy) | Abyssal, Chthonic, Infernal | `resistance` poison/necrotic/fire, 9 заклинань |
+| Dragonborn (Draconic Ancestry) | 10 драконів | `resistance` типу; Breath Weapon — нотатка з типом (механізм подиху 4f-5) |
+| Goliath (Giant Ancestry) | 6 велетнів | Fire's Burn (`hit` +1d10 fire), Frost's Chill (+1d6 cold), Hill's Tumble (`applyCondition prone`), Stone's Endurance (реакція: лікування 1d12 + `con_mod`, як Deflect 4f-2) — `perRest uses {formula: prof}` / довгий; Cloud's Jaunt, Storm's Thunder — нотатки |
+
+Плюс вибори: Keen Senses (`skill` 1 з insight/perception/survival), Skillful (`skill` 1), Versatile (`feat`, `featTypes: [origin]`). Трейти-«оболонки» (Elven Lineage, Draconic Ancestry, Damage Resistance…) з рас прибираються — їх текст переходить в опис вибору. Разом **24 опції, ~16 механізовані, 22 заклинання**.
+- **Вибори класів** (`overrides/class-choices.ts` за slug фічі; ~100 виборів): ASI (51 рядок рівня) → `feat [origin, general]`; Epic Boon (12) → `feat [origin, general, epicBoon]`; Fighting Style (Fighter 1, Paladin 2, Ranger 2, Champion 7) → `feat [fightingStyle]` + вбудована опція Blessed/Druidic Warrior (нотатка); Expertise (Bard 2/9, Rogue 1/6, Ranger 2 (Deft Explorer)/9, Wizard Scholar 2 зі списку) → `expertise`; Primal Knowledge (1 зі списку класу), Lore Bonus Proficiencies (3) → `skill`; Metamagic (9 опцій з `### `-заголовків `metamagic-options`, синтетична колонка `metamagic` 2/4/6) і Eldritch Invocations (28 опцій, `minLevel`/`requires` з `*Prerequisite*`, `count {scale: eldritch-invocation-count}`) — опції-нотатки з повним текстом (механізовано: Eldritch Mind — `saveAdvantage` Тіл, Thirsting Blade — `attacksPerAction +1`); бінарні опції з жирних абзаців: Divine/Primal Order (нотатки), Blessed Strikes (Divine Strike — `hit` +1d8 radiant 1 / хід; Potent Spellcasting — нотатка), Elemental Fury (Primal Strike +1d8 fire наближено), Hunter's Prey (Colossus Slayer — `hit` +1d8 з `hpBelow target 100`, 1 / хід), Defensive Tactics (нотатки), Elemental Affinity (5 опцій `resistance`), Fiendish Resilience (12 опцій `resistance`); Magical Discoveries → `spell` 2 з Cleric/Druid/Wizard. Псевдофічі `*-options` і нотатки, замінені виборами, з шаблону зникають. Weapon Mastery лишається нотаткою.
+- **Списки заклинань**: `Spell.classes` → `lists` (назви класів: «Wizard»…); 8 класів-заклиначів отримують `spellList` = назва і вибори `spell` (8 підготовлених + 6 кантрипів).
+- Цілісність (`scripts/srd/__tests__`): унікальні id виборів/опцій у власнику; кожен `{ scale }` має колонку; кожне `spellId` опцій раси розв'язується; кожен `spellList` має ≥ 1 заклинання й кількість збігається з `Spell.classes`; `featTypes` мають ≥ 1 рису; `importContent` з `dryRun` без помилок. Після злиття частини — `pnpm srd:build` і `pnpm constructor:srd-template` (локально).
+
+### 8. UI
+
+- **ДМ, «Риси»** (`HudPage`, `HudCard`, `HudChipTabs` за типом) і форма риси (`HudForm`): «Основне» (тип, передумови: рівень, характеристики, текст; повторювана; опис), «Вміння» (`AbilityListEditor`), «Вибори».
+- **Редактор виборів** `ChoiceListEditor` (спільний для раси, рівня класу/підкласу й риси): вид, мітка, рівень, кількість (число або «З таблиці класу» — лише в класі), поля виду; опції — назва, опис, мінімальний рівень, вимоги, `AbilityListEditor`, для раси — заклинання за рівнем (пікер з бібліотеки) (рекомендоване; користувач спав — переглянути). Форма раси — вкладка «Вибори й лінії»; форма класу — блок «Вибори» в секції кожного рівня; поле «Список заклинань» на «Основне».
+- **Форма персонажа** (створення, редагування, чернетка гравця): вкладка «Вибори» (`CHARACTER_FORM_TAB.choices`), коли раса має вибори або герой у режимі класів. Секції: Раса (лінія — картки-радіо, інші вибори), Риса походження, кожен клас до поточного рівня. Пікери за видом: опції (картки, недоступні за `minLevel`/`requires` з причиною), риса (список за типом з передумовами; вкладені вибори одразу під обраною — напр. ASI: два «+1» з прев'ю «Strength 15 → 17», межа), навички (чипи), заклинання (`SpellMultiSelect` з фільтром списку/кола й лічильником). Помилки сервера — біля вибору.
+- **Підвищення рівня** (`ClassLevelUpDialog`): після класу й підкласу — крок «Вибори рівня» з новими й дообраними виборами піднятого класу (той самий пікер), кнопка «Обрати пізніше».
+- **Лист персонажа**: «Elf (Wood Elf)» у `ProfileHero`; блок «Риси» (тип-бейдж, вкладені вибори «+1 STR, +1 DEX», джерело «Fighter 4»); під кожним класом — обрані опції («Metamagic: Quickened, Twinned»); навички з експертизою «×2»; у «Магії» — джерело додаткового заклинання (Лінія / Риса / Клас); бейдж «Невибрані вибори: N» з кнопкою «Обрати» (ДМ або власник при `allowPlayerEdit`) → `ResponsiveDialog` з тим самим пікером.
+- Онбординг: запис у `lib/onboarding/whats-new.ts` («Риси й вибори 5e»).
+
+### 9. Поза обсягом 4f-4
+
+**Передісторії** (4 SRD: характеристики +2/+1, 2 навички, інструмент, спорядження, риса походження) — окремий тип контенту поверх тих самих виборів, малою частиною після 4f-5 (рекомендоване; користувач спав — переглянути); до того — риса походження обирається вільно, характеристики й навички ДМ вносить руками. **Вибір параметра предмета при видачі** (тип опору Armor/Ring/Potion of Resistance; велетень/дракон для Giant/Dragon Slayer) — **4f-5**: потребує третього сегмента ref у всіх читачах `resolveItemRows`, а умови за типом істоти — механізм монстрів 4f-5. Безкоштовний каст «1 / довгий» без слота (заклинання ліній, Magic Initiate, Mystic Arcanum, Signature Spells) — 4f-5 разом із заклинаннями з предметів; Breath Weapon драконороджених — механізм подиху 4f-5. Weapon Mastery (властивостей майстерності в рушії немає); активні ефекти метамагії й більшості заклинань-закликів (оголошені опції, як Reckless Attack у 4f-2); Great Weapon Fighting, Savage Attacker; вибір характеристики заклинань для лінії/риси (береться характеристика героя); заміна виборів «лише на рівні / після відпочинку» (міняти можна будь-коли поза боєм за правами); `skillChoices` класу як вибір (лишається підказкою); інструменти й мови; AI-контекст рис (`ai/tools/party.ts`).
+
+### 10. Перевірка 4f-4
+
+- Наявні тести — без змін (HOMM: раси без виборів, level-up HOMM, `knownSpells`, `rollCheck`); `battle-sweep` на HOMM5.
+- Нові тести: Zod `Choice` (вкладеність без `feat`, `scale` поза класом, ≤ 1 `lineage`); `resolveChoiceCount` (число, колонка на різних рівнях), `pendingChoices` (новий вибір рівня, дообрання при рості колонки, вибір вище рівня не діє); `validatePicks` (невідома опція, `minLevel`, `requires`, повтор, кількість, риса: тип/передумова рівня й характеристики/неповторювана, навичка поза списком, експертиза без майстерності, заклинання поза списком і вище `"slots"`, межа ASI 20/30); `abilityScoreDelta` (додавання, зміна, зняття); ресурс `feats` (CRUD, 409 у використанні, імпорт/експорт, бандл, синхронізація); `races.choices` з розв'язанням назв заклинань; `spells.lists`, `classes.spellList`; роут `choices` (права ДМ/власник/чужий, `source: dm` лише ДМ, 409 у бою, журнал, `subrace`); level-up з `choices` і без; створення з виборами; збирання учасника (опції раси/класу/риси як вміння з джерелами, `skillProficiency`/`skillExpertise`, додані заклинання за рівнем, видалена риса/опція пропускається); `skillExpertise` у `checkBonus`; міграція з RLS (`migrations-rls.test.ts`); компонентні — пікер виборів (картки, ASI-прев'ю з межею, лічильник заклинань), крок рівня в `ClassLevelUpDialog`, `ChoiceListEditor`.
+- Конвертер: Elf → 3 лінії, Wood Elf `speed +5` + Druidcraft/Longstrider (3)/Pass without Trace (5); Dragonborn Red → `resistance fire`; Goliath Fire's Burn `uses prof`; Gnome Rock — 2 кантрипи з жирного абзацу; Human Versatile `feat [origin]`; ASI-риса `abilityScore 2/20`, Grappler `scores str|dex 13`, Magic Initiate `repeatable`; Warlock Invocations 28 опцій, Thirsting Blade `minLevel 5`, `requires pact-of-the-blade`; Sorcerer Metamagic 9 + колонка 2/4/6; Fighter ASI на 4/6/8/12/14/16; Wizard `lists` 218; лічильники (17 рис, 24 опції ліній, ~100 виборів класів).
+- Живий прогін (десктоп + 500 px, окремий субагент): шаблон SRD → створити Wood Elf Wizard 1 з рисою Alert, 3 кантрипи й 4 підготовлені лише зі списку Wizard (Cure Wounds — відмова); Infernal Tiefling Fighter 1 з Fighting Style Archery → у бою +2 до дальньої атаки й опір вогню, Fire Bolt у книзі; Rogue 1 з Expertise Stealth → кидок з листа з подвійною майстерністю; Fighter → рівень 4: крок «Вибори рівня», ASI +2 STR (17 → 19), 20 → відмова при +2; Warlock 5 — Invocations 3 з фільтром `minLevel`/`requires`; «Обрати пізніше» → бейдж на листі; HOMM-кампанія без змін. Тестові дані видаляються.
+- Документи: `battle.md` («5e: риси й вибори»), `abilities.md` (`skillExpertise`, джерело `feat`, вміння з виборів), `content-api.md` (`feats`, `choices`, `lists`, `spellList`), STATUS, хендоф, пам'ять.
+
+### 11. Обсяг плану (орієнтовно 17 задач)
+
+1 міграція (таблиця `feats` + RLS, `races.choices`, `spells.lists`, `classes.spell_list`, `characters.feats`/`race_choices`) і типи; 2 модель `Choice` і чисті функції `choices/` (кількість, невибрані, `validatePicks`, дельта ASI); 3 тип контенту `feats` (ресурс, довідник, імпорт/експорт, бандл/синхронізація, OpenAPI/MCP, 409); 4 `choices` раси (з розв'язанням назв заклинань) і фіч класу, `spellList`, `Spell.lists` у схемах, імпорті й OpenAPI; 5 сервер персонажа: створення, `PUT …/choices`, level-up з `choices`, `subrace`, ASI у транзакції, журнал, блокування в бою; 6 рушій: `choiceResolved` у `collectCharacterAbilities`, джерело `feat`, синтетичні навички, `skillExpertise` у `checkBonus` і листі; 7 додані заклинання (бій і лист) і перевірка списків `spell`-виборів; 8 UI «Риси» (сторінка, форма); 9 UI `ChoiceListEditor` у формах раси, класу/підкласу й риси, «Списки» заклинання, фільтр бібліотеки; 10 UI вкладка «Вибори» у формі персонажа й чернетці; 11 UI крок «Вибори рівня» і бейдж невибраних; 12 UI листа (лінія, риси, опції класів, «×2», джерела заклинань); 13 конвертер рис; 14 конвертер ліній і виборів рас; 15 конвертер виборів класів (ASI/Epic Boon/Fighting Style/Expertise/навички, Metamagic, Invocations, бінарні опції, синтетична колонка); 16 конвертер списків заклинань і виборів `spell`, порядок імпорту, цілісність, регенерація даних і перезаливка шаблону; 17 документи, онбординг і живий прогін. Більше — у 4f-5 і після (§9).
 
 ## Ризики
 
@@ -1093,3 +1262,8 @@ ItemStats = {
 - **Неунікальність SRD (4f-3).** Звичайне спорядження й магічні предмети шаблону SRD стають `unique: false`; кампанія, створена з шаблону до 4f-3, отримає прапорець лише через «оновлення з джерела». HOMM-артефакти без поля лишаються унікальними.
 - **Наближення предметів (4f-3).** Райдери діють без запалювання бонусною дією, тип шкоди Vicious — тип за замовчуванням `dealDamage`, заряди відновлюються повністю на довгому відпочинку, Defender — постійні +3 без перенесення в КЗ, ~190 унікальних предметів — лише опис. Повний текст SRD лишається в описі; ДМ виправляє в редакторі.
 - **Носіння зі сховища (4f-3).** При `items.enabled` усі предмети слотів `item`/`ring` у сховищі діють; ДМ має прибирати непотрібні в «Підсумок», а межу задає лише налаштування. Предмет без налаштування (Boots of Elvenkind) діє, навіть якщо їх кілька.
+- **Вибори в JSON (4f-4).** Пікі посилаються на id опцій і рис усередині JSON класу/раси/риси; синхронізація з джерелом, що перейменує id опції чи видалить рису, лишає «осиротілий» вибір — він пропускається в рушії, форма показує «Вибір не знайдено», лист — бейдж невибраних. Конвертер генерує id з slug фіч, тож перезаливка шаблону їх не змінює.
+- **ASI у базових характеристиках (4f-4).** Дельта пишеться в колонки; ручна правка ДМ між виборами може зробити відкат нижчим за початкове значення чи вищим за межу — валідація на результат, видалення риси (409) не відкочує характеристики, синхронізація, що видалила рису, теж. На HOMM не впливає (вибори лише в режимі класів).
+- **Списки тегами (4f-4).** Тег — рядок: друкарська помилка в `spellList` чи `lists` дає порожній список; форма класу показує кількість заклинань у списку (0 → попередження), цілісність SRD звіряє з `Spell.classes`.
+- **Розмір OpenAPI (4f-4).** `Choice` з'являється в класах, расах і рисах — тримати одним `$ref`; тест розміру (< 130 000) уже близько до межі після 4f-2/4f-3.
+- **Невибрані вибори (4f-4).** Level-up без виборів дозволений — герой може воювати без рис/кантрипів; бейдж на листі й у списку ДМ — єдиний сигнал.

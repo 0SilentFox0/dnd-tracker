@@ -2,19 +2,24 @@
 
 import { useMemo, useState } from "react";
 
+import { LevelUpChoicesStep } from "./LevelUpChoicesStep";
+
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { useClassLevelUp } from "@/lib/hooks/characters";
 import { useClasses } from "@/lib/hooks/classes";
+import { levelUpChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { classesById } from "@/lib/utils/characters/classes";
 import type { Character } from "@/types/characters";
+import type { Picks } from "@/types/choices";
 import type { CharacterClassEntry, GameClassData } from "@/types/classes";
 
 interface ClassLevelUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  character: { campaignId: string; id: string; entries: CharacterClassEntry[] };
+  character: { campaignId: string; id: string; entries: CharacterClassEntry[]; hero?: { race: string; level: number; scores: Record<AbilityKey, number>; skills: unknown } };
   onLeveled?: (updated: Character) => void;
 }
 
@@ -37,6 +42,8 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
 
   const [subclassId, setSubclassId] = useState("");
 
+  const [picks, setPicks] = useState<Picks>({});
+
   const levelUp = useClassLevelUp({ campaignId: character.campaignId, characterId: character.id, onLeveled });
 
   const classId = choice === NEW_CLASS ? newClassId : choice;
@@ -54,15 +61,29 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
   const pick = (value: string) => {
     setChoice(value);
     setSubclassId("");
+    setPicks({});
     levelUp.clearError();
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const subclassPicked = current?.subclassId ?? subclassId;
 
+  const subclass = cls?.subclasses.find((s) => s.id === subclassPicked) ?? null;
+
+  const stepDefs = cls && character.hero ? levelUpChoiceDefs(cls, subclass, nextLevel) : [];
+
+  const raisedEntry: CharacterClassEntry | null = cls ? { classId, level: nextLevel, ...(subclassPicked && { subclassId: subclassPicked }), ...(current?.choices && { choices: current.choices }) } : null;
+
+  const send = async (withChoices: boolean) => {
     if (!canSubmit) return;
 
-    if (await levelUp.submit({ classId, ...(needsSubclass && { subclassId }) })) onOpenChange(false);
+    const chosen = withChoices && Object.values(picks).some((l) => l.length > 0);
+
+    if (await levelUp.submit({ classId, ...(needsSubclass && { subclassId }), ...(chosen && { choices: picks }) })) onOpenChange(false);
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void send(true);
   };
 
   return (
@@ -76,13 +97,18 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
+          {stepDefs.length > 0 && (
+            <Button type="button" variant="outline" disabled={!canSubmit} onClick={() => void send(false)}>
+              Обрати пізніше
+            </Button>
+          )}
           <Button type="submit" form="class-level-up-form" disabled={!canSubmit}>
             Підвищити
           </Button>
         </>
       }
     >
-      <form id="class-level-up-form" onSubmit={(e) => void submit(e)} className="space-y-3">
+      <form id="class-level-up-form" onSubmit={submit} className="space-y-3">
         <fieldset className="space-y-2">
           {entries.map((entry) => (
             <label key={entry.classId} className="flex items-center gap-2 text-sm">
@@ -104,6 +130,7 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
             onValueChange={(v) => {
               setNewClassId(v);
               setSubclassId("");
+              setPicks({});
             }}
             placeholder="Оберіть клас"
             options={available.map((c) => ({ value: c.id, label: c.name }))}
@@ -114,13 +141,17 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
           <SelectField
             aria-label="Підклас"
             value={subclassId}
-            onValueChange={setSubclassId}
+            onValueChange={(v) => {
+              setSubclassId(v);
+              setPicks({});
+            }}
             placeholder="Оберіть підклас"
             options={cls.subclasses.map((s) => ({ value: s.id, label: s.name }))}
             required
             triggerClassName="w-full"
           />
         )}
+        {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} value={picks} onChange={setPicks} />}
         {levelUp.error && (
           <p role="alert" className="text-sm text-destructive">
             {levelUp.error}

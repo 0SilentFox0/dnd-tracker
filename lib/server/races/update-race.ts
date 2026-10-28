@@ -26,6 +26,7 @@ export async function updateRaceCascade(campaignId: string, current: { id: strin
         spellSlotProgression:
           data.spellSlotProgression !== undefined ? (data.spellSlotProgression as Prisma.InputJsonValue) : undefined,
         abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
+        ...(data.choices !== undefined && { choices: data.choices as unknown as Prisma.InputJsonValue }),
       },
     });
 

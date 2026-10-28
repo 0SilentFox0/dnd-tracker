@@ -53,5 +53,6 @@ export function toGameClassData(row: GameClass): GameClassData {
     subclassLevel: row.subclassLevel,
     subclasses: subclassesOf(row.subclasses),
     columns: columnsOf(row.columns),
+    ...(row.spellList && { spellList: row.spellList }),
   };
 }

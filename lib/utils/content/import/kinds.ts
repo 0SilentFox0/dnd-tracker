@@ -1,6 +1,6 @@
 import type { ImportCounts, ImportKind, ImportMode, ImportRowStatus, ImportSpec } from "@/types/content-import";
 
-export const IMPORT_KINDS = ["units", "spells", "skills", "main-skills", "spell-groups", "races", "classes", "artifacts", "artifact-sets"] as const satisfies readonly ImportKind[];
+export const IMPORT_KINDS = ["units", "spells", "skills", "main-skills", "spell-groups", "races", "classes", "feats", "artifacts", "artifact-sets"] as const satisfies readonly ImportKind[];
 
 export const IMPORT_MODES = ["create", "update", "skip"] as const satisfies readonly ImportMode[];
 
@@ -9,7 +9,11 @@ export const IMPORT_STATUSES = ["created", "updated", "skipped", "error"] as con
 export const emptyCounts = (): ImportCounts => ({ created: 0, updated: 0, skipped: 0, error: 0 });
 
 export const refKindsOf = (spec: ImportSpec, types?: ReadonlyArray<ImportSpec["fields"][number]["type"]>): ImportKind[] => [
-  ...new Set(spec.fields.flatMap((f) => (f.ref && (!types || types.includes(f.type)) ? [f.ref] : []))),
+  ...new Set(spec.fields.flatMap((f) => {
+    const kinds = [f.ref, f.nestedRef?.kind].filter((k): k is ImportKind => !!k);
+
+    return !types || types.includes(f.type) ? kinds : [];
+  })),
 ];
 
 export const isImportKind = (v: string): v is ImportKind => (IMPORT_KINDS as readonly string[]).includes(v);

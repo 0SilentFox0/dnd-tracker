@@ -13,6 +13,7 @@ export const RACES_IMPORT: ImportSpec = {
     { key: "disabledSkills", label: "Заборонені скіли", aliases: ["disabled skills"], type: "refList", ref: "skills", examples: ["", ""] },
     jsonField("passiveAbility", "Пасивна здібність (JSON)", ["passive ability"], ['{"name":"Лісова стежка","description":"Швидкість +10 у лісі"}', ""]),
     jsonField("spellSlotProgression", "Слоти заклинань (JSON)", ["слоти"], ['[{"level":1,"slots":2}]', ""]),
+    { ...jsonField("choices", "Вибори (JSON)", ["choices", "вибори", "лінії", "lineages"], ["[]", ""]), nestedRef: { kind: "spells", key: "spellId" } },
     abilitiesField(),
   ],
 };

@@ -233,6 +233,7 @@ export function convertSpell(row: Fixture<O5Spell>, options: Array<Fixture<O5Cas
     targeting,
     resolution: resolution(f, kind, targeting),
     spellEffects: effects(f, kind),
+    lists: f.classes.map((c) => titleCase(c.replace(/^srd-2024_/, ""))),
   };
 
   return { ...base, ...SPELL_OVERRIDES[row.pk] };

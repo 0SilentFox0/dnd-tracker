@@ -24,6 +24,7 @@ const fields: ImportField[] = [
   jsonField("spellEffects", "Ефекти (JSON)", ["ефекти", "effects"], ["[]", "[]"]),
   jsonField("raceModifiers", "Модифікатори рас (JSON)", []),
   jsonField("fx", "Візуальний ефект (JSON)", []),
+  { key: "lists", label: "Списки", aliases: ["lists", "списки", "spell lists"], type: "list", examples: ["Wizard, Sorcerer", "Cleric"] },
 ];
 
 const DICE = /^(\d*)d(\d+)/;

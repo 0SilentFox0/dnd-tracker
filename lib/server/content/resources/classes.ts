@@ -11,6 +11,7 @@ import { classNameTaken } from "@/lib/server/classes/class-name";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
+import { choiceColumnIssues } from "@/lib/utils/characters/choices/columns";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
 
 type CreateInput = z.infer<typeof createClassSchema>;
@@ -70,6 +71,7 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
         subclassLevel: data.subclassLevel,
         subclasses: json(data.subclasses),
         columns: json(data.columns),
+        ...(data.spellList !== undefined && { spellList: data.spellList }),
       },
     });
   },
@@ -84,7 +86,7 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
 
     const subclasses = data.columns === undefined ? (data.subclasses ?? []) : (data.subclasses ?? stored.subclasses ?? []);
 
-    const issues = [...features, ...subclasses.flatMap((s) => s.features)].flatMap((f) => columnRefIssues(f.abilities, columns));
+    const issues = [...features, ...subclasses.flatMap((s) => s.features)].flatMap((f) => [...columnRefIssues(f.abilities, columns), ...choiceColumnIssues(f.choices, columns)]);
 
     if (issues.length > 0) throw new ContentError(API_ERRORS.CLASS_COLUMN_UNKNOWN, 400, issues);
 

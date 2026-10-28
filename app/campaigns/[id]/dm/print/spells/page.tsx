@@ -2,6 +2,7 @@ import { PrintSpellsPageClient } from "./page-client";
 
 import { prisma } from "@/lib/db";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import type { Spell } from "@/types/spells";
 
 export default async function PrintSpellsPage({
   params,
@@ -24,7 +25,7 @@ export default async function PrintSpellsPage({
     }),
   ]);
 
-  const spellsForClient = spells;
+  const spellsForClient = spells as unknown as Spell[];
 
   return (
     <PrintSpellsPageClient

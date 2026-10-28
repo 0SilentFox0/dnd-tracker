@@ -5,6 +5,7 @@ import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadClassesById } from "./load-classes";
+import { loadFeatsById } from "./load-feats";
 import { loadRace } from "./load-race";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
@@ -18,8 +19,11 @@ import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { classPools } from "@/lib/utils/abilities/class-columns";
+import { readChoiceList } from "@/lib/utils/abilities/read";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
+import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
 import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
 import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
@@ -88,6 +92,26 @@ export async function createBattleParticipantFromCharacter(
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
+  const choiceState = choicesStateOf(character);
+
+  const raceChoiceDefs = race ? readChoiceList(race.choices) : [];
+
+  const classMode = !!resolvedClasses;
+
+  const selections =
+    raceChoiceDefs.length > 0 || classMode
+      ? choiceSelections({
+          race: race && raceChoiceDefs.length > 0 ? { id: race.id, name: race.name, choices: raceChoiceDefs } : null,
+          raceChoices: choiceState.raceChoices,
+          classes: resolvedClasses ?? [],
+          feats: classMode ? choiceState.feats : [],
+          featsById: await loadFeatsById(character.campaignId, selectionNeedsFeats(choiceState, classMode)),
+          level: character.level,
+        })
+      : null;
+
+  const granted = selections?.spells.map((s) => s.spellId) ?? [];
+
   const rawKnown = character.knownSpells;
 
   const baseKnownSpells = Array.isArray(rawKnown)
@@ -138,6 +162,7 @@ export async function createBattleParticipantFromCharacter(
     completedSets: completed.sets,
     consumables: consumables.map(({ itemId, row }) => ({ itemId, row })),
     ...(resolvedClasses && { classes: resolvedClasses }),
+    ...(selections && selections.groups.length > 0 && { choiceGroups: selections.groups }),
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
@@ -200,7 +225,7 @@ export async function createBattleParticipantFromCharacter(
         | "charisma"
         | undefined,
       spellSlots: resolvedSpellSlots,
-      knownSpells,
+      knownSpells: granted.length > 0 ? [...new Set([...knownSpells, ...granted])] : knownSpells,
     },
     battleData: {
       attacks,

@@ -1,4 +1,4 @@
-export type ImportKind = "units" | "spells" | "skills" | "main-skills" | "spell-groups" | "races" | "classes" | "artifacts" | "artifact-sets";
+export type ImportKind = "units" | "spells" | "skills" | "main-skills" | "spell-groups" | "races" | "classes" | "feats" | "artifacts" | "artifact-sets";
 
 export type ImportMode = "create" | "update" | "skip";
 
@@ -15,6 +15,8 @@ export interface ImportField {
   /** words accepted instead of a number (normalized header form), e.g. "cantrip" -> 0 */
   numberWords?: Readonly<Record<string, number>>;
   ref?: ImportKind;
+  /** json: глибоко замінює назви на id у властивості `key` (напр. spellId у виборах раси) */
+  nestedRef?: { kind: ImportKind; key: string };
   required?: boolean;
   examples: readonly [string, string];
 }

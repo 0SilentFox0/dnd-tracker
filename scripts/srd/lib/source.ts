@@ -25,6 +25,8 @@ export const OPEN5E_FILES = {
   Armor: "8e030b74c8a06cb40a3f924565dc59d6",
   Item: "4f02971a31a32db793e357d3cd0624c8",
   MagicItem: "bb43403c17dea6aebed685d3626fdf14",
+  Feat: "00522a4edd44236cc9dd6d95775d930b",
+  FeatBenefit: "515b253cb2e00aba2c7886115cb043c7",
 } as const;
 
 export type Open5eFile = keyof typeof OPEN5E_FILES;

@@ -1,11 +1,18 @@
+import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { buildCharacterParticipant } from "@/lib/server/characters/participant";
 import { loadStoryChapters } from "@/lib/server/scenario/player-story";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
+import { readChoiceList } from "@/lib/utils/abilities/read";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract-artifacts";
+import { loadFeatsById } from "@/lib/utils/battle/participant/load-feats";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { pendingCount } from "@/lib/utils/characters/choices/pending";
+import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
+import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
+import { visitPicks } from "@/lib/utils/characters/choices/walk";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import { attunedRefs, attunementRequired, pruneAttuned, resolveItemRow } from "@/lib/utils/items/resolve";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -17,7 +24,7 @@ export const loadSheetCharacter = (characterId: string) => prisma.character.find
 
 export type SheetCharacter = NonNullable<Awaited<ReturnType<typeof loadSheetCharacter>>>;
 
-export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], campaign: { maxLevel: number; rules: Ruleset }): Promise<CharacterSheet> {
+export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], campaign: { maxLevel: number; rules: Ruleset; allowPlayerEdit?: boolean }): Promise<CharacterSheet> {
   const { context, race, tree, participant } = await buildCharacterParticipant(character, campaign);
 
   const known = participant.spellcasting.knownSpells ?? [];
@@ -52,6 +59,24 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const classes = classEntries?.success && classEntries.data.length > 0 ? resolveClassEntries(classEntries.data, context.classesById ?? {}) : undefined;
 
+  const state = choicesStateOf(character);
+
+  const raceDefs = race ? readChoiceList(race.choices) : [];
+
+  const classMode = !!classes?.some((e) => e.class);
+
+  const choiceRace = race && raceDefs.length > 0 ? { id: race.id, name: race.name, choices: raceDefs } : null;
+
+  const featsById = choiceRace || classMode ? await loadFeatsById(character.campaignId, selectionNeedsFeats(state, classMode)) : {};
+
+  const choices =
+    choiceRace || classMode
+      ? {
+          selections: choiceSelections({ race: choiceRace, raceChoices: state.raceChoices, classes: classMode ? (classes ?? []) : [], feats: classMode ? state.feats : [], featsById, level: character.level }),
+          pending: pendingCount(visitPicks(state, { race: choiceRace, classesById: context.classesById ?? {}, featsById }, { level: character.level, classMode }), { featsById }),
+        }
+      : undefined;
+
   const normalized = tree ? normalizeTree(tree) : null;
 
   return buildCharacterSheet({
@@ -60,6 +85,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     maxLevel: campaign.maxLevel,
     rules: campaign.rules,
     classes,
+    ...(choices && { choices: { ...choices, canEdit: viewer.isDM || (viewer.isOwner && !!campaign.allowPlayerEdit && character.status !== CharacterStatus.PENDING) } }),
     chapters,
     character,
     raceIcon: race?.icon ?? null,

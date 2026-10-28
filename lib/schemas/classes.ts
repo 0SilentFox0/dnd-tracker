@@ -3,8 +3,10 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CLASS_CASTERS, CLASS_COLUMN_KEY_RE, MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DND_SKILLS } from "@/lib/constants/skills";
+import { ClassChoicesSchema, PicksSchema } from "@/lib/schemas/choices";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
+import { choiceColumnIssues, classChoiceIdIssues } from "@/lib/utils/characters/choices/columns";
 import { classColumnIssues } from "@/lib/utils/characters/classes/columns";
 
 const classIconSchema = z.preprocess(
@@ -17,7 +19,7 @@ const classColorSchema = z.preprocess(
   z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір класу — у форматі #RRGGBB").nullable().optional(),
 );
 
-const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), abilities: AbilitiesSchema });
+const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), abilities: AbilitiesSchema, choices: ClassChoicesSchema.optional() });
 
 const subclassSchema = z.object({
   id: z.string().min(1).max(40),
@@ -39,7 +41,7 @@ type TableIssue = { path: (string | number)[]; message: string };
 const columnsIssues = (c: { columns?: z.infer<typeof ClassColumnSchema>[] }): TableIssue[] =>
   classColumnIssues(c.columns ?? []).map((issue) => ({ path: ["columns", ...issue.path], message: issue.message }));
 
-type FeatureLike = { abilities: Parameters<typeof columnRefIssues>[0] };
+type FeatureLike = { abilities: Parameters<typeof columnRefIssues>[0]; choices?: Parameters<typeof choiceColumnIssues>[0] };
 
 type TableInput = { columns?: z.infer<typeof ClassColumnSchema>[]; features?: FeatureLike[]; subclasses?: { features: FeatureLike[] }[] };
 
@@ -50,12 +52,15 @@ function refsIssues(c: TableInput): TableIssue[] {
   const columns = c.columns;
 
   const check = (features: FeatureLike[] | undefined, base: (string | number)[]) =>
-    (features ?? []).flatMap((f, i) => columnRefIssues(f.abilities, columns).map((issue) => ({ path: [...base, i, "abilities", ...issue.path], message: issue.message })));
+    (features ?? []).flatMap((f, i) => [
+      ...columnRefIssues(f.abilities, columns).map((issue) => ({ path: [...base, i, "abilities", ...issue.path], message: issue.message })),
+      ...choiceColumnIssues(f.choices, columns).map((issue) => ({ path: [...base, i, "choices", ...issue.path], message: issue.message })),
+    ]);
 
   return [...check(c.features, ["features"]), ...(c.subclasses ?? []).flatMap((s, k) => check(s.features, ["subclasses", k, "features"]))];
 }
 
-const tableIssues = (c: TableInput): TableIssue[] => [...columnsIssues(c), ...refsIssues(c)];
+const tableIssues = (c: TableInput): TableIssue[] => [...columnsIssues(c), ...refsIssues(c), ...classChoiceIdIssues(c.features, c.subclasses)];
 
 const refineTable = (c: TableInput, ctx: z.RefinementCtx) => {
   for (const issue of tableIssues(c)) ctx.addIssue({ code: "custom", path: issue.path, message: issue.message });
@@ -90,6 +95,7 @@ export const createClassSchema = z
     subclassLevel: z.number().int().min(1).max(MAX_CLASS_LEVEL).nullable().default(null),
     subclasses: z.array(subclassSchema).max(20).default([]),
     columns: columnsSchema.default([]),
+    spellList: z.string().trim().min(1).max(40).nullable().optional(),
   })
   .refine(uniqueSubclassIds, duplicateSubclass)
   .superRefine(refineTable);
@@ -109,6 +115,7 @@ export const updateClassSchema = z
     subclassLevel: z.number().int().min(1).max(MAX_CLASS_LEVEL).nullable().optional(),
     subclasses: z.array(subclassSchema).max(20).optional(),
     columns: columnsSchema.optional(),
+    spellList: z.string().trim().min(1).max(40).nullable().optional(),
   })
   .refine(uniqueSubclassIds, duplicateSubclass)
   .superRefine(refineTable);
@@ -117,6 +124,7 @@ export const CharacterClassEntrySchema = z.object({
   classId: z.string().min(1),
   subclassId: z.string().min(1).nullable().optional(),
   level: z.number().int().min(1).max(MAX_CLASS_LEVEL),
+  choices: PicksSchema.optional(),
 });
 
 export const CharacterClassesSchema = z

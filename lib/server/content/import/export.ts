@@ -3,7 +3,7 @@ import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { assertCan } from "@/lib/server/content/access";
 import { loadNames } from "@/lib/server/content/import/names";
-import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
+import { artifactAbilities, artifactSetAbilities, featAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
@@ -33,6 +33,7 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
   "spell-groups": async (c) => asRecords(await prisma.spellGroup.findMany(query(c))),
   races: async (c) => asRecords((await prisma.race.findMany(query(c))).map((r) => ({ ...r, abilities: raceAbilities(r) }))),
   classes: async (c) => asRecords(await prisma.gameClass.findMany(query(c))),
+  feats: async (c) => asRecords((await prisma.feat.findMany(query(c))).map((r) => ({ ...r, abilities: featAbilities(r) }))),
   artifacts: async (c) =>
     asRecords((await prisma.artifact.findMany(query(c))).map((r) => ({ ...r, abilities: artifactAbilities(r), weapon: isWeaponSlot(r.slot) ? weaponStatsFromRow(r) : undefined, armor: r.slot === ArtifactSlot.ARMOR ? (armorStatsFromRow(r) ?? undefined) : undefined, item: itemStatsFromRow(r) ?? undefined }))),
   "artifact-sets": async (c) =>

@@ -3,12 +3,22 @@ import type { Prisma } from "@prisma/client";
 
 import { loadRaceProgression } from "../load-race-progression";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { CharacterLogKind } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
+import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
+import { characterClassMode, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { classLevelUp, readLevelUpPick } from "@/lib/server/characters/class-level-up";
+import { lockCharacters } from "@/lib/server/characters/lock";
+import { writeCharacterLog } from "@/lib/server/characters/log";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { loadOwned } from "@/lib/utils/api/load-owned";
+import { choicesStateOf, withClassPicks } from "@/lib/utils/characters/choices/picks";
+import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 
@@ -45,23 +55,66 @@ export async function POST(
     if (classResult instanceof NextResponse) return classResult;
 
     if (classResult) {
-      const seenLevel = seenLevelOnLevelChange(character.level, classResult.level, character.seenLevel);
+      const withChoices = hasPicks(pick.choices);
 
-      const updated = await prisma.character.update({
-        where: { id: characterId },
-        data: {
-          classes: classResult.classes as unknown as Prisma.InputJsonValue,
-          level: classResult.level,
-          class: classResult.class,
-          subclass: classResult.subclass,
-          spellSlots: classResult.spellSlots as Prisma.InputJsonValue,
-          ...(classResult.spellcastingAbility && { spellcastingAbility: classResult.spellcastingAbility }),
-          ...(seenLevel !== undefined && { seenLevel }),
-        },
-        include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+      if (withChoices) {
+        const inBattle = await rejectIfInActiveBattle(id, [characterId]);
+
+        if (inBattle) return inBattle;
+      }
+
+      const refs = withChoices ? await loadChoiceRefs(id, character.race, { classMode: characterClassMode(campaign.rules, classResult.classes) }) : undefined;
+
+      return await prisma.$transaction(async (tx) => {
+        await lockCharacters(tx, [characterId]);
+
+        const row = await tx.character.findUnique({ where: { id: characterId } });
+
+        if (!row) return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const fresh = await classLevelUp({ campaign, character: row, pick });
+
+        if (!fresh || fresh instanceof NextResponse) return fresh ?? errorResponse(API_ERRORS.CLASS_REQUIRED, 422);
+
+        const seenLevel = seenLevelOnLevelChange(row.level, fresh.level, row.seenLevel);
+
+        const before = choicesStateOf(row);
+
+        const raised = fresh.classes.find((e) => e.classId === pick.classId);
+
+        const choices = withChoices
+          ? await resolveCharacterChoices({
+              campaignId: id,
+              rules: campaign.rules,
+              isDM: true,
+              character: { ...row, level: fresh.level },
+              before,
+              after: { ...before, classes: withClassPicks(fresh.classes, { [pick.classId as string]: { ...(raised?.choices ?? {}), ...pick.choices } }) },
+              refs,
+            })
+          : null;
+
+        if (choices && !choices.ok) return choices.response;
+
+        const updated = await tx.character.update({
+          where: { id: characterId },
+          data: {
+            classes: fresh.classes as unknown as Prisma.InputJsonValue,
+            level: fresh.level,
+            class: fresh.class,
+            subclass: fresh.subclass,
+            spellSlots: fresh.spellSlots as Prisma.InputJsonValue,
+            ...(fresh.spellcastingAbility && { spellcastingAbility: fresh.spellcastingAbility }),
+            ...(seenLevel !== undefined && { seenLevel }),
+            ...(choices?.ok && choices.fields),
+          },
+          include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+        });
+
+        if (choices?.ok) await writeCharacterLog(tx, [{ campaignId: id, characterId, actorUserId: accessResult.userId, kind: CharacterLogKind.CHOICES_EDIT, data: { before, after: choices.state } }]);
+
+        return NextResponse.json({ ...updated, levelUpDetails: { abilityIncreased: null, classId: pick.classId } });
       });
-
-      return NextResponse.json({ ...updated, levelUpDetails: { abilityIncreased: null, classId: pick.classId } });
     }
 
     const newLevel = character.level + 1;

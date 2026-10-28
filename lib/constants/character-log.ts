@@ -8,6 +8,7 @@ export const CharacterLogKind = {
   XP: "xp",
   INSPIRATION: "inspiration",
   RESOURCES_EDIT: "resources_edit",
+  CHOICES_EDIT: "choices_edit",
   BATTLE_RESULT: "battle_result",
 } as const;
 

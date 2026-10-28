@@ -11,6 +11,7 @@ import type { CharacterLogKindValue } from "@/lib/constants/character-log";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
+import type { CharacterFeat, Picks, SheetChoices } from "@/types/choices";
 
 export type { AbilityKey };
 
@@ -87,6 +88,7 @@ export interface CharacterFormData {
   abilities: {
     personalSkillId: string;
   };
+  choices?: { raceChoices: Picks; feats: CharacterFeat[] };
 }
 
 /**
@@ -101,6 +103,8 @@ export interface Character {
   level: number;
   class: string;
   subclass?: string;
+  raceChoices?: Picks;
+  feats?: CharacterFeat[];
   classes?: CharacterClassEntry[];
   race: string;
   subrace?: string;
@@ -192,6 +196,7 @@ export interface SheetCheck {
   ability: AbilityKey;
   bonus: number;
   proficient: boolean;
+  expertise?: true;
 }
 
 export interface SheetArtifact {
@@ -219,7 +224,7 @@ export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };
   maxLevel: number;
-  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
+  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; subrace?: string | null; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
   primaryAbility: AbilityKey | null;
   proficiency: number;
@@ -248,6 +253,7 @@ export interface CharacterSheet {
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; notes: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
+  choices?: SheetChoices;
 }
 
 export interface RosterHero {
@@ -276,6 +282,7 @@ export interface DraftInput {
   charisma: number;
   primaryAbility?: AbilityKey;
   goals?: Array<{ text: string; kind: GoalKind }>;
+  choices?: { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
 }
 
 export type RestKindValue = "short" | "long";

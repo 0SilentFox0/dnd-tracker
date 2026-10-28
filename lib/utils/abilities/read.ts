@@ -1,9 +1,11 @@
 import type { Prisma } from "@prisma/client";
 
 import { type Ability, AbilitySchema, type ConversionIssue, parseAbilities } from "@/lib/utils/abilities/schema";
+import { readChoices } from "@/lib/utils/characters/choices/read";
+import type { Choice } from "@/types/choices";
 import type { ClassFeature } from "@/types/classes";
 
-export const OwnerKind = { SKILL: "skill", RACE: "race", CLASS: "class", ARTIFACT: "artifact", ARTIFACT_SET: "artifactSet", UNIT: "unit" } as const;
+export const OwnerKind = { SKILL: "skill", RACE: "race", CLASS: "class", ARTIFACT: "artifact", ARTIFACT_SET: "artifactSet", UNIT: "unit", FEAT: "feat" } as const;
 
 export type OwnerKind = (typeof OwnerKind)[keyof typeof OwnerKind];
 
@@ -41,6 +43,8 @@ export const artifactSetAbilities = (row: OwnerRow) => read(row);
 
 export const unitAbilities = (row: OwnerRow) => read(row);
 
+export const featAbilities = (row: OwnerRow) => read(row);
+
 export function abilitiesJson(abilities: Ability[]): Prisma.InputJsonValue {
   return abilities as unknown as Prisma.InputJsonValue;
 }
@@ -71,16 +75,24 @@ export function withAbilityIssues<R extends OwnerRow, B extends object = R>(kind
   return { ...base, abilities, abilityIssues };
 }
 
+export function readChoiceList(raw: unknown): Choice[] {
+  return readChoices(raw).map((c) =>
+    c.options ? { ...c, options: c.options.map((o) => ({ ...o, abilities: read({ id: `choice-option@${c.id}.${o.id}`, abilities: o.abilities }) })) } : c,
+  );
+}
+
 export function classFeatureAbilities(features: unknown): ClassFeature[] {
   if (!Array.isArray(features)) return [];
 
   return features.flatMap((f): ClassFeature[] => {
     if (!f || typeof f !== "object") return [];
 
-    const { level, abilities } = f as { level?: unknown; abilities?: unknown };
+    const { level, abilities, choices } = f as { level?: unknown; abilities?: unknown; choices?: unknown };
 
     if (typeof level !== "number" || !Number.isInteger(level) || level < 1 || level > 20) return [];
 
-    return [{ level, abilities: read({ id: `class-feature@${level}`, abilities }) }];
+    const list = readChoiceList(choices);
+
+    return [{ level, abilities: read({ id: `class-feature@${level}`, abilities }), ...(list.length > 0 && { choices: list }) }];
   });
 }

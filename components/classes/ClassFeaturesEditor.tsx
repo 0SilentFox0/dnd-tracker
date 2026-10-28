@@ -6,10 +6,12 @@ import { Plus, Trash2 } from "lucide-react";
 import { useErrorTotals } from "./use-error-totals";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import type { Ability } from "@/types/abilities";
+import type { Choice } from "@/types/choices";
 import type { ClassColumn, ClassFeature } from "@/types/classes";
 
 interface ClassFeaturesEditorProps {
@@ -42,10 +44,14 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
 
   const remove = (level: number) => {
     drop(String(level));
+    drop(`choices-${level}`);
     onChange(value.filter((f) => f.level !== level));
   };
 
   const setAbilities = (level: number, abilities: Ability[]) => onChange(value.map((f) => (f.level === level ? { ...f, abilities } : f)));
+
+  const setChoices = (level: number, choices: Choice[]) =>
+    onChange(value.map((f) => (f.level !== level ? f : choices.length > 0 ? { ...f, choices } : { level: f.level, abilities: f.abilities })));
 
   return (
     <div className="space-y-4">
@@ -66,6 +72,10 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
             onValidityChange={(_, n) => report(String(feature.level), n)}
             classColumns={classColumns}
           />
+          <div className="mt-3 space-y-2">
+            <p className="hud-sc text-xs text-hud-muted">Вибори</p>
+            <ChoiceListEditor campaignId={campaignId} owner="class" value={feature.choices ?? []} onChange={(choices) => setChoices(feature.level, choices)} classColumns={classColumns} onValidityChange={(_, n) => report(`choices-${feature.level}`, n)} />
+          </div>
         </HudSection>
       ))}
 

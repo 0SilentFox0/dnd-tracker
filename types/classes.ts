@@ -1,6 +1,7 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { ClassCaster } from "@/lib/constants/classes";
 import type { Ability } from "@/types/abilities";
+import type { Choice, Picks } from "@/types/choices";
 
 export type { ClassCaster };
 export type HitDie = 6 | 8 | 10 | 12;
@@ -8,6 +9,7 @@ export type HitDie = 6 | 8 | 10 | 12;
 export interface ClassFeature {
   level: number;
   abilities: Ability[];
+  choices?: Choice[];
 }
 
 export interface Subclass {
@@ -40,17 +42,20 @@ export interface GameClassData {
   subclassLevel: number | null;
   subclasses: Subclass[];
   columns?: ClassColumn[];
+  spellList?: string | null;
 }
 
 export interface CharacterClassEntry {
   classId: string;
   subclassId?: string | null;
   level: number;
+  choices?: Picks;
 }
 
 export interface ClassLevelUpPick {
   classId?: string;
   subclassId?: string;
+  choices?: Picks;
 }
 
 /** запис персонажа з розв'язаним класом; class === null — клас не знайдено */

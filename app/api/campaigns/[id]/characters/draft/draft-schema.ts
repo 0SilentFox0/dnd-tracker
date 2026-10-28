@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { GoalKind } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
+import { DraftChoicesSchema } from "@/lib/schemas/choices";
 import type { DraftInput } from "@/types/characters";
 
 const score = z.number().int();
@@ -27,6 +28,7 @@ export const draftSchema = z.object({
     .array(z.object({ text: z.string().min(1).max(500), kind: z.enum([GoalKind.MAIN, GoalKind.PERSONAL, GoalKind.INNER, GoalKind.SECRET]) }))
     .max(5)
     .optional(),
+  choices: DraftChoicesSchema.optional(),
 }) satisfies z.ZodType<DraftInput>;
 
 export const classDraftSchema = draftSchema.omit({ class: true, archetype: true }).extend({ classId: z.string().min(1).max(100).optional() });

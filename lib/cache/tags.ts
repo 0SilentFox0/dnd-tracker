@@ -7,6 +7,7 @@ export const ReferenceKind = {
   UNITS: "units",
   RACES: "races",
   CLASSES: "classes",
+  FEATS: "feats",
 } as const;
 
 export type ReferenceKindValue = (typeof ReferenceKind)[keyof typeof ReferenceKind];
@@ -18,6 +19,7 @@ const TAG_PREFIX: Record<ReferenceKindValue, string> = {
   units: "units",
   races: "races",
   classes: "classes",
+  feats: "feats",
 };
 
 const tagFor = (kind: ReferenceKindValue) => (campaignId: string) => `${TAG_PREFIX[kind]}-${campaignId}`;
@@ -29,6 +31,7 @@ export const cacheTags: Record<ReferenceKindValue, (campaignId: string) => strin
   units: tagFor(ReferenceKind.UNITS),
   races: tagFor(ReferenceKind.RACES),
   classes: tagFor(ReferenceKind.CLASSES),
+  feats: tagFor(ReferenceKind.FEATS),
 };
 
 export function invalidateReference(

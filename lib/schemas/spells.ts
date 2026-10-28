@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
+import { SpellListsSchema } from "@/lib/schemas/choices";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
@@ -29,6 +30,7 @@ const spellFields = {
   upcastTargets: z.number().int().min(0).max(10).nullable(),
   addAbilityMod: z.boolean().nullable(),
   fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
+  lists: SpellListsSchema.describe("Теги списків заклинань класів (Wizard, Cleric…)"),
 };
 
 export const createSpellSchema = z.object({
@@ -50,6 +52,7 @@ export const createSpellSchema = z.object({
   upcastDice: spellFields.upcastDice.optional(),
   upcastTargets: spellFields.upcastTargets.optional(),
   addAbilityMod: spellFields.addAbilityMod.optional(),
+  lists: spellFields.lists.optional(),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;

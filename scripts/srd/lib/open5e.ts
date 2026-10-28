@@ -133,6 +133,10 @@ export interface O5Item { name: string; weapon: string | null; armor: string | n
 
 export interface O5MagicItem { name: string; desc: string; category: string; rarity: string; requires_attunement: boolean; weapon: string | null; armor: string | null }
 
+export interface O5Feat { name: string; desc: string; type: string; prerequisite: string }
+
+export interface O5FeatBenefit { name: string; desc: string; parent: string; type: string | null }
+
 export interface O5Document { name: string; licenses: string[] }
 
 export interface Open5eData {
@@ -154,6 +158,8 @@ export interface Open5eData {
   armor: Fixture<O5Armor>[];
   items: Fixture<O5Item>[];
   magicItems: Fixture<O5MagicItem>[];
+  feats: Fixture<O5Feat>[];
+  featBenefits: Fixture<O5FeatBenefit>[];
 }
 
 export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
@@ -175,6 +181,8 @@ export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
   armor: "Armor",
   items: "Item",
   magicItems: "MagicItem",
+  feats: "Feat",
+  featBenefits: "FeatBenefit",
 };
 
 export const FIXTURE_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures");
@@ -182,8 +190,10 @@ export const FIXTURE_4F2_DIR = path.join(process.cwd(), "scripts", "srd", "__tes
 
 export const FIXTURE_4F3_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f3");
 
-// MagicItem arrived in 4f-3: the 4f-1/4f-2 fixture dirs do not carry it
-const OPTIONAL_FILES = new Set<Open5eFile>(["MagicItem"]);
+export const FIXTURE_4F4_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f4");
+
+// MagicItem arrived in 4f-3, feats in 4f-4: older fixture dirs do not carry them
+const OPTIONAL_FILES = new Set<Open5eFile>(["MagicItem", "Feat", "FeatBenefit"]);
 
 export function loadOpen5e(dir: string): Open5eData {
   const read = (file: Open5eFile) => {

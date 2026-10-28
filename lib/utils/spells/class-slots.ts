@@ -96,6 +96,14 @@ export function classSpellSlots(entries: ResolvedClassEntry[]): ClassSlots {
   return slots;
 }
 
+export function maxSlotLevelFor(entry: ResolvedClassEntry): number {
+  const slots = classSpellSlots([entry]);
+
+  const regular = Object.keys(slots).filter((k) => k !== PACT_KEY).map(Number).filter(Number.isFinite);
+
+  return Math.max(0, slots[PACT_KEY]?.level ?? 0, ...regular);
+}
+
 export function resolveClassEntries(entries: CharacterClassEntry[], classesById: Record<string, GameClassData>): ResolvedClassEntry[] {
   return entries.map((entry) => {
     const cls = classesById[entry.classId] ?? null;

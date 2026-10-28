@@ -124,6 +124,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("checkAdvantage"), skills: SkillsOrAll }),
   z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
   z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("skillExpertise"), skills: z.array(DndSkillSchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),

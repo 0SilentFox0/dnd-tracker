@@ -10,6 +10,7 @@ import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
+import { PendingChoicesBadge } from "./PendingChoicesBadge";
 import { ProfileProvider } from "./ProfileContext";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
@@ -100,7 +101,12 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
               <>
                 <ProfileHero
                   ref={hero.ref}
-                  badge={<LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />}
+                  badge={
+                    <>
+                      <LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />
+                      <PendingChoicesBadge />
+                    </>
+                  }
                   actions={
                     canEdit && sheet.viewer.isDM ? (
                       <>

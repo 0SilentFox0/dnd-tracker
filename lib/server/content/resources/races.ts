@@ -14,6 +14,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { raceNameTaken } from "@/lib/server/races/race-name";
 import { updateRaceCascade } from "@/lib/server/races/update-race";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
+import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
   if (await raceNameTaken(campaignId, name, exceptId)) throw new ContentError(raceNameTakenMessage(name), 409);
@@ -36,7 +37,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
   toItem: (row) => withAbilityIssues("race", row),
   async create(actor, data) {
     await assertNameFree(actor.campaignId, data.name);
-    await assertCampaignRefs(actor.campaignId, { mainSkill: data.availableSkills, skill: data.disabledSkills });
+    await assertCampaignRefs(actor.campaignId, { mainSkill: data.availableSkills, skill: data.disabledSkills, spell: choiceSpellIds(data.choices) });
 
     const color = data.color ?? raceColorAt(await prisma.race.count({ where: { campaignId: actor.campaignId } }));
 
@@ -51,6 +52,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
         passiveAbility: data.passiveAbility ? (data.passiveAbility as Prisma.InputJsonValue) : Prisma.JsonNull,
         spellSlotProgression: data.spellSlotProgression ? (data.spellSlotProgression as Prisma.InputJsonValue) : [],
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
+        ...(data.choices && { choices: data.choices as unknown as Prisma.InputJsonValue }),
       },
     });
   },
@@ -60,6 +62,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
     await assertCampaignRefs(actor.campaignId, {
       mainSkill: addedIds(data.availableSkills, existing.availableSkills),
       skill: addedIds(data.disabledSkills, existing.disabledSkills),
+      spell: addedIds(choiceSpellIds(data.choices), choiceSpellIds(readChoices(existing.choices)) ?? []),
     });
 
     return updateRaceCascade(actor.campaignId, existing, data);

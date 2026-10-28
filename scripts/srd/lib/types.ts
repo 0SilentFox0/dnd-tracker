@@ -8,9 +8,10 @@ import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
 import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { Choice, FeatPrerequisite, FeatType } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
-export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "units", "artifacts"] as const;
+export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "units", "artifacts"] as const;
 
 export type SrdKind = (typeof SRD_KINDS)[number];
 
@@ -32,11 +33,12 @@ export interface SpellRow {
   targeting: SpellTargeting;
   resolution: SpellResolution;
   spellEffects: Effect[];
+  lists: string[];
 }
 
-export interface RaceRow { slug: string; name: string; passiveAbility: { name: string; description: string }; abilities: Ability[] }
+export interface RaceRow { slug: string; name: string; passiveAbility: { name: string; description: string }; abilities: Ability[]; choices?: Choice[] }
 
-export interface ClassFeatureGroup { level: number; abilities: Ability[] }
+export interface ClassFeatureGroup { level: number; abilities: Ability[]; choices?: Choice[] }
 
 export interface ClassRow {
   slug: string;
@@ -51,6 +53,7 @@ export interface ClassRow {
   subclassLevel: number;
   subclasses: Array<{ id: string; name: string; features: ClassFeatureGroup[] }>;
   columns: ClassColumn[];
+  spellList?: string;
 }
 
 export interface UnitAttackRow {
@@ -100,11 +103,23 @@ export interface ArtifactRow {
   abilities?: Ability[];
 }
 
+export interface FeatRow {
+  slug: string;
+  name: string;
+  type: FeatType;
+  prerequisite: FeatPrerequisite;
+  repeatable: boolean;
+  description: string;
+  abilities: Ability[];
+  choices: Choice[];
+}
+
 export interface SrdData {
   "spell-groups": SpellGroupRow[];
   spells: SpellRow[];
   races: RaceRow[];
   classes: ClassRow[];
+  feats: FeatRow[];
   units: UnitRow[];
   artifacts: ArtifactRow[];
 }

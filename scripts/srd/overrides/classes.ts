@@ -192,6 +192,7 @@ const levels = (f: (level: number) => string) => Array.from({ length: MAX_CLASS_
 export const EXTRA_COLUMNS: Record<string, ClassColumn[]> = {
   "srd-2024_fighter": [{ key: "action-surge", label: "Action Surge", values: levels((l) => (l >= 17 ? "2" : l >= 2 ? "1" : "")) }],
   "srd-2024_cleric": [{ key: "divine-spark", label: "Divine Spark", values: levels((l) => (l >= 18 ? "4d8" : l >= 13 ? "3d8" : l >= 7 ? "2d8" : l >= 2 ? "1d8" : "")) }],
+  "srd-2024_sorcerer": [{ key: "metamagic", label: "Metamagic", values: levels((l) => (l >= 17 ? "6" : l >= 10 ? "4" : l >= 2 ? "2" : "")) }],
   "srd-2024_paladin": [{ key: "lay-on-hands", label: "Lay on Hands", values: levels((l) => String(5 * l)), pool: { rest: "long" } }],
 };
 

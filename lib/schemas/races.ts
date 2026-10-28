@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { RaceChoicesSchema } from "@/lib/schemas/choices";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const passiveAbilitySchema = z
@@ -49,6 +50,7 @@ export const createRaceSchema = z.object({
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
   abilities: AbilitiesSchema.describe("Здібності раси").optional(),
+  choices: RaceChoicesSchema.describe("Вибори раси: лінія (lineage), навички, риси, опції; spellId опції — id заклинання").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 
@@ -60,6 +62,7 @@ export const updateRaceSchema = z.object({
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,
   abilities: AbilitiesSchema.describe("Здібності раси").optional(),
+  choices: RaceChoicesSchema.describe("Вибори раси: лінія (lineage), навички, риси, опції; spellId опції — id заклинання").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 

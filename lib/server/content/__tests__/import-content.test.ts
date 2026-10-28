@@ -10,7 +10,7 @@ vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
 import type { ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { createArtifactSchema, createArtifactSetSchema, createClassSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
@@ -216,6 +216,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   "spell-groups": createSpellGroupSchema,
   races: createRaceSchema,
   classes: createClassSchema,
+  feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,
 };

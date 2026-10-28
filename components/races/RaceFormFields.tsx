@@ -7,6 +7,7 @@ import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
 import { RaceEditFormStatModifiers } from "./RaceEditFormStatModifiers";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
 import { ColorField } from "@/components/common/ColorField";
 import { HudSection, type HudTab, HudTabs } from "@/components/hud/form";
 import { useRevealInvalidTab } from "@/components/hud/form/reveal-invalid-tab";
@@ -35,6 +36,8 @@ export function RaceFormFields({
   const [tab, setTab] = useState<RaceFormTabId>(RACE_FORM_TAB.basic);
 
   const [abilityErrors, setAbilityErrors] = useState(0);
+
+  const [choiceErrors, setChoiceErrors] = useState(0);
 
   const onInvalidCapture = useRevealInvalidTab(tab, setTab);
 
@@ -137,6 +140,27 @@ export function RaceFormFields({
         />
       ),
     },
+    ...(compact
+      ? []
+      : [
+          {
+            id: RACE_FORM_TAB.choices,
+            label: "Вибори й лінії",
+            invalid: choiceErrors > 0,
+            content: (
+              <ChoiceListEditor
+                campaignId={campaignId}
+                owner="race"
+                value={formData.choices ?? []}
+                onChange={(choices) => setFormData((prev) => ({ ...prev, choices }))}
+                onValidityChange={(ok, n) => {
+                  setChoiceErrors(n);
+                  onAbilitiesValidityChange?.(ok && abilityErrors === 0, abilityErrors + n);
+                }}
+              />
+            ),
+          },
+        ]),
   ];
 
   return (

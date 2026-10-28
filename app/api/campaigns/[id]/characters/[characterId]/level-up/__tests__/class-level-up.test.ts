@@ -15,7 +15,13 @@ vi.mock("@/lib/cache/reference-data", () => ({
   ]),
 }));
 vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
-vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() } } }));
+vi.mock("@/lib/db", () => {
+  const prisma: Record<string, unknown> = { $queryRaw: vi.fn(async () => []), character: { findUnique: vi.fn(), update: vi.fn() } };
+
+  prisma.$transaction = vi.fn(async (fn: (tx: unknown) => unknown) => fn(prisma));
+
+  return { prisma };
+});
 
 const campaign = { id: "camp", maxLevel: 20, rules: { ...DEFAULT_RULES, classes: { enabled: true } } };
 

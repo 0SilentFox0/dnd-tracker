@@ -1,0 +1,48 @@
+[
+  {
+    "fields": {
+      "attack_type": "WEAPON",
+      "damage_bonus": null,
+      "damage_die_count": 3,
+      "damage_die_type": "D6",
+      "damage_type": "radiant",
+      "distance_unit": null,
+      "extra_damage_bonus": null,
+      "extra_damage_die_count": null,
+      "extra_damage_die_type": null,
+      "extra_damage_type": null,
+      "long_range": null,
+      "name": "Verdant Wisp attack",
+      "parent": "srd-2024_druid_verdant-wisp",
+      "range": 90,
+      "reach": null,
+      "target_creature_only": false,
+      "to_hit_mod": 5
+    },
+    "model": "api_v2.creatureactionattack",
+    "pk": "srd-2024_druid_verdant-wisp_verdant-wisp-attack"
+  },
+  {
+    "fields": {
+      "attack_type": "WEAPON",
+      "damage_bonus": 3,
+      "damage_die_count": 1,
+      "damage_die_type": "D8",
+      "damage_type": "bludgeoning",
+      "distance_unit": null,
+      "extra_damage_bonus": null,
+      "extra_damage_die_count": null,
+      "extra_damage_die_type": null,
+      "extra_damage_type": "poison",
+      "long_range": null,
+      "name": "Vine Staff attack",
+      "parent": "srd-2024_druid_vine-staff",
+      "range": null,
+      "reach": 5,
+      "target_creature_only": false,
+      "to_hit_mod": 5
+    },
+    "model": "api_v2.creatureactionattack",
+    "pk": "srd-2024_druid_vine-staff_vine-staff-attack"
+  }
+]

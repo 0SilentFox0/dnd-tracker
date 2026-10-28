@@ -1,0 +1,962 @@
+[
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10631,
+    "fields": {
+      "parent": "srd-2024_chill-touch",
+      "type": "player_level_11",
+      "damage_roll": "3d10",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10632,
+    "fields": {
+      "parent": "srd-2024_chill-touch",
+      "type": "player_level_17",
+      "damage_roll": "4d10",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "2d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_chill-touch",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "player_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10092
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "4d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10163
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "6d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10164
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "8d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10165
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "10d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10166
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "12d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10167
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "14d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10168
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "16d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10169
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "18d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_cure-wounds",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10170
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 5 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10221
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 10 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10222
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 15 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10223
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 20 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10224
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 25 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10225
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 30 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10226
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 35 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10227
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": "grants 40 additional temporary hit points",
+      "duration": null,
+      "parent": "srd-2024_false-life",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10228
+  },
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10629,
+    "fields": {
+      "parent": "srd-2024_fire-bolt",
+      "type": "player_level_11",
+      "damage_roll": "3d10",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10630,
+    "fields": {
+      "parent": "srd-2024_fire-bolt",
+      "type": "player_level_17",
+      "damage_roll": "4d10",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "2d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_fire-bolt",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "player_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10236
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "3d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10313
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "4d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10314
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "5d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10315
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "6d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10316
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "7d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10317
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "8d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10318
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "9d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10319
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "10d10",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hellish-rebuke",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10320
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 2,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10342
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 3,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10343
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 4,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10344
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 5,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10345
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 6,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10346
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 7,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10347
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_hold-person",
+      "range": null,
+      "shape_size": null,
+      "target_count": 8,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10348
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 2,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10397
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 3,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10398
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 4,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10399
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 5,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10400
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 6,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10401
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 7,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10402
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 8,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10403
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_longstrider",
+      "range": null,
+      "shape_size": null,
+      "target_count": 9,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10404
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 4,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10411
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 5,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10412
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 6,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10413
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 7,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10414
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 8,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10415
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 9,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10416
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 10,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10417
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": null,
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_magic-missile",
+      "range": null,
+      "shape_size": null,
+      "target_count": 11,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10418
+  },
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10633,
+    "fields": {
+      "parent": "srd-2024_poison-spray",
+      "type": "player_level_11",
+      "damage_roll": "3d12",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "model": "api_v2.spellcastingoption",
+    "pk": 10634,
+    "fields": {
+      "parent": "srd-2024_poison-spray",
+      "type": "player_level_17",
+      "damage_roll": "4d12",
+      "target_count": null,
+      "duration": null,
+      "range": null,
+      "concentration": null,
+      "shape_size": null,
+      "desc": null
+    }
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "2d12",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_poison-spray",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "player_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10472
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "3d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_2"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10482
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "4d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_3"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10483
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "5d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_4"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10484
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "6d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_5"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10485
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "7d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_6"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10486
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "8d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_7"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10487
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "9d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_8"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10488
+  },
+  {
+    "fields": {
+      "concentration": null,
+      "damage_roll": "10d8",
+      "desc": null,
+      "duration": null,
+      "parent": "srd-2024_ray-of-sickness",
+      "range": null,
+      "shape_size": null,
+      "target_count": null,
+      "type": "slot_level_9"
+    },
+    "model": "api_v2.spellcastingoption",
+    "pk": 10489
+  }
+]

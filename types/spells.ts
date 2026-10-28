@@ -30,6 +30,7 @@ export interface Spell {
   addAbilityMod?: boolean | null;
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
+  lists?: string[];
 }
 
 export interface SpellGroup {
@@ -60,6 +61,7 @@ export interface SpellFormData {
   upcastTargets?: number | null;
   addAbilityMod?: boolean;
   fx: SpellFx;
+  lists?: string[];
 }
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */

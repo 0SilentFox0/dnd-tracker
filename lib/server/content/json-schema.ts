@@ -1,6 +1,7 @@
 import { z, type ZodType } from "zod";
 
 import "server-only";
+import { ChoiceSchema } from "@/lib/schemas/choices";
 import { ClassColumnSchema } from "@/lib/schemas/classes";
 import { AbilitySchema, LimitsSchema } from "@/lib/utils/abilities/schema/ability";
 import { AmountSchema, FlatSchema, FormulaSchema, ScaleSchema } from "@/lib/utils/abilities/schema/common";
@@ -40,6 +41,7 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [ArmorStatsSchema, "ArmorStats"],
   [ItemStatsSchema, "ItemStats"],
   [ClassColumnSchema, "ClassColumn"],
+  [ChoiceSchema, "Choice"],
   [RulesetPatchSchema, "RulesetPatch"],
 ];
 

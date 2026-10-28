@@ -35,7 +35,7 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
   const { data, set } = editor.form;
 
   const tabs: HudTab<ClassFormTabId>[] = [
-    { id: "basics", label: "Основне", content: <ClassBasicsTab form={editor.form} /> },
+    { id: "basics", label: "Основне", content: <ClassBasicsTab form={editor.form} campaignId={campaignId} /> },
     { id: "table", label: "Таблиця класу", content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
     {
       id: "features",

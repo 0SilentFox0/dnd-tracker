@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { SpellListHint } from "./SpellListHint";
+
 import { ColorField } from "@/components/common/ColorField";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -11,13 +13,14 @@ import { SelectField } from "@/components/ui/select-field";
 import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
 import { CLASS_CASTER_LABELS, CLASS_CASTERS, HIT_DICE } from "@/lib/constants/classes";
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
+import { toggleItem } from "@/lib/utils/common/collections";
+import { parseCommaList } from "@/lib/utils/common/text";
 import type { ClassCaster, ClassFormData, HitDie } from "@/types/classes";
 
 interface ClassBasicsTabProps {
   form: { data: ClassFormData; set: React.Dispatch<React.SetStateAction<ClassFormData>> };
+  campaignId?: string;
 }
-
-const parseList = (text: string) => text.split(",").map((s) => s.trim()).filter(Boolean);
 
 function ListInput({ id, label, value, onChange }: { id: string; label: string; value: string[]; onChange: (next: string[]) => void }) {
   const [text, setText] = useState(value.join(", "));
@@ -30,7 +33,7 @@ function ListInput({ id, label, value, onChange }: { id: string; label: string; 
         value={text}
         onChange={(e) => {
           setText(e.target.value);
-          onChange(parseList(e.target.value));
+          onChange(parseCommaList(e.target.value));
         }}
         placeholder="Через кому"
       />
@@ -38,9 +41,7 @@ function ListInput({ id, label, value, onChange }: { id: string; label: string; 
   );
 }
 
-const toggle = <T extends string>(list: T[], item: T) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
-
-export function ClassBasicsTab({ form: { data, set } }: ClassBasicsTabProps) {
+export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsTabProps) {
   const patch = (next: Partial<ClassFormData>) => set((prev) => ({ ...prev, ...next }));
 
   const isCaster = data.caster !== "none";
@@ -71,7 +72,7 @@ export function ClassBasicsTab({ form: { data, set } }: ClassBasicsTabProps) {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {ABILITY_KEYS.map((key) => (
             <label key={key} className="flex items-center gap-2 text-sm">
-              <Checkbox checked={data.savingThrows.includes(key)} onCheckedChange={() => patch({ savingThrows: toggle<AbilityKey>(data.savingThrows, key) })} />
+              <Checkbox checked={data.savingThrows.includes(key)} onCheckedChange={() => patch({ savingThrows: toggleItem(data.savingThrows, key) })} />
               {ABILITY_LABELS[key]}
             </label>
           ))}
@@ -100,7 +101,7 @@ export function ClassBasicsTab({ form: { data, set } }: ClassBasicsTabProps) {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {DND_SKILLS.map((skill) => (
             <label key={skill} className="flex items-center gap-2 text-sm">
-              <Checkbox checked={data.skillChoices.from.includes(skill)} onCheckedChange={() => patch({ skillChoices: { ...data.skillChoices, from: toggle(data.skillChoices.from, skill) } })} />
+              <Checkbox checked={data.skillChoices.from.includes(skill)} onCheckedChange={() => patch({ skillChoices: { ...data.skillChoices, from: toggleItem(data.skillChoices.from, skill) } })} />
               {DND_SKILL_META[skill].label}
             </label>
           ))}
@@ -127,6 +128,14 @@ export function ClassBasicsTab({ form: { data, set } }: ClassBasicsTabProps) {
             options={ABILITY_KEYS.map((k) => ({ value: k, label: ABILITY_LABELS[k] }))}
             allowNone
           />
+        </div>
+      )}
+
+      {isCaster && (
+        <div className="space-y-2">
+          <Label htmlFor="class-spell-list">Список заклинань</Label>
+          <Input id="class-spell-list" value={data.spellList ?? ""} placeholder={data.name} onChange={(e) => patch({ spellList: e.target.value.trim() ? e.target.value : null })} />
+          {campaignId && data.spellList && <SpellListHint campaignId={campaignId} tag={data.spellList} />}
         </div>
       )}
     </div>

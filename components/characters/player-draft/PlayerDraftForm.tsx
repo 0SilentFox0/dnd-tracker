@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AbilityScoresPicker } from "./AbilityScoresPicker";
 import { RollingField } from "./RollingField";
 
+import { ChoicesEditor } from "@/components/choices/ChoicesEditor";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -18,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { GOAL_KIND_LABEL } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
-import { type RollKey, usePlayerDraftForm } from "@/lib/hooks/characters";
+import { type RollKey, useChoiceRefs, usePlayerDraftForm } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 import type { DraftInput } from "@/types/characters";
 
@@ -33,9 +34,11 @@ const ARCHETYPES = HERO_ARCHETYPE_OPTIONS.filter((o) => o.value);
 export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraftFormProps) {
   const { data: races = [] } = useRaces(campaignId);
 
-  const { form, generate, ai, submit, scoreStatus, reveal } = usePlayerDraftForm({ campaignId, characterId, initial });
+  const { form, choices, generate, ai, submit, scoreStatus, reveal } = usePlayerDraftForm({ campaignId, characterId, initial });
 
   const { values, set } = form;
+
+  const refs = useChoiceRefs(campaignId, values.race);
 
   const spinning = (key: RollKey) => reveal.rolling && !reveal.settled.has(key) && key in reveal.display;
 
@@ -71,7 +74,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
         error={submit.error ?? disabledReason}
         onSubmit={(e) => {
           e.preventDefault();
-          submit.run();
+          submit.run(refs.ready ? refs : undefined);
         }}
         actions={
           <>
@@ -165,6 +168,21 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
             <HudSection title="Характеристики">
               <AbilityScoresPicker form={form} scoreStatus={scoreStatus} reveal={reveal} />
             </HudSection>
+
+            {(refs.race || choices.enabled) && refs.ready && (
+              <HudSection title="Вибори">
+                <ChoicesEditor
+                  state={choices}
+                  refs={refs}
+                  hero={{
+                    level: 1,
+                    scores: { strength: values.strength, dexterity: values.dexterity, constitution: values.constitution, intelligence: values.intelligence, wisdom: values.wisdom, charisma: values.charisma },
+                    skills: {},
+                    classMode: choices.enabled && !!values.classId,
+                  }}
+                />
+              </HudSection>
+            )}
 
             <HudSection title="Історія">
               <div data-settled={settled("background")} className="hud-roll-fade flex flex-col gap-3" style={spinning("background") ? { opacity: 0 } : undefined}>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { deriveCharacterDefaults, EMPTY_INVENTORY } from "../derive-character-defaults";
+import { draftChoiceFields } from "./draft-choices";
 import { parseDraftBody } from "./draft-class";
 import { draftFields } from "./draft-data";
 import { resolveDraftParts } from "./draft-resolve";
@@ -11,6 +12,7 @@ import { prisma } from "@/lib/db";
 import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import type { CharacterClassEntry } from "@/types/classes";
 
 export async function createDraft(request: Request, campaignId: string): Promise<NextResponse> {
   const access = await requireCampaignAccess(campaignId);
@@ -41,6 +43,10 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   if (asClass && !asClass.ok) return errorResponse(asClass.error, asClass.status);
 
+  const choices = await draftChoiceFields({ campaignId, rules: campaign.rules, data, classes: asClass?.ok ? (asClass.fields.classes as unknown as CharacterClassEntry[]) : [], classesById: parsed.asClass?.classesById });
+
+  if (choices && !choices.ok) return choices.response;
+
   const spellSlots = asClass?.spellSlots ?? (await deriveCharacterDefaults(campaignId, { level: 1, race: data.race })).spellSlots;
 
   const result = await prisma.$transaction(async (tx) => {
@@ -59,6 +65,7 @@ export async function createDraft(request: Request, campaignId: string): Promise
         controlledBy: access.userId,
         level: 1,
         ...asClass?.fields,
+        ...(choices?.ok && choices.fields),
         initiative: HERO_INITIATIVE.DEFAULT,
         avatar: avatar.avatar ?? undefined,
         spellSlots,

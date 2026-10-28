@@ -30,6 +30,8 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
       return d.value ? "✦ Отримано натхнення" : "✦ Натхнення знято";
     case "resources_edit":
       return "ДМ змінив ресурси";
+    case "choices_edit":
+      return "✎ Змінено вибори (раса, риси, опції класу)";
     case "battle_result":
       return `⚔ Після бою: HP ${num("hpBefore")} → ${num("hpAfter")} / ${num("maxHp")}${d.dead ? " · загинув" : ""}`;
   }

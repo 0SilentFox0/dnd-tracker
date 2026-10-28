@@ -1,0 +1,62 @@
+[
+  {
+    "fields": {
+      "action_type": "ACTION",
+      "desc": "The druid makes two attacks, using Vine Staff or Verdant Wisp in any combination.",
+      "name": "Multiattack",
+      "parent": "srd-2024_druid",
+      "uses_param": null,
+      "uses_type": null,
+      "order_in_statblock": 0,
+      "limited_to_form": null,
+      "legendary_action_cost": null
+    },
+    "model": "api_v2.creatureaction",
+    "pk": "srd-2024_druid_multiattack"
+  },
+  {
+    "fields": {
+      "action_type": "ACTION",
+      "desc": "The druid casts one of the following spells, using Wisdom as the spellcasting ability (spell save DC 13):\n\n- **At Will:** Druidcraft, Speak with Animals\n- **2/Day Each:** Entangle, Thunderwave\n- **1/Day Each:** Animal Messenger, Longstrider, Moonbeam",
+      "name": "Spellcasting",
+      "parent": "srd-2024_druid",
+      "uses_param": null,
+      "uses_type": null,
+      "order_in_statblock": 3,
+      "limited_to_form": null,
+      "legendary_action_cost": null
+    },
+    "model": "api_v2.creatureaction",
+    "pk": "srd-2024_druid_spellcasting"
+  },
+  {
+    "fields": {
+      "action_type": "ACTION",
+      "desc": "Ranged Attack Roll: +5, range 90 ft. 10 (3d6) Radiant damage.",
+      "name": "Verdant Wisp",
+      "parent": "srd-2024_druid",
+      "uses_param": null,
+      "uses_type": null,
+      "order_in_statblock": 2,
+      "limited_to_form": null,
+      "legendary_action_cost": null
+    },
+    "model": "api_v2.creatureaction",
+    "pk": "srd-2024_druid_verdant-wisp"
+  },
+  {
+    "fields": {
+      "action_type": "ACTION",
+      "desc": "Melee Attack Roll: +5, reach 5 ft. 7 (1d8 + 3) Bludgeoning damage plus 2 (1d4) Poison damage.",
+      "name": "Vine Staff",
+      "parent": "srd-2024_druid",
+      "uses_param": null,
+      "uses_type": null,
+      "order_in_statblock": 1,
+      "limited_to_form": null,
+      "legendary_action_cost": null
+    },
+    "model": "api_v2.creatureaction",
+    "pk": "srd-2024_druid_vine-staff"
+  }
+]

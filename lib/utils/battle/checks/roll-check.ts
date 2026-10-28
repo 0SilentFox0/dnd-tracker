@@ -38,10 +38,16 @@ function skillProficient(actor: BattleParticipant, skill: DndSkill, participants
   return byData || collectModifiers(withSelf(participants, actor), actor.basicInfo.id, { flag: "skillProficiency" }).flags.some((f) => f.flag === "skillProficiency" && f.skills.includes(skill));
 }
 
+function skillExpert(actor: BattleParticipant, skill: DndSkill, participants: BattleParticipant[]): boolean {
+  return collectModifiers(withSelf(participants, actor), actor.basicInfo.id, { flag: "skillExpertise" }).flags.some((f) => f.flag === "skillExpertise" && f.skills.includes(skill));
+}
+
 export function checkBonus(actor: BattleParticipant, subject: CheckSubject, participants: BattleParticipant[], rules?: Ruleset): { mod: number; bonus: number } {
   const skill = skillOf(subject);
 
-  const proficiency = skill && skillProficient(actor, skill, participants) ? actor.abilities.proficiencyBonus : 0;
+  const proficient = !!skill && skillProficient(actor, skill, participants);
+
+  const proficiency = proficient ? actor.abilities.proficiencyBonus * (skill && skillExpert(actor, skill, participants) ? 2 : 1) : 0;
 
   const exhaustion = exhaustionVariant(actor, rules) === "2024" ? -2 * exhaustionLevel(actor) : 0;
 

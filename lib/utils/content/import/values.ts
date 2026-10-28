@@ -182,6 +182,14 @@ export function parseFieldValue(field: ImportField, rawCell: unknown): ParsedVal
   }
 }
 
+function namesInside(value: unknown, nested: NonNullable<ImportField["nestedRef"]>, nameOf: (kind: ImportKind, id: string) => string | undefined): unknown {
+  if (Array.isArray(value)) return value.map((v) => namesInside(v, nested, nameOf));
+
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === nested.key && typeof v === "string" ? (nameOf(nested.kind, v) ?? v) : namesInside(v, nested, nameOf)]));
+}
+
 export function formatFieldValue(field: ImportField, value: unknown, nameOf: (kind: ImportKind, id: string) => string | undefined): string {
   if (value === undefined || value === null) return "";
 
@@ -198,7 +206,11 @@ export function formatFieldValue(field: ImportField, value: unknown, nameOf: (ki
       return value ? "так" : "ні";
     case "cr":
       return String(value);
-    case "json":
+    case "json": {
+      const mapped = field.nestedRef ? namesInside(value, field.nestedRef, nameOf) : value;
+
+      return Array.isArray(mapped) && mapped.length === 0 ? "" : JSON.stringify(mapped);
+    }
     case "attacks":
     case "abilitiesText":
       return Array.isArray(value) && value.length === 0 ? "" : JSON.stringify(value);

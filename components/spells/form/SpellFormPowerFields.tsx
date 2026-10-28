@@ -14,6 +14,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { labelOptions, TEMPLATE_SHAPE_LABELS } from "@/lib/constants/spells";
+import { parseCommaList } from "@/lib/utils/common/text";
 import type { TemplateShape } from "@/types/battle";
 import type { SpellTargeting } from "@/types/spells";
 
@@ -159,6 +160,10 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
         <div className="col-span-2">
           <HudSection title="5e">
             <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
+              <div className="col-span-2">
+                <Label htmlFor="spell-lists">Списки</Label>
+                <Input id="spell-lists" placeholder="Wizard, Sorcerer" value={(formData.lists ?? []).join(", ")} onChange={(e) => setFormData({ ...formData, lists: parseCommaList(e.target.value) })} />
+              </div>
               <div>
                 <Label htmlFor="die-sides">Грань кубика</Label>
                 <SelectField id="die-sides" value={formData.dieSides ? String(formData.dieSides) : ""} onValueChange={(v) => setFormData({ ...formData, dieSides: v ? parseInt(v) : null })} placeholder="к6 (типово)" options={DIE_SIDES_OPTIONS} />

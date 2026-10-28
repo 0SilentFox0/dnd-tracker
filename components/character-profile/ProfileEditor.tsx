@@ -19,6 +19,7 @@ import { CharacterArtifactsSection } from "@/components/characters/artifacts/Cha
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { CharacterChoicesPanel } from "@/components/choices/CharacterChoicesPanel";
 import { ActionBar } from "@/components/common/ActionBar";
 import { LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
@@ -60,6 +61,12 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const { formData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
+  const heroClasses = (formData.basicInfo.classes ?? []).filter((e) => e.classId);
+
+  const heroClassMode = classesEnabled && heroClasses.length > 0;
+
+  const showChoices = heroClassMode || !!sheet.choices;
+
   return (
     <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
@@ -70,7 +77,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             onLevelUp={() => void editor.dmActions.levelUp()}
             classLevelUp={
               classesEnabled && (formData.basicInfo.classes ?? []).length > 0
-                ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [] }, onLeveled: editor.dmActions.applyClassLevelUp }
+                ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [], hero: { race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills } }, onLeveled: editor.dmActions.applyClassLevelUp }
                 : undefined
             }
           />
@@ -107,6 +114,23 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               </div>
             ),
           },
+          ...(showChoices
+            ? [
+                {
+                  id: "choices" as const,
+                  label: "Вибори",
+                  content: (
+                    <CharacterChoicesPanel
+                      campaignId={campaignId}
+                      characterId={characterId}
+                      initial={{ raceChoices: formData.choices?.raceChoices ?? {}, feats: formData.choices?.feats ?? [], classes: heroClasses }}
+                      hero={{ race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills, classMode: heroClassMode }}
+                      onSaved={editor.dmActions.applyClassLevelUp}
+                    />
+                  ),
+                },
+              ]
+            : []),
           {
             id: "magic",
             label: "Магія",

@@ -114,8 +114,9 @@ export function CombatTab() {
                 { label: `Рятівний кидок: ${s.label}`, subject: { kind: "save", ability: s.ability } },
                 <>
                   <span className="min-w-0 truncate">
-                    {s.proficient ? "● " : ""}
+                    {s.proficient ? (s.expertise ? "●● " : "● ") : ""}
                     {s.label}
+                    {s.expertise && <span className="ml-1 text-xs text-hud-muted">×2</span>}
                   </span>
                   <span className="tabular-nums">{signed(s.bonus)}</span>
                 </>,

@@ -9,12 +9,14 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
+import { lockCharacters } from "@/lib/server/characters/lock";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
@@ -54,12 +56,14 @@ export async function patchCharacter(request: Request, campaignId: string, chara
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
-  const applied = data.classes
+  const classesInput = data.classes ? keepStoredPicks(data.classes, character.classes) : undefined;
+
+  const applied = classesInput
     ? await applyClasses({
         campaignId,
         rules: campaign.rules,
         maxLevel: campaign.maxLevel,
-        entries: data.classes,
+        entries: classesInput,
         spellcastingAbility: data.spellcastingAbility ?? character.spellcastingAbility,
       })
     : null;
@@ -101,29 +105,40 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  const updatedCharacter = await prisma.character.update({
-    where: { id: characterId },
-    data: {
-      ...data,
-      classes: data.classes as unknown as Prisma.InputJsonValue | undefined,
-      avatar: avatar.avatar,
-      level: computed.finalLevel,
-      ...computed.abilityScores,
-      ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
-      ...(restoredSlots && { spellSlots: restoredSlots as Prisma.InputJsonValue }),
-      immunities:
-        data.immunities !== undefined
-          ? (data.immunities as Prisma.InputJsonValue)
-          : (character.immunities as Prisma.InputJsonValue | undefined),
-      ...classesData,
-      ...(computed.skillTreeProgressUpdate !== undefined && { skillTreeProgress: computed.skillTreeProgressUpdate }),
-      ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
-      ...(fromClasses && { level: finalLevel }),
-      ...(classSeenLevel !== undefined && { seenLevel: classSeenLevel }),
-    },
-    include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
-    omit: { notes: true },
-  });
+  const writeUpdate = (db: Pick<Prisma.TransactionClient, "character">, classes: typeof classesInput) =>
+    db.character.update({
+      where: { id: characterId },
+      data: {
+        ...data,
+        classes: classes as unknown as Prisma.InputJsonValue | undefined,
+        avatar: avatar.avatar,
+        level: computed.finalLevel,
+        ...computed.abilityScores,
+        ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
+        ...(restoredSlots && { spellSlots: restoredSlots as Prisma.InputJsonValue }),
+        immunities:
+          data.immunities !== undefined
+            ? (data.immunities as Prisma.InputJsonValue)
+            : (character.immunities as Prisma.InputJsonValue | undefined),
+        ...classesData,
+        ...(computed.skillTreeProgressUpdate !== undefined && { skillTreeProgress: computed.skillTreeProgressUpdate }),
+        ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
+        ...(fromClasses && { level: finalLevel }),
+        ...(classSeenLevel !== undefined && { seenLevel: classSeenLevel }),
+      },
+      include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+      omit: { notes: true },
+    });
+
+  const updatedCharacter = data.classes
+    ? await prisma.$transaction(async (tx) => {
+        await lockCharacters(tx, [characterId]);
+
+        const fresh = await tx.character.findUnique({ where: { id: characterId }, select: { classes: true } });
+
+        return writeUpdate(tx, keepStoredPicks(data.classes ?? [], fresh?.classes ?? character.classes));
+      })
+    : await writeUpdate(prisma, classesInput);
 
   return NextResponse.json(updatedCharacter);
 }

@@ -224,6 +224,12 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { skills: ["perception"] },
     describe: (e) => `майстерність у навичках${skillsText(e.skills)}`,
   },
+  skillExpertise: {
+    label: "Експертиза в навичках",
+    fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OPTIONS }],
+    defaults: { skills: ["stealth"] },
+    describe: (e) => `експертиза в навичках${skillsText(e.skills)} (подвійна майстерність)`,
+  },
   autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
   twoWeaponFighting: plain("Бій двома зброями", "модифікатор до шкоди другої руки"),
   critImmunity: plain("Імунітет до критів", "критичне влучання по власнику стає звичайним"),

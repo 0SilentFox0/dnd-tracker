@@ -2,7 +2,7 @@
 
 Спека: `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (етап 2 «Конструктора кампаній»).
 
-Контент кампанії можна змінювати з UI, через REST з токеном і через MCP. Усі три шляхи проходять через одні й ті самі Zod-схеми, сервіс і перевірки прав. До контенту належать раси, юніти, заклинання, школи магії, основні скіли, скіли, артефакти, сети, треки музики, класи (`classes`), а також правила кампанії й дерева скілів.
+Контент кампанії можна змінювати з UI, через REST з токеном і через MCP. Усі три шляхи проходять через одні й ті самі Zod-схеми, сервіс і перевірки прав. До контенту належать раси, юніти, заклинання, школи магії, основні скіли, скіли, артефакти, сети, треки музики, класи (`classes`), риси (`feats`), а також правила кампанії й дерева скілів.
 
 ## Шари
 
@@ -98,6 +98,14 @@
 - Синхронізація із джерелом: збережені базові хеші рядків обчислені без нових колонок юніта, тож після деплою юніт, змінений лише в джерелі, показується як `conflict`, а не `updated` (`pairStatus`, `b` не збігається ні з однією стороною). Це властиво будь-якій міграції з новими колонками; юніти без змін з обох боків не зачеплені.
 - Бандл, синхронізація, OpenAPI і MCP — автоматично; правила — `rules.encounters`.
 
+## Риси й вибори (етап 4f-4)
+
+- Вид `feats` (`/feats`, `featId`): `name`, `icon?`, `type` (`origin | general | fightingStyle | epicBoon`), `prerequisite { level?, scores?: { abilities, min }, text? }`, `repeatable`, `description?`, `abilities`, `choices` (без виду `feat`). Видалення риси, яку тримає герой (у `feats`, `raceChoices` чи `classes`), — 409 `FEAT_IN_USE`. Кеш — `ReferenceKind.FEATS`; бандл/синхронізація — таблиця `feats` після `classes`.
+- `Choice` — спільна схема OpenAPI (`$ref`); поля `races.choices` (лише числова кількість, ≤ 1 `lineage`; `options[].spells[].spellId` — id заклинання), `features[].choices` класів і підкласів (кількість `{ scale }` — колонка таблиці класу; id виборів унікальні в межах класу й кожного підкласу), `classes.spellList` (тег списку), `spells.lists` (≤ 20 тегів).
+- Імпорт: поле `ImportField.nestedRef { kind, key }` для JSON-колонок — `resolveNestedRefs` замінює назви на id у властивості `key` будь-якої глибини (раса: `{ kind: "spells", key: "spellId" }`), експорт CSV повертає назви. Порядок шаблону SRD: spell-groups → spells → races → classes → feats → units → artifacts.
+- `PUT /api/campaigns/{id}/characters/{characterId}/choices` (сесія, поза OpenAPI): `{ raceChoices?, feats?, classChoices?: Record<classId, Picks> }` → персонаж; відмови `CHOICE_*`, `FEAT_*`, `SKILL_NOT_ALLOWED`, `EXPERTISE_NEEDS_PROFICIENCY`, `SPELL_NOT_IN_LIST`, `ABILITY_SCORE_CAP`, `CHOICES_NEED_CLASSES`, `ORIGIN_FEAT_ONLY_ONE`, `DM_FEAT_ONLY_DM` (422/403) з `issues [{ path, code, message }]`. Створення персонажа приймає `raceChoices`, `feats`, `classes[].choices`; level-up — `choices`; чернетка гравця — `choices { raceChoices?, feats?, classChoices? }`.
+- Міграція `20261103000000_choices_feats`.
+
 ## Імпорт і експорт (етап 4f-0)
 
 Масове перенесення контенту з CSV/TSV/JSON для `units`, `spells`, `skills`, `main-skills`, `spell-groups`, `races`, `classes`, `artifacts`, `artifact-sets` (треки — ні).
@@ -130,6 +138,7 @@
 - **Іконки** — сторонніх наборів немає. Заклинання без іконки показують значок школи в її кольорі (`SpellIcon`; ключі `shield|portal|eye|heart|flame|mask|skull|vortex` поруч із 5 ключами HOMM5). `pnpm assets:attach <campaignId> <тека> --kind units|spells|artifacts|classes|races|skills|main-skills [--allow-official]`: ім'я файлу = назва контенту або `slug` рядка даних SRD (з префіксом `srd-2024_` чи без); нормалізація без регістру й пунктуації (`_`, `-`, `:`, апострофи, повторні пробіли → пробіл), суфікси варіантів `A1`/`2`/`v3` відкидаються, із кількох варіантів — перший, завантаження в бакет виду (`<campaignId>/<kind>/<назва>-<sha1>.<ext>`, `cacheControl` рік), прив'язка через `importContent(update)` (юніт — `avatar`, решта — `icon`), звіт без пари. Офіційний шаблон — лише з `--allow-official` (власні AI-іконки; токени Forgotten Adventures — ніколи).
 - **4f-2**: 12 обладунків; колонки таблиць класів з пулами (Focus, Sorcery Points, Channel Divinity, Lay on Hands) і додатковими колонками (Action Surge, Divine Spark); 37 механізованих умінь класів. Завантажувач замінює назви шкіл у `school` на id груп кампанії (ручний імпорт `classes.json` через UI лишає назву — бонус школи не спрацює).
 - **4f-3**: джерело `MagicItem.json` (md5 у `OPEN5E_FILES`), спорядження `unique: false`, 32 властивості (31 сімейство варіантів + Dragon Slayer; назви складаються з повної назви бази, перевірка 513 варіантів у `pnpm srd:build` нормалізує слово «Armor»), 248 унікальних (244 + 4 зілля лікування з `Item.json`), неунікальні всі, крім Dragon Orb; регулярки механізації — `scripts/srd/convert/magic-items.ts`.
+- **4f-4**: джерела `Feat.json`/`FeatBenefit.json` (md5 у `OPEN5E_FILES`), 17 рис (`convert/feats.ts`, механіка — `overrides/feats.ts`), вибори рас (`convert/race-choices.ts`: таблиці, жирні абзаци, список; 24 опції, 22 заклинання назвами → `nestedRef`), 101 вибір класів (`convert/class-choices.ts`, `overrides/class-choices.ts`; синтетична колонка `metamagic`), `Spell.classes` → `lists`, `spellList` = назва класу для 8 заклиначів.
 
 ## Оновлення з джерела (етап 3)
 

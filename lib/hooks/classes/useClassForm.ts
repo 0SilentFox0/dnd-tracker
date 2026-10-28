@@ -16,6 +16,7 @@ export function buildClassBody(data: ClassFormData): ClassFormData {
     icon: data.icon?.trim() || null,
     color: data.color?.trim() || null,
     spellcastingAbility: data.caster === "none" ? null : data.spellcastingAbility,
+    ...(data.spellList !== undefined && { spellList: data.caster === "none" ? null : data.spellList?.trim() || null }),
     subclassLevel: data.subclasses.length > 0 ? (data.subclassLevel ?? 3) : null,
   };
 }

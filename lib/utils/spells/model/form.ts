@@ -53,6 +53,7 @@ export function spellToForm(spell: Spell): SpellFormData {
     upcastTargets: def.upcastTargets ?? null,
     addAbilityMod: def.addAbilityMod === true,
     fx: parseSpellFx(spell.fx) ?? {},
+    ...(spell.lists?.length && { lists: spell.lists }),
   };
 }
 
@@ -97,7 +98,7 @@ function issueLabel(path: PropertyKey[]): string {
 }
 
 function payloadInput(form: SpellFormData) {
-  return { ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null, addAbilityMod: form.addAbilityMod || null };
+  return { ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null, addAbilityMod: form.addAbilityMod || null, ...(form.lists && { lists: form.lists }) };
 }
 
 export function formToPayload(form: SpellFormData) {

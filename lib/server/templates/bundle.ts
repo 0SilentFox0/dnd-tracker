@@ -7,7 +7,7 @@ import type { SYNC_TABLE_SCOPES } from "@/lib/constants/source-sync";
 
 export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
-type Delegate = "spellGroup" | "race" | "gameClass" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
+type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
 
 export interface BundleTableDef {
   key: BundleTable;
@@ -24,6 +24,7 @@ const SCALAR_ENUMS = {
   SpellGroup: Prisma.SpellGroupScalarFieldEnum,
   Race: Prisma.RaceScalarFieldEnum,
   GameClass: Prisma.GameClassScalarFieldEnum,
+  Feat: Prisma.FeatScalarFieldEnum,
   Unit: Prisma.UnitScalarFieldEnum,
   Spell: Prisma.SpellScalarFieldEnum,
   MainSkill: Prisma.MainSkillScalarFieldEnum,
@@ -38,6 +39,7 @@ const MODEL_TO_KEY: Record<keyof typeof SCALAR_ENUMS, BundleTable> = {
   SpellGroup: "spellGroups",
   Race: "races",
   GameClass: "classes",
+  Feat: "feats",
   Unit: "units",
   Spell: "spells",
   MainSkill: "mainSkills",
@@ -74,6 +76,7 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("spellGroups", "SpellGroup", "spellGroup"),
   table("races", "Race", "race"),
   table("classes", "GameClass", "gameClass"),
+  table("feats", "Feat", "feat"),
   table("units", "Unit", "unit"),
   table("spells", "Spell", "spell"),
   table("mainSkills", "MainSkill", "mainSkill"),
@@ -100,6 +103,7 @@ export const BundleSchema = z.object({
   credits: z.string().max(10_000).nullable().optional(),
   ...perTable(() => rowSchema),
   classes: rowSchema.default([]),
+  feats: rowSchema.default([]),
 }) as unknown as z.ZodType<Bundle>;
 
 export type Bundle = {
@@ -120,7 +124,7 @@ export function emptyBundle(): Bundle {
 
 export type TemplateDb = Pick<
   Prisma.TransactionClient,
-  "spellGroup" | "race" | "gameClass" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
+  "spellGroup" | "race" | "gameClass" | "feat" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
 >;
 
 export class TemplateLeakError extends Error {}

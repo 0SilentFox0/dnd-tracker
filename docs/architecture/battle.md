@@ -135,6 +135,15 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Заряди** — пул `pool:item:<ref>` (`itemPools`, лише активні предмети з `charges`; однакові ref ділять пул); уміння з `limits.pool.key: "charges"` отримують цей ключ при збиранні. `rest: null` — не відновлюються (довгий відпочинок їх лишає). ДМ правит витрачене через `PATCH …/resources { charges }`.
 - **Витратні** — `SpecialItem.artifactId`, пул `pool:consumable:<itemId>` (max = кількість, `rest: null`), у `resources.charges` не пишеться; `saveBattle` (гілка `completing`, та сама транзакція) віднімає витрачене (`persistConsumables`), запис на 0 видаляється, журнал `item_use` від `campaigns.dmUserId`.
 
+## 5e: риси й вибори (етап 4f-4)
+
+- **Модель** — `Choice` (`types/choices.ts`; Zod — `lib/schemas/choices.ts`): `kind` `option | feat | skill | expertise | abilityScore | spell`, `count` — число або колонка класу `{ scale }`, `level` (рівень у класі / загальний), `lineage` (лише раса, ≤ 1; назва опції → `Character.subrace`). Власники: `races.choices`, фічі класу/підкласу `{ level, abilities, choices }`, `feats.choices` (без виду `feat`). Піки — `Picks = Record<choiceId, ChoicePick[]>` у `Character.raceChoices`, `Character.classes[i].choices`, `Character.feats [{ id, picks?, source: origin | dm }]`.
+- **Чисті функції без zod** — `lib/utils/characters/choices/`: `resolveChoiceCount`, `validatePicks`, `visitPicks`, `pendingCount`, `abilityScoreDelta`/`capIssues`, `planChoices` (закриті вибори — `CHOICE_LOCKED`, права на риси ДМ, походження ≤ 1, межа ASI лише для характеристик з додатною дельтою), `choiceSelections` (групи вмінь для рушія), `prunePicks`.
+- **Збереження** — `resolveCharacterChoices` (`lib/server/characters/choices/`) для створення, чернетки, `PUT …/characters/[id]/choices` (ДМ або власник при `allowPlayerEdit`; 409 в активному бою; журнал `choices_edit`) і level-up з `choices` (без — як раніше). ASI пишеться в базові колонки дельтою в тій самій транзакції. Класовий PATCH ігнорує вхідні `classes[].choices` (`keepStoredPicks`).
+- **Рушій** — `createBattleParticipantFromCharacter`: `choiceSelections` → `collectCharacterAbilities({ choiceGroups })`: опції раси — джерело `race`, опції класу — `class` з `applyClassScale`, риси — `feat`, навички й експертиза — синтетичні `flag skillProficiency`/`skillExpertise` (джерело `character:choices`); заклинання опцій раси (до загального рівня) і вибори `spell` зливаються з `knownSpells`. Риси вантажаться (`loadFeatsById`, кеш `getCachedFeats`) лише коли є піки чи `Character.feats` у режимі класів. Невідомі опції/риси/заклинання тихо пропускаються. У snapshot нічого нового.
+- **`"slots"`** у виборі `spell` = найвище коло слотів цього класу самого (`maxSlotLevelFor`; пакт — коло пакту).
+- **Лист** — `identity.subrace`, `choices: SheetChoices` (риси з піками, опції класів, джерела заклинань, `pending`), навички з експертизою (`expertise: true`, подвійна майстерність).
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

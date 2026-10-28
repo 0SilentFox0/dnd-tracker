@@ -1,4 +1,5 @@
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
+import { readChoices } from "@/lib/utils/characters/choices/read";
 import type { Race, RaceRow } from "@/types/races";
 
 export function toRace(row: Omit<RaceRow, "abilities">, extra: { abilities?: Ability[]; abilityIssues?: ConversionIssue[] } = {}): Race {
@@ -15,6 +16,7 @@ export function toRace(row: Omit<RaceRow, "abilities">, extra: { abilities?: Abi
     disabledSkills: Array.isArray(row.disabledSkills) ? (row.disabledSkills as string[]) : [],
     passiveAbility: passive && typeof passive === "object" && !Array.isArray(passive) ? (passive as unknown as Race["passiveAbility"]) : null,
     spellSlotProgression: Array.isArray(row.spellSlotProgression) ? (row.spellSlotProgression as unknown as Race["spellSlotProgression"]) : undefined,
+    ...(Array.isArray(row.choices) && row.choices.length > 0 && { choices: readChoices(row.choices) }),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

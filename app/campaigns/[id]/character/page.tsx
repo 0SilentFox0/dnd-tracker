@@ -24,7 +24,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
     return <NoCharacterState campaignId={id} canCreate={!isDM} />;
   }
 
-  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules: parseRules(campaign.rules) } }));
+  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules: parseRules(campaign.rules), allowPlayerEdit: campaign.allowPlayerEdit } }));
 
   return (
     <PrefetchedQuery queryKey={characterKeys.sheet(id, character.id)} data={sheet}>

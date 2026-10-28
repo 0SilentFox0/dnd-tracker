@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 
 import { ClassLevelUpDialog } from "./ClassLevelUpDialog";
 
 import { Button } from "@/components/ui/button";
 import type { Character } from "@/types/characters";
-import type { CharacterClassEntry } from "@/types/classes";
 
 interface LevelUpActionProps {
   level: number;
   maxLevel: number;
   onLevelUp: () => void;
-  classLevelUp?: { character: { campaignId: string; id: string; entries: CharacterClassEntry[] }; onLeveled: (updated: Character) => void };
+  classLevelUp?: { character: ComponentProps<typeof ClassLevelUpDialog>["character"]; onLeveled: (updated: Character) => void };
 }
 
 export function LevelUpAction({ level, maxLevel, onLevelUp, classLevelUp }: LevelUpActionProps) {

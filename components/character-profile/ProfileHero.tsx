@@ -42,7 +42,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
                 {badge}
                 {id.raceIcon && <OptimizedImage src={id.raceIcon} alt="" width={14} height={14} className="size-3.5 shrink-0 rounded-sm" />}
                 <span className="truncate">
-                  {id.race}
+                  {id.race}{id.subrace ? ` (${id.subrace})` : ""}
                   {id.alignment ? ` · ${id.alignment}` : ""}
                 </span>
               </p>

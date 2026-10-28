@@ -4,8 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDraftPortraitPools } from "@/lib/api/characters";
+import { createDraft, getDraftPortraitPools } from "@/lib/api/characters";
 import { usePlayerDraftForm } from "@/lib/hooks/characters/usePlayerDraftForm";
+import { refs } from "@/lib/utils/characters/choices/__tests__/fixtures";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
@@ -137,5 +138,19 @@ describe("usePlayerDraftForm", () => {
 
       expect(result.current.form.values.avatar).toBe("https://x/own.png");
     });
+  });
+
+  it("submit prunes picks of a previous race before sending", async () => {
+    classMode.value = { enabled: false, classes: [], pending: false };
+    vi.mocked(createDraft).mockResolvedValue({} as never);
+
+    const { result } = setup();
+
+    act(() => result.current.form.set("race", "Люди"));
+    act(() => result.current.choices.set({ raceChoices: { "old-race-choice": [{ id: "x" }], "elven-lineage": [{ id: "drow" }] }, feats: [], classes: [] }));
+    act(() => result.current.submit.run(refs));
+
+    await waitFor(() => expect(createDraft).toHaveBeenCalled());
+    expect(vi.mocked(createDraft).mock.calls[0][1].choices?.raceChoices).toEqual({ "elven-lineage": [{ id: "drow" }] });
   });
 });

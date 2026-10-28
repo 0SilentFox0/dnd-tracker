@@ -1,6 +1,7 @@
 "use client";
 
 import { ChargesList } from "./rest/ChargesList";
+import { FeatsBlock } from "./FeatsBlock";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
@@ -14,6 +15,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
 
   return (
     <>
+      <FeatsBlock />
       <RacePassive />
       <ChargesList />
       {personal && (

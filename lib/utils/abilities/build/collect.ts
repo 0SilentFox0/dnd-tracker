@@ -3,6 +3,7 @@ import { pickHighestPerLine, resolveAbilities } from "./resolve";
 import { applyClassScale } from "@/lib/utils/abilities/class-columns";
 import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { consumablePoolKey, itemPoolKey, withItemPool } from "@/lib/utils/items/pools";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
@@ -109,6 +110,7 @@ export function collectCharacterAbilities(input: {
   completedSets: ArtifactSetRowLike[];
   classes?: ResolvedClassEntry[];
   consumables?: Array<{ itemId: string; row: ArtifactRowLike }>;
+  choiceGroups?: readonly ChoiceGroup[];
 }): ResolvedAbility[] {
   const fromSkills = pickSkillEntries(input.skills).flatMap((entry) =>
     resolveAbilities(skillSource(entry), inheritSchool(skillAbilities(entry.row), entry.row.spellGroupId ?? entry.mainSkillSpellGroupId)),
@@ -128,7 +130,9 @@ export function collectCharacterAbilities(input: {
     resolveAbilities({ type: "artifact", id: `consumable:${itemId}`, name: row.name, icon: row.icon ?? null }, withItemPool(artifactAbilities(row), consumablePoolKey(itemId))),
   );
 
-  return [...fromSkills, ...raceResolved(input.race), ...classResolved(input.classes ?? []), ...fromArtifacts, ...fromSets, ...fromConsumables];
+  const fromChoices = (input.choiceGroups ?? []).flatMap((g) => resolveAbilities(g.source, g.scale ? applyClassScale(g.abilities, g.scale) : g.abilities));
+
+  return [...fromSkills, ...raceResolved(input.race), ...classResolved(input.classes ?? []), ...fromChoices, ...fromArtifacts, ...fromSets, ...fromConsumables];
 }
 
 export function collectUnitAbilities(unit: UnitRowLike, race: RaceRowLike | null): ResolvedAbility[] {

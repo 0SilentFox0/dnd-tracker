@@ -23,6 +23,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   skills: "Скіли",
   races: "Раси",
   classes: "Класи",
+  feats: "Риси",
   "main-skills": "Основні навики",
   "skill-trees": "Дерева прокачки",
   info: "Довідник",

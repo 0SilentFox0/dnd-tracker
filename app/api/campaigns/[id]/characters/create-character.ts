@@ -8,11 +8,13 @@ import { resolveCharacterOwner } from "./resolve-character-owner";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
+import { resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { hasPicks } from "@/lib/utils/characters/choices/read";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
@@ -43,6 +45,23 @@ export async function createCharacter(request: Request, campaignId: string): Pro
   if (!applied.ok) return errorResponse(applied.error, applied.status);
 
   const fromClasses = applied.data;
+
+  const entries = data.classes ?? [];
+
+  const withChoices = hasPicks(data.raceChoices) || (data.feats?.length ?? 0) > 0 || entries.some((e) => hasPicks(e.choices));
+
+  const choices = withChoices
+    ? await resolveCharacterChoices({
+        campaignId,
+        rules: campaign.rules,
+        isDM: true,
+        character: { race: data.race, level: fromClasses?.level ?? data.level, skills: data.skills, strength: data.strength, dexterity: data.dexterity, constitution: data.constitution, intelligence: data.intelligence, wisdom: data.wisdom, charisma: data.charisma },
+        before: { raceChoices: {}, feats: [], classes: [] },
+        after: { raceChoices: data.raceChoices ?? {}, feats: data.feats ?? [], classes: entries },
+      })
+    : null;
+
+  if (choices && !choices.ok) return choices.response;
 
   const owner = await resolveCharacterOwner(campaignId, accessResult.userId, data);
 
@@ -98,6 +117,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         primaryAbility: data.primaryAbility ?? null,
 
         skillTreeProgress: {},
+        ...(choices?.ok && choices.fields),
       },
       include: { user: { select: PUBLIC_USER_SELECT } },
     });

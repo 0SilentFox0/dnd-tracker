@@ -20,5 +20,6 @@ export const CLASSES_IMPORT: ImportSpec = {
     { key: "subclassLevel", label: "Рівень підкласу", aliases: ["subclass level"], type: "int", examples: ["3", "2"] },
     jsonField("subclasses", "Підкласи (JSON)", ["subclasses"], ["[]", "[]"]),
     jsonField("columns", "Таблиця класу (JSON)", ["columns", "class table"], ["[]", "[]"]),
+    textField("spellList", "Список заклинань", ["spell list", "список заклинань"], ["", "Wizard"]),
   ],
 };

@@ -11,6 +11,7 @@ import { OPEN5E_SHA } from "../lib/source";
 import { SRD_KINDS, type SrdKind } from "../lib/types";
 
 import { createArtifactSchema, createClassSchema, createRaceSchema, createSpellGroupSchema, createSpellSchema, patchArtifactSchema, updateClassSchema, updateRaceSchema, updateSpellGroupSchema, updateSpellSchema } from "@/lib/schemas";
+import { createFeatSchema, updateFeatSchema } from "@/lib/schemas/feats";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { importContent } from "@/lib/server/content/import/import-content";
@@ -21,11 +22,12 @@ const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
   spells: { create: createSpellSchema, update: updateSpellSchema },
   races: { create: createRaceSchema, update: updateRaceSchema },
   classes: { create: createClassSchema, update: updateClassSchema },
+  feats: { create: createFeatSchema, update: updateFeatSchema },
   units: { create: createUnitSchema, update: updateUnitSchema },
   artifacts: { create: createArtifactSchema, update: patchArtifactSchema },
 };
 
-const EXPECTED: Record<SrdKind, number> = { "spell-groups": 8, spells: 339, races: 9, classes: 12, units: 331, artifacts: 331 };
+const EXPECTED: Record<SrdKind, number> = { "spell-groups": 8, spells: 339, races: 9, classes: 12, feats: 17, units: 331, artifacts: 331 };
 
 const actor: Actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session", scopes: null };
 

@@ -1,10 +1,4 @@
 import { prisma } from "@/lib/db";
+import { nameTaken } from "@/lib/server/content/name-taken";
 
-export async function classNameTaken(campaignId: string, name: string, exceptId?: string): Promise<boolean> {
-  const clash = await prisma.gameClass.findFirst({
-    where: { campaignId, name: { equals: name, mode: "insensitive" }, ...(exceptId && { id: { not: exceptId } }) },
-    select: { id: true },
-  });
-
-  return clash !== null;
-}
+export const classNameTaken = (campaignId: string, name: string, exceptId?: string): Promise<boolean> => nameTaken((where) => prisma.gameClass.findFirst({ where, select: { id: true } }), campaignId, name, exceptId);
