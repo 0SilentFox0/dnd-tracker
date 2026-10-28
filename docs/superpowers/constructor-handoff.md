@@ -1,6 +1,10 @@
 # Конструктор кампаній — хендоф для нового контексту
 
-## Частина 2 закрита — 2026-10-28 (поточна черга)
+## Частина 3 (HOMM-шлюз) закрита — 2026-10-28 (поточна черга)
+
+Worktree `../dnd-tracker-constructor`, `feat/constructor`, українською. Шлюз виконано, регресій немає: [звіт](plans/2026-10-27-homm-gate-report.md) (паритет, battle-sweep, браузер ДМ+гравець, a11y T27, `assistant-check --run` T28). Main змерджено в гілку (`0d922f9d`) і перевірено Opus; фікси `cb5ee910`, `760f2bd5`, `858e56f0`. Backup-теги: `backup/constructor-pre-squash-2026-10-28`, `backup/constructor-pre-main-sync-2026-10-28`. **Далі:** рішення користувача про merge у `main` (перед деплоєм — свіжий бекап prod; міграції гілки expand-only, застосувати `migrate deploy`), потім окрема сесія за [планом Obojima](plans/2026-10-28-obojima-import-fixes.md) (рішення: резисти/вразливості розширюємо, ≥80% заклинань `native`, mixed-edition дозволено). Backlog після шлюзу — у кінці звіту (зокрема «Передати» показує гравцю ворожих NPC — давня поведінка main). Прибирання: worktree `../dnd-tracker-homm-base`, локальні БД `prodcopy*`/`obojima_test`, untracked `scripts/homm-gate/`. Заборонено досі: push, deploy, зміни prod без окремого рішення.
+
+## Частина 2 закрита — 2026-10-28 (історія)
 
 Worktree `../dnd-tracker-constructor`, branch `feat/constructor`, працюємо українською. **Частину 2 (виправлення 86 знахідок + 4 хвости S10) завершено локально:** T1–T29 у `7ee09df5..63bd0944`, [реєстр з Disposition](plans/2026-10-27-constructor-premerge-findings.md) (76 повністю, 8 частково, A22 і B27 у backlog, B04 довгостроково — epic D3), фінальне Opus-ревю без critical (4 important: I1–I3 виправлено `daf2687b`/`77b165d9`/`63bd0944`, I4 battle-sweep відкритий). Перевірено: tsc 0, lint 0 errors, `test:run` 8475/8477 (2 таймаути під навантаженням, окремо проходять), integration 138/138, build 0.
 
