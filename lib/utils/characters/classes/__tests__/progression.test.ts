@@ -1,0 +1,110 @@
+import { describe, expect, it } from "vitest";
+
+import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
+import type { Choice } from "@/types/choices";
+import type { ClassFeature, GameClassData } from "@/types/classes";
+
+const ability = (id: string, name: string, description?: string) => ({ id, name, description, trigger: { event: "passive" }, effects: [{ kind: "stat" }] }) as unknown as ClassFeature["abilities"][number];
+
+const choice = (over: Partial<Choice> & Pick<Choice, "id" | "level">): Choice => ({ label: over.id, count: 1, kind: "feat", ...over });
+
+const make = (over: Partial<GameClassData> = {}): GameClassData => ({
+  id: "fighter",
+  name: "Fighter",
+  icon: null,
+  color: "#c33",
+  hitDie: 10,
+  savingThrows: [],
+  proficiencies: { armor: [], weapons: [], tools: [] },
+  skillChoices: { count: 0, from: [] },
+  caster: "none",
+  spellcastingAbility: null,
+  features: [],
+  subclassLevel: null,
+  subclasses: [],
+  ...over,
+});
+
+const rich = (): GameClassData =>
+  make({
+    features: [
+      { level: 1, abilities: [ability("a1", "Second Wind", "Heal.\nMore")] },
+      { level: 3, abilities: [ability("a3", "Tactics")] },
+      { level: 4, abilities: [], choices: [choice({ id: "asi4", level: 4 })] },
+      { level: 8, abilities: [], choices: [choice({ id: "asi8", level: 8 })] },
+    ],
+    subclassLevel: 3,
+    subclasses: [
+      { id: "champ", name: "Champion", features: [{ level: 3, abilities: [ability("c3", "Crit")], choices: [choice({ id: "style", level: 3 })] }] },
+      { id: "battle", name: "Battle Master", features: [{ level: 3, abilities: [], choices: [choice({ id: "style", level: 3 })] }] },
+    ],
+  });
+
+describe("buildClassProgression", () => {
+  it("builds 20 rows for a minimal class", () => {
+    const p = buildClassProgression(make());
+
+    expect(p.rows).toHaveLength(20);
+    expect(p.subclasses).toEqual([]);
+    expect(p.rows.flatMap((r) => r.picks)).toEqual([]);
+  });
+
+  it("derives states, picks and subclass marker for an entry", () => {
+    const p = buildClassProgression(rich(), { classId: "fighter", level: 4 });
+
+    const at = (l: number) => p.rows[l - 1];
+
+    expect([at(1).state, at(4).state, at(5).state, at(6).state]).toEqual(["reached", "current", "next", "future"]);
+    expect(at(1).base[0]).toMatchObject({ key: "a1", summary: "Heal.", description: "Heal.\nMore" });
+    expect(at(4).picks).toEqual([expect.objectContaining({ key: "asi4", status: "open", done: 0 })]);
+    expect(at(8).picks[0]).toMatchObject({ key: "asi8", status: "locked" });
+    expect(at(3).picks).toEqual([expect.objectContaining({ key: "subclass", kind: "subclass", status: "open", done: 0 })]);
+    expect(at(3).bySubclass.champ.map((i) => i.key)).toEqual(["c3"]);
+
+    const chosen = buildClassProgression(rich(), { classId: "fighter", level: 4, subclassId: "champ", choices: { asi4: [{ id: "x" }] } });
+
+    expect(chosen.rows[2].picks.map((x) => [x.key, x.status, x.done])).toEqual([
+      ["style", "open", 0],
+      ["subclass", "done", 1],
+    ]);
+    expect(chosen.rows[3].picks[0]).toMatchObject({ status: "done", done: 1 });
+    expect(chosen.subclasses.find((s) => s.id === "champ")?.chosen).toBe(true);
+  });
+
+  it("places a pick on choice.level, not feature.level", () => {
+    const p = buildClassProgression(make({ features: [{ level: 1, abilities: [], choices: [choice({ id: "late", level: 6 })] }] }));
+
+    expect(p.rows[0].picks).toEqual([]);
+    expect(p.rows[5].picks[0].key).toBe("late");
+  });
+
+  it("drops a pick whose scale column is missing", () => {
+    const p = buildClassProgression(make({ features: [{ level: 1, abilities: [], choices: [choice({ id: "s", level: 1, count: { scale: "x" } })] }] }));
+
+    expect(p.rows[0].picks).toEqual([]);
+  });
+
+  it("template mode: all rows template, subclass picks prefixed", () => {
+    const p = buildClassProgression(rich());
+
+    expect(p.rows.every((r) => r.state === "template")).toBe(true);
+    expect(p.rows[2].picks.map((x) => [x.key, x.status, x.done])).toEqual([
+      ["champ:style", "template", null],
+      ["battle:style", "template", null],
+      ["subclass", "template", null],
+    ]);
+  });
+
+  it("ignores unknown keys in entry.choices", () => {
+    const p = buildClassProgression(rich(), { classId: "fighter", level: 4, choices: { nope: [{ id: "a" }, { id: "b" }] } });
+
+    expect(p.rows[3].picks[0].done).toBe(0);
+  });
+
+  it("truncates summary to 120 chars", () => {
+    const p = buildClassProgression(make({ features: [{ level: 1, abilities: [ability("l", "Long", "x".repeat(300))] }] }));
+
+    expect(p.rows[0].base[0].summary).toHaveLength(120);
+    expect(p.rows[0].base[0].description).toHaveLength(300);
+  });
+});
