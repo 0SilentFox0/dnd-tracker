@@ -45,7 +45,8 @@ export function WorldToolbar({ drawing, readOnly = false, onSettings, inspector,
   return (
     <TooltipProvider delayDuration={300}>
       <div className="rounded-md border border-hud-rule bg-[rgba(17,14,11,.97)]">
-      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto p-1">
+      <div className="flex flex-col lg:flex-row lg:items-center">
+      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto p-1 lg:min-w-0 lg:flex-1">
         {TOOLS.map(({ key, label, hotkey, Icon }) => (
           <ToolButton key={key} label={label} hotkey={hotkey} Icon={Icon} active={tool === key} disabled={readOnly} onClick={() => setTool(key)} />
         ))}
@@ -66,7 +67,8 @@ export function WorldToolbar({ drawing, readOnly = false, onSettings, inspector,
           </>
         ) : null}
         {onSettings ? <ToolButton label="Налаштування карти" Icon={Settings2} disabled={readOnly} onClick={onSettings} /> : null}
-        {children ? <div className="ml-auto flex shrink-0 items-center gap-1 pl-2">{children}</div> : null}
+      </div>
+        {children ? <div data-slot="toolbar-extras" className="flex shrink-0 items-center gap-1 border-t border-hud-rule p-1 lg:border-t-0 lg:pl-2">{children}</div> : null}
       </div>
       {inspector}
       </div>

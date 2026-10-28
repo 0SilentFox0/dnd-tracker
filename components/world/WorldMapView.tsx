@@ -145,7 +145,7 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
             ) : null}
           </div>
       </div>
-      {hint ? <div className="pointer-events-none absolute right-2 bottom-2 left-2 z-10 flex justify-center max-lg:bottom-3 lg:top-2 lg:bottom-auto">{hint}</div> : null}
+      {hint ? <div className="pointer-events-none absolute top-2 right-2 left-2 z-10 flex justify-center">{hint}</div> : null}
       <div className="absolute right-2 bottom-14 z-10 flex flex-col gap-1 max-lg:opacity-60 max-lg:focus-within:opacity-100 max-lg:active:opacity-100 lg:bottom-2">
         <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label="Наблизити" onClick={() => zoomBy(ZOOM_STEP)}>
           <Plus className="size-4" />

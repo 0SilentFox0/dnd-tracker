@@ -35,6 +35,17 @@ describe("HeroEyesSelect", () => {
   });
 });
 
+describe("HeroEyesSelect layout", () => {
+  it("is full width below lg and shrinks to content on lg", () => {
+    render(<HeroEyesSelect heroes={heroes} value={null} onChange={vi.fn()} />);
+
+    const label = screen.getByLabelText("Очима героя").parentElement as HTMLElement;
+
+    expect(label.className).toContain("w-full");
+    expect(label.className).toContain("lg:w-auto");
+  });
+});
+
 describe("useHeroEyes", () => {
   const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>;
 
