@@ -93,6 +93,10 @@ describe.skipIf(!FILE)("real file import", () => {
 
     console.info(JSON.stringify({ ready: p.report.readyToImport, counts: p.report.counts, next: p.report.nextActions.filter((a) => !/^MANUAL_/.test(a.code)).slice(0, 15).map((a) => `${a.code}: ${a.action}`) }, null, 1));
 
+    const issueCodes = p.report.rows.flatMap((r) => r.issues.map((i) => i.code));
+
+    console.info("optionalfeature: without owner", issueCodes.filter((c) => c === "OPTIONAL_FEATURE_WITHOUT_OWNER").length, "bound progressions", issueCodes.filter((c) => c === "MANUAL_OPTIONAL_FEATURE").length, "manual progressions", issueCodes.filter((c) => c === "MANUAL_OPTIONAL_PROGRESSION").length, "item effects manual", issueCodes.filter((c) => c === "MANUAL_ITEM_EFFECT").length);
+
     const errs = p.report.rows.flatMap((r) => r.issues.filter((i) => i.severity === "error").map((i) => `${r.kind} ${i.code} ${JSON.stringify(i).slice(0, 260)}`));
 
     console.info([...new Set(errs)].slice(0, 12).join("\n"));

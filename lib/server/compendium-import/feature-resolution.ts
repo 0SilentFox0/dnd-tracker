@@ -4,6 +4,8 @@ import { canonicalKey, nestedId } from "./identity";
 import { type Compendium, type JsonRecord, normalized } from "./parse";
 import { type AdapterContext, type Edition, type ImportIssue, issue } from "./types";
 
+import { CHOICE_LIMITS } from "@/lib/constants/choices";
+
 export interface FeatureResolutionContext {
   root: Compendium;
   editionFallback: unknown;
@@ -41,8 +43,27 @@ function findFeatureRows(root: Compendium, kind: Kind, parts: string[], edition:
     (!parts[sourceAt] || normalized(str(r.source)) === normalized(parts[sourceAt])));
 }
 
+function optionFromRow(context: FeatureResolutionContext, featureContext: AdapterContext, row: JsonRecord): JsonRecord {
+  const name = str(row.name);
+
+  const source = str(row.source);
+
+  context.usedOptionals.add(canonicalKey("optionalfeature", name, source, effectiveEdition(row.edition, context.editionFallback)));
+
+  return {
+    id: nestedId(`${name}|${source}`),
+    name,
+    description: [
+      renderEntries(row.entries).text,
+      unsupported(row, ["prerequisite", "featureType"], featureContext),
+      row.prerequisite ? `Вимоги (ДМ перевіряє вручну): ${JSON.stringify(row.prerequisite)}` : "",
+    ].filter(Boolean).join("\n"),
+    abilities: [],
+  };
+}
+
 function resolveOptional({ context, ownerPath, featureContext }: FeatureScope, v: JsonRecord): JsonRecord | undefined {
-  const { root, editionFallback, issues, usedOptionals } = context;
+  const { root, issues } = context;
 
   const uid = str(v.optionalfeature);
 
@@ -56,18 +77,7 @@ function resolveOptional({ context, ownerPath, featureContext }: FeatureScope, v
     return;
   }
 
-  usedOptionals.add(canonicalKey("optionalfeature", name, source ?? "", effectiveEdition(candidates[0].edition, editionFallback)));
-
-  return {
-    id: nestedId(uid),
-    name,
-    description: [
-      renderEntries(candidates[0].entries).text,
-      unsupported(candidates[0], ["prerequisite", "featureType"], featureContext),
-      candidates[0].prerequisite ? `Вимоги (ДМ перевіряє вручну): ${JSON.stringify(candidates[0].prerequisite)}` : "",
-    ].filter(Boolean).join("\n"),
-    abilities: [],
-  };
+  return { ...optionFromRow(context, featureContext, candidates[0]), id: nestedId(uid) };
 }
 
 function collectChoices(scope: FeatureScope, entries: unknown, parts: string[]): JsonRecord[] {
@@ -153,6 +163,72 @@ export function resolveCompendiumFeatures(raw: unknown, kind: Kind, ownerPath: s
     }
 
     out.push(resolveFeature(context, kind, ownerPath, i, parts, candidates[0]));
+  }
+
+  return out;
+}
+
+export interface OptionalOwner {
+  kind: "class" | "subclass";
+  names: string[];
+}
+
+const levelRefs = (prerequisite: unknown) => (Array.isArray(prerequisite) ? prerequisite : [prerequisite]).map((p) => object(object(p).level)).filter((l) => l.class !== undefined || l.subclass !== undefined);
+
+// A prerequisite naming another class/subclass means the option belongs to that owner.
+function belongsTo(prerequisite: unknown, owner: OptionalOwner): boolean {
+  const named = (r: unknown) => normalized(str(object(r).name));
+
+  return levelRefs(prerequisite).every((l) => {
+    if (owner.kind === "subclass") return l.subclass === undefined || owner.names.some((n) => normalized(n) === named(l.subclass));
+
+    return l.class === undefined || named(l.class) === normalized(owner.names[0] ?? "");
+  });
+}
+
+const progressionLevels = (progression: unknown): Array<[number, number]> =>
+  (Array.isArray(progression) ? progression.map((c, i): [number, number] => [i + 1, Number(c)]) : Object.entries(object(progression)).map(([level, c]): [number, number] => [Number(level), Number(c)]))
+    .filter(([level, count]) => Number.isInteger(level) && level >= 1 && level <= 20 && Number.isInteger(count) && count > 0)
+    .sort((a, b) => a[0] - b[0]);
+
+// 5etools `optionalfeatureProgression`: the owner picks N options of the matching `featureType`s by level; each increase becomes one choice feature.
+export function resolveOptionalProgression(raw: unknown, ownerPath: string, context: FeatureResolutionContext, owner: OptionalOwner, ownerEdition?: Edition): JsonRecord[] {
+  const edition = effectiveEdition(ownerEdition, context.editionFallback);
+
+  const featureContext: AdapterContext = { root: context.root, inputKind: "optionalfeature", path: ownerPath, source: "", edition, key: ownerPath, issues: context.issues };
+
+  const out: JsonRecord[] = [];
+
+  for (const [p, entry] of array(raw).map(object).entries()) {
+    const at = `${ownerPath}.optionalfeatureProgression[${p}]`;
+
+    const types = new Set(array(entry.featureType).map(str));
+
+    const label = str(entry.name) || "Особливості на вибір";
+
+    const rows = array(context.root.optionalfeature).map(object).filter((r) => array(r.featureType).some((t) => types.has(str(t))) && belongsTo(r.prerequisite, owner) && (edition === "unknown" || effectiveEdition(r.edition, context.editionFallback) === edition));
+
+    const levels = progressionLevels(entry.progression);
+
+    if (rows.length === 0 || levels.length === 0 || rows.length > CHOICE_LIMITS.options) {
+      context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", at, "warning", "Налаштуйте вибір опційних особливостей вручну"));
+
+      continue;
+    }
+
+    context.issues.push(issue("MANUAL_OPTIONAL_FEATURE", at, "warning", "Опційні особливості перенесено як вибір з описом; застосовуйте їхні правила вручну"));
+
+    const options = rows.map((r) => optionFromRow(context, featureContext, r));
+
+    let previous = 0;
+
+    for (const [level, total] of levels) {
+      const count = Math.min(total - previous, options.length);
+
+      previous = Math.max(previous, total);
+
+      if (count > 0) out.push({ level, description: label, abilities: [], choices: [{ id: nestedId(`${ownerPath}:progression:${p}:${level}`), label, kind: "option", count, options }] });
+    }
   }
 
   return out;

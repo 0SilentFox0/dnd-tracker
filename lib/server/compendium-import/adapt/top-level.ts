@@ -1,7 +1,7 @@
 import { background, feat, gameClass, race } from "../adapters/characters";
 import { item, materialPage, monster, spell } from "../adapters/content";
-import { array, object } from "../adapters/shared";
-import { resolveCompendiumFeatures } from "../feature-resolution";
+import { array, object, str } from "../adapters/shared";
+import { resolveCompendiumFeatures, resolveOptionalProgression } from "../feature-resolution";
 import { canonicalKey } from "../identity";
 import { type AdaptedEntry, type Adapter, issue } from "../types";
 import { type AdaptState, addEntry, isEnabled } from "./state";
@@ -64,6 +64,9 @@ export function adaptTopLevel(state: AdaptState) {
   for (const entry of state.entries.filter((e) => e.inputKind === "class")) {
     const row = state.sourceRows.get(entry.key);
 
-    entry.body.features = resolveCompendiumFeatures(row?.classFeatures, "classFeature", `${entry.key}.classFeatures`, state.featureContext, entry.edition);
+    entry.body.features = [
+      ...resolveCompendiumFeatures(row?.classFeatures, "classFeature", `${entry.key}.classFeatures`, state.featureContext, entry.edition),
+      ...resolveOptionalProgression(row?.optionalfeatureProgression, entry.key, state.featureContext, { kind: "class", names: [str(row?.name)] }, entry.edition),
+    ];
   }
 }
