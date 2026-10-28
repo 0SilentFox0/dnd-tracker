@@ -90,6 +90,17 @@ describe("source aware atomic import plan", () => {
     expect(reimport.writes.map((r) => r.body.name)).toEqual(plan.writes.map((r) => r.body.name));
   });
 
+  it("reuses an existing school group by name and suffixes same-named content with a readable source, never a hash", () => {
+    const input = adaptCompendium({ _meta: { edition: "one" }, spell: [{ name: "Spark", source: "Tale", level: 1, school: "V", time: [{ number: 1, unit: "action" }], range: { type: "point", distance: { type: "self" } }, duration: [{ type: "instant" }], entries: ["Text."] }], race: [{ name: "Elf", source: "Tale" }] });
+
+    const plan = buildImportPlan(input, { campaignId: "c", existing: [], occupiedNames: { "spell-groups": [{ id: "g-evo", name: "Evocation" }], races: [{ id: "r-elf", name: "Elf" }] } });
+
+    expect(plan.errors).toEqual([]);
+    expect(plan.writes.some((w) => w.kind === "spell-groups")).toBe(false);
+    expect(plan.writes.find((w) => w.kind === "spells")?.body.groupId).toBe("g-evo");
+    expect(plan.writes.find((w) => w.kind === "races")?.body.name).toBe("Elf (Tale)");
+  });
+
   it("resolves subraces into parent lineage without creating a second race", () => {
     const plan = buildImportPlan(adaptCompendium({ race: [{ name: "People", source: "T" }], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", entries: ["Hill heritage"] }] }), { campaignId: "c", existing: [] });
 

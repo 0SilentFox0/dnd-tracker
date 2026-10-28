@@ -80,6 +80,7 @@ interface PlanState {
   ids: Map<string, string>;
   states: Map<string, "visiting" | "done">;
   planned: Map<string, PlannedWrite>;
+  usedNames: Map<string, Set<string>>;
 }
 
 type Resolved = { localId: string; body: JsonRecord; key: string };
@@ -195,9 +196,21 @@ function disambiguateName(ps: PlanState, entry: AdaptedEntry, body: JsonRecord, 
 
   if (!collision || !isNew) return;
 
-  const suffix = ` [${entry.source}; ${entry.edition}]`;
+  const taken = (name: string) => ps.entries.some((e) => e.kind === entry.kind && e.key !== entry.key && e.name.toLowerCase() === name.toLowerCase()) || ps.context.occupiedNames?.[entry.kind]?.some((r) => r.id !== localId && r.name.toLowerCase() === name.toLowerCase()) || ps.usedNames.get(entry.kind)?.has(name.toLowerCase());
 
-  body.name = `${entry.name.slice(0, Math.max(1, 100 - suffix.length - 9))}-${digest(entry.key).slice(0, 8)}${suffix}`;
+  const room = (suffix: string) => `${entry.name.slice(0, Math.max(1, 100 - suffix.length))}${suffix}`;
+
+  const candidates = [` (${entry.source})`, ` (${entry.source}, ${entry.edition})`];
+
+  let name = candidates.map(room).find((n) => !taken(n));
+
+  for (let n = 2; !name; n++) if (!taken(room(` (${entry.source}) ${n}`))) name = room(` (${entry.source}) ${n}`);
+
+  body.name = name;
+
+  if (!ps.usedNames.has(entry.kind)) ps.usedNames.set(entry.kind, new Set());
+
+  ps.usedNames.get(entry.kind)!.add(name.toLowerCase());
 }
 
 function validateStandalone(ps: PlanState, entry: AdaptedEntry, body: JsonRecord, sourceBody: JsonRecord) {
@@ -307,6 +320,20 @@ function revalidateWrites(ps: PlanState) {
   }
 }
 
+function reuseNamedSchools(entries: AdaptedEntry[], context: PlanContext, existing: Map<string, ExistingEntry>) {
+  const bindings = { ...context.bindings };
+
+  const kept = entries.filter((e) => {
+    const row = e.kind === "spell-groups" && !existing.has(e.key) && !bindings[e.key] ? context.occupiedNames?.["spell-groups"]?.find((r) => nameKey(r.name) === nameKey(e.name)) : undefined;
+
+    if (row) bindings[e.key] = { key: e.key, edition: e.edition, kind: e.kind, localId: row.id, body: { name: row.name }, baseline: { name: row.name } };
+
+    return !row;
+  });
+
+  return { entries: kept, context: { ...context, bindings } };
+}
+
 function createPlanState(adapted: AdaptedCompendium, context: PlanContext): PlanState {
   const excluded = new Set(context.excludedKeys);
 
@@ -314,15 +341,19 @@ function createPlanState(adapted: AdaptedCompendium, context: PlanContext): Plan
 
   const errors = adapted.issues.filter((i) => i.severity === "error" && !excludedPaths.some((p) => i.path === p || i.path.startsWith(`${p}.`)));
 
-  const entries = adapted.entries.filter((e) => !excluded.has(e.key)).map((e) => structuredClone(e));
-
   const existing = new Map(context.existing.map((e) => [e.key, e]));
+
+  const reused = reuseNamedSchools(adapted.entries.filter((e) => !excluded.has(e.key)), context, existing);
+
+  context = reused.context;
+
+  const entries = reused.entries.map((e) => structuredClone(e));
 
   const fresh = (key: string) => `c${digest([context.campaignId, key]).slice(0, 24)}`;
 
   const ids = new Map(entries.map((e) => [e.key, existing.get(e.key)?.missing ? fresh(e.key) : existing.get(e.key)?.localId ?? fresh(e.key)]));
 
-  return { context, excludedPaths, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map() };
+  return { context, excludedPaths, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map(), usedNames: new Map() };
 }
 
 export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext): ImportPlan {
