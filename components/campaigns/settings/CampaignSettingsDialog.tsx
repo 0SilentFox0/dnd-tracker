@@ -111,6 +111,13 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
             <Checkbox id="allow-player-edit" checked={fields.allowPlayerEdit} onCheckedChange={(v) => set("allowPlayerEdit", v === true)} disabled={isSaving} />
             <Label htmlFor="allow-player-edit">Дозволити гравцям редагувати своїх персонажів</Label>
           </div>
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="crit-choice-by-dm" checked={fields.critChoiceByDm} onCheckedChange={(v) => set("critChoiceByDm", v === true)} disabled={isSaving} />
+              <Label htmlFor="crit-choice-by-dm">ДМ обирає ефекти крита/провалу</Label>
+            </div>
+            <p className="text-xs text-hud-muted">Вимкнено — ефект випадковий</p>
+          </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="campaign-status" checked={fields.status === CampaignStatus.ACTIVE} onCheckedChange={(v) => set("status", v === true ? CampaignStatus.ACTIVE : CampaignStatus.ARCHIVED)} disabled={isSaving} />
             <Label htmlFor="campaign-status">Кампанія активна</Label>

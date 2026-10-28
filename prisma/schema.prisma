@@ -34,6 +34,7 @@ model Campaign {
   maxLevel        Int              @default(20)
   xpMultiplier    Float            @default(2.5)
   allowPlayerEdit Boolean          @default(true)
+  critChoiceByDm  Boolean          @default(false)
   status          String           @default("active")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -350,6 +351,7 @@ model BattleScene {
   currentRound       Int                 @default(1)
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
+  pendingCritChoice  Json?
   map                Json?
   audio              Json?
   createdAt          DateTime            @default(now())

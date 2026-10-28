@@ -48,6 +48,7 @@ export async function POST(request: Request) {
           dmUserId: userId,
           maxLevel: data.maxLevel,
           allowPlayerEdit: data.allowPlayerEdit,
+          critChoiceByDm: data.critChoiceByDm,
           members: { create: { userId, role: CampaignRole.DM } },
         },
         include: { members: true },
