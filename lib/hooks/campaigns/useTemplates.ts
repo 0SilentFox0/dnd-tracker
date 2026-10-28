@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { campaignKeys } from "./keys";
 
 import { getTemplates } from "@/lib/api/templates";
+import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { TemplateList, TemplateSelection } from "@/types/campaigns";
 
@@ -16,7 +17,7 @@ export function useTemplates() {
 }
 
 const defaultSelection = (templates: TemplateList | undefined): TemplateSelection => ({
-  templateId: templates?.official.find((t) => t.name === EMPTY_TEMPLATE_NAME)?.id ?? null,
+  templateId: (templates?.official.find((t) => t.name === EMPTY_TEMPLATE_NAME) ?? templates?.official.find((t) => t.name === SRD_TEMPLATE_NAME))?.id ?? null,
 });
 
 export function useTemplateSelection() {

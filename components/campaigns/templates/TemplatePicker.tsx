@@ -58,6 +58,8 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
   ].filter((g) => g.options.length > 0);
 
   const handleChange = (next: string) => {
+    if (!next) return;
+
     if (next === FILE_VALUE) setImportOpen(true);
     else onChange({ templateId: next === NONE_VALUE ? null : next });
   };

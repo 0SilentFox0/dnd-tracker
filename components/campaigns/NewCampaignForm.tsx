@@ -53,7 +53,7 @@ export function NewCampaignForm() {
       return;
     }
 
-    create.mutate({ ...formData, ...settings, templateId: selection.templateId ?? undefined }, options);
+    create.mutate({ ...formData, ...settings, templateId: selection.templateId || undefined }, options);
   };
 
   return (
