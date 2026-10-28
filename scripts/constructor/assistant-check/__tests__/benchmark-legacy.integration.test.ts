@@ -8,24 +8,17 @@ import { createSyntheticCampaign, deleteSyntheticCampaign } from "@/fixtures/cam
 import { CONTENT_ACTIONS } from "@/lib/server/assistant/actions/content";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
-import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 vi.mock("@/lib/server/assistant/runtime-effects", () => ({ ASSISTANT_EFFECT_HANDLERS: {} }));
 
-assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
-
-for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) {
-  const url = new URL(process.env[key] ?? "");
-
-  url.searchParams.set("connection_limit", "1");
-  process.env[key] = url.toString();
-}
+for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) process.env[key] = singleConnectionDatabaseUrl(key);
 
 type LegacyEvidence = { fixture: Awaited<ReturnType<typeof createSyntheticCampaign>>; intentId: string; expected: unknown; spellId: string };
 
-it("confirms a persisted pre-extraction content intent without a replacement preview", async () => {
+it.skipIf(!isLocalDevDatabaseEnv())("confirms a persisted pre-extraction content intent without a replacement preview", async () => {
   const db = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } }, log: [] });
 
   const phase = process.env.S3_LEGACY_PHASE ?? "roundtrip";

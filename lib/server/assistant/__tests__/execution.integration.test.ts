@@ -10,10 +10,10 @@ import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { readDeletionReceipt } from "@/lib/server/assistant/receipts";
 import { readReceipt } from "@/lib/server/assistant/receipts";
-import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
 import type { ActionExecutionContext, AssistantCaller, DurableEffect } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { manifestTracker } from "@/scripts/constructor/assistant-check/manifest";
 
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger: vi.fn(async () => {}) } }));
@@ -41,24 +41,10 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
+const url = new URL(singleConnectionDatabaseUrl("DATABASE_URL"));
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-const url = new URL(databaseUrl);
-
-const directUrl = process.env.DIRECT_URL;
-
-if (!directUrl) throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-const direct = new URL(directUrl);
-
-url.searchParams.set("connection_limit", "1");
-direct.searchParams.set("connection_limit", "1");
 process.env.DATABASE_URL = url.toString();
-process.env.DIRECT_URL = direct.toString();
+process.env.DIRECT_URL = singleConnectionDatabaseUrl("DIRECT_URL");
 
 const db = new PrismaClient({ datasources: { db: { url: url.toString() } }, log: [] });
 
@@ -78,7 +64,7 @@ const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", thread
 
 const executor = (actions: readonly import("@/lib/server/assistant/types").AssistantActionDef[] = CAMPAIGN_ACTIONS) => createAssistantExecutor({ db, catalog: createActionCatalog(actions) });
 
-describe("T19 local constructor execution integration (connection_limit=1)", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("T19 local constructor execution integration (connection_limit=1)", () => {
   beforeAll(async () => {
     const counts = await Promise.all([
       db.spell.count(),

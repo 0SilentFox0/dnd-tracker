@@ -10,19 +10,12 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { createAssistantRunStore, toolRequestKey } from "@/lib/server/assistant/runs";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { createScopedDatabase } from "@/lib/server/content/write-context";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger: vi.fn(async () => {}) } }));
 vi.mock("@/lib/server/assistant/runtime-effects", () => ({ ASSISTANT_EFFECT_HANDLERS: {} }));
 
-function localUrl(name: string) {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -60,7 +53,7 @@ const caller = (): AssistantCaller => ({ actor: { campaignId, userId: marker, is
 
 const store = createAssistantRunStore({ db, now: () => new Date(time) });
 
-describe("T15 real constructor run storage", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("T15 real constructor run storage", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: marker, email: `${marker}@example.invalid`, displayName: marker } });
 

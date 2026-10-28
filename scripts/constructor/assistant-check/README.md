@@ -7,7 +7,7 @@ pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/con
 ASSISTANT_CHECK_RUN_ID=s1-local-unique-marker pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/assistant-check.ts --run --output-dir .superpowers/refactor/s1
 ```
 
-Guard приймає **обидва** `DATABASE_URL` і `DIRECT_URL` лише для `constructor` на loopback:54322. Runner встановлює `connection_limit=1` для обох до створення client/дочірніх тестів. Він не застосовує міграцій, не викликає prod/prodcopy, provider, Storage, Pusher чи Redis. `execution.integration.test.ts` перевіряє реальні locks/rollback/ownership/receipt idempotency; auth route mock і after-commit integrations залишаються synthetic.
+Guard приймає **обидва** `DATABASE_URL` і `DIRECT_URL` лише для локальної dev-БД (будь-яка назва) на loopback:54322. Runner встановлює `connection_limit=1` для обох до створення client/дочірніх тестів. Він не застосовує міграцій, не викликає prod/prodcopy, provider, Storage, Pusher чи Redis. `execution.integration.test.ts` перевіряє реальні locks/rollback/ownership/receipt idempotency; auth route mock і after-commit integrations залишаються synthetic.
 
 Фінальний JSON містить фактичні `total/passed/failed/skipped` з Vitest `integration.json` і `browser.json`. Ненульовий exit, відсутній/невалідний report, zero tests, skip або неповне browser покриття завершують runner помилкою; фіксованого повідомлення про кількість успіхів немає.
 

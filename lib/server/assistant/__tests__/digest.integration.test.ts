@@ -7,11 +7,11 @@ import { contentDeleteCascades, contentDependencies } from "@/lib/server/assista
 import { contentOperationState, contentPreviewState } from "@/lib/server/assistant/actions/content-preview";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
 import { fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
-import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
 import { prepareBattleAction } from "@/lib/server/battles/action-service";
 import { ContentError } from "@/lib/server/content/errors";
 import { prepareShowAction, runShowOperation } from "@/lib/server/show/action-service";
 import { bindDeckRecord } from "@/lib/server/show/deck-operations";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 
@@ -31,17 +31,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
-
-function localUrl(name: string): string {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -68,7 +58,7 @@ const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: n
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-describe("precondition digests against the local constructor database", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("precondition digests against the local constructor database", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: userId, email: `${marker}@example.invalid`, displayName: marker } });
 

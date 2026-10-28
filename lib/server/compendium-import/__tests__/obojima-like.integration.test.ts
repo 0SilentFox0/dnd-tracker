@@ -3,14 +3,14 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import fixture from "./fixtures/obojima-like.synthetic.json";
 
-const localDb = vi.hoisted(() => {
-  try {
-    const url = new URL(process.env.DATABASE_URL ?? "");
+const localDb = await vi.hoisted(async () => {
+  const { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } = await import("@/lib/server/test-support/local-db");
 
-    return url.hostname === "localhost" && url.port === "54322";
-  } catch {
-    return false;
-  }
+  if (!isLocalDevDatabaseEnv()) return false;
+
+  for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) process.env[key] = singleConnectionDatabaseUrl(key);
+
+  return true;
 });
 
 vi.mock("next/cache", async (original) => ({ ...(await original<object>()), unstable_cache: <T,>(fn: T) => fn, revalidateTag: vi.fn() }));

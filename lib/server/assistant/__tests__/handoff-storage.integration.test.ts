@@ -7,6 +7,7 @@ import { HANDOFF_ACTIONS, readCompendiumSummary } from "@/lib/server/assistant/a
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 const database = vi.hoisted(() => ({ client: undefined as PrismaClient | undefined }));
 
@@ -26,15 +27,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-function localUrl(name: string) {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -59,7 +52,7 @@ const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: n
 
 const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId: null, tokenId: null });
 
-describe("T13 authorized bounded reads on real constructor", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("T13 authorized bounded reads on real constructor", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: userId, email: `${marker}@example.invalid`, displayName: marker } });
     campaignId = (await db.campaign.create({ data: { name: marker, dmUserId: userId, inviteCode: randomUUID(), members: { create: { userId, role: "dm" } } } })).id;

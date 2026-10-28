@@ -9,11 +9,9 @@ import { afterAll, describe, expect, it } from "vitest";
 import { initManifest, MANIFEST_FILE, readManifest, setManifestPid, trackFixture } from "../manifest";
 import { type RecoverDeps,recoverRun } from "../recover";
 
-import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
-assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
-
-const db = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } }, log: [] });
+const db = new PrismaClient({ datasources: { db: { url: singleConnectionDatabaseUrl("DATABASE_URL") } }, log: [] });
 
 const deps: RecoverDeps = { db, graceMs: 2_000 };
 
@@ -77,7 +75,7 @@ afterAll(async () => {
   await db.$disconnect();
 });
 
-describe("assistant-check crash recovery (local constructor only)", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("assistant-check crash recovery (local dev DB only)", () => {
   it("removes exactly the manifest fixtures after SIGKILL and keeps a foreign campaign with the same prefix", async () => {
     const dir = runDir();
 
@@ -223,7 +221,7 @@ describe("assistant-check crash recovery (local constructor only)", () => {
     expect(readFileSync(manifestFile, "utf8")).toContain(String(stranger.pid));
   });
 
-  it("refuses a non-constructor database before any query", async () => {
+  it("refuses a non-local database before any query", async () => {
     const dir = runDir();
 
     const manifestFile = path.join(dir, MANIFEST_FILE);

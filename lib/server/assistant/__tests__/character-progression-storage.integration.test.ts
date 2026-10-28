@@ -10,6 +10,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { runCharacterOperation } from "@/lib/server/characters/action-service";
 import { runCharacterProgression } from "@/lib/server/characters/progression-service";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { loadCharacterContext } from "@/lib/utils/battle/participant/load-character-context";
 import { loadBattle, saveBattle } from "@/lib/utils/battle/store";
@@ -36,15 +37,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-function localUrl(name: string) {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -70,7 +63,7 @@ const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", thread
 
 const executor = () => createAssistantExecutor({ db, catalog: createActionCatalog([...CHARACTER_ACTIONS, ...CHARACTER_PROGRESSION_ACTIONS]) });
 
-describe("character progression real constructor, connection_limit=1", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("character progression real constructor, connection_limit=1", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: userId, email: `${marker}@example.invalid`, displayName: marker } });
   });

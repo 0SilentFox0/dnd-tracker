@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-const localDb = vi.hoisted(() => {
-  try {
-    const url = new URL(process.env.DATABASE_URL ?? "");
+const localDb = await vi.hoisted(async () => {
+  const { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } = await import("@/lib/server/test-support/local-db");
 
-    return url.hostname === "localhost" && url.port === "54322";
-  } catch {
-    return false;
-  }
+  if (!isLocalDevDatabaseEnv()) return false;
+
+  for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) process.env[key] = singleConnectionDatabaseUrl(key);
+
+  return true;
 });
 
 vi.mock("@/lib/cache/tags", async original => ({ ...await original<object>(), invalidateReference: vi.fn() }));
