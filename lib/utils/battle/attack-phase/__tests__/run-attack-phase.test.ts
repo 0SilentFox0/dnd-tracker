@@ -7,6 +7,7 @@
  * які короткозамикають до processAttack.
  */
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { findAttack, requestedTargetIds } from "../request";
@@ -216,7 +217,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect(e).toMatchObject({ code: "action_used", message: "Дію цього ходу вже використано" });
+      expect(e).toMatchObject({ code: "action_used", message: API_ERRORS.ACTION_USED });
     }
   });
 

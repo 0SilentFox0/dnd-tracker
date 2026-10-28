@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -15,7 +16,7 @@ describe("BattlePreparationView: старт", () => {
     const button = screen.getByRole("button", { name: "ДО БОЮ!" }) as HTMLButtonElement;
 
     expect(button.disabled).toBe(true);
-    expect(screen.getByText("Хоча б один учасник має бути на полі")).toBeTruthy();
+    expect(screen.getByText(API_ERRORS.BATTLE_ONE_ON_FIELD)).toBeTruthy();
   });
 
   it("за наявності учасників на полі старт працює", () => {

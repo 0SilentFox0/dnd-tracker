@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { battleChannelName, showChannelName, userChannelName } from "@/lib/pusher/channels";
@@ -106,6 +107,6 @@ describe("POST /api/pusher/auth", () => {
     const res = await POST(new Request("http://x", { method: "POST", body: "{oops" }));
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ error: "Некоректний JSON у тілі запиту" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.INVALID_JSON });
   });
 });

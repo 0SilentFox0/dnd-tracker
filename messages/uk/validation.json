@@ -6,5 +6,7 @@
   "invalid": "Некоректне значення",
   "passwordMismatch": "Паролі не збігаються",
   "min": "Не менше {minimum}",
-  "max": "Не більше {maximum}"
+  "max": "Не більше {maximum}",
+  "itemConsumableConflict": "Витратний предмет не може бути властивістю і не відновлює заряди",
+  "youtubeUrlInvalid": "Не вдалося розпізнати посилання YouTube"
 }

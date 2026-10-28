@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -105,7 +106,7 @@ describe("tracks API", () => {
     const res = await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params());
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ error: "Цей файл уже є в бібліотеці" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.TRACK_DUPLICATE });
     expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({ where: { campaignId: "camp1", url: "https://s/battle-music/x.mp3" }, select: { id: true } });
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
   });

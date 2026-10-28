@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -219,7 +220,7 @@ describe("world API", () => {
       const res = await (await maps()).POST(json("POST", { name: "Світ", imageUrl: img("a"), width: 100, height: 100 }), ctx());
 
       expect(res.status).toBe(409);
-      expect((await res.json()).error).toBe("Коренева карта вже є");
+      expect((await res.json()).error).toBe(API_ERRORS.WORLD_ROOT_EXISTS);
     });
   });
 

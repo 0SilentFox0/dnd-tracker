@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach,describe, expect, it, vi } from "vitest";
 
@@ -65,7 +66,7 @@ describe("GET /api/campaigns/[id]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Кампанію не знайдено");
+    expect(data.error).toBe(API_ERRORS.CAMPAIGN_NOT_FOUND);
   });
 
   it("повертає 403, якщо користувач не учасник кампанії", async () => {
@@ -100,7 +101,7 @@ describe("GET /api/campaigns/[id]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Недостатньо прав");
+    expect(data.error).toBe(API_ERRORS.FORBIDDEN);
   });
 
   it("повертає 200 та кампанію, якщо користувач — учасник", async () => {

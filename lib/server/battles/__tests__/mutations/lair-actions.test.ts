@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { context, hero, participant } from "./fixtures";
@@ -38,8 +39,8 @@ describe("lair actions", () => {
     expect(p.battleData.legendary?.actionsLeft).toBe(3);
     expect(p.battleData.lair).toMatchObject({ usedRound: 1, lastKey: a.key });
     expect(p.combatStats.morale).toBe(1);
-    await expect(legendaryMutation(dm(p), body(b.key))).rejects.toMatchObject({ message: "Дію лігва вже використано в цьому раунді" });
-    await expect(legendaryMutation(dm(p, 2), body())).rejects.toMatchObject({ message: "Не можна повторити цю дію лігва в сусідніх раундах" });
+    await expect(legendaryMutation(dm(p), body(b.key))).rejects.toMatchObject({ message: API_ERRORS.LAIR_USED });
+    await expect(legendaryMutation(dm(p, 2), body())).rejects.toMatchObject({ message: API_ERRORS.LAIR_REPEAT });
     expect(actor(await legendaryMutation(dm(p, 2), body(b.key))).battleData.lair?.lastKey).toBe(b.key);
     expect(actor(await legendaryMutation(dm(p, 3), body())).battleData.lair?.usedRound).toBe(3);
   });
@@ -48,7 +49,7 @@ describe("lair actions", () => {
     const p = dragon();
 
     p.battleData.lair = { active: false, baseResistances: 2, resistSpent: 0 };
-    await expect(legendaryMutation(dm(p), body())).rejects.toMatchObject({ message: "Учасник зараз не в лігві" });
+    await expect(legendaryMutation(dm(p), body())).rejects.toMatchObject({ message: API_ERRORS.LAIR_NOT_ACTIVE });
     await expect(legendaryMutation({ ...dm(dragon()), isDM: false }, body())).rejects.toMatchObject({ status: 403 });
     expect(p.battleData.abilityUsage).toBeUndefined();
   });

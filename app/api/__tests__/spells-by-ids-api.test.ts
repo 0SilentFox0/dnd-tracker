@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -48,7 +49,7 @@ describe("GET /spells?ids=", () => {
     const res = await get(`?ids=${ids}`);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Некоректні параметри запиту");
+    expect((await res.json()).error).toBe(API_ERRORS.INVALID_QUERY);
     expect(prisma.spell.findMany).not.toHaveBeenCalled();
   });
 

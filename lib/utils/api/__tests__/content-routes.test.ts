@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
@@ -90,7 +91,7 @@ describe("content routes", () => {
       const res = await json(await col.POST(req("POST", body), ctx));
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe("Некоректний JSON у тілі запиту");
+      expect(res.body.error).toBe(API_ERRORS.INVALID_JSON);
     }
   });
 

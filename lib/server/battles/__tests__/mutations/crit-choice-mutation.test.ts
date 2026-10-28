@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin as baseGoblin, hero as baseHero } from "./fixtures";
@@ -73,7 +74,7 @@ describe("crit-choice mutation", () => {
   });
 
   it("помилки: немає pending, частковий вибір, чужий ключ, неіснуючий id", async () => {
-    await expect(critChoice(on(), { choices: {} })).rejects.toMatchObject({ code: "action_rejected", message: "Немає вибору крита" });
+    await expect(critChoice(on(), { choices: {} })).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.CRIT_CHOICE_NONE });
 
     const { ctx } = await pendingCtx();
 
@@ -98,7 +99,7 @@ describe("crit-choice mutation", () => {
 
     const ctx = { ...withRules, scene: { ...withRules.scene, pendingCritChoice: pending } };
 
-    await expect(critChoice(ctx, { choices: { [KEY]: all[0].id } })).rejects.toMatchObject({ message: "Невідомий ефект крита" });
+    await expect(critChoice(ctx, { choices: { [KEY]: all[0].id } })).rejects.toMatchObject({ message: API_ERRORS.CRIT_EFFECT_UNKNOWN });
 
     const done = await critChoice(ctx, { choices: { [KEY]: "random" } });
 

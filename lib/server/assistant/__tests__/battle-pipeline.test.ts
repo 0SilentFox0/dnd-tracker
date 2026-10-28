@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
@@ -94,7 +95,7 @@ describe("shared battle operation pipeline", () => {
   it("missing campaign guard preserves HTTP 404", async () => {
     const d = deps();
 
-    d.withWrite = async () => { throw new ContentError("Кампанію не знайдено", 404); };
+    d.withWrite = async () => { throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404); };
     expect((await runBattleMutation(request(), { params: { id: "c", battleId: "b" }, operation: "next-turn" }, d)).status).toBe(404);
     expect(d.saveBattle).not.toHaveBeenCalled();
   });

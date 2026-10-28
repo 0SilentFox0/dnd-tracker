@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -111,7 +112,7 @@ describe("AI proposals API", () => {
     const res = await apply();
 
     expect(res.status).toBe(409);
-    expect((await res.json()).error).toBe("Пропозицію вже застосовано або відхилено");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_PROPOSAL_DONE);
     expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
   });
 

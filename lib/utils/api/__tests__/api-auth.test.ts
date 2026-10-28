@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -104,10 +105,10 @@ describe("api-auth", () => {
 
     it("відмови мають форму { error } українською", async () => {
       findCampaign.mockResolvedValue(null);
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: "Кампанію не знайдено" });
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: API_ERRORS.CAMPAIGN_NOT_FOUND });
 
       findCampaign.mockResolvedValue(campaign());
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: "Недостатньо прав" });
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: API_ERRORS.FORBIDDEN });
     });
 
     it("гравець — доступ і дані кампанії", async () => {

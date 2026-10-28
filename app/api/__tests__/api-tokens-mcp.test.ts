@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/mcp/route";
@@ -25,7 +26,7 @@ vi.mock("@/lib/server/content/resources", async () => {
     schemas: { create: z.object({ name: z.string().min(2) }), update: z.object({ name: z.string().min(2).optional() }) },
     access: { list: "member", item: "member" },
     invalidates: [],
-    notFound: "Юніта не знайдено",
+    notFound: API_ERRORS.BATTLE_UNIT_NOT_FOUND,
     list: async () => [...things.values()],
     find: async (actor, id) => {
       const row = things.get(id);

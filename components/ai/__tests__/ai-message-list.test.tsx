@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +13,7 @@ describe("AiMessageList", () => {
           { id: "1", role: "user", parts: [{ type: "text", text: "Хто такий Фенікс?" }] },
           { id: "2", role: "assistant", parts: [{ type: "tool-search_reference", toolCallId: "c1", state: "output-available", input: { kind: "unit", query: "Фенікс" }, output: "[]" }, { type: "text", text: "Птах вогню." }] },
         ] as never}
-        error="Ліміт провайдера, спробуйте за хвилину"
+        error=API_ERRORS.AI_RATE_LIMIT
         onRedo={() => {}}
       />,
     );
@@ -20,7 +21,7 @@ describe("AiMessageList", () => {
     expect(screen.getByText("Хто такий Фенікс?")).toBeTruthy();
     expect(screen.getByText("Шукаю в довіднику: Фенікс")).toBeTruthy();
     expect(screen.getByText("Птах вогню.")).toBeTruthy();
-    expect(screen.getByText("Ліміт провайдера, спробуйте за хвилину")).toBeTruthy();
+    expect(screen.getByText(API_ERRORS.AI_RATE_LIMIT)).toBeTruthy();
   });
 
   it("markdown асистента рендериться, а текст користувача лишається простим", () => {

@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
@@ -62,7 +63,7 @@ describe("map-weather mutation", () => {
 
   it("бій без карти — відмова", () => {
     expect(() => mapWeatherMutation(ctx(null), { weather: "rain" })).toThrow(BattleRuleError);
-    expect(() => mapWeatherMutation(ctx(null), { weather: "rain" })).toThrow("У цьому бою немає карти");
+    expect(() => mapWeatherMutation(ctx(null), { weather: "rain" })).toThrow(API_ERRORS.BATTLE_NO_MAP);
   });
 });
 

@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach,describe, expect, it, vi } from "vitest";
 
@@ -429,7 +430,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Навик не знайдено");
+    expect(data.error).toBe(API_ERRORS.SKILL_NOT_FOUND);
   });
 
   it("повертає 404, якщо скіл належить іншій кампанії", async () => {

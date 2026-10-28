@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bodyErrorMessage, campaignGet, campaignRequest, request } from "../client";
@@ -29,11 +30,11 @@ describe("bodyErrorMessage / request errors", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("рядок error показується як є", () => {
-    expect(bodyErrorMessage({ error: "Недостатньо прав" }, "x")).toBe("Недостатньо прав");
+    expect(bodyErrorMessage({ error: API_ERRORS.FORBIDDEN }, "x")).toBe(API_ERRORS.FORBIDDEN);
   });
 
   it("error + issues — повідомлення з деталями", () => {
-    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
+    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
       "Некоректні дані запиту: Required; Too short",
     );
   });
@@ -45,7 +46,7 @@ describe("bodyErrorMessage / request errors", () => {
       { path: ["customField"], message: "x" },
     ];
 
-    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues }, "x")).toBe(
+    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues }, "x")).toBe(
       "Некоректні дані запиту: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x",
     );
   });
@@ -59,9 +60,9 @@ describe("bodyErrorMessage / request errors", () => {
   });
 
   it("request кидає ApiError з українським повідомленням сервера", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Некоректний JSON у тілі запиту" }), { status: 400 })));
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: API_ERRORS.INVALID_JSON }), { status: 400 })));
 
-    await expect(request("/api/x")).rejects.toMatchObject({ message: "Некоректний JSON у тілі запиту", status: 400 });
+    await expect(request("/api/x")).rejects.toMatchObject({ message: API_ERRORS.INVALID_JSON, status: 400 });
   });
 });
 

@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -188,7 +189,7 @@ describe("campaign templates API", () => {
     const res = await joinPost(json({ inviteCode: "ABC123" }));
 
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe("До шаблону не можна приєднатися");
+    expect((await res.json()).error).toBe(API_ERRORS.TEMPLATE_NOT_JOINABLE);
   });
 
   it("GET /api/templates — офіційні й мої, без чужих приватних", async () => {

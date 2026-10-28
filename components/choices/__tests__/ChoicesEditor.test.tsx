@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -14,7 +15,7 @@ function Harness({ initial, classMode, level = 1 }: { initial: ChoicesState; cla
 
   return (
     <>
-      <ChoicesEditor state={{ data, set }} refs={view} hero={{ level, scores, skills: {}, classMode }} issues={[{ path: "raceChoices.keen-senses", code: "SKILL_NOT_ALLOWED", message: "Навичка не входить у список вибору" }]} />
+      <ChoicesEditor state={{ data, set }} refs={view} hero={{ level, scores, skills: {}, classMode }} issues={[{ path: "raceChoices.keen-senses", code: "SKILL_NOT_ALLOWED", message: API_ERRORS.SKILL_NOT_ALLOWED }]} />
       <output data-testid="json">{JSON.stringify(data)}</output>
     </>
   );
@@ -33,7 +34,7 @@ describe("ChoicesEditor", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /Wood Elf/ }));
 
     expect(json().raceChoices).toEqual({ "elven-lineage": [{ id: "wood-elf" }] });
-    expect(screen.getByText("Навичка не входить у список вибору")).toBeTruthy();
+    expect(screen.getByText(API_ERRORS.SKILL_NOT_ALLOWED)).toBeTruthy();
   });
 
   it("class mode: origin feat and class sections", () => {

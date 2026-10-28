@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it, vi } from "vitest";
 
 import { DELETE,GET } from "@/app/api/campaigns/[id]/ai/threads/[threadId]/chat/route";
@@ -26,15 +27,15 @@ describe("assistant chat recovery API", () => {
     expect(await (await GET(new Request("http://local/chat"), { params })).json()).toHaveProperty("messages");
   });
   it("foreign thread recovery preserves safe 404 instead of becoming 500", async () => {
-    vi.mocked(readAssistantRuns).mockRejectedValueOnce(new ContentError("Тред не знайдено", 404));
+    vi.mocked(readAssistantRuns).mockRejectedValueOnce(new ContentError(API_ERRORS.AI_THREAD_NOT_FOUND, 404));
 
     const res = await GET(new Request("http://local/chat"), { params });
 
     expect(res.status).toBe(404);
-    expect(await res.json()).toMatchObject({ error: "Тред не знайдено" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.AI_THREAD_NOT_FOUND });
   });
   it("cancellation forwards only the validated requestId and preserves authorization errors", async () => {
-    vi.mocked(cancelAssistantRun).mockRejectedValueOnce(new ContentError("Дія недоступна", 403));
+    vi.mocked(cancelAssistantRun).mockRejectedValueOnce(new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403));
 
     const res = await DELETE(new Request("http://local/chat?requestId=stable"), { params });
 

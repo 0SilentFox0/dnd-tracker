@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -38,7 +39,7 @@ describe("RowBindings", () => {
   it("слайд зник — «недоступно»", () => {
     render(<RowBindings campaignId="c" pageId="p1" row={{ id: "r", story: doc, notes: doc, slide: { deckId: "d1", slideId: "slide-gone" } }} onChange={{ slide: vi.fn(), battle: vi.fn(), marker: vi.fn() }} />);
 
-    expect(screen.getByText("Слайд недоступний")).toBeTruthy();
+    expect(screen.getByText(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE)).toBeTruthy();
   });
 
   it("без прив'язок — кнопки «Слайд» і «Бій»", () => {

@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it, vi } from "vitest";
 
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
@@ -44,7 +45,7 @@ describe("start mutation", () => {
 
     const build = vi.fn(async () => ({ order: [], reserve: [imp], triggerLogEntries: [] }));
 
-    await expect(createStartMutation(build)(ctx)).rejects.toMatchObject({ code: "invalid_target", message: "Хоча б один учасник має бути на полі" });
+    await expect(createStartMutation(build)(ctx)).rejects.toMatchObject({ code: "invalid_target", message: API_ERRORS.BATTLE_ONE_ON_FIELD });
   });
 
   it("порожнє лобі — 422 invalid_target", async () => {

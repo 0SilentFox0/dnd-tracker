@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -55,7 +56,7 @@ describe("battle-music storage", () => {
     expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
 
     bucketApi.info.mockResolvedValueOnce({ data: null, error: { message: "not found" } });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: "Файл не завантажено — спробуйте ще раз" });
+    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: API_ERRORS.TRACK_UPLOAD_MISSING });
   });
 
   it("видалення: шлях із публічного URL; чужий URL — нічого", async () => {

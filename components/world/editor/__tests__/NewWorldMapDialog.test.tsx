@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -80,14 +81,14 @@ describe("NewWorldMapDialog", () => {
   });
 
   it("shows WORLD_ROOT_EXISTS (409) in the name field", async () => {
-    create.mockRejectedValue(new Error("Коренева карта вже є"));
+    create.mockRejectedValue(new Error(API_ERRORS.WORLD_ROOT_EXISTS));
 
     renderDialog();
     fireEvent.change(screen.getByLabelText(/Назва/), { target: { value: "Світ" } });
     pickFile();
     submit();
 
-    expect(await screen.findByText("Коренева карта вже є")).toBeTruthy();
+    expect(await screen.findByText(API_ERRORS.WORLD_ROOT_EXISTS)).toBeTruthy();
   });
 
   it("blocks submit until a file is chosen", () => {

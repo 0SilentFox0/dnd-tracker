@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -96,7 +97,7 @@ describe("battle audio API", () => {
     const res = await post({ action: "next" });
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toMatchObject({ error: "Стан музики змінився — повторіть" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.BATTLE_AUDIO_CONFLICT });
     expect(afterCallbacks).toHaveLength(0);
   });
 

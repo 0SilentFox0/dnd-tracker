@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { context, goblin, hero, participant } from "./fixtures";
@@ -79,6 +80,6 @@ describe("patch-participant mutation", () => {
   });
 
   it("revive живого — помилка", () => {
-    expect(() => patchParticipantMutation(context(), "hero", { revive: true })).toThrow("Учасник і так живий");
+    expect(() => patchParticipantMutation(context(), "hero", { revive: true })).toThrow(API_ERRORS.BATTLE_PARTICIPANT_ALREADY_ALIVE);
   });
 });
