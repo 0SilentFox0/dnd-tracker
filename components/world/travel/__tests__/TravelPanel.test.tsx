@@ -122,7 +122,7 @@ describe("TravelPanel", () => {
 
   it("lists the journal", async () => {
     vi.mocked(api.getTravelLog).mockResolvedValue([
-      { id: "e1", mapId: "m1", mapName: "World", heroes: [{ id: "h1", name: "Aria" }], from: null, to: { mapId: "m1", x: 0, y: 0 }, toMarkerName: "Town", rest: "short", createdAt: "" },
+      { id: "e1", mapId: "m1", mapName: "World", heroes: [{ id: "h1", name: "Aria" }], from: null, to: { mapId: "m1", x: 0, y: 0 }, toMarkerName: "Town", rest: "short", kind: "travel", createdAt: "" },
     ]);
     renderPanel();
 

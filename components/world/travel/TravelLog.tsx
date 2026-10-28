@@ -1,13 +1,20 @@
 "use client";
 
-import { ArrowRight, Moon, Route, Shuffle, Users } from "lucide-react";
+import type { ReactNode } from "react";
+import { ArrowRight, DoorOpen, LogOut, Moon, Route, Users } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudPill } from "@/components/hud/page";
 import { useTravelLog } from "@/lib/hooks/world";
-import type { TravelRest, WorldTravelEntry } from "@/types/world";
+import type { TravelKind, TravelRest, WorldTravelEntry } from "@/types/world";
 
 const REST_LABEL: Record<Exclude<TravelRest, "none">, string> = { short: "Короткий відпочинок", long: "Довгий відпочинок" };
+
+const KIND_BADGE: Record<TravelKind, { label: string; tone: "accent" | "muted" | "bone"; icon: ReactNode }> = {
+  travel: { label: "Подорож", tone: "accent", icon: <Route className="size-3" aria-hidden /> },
+  enter: { label: "Зайшли", tone: "bone", icon: <DoorOpen className="size-3" aria-hidden /> },
+  exit: { label: "Вийшли", tone: "muted", icon: <LogOut className="size-3" aria-hidden /> },
+};
 
 const formatWhen = (iso: string) => {
   const d = new Date(iso);
@@ -16,15 +23,15 @@ const formatWhen = (iso: string) => {
 };
 
 function TravelEntry({ e }: { e: WorldTravelEntry }) {
-  const crossed = e.from !== null && e.from.mapId !== e.to.mapId;
+  const badge = KIND_BADGE[e.kind] ?? KIND_BADGE.travel;
 
   const when = formatWhen(e.createdAt);
 
   return (
     <li className="flex flex-col gap-1.5 rounded-lg bg-[rgba(20,16,12,.85)] p-2.5 shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)]">
       <div className="flex flex-wrap items-center gap-1.5">
-        <HudPill tone="accent" icon={crossed ? <Shuffle className="size-3" aria-hidden /> : <Route className="size-3" aria-hidden />}>
-          {crossed ? "Перехід" : "Подорож"}
+        <HudPill tone={badge.tone} icon={badge.icon}>
+          {badge.label}
         </HudPill>
         {e.rest !== "none" ? (
           <HudPill tone="muted" icon={<Moon className="size-3" aria-hidden />}>

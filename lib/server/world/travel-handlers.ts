@@ -51,7 +51,7 @@ export function travelHandler(req: Request, campaignId: string) {
 
     const plan = planTravel({ positions, characterIds: body.characterIds, mapId: map.id, to: body.to, radius: map.revealRadius, aspect: map.width / map.height });
 
-    await commitTravel({ campaignId, userId: access.userId, dest: map, plan, positions, rest: body.rest, toMarkerId: marker?.id ?? null });
+    await commitTravel({ campaignId, userId: access.userId, dest: map, plan, positions, rest: body.rest, toMarkerId: marker?.id ?? null, kind: "travel" });
 
     publishWorldChanged(campaignId, map.id);
 
@@ -81,7 +81,7 @@ export function enterHandler(req: Request, campaignId: string) {
 
     const plan = planEnter({ marker, childMap: child, characterIds: body.characterIds });
 
-    await commitTravel({ campaignId, userId: access.userId, dest: child, plan, positions, rest: body.rest, toMarkerId: null });
+    await commitTravel({ campaignId, userId: access.userId, dest: child, plan, positions, rest: body.rest, toMarkerId: null, kind: "enter" });
 
     publishWorldChanged(campaignId, child.id);
 
@@ -117,7 +117,7 @@ export function exitHandler(req: Request, campaignId: string) {
 
     const plan = planExit({ map: { id: map.id, parentMarker }, characterIds: body.characterIds });
 
-    await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id });
+    await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id, kind: "exit" });
 
     publishWorldChanged(campaignId, dest.id);
 
