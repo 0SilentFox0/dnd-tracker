@@ -4,5 +4,6 @@ export * from "./conditions";
 export * from "./conversion-issue";
 export * from "./damage-kind";
 export * from "./effects";
+export * from "./params";
 export * from "./static-condition";
 export * from "./triggers";

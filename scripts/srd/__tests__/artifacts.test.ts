@@ -25,6 +25,11 @@ describe("convertArtifacts", () => {
     expect(item("Blowgun").weapon?.damageDice).toBe("1");
   });
 
+  it("weaponCategory is structured", () => {
+    expect(item("Battleaxe").weapon?.weaponCategory).toBe("martial");
+    expect(item("Dagger").weapon?.weaponCategory).toBe("simple");
+  });
+
   it("Shield: +2 AC passive", () => {
     expect(item("Shield")).toMatchObject({ slot: "shield", abilities: [{ id: "shield-ac", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 2 }] }] });
   });

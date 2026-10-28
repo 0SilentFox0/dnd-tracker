@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { armorStatsColumns } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
+import { weaponCategoryOf } from "@/lib/utils/battle/participant/extract-attacks";
 import { composedName, composeItemRow, itemKindOf, type ItemRowLike, matchesAppliesTo } from "@/lib/utils/items/compose";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { type ItemStats,itemStatsColumns } from "@/lib/utils/items/item-stats";
@@ -118,5 +119,17 @@ describe("composeItemRow", () => {
     const homm = { ...longsword, id: "homm", modifiers: weaponStatsColumns({ damageDice: "1d8" }).modifiers };
 
     expect(itemStatsFromRow(composeItemRow(homm, plus2))).toBeNull();
+  });
+
+  it("keeps the base weapon category, also when it lives only in the description (a property replaces the description)", () => {
+    const structured = weapon("ms", "Maul", { damageDice: "2d6", damageType: "bludgeoning", attackType: "melee", weaponCategory: "martial" });
+
+    const legacy = { ...longsword, description: "Simple Melee Weapon. Damage: 1d8 slashing." };
+
+    const category = (row: ItemRowLike) => weaponCategoryOf(row.modifiers as never, row.description);
+
+    expect(category(composeItemRow(structured, plus2))).toBe("martial");
+    expect(category(composeItemRow(legacy, plus2))).toBe("simple");
+    expect(category(composeItemRow(longsword, plus2))).toBeUndefined();
   });
 });

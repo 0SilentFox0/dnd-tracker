@@ -75,7 +75,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     .map((e) => e.name);
 
   const advantage = [
-    ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => !(targetSees && e.condition === "invisible") && e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
+    ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => !(targetSees && e.condition === "invisible") && e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind) && (!e.flag.attackAbility || e.flag.attackAbility === attackAbilityFor(attacker, attack)))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
     ...(adjacent ? proneDefense : []),
     ...(opts.inspiration ? [INSPIRATION_LABEL] : []),

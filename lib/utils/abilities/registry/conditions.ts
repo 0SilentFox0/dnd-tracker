@@ -57,6 +57,7 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
     fields: [{ name: "mode", label: "Режим", input: "select", options: [{ value: "advantage", label: "перевага" }, { value: "disadvantage", label: "недолік" }, { value: "normal", label: "звичайний" }] }],
   },
   allyAdjacent: { label: "Союзник поруч із ціллю", fields: [] },
+  notMoved: { label: "Не рухався цього ходу", fields: [] },
   withThisItem: { label: "Атака цим предметом", fields: [] },
   not: { label: "НЕ (заперечення)", fields: [{ name: "condition", label: "Умова", input: "effects" }] },
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
@@ -127,6 +128,8 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       return eventRollModeOf(ctx.event) === c.mode;
     case "allyAdjacent":
       return allyNextToTarget(ctx);
+    case "notMoved":
+      return !ctx.owner.battleData.movementUsed;
     case "withThisItem": {
       const e = ctx.event;
 
@@ -149,6 +152,14 @@ export function conditionRequiresDeadTarget(c?: Condition): boolean {
   if (c.type === "all") return c.conditions.some(conditionRequiresDeadTarget);
 
   return c.type === "any" && c.conditions.every(conditionRequiresDeadTarget);
+}
+
+export function conditionRequiresStill(c?: Condition): boolean {
+  if (!c) return false;
+
+  if (c.type === "notMoved") return true;
+
+  return c.type === "all" && c.conditions.some(conditionRequiresStill);
 }
 
 export function hasCreatureTypeCondition(c: Condition | undefined): boolean {

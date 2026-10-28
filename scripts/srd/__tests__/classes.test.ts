@@ -20,9 +20,14 @@ describe("convertClasses", () => {
 
   it("Fighter core traits", () => {
     expect(cls("Fighter")).toMatchObject({ hitDie: 10, savingThrows: ["strength", "constitution"], caster: "none", spellcastingAbility: null, subclassLevel: 3 });
-    expect(cls("Fighter").proficiencies).toEqual({ armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"], tools: [] });
+    expect(cls("Fighter").proficiencies).toEqual({ armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"], tools: [], multiclass: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] } });
     expect(cls("Fighter").skillChoices.count).toBe(2);
     expect(cls("Fighter").skillChoices.from).toEqual(["acrobatics", "animalHandling", "athletics", "history", "insight", "intimidation", "persuasion", "perception", "survival"]);
+  });
+
+  it("multiclass skill grant: Bard any skill, Fighter none", () => {
+    expect(cls("Bard").proficiencies.multiclass).toMatchObject({ skills: { count: 1, from: [...DND_SKILLS] } });
+    expect(cls("Fighter").proficiencies.multiclass?.skills).toBeUndefined();
   });
 
   it("Extra Attack, Second Wind, Action Surge (2 only, scaled by the table), no table columns", () => {

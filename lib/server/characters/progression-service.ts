@@ -13,7 +13,7 @@ import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
-import { experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
+import { arcaneRecoverySchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
@@ -32,7 +32,7 @@ export const PROGRESSION_INPUTS = {
   "level-up": withId(LevelUpBodySchema), choices: withId(ChoicesBodySchema), resources: withId(resourcesEditSchema),
   "inventory.patch": withId(updateInventorySchema), "inventory": characterIdSchema,
   "stash": characterIdSchema, "stash.apply": stashWithId, "transfer": withId(transferSchema),
-  "hit-dice": withId(hitDieSchema), inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
+  "hit-dice": withId(hitDieSchema), "arcane-recovery": withId(arcaneRecoverySchema), inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
   roll: serverRoll, sheet: characterIdSchema, progression: characterIdSchema,
   "progression.learn": characterIdSchema.extend({ nodeId: z.string().min(1) }).strict(),
   "progression.unlearn": characterIdSchema.extend({ nodeIds: z.array(z.string().min(1)).min(1).max(100) }).strict(),

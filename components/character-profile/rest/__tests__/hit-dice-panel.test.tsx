@@ -16,7 +16,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), 
 
 const rest = (over: Partial<SheetRest> = {}): SheetRest => ({
   persist: true, hp: { current: 10, max: 30, temp: 0 }, dead: false, exhaustion: 0, shortRestOpen: true,
-  hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 1 }], charges: [], inspiration: null, xp: null, ...over,
+  hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 1 }], charges: [], arcaneRecovery: null, inspiration: null, xp: null, ...over,
 });
 
 const show = (r: SheetRest, viewer: CharacterSheet["viewer"] = { isDM: false, isOwner: true }) =>

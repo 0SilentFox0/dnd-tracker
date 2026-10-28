@@ -171,7 +171,7 @@ function applyStartOfBattleAndSort(
   const allTriggerMessages = [...battleStart.messages, ...roundStart.messages];
 
   const withCalculatedInitiative = afterStartOfRound.map((participant) => {
-    const calculatedInitiative = calculateInitiative(participant, afterStartOfRound);
+    const calculatedInitiative = calculateInitiative(participant, afterStartOfRound, { rules });
 
     return {
       ...participant,

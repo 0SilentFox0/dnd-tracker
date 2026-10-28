@@ -4,6 +4,7 @@ import { FormulaSchema, ScaleSchema } from "./common";
 import { ConditionSchema } from "./conditions";
 import { type Effect, EffectSchema, isBakedStat, isStaticEffect, TIMED_STATS } from "./effects";
 import { isAreaTarget, PASSIVE_TARGETS } from "./kinds";
+import { AbilityParamsSchema } from "./params";
 import { isStaticCondition } from "./static-condition";
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
 
@@ -25,7 +26,7 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
   const issues: string[] = [];
 
   if (trigger.event === "passive") {
-    if (effect.kind !== "note" && !isStaticEffect(effect)) {
+    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isStaticEffect(effect)) {
       issues.push("Пасивка допускає лише modifyStat, damageBonus, flag, note");
     }
 
@@ -90,6 +91,7 @@ export const AbilitySchema = z
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
     maxTargets: z.number().int().min(1).optional(),
+    params: AbilityParamsSchema.optional(),
     aim: z.object({ kind: z.enum(["cell", "direction"]), range: z.number().int().min(5) }).optional(),
   })
   .superRefine((a, ctx) => {
@@ -115,6 +117,14 @@ export const AbilitySchema = z
 
     if (a.perform && (!a.limits?.legendaryCost && !a.limits?.lair || a.effects.some((e) => e.kind !== "note"))) {
       ctx.addIssue({ code: "custom", path: ["perform"], message: "Виконання атаки чи заклинання — лише легендарна дія або дія лігва з ефектами-нотатками" });
+    }
+
+    if (a.params?.sneakAttack && (a.trigger.event !== "hit" || !a.effects.some((e) => e.kind === "dealDamage"))) {
+      ctx.addIssue({ code: "custom", path: ["params", "sneakAttack"], message: "Прихована атака — вміння на влучання з ефектом dealDamage" });
+    }
+
+    if (a.params?.cunningStrike && a.trigger.event !== "passive") {
+      ctx.addIssue({ code: "custom", path: ["params", "cunningStrike"], message: "Підступний удар — лише пасивка" });
     }
 
     if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {

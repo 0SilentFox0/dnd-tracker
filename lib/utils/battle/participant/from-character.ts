@@ -23,6 +23,7 @@ import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas
 import { classPools } from "@/lib/utils/abilities/class-columns";
 import { readChoiceList } from "@/lib/utils/abilities/read";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
+import { classProficiencies, withGrantedProficiencies } from "@/lib/utils/battle/proficiency/collect";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
@@ -146,7 +147,7 @@ async function characterSpellcasting(character: CharacterFromPrisma, refs: Build
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
   const baked = bakePassives(participant);
 
-  const armored = resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked);
+  const armored = withGrantedProficiencies(resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked));
 
   // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
   const spell = spellcastingDerived(character.level, spellcastingAbility, armored.abilities, rules.formulas);
@@ -199,9 +200,7 @@ export async function createBattleParticipantFromCharacter(
       ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
       : [];
 
-  const startClass = resolvedClasses?.[0]?.class?.proficiencies;
-
-  const classProficiencies = startClass && (startClass.armor.length > 0 || startClass.weapons.length > 0) ? { armor: startClass.armor, weapons: startClass.weapons } : undefined;
+  const classProficiency = resolvedClasses ? classProficiencies(resolvedClasses.map((e) => e.class)) : undefined;
 
   const rawSkills = character.skills;
 
@@ -262,7 +261,7 @@ export async function createBattleParticipantFromCharacter(
       rangedMultiplier: archetype.ranged,
       magicMultiplier: archetype.magic,
       archetypeName: archetype.name,
-      ...(classProficiencies && { proficiencies: classProficiencies }),
+      ...(classProficiency && { proficiencies: classProficiency }),
       ...(saveProficiencies.length && { saveProficiencies }),
       ...(dndSkillProficiencies.length && { skillProficiencies: dndSkillProficiencies }),
     },

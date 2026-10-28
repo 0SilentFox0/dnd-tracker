@@ -35,7 +35,7 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
     case "maxTargets":
       return { ...p, combatStats: { ...cs, [e.stat]: cs[e.stat] + flat } };
     case "initiative":
-      return { ...p, abilities: { ...p.abilities, baseInitiative: p.abilities.baseInitiative + flat, initiative: p.abilities.initiative + flat } };
+      return { ...p, abilities: { ...p.abilities, baseInitiative: p.abilities.baseInitiative + flat, initiative: p.abilities.initiative + flat, initiativeBonus: (p.abilities.initiativeBonus ?? 0) + flat } };
     case "spellSlots": {
       const slots = { ...p.spellcasting.spellSlots };
 

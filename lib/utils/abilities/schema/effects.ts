@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
+import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { DND_SKILLS } from "@/lib/constants/skills";
 
 export {
@@ -36,6 +37,7 @@ const ModifyStatSchema = z
     atLeast: z.number().int().min(1).max(30).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
+    until: z.literal("turnEnd").optional(),
     ...timed,
   })
   .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })
@@ -69,7 +71,7 @@ const AbilitiesOrAll = z.union([z.literal("all"), z.array(AbilityKeySchema).min(
 
 const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("sense"), sense: z.enum(["darkvision", "blindsight", "tremorsense", "truesight"]), range: z.number().int().min(5).max(1000) }),
-  z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
+  z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]), attackAbility: AbilityKeySchema.optional(), consumeOn: z.literal("ownAttack").optional(), until: z.literal("turnEnd").optional() }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),
   z.object({ ...flagBase, flag: z.literal("advantageForAttackers") }),
@@ -126,6 +128,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
   z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("skillExpertise"), skills: z.array(DndSkillSchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("proficiency"), kinds: z.array(z.enum(PROFICIENCY_KINDS)).min(1) }),
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),
@@ -201,6 +204,8 @@ const ApplyConditionSchema = z.object({
 
 const RestoreSpellSlotSchema = z.object({ kind: z.literal("restoreSpellSlot"), count: z.number().int().min(1), ...target });
 
+const RestoreSpellSlotLevelsSchema = z.object({ kind: z.literal("restoreSpellSlotLevels"), budget: z.union([z.number().int().min(1), FormulaSchema]), maxSlotLevel: z.number().int().min(1).max(9) });
+
 const DrainSpellSlotSchema = z.object({ kind: z.literal("drainSpellSlot"), count: z.number().int().min(1), ...target });
 
 const ChangeMoraleSchema = z.object({
@@ -249,6 +254,7 @@ const BASE_EFFECTS = [
   CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
+  RestoreSpellSlotLevelsSchema,
   DrainSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,

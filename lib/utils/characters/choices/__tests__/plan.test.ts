@@ -21,6 +21,12 @@ const input = (before: Partial<ChoicesState>, after: Partial<ChoicesState>, extr
   ...extra,
 });
 
+const ranger = { ...rogue, id: "cls-ranger", multiclassProficiencies: { armor: [], weapons: [], skills: { count: 1, from: ["stealth", "survival"] } } };
+
+const multiclassRefs = { ...refs, classesById: { ...refs.classesById, [ranger.id]: ranger } };
+
+const rangerEntry = (choices?: Picks) => ({ classId: ranger.id, level: 1, ...(choices && { choices }) });
+
 const fail = (r: ReturnType<typeof planChoices>) => (r.ok ? null : r.code);
 
 describe("planChoices", () => {
@@ -72,5 +78,14 @@ describe("planChoices", () => {
 
     expect(fail(planChoices(input({}, { classes: [sorc(4, twice("f-grappler"))], feats: [{ id: "f-grappler", source: "dm" }] })))).toBe("FEAT_NOT_REPEATABLE");
     expect(planChoices(input({}, { classes: [sorc(4, twice("f-mi"))], feats: [{ id: "f-mi", source: "origin" }] })).ok).toBe(true);
+  });
+
+  it("multiclass skill grant: only on a non-first class, from its list, within count", () => {
+    const run = (classes: ChoicesState["classes"]) => planChoices(input({}, { classes }, { refs: multiclassRefs }));
+
+    expect(run([sorc(4), rangerEntry({ "multiclass-skills": [{ id: "survival" }] })]).ok).toBe(true);
+    expect(fail(run([sorc(4), rangerEntry({ "multiclass-skills": [{ id: "arcana" }] })]))).toBe("SKILL_NOT_ALLOWED");
+    expect(fail(run([sorc(4), rangerEntry({ "multiclass-skills": [{ id: "stealth" }, { id: "survival" }] })]))).toBe("CHOICE_COUNT");
+    expect(fail(run([rangerEntry({ "multiclass-skills": [{ id: "survival" }] })]))).toBe("CHOICE_UNKNOWN");
   });
 });

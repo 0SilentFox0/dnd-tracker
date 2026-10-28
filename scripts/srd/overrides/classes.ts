@@ -5,6 +5,23 @@ import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import type { Condition, Effect } from "@/lib/utils/abilities/schema";
 import type { ClassColumn } from "@/types/classes";
 
+// SRD 5.2 "Multiclass proficiencies": what a class grants when it is not the first one
+// skills: 2024 grants one skill (Bard: any; Ranger/Rogue: from the class list); "class" = the class' own skill list
+export const MULTICLASS_PROFICIENCIES: Record<string, { armor: string[]; weapons: string[]; skills?: { count: number; from: "any" | "class" } }> = {
+  barbarian: { armor: ["Shields"], weapons: ["Martial weapons"] },
+  bard: { armor: ["Light armor"], weapons: [], skills: { count: 1, from: "any" } },
+  cleric: { armor: ["Light armor", "Medium armor", "Shields"], weapons: [] },
+  druid: { armor: ["Light armor", "Shields"], weapons: [] },
+  fighter: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+  monk: { armor: [], weapons: [] },
+  paladin: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+  ranger: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"], skills: { count: 1, from: "class" } },
+  rogue: { armor: ["Light armor"], weapons: [], skills: { count: 1, from: "class" } },
+  sorcerer: { armor: [], weapons: [] },
+  warlock: { armor: ["Light armor"], weapons: [] },
+  wizard: { armor: [], weapons: [] },
+};
+
 export type FeatureOption = AbilityCore & { name: string; slug: string };
 
 const EXTRA_ATTACK: AbilityCore = { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: 1 }] };
@@ -59,21 +76,21 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_fighter_champion_remarkable-athlete": passive([{ kind: "flag", flag: "checkAdvantage", skills: ["athletics"] }]),
   "srd-2024_fighter_champion_survivor": { trigger: { event: "turnStart" }, condition: { type: "hpBelow", who: "self", percent: 50 }, effects: [{ kind: "heal", amount: { formula: "5 + con_mod" }, target: "self" }] },
   "srd-2024_barbarian_danger-sense": passive([{ kind: "flag", flag: "saveAdvantage", abilities: ["dexterity"] }]),
-  // free in the SRD: the bonus action is refreshed, so use it before Rage; melee approximates "Strength attack rolls"
+  // free in the SRD: the bonus action is refreshed, so use it before Rage
   "srd-2024_barbarian_reckless-attack": {
     trigger: { event: "bonusAction" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "melee", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "all", attackAbility: "strength", duration: { rounds: 1 }, target: "self" },
       { kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "self" },
       { kind: "grantAction", refreshBonusAction: true, target: "self" },
     ],
   },
-  // advantage lasts until the next turn start (not consumed by the first attack), "haven't moved" is not checked
   "srd-2024_rogue_steady-aim": {
     trigger: { event: "bonusAction" },
+    condition: { type: "notMoved" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "all", duration: { rounds: 1 }, target: "self" },
-      { kind: "modifyStat", stat: "speed", percent: -100, duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" },
+      { kind: "modifyStat", stat: "speed", percent: -100, until: "turnEnd", duration: { rounds: 1 }, target: "self" },
     ],
   },
   "srd-2024_barbarian_unarmored-defense": passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "max(0, con_mod)" } }], UNARMORED),
@@ -110,7 +127,13 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_paladin_aura-of-protection": passive([{ kind: "modifyStat", stat: "savingThrow", flat: { formula: "max(1, cha_mod)" }, target: "nearbyAllies" }]),
   "srd-2024_paladin_radiant-strikes": { trigger: { event: "hit", role: "attacker", attackKind: "melee" }, effects: [{ kind: "dealDamage", amount: "1d8", damageType: "radiant", target: "eventTarget" }] },
   "srd-2024_rogue_slippery-mind": passive([{ kind: "flag", flag: "saveProficiency", abilities: ["wisdom", "charisma"] }]),
-  "srd-2024_rogue_sneak-attack": { trigger: { event: "hit", role: "attacker" }, condition: SNEAK, limits: { perTurn: 1 }, effects: [{ kind: "dealDamage", amount: { scale: "sneak-attack" }, target: "eventTarget" }] },
+  "srd-2024_rogue_sneak-attack": { trigger: { event: "hit", role: "attacker" }, condition: SNEAK, limits: { perTurn: 1 }, params: { sneakAttack: true }, effects: [{ kind: "dealDamage", amount: { scale: "sneak-attack" }, target: "eventTarget" }] },
+  "srd-2024_rogue_cunning-strike": {
+    trigger: { event: "passive" },
+    params: { cunningStrike: { options: [{ effect: "poison", dice: 1 }, { effect: "trip", dice: 1 }, { effect: "withdraw", dice: 1 }], maxEffects: 1 } },
+    effects: [note("Cunning Strike")],
+  },
+  "srd-2024_rogue_improved-cunning-strike": { trigger: { event: "passive" }, params: { cunningStrike: { maxEffects: 2 } }, effects: [note("Improved Cunning Strike")] },
   "srd-2024_rogue_uncanny-dodge": { trigger: { event: "hit", role: "target" }, limits: { perRound: 1 }, effects: [{ kind: "heal", amount: { percentOf: "eventDamage", value: 50 }, target: "self" }] },
   "srd-2024_rogue_evasion": passive([{ kind: "flag", flag: "evasion" }]),
   "srd-2024_rogue_cunning-action": passive([{ kind: "flag", flag: "cunningAction" }]),
@@ -174,6 +197,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
     { name: "Draconic Resilience", slug: "hp", ...passive([{ kind: "modifyStat", stat: "maxHp", flat: { formula: "class_level" } }]) },
     { name: "Draconic Resilience: AC", slug: "ac", ...passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "cha_mod" } }], UNARMORED) },
   ],
+  "srd-2024_wizard_arcane-recovery": passive([{ kind: "restoreSpellSlotLevels", budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 }]),
   "srd-2024_wizard_evoker_empowered-evocation": passive([{ kind: "damageBonus", filter: { kind: "magic", school: "Evocation" }, flat: { formula: "int_mod" } }]),
 };
 

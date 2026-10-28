@@ -31,3 +31,16 @@ describe("weapon stats", () => {
     expect(isWeaponSlot("ring")).toBe(false);
   });
 });
+
+describe("weaponCategory", () => {
+  it("зберігається в модифікаторах і читається назад", () => {
+    const cols = weaponStatsColumns({ damageDice: "1d8", weaponCategory: "martial" });
+
+    expect(cols.modifiers).toContainEqual({ type: "weaponCategory", value: "martial" });
+    expect(weaponStatsFromRow(cols).weaponCategory).toBe("martial");
+  });
+
+  it("некоректна категорія відкидає всю структуру", () => {
+    expect(weaponStatsFromRow({ modifiers: [{ type: "weaponCategory", value: "exotic" }] })).toEqual({});
+  });
+});
