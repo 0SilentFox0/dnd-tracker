@@ -9,76 +9,78 @@ datasource db {
 }
 
 model User {
-  id              String               @id
-  email           String               @unique
-  displayName     String
-  avatar          String?
-  locale          String?
-  createdAt       DateTime             @default(now())
-  campaignMembers CampaignMember[]
-  dmCampaigns     Campaign[]           @relation("DMCampaigns")
-  characters      Character[]
-  aiCredentials   AiCredential[]
-  onboardingFlags UserOnboardingFlag[]
-  worldNotes      WorldNote[]
-  worldTravelLog  WorldTravelLog[]
+  id                  String               @id
+  email               String               @unique
+  displayName         String
+  avatar              String?
+  locale              String?
+  createdAt           DateTime             @default(now())
+  campaignMembers     CampaignMember[]
+  dmCampaigns         Campaign[]           @relation("DMCampaigns")
+  characters          Character[]
+  aiCredentials       AiCredential[]
+  onboardingFlags     UserOnboardingFlag[]
+  worldNotes          WorldNote[]
+  worldTravelLog      WorldTravelLog[]
+  playerNotifications PlayerNotification[]
 
   @@map("users")
 }
 
 model Campaign {
-  id                String                @id @default(cuid())
-  sourceSync        CampaignSourceSync?
-  name              String
-  description       String?
-  inviteCode        String                @unique
-  dmUserId          String
-  maxLevel          Int                   @default(20)
-  xpMultiplier      Float                 @default(2.5)
-  allowPlayerEdit   Boolean               @default(true)
-  critChoiceByDm    Boolean               @default(false)
-  status            String                @default("active")
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
-  friendlyFire      Boolean               @default(false)
-  rules             Json                  @default("{}")
-  kind              String                @default("campaign")
-  visibility        String                @default("private")
-  createdFromId     String?
-  aiInstructions    String?
-  credits           String?
-  artifactSets      ArtifactSet[]
-  artifacts         Artifact[]
-  battles           BattleScene[]
-  members           CampaignMember[]
-  dm                User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
-  characters        Character[]
-  mainSkills        MainSkill[]
-  races             Race[]
-  classes           GameClass[]
-  backgrounds       Background[]
-  feats             Feat[]
-  scenarioPages     ScenarioPage[]
-  skillTrees        SkillTree[]
-  skills            Skill[]
-  spellGroups       SpellGroup[]
-  spells            Spell[]
-  tracks            CampaignTrack[]
-  slideDecks        SlideDeck[]
-  show              CampaignShow?
-  units             Unit[]
-  assistantIntents  AssistantIntent[]
-  aiThreads         AiThread[]
-  aiProposals       AiProposal[]
-  apiTokens         ApiToken[]
-  compendiumSources CompendiumSource[]
-  compendiumEntries CompendiumEntry[]
-  compendiumRuns    CompendiumImportRun[]
-  inventoryLog      InventoryLog[]
-  characterLog      CharacterLog[]
-  worldMaps         WorldMap[]
-  worldPositions    WorldPosition[]
-  worldTravelLog    WorldTravelLog[]
+  id                  String                @id @default(cuid())
+  sourceSync          CampaignSourceSync?
+  name                String
+  description         String?
+  inviteCode          String                @unique
+  dmUserId            String
+  maxLevel            Int                   @default(20)
+  xpMultiplier        Float                 @default(2.5)
+  allowPlayerEdit     Boolean               @default(true)
+  critChoiceByDm      Boolean               @default(false)
+  status              String                @default("active")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  friendlyFire        Boolean               @default(false)
+  rules               Json                  @default("{}")
+  kind                String                @default("campaign")
+  visibility          String                @default("private")
+  createdFromId       String?
+  aiInstructions      String?
+  credits             String?
+  artifactSets        ArtifactSet[]
+  artifacts           Artifact[]
+  battles             BattleScene[]
+  members             CampaignMember[]
+  dm                  User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
+  characters          Character[]
+  mainSkills          MainSkill[]
+  races               Race[]
+  classes             GameClass[]
+  backgrounds         Background[]
+  feats               Feat[]
+  scenarioPages       ScenarioPage[]
+  skillTrees          SkillTree[]
+  skills              Skill[]
+  spellGroups         SpellGroup[]
+  spells              Spell[]
+  tracks              CampaignTrack[]
+  slideDecks          SlideDeck[]
+  show                CampaignShow?
+  units               Unit[]
+  assistantIntents    AssistantIntent[]
+  aiThreads           AiThread[]
+  aiProposals         AiProposal[]
+  apiTokens           ApiToken[]
+  compendiumSources   CompendiumSource[]
+  compendiumEntries   CompendiumEntry[]
+  compendiumRuns      CompendiumImportRun[]
+  inventoryLog        InventoryLog[]
+  characterLog        CharacterLog[]
+  worldMaps           WorldMap[]
+  worldPositions      WorldPosition[]
+  worldTravelLog      WorldTravelLog[]
+  playerNotifications PlayerNotification[]
 
   @@index([dmUserId])
   @@index([kind, visibility])
@@ -1128,4 +1130,22 @@ model WorldNote {
 
   @@index([markerId])
   @@map("world_notes")
+}
+
+model PlayerNotification {
+  id         String    @id @default(cuid())
+  userId     String
+  campaignId String
+  type       String
+  refId      String
+  href       String
+  createdAt  DateTime  @default(now())
+  readAt     DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, refId])
+  @@index([userId, campaignId, readAt])
+  @@index([readAt])
+  @@map("player_notifications")
 }
