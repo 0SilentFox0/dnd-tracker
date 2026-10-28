@@ -1,3 +1,4 @@
+import { findByName, type NamedRow, pendingRefs } from "./auto-bind";
 import { buildDependencyClosure, type TemplateSnapshot } from "./dependencies";
 import { domainSchemas } from "./domain-schemas";
 import { digest } from "./identity";
@@ -5,7 +6,7 @@ import { digest as identityDigest } from "./identity";
 import { CompendiumError, type JsonRecord, normalized } from "./parse";
 import type { ExistingEntry, PlannedWrite } from "./plan";
 import { ADAPTER_VERSION } from "./plan";
-import type { CompendiumReport, ImportRepository } from "./service";
+import type { CompendiumReport, DependencyChoice, ImportRepository } from "./service";
 import type { TargetKind } from "./types";
 
 import "server-only";
@@ -110,7 +111,7 @@ export const prismaImportRepository: ImportRepository = {
 
     if (!found) throw new CompendiumError("FORBIDDEN");
   },
-  async loadContext(actor, input) {
+  async loadContext(actor, input, adaptedEntries = []) {
     const settings = await prisma.campaign.findUniqueOrThrow({ where: { id: actor.campaignId }, select: { rules: true, credits: true } });
 
     const hasCharacters = (await prisma.character.count({ where: { campaignId: actor.campaignId } })) > 0;
@@ -166,9 +167,47 @@ export const prismaImportRepository: ImportRepository = {
       bindings[key] = boundEntry(key, binding.kind, binding.id, raw);
     }
 
+    const occupiedNames = await loadNames(actor.campaignId);
+
+    const explicit = new Set((input.dependencies ?? []).map((d) => d.refKey));
+
+    const pending = pendingRefs(adaptedEntries.filter((e) => !input.excludedKeys?.includes(e.key)), (key) => key in bindings || explicit.has(key) || existing.some((e) => e.key === key));
+
+    const matched = pending.flatMap((p) => { const row = findByName(occupiedNames[p.kind], p.ref.name);
+
+ return row ? [{ ...p, row }] : []; });
+
+    const autoRows = await loadRows(actor.campaignId, matched.map((m) => ({ kind: m.kind, id: m.row.id })));
+
+    for (const m of matched) {
+      const raw = autoRows.get(m.kind)?.get(m.row.id);
+
+      if (raw) bindings[m.key] = boundEntry(m.key, m.kind, m.row.id, raw);
+    }
+
+    const choices: DependencyChoice[] = [...(input.dependencies ?? [])];
+
+    const stillPending = pending.filter((p) => !(p.key in bindings));
+
+    if (stillPending.length) {
+      const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+
+      for (const template of official) {
+        const names = await loadNames(template.id);
+
+        for (const p of stillPending) {
+          const row = findByName(names[p.kind] as NamedRow[] | undefined, p.ref.name);
+
+          const compatible = p.ref.edition === "one" || input.allowMixedEdition;
+
+          if (row && compatible && !choices.some((c) => c.refKey === p.key)) choices.push({ refKey: p.key, templateId: template.id, kind: p.kind, localId: row.id, edition: "one" });
+        }
+      }
+    }
+
     const templates: TemplateSnapshot[] = [];
 
-    for (const templateId of new Set(input.dependencies?.map((d) => d.templateId))) {
+    for (const templateId of new Set(choices.map((d) => d.templateId))) {
       const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
 
       if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
@@ -176,7 +215,7 @@ export const prismaImportRepository: ImportRepository = {
       templates.push({ id: templateId, edition: "one", rows: await loadTemplateRows(templateId) });
     }
 
-    const dependencies = buildDependencyClosure(templates, input.dependencies ?? [], input.allowMixedEdition);
+    const dependencies = buildDependencyClosure(templates, choices, input.allowMixedEdition);
 
     for (const [refKey, key] of Object.entries(dependencies.aliases)) {
       const entry = dependencies.entries.find((e) => e.key === key)!;
@@ -185,8 +224,6 @@ export const prismaImportRepository: ImportRepository = {
 
       bindings[refKey] = { key, edition: entry.edition, kind: entry.kind, localId, body: entry.body, baseline: entry.body };
     }
-
-    const occupiedNames = await loadNames(actor.campaignId);
 
     return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters, hasClasses, classesEnabled: parseRules(settings.rules).classes.enabled };
   },

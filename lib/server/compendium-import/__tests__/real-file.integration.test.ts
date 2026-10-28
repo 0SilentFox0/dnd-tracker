@@ -7,13 +7,11 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("next/cache", async (original) => ({ ...(await original<object>()), unstable_cache: <T,>(fn: T) => fn, revalidateTag: vi.fn() }));
 vi.mock("@/lib/cache/tags", async (original) => ({ ...(await original<object>()), invalidateReference: vi.fn() }));
 
-import { importTargetOptions, previewPresentation } from "../presentation";
+import { previewPresentation } from "../presentation";
 import { prismaImportRepository } from "../repository";
 import { confirmImport, previewImport } from "../service";
-import type { TargetKind } from "../types";
 
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
-import { COMPENDIUM_REF_KINDS } from "@/lib/constants/compendium-import";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
 import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
@@ -63,31 +61,23 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const base = projectInput(root, categoryInventory(root).filter((c) => c.selected).map((c) => c.kind), { rulesPatch: { classes: { enabled: true } }, allowMixedEdition: true });
 
+    const bare = await previewImport(actor(), base, secret, prismaImportRepository);
+
+    const unresolved = bare.report.rows.flatMap((r) => r.issues.filter((i) => i.code === "UNRESOLVED_REF"));
+
+    console.info("auto-bind: unresolved refs", unresolved.length, "in rows", bare.report.rows.filter((r) => r.issues.some((i) => i.code === "UNRESOLVED_REF")).length, [...new Set(unresolved.map((i) => i.action.match(/«[^»]+»/)?.[0]))].join(", "));
+
     const { graph } = previewPresentation(base);
 
     const own = new Set(graph.map((r) => r.key));
 
-    const [template] = (await importTargetOptions(actor())).templates;
-
-    const dependencies = new Map<string, NonNullable<typeof base.dependencies>[number]>();
-
-    for (const ref of graph.flatMap((r) => r.refs)) {
-      const target = own.has(ref.key) ? undefined : template.rows.find((t) => t.kind === COMPENDIUM_REF_KINDS[ref.kind] && t.name.toLowerCase() === ref.name.toLowerCase());
-
-      if (target) dependencies.set(ref.key, { refKey: ref.key, templateId: template.id, kind: target.kind as TargetKind, localId: target.id, edition: template.edition });
-    }
-
     const bindings: NonNullable<typeof base.bindings> = {};
 
-    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && !dependencies.has(r.key))) {
-      const placeholder = bindings[ref.key] ?? { kind: "spells" as const, id: (await prisma.spell.create({ data: { campaignId, name: ref.name, executionMode: "manual", type: "damage", damageType: "none" } })).id };
-
-      bindings[ref.key] = placeholder;
+    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.action.includes(`«${r.name}»`)))) {
+      bindings[ref.key] = bindings[ref.key] ?? { kind: "spells" as const, id: (await prisma.spell.create({ data: { campaignId, name: ref.name, executionMode: "manual", type: "damage", damageType: "none" } })).id };
     }
 
-    const input = { ...base, dependencies: [...dependencies.values()], bindings };
-
-    console.info("template dependencies:", dependencies.size, "missing:", [...new Set(graph.flatMap((r) => r.refs).filter((r) => !own.has(r.key) && !dependencies.has(r.key)).map((r) => `${r.kind}:${r.name}`))].join(", "));
+    const input = { ...base, bindings };
 
     const p = await previewImport(actor(), input, secret, prismaImportRepository);
 

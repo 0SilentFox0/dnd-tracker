@@ -21,3 +21,5 @@ export function stableJson(value: unknown): string {
 
   return JSON.stringify(value) ?? "null";
 }
+
+export const nameKey = (name: string): string => normalized(name).replace(/[\u2018\u2019\u02bc`]/g, "'").replace(/\s+/g, " ");

@@ -30,6 +30,19 @@ describe("source aware atomic import plan", () => {
     expect(general.errors.some((e) => e.code === "BACKGROUND_FEAT_INVALID")).toBe(true);
   });
 
+  it("binds a ref to the file's own entry of the same name from another source and names missing ones readably", () => {
+    const otherSource = { ...root, feat: [{ ...root.feat[0], name: "GIFT", source: "Other" }] };
+
+    const plan = buildImportPlan(adaptCompendium(otherSource), { campaignId: "c", existing: [] });
+
+    expect(plan.errors).toEqual([]);
+
+    const missing = buildImportPlan(adaptCompendium({ background: root.background }), { campaignId: "c", existing: [] });
+
+    expect(missing.errors[0].action).toContain("«Gift»");
+    expect(missing.errors[0].action).toContain("«Past»");
+  });
+
   it("records explicit bindings for reuse and rejects bindings of the wrong resource kind", () => {
     const adapted = adaptCompendium({ background: root.background });
 

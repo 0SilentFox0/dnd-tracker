@@ -60,7 +60,7 @@ export interface CompendiumReport {
 export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean }
 export interface ImportRepository {
   authorize(actor: Actor): Promise<void>;
-  loadContext(actor: Actor, input: ImportInput): Promise<RepositoryContext>;
+  loadContext(actor: Actor, input: ImportInput, entries?: AdaptedEntry[]): Promise<RepositoryContext>;
   findRun(actor: Actor, key: string): Promise<{ requestHash: string; report: CompendiumReport } | undefined>;
   transaction<T>(actor: Actor, callback: (repository: ImportRepository) => Promise<T>): Promise<T>;
   write(actor: Actor, row: PlannedWrite): Promise<string>;
@@ -198,7 +198,7 @@ async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof
 
   const adapted = adaptCompendium(root, input);
 
-  const ctx = await repository.loadContext(actor, input);
+  const ctx = await repository.loadContext(actor, input, adapted.entries);
 
   if (ctx.campaignId !== actor.campaignId) throw new CompendiumError("FORBIDDEN");
 

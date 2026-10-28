@@ -1,5 +1,5 @@
 import { domainSchemas } from "./domain-schemas";
-import { canonicalKey, digest, stableJson } from "./identity";
+import { canonicalKey, digest, nameKey, stableJson } from "./identity";
 import type { JsonRecord } from "./parse";
 import { type AdaptedCompendium, type AdaptedEntry, type CompendiumRef, type Edition, type ImportIssue, issue } from "./types";
 
@@ -88,7 +88,9 @@ const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.sour
 
 const REF_KINDS: Record<string, AdaptedEntry["kind"]> = { feat: "feats", spell: "spells", class: "classes", race: "races", background: "backgrounds", monster: "units", item: "artifacts", spellSchool: "spell-groups" };
 
-const expectedKind = (ref: CompendiumRef): AdaptedEntry["kind"] | undefined => REF_KINDS[ref.kind] ?? (ref.kind.startsWith("template:") ? ref.kind.slice(9) as AdaptedEntry["kind"] : undefined);
+const REF_KIND_LABELS: Record<string, string> = { spell: "заклинання", feat: "риса", class: "клас", race: "раса", background: "передісторія", monster: "юніт", item: "предмет", spellSchool: "школа магії" };
+
+export const expectedKind = (ref: CompendiumRef): AdaptedEntry["kind"] | undefined => REF_KINDS[ref.kind] ?? (ref.kind.startsWith("template:") ? ref.kind.slice(9) as AdaptedEntry["kind"] : undefined);
 
 function plannedResolved(ps: PlanState, key: string): Resolved | undefined {
   visitEntry(ps, key);
@@ -127,7 +129,11 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
     return { localId: bound.localId, body: bound.body, key: bound.key };
   }
 
-  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", "Додайте залежність, виберіть явне зіставлення або виключіть залежний запис");
+  const own = ps.entries.find((e) => e.key !== owner.key && e.kind === expectedKind(ref) && nameKey(e.name) === nameKey(ref.name));
+
+  if (own) return plannedResolved(ps, own.key);
+
+  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", `Не знайдено «${ref.name}» (${REF_KIND_LABELS[ref.kind] ?? ref.kind}), потрібне для «${owner.name}». Додайте залежність, виберіть зіставлення або виключіть залежний запис`);
 
   owner.issues.push(error);
   errors.push(error);
