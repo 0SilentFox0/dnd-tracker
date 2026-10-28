@@ -4,23 +4,31 @@ import { Check, ChevronDown, Hammer } from "lucide-react";
 
 import "@/components/hud/hud.css";
 import "@/components/landing/landing.css";
+import { LocaleSwitcher } from "@/components/common/LocaleSwitcher";
 import { HUD_SURFACE } from "@/components/hud";
 import { AiMock } from "@/components/landing/AiMock";
-import { CONSTRUCTOR, FAQ, type Feature, FEATURES, ROLES, type Showcase, SHOWCASES, STEPS } from "@/components/landing/content";
+import { CONSTRUCTOR, FAQ, type Feature, FEATURES, META_FEATURES, numbered, ROLES, type Showcase, SHOWCASES, STEPS } from "@/components/landing/content";
+import { landingHomePath } from "@/components/landing/landing-metadata";
 import { LandingHero, PrimaryCta } from "@/components/landing/LandingHero";
 import { MagicSection, PainSection, StatsBand } from "@/components/landing/LandingSections";
 import { SessionSwitch } from "@/components/landing/SessionSwitch";
+import { SITE_URL } from "@/lib/constants/site";
+import type { Locale } from "@/lib/i18n/config";
+import { FixedLocaleProvider } from "@/lib/i18n/fixed-locale-provider";
+import { getTranslator, type Translator } from "@/lib/i18n/translator";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "#features", label: "Можливості" },
-  { href: "#constructor", label: "Конструктор" },
-  { href: "#faq", label: "Питання" },
+  { href: "#features", key: "nav.features" },
+  { href: "#constructor", key: "nav.constructor" },
+  { href: "#faq", key: "nav.faq" },
 ];
 
-function Brand() {
+const LOCALE_HREFS: Record<Locale, string> = { uk: "/", en: "/en" };
+
+function Brand({ home }: { home: string }) {
   return (
-    <Link prefetch={false} href="/" className="hud-sc flex items-center gap-2 text-lg text-hud-ink">
+    <Link prefetch={false} href={home} className="hud-sc flex items-center gap-2 text-lg text-hud-ink">
       <span aria-hidden className="metal-gold metal-fill grid size-8 place-items-center rounded-md text-sm font-bold">
         d20
       </span>
@@ -29,32 +37,33 @@ function Brand() {
   );
 }
 
-function LandingNav() {
+function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-[#0b0908]/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Brand />
-        <nav aria-label="Розділи" className="hidden items-center gap-6 md:flex">
+        <Brand home={landingHomePath(locale)} />
+        <nav aria-label={t("nav.sections")} className="hidden items-center gap-6 md:flex">
           {NAV.map((n) => (
             <a key={n.href} href={n.href} className="hud-sc text-sm text-hud-bone transition hover:text-hud-gold-strong">
-              {n.label}
+              {t(n.key)}
             </a>
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <LocaleSwitcher hrefs={LOCALE_HREFS} />
           <SessionSwitch
             member={
             <Link prefetch={false} href="/campaigns" className="hud-sc metal-gold metal-fill rounded-md px-4 py-2 text-sm">
-              Мої кампанії
+              {t("nav.myCampaigns")}
             </Link>
             }
             guest={
             <>
               <Link prefetch={false} href="/sign-in" className="hud-sc rounded-md px-3 py-2 text-sm text-hud-bone hover:text-hud-gold-strong">
-                Увійти
+                {t("nav.signIn")}
               </Link>
               <Link prefetch={false} href="/sign-up" className="hud-sc metal-gold metal-fill rounded-md px-4 py-2 text-sm">
-                Реєстрація
+                {t("nav.signUp")}
               </Link>
             </>
             }
@@ -93,7 +102,7 @@ function CheckList({ items }: { items: string[] }) {
   );
 }
 
-function ShowcaseMedia({ item }: { item: Showcase }) {
+function ShowcaseMedia({ item, t }: { item: Showcase; t: Translator }) {
   return (
     <div className="overflow-hidden rounded-xl border border-hud-line bg-[#0e0b09] shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.15)] transition duration-500 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.4),0_0_60px_-20px_rgba(230,194,90,.35)]">
       <div className="flex items-center gap-2 border-b border-hud-rule bg-[#15110d] px-3 py-1.5">
@@ -102,45 +111,45 @@ function ShowcaseMedia({ item }: { item: Showcase }) {
           <span className="size-2 rounded-full bg-[#5a4a2a]" />
           <span className="size-2 rounded-full bg-[#3a4a2a]" />
         </span>
-        <span className="hud-sc truncate text-xs text-hud-bone">{item.screen}</span>
+        <span className="hud-sc truncate text-xs text-hud-bone">{t(`features.showcases.${item.id}.screen`)}</span>
       </div>
       {item.mock === "ai" ? (
-        <div role="img" aria-label={item.alt}>
-          <AiMock />
+        <div role="img" aria-label={t(`features.showcases.${item.id}.alt`)}>
+          <AiMock t={t} />
         </div>
       ) : (
         <div className="relative aspect-[16/10]">
-          <Image src={item.image} alt={item.alt} fill sizes="(min-width: 1152px) 550px, (min-width: 1024px) 45vw, 100vw" className="object-cover object-top" />
+          <Image src={item.image} alt={t(`features.showcases.${item.id}.alt`)} fill sizes="(min-width: 1152px) 550px, (min-width: 1024px) 45vw, 100vw" className="object-cover object-top" />
         </div>
       )}
     </div>
   );
 }
 
-function ShowcaseRow({ item, flipped }: { item: Showcase; flipped: boolean }) {
+function ShowcaseRow({ item, flipped, t }: { item: Showcase; flipped: boolean; t: Translator }) {
   return (
     <article className="landing-reveal grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
       <div className={cn(flipped && "lg:order-2")}>
-        <ShowcaseMedia item={item} />
+        <ShowcaseMedia item={item} t={t} />
       </div>
       <div className="space-y-4">
-        <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">{item.eyebrow}</p>
-        <h3 className="hud-sc text-2xl text-hud-ink sm:text-3xl">{item.title}</h3>
-        <p className="text-lg text-hud-bone">{item.text}</p>
-        <CheckList items={item.points} />
+        <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">{t(`features.showcases.${item.id}.eyebrow`)}</p>
+        <h3 className="hud-sc text-2xl text-hud-ink sm:text-3xl">{t(`features.showcases.${item.id}.title`)}</h3>
+        <p className="text-lg text-hud-bone">{t(`features.showcases.${item.id}.text`)}</p>
+        <CheckList items={numbered(item.points).map((n) => t(`features.showcases.${item.id}.points.${n}`))} />
       </div>
     </article>
   );
 }
 
-function FeatureCard({ feature }: { feature: Feature }) {
+function FeatureCard({ feature, prefix, t }: { feature: Feature; prefix: string; t: Translator }) {
   const Icon = feature.icon;
 
   return (
     <div className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel p-5 transition hover:-translate-y-0.5 hover:border-hud-gold/60">
       <Icon aria-hidden className="mb-3 size-6 text-hud-gold transition group-hover:text-hud-gold-bright" />
-      <h3 className="hud-sc mb-1 text-lg text-hud-ink">{feature.title}</h3>
-      <p className="text-sm text-[#b3a893]">{feature.text}</p>
+      <h3 className="hud-sc mb-1 text-lg text-hud-ink">{t(`${prefix}.${feature.id}.title`)}</h3>
+      <p className="text-sm text-[#b3a893]">{t(`${prefix}.${feature.id}.text`)}</p>
     </div>
   );
 }
@@ -149,79 +158,108 @@ function BackdropImage({ src, opacity }: { src: string; opacity: string }) {
   return <Image src={src} alt="" fill sizes="100vw" quality={60} className={cn("-z-10 object-cover", opacity)} />;
 }
 
-export function LandingPage() {
+function landingJsonLd(t: Translator, locale: Locale) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        name: "D&D Combat Tracker",
+        url: SITE_URL,
+        applicationCategory: "GameApplication",
+        operatingSystem: "Web",
+        inLanguage: locale,
+        description: t("meta.description"),
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        featureList: numbered(META_FEATURES).map((n) => t(`meta.features.${n}`)),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQ.map((id) => ({ "@type": "Question", name: t(`faq.items.${id}.q`), acceptedAnswer: { "@type": "Answer", text: t(`faq.items.${id}.a`) } })),
+      },
+    ],
+  };
+}
+
+export async function LandingPage({ locale }: { locale: Locale }) {
+  const t = await getTranslator(locale, "landing");
+
+  const jsonLd = landingJsonLd(t, locale);
+
   return (
+    <FixedLocaleProvider locale={locale}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <div data-landing className={cn(HUD_SURFACE, "min-h-screen bg-[#0b0908]")}>
-      <LandingNav />
+      <LandingNav t={t} locale={locale} />
       <main>
-        <LandingHero />
+        <LandingHero t={t} />
 
-        <StatsBand />
+        <StatsBand t={t} />
 
-        <PainSection />
+        <PainSection t={t} />
 
         <section id="features" className="ld-lazy scroll-mt-20 px-4 py-20">
-          <SectionTitle eyebrow="Можливості" title="Усе для гри — без паперу й таблиць" text="Від першого кидка ініціативи до фінальної сцени кампанії." />
+          <SectionTitle eyebrow={t("features.eyebrow")} title={t("features.title")} text={t("features.text")} />
           <div className="mx-auto mt-12 max-w-6xl space-y-20">
             {SHOWCASES.map((item, i) => (
-              <ShowcaseRow key={item.id} item={item} flipped={i % 2 === 1} />
+              <ShowcaseRow key={item.id} item={item} flipped={i % 2 === 1} t={t} />
             ))}
           </div>
           <div className="mx-auto mt-20 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((f) => (
-              <FeatureCard key={f.title} feature={f} />
+              <FeatureCard key={f.id} feature={f} prefix="features.items" t={t} />
             ))}
           </div>
         </section>
 
-        <MagicSection />
+        <MagicSection t={t} />
 
         <section id="constructor" className="ld-lazy relative isolate scroll-mt-20 overflow-hidden border-y border-hud-rule px-4 py-20">
           <BackdropImage src="/landing/constructor.webp" opacity="opacity-20" />
           <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#0b0908] via-[#0b0908]/70 to-[#0b0908]" />
           <p className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full border border-hud-gold/50 bg-black/60 px-3 py-1 text-xs text-hud-gold">
             <Hammer aria-hidden className="size-3.5" />
-            Незабаром
+            {t("constructor.soon")}
           </p>
           <SectionTitle
-            eyebrow="Конструктор кампаній"
-            title="Власна кампанія або готовий шаблон"
-            text="Шаблони під популярні редакції D&D, власні правила, відкрите API та повні механіки 5e — будь-який світ без жодного рядка коду."
+            eyebrow={t("constructor.eyebrow")}
+            title={t("constructor.title")}
+            text={t("constructor.text")}
           />
           <div className="mx-auto mt-12 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CONSTRUCTOR.map((f) => (
-              <FeatureCard key={f.title} feature={f} />
+              <FeatureCard key={f.id} feature={f} prefix="constructor.items" t={t} />
             ))}
           </div>
         </section>
 
         <section id="roles" className="ld-lazy scroll-mt-20 px-4 py-20">
-          <SectionTitle eyebrow="Для кого" title="Один стіл — дві сторони екрана" />
+          <SectionTitle eyebrow={t("roles.eyebrow")} title={t("roles.title")} />
           <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
-            {ROLES.map(({ icon: Icon, title, points }) => (
-              <div key={title} className="landing-reveal rounded-xl border border-hud-line bg-gradient-to-b from-[#1a140f] to-[#110e0b] p-6 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]">
+            {ROLES.map(({ id, icon: Icon, points }) => (
+              <div key={id} className="landing-reveal rounded-xl border border-hud-line bg-gradient-to-b from-[#1a140f] to-[#110e0b] p-6 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]">
                 <div className="mb-4 flex items-center gap-3">
                   <span className="metal-gold metal-fill grid size-10 place-items-center rounded-lg">
                     <Icon aria-hidden className="size-5" />
                   </span>
-                  <h3 className="hud-sc text-2xl text-hud-ink">{title}</h3>
+                  <h3 className="hud-sc text-2xl text-hud-ink">{t(`roles.items.${id}.title`)}</h3>
                 </div>
-                <CheckList items={points} />
+                <CheckList items={numbered(points).map((n) => t(`roles.items.${id}.points.${n}`))} />
               </div>
             ))}
           </div>
         </section>
 
         <section id="faq" className="ld-lazy scroll-mt-20 border-t border-hud-rule px-4 py-20">
-          <SectionTitle eyebrow="Питання" title="Часті запитання" />
+          <SectionTitle eyebrow={t("faq.eyebrow")} title={t("faq.title")} />
           <div className="mx-auto mt-10 max-w-3xl space-y-3">
-            {FAQ.map(({ q, a }) => (
-              <details key={q} className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel open:border-hud-gold/50">
+            {FAQ.map((id) => (
+              <details key={id} className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel open:border-hud-gold/50">
                 <summary className="hud-sc flex cursor-pointer list-none items-center justify-between gap-4 p-4 text-lg text-hud-ink [&::-webkit-details-marker]:hidden">
-                  {q}
+                  {t(`faq.items.${id}.q`)}
                   <ChevronDown aria-hidden className="size-5 shrink-0 text-hud-gold transition group-open:rotate-180" />
                 </summary>
-                <p className="px-4 pb-4 text-hud-bone">{a}</p>
+                <p className="px-4 pb-4 text-hud-bone">{t(`faq.items.${id}.a`)}</p>
               </details>
             ))}
           </div>
@@ -230,51 +268,54 @@ export function LandingPage() {
         <section className="ld-lazy relative isolate overflow-hidden px-4 py-24">
           <BackdropImage src="/landing/candle.webp" opacity="opacity-40" />
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(11,9,8,.35),#0b0908_75%)]" />
-          <SectionTitle eyebrow="Як почати" title="Три кроки до першого бою" />
+          <SectionTitle eyebrow={t("steps.eyebrow")} title={t("steps.title")} />
           <ol className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
-            {STEPS.map(({ icon: Icon, title, text }, i) => (
-              <li key={title} className="landing-reveal text-center">
+            {STEPS.map(({ id, icon: Icon }, i) => (
+              <li key={id} className="landing-reveal text-center">
                 <span className="mx-auto mb-3 grid size-14 place-items-center rounded-full border border-hud-gold/60 bg-black/60 text-hud-gold">
                   <Icon aria-hidden className="size-6" />
                 </span>
                 <p className="hud-sc text-lg text-hud-ink">
-                  {i + 1}. {title}
+                  {i + 1}. {t(`steps.items.${id}.title`)}
                 </p>
-                <p className="text-sm text-hud-bone">{text}</p>
+                <p className="text-sm text-hud-bone">{t(`steps.items.${id}.text`)}</p>
               </li>
             ))}
           </ol>
           <div className="mt-12 flex justify-center">
-            <PrimaryCta />
+            <PrimaryCta t={t} />
           </div>
         </section>
       </main>
 
       <footer className="border-t border-hud-rule px-4 py-8 text-sm text-[#b3a893]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <Brand />
-          <p>Помічник ДМ для D&D 5e · {new Date().getFullYear()}</p>
-          <nav aria-label="Акаунт" className="flex gap-4">
+          <Brand home={landingHomePath(locale)} />
+          <p>
+            {t("footer.tagline")} · {new Date().getFullYear()}
+          </p>
+          <nav aria-label={t("nav.account")} className="flex gap-4">
             <Link prefetch={false} href="/sign-in" className="hover:text-hud-gold-strong">
-              Вхід
+              {t("nav.signInShort")}
             </Link>
             <Link prefetch={false} href="/sign-up" className="hover:text-hud-gold-strong">
-              Реєстрація
+              {t("nav.signUp")}
             </Link>
           </nav>
         </div>
         <p className="mx-auto mt-6 max-w-6xl text-center text-xs sm:text-left">
-          Фото —{" "}
+          {t("footer.photo")}{" "}
           <a href="https://unsplash.com" className="underline hover:text-hud-gold-strong" rel="noopener noreferrer" target="_blank">
             Unsplash
           </a>
-          . Силуети токенів —{" "}
+          . {t("footer.tokens")}{" "}
           <a href="https://game-icons.net" className="underline hover:text-hud-gold-strong" rel="noopener noreferrer" target="_blank">
             game-icons.net
           </a>{" "}
-          (Delapouite, Lorc), CC BY 3.0. Dungeons & Dragons — торгова марка Wizards of the Coast; проєкт не пов&apos;язаний з нею.
+          {t("footer.credits")}
         </p>
       </footer>
     </div>
+    </FixedLocaleProvider>
   );
 }

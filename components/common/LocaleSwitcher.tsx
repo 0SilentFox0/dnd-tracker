@@ -11,7 +11,7 @@ const LABELS: Record<Locale, string> = {
   en: "English",
 };
 
-export function LocaleSwitcher() {
+export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
   const { locale, set } = useSetLocale();
 
   return (
@@ -24,7 +24,7 @@ export function LocaleSwitcher() {
           lang={code}
           aria-pressed={code === locale}
           className={code === locale ? "text-hud-gold" : "text-hud-muted"}
-          onClick={() => void set(code)}
+          onClick={() => void set(code, hrefs?.[code])}
         >
           {code.toUpperCase()}
           <span className="sr-only">{LABELS[code]}</span>
