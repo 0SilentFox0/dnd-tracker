@@ -6,11 +6,11 @@
 - Проксі на `/` не ходить у Supabase (`lib/supabase/middleware.ts`); виняток — `/?code=` / `/?token_hash=` (Supabase повертає на Site URL, якщо `redirectTo` не в allow-list) → редірект на `/auth/callback`.
 - «Гість / учасник» у CTA — `SessionSwitch` + `useHasSessionCookie` (наявність cookie `sb-…-auth-token`), без supabase-js у бандлі.
 - Код: `components/landing/`. Двомовність: словники `copy/{en,uk}.ts` (типи й `getCopy(locale)` — `copy/types.ts`, `copy/index.ts`; ключі однакові, тест заборонює кирилицю в EN і зайву латиницю в UK), маршрути `/` (EN) і `/uk`, перемикач мови в шапці. Назва продукту — лише `BRAND` (`lib/constants/site.ts`). `lang` ставиться на обгортку лендінгу (`<div data-landing lang=…>`); root `<html lang="uk">` лишається, щоб не ламати статичність. Секції — `sections/*` (Hero, Problem, Combat, Mechanics, Prep, AiSection, Players, HowItWorks, Faq, FinalCta), картинки й іконки — `media.ts`, прапорець блоку шаблонів — `flags.ts` (`LANDING_TEMPLATES`, зараз `false`: нотатка про офіційні шаблони не рендериться). Стилі й CSS-таймлайн демо — `landing.css` (8-секундний цикл, усі `ld-*` анімації ключуються на ті самі відсотки). Мапа демо й силуети токенів — статичні `public/landing/battle-map.svg`, `tokens.svg` (сітка 16×10: центр клітинки = (c+0.5)·6.25%, (r+0.5)·10%). Скріни продукту — `public/landing/screen-*.webp`.
-- Лендінг-шляхи (`/`, `/uk`) перелічені в трьох місцях: проксі (`lib/supabase/middleware.ts`, без Supabase), `HeaderGate` і `Breadcrumbs` — новий шлях лендінгу додавай у всі.
+- Шляхи лендінгу — `LANDING_PATH`/`LANDING_PATHS` у `lib/constants/site.ts`; їх читають проксі (без Supabase), `HeaderGate`, `Breadcrumbs`, метадані й sitemap. Нова мова = запис у `LANDING_LOCALES`/`LANDING_PATH` + словник.
 - Нижні секції — `.ld-lazy` (`content-visibility: auto`), щоб спрайти й картинки не вантажились до першої відмальовки. Шапка застосунку (`HeaderGate` → dynamic `Header`) і діалог `ConfirmProvider` — ліниві чанки.
 - `experimental.inlineCss` у `next.config.ts` — CSS у HTML, без блокуючих запитів (діє на всі сторінки).
-- SEO: метадані й JSON-LD (WebApplication + FAQPage, мова з відповідного словника) у `app/page.tsx` і `app/uk/page.tsx`; `app/sitemap.ts` — обидві URL з hreflang; `app/robots.ts`, `app/sitemap.ts`. Індексація вимкнена, доки не задано `SITE_INDEXING=1`; домен — `NEXT_PUBLIC_SITE_URL` (`lib/constants/site.ts`).
-- Lighthouse (локальна prod-збірка): desktop 100/100/100/100, mobile 91/100/100/100 — стеля через рантайм React/Next і шрифти, що preload-ить root layout.
+- SEO: метадані й JSON-LD (WebApplication + FAQPage, мова з відповідного словника) у `app/page.tsx` і `app/uk/page.tsx`; `app/sitemap.ts` — обидві URL з hreflang; `app/robots.ts`. Індексація вимкнена, доки не задано `SITE_INDEXING=1`; домен — `NEXT_PUBLIC_SITE_URL` (`lib/constants/site.ts`).
+- Lighthouse: цифри для старого лендінгу (desktop 100/100/100/100, mobile 91/100/100/100) — для v2 не перемірювано.
 
 ## Авторизація
 

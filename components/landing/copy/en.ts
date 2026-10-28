@@ -19,8 +19,6 @@ export const en = {
       "5e-style rules",
       "online character sheet",
     ],
-    ogAlt: "Metal dice on a dark table",
-    siteName: BRAND.name,
   },
   nav: {
     aria: "Sections",
@@ -34,7 +32,7 @@ export const en = {
     signIn: "Sign in",
     signUp: "Sign up",
     myCampaigns: "My campaigns",
-    switchTo: { label: "UA", href: "/uk" },
+    switchTo: "UA",
     switchLabel: "Українською",
   },
   hero: {
@@ -44,7 +42,7 @@ export const en = {
     text: "Prepare your campaign, shape your own mechanics and run tactical combat in one connected place — initiative, damage and effects calculated for you, synced to every player's device.",
     primary: "Start a campaign",
     member: "My campaigns",
-    secondary: { label: "See how it works", href: "#combat" },
+    secondary: { label: "See how it works", href: "#how" },
     note: "Works in the browser · players join from their phones",
     alt: "The DM screen of a battle: initiative queue, tactical map with tokens, combat log and music player",
   },
@@ -116,6 +114,7 @@ export const en = {
       { id: "api", title: "Open API", text: "An OpenAPI description and MCP tools let a script or an AI agent fill your world, with scoped tokens." },
     ],
     templatesNote: "Start from an official template, or from scratch.",
+    alt: "Spell library of a campaign: school and level groups, import, CSV export and a card for every spell",
     footnote: "Built for D&D-style, turn-based tabletop RPGs. Imported rules are validated row by row; check results before play.",
   },
   prep: {
@@ -174,7 +173,7 @@ export const en = {
     honesty: "Bring your own Claude, OpenAI or Gemini key. The assistant works from your scenario and scene; every change is a proposal you review before it is applied.",
     mock: {
       pageTitle: "1.2 The trap at Brezgir",
-      pageText: "The village is spending its evening, and at first glance everything is fine.",
+      pageText: "The village settles into its evening, and at first glance everything is fine.",
       newSceneLabel: "New scene: ",
       newSceneText: "Elder Miroslav hides a wounded imp in his cellar — and asks the heroes to keep quiet.",
       pageTail: "Whoever passed the check may warn the people…",
@@ -207,7 +206,7 @@ export const en = {
         text: "An online character sheet with race, ability scores, skill tree, spellbook and gear — equally handy for the DM and the player.",
         points: ["Levels, advancement and skill trees", "Spells by circle", "Artifacts and sets with bonuses", "Players can draft a hero for the DM to approve"],
         alt: "Hero sheet: portrait, class, level, ability scores and attacks",
-        screen: "Hero · Ivan",
+        screen: "Hero · Kael",
       },
     ],
   },
@@ -238,6 +237,10 @@ export const en = {
         a: "Yes. Races, spells, creatures, artifacts, skills and rules are edited without code, separately in each campaign. Start from scratch or import your content.",
       },
       {
+        q: "Can I import my existing content?",
+        a: "Yes. Import CSV, TSV or JSON; every row is validated, and you review the result before anything is applied.",
+      },
+      {
         q: "What do players need?",
         a: "Just a phone or a laptop with a browser. A player enters your campaign code and sees their hero, the battle and the scene slides.",
       },
@@ -252,6 +255,7 @@ export const en = {
     text: "Create a campaign, invite your players with a code and start your first battle.",
   },
   footer: {
+    navAria: "Account",
     tagline: "The all-in-one platform for Dungeon Masters",
     credits: "Photos from Unsplash. Token silhouettes from game-icons.net (Delapouite, Lorc), CC BY 3.0.",
     disclaimer: `${BRAND.name} is an independent project. Dungeons & Dragons is a trademark of Wizards of the Coast; this project is not affiliated with it.`,

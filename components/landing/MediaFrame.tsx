@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 
-import { SHOWCASE_MEDIA } from "@/components/landing/media";
+import { SHOWCASE_MEDIA, type ShowcaseId, type ShowcaseMedia } from "@/components/landing/media";
 import { cn } from "@/lib/utils";
 
 const FRAME =
@@ -24,7 +24,7 @@ export function MediaFrame({ title, children, className }: { title: string; chil
 }
 
 interface ScreenProps {
-  id: string;
+  id: ShowcaseId;
   alt: string;
   priority?: boolean;
   sizes?: string;
@@ -33,11 +33,11 @@ interface ScreenProps {
 
 // a missing screenshot degrades to a styled placeholder, never to a broken image
 export function Screen({ id, alt, priority, sizes = "(min-width: 1152px) 550px, (min-width: 1024px) 45vw, 100vw", className }: ScreenProps) {
-  const media = SHOWCASE_MEDIA[id];
+  const media: ShowcaseMedia = SHOWCASE_MEDIA[id];
 
-  const ratio = media?.ratio === "9/16" ? "aspect-[9/16]" : "aspect-[16/10]";
+  const ratio = media.ratio === "9/16" ? "aspect-[9/16]" : "aspect-[16/10]";
 
-  if (!media?.image) {
+  if (!media.image) {
     return (
       <div
         role="img"

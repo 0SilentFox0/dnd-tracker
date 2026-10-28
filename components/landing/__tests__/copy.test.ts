@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { getCopy } from "@/components/landing/copy";
+import { FX_SPRITES, SHOWCASE_MEDIA } from "@/components/landing/media";
 import { BRAND, LANDING_LOCALES } from "@/lib/constants/site";
 
 type Leaf = { path: string; value: string };
 
-// language switch labels are written in the target language
 const SKIP_KEYS = new Set(["href", "id", "locale"]);
 
 function shape(node: unknown): unknown {
@@ -26,6 +26,7 @@ function leaves(node: unknown, path = ""): Leaf[] {
   return [];
 }
 
+// the language switch label is written in the target language
 function textLeaves(node: unknown): Leaf[] {
   return leaves(node).filter((l) => !SKIP_KEYS.has(l.path.split(".").pop()?.replace(/\[\d+\]/g, "") ?? "") && !l.path.startsWith("nav.switch"));
 }
@@ -52,6 +53,14 @@ describe("landing copy", () => {
 
     expect(at(uk).length).toBe(at(en).length);
     expect(at(en).length).toBeGreaterThan(0);
+  });
+
+  it.each(LANDING_LOCALES)("%s: every screenshot panel has an image and every sprite a name", (locale) => {
+    const c = getCopy(locale);
+
+    for (const id of [...c.prep.panels, ...c.players.panels].map((p) => p.id)) expect(SHOWCASE_MEDIA[id].image, id).toBeTruthy();
+
+    expect(c.combat.fx.names).toHaveLength(FX_SPRITES.length);
   });
 
   it.each(LANDING_LOCALES)("%s: every leaf string is non-empty", (locale) => {

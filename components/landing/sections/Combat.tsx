@@ -34,8 +34,8 @@ export function Combat({ copy }: { copy: LandingCopy["combat"] }) {
             <p className="text-hud-bone">{fx.text}</p>
           </div>
           <ul className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {fx.names.map((name, i) => {
-              const sprite = FX_SPRITES[i];
+            {FX_SPRITES.map((sprite, i) => {
+              const name = fx.names[i];
 
               return (
                 <li key={name} className="flex flex-col items-center gap-2 rounded-xl border border-hud-rule bg-[#120e0b] p-4" style={{ boxShadow: `inset 0 -40px 60px -30px ${sprite.glow}` }}>

@@ -5,18 +5,16 @@ import { MediaFrame, Screen } from "@/components/landing/MediaFrame";
 import { SectionTitle } from "@/components/landing/parts";
 
 export function Mechanics({ copy }: { copy: LandingCopy["mechanics"] }) {
-  const showTemplates = LANDING_TEMPLATES;
-
   return (
     <section id="mechanics" className="ld-lazy relative isolate scroll-mt-20 overflow-hidden border-y border-hud-rule px-4 py-20">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_85%_10%,rgba(230,194,90,.1),transparent_55%),#0b0908]" />
       <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
         <div className="space-y-5">
           <SectionTitle align="left" eyebrow={copy.eyebrow} title={copy.title} text={copy.text} />
-          {showTemplates && <p className="hud-sc text-hud-gold-strong">{copy.templatesNote}</p>}
+          {LANDING_TEMPLATES && <p className="hud-sc text-hud-gold-strong">{copy.templatesNote}</p>}
         </div>
         <MediaFrame title={copy.eyebrow} className="landing-reveal">
-          <Screen id="mechanics" alt={copy.title} />
+          <Screen id="mechanics" alt={copy.alt} />
         </MediaFrame>
       </div>
 

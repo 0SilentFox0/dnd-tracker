@@ -16,6 +16,7 @@ import { Players } from "@/components/landing/sections/Players";
 import { Prep } from "@/components/landing/sections/Prep";
 import { Problem } from "@/components/landing/sections/Problem";
 import { SessionSwitch } from "@/components/landing/SessionSwitch";
+import { LANDING_PATH } from "@/lib/constants/site";
 import { cn } from "@/lib/utils";
 
 const OTHER_LANG = { en: "uk", uk: "en" } as const;
@@ -37,13 +38,13 @@ function LandingNav({ copy }: { copy: LandingCopy }) {
         <div className="flex items-center gap-2">
           <Link
             prefetch={false}
-            href={nav.switchTo.href}
+            href={LANDING_PATH[OTHER_LANG[copy.locale]]}
             hrefLang={OTHER_LANG[copy.locale]}
             lang={OTHER_LANG[copy.locale]}
-            aria-label={nav.switchLabel}
             className="hud-sc rounded-md border border-hud-line px-2.5 py-1.5 text-xs text-hud-bone hover:text-hud-gold-strong"
           >
-            {nav.switchTo.label}
+            {nav.switchTo}
+            <span className="sr-only"> — {nav.switchLabel}</span>
           </Link>
           <SessionSwitch
             member={
@@ -76,7 +77,7 @@ function LandingFooter({ copy }: { copy: LandingCopy["footer"] }) {
         <p>
           {copy.tagline} · {new Date().getFullYear()}
         </p>
-        <nav className="flex gap-4">
+        <nav aria-label={copy.navAria} className="flex gap-4">
           <Link prefetch={false} href="/sign-in" className="hover:text-hud-gold-strong">
             {copy.signIn}
           </Link>

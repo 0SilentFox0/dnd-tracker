@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { DM_SECTION_LABELS } from "@/lib/constants/campaigns";
+import { LANDING_PATHS } from "@/lib/constants/site";
 
 const SEGMENT_LABELS: Record<string, string> = {
   ...DM_SECTION_LABELS,
@@ -50,8 +51,7 @@ export function Breadcrumbs() {
   if (
     pathname?.startsWith("/sign-in") ||
     pathname?.startsWith("/sign-up") ||
-    pathname === "/" ||
-    pathname === "/uk"
+    LANDING_PATHS.includes(pathname)
   ) {
     return null;
   }

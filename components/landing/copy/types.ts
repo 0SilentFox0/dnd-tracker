@@ -1,3 +1,4 @@
+import type { ShowcaseId } from "@/components/landing/media";
 import type { LANDING_LOCALES } from "@/lib/constants/site";
 
 export type Locale = (typeof LANDING_LOCALES)[number];
@@ -8,7 +9,7 @@ export interface Cta {
 }
 
 export interface Showcase {
-  id: string;
+  id: ShowcaseId;
   eyebrow: string;
   title: string;
   text: string;
@@ -44,8 +45,8 @@ export interface AiMockCopy {
 
 export interface LandingCopy {
   locale: Locale;
-  meta: { title: string; description: string; keywords: string[]; ogAlt: string; siteName: string };
-  nav: { aria: string; items: Cta[]; signIn: string; signUp: string; myCampaigns: string; switchTo: Cta; switchLabel: string };
+  meta: { title: string; description: string; keywords: string[] };
+  nav: { aria: string; items: Cta[]; signIn: string; signUp: string; myCampaigns: string; switchTo: string; switchLabel: string };
   hero: { eyebrow: string; titleLead: string; titleAccent: string; text: string; primary: string; member: string; secondary: Cta; note: string; alt: string };
   problem: { eyebrow: string; title: string; pains: string[]; resolve: string; replaces: { title: string; text: string }[]; hubTag: string };
   combat: {
@@ -57,12 +58,12 @@ export interface LandingCopy {
     demo: DemoCopy;
     fx: { title: string; text: string; names: string[]; auras: string[]; more: string };
   };
-  mechanics: { eyebrow: string; title: string; text: string; capabilities: { id: string; title: string; text: string }[]; templatesNote: string; footnote: string };
+  mechanics: { eyebrow: string; title: string; text: string; capabilities: { id: string; title: string; text: string }[]; templatesNote: string; footnote: string; alt: string };
   prep: { eyebrow: string; title: string; text: string; panels: Showcase[] };
-  ai: Showcase & { honesty: string; mock: AiMockCopy };
+  ai: Omit<Showcase, "id"> & { id: "ai"; honesty: string; mock: AiMockCopy };
   players: { eyebrow: string; title: string; text: string; panels: Showcase[] };
   how: { eyebrow: string; title: string; steps: { title: string; text: string }[] };
   faq: { eyebrow: string; title: string; items: { q: string; a: string }[] };
   cta: { title: string; text: string };
-  footer: { tagline: string; credits: string; disclaimer: string; signIn: string; signUp: string };
+  footer: { navAria: string; tagline: string; credits: string; disclaimer: string; signIn: string; signUp: string };
 }
