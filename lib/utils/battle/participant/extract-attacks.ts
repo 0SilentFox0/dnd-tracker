@@ -15,7 +15,7 @@ import {
 import { WEAPON_PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
-import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-stats";
+import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-slot";
 import { resolveItemRow } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 

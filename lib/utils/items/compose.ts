@@ -1,7 +1,7 @@
 import { ArmorModifierType, ArtifactModifierType, ArtifactSlot, ItemModifierType } from "@/lib/constants/artifacts";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-row";
-import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-stats";
+import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-slot";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { itemStatsFromRow, itemStatsRecords } from "@/lib/utils/items/item-row";
 import type { ItemKind, ItemStats } from "@/lib/utils/items/item-stats";
