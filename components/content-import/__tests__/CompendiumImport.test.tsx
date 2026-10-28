@@ -41,6 +41,16 @@ describe("CompendiumImport", () => {
   expect(calls.find(x => x.url.endsWith("confirm"))?.body).toMatchObject({ token: "signed", rightsConfirmed: true });
   expect(calls.find(x => x.url.endsWith("preview"))?.body).toMatchObject({ input: { categories: ["spell", "background"] } });
  });
+ it("renders inside HudPage with a header and campaign link", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [], hasMore: false }))));
+
+  const { container } = render(<CompendiumImport campaignId="c" />);
+
+  expect(container.querySelector(".hud-page")).not.toBeNull();
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Імпорт JSON-компендіуму");
+  expect(screen.getByRole("link", { name: "До кампанії" }).getAttribute("href")).toBe("/campaigns/c");
+  await screen.findByText("Збережені звіти");
+ });
  it("shows saved report on refresh without file selection", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [{ id: "old", report }], hasMore: false }))));
   render(<CompendiumImport campaignId="c" />);

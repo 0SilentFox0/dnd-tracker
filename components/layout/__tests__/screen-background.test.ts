@@ -27,6 +27,7 @@ describe("screenBackgroundFor", () => {
     ["/campaigns/1/battles/2", "battle"],
     ["/campaigns/1/dm/battles", "battle"],
     ["/campaigns/1/dm/skill-trees/3", "skill-tree"],
+    ["/campaigns/1/dm/compendium", "races"],
     ["/campaigns/1/dm/main-skills", "skills"],
     ["/campaigns/1/dm/print/spells", "spells"],
     ["/campaigns/1/dm/artifacts/new", "artifacts"],

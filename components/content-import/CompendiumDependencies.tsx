@@ -1,4 +1,5 @@
 "use client";
+import { ActionBar } from "@/components/common/ActionBar";
 import { PagerNav } from "@/components/common/PagerNav";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
@@ -46,17 +47,17 @@ export function CompendiumDependencies({ wizard }: { wizard: CompendiumImportCon
 
   const overwrite = (key: string, on: boolean) => changeOptions({ ...options, overwriteKeys: on ? [...(options.overwriteKeys ?? []), key] : options.overwriteKeys?.filter(item => item !== key) });
 
-  return <>
-    <details open><summary>Посилання, залежності й конфлікти</summary>
-      {pager.pageItems.map(row => <div className="my-3 break-words" key={row.key}><strong>{row.name} · {row.kind}</strong>
-        {row.summary !== undefined && <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(row.summary, null, 2)}</pre>}
-        {row.refs.map(ref => <div key={ref.key}><p>Залежність: {ref.name} · {ref.source} · {ref.edition}</p><SelectField aria-label={`Зіставлення ${ref.name}`} value="" disabled={busy} className="max-w-full" placeholder="Оберіть запис кампанії або залежність SRD…" options={choices(ref)} onValueChange={value => bind(ref, value)} /></div>)}
+  return <div className="space-y-3">
+    <details open className="text-sm"><summary className="cursor-pointer text-hud-gold">Посилання, залежності й конфлікти</summary>
+      {pager.pageItems.map(row => <div className="my-3 space-y-2 break-words rounded-lg border border-hud-rule p-3" key={row.key}><strong>{row.name} · {row.kind}</strong>
+        {row.summary !== undefined && <pre className="whitespace-pre-wrap break-words text-xs text-hud-muted">{JSON.stringify(row.summary, null, 2)}</pre>}
+        {row.refs.map(ref => <div key={ref.key}><p className="text-hud-muted">Залежність: {ref.name} · {ref.source} · {ref.edition}</p><SelectField aria-label={`Зіставлення ${ref.name}`} value="" disabled={busy} className="max-w-full" placeholder="Оберіть запис кампанії або залежність SRD…" options={choices(ref)} onValueChange={value => bind(ref, value)} /></div>)}
         {row.refs.length === 0 && <p>Механічних залежностей немає</p>}
-        <label className="block"><input type="checkbox" checked={options.overwriteKeys?.includes(row.key) ?? false} onChange={e => overwrite(row.key, e.target.checked)} /> Перезаписати локальні зміни (типово зберігаються)</label>
-        <button className="underline" onClick={() => excludeRow(row.key)}>Виключити запис</button>
+        <label className="flex items-start gap-2"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={options.overwriteKeys?.includes(row.key) ?? false} onChange={e => overwrite(row.key, e.target.checked)} /> Перезаписати локальні зміни (типово зберігаються)</label>
+        <Button variant="outline" size="sm" onClick={() => excludeRow(row.key)}>Виключити запис</Button>
       </div>)}
       <PagerNav pager={pager} labels={{ prev: "Попередні залежності", next: "Наступні залежності" }} />
     </details>
-    {!preview.report.readyToImport && <Button disabled={busy} onClick={excludeBlockedRows}>Виключити заблоковані та залежні й перевірити решту</Button>}
-  </>;
+    {!preview.report.readyToImport && <ActionBar><Button className="h-auto whitespace-normal" disabled={busy} onClick={excludeBlockedRows}>Виключити заблоковані та залежні й перевірити решту</Button></ActionBar>}
+  </div>;
 }
