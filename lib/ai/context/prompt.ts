@@ -6,6 +6,7 @@ import { partySummary } from "@/lib/ai/tools/party";
 import { contentToMarkdown, sectionToMarkdown } from "@/lib/ai/tools/scenario-read";
 import { showSummary } from "@/lib/ai/tools/show";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { readCompendiumSummary } from "@/lib/server/assistant/actions/compendium-reads";
@@ -43,20 +44,20 @@ function liveScene(title: string, content: ScenarioContent): string {
 export type SourceNoteSelection = { source: "session-ui"; selectedKeys: string[] };
 
 export async function buildInstructions({ campaignId, mode, pageId, focus, caller, sourceNoteSelection, onDisclosure }: { campaignId: string; mode: AiThreadMode; pageId: string | null; focus?: AiFocus; caller: AssistantCaller; sourceNoteSelection?: SourceNoteSelection; onDisclosure?: (value: AssistantContextDisclosure) => void }): Promise<string> {
-  if (!caller || caller.actor.campaignId !== campaignId) throw new ContentError("Контекст недоступний", 403);
+  if (!caller || caller.actor.campaignId !== campaignId) throw new ContentError(API_ERRORS.ASSISTANT_CONTEXT_UNAVAILABLE, 403);
 
   const actor = await revalidateAssistantCaller(caller);
 
   // Prompt context is a session DM boundary. Tokens use scoped tools and compendium handoffs.
-  if (actor.via !== "session") throw new ContentError("Контекст доступний лише ДМ у застосунку", 403);
+  if (actor.via !== "session") throw new ContentError(API_ERRORS.ASSISTANT_CONTEXT_DM_SESSION_ONLY, 403);
 
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { name: true, description: true, aiInstructions: true, rules: true } });
 
-  if (!campaign) throw new ContentError("Кампанію не знайдено", 404);
+  if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
   const policy = caller.threadId ? await prisma.aiThread.findFirst({ where: { id: caller.threadId, campaignId, userId: actor.userId }, select: { executionMode: true } }) : { executionMode: "review" };
 
-  if (!policy || !["review", "auto"].includes(policy.executionMode)) throw new ContentError("Політика виконання недоступна", 403);
+  if (!policy || !["review", "auto"].includes(policy.executionMode)) throw new ContentError(API_ERRORS.ASSISTANT_EXECUTION_POLICY_UNAVAILABLE, 403);
 
   const role = [
     "Ти — помічник Майстра (ДМ) у настільній рольовій кампанії.",
@@ -129,7 +130,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 }
 
 function validateSourceSelection(selection: SourceNoteSelection): string[] {
-  if (selection.source !== "session-ui") throw new ContentError("Потрібен явний вибір приміток у застосунку", 400);
+  if (selection.source !== "session-ui") throw new ContentError(API_ERRORS.ASSISTANT_NOTE_SELECTION_REQUIRED, 400);
 
   return selection.selectedKeys;
 }

@@ -57,7 +57,7 @@ describe("language isolation", () => {
   it("has no Cyrillic in the EN markup besides the switcher's native names", async () => {
     const html = renderToStaticMarkup(await LandingPage({ locale: "en" }));
 
-    // eslint-disable-next-line no-restricted-syntax -- the switcher names each language in itself
+     
     expect(html.replace("Українська", "")).not.toMatch(/[А-Яа-яІіЇїЄє]/);
   });
 });

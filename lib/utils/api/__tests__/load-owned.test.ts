@@ -11,13 +11,13 @@ describe("loadOwned", () => {
 
     expect(res).toBeInstanceOf(NextResponse);
     expect((res as NextResponse).status).toBe(404);
-    expect(await (res as NextResponse).json()).toEqual({ error: API_ERRORS.NOT_FOUND });
+    expect(await (res as NextResponse).json()).toMatchObject({ error: API_ERRORS.NOT_FOUND });
   });
 
   it("власне повідомлення для 404", async () => {
     const res = await loadOwned(Promise.resolve(null), "c1", API_ERRORS.RACE_NOT_FOUND);
 
-    expect(await (res as NextResponse).json()).toEqual({ error: API_ERRORS.RACE_NOT_FOUND });
+    expect(await (res as NextResponse).json()).toMatchObject({ error: API_ERRORS.RACE_NOT_FOUND });
   });
 
   it("запис іншої кампанії — 403", async () => {

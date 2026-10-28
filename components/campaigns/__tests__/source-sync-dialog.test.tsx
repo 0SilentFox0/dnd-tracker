@@ -89,7 +89,7 @@ describe("SourceSyncDialog", () => {
     render();
     fireEvent.click(screen.getByRole("button", { name: "Ігнорувати вибране" }));
     await screen.findByText("Приховати 1 зміну?");
-    fireEvent.click(screen.getAllByRole("button", { name: "Скасувати" }).pop() as HTMLElement);
+    fireEvent.click(screen.getAllByRole("button", { name: "common.confirm.cancel" }).pop() as HTMLElement);
     await vi.waitFor(() => expect(screen.queryByText("Приховати 1 зміну?")).toBeNull());
 
     expect(mocks.apply).not.toHaveBeenCalled();
@@ -171,7 +171,8 @@ describe("SourceSyncDialog", () => {
     render();
 
     expect(screen.getByText("Усе синхронізовано")).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: "Закрити" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Закрити" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "common.ui.close" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Ігнорувати/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /Застосувати/ })).toBeNull();
   });

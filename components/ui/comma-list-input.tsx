@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Input } from "@/components/ui/input";
 import { parseCommaList } from "@/lib/utils/common/text";
@@ -10,7 +11,9 @@ interface CommaListInputProps extends Omit<React.ComponentProps<typeof Input>, "
   onChange: (next: string[]) => void;
 }
 
-export function CommaListInput({ value, onChange, placeholder = "Через кому", onBlur, ...rest }: CommaListInputProps) {
+export function CommaListInput({ value, onChange, placeholder, onBlur, ...rest }: CommaListInputProps) {
+  const t = useTranslations("common");
+
   const [text, setText] = useState(value.join(", "));
 
   const [seen, setSeen] = useState(value.join("\u0000"));
@@ -27,7 +30,7 @@ export function CommaListInput({ value, onChange, placeholder = "Через ко
     <Input
       {...rest}
       value={text}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("ui.commaPlaceholder")}
       onChange={(e) => {
         const next = parseCommaList(e.target.value);
 

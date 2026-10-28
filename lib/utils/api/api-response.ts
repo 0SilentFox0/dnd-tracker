@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 
 import { PRIVATE_NO_STORE_HEADERS } from "./cache-headers";
+import { apiErrorJson } from "./translate-error";
 
-export type ApiErrorBody = { error: string; issues?: unknown };
+import type { ErrorParams } from "@/lib/constants/api-errors";
 
-export function errorResponse(message: string, status: number, issues?: unknown): NextResponse {
-  const body: ApiErrorBody = issues === undefined ? { error: message } : { error: message, issues };
+export type ApiErrorBody = { error: string; errorKey?: string; issues?: unknown };
 
-  return NextResponse.json(body, { status });
+export function errorResponse(keyOrText: string, status: number, issues?: unknown, params?: ErrorParams): NextResponse {
+  return apiErrorJson({ error: keyOrText, issues, params }, { status });
 }
 
 export const attachmentHeaders = (fileName: string, contentType?: string): Record<string, string> => ({

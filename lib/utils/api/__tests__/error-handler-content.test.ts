@@ -12,7 +12,7 @@ describe("handleApiError", () => {
     const res = handleApiError(new ContentError("x", 409, issues), { action: "t" });
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "x", issues });
+    expect(await res.json()).toMatchObject({ error: "x", issues });
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });

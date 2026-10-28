@@ -12,6 +12,7 @@ import { SRD_RULES } from "./lib/rules-preset";
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
 import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { getTranslator } from "@/lib/i18n/translator";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import { emptyBundle } from "@/lib/server/templates/bundle";
@@ -59,7 +60,7 @@ async function main() {
 
   for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
 
-  for (const line of formatImportSummary(results)) console.info(line);
+  for (const line of formatImportSummary(results, await getTranslator("uk"))) console.info(line);
 
   console.info(`Кеш довідника на сервері оновиться протягом ${REFERENCE_REVALIDATE_SECONDS} с`);
 

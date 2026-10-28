@@ -129,7 +129,7 @@ describe("DM-операції: гравець і сторонній отриму
     const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) } as never);
 
     expect(res.status).toBe(403);
-    expect(await res.json()).toEqual({ error: API_ERRORS.FORBIDDEN });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.FORBIDDEN });
     expect(touchedModels).toEqual([]);
   });
 
@@ -147,7 +147,7 @@ describe("DM-операції: гравець і сторонній отриму
     const res = await races.POST(new Request("http://x", { method: "POST", body: "{oops" }), { params: Promise.resolve({ id: "c1" }) } as never);
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: API_ERRORS.INVALID_JSON });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.INVALID_JSON });
   });
 
   it("DM з невалідним тілом — 400 з error і issues", async () => {
@@ -168,7 +168,7 @@ describe("DM-операції: гравець і сторонній отриму
     const res = await handler(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve(ids) } as never);
 
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ error: API_ERRORS.UNAUTHORIZED });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.UNAUTHORIZED });
   });
 });
 

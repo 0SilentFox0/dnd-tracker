@@ -5,9 +5,9 @@ import { getRedirectOrigin } from './redirect-origin'
 
 import { RESET_PASSWORD_PATH } from '@/lib/constants/auth'
 import type { Locale } from '@/lib/i18n/config'
-import { setLocaleCookie } from '@/lib/i18n/cookie'
+import { readLocaleCookie, setLocaleCookie } from '@/lib/i18n/cookie'
 import { ensureDbUser } from '@/lib/server/users/db-user'
-import { readUserLocale } from '@/lib/server/users/locale'
+import { syncUserLocale } from '@/lib/server/users/locale'
 import { createClient } from '@/lib/supabase/server'
 import { safeNextPath } from '@/lib/utils/auth'
 
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     try {
       await ensureDbUser(user, { refresh: true })
 
-      locale = await readUserLocale(user.id)
+      locale = await syncUserLocale(user.id, readLocaleCookie(request))
     } catch (dbError) {
       // the session is valid either way; the row is created again on the first campaign create/join
       console.error('Database error:', dbError)
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
 
     const res = NextResponse.redirect(`${origin}${next}`)
 
-    if (locale) setLocaleCookie(res, locale)
+    if (locale) setLocaleCookie(res, locale, request)
 
     return res
   } catch (error) {

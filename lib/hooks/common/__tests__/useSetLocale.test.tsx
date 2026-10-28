@@ -39,6 +39,23 @@ describe("useSetLocale", () => {
     window.removeEventListener(LOCALE_CHANGE_EVENT, onChange);
   });
 
+  it("при падінні PUT без hardNavigateTo ставить cookie, шле подію й оновлює маршрут", async () => {
+    vi.mocked(localeApi.set).mockRejectedValue(new Error("offline"));
+
+    const onChange = vi.fn();
+
+    window.addEventListener(LOCALE_CHANGE_EVENT, onChange);
+
+    const { result } = renderHook(() => useSetLocale());
+
+    await act(() => result.current.set("en"));
+
+    expect(document.cookie).toContain("NEXT_LOCALE=en");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(refresh).toHaveBeenCalled();
+    window.removeEventListener(LOCALE_CHANGE_EVENT, onChange);
+  });
+
   it("з hardNavigateTo робить повне завантаження, а не router.push", async () => {
     const { result } = renderHook(() => useSetLocale());
 

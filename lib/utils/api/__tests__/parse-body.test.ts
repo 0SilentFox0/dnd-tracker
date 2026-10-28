@@ -20,7 +20,7 @@ describe("parseBody", () => {
 
     expect(res).toBeInstanceOf(NextResponse);
     expect((res as NextResponse).status).toBe(400);
-    expect(await (res as NextResponse).json()).toEqual({ error: API_ERRORS.INVALID_JSON });
+    expect(await (res as NextResponse).json()).toMatchObject({ error: API_ERRORS.INVALID_JSON });
   });
 
   it("помилка схеми — 400 з error і issues", async () => {
@@ -64,7 +64,7 @@ describe("parseBody", () => {
       const res = (await parseBody(schema, post(JSON.stringify({ name: "x".repeat(200) })), undefined, { maxBytes: 100 })) as NextResponse;
 
       expect(res.status).toBe(413);
-      expect(await res.json()).toEqual({ error: API_ERRORS.BODY_TOO_LARGE });
+      expect(await res.json()).toMatchObject({ error: API_ERRORS.BODY_TOO_LARGE });
     });
 
     it("потік без Content-Length понад ліміт — 413, reader скасовано", async () => {

@@ -15,7 +15,7 @@ import { QueryProvider } from "@/lib/providers/query-provider";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "D&D Combat Tracker",
-  description: "Помічник ДМ для кампаній D&D 5e",
+  description: "Dungeon Master companion for D&D 5e campaigns",
   robots: SITE_INDEXING ? undefined : { index: false, follow: false },
 };
 
@@ -24,7 +24,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const messages = await loadStaticMessages(["common", "validation", "auth"]);
+  const messages = await loadStaticMessages(["common", "validation"]);
 
   return (
     <html lang="uk" className="dark">

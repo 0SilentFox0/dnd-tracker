@@ -6,6 +6,7 @@ import { pickMeleeAttack, reactionBlocker } from "./reaction";
 import { CORE_ACTION_REGISTRY, type CoreActionKey } from "./registry";
 import type { CoreActionBody } from "./schema";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, isAttackable, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { type TimedEffectInput, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { canAttackFromPool, spendFromPool } from "@/lib/utils/battle/attack/attacks-left";
@@ -57,7 +58,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const actor = findParticipant(participants, body.participantId);
 
-  if (!actor) return reject("Учасника немає в бою");
+  if (!actor) return reject(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
   if (body.action === "readiedAttack") return readiedAttack(input, actor, body.targetId);
 

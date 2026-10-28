@@ -198,7 +198,7 @@ async function runResponse(run: () => Promise<Response>): Promise<Response> {
     return response; }
   catch (error) {
     if (error instanceof ContentError) {
-      const response = errorResponse(error.message, error.status);
+      const response = errorResponse(error.message, error.status, undefined, error.params);
 
       response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
 

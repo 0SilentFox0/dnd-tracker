@@ -1,5 +1,4 @@
 import { getCampaignApiUrl } from "@/lib/api/api-helpers";
-import { FIELD_LABELS } from "@/lib/constants/field-labels";
 
 export class ApiError extends Error {
   constructor(
@@ -7,25 +6,24 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly url: string,
     public readonly body?: unknown,
+    public readonly errorKey?: string,
   ) {
     super(message);
     this.name = "ApiError";
   }
 }
 
-const issuePath = (path: unknown): string =>
-  Array.isArray(path) && path.length
-    ? path.map((key) => (typeof key === "number" ? `#${key + 1}` : (FIELD_LABELS[String(key)] ?? String(key)))).join(" › ")
-    : "";
+const issuePath = (issue: { path?: unknown; pathLabel?: unknown }): string =>
+  typeof issue.pathLabel === "string" ? issue.pathLabel : Array.isArray(issue.path) ? issue.path.join(" › ") : "";
 
 const issueMessage = (issue: unknown): string => {
   if (!issue || typeof issue !== "object" || typeof (issue as { message?: unknown }).message !== "string") {
     return JSON.stringify(issue);
   }
 
-  const { message, path } = issue as { message: string; path?: unknown };
+  const { message } = issue as { message: string };
 
-  const where = issuePath(path);
+  const where = issuePath(issue as { path?: unknown; pathLabel?: unknown });
 
   return where ? `${where}: ${message}` : message;
 };
@@ -98,7 +96,7 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
     let message = bodyErrorMessage(body, response.statusText);
 
     if (!message.trim()) {
-      message = `Помилка ${response.status}`;
+      message = `HTTP ${response.status}`;
     }
 
     const payload: ApiErrorPayload = {
@@ -110,7 +108,9 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
 
     globalErrorHandler(payload);
 
-    throw new ApiError(message, response.status, url, body);
+    const errorKey = (body as { errorKey?: unknown } | null)?.errorKey;
+
+    throw new ApiError(message, response.status, url, body, typeof errorKey === "string" ? errorKey : undefined);
   }
 
   if (parseResponse === "none") return undefined as T;

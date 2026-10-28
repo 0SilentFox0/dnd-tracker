@@ -17,6 +17,7 @@ import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunC
 import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
+import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate-error";
 import type { AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
 
 type RunChatArgs = { campaignId: string; userId: string; threadId: string; requestId: string; text: string; focus?: AiFocus; sessionContext?: AssistantSessionContext; abortSignal?: AbortSignal };
@@ -26,6 +27,8 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
 
   if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
+  const t = await requestTranslator();
+
   const caller = chatCaller(campaignId, userId, threadId);
 
   let claim;
@@ -33,7 +36,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
   try {
     claim = await beginAssistantRun(caller, requestId, { text, ...(focus && { focus }), ...(sessionContext?.sourceNoteKeys.length && { sessionContext }) });
   } catch (e) {
-    if (e instanceof ContentError) return errorResponse(e.message, e.status);
+    if (e instanceof ContentError) return errorResponse(e.message, e.status, undefined, e.params);
 
     throw e;
   }
@@ -129,7 +132,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
         tools,
         originalMessages: history,
         generateMessageId: () => crypto.randomUUID(),
-        onError: (e) => (error = aiErrorMessage(e)),
+        onError: (e) => (error = translateErrorBody(t, { error: aiErrorMessage(e) }).error),
         messageMetadata: ({ part }) => {
           if (part.type !== "finish") return undefined;
 
@@ -155,6 +158,6 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
     dispose();
     await finishAssistantRun(claim.run.id, { status: toolSignal.aborted ? "cancelled" : "failed", usage, errorCode: "CHAT_FAILED" });
 
-    return errorResponse(e instanceof ContentError ? e.message : aiErrorMessage(e), e instanceof ContentError ? e.status : 500);
+    return e instanceof ContentError ? errorResponse(e.message, e.status, undefined, e.params) : errorResponse(aiErrorMessage(e), 500);
   }
 }

@@ -37,7 +37,7 @@ describe("SpellLevelAccordion delete level", () => {
   it("does nothing on cancel", async () => {
     renderIt();
     fireEvent.click(screen.getByTitle("Видалити всі заклинання рівня"));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Скасувати" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "common.confirm.cancel" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(mutateAsync).not.toHaveBeenCalled();
   });

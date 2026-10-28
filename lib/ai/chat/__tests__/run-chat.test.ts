@@ -2,6 +2,8 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 vi.mock("@/lib/ai/threads", () => ({ loadThread: vi.fn(), loadMessages: vi.fn(async () => []), appendMessage: vi.fn() }));
 vi.mock("@/lib/ai/credentials", () => {
   class AiKeyUnreadableError extends Error {}
@@ -10,6 +12,11 @@ vi.mock("@/lib/ai/credentials", () => {
 });
 vi.mock("@/lib/ai/context/prompt", () => ({ buildInstructions: vi.fn(async () => "ІНСТРУКЦІЇ") }));
 vi.mock("@/lib/ai/tools", () => ({ toAiSdkTools: vi.fn(() => ({})) }));
+vi.mock("@/lib/utils/api/translate-error", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/utils/api/translate-error")>();
+
+  return { ...actual, requestTranslator: vi.fn(actual.requestTranslator) };
+});
 
 vi.mock("@/lib/server/assistant/runs", async () => ({
   createRunSignal: (await import("@/lib/ai/chat/run-signal")).createRunSignal,
@@ -137,7 +144,7 @@ describe("runChat", () => {
     const res = await runChat(args);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toContain("збережіть ключ заново");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_KEY_UNREADABLE);
   });
 
   it("інструменти отримують сигнал, що спрацьовує разом із клієнтським abort", async () => {
@@ -188,7 +195,7 @@ describe("runChat", () => {
     const res = await runChat(args);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toContain("Додайте ключ");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_KEY_MISSING);
   });
 
   it("помилка провайдера → український текст у стрімі, без тексту оригіналу", async () => {
@@ -200,8 +207,28 @@ describe("runChat", () => {
 
     const body = await (await runChat(args, { model: failing })).text();
 
-    expect(body).toContain("Ключ недійсний");
+    expect(body).toContain(API_ERRORS.AI_KEY_INVALID);
     expect(body).not.toContain("sk-test");
+  });
+
+  it("метадані з помилкою провайдера зберігають результат перекладу, не ключ", async () => {
+    const { APICallError } = await import("ai");
+
+    const { requestTranslator } = await import("@/lib/utils/api/translate-error");
+
+    const { appendMessage } = await import("@/lib/ai/threads");
+
+    vi.mocked(requestTranslator).mockResolvedValueOnce(Object.assign((key: string) => `T(${key})`, { has: () => true, raw: () => ({}) }));
+
+    const failing = new MockLanguageModelV4({ doStream: async () => { throw new APICallError({ message: "bad", url: "u", requestBodyValues: {}, statusCode: 401, isRetryable: false }); } });
+
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    await (await runChat(args, { model: failing })).text();
+
+    const saved = vi.mocked(appendMessage).mock.calls.map((c) => c[1]).find((m) => m.role === "assistant");
+
+    expect((saved?.metadata as { error?: string }).error).toMatch(/^T\(.+\)$/);
   });
 
   it("логи помилки провайдера не містять тексту оригіналу", async () => {

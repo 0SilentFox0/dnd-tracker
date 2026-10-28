@@ -4,7 +4,7 @@ import type { z } from "zod";
 import "server-only";
 import { getCachedFeats } from "@/lib/cache/reference-data";
 import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS, featNameTakenMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createFeatSchema, updateFeatSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
@@ -24,7 +24,7 @@ type UpdateInput = z.infer<typeof updateFeatSchema>;
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
-  if (await featNameTaken(campaignId, name, exceptId)) throw new ContentError(featNameTakenMessage(name), 409);
+  if (await featNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.FEAT_NAME_TAKEN, 409, undefined, { name });
 }
 
 export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({

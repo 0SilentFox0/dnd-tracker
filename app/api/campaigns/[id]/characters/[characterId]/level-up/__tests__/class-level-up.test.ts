@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
@@ -91,7 +92,7 @@ describe("POST level-up (classes)", () => {
     const res = await post({ classId: "c1" });
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe("Оберіть підклас");
+    expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_REQUIRED);
     expect(prisma.character.update).not.toHaveBeenCalled();
   });
 
@@ -110,7 +111,7 @@ describe("POST level-up (classes)", () => {
     const res = await post();
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe("Оберіть клас для нового рівня");
+    expect((await res.json()).error).toBe(API_ERRORS.CLASS_REQUIRED);
   });
 
   it("HOMM-шлях: без класів і без тіла — як раніше", async () => {
@@ -132,7 +133,7 @@ describe("POST level-up (classes)", () => {
     const res = await post({ classId: "c1" });
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe("Спершу переведіть персонажа на класи");
+    expect((await res.json()).error).toBe(API_ERRORS.CONVERT_TO_CLASSES_FIRST);
     expect(prisma.character.update).not.toHaveBeenCalled();
   });
 
@@ -150,7 +151,7 @@ describe("POST level-up (classes)", () => {
     const res = await post({ classId: "c1", subclassId: "s2" });
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toContain("Підклас уже обрано");
+    expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_ALREADY_SET);
   });
 });
 

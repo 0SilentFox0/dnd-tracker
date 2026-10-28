@@ -3,7 +3,7 @@ import type { Character } from "@prisma/client";
 import { z } from "zod";
 
 import "server-only";
-import { API_ERRORS, multiclassRequirementMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { PicksSchema } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { applyClasses, type ClassesApplied } from "@/lib/server/characters/apply-classes";
@@ -66,14 +66,14 @@ export async function classLevelUp({ campaign, character, pick }: ClassLevelUpIn
     spellcastingAbility: character.spellcastingAbility,
   });
 
-  if (!applied.ok) return errorResponse(applied.error, applied.status);
+  if (!applied.ok) return errorResponse(applied.error, applied.status, undefined, applied.params);
 
   const byId = applied.classesById;
 
   if (!existing && byId?.[pick.classId]) {
     const blocked = multiclassBlockedBy(entries.flatMap((e) => byId[e.classId] ?? []), byId[pick.classId], character);
 
-    if (blocked) return errorResponse(multiclassRequirementMessage(blocked), 422);
+    if (blocked) return errorResponse(API_ERRORS.MULTICLASS_REQUIREMENT, 422, undefined, { name: blocked });
   }
 
   const raised = next.find((e) => e.classId === pick.classId);

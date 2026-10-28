@@ -64,6 +64,7 @@ describe("useUnsavedChangesGuard", () => {
     click(a);
     await flush();
     expect(push).toHaveBeenCalledWith("/campaigns/x?y=1#z");
+    expect(confirm).toHaveBeenCalledWith({ title: "common.confirm.unsavedTitle", confirmLabel: "common.confirm.leave", destructive: true });
   });
 
   it("зовнішні, _blank, модифіковані кліки й якір на цій сторінці — без підтвердження", () => {

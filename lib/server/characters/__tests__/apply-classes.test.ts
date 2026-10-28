@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyClasses, validateClassEntries } from "../apply-classes";
 
 import { getCachedClasses } from "@/lib/cache/reference-data";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { GameClassData } from "@/types/classes";
 
@@ -36,17 +37,17 @@ describe("validateClassEntries", () => {
   const champ = { id: "s1", name: "Чемпіон", features: [] };
 
   it("rejects unknown class", () => {
-    expect(validateClassEntries([{ classId: "x", level: 1 }], {}, 20)).toBe("Клас не знайдено");
+    expect(validateClassEntries([{ classId: "x", level: 1 }], {}, 20)).toEqual({ error: API_ERRORS.CLASS_NOT_FOUND });
   });
 
   it("rejects subclass before subclassLevel", () => {
-    expect(validateClassEntries([{ classId: "c1", subclassId: "s1", level: 2 }], { c1: cls({ subclassLevel: 3, subclasses: [champ] }) }, 20)).toMatch(/рівня 3/);
+    expect(validateClassEntries([{ classId: "c1", subclassId: "s1", level: 2 }], { c1: cls({ subclassLevel: 3, subclasses: [champ] }) }, 20)).toEqual({ error: API_ERRORS.SUBCLASS_TOO_EARLY, params: { level: 3 } });
   });
 
   it("rejects subclass of another class", () => {
     const byId = { c1: cls({ subclassLevel: 3, subclasses: [champ] }), c2: cls({ id: "c2", subclassLevel: 3 }) };
 
-    expect(validateClassEntries([{ classId: "c2", subclassId: "s1", level: 5 }], byId, 20)).toBe("Підклас не знайдено в цьому класі");
+    expect(validateClassEntries([{ classId: "c2", subclassId: "s1", level: 5 }], byId, 20)).toEqual({ error: API_ERRORS.SUBCLASS_NOT_FOUND });
   });
 
   it("accepts subclass at subclassLevel", () => {
@@ -54,7 +55,7 @@ describe("validateClassEntries", () => {
   });
 
   it("rejects total level above campaign max", () => {
-    expect(validateClassEntries([{ classId: "c1", level: 12 }], { c1: cls() }, 10)).toBe("Максимальний рівень кампанії — 10");
+    expect(validateClassEntries([{ classId: "c1", level: 12 }], { c1: cls() }, 10)).toEqual({ error: API_ERRORS.MAX_LEVEL_EXCEEDED, params: { max: 10 } });
   });
 });
 
@@ -75,7 +76,7 @@ describe("applyClasses", () => {
   });
 
   it("rejects unknown class", async () => {
-    expect(await applyClasses({ ...base, entries: [{ classId: "zz", level: 1 }] })).toMatchObject({ ok: false, error: "Клас не знайдено" });
+    expect(await applyClasses({ ...base, entries: [{ classId: "zz", level: 1 }] })).toMatchObject({ ok: false, error: API_ERRORS.CLASS_NOT_FOUND });
   });
 
   it("derives level, label and slots", async () => {

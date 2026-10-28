@@ -40,7 +40,7 @@ async function assertClassSkills({ campaignId, data, entries, byId }: { campaign
 async function createCharacterCore({ access, campaignId }: CampaignScope, data: CreateCharacterInput) {
   const { heroMin, heroMax } = access.campaign.rules.initiative;
 
-  if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
+  if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, 400, undefined, { min: heroMin, max: heroMax });
 
   const { campaign } = access;
 
@@ -52,7 +52,7 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
     spellcastingAbility: data.spellcastingAbility ?? null,
   });
 
-  if (!applied.ok) throw new ContentError(applied.error, applied.status);
+  if (!applied.ok) throw new ContentError(applied.error, applied.status, undefined, applied.params);
 
   const fromClasses = applied.data;
 

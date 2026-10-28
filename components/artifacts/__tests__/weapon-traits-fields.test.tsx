@@ -28,10 +28,10 @@ describe("ArtifactWeaponFields traits", () => {
   it("кубик двома руками лише для універсальної", () => {
     const { rerender } = render(<ArtifactWeaponFields value={{}} onChange={vi.fn()} />);
 
-    expect(screen.queryByLabelText("Кубик двома руками")).toBeNull();
+    expect(screen.queryByLabelText("common.weaponTraits.versatileDice")).toBeNull();
 
     rerender(<ArtifactWeaponFields value={{ traits: ["versatile"] }} onChange={vi.fn()} />);
 
-    expect(screen.getByLabelText("Кубик двома руками")).toBeTruthy();
+    expect(screen.getByLabelText("common.weaponTraits.versatileDice")).toBeTruthy();
   });
 });

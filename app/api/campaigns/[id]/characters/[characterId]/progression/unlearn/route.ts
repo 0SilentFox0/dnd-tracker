@@ -11,7 +11,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const { id, characterId } = await params;
 
-    const parsed = await parseBody(bodySchema, request, "Невалідний запит");
+    const parsed = await parseBody(bodySchema, request);
 
     if (parsed instanceof NextResponse) return parsed;
 

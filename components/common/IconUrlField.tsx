@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ export interface IconUrlFieldProps {
 }
 
 export function IconUrlField({ label, value, onChange, fallbackText, id }: IconUrlFieldProps) {
+  const t = useTranslations("common.iconUrl");
+
   const autoId = useId();
 
   const inputId = id ?? autoId;
@@ -41,7 +44,7 @@ export function IconUrlField({ label, value, onChange, fallbackText, id }: IconU
           className="flex-1"
         />
       </div>
-      {invalid && <p className="text-xs text-destructive">Вкажіть посилання, що починається з https:// або http://</p>}
+      {invalid && <p className="text-xs text-destructive">{t("invalid")}</p>}
     </div>
   );
 }

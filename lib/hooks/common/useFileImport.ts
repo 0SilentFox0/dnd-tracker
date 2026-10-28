@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface UseFileImportOptions<T> {
   onImport: (data: T[]) => Promise<{ imported: number; total: number; skipped?: number; warnings?: string[] }>;
@@ -27,6 +28,8 @@ export function useFileImport<T>({
   parseCSV,
   parseJSON,
 }: UseFileImportOptions<T>): UseFileImportReturn {
+  const t = useTranslations("common");
+
   const [file, setFile] = useState<File | null>(null);
 
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +45,7 @@ export function useFileImport<T>({
       const ext = selectedFile.name.split(".").pop()?.toLowerCase();
 
       if (ext !== "csv" && ext !== "json") {
-        setError("Підтримуються тільки CSV та JSON файли");
+        setError(t("import.unsupportedType"));
 
         return;
       }
@@ -55,13 +58,13 @@ export function useFileImport<T>({
 
   const handleImport = async () => {
     if (!file) {
-      setError("Виберіть файл для імпорту");
+      setError(t("import.pickFile"));
 
       return;
     }
 
     if (!parseCSV && !parseJSON) {
-      setError("Не вказано функції парсингу");
+      setError(t("import.noParsers"));
 
       return;
     }
@@ -77,18 +80,18 @@ export function useFileImport<T>({
 
       if (ext === "csv") {
         if (!parseCSV) {
-          throw new Error("CSV парсинг не підтримується");
+          throw new Error(t("import.csvUnsupported"));
         }
 
         data = await parseCSV(file);
       } else if (ext === "json") {
         if (!parseJSON) {
-          throw new Error("JSON парсинг не підтримується");
+          throw new Error(t("import.jsonUnsupported"));
         }
 
         data = await parseJSON(file);
       } else {
-        throw new Error("Непідтримуваний формат файлу");
+        throw new Error(t("import.unsupportedFormat"));
       }
 
       const result = await onImport(data);
@@ -101,7 +104,7 @@ export function useFileImport<T>({
       });
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Помилка при імпорті";
+        err instanceof Error ? err.message : t("import.failed");
 
       setError(errorMessage);
     } finally {

@@ -9,7 +9,7 @@ import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleCheckInput): MutationResult {
   if (!ctx.meta.rules.morale.enabled) rejectAction(API_ERRORS.BATTLE_MORALE_DISABLED);
 
-  const participant = requireActor(ctx, data.participantId, { missing: "Учасника немає в бою", forbidden: API_ERRORS.FORBIDDEN });
+  const participant = requireActor(ctx, data.participantId, { missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE, forbidden: API_ERRORS.FORBIDDEN });
 
   const pending = ctx.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null;
 

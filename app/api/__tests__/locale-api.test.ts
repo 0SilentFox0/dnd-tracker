@@ -7,6 +7,8 @@ import { prisma } from "@/lib/db";
 vi.mock("@/lib/auth", () => ({ getSessionUserId: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { user: { findUnique: vi.fn(), updateMany: vi.fn() } } }));
 
+const get = (cookie?: string) => new Request("http://x/api/locale", cookie ? { headers: { cookie } } : undefined);
+
 const put = (body: unknown) => new Request("http://x/api/locale", { method: "PUT", body: JSON.stringify(body) });
 
 describe("/api/locale", () => {
@@ -41,7 +43,7 @@ describe("/api/locale", () => {
     vi.mocked(getSessionUserId).mockResolvedValue("u1");
     vi.mocked(prisma.user.findUnique).mockResolvedValue({ locale: "en" } as never);
 
-    const res = await GET();
+    const res = await GET(get());
 
     expect(await res.json()).toEqual({ locale: "en" });
     expect(res.headers.get("set-cookie")).toContain("NEXT_LOCALE=en");
@@ -51,14 +53,36 @@ describe("/api/locale", () => {
     vi.mocked(getSessionUserId).mockResolvedValue("u1");
     vi.mocked(prisma.user.findUnique).mockResolvedValue({ locale: null } as never);
 
-    const res = await GET();
+    const res = await GET(get());
 
     expect(await res.json()).toEqual({ locale: null });
     expect(res.headers.get("set-cookie")).toBeNull();
   });
 
+  it("GET: профіль null + cookie en — зберігає мову в профіль і не ставить cookie", async () => {
+    vi.mocked(getSessionUserId).mockResolvedValue("u1");
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ locale: null } as never);
+
+    const res = await GET(get("NEXT_LOCALE=en"));
+
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1", locale: null }, data: { locale: "en" } });
+    expect(await res.json()).toEqual({ locale: null });
+  });
+
+  it("PUT: secure cookie для https і x-forwarded-proto", async () => {
+    const https = await PUT(new Request("https://x/api/locale", { method: "PUT", body: JSON.stringify({ locale: "en" }) }));
+
+    const proxied = await PUT(new Request("http://x/api/locale", { method: "PUT", body: JSON.stringify({ locale: "en" }), headers: { "x-forwarded-proto": "https" } }));
+
+    const local = await PUT(put({ locale: "en" }));
+
+    expect(https.headers.get("set-cookie")).toMatch(/secure/i);
+    expect(proxied.headers.get("set-cookie")).toMatch(/secure/i);
+    expect(local.headers.get("set-cookie")).not.toMatch(/secure/i);
+  });
+
   it("GET без сесії не читає БД", async () => {
-    const res = await GET();
+    const res = await GET(get());
 
     expect(res.headers.get("set-cookie")).toBeNull();
     expect(prisma.user.findUnique).not.toHaveBeenCalled();

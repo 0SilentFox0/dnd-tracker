@@ -1,6 +1,8 @@
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
+
 export class BattleConflictError extends Error {
   constructor(readonly currentVersion?: number) {
-    super("Стан бою змінився");
+    super(API_ERRORS.BATTLE_STATE_CHANGED);
     this.name = "BattleConflictError";
   }
 }
@@ -31,6 +33,7 @@ export class BattleRuleError extends Error {
   constructor(
     readonly code: BattleRuleCode,
     message: string,
+    readonly params?: ErrorParams,
   ) {
     super(message);
     this.name = "BattleRuleError";

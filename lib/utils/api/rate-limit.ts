@@ -2,11 +2,12 @@
  * Rate limiting через `@upstash/ratelimit` (sliding window).
  * Fail-open: без Upstash запит пропускається, крім викликів з `memoryFallback` — вони рахуються в пам'яті інстанса.
  */
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getRedisClient } from "@/lib/redis";
+import { apiErrorJson } from "@/lib/utils/api/translate-error";
 
 export interface RateLimitInput {
   /** Хто робить запит — зазвичай userId з сесії. */
@@ -145,7 +146,7 @@ export async function checkRateLimit(
  * Convenience: 429 response з Retry-After header.
  */
 export function rateLimitResponse(rl: RateLimitResult): NextResponse {
-  return NextResponse.json(
+  return apiErrorJson(
     {
       error: API_ERRORS.TOO_MANY_REQUESTS,
       retryAfterSeconds: rl.retryAfterSeconds,

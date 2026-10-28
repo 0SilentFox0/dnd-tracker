@@ -9,6 +9,8 @@ import { z } from "zod";
 
 import { handleApiError } from "../error-handler";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 describe("handleApiError", () => {
   const consoleErrorSpy = vi
     .spyOn(console, "error")
@@ -35,7 +37,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Некоректні дані запиту");
+    expect(body.error).toBe(API_ERRORS.INVALID_BODY);
     expect(Array.isArray(body.issues)).toBe(true);
   });
 
@@ -51,7 +53,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Не знайдено");
+    expect(body.error).toBe(API_ERRORS.NOT_FOUND);
   });
 
   it("Prisma P2003 → 400 (FK violation)", async () => {
@@ -66,7 +68,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Пов'язаний запис не існує");
+    expect(body.error).toBe(API_ERRORS.FOREIGN_KEY);
   });
 
   it("Прочий Prisma код → 500", async () => {
@@ -89,7 +91,7 @@ describe("handleApiError", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Внутрішня помилка сервера");
+    expect(body.error).toBe(API_ERRORS.INTERNAL);
     expect(JSON.stringify(body)).not.toContain("internal database secret leak");
   });
 

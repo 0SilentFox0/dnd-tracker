@@ -56,7 +56,7 @@ describe("TemplatePicker", () => {
 
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={onChange} />);
     fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "__file" } });
-    fireEvent.click(await screen.findByRole("button", { name: "Імпортувати" }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.import.submit" }));
     await waitFor(() => expect(onChange).toHaveBeenCalledWith({ file: { name: "c.json", bundle: {}, entities: 3 } }));
   });
 });
