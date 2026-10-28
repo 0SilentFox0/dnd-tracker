@@ -2,6 +2,7 @@ import { CharacterProfile } from "@/components/character-profile";
 import { NoCharacterState } from "@/components/characters/player-draft/NoCharacterState";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
@@ -25,11 +26,15 @@ export default async function CharacterPage({ params, searchParams }: { params: 
     return <NoCharacterState campaignId={id} canCreate={!isDM} />;
   }
 
-  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules: parseRules(campaign.rules), allowPlayerEdit: campaign.allowPlayerEdit } }));
+  const rules = parseRules(campaign.rules);
+
+  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules, allowPlayerEdit: campaign.allowPlayerEdit } }));
 
   return (
     <PrefetchedQuery queryKey={characterKeys.sheet(id, character.id)} data={sheet}>
-      <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />
+      <PrefetchedQuery queryKey={campaignKeys.rules(id)} data={rules}>
+        <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />
+      </PrefetchedQuery>
     </PrefetchedQuery>
   );
 }
