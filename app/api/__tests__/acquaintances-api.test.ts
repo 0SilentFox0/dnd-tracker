@@ -12,6 +12,8 @@ vi.mock("@/lib/db", () => ({
     campaign: { findUnique: vi.fn() },
     character: { findUnique: vi.fn() },
     scenarioPage: { findUnique: vi.fn() },
+    acquaintanceEntry: { findUnique: vi.fn(), aggregate: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    acquaintanceNote: { upsert: vi.fn(), deleteMany: vi.fn() },
     acquaintance: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }));
@@ -21,6 +23,12 @@ const dm = { userId: "dm", isDM: true } as never;
 const player = { userId: "u1", isDM: false } as never;
 
 const collection = () => import("@/app/api/campaigns/[id]/acquaintances/route");
+
+const entries = () => import("@/app/api/campaigns/[id]/acquaintances/[acquaintanceId]/entries/route");
+
+const entryById = () => import("@/app/api/campaigns/[id]/acquaintances/[acquaintanceId]/entries/[entryId]/route");
+
+const noteRoute = () => import("@/app/api/campaigns/[id]/acquaintances/[acquaintanceId]/note/route");
 
 const single = () => import("@/app/api/campaigns/[id]/acquaintances/[acquaintanceId]/route");
 
@@ -180,5 +188,145 @@ describe("PATCH/DELETE /acquaintances/[id]", () => {
     vi.mocked(prisma.acquaintance.findUnique).mockResolvedValueOnce(null);
 
     expect((await (await single()).DELETE(json("DELETE"), params)).status).toBe(404);
+  });
+});
+
+describe("acquaintance entries", () => {
+  const params = ctx({ acquaintanceId: "a1" });
+
+  const entryParams = ctx({ acquaintanceId: "a1", entryId: "e1" });
+
+  const entryRow = { id: "e1", acquaintanceId: "a1", pageId: "p1", sectionId: "s1", text: "Зустріч", sortOrder: 3, createdAt: new Date(0) };
+
+  it("is forbidden for players on create", async () => {
+    const { NextResponse } = await import("next/server");
+
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);
+
+    expect((await (await entries()).POST(json("POST", { pageId: "p1", sectionId: "s1", text: "t" }), params)).status).toBe(403);
+  });
+
+  it("403s for an entry on another campaign's acquaintance", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row({ campaignId: "other" }) as never);
+
+    expect((await (await entries()).POST(json("POST", { pageId: "p1", sectionId: "s1", text: "t" }), params)).status).toBe(403);
+  });
+
+  it("404s for an unknown section", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(pageRow as never);
+
+    expect((await (await entries()).POST(json("POST", { pageId: "p1", sectionId: "zz", text: "t" }), params)).status).toBe(404);
+  });
+
+  it("appends with sortOrder = max + 1", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(pageRow as never);
+    vi.mocked(prisma.acquaintanceEntry.aggregate).mockResolvedValue({ _max: { sortOrder: 4 } } as never);
+    vi.mocked(prisma.acquaintanceEntry.create).mockResolvedValue({ ...entryRow, sortOrder: 5 } as never);
+
+    const res = await (await entries()).POST(json("POST", { pageId: "p1", sectionId: "s1", text: "Зустріч" }), params);
+
+    expect(res.status).toBe(201);
+    expect(vi.mocked(prisma.acquaintanceEntry.create).mock.calls[0][0].data).toMatchObject({ acquaintanceId: "a1", pageId: "p1", sectionId: "s1", sortOrder: 5 });
+    expect(await res.json()).toMatchObject({ id: "e1", sortOrder: 5, hidden: false });
+  });
+
+  it("starts at 0 when there are no entries", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(pageRow as never);
+    vi.mocked(prisma.acquaintanceEntry.aggregate).mockResolvedValue({ _max: { sortOrder: null } } as never);
+    vi.mocked(prisma.acquaintanceEntry.create).mockResolvedValue({ ...entryRow, sortOrder: 0 } as never);
+
+    await (await entries()).POST(json("POST", { pageId: "p1", sectionId: "s1", text: "t" }), params);
+
+    expect(vi.mocked(prisma.acquaintanceEntry.create).mock.calls[0][0].data.sortOrder).toBe(0);
+  });
+
+  it("404s PATCH and DELETE for an entry of another acquaintance", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.acquaintanceEntry.findUnique).mockResolvedValue({ ...entryRow, acquaintanceId: "other" } as never);
+
+    const patch = await (await entryById()).PATCH(json("PATCH", { text: "n" }), entryParams);
+
+    const del = await (await entryById()).DELETE(json("DELETE"), entryParams);
+
+    expect(patch.status).toBe(404);
+    expect((await patch.json()).errorKey).toBe("errors.acquaintanceEntryNotFound");
+    expect(del.status).toBe(404);
+    expect(prisma.acquaintanceEntry.delete).not.toHaveBeenCalled();
+  });
+
+  it("updates and deletes an own entry", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.acquaintanceEntry.findUnique).mockResolvedValue(entryRow as never);
+    vi.mocked(prisma.acquaintanceEntry.update).mockResolvedValue({ ...entryRow, text: "n" } as never);
+
+    expect((await (await entryById()).PATCH(json("PATCH", { text: "n" }), entryParams)).status).toBe(200);
+    expect(vi.mocked(prisma.acquaintanceEntry.update).mock.calls[0][0].data).toEqual({ text: "n" });
+    expect((await (await entryById()).DELETE(json("DELETE"), entryParams)).status).toBe(200);
+    expect(prisma.acquaintanceEntry.delete).toHaveBeenCalledWith({ where: { id: "e1" } });
+  });
+});
+
+describe("PUT /acquaintances/[id]/note", () => {
+  const params = ctx({ acquaintanceId: "a1" });
+
+  const noteRow = { id: "n1", authorUserId: "u1", text: "моя", updatedAt: new Date(0), author: { displayName: "Аня" } };
+
+  it("403s for players when the toggle is off", async () => {
+    vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ acquaintancesEnabled: false } as never);
+
+    expect((await (await noteRoute()).PUT(json("PUT", { text: "x" }), params)).status).toBe(403);
+  });
+
+  it("404s without leaking the name when the acquaintance is not revealed", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row({ name: "Таємний", sourceSectionId: "s9" }) as never);
+
+    const res = await (await noteRoute()).PUT(json("PUT", { text: "x" }), params);
+
+    const text = await res.text();
+
+    expect(res.status).toBe(404);
+    expect(text).toContain("errors.acquaintanceNotFound");
+    expect(text).not.toContain("Таємний");
+    expect(prisma.acquaintanceNote.upsert).not.toHaveBeenCalled();
+  });
+
+  it("upserts the player's own note for a revealed acquaintance", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.acquaintanceNote.upsert).mockResolvedValue(noteRow as never);
+
+    const res = await (await noteRoute()).PUT(json("PUT", { text: "моя" }), params);
+
+    expect(vi.mocked(prisma.acquaintanceNote.upsert).mock.calls[0][0].where).toEqual({ acquaintanceId_authorUserId: { acquaintanceId: "a1", authorUserId: "u1" } });
+    expect(await res.json()).toMatchObject({ id: "n1", own: true, authorName: "Аня", text: "моя" });
+  });
+
+  it("deletes the own note for an empty text", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+
+    const res = await (await noteRoute()).PUT(json("PUT", { text: "   " }), params);
+
+    expect(prisma.acquaintanceNote.deleteMany).toHaveBeenCalledWith({ where: { acquaintanceId: "a1", authorUserId: "u1" } });
+    expect(await res.json()).toEqual({ deleted: true });
+  });
+
+  it("lets the DM write a note on a hidden acquaintance", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(dm);
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row({ sourceSectionId: "s9" }) as never);
+    vi.mocked(prisma.acquaintanceNote.upsert).mockResolvedValue({ ...noteRow, authorUserId: "dm" } as never);
+
+    expect((await (await noteRoute()).PUT(json("PUT", { text: "план" }), params)).status).toBe(200);
+    expect(vi.mocked(prisma.acquaintanceNote.upsert).mock.calls[0][0].where).toEqual({ acquaintanceId_authorUserId: { acquaintanceId: "a1", authorUserId: "dm" } });
+  });
+
+  it("keeps another player's note out of the GET list", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "u2", isDM: false } as never);
+    vi.mocked(prisma.acquaintance.findMany).mockResolvedValue([row({ notes: [{ ...noteRow, authorUserId: "u1" }] })] as never);
+
+    const body = await (await (await collection()).GET(json("GET"), ctx())).json();
+
+    expect(body.items[0].notes).toEqual([]);
   });
 });
