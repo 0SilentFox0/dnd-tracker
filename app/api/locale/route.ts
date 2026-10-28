@@ -2,22 +2,22 @@ import { NextResponse } from "next/server";
 
 import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { setLocaleCookie } from "@/lib/i18n/cookie";
+import { readLocaleCookie, setLocaleCookie } from "@/lib/i18n/cookie";
 import { localeSchema } from "@/lib/schemas/locale";
-import { readUserLocale } from "@/lib/server/users/locale";
+import { syncUserLocale } from "@/lib/server/users/locale";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const userId = await getSessionUserId();
 
-    const locale = userId ? await readUserLocale(userId) : null;
+    const locale = userId ? await syncUserLocale(userId, readLocaleCookie(req)) : null;
 
     const res = NextResponse.json({ locale }, { headers: PRIVATE_NO_STORE_HEADERS });
 
-    if (locale) setLocaleCookie(res, locale);
+    if (locale) setLocaleCookie(res, locale, req);
 
     return res;
   } catch (error) {
@@ -37,7 +37,7 @@ export async function PUT(req: Request) {
 
     const res = NextResponse.json({ locale: body.locale });
 
-    setLocaleCookie(res, body.locale);
+    setLocaleCookie(res, body.locale, req);
 
     return res;
   } catch (error) {

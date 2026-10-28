@@ -4,21 +4,41 @@ import { useEffect } from "react";
 
 import type { Locale } from "./config";
 
-const LOCK_ATTRIBUTE = "data-lang-lock";
+const store: { locks: Locale[]; root: Locale | null } = { locks: [], root: null };
 
-// effects run child-first: an explicit page locale (static landing) must not be overwritten by the cookie-driven root provider
+function applyLang() {
+  const lang = store.locks.at(-1) ?? store.root;
+
+  if (lang) document.documentElement.lang = lang;
+}
+
+export function resetHtmlLangForTests() {
+  store.locks = [];
+  store.root = null;
+}
+
+// a locked page locale (static landing) outranks the cookie-driven root provider; locks stack
 export function HtmlLang({ locale, lock = false }: { locale: Locale; lock?: boolean }) {
   useEffect(() => {
-    const root = document.documentElement;
+    if (!lock) {
+      store.root = locale;
+      applyLang();
 
-    if (lock) {
-      root.lang = locale;
-      root.setAttribute(LOCK_ATTRIBUTE, "");
-
-      return () => root.removeAttribute(LOCK_ATTRIBUTE);
+      return;
     }
 
-    if (!root.hasAttribute(LOCK_ATTRIBUTE)) root.lang = locale;
+    const entry = locale;
+
+    store.locks.push(entry);
+    applyLang();
+
+    return () => {
+      const index = store.locks.lastIndexOf(entry);
+
+      if (index !== -1) store.locks.splice(index, 1);
+
+      applyLang();
+    };
   }, [locale, lock]);
 
   return null;
