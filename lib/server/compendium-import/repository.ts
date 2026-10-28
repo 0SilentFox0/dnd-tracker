@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-
 import { buildDependencyClosure, type TemplateSnapshot } from "./dependencies";
 import { domainSchemas } from "./domain-schemas";
 import { digest } from "./identity";
@@ -12,7 +10,9 @@ import type { TargetKind } from "./types";
 
 import "server-only";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { jsonContentInput } from "@/lib/server/assistant/json";
 import { updateCampaignRules } from "@/lib/server/campaigns/rules";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -31,8 +31,6 @@ import type { ScenarioContent } from "@/types/scenario";
 
 export const kindTable = { "spell-groups": "spellGroups", spells: "spells", units: "units", artifacts: "artifacts", races: "races", classes: "classes", feats: "feats", backgrounds: "backgrounds" } as const;
 
-const json = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
-
 const object = (v: unknown): JsonRecord => isRecord(v) ? v : {};
 
 export function nativeBody(kind: TargetKind, raw: JsonRecord): JsonRecord {
@@ -47,23 +45,59 @@ export function nativeBody(kind: TargetKind, raw: JsonRecord): JsonRecord {
   return parsed?.success ? parsed.data as JsonRecord : body;
 }
 
-async function loadDomain(campaignId: string) {
-  const rows = new Map<TargetKind, Map<string, JsonRecord>>();
+const tableOf = (key: string) => BUNDLE_TABLES.find((t) => t.key === key)!;
+
+type DomainRows = Map<TargetKind, Map<string, JsonRecord>>;
+
+async function loadNames(campaignId: string) {
+  const names: Record<string, Array<{ id: string; name: string }>> = {};
 
   for (const [kind, key] of Object.entries(kindTable)) {
-    const table = BUNDLE_TABLES.find((t) => t.key === key)!;
+    const values = await delegateOf(prisma, tableOf(key)).findMany({ where: { campaignId }, orderBy: { id: "asc" }, select: { id: true, name: true } });
 
-    const values = await delegateOf(prisma, table).findMany({ where: { campaignId }, orderBy: { id: "asc" } });
-
-    rows.set(kind as TargetKind, new Map(values.map((r) => [String(r.id), r])));
+    names[kind] = values.map((r) => ({ id: String(r.id), name: String(r.name) }));
   }
 
-  const pages = await prisma.scenarioPage.findMany({ where: { campaignId }, orderBy: { id: "asc" } });
+  const pages = await prisma.scenarioPage.findMany({ where: { campaignId }, orderBy: { id: "asc" }, select: { id: true, title: true } });
 
-  rows.set("scenarioPages", new Map(pages.map((r) => [r.id, r as unknown as JsonRecord])));
+  names.scenarioPages = pages.map((r) => ({ id: r.id, name: String(r.title) }));
+
+  return names;
+}
+
+async function loadRows(campaignId: string, refs: Iterable<{ kind: TargetKind; id: string }>) {
+  const wanted = new Map<TargetKind, Set<string>>();
+
+  for (const { kind, id } of refs) wanted.set(kind, (wanted.get(kind) ?? new Set()).add(id));
+
+  const rows: DomainRows = new Map();
+
+  for (const [kind, ids] of wanted) {
+    if (kind !== "scenarioPages" && !(kind in kindTable)) continue;
+
+    const where = { campaignId, id: { in: [...ids] } };
+
+    const values = kind === "scenarioPages"
+      ? await prisma.scenarioPage.findMany({ where }) as unknown as JsonRecord[]
+      : await delegateOf(prisma, tableOf(kindTable[kind as keyof typeof kindTable])).findMany({ where });
+
+    rows.set(kind, new Map(values.map((r) => [String(r.id), r])));
+  }
 
   return rows;
 }
+
+async function loadTemplateRows(templateId: string) {
+  const rows = await Promise.all(Object.entries(kindTable).map(async ([kind, key]) => {
+    const values = await delegateOf(prisma, tableOf(key)).findMany({ where: { campaignId: templateId }, orderBy: { id: "asc" } });
+
+    return values.map((r) => ({ id: String(r.id), kind: kind as TargetKind, body: nativeBody(kind as TargetKind, r) }));
+  }));
+
+  return rows.flat();
+}
+
+const entryRefKey = (kind: string, id: string) => `${kind}:${id}`;
 
 const sourceFields = new Set(["json", "abbreviation", "full", "authors", "convertedBy", "version", "dateReleased", "url", "color", "partnered"]);
 
@@ -82,13 +116,29 @@ export const prismaImportRepository: ImportRepository = {
 
     const provenance = await prisma.compendiumEntry.findMany({ where: { campaignId: actor.campaignId }, orderBy: { canonicalKey: "asc" } });
 
-    const rows = await loadDomain(actor.campaignId);
+    const bindingRefs = (entry: (typeof provenance)[number]) => Object.values(object(entry.bindings)).map(object).filter((b) => typeof b.kind === "string" && typeof b.id === "string").map((b) => ({ kind: b.kind as TargetKind, id: b.id as string }));
+
+    const rows = await loadRows(actor.campaignId, [
+      ...provenance.map((entry) => ({ kind: entry.kind as TargetKind, id: entry.localId })),
+      ...provenance.flatMap(bindingRefs),
+      ...Object.values(input.bindings ?? {}),
+    ]);
 
     const existing: ExistingEntry[] = provenance.map((entry) => {
       const raw = rows.get(entry.kind as TargetKind)?.get(entry.localId);
 
       return { key: entry.canonicalKey, kind: entry.kind as TargetKind, edition: entry.edition as "classic" | "one" | "unknown", localId: entry.localId, baseline: object(entry.baseline), body: raw ? nativeBody(entry.kind as TargetKind, raw) : {}, missing: !raw };
     });
+
+    const existingByRef = new Map(existing.map((e) => [entryRefKey(e.kind ?? "", e.localId), e] as const));
+
+    const boundEntry = (key: string, kind: TargetKind, localId: string, raw: JsonRecord): ExistingEntry => {
+      const body = nativeBody(kind, raw);
+
+      const found = existingByRef.get(entryRefKey(kind, localId));
+
+      return { ...found, key: found?.key ?? key, kind, localId, body, baseline: body };
+    };
 
     const bindings: Record<string, ExistingEntry> = Object.create(null);
 
@@ -103,30 +153,24 @@ export const prismaImportRepository: ImportRepository = {
 
       if (!raw) continue;
 
-      const body = nativeBody(kind, raw);
-
-      bindings[key] = { ...existing.find((e) => e.kind === kind && e.localId === binding.id), key: existing.find((e) => e.kind === kind && e.localId === binding.id)?.key ?? key, kind, localId: binding.id, body, baseline: body };
+      bindings[key] = boundEntry(key, kind, binding.id, raw);
     }
     for (const [key, binding] of Object.entries(input.bindings ?? {})) {
       const raw = rows.get(binding.kind)?.get(binding.id);
 
       if (!raw) throw new CompendiumError("BINDING_WRONG_CAMPAIGN", key);
 
-      const body = nativeBody(binding.kind, raw);
-
-      bindings[key] = { ...existing.find((e) => e.kind === binding.kind && e.localId === binding.id), key: existing.find((e) => e.kind === binding.kind && e.localId === binding.id)?.key ?? key, kind: binding.kind, localId: binding.id, body, baseline: body };
+      bindings[key] = boundEntry(key, binding.kind, binding.id, raw);
     }
 
     const templates: TemplateSnapshot[] = [];
 
     for (const templateId of new Set(input.dependencies?.map((d) => d.templateId))) {
-      const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: "template", visibility: "official", name: "5e SRD 5.2" }, select: { id: true } });
+      const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
 
       if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
 
-      const templateRows = await loadDomain(templateId);
-
-      templates.push({ id: templateId, edition: "one", rows: [...templateRows].filter(([kind]) => kind !== "scenarioPages").flatMap(([kind, values]) => [...values.values()].map((r) => ({ id: String(r.id), kind, body: nativeBody(kind, r) }))) });
+      templates.push({ id: templateId, edition: "one", rows: await loadTemplateRows(templateId) });
     }
 
     const dependencies = buildDependencyClosure(templates, input.dependencies ?? [], input.allowMixedEdition);
@@ -139,7 +183,7 @@ export const prismaImportRepository: ImportRepository = {
       bindings[refKey] = { key, edition: entry.edition, kind: entry.kind, localId, body: entry.body, baseline: entry.body };
     }
 
-    const occupiedNames = Object.fromEntries([...rows].map(([kind, values]) => [kind, [...values.values()].map((r) => ({ id: String(r.id), name: String(r.name ?? r.title) }))]));
+    const occupiedNames = await loadNames(actor.campaignId);
 
     return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters };
   },
@@ -181,7 +225,7 @@ export const prismaImportRepository: ImportRepository = {
     return String(object(result).id);
   },
   async saveEntry(actor, row) {
-    const data = { kind: row.kind, localId: row.localId, locator: json(row.nested ? row.body : []), edition: row.edition, sourceJson: row.source, originalName: row.name, attribution: json(row.attribution ?? {}), inputHash: digest(row.baseline ?? row.body), adapterVersion: ADAPTER_VERSION, baseline: json(row.baseline ?? row.body), notes: row.notes, issues: json(row.issues), bindings: json(row.resolvedBindings ?? {}) };
+    const data = { kind: row.kind, localId: row.localId, locator: jsonContentInput(row.nested ? row.body : []), edition: row.edition, sourceJson: row.source, originalName: row.name, attribution: jsonContentInput(row.attribution ?? {}), inputHash: digest(row.baseline ?? row.body), adapterVersion: ADAPTER_VERSION, baseline: jsonContentInput(row.baseline ?? row.body), notes: row.notes, issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.resolvedBindings ?? {}) };
 
     await prisma.compendiumEntry.upsert({ where: { campaignId_canonicalKey: { campaignId: actor.campaignId, canonicalKey: row.key } }, create: { campaignId: actor.campaignId, canonicalKey: row.key, ...data }, update: data });
   },
@@ -195,7 +239,7 @@ export const prismaImportRepository: ImportRepository = {
 
       const sourceJson = normalized(source.json);
 
-      await prisma.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId: actor.campaignId, sourceJson } }, create: { campaignId: actor.campaignId, sourceJson, metadata: json(metadata) }, update: { metadata: json(metadata) } });
+      await prisma.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId: actor.campaignId, sourceJson } }, create: { campaignId: actor.campaignId, sourceJson, metadata: jsonContentInput(metadata) }, update: { metadata: jsonContentInput(metadata) } });
       credits.push([source.full ?? source.json, Array.isArray(source.authors) ? source.authors.join(", ") : "", source.version ?? ""].filter(Boolean).join(" — "));
     }
 
@@ -213,7 +257,7 @@ export const prismaImportRepository: ImportRepository = {
     const id = newContentId();
 
     report.runId = id;
-    await prisma.compendiumImportRun.create({ data: { id, campaignId: actor.campaignId, userId: actor.userId, idempotencyKey: key, planHash: requestHash, report: json(report) } });
+    await prisma.compendiumImportRun.create({ data: { id, campaignId: actor.campaignId, userId: actor.userId, idempotencyKey: key, planHash: requestHash, report: jsonContentInput(report) } });
     afterContentCommit(() => invalidateReference(Object.values(ReferenceKind), actor.campaignId));
   },
   applyRules: async (actor, patch) => { await updateCampaignRules(actor, patch); },

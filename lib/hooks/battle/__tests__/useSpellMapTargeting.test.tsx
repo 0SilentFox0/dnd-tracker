@@ -6,6 +6,7 @@ import { fakeScene } from "./fake-scene";
 
 import { useBonusSpells, useReactionSpells, useSpellBook } from "@/lib/hooks/battle/useSpellBook";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
+import type { GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 const spells = [
@@ -67,7 +68,11 @@ it.each(["ray", "cloud"])("%s map lifecycle uses live caster, clears registratio
     const aim = vi.mocked(value.intents.setMapAim).mock.lastCall?.[0] as MapAim;
 
     act(() => aim.onHover?.({ x: 3, y: 1 }));
-    expect(result.current.view.aimPreview?.targets.map(t => t.participant.basicInfo.id)).toContain("gob");
+
+    const hovered = result.current.view.hover.get();
+
+    expect(hovered).toEqual({ x: 3, y: 1 });
+    expect(result.current.view.aimPreviewAt(hovered as GridPoint).targets.map(t => t.participant.basicInfo.id)).toContain("gob");
     act(() => aim.onAim({ x: 3, y: 1 }));
     expect(result.current.state.targetIds).toEqual(["gob", "ally"]);
     expect(result.current.state.step).toBe("rolls");
@@ -103,4 +108,42 @@ it.each([false, true])("library scopes requested IDs to viewer control (DM=%s) a
   rerender();
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(String(fetch.mock.calls[0][0])).toContain(isDM ? "ids=cloud,enemy-secret,ray" : "ids=cloud,ray");
+});
+
+it("hover на карті не перерендерює хук книги, а бібліотека зберігає референцію", async () => {
+  vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL) => Response.json(spells)));
+
+  const { wrapper, value, me, gob } = fakeScene({ isDM: true, knownSpells: ["ray", "cloud"], map: { cols: 10, rows: 10, background: null, opacity: 0.3 } });
+
+  const caster = { ...me, battleData: { ...me.battleData, position: { x: 1, y: 1 } } };
+
+  value.battle = { ...value.battle, initiativeOrder: [caster, { ...gob, battleData: { ...gob.battleData, position: { x: 3, y: 1 } } }] };
+
+  let renders = 0;
+
+  const { result, rerender } = renderHook(() => { renders++;
+
+    return useSpellBook(caster);
+  }, { wrapper });
+
+  act(() => result.current.actions.open());
+  await waitFor(() => expect(result.current.view.spells).toHaveLength(2));
+
+  const library = result.current.view.spells;
+
+  rerender();
+  expect(result.current.view.spells).toBe(library);
+
+  const cloud = spells[1];
+
+  act(() => result.current.actions.pick(cloud));
+  act(() => result.current.actions.toTargets());
+
+  const aim = vi.mocked(value.intents.setMapAim).mock.lastCall?.[0] as MapAim;
+
+  const before = renders;
+
+  act(() => { for (let x = 0; x < 10; x++) aim.onHover?.({ x, y: 1 }); });
+  expect(renders).toBe(before);
+  expect(result.current.view.hover.get()).toEqual({ x: 9, y: 1 });
 });

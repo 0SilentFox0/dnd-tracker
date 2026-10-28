@@ -8,10 +8,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   return chatHandler(req, id, threadId);
 }
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string; threadId: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string; threadId: string }> }) {
   const { id, threadId } = await params;
 
-  return recoverChatHandler(id, threadId, new URL(_req.url).searchParams.get("requestId") ?? undefined);
+  const query = new URL(req.url).searchParams;
+
+  return recoverChatHandler(id, threadId, query.get("requestId") ?? undefined, query.get("statusOnly") === "1");
 }
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string; threadId: string }> }) {
   const { id, threadId } = await params;

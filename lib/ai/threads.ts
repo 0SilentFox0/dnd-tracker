@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import "server-only";
-import { AI_LIMITS, type AiProvider, type AiThreadMode, defaultModelFor, isKnownModel } from "@/lib/constants/ai";
+import { AI_LIMITS, type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE, defaultModelFor, isKnownModel } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
 import type { AiChatMessage, AiMessageMetadata, AiThread, AiUsage } from "@/types/ai";
 
@@ -32,7 +32,7 @@ export async function resolveDefaultModel(userId: string, provider: AiProvider, 
 export async function createThread(campaignId: string, userId: string, input: { mode: AiThreadMode; scenarioPageId?: string | null; provider: AiProvider; model?: string }): Promise<AiThread> {
   const model = input.model ?? (await resolveDefaultModel(userId, input.provider, input.mode));
 
-  const row = await prisma.aiThread.create({ data: { campaignId, userId, mode: input.mode, scenarioPageId: input.scenarioPageId ?? null, provider: input.provider, model, title: "Новий тред" }, select: SELECT });
+  const row = await prisma.aiThread.create({ data: { campaignId, userId, mode: input.mode, scenarioPageId: input.scenarioPageId ?? null, provider: input.provider, model, title: DEFAULT_THREAD_TITLE }, select: SELECT });
 
   return toThread(row);
 }
@@ -57,17 +57,6 @@ export async function loadMessages(threadId: string, limit: number = AI_LIMITS.h
   const rows = await prisma.aiMessage.findMany({ where: { threadId }, orderBy: { seq: "desc" }, take: limit, select: { id: true, role: true, parts: true, metadata: true } });
 
   return rows.reverse().map((r) => ({ id: r.id, role: r.role as "user" | "assistant", parts: r.parts as unknown[], metadata: r.metadata as AiMessageMetadata }));
-}
-
-const SLIM_OUTPUT_CHARS = 2000;
-
-// the panel renders tool chips and proposal ids, never big raw outputs: older ones stay out of the response
-export function slimToolOutputs(messages: AiChatMessage[]): AiChatMessage[] {
-  const keepFrom = messages.length - AI_LIMITS.fullToolResultsInLast;
-
-  const slim = (p: unknown) => (p && typeof p === "object" && typeof (p as { output?: unknown }).output === "string" && (p as { output: string }).output.length > SLIM_OUTPUT_CHARS ? { ...p, output: "[результат інструменту стиснуто]" } : p);
-
-  return messages.map((m, i) => (i >= keepFrom ? m : { ...m, parts: m.parts.map(slim) }));
 }
 
 const textOf = (parts: unknown[]) => parts.map((p) => (p && typeof p === "object" && (p as { type?: string }).type === "text" ? String((p as { text?: string }).text ?? "") : "")).join(" ").trim();

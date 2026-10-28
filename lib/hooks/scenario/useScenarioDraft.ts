@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { hashKey, useQueryClient } from "@tanstack/react-query";
 
 import { scenarioKeys } from "./keys";
 
@@ -159,10 +159,10 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 
     sync();
 
-    return queryClient.getQueryCache().subscribe(event => {
-      const key = event.query.queryKey;
+    const pageHash = hashKey(scenarioKeys.page(campaignId, page.id));
 
-      if (key[0] === scenarioKeys.page(campaignId, page.id)[0] && key[1] === campaignId && key[2] === page.id) sync();
+    return queryClient.getQueryCache().subscribe(event => {
+      if (event.query.queryHash === pageHash) sync();
     });
   }, [campaignId, page.id, queryClient]);
 

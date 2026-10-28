@@ -2,7 +2,8 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { revalidateAssistantCaller } from "./authorize";
 import { createAssistantExecutor } from "./execute";
-import { intentOwner, intentSummary, requestDigest } from "./intent-store";
+import { intentOwner, intentSummary } from "./intent-store";
+import { requestDigest } from "./json";
 import type { AssistantCaller } from "./types";
 
 import "server-only";

@@ -66,6 +66,8 @@ export const AI_LIMITS = {
   historyMessages: 30,
   fullToolResultsInLast: 6,
   requestDeadlineMs: 270_000,
+  cancelPollMs: 2500,
+  slimOutputChars: 2000,
   toolResultChars: 24_000,
   contextChars: 40_000,
   maxSteps: 8,
@@ -74,6 +76,8 @@ export const AI_LIMITS = {
   threadTitleChars: 80,
   instructionsChars: 8000,
 } as const;
+
+export const AI_TOOL_OUTPUT_COMPACTED = "[результат інструменту стиснуто]";
 
 export const API_TOKEN_PREFIX = "dndt_";
 export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write", "campaign:read", "campaign:write", "scenario:read", "scenario:write", "characters:read", "characters:write", "battles:read", "battles:write", "show:read", "show:write"] as const;
@@ -106,3 +110,7 @@ export const API_TOKEN_SCOPE_LABELS: Record<ApiTokenScope, string> = {
 };
 
 export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scopes.includes(need) || (need.endsWith(":read") && scopes.includes(`${need.slice(0, -5)}:write`));
+
+export const ASSISTANT_PAGE_SIZES = { changes: 20, queue: 20, queueMax: 50 } as const;
+
+export const DEFAULT_THREAD_TITLE = "Новий тред";

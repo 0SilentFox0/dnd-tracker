@@ -11,7 +11,7 @@ import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
 import { chatCaller } from "@/lib/server/assistant/caller";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";

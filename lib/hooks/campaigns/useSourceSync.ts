@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateCampaignQueries } from "./invalidate";
@@ -27,8 +26,6 @@ export function useSourceDiff(campaignId: string, enabled: boolean) {
 export function useApplySourceChanges(campaignId: string) {
   const queryClient = useQueryClient();
 
-  const router = useRouter();
-
   return useMutation({
     mutationFn: (body: SourceApplyBody) => applySourceChanges(campaignId, body),
     onSuccess: (_result, body) => {
@@ -39,7 +36,6 @@ export function useApplySourceChanges(campaignId: string) {
       }
 
       void invalidateCampaignQueries(queryClient, campaignId);
-      router.refresh();
     },
     onError: (err) => {
       if (err instanceof ApiError && err.status === 409) void queryClient.invalidateQueries({ queryKey: campaignKeys.sourceDiff(campaignId) });
@@ -73,32 +69,33 @@ export function useSourceSyncApply(campaignId: string, items: SourceDiffItem[]) 
   return { run, reset, isPending: apply.isPending, staleNotice, error: errorState?.items === items ? errorState.message : null };
 }
 
+// new diff (refetch after 409 or apply) → reset to its defaults
+const currentSelection = (s: { items: SourceDiffItem[]; selected: Set<string> }, items: SourceDiffItem[]) => (s.items === items ? s.selected : defaultSelection(items));
+
 export function useSourceSyncSelection(items: SourceDiffItem[]) {
   const [state, setState] = useState(() => ({ items, selected: defaultSelection(items) }));
 
-  // new diff (refetch after 409 or apply) → reset to its defaults
-  const current = (s: typeof state) => (s.items === items ? s.selected : defaultSelection(items));
+  const selected = currentSelection(state, items);
 
-  const selected = current(state);
-
-  const update = (change: (next: Set<string>) => void) =>
+  const update = useCallback((change: (next: Set<string>) => void) =>
     setState((prev) => {
-      const next = new Set(current(prev));
+      const next = new Set(currentSelection(prev, items));
 
       change(next);
 
       return { items, selected: next };
-    });
+    }), [items]);
 
-  return {
-    selected,
-    isSelected: (i: SourceDiffItem) => selected.has(itemKey(i)),
-    toggle: (i: SourceDiffItem) => update((next) => void (next.delete(itemKey(i)) || next.add(itemKey(i)))),
-    setGroup: (scope: SourceSyncScope, on: boolean) =>
-      update((next) => {
-        for (const i of items) if (i.scope === scope) next[on ? "add" : "delete"](itemKey(i));
-      }),
-    autoAdded: autoAddedPreview(items, selected),
-    refs: toRefs(items, selected),
-  };
+  const toggle = useCallback((i: SourceDiffItem) => update((next) => void (next.delete(itemKey(i)) || next.add(itemKey(i)))), [update]);
+
+  const setGroup = useCallback((scope: SourceSyncScope, on: boolean) =>
+    update((next) => {
+      for (const i of items) if (i.scope === scope) next[on ? "add" : "delete"](itemKey(i));
+    }), [update, items]);
+
+  const autoAdded = useMemo(() => autoAddedPreview(items, selected), [items, selected]);
+
+  const refs = useMemo(() => toRefs(items, selected), [items, selected]);
+
+  return { selected, isSelected: (i: SourceDiffItem) => selected.has(itemKey(i)), toggle, setGroup, autoAdded, refs };
 }

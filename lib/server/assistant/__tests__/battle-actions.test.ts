@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { isAssistantHandoffHref } from "@/lib/schemas/assistant-handoff";
+import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/__tests__/helpers/coverage";
 import { BATTLE_ACTION_COVERAGE } from "@/lib/server/assistant/actions/battle-coverage";
 import { BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battles";
-import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/coverage";
 import { confirmationFor } from "@/lib/server/assistant/policy";
 import type { AssistantCaller, AssistantWriteAction } from "@/lib/server/assistant/types";
 import { prepareBattleAction, runBattleAction } from "@/lib/server/battles/action-service";

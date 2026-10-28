@@ -62,10 +62,20 @@ export const revokeApiToken = (campaignId: string, tokenId: string) => campaignD
 export interface AiRunRecovery {
   intents?: { id: string; status: string; summary: string }[];
   runs: { requestId: string; status: string; abortRequested: boolean; expiresAt: string }[];
-  messages: AiChatMessage[];
+  messages?: AiChatMessage[];
   receipts: { id: string; intentId: string; status: string; effectsStatus: string; result: unknown }[];
 }
-export const getAiRunRecovery = (campaignId: string, threadId: string, requestId?: string) => campaignGet<AiRunRecovery>(campaignId, `/ai/threads/${threadId}/chat${requestId ? `?requestId=${encodeURIComponent(requestId)}` : ""}`, { cache: "no-store" });
+export const getAiRunRecovery = (campaignId: string, threadId: string, requestId?: string, options: { statusOnly?: boolean } = {}) => {
+  const query = new URLSearchParams();
+
+  if (requestId) query.set("requestId", requestId);
+
+  if (options.statusOnly) query.set("statusOnly", "1");
+
+  const suffix = query.size ? `?${query}` : "";
+
+  return campaignGet<AiRunRecovery>(campaignId, `/ai/threads/${threadId}/chat${suffix}`, { cache: "no-store" });
+};
 export const cancelAiRun = (campaignId: string, threadId: string, requestId: string) => campaignDelete<AiRunRecovery>(campaignId, `/ai/threads/${threadId}/chat?requestId=${encodeURIComponent(requestId)}`);
 
 // the server keeps the history; send only the new text and the DM's focus

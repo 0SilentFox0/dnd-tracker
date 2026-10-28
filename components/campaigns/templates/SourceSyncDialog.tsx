@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 
 import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
@@ -46,10 +46,10 @@ interface SyncItemRowProps {
   item: SourceDiffItem;
   isTemplate: boolean;
   checked: boolean;
-  onToggle: () => void;
+  onToggle: (item: SourceDiffItem) => void;
 }
 
-function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) {
+const SyncItemRow = memo(function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) {
   const id = useId();
 
   const details = itemDetails(item);
@@ -57,7 +57,7 @@ function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) 
   return (
     <li>
       <label className="flex cursor-pointer items-start gap-2 py-1">
-        <Checkbox className="mt-0.5" checked={checked} onCheckedChange={onToggle} aria-labelledby={`${id}-name`} aria-describedby={`${id}-status ${id}-info`} />
+        <Checkbox className="mt-0.5" checked={checked} onCheckedChange={() => onToggle(item)} aria-labelledby={`${id}-name`} aria-describedby={`${id}-status ${id}-info`} />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
             <span id={`${id}-name`}>{item.name}</span>
@@ -76,7 +76,7 @@ function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) 
       </label>
     </li>
   );
-}
+});
 
 interface SyncGroupProps {
   group: ReturnType<typeof groupItems>[number];
@@ -98,7 +98,7 @@ function SyncGroup({ group, isTemplate, selection }: SyncGroupProps) {
     >
       <ul className="space-y-1">
         {group.items.map((i) => (
-          <SyncItemRow key={itemKey(i)} item={i} isTemplate={isTemplate} checked={selection.isSelected(i)} onToggle={() => selection.toggle(i)} />
+          <SyncItemRow key={itemKey(i)} item={i} isTemplate={isTemplate} checked={selection.isSelected(i)} onToggle={selection.toggle} />
         ))}
       </ul>
     </HudSection>

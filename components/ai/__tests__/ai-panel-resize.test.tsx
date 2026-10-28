@@ -15,7 +15,7 @@ const page = { id: "p1", content: { legend: [], sections: [] } } as never;
 
 const proposals = { pending: [], refresh: vi.fn() } as never;
 
-const mount = () => render(<AiPanel campaignId="c1" page={page} mode="scenario" focus={undefined} proposals={proposals} actions={{ onClose: vi.fn(), onClearFocus: vi.fn() }} />);
+const mount = () => render(<AiPanel campaignId="c1" mode="scenario" focus={{ page, onClear: vi.fn() }} proposals={{ data: proposals }} actions={{ onClose: vi.fn() }} />);
 
 const handle = () => screen.getByRole("separator", { name: "Ширина панелі AI" });
 
@@ -67,7 +67,7 @@ describe("AiPanel resize", () => {
 });
 
 it("shared queue replaces the old pending list rather than rendering a second copy", () => {
- render(<AiPanel campaignId="c1" page={page} mode="scenario" proposals={{pending:[{id:"old1"}],refresh:vi.fn()} as never} showPending renderProposal={()=><div>Duplicate legacy card</div>} review={<section aria-label="Єдина черга" />} actions={{onClose:vi.fn(),onClearFocus:vi.fn()}} />);
+ render(<AiPanel campaignId="c1" mode="scenario" focus={{page,onClear:vi.fn()}} proposals={{data:{pending:[{id:"old1"}],refresh:vi.fn()} as never,showPending:true,render:()=><div>Duplicate legacy card</div>,review:<section aria-label="Єдина черга" />}} actions={{onClose:vi.fn()}} />);
  expect(screen.queryByText("Duplicate legacy card")).toBeNull();
  expect(screen.getByRole("region",{name:"Єдина черга"})).toBeTruthy();
 });

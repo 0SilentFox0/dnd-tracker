@@ -4,7 +4,7 @@ import { CAMPAIGN_ACTIONS } from "@/lib/server/assistant/actions/campaign";
 import { CONTENT_ACTIONS } from "@/lib/server/assistant/actions/content";
 import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 
 const h = vi.hoisted(() => ({

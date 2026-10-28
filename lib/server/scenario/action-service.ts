@@ -10,7 +10,7 @@ import { DEFAULT_SCENE_LEGEND, SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { stampDigest } from "@/lib/server/assistant/digest";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { actionResult, requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -21,7 +21,10 @@ import { moveRow, moveSection, newSection, removeRow, removeSection, updateSecti
 import type { ScenarioContent } from "@/types/scenario";
 
 export const scenarioFingerprint = requestDigest;
-export const scenarioResult = (data: unknown, id = "all"): ActionResult => ({ data: JSON.parse(JSON.stringify(data)), affected: [{ domain: "scenario", id, name: "Сценарій" }], warnings: [] });
+
+const scenarioActionResult = actionResult("scenario", "Сценарій");
+
+export const scenarioResult = (data: unknown, id = "all"): ActionResult => scenarioActionResult(data, id);
 export async function scenarioState(actor: Actor, id?: string) {
   const where = { campaignId: actor.campaignId };
 

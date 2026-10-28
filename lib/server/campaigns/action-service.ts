@@ -13,7 +13,7 @@ import { checklistProgress, checklistState } from "@/lib/onboarding/progress";
 import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { actionResult, requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -38,7 +38,7 @@ export async function loadCampaignMembers(campaignId: string) {
   return prisma.campaignMember.findMany({ where: { campaignId }, select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } }, orderBy: { joinedAt: "asc" } });
 }
 export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
-export const campaignResult = (data: unknown, id: string): ActionResult => ({ data: JSON.parse(JSON.stringify(data)), affected: [{ domain: "campaign", id, name: "Кампанія" }], warnings: [] });
+export const campaignResult = actionResult("campaign", "Кампанія");
 
 function safeSettings(row: Record<string, unknown>) {
   return Object.fromEntries(Object.keys(CAMPAIGN_SETTINGS_SELECT).map(key => [key, row[key]]));

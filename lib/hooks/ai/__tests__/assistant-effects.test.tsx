@@ -180,3 +180,24 @@ it('one receipt refetches each active campaign query once and keeps other campai
  expect(reads.cascade).toHaveBeenCalledTimes(2);
  expect(reads.other).toHaveBeenCalledTimes(1);
 });
+
+it('spellsReceiptInvalidatesOnlySpellKeys',async()=>{
+ const {client,wrapper}=setup();
+
+client.setQueryData(['spells','c1'],[]);client.setQueryData(['units','c1'],[]);client.setQueryData(['scenario-pages','c1'],[]);
+
+ const {result}=renderHook(()=>useAssistantEffects('c1'),{wrapper});
+
+ await act(()=>result.current.consumeReceipt({id:'r-spell',status:'applied' as const,effectsStatus:'complete' as const,result:{data:null,affected:[{domain:'spells',id:'s1',name:'Спел'}],warnings:[]}}));
+ expect(client.getQueryState(['spells','c1'])?.isInvalidated).toBe(true);expect(client.getQueryState(['units','c1'])?.isInvalidated).toBe(false);expect(client.getQueryState(['scenario-pages','c1'])?.isInvalidated).toBe(false);
+});
+it('unknownDomainFallsBackToCampaignWide',async()=>{
+ const {client,wrapper}=setup();
+
+client.setQueryData(['units','c1'],[]);
+
+ const {result}=renderHook(()=>useAssistantEffects('c1'),{wrapper});
+
+ await act(()=>result.current.consumeReceipt({id:'r-x',status:'applied' as const,effectsStatus:'complete' as const,result:{data:null,affected:[{domain:'content',id:'x',name:'X'}],warnings:[]}}));
+ expect(client.getQueryState(['units','c1'])?.isInvalidated).toBe(true);
+});

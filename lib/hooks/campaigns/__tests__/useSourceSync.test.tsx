@@ -30,7 +30,7 @@ const item = (over: Partial<SourceDiffItem>): SourceDiffItem => ({
 describe("useApplySourceChanges", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("applies, refreshes and invalidates only this campaign's queries", async () => {
+  it("applies and invalidates only this campaign's queries", async () => {
     vi.mocked(applySourceChanges).mockResolvedValue({} as SourceApplyResult);
 
     const client = new QueryClient();
@@ -47,7 +47,7 @@ describe("useApplySourceChanges", () => {
     await act(() => result.current.mutateAsync({ apply: [ref], ignore: [] }));
 
     expect(applySourceChanges).toHaveBeenCalledWith("c1", { apply: [ref], ignore: [] });
-    expect(refresh).toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
     expect(client.getQueryState(["spells", "c1"])?.isInvalidated).toBe(true);
     expect(client.getQueryState(["spells", "c2"])?.isInvalidated).toBe(false);
   });
@@ -130,6 +130,24 @@ describe("useSourceSyncSelection", () => {
     act(() => result.current.setGroup("spells", false));
     expect(result.current.refs).toEqual([]);
     expect(result.current.selected.size).toBe(0);
+  });
+
+  it("toggle/setGroup stay stable and refs/autoAdded keep identity across unrelated renders", () => {
+    const items = [a, b, c];
+
+    const { result, rerender } = renderHook(() => useSourceSyncSelection(items));
+
+    const first = result.current;
+
+    rerender();
+    expect(result.current.toggle).toBe(first.toggle);
+    expect(result.current.setGroup).toBe(first.setGroup);
+    expect(result.current.refs).toBe(first.refs);
+    expect(result.current.autoAdded).toBe(first.autoAdded);
+
+    act(() => result.current.toggle(c));
+    expect(result.current.toggle).toBe(first.toggle);
+    expect(result.current.refs).not.toBe(first.refs);
   });
 
   it("resets to defaults when a new items array arrives", () => {

@@ -19,8 +19,8 @@ export function autoAddedPreview(items: SourceDiffItem[], selected: ReadonlySet<
 
   const queue = items.filter((i) => selected.has(itemKey(i)));
 
-  for (let i = queue.shift(); i; i = queue.shift()) {
-    for (const r of i.requires) {
+  for (let head = 0; head < queue.length; head++) {
+    for (const r of queue[head].requires) {
       const k = itemKey(r);
 
       if (selected.has(k) || out.has(k)) continue;

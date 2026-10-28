@@ -12,7 +12,7 @@ import { prisma } from "@/lib/db";
 import { putGoalsSchema } from "@/lib/schemas/character-goals";
 import { putNotesSchema } from "@/lib/schemas/character-notes";
 import { createTokenSchema } from "@/lib/schemas/character-tokens";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { actionResult, requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
@@ -31,7 +31,7 @@ export const CHARACTER_INPUTS = {
   "tokens.create": createTokenSchema.extend(characterIdSchema.shape), "tokens.delete": characterIdSchema.extend({ tokenId: z.string().min(1).max(100) })
 };
 export const characterReads = new Set(["list", "get", "roster"]);
-export const characterResult = (data: unknown, id: string): ActionResult => ({ data: JSON.parse(JSON.stringify(data)), affected: [{ domain: "characters", id, name: "Персонажі" }], warnings: [] });
+export const characterResult = actionResult("characters", "Персонажі");
 export async function characterState(actor: Actor, input: Record<string, unknown>) {
   await actorDmAccess(actor);
 

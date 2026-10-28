@@ -5,7 +5,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { readSlides } from "@/lib/schemas/show";
 import { fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { jsonContent, requestDigest } from "@/lib/server/assistant/json";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
@@ -23,8 +23,6 @@ import { applyShowCommand, refreshShowSlide } from "@/lib/utils/show/show-comman
 import type { ShowCommand, ShowState, Slide } from "@/types/show";
 
 export type ShowInput = { deckId?: string; body?: Record<string, unknown>; explicitRequest?: true };
-
-const json = (v: unknown): JsonValue => JSON.parse(JSON.stringify(v));
 
 function safeMedia(value: unknown): JsonValue {
   return JSON.parse(JSON.stringify(value, (key, v) => {
@@ -95,7 +93,7 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
       return !next || old.imageUrl !== next.imageUrl || (["title", "caption", "trackId"] as const).some(k => old[k] && !next[k]);
     });
 
-    return { summary: `Показ: ${operation}`, targets: [target], changes: [{ target, path: operation, before: operation === "decks.save" ? safeMedia(snapshot.deck && toSlideDeck(snapshot.deck)) : null, after: json(input) }], warnings: [], effects: [{ kind: operation === "generate" ? "paid" : operation === "decks.delete" || operation === "discard" || removed ? "delete" : "update", targets: [target], description: operation }], preconditions: { fingerprint: requestDigest(json(snapshot)) } };
+    return { summary: `Показ: ${operation}`, targets: [target], changes: [{ target, path: operation, before: operation === "decks.save" ? safeMedia(snapshot.deck && toSlideDeck(snapshot.deck)) : null, after: jsonContent(input) }], warnings: [], effects: [{ kind: operation === "generate" ? "paid" : operation === "decks.delete" || operation === "discard" || removed ? "delete" : "update", targets: [target], description: operation }], preconditions: { fingerprint: requestDigest(jsonContent(snapshot)) } };
   });
 }
 
@@ -108,7 +106,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
 
     const snapshot = await state(actor, input);
 
-    if (expected && requestDigest(json(snapshot)) !== (expected as { fingerprint: string }).fingerprint) throw conflict();
+    if (expected && requestDigest(jsonContent(snapshot)) !== (expected as { fingerprint: string }).fingerprint) throw conflict();
 
     const body = input.body ?? {};
 
@@ -121,7 +119,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     const emit = async (next: ShowState) => {
       if (!(await writeShowState(campaignId, snapshot.show, next))) throw new ContentError(API_ERRORS.SHOW_CONFLICT, 409);
 
-      if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: json({ campaignId, show: next }) });
+      if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
       else afterContentCommit(() => { void publishShow(campaignId, next); });
     };
 
@@ -154,7 +152,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
       const next = await applyAndWriteShowCommand(campaignId, snapshot.show, body as ShowCommand);
 
       if (next !== snapshot.show) {
-        if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: json({ campaignId, show: next }) });
+        if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
         else afterContentCommit(() => { void publishShow(campaignId, next); });
       }
 

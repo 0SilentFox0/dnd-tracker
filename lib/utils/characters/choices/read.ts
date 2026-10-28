@@ -58,3 +58,5 @@ export function choiceSpellIds(choices: readonly Choice[] | undefined): string[]
 
   return [...new Set(choices.flatMap((c) => (c.options ?? []).flatMap((o) => (o.spells ?? []).map((s) => s.spellId))))];
 }
+
+export const hasSpellChoice = (lists: readonly (readonly Choice[] | undefined)[]): boolean => lists.some((choices) => choices?.some((c) => c.kind === "spell"));

@@ -1,4 +1,4 @@
-import { requestDigest } from "../intent-store";
+import { requestDigest } from "../json";
 import type { AssistantActionDef, EffectKind } from "../types";
 
 import "server-only";

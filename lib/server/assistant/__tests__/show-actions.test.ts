@@ -4,10 +4,10 @@ import { z } from "zod";
 
 import { executorDatabase } from "./fixtures/executor-db";
 
+import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/__tests__/helpers/coverage";
 import { SHOW_ACTIONS } from "@/lib/server/assistant/actions/show";
 import { SHOW_ACTION_COVERAGE } from "@/lib/server/assistant/actions/show-coverage";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
-import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/coverage";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { confirmationFor } from "@/lib/server/assistant/policy";
 import type { AssistantCaller, AssistantWriteAction } from "@/lib/server/assistant/types";

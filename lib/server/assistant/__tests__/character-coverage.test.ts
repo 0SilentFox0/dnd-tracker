@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 
+import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/__tests__/helpers/coverage";
 import { CHARACTER_ACTION_COVERAGE } from "@/lib/server/assistant/actions/character-coverage";
 import { CHARACTER_PROGRESSION_ACTIONS } from "@/lib/server/assistant/actions/character-progression";
 import { CHARACTER_ACTIONS } from "@/lib/server/assistant/actions/characters";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
-import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/coverage";
 it("every character route method has one implemented action and test owner", () => {
   const catalog = createActionCatalog([...CHARACTER_ACTIONS, ...CHARACTER_PROGRESSION_ACTIONS]);
 

@@ -311,17 +311,51 @@ describe("runChat", () => {
     expect(vi.mocked(appendMessage).mock.calls.find(c => c[1].role === "assistant")?.[1].metadata?.usage).toMatchObject({ inputTokens: null, outputTokens: null });
   });
 
-  it("compactHistory стискає старі результати інструментів", async () => {
-    const { compactHistory } = await import("@/lib/ai/chat/run-chat");
+  it("replay returns compacted old tool outputs", async () => {
+    const { beginAssistantRun } = await import("@/lib/server/assistant/runs");
 
-    const toolMsg = (id: string) => ({ id, role: "assistant" as const, parts: [{ type: "tool-read_scenario_page", toolCallId: id, state: "output-available", input: {}, output: "ДОВГИЙ ТЕКСТ" }] });
+    const { loadMessages } = await import("@/lib/ai/threads");
 
-    const msgs = Array.from({ length: 10 }, (_, i) => toolMsg(`m${i}`));
+    const big = "ДОВГИЙ ТЕКСТ".repeat(300);
 
-    const out = compactHistory(msgs);
+    vi.mocked(loadMessages).mockResolvedValue(Array.from({ length: 10 }, (_, i) => ({ id: `m${i}`, role: "assistant" as const, parts: [{ type: "tool-x", output: big }] })) as never);
+    vi.mocked(beginAssistantRun).mockResolvedValueOnce({ replayed: true, run: { id: "run1", requestId: args.requestId, status: "completed", expiresAt: new Date(), abortRequested: false } });
 
-    expect(JSON.stringify(out[0])).not.toContain("ДОВГИЙ ТЕКСТ");
-    expect(JSON.stringify(out[9])).toContain("ДОВГИЙ ТЕКСТ");
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    const body = await (await runChat(args, { model: textModel("x") })).json();
+
+    expect(JSON.stringify(body.messages[0])).not.toContain("ДОВГИЙ");
+    expect(JSON.stringify(body.messages[9])).toContain("ДОВГИЙ");
+  });
+
+  it("cancel is checked at step boundaries and stops the run", async () => {
+    const { isAssistantRunCancelled, finishAssistantRun } = await import("@/lib/server/assistant/runs");
+
+    vi.mocked(isAssistantRunCancelled).mockResolvedValue(true);
+
+    const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+    await (await runChat(args, { model: textModel("ok") })).text();
+    expect(isAssistantRunCancelled).toHaveBeenCalled();
+    expect(finishAssistantRun).toHaveBeenLastCalledWith("run1", expect.objectContaining({ status: "cancelled" }));
+    vi.mocked(isAssistantRunCancelled).mockResolvedValue(false);
+  });
+
+  it("slow poll queries the run at most 5 times in 10s", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    try {
+      const { isAssistantRunCancelled } = await import("@/lib/server/assistant/runs");
+
+      const hanging = new MockLanguageModelV4({ doStream: async () => ({ stream: new ReadableStream({ start(c) { c.enqueue({ type: "text-start", id: "1" }); } }) }) });
+
+      const { runChat } = await import("@/lib/ai/chat/run-chat");
+
+      await runChat(args, { model: hanging });
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(vi.mocked(isAssistantRunCancelled).mock.calls.length).toBeLessThanOrEqual(5);
+      expect(vi.mocked(isAssistantRunCancelled).mock.calls.length).toBeGreaterThan(0);
+    } finally { vi.useRealTimers(); }
   });
 });
 

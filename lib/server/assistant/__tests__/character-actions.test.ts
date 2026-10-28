@@ -74,7 +74,7 @@ it("httpAvatarPreparationRunsBeforeWriteGuard", async () => {
 it("characterCorePreviewTracksContentChanges", async () => {
   const { characterState } = await import("@/lib/server/characters/action-service");
 
-  const { requestDigest } = await import("@/lib/server/assistant/intent-store");
+  const { requestDigest } = await import("@/lib/server/assistant/json");
 
   const before = requestDigest(await characterState(actor, { characterId: "hero" }));
 

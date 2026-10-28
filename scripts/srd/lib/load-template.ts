@@ -1,10 +1,11 @@
 import { toImportRows } from "./data-files";
 import { type SpellRow, SRD_KINDS, type SrdData, type SrdKind } from "./types";
 
+import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { ImportReport } from "@/types/content-import";
 
-export const SRD_TEMPLATE_NAME = "5e SRD 5.2";
+export { SRD_TEMPLATE_NAME };
 
 export const SRD_TEMPLATE_DESCRIPTION = "System Reference Document 5.2 (CC-BY-4.0): заклинання, монстри, зброя, раси й класи; правила 5e";
 

@@ -4,7 +4,8 @@ import { authorizeAssistant } from "./authorize";
 import { conflict,forbidden } from "./errors";
 import { actionExpected, actionExternalResult, externalRun, readExternalState } from "./execution-state";
 import { executionModeFor, type ExecutorDeps } from "./executor-deps";
-import { intentOwner, requestDigest } from "./intent-store";
+import { intentOwner } from "./intent-store";
+import { requestDigest } from "./json";
 import { confirmationFor } from "./policy";
 import type { ActionExecutionContext, AssistantCaller, AssistantWriteAction, DurableEffect } from "./types";
 

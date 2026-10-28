@@ -1,6 +1,6 @@
-import { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord } from "@/lib/constants/compendium-import";
-import type { ImportInput } from "@/lib/server/compendium-import/service";
-import type { ImportIssue } from "@/lib/server/compendium-import/types";
+import { ApiError } from "@/lib/api/client";
+import { byteLength, COMPENDIUM_ERROR_TEXT, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord } from "@/lib/constants/compendium-import";
+import type { CompendiumGraphRow, CompendiumOptions, ImportInput, ImportIssue } from "@/types/compendium-import";
 
 export const MATERIAL_KINDS = new Set(["book", "bookData", "adventure", "adventureData"]);
 export const CATEGORY_LABELS: Record<string, string> = { spell: "Заклинання", monster: "Юніти", item: "Предмети", baseitem: "Базові предмети", race: "Раси", subrace: "Підраси", background: "Передісторії", feat: "Риси", class: "Класи", classFeature: "Вміння класів", subclass: "Підкласи", subclassFeature: "Вміння підкласів", optionalfeature: "Опційні вміння", book: "Маніфести книг", bookData: "Сторінки книг", adventure: "Маніфести пригод", adventureData: "Сторінки пригод", table: "Таблиці", reward: "Нагороди", condition: "Стани", skill: "Навички", language: "Мови", itemProperty: "Властивості предметів", itemType: "Типи предметів" };
@@ -39,4 +39,34 @@ export function destination(campaignId: string, row: { kind?: string; targetId?:
 }
 export function excludeBlocked(issues: ImportIssue[]) {
   return [...new Set(issues.filter(i => i.severity === "error").flatMap(i => i.path.match(/^[a-zA-Z][a-zA-Z0-9]*\[\d+\]/)?.[0] ?? []))];
+}
+export function blockedClosure(graph: CompendiumGraphRow[], issues: ImportIssue[]) {
+  const blocked = new Set(graph.filter(row => issues.some(issue => issue.severity === "error" && issue.path.startsWith(row.key))).map(row => row.key));
+
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+
+    for (const row of graph) {
+      if (!blocked.has(row.key) && row.refs.some(ref => blocked.has(ref.key))) {
+        blocked.add(row.key);
+        changed = true;
+      }
+    }
+  }
+
+  return blocked;
+}
+export function excludeAllBlocked(options: CompendiumOptions, graph: CompendiumGraphRow[], issues: ImportIssue[]): CompendiumOptions {
+  return { ...options, excludedKeys: [...new Set([...(options.excludedKeys ?? []), ...blockedClosure(graph, issues)])], excludedPaths: [...new Set([...(options.excludedPaths ?? []), ...excludeBlocked(issues)])] };
+}
+export function compendiumErrorMessage(error: unknown, fallback: string) {
+  const code = error instanceof ApiError ? (error.body as { code?: unknown } | null)?.code : undefined;
+
+  if (typeof code === "string") return COMPENDIUM_ERROR_TEXT[code] ?? `${code}: перевірте вибір і повторіть preview`;
+
+  if (error instanceof ApiError) return "HTTP_ERROR: перевірте вибір і повторіть preview";
+
+  return error instanceof Error ? (COMPENDIUM_ERROR_TEXT[error.message.split(":")[0]] ?? error.message) : fallback;
 }

@@ -17,8 +17,35 @@ export interface MapTargetingContext {
   setMapPick(pick: MapPick | null): void;
 }
 
-/** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер віддає точку прев'ю, Escape скасовує. */
-export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext): GridPoint | null {
+export interface AimHoverStore {
+  get(): GridPoint | null;
+  set(cell: GridPoint | null): void;
+  subscribe(listener: () => void): () => void;
+}
+
+function createAimHoverStore(): AimHoverStore {
+  let cell: GridPoint | null = null;
+
+  const listeners = new Set<() => void>();
+
+  return {
+    get: () => cell,
+    set: (next) => {
+      if (next === cell) return;
+
+      cell = next;
+      listeners.forEach((l) => l());
+    },
+    subscribe: (l) => {
+      listeners.add(l);
+
+      return () => listeners.delete(l);
+    },
+  };
+}
+
+/** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер пишеться у стор, щоб прев'ю перемальовувало лише своїх підписників, Escape скасовує. */
+export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext): AimHoverStore {
   const { caster, order, map, active, candidates, inRange, setMapAim, setMapPick } = ctx;
 
   const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
@@ -27,7 +54,7 @@ export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<S
 
   const latest = useRef({ candidates, inRange });
 
-  const [hover, setHover] = useState<GridPoint | null>(null);
+  const [hover] = useState(createAimHoverStore);
 
   useEffect(() => {
     latest.current = { candidates, inRange };
@@ -62,13 +89,13 @@ export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<S
   useEffect(() => {
     if (!template || !casterId) return;
 
-    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim, onHover: setHover });
+    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim, onHover: hover.set });
 
     return () => {
       setMapAim(null);
-      setHover(null);
+      hover.set(null);
     };
-  }, [template, casterId, range, state.aim, onAim, setMapAim]);
+  }, [template, casterId, range, state.aim, onAim, setMapAim, hover]);
 
   const pickSignature = picking ? candidates.map((p) => `${p.basicInfo.id}${inRange(p) ? "+" : "-"}`).join(",") : "";
 
@@ -96,5 +123,5 @@ export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<S
     return () => window.removeEventListener("keydown", onKey);
   }, [active, dispatch]);
 
-  return template ? hover : null;
+  return hover;
 }

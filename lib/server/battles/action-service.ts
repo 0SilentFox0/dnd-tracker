@@ -4,8 +4,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { BATTLE_COMMANDS, BATTLE_READS, type BattleActionInput,battleActionInput, HUMAN_BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battle-actions";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
-import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
+import { actionResult, jsonContent, requestDigest } from "@/lib/server/assistant/json";
+import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller } from "@/lib/server/assistant/types";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
 import { assertDiceMode, schemaDiceInput, validateAttackPreview } from "@/lib/server/battles/dice";
 import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
@@ -19,15 +19,14 @@ import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
+import { pageOf } from "@/lib/utils/api/page-of";
 import { toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import { guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, loadRecentEvents } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
 import { parseRules } from "@/lib/utils/rules/schema";
 
-const json = (value: unknown): JsonValue => JSON.parse(JSON.stringify(value));
-
-const result = (data: unknown, id: string): ActionResult => ({ data: json(data), affected: [{ domain: "battles", id, name: "Бій" }], warnings: [] });
+const result = actionResult("battles", "Бій");
 
 const isCommand = (op: string) => (BATTLE_COMMANDS as readonly string[]).includes(op);
 
@@ -166,7 +165,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 
   return {
     summary: `Бої: ${operation}`, targets,
-    changes: [{ target, path: operation, before: json({ version: current.version, battle: current.row, participants: current.loaded?.participants ?? [], reserve: current.loaded?.pending ?? [] }), after: json(value) }],
+    changes: [{ target, path: operation, before: jsonContent({ version: current.version, battle: current.row, participants: current.loaded?.participants ?? [], reserve: current.loaded?.pending ?? [] }), after: jsonContent(value) }],
     warnings: ["Кубики та випадкові ефекти обчислюються лише під час виконання; результат ще невідомий.", ...(operation === "clear-history" ? ["Буде видалено всі бої кампанії разом із подіями та знімками."] : []), ...(value.dice === "manual" ? ["Використовуються явно задані ДМ значення кидків."] : [])],
     preconditions: { version: current.version, fingerprint: current.fingerprint },
     effects: [{ kind: accessChange ? "change-access" : destructive ? (deletion ? "delete" : "erase-progress") : operation === "create" ? "create" : "update", targets, description: operation }],
@@ -214,7 +213,9 @@ export async function readBattleAction(actor: Actor, operation: string, raw: unk
 
     const rows = await prisma.battleScene.findMany({ where: { campaignId, ...(operation === "active" && { status: "active" }) }, orderBy: { createdAt: "desc" }, skip: page.offset, take: page.limit + 1, select: { id: true, name: true, status: true, version: true } });
 
-    return result({ items: rows.slice(0, page.limit), nextOffset: rows.length > page.limit ? page.offset + page.limit : null }, campaignId);
+    const { items, nextOffset } = pageOf(rows, page.offset, page.limit);
+
+    return result({ items, nextOffset }, campaignId);
   }
 
   if (operation === "balance.get" || operation === "balance") {

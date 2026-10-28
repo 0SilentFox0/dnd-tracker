@@ -6,6 +6,7 @@ import { AssistantIntentCard } from "./AssistantIntentCard";
 import { AssistantQueue } from "./AssistantQueue";
 
 import { Button } from "@/components/ui/button";
+import { ASSISTANT_PAGE_SIZES } from "@/lib/constants/ai";
 import { useAssistantIntents } from "@/lib/hooks/ai/useAssistantIntents";
 
 export function AssistantReview({campaignId,initialIntentId}:{campaignId:string;initialIntentId?:string}) {
@@ -21,7 +22,7 @@ export function AssistantReview({campaignId,initialIntentId}:{campaignId:string;
 
  const [error,setError]=useState("");
 
- const queue=useAssistantIntents(campaignId,{cursor:cursors.at(-1),limit:20,intentId});
+ const queue=useAssistantIntents(campaignId,{cursor:cursors.at(-1),limit:ASSISTANT_PAGE_SIZES.queue,intentId});
 
  const legacy=queue.legacy;
 

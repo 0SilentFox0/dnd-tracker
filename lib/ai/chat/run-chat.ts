@@ -1,31 +1,23 @@
 import { APICallError, consumeStream, convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
 
 import "server-only";
+import { compactToolOutputs } from "@/lib/ai/compact";
 import { buildInstructions } from "@/lib/ai/context/prompt";
 import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { createModel } from "@/lib/ai/providers";
+import { recoveredState } from "@/lib/ai/recovered-state";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
 import { toAiSdkTools } from "@/lib/ai/tools";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { chatCaller } from "@/lib/server/assistant/caller";
-import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, readAssistantRuns, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
+import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
 import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
-import type { AiChatMessage, AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
-
-const COMPACTED = "[результат інструменту стиснуто]";
-
-const isToolPart = (p: unknown): p is { type: string; output?: unknown } => !!p && typeof p === "object" && String((p as { type?: string }).type).startsWith("tool-");
-
-export function compactHistory(messages: AiChatMessage[]): AiChatMessage[] {
-  const keepFrom = messages.length - AI_LIMITS.fullToolResultsInLast;
-
-  return messages.map((m, i) => (i >= keepFrom ? m : { ...m, parts: m.parts.map((p) => (isToolPart(p) && "output" in p ? { ...p, output: COMPACTED } : p)) }));
-}
+import type { AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
 
 type RunChatArgs = { campaignId: string; userId: string; threadId: string; requestId: string; text: string; focus?: AiFocus; sessionContext?: AssistantSessionContext; abortSignal?: AbortSignal };
 
@@ -46,7 +38,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
     throw e;
   }
 
-  if (claim.replayed) return Response.json({ recovered: true, ...await readAssistantRuns(caller, requestId), messages: await loadMessages(threadId, AI_LIMITS.historyMessages * 2) }, { headers: PRIVATE_NO_STORE_HEADERS });
+  if (claim.replayed) return Response.json({ recovered: true, ...await recoveredState(caller, threadId, requestId) }, { headers: PRIVATE_NO_STORE_HEADERS });
 
   caller.runId = claim.run.id;
 
@@ -65,7 +57,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
     try { if (await isAssistantRunCancelled(claim.run.id)) cancellation.abort(); }
     catch { cancellation.abort(); }
     finally { checking = false; }
-  }, 500);
+  }, AI_LIMITS.cancelPollMs);
 
   const dispose = () => { clearInterval(poll); runSignal.dispose(); };
 
@@ -102,7 +94,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
     ]);
 
     // Historical tool outputs predate the current transport redaction boundary.
-    const history = publicToolData(compactHistory(stored)) as UIMessage[];
+    const history = publicToolData(compactToolOutputs(stored)) as UIMessage[];
 
     const result = streamText({
       model,
@@ -123,6 +115,8 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
           partial: true,
         };
         await recordAssistantRunUsage(claim.run.id, usage);
+
+        if (await isAssistantRunCancelled(claim.run.id).catch(() => true)) cancellation.abort();
       },
       onError: ({ error: e }) => console.error("[ai chat]", APICallError.isInstance(e) ? e.statusCode : e instanceof Error ? e.name : "unknown"),
     });

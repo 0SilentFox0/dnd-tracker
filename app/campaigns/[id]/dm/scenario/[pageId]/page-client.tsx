@@ -163,22 +163,23 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
       {aiEnabled && aiOpen && (
         <AiPanel
           campaignId={campaignId}
-          page={page}
           mode={aiMode}
-          focus={focus}
-          proposals={proposals}
-          showPending={pendingShown}
-          review={<AssistantReview campaignId={campaignId} />}
-          renderProposal={(id, { send }) => {
-            const proposal = proposals.byId(id);
+          focus={{ value: focus, page, onClear: () => setFocusCleared(true) }}
+          proposals={{
+            data: proposals,
+            showPending: pendingShown,
+            review: <AssistantReview campaignId={campaignId} />,
+            render: (id, { send }) => {
+              const proposal = proposals.byId(id);
 
-            if (!proposal) return null;
+              if (!proposal) return null;
 
-            const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
+              const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
 
-            return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
+              return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
+            },
           }}
-          actions={{ onClose: () => setAiOpen(false), onClearFocus: () => setFocusCleared(true) }}
+          actions={{ onClose: () => setAiOpen(false) }}
         />
       )}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}

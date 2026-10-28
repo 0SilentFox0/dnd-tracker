@@ -1,15 +1,12 @@
 import { z } from "zod";
 
-import { callerOf } from "./assistant-caller";
+import { aliasHandler } from "./alias-handler";
 import { defineTool } from "./define";
-import { toolRequestId } from "./request-key";
 
 import { SYNC_SCOPES } from "@/lib/constants/source-sync";
 import { contentImportSchema } from "@/lib/schemas/content-import";
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
 import { sourceSyncApplySchema } from "@/lib/schemas/source-sync";
-import { dispatchContentAlias } from "@/lib/server/assistant/actions/content-aliases";
-import { dispatchAction } from "@/lib/server/assistant/execute";
 import { KINDS, SCHEMA_TARGETS } from "@/lib/server/content/schema-targets";
 import { IMPORT_KINDS, IMPORT_MODES } from "@/lib/utils/content/import/kinds";
 
@@ -24,7 +21,7 @@ export const contentKindsTool = defineTool({
     "Перелік видів контенту, якими можна керувати (юніти, раси, заклинання, скіли, артефакти…): назва, опис, поля у списку й доступні операції. Додатково: abilities (здібності), rules (правила кампанії), skill-tree (дерево скілів раси). Почни звідси.",
   scopes: ["content:read"],
   input: z.object({}),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_kinds", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_kinds"),
 });
 
 export const contentSchemaTool = defineTool({
@@ -34,7 +31,7 @@ export const contentSchemaTool = defineTool({
     'JSON-схема тіла create/update для виду контенту (або "abilities", "rules", "skill-tree"). Виклич перед content_create/content_update. Для здібностей: kind "abilities", а схему конкретного ефекту — з effectKind.',
   scopes: ["content:read"],
   input: z.object({ kind: z.enum(SCHEMA_TARGETS), op: z.enum(["create", "update"]).optional(), effectKind: z.string().optional() }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_schema", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_schema"),
 });
 
 export const contentListTool = defineTool({
@@ -49,7 +46,7 @@ export const contentListTool = defineTool({
     limit: z.number().int().min(1).max(50).optional(),
     offset: z.number().int().min(0).optional(),
   }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_list", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_list"),
 });
 
 export const contentGetTool = defineTool({
@@ -58,7 +55,7 @@ export const contentGetTool = defineTool({
   description: "Повний запис за id (id бери з content_list).",
   scopes: ["content:read"],
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_get", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_get"),
 });
 
 export const contentCreateTool = defineTool({
@@ -68,7 +65,7 @@ export const contentCreateTool = defineTool({
     'Створює запис. Спершу візьми схему через content_schema(kind, "create"). Посилання (raceId, groupId, knownSpells…) — id цієї ж кампанії з content_list. Помилки валідації повертаються зі шляхами полів — виправ і повтори.',
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, data: z.record(z.string(), z.unknown()) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_create", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_create"),
 });
 
 export const contentUpdateTool = defineTool({
@@ -77,7 +74,7 @@ export const contentUpdateTool = defineTool({
   description: 'Оновлює запис частковим патчем: передавай лише змінені поля. Схема — content_schema(kind, "update"). Id бери з content_list.',
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, id: z.string().min(1), patch: z.record(z.string(), z.unknown()) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_update", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_update"),
 });
 
 export const contentDeleteTool = defineTool({
@@ -86,7 +83,7 @@ export const contentDeleteTool = defineTool({
   description: "Видаляє один запис за id. Незворотно; масового видалення немає. Перед видаленням переконайся, що це саме той запис (content_get).",
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_delete", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_delete"),
 });
 
 export const getRulesTool = defineTool({
@@ -95,7 +92,7 @@ export const getRulesTool = defineTool({
   description: "Повний набір правил кампанії (ruleset) зі значеннями за замовчуванням. Схема — content_schema(kind: \"rules\").",
   scopes: ["content:read"],
   input: z.object({}),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "get_rules", input, toolRequestId(ctx)),
+  handler: aliasHandler("get_rules"),
 });
 
 export const updateRulesTool = defineTool({
@@ -104,7 +101,7 @@ export const updateRulesTool = defineTool({
   description: "Частковий патч правил: не вказані поля лишаються як були. Схема патча — content_schema(kind: \"rules\"). Повертає правила після зміни.",
   scopes: ["content:write"],
   input: z.object({ patch: z.record(z.string(), z.unknown()) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "update_rules", input, toolRequestId(ctx)),
+  handler: aliasHandler("update_rules"),
 });
 
 export const getSkillTreeTool = defineTool({
@@ -113,7 +110,7 @@ export const getSkillTreeTool = defineTool({
   description: "Дерево скілів раси за її назвою (race): { id, race, skills }. Посилається на id головних скілів і скілів з бібліотеки. Схема — content_schema(kind: \"skill-tree\").",
   scopes: ["content:read"],
   input: z.object({ race: z.string().min(1) }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "get_skill_tree", input, toolRequestId(ctx)),
+  handler: aliasHandler("get_skill_tree"),
 });
 
 export const saveSkillTreeTool = defineTool({
@@ -123,7 +120,7 @@ export const saveSkillTreeTool = defineTool({
     'Зберігає дерево скілів раси цілком (створює, якщо ще немає): { race, skills: { mainSkills, ultimateSkill } }. Існуюче дерево замінюється — спершу get_skill_tree. Схема — content_schema(kind: "skill-tree"); id головних скілів і скілів — з content_list. Помилки дерева повертаються списком.',
   scopes: ["content:write"],
   input: saveSkillTreeSchema,
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "save_skill_tree", input, toolRequestId(ctx)),
+  handler: aliasHandler("save_skill_tree"),
 });
 
 export const sourceDiffTool = defineTool({
@@ -137,7 +134,7 @@ export const sourceDiffTool = defineTool({
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(50).default(DEFAULT_LIMIT),
   }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "source_diff", input, toolRequestId(ctx)),
+  handler: aliasHandler("source_diff"),
 });
 
 export const sourceApplyTool = defineTool({
@@ -147,7 +144,7 @@ export const sourceApplyTool = defineTool({
     "apply — пункти з source_diff, які взяти з джерела (залежності додаються самі, див. autoAdded); ignore — сховати пункти до наступної зміни джерела. Конфлікт у apply = взяти версію джерела замість своєї. Помилка «Джерело змінилося» — повтори source_diff.",
   scopes: ["content:write"],
   input: sourceSyncApplySchema,
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "source_apply", input, toolRequestId(ctx)),
+  handler: aliasHandler("source_apply"),
 });
 
 export const contentImportTool = defineTool({
@@ -162,7 +159,7 @@ export const contentImportTool = defineTool({
     mode: z.enum(IMPORT_MODES).default("create"),
     dryRun: z.boolean().default(false),
   }),
-  handler: (ctx, input) => dispatchContentAlias((caller, request) => dispatchAction(caller, request, ctx.abortSignal), callerOf(ctx), "content_import", input, toolRequestId(ctx)),
+  handler: aliasHandler("content_import"),
 });
 
 export const CONTENT_TOOLS = [

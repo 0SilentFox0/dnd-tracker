@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
 import { CHARACTER_PROGRESSION_ACTIONS } from "@/lib/server/assistant/actions/character-progression";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 import { confirmationFor } from "@/lib/server/assistant/policy";
 import { progressionState, runCharacterProgression } from "@/lib/server/characters/progression-service";
 import { parseRules } from "@/lib/utils/rules/schema";

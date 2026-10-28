@@ -1,0 +1,143 @@
+"use client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { compendiumKeys } from "./keys";
+
+import { confirmCompendium, getCompendiumOptions, getCompendiumRunReport, previewCompendium } from "@/lib/api/compendium";
+import type { JsonRecord } from "@/lib/constants/compendium-import";
+import { readCompendiumFile } from "@/lib/utils/compendium-import/file";
+import { categoryInventory, compendiumErrorMessage, excludeAllBlocked, projectInput } from "@/lib/utils/compendium-import/flow";
+import type { CompendiumOptions, CompendiumPreview, CompendiumReport, CompendiumRun, CompendiumTargets, ImportInput } from "@/types/compendium-import";
+
+const NO_TARGETS: CompendiumTargets = { local: [], templates: [] };
+
+export function useCompendiumImport(campaignId: string, initialFile?: File) {
+  const queryClient = useQueryClient();
+
+  const [root, setRoot] = useState<JsonRecord | null>(null), [categories, setCategories] = useState<string[]>([]), [excludedChapters, setExcludedChapters] = useState<string[]>([]);
+
+  const [options, setOptions] = useState<CompendiumOptions>({});
+
+  const [preview, setPreview] = useState<CompendiumPreview | null>(null), [input, setInput] = useState<ImportInput | null>(null), [result, setResult] = useState<CompendiumReport | null>(null);
+
+  const [rights, setRights] = useState(false), [reading, setReading] = useState(false), [error, setError] = useState("");
+
+  const key = useRef(""), controller = useRef<AbortController | null>(null);
+
+  const previewMutation = useMutation({ mutationFn: ({ next, signal }: { next: ImportInput; signal: AbortSignal }) => previewCompendium(campaignId, next, signal) });
+
+  const confirmMutation = useMutation({ mutationFn: ({ body, signal }: { body: Parameters<typeof confirmCompendium>[1]; signal: AbortSignal }) => confirmCompendium(campaignId, body, signal) });
+
+  const openRunMutation = useMutation({ mutationFn: (runId: string) => getCompendiumRunReport(campaignId, runId) });
+
+  const targetsQuery = useQuery({ queryKey: compendiumKeys.options(campaignId), queryFn: ({ signal }) => getCompendiumOptions(campaignId, signal), enabled: !!preview, staleTime: 0 });
+
+  const busy = reading || previewMutation.isPending || confirmMutation.isPending || openRunMutation.isPending;
+
+  useEffect(() => () => controller.current?.abort(), []);
+
+  const invalidate = useCallback(() => { setPreview(null); setInput(null); setResult(null); setRights(false); key.current = ""; }, []);
+
+  const startRequest = () => {
+    controller.current?.abort();
+
+    const abort = new AbortController();
+
+    controller.current = abort;
+
+    return abort;
+  };
+
+  const changeOptions = (value: CompendiumOptions) => { setOptions(value); invalidate(); };
+
+  const selectFile = useCallback(async (file: File) => {
+    const abort = startRequest();
+
+    setReading(true); setError(""); setRoot(null); invalidate(); setOptions({}); setExcludedChapters([]);
+    try {
+      const parsed = await readCompendiumFile(file, abort.signal);
+
+      if (abort.signal.aborted) return;
+
+      setRoot(parsed); setCategories(categoryInventory(parsed).filter(row => row.selected).map(row => row.kind));
+    } catch (e) { if (!abort.signal.aborted) setError(e instanceof Error ? e.message : "Не вдалося прочитати JSON"); }
+    finally { if (!abort.signal.aborted) setReading(false); }
+  }, [invalidate]);
+
+  useEffect(() => { if (initialFile) void selectFile(initialFile); }, [initialFile, selectFile]);
+
+  async function runPreview(nextOptions = options) {
+    if (!root) return;
+
+    setError(""); invalidate();
+
+    const abort = startRequest();
+
+    try {
+      const next = projectInput(root, categories, nextOptions, excludedChapters);
+
+      const data = await previewMutation.mutateAsync({ next, signal: abort.signal });
+
+      if (abort.signal.aborted) return;
+
+      setPreview(data); setInput(next); key.current = crypto.randomUUID();
+    } catch (e) { if (!abort.signal.aborted) setError(compendiumErrorMessage(e, "Помилка preview")); }
+  }
+
+  async function confirm() {
+    if (!preview || !input || !rights || busy) return;
+
+    setError("");
+
+    const abort = startRequest();
+
+    try {
+      const report = await confirmMutation.mutateAsync({ body: { input, token: preview.token, idempotencyKey: key.current, rightsConfirmed: rights }, signal: abort.signal });
+
+      if (abort.signal.aborted) return;
+
+      setResult(report); setPreview(null); setInput(null); setRoot(null); setOptions({});
+      void queryClient.invalidateQueries({ queryKey: compendiumKeys.all(campaignId) });
+    } catch (e) { if (!abort.signal.aborted) setError(compendiumErrorMessage(e, "Помилка confirm")); }
+  }
+
+  function applyExclusion(next: CompendiumOptions) {
+    setOptions(next);
+    void runPreview(next);
+  }
+
+  const excludeBlockedRows = () => { if (preview) applyExclusion(excludeAllBlocked(options, preview.graph, preview.report.nextActions)); };
+
+  const excludeRow = (rowKey: string) => applyExclusion({ ...options, excludedKeys: [...(options.excludedKeys ?? []), rowKey] });
+
+  const toggleCategory = (kind: string, on: boolean) => { setCategories(on ? [...categories, kind] : categories.filter(item => item !== kind)); invalidate(); };
+
+  const toggleChapter = (path: string, on: boolean) => { setExcludedChapters(on ? excludedChapters.filter(item => item !== path) : [...excludedChapters, path]); invalidate(); };
+
+  const openRun = async (run: CompendiumRun) => {
+    invalidate(); setRoot(null);
+
+    if (run.report) return setResult(run.report);
+
+    setError("");
+    try {
+      const data = await openRunMutation.mutateAsync(run.id);
+
+      if (data.runs[0]) setResult(data.runs[0].report); else setError("Звіт більше недоступний");
+    } catch { setError("Не вдалося завантажити звіт"); }
+  };
+
+  const close = () => { controller.current?.abort(); setReading(false); setRoot(null); setCategories([]); setOptions({}); invalidate(); };
+
+  const targets = targetsQuery.data ?? NO_TARGETS;
+
+  const shownError = error || (targetsQuery.isError && preview ? "Не вдалося завантажити варіанти залежностей; повторіть preview" : "");
+
+  return {
+    state: { root, categories, excludedChapters, options, preview, input, result, rights, targets, busy, error: shownError },
+    actions: { selectFile, changeOptions, setOptions, toggleCategory, toggleChapter, setRights, runPreview, confirm, excludeBlockedRows, excludeRow, openRun, close },
+  };
+}
+
+export type CompendiumImportController = ReturnType<typeof useCompendiumImport>;

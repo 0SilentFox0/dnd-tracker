@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { executorDatabase } from "./fixtures/executor-db";
 
+import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/__tests__/helpers/coverage";
 import { HANDOFF_ACTION_COVERAGE } from "@/lib/server/assistant/actions/handoff-coverage";
 import { buildAssistantHandoff, HANDOFF_ACTIONS, readCompendiumSummary } from "@/lib/server/assistant/actions/handoffs";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
-import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/coverage";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { prismaImportRepository } from "@/lib/server/compendium-import/repository";
@@ -16,11 +16,12 @@ const f = vi.hoisted(() => ({ allowed: true, member: true, entryQueries: [] as R
 
 vi.mock("@/lib/db", () => ({ prisma: {
   campaignMember: { findMany: async () => f.member ? [{ role: "dm" }] : [] },
-  campaign: { findFirst: async () => f.allowed ? { id: "campaign" } : null, findMany: async () => [] },
+  campaign: { findFirst: async () => f.allowed && f.member ? { id: "campaign" } : null, findMany: async () => [] },
   compendiumEntry: { findMany: async (query: Record<string, unknown>) => { f.entryQueries.push(query);
 
  return f.entries; } },
   compendiumImportRun: { findMany: async () => f.reports },
+  $queryRaw: async () => f.reports.map(({ report, ...row }) => ({ ...row, counts: (report as Record<string, unknown>).counts, readyToImport: (report as Record<string, unknown>).readyToImport, readyToPlay: (report as Record<string, unknown>).readyToPlay })),
 } }));
 
 const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null };

@@ -76,20 +76,4 @@ describe("threads", () => {
 
     expect(await resolveDefaultModel("dm", "anthropic", "scenario")).toBe(defaultModelFor("anthropic", "scenario"));
   });
-
-  it("slimToolOutputs стискає великі виводи лише у старих повідомленнях", async () => {
-    const { slimToolOutputs } = await import("@/lib/ai/threads");
-
-    const big = "x".repeat(5000);
-
-    const msg = (id: string) => ({ id, role: "assistant" as const, parts: [{ type: "tool-read_scenario_page", output: big }, { type: "tool-propose_scenario_edit", output: '{"proposalId":"ap1"}' }] as unknown[], metadata: {} });
-
-    const messages = Array.from({ length: 10 }, (_, i) => msg(`m${i}`));
-
-    const out = slimToolOutputs(messages as never);
-
-    expect((out[0].parts[0] as { output: string }).output).toContain("стиснуто");
-    expect((out[0].parts[1] as { output: string }).output).toBe('{"proposalId":"ap1"}');
-    expect((out[9].parts[0] as { output: string }).output).toBe(big);
-  });
 });

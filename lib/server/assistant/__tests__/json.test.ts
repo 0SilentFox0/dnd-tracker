@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { jsonContent as compatibilityJson, snapshotHash } from "@/lib/server/assistant/actions/content-snapshot";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 import { jsonContent } from "@/lib/server/assistant/json";
 
 const legacy = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));

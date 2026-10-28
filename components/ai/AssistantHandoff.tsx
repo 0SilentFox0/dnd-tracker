@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { isAssistantHandoffHref } from "@/lib/schemas/assistant-handoff";
-import type { HandoffResult } from "@/lib/server/assistant/types";
+import type { HandoffResult } from "@/types/assistant";
 
 type NoteChoice = { canonicalKey: string; title: string };
 type Props = { handoff: HandoffResult; notes?: readonly NoteChoice[]; onSelectNotes?: (keys: string[]) => void };

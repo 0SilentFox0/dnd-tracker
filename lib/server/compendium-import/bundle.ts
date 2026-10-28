@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CompendiumError } from "./parse";
 
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
+import { jsonContentInput } from "@/lib/server/assistant/json";
 import { newContentId } from "@/lib/server/templates/ids";
 import { remapIds } from "@/lib/server/templates/remap-ids";
 
@@ -23,8 +24,6 @@ export function remapCompendiumSection(section: CompendiumBundle, idMap: Readonl
   return { ...section, sources: section.sources, entries: section.entries.map((r) => ({ ...r, localId: idMap.get(r.localId)!, baseline: remapIds(r.baseline, idMap), locator: remapIds(r.locator, idMap), bindings: remapIds(r.bindings, idMap) })), pages: section.pages.map((p) => ({ ...p, id: idMap.get(p.id) ?? p.id, content: remapIds(p.content, idMap) })) };
 }
 
-const json = (v: unknown) => JSON.parse(JSON.stringify(v)) as Prisma.InputJsonValue;
-
 export async function exportCompendiumSection(db: CompendiumBundleDb, campaignId: string): Promise<CompendiumBundle | undefined> {
   const entries = await db.compendiumEntry.findMany({ where: { campaignId }, orderBy: { canonicalKey: "asc" } });
 
@@ -40,7 +39,7 @@ export async function exportCompendiumSection(db: CompendiumBundleDb, campaignId
 export async function importCompendiumSection(db: CompendiumBundleDb, section: CompendiumBundle, campaignId: string, idMap: ReadonlyMap<string, string>): Promise<void> {
   const next = remapCompendiumSection(section, idMap);
 
-  for (const source of next.sources) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: json(source.metadata) }, update: { metadata: json(source.metadata) } });
-  for (const page of next.pages) await db.scenarioPage.create({ data: { id: page.id, campaignId, kind: "note", status: "draft", title: page.title, content: json(page.content), searchText: page.title } });
-  for (const row of next.entries) await db.compendiumEntry.create({ data: { ...row, id: newContentId(), campaignId, locator: json(row.locator), baseline: json(row.baseline), issues: json(row.issues), bindings: json(row.bindings), attribution: json(row.attribution) } });
+  for (const source of next.sources) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: jsonContentInput(source.metadata) }, update: { metadata: jsonContentInput(source.metadata) } });
+  for (const page of next.pages) await db.scenarioPage.create({ data: { id: page.id, campaignId, kind: "note", status: "draft", title: page.title, content: jsonContentInput(page.content), searchText: page.title } });
+  for (const row of next.entries) await db.compendiumEntry.create({ data: { ...row, id: newContentId(), campaignId, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) } });
 }

@@ -2,19 +2,21 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { runChat } from "@/lib/ai/chat/run-chat";
+import { compactToolOutputs } from "@/lib/ai/compact";
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { discardGeneratedImage } from "@/lib/ai/generated-images";
 import { guarded } from "@/lib/ai/guarded";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
 import { applyProposal, listProposals, listProposalSummaries, rejectProposal } from "@/lib/ai/proposals";
+import { recoveredState } from "@/lib/ai/recovered-state";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
-import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel,slimToolOutputs } from "@/lib/ai/threads";
+import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
 import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { aiSettingsSchema, assistantRequestIdSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
 import { chatCaller } from "@/lib/server/assistant/caller";
-import { cancelAssistantRun, readAssistantRuns } from "@/lib/server/assistant/runs";
+import { cancelAssistantRun } from "@/lib/server/assistant/runs";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -113,7 +115,7 @@ export const listMessagesHandler = (campaignId: string, threadId: string) =>
 
     if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-    return NextResponse.json({ thread, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+    return NextResponse.json({ thread, messages: compactToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2), { minChars: AI_LIMITS.slimOutputChars }) });
   });
 
 export const getSettingsHandler = (campaignId: string) =>
@@ -166,13 +168,11 @@ export const discardGeneratedImageHandler = (req: Request, campaignId: string) =
   });
 
 
-export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string) =>
+export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string, statusOnly = false) =>
   guarded("recover ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
     const caller = chatCaller(campaignId, access.userId, threadId);
 
-    const state = requestId ? await readAssistantRuns(caller, requestId) : await readAssistantRuns(caller);
-
-    return NextResponse.json({ ...state, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+    return NextResponse.json(await recoveredState(caller, threadId, requestId, undefined, { statusOnly }));
   }));
 export const cancelChatHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("cancel ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
@@ -180,9 +180,9 @@ export const cancelChatHandler = (req: Request, campaignId: string, threadId: st
 
     if (!id.success) return errorResponse(API_ERRORS.INVALID_REQUEST_ID, 400);
 
-    const state = await cancelAssistantRun(chatCaller(campaignId, access.userId, threadId), id.data);
+    const caller = chatCaller(campaignId, access.userId, threadId);
 
-    return NextResponse.json({ ...state, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+    return NextResponse.json(await recoveredState(caller, threadId, id.data, await cancelAssistantRun(caller, id.data)));
   }));
 
 async function runResponse(run: () => Promise<Response>): Promise<Response> {

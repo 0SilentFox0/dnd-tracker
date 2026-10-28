@@ -210,7 +210,7 @@ it("a target removed after preview marks the intent stale", async () => {
 it("every Task5 route method resolves to a real content action", async () => {
   const { CONTENT_ACTION_COVERAGE } = await import("@/lib/server/assistant/actions/content-coverage");
 
-  const { ASSISTANT_ROUTE_COVERAGE } = await import("@/lib/server/assistant/coverage");
+  const { ASSISTANT_ROUTE_COVERAGE } = await import("@/lib/server/assistant/__tests__/helpers/coverage");
 
   const catalog = createActionCatalog(createContentActions());
 

@@ -8,6 +8,7 @@ import {
 } from "@/lib/api/client";
 import { SPELL_IDS_QUERY_MAX } from "@/lib/constants/spells";
 import type { CreateSpellInput, UpdateSpellInput } from "@/lib/schemas/spells";
+import type { SpellRef } from "@/types/choices";
 import type { BookSpell, Spell, SpellGroup } from "@/types/spells";
 
 const spellsApi = createCampaignCrudApi<Spell, CreateSpellInput, UpdateSpellInput, { ok: true }>("/spells");
@@ -26,6 +27,10 @@ export async function updateSpellAppearance(
   return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, {
     appearanceDescription,
   });
+}
+
+export async function getSpellRefs(campaignId: string): Promise<SpellRef[]> {
+  return campaignGet<SpellRef[]>(campaignId, "/spells/refs");
 }
 
 export async function getSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {

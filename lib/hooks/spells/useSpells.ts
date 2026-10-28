@@ -70,7 +70,6 @@ export function useUpdateSpellGroup(campaignId: string) {
     },
     invalidateKeys: [
       spellKeys.list(campaignId),
-      spellKeys.byIds(campaignId, ""),
       spellKeys.groups(campaignId),
     ],
   });

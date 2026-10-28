@@ -12,53 +12,25 @@ import { AssistantContextDisclosure } from "./AssistantContextDisclosure";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { AI_MODE_LABELS, type AiProvider, type AiThreadMode } from "@/lib/constants/ai";
+import { AI_MODE_LABELS, type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE } from "@/lib/constants/ai";
 import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { useAssistantContext } from "@/lib/hooks/ai/useAssistantContext";
 import { useAssistantEffects } from "@/lib/hooks/ai/useAssistantEffects";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
-import { pluralUk } from "@/lib/utils/common/plural";
+import { focusLabelOf } from "@/lib/utils/ai/focus";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
-
-type Proposals = ReturnType<typeof useAiProposals>;
 
 export type RenderProposal = (proposalId: string, helpers: { send?: (text: string) => void }) => ReactNode;
 
 interface AiPanelProps {
   campaignId: string;
-  page?: ScenarioPage;
   mode: AiThreadMode;
-  focus?: AiFocus;
-  proposals?: Proposals;
+  focus: { value?: AiFocus; page?: ScenarioPage; onClear: () => void };
+  proposals?: { data?: ReturnType<typeof useAiProposals>; render?: RenderProposal; showPending?: boolean; review?: ReactNode };
   campaignName?: string;
   embedded?: boolean;
-  review?: ReactNode;
-  showPending?: boolean;
-  renderProposal?: RenderProposal;
-  actions: { onClose: () => void; onClearFocus: () => void };
-}
-
-const rowWord = (n: number) => pluralUk(n, ["рядок", "рядки", "рядків"]);
-
-function focusLabelOf(page: ScenarioPage | undefined, focus: AiFocus | undefined): string | null {
-  if (!focus) return null;
-
-  if (focus.kind === "character") return `Фокус: герой ${focus.characterId}`;
-
-  if (focus.kind === "battle") return `Фокус: бій ${focus.battleId}`;
-
-  if (focus.kind === "campaign") return "Фокус: кампанія";
-
-  if (!page || focus.pageId !== page.id) return `Фокус: сторінка ${focus.pageId}`;
-
-  const section = page.content.sections.find((s) => s.id === focus.sectionId);
-
-  const rows = focus.rowIds?.length ?? 0;
-
-  if (!section) return rows ? `Фокус: ${rows} ${rowWord(rows)}` : null;
-
-  return rows ? `Фокус: розділ «${section.title}», ${rows} ${rowWord(rows)}` : `Фокус: розділ «${section.title}»`;
+  actions: { onClose: () => void };
 }
 
 interface ThreadChatProps {
@@ -144,7 +116,11 @@ function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) 
   );
 }
 
-export function AiPanel({ campaignId, campaignName, embedded = false, review, page, mode, focus, proposals, showPending = false, renderProposal, actions }: AiPanelProps) {
+export function AiPanel({ campaignId, campaignName, embedded = false, mode, focus, proposals, actions }: AiPanelProps) {
+  const { value: focusValue, page, onClear: onClearFocus } = focus;
+
+  const { data: proposalData, render: renderProposal, showPending = false, review } = proposals ?? {};
+
   const desktop = useMediaQuery(DESKTOP_QUERY);
 
   const panel = useAiPanelWidth();
@@ -174,8 +150,9 @@ export function AiPanel({ campaignId, campaignName, embedded = false, review, pa
   const { refetch } = threadsQuery;
 
   const onFinish = () => {
-    proposals?.refresh();
-    refetch();
+    proposalData?.refresh();
+
+    if (thread?.title === DEFAULT_THREAD_TITLE) void refetch();
   };
 
   let body: ReactNode;
@@ -198,7 +175,7 @@ export function AiPanel({ campaignId, campaignName, embedded = false, review, pa
   } else if (!thread) {
     body = <EmptyState title={`Немає тредів: ${AI_MODE_LABELS[mode]}`} />;
   } else {
-    body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focus} focusLabel={focusLabelOf(page, focus)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus: actions.onClearFocus }} />;
+    body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focusValue} focusLabel={focusLabelOf(page, focusValue)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus }} />;
   }
 
   const content = (
@@ -218,10 +195,10 @@ export function AiPanel({ campaignId, campaignName, embedded = false, review, pa
           }}
         />
       ) : null}
-      {showPending && !review && renderProposal && proposals && proposals.pending.length ? (
+      {showPending && !review && renderProposal && proposalData && proposalData.pending.length ? (
         <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label="Пропозиції AI">
           <h3 className="text-sm font-medium">Пропозиції AI</h3>
-          {proposals.pending.map((p) => (
+          {proposalData.pending.map((p) => (
             <div key={p.id}>{renderProposal(p.id, {})}</div>
           ))}
         </section>

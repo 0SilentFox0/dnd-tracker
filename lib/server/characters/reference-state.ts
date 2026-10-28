@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { FULL_ROW_TABLES, fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 
 /** Conservative, uncached dependency hash; reference content is never copied into intent payloads. */
 export async function characterReferenceHash(campaignId: string): Promise<string> {

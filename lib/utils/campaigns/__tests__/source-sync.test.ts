@@ -82,3 +82,40 @@ describe("formatUsage", () => {
     expect(formatUsage({ characters: 0, content: 0 })).toBeNull();
   });
 });
+
+describe("autoAddedPreview on a large diff", () => {
+  const legacy = (items: SourceDiffItem[], selected: ReadonlySet<string>) => {
+    const byKey = new Map(items.map((i) => [itemKey(i), i]));
+
+    const out = new Map<string, SourceDiffItem["requires"][number]>();
+
+    const queue = items.filter((i) => selected.has(itemKey(i)));
+
+    for (let i = queue.shift(); i; i = queue.shift()) {
+      for (const r of i.requires) {
+        const k = itemKey(r);
+
+        if (selected.has(k) || out.has(k)) continue;
+
+        out.set(k, r);
+
+        const pulled = byKey.get(k);
+
+        if (pulled) queue.push(pulled);
+      }
+    }
+
+    return [...out.values()];
+  };
+
+  it("500 records with fan-out dependencies match the queue.shift reference", () => {
+    const items = Array.from({ length: 500 }, (_, n) => item({ key: `k${n}`, status: n % 7 === 0 ? "new" : "conflict", requires: [n + 1, n * 2 + 3, n + 11].filter((m) => m < 520).map((m) => ({ scope: "spells", key: `k${m}`, name: `R${m}` })) as SourceDiffItem["requires"] }));
+
+    const selected = defaultSelection(items);
+
+    const out = autoAddedPreview(items, selected);
+
+    expect(out.length).toBeGreaterThan(100);
+    expect(out).toEqual(legacy(items, selected));
+  });
+});

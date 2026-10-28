@@ -3,14 +3,14 @@ import type { Spell } from "@prisma/client";
 import type { SpellRequestData } from "./cast-spell-schema";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
-import { abilityCooldownMessage,API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { cooldownLeft, poolLeft, recordUse, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
-import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/actions/lair";
-import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
+import { spendLair } from "@/lib/utils/battle/actions/lair";
+import { legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
@@ -22,6 +22,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
+import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
@@ -80,59 +81,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       return { participants: dropped.participants, pending: ctx.pending, events: [systemEvent(ctx.scene.round, `${caster.basicInfo.name}: накладання скасовано`)] };
     }
 
-    const legendaryAbility = data.legendaryKey ? [...legendaryAbilities(caster), ...lairAbilities(caster)].find((a) => a.key === data.legendaryKey && a.perform?.kind === "spell" && a.perform.spellId === data.spellId) : undefined;
-
-    if (data.legendaryKey) {
-      if (!legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY_SPELL);
-
-      const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, order[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
-
-      if (blocker) throw new BattleRuleError("action_rejected", blocker);
-
-      if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
-
-      const wait = cooldownLeft(caster, legendaryAbility, ctx.scene.round);
-
-      if (wait > 0) throw new BattleRuleError("ability_limit", abilityCooldownMessage(wait));
-    }
-
-    // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
-
-    const free = ctx.isDM && data.free === true;
-
-    const spellGrants = free ? [] : (caster.spellcasting.grants ?? []).filter((g) => g.spellId === data.spellId);
-
-    let grant = data.grantKey ? spellGrants.find((g) => g.key === data.grantKey) : undefined;
-
-    if (data.grantKey && !grant) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_UNAVAILABLE);
-
-    if (!data.grantKey && data.slotKey) {
-      if (!caster.spellcasting.slotSpells?.includes(data.spellId) && !spellGrants.some((g) => g.via === "slotOrGrant") && spellGrants.length > 0) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);
-    } else if (!data.grantKey && spellGrants.length > 1) {
-      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_REQUIRED);
-    } else if (!data.grantKey && spellGrants.length === 1) {
-      grant = spellGrants[0];
-    }
-
-    if (data.grantKey && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SLOT_OR_SOURCE);
-
-    if (data.castLevel !== undefined && (!grant?.upcast || data.castLevel < (grant.castLevel ?? 0) || data.castLevel > grant.upcast.maxLevel)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ITEM_UPCAST_LEVEL_INVALID);
-
-    if (data.castLevel !== undefined && grant?.upcast) grant = { ...grant, cost: (grant.cost ?? 1) + (data.castLevel - (grant.castLevel ?? 0)) * grant.upcast.extraCost };
-
-    if (!free && !legendaryAbility && !grant && !caster.spellcasting.knownSpells.includes(data.spellId)) {
-      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_UNKNOWN_SPELL);
-    }
-
-    if (grant && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);
-
-    if (grant?.legendaryOnly && !legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.SPELL_LEGENDARY_ONLY);
-
-    if (grant?.pool && (poolLeft(caster, grant.pool) ?? -1) < (grant.cost ?? 1)) {
-      throw new BattleRuleError("action_rejected", API_ERRORS.SPELL_USES_EMPTY);
-    }
-
-    if (grant?.castLevel !== undefined && grant.castLevel < spell.level) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SOURCE_LEVEL_TOO_LOW);
+    const { legendaryAbility, free, grant } = resolveSpellSource(ctx, caster, spell, data);
 
     if (!data.preview && !legendaryAbility) {
       if (definition.cost === "reaction" && !free) {

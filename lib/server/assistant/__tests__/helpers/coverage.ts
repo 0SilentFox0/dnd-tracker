@@ -176,6 +176,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/source-sync', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/[spellId]/remove-from-group', methods: ['POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/[spellId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/spells/refs', methods: ['GET'], task: 18, adapter: 'ui-only spell refs', state: "handoff" },
   { route: 'campaigns/[id]/spells/delete-all', methods: ['DELETE'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/delete-by-level', methods: ['DELETE'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/groups/[groupId]/remove-all-spells', methods: ['POST'], task: 5, adapter: 'content', state: "active" },

@@ -3,12 +3,15 @@ import { useState } from "react";
 
 import { SourceNotes } from "./SourceNotes";
 
-import type { CompendiumReport as Report } from "@/lib/server/compendium-import/service";
+import { PagerNav } from "@/components/common/PagerNav";
+import { COMPENDIUM_PAGE_SIZES } from "@/lib/constants/compendium-import";
+import { usePager } from "@/lib/hooks/common";
 import { downloadText } from "@/lib/utils/common/download-text";
 import { CATEGORY_LABELS, destination } from "@/lib/utils/compendium-import/flow";
+import type { CompendiumReport as Report } from "@/types/compendium-import";
 
 export function CompendiumReport({ campaignId, report, committed = false }: { campaignId: string; report: Report; committed?: boolean }) {
-  const [page, setPage] = useState(0), [actionPage, setActionPage] = useState(0);
+  const rows = usePager(report.rows, COMPENDIUM_PAGE_SIZES.reportRows), actions = usePager(report.nextActions, COMPENDIUM_PAGE_SIZES.reportActions);
 
   const [notes, setNotes] = useState<{ kind: string; targetId: string } | null>(null);
 
@@ -24,19 +27,19 @@ export function CompendiumReport({ campaignId, report, committed = false }: { ca
       {Object.entries(report.countsByCategory).map(([kind, count]) => <tr key={kind}><td>{CATEGORY_LABELS[kind] ?? kind}</td><td>{count.present}</td><td>{count.mapped}</td><td>{count.partial}</td><td>{count.skipped}</td></tr>)}
     </tbody></table>
     <h3>Записи та покриття</h3>
-    <ul>{report.rows.slice(page * 50, (page + 1) * 50).map((row, index) => <li className="mb-3" key={`${row.canonicalKey}:${index}`}>
+    <ul>{rows.pageItems.map((row, index) => <li className="mb-3" key={`${row.canonicalKey}:${index}`}>
       <p>{row.canonicalKey} · {row.status} · {row.coverage === "native" ? "структуровано" : row.coverage === "manual" ? "вручну" : "частково"}</p>
       {row.issues.map((issue, i) => <p key={i}>{issue.code}: {issue.action} ({issue.path})</p>)}
       {committed && <><a className="underline" href={destination(campaignId, row)}>Відкрити редактор / опис</a>{" · "}<button className="underline" onClick={() => setNotes(row)}>Джерело й примітки</button></>}
     </li>)}</ul>
-    <nav aria-label="Сторінки записів"><button disabled={page === 0} onClick={() => setPage(page - 1)}>Попередні записи</button>{" · "}<button disabled={(page + 1) * 50 >= report.rows.length} onClick={() => setPage(page + 1)}>Наступні записи</button></nav>
+    <PagerNav ariaLabel="Сторінки записів" pager={rows} labels={{ prev: "Попередні записи", next: "Наступні записи" }} />
     <h3>Що далі</h3>
-    <ol>{report.nextActions.slice(actionPage * 50, (actionPage + 1) * 50).map((issue, index) => {
+    <ol>{actions.pageItems.map((issue, index) => {
       const row = report.rows.find(r => issue.path.startsWith(r.canonicalKey) || r.issues.some(owned => owned.code === issue.code && owned.path === issue.path));
 
       return <li className="mb-2" key={index}><strong>{issue.severity === "error" ? "Блокер" : "Ручна перевірка"} · {issue.code}</strong><p>{issue.action}</p><p className="text-xs">{issue.path}</p>{committed && <a className="underline" href={destination(campaignId, { ...row, code: issue.code })}>Перейти до дії</a>}</li>;
     })}</ol>
-    <nav aria-label="Сторінки дій"><button disabled={actionPage === 0} onClick={() => setActionPage(actionPage - 1)}>Попередні дії</button>{" · "}<button disabled={(actionPage + 1) * 50 >= report.nextActions.length} onClick={() => setActionPage(actionPage + 1)}>Наступні дії</button></nav>
+    <PagerNav ariaLabel="Сторінки дій" pager={actions} labels={{ prev: "Попередні дії", next: "Наступні дії" }} />
     {report.omittedIssues > 0 && <p>Ще {report.omittedIssues} попереджень; кількість за кодами: {JSON.stringify(report.issueCounts)}</p>}
     <p>Передісторії: ASI, навички, інструменти й origin feat — через чинні Choice/Picks. Спорядження й гроші видайте героям вручну.</p>
     <a className="underline" href={`/campaigns/${campaignId}/dm/characters`}>Створити персонажів / видати спорядження й гроші</a>

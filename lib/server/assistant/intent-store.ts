@@ -1,6 +1,6 @@
 import { type AssistantIntent,Prisma } from "@prisma/client";
-import { createHash } from "node:crypto";
 
+import { requestDigest } from "./json";
 import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentStatus,IntentSummary } from "./types";
 
 import "server-only";
@@ -9,7 +9,7 @@ import { ASSISTANT_LIMITS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
 import { actionPreviewSchema, assistantRequestSchema, assistantTargetSchema, intentPageSchema, intentStatusSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
-import { stableStringify } from "@/lib/utils/battle/store/stable-json";
+import { pageOf } from "@/lib/utils/api/page-of";
 import type { IntentPage } from "@/types/assistant";
 
 type IntentDb = Pick<Prisma.TransactionClient, "assistantIntent">;
@@ -19,7 +19,6 @@ const SUMMARY_SELECT = { id: true, actionId: true, status: true, summary: true, 
 
 type SummaryRow = Pick<AssistantIntent, keyof typeof SUMMARY_SELECT>;
 
-export const requestDigest = (value: unknown): string => createHash("sha256").update(stableStringify(value)).digest("hex");
 export const jsonInput = (value: Prisma.JsonValue): Prisma.InputJsonValue | typeof Prisma.JsonNull => value === null ? Prisma.JsonNull : value as Prisma.InputJsonValue;
 
 export function intentOwner(caller: AssistantCaller): { campaignId: string; userId: string; originTokenId?: string } {
@@ -107,9 +106,9 @@ export async function listIntents(caller: AssistantCaller, input: { cursor?: str
     orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: limit + 1, select: SUMMARY_SELECT,
   });
 
-  const shown = rows.slice(0, limit);
+  const { items: shown, hasMore } = pageOf(rows, 0, limit);
 
   const last = shown.at(-1);
 
-  return { items: shown.map(intentSummary), nextCursor: rows.length > limit && last ? Buffer.from(JSON.stringify({ createdAt: last.createdAt.toISOString(), id: last.id })).toString("base64url") : null };
+  return { items: shown.map(intentSummary), nextCursor: hasMore && last ? Buffer.from(JSON.stringify({ createdAt: last.createdAt.toISOString(), id: last.id })).toString("base64url") : null };
 }

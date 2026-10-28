@@ -2,7 +2,7 @@ import { readdirSync,readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { ASSISTANT_ROUTE_COVERAGE, auditRouteCoverage, exportedHttpMethods } from "@/lib/server/assistant/coverage";
+import { ASSISTANT_ROUTE_COVERAGE, auditRouteCoverage, exportedHttpMethods } from "@/lib/server/assistant/__tests__/helpers/coverage";
 
 describe("assistant route coverage", () => {
   it("discovers explicit handlers, aliases and collection factory destructuring", () => {

@@ -62,7 +62,13 @@ export function useBattleSpellLibrary(caster: BattleParticipant | null, options:
 
   const known = useSpellsByIds(campaignId, useBattleSpellIds(), { enabled: isOpen && !free });
 
-  const availableSpells = free ? ((library.data ?? []) as BookSpell[]) : specialSpellId ? (known.data ?? []).filter((s) => s.id === specialSpellId) : knownBy(known.data, caster);
+  const libraryData = library.data;
 
-  return reactionsOnly ? availableSpells.filter((s) => s.cost === "reaction") : availableSpells;
+  const knownData = known.data;
+
+  return useMemo(() => {
+    const availableSpells = free ? ((libraryData ?? []) as BookSpell[]) : specialSpellId ? (knownData ?? []).filter((s) => s.id === specialSpellId) : knownBy(knownData, caster);
+
+    return reactionsOnly ? availableSpells.filter((s) => s.cost === "reaction") : availableSpells;
+  }, [free, libraryData, knownData, specialSpellId, caster, reactionsOnly]);
 }

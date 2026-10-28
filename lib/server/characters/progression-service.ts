@@ -14,7 +14,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
 import { experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
-import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";

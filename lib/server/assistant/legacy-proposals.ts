@@ -1,7 +1,8 @@
 import type { Prisma } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
-import { intentSummary, requestDigest } from "./intent-store";
+import { intentSummary } from "./intent-store";
+import { requestDigest } from "./json";
 import type { ActionPreview, ActionResult,AssistantCaller } from "./types";
 
 import "server-only";

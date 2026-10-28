@@ -13,3 +13,5 @@ export type CampaignKind = (typeof CampaignKind)[keyof typeof CampaignKind];
 export const CampaignVisibility = { PRIVATE: "private", OFFICIAL: "official" } as const;
 
 export type CampaignVisibility = (typeof CampaignVisibility)[keyof typeof CampaignVisibility];
+
+export const SRD_TEMPLATE_NAME = "5e SRD 5.2";
