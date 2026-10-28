@@ -20,6 +20,8 @@ import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mut
 import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
 import { moveMutation, moveSchema } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
+import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
@@ -264,5 +266,91 @@ describe.skipIf(!FILE)("real file import", () => {
     console.info(JSON.stringify({ units: units.length, participantsCreated: created, withAttacks: [...byName.values()].filter((s) => s.attacks > 0).length, speedPositive: [...byName.values()].filter((s) => s.baseCells > 0).length, flyers: flyers.length, flyersWithSpeed: flyers.filter((s) => s.baseCells > 0).length, flyersMoved: flyers.filter((s) => s.moved > 0).length, attacked: [...byName.values()].filter((s) => s.attacked > 0).length, errors: issues.length, noAttacks: [...byName.values()].filter((s) => s.attacks === 0).map((s) => s.name), zeroSpeed: [...byName.values()].filter((s) => s.baseCells === 0).map((s) => s.name), neverAttacked: [...byName.values()].filter((s) => s.attacks > 0 && s.attacked === 0 && s.turns > 0).map((s) => s.name), neverActed: [...byName.values()].filter((s) => s.turns === 0).map((s) => s.name), rejections: [...rejections], issues: issues.slice(0, 20) }, null, 1));
     expect(issues).toEqual([]);
     expect(created).toBe(units.length);
+  }, 600_000);
+  it("every native imported spell casts in a battle", async () => {
+    const spells = await prisma.spell.findMany({ where: { campaignId, executionMode: "native" } });
+
+    const units = await prisma.unit.findMany({ where: { campaignId }, take: 2 });
+
+    const hero = await prisma.character.create({ data: { campaignId, type: "player", controlledBy: userId, name: "Caster Hero", class: "Wizard", race: "Human", level: 10, intelligence: 18, constitution: 14, armorClass: 14 } });
+
+    const summonDeps = { loadPool: async (id: string) => ({ units: await prisma.unit.findMany({ where: { campaignId: id } }), races: await prisma.race.findMany({ where: { campaignId: id } }) }) };
+
+    const rng = (() => { let a = 11;
+
+ return () => { a = (a + 0x6d2b79f5) | 0;
+
+ let t = Math.imul(a ^ (a >>> 15), 1 | a);
+
+ t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+
+ return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
+
+    const deps: any = { getUserId: async () => userId, rateLimit: async () => ({ allowed: true, count: 0, limit: 1e6, resetInSeconds: 0 }), loadBattle: (a: any) => loadBattle(prisma, a), saveBattle: (b: any, o: any) => saveBattle(prisma, b, o), loadRecentEvents: (id: string, l: number) => loadRecentEvents(prisma, id, l), publish: () => {}, rng };
+
+    const run = async (battleId: string, options: any, body: any = {}) => {
+      const res = await runBattleMutation(new Request("http://localhost/x", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }), { ...options, params: { id: campaignId, battleId } }, deps);
+
+      return { status: res.status, body: await res.json() };
+    };
+
+    const CAST = { access: "member", requireStatus: "active", blockedByMode: true, schema: spellSchema, mutate: createSpellMutation({ ...summonDeps, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) }, { serverRolls: true }) };
+
+    const mechanic = (s: (typeof spells)[number]) => {
+      const r = (s.resolution as any)?.kind ?? "auto";
+
+      const kinds = [...new Set(((s.spellEffects as any[]) ?? []).map((e) => e.kind))].sort().join("+") || "none";
+
+      return `${(s.targeting as any)?.kind ?? "?"}/${r}/${kinds}${s.cost === "reaction" ? "/reaction" : ""}`;
+    };
+
+    const byMechanic = new Map<string, { cast: number; errors: number }>();
+
+    const issues: string[] = [];
+
+    let cast = 0;
+
+    for (const spell of spells) {
+      const key = mechanic(spell);
+
+      const tally = byMechanic.get(key) ?? { cast: 0, errors: 0 };
+
+      byMechanic.set(key, tally);
+
+      const battleId = (await prisma.battleScene.create({ data: { campaignId, name: `ТЕСТ spell ${spell.name}`.slice(0, 80), status: "prepared", participants: [{ id: hero.id, type: ParticipantSourceType.CHARACTER, side: "ally" }, { id: units[0].id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }, { id: units[1].id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 }] as any, map: { cols: 20, rows: 14, background: null, opacity: 0.5 }, currentRound: 1, currentTurnIndex: 0 } })).id;
+
+      const start = await run(battleId, { access: "dm", requireStatus: "prepared", mutate: createStartMutation() });
+
+      if (start.status !== 200) { issues.push(`start ${spell.name}: ${start.status} ${JSON.stringify(start.body).slice(0, 160)}`); tally.errors++; continue; }
+
+      const state: any = await (await runBattleMutation(new Request("http://localhost/b"), { params: { id: campaignId, battleId }, access: "member", dryRun: () => true, includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, mutate: (c: any) => ({ participants: c.participants, pending: c.pending, events: [] }) } as any, deps)).json();
+
+      const order = state.initiativeOrder as any[];
+
+      const me = order.find((p) => p.basicInfo.sourceType === "character");
+
+      const foe = order.find((p) => p.basicInfo.side === "enemy");
+
+      const friend = order.find((p) => p.basicInfo.side === "ally" && p.basicInfo.id !== me.basicInfo.id);
+
+      const at = me.battleData.position;
+
+      const close = (p: any, dx: number) => ({ ...p, battleData: { ...p.battleData, position: { x: at.x + dx, y: at.y } } });
+
+      await run(battleId, { access: "dm", requireStatus: "active", mutate: (c: any) => ({ participants: c.participants.map((p: any) => (p.basicInfo.id === foe.basicInfo.id ? close(p, 1) : p.basicInfo.id === friend.basicInfo.id ? close(p, -1) : p)), pending: c.pending, events: [] }) });
+      foe.battleData.position = { x: at.x + 1, y: at.y };
+
+      const kind = (spell.targeting as any)?.kind;
+
+      const body = { casterId: me.basicInfo.id, spellId: spell.id, free: true, targetIds: kind === "self" || kind === "template" ? [] : kind === "ally" ? [friend.basicInfo.id] : [foe.basicInfo.id], ...(kind === "template" && { targetCell: foe.battleData.position }), diceRolls: [] };
+
+      const r = await run(battleId, CAST, body);
+
+      if (r.status === 200) { cast++; tally.cast++; } else { tally.errors++; issues.push(`${spell.name} [${key}]: ${r.status} ${JSON.stringify(r.body).slice(0, 200)}`); }
+    }
+
+    await prisma.battleScene.deleteMany({ where: { campaignId } });
+    console.info(JSON.stringify({ native: spells.length, cast, errors: issues.length, byMechanic: Object.fromEntries(byMechanic), issues: issues.slice(0, 30) }, null, 1));
+    expect(issues).toEqual([]);
   }, 600_000);
 });
