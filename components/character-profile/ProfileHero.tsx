@@ -50,6 +50,9 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
                 {hpText(sheet)}
                 {sheet.hitDice && ` · ${sheet.hitDice}`}
               </button>
+              {sheet.classTable?.map((line) => (
+                <p key={line} className="text-xs text-hud-muted">{line}</p>
+              ))}
               {sheet.rest && <RestBadges />}
               {sheet.rest && <HitDicePanel />}
             </div>

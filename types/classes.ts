@@ -16,6 +16,15 @@ export interface Subclass {
   features: ClassFeature[];
 }
 
+export interface ClassColumn {
+  key: string;
+  label: string;
+  /** рівно 20 клітинок: "2", "+2", "1d6", "D8", "+10 ft.", "" */
+  values: string[];
+  /** колонка — максимум спільного пулу вмінь класу */
+  pool?: { rest: "short" | "long" };
+}
+
 export interface GameClassData {
   id: string;
   name: string;
@@ -30,6 +39,7 @@ export interface GameClassData {
   features: ClassFeature[];
   subclassLevel: number | null;
   subclasses: Subclass[];
+  columns?: ClassColumn[];
 }
 
 export interface CharacterClassEntry {

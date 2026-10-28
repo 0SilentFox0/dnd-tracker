@@ -1,4 +1,6 @@
+import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
@@ -11,6 +13,7 @@ export interface ArtifactFormState {
   setId: string | null;
   abilities: Ability[];
   weapon: WeaponStats;
+  armor?: ArmorStats | null;
 }
 
 export interface ArtifactFormSubmitPayload {
@@ -22,6 +25,7 @@ export interface ArtifactFormSubmitPayload {
   setId: string | null | undefined;
   abilities: Ability[];
   weapon?: WeaponStats;
+  armor?: ArmorStats | null;
 }
 
 export function buildArtifactPayload(s: ArtifactFormState, mode: "create" | "edit"): ArtifactFormSubmitPayload {
@@ -36,5 +40,6 @@ export function buildArtifactPayload(s: ArtifactFormState, mode: "create" | "edi
     setId: s.setId || cleared,
     abilities: s.abilities,
     ...(isWeaponSlot(s.slot) && { weapon: s.weapon }),
+    ...(s.slot === ArtifactSlot.ARMOR && (s.armor ? { armor: s.armor } : mode === "edit" && { armor: null })),
   };
 }

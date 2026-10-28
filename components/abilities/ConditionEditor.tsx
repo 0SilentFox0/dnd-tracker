@@ -28,9 +28,14 @@ function defaultFor(type: Condition["type"]): Condition {
       return { type, races: [""] };
     case "targetDead":
     case "actorIsEnemy":
+    case "allyAdjacent":
       return { type };
+    case "attackRollMode":
+      return { type, mode: "advantage" };
     case "hasMark":
       return { type, who: "eventActor", markId: "mark" };
+    case "armorWorn":
+      return { type, categories: ["none"] };
     case "not":
       return { type, condition: DEFAULT_CONDITION };
     case "all":

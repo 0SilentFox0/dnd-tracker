@@ -5,6 +5,7 @@ import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { attackDamageModifier, attackRollModifier } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { classArmorBase, isClassModeHero } from "@/lib/utils/characters/classes/armor-class";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -22,10 +23,12 @@ export function abilityLines(p: BattleParticipant, key: AbilityKey, base: number
 export function armorTotal(p: BattleParticipant): SheetTotal {
   const mods = collectModifiers([p], p.basicInfo.id, { stat: "armor" });
 
+  const base: SheetLine[] = isClassModeHero(p) ? classArmorBase(p).lines : [{ label: "База", value: String(p.combatStats.armorClass), source: "base" }];
+
   return {
     total: statWithModifiers([p], p.basicInfo.id, "armor", p.combatStats.armorClass),
     lines: [
-      { label: "База", value: String(p.combatStats.armorClass), source: "base" },
+      ...base,
       ...mods.entries.flatMap((e) => [
         ...(e.flat ? [{ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) }] : []),
         ...(e.percent ? [{ label: e.label, value: `${signed(e.percent)}%`, source: asSource(e.sourceType) }] : []),

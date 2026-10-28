@@ -37,11 +37,11 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
               <span className="hud-sc block font-bold">Атака другою рукою</span>
             </button>
           )}
-          {!ability && abilities.map(({ ability: a, cooldownLeft }) => (
+          {!ability && abilities.map(({ ability: a, cooldownLeft, pool }) => (
             <button key={a.key} type="button" disabled={cooldownLeft > 0 || isPending} onClick={() => pick(a)} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
               {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
               <span className="min-w-0">
-                <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">ще {cooldownLeft} р.</span>}</span>
+                <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">ще {cooldownLeft} р.</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
                 <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(describeEffect).join(", ")}</span>
               </span>
             </button>

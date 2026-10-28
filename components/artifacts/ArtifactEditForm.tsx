@@ -54,6 +54,7 @@ export function ArtifactEditForm({
         abilities: artifact.abilities,
         abilityIssues: artifact.abilityIssues,
         weapon: artifact.weapon,
+        armor: artifact.armor ?? null,
       }}
       actions={{
         onSubmit: async (payload) => {

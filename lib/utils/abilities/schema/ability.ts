@@ -1,18 +1,23 @@
 import { z } from "zod";
 
+import { FormulaSchema, ScaleSchema } from "./common";
 import { ConditionSchema } from "./conditions";
 import { type Effect, EffectSchema, isBakedStat, isStaticEffect, TIMED_STATS } from "./effects";
 import { isAreaTarget, PASSIVE_TARGETS } from "./kinds";
+import { isStaticCondition } from "./static-condition";
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
+
+import { CLASS_COLUMN_KEY_RE } from "@/lib/constants/classes";
 
 export const LimitsSchema = z.object({
   perBattle: z.number().int().min(1).optional(),
   perRound: z.number().int().min(1).optional(),
   perTurn: z.number().int().min(1).optional(),
-  perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.number().int().min(1) }).optional(),
+  perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.union([z.number().int().min(1), FormulaSchema, ScaleSchema]) }).optional(),
   cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
   legendaryCost: z.number().int().min(1).max(3).optional(),
+  pool: z.object({ key: z.string().regex(CLASS_COLUMN_KEY_RE).max(40), cost: z.number().int().min(1).max(20) }).optional(),
 });
 
 function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): string[] {
@@ -107,7 +112,7 @@ export const AbilitySchema = z
     }
 
     a.effects.forEach((effect, i) => {
-      for (const message of effectIssues(effect, a.trigger, a.condition !== undefined)) {
+      for (const message of effectIssues(effect, a.trigger, a.condition !== undefined && !isStaticCondition(a.condition))) {
         ctx.addIssue({ code: "custom", path: ["effects", i], message });
       }
     });

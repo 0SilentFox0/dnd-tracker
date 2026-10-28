@@ -59,7 +59,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         continue;
       }
 
-      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key, ctx.round));
+      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key, ctx.round, ability.limits?.pool));
       fired.push(ability.key);
 
       for (const [effectIndex, effect] of ability.effects.entries()) {

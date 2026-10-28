@@ -36,7 +36,7 @@
 
 `GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~100 КБ), статичний (`force-static`, `s-maxage`).
 - Його будує `lib/server/content/openapi.ts` з обох реєстрів.
-- Тіла запитів — ті самі Zod-схеми через `toJsonSchemas` (`json-schema.ts`, локальний реєстр Zod). Спільні підсхеми підставляються через `$ref`: здібність, тригер, умова, кожен вид ефекту, `SpellFx`, `WeaponStats`, `RulesetPatch`.
+- Тіла запитів — ті самі Zod-схеми через `toJsonSchemas` (`json-schema.ts`, локальний реєстр Zod). Спільні підсхеми підставляються через `$ref`: здібність, тригер, умова, кожен вид ефекту, `SpellFx`, `WeaponStats`, `RulesetPatch`. Спільні схеми 4f-2: `Formula`, `Flat`, `Amount`, `ArmorStats`, `ClassColumn`.
 - Помилки й успішні відповіді винесені в `components.responses`.
 - Кожна операція має `x-scopes`. Операції `sessionOnly` в документ не входять.
 - Тест звіряє кожен шлях документа з наявним `route.ts`.
@@ -80,12 +80,14 @@
 - **Відповіді** (`list`/`toItem`) нормалізуються через `toGameClassData` (`lib/utils/characters/classes/row.ts`): клієнтські хуки отримують `GameClassData` без `campaignId`/`sourceId`.
 - **Бандл**: таблиця `classes` необов'язкова — старі бандли імпортуються без неї.
 - Правила: `rules.classes { enabled }`; без нього ресурс доступний, але персонажів із `classes` сервер не приймає (422).
+- **Колонки таблиці класу (4f-2)**: `columns` — `ClassColumn { key, label, values[20], pool? }`, міграція `20261101000000_class_columns` (лише додає колонку). Zod перевіряє посилання `scale`/`pool` вмінь на колонки; оновлення без `columns` перевіряється за збереженою таблицею — `CLASS_COLUMN_UNKNOWN`.
 
 ## Заклинання й зброя 5e (етап 4c-2)
 
 - **Заклинання** (`spells`): додаткові поля `dieSides` (грань кубика; порожнє = d6 у 5e, HOMM поле ігнорує), `upcastDice` (кубики на крок підсилення), `upcastTargets` (цілі на крок), `addAbilityMod` (додавати модифікатор характеристики до шкоди); `dice` до 40 (`SpellDiceSchema`); `resolution` приймає `attack` (кидок проти AC). Міграція `20261028000000_spell_5e_dice` — лише додає колонки. У HOMM-заклинань поля порожні, поведінка не змінюється.
 - **Зброя** (артефакти слота зброї і `attacks` юніта): `traits` — масив із `light|finesse|twoHanded|versatile|reach|thrown|ammunition` (в артефакті зберігається модифікатором `traits`), `versatileDice` — кубик двома руками для `versatile`; `properties` — вільна примітка. Форми: чекбокси `WeaponTraitsField`.
 - Правила: `rules.criticals.doubleDice` (за замовчуванням `false`).
+- **Броня артефакта (4f-2)**: `armor` — `ArmorStats { category, base, dexCap?, strength?, stealthDisadvantage? }`, лише слот `armor` (`ARMOR_SLOT_ONLY`); зберігається записами в `modifiers` з типами `ArmorModifierType`; імпорт/експорт поля `armor`, OpenAPI `ArmorStats`.
 
 ## Монстри 5e (етап 4e)
 
@@ -122,9 +124,10 @@
 - **Конвеєр** — `scripts/srd/`: `lib/source.ts` (Open5e `open5e/open5e-api`, тека `data/v2/wizards-of-the-coast/srd-2024`, SHA `e69ac13b…`, 17 файлів з md5), `lib/fetch.ts` (завантаження в tmp з перевіркою md5), `convert/*.ts` (чисті функції: рядок Open5e → рядок імпортера 4f-0), `overrides/*.ts` (ручні таблиці за `slug`: заклинання — сторона/цілі/баффи, вміння класів, раси, монстри). `pnpm srd:build` пише `data/templates/srd-5.2/{spell-groups,spells,races,classes,units,artifacts}.json` + `manifest.json` (SHA, дата, лічильники, credits). Кожен рядок має `slug` для майбутніх мовних накладок; імпортер його не отримує. Тест цілісності (`scripts/srd/__tests__/data-integrity.test.ts`) проганяє всі файли через `importContent` з `dryRun` без помилок і попереджень.
 - **Унікальність slug** — лише в межах виду: `srd-2024_shield` є і заклинанням, і артефактом. Мовні накладки мають ключуватися парою `(kind, slug)`, не самим `slug`.
 - **Завантажувач** — `pnpm constructor:srd-template [--owner <userId>] [--allow-remote]`: знаходить або створює офіційний шаблон, пише пресет правил (`scripts/srd/lib/rules-preset.ts`: усі механіки 5e увімкнено, мораль вимкнено, `initiative 0–20`, баланс `xp` 2024) і `credits`, потім `importContent(mode: "update")` у порядку `spell-groups → spells → races → classes → units → artifacts`; exit 1, якщо є помилки рядків. Повторний запуск оновлює за назвами. Кеш Next скрипт не інвалідовує (`ImportDeps.invalidate` = no-op) — довідник оновиться протягом `REFERENCE_REVALIDATE_SECONDS`.
-- **Обсяг** — 8 шкіл (значок і колір), 339 заклинань (137 з ефектами), 9 рас, 12 класів з підкласами (механізовано 25 із 281 вмінь класів), 331 монстр, 39 артефактів (38 видів зброї і щит); що механізовано, а що лишається описом/нотаткою — спек §4f-1 «Контент». Монстри — без раси (тип, чуття, мови, режими руху — нотатка «Statblock»), `gridSize` gargantuan = 3, `level = ⌈CR⌉`.
+- **Обсяг** — 8 шкіл (значок і колір), 339 заклинань (137 з ефектами), 9 рас, 12 класів з підкласами (механізовано 51 із 284 вмінь класів), 331 монстр, 51 артефакт (38 видів зброї, щит і 12 обладунків); що механізовано, а що лишається описом/нотаткою — спек §4f-1 «Контент». Монстри — без раси (тип, чуття, мови, режими руху — нотатка «Statblock»), `gridSize` gargantuan = 3, `level = ⌈CR⌉`.
 - **Атрибуція** — `campaigns.credits` (текст, міграція `20261031000000_campaign_credits`): бандл (`Bundle.credits`), створення з шаблону, «оновлення з джерела» (копіюється, коли відрізняється); показ лише для читання — картка шаблону, банер шаблону, налаштування кампанії «Джерела й ліцензії».
 - **Іконки** — сторонніх наборів немає. Заклинання без іконки показують значок школи в її кольорі (`SpellIcon`; ключі `shield|portal|eye|heart|flame|mask|skull|vortex` поруч із 5 ключами HOMM5). `pnpm assets:attach <campaignId> <тека> --kind units|spells|artifacts|classes|races|skills|main-skills [--allow-official]`: ім'я файлу = назва контенту або `slug` рядка даних SRD (з префіксом `srd-2024_` чи без); нормалізація без регістру й пунктуації (`_`, `-`, `:`, апострофи, повторні пробіли → пробіл), суфікси варіантів `A1`/`2`/`v3` відкидаються, із кількох варіантів — перший, завантаження в бакет виду (`<campaignId>/<kind>/<назва>-<sha1>.<ext>`, `cacheControl` рік), прив'язка через `importContent(update)` (юніт — `avatar`, решта — `icon`), звіт без пари. Офіційний шаблон — лише з `--allow-official` (власні AI-іконки; токени Forgotten Adventures — ніколи).
+- **4f-2**: 12 обладунків; колонки таблиць класів з пулами (Focus, Sorcery Points, Channel Divinity, Lay on Hands) і додатковими колонками (Action Surge, Divine Spark); 37 механізованих умінь класів. Завантажувач замінює назви шкіл у `school` на id груп кампанії (ручний імпорт `classes.json` через UI лишає назву — бонус школи не спрацює).
 
 ## Оновлення з джерела (етап 3)
 

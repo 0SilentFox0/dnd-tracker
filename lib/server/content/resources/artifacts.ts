@@ -4,14 +4,21 @@ import type { z } from "zod";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { ArmorModifierType, ArtifactSlot } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { createArtifactSchema, patchArtifactSchema } from "@/lib/schemas/artifacts";
 import { persistIcon } from "@/lib/server/artifacts/persist-icon";
 import { readArtifactsList } from "@/lib/server/artifacts/read-artifacts-list";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { ContentError } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
+import { armorStatsColumns } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
+
+const ARMOR_TYPES = new Set<string>(Object.values(ArmorModifierType));
+
+const withoutArmorModifiers = (modifiers: unknown) => (Array.isArray(modifiers) ? modifiers : []).filter((m) => !(m && typeof m === "object" && ARMOR_TYPES.has((m as { type?: string }).type ?? "")));
 
 const withSet = { artifactSet: true } as const;
 
@@ -20,7 +27,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   listFields: ["slot", "rarity", "setId"],
   idParam: "artifactId",
   label: "Артефакти",
-  description: "Артефакти: слот, рідкість, сет, зброя, бонуси (здібності).",
+  description: "Артефакти: слот, рідкість, сет, зброя, броня 5e (armor — лише слот armor), бонуси (здібності).",
   path: "/artifacts",
   schemas: { create: createArtifactSchema, update: patchArtifactSchema },
   errors: [422],
@@ -44,6 +51,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
         slot: data.slot,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         ...(data.weapon && weaponStatsColumns(data.weapon)),
+        ...(data.armor && armorStatsColumns(data.armor)),
         setId: data.setId,
         icon,
       },
@@ -51,9 +59,15 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
     });
   },
   async update(actor, existing, data) {
+    if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR) throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
+
     await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId });
 
     const icon = data.icon === undefined ? undefined : data.icon === existing.icon ? data.icon : await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`);
+
+    const dropArmor = data.armor === null || (data.slot !== undefined && data.slot !== ArtifactSlot.ARMOR);
+
+    const keptModifiers = dropArmor ? { modifiers: withoutArmorModifiers(existing.modifiers) } : {};
 
     return prisma.artifact.update({
       where: { id: existing.id },
@@ -63,7 +77,9 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
         rarity: data.rarity,
         slot: data.slot,
         abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
+        ...keptModifiers,
         ...(data.weapon && weaponStatsColumns(data.weapon)),
+        ...(data.armor && armorStatsColumns(data.armor)),
         setId: data.setId !== undefined ? data.setId || null : undefined,
         icon: icon === undefined ? undefined : (icon ?? null),
       },

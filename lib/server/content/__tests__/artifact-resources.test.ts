@@ -55,3 +55,33 @@ describe("artifact resources", () => {
     expect(error).toMatchObject({ status: 400 });
   });
 });
+
+describe("artifact armor removal", () => {
+  const modifiers = [
+    { type: "armorCategory", value: "heavy" },
+    { type: "armorBase", value: "16" },
+    { type: "damageDice", value: "1d4" },
+  ];
+
+  const patch = async (existing: object, data: object) => {
+    db.artifact.findFirst.mockResolvedValue({ id: "a1", campaignId: "c1", icon: null, ...existing });
+    db.artifact.update.mockResolvedValue({ id: "a1" });
+    await updateContent(artifactsResource, actor, "a1", data);
+
+    return db.artifact.update.mock.calls[0][0].data;
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("armor null strips armor modifiers and keeps the rest", async () => {
+    expect((await patch({ slot: "armor", modifiers }, { armor: null })).modifiers).toEqual([{ type: "damageDice", value: "1d4" }]);
+  });
+
+  it("changing the slot away from armor strips them", async () => {
+    expect((await patch({ slot: "armor", modifiers }, { slot: "ring" })).modifiers).toEqual([{ type: "damageDice", value: "1d4" }]);
+  });
+
+  it("untouched armor keeps modifiers as is", async () => {
+    expect(await patch({ slot: "armor", modifiers }, { name: "X" })).not.toHaveProperty("modifiers");
+  });
+});

@@ -11,7 +11,7 @@ import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { abilityCharges, NO_EFFECTS, turnsUntil } from "@/lib/utils/battle/view";
+import { abilityCharges, NO_EFFECTS, poolViews, turnsUntil } from "@/lib/utils/battle/view";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -25,6 +25,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 
   const charges = abilityCharges(hero, battle.currentRound);
+
+  const pools = poolViews(hero);
 
   const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
@@ -56,9 +58,10 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
         </div>
       </div>
       {!compact && <SlotGrid participant={hero} />}
-      {!compact && charges.length > 0 && (
+      {!compact && (charges.length > 0 || pools.length > 0) && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-[#d6cbb7]">
           {charges.map((c) => <span key={c.key}>{c.name}{c.limit !== null && ` ${c.left}/${c.limit}`}{c.cooldownLeft > 0 && ` · перезарядка: ${c.cooldownLeft} р.`}</span>)}
+          {pools.map((p) => <span key={p.key}>{p.label} {p.left}/{p.max}</span>)}
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}

@@ -1,7 +1,10 @@
 "use client";
 
 import type { AbilitySectionProps } from "../AbilityPanel";
+import { useAbilityEditor } from "../editor-context";
 import { FieldRenderer } from "../fields/FieldRenderer";
+import { FlatField } from "../fields/FlatField";
+import { ScaleColumnSelect } from "../fields/ScaleColumnSelect";
 import { SectionTitle } from "./SectionTitle";
 
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
@@ -21,6 +24,8 @@ const REST_OPTIONS = [
 ];
 
 export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) {
+  const columns = useAbilityEditor().classColumns;
+
   if (ability.trigger.event === "passive") {
     return (
       <div className="space-y-1">
@@ -52,7 +57,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
     onChange(Object.keys(next).length ? { ...rest, limits: next } : rest);
   };
 
-  const setRest = (patch: { rest?: string; uses?: number }) => {
+  const setRest = (patch: { rest?: string; uses?: NonNullable<Limits["perRest"]>["uses"] }) => {
     const current = ability.limits?.perRest;
 
     const rest = "rest" in patch ? patch.rest : (current?.rest ?? "long");
@@ -72,7 +77,23 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />
         ))}
         <FieldRenderer meta={{ name: "perRestKind", label: "Відпочинок", input: "select", options: REST_OPTIONS, optional: true }} path={`${path}.limits.perRest.rest`} value={ability.limits?.perRest?.rest} onChange={(v) => setRest({ rest: v as string | undefined })} />
-        <FieldRenderer meta={{ name: "perRestUses", label: "Разів", input: "number", optional: true }} path={`${path}.limits.perRest.uses`} value={ability.limits?.perRest?.uses} onChange={(v) => setRest({ uses: v as number | undefined })} />
+        {columns ? (
+          <div className="col-span-3 space-y-1">
+            <span className="text-xs text-muted-foreground">Разів за відпочинок</span>
+            <FlatField id={`${path}.limits.perRest.uses`} meta={{ name: "perRestUses", label: "Разів", input: "flat", optional: true }} value={ability.limits?.perRest?.uses as never} onChange={(v) => setRest({ uses: v as never })} />
+          </div>
+        ) : (
+          <FieldRenderer meta={{ name: "perRestUses", label: "Разів", input: "number", optional: true }} path={`${path}.limits.perRest.uses`} value={ability.limits?.perRest?.uses as number | undefined} onChange={(v) => setRest({ uses: v as number | undefined })} />
+        )}
+        {columns && isButton && (
+          <div className="col-span-3 space-y-1">
+            <span className="text-xs text-muted-foreground">Пул (колонка, ціна)</span>
+            <div className="flex gap-1">
+              <ScaleColumnSelect id={`${path}.limits.pool.key`} poolsOnly value={ability.limits?.pool?.key} onChange={(key) => set("pool", { key, cost: ability.limits?.pool?.cost ?? 1 })} />
+              <input aria-label="Ціна пулу" type="number" min={1} max={20} className="h-9 w-16 rounded-md border border-hud-line bg-hud-field px-2 text-sm" value={ability.limits?.pool?.cost ?? ""} onChange={(e) => set("pool", e.target.value === "" ? undefined : { key: ability.limits?.pool?.key ?? "", cost: Number(e.target.value) })} />
+            </div>
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />

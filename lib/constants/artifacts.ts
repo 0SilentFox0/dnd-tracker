@@ -125,6 +125,17 @@ export enum ArtifactModifierType {
   VERSATILE_DICE = "versatileDice",
 }
 
+// окремо від ArtifactModifierType: weaponStatsFromRow бере лише свої типи
+export enum ArmorModifierType {
+  CATEGORY = "armorCategory",
+  BASE = "armorBase",
+  DEX_CAP = "armorDexCap",
+  STRENGTH = "armorStrength",
+  STEALTH = "armorStealth",
+}
+
+export const ARMOR_LIMITS = { base: [1, 30], dexCap: [0, 10], strength: [1, 30] } as const;
+
 export const DEFAULT_ARTIFACT_MODIFIERS = {
   DAMAGE_DICE: "1d6",
   DAMAGE_TYPE: "slashing",

@@ -25,16 +25,17 @@ describe("convertClasses", () => {
     expect(cls("Fighter").skillChoices.from).toEqual(["acrobatics", "animalHandling", "athletics", "history", "insight", "intimidation", "persuasion", "perception", "survival"]);
   });
 
-  it("Extra Attack, Second Wind, Action Surge (2 and 17), no table columns", () => {
+  it("Extra Attack, Second Wind, Action Surge (2 only, scaled by the table), no table columns", () => {
     expect(at("Fighter", 5).find((a) => a.name === "Extra Attack")).toMatchObject({ id: "extra-attack-5", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: 1 }] });
     expect(at("Fighter", 1).find((a) => a.name === "Second Wind")).toMatchObject({
       id: "second-wind-1",
       trigger: { event: "bonusAction" },
-      limits: { perRest: { rest: "long", uses: 2 } },
-      effects: [{ kind: "heal", amount: "1d10", target: "self" }, { kind: "heal", amount: { formula: "hero_level" }, target: "self" }],
+      limits: { perRest: { rest: "long", uses: { scale: "second-wind-uses" } } },
+      effects: [{ kind: "heal", amount: "1d10", target: "self" }, { kind: "heal", amount: { formula: "class_level" }, target: "self" }],
     });
     expect(at("Fighter", 2).some((a) => a.id === "action-surge-2")).toBe(true);
-    expect(at("Fighter", 17).find((a) => a.id === "action-surge-17")).toMatchObject({ trigger: { event: "action" }, effects: [{ kind: "grantAction", extraActions: 2 }] });
+    expect(at("Fighter", 2).find((a) => a.id === "action-surge-2")).toMatchObject({ trigger: { event: "action" }, effects: [{ kind: "grantAction", extraActions: 2 }] });
+    expect(at("Fighter", 17).some((a) => a.id === "action-surge-17")).toBe(false);
 
     const names = cls("Fighter").features.flatMap((f) => f.abilities.map((a) => a.name));
 
@@ -63,7 +64,7 @@ describe("convertClasses", () => {
     const movement = cls("Monk").features.flatMap((f) => f.abilities.map((a) => ({ level: f.level, a }))).filter((x) => x.a.name === "Unarmored Movement");
 
     expect(movement.map((x) => x.level)).toEqual([2]);
-    expect(movement[0].a.effects).toEqual([{ kind: "modifyStat", stat: "speed", flat: 10 }]);
+    expect(movement[0].a.effects).toEqual([{ kind: "modifyStat", stat: "speed", flat: { scale: "unarmored-movement" } }]);
   });
 
   it("parseCoreTraits handles typos and long weapon lists", () => {

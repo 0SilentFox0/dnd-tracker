@@ -2,7 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
-import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -55,6 +55,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
   const usage = USAGE[trigger];
 
   if (usage.used(participant)) throw new BattleRuleError(usage.error.code, usage.error.message);
+
+  if (!poolAffordable(participant, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_POOL_EMPTY);
 
   if (!withinCountLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 

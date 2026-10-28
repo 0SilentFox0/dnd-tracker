@@ -1,4 +1,5 @@
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
+import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
 export interface ArtifactListItem {
@@ -43,4 +44,5 @@ export interface ArtifactData {
   abilities: Ability[];
   abilityIssues: ConversionIssue[];
   weapon: WeaponStats;
+  armor?: ArmorStats | null;
 }

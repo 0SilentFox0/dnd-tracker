@@ -59,7 +59,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
             <CharacterAbilityScores abilityScores={abilityScores} />
           </HudSection>
           <HudSection title="Бойові параметри">
-            <CharacterCombatParams campaignId={id} combatStats={combatStats} />
+            <CharacterCombatParams campaignId={id} combatStats={combatStats} classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />
           </HudSection>
         </>
       ),

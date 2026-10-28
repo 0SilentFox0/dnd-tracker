@@ -14,6 +14,7 @@ export const ARTIFACTS_IMPORT: ImportSpec = {
     { key: "setId", label: "Сет", aliases: ["set", "комплект"], type: "ref", ref: "artifact-sets", examples: ["", ""] },
     textField("icon", "Іконка", ["icon"]),
     jsonField("weapon", "Зброя (JSON)", ["weapon"], ['{"damageDice":"1d8","damageType":"slashing","attackType":"melee"}', ""]),
+    jsonField("armor", "Броня (JSON)", ["armor"]),
     abilitiesField(),
   ],
 };

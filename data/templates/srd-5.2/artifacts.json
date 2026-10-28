@@ -34,6 +34,41 @@
     }
   },
   {
+    "slug": "srd-2024_breastplate",
+    "name": "Breastplate",
+    "description": "Medium Armor. Armor Class: 14 + Dex modifier (max 2). Cost: 400 GP. Weight: 20 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "medium",
+      "base": 14
+    }
+  },
+  {
+    "slug": "srd-2024_chain-mail",
+    "name": "Chain Mail",
+    "description": "Heavy Armor. Armor Class: 16. Strength: 13. Stealth: Disadvantage. Cost: 75 GP. Weight: 55 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "heavy",
+      "base": 16,
+      "strength": 13,
+      "stealthDisadvantage": true
+    }
+  },
+  {
+    "slug": "srd-2024_chain-shirt",
+    "name": "Chain Shirt",
+    "description": "Medium Armor. Armor Class: 13 + Dex modifier (max 2). Cost: 50 GP. Weight: 20 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "medium",
+      "base": 13
+    }
+  },
+  {
     "slug": "srd-2024_club",
     "name": "Club",
     "description": "Simple Melee Weapon. Damage: 1d4 bludgeoning. Properties: Light. Mastery: Slow. Cost: 0.1 GP. Weight: 2 lb.",
@@ -182,6 +217,18 @@
     }
   },
   {
+    "slug": "srd-2024_half-plate-armor",
+    "name": "Half Plate Armor",
+    "description": "Medium Armor. Armor Class: 15 + Dex modifier (max 2). Stealth: Disadvantage. Cost: 750 GP. Weight: 40 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "medium",
+      "base": 15,
+      "stealthDisadvantage": true
+    }
+  },
+  {
     "slug": "srd-2024_hand-crossbow",
     "name": "Hand Crossbow",
     "description": "Martial Ranged Weapon. Damage: 1d6 piercing. Properties: Ammunition (Range 30/120; Bolt), Light, Loading. Mastery: Vex. Cost: 75 GP. Weight: 3 lb.",
@@ -236,6 +283,17 @@
     }
   },
   {
+    "slug": "srd-2024_hide-armor",
+    "name": "Hide Armor",
+    "description": "Medium Armor. Armor Class: 12 + Dex modifier (max 2). Cost: 10 GP. Weight: 12 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "medium",
+      "base": 12
+    }
+  },
+  {
     "slug": "srd-2024_javelin",
     "name": "Javelin",
     "description": "Simple Melee Weapon. Damage: 1d6 piercing. Properties: Thrown (Range 30/120). Mastery: Slow. Cost: 0.5 GP. Weight: 2 lb.",
@@ -267,6 +325,17 @@
         "reach"
       ],
       "properties": "Heavy. Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_leather-armor",
+    "name": "Leather Armor",
+    "description": "Light Armor. Armor Class: 11 + Dex modifier. Cost: 10 GP. Weight: 10 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "light",
+      "base": 11
     }
   },
   {
@@ -401,6 +470,18 @@
     }
   },
   {
+    "slug": "srd-2024_padded-armor",
+    "name": "Padded Armor",
+    "description": "Light Armor. Armor Class: 11 + Dex modifier. Stealth: Disadvantage. Cost: 5 GP. Weight: 8 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "light",
+      "base": 11,
+      "stealthDisadvantage": true
+    }
+  },
+  {
     "slug": "srd-2024_pike",
     "name": "Pike",
     "description": "Martial Melee Weapon. Damage: 1d10 piercing. Properties: Heavy, Reach, Two-Handed. Mastery: Push. Cost: 5 GP. Weight: 18 lb.",
@@ -435,6 +516,19 @@
     }
   },
   {
+    "slug": "srd-2024_plate-armor",
+    "name": "Plate Armor",
+    "description": "Heavy Armor. Armor Class: 18. Strength: 15. Stealth: Disadvantage. Cost: 1500 GP. Weight: 65 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "heavy",
+      "base": 18,
+      "strength": 15,
+      "stealthDisadvantage": true
+    }
+  },
+  {
     "slug": "srd-2024_quarterstaff",
     "name": "Quarterstaff",
     "description": "Simple Melee Weapon. Damage: 1d6 bludgeoning. Properties: Versatile (1d8). Mastery: Topple. Cost: 0.2 GP. Weight: 4 lb.",
@@ -465,6 +559,30 @@
         "finesse"
       ],
       "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_ring-mail",
+    "name": "Ring Mail",
+    "description": "Heavy Armor. Armor Class: 14. Stealth: Disadvantage. Cost: 30 GP. Weight: 40 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "heavy",
+      "base": 14,
+      "stealthDisadvantage": true
+    }
+  },
+  {
+    "slug": "srd-2024_scale-mail",
+    "name": "Scale Mail",
+    "description": "Medium Armor. Armor Class: 14 + Dex modifier (max 2). Stealth: Disadvantage. Cost: 50 GP. Weight: 45 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "medium",
+      "base": 14,
+      "stealthDisadvantage": true
     }
   },
   {
@@ -593,6 +711,30 @@
       ],
       "versatileDice": "1d8",
       "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_splint-armor",
+    "name": "Splint Armor",
+    "description": "Heavy Armor. Armor Class: 17. Strength: 15. Stealth: Disadvantage. Cost: 200 GP. Weight: 60 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "heavy",
+      "base": 17,
+      "strength": 15,
+      "stealthDisadvantage": true
+    }
+  },
+  {
+    "slug": "srd-2024_studded-leather-armor",
+    "name": "Studded Leather Armor",
+    "description": "Light Armor. Armor Class: 12 + Dex modifier. Cost: 45 GP. Weight: 13 lb.",
+    "rarity": "common",
+    "slot": "armor",
+    "armor": {
+      "category": "light",
+      "base": 12
     }
   },
   {

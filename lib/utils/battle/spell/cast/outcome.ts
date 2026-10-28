@@ -5,6 +5,7 @@ import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
@@ -128,7 +129,10 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
 
-    if (success) factor = onSuccess === "half" ? 0.5 : 0;
+    const evasive = saveAbility === "dexterity" && onSuccess === "half" && hasEvasion(flow.ps, target);
+
+    if (evasive) factor = evasionFactor(success, true);
+    else if (success) factor = onSuccess === "half" ? 0.5 : 0;
 
     const extra = (bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "");
 
@@ -136,7 +140,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     flow.messages.push(r.autoFail
       ? `🎲 ${target.basicInfo.name}: рятівний кидок проти СК ${dc} — автопровал`
-      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${r.success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${r.success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}${evasive ? " · ухилення" : ""}`);
 
     if (resisted.message) flow.messages.push(resisted.message);
 

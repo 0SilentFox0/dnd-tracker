@@ -10,6 +10,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
+import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
@@ -182,5 +183,5 @@ export async function createBattleParticipantFromUnit(
     },
   };
 
-  return bakePassives(participant);
+  return resolveLimitFormulas(bakePassives(participant));
 }

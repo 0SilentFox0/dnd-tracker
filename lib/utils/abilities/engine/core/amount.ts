@@ -7,11 +7,24 @@ import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { rollDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
-function formulaContext(p: BattleParticipant): Record<string, number> {
+export const FORMULA_VARIABLES = ["hero_level", "class_level", "str_mod", "dex_mod", "con_mod", "int_mod", "wis_mod", "cha_mod", "prof", "lost_hp_percent", "morale", "cells_moved"] as const;
+
+function formulaContext(p: BattleParticipant): Record<(typeof FORMULA_VARIABLES)[number], number> {
   const { maxHp, currentHp } = p.combatStats;
+
+  const m = p.abilities.modifiers;
 
   return {
     hero_level: p.abilities.level,
+    // у вміннях класу class_level уже підставлено при збиранні (applyClassScale)
+    class_level: p.abilities.level,
+    str_mod: m.strength,
+    dex_mod: m.dexterity,
+    con_mod: m.constitution,
+    int_mod: m.intelligence,
+    wis_mod: m.wisdom,
+    cha_mod: m.charisma,
+    prof: p.abilities.proficiencyBonus ?? 0,
     lost_hp_percent: maxHp > 0 ? ((maxHp - currentHp) / maxHp) * 100 : 0,
     morale: ownMorale(p),
     cells_moved: p.battleData.movementUsed ?? 0,
@@ -19,7 +32,9 @@ function formulaContext(p: BattleParticipant): Record<string, number> {
 }
 
 export function resolveFlat(flat: Flat, owner: BattleParticipant): number {
-  return typeof flat === "number" ? flat : Math.floor(evaluateFormula(flat.formula, formulaContext(owner)));
+  if (typeof flat === "number") return flat;
+
+  return "formula" in flat ? Math.floor(evaluateFormula(flat.formula, formulaContext(owner))) : 0;
 }
 
 function percentBase(
@@ -42,6 +57,8 @@ export function resolveAmount(
   if (typeof amount === "number") return amount;
 
   if (typeof amount === "string") return rollDice(amount, input.rng);
+
+  if ("scale" in amount) return 0;
 
   if ("formula" in amount) return Math.max(0, Math.floor(evaluateFormula(amount.formula, formulaContext(input.owner))));
 

@@ -2,9 +2,10 @@ import type { GameClass } from "@prisma/client";
 
 import { isAbilityKey } from "@/lib/constants/abilities";
 import { CLASS_CASTERS, HIT_DICE } from "@/lib/constants/classes";
+import { ClassColumnSchema } from "@/lib/schemas/classes";
 import { classFeatureAbilities } from "@/lib/utils/abilities/read";
 import { isRecord } from "@/lib/utils/common/is-record";
-import type { ClassCaster, GameClassData, HitDie, Subclass } from "@/types/classes";
+import type { ClassCaster, ClassColumn, GameClassData, HitDie, Subclass } from "@/types/classes";
 
 const asObject = (v: unknown): Record<string, unknown> => (isRecord(v) ? v : {});
 
@@ -19,6 +20,16 @@ function subclassesOf(v: unknown): Subclass[] {
     const o = asObject(s);
 
     return typeof o.id === "string" && typeof o.name === "string" ? [{ id: o.id, name: o.name, features: classFeatureAbilities(o.features) }] : [];
+  });
+}
+
+function columnsOf(v: unknown): ClassColumn[] {
+  if (!Array.isArray(v)) return [];
+
+  return v.flatMap((c) => {
+    const parsed = ClassColumnSchema.safeParse(c);
+
+    return parsed.success ? [parsed.data] : [];
   });
 }
 
@@ -41,5 +52,6 @@ export function toGameClassData(row: GameClass): GameClassData {
     features: classFeatureAbilities(row.features),
     subclassLevel: row.subclassLevel,
     subclasses: subclassesOf(row.subclasses),
+    columns: columnsOf(row.columns),
   };
 }

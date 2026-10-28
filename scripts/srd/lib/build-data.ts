@@ -4,7 +4,7 @@ import { convertRaces } from "../convert/races";
 import { convertSpellGroups } from "../convert/spell-groups";
 import { convertSpells } from "../convert/spells";
 import { convertUnits } from "../convert/units";
-import { CLASS_FEATURE_OVERRIDES, DROP_FEATURES, FEATURE_LEVELS, SPELLCASTING_ABILITY } from "../overrides/classes";
+import { CLASS_FEATURE_OVERRIDES, COLUMN_FEATURES, COLUMN_LABELS, DROP_COLUMNS, DROP_FEATURES, EXTRA_COLUMNS, FEATURE_LEVELS, POOL_COLUMNS, SINGLE_LEVEL_FEATURES, SPELLCASTING_ABILITY } from "../overrides/classes";
 import { RACE_OVERRIDES } from "../overrides/races";
 import { SPELL_OVERRIDES } from "../overrides/spells";
 import { UNIT_OVERRIDES } from "../overrides/units";
@@ -34,7 +34,8 @@ export function buildSrdData(data: Open5eData): SrdData {
 
   assertKnown("spell overrides", Object.keys(SPELL_OVERRIDES), pks(data.spells));
   assertKnown("race overrides", Object.keys(RACE_OVERRIDES), pks(data.speciesTraits));
-  assertKnown("class feature overrides", [...Object.keys(CLASS_FEATURE_OVERRIDES), ...Object.keys(FEATURE_LEVELS), ...DROP_FEATURES], pks(data.features));
+  assertKnown("class feature overrides", [...Object.keys(CLASS_FEATURE_OVERRIDES), ...Object.keys(FEATURE_LEVELS), ...DROP_FEATURES, ...COLUMN_FEATURES, ...DROP_COLUMNS, ...Object.keys(COLUMN_LABELS), ...Object.keys(POOL_COLUMNS), ...SINGLE_LEVEL_FEATURES], pks(data.features));
+  assertKnown("extra class columns", Object.keys(EXTRA_COLUMNS), pks(data.classes));
   assertKnown("spellcasting abilities", Object.keys(SPELLCASTING_ABILITY), pks(data.classes));
   assertKnown("unit overrides", Object.keys(UNIT_OVERRIDES), pks(data.creatures));
 

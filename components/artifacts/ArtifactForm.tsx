@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ARTIFACT_FORM_TAB, type ArtifactFormTabId } from "./artifact-form-tabs";
+import { ArtifactArmorFields } from "./ArtifactArmorFields";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
@@ -17,10 +18,13 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ARTIFACT_RARITY_OPTIONS,
   ARTIFACT_SLOT_OPTIONS,
+  ArtifactSlot,
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
@@ -38,6 +42,7 @@ export interface ArtifactFormInitial {
   abilities: Ability[];
   abilityIssues: ConversionIssue[];
   weapon?: WeaponStats;
+  armor?: ArmorStats | null;
 }
 
 export interface ArtifactFormProps {
@@ -61,9 +66,15 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
 
   const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
 
-  if (!hasWeapon && tab === ARTIFACT_FORM_TAB.weapon) setTab(ARTIFACT_FORM_TAB.basic);
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
-  const activeTab = hasWeapon || tab !== ARTIFACT_FORM_TAB.weapon ? tab : ARTIFACT_FORM_TAB.basic;
+  const hasArmor = classesEnabled && data.slot === ArtifactSlot.ARMOR;
+
+  const tabMissing = (id: ArtifactFormTabId) => (id === ARTIFACT_FORM_TAB.weapon && !hasWeapon) || (id === ARTIFACT_FORM_TAB.armor && !hasArmor);
+
+  if (tabMissing(tab)) setTab(ARTIFACT_FORM_TAB.basic);
+
+  const activeTab = tabMissing(tab) ? ARTIFACT_FORM_TAB.basic : tab;
 
   const tabs: HudTab<ArtifactFormTabId>[] = [
     {
@@ -149,6 +160,9 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
             content: <ArtifactWeaponFields value={data.weapon} onChange={(w) => set("weapon", w)} />,
           },
         ]
+      : []),
+    ...(hasArmor
+      ? [{ id: ARTIFACT_FORM_TAB.armor, label: "Броня", content: <ArtifactArmorFields value={data.armor ?? null} onChange={(a) => set("armor", a)} /> }]
       : []),
     {
       id: ARTIFACT_FORM_TAB.abilities,

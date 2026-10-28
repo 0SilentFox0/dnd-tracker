@@ -29,6 +29,7 @@ export function refreshFromSource(live: BattleParticipant, fresh: BattleParticip
       ...live.battleData,
       resolvedAbilities: fresh.battleData.resolvedAbilities,
       attacks: fresh.battleData.attacks,
+      pools: fresh.battleData.pools,
     },
     spellcasting: {
       ...live.spellcasting,

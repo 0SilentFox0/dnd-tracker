@@ -1,0 +1,41 @@
+[
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_shield",
+    "fields": {
+      "name": "Shield",
+      "desc": "An imperceptible barrier of magical force protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from Magic Missile.",
+      "document": "srd-2024",
+      "level": 1,
+      "school": "abjuration",
+      "higher_level": "",
+      "target_type": "creature",
+      "range_text": "Self",
+      "range": 0,
+      "range_unit": null,
+      "ritual": false,
+      "casting_time": "reaction",
+      "reaction_condition": "which you take when you are hit by an attack roll or targeted by the Magic Missile spell",
+      "verbal": true,
+      "somatic": true,
+      "material": false,
+      "material_specified": "",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "",
+      "attack_roll": false,
+      "damage_roll": "",
+      "damage_types": [],
+      "duration": "1 round",
+      "shape_type": null,
+      "shape_size": null,
+      "shape_size_unit": null,
+      "concentration": false,
+      "classes": [
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  }
+]

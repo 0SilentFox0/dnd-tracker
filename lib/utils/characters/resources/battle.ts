@@ -61,6 +61,12 @@ function withCharges(p: BattleParticipant, charges: CharacterResources["charges"
     if (used > 0) usage[a.key] = { battle: used, round: 0, turn: 0 };
   }
 
+  for (const key of Object.keys(p.battleData.pools ?? {})) {
+    const used = charges[key]?.used ?? 0;
+
+    if (used > 0) usage[key] = { battle: used, round: 0, turn: 0 };
+  }
+
   return { ...p, battleData: { ...p.battleData, abilityUsage: usage } };
 }
 
@@ -97,7 +103,10 @@ export function spentSlots(p: BattleParticipant): Record<string, number> {
 }
 
 function battleCharges(prev: CharacterResources["charges"], p: BattleParticipant): CharacterResources["charges"] {
-  const perRest = p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, rest: a.limits.perRest.rest }] : []));
+  const perRest = [
+    ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, rest: a.limits.perRest.rest }] : [])),
+    ...Object.entries(p.battleData.pools ?? {}).map(([key, pool]) => ({ key, rest: pool.rest })),
+  ];
 
   const own = new Set(perRest.map((a) => a.key));
 

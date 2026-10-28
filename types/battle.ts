@@ -356,6 +356,12 @@ export interface LegendaryState {
 
 export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: string } | { kind: "ability"; abilityKey: string; targetIds?: string[] };
 
+export interface AbilityPool {
+  label: string;
+  max: number;
+  rest: "short" | "long";
+}
+
 export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
@@ -382,6 +388,8 @@ export interface BattleParticipantBattleData {
   deathSaves?: { successes: number; failures: number; stable: boolean };
   resolvedAbilities: ResolvedAbility[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** Спільні пули вмінь класу (ключ pool:<classId>:<колонка>); витрачено — abilityUsage[ключ].battle */
+  pools?: Record<string, AbilityPool>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
   charmReturn?: { side: ParticipantSide; controlledBy: string };
   /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */

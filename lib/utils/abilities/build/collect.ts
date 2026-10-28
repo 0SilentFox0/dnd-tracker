@@ -1,5 +1,6 @@
 import { pickHighestPerLine, resolveAbilities } from "./resolve";
 
+import { applyClassScale } from "@/lib/utils/abilities/class-columns";
 import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
@@ -88,9 +89,12 @@ function classResolved(entries: ResolvedClassEntry[]): ResolvedAbility[] {
 
     const upTo = (features: { level: number; abilities: Ability[] }[]) => features.filter((f) => f.level <= level).flatMap((f) => f.abilities);
 
+    // підклас бере колонки, рівень і пули свого класу
+    const scale = (abilities: Ability[]) => applyClassScale(abilities, { classId: cls.id, level, columns: cls.columns ?? [] });
+
     return [
-      ...resolveAbilities({ type: "class", id: cls.id, name: cls.name, icon: cls.icon }, upTo(cls.features)),
-      ...(subclass ? resolveAbilities({ type: "class", id: subclass.id, name: `${cls.name}: ${subclass.name}` }, upTo(subclass.features)) : []),
+      ...resolveAbilities({ type: "class", id: cls.id, name: cls.name, icon: cls.icon }, scale(upTo(cls.features))),
+      ...(subclass ? resolveAbilities({ type: "class", id: subclass.id, name: `${cls.name}: ${subclass.name}` }, scale(upTo(subclass.features))) : []),
     ];
   });
 }

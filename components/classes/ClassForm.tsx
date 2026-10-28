@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ClassBasicsTab } from "./ClassBasicsTab";
+import { ClassColumnsEditor } from "./ClassColumnsEditor";
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
 import { SubclassesEditor } from "./SubclassesEditor";
 import { useErrorTotals } from "./use-error-totals";
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useClassForm } from "@/lib/hooks/classes";
 import type { GameClassData } from "@/types/classes";
 
-type ClassFormTabId = "basics" | "features" | "subclasses";
+type ClassFormTabId = "basics" | "table" | "features" | "subclasses";
 
 export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameClass: GameClassData }) {
   const { id, ...initial } = gameClass;
@@ -35,6 +36,7 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
 
   const tabs: HudTab<ClassFormTabId>[] = [
     { id: "basics", label: "Основне", content: <ClassBasicsTab form={editor.form} /> },
+    { id: "table", label: "Таблиця класу", content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
     {
       id: "features",
       label: "Вміння за рівнями",
@@ -45,6 +47,7 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
           value={data.features}
           onChange={(features) => set((prev) => ({ ...prev, features }))}
           onValidityChange={track("features")}
+          classColumns={data.columns ?? []}
         />
       ),
     },

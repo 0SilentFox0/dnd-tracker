@@ -102,7 +102,7 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : `(${p.formula})%`);
+const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
 
 function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Parameters<typeof flatLabel>[0] }): string {
   return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]

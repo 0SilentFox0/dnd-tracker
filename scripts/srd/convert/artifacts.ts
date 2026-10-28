@@ -1,10 +1,12 @@
-import { type Fixture, type O5Weapon, type Open5eData } from "../lib/open5e";
+import { type Fixture, type O5Armor, type O5Weapon, type Open5eData } from "../lib/open5e";
 import { bySlug } from "../lib/text";
 import type { ArtifactRow } from "../lib/types";
 
 import { WEAPON_TRAITS, type WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { ArmorCategory } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import { groupBy } from "@/lib/utils/common/collections";
+import { capitalize } from "@/lib/utils/common/text";
 
 const TRAIT_OF: Record<string, WeaponTrait> = {
   "srd-2024_finesse-wp": "finesse",
@@ -20,6 +22,8 @@ const NOTE_OF: Record<string, string> = { "srd-2024_heavy-wp": "Heavy", "srd-202
 
 // SRD 5.2 lists Dart as a Simple Ranged weapon without the Ammunition property
 const RANGED_WEAPONS = new Set(["srd-2024_dart"]);
+
+const SHIELD_PK = "srd-2024_shield";
 
 const amount = (s: string | undefined) => (s === undefined ? "—" : String(Number(s)));
 
@@ -63,12 +67,56 @@ function convertWeapon(w: Fixture<O5Weapon>, data: Open5eData, assignments: Map<
   return { slug: w.pk, name: w.fields.name, description, rarity: "common", slot: ranged ? "range_weapon" : "weapon", weapon };
 }
 
+// Open5e has no category: no Dex → heavy, Dex capped at 2 → medium, otherwise light
+export function armorCategory(a: O5Armor): ArmorCategory {
+  if (!a.ac_add_dexmod) return "heavy";
+
+  return a.ac_cap_dexmod === 2 ? "medium" : "light";
+}
+
+const AC_TEXT: Record<ArmorCategory, (base: number) => string> = {
+  light: (b) => `${b} + Dex modifier`,
+  medium: (b) => `${b} + Dex modifier (max 2)`,
+  heavy: (b) => String(b),
+};
+
+function convertArmor(data: Open5eData): ArtifactRow[] {
+  return data.armor
+    .filter((a) => a.pk !== SHIELD_PK)
+    .map((a) => {
+      const f = a.fields;
+
+      const category = armorCategory(f);
+
+      const item = data.items.find((i) => i.pk === a.pk || i.fields.armor === a.pk)?.fields;
+
+      const description = [
+        `${capitalize(category)} Armor.`,
+        `Armor Class: ${AC_TEXT[category](f.ac_base)}.`,
+        f.strength_score_required ? `Strength: ${f.strength_score_required}.` : null,
+        f.grants_stealth_disadvantage ? "Stealth: Disadvantage." : null,
+        `Cost: ${amount(item?.cost)} GP. Weight: ${amount(item?.weight)} lb.`,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      return {
+        slug: a.pk,
+        name: f.name,
+        description,
+        rarity: "common" as const,
+        slot: "armor" as const,
+        armor: { category, base: f.ac_base, ...(f.strength_score_required && { strength: f.strength_score_required }), ...(f.grants_stealth_disadvantage && { stealthDisadvantage: true }) },
+      };
+    });
+}
+
 function convertShield(data: Open5eData): ArtifactRow[] {
-  const shield = data.armor.find((a) => a.pk === "srd-2024_shield");
+  const shield = data.armor.find((a) => a.pk === SHIELD_PK);
 
   if (!shield) return [];
 
-  const item = data.items.find((i) => i.pk === "srd-2024_shield")?.fields;
+  const item = data.items.find((i) => i.pk === SHIELD_PK)?.fields;
 
   return [
     {
@@ -85,5 +133,5 @@ function convertShield(data: Open5eData): ArtifactRow[] {
 export function convertArtifacts(data: Open5eData): ArtifactRow[] {
   const assignments = groupBy(data.weaponAssignments, (a) => a.fields.weapon);
 
-  return [...data.weapons.map((w) => convertWeapon(w, data, assignments)), ...convertShield(data)].sort(bySlug);
+  return [...data.weapons.map((w) => convertWeapon(w, data, assignments)), ...convertArmor(data), ...convertShield(data)].sort(bySlug);
 }

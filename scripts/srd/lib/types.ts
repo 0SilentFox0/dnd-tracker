@@ -4,8 +4,10 @@ import type { DndSkill } from "@/lib/constants/skills";
 import type { SpellGroupIconKey } from "@/lib/constants/spell-groups";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
+import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { ClassColumn } from "@/types/classes";
 
 export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "units", "artifacts"] as const;
 
@@ -47,6 +49,7 @@ export interface ClassRow {
   features: ClassFeatureGroup[];
   subclassLevel: number;
   subclasses: Array<{ id: string; name: string; features: ClassFeatureGroup[] }>;
+  columns: ClassColumn[];
 }
 
 export interface UnitAttackRow {
@@ -84,7 +87,7 @@ export interface UnitRow {
   abilities: Ability[];
 }
 
-export interface ArtifactRow { slug: string; name: string; description: string; rarity: "common"; slot: "weapon" | "range_weapon" | "shield"; weapon?: WeaponStats; abilities?: Ability[] }
+export interface ArtifactRow { slug: string; name: string; description: string; rarity: "common"; slot: "weapon" | "range_weapon" | "shield" | "armor"; weapon?: WeaponStats; armor?: ArmorStats; abilities?: Ability[] }
 
 export interface SrdData {
   "spell-groups": SpellGroupRow[];

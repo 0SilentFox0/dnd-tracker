@@ -92,7 +92,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-6">
                 <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
-                <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} />
+                <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
                 <CharacterSkillsSection skills={skills} />
               </div>
             ),

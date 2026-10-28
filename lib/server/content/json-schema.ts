@@ -1,10 +1,13 @@
 import { z, type ZodType } from "zod";
 
 import "server-only";
+import { ClassColumnSchema } from "@/lib/schemas/classes";
 import { AbilitySchema, LimitsSchema } from "@/lib/utils/abilities/schema/ability";
+import { AmountSchema, FlatSchema, FormulaSchema, ScaleSchema } from "@/lib/utils/abilities/schema/common";
 import { ConditionSchema } from "@/lib/utils/abilities/schema/conditions";
 import { AbilityKeySchema, AnyConditionSchema, EffectSchema, NonRandomEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { TriggerSchema } from "@/lib/utils/abilities/schema/triggers";
+import { ArmorStatsSchema } from "@/lib/utils/artifacts/armor-stats";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { capitalize } from "@/lib/utils/common/text";
@@ -25,10 +28,16 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [EffectSchema, "Effect"],
   [NonRandomEffectSchema, "NonRandomEffect"],
   ...(NonRandomEffectSchema.options as readonly ZodType[]).map((s): Entry => [s, `Effect.${effectKind(s)}`]),
+  [FormulaSchema, "Formula"],
+  [ScaleSchema, "Scale"],
+  [FlatSchema, "Flat"],
+  [AmountSchema, "Amount"],
   [AbilityKeySchema, "AbilityKey"],
   [AnyConditionSchema, "AnyCondition"],
   [SpellFxSchema, "SpellFx"],
   [WeaponStatsSchema, "WeaponStats"],
+  [ArmorStatsSchema, "ArmorStats"],
+  [ClassColumnSchema, "ClassColumn"],
   [RulesetPatchSchema, "RulesetPatch"],
 ];
 

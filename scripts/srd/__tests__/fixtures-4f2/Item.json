@@ -1,0 +1,137 @@
+[
+  {
+    "fields": {
+      "armor": "srd-2024_breastplate",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "400.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A breastplate.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Breastplate",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "20.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_breastplate"
+  },
+  {
+    "fields": {
+      "armor": "srd-2024_chain-mail",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "75.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A chain mail.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Chain Mail",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "55.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_chain-mail"
+  },
+  {
+    "fields": {
+      "armor": "srd-2024_leather-armor",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "10.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A leather armor.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Leather Armor",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "10.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_leather-armor"
+  },
+  {
+    "fields": {
+      "armor": "srd-2024_plate-armor",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "1500.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A plate armor.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Plate Armor",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "65.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_plate-armor"
+  },
+  {
+    "fields": {
+      "armor": "srd-2024_shield",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "10.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A shield.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Shield",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "6.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_shield"
+  }
+]

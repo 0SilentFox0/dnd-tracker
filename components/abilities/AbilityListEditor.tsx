@@ -11,8 +11,10 @@ import { HudSection } from "@/components/hud/form";
 import { validateAbilities, withFreshIds } from "@/lib/utils/abilities/editor";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import type { ClassColumn } from "@/types/classes";
 
 interface AbilityListEditorProps {
+  classColumns?: readonly ClassColumn[];
   campaignId: string;
   value: Ability[];
   onChange: (next: Ability[]) => void;
@@ -20,12 +22,12 @@ interface AbilityListEditorProps {
   onValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
-export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange }: AbilityListEditorProps) {
+export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns }: AbilityListEditorProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const [selectedId, setSelectedId] = useState<string | null>(value[0]?.id ?? null);
 
-  const validation = useMemo(() => validateAbilities(value), [value]);
+  const validation = useMemo(() => validateAbilities(value, { classColumns }), [value, classColumns]);
 
   const errorCount = Object.keys(validation.errorsByPath).length;
 
@@ -62,7 +64,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
   };
 
   return (
-    <AbilityEditorProvider value={{ campaignId, errorsByPath: validation.errorsByPath }}>
+    <AbilityEditorProvider value={{ campaignId, errorsByPath: validation.errorsByPath, classColumns }}>
       <HudSection
         title={
           <>

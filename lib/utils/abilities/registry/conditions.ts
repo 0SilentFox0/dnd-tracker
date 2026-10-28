@@ -5,6 +5,8 @@ import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abili
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import { armorWornMatches } from "@/lib/utils/artifacts/worn-armor";
+import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
@@ -41,6 +43,18 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
     label: "Має мітку",
     fields: [WHO, { name: "markId", label: "Мітка", input: "text" }, { name: "bySelf", label: "Лише моя мітка", input: "toggle", optional: true }],
   },
+  armorWorn: {
+    label: "Броня на мені",
+    fields: [
+      { name: "categories", label: "Категорії", input: "multiselect", options: [{ value: "none", label: "без броні" }, { value: "light", label: "легка" }, { value: "medium", label: "середня" }, { value: "heavy", label: "важка" }] },
+      { name: "shield", label: "Щит", input: "select", optional: true, options: [{ value: "with", label: "зі щитом" }, { value: "without", label: "без щита" }] },
+    ],
+  },
+  attackRollMode: {
+    label: "Режим кидка атаки",
+    fields: [{ name: "mode", label: "Режим", input: "select", options: [{ value: "advantage", label: "перевага" }, { value: "disadvantage", label: "недолік" }, { value: "normal", label: "звичайний" }] }],
+  },
+  allyAdjacent: { label: "Союзник поруч із ціллю", fields: [] },
   not: { label: "НЕ (заперечення)", fields: [{ name: "condition", label: "Умова", input: "effects" }] },
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
   any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
@@ -70,6 +84,20 @@ function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipa
 
 const hpPercent = (p: BattleParticipant) => hpRatio(p) * 100;
 
+function eventRollModeOf(e: AbilityEvent | null): "advantage" | "disadvantage" | "normal" | null {
+  if (!e || (e.type !== "attack" && e.type !== "hit")) return null;
+
+  return e.rollMode ?? "normal";
+}
+
+function allyNextToTarget({ owner, event, participants }: ConditionContext): boolean {
+  const target = event ? eventTargetIds(event).map((id) => findParticipant(participants, id)).find((p) => !!p) : undefined;
+
+  if (!target) return false;
+
+  return participants.some((p) => p.basicInfo.id !== owner.basicInfo.id && p.basicInfo.side === owner.basicInfo.side && isActive(p) && isAdjacent(p, target));
+}
+
 export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean {
   switch (c.type) {
     case "hpBelow":
@@ -88,6 +116,12 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       return subjects("eventActor", ctx).some((p) => p.basicInfo.side !== ctx.owner.basicInfo.side);
     case "hasMark":
       return subjects(c.who, ctx).some((p) => (c.bySelf ? countMarks(p, c.markId, ctx.owner.basicInfo.id) > 0 : p.battleData.activeEffects.some((e) => e.abilityKey === markKey(c.markId))));
+    case "armorWorn":
+      return armorWornMatches(ctx.owner, c);
+    case "attackRollMode":
+      return eventRollModeOf(ctx.event) === c.mode;
+    case "allyAdjacent":
+      return allyNextToTarget(ctx);
     case "not":
       return !evaluateCondition(c.condition, ctx);
     case "all":

@@ -122,6 +122,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),
+  z.object({ ...flagBase, flag: z.literal("evasion") }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),

@@ -42,10 +42,25 @@ export function staleSpellColumns(spells: SpellRow[]): Array<{ column: (typeof C
   return CLEARABLE_SPELL_COLUMNS.map((column) => ({ column, names: spells.filter((s) => s[column] === undefined).map((s) => s.name) })).filter((c) => c.names.length > 0);
 }
 
-export async function importSrdData(data: SrdData, run: RunImport): Promise<SrdImportResult[]> {
+// the engine compares damageBonus/flag schools with spell group ids; data files keep portable names
+export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, string>): T {
+  if (Array.isArray(value)) return value.map((v) => resolveSchoolRefs(v, idByName)) as T;
+
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === "school" && typeof v === "string" ? (idByName.get(v) ?? v) : resolveSchoolRefs(v, idByName)])) as T;
+}
+
+export type PrepareRows = (kind: SrdKind, rows: Record<string, unknown>[]) => Promise<Record<string, unknown>[]>;
+
+export async function importSrdData(data: SrdData, run: RunImport, prepare?: PrepareRows): Promise<SrdImportResult[]> {
   const results: SrdImportResult[] = [];
 
-  for (const kind of SRD_KINDS) results.push({ kind, report: await run(kind, toImportRows(data[kind])) });
+  for (const kind of SRD_KINDS) {
+    const rows = toImportRows(data[kind]);
+
+    results.push({ kind, report: await run(kind, prepare ? await prepare(kind, rows) : rows) });
+  }
 
   return results;
 }

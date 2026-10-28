@@ -77,3 +77,13 @@ describe("refreshFromSource", () => {
     });
   });
 });
+
+describe("refreshFromSource pools", () => {
+  it("drops live pools when the fresh build has none", () => {
+    const base = makeParticipant({ id: "p", hp: 7 });
+
+    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:c:x": { label: "X", max: 2, rest: "long" as const } } } };
+
+    expect(refreshFromSource(live, makeParticipant({ id: "p", hp: 7 })).battleData.pools).toBeUndefined();
+  });
+});

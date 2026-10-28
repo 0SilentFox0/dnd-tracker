@@ -1,4 +1,5 @@
 import { levelUpAvailable, xpForLevel } from "@/lib/constants/experience";
+import { restUses } from "@/lib/utils/abilities/engine/core/usage";
 import { hitDicePool } from "@/lib/utils/characters/resources/hit-dice";
 import { readResources } from "@/lib/utils/characters/resources/schema";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -33,7 +34,10 @@ export function buildRestBlock(input: {
     shortRestOpen: !!r.shortRestOpen,
     hitDice: persist ? hitDicePool(input.classes ?? []).map((e) => ({ classId: e.classId, name: e.name, die: e.die, total: e.level, spent: Math.min(e.level, r.hitDiceSpent?.[e.classId] ?? 0) })) : [],
     charges: persist
-      ? p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, name: a.name, uses: a.limits.perRest.uses, used: p.battleData.abilityUsage?.[a.key]?.battle ?? 0, rest: a.limits.perRest.rest }] : []))
+      ? [
+          ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, name: a.name, uses: restUses(a.limits) ?? 0, used: p.battleData.abilityUsage?.[a.key]?.battle ?? 0, rest: a.limits.perRest.rest }] : [])),
+          ...Object.entries(p.battleData.pools ?? {}).map(([key, pool]) => ({ key, name: pool.label, uses: pool.max, used: p.battleData.abilityUsage?.[key]?.battle ?? 0, rest: pool.rest })),
+        ]
       : [],
     inspiration: ooc.inspiration ? !!c.inspiration : null,
     xp: ooc.xp ? { value: experience, next: xpForLevel(c.level + 1), levelUp: levelUpAvailable({ level: c.level, experience }, input.maxLevel) } : null,

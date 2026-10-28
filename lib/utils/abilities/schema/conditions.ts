@@ -4,6 +4,10 @@ import { CONDITION_SUBJECTS, type ConditionSubject, DAMAGE_KINDS, type DamageKin
 
 export { CONDITION_SUBJECTS, type ConditionSubject } from "./kinds";
 
+export const WORN_ARMOR_KINDS = ["none", "light", "medium", "heavy"] as const;
+
+export type WornArmorKind = (typeof WORN_ARMOR_KINDS)[number];
+
 export type Condition =
   | { type: "hpBelow"; who: ConditionSubject; percent: number }
   | { type: "hpAbove"; who: ConditionSubject; percent: number }
@@ -13,6 +17,9 @@ export type Condition =
   | { type: "targetDead" }
   | { type: "actorIsEnemy" }
   | { type: "hasMark"; who: ConditionSubject; markId: string; bySelf?: boolean }
+  | { type: "armorWorn"; categories: WornArmorKind[]; shield?: "with" | "without" }
+  | { type: "attackRollMode"; mode: "advantage" | "disadvantage" | "normal" }
+  | { type: "allyAdjacent" }
   | { type: "not"; condition: Condition }
   | { type: "all"; conditions: Condition[] }
   | { type: "any"; conditions: Condition[] };
@@ -31,6 +38,9 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.object({ type: z.literal("targetDead") }),
     z.object({ type: z.literal("actorIsEnemy") }),
     z.object({ type: z.literal("hasMark"), who: subject, markId: z.string().min(1), bySelf: z.boolean().optional() }),
+    z.object({ type: z.literal("armorWorn"), categories: z.array(z.enum(WORN_ARMOR_KINDS)).min(1), shield: z.enum(["with", "without"]).optional() }),
+    z.object({ type: z.literal("attackRollMode"), mode: z.enum(["advantage", "disadvantage", "normal"]) }),
+    z.object({ type: z.literal("allyAdjacent") }),
     z.object({ type: z.literal("not"), condition: ConditionSchema }),
     z.object({ type: z.literal("all"), conditions: z.array(ConditionSchema).min(1) }),
     z.object({ type: z.literal("any"), conditions: z.array(ConditionSchema).min(1) }),

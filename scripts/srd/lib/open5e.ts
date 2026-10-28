@@ -41,7 +41,7 @@ export interface O5Class { name: string; hit_dice: string | null; caster_type: s
 
 export interface O5Feature { name: string; desc: string; parent: string; feature_type?: string }
 
-export interface O5FeatureItem { parent: string; level: number }
+export interface O5FeatureItem { parent: string; level: number; column_value: string | null }
 
 export interface O5Species { name: string }
 
@@ -120,7 +120,14 @@ export interface O5WeaponProperty { name: string; type: string | null; desc: str
 
 export interface O5WeaponAssignment { weapon: string; property: string; detail: string | null }
 
-export interface O5Armor { name: string; ac_base: number }
+export interface O5Armor {
+  name: string;
+  ac_base: number;
+  ac_add_dexmod: boolean;
+  ac_cap_dexmod: number | null;
+  strength_score_required: number | null;
+  grants_stealth_disadvantage: boolean;
+}
 
 export interface O5Item { name: string; weapon: string | null; armor: string | null; cost: string; weight: string; desc: string }
 
@@ -167,6 +174,7 @@ export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
 };
 
 export const FIXTURE_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures");
+export const FIXTURE_4F2_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f2");
 
 export function loadOpen5e(dir: string): Open5eData {
   const read = (file: Open5eFile) => JSON.parse(fs.readFileSync(path.join(dir, `${file}.json`), "utf8")) as unknown;

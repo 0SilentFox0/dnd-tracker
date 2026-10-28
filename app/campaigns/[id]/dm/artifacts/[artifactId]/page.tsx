@@ -4,6 +4,7 @@ import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
 import { prisma } from "@/lib/db";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { readAbilities } from "@/lib/utils/abilities/read";
+import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 
 export default async function EditArtifactPage({
@@ -46,6 +47,7 @@ export default async function EditArtifactPage({
         abilities,
         abilityIssues: issues,
         weapon: weaponStatsFromRow(artifact),
+        armor: armorStatsFromRow(artifact),
       }}
       artifactSets={artifactSets}
     />

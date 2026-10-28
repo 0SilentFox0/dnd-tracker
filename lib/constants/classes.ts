@@ -15,3 +15,7 @@ export const CLASS_CASTER_LABELS: Record<ClassCaster, string> = {
 };
 
 export const MAX_CLASS_LEVEL = 20;
+
+export const CLASS_COLUMN_KEY_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const MAX_CLASS_COLUMNS = 12;

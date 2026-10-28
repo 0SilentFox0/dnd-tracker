@@ -16,9 +16,12 @@ import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
+import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
+import { classPools } from "@/lib/utils/abilities/class-columns";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
+import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
@@ -131,6 +134,8 @@ export async function createBattleParticipantFromCharacter(
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
+  const pools = resolvedClasses ? classPools(resolvedClasses) : {};
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
@@ -197,6 +202,7 @@ export async function createBattleParticipantFromCharacter(
       resolvedAbilities,
       schoolMastery,
       abilityUsage: {},
+      ...(Object.keys(pools).length > 0 && { pools }),
       pendingExtraActions: 0,
     },
     actionFlags: {
@@ -209,10 +215,12 @@ export async function createBattleParticipantFromCharacter(
 
   const baked = bakePassives(participant);
 
-  // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
-  const spell = spellcastingDerived(character.level, spellcastingAbility, baked.abilities, rules.formulas);
+  const armored = resolveLimitFormulas(resolvedClasses ? applyClassArmor(baked) : baked);
 
-  const ready = { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
+  // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
+  const spell = spellcastingDerived(character.level, spellcastingAbility, armored.abilities, rules.formulas);
+
+  const ready = { ...armored, spellcasting: { ...armored.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
 
   return applyCharacterResources(ready, storedCharacterState(character, rules), rules);
 }

@@ -10,6 +10,7 @@ import { createClassSchema, updateClassSchema } from "@/lib/schemas";
 import { classNameTaken } from "@/lib/server/classes/class-name";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
 
 type CreateInput = z.infer<typeof createClassSchema>;
@@ -22,7 +23,7 @@ async function assertNameFree(campaignId: string, name: string, exceptId?: strin
 }
 
 function updateData(data: UpdateInput): Prisma.GameClassUncheckedUpdateInput {
-  const { savingThrows, proficiencies, skillChoices, features, subclasses, ...rest } = data;
+  const { savingThrows, proficiencies, skillChoices, features, subclasses, columns, ...rest } = data;
 
   return {
     ...rest,
@@ -31,6 +32,7 @@ function updateData(data: UpdateInput): Prisma.GameClassUncheckedUpdateInput {
     ...(skillChoices && { skillChoices: json(skillChoices) }),
     ...(features && { features: json(features) }),
     ...(subclasses && { subclasses: json(subclasses) }),
+    ...(columns && { columns: json(columns) }),
   };
 }
 
@@ -39,7 +41,7 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
   listFields: ["color", "caster", "hitDie"],
   idParam: "classId",
   label: "Класи",
-  description: "Класи 5e: кістка хітів, рятівні кидки, тип заклинача, вміння за рівнями, підкласи.",
+  description: "Класи 5e: кістка хітів, рятівні кидки, тип заклинача, вміння за рівнями, підкласи, таблиця класу (columns: 20 клітинок; pool — спільний пул).",
   path: "/classes",
   schemas: { create: createClassSchema, update: updateClassSchema },
   errors: [409],
@@ -67,11 +69,24 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
         features: json(data.features),
         subclassLevel: data.subclassLevel,
         subclasses: json(data.subclasses),
+        columns: json(data.columns),
       },
     });
   },
   async update(actor, existing, data) {
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
+
+    const stored = toGameClassData(existing);
+
+    const columns = data.columns ?? stored.columns ?? [];
+
+    const features = data.columns === undefined ? (data.features ?? []) : (data.features ?? stored.features);
+
+    const subclasses = data.columns === undefined ? (data.subclasses ?? []) : (data.subclasses ?? stored.subclasses ?? []);
+
+    const issues = [...features, ...subclasses.flatMap((s) => s.features)].flatMap((f) => columnRefIssues(f.abilities, columns));
+
+    if (issues.length > 0) throw new ContentError(API_ERRORS.CLASS_COLUMN_UNKNOWN, 400, issues);
 
     return prisma.gameClass.update({ where: { id: existing.id }, data: updateData(data) });
   },

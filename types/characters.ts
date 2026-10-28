@@ -237,6 +237,7 @@ export interface CharacterSheet {
   passives: { perception: number; investigation: number; insight: number };
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
+  classTable?: string[];
   pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number; current: number }[];
   rest: SheetRest | null;

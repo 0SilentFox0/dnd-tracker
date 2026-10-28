@@ -6,22 +6,21 @@ import { Plus, Trash2 } from "lucide-react";
 import { useErrorTotals } from "./use-error-totals";
 
 import { AbilityListEditor } from "@/components/abilities";
-import { HudSection } from "@/components/hud/form";
+import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import type { Ability } from "@/types/abilities";
-import type { ClassFeature } from "@/types/classes";
+import type { ClassColumn, ClassFeature } from "@/types/classes";
 
 interface ClassFeaturesEditorProps {
   campaignId: string;
   value: ClassFeature[];
   onChange: (next: ClassFeature[]) => void;
   onValidityChange?: (ok: boolean, errorCount: number) => void;
+  classColumns?: readonly ClassColumn[];
 }
 
-const SELECT_CLASS = "h-9 rounded-md border border-hud-line bg-hud-field px-2 text-sm text-hud-ink";
-
-export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityChange }: ClassFeaturesEditorProps) {
+export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityChange, classColumns }: ClassFeaturesEditorProps) {
   const { report, drop } = useErrorTotals(onValidityChange);
 
   const used = new Set(value.map((f) => f.level));
@@ -65,13 +64,14 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
             value={feature.abilities}
             onChange={(abilities) => setAbilities(feature.level, abilities)}
             onValidityChange={(_, n) => report(String(feature.level), n)}
+            classColumns={classColumns}
           />
         </HudSection>
       ))}
 
       {free.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <select aria-label="Рівень для додавання" className={SELECT_CLASS} value={next ?? ""} onChange={(e) => setPicked(Number(e.target.value))}>
+          <select aria-label="Рівень для додавання" className={HUD_SELECT_CLASS} value={next ?? ""} onChange={(e) => setPicked(Number(e.target.value))}>
             {free.map((l) => (
               <option key={l} value={l}>
                 {l}

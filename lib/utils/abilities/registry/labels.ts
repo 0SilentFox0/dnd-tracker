@@ -30,11 +30,15 @@ export const DAMAGE_FILTER_LABELS: Record<DamageFilterKind, string> = {
 };
 
 export function flatLabel(flat: Flat): string {
-  return typeof flat === "number" ? signed(flat) : `+(${flat.formula})`;
+  if (typeof flat === "number") return signed(flat);
+
+  return "formula" in flat ? `+(${flat.formula})` : `+[${flat.scale}]`;
 }
 
 export function amountLabel(amount: Amount): string {
   if (typeof amount === "number" || typeof amount === "string") return String(amount);
+
+  if ("scale" in amount) return `[${amount.scale}]`;
 
   if ("formula" in amount) return `(${amount.formula})`;
 
@@ -72,16 +76,20 @@ export const CONDITION_LABELS: Record<AnyConditionKey, string> = {
   ...Object.fromEntries(Object.entries(CONDITION_5E_REGISTRY).map(([k, d]) => [k, d.label.toLowerCase()])) as Record<Condition5eKey, string>,
 };
 
+const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) =>
+  typeof uses === "number" ? `${uses} ${pluralUk(uses, ["раз", "рази", "разів"])}` : `${"formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`} разів`;
+
 export function limitsLabel(l: Limits | undefined): string[] {
   if (!l) return [];
 
   return [
     l.perBattle ? `${l.perBattle} ${pluralUk(l.perBattle, ["раз", "рази", "разів"])} за бій` : null,
-    l.perRest ? `${l.perRest.uses} ${pluralUk(l.perRest.uses, ["раз", "рази", "разів"])} за ${l.perRest.rest === "short" ? "короткий" : "довгий"} відпочинок` : null,
+    l.perRest ? `${usesLabel(l.perRest.uses)} за ${l.perRest.rest === "short" ? "короткий" : "довгий"} відпочинок` : null,
     l.perRound ? `${l.perRound}/раунд` : null,
     l.perTurn ? `${l.perTurn}/хід` : null,
     l.cooldownRounds ? `перезарядка ${l.cooldownRounds} р.` : null,
     l.chance ? `${l.chance}%` : null,
     l.legendaryCost ? `легендарна дія (${l.legendaryCost})` : null,
+    l.pool ? `пул «${l.pool.key}»: ${l.pool.cost}` : null,
   ].filter((x): x is string => !!x);
 }

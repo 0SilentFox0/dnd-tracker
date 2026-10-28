@@ -10,7 +10,7 @@ import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
-import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
+import { calculateAttackRoll, eventRollMode } from "@/lib/utils/battle/attack/roll";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -194,7 +194,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 
-  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
+  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind, ...eventRollMode(attackRoll) });
 
   const battleAction = buildBattleActionForHit({
     attacker: getP(flow, attackerId),

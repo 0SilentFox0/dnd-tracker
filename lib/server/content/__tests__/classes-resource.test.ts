@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  gameClass: { create: vi.fn(), deleteMany: vi.fn() },
+  gameClass: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
   character: { count: vi.fn() },
 }));
 
@@ -53,5 +53,14 @@ describe("classesResource", () => {
     await classesResource.remove(actor, { id: "k1" } as never);
 
     expect(db.gameClass.deleteMany).toHaveBeenCalledWith({ where: { id: "k1", campaignId: "c1" } });
+  });
+
+  it("PATCH with only columns validates stored feature refs against the new columns", async () => {
+    const features = [{ level: 2, abilities: [{ id: "a", name: "A", trigger: { event: "bonusAction" }, effects: [{ kind: "note", text: "x" }], limits: { perRest: { rest: "short", uses: { scale: "focus" } } } }] }];
+
+    const existing = { id: "k1", name: "Monk", features, subclasses: [], columns: [{ key: "focus", label: "Focus", values: Array(20).fill("2") }] };
+
+    await expect(classesResource.update(actor, existing as never, { columns: [] })).rejects.toMatchObject({ message: API_ERRORS.CLASS_COLUMN_UNKNOWN, status: 400 });
+    expect(db.gameClass.update).not.toHaveBeenCalled();
   });
 });

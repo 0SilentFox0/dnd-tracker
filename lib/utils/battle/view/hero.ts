@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { battleLimit, cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { battleLimit, cooldownLeft, poolLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { HARMFUL_FLAGS } from "@/lib/utils/abilities/engine/effects/harmful-flags";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
@@ -102,15 +102,35 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   return hostile ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 }
 
+export interface PoolView {
+  key: string;
+  label: string;
+  left: number;
+  max: number;
+}
+
+export function poolViews(p: BattleParticipant): PoolView[] {
+  return Object.entries(p.battleData.pools ?? {}).map(([key, pool]) => ({ key, label: pool.label, left: poolLeft(p, key) ?? 0, max: pool.max }));
+}
+
 export interface AbilityOption {
   ability: ResolvedAbility;
   cooldownLeft: number;
+  pool?: PoolView & { cost: number };
 }
 
 export function abilityOptions(p: BattleParticipant, trigger: "bonusAction" | "action", round: number): AbilityOption[] {
+  const pools = poolViews(p);
+
   return (p.battleData.resolvedAbilities ?? [])
     .filter((a) => a.trigger.event === trigger && !a.limits?.legendaryCost && withinCountLimits(p, a))
-    .map((ability) => ({ ability, cooldownLeft: cooldownLeft(p, ability, round) }));
+    .map((ability) => {
+      const ref = ability.limits?.pool;
+
+      const view = ref && pools.find((v) => v.key === ref.key);
+
+      return { ability, cooldownLeft: cooldownLeft(p, ability, round), ...(view && ref && { pool: { ...view, cost: ref.cost } }) };
+    });
 }
 
 export function usableAbilities(p: BattleParticipant, trigger: "bonusAction" | "action", round: number): ResolvedAbility[] {

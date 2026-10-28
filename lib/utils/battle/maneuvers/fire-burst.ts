@@ -3,6 +3,7 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
+import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
@@ -39,9 +40,11 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
       resisted.push(message);
     }
 
-    notes.set(t.basicInfo.id, ` (Спритність ${rolled.total} проти СК ${dc}${result.success ? " — половина" : ""})`);
+    const evasive = hasEvasion(ps, t);
 
-    return { targetId: t.basicInfo.id, amount: result.success ? Math.floor(full / 2) : full };
+    notes.set(t.basicInfo.id, ` (Спритність ${rolled.total} проти СК ${dc}${evasive ? (result.success ? " — ухилення" : " — ухилення, половина") : result.success ? " — половина" : ""})`);
+
+    return { targetId: t.basicInfo.id, amount: Math.floor(full * evasionFactor(result.success, evasive)) };
   });
 
   return strikeAll(maneuverResult(next, resisted), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, rules: input.rules, rng: input.rng, note: (id) => notes.get(id) ?? "" });

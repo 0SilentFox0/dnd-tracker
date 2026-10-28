@@ -69,6 +69,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
               value={subclass.features}
               onChange={(features) => patchSubclass(subclass.id, { features })}
               onValidityChange={(_, n) => report(subclass.id, n)}
+              classColumns={data.columns ?? []}
             />
           </div>
         </HudSection>
