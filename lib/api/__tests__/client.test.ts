@@ -38,10 +38,10 @@ describe("bodyErrorMessage / request errors", () => {
     );
   });
 
-  it("issue з path — підпис поля перед повідомленням", () => {
+  it("issue з pathLabel — підпис поля перед повідомленням, pathLabel важить більше за path", () => {
     const issues = [
-      { path: ["name"], message: "Обов'язкове поле" },
-      { path: ["attacks", 0, "damageDice"], message: "Не більше 30 символів" },
+      { path: ["name"], pathLabel: "Назва", message: "Обов'язкове поле" },
+      { path: ["attacks", 0, "damageDice"], pathLabel: "Атаки › #1 › Кубики шкоди", message: "Не більше 30 символів" },
       { path: ["customField"], message: "x" },
     ];
 
@@ -62,6 +62,22 @@ describe("bodyErrorMessage / request errors", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Некоректний JSON у тілі запиту" }), { status: 400 })));
 
     await expect(request("/api/x")).rejects.toMatchObject({ message: "Некоректний JSON у тілі запиту", status: 400 });
+  });
+});
+
+describe("request errorKey", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("ApiError.errorKey береться з тіла", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Forbidden", errorKey: "errors.forbidden" }), { status: 403 })));
+
+    await expect(request("/api/x")).rejects.toMatchObject({ message: "Forbidden", errorKey: "errors.forbidden" });
+  });
+
+  it("тіло без error — HTTP <status>", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 502, statusText: "" })));
+
+    await expect(request("/api/x")).rejects.toMatchObject({ message: "HTTP 502" });
   });
 });
 

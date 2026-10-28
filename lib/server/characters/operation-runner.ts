@@ -65,7 +65,7 @@ export const memberScope = scoped(memberGate);
 export const errorStatusMessage = async (response: NextResponse): Promise<never> => {
   const data = await response.json().catch(() => null);
 
-  throw new ContentError(typeof data?.error === "string" ? data.error : API_ERRORS.CHARACTER_OPERATION_REJECTED, response.status, data?.issues);
+  throw new ContentError(data?.errorKey ?? (typeof data?.error === "string" ? data.error : API_ERRORS.CHARACTER_OPERATION_REJECTED), response.status, data?.issues);
 };
 
 export async function responseBody(response: NextResponse) {

@@ -1,9 +1,12 @@
+import { API_ERROR_PARAMS, type ApiErrorKey, type ErrorParams } from "@/lib/constants/api-errors";
+
 import type { Translator } from "./translator";
 
 interface TranslatableIssue {
   message: string;
   minimum?: unknown;
   maximum?: unknown;
+  params?: ErrorParams;
 }
 
 function toNumber(value: unknown): number | undefined {
@@ -13,7 +16,7 @@ function toNumber(value: unknown): number | undefined {
 export function translateIssue(t: Translator, issue: TranslatableIssue): string {
   if (!t.has(issue.message)) return issue.message;
 
-  const values: Record<string, number> = {};
+  const values: ErrorParams = { ...API_ERROR_PARAMS[issue.message as ApiErrorKey], ...issue.params };
 
   const minimum = toNumber(issue.minimum);
 

@@ -106,6 +106,6 @@ describe("POST /api/pusher/auth", () => {
     const res = await POST(new Request("http://x", { method: "POST", body: "{oops" }));
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Некоректний JSON у тілі запиту" });
+    expect(await res.json()).toMatchObject({ error: "Некоректний JSON у тілі запиту" });
   });
 });

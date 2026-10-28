@@ -1,1 +1,35 @@
-{}
+{
+  "fields": {
+    "name": "Name",
+    "title": "Title",
+    "description": "Description",
+    "race": "Race",
+    "class": "Class",
+    "level": "Level",
+    "maxLevel": "Max level",
+    "maxHp": "Max HP",
+    "armorClass": "Armor class",
+    "speed": "Speed",
+    "initiative": "Initiative",
+    "color": "Color",
+    "icon": "Icon",
+    "image": "Image",
+    "avatar": "Avatar",
+    "inviteCode": "Invite code",
+    "damageDice": "Damage dice",
+    "damageType": "Damage type",
+    "damageDistribution": "Damage distribution",
+    "range": "Range",
+    "properties": "Properties",
+    "attackBonus": "Attack bonus",
+    "minTargets": "Min targets",
+    "maxTargets": "Max targets",
+    "slots": "Slots",
+    "rarity": "Rarity",
+    "slot": "Slot",
+    "abilities": "Abilities",
+    "attacks": "Attacks",
+    "units": "Units",
+    "durationSec": "Duration"
+  }
+}

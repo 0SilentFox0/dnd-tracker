@@ -104,10 +104,10 @@ describe("api-auth", () => {
 
     it("відмови мають форму { error } українською", async () => {
       findCampaign.mockResolvedValue(null);
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toEqual({ error: "Кампанію не знайдено" });
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: "Кампанію не знайдено" });
 
       findCampaign.mockResolvedValue(campaign());
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toEqual({ error: "Недостатньо прав" });
+      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: "Недостатньо прав" });
     });
 
     it("гравець — доступ і дані кампанії", async () => {

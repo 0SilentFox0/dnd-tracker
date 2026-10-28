@@ -14,7 +14,7 @@ export interface ApiErrorContext {
 
 /** Details go to the log only; the response carries a generic message. */
 export function handleApiError(error: unknown, context: ApiErrorContext): NextResponse {
-  if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
+  if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues, error.params);
 
   logger.error(`[api] ${context.action} failed`, context, error);
 

@@ -96,7 +96,7 @@ describe("battle audio API", () => {
     const res = await post({ action: "next" });
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "Стан музики змінився — повторіть" });
+    expect(await res.json()).toMatchObject({ error: "Стан музики змінився — повторіть" });
     expect(afterCallbacks).toHaveLength(0);
   });
 

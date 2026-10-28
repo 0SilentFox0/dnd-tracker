@@ -1,13 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import type { ZodType } from "zod";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 
 export class ContentError extends Error {
   constructor(
     message: string,
     readonly status: number,
     readonly issues?: unknown,
+    readonly params?: ErrorParams,
   ) {
     super(message);
     this.name = "ContentError";

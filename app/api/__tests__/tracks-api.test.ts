@@ -105,7 +105,7 @@ describe("tracks API", () => {
     const res = await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params());
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Цей файл уже є в бібліотеці" });
+    expect(await res.json()).toMatchObject({ error: "Цей файл уже є в бібліотеці" });
     expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({ where: { campaignId: "camp1", url: "https://s/battle-music/x.mp3" }, select: { id: true } });
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
   });
@@ -135,7 +135,7 @@ describe("tracks API", () => {
     const created = await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
 
     expect(created.status).toBe(400);
-    expect(await created.json()).toEqual({ error: "У бібліотеці вже 200 треків — видаліть зайві" });
+    expect(await created.json()).toMatchObject({ error: "У бібліотеці вже 200 треків — видаліть зайві" });
     expect((await ticket(req("POST", { name: "a.mp3", size: 100, contentType: "audio/mpeg" }), params())).status).toBe(400);
     expect(storage.createTrackUploadTicket).not.toHaveBeenCalled();
   });

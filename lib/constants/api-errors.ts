@@ -374,6 +374,12 @@ export const API_ERRORS = {
   SCENARIO_SLIDE_UNAVAILABLE: "Слайд недоступний",
 } as const;
 
+export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
+
+export type ErrorParams = Record<string, string | number>;
+
+export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {};
+
 export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
 
 export const featNameTakenMessage = (name: string) => `Риса «${name}» уже є в кампанії`;
