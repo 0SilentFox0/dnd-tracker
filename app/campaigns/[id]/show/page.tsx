@@ -10,13 +10,13 @@ import type { ShowResponse, ShowSnapshot } from "@/types/show";
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [{ isDM }, body] = await Promise.all([requireCampaignMember(id), readShow(id).then((res) => readOkJson<ShowResponse>(res))]);
+  const [{ isDM, userId }, body] = await Promise.all([requireCampaignMember(id), readShow(id).then((res) => readOkJson<ShowResponse>(res))]);
 
   const seed: ShowSnapshot | null = body && { show: body.show, clockOffsetMs: null };
 
   return (
     <PrefetchedQuery queryKey={showKeys.state(id)} data={seed}>
-      <ShowPageClient campaignId={id} isDM={isDM} />
+      <ShowPageClient campaignId={id} isDM={isDM} userId={userId} />
     </PrefetchedQuery>
   );
 }

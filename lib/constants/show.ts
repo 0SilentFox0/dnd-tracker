@@ -42,3 +42,5 @@ export const PUZZLE_MAX_PIECES = 100;
 export const PUZZLE_HOLD_MS = 30_000;
 
 export const PUZZLE_SNAP = 0.25;
+
+export const PUZZLE_KEEPALIVE_MS = 10_000;

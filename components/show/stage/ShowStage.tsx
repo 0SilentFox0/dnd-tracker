@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ShowWaiting } from "./ShowWaiting";
 import { SlideCaption } from "./SlideCaption";
 
+import { PuzzleStage } from "@/components/show/puzzle/PuzzleStage";
 import { ShowWorldStage } from "@/components/world/show/ShowWorldStage";
 import { SLIDE_CROSSFADE_MS } from "@/lib/constants/show";
 import { useSlideLayers } from "@/lib/hooks/show";
@@ -15,14 +16,16 @@ import type { ShowState } from "@/types/show";
 
 const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
 
-export function ShowStage({ show, campaignId, isDM = false }: { show: ShowState | null; campaignId: string; isDM?: boolean }) {
+export function ShowStage({ show, campaignId, isDM = false, userId = "" }: { show: ShowState | null; campaignId: string; isDM?: boolean; userId?: string }) {
   const current = visibleSlide(show);
 
   const layers = useSlideLayers(current);
 
+  const puzzle = stageMode(show) === "puzzle" && current?.puzzle && show?.puzzle ? { spec: current.puzzle, imageUrl: current.imageUrl, puzzle: show.puzzle } : null;
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">
-      {layers.map(({ slide, key, role }) => (
+      {!puzzle && layers.map(({ slide, key, role }) => (
         <div
           key={key}
           className={cn("absolute inset-0", role === "top" && "animate-slide-in", role === "ending" && "animate-slide-out")}
@@ -31,7 +34,8 @@ export function ShowStage({ show, campaignId, isDM = false }: { show: ShowState 
           <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority />
         </div>
       ))}
-      {current ? <SlideCaption key={current.id} slide={current} /> : !show?.battle && <ShowWaiting paused={!!show?.curtain} />}
+      {puzzle && <PuzzleStage campaignId={campaignId} isDM={isDM} userId={userId} {...puzzle} />}
+      {puzzle ? null : current ? <SlideCaption key={current.id} slide={current} /> : !show?.battle && <ShowWaiting paused={!!show?.curtain} />}
       {show?.world && stageMode(show) === "world" && <ShowWorldStage campaignId={campaignId} world={show.world} isDM={isDM} />}
       <div data-slide-preload aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
         {show?.nextImageUrl && <Image {...imageProps(show.nextImageUrl)} alt="" loading="eager" />}

@@ -263,3 +263,5 @@ export function pieceSize(pieces: PuzzlePiece[]): number {
 
   return pieces.reduce((sum, p) => sum + (p.bbox.w + p.bbox.h) / 2, 0) / pieces.length;
 }
+
+export const pieceDiag = (piece: PuzzlePiece): number => Math.hypot(piece.bbox.w, piece.bbox.h);
