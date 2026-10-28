@@ -28,7 +28,7 @@ function fakeDb(rows = stored) {
     currentTurnIndex: 0,
     version: 3,
     eventSeq: 0,
-    pendingMoraleCheck: null,
+    pendingMoraleCheck: null, pendingCritChoice: null,
     audio: { trackId: "t1", track: null, playing: false, offsetSec: 5, startedAt: 1, seq: 7 },
     startedAt: null,
     completedAt: null,

@@ -4,6 +4,7 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -42,6 +43,7 @@ export function toBattleResponse(
     initiativeOrder: participants,
     pendingSummons: pending,
     pendingMoraleCheck: scene.pendingMoraleCheck,
+    pendingCritChoice: toPublicPendingCrit(scene.pendingCritChoice),
     map: meta.map,
     audio: meta.audio ?? null,
     battleLog: log.entries,

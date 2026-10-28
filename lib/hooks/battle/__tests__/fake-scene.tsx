@@ -68,7 +68,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
     initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
-    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, map: opts.map ?? null, audio: opts.audio ?? null,
+    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: null, map: opts.map ?? null, audio: opts.audio ?? null,
   } as BattleScene;
 
   const usedMe = { ...me, actionFlags: { ...me.actionFlags, hasUsedAction: true, hasUsedBonusAction: true } };

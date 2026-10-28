@@ -6,6 +6,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
@@ -102,6 +103,7 @@ export async function loadBattle(
       version: true,
       eventSeq: true,
       pendingMoraleCheck: true,
+      pendingCritChoice: true,
       map: true,
       audio: true,
       startedAt: true,
@@ -110,7 +112,7 @@ export async function loadBattle(
       participants: true,
       battleParticipants: { orderBy: { orderIndex: "asc" }, select: PARTICIPANT_ROW_SELECT },
       campaign: {
-        select: { friendlyFire: true, members: { where: { userId: args.userId }, select: { role: true } } },
+        select: { friendlyFire: true, critChoiceByDm: true, members: { where: { userId: args.userId }, select: { role: true } } },
       },
     },
   });
@@ -126,6 +128,7 @@ export async function loadBattle(
     version: row.version,
     eventSeq: row.eventSeq,
     pendingMoraleCheck: row.pendingMoraleCheck ?? null,
+    pendingCritChoice: (row.pendingCritChoice ?? null) as StoredPendingCritChoice | null,
     startedAt: row.startedAt,
     completedAt: row.completedAt,
   };
@@ -141,6 +144,7 @@ export async function loadBattle(
       description: row.description,
       setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
       friendlyFire: row.campaign.friendlyFire ?? false,
+      critChoiceByDm: row.campaign.critChoiceByDm,
       map: (row.map ?? null) as BattleMapConfig | null,
       audio: (row.audio ?? null) as BattleAudioState | null,
       createdAt: row.createdAt,

@@ -7,10 +7,10 @@ import type { BattleSceneState } from "@/lib/utils/battle/store";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 3,
-  eventSeq: 4, pendingMoraleCheck: null, startedAt: null, completedAt: null,
+  eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, map: null, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, critChoiceByDm: false, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
@@ -47,7 +47,7 @@ describe("toBattleResponse", () => {
 });
 
 describe("buildPusherMessages", () => {
-  const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null }, upserted: [], removed: [], log: [] };
+  const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log: [] };
 
   it("зміна ходу на гравця — battle-delta + turn-started у його канал", () => {
     const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: payload });

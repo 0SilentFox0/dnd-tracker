@@ -77,6 +77,7 @@ export interface RunBattleMutationOptions<TBody> {
   access: BattleAccess;
   requireStatus?: BattleStatus | BattleStatus[];
   allowWhileAwaitingDm?: boolean;
+  allowWhileCritPending?: boolean;
   schema?: ZodType<TBody>;
   rateLimitScope?: keyof typeof BATTLE_RATE_LIMITS;
   dryRun?: (body: TBody) => boolean;
@@ -255,6 +256,10 @@ export async function runBattleMutation<TBody>(
       checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
     ) {
       throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
+    }
+
+    if (loaded.scene.pendingCritChoice && !options.allowWhileCritPending && !options.dryRun?.(parsed.body)) {
+      throw new BattleRuleError("crit_pending", "ДМ обирає ефект крита — зачекайте");
     }
 
     const expected = parsed.expectedVersion;

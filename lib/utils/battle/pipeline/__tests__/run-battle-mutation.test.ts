@@ -26,11 +26,11 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       turnIndex: 0,
       version: 3,
       eventSeq: 4,
-      pendingMoraleCheck: null,
+      pendingMoraleCheck: null, pendingCritChoice: null,
       startedAt: null,
       completedAt: null,
     },
-    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date("2026-01-01") },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date("2026-01-01") },
     participants: [hero, goblin],
     pending: [],
     isDM: false,
@@ -49,7 +49,7 @@ function delta(): BattleDelta {
   return {
     battleId: "b1",
     version: 4,
-    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null },
+    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null },
     upserted: [],
     fullIds: [],
     removed: [],
@@ -587,5 +587,56 @@ describe("резерв і рішення ДМ", () => {
     expect(saved[1].battleData.position).toEqual({ x: 3, y: 2 });
     expect(saved[0].battleData.position).not.toEqual({ x: 3, y: 2 });
     expect(saved[0].battleData.position).toBeDefined();
+  });
+});
+
+describe("runBattleMutation: pending крита", () => {
+  const stored = { action: "attack" as const, actorId: "hero", triggers: [], request: { secret: "req" }, seed: 424242 };
+
+  const pendingLoaded = () => {
+    const base = loaded({ isDM: true });
+
+    return { ...base, scene: { ...base.scene, pendingCritChoice: stored } };
+  };
+
+  const dmDeps = (over: Partial<PipelineDeps> = {}) => deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => pendingLoaded()), ...over });
+
+  it("інша дія при pending — 422 crit_pending", async () => {
+    const res = await runBattleMutation(req(), { params, access: "member", mutate: noop }, dmDeps());
+
+    expect(res.status).toBe(422);
+    expect((await res.json()).code).toBe("crit_pending");
+  });
+
+  it("dryRun і allowWhileCritPending проходять", async () => {
+    expect((await runBattleMutation(req(), { params, access: "member", dryRun: () => true, mutate: noop }, dmDeps())).status).toBe(200);
+    expect((await runBattleMutation(req(), { params, access: "member", allowWhileCritPending: true, mutate: noop }, dmDeps())).status).toBe(200);
+  });
+
+  it("результат лише зі scene-патчем: delta і Pusher несуть публічний pending без request/seed", async () => {
+    const publish = vi.fn();
+
+    const d = deps({
+      saveBattle: vi.fn(async () => ({ ...delta(), version: 4 })),
+      publish,
+    });
+
+    const res = await runBattleMutation(
+      req(),
+      { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], scene: { pendingCritChoice: stored } }) },
+      d,
+    );
+
+    const json = await res.json();
+
+    expect(json.delta.version).toBe(4);
+    expect(json.delta.scene.pendingCritChoice).toEqual({ action: "attack", actorId: "hero", triggers: [] });
+
+    const sent = JSON.stringify(publish.mock.calls);
+
+    expect(sent).toContain("pendingCritChoice");
+    expect(sent).not.toContain("424242");
+    expect(sent).not.toContain("secret");
+    expect(JSON.stringify(json)).not.toContain("424242");
   });
 });

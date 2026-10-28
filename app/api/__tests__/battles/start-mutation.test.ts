@@ -5,8 +5,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 const ctx = {
-  scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null },
-  meta: { name: "Бій", description: null, setup: [{ id: "u1", type: "unit", side: "enemy" }], friendlyFire: false, map: null, createdAt: new Date() },
+  scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+  meta: { name: "Бій", description: null, setup: [{ id: "u1", type: "unit", side: "enemy" }], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date() },
   participants: [],
   pending: [],
   userId: "dm",

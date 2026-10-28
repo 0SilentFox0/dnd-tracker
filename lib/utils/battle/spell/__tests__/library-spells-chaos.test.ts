@@ -68,7 +68,7 @@ function cast(key: string, caster: BattleParticipant, order: BattleParticipant[]
   return castSpell({ caster, spell: sp, targetIds: res.targetIds, allParticipants: order, currentRound: over.round ?? 1, battleId: "b", diceRolls: over.rolls ?? [], saveRolls: over.saves ?? [], rng: seq(0.99) });
 }
 
-const scene = (turnIndex: number, round = 1): BattleSceneState => ({ id: "b", campaignId: "camp", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null });
+const scene = (turnIndex: number, round = 1): BattleSceneState => ({ id: "b", campaignId: "camp", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null });
 
 /** Ганяє next-turn, поки не настане хід `id` (до maxSteps переходів). */
 function advanceTo(order: BattleParticipant[], s: BattleSceneState, id: string, maxSteps = 10) {

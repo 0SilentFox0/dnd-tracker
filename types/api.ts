@@ -5,6 +5,7 @@ import type { GroupedSkillPayload } from "./hooks";
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
+import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
@@ -62,6 +63,7 @@ export interface BattleScene {
   /** Записи з actionIndex ≥ цього значення скасовано відкатом */
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
+  pendingCritChoice?: PendingCritChoice | null;
   map?: BattleMapConfig | null;
   /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
   audio?: BattleAudioState | null;
@@ -81,6 +83,7 @@ export interface ClientBattleDelta {
     round: number;
     turnIndex: number;
     pendingMoraleCheck: unknown;
+    pendingCritChoice: PendingCritChoice | null;
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
     completedAt?: string | null;
