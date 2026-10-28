@@ -65,6 +65,23 @@ describe("puzzle API", () => {
     expect(afterCallbacks).toHaveLength(1);
   });
 
+  it("drop outside the image is clamped to its bounds", async () => {
+    const state = initPuzzle(spec);
+
+    state.pieces[pieceId].holder = { userId: "p1", name: "Аліса", until: Date.now() + 60_000 };
+    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(row(5, state) as never);
+
+    expect((await post({ action: "puzzleDrop", pieceId, x: -50.5, y: 99999.9, rot: 0 })).status).toBe(200);
+
+    const { slide } = vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0].data as { slide: { puzzleState: { pieces: Record<string, { x: number; y: number }> } } };
+
+    expect(slide.puzzleState.pieces[pieceId]).toMatchObject({ x: 0, y: spec.imageHeight });
+  });
+
+  it("prototype piece ids are 400", async () => {
+    expect((await post({ action: "puzzleGrab", pieceId: "__proto__" })).status).toBe(400);
+  });
+
   it("unauthenticated is passed through", async () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 401 }) as never);
 

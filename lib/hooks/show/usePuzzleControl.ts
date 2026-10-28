@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showKeys } from "./keys";
 import { writeShowSnapshot } from "./show-snapshot";
 
-import { ApiError } from "@/lib/api/client";
 import { sendPuzzle } from "@/lib/api/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { PuzzleCommand } from "@/types/show";
@@ -22,7 +21,7 @@ export function usePuzzleControl(campaignId: string, onFailure: (message: string
     mutationFn: (cmd: PuzzleCommand) => sendPuzzle(campaignId, cmd),
     onSuccess: (fresh) => writeShowSnapshot(queryClient, campaignId, fresh),
     onError: (error) => {
-      if (error instanceof ApiError && (error.status === 409 || error.status === 422)) void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
+      void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
 
       onFailure(errorMessage(error, "Не вдалося виконати дію з пазлом"));
     },

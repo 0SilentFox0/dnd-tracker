@@ -124,4 +124,154 @@ describe("PuzzleStage", () => {
     fireEvent.click(await within(await screen.findByRole("dialog")).findByRole("button", { name: "Скинути" }));
     await waitFor(() => expect(send).toHaveBeenCalledWith({ action: "puzzleReset" }));
   });
+
+  it("ігнорує move/up/cancel іншого pointerId", async () => {
+    mount(state({ [a]: { holder: mine } }));
+    stubBoard();
+
+    fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10, pointerId: 1 });
+    await flush();
+    send.mockClear();
+    fireEvent.pointerCancel(window, { pointerId: 2 });
+    fireEvent.pointerUp(window, { clientX: 200, clientY: 300, pointerId: 2 });
+    await flush();
+
+    expect(send).not.toHaveBeenCalled();
+    expect(screen.getByTestId("puzzle-hand")).toBeTruthy();
+
+    fireEvent.pointerUp(window, { clientX: 200, clientY: 300, pointerId: 1 });
+    await flush();
+
+    expect(send).toHaveBeenCalledWith({ action: "puzzleDrop", pieceId: a, x: 100, y: 200, rot: 90 });
+  });
+
+  it("pointercancel власного pointerId повертає шматочок", async () => {
+    mount(state({ [a]: { holder: mine } }));
+    stubBoard();
+
+    fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10, pointerId: 1 });
+    await flush();
+    fireEvent.pointerCancel(window, { clientX: 200, clientY: 300, pointerId: 1 });
+    await flush();
+
+    expect(send).toHaveBeenCalledWith({ action: "puzzleReturn", pieceId: a });
+  });
+
+  it("короткий тап по шматочку на дошці обертає його на +45 і лишає на місці", async () => {
+    mount(state({ [b]: { place: "board", x: 50, y: 60, rot: 0, holder: mine } }));
+    stubBoard();
+
+    fireEvent.pointerDown(screen.getByTestId(`board-piece-${b}`), { clientX: 150, clientY: 160, pointerId: 1 });
+    await flush();
+    fireEvent.pointerUp(window, { clientX: 152, clientY: 161, pointerId: 1 });
+    await flush();
+
+    expect(send).toHaveBeenCalledWith({ action: "puzzleDrop", pieceId: b, x: 50, y: 60, rot: 45 });
+  });
+
+  it("рух понад 5px на дошці — звичайне перетягування", async () => {
+    mount(state({ [b]: { place: "board", x: 50, y: 60, rot: 0, holder: mine } }));
+    stubBoard();
+
+    fireEvent.pointerDown(screen.getByTestId(`board-piece-${b}`), { clientX: 150, clientY: 160, pointerId: 1 });
+    await flush();
+    fireEvent.pointerUp(window, { clientX: 200, clientY: 300, pointerId: 1 });
+    await flush();
+
+    expect(send).toHaveBeenCalledWith({ action: "puzzleDrop", pieceId: b, x: 100, y: 200, rot: 0 });
+  });
+
+  it("колесо миші обертає шматочок у руці", async () => {
+    mount(state({ [a]: { holder: mine } }));
+    stubBoard();
+
+    fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10 });
+    await flush();
+    fireEvent.wheel(window, { deltaY: 100 });
+    fireEvent.pointerUp(window, { clientX: 200, clientY: 300 });
+    await flush();
+
+    expect(send).toHaveBeenCalledWith({ action: "puzzleDrop", pieceId: a, x: 100, y: 200, rot: 135 });
+  });
+
+  describe("дотик із сайдбара", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    const touchDown = () => fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10, pointerId: 1, pointerType: "touch" });
+
+    it("довгий тап (200мс) бере шматочок, одразу — ні", async () => {
+      mount(state({ [a]: { holder: mine } }));
+      touchDown();
+
+      expect(screen.queryByTestId("puzzle-hand")).toBeNull();
+      expect(send).not.toHaveBeenCalled();
+
+      await act(async () => {
+        vi.advanceTimersByTime(250);
+      });
+
+      expect(screen.getByTestId("puzzle-hand")).toBeTruthy();
+      expect(send).toHaveBeenCalledWith({ action: "puzzleGrab", pieceId: a });
+    });
+
+    it("рух переважно вертикальний бере шматочок одразу", async () => {
+      mount(state({ [a]: { holder: mine } }));
+      touchDown();
+      fireEvent.pointerMove(window, { clientX: 12, clientY: 40, pointerId: 1 });
+      await act(async () => {});
+
+      expect(screen.getByTestId("puzzle-hand")).toBeTruthy();
+    });
+
+    it("горизонтальний рух — це прокрутка стрічки, шматочок не береться", async () => {
+      mount(state({ [a]: { holder: mine } }));
+      touchDown();
+      fireEvent.pointerMove(window, { clientX: 60, clientY: 12, pointerId: 1 });
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(screen.queryByTestId("puzzle-hand")).toBeNull();
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it("pointercancel (браузер прокручує) скасовує очікування", async () => {
+      mount(state({ [a]: { holder: mine } }));
+      touchDown();
+      fireEvent.pointerCancel(window, { pointerId: 1 });
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(send).not.toHaveBeenCalled();
+    });
+  });
+
+  it("keepAlive шле раз на 10с і зупиняється після unmount", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const { unmount } = mount(state({ [a]: { holder: mine } }));
+
+      fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10 });
+      await act(async () => {});
+      send.mockClear();
+      await act(async () => {
+        vi.advanceTimersByTime(10_000);
+      });
+
+      expect(send).toHaveBeenCalledWith({ action: "puzzleKeepAlive", pieceId: a });
+
+      unmount();
+      send.mockClear();
+      await act(async () => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      expect(send).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

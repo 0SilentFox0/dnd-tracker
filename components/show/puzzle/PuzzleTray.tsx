@@ -19,7 +19,7 @@ export function PuzzleTray({ scene }: { scene: PuzzleScene }) {
             key={piece.id}
             data-testid={`tray-piece-${piece.id}`}
             data-held={other || undefined}
-            className={cn("relative size-20 shrink-0 touch-none", other && "opacity-40")}
+            className={cn("relative size-20 shrink-0 touch-pan-x md:touch-pan-y", other && "opacity-40")}
             onPointerDown={(e) => scene.onGrab(piece.id, e)}
           >
             <PuzzlePieceView piece={piece} spec={scene.spec} imageUrl={scene.imageUrl} rot={s.rot} />

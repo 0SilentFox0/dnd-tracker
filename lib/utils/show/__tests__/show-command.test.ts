@@ -413,7 +413,7 @@ describe("пазл-слайд", () => {
   it("повторний open того ж пазл-слайда зберігає прогрес, але знімає curtain/world/battle", () => {
     const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
 
-    const progressed = { ...opened, curtain: true, puzzle: { ...opened.puzzle!, solved: true } };
+    const progressed = { ...opened, curtain: true as const, puzzle: { ...opened.puzzle!, solved: true } };
 
     const again = ok(applyShowCommand(progressed, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
 

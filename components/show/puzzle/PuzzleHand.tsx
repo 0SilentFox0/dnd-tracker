@@ -1,6 +1,6 @@
 import { PuzzlePieceView } from "./PuzzlePieceView";
 
-import type { DragState } from "@/lib/hooks/show/usePuzzleDrag";
+import type { DragState } from "@/lib/hooks/show";
 import { pieceDiag,type PuzzlePiece } from "@/lib/utils/puzzle/generate";
 import type { PuzzleSpec } from "@/types/show";
 

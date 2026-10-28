@@ -9,8 +9,7 @@ import type { PuzzleScene } from "./types";
 
 import { Button } from "@/components/ui/button";
 import { useConfirm, useElementSize, useNotify } from "@/lib/hooks/common";
-import { usePuzzleControl } from "@/lib/hooks/show/usePuzzleControl";
-import { usePuzzleDrag } from "@/lib/hooks/show/usePuzzleDrag";
+import { usePuzzleControl, usePuzzleDrag } from "@/lib/hooks/show";
 import { generatePuzzle } from "@/lib/utils/puzzle/generate";
 import type { PuzzleSpec, PuzzleState } from "@/types/show";
 
