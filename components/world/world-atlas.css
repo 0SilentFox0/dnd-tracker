@@ -148,3 +148,6 @@
 .atlas-hero-own {
   box-shadow: 0 0 0 2px var(--color-hud-gold-bright, #ffe08a), 0 0 0 4px var(--atlas-ink), 0 0 12px 3px rgba(255, 224, 138, 0.7);
 }
+
+.atlas-top-layer { pointer-events: none; }
+.atlas-top-layer .atlas-pin, .atlas-top-layer .atlas-hero { pointer-events: auto; }

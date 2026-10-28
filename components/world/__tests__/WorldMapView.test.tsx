@@ -245,4 +245,18 @@ describe("WorldMapView", () => {
 
     expect(offset()).toBe(after);
   });
+
+  it("draws the fog above the map but under pins and heroes", () => {
+    const hero = { id: "h", name: "Aria", avatar: null, mapId: "map", x: 0.3, y: 0.3, own: true };
+
+    render(<WorldMapView detail={detail([marker({ id: "p", name: "Town" })])} fog={{ shapes: [], radius: 0.05 }} heroes={[hero]} />);
+
+    const fog = screen.getByTestId("world-fog");
+
+    const after = (el: Element) => Boolean(fog.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    expect(after(screen.getByRole("button", { name: "Town" }))).toBe(true);
+    expect(after(screen.getByRole("button", { name: "Aria" }))).toBe(true);
+    expect(fog.compareDocumentPosition(screen.getByAltText("World")) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+  });
 });

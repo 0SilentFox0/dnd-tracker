@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Check, CornerLeftUp, LogIn, type LucideIcon, MapPin, MousePointer2, Pentagon, Settings2, Undo2 } from "lucide-react";
+import { Check, CornerLeftUp, LogIn, type LucideIcon, MapPin, MousePointer2, Navigation, Pentagon, Settings2, Undo2 } from "lucide-react";
 
 import { useWorldEditorContext } from "./WorldEditorContext";
 
@@ -14,6 +14,7 @@ const TOOLS: { key: WorldTool; label: string; hotkey: string; Icon: LucideIcon }
   { key: "point", label: "Точка", hotkey: "P", Icon: MapPin },
   { key: "zone", label: "Зона", hotkey: "Z", Icon: Pentagon },
   { key: "entry", label: "Точка входу", hotkey: "E", Icon: LogIn },
+  { key: "move", label: "Герої", hotkey: "M", Icon: Navigation },
 ];
 
 const BUTTON = "inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10";
@@ -88,6 +89,11 @@ export function WorldToolHint({ tool, vertices }: { tool: WorldTool; vertices: n
       {tool === "entry" ? (
         <>
           <b className={KEY}>Клікніть</b> по карті — тут з&apos;являться герої · <b className={KEY}>Esc</b> — скасувати
+        </>
+      ) : null}
+      {tool === "move" ? (
+        <>
+          <b className={KEY}>Клікніть</b> по карті чи маркеру — це ціль для героїв · <b className={KEY}>Esc</b> — вийти
         </>
       ) : null}
       {tool === "zone" ? (

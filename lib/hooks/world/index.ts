@@ -1,9 +1,12 @@
 export { worldKeys } from "./keys";
+export { useHeroEyes } from "./useHeroEyes";
 export { useMapDrawing, type WorldTool } from "./useMapDrawing";
 export { useMapFields } from "./useMapFields";
 export { useMarkerFields } from "./useMarkerFields";
 export { useRemoveMarker } from "./useRemoveMarker";
+export { useTravelPanel } from "./useTravelPanel";
 export { useWorldEditor } from "./useWorldEditor";
+export { type RosterHero, useWorldHeroes } from "./useWorldHeroes";
 export { useWorldMap } from "./useWorldMap";
 export { useWorldMaps } from "./useWorldMaps";
 export { useWorldMapUpload } from "./useWorldMapUpload";

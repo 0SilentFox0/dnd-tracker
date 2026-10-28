@@ -5,12 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { closePolygon } from "@/lib/utils/world/geometry";
 import type { MapPoint, Polygon } from "@/types/world";
 
-export type WorldTool = "select" | "point" | "zone" | "entry";
+export type WorldTool = "select" | "point" | "zone" | "entry" | "move";
 
 interface Actions {
   onPoint(p: MapPoint): void;
   onZone(polygon: Polygon): void;
   onEntry(p: MapPoint): void;
+  onMove?(p: MapPoint): void;
 }
 
 const POINT_DEBOUNCE_MS = 400;
@@ -18,7 +19,7 @@ const POINT_DEBOUNCE_MS = 400;
 const POINT_DEBOUNCE_DIST = 0.02;
 
 // the Ukrainian letters sit on the same physical keys
-export const TOOL_HOTKEYS: Record<string, WorldTool> = { v: "select", м: "select", p: "point", з: "point", z: "zone", я: "zone", e: "entry", у: "entry" };
+export const TOOL_HOTKEYS: Record<string, WorldTool> = { v: "select", м: "select", p: "point", з: "point", z: "zone", я: "zone", e: "entry", у: "entry", m: "move", ь: "move" };
 
 const isTyping = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 
@@ -85,7 +86,7 @@ export function useMapDrawing(actions: Actions) {
         else if (tool === "entry") {
           setTool("select");
           actions.onEntry(p);
-        }
+        } else if (tool === "move") actions.onMove?.(p);
       },
       onMapDoubleClick: () => {
         if (tool === "zone") finish();

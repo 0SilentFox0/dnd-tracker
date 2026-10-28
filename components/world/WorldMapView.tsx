@@ -51,6 +51,8 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
 
   const [cursor, setCursor] = useState<MapPoint | null>(null);
 
+  const layerStyle = { transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: "0 0" };
+
   const still = useReducedMotion();
 
   const pinGesture = useRef(false);
@@ -99,7 +101,7 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
             onDoubleClick={(e) => handlers.onMapDoubleClick?.(pointAt(e.clientX, e.clientY))}
           >
             {size.width > 0 ? (
-            <div className="absolute inset-0" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: "0 0" }}>
+            <div className="absolute inset-0" style={layerStyle}>
               <Image src={map.imageUrl} alt={map.name} fill priority draggable={false} sizes={`${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`} className="pointer-events-none select-none object-fill" />
               <WorldZones markers={markers} selectedId={selectedId} draft={draft} cursor={tool === "zone" ? cursor : null} interactive={tool === "select"} />
               {draft?.map((p, i) => (
@@ -110,6 +112,11 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
                   style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%`, transform: `translate(-50%, -50%) scale(${1 / zoom})` }}
                 />
               ))}
+            </div>
+            ) : null}
+            {fog && size.width > 0 ? <WorldFog shapes={fog.shapes} radius={fog.radius} box={box} zoom={zoom} offset={offset} still={still} /> : null}
+            {size.width > 0 ? (
+            <div className="atlas-top-layer absolute inset-0" style={layerStyle}>
               <div className="contents" onPointerDownCapture={() => (pinGesture.current = true)} onPointerUpCapture={() => (pinGesture.current = false)}>
               <WorldPins
                 markers={markers}
@@ -129,7 +136,6 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
               {overlay}
             </div>
             ) : null}
-            {fog && size.width > 0 ? <WorldFog shapes={fog.shapes} radius={fog.radius} box={box} zoom={zoom} offset={offset} still={still} /> : null}
           </div>
       </div>
       {hint ? <div className="pointer-events-none absolute right-2 bottom-2 left-2 z-10 flex justify-center max-lg:bottom-3 lg:top-2 lg:bottom-auto">{hint}</div> : null}
