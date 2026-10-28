@@ -17,6 +17,7 @@ import type {
   BattleSummary,
   BattleVersion,
   BonusActionData,
+  CritChoiceData,
   MapTerrainData,
   MapTerrainResponse,
   MapWeatherData,
@@ -159,6 +160,10 @@ export async function moraleCheck(
   data: WithVersion<MoraleCheckData>,
 ): Promise<BattleMutationResponse<{ moraleResult: MoraleCheckResult }>> {
   return campaignPost(campaignId, `/battles/${battleId}/morale-check`, data);
+}
+
+export async function critChoice(campaignId: string, battleId: string, data: WithVersion<CritChoiceData>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/crit-choice`, data);
 }
 
 export async function castSpell(campaignId: string, battleId: string, data: WithVersion<SpellCastData>): Promise<BattleMutationResponse> {

@@ -230,4 +230,20 @@ describe("attackFlow", () => {
       expect(attackPayload(t, "me")).toMatchObject({ attackRolls: [17, 4], secondRolls: [null, 15], rollMode: "advantage" });
     });
   });
+
+  describe("WAIT_CRIT", () => {
+    const submitted: AttackFlowAction[] = [open(), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 4, outcome: "miss" }];
+
+    it("відправка → очікування вибору ДМ → результат", () => {
+      const waiting = run(...submitted, { type: "WAIT_CRIT" });
+
+      expect(waiting).toMatchObject({ step: "submitting", waitingCrit: true });
+      expect(attackFlow(waiting, { type: "SUCCESS", results: [] })).toMatchObject({ step: "result", waitingCrit: false });
+    });
+
+    it("поза відправкою ігнорується; FAIL знімає очікування", () => {
+      expect(run(open(), { type: "WAIT_CRIT" }).waitingCrit).toBeFalsy();
+      expect(attackFlow(run(...submitted, { type: "WAIT_CRIT" }), { type: "FAIL", error: "x" }).waitingCrit).toBe(false);
+    });
+  });
 });

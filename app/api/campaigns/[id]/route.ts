@@ -79,6 +79,7 @@ export async function PATCH(
           data.description === undefined ? undefined : data.description || null,
         maxLevel: data.maxLevel,
         allowPlayerEdit: data.allowPlayerEdit,
+        critChoiceByDm: data.critChoiceByDm,
         status: data.status,
       },
       include: CAMPAIGN_INCLUDE,

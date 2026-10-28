@@ -3,6 +3,7 @@ import type { CastableSpell } from "./spell-process";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface ProcessAttackParams {
@@ -26,6 +27,7 @@ export interface ProcessAttackParams {
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;
+  crit?: CritPicker;
   /** Лише основна фаза атаки пише кубики в журнал (Шал та інші внутрішні удари — ні) */
   recordDice?: boolean;
   /** Що з кубиків докинув сервер: d20 і шкода від цього індексу */

@@ -8,6 +8,7 @@ export interface Campaign {
   dmUserId: string;
   maxLevel: number;
   allowPlayerEdit: boolean;
+  critChoiceByDm: boolean;
   status: string;
   members?: CampaignMembership[];
 }
@@ -38,6 +39,7 @@ export interface CampaignSettings {
   description: string | null;
   maxLevel: number;
   allowPlayerEdit: boolean;
+  critChoiceByDm: boolean;
   status: string;
 }
 

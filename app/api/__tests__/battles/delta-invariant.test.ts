@@ -36,13 +36,13 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
     turnIndex: 0,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null,
+    pendingMoraleCheck: null, pendingCritChoice: null,
     startedAt: new Date("2026-01-01T00:00:00.000Z"),
     completedAt: null,
     ...init.scene,
   };
 
-  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: CREATED_AT };
+  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: CREATED_AT };
 
   let rows: StoredParticipant[] = wire([
     ...init.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })),

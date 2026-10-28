@@ -12,6 +12,7 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { type ActionFlow, appendHpChanges, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -34,6 +35,7 @@ export interface RetaliationInput {
   round: number;
   battleId: string;
   rng: Rng;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
 }
 
@@ -86,7 +88,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, crit: input.crit } };
 
   if (!provoked && !unlimited) {
     put(flow, {
@@ -100,7 +102,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const second = rollDie(20, rng);
 
-  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
+  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng, crit: flow.ctx.crit });
 
   if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
 

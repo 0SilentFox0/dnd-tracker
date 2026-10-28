@@ -24,7 +24,8 @@ export type BattleRuleCode =
   | "invalid_target"
   | "action_rejected"
   | "ability_limit"
-  | "awaiting_dm";
+  | "awaiting_dm"
+  | "crit_pending";
 
 export class BattleRuleError extends Error {
   constructor(

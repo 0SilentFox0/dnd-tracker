@@ -1,13 +1,16 @@
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
+import type { Rng } from "@/lib/utils/common/rng";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-export type Rng = () => number;
+export type { Rng };
 
 export interface AbilityRunContext {
   round: number;
   rng: Rng;
   depth?: number;
   map?: BattleMapConfig | null;
+  crit?: CritPicker;
 }
 
 export interface SummonRequest {

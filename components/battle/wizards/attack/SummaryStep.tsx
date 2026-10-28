@@ -2,6 +2,7 @@ import { Loader2, Swords } from "lucide-react";
 
 import { type AttackWizardModel,btn, primaryBtn } from "./shared";
 
+import { CritWaitingNote } from "@/components/battle/crit-choice/CritWaitingNote";
 import { cn } from "@/lib/utils";
 import { formatDamageStep } from "@/lib/utils/battle/view";
 
@@ -22,6 +23,7 @@ export function SummaryStep({ wizard: { state, view, actions } }: { wizard: Atta
       ))}
       {view.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
       {view.steps.length > 0 && <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold"><span>Орієнтовно</span><span className="text-[26px]">{view.estimate}</span></div>}
+      {state.waitingCrit && <CritWaitingNote />}
       {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" disabled={submitting} onClick={actions.back} className={cn(btn, "border-white/25")}>← Назад</button>

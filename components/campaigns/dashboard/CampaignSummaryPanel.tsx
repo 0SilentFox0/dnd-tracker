@@ -23,6 +23,7 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignI
                 description: campaign.description || null,
                 maxLevel: campaign.maxLevel,
                 allowPlayerEdit: campaign.allowPlayerEdit,
+                critChoiceByDm: campaign.critChoiceByDm,
                 status: campaign.status,
               }}
             />

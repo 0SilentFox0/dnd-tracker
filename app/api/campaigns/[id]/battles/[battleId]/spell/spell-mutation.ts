@@ -7,6 +7,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { requireActor } from "@/lib/utils/battle/common/control";
+import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
+import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -39,7 +41,7 @@ const defaultDeps: SpellMutationDeps = {
 };
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
-  return async (ctx: BattleMutationContext, data: SpellRequestData): Promise<MutationResult> => {
+  return async (ctx: BattleMutationContext, data: SpellRequestData, resume?: CritResume): Promise<MutationResult> => {
     const order = ctx.participants;
 
     const caster = requireActor(ctx, data.casterId, {
@@ -82,65 +84,73 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
-    const rng = ctx.rng ?? Math.random;
-
     const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId });
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
-    const diceRolls = data.preview && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
+    const diceRolls = data.preview && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, ctx.rng ?? Math.random) : data.diceRolls;
 
     assertSpellRolls(expected, diceRolls);
 
     const { trusted, serverRolled } = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const result = castSpell({
-      caster,
-      spell,
-      targetIds: resolution.targetIds,
-      allParticipants: order,
-      currentRound: ctx.scene.round,
-      battleId: ctx.scene.id,
-      diceRolls,
-      saveRolls: trusted,
-      isDMCast: free,
-      rng,
-      map: ctx.meta.map,
+    return runWithCritChoice(ctx, {
+      action: "spell",
+      actorId: data.casterId,
+      request: data,
+      enabled: ctx.meta.critChoiceByDm && !data.preview,
+      resume,
+      run: async ({ rng, crit }) => {
+        const result = castSpell({
+          caster,
+          spell,
+          targetIds: resolution.targetIds,
+          allParticipants: order,
+          currentRound: ctx.scene.round,
+          battleId: ctx.scene.id,
+          diceRolls,
+          saveRolls: trusted,
+          isDMCast: free,
+          rng,
+          crit,
+          map: ctx.meta.map,
+        });
+
+        if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
+
+        const groups = spellDiceRolls({
+          casterId: caster.basicInfo.id,
+          sides: expected.sides,
+          rolls: diceRolls,
+          heal: healsByDefinition(definition.effects),
+          saves: result.battleAction.actionDetails.savingThrows ?? [],
+          presetSaveIds: new Set(trusted.map((s) => s.participantId)),
+        });
+
+        if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
+
+        if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
+
+        if (serverRolled.length > 0) {
+          result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
+        }
+
+        if (data.preview) {
+          return {
+            participants: order,
+            pending: ctx.pending,
+            events: [],
+            response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined }, ...(resolution.cells && { cells: resolution.cells }) },
+          };
+        }
+
+        const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, deps });
+
+        const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
+
+        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage });
+
+        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
+      },
     });
-
-    if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
-
-    const groups = spellDiceRolls({
-      casterId: caster.basicInfo.id,
-      sides: expected.sides,
-      rolls: diceRolls,
-      heal: healsByDefinition(definition.effects),
-      saves: result.battleAction.actionDetails.savingThrows ?? [],
-      presetSaveIds: new Set(trusted.map((s) => s.participantId)),
-    });
-
-    if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
-
-    if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
-
-    if (serverRolled.length > 0) {
-      result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
-    }
-
-    if (data.preview) {
-      return {
-        participants: order,
-        pending: ctx.pending,
-        events: [],
-        response: { preview: true, battleAction: { ...result.battleAction, stateBefore: undefined }, ...(resolution.cells && { cells: resolution.cells }) },
-      };
-    }
-
-    const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, deps });
-
-    const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
-
-    const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage });
-
-    return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
   };
 }

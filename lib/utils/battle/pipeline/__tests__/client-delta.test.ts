@@ -15,10 +15,10 @@ const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant 
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 2, turnIndex: 1, version: 7,
-  eventSeq: 10, pendingMoraleCheck: null, startedAt: new Date("2026-01-01"), completedAt: null,
+  eventSeq: 10, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01"), completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date() };
 
 describe("buildClientDelta", () => {
   it("зміна HP наявного учасника — лише патч поля, без order, коли порядок той самий", () => {

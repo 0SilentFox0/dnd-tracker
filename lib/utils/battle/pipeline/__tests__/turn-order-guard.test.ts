@@ -5,7 +5,7 @@ import { guardTurnOrder } from "@/lib/utils/battle/pipeline/turn-order-guard";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { logger } from "@/lib/utils/common/logger";
 
-const scene: BattleSceneState = { id: "b", campaignId: "c", status: "active", round: 2, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null };
+const scene: BattleSceneState = { id: "b", campaignId: "c", status: "active", round: 2, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null };
 
 const p = (id: string) => makeParticipant({ id });
 

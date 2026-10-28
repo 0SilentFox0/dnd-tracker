@@ -28,7 +28,7 @@ export function createStartMutation(build = buildStartOrder) {
     return {
       participants,
       pending: reserve,
-      scene: { status: BattleStatus.ACTIVE, startedAt: new Date(), completedAt: null, round: 1, turnIndex, pendingMoraleCheck: null },
+      scene: { status: BattleStatus.ACTIVE, startedAt: new Date(), completedAt: null, round: 1, turnIndex, pendingMoraleCheck: null, pendingCritChoice: null },
       events: triggerLogEntries.map(battleActionToEvent),
       history: { clear: true },
     };

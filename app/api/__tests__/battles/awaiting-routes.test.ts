@@ -21,6 +21,15 @@ describe("allowWhileAwaitingDm", () => {
       .map((file) => relative(ROOT, join(file, "..")))
       .sort();
 
-    expect(allowed).toEqual(["add-participant", "complete", "morale-check", "participants/[participantId]", "refresh-sources", "reset", "reveal-participant", "rollback"]);
+    expect(allowed).toEqual(["add-participant", "complete", "crit-choice", "morale-check", "participants/[participantId]", "refresh-sources", "reset", "reveal-participant", "rollback"]);
+  });
+
+  it("allowWhileCritPending: лише вибір крита, завершення, скидання й відкат", () => {
+    const allowed = routes(ROOT)
+      .filter((file) => /allowWhileCritPending:\s*true/.test(readFileSync(file, "utf8")))
+      .map((file) => relative(ROOT, join(file, "..")))
+      .sort();
+
+    expect(allowed).toEqual(["complete", "crit-choice", "reset", "rollback"]);
   });
 });

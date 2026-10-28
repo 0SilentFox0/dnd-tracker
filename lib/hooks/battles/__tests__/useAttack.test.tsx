@@ -17,7 +17,7 @@ describe("useAttack", () => {
   it("повертає зміни HP з журналу дельти — і цілі, і атакувальника", async () => {
     const log = [{ hpChanges: [change("gob", 7)] }, { hpChanges: [change("me", 4)] }] as unknown as BattleAction[];
 
-    const delta = { battleId: "b1", version: 6, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null }, upserted: [], removed: [], log } as ClientBattleDelta;
+    const delta = { battleId: "b1", version: 6, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log } as ClientBattleDelta;
 
     vi.mocked(attack).mockResolvedValue({ delta });
 

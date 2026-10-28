@@ -41,7 +41,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map, crit: params.crit } };
 
   const existedBefore = activeEffectIds(flow.ps);
 
@@ -79,6 +79,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     targetExtra: actionModifiers[targetId],
     rng: flow.ctx.rng,
     manualMode: params.rollMode,
+    crit: flow.ctx.crit,
   });
 
   const second = attackRoll.secondRoll;

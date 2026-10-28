@@ -19,7 +19,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const casterId = caster.basicInfo.id;
 
-  const flow: ActionFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map } };
+  const flow: ActionFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, crit: params.crit } };
 
   const before = flow.ps;
 
@@ -58,6 +58,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     ability: abilityOf(spell),
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId] }),
     saveDc: spellSaveDc(readyCaster),
+    battleId,
     actionModifiers,
     rng,
     saveRolls,

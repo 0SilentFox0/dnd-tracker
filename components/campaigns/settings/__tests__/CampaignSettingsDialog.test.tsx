@@ -12,7 +12,7 @@ vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ suc
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-const campaign = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, status: "active" };
+const campaign = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, status: "active" };
 
 const renderDialog = () =>
   renderWithConfirm(
@@ -44,5 +44,15 @@ describe("CampaignSettingsDialog: видалення", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Скасувати" }).pop() as HTMLElement);
     await waitFor(() => expect(screen.queryByText("Видалити кампанію «Зоря»?")).not.toBeInTheDocument());
     expect(deleteCampaign).not.toHaveBeenCalled();
+  });
+});
+
+describe("CampaignSettingsDialog: ефекти крита", () => {
+  afterEach(cleanup);
+
+  it("показує чекбокс вибору ефектів ДМом", () => {
+    renderDialog();
+    expect(screen.getByLabelText("ДМ обирає ефекти крита/провалу")).not.toBeChecked();
+    expect(screen.getByText("Вимкнено — ефект випадковий")).toBeInTheDocument();
   });
 });

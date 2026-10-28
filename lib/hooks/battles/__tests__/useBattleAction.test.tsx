@@ -14,7 +14,7 @@ const key = ["battle", "c1", "b1"];
 const base = { id: "b1", status: "active", initiativeOrder: [], battleLog: [], participants: [], currentRound: 1, currentTurnIndex: 0, version: 5 } as unknown as BattleScene;
 
 const delta = (version: number): ClientBattleDelta => ({
-  battleId: "b1", version, scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null }, upserted: [], removed: [], log: [],
+  battleId: "b1", version, scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log: [],
 });
 
 function setup() {

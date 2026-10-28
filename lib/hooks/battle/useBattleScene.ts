@@ -22,6 +22,7 @@ import {
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
+  useCritChoice,
   useMapTerrain,
   useMapWeather,
   useMazeAction,
@@ -100,6 +101,7 @@ export interface BattleSceneActions {
   nextTurn: ReturnType<typeof useNextTurn>;
   attack: ReturnType<typeof useAttack>;
   moraleCheck: ReturnType<typeof useMoraleCheck>;
+  critChoice: ReturnType<typeof useCritChoice>;
   move: ReturnType<typeof useMoveParticipant>;
   mapTerrain: ReturnType<typeof useMapTerrain>;
   maze: ReturnType<typeof useMazeAction>;
@@ -316,6 +318,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     nextTurn: useNextTurn(campaignId, battleId, o),
     attack: useAttack(campaignId, battleId, o),
     moraleCheck: useMoraleCheck(campaignId, battleId, o),
+    critChoice: useCritChoice(campaignId, battleId, o),
     move: useMoveParticipant(campaignId, battleId, o),
     mapTerrain: useMapTerrain(campaignId, battleId, o),
     maze: useMazeAction(campaignId, battleId, o),

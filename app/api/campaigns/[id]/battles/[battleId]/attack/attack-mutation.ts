@@ -6,6 +6,8 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
+import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
+import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -87,7 +89,7 @@ async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, dep
 }
 
 export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
-  return async (ctx: BattleMutationContext, body: AttackBody): Promise<MutationResult> => {
+  return async (ctx: BattleMutationContext, body: AttackBody, resume?: CritResume): Promise<MutationResult> => {
     const { endTurn, ...data } = body;
 
     assertAttackInput(ctx, data);
@@ -95,35 +97,45 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
 
     const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
 
-    const phase = runAttackPhase({
-      battle: { initiativeOrder: ctx.participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
-      data,
-      battleId: ctx.scene.id,
-      userId: ctx.userId,
-      isDM: ctx.isDM,
-      rng: ctx.rng,
-      map: ctx.meta.map,
-      hitSpells,
+    return runWithCritChoice(ctx, {
+      action: "attack",
+      actorId: data.attackerId,
+      request: body,
+      enabled: ctx.meta.critChoiceByDm,
+      resume,
+      run: async ({ rng, crit }) => {
+        const phase = runAttackPhase({
+          battle: { initiativeOrder: ctx.participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
+          data,
+          battleId: ctx.scene.id,
+          userId: ctx.userId,
+          isDM: ctx.isDM,
+          rng,
+          crit,
+          map: ctx.meta.map,
+          hitSpells,
+        });
+
+        const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, deps });
+
+        const order = summoned.order;
+
+        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 && summoned.messages.length > 0 ? { ...a, resultText: [a.resultText, ...summoned.messages].join(" | ") } : a));
+
+        const events = actions.map(battleActionToEvent);
+
+        if (!endTurn) return { participants: order, pending: ctx.pending, events };
+
+        const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng, map: ctx.meta.map });
+
+        return {
+          participants: advanced.participants,
+          pending: advanced.pending,
+          scene: advanced.scene,
+          events: [...events, ...advanced.actions.map(battleActionToEvent)],
+        };
+      },
     });
-
-    const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
-
-    const order = summoned.order;
-
-    const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 && summoned.messages.length > 0 ? { ...a, resultText: [a.resultText, ...summoned.messages].join(" | ") } : a));
-
-    const events = actions.map(battleActionToEvent);
-
-    if (!endTurn) return { participants: order, pending: ctx.pending, events };
-
-    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map });
-
-    return {
-      participants: advanced.participants,
-      pending: advanced.pending,
-      scene: advanced.scene,
-      events: [...events, ...advanced.actions.map(battleActionToEvent)],
-    };
   };
 }
 

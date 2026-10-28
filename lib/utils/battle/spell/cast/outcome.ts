@@ -1,9 +1,15 @@
+import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { applyCriticalEffect, critFlavorFor } from "@/lib/utils/battle/attack/critical";
+import { getP, put } from "@/lib/utils/battle/common/action-flow";
+import type { CritKind } from "@/lib/utils/battle/crit-choice/catalog";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import { rollSavingThrow } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
+
+const NON_PARTICIPANT_EFFECTS = new Set<CriticalEffectType>(["negate_damage", "negate_effects", "double_damage"]);
 
 const SKIPPED: Outcome = { skip: true, factor: 0, raceMultiplier: 0 };
 
@@ -15,6 +21,24 @@ function raceEffect(mods: RaceModifier[], target: BattleParticipant): { immune: 
   const percent = raceId ? mods.filter((m) => m.raceId === raceId).reduce((sum, m) => sum + m.percent, 0) : 0;
 
   return { immune: percent <= -100, multiplier: Math.max(0, (100 + percent) / 100) };
+}
+
+function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): CriticalEffect["effect"] | undefined {
+  const { flow, spell, caster } = state;
+
+  if (!flow.ctx.crit) return undefined;
+
+  const effect = flow.ctx.crit({ source: "save", kind, actorId: caster.basicInfo.id, targetId: id });
+
+  const target = getP(flow, id);
+
+  const flavor = critFlavorFor(effect, caster.basicInfo.name, target.basicInfo.name, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id });
+
+  flow.messages.push(`🎯 ${target.basicInfo.name}: ${effect.name} — ${flavor}`);
+
+  if (!NON_PARTICIPANT_EFFECTS.has(effect.effect.type)) put(flow, applyCriticalEffect(target, effect, flow.ctx.round));
+
+  return effect.effect;
 }
 
 export function resolveOutcome(state: SpellCastState, id: string, withSave: boolean): Outcome {
@@ -47,7 +71,12 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     const dc = state.saveDc;
 
-    const { roll, mod, total, success } = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+    const rolled = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+
+    const { roll, mod, total } = rolled;
+
+    // нат. 20/1 визначають результат лише там, де діють криті (є picker)
+    const success = flow.ctx.crit && (roll === 20 || roll === 1) ? roll === 20 : rolled.success;
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 
@@ -55,7 +84,13 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}=${total} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
 
+    const crit = roll === 20 || roll === 1 ? applySaveCrit(state, id, roll === 20 ? "success" : "fail") : undefined;
+
+    if (crit?.type === "negate_damage") factor = 0;
+
     if (factor === 0) return SKIPPED;
+
+    return { skip: false, factor, raceMultiplier: race.multiplier * (crit?.type === "double_damage" ? 2 : 1), ...(crit?.type === "negate_effects" && { negateEffects: true }) };
   }
 
   return { skip: false, factor, raceMultiplier: race.multiplier };

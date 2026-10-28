@@ -12,6 +12,7 @@ import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -29,6 +30,7 @@ export type AttackPhaseInput = {
   userId: string;
   isDM: boolean;
   rng?: Rng;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 };
@@ -108,6 +110,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       map: input.map,
       hitSpells: input.hitSpells,
       rng,
+      crit: input.crit,
       recordDice: true,
       serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
     });
@@ -138,6 +141,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         round: battle.currentRound,
         battleId,
         rng,
+        crit: input.crit,
         map: input.map,
       });
 
