@@ -136,6 +136,8 @@ export interface BattleParticipantBasicInfo {
   side: ParticipantSide;
   controlledBy: string; // userId (для players) або CONTROLLED_BY_DM (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
+  /** XP за перемогу над учасником (юніт з CR або ручним XP) */
+  xp?: number;
 }
 
 /**
@@ -346,6 +348,14 @@ export interface AirborneState {
   name: string;
 }
 
+export interface LegendaryState {
+  actions: number;
+  actionsLeft: number;
+  resistLeft: number;
+}
+
+export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: string } | { kind: "ability"; abilityKey: string; targetIds?: string[] };
+
 export interface BattleParticipantBattleData {
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
@@ -405,6 +415,8 @@ export interface BattleParticipantBattleData {
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
   hpMultiplier?: number;
+  /** Легендарні дії й опір монстра 5e; actionsLeft відновлюється на початку його ходу */
+  legendary?: LegendaryState;
 }
 
 /**

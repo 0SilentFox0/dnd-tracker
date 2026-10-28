@@ -1,10 +1,11 @@
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
@@ -116,7 +117,14 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     const r = rollSave({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
 
-    const { roll, mod, bonus, total, success } = r;
+    // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
+    const resisted = target.basicInfo.side !== state.caster.basicInfo.side ? resolveSave(target, r) : { result: r, participant: target, message: null };
+
+    if (resisted.message) flow.ps = replaceParticipant(flow.ps, resisted.participant);
+
+    const { roll, mod, bonus, total } = r;
+
+    const { success } = resisted.result;
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
 
@@ -128,7 +136,9 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     flow.messages.push(r.autoFail
       ? `🎲 ${target.basicInfo.name}: рятівний кидок проти СК ${dc} — автопровал`
-      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${r.success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+
+    if (resisted.message) flow.messages.push(resisted.message);
 
     if (factor === 0) return SKIPPED;
   }

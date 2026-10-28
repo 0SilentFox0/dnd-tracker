@@ -16,6 +16,7 @@ export interface DmParticipantActions {
   onRemove: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
   onConditions?: (p: BattleParticipant) => void;
+  onLegendary?: (p: BattleParticipant) => void;
   conditionsEnabled?: boolean;
   onDone?: () => void;
   unitControl?: UnitControlRow;
@@ -34,6 +35,8 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
   const unitControl = useUnitControlPanel();
 
   const [conditionsId, setConditionsId] = useState<string | null>(null);
+
+  const [legendaryId, setLegendaryId] = useState<string | null>(null);
 
   const isActive = battle.status === BattleStatus.ACTIVE;
 
@@ -55,6 +58,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     onTakeControl: (p) => dmControl.set(p?.basicInfo.id ?? null),
     onRemove: (p) => update(p, { removeFromBattle: true }),
     onConditions: isActive ? (p) => setConditionsId(p.basicInfo.id) : undefined,
+    onLegendary: isActive ? (p) => setLegendaryId(p.basicInfo.id) : undefined,
     conditionsEnabled: (battle.rules?.conditions.enabled ?? false) || (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
     onKill: isActive ? (p) => update(p, { kill: true }) : undefined,
     onDone,
@@ -63,9 +67,12 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
 
   const conditionsTarget = useMemo(() => (battle.initiativeOrder ?? []).find((p) => p.basicInfo.id === conditionsId) ?? null, [battle.initiativeOrder, conditionsId]);
 
+  const legendaryTarget = useMemo(() => (battle.initiativeOrder ?? []).find((p) => p.basicInfo.id === legendaryId) ?? null, [battle.initiativeOrder, legendaryId]);
+
   return {
     row,
     conditions: { target: conditionsTarget, close: () => setConditionsId(null), submit: actions.conditions.mutate, isPending: actions.conditions.isPending },
+    legendary: { target: legendaryTarget, close: () => setLegendaryId(null) },
     refreshSources: { run: refreshSources, isPending: actions.refreshSources.isPending },
     randomUnits: unitControl.random,
   };

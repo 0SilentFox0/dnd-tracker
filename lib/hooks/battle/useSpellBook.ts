@@ -6,13 +6,13 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
-import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import {
   buildSpellPick,
   casterUsesUniversalSlot,
   initialSpellFlow,
   slotOptions,
   spellAimTargets,
+  spellBlockedBySlots,
   spellDefinition,
   spellFlow,
   type SpellFlowAction,
@@ -293,7 +293,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
     slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
     slot: { options: slotChoices, value: state.slotKey },
-    noSlot: (s: BookSpell) => (caster && isFiveE(caster) ? !free && s.level > 0 && slotOptions(caster, s.level).length === 0 : false),
+    noSlot: (s: BookSpell) => spellBlockedBySlots(caster, s.level, free),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => !!caster && !free && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
   };

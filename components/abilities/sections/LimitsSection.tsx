@@ -82,6 +82,9 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
         {isButton && (
           <FieldRenderer meta={{ name: "maxTargets", label: "Макс. цілей", input: "number", optional: true }} path={`${path}.maxTargets`} value={ability.maxTargets} onChange={(v) => setTop("maxTargets", v)} />
         )}
+        {ability.trigger.event === "action" && (
+          <FieldRenderer meta={{ name: "legendaryCost", label: "Легендарна дія (вартість 1–3)", input: "number", optional: true }} path={`${path}.limits.legendaryCost`} value={ability.limits?.legendaryCost} onChange={(v) => set("legendaryCost", v)} />
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
+import { bestMentalAbility, isMonster5e, monsterSaveDc, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
 import type { BattleParticipant } from "@/types/battle";
 import type { Unit } from "@/types/units";
 
@@ -97,6 +98,17 @@ export async function createBattleParticipantFromUnit(
     logger.error("[battle/from-unit] load race failed", { unitId: unit.id, raceId: unit.raceId, campaignId: unit.campaignId }, error);
   }
 
+  const monster = isMonster5e(unit);
+
+  const xp = unitXp(unit);
+
+  const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
+
+  const legendary =
+    monster && (unit.legendaryActions > 0 || unit.legendaryResistances > 0)
+      ? { actions: unit.legendaryActions, actionsLeft: unit.legendaryActions, resistLeft: unit.legendaryResistances }
+      : undefined;
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
@@ -109,6 +121,7 @@ export async function createBattleParticipantFromUnit(
       avatar: unit.avatar || undefined,
       side,
       controlledBy: CONTROLLED_BY_DM,
+      ...(xp !== null && { xp }),
     },
     abilities: {
       level: unit.level,
@@ -125,6 +138,8 @@ export async function createBattleParticipantFromUnit(
       race: race?.name ?? "",
       raceId: race?.id,
       moraleCap: moraleCapFromRules(rules),
+      ...(monster && { damageModel: "5e" as const }),
+      ...(saveProficiencies.length > 0 && { saveProficiencies }),
     },
     combatStats: {
       maxHp: unit.maxHp,
@@ -139,9 +154,9 @@ export async function createBattleParticipantFromUnit(
       maxTargets: unit.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingAbility: undefined,
-      // юніти без заклинальної характеристики: СК росте з тіром (level = тір)
-      spellSaveDC: rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
+      spellcastingAbility: monster ? bestMentalAbility(unit) : undefined,
+      // HOMM-юніт без заклинальної характеристики: СК росте з тіром (level = тір)
+      spellSaveDC: monster ? monsterSaveDc(rules.formulas.saveDcBase, unit.proficiencyBonus, unit) : rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
       spellAttackBonus: undefined,
       spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],
@@ -152,10 +167,12 @@ export async function createBattleParticipantFromUnit(
       equippedArtifacts: [],
       resolvedAbilities: [
         ...collectUnitAbilities(unit, race),
+        ...(monster ? multiattackAbilities(unit) : []),
         ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
       ],
       abilityUsage: {},
       pendingExtraActions: 0,
+      ...(legendary && { legendary }),
     },
     actionFlags: {
       hasUsedAction: false,

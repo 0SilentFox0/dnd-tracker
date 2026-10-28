@@ -31,6 +31,7 @@ export { useFxEnabled } from "./useFxEnabled";
 export { useFxImpacts } from "./useFxImpacts";
 export { useHitChange, useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
+export { type LegendaryChoice, useLegendaryAction } from "./useLegendaryAction";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { DRAG_THRESHOLD, useMapViewport } from "./useMapViewport";
 export { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";

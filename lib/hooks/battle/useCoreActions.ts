@@ -33,7 +33,7 @@ function bodyFor(participantId: string, { key, targetId = "", mode = "prone" }: 
 
 export const canReadiedAttack = (rulesEnabled: boolean, p: BattleParticipant) => rulesEnabled && !!p.battleData.readied && reactionBlocker(p) === null;
 
-function useSendCoreAction(onDone?: () => void) {
+export function useSendCoreAction(onDone?: () => void) {
   const { actions } = useBattleScene();
 
   const send = async (body: CoreActionBody) => {

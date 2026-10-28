@@ -28,7 +28,7 @@ import type {
   MoveParticipantData,
   SpellCastData,
 } from "@/types/api";
-import type { BattleBrief } from "@/types/battle";
+import type { BattleBrief, LegendaryOption } from "@/types/battle";
 import type {
   AddParticipantData,
   BattleBalanceBody,
@@ -236,7 +236,8 @@ export async function applyBattleCondition(campaignId: string, battleId: string,
 export type CoreActionBody =
   | { action: "dash" | "disengage" | "dodge" | "hide" | "ready" | "standUp" | "escape"; participantId: string }
   | { action: "help" | "grapple" | "readiedAttack"; participantId: string; targetId: string }
-  | { action: "shove"; participantId: string; targetId: string; mode: "prone" | "push" };
+  | { action: "shove"; participantId: string; targetId: string; mode: "prone" | "push" }
+  | { action: "legendary"; participantId: string; option: LegendaryOption };
 
 export async function runCoreAction(campaignId: string, battleId: string, data: WithVersion<CoreActionBody>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/core-action`, data);

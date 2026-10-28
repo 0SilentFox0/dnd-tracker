@@ -16,6 +16,7 @@ import type { BranchLevel } from "@/lib/utils/skills/progression";
 import { spellDice } from "@/lib/utils/spells/model/dice";
 import { readSpellDefinition, spellEffects, spellResolution, spellTargeting } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
+import { bestMentalAbility, isMonster5e, unitXp } from "@/lib/utils/units/monster";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown, UnitSpellPower } from "@/types/battle-setup";
 
@@ -38,6 +39,8 @@ export interface UnitStats {
   spell?: UnitSpellPower;
   /** Ціль прикликання (Фенікс, елементалі): ДМ не виставляє його сам, тож він не задає стелю тіру. */
   summon?: boolean;
+  cr?: number;
+  xp?: number;
 }
 
 export interface GetCharacterStatsParams {
@@ -61,10 +64,16 @@ export interface UnitStatsInput {
   raceId?: string | null;
   strength?: number;
   dexterity?: number;
+  intelligence?: number;
+  wisdom?: number;
+  charisma?: number;
   maxTargets?: number | null;
   armorClass?: number;
   proficiencyBonus?: number;
   saveDcBase?: number;
+  cr?: number | null;
+  xp?: number | null;
+  multiattack?: number | null;
   attacks: Array<{
     damageDice?: string;
     damageType?: string;
@@ -93,7 +102,7 @@ function spellTargets(targeting: SpellTargeting): number {
 
 type BestSpell = Pick<UnitSpellPower, "dpr" | "damageType" | "save">;
 
-function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }, saveDcBase = 8): BestSpell | null {
+function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }, saveDcBase = 8, dcBonus = 0): BestSpell | null {
   let best: BestSpell | null = null;
 
   for (const [index, s] of spells.entries()) {
@@ -115,8 +124,7 @@ function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyB
 
     const resolution = spellResolution(row);
 
-    // юніт без заклинальної характеристики: СК = 8 + майстерність (spellSaveDc рушія)
-    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDcBase + (unit.proficiencyBonus ?? 0), half: resolution.onSuccess === "half" } : undefined;
+    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDcBase + (unit.proficiencyBonus ?? 0) + dcBonus, half: resolution.onSuccess === "half" } : undefined;
 
     best = { dpr, damageType: damage.damageType ?? "magic", ...(save && { save }) };
   }
@@ -153,7 +161,17 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     }
   }
 
-  const spell = bestSpell(unit.spells ?? [], unit, unit.saveDcBase);
+  const monster = isMonster5e(unit);
+
+  if (monster) weaponDpr *= Math.max(1, unit.multiattack ?? 1);
+
+  const mental = { intelligence: unit.intelligence ?? 10, wisdom: unit.wisdom ?? 10, charisma: unit.charisma ?? 10 };
+
+  const dcBonus = monster ? getAbilityModifier(mental[bestMentalAbility(mental)]) : 0;
+
+  const xp = unitXp(unit);
+
+  const spell = bestSpell(unit.spells ?? [], unit, unit.saveDcBase, dcBonus);
 
   const spellDpr = spell?.dpr ?? 0;
 
@@ -177,6 +195,8 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     ...(attackBonus !== undefined && { attackBonus }),
     ...(weaponLeads && weaponKey && { damageKey: weaponKey }),
     ...(spell && !weaponLeads && { spell: { ...spell, weaponDpr: weaponDpr || diceAverage("1d6"), ...(unit.proficiencyBonus !== undefined && weaponToHit !== undefined && { weaponToHit }) } }),
+    ...(monster && { cr: unit.cr }),
+    ...(xp !== null && { xp }),
   };
 }
 

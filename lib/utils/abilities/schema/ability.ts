@@ -12,6 +12,7 @@ export const LimitsSchema = z.object({
   perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.number().int().min(1) }).optional(),
   cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
+  legendaryCost: z.number().int().min(1).max(3).optional(),
 });
 
 function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): string[] {
@@ -95,6 +96,10 @@ export const AbilitySchema = z
 
     if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
       ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
+    }
+
+    if (a.limits?.legendaryCost !== undefined && (a.trigger.event !== "action" || a.aim)) {
+      ctx.addIssue({ code: "custom", path: ["limits", "legendaryCost"], message: "Легендарна дія — лише для вміння-дії без прицілу на клітинку" });
     }
 
     if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {

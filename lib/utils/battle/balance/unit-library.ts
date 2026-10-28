@@ -20,6 +20,12 @@ export interface UnitStatsRow {
   raceId: string | null;
   strength: number;
   dexterity: number;
+  intelligence?: number;
+  wisdom?: number;
+  charisma?: number;
+  cr?: number | null;
+  xp?: number | null;
+  multiattack?: number;
   maxTargets?: number;
   armorClass?: number;
   proficiencyBonus?: number;
@@ -34,7 +40,7 @@ export function unitRowStats(u: UnitStatsRow, spellsById: Map<string, UnitSpellR
 
   const spells = known.map((id) => spellsById.get(id)).filter((s): s is UnitSpellRow => !!s);
 
-  const stats = getUnitStats({ id: u.id, name: u.name, maxHp: u.maxHp, level: u.level, raceId: u.raceId, strength: u.strength, dexterity: u.dexterity, maxTargets: u.maxTargets, armorClass: u.armorClass, proficiencyBonus: u.proficiencyBonus, attacks: (u.attacks as UnitAttacks) || [], spells, saveDcBase });
+  const stats = getUnitStats({ id: u.id, name: u.name, maxHp: u.maxHp, level: u.level, raceId: u.raceId, strength: u.strength, dexterity: u.dexterity, intelligence: u.intelligence, wisdom: u.wisdom, charisma: u.charisma, cr: u.cr, xp: u.xp, multiattack: u.multiattack, maxTargets: u.maxTargets, armorClass: u.armorClass, proficiencyBonus: u.proficiencyBonus, attacks: (u.attacks as UnitAttacks) || [], spells, saveDcBase });
 
   return resist && Object.keys(resist).length > 0 ? { ...stats, resist } : stats;
 }

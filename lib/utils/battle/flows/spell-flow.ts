@@ -372,6 +372,9 @@ export function spellSlotsLeft(caster: BattleParticipant | null, level: number, 
 
 export const casterUsesUniversalSlot = (caster: BattleParticipant | null): boolean => !!caster && spellSlotKey(caster, 1) === "universal";
 
+export const spellBlockedBySlots = (caster: BattleParticipant | null, level: number, free: boolean): boolean =>
+  !!caster && isFiveE(caster) && !casterUsesUniversalSlot(caster) && !free && level > 0 && slotOptions(caster, level).length === 0;
+
 export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean; chosen?: string }): string | null {
   if (!spellNeedsSlot(spell.level)) return null;
 

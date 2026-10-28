@@ -13,12 +13,13 @@ import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack } from "@/types/battle";
 
-export type ServerAttackLabel = "retaliation" | "opportunity" | "readied";
+export type ServerAttackLabel = "retaliation" | "opportunity" | "readied" | "legendary";
 
 const LABELS: Record<ServerAttackLabel, { title: string; noun: string }> = {
   retaliation: { title: "Відсіч", noun: "відсіч" },
   opportunity: { title: "Атака можливості", noun: "атака можливості" },
   readied: { title: "Підготовлена атака", noun: "підготовлена атака" },
+  legendary: { title: "Легендарна дія", noun: "легендарна атака" },
 };
 
 export interface ServerAttackInput {

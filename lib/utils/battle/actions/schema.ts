@@ -10,3 +10,14 @@ export const coreActionSchema = z.discriminatedUnion("action", [
 ]);
 
 export type CoreActionBody = z.infer<typeof coreActionSchema>;
+
+const legendaryOptionSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("attack"), attackIndex: z.number().int().min(0).max(50), targetId: id }),
+  z.object({ kind: z.literal("ability"), abilityKey: id, targetIds: z.array(id).max(20).optional() }),
+]);
+
+export const legendaryActionSchema = z.object({ action: z.literal("legendary"), participantId: id, option: legendaryOptionSchema });
+
+export type LegendaryActionBody = z.infer<typeof legendaryActionSchema>;
+
+export const coreActionRouteSchema = z.union([coreActionSchema, legendaryActionSchema]);

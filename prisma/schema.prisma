@@ -152,38 +152,44 @@ model Character {
 }
 
 model Unit {
-  id               String   @id @default(cuid())
-  campaignId       String
-  name             String
-  raceId           String?
-  level            Int      @default(1)
-  strength         Int      @default(10)
-  dexterity        Int      @default(10)
-  constitution     Int      @default(10)
-  intelligence     Int      @default(10)
-  wisdom           Int      @default(10)
-  charisma         Int      @default(10)
-  armorClass       Int      @default(10)
-  initiative       Int      @default(0)
-  speed            Int      @default(30)
-  gridSize         Int      @default(1)
-  maxHp            Int      @default(10)
-  proficiencyBonus Int      @default(2)
-  attacks          Json     @default("[]")
-  knownSpells      Json     @default("[]")
-  avatar           String?
-  createdAt        DateTime @default(now())
-  immunities       Json     @default("[]")
-  morale           Int      @default(0)
-  maxTargets       Int      @default(1)
-  minTargets       Int      @default(1)
-  abilities        Json     @default("[]")
-  levelScaling     Json?
-  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
-  spellsSummoning  Spell[]  @relation("SpellSummonUnit")
-  sourceId         String?
-  sourceHash       String?
+  id                   String   @id @default(cuid())
+  campaignId           String
+  name                 String
+  raceId               String?
+  level                Int      @default(1)
+  strength             Int      @default(10)
+  dexterity            Int      @default(10)
+  constitution         Int      @default(10)
+  intelligence         Int      @default(10)
+  wisdom               Int      @default(10)
+  charisma             Int      @default(10)
+  armorClass           Int      @default(10)
+  initiative           Int      @default(0)
+  speed                Int      @default(30)
+  gridSize             Int      @default(1)
+  maxHp                Int      @default(10)
+  proficiencyBonus     Int      @default(2)
+  attacks              Json     @default("[]")
+  knownSpells          Json     @default("[]")
+  avatar               String?
+  createdAt            DateTime @default(now())
+  immunities           Json     @default("[]")
+  morale               Int      @default(0)
+  maxTargets           Int      @default(1)
+  minTargets           Int      @default(1)
+  abilities            Json     @default("[]")
+  levelScaling         Json?
+  cr                   Float?
+  xp                   Int?
+  multiattack          Int      @default(1)
+  legendaryActions     Int      @default(0)
+  legendaryResistances Int      @default(0)
+  saveProficiencies    Json     @default("[]")
+  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  race                 Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
+  spellsSummoning      Spell[]  @relation("SpellSummonUnit")
+  sourceId             String?
+  sourceHash           String?
 
   @@index([campaignId])
   @@index([raceId])

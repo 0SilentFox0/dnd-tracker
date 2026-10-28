@@ -1,6 +1,6 @@
 # Fair battles (balance)
 
-There is no difficulty setting. `lib/utils/battle/balance` (`computeFairScaling`, `pickEnemyRoster`; constants in `lib/constants/battle-balance.ts`) scales enemy units to the party power. The battle setup UI (via `useFairBalance`) and the battle start (`start-fair-scaling.ts`) call the same function.
+There is no difficulty setting. `lib/utils/battle/balance` (`computeFairScaling`, `pickEnemyRoster`; constants in `lib/constants/battle-balance.ts`) scales enemy units to the party power. The battle setup UI (via `useFairBalance`) and the battle start (`start-fair-scaling.ts`) call the same function. In the XP mode (`rules.encounters.balance: "xp"`) neither of them scales — see below.
 
 ## Applying the scale
 
@@ -19,3 +19,7 @@ A unit whose spell beats its weapon counts spell damage against this party (`uni
 ## Summons
 
 Summon targets (units a spell or ability summons by `unitId`, `summonedUnitIds` in `unit-library.ts`, flagged `summon`) are left out of the per-tier scaling ceiling (`weakestPerTier`, lower quantile `TIER_CEILING_QUANTILE` of the units a DM fields) and are never offered by `pickEnemyRoster`.
+
+## XP mode (5e)
+
+`rules.encounters { balance: "fair" | "xp", edition: "2014" | "2024" }`. In `xp` the setup shows `XpBalanceSummary` (`setupXpBudget` → `computeXpBudget` in `balance/xp-budget.ts`: DMG 2014 per-hero thresholds × the monster-count multiplier with the party-size step, or DMG 2024 per-hero budget without a multiplier; units without CR go to `missingCr`, NPC enemies are ignored); the battle start skips `scaleEnemiesForFairBattle`; autopick (`balance-post`, `xpDifficulty`) uses `pickXpRoster` (one unit kind, the band from the chosen threshold up to the next one). Unit XP comes from `unitXp` (manual `xp`, else the CR table); `UnitStats` carries `cr`/`xp`, a CR unit's spell DC adds its best Int/Wis/Cha modifier and its weapon DPR is multiplied by `multiattack`.

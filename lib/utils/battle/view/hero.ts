@@ -109,7 +109,7 @@ export interface AbilityOption {
 
 export function abilityOptions(p: BattleParticipant, trigger: "bonusAction" | "action", round: number): AbilityOption[] {
   return (p.battleData.resolvedAbilities ?? [])
-    .filter((a) => a.trigger.event === trigger && withinCountLimits(p, a))
+    .filter((a) => a.trigger.event === trigger && !a.limits?.legendaryCost && withinCountLimits(p, a))
     .map((ability) => ({ ability, cooldownLeft: cooldownLeft(p, ability, round) }));
 }
 

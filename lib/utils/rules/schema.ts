@@ -53,6 +53,11 @@ const sections = {
     xp: z.boolean().default(false),
     inspiration: z.boolean().default(false),
   }),
+  encounters: z.strictObject({
+    balance: z.enum(["fair", "xp"]).default("fair"),
+    edition: z.enum(["2014", "2024"]).default("2014"),
+    autoXp: z.boolean().default(false),
+  }),
 };
 
 type Sections = typeof sections;
@@ -82,6 +87,7 @@ export const RulesetSchema = z
     actions: sections.actions.prefault({}),
     classes: sections.classes.prefault({}),
     outOfCombat: sections.outOfCombat.prefault({}),
+    encounters: sections.encounters.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -120,6 +126,7 @@ export const RulesetPatchSchema = z
     actions: patchSection("actions").optional(),
     classes: patchSection("classes").optional(),
     outOfCombat: patchSection("outOfCombat").optional(),
+    encounters: patchSection("encounters").optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
 

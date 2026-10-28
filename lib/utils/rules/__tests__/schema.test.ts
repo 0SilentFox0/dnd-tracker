@@ -24,6 +24,7 @@ describe("parseRules", () => {
       actions: { enabled: false, opportunityAttacks: true, variant: "2014" },
       classes: { enabled: false },
       outOfCombat: { persistResources: false, longRestHitDice: "half", xp: false, inspiration: false },
+      encounters: { balance: "fair", edition: "2014", autoXp: false },
     });
   });
 

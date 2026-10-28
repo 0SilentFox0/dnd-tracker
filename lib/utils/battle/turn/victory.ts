@@ -1,3 +1,6 @@
+import { autoXpEnabled, battleXpAward } from "./battle-xp";
+import { originalSide } from "./original-side";
+
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
@@ -11,13 +14,6 @@ export interface VictoryCheckResult {
   result: "victory" | "defeat" | null;
   awaiting: "victory" | "defeat" | null;
   message: string;
-}
-
-/** Зачарований юніт у переможних умовах лишається на своєму початковому боці. */
-export function originalSide(p: BattleParticipant): ParticipantSide {
-  const origin = p.battleData.charmReturn ?? p.battleData.activeEffects.find((e) => e.charmOrigin)?.charmOrigin;
-
-  return origin?.side ?? p.basicInfo.side;
 }
 
 /** Перевіряє умови перемоги. */
@@ -106,6 +102,10 @@ export function completeBattle(
     revived.includes(p) ? { ...clearDeathSaves(p), combatStats: { ...p.combatStats, currentHp: reviveHp(p), status: CombatStatus.ACTIVE } } : p,
   );
 
+  const award = result === "victory" && autoXpEnabled(rules) ? battleXpAward(updatedParticipants) : null;
+
+  const baseText = result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!";
+
   const battleAction: BattleAction = {
     id: `battle-complete-${Date.now()}`,
     battleId: "",
@@ -116,7 +116,7 @@ export function completeBattle(
     actionType: "end_turn",
     targets: [],
     actionDetails: { battleResult: result },
-    resultText: result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!",
+    resultText: award ? `${baseText} · ⭐ Досвід: ${award.share} кожному` : baseText,
     hpChanges: revived.map((p) => ({
       participantId: p.basicInfo.id,
       participantName: p.basicInfo.name,

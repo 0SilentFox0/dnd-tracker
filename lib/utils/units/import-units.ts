@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ImportUnitRow } from "@/lib/schemas/units";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { resolveUnitProficiency } from "@/lib/utils/units/monster";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import type { UnitImportResult } from "@/types/import";
 
@@ -48,11 +49,17 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     speed: unit.speed,
     gridSize: unit.gridSize,
     maxHp: unit.maxHp,
-    proficiencyBonus: unit.proficiencyBonus,
+    proficiencyBonus: resolveUnitProficiency(unit),
     attacks: unit.attacks as Prisma.InputJsonValue,
     abilities: abilitiesJson(specialAbilitiesToAbilities(unit.specialAbilities)),
     knownSpells: unit.knownSpells,
     avatar: unit.avatar ?? null,
+    cr: unit.cr ?? null,
+    xp: unit.xp ?? null,
+    multiattack: unit.multiattack,
+    legendaryActions: unit.legendaryActions,
+    legendaryResistances: unit.legendaryResistances,
+    saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
   };
 }
 

@@ -3,6 +3,7 @@
 import { UNIT_FORM_TAB, type UnitFormTabId } from "./unit-form-tabs";
 import { UnitAttacks } from "./UnitAttacks";
 import { UnitBasicInfo } from "./UnitBasicInfo";
+import { UnitFiveEFields } from "./UnitFiveEFields";
 import { UnitImmunities } from "./UnitImmunities";
 import { UnitKnownSpells } from "./UnitKnownSpells";
 
@@ -32,7 +33,7 @@ export function UnitFormError({ error }: { error: Error | null }) {
 export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
   const { data: formData, change } = editor.form;
 
-  const { races, spells } = editor.options;
+  const { races, spells, fiveE } = editor.options;
 
   return [
     {
@@ -41,6 +42,11 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <div className="space-y-4">
           <UnitBasicInfo formData={formData} races={races} onChange={change} />
+          {(fiveE || formData.cr != null) && (
+            <HudSection title="5e">
+              <UnitFiveEFields formData={formData} onChange={change} />
+            </HudSection>
+          )}
           <IconUrlField
             id="avatar"
             label="Аватар (посилання на картинку)"

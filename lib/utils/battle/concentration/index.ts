@@ -2,7 +2,7 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
-import { rollSave } from "@/lib/utils/battle/saves";
+import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -104,11 +104,13 @@ export function concentrationCheck(input: { caster: BattleParticipant; damage: n
 
   const dc = Math.min(rules.concentration.dcCap ?? Infinity, Math.max(10, Math.floor(damage / 2)));
 
-  const save = rollSave({ target: caster, ability: "constitution", dc, participants: ps, rules, rng });
+  const rolled = rollSave({ target: caster, ability: "constitution", dc, participants: ps, rules, rng });
 
-  const head = `🎲 ${caster.basicInfo.name}: концентрація — рятівний кидок ВИТ ${save.total} проти СК ${dc}`;
+  const { result: save, participant: resisted, message } = resolveSave(caster, rolled);
 
-  if (save.success) return { participants: ps, messages: [`${head} — утримує`] };
+  const head = `🎲 ${caster.basicInfo.name}: концентрація — рятівний кидок ВИТ ${rolled.total} проти СК ${dc}`;
+
+  if (save.success) return { participants: message ? replaceParticipant(ps, resisted) : ps, messages: [`${head} — утримує`, ...(message ? [message] : [])] };
 
   return { participants: strip(ps, id)?.participants ?? ps, messages: [`${head} — втрачає концентрацію на «${marker.concentration.spellName}»`] };
 }

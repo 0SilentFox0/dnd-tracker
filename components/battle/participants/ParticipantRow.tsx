@@ -7,6 +7,7 @@ import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
@@ -48,6 +49,8 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
 
   const down = isDown(participant);
 
+  const badge = legendaryBadge(participant);
+
   return (
     <div ref={shakeRef} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
@@ -64,6 +67,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         <HealthBar participant={participant} exact={exact} />
         <EffectLine effects={effects} />
         {participant.battleData.deathSaves && <DeathSavePips saves={participant.battleData.deathSaves} />}
+        {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{badge}</div>}
       </div>
       <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-[#b8ab95]">
         {acText}

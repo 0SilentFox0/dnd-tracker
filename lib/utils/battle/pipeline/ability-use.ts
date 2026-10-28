@@ -50,6 +50,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
+  if (ability.limits?.legendaryCost) throw new BattleRuleError("action_rejected", "Це вміння — легендарна дія, її використовують поза своїм ходом");
+
   const usage = USAGE[trigger];
 
   if (usage.used(participant)) throw new BattleRuleError(usage.error.code, usage.error.message);

@@ -11,7 +11,7 @@ import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-re
 import { defineResource } from "@/lib/server/content/define-resource";
 import { toJsonInput } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
-import { getProficiencyBonus } from "@/lib/utils/common/calculations";
+import { resolveUnitProficiency } from "@/lib/utils/units/monster";
 import { toUnit } from "@/lib/utils/units/to-unit";
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
@@ -48,7 +48,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         speed: data.speed,
         gridSize: data.gridSize,
         maxHp: data.maxHp,
-        proficiencyBonus: data.proficiencyBonus || getProficiencyBonus(data.level),
+        proficiencyBonus: resolveUnitProficiency(data),
         minTargets: data.minTargets,
         maxTargets: data.maxTargets,
         attacks: data.attacks as Prisma.InputJsonValue,
@@ -57,6 +57,12 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         knownSpells: data.knownSpells,
         morale: data.morale,
         avatar: data.avatar ?? null,
+        cr: data.cr ?? null,
+        xp: data.xp ?? null,
+        multiattack: data.multiattack,
+        legendaryActions: data.legendaryActions,
+        legendaryResistances: data.legendaryResistances,
+        saveProficiencies: data.saveProficiencies as Prisma.InputJsonValue,
       },
     });
 
@@ -91,6 +97,12 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         minTargets: data.minTargets,
         maxTargets: data.maxTargets,
         avatar: data.avatar,
+        cr: data.cr,
+        xp: data.xp,
+        multiattack: data.multiattack,
+        legendaryActions: data.legendaryActions,
+        legendaryResistances: data.legendaryResistances,
+        saveProficiencies: toJsonInput(data.saveProficiencies),
       },
     });
 

@@ -1,3 +1,4 @@
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
@@ -47,4 +48,10 @@ export interface Unit {
   immunities: string[];
   knownSpells: string[];
   avatar: string | null;
+  cr?: number | null;
+  xp?: number | null;
+  multiattack?: number;
+  legendaryActions?: number;
+  legendaryResistances?: number;
+  saveProficiencies?: AbilityKey[];
 }

@@ -108,6 +108,16 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Паралельність** — read-modify-write іде в транзакції з `lockCharacters` (`lib/server/characters/lock.ts`, `SELECT … FOR UPDATE` по відсортованих id).
 - **Натхнення в атаці** — `useInspiration` → причина переваги «Натхнення» в `rollModeReasons` (лише перший удар), знімається в мутації; клієнт — `SET_INSPIRATION` у майстрі атаки.
 
+## 5e: монстри
+
+- Юніт з `cr` (`isMonster5e`, `lib/utils/units/monster.ts`) у `createBattleParticipantFromUnit`: `damageModel: "5e"`, СК = `saveDcBase` + майстерність + найкращий мод. Інт/Мдр/Хар (`spellcastingAbility` — ця характеристика), `saveProficiencies` (читає `rollSave` за `rules.saves.proficiency`), мультиатака — синтетичне пасивне вміння `unit:<id>:multiattack` (`modifyStat attacksPerAction`), `basicInfo.xp` (`unitXp`), `battleData.legendary { actions, actionsLeft, resistLeft }`. Юніт без `cr` — нульова зміна (HOMM5).
+- Легендарні дії: тіло `{ action: "legendary", participantId, option }` роуту `core-action` (`legendary-mutation.ts`), лише ДМ, поза ходом монстра, не залежить від `rules.actions`. Атака — `legendaryAttack` (`actions/legendary.ts`) → `resolveServerAttack` (`label: "legendary"`, одна атака); вміння — `limits.legendaryCost` через `runAbilities` подією `action`. Відновлення — у `resetTurnState`. UI — `LegendaryActionDialog` (кнопка-корона в панелі ДМ), значок `legendaryBadge`.
+- Легендарна атака, як і підготовлена, не запускає тригери до/після атаки і HOMM-відповідний удар (властивість `resolveServerAttack`): HOMM-юніт, по якому влучила легендарна ближня атака, не відповідає.
+- Легендарний опір: `resolveSave` (`saves/legendary.ts`) у заклинаннях (лише ціль з іншого боку), концентрації, `saveEnds`, Схопленні/Штовханні 2024, Вогняному вибуху; лист не зачіпає.
+- Дії лігва — вміння `roundStart` + `perRound: 1`.
+- Заговори монстра масштабуються з `unit.level` (`spell/caster-dice.ts`), а не з CR: монстр CR 10 із `level: 1` кидає заговори в один кубик. Заклинання монстра поза межами 4e — ДМ виставляє `level` під потрібний масштаб.
+- Авто-досвід: `completeBattle` додає «⭐ Досвід: N кожному», `saveBattle` (гілка `completing`) → `persistBattleXp` (`store/persist-xp.ts`: `battleXpAward`, `lockCharacters`, журнал `xp` з `battleId`). Лише перемога, `encounters.autoXp && outOfCombat.xp`; відкат завершеного бою повторює нарахування (як запис ресурсів 4d).
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

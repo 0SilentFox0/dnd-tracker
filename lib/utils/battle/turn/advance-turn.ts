@@ -104,7 +104,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
             battleData: {
-              ...resetTurnState(p),
+              ...resetTurnState(p, { keepLegendary: true }),
               extraTurnActive: true,
               pendingExtraActions: actionsPerTurnPool(p, order),
             },

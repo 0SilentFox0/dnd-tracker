@@ -129,7 +129,7 @@ export async function buildStartOrder(
     ),
   );
 
-  const built = await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
+  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
 
   const { field, reserve } = partitionReserve(slots, built);
 

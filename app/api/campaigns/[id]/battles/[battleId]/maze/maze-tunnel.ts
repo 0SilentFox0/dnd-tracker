@@ -9,7 +9,7 @@ import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
 import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
-import { originalSide } from "@/lib/utils/battle/turn/victory";
+import { originalSide } from "@/lib/utils/battle/turn/original-side";
 import type { BattleMapConfig, BattleParticipant, MazeConfig } from "@/types/battle";
 
 const isDead = (p: BattleParticipant) => p.combatStats.status === CombatStatus.DEAD;

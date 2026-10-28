@@ -5,6 +5,7 @@ import { diffParticipants } from "./diff-participants";
 import { BattleConflictError } from "./errors";
 import type { BattleDb } from "./load-battle";
 import { persistCharacterResources } from "./persist-resources";
+import { persistBattleXp } from "./persist-xp";
 import { buildSnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type {
@@ -232,6 +233,7 @@ export async function saveBattle(
 
     if (completing) {
       await persistCharacterResources(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants);
+      await persistBattleXp(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants, outcome.events);
       await tx.$executeRaw(pruneSnapshotsSql(scene.id));
     }
   });

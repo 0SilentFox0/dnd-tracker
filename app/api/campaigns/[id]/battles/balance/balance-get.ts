@@ -17,7 +17,7 @@ export async function getBalancePayload(campaignId: string, rules?: Ruleset) {
   const unitStats: Record<string, UnitEntityStats> = {};
 
   for (const u of await loadUnitLibraryStats(campaignId, rules)) {
-    unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId, ac: u.ac, attackBonus: u.attackBonus, damageKey: u.damageKey, resist: u.resist, spell: u.spell, summon: u.summon };
+    unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId, ac: u.ac, attackBonus: u.attackBonus, damageKey: u.damageKey, resist: u.resist, spell: u.spell, summon: u.summon, cr: u.cr, xp: u.xp };
   }
 
   const payload: Record<string, unknown> = { characterStats, unitStats };

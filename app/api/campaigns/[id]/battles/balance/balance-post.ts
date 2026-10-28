@@ -3,8 +3,10 @@ import type { z } from "zod";
 import type { balanceSchema } from "./balance-schema";
 import { loadCharacterBalanceStats } from "./character-stats";
 
+import type { UnitStats } from "@/lib/utils/battle/balance";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
+import { pickXpRoster, resolveXpDifficulty, type XpEdition } from "@/lib/utils/battle/balance/xp-budget";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
@@ -12,21 +14,29 @@ type BalancePostData = z.infer<typeof balanceSchema>;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+function xpSuggestion(heroLevels: number[], library: UnitStats[], byId: Map<string, UnitStats>, data: BalancePostData, edition: XpEdition): SuggestedEnemy[] {
+  const difficulty = resolveXpDifficulty(edition, data.xpDifficulty);
+
+  const pick = pickXpRoster({ edition, heroLevels, library, difficulty, raceId: data.raceId });
+
+  const u = pick && byId.get(pick.unitId);
+
+  if (!pick || !u) return [];
+
+  return [{ unitId: u.unitId, name: u.name, quantity: pick.quantity, dpr: u.dpr, hp: u.hp, totalDpr: round1(u.dpr * pick.quantity), totalHp: u.hp * pick.quantity, ...(u.xp !== undefined && { xp: u.xp }) }];
+}
+
 export async function postBalanceResponse(campaignId: string, data: BalancePostData, rules?: Ruleset) {
   const { allyParticipants, suggest, raceId } = data;
 
-  const library = await loadUnitLibraryStats(campaignId, rules);
+  const [library, heroes] = await Promise.all([
+    loadUnitLibraryStats(campaignId, rules),
+    allyParticipants.characterIds.length > 0 ? loadCharacterBalanceStats(campaignId, allyParticipants.characterIds) : [],
+  ]);
 
-  const members: Parameters<typeof buildPartyPower>[0] = [];
+  const members: Parameters<typeof buildPartyPower>[0] = heroes.map(({ stats }) => ({ stats: heroMember(stats), hero: true }));
 
-  let allyCount = 0;
-
-  if (allyParticipants.characterIds.length > 0) {
-    for (const { stats } of await loadCharacterBalanceStats(campaignId, allyParticipants.characterIds)) {
-      members.push({ stats: heroMember(stats), hero: true });
-      allyCount += 1;
-    }
-  }
+  let allyCount = heroes.length;
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
 
@@ -50,7 +60,9 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const response: { allyStats: AllyStats; suggestedEnemies?: SuggestedEnemy[] } = { allyStats };
 
-  if (suggest) {
+  if (suggest && rules?.encounters.balance === "xp") {
+    response.suggestedEnemies = xpSuggestion(heroes.map((h) => h.character.level), library, byId, data, rules.encounters.edition);
+  } else if (suggest) {
     const pick = pickEnemyRoster(party, library, raceId);
 
     const roster = pick?.roster ?? [];

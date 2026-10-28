@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, type LucideIcon, RefreshC
 import { ConditionsDialog } from "./ConditionsDialog";
 import { DmBattleLog } from "./DmBattleLog";
 import { DmParticipantRow } from "./DmParticipantRow";
+import { LegendaryActionDialog } from "./LegendaryActionDialog";
 
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -71,7 +72,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const closePanel = () => setOpen(false);
 
-  const { row, refreshSources, randomUnits, conditions } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+  const { row, refreshSources, randomUnits, conditions, legendary } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -177,6 +178,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
       </div>
 
       <ConditionsDialog participant={conditions.target} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      <LegendaryActionDialog participant={legendary.target} onClose={legendary.close} />
 
       {open && (
         <button

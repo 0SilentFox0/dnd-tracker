@@ -6,7 +6,7 @@ import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { canStand, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
-import { rollSave } from "@/lib/utils/battle/saves";
+import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -24,7 +24,7 @@ function bestSkill(p: BattleParticipant, ps: BattleParticipant[], rules: Ruleset
 
 const grappleDc = (grappler: BattleParticipant) => 8 + grappler.abilities.modifiers.strength + grappler.abilities.proficiencyBonus;
 
-export function contest(input: { attacker: BattleParticipant; target: BattleParticipant } & RollInput): { success: boolean; message: string } {
+export function contest(input: { attacker: BattleParticipant; target: BattleParticipant } & RollInput): { success: boolean; message: string; participants: BattleParticipant[] } {
   const { attacker, target, participants, rules, rng } = input;
 
   if (rules.actions.variant === "2024") {
@@ -32,16 +32,22 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
 
     const dc = grappleDc(attacker);
 
-    const save = rollSave({ target, ability, dc, participants, rules, rng });
+    const rolled = rollSave({ target, ability, dc, participants, rules, rng });
 
-    return { success: !save.success, message: `🎲 СК ${dc}, ${target.basicInfo.name} кидає ${save.total}` };
+    const { result, participant, message } = resolveSave(target, rolled);
+
+    return {
+      success: !result.success,
+      message: `🎲 СК ${dc}, ${target.basicInfo.name} кидає ${rolled.total}${message ? `; ${message}` : ""}`,
+      participants: message ? replaceParticipant(participants, participant) : participants,
+    };
   }
 
   const mine = rollCheck({ actor: attacker, subject: { skill: "athletics" }, participants, rules, rng });
 
   const theirs = rollCheck({ actor: target, subject: { skill: bestSkill(target, participants, rules) }, participants, rules, rng });
 
-  return { success: mine.total > theirs.total, message: `🎲 ${mine.total} проти ${theirs.total}` };
+  return { success: mine.total > theirs.total, message: `🎲 ${mine.total} проти ${theirs.total}`, participants };
 }
 
 export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: string } {
@@ -100,7 +106,7 @@ export function runGrapple(input: GrappleActionInput): GrappleActionResult {
 
   const check = contest({ attacker: actor, target, participants, rules, rng: input.rng });
 
-  if (!check.success) return { participants, message: `🤲 ${name}: Схопити — ${target.basicInfo.name} вислизає ${check.message}` };
+  if (!check.success) return { participants: check.participants, message: `🤲 ${name}: Схопити — ${target.basicInfo.name} вислизає ${check.message}` };
 
   const result = applyHeld(input, target, "grappled", grappleKey(actor.basicInfo.id));
 
@@ -118,7 +124,7 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
 
   const check = contest({ attacker: actor, target, participants, rules, rng: input.rng });
 
-  if (!check.success) return { participants, message: `💥 ${name}: Штовхнути — ${target.basicInfo.name} встоює ${check.message}` };
+  if (!check.success) return { participants: check.participants, message: `💥 ${name}: Штовхнути — ${target.basicInfo.name} встоює ${check.message}` };
 
   const messages = [`💥 ${name}: Штовхнути ${check.message}`];
 

@@ -9,6 +9,7 @@ import { BattleFormMap } from "./BattleFormMap";
 import { CharactersListCard } from "./CharactersListCard";
 import { SidePanelCard } from "./SidePanelCard";
 import { UnitsListCard } from "./UnitsListCard";
+import { XpBalanceSummary } from "./XpBalanceSummary";
 
 import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/setup/battle-form-tabs";
 import { LoadingState } from "@/components/common/states";
@@ -93,7 +94,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: `Склад · ${participants.list.length}`,
       content: (
         <div>
-          <BalanceSummary fair={setup.fair} />
+          {setup.encounters.balance === "xp" ? <XpBalanceSummary xp={setup.xp} units={data.units} /> : <BalanceSummary fair={setup.fair} />}
           <div className="grid gap-4 md:grid-cols-2">
             {sidePanel(ParticipantSide.ALLY)}
             {sidePanel(ParticipantSide.ENEMY)}
