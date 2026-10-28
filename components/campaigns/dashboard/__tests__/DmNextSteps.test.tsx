@@ -17,6 +17,7 @@ describe("DmNextSteps", () => {
     expect(screen.queryByText("Підготовка")).toBeNull();
     expect(screen.queryByText(/На схваленні/)).toBeNull();
     expect(screen.getByRole("link", { name: "Показ" }).getAttribute("href")).toBe("/campaigns/c1/dm/show");
+    expect(screen.getByRole("link", { name: "Глобальна карта" }).getAttribute("href")).toBe("/campaigns/c1/dm/world");
     expect(screen.getByRole("link", { name: "Музика" }).getAttribute("href")).toBe("/campaigns/c1/dm/music");
   });
 

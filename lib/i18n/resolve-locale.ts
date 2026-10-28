@@ -22,14 +22,12 @@ function parseAcceptLanguage(header: string): string[] {
     .map((entry) => entry.tag.split("-")[0]);
 }
 
-export function resolveLocale({ cookie, acceptLanguage }: ResolveInput): Locale {
+export function negotiateLocale({ cookie, acceptLanguage }: ResolveInput): Locale | null {
   if (isLocale(cookie)) return cookie;
 
-  if (acceptLanguage) {
-    const match = parseAcceptLanguage(acceptLanguage).find(isLocale);
+  return (acceptLanguage && parseAcceptLanguage(acceptLanguage).find(isLocale)) || null;
+}
 
-    if (match) return match;
-  }
-
-  return DEFAULT_LOCALE;
+export function resolveLocale(input: ResolveInput): Locale {
+  return negotiateLocale(input) ?? DEFAULT_LOCALE;
 }

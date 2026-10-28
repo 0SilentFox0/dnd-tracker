@@ -6,6 +6,7 @@ import { loadMessages } from "./messages";
 export interface Translator {
   (key: string, values?: Record<string, string | number>): string;
   has(key: string): boolean;
+  raw(key: string): unknown;
 }
 
 export async function getTranslator(locale: Locale, namespace?: Namespace): Promise<Translator> {

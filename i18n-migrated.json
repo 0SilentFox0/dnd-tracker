@@ -2,7 +2,7 @@
   "components/auth/**",
   "components/landing/**",
   "app/(auth)/**",
-  "app/en/**",
+  "app/uk/**",
   "app/page.tsx",
   "lib/i18n/**",
   "components/common/LocaleSwitcher.tsx"

@@ -1,6 +1,7 @@
 import { type NextRequest,NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+import { LANDING_PATHS } from '@/lib/constants/site'
 import { bearerToken } from '@/lib/utils/api/bearer'
 
 /**
@@ -62,7 +63,7 @@ export async function updateSession(request: NextRequest) {
   // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
   if (request.nextUrl.pathname.startsWith('/api/') || request.nextUrl.pathname === SIGN_OUT_PATH) return NextResponse.next()
 
-  if (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/en') {
+  if (LANDING_PATHS.includes(request.nextUrl.pathname)) {
     // Supabase falls back to the Site URL when a redirectTo isn't allow-listed: finish the auth link anyway
     if (request.nextUrl.searchParams.has('code') || request.nextUrl.searchParams.has('token_hash')) {
       const url = request.nextUrl.clone()

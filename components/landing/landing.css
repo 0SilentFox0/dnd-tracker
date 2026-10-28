@@ -91,14 +91,11 @@ body:has([data-landing])::after { display: none; }
 .ld-sprite-rings { --ld-n: 7; --ld-w: 64px; width: 64px; height: 64px; background-image: url("/fx/sprites/rings.png"); }
 .ld-sprite-spark { --ld-n: 7; --ld-w: 32px; width: 32px; height: 32px; background-image: url("/fx/sprites/spark.png"); }
 
-.landing-flicker { animation: ld-flicker 2.6s ease-in-out infinite alternate; transform-origin: center; transform-box: fill-box; }
-@keyframes ld-flicker { 0% { opacity: 0.75; transform: scale(0.96); } 40% { opacity: 1; } 70% { opacity: 0.85; transform: scale(1.04); } 100% { opacity: 1; } }
-
 .ld-d20-spin { animation: ld-d20 3.2s cubic-bezier(.2, .7, .2, 1) infinite; }
 @keyframes ld-d20 { 0% { transform: rotate(-540deg) scale(0.6); } 45%, 100% { transform: rotate(0) scale(1); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ld-demo *, .ld-sprite, .landing-flicker, .ld-d20-spin { animation: none !important; }
+  .ld-demo *, .ld-sprite, .ld-d20-spin { animation: none !important; }
 }
 
 /* below-the-fold sections render (and fetch their backgrounds/sprites) only near the viewport */

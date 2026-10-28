@@ -1,7 +1,12 @@
-import { resolveLocale } from "./resolve-locale";
+import { negotiateLocale } from "./resolve-locale";
 
-export function landingRewriteTarget(input: { pathname: string; cookie?: string | null; acceptLanguage?: string | null }): "/en" | null {
-  if (input.pathname !== "/") return null;
+import { LANDING_PATH } from "@/lib/constants/site";
 
-  return resolveLocale({ cookie: input.cookie, acceptLanguage: input.acceptLanguage }) === "en" ? "/en" : null;
+// only an explicit preference moves `/` off English: crawlers without Accept-Language keep the x-default page
+export function landingRewriteTarget(input: { pathname: string; cookie?: string | null; acceptLanguage?: string | null }): string | null {
+  if (input.pathname !== LANDING_PATH.en) return null;
+
+  const locale = negotiateLocale({ cookie: input.cookie, acceptLanguage: input.acceptLanguage });
+
+  return locale && locale !== "en" ? LANDING_PATH[locale] : null;
 }

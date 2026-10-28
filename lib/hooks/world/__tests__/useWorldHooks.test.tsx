@@ -9,12 +9,13 @@ import { useWorldNotes } from "../useWorldNotes";
 import { useWorldTravel } from "../useWorldTravel";
 import { useWorldView } from "../useWorldView";
 
-import { deleteWorldNote, getWorldView, travelHeroes } from "@/lib/api/world";
+import { deleteWorldNote, getWorldView, restHeroes, travelHeroes } from "@/lib/api/world";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import type { WorldNote, WorldView } from "@/types/world";
 
 const notifyMock = vi.fn();
 
-vi.mock("@/lib/api/world", () => ({ getWorldView: vi.fn(), travelHeroes: vi.fn(), enterMarker: vi.fn(), exitMap: vi.fn(), deleteWorldNote: vi.fn(), createWorldNote: vi.fn(), updateWorldNote: vi.fn() }));
+vi.mock("@/lib/api/world", () => ({ getWorldView: vi.fn(), travelHeroes: vi.fn(), restHeroes: vi.fn(), enterMarker: vi.fn(), exitMap: vi.fn(), deleteWorldNote: vi.fn(), createWorldNote: vi.fn(), updateWorldNote: vi.fn() }));
 vi.mock("@/lib/hooks/common/useNotify", () => ({ useOptionalNotify: () => notifyMock }));
 
 const note = (id: string): WorldNote => ({ id, markerId: "m", authorUserId: "u", authorName: "A", characterId: null, visibility: "public", text: id, mine: true, createdAt: "", updatedAt: "" });
@@ -60,6 +61,40 @@ describe("useWorldTravel", () => {
     expect(keys).toContainEqual(["world-view", "c1"]);
     expect(keys).toContainEqual(worldKeys.mapAll("c1"));
     expect(keys).toContainEqual(worldKeys.log("c1"));
+  });
+
+  it("rest calls restHeroes and invalidates world log and character caches", async () => {
+    vi.mocked(restHeroes).mockResolvedValue({ ok: true, applied: true });
+
+    const spy = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useWorldTravel("c1"), { wrapper });
+
+    await act(async () => void (await result.current.rest.mutateOk({ mapId: "m1", characterIds: ["h"], kind: "long" })));
+
+    const keys = spy.mock.calls.map(([f]) => f?.queryKey);
+
+    expect(restHeroes).toHaveBeenCalledWith("c1", { mapId: "m1", characterIds: ["h"], kind: "long" });
+    expect(keys).toContainEqual(worldKeys.log("c1"));
+    expect(keys).toContainEqual(characterKeys.sheet("c1"));
+    expect(keys).toContainEqual(characterKeys.lists("c1"));
+    expect(keys).toContainEqual(characterKeys.logs("c1"));
+  });
+
+  it("travel with a rest also invalidates character caches, without it does not", async () => {
+    vi.mocked(travelHeroes).mockResolvedValue({ ok: true, positions: [] });
+
+    const spy = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useWorldTravel("c1"), { wrapper });
+
+    await act(async () => void (await result.current.travel.mutateOk({ mapId: "m1", characterIds: ["h"], to: { x: 0, y: 0 }, rest: "none" })));
+
+    expect(spy.mock.calls.map(([f]) => f?.queryKey)).not.toContainEqual(characterKeys.sheet("c1"));
+
+    await act(async () => void (await result.current.travel.mutateOk({ mapId: "m1", characterIds: ["h"], to: { x: 0, y: 0 }, rest: "short" })));
+
+    expect(spy.mock.calls.map(([f]) => f?.queryKey)).toContainEqual(characterKeys.sheet("c1"));
   });
 
   it("notifies the error text on failure", async () => {

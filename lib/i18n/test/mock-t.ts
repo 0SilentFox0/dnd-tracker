@@ -7,5 +7,5 @@ export function makeT(namespace?: string): Translator {
     return values && Object.keys(values).length > 0 ? `${full} ${JSON.stringify(values)}` : full;
   };
 
-  return Object.assign(t, { has: () => true });
+  return Object.assign(t, { has: () => true, raw: () => ({}) });
 }
