@@ -1,1 +1,21 @@
-{ "app": { "name": "D&D Combat Tracker" } }
+{
+  "app": {
+    "name": "D&D Combat Tracker"
+  },
+  "creatureTypes": {
+    "aberration": "Аберації",
+    "beast": "Звірі",
+    "celestial": "Небожителі",
+    "construct": "Конструкти",
+    "dragon": "Дракони",
+    "elemental": "Елементалі",
+    "fey": "Феї",
+    "fiend": "Пекельні створіння",
+    "giant": "Велетні",
+    "humanoid": "Гуманоїди",
+    "monstrosity": "Монстри",
+    "ooze": "Слизи",
+    "plant": "Рослини",
+    "undead": "Нежить"
+  }
+}

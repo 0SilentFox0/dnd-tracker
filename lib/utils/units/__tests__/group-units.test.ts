@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
-import { groupUnitsByRace, groupUnitsByRaceName, isTypeGroup, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
+import { creatureTypeOfGroup, groupUnitsByRace, groupUnitsByRaceName, isTypeGroup, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
 
 const races = [
@@ -72,11 +72,13 @@ describe("groupUnitsByRaceName", () => {
     expect(g.map((x) => [x.key, x.label, x.total])).toEqual([
       ["r1", "Гобліни", 1],
       ["r2", "Орки", 0],
-      ["type:beast", "Звірі", 2],
-      ["type:undead", "Нежить", 1],
+      ["type:beast", "beast", 2],
+      ["type:undead", "undead", 1],
       [NO_RACE, "Без раси", 1],
     ]);
     expect(isTypeGroup("type:beast")).toBe(true);
     expect(raceIdOfGroup("type:beast")).toBeNull();
+    expect(creatureTypeOfGroup("type:beast")).toBe("beast");
+    expect(creatureTypeOfGroup("r1")).toBeNull();
   });
 });

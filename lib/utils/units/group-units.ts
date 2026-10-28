@@ -8,23 +8,6 @@ export const NO_RACE = "none";
 
 const TYPE_PREFIX = "type:";
 
-export const CREATURE_TYPE_LABELS: Record<string, string> = {
-  aberration: "Аберації",
-  beast: "Звірі",
-  celestial: "Небожителі",
-  construct: "Конструкти",
-  dragon: "Дракони",
-  elemental: "Елементалі",
-  fey: "Феї",
-  fiend: "Пекельні створіння",
-  giant: "Велетні",
-  humanoid: "Гуманоїди",
-  monstrosity: "Монстри",
-  ooze: "Слизи",
-  plant: "Рослини",
-  undead: "Нежить",
-};
-
 export type UnitGroupRace = Pick<Race, "id" | "name" | "color" | "icon">;
 
 export interface UnitTier {
@@ -47,8 +30,6 @@ export interface UnitRaceChip {
   count: number;
 }
 
-const byLabel = (a: { label: string }, b: { label: string }) => a.label.localeCompare(b.label, "uk");
-
 const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, "uk");
 
 function toTiers(units: Unit[]): UnitTier[] {
@@ -70,8 +51,8 @@ export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: 
 
   const typeGroups = [...byType.entries()]
     .filter(([type]) => type)
-    .map(([type, own]) => group(TYPE_PREFIX + type, null, own, CREATURE_TYPE_LABELS[type] ?? type))
-    .sort(byLabel);
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([type, own]) => group(TYPE_PREFIX + type, null, own, type));
 
   const groups = [
     ...[...races].sort(byName).map((race) => group(race.id, race, units.filter((u) => u.raceId === race.id))),
@@ -88,8 +69,10 @@ export function raceIdOfGroup(key: string): string | null {
 
 export const isTypeGroup = (key: string): boolean => key.startsWith(TYPE_PREFIX);
 
-export function raceChips(groups: UnitRaceGroup[]): UnitRaceChip[] {
-  return groups.map((g) => ({ key: g.key, label: g.label, color: g.race?.color ?? null, count: g.total }));
+export const creatureTypeOfGroup = (key: string): string | null => (isTypeGroup(key) ? key.slice(TYPE_PREFIX.length) : null);
+
+export function raceChips(groups: UnitRaceGroup[], labelOf: (group: UnitRaceGroup) => string = (g) => g.label): UnitRaceChip[] {
+  return groups.map((g) => ({ key: g.key, label: labelOf(g), color: g.race?.color ?? null, count: g.total }));
 }
 
 export function groupUnitsByRaceName<U extends { raceName: string | null; level: number }>(units: U[]): Map<string, U[]> {

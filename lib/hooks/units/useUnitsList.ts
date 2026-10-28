@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { useGroupLabel } from "./useGroupLabel";
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
 import { useRaces } from "@/lib/hooks/races";
@@ -25,15 +26,17 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const [open, setOpen] = useState<string[]>([]);
 
-  const allGroups = useMemo(() => groupUnitsByRace(units, races), [units, races]);
+  const labelOf = useGroupLabel();
 
-  const found = useMemo(() => groupUnitsByRace(units, races, query), [units, races, query]);
+  const allGroups = useMemo(() => groupUnitsByRace(units, races).filter((g) => g.total > 0), [units, races]);
+
+  const found = useMemo(() => groupUnitsByRace(units, races, query).filter((g) => g.total > 0), [units, races, query]);
 
   const groups = raceFilter.length > 0 ? found.filter((g) => raceFilter.includes(g.key)) : found;
 
   const search = (next: string) => {
     setQuery(next);
-    setOpen(next.trim() ? groupUnitsByRace(units, races, next).map((g) => g.key) : []);
+    setOpen(next.trim() ? groupUnitsByRace(units, races, next).filter((g) => g.total > 0).map((g) => g.key) : []);
   };
 
   const toggleRace = (key: string) =>
@@ -50,7 +53,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
   return {
     units,
     isLoading,
-    view: { groups, chips: raceChips(allGroups), open, setOpen },
+    view: { groups, chips: raceChips(allGroups, labelOf), open, setOpen },
     filter: { query, search, raceFilter, toggleRace },
     actions: {
       deleteUnit,
