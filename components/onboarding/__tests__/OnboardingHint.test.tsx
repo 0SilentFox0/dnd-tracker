@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
+import { renderToString } from "react-dom/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createWrapper } from "@/components/onboarding/__tests__/onboarding-test-utils";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import * as api from "@/lib/api/onboarding";
+import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
 import { HINTS } from "@/lib/onboarding/hints";
 
 vi.unmock("@/components/onboarding/OnboardingHint");
@@ -26,6 +29,20 @@ describe("OnboardingHint", () => {
     fireEvent.click(screen.getByRole("button", { name: "Закрити підказку" }));
 
     await waitFor(() => expect(screen.queryByText(HINTS["dm.races"].title)).toBeNull());
+  });
+
+  it("у серверному HTML підказки немає, навіть коли прапорці вже в кеші клієнта", () => {
+    const qc = new QueryClient();
+
+    qc.setQueryData(onboardingKeys.flags(), { flags: {}, audiences: ["dm"] });
+
+    const html = renderToString(
+      <QueryClientProvider client={qc}>
+        <OnboardingHint id="dm.races" />
+      </QueryClientProvider>,
+    );
+
+    expect(html).toBe("");
   });
 
   it("усі підказки сховані — нічого", async () => {

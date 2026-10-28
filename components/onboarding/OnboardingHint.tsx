@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Lightbulb, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/lib/hooks/common";
 import { useMarkPlayerSheetSeen, useOnboardingHint } from "@/lib/hooks/onboarding";
 import { HINTS } from "@/lib/onboarding/hints";
 import { cn } from "@/lib/utils";
@@ -11,9 +12,12 @@ import { cn } from "@/lib/utils";
 export function OnboardingHint({ id, className }: { id: string; className?: string }) {
   const { visible, dismiss } = useOnboardingHint(id);
 
+  const hydrated = useHydrated();
+
   const hint = HINTS[id];
 
-  if (!hint || !visible) return null;
+  // flags may already be cached on the client (soft navigation, back) while the server HTML has no hint
+  if (!hint || !visible || !hydrated) return null;
 
   return (
     <aside className={cn("flex items-start gap-3 rounded-lg border border-hud-rule bg-hud-panel p-3 text-sm", className)}>

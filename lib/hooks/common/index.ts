@@ -10,6 +10,7 @@ export { useElementSize } from "./useElementSize";
 export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";
+export { useHydrated } from "./useHydrated";
 export { useImageSize } from "./useImageSize";
 export { DESKTOP_QUERY } from "./useIsMobile";
 export { useMediaQuery } from "./useMediaQuery";
