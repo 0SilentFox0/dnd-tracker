@@ -1,4 +1,3 @@
-import { classFeatureDescriptions } from "./feature-descriptions";
 import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from "./lines";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
@@ -11,7 +10,7 @@ import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { pactSlot, slotLevels } from "@/lib/utils/battle/view";
 import { describeFeatPicks } from "@/lib/utils/characters/choices/describe";
 import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections";
-import { hitDiceLabel } from "@/lib/utils/characters/classes";
+import { buildClassProgression, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
@@ -148,7 +147,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     hitDice: classEntries ? hitDiceLabel(classEntries) : null,
-    ...(classEntries && { classTable: classTableLines(classEntries), classFeatureDescriptions: classFeatureDescriptions(classEntries) }),
+    ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),
     rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules: input.rules, maxLevel: input.maxLevel }),

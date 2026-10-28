@@ -67,17 +67,22 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
   return (
     <>
       <HudSection title="Шаблон">
-        <p className="text-sm text-hud-muted">
-          Шаблон — готова основа кампанії: набір правил і контенту (раси, класи, юніти, заклинання, артефакти, навички, музика), який копіюється у вашу кампанію. Далі ви змінюєте його як завгодно. «Без шаблону» дає порожню бібліотеку.
-        </p>
-        <SelectField aria-label="Шаблон" value={current} onValueChange={handleChange} groups={groups} />
-        {selected && (
-          <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>
-        )}
-        {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
-        {value.file && (
-          <p className="text-xs text-hud-muted">{value.file.entities} {pluralUk(value.file.entities, ["сутність", "сутності", "сутностей"])}</p>
-        )}
+        <div className="space-y-2">
+          <p className="text-sm text-hud-muted">
+            Шаблон — готова основа кампанії: набір правил і контенту (раси, класи, юніти, заклинання, артефакти, навички, музика), який копіюється у вашу кампанію. Далі ви змінюєте його як завгодно. «Без шаблону» дає порожню бібліотеку.
+          </p>
+          <SelectField aria-label="Шаблон" value={current} onValueChange={handleChange} groups={groups} />
+          {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
+          {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
+          {value.file && (
+            <p className="text-xs text-hud-muted">
+              {value.file.entities} {pluralUk(value.file.entities, ["сутність", "сутності", "сутностей"])} ·{" "}
+              <button type="button" className="underline" onClick={() => setImportOpen(true)}>
+                Обрати інший файл
+              </button>
+            </p>
+          )}
+        </div>
       </HudSection>
       <ImportDialog
         hideTrigger

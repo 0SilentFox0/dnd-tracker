@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { useGroupLabel } from "./useGroupLabel";
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
 import { useRaces } from "@/lib/hooks/races";
@@ -25,9 +26,13 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const [open, setOpen] = useState<string[]>([]);
 
-  const allGroups = useMemo(() => groupUnitsByRace(units, races), [units, races]);
+  const labelOf = useGroupLabel();
 
-  const found = useMemo(() => groupUnitsByRace(units, races, query), [units, races, query]);
+  const [hideEmpty, setHideEmpty] = useState(false);
+
+  const allGroups = useMemo(() => groupUnitsByRace(units, races).filter((g) => !hideEmpty || g.total > 0), [units, races, hideEmpty]);
+
+  const found = useMemo(() => groupUnitsByRace(units, races, query).filter((g) => !hideEmpty || g.total > 0), [units, races, query, hideEmpty]);
 
   const groups = raceFilter.length > 0 ? found.filter((g) => raceFilter.includes(g.key)) : found;
 
@@ -41,15 +46,21 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const removeAll = () => deleteAll.mutateAsync();
 
+  const { mutate: deleteUnit } = deleteOne;
+
+  const { mutate: updateUnit } = update;
+
+  const drop = useCallback((unitId: string, data: Partial<Unit>) => updateUnit({ unitId, data }), [updateUnit]);
+
   return {
     units,
     isLoading,
-    view: { groups, chips: raceChips(allGroups), open, setOpen },
-    filter: { query, search, raceFilter, toggleRace },
+    view: { groups, chips: raceChips(allGroups, labelOf), open, setOpen },
+    filter: { query, search, raceFilter, toggleRace, hideEmpty, toggleHideEmpty: () => setHideEmpty((v) => !v) },
     actions: {
-      deleteUnit: (unitId: string) => deleteOne.mutate(unitId),
+      deleteUnit,
       removeAll,
-      drop: (unitId: string, data: Partial<Unit>) => update.mutate({ unitId, data }),
+      drop,
     },
   };
 }

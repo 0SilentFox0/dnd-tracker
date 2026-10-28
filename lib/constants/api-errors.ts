@@ -297,6 +297,7 @@ export const API_ERRORS = {
   BATTLE_ACTION_NOT_IN_LOG: "Цієї дії вже немає в журналі",
   BATTLE_AURA_ZONE_CHOSEN: "Зону цієї аури вже обрано в цьому раунді",
   BATTLE_CASTER_CANNOT_CAST: "Кастер не може чаклувати",
+  BATTLE_CASTER_ARMOR_NOT_PROFICIENT: "Броня чи щит без володіння: кастер не може чаклувати",
   BATTLE_CASTER_UNKNOWN_SPELL: "Кастер не знає цього заклинання",
   BATTLE_CELL_BLOCKED: "Клітинка зайнята, неігрова або поза картою",
   BATTLE_CHANGED_PREVIEW_AGAIN: "Бій змінився; підготуйте новий перегляд",
@@ -381,6 +382,8 @@ export const featNameTakenMessage = (name: string) => `Риса «${name}» уж
 export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;
 
 export const subclassTooEarlyMessage = (level: number) => `Підклас доступний з рівня ${level}`;
+
+export const multiclassRequirementMessage = (name: string) => `Мультиклас: для класу «${name}» потрібно мінімум 13 у ключовій характеристиці`;
 
 export const maxLevelMessage = (max: number) => `Максимальний рівень кампанії — ${max}`;
 

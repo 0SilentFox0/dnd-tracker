@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
-import { groupUnitsByRace, groupUnitsByRaceName, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
+import { creatureTypeOfGroup, groupUnitsByRace, groupUnitsByRaceName, isTypeGroup, NO_RACE, raceChips, raceIdOfGroup } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
 
 const races = [
@@ -62,5 +62,23 @@ describe("groupUnitsByRaceName", () => {
     expect([...grouped.keys()].sort()).toEqual([UNGROUPED_KEY, "Орки"].sort());
     expect(grouped.get("Орки")?.map((x) => x.id)).toEqual(["b", "a"]);
     expect(grouped.get(UNGROUPED_KEY)?.map((x) => x.id)).toEqual(["c"]);
+  });
+
+  it("юніти без раси групуються за типом істоти, решта — «Без раси»", () => {
+    const typed = (id: string, type: string) => ({ id, name: id, level: 1, raceId: null, statblock: { creatureType: type } }) as Unit;
+
+    const g = groupUnitsByRace([typed("a", "beast"), typed("b", "Beast"), typed("c", "undead"), u("d", "Д", 1, null), u("e", "Е", 1, "r1")], races);
+
+    expect(g.map((x) => [x.key, x.label, x.total])).toEqual([
+      ["r1", "Гобліни", 1],
+      ["r2", "Орки", 0],
+      ["type:beast", "beast", 2],
+      ["type:undead", "undead", 1],
+      [NO_RACE, "Без раси", 1],
+    ]);
+    expect(isTypeGroup("type:beast")).toBe(true);
+    expect(raceIdOfGroup("type:beast")).toBeNull();
+    expect(creatureTypeOfGroup("type:beast")).toBe("beast");
+    expect(creatureTypeOfGroup("r1")).toBeNull();
   });
 });

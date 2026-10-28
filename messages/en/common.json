@@ -1,0 +1,21 @@
+{
+  "app": {
+    "name": "D&D Combat Tracker"
+  },
+  "creatureTypes": {
+    "aberration": "Aberrations",
+    "beast": "Beasts",
+    "celestial": "Celestials",
+    "construct": "Constructs",
+    "dragon": "Dragons",
+    "elemental": "Elementals",
+    "fey": "Fey",
+    "fiend": "Fiends",
+    "giant": "Giants",
+    "humanoid": "Humanoids",
+    "monstrosity": "Monstrosities",
+    "ooze": "Oozes",
+    "plant": "Plants",
+    "undead": "Undead"
+  }
+}

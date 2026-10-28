@@ -13,7 +13,7 @@ export const LimitsSchema = z.object({
   perBattle: z.number().int().min(1).optional(),
   perRound: z.number().int().min(1).optional(),
   perTurn: z.number().int().min(1).optional(),
-  perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.union([z.number().int().min(1), FormulaSchema, ScaleSchema]) }).optional(),
+  perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.union([z.number().int().min(1), FormulaSchema, ScaleSchema]), shortRegain: z.number().int().min(1).optional() }).optional(),
   cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
   lair: z.literal(true).optional(),

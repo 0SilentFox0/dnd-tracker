@@ -18,7 +18,7 @@ vi.mock("@/components/ui/select-field", () => ({
 }));
 
 vi.mock("@/lib/hooks/campaigns", () => ({
-  useTemplates: () => ({ data: { official: [card("o1", "Порожня"), card("o2", "HoMM")], mine: [card("m1", "Мій шаблон")] } }),
+  useTemplates: () => ({ data: { official: [card("o1", "Heroes"), card("o2", "HoMM")], mine: [card("m1", "Мій шаблон")] } }),
   useBundleFilePicker: (onPick: (file: unknown) => void) => ({
     file: new File(["{}"], "c.json"),
     status: { error: null, success: null, isLoading: false },

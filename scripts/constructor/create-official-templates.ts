@@ -5,7 +5,6 @@ import { assertSeedTarget } from "../seed/seed-library-lib";
 import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
-import { emptyBundle } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 
 const official = { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL };
@@ -50,24 +49,6 @@ async function main() {
     });
 
     report("Heroes", result, bundle);
-  }
-
-  const existingEmpty = await prisma.campaign.findFirst({ where: { name: "Порожня", ...official }, select: { id: true } });
-
-  if (existingEmpty) {
-    console.info(`Порожня: вже існує (${existingEmpty.id})`);
-  } else {
-    const bundle = emptyBundle();
-
-    const result = await createCampaignFromBundle({
-      userId: owner ?? source.dmUserId,
-      name: "Порожня",
-      description: "Без контенту, правила за замовчуванням",
-      bundle,
-      ...official,
-    });
-
-    report("Порожня", result, bundle);
   }
 }
 

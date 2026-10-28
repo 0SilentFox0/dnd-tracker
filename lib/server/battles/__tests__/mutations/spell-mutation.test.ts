@@ -305,6 +305,18 @@ describe("spell mutation", () => {
     await expect(mutation()(context({ participants: [blinded, goblin] }), body() as never)).rejects.toMatchObject({ code: "action_rejected" });
   });
 
+  it("5e: важка броня без володіння блокує каст", async () => {
+    const plate = { id: "plate", name: "Plate", slot: "armor", modifiers: [{ type: "armorCategory", value: "heavy" }, { type: "armorBase", value: "18" }] };
+
+    const armored = {
+      ...caster,
+      abilities: { ...caster.abilities, damageModel: "5e" as const, proficiencies: { armor: [], weapons: ["Simple weapons"] } },
+      battleData: { ...caster.battleData, equippedArtifacts: [plate as never] },
+    };
+
+    await expect(mutation()(context({ participants: [armored, goblin] }), body() as never)).rejects.toMatchObject({ code: "action_rejected", message: expect.stringContaining("без володіння") });
+  });
+
   it("неправильна ціль — invalid_target", async () => {
     await expect(mutation()(context({ participants: [caster, goblin] }), body({ targetIds: ["hero"] }) as never)).rejects.toMatchObject({ code: "invalid_target" });
     await expect(mutation()(context({ participants: [caster, goblin] }), body({ targetIds: [] }) as never)).rejects.toMatchObject({ code: "invalid_target" });

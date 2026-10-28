@@ -18,24 +18,14 @@ const card = (id: string, name: string) => ({ id, name, description: null, visib
 afterEach(cleanup);
 
 describe("NewCampaignForm default template", () => {
-  it("sends the preselected template id on the first submit", async () => {
-    vi.mocked(getTemplates).mockResolvedValue({ official: [card("srd", "5e SRD 5.2"), card("heroes", "Heroes"), card("empty", "Порожня")], mine: [] } as never);
-    render(<QueryClientProvider client={new QueryClient()}><ConfirmProvider><NewCampaignForm /></ConfirmProvider></QueryClientProvider>);
-    await waitFor(() => expect((screen.getByRole("button", { name: "Створити кампанію" }) as HTMLButtonElement).disabled).toBe(false));
-    expect(screen.getByRole("combobox", { name: "Шаблон" }).textContent).toContain("Порожня");
-    fireEvent.change(screen.getByLabelText(/Назва кампанії/), { target: { value: "Test" } });
-    fireEvent.click(screen.getByRole("button", { name: "Створити кампанію" }));
-    await waitFor(() => expect(createCampaign).toHaveBeenCalled());
-    expect(vi.mocked(createCampaign).mock.calls[0][0]).toMatchObject({ name: "Test", templateId: "empty" });
-  });
-
-  it("falls back to the SRD template and never sends an empty id", async () => {
+  it("creates without a template by default and never sends an empty id", async () => {
     vi.mocked(getTemplates).mockResolvedValue({ official: [card("srd", "5e SRD 5.2")], mine: [] } as never);
     render(<QueryClientProvider client={new QueryClient()}><ConfirmProvider><NewCampaignForm /></ConfirmProvider></QueryClientProvider>);
     await waitFor(() => expect((screen.getByRole("button", { name: "Створити кампанію" }) as HTMLButtonElement).disabled).toBe(false));
+    expect(screen.getByRole("combobox", { name: "Шаблон" }).textContent).toContain("Без шаблону");
     fireEvent.change(screen.getByLabelText(/Назва кампанії/), { target: { value: "Test" } });
     fireEvent.click(screen.getByRole("button", { name: "Створити кампанію" }));
-    await waitFor(() => expect(createCampaign).toHaveBeenCalledTimes(2));
-    expect(vi.mocked(createCampaign).mock.calls[1][0].templateId).toBe("srd");
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(createCampaign).mock.calls[0][0].templateId).toBeUndefined();
   });
 });

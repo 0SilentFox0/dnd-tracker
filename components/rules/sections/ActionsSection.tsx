@@ -13,6 +13,7 @@ export function ActionsSection({ form }: { form: RulesFormState }) {
         {actions.enabled && (
           <>
             <SwitchField id="rules-actions-oa" label="Атаки при відході" checked={actions.opportunityAttacks} onCheckedChange={(v) => form.set("actions", { ...actions, opportunityAttacks: v })} />
+            <SwitchField id="rules-actions-retaliation" label="Відсіч (HOMM)" checked={actions.retaliation} onCheckedChange={(v) => form.set("actions", { ...actions, retaliation: v })} />
             <SwitchField id="rules-actions-variant" label="Правила 2024 (інакше 2014)" checked={actions.variant === "2024"} onCheckedChange={(v) => form.set("actions", { ...actions, variant: v ? "2024" : "2014" })} />
           </>
         )}

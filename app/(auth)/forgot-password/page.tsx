@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
-
+import { authMetadata } from "@/app/(auth)/auth-metadata";
 import { ForgotPasswordScreen } from "@/components/auth/AuthScreens";
 
-export const metadata: Metadata = { title: "Відновлення пароля — D&D Combat Tracker" };
+export const generateMetadata = () => authMetadata("forgot.title");
 
 export default function ForgotPasswordPage() {
   return <ForgotPasswordScreen />;

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GET } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/route";
 import { prisma } from "@/lib/db";
+import { readCharacterSheet } from "@/lib/server/characters/core/read-sheet";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -15,11 +17,7 @@ vi.mock("@/lib/server/characters/core/sheet-handler", async (orig) => ({
 
 const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, members: [{ userId, role }] } }) as never;
 
-const get = async (characterId = "ch") => {
-  const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/sheet/route");
-
-  return mod.GET(new Request("http://x"), { params: Promise.resolve({ id: "camp", characterId }) }) as Promise<NextResponse>;
-};
+const get = async (characterId = "ch") => GET(new Request("http://x"), { params: Promise.resolve({ id: "camp", characterId }) }) as Promise<NextResponse>;
 
 describe("GET sheet", () => {
   beforeEach(() => {
@@ -49,8 +47,6 @@ describe("GET sheet", () => {
   });
 
   it("відомий доступ сторінки — без повторного запиту членства", async () => {
-    const { readCharacterSheet } = await import("@/lib/server/characters/core/read-sheet");
-
     const res = await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "owner", isDM: false, maxLevel: 20, rules: DEFAULT_RULES } });
 
     expect(res.status).toBe(200);

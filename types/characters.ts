@@ -1,5 +1,5 @@
 import type { PublicUser } from "./campaigns";
-import type { CharacterClassEntry } from "./classes";
+import type { CharacterClassEntry, ClassProgression } from "./classes";
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { StoryChapter } from "./scenario";
 import type { BookSpell } from "./spells";
@@ -252,7 +252,7 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
   classTable?: string[];
-  classFeatureDescriptions?: Array<{ source: string; level: number; description: string }>;
+  classProgression?: ClassProgression[];
   pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number; current: number }[];
   rest: SheetRest | null;
@@ -307,7 +307,7 @@ export interface CharacterResources {
   /** classId → витрачено */
   hitDiceSpent?: Record<string, number>;
   /** ключ вміння (ResolvedAbility.key) → використання perRest */
-  charges?: Record<string, { used: number; rest: RestKindValue | null }>;
+  charges?: Record<string, { used: number; rest: RestKindValue | null; /** uses restored by a short rest even though `rest` is long */ regain?: number }>;
   exhaustion?: number;
   shortRestOpen?: boolean;
 }

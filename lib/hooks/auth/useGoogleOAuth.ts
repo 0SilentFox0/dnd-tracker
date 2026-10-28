@@ -4,10 +4,13 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useNotify } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/utils/auth";
 
 function useOAuthRunner() {
+  const t = useTranslator("auth");
+
   const notify = useNotify();
 
   const [loading, setLoading] = useState(false);
@@ -20,11 +23,11 @@ function useOAuthRunner() {
 
       if (error) {
         console.error("Google OAuth", error);
-        void notify(authErrorMessage(error));
+        void notify(authErrorMessage(error, t));
       }
     } catch (err) {
       console.error("Google OAuth", err);
-      void notify(authErrorMessage(err instanceof Error ? err : null));
+      void notify(authErrorMessage(err instanceof Error ? err : null, t));
     } finally {
       setLoading(false);
     }

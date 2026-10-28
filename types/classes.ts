@@ -1,7 +1,7 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { ClassCaster } from "@/lib/constants/classes";
 import type { Ability } from "@/types/abilities";
-import type { Choice, Picks } from "@/types/choices";
+import type { Choice, ChoiceKind, Picks } from "@/types/choices";
 
 export type { ClassCaster };
 export type HitDie = 6 | 8 | 10 | 12;
@@ -66,3 +66,36 @@ export interface ResolvedClassEntry extends CharacterClassEntry {
 }
 
 export type ClassFormData = Omit<GameClassData, "id">;
+
+export interface ProgressionItem {
+  key: string;
+  name: string;
+  summary: string;
+  description?: string;
+}
+
+export interface ProgressionPick {
+  key: string;
+  kind: ChoiceKind | "subclass";
+  label: string;
+  required: number;
+  done: number | null;
+  status: "open" | "done" | "locked" | "template";
+}
+
+export interface ProgressionRow {
+  level: number;
+  state: "reached" | "current" | "next" | "future" | "template";
+  base: ProgressionItem[];
+  bySubclass: Record<string, ProgressionItem[]>;
+  picks: ProgressionPick[];
+}
+
+export interface ClassProgression {
+  classId: string;
+  className: string;
+  color: string | null;
+  subclasses: { id: string; name: string; chosen: boolean }[];
+  subclassLevel: number | null;
+  rows: ProgressionRow[];
+}

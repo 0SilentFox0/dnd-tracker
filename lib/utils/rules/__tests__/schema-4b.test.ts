@@ -4,7 +4,7 @@ import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
 
 describe("rules actions section", () => {
   it("defaults off", () => {
-    expect(parseRules({}).actions).toEqual({ enabled: false, opportunityAttacks: true, variant: "2014" });
+    expect(parseRules({}).actions).toEqual({ enabled: false, opportunityAttacks: true, retaliation: true, variant: "2014" });
   });
 
   it("invalid variant falls back", () => {
@@ -14,6 +14,6 @@ describe("rules actions section", () => {
   it("patch merges", () => {
     const r = mergeRules(parseRules({}), { actions: { enabled: true, variant: "2024" } });
 
-    expect(r.ok && r.rules.actions).toEqual({ enabled: true, opportunityAttacks: true, variant: "2024" });
+    expect(r.ok && r.rules.actions).toEqual({ enabled: true, opportunityAttacks: true, retaliation: true, variant: "2024" });
   });
 });

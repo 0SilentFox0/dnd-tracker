@@ -1,0 +1,378 @@
+{
+  "meta": {
+    "title": "{brand} — the all-in-one platform for Dungeon Masters",
+    "description": "Prepare your campaign, shape your own mechanics and run tactical combat in one connected place: initiative, damage and effects calculated for you, synced to every player's phone. For D&D-style, turn-based tabletop RPGs.",
+    "keywords": "dungeon master tools, DM tools, combat tracker, initiative tracker, tabletop RPG, virtual tabletop, campaign manager, custom RPG rules, 5e-style rules, online character sheet"
+  },
+  "nav": {
+    "aria": "Sections",
+    "items": {
+      "combat": "Combat",
+      "mechanics": "Mechanics",
+      "prep": "Preparation",
+      "ai": "AI",
+      "faq": "FAQ"
+    },
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "myCampaigns": "My campaigns"
+  },
+  "hero": {
+    "eyebrow": "The all-in-one platform for Dungeon Masters",
+    "titleLead": "Your world. Your rules.",
+    "titleAccent": "Combat that runs itself.",
+    "text": "Prepare your campaign, shape your own mechanics and run tactical combat in one connected place — initiative, damage and effects calculated for you, synced to every player's device.",
+    "primary": "Start a campaign",
+    "member": "My campaigns",
+    "secondary": "See how it works",
+    "note": "Works in the browser · players join from their phones",
+    "alt": "The DM screen of a battle: initiative queue, tactical map with tokens, combat log and music player"
+  },
+  "problem": {
+    "eyebrow": "Sound familiar?",
+    "title": "How many tabs does your session need?",
+    "pains": {
+      "1": "Story notes in one app, character sheets in another",
+      "2": "Initiative and hit points in a spreadsheet",
+      "3": "The map and effects somewhere else entirely",
+      "4": "Music playing from a phone, handouts hiding in a gallery"
+    },
+    "resolve": "One connected environment: prepare once, play without switching.",
+    "replaces": {
+      "1": {
+        "title": "Virtual tabletop",
+        "text": "map and tokens"
+      },
+      "2": {
+        "title": "Initiative sheet",
+        "text": "turn order and hit points"
+      },
+      "3": {
+        "title": "Character sheets",
+        "text": "PDFs and printouts"
+      },
+      "4": {
+        "title": "Dice bot",
+        "text": "rolls in a chat"
+      },
+      "5": {
+        "title": "Playlist",
+        "text": "music from a phone"
+      },
+      "6": {
+        "title": "Session notes",
+        "text": "the plot in a notebook"
+      },
+      "7": {
+        "title": "Image generator",
+        "text": "art for scenes"
+      }
+    },
+    "hubTag": "all in one place"
+  },
+  "combat": {
+    "eyebrow": "Tactical combat",
+    "title": "Combat that runs itself",
+    "text": "The rules engine does the arithmetic while you run the story. Everyone sees the same battle, live, on their own screen.",
+    "points": {
+      "1": {
+        "title": "Initiative and turns",
+        "text": "A turn queue that advances on its own, with a clear view of whose move it is."
+      },
+      "2": {
+        "title": "Attacks, spells and areas",
+        "text": "To-hit, damage and modifiers are calculated automatically, including area spells and zones."
+      },
+      "3": {
+        "title": "Conditions, saves and positioning",
+        "text": "Saving throws, conditions, cover, ranged attacks and auras are resolved by the engine."
+      },
+      "4": {
+        "title": "Real-time sync",
+        "text": "DM and players see the same battle at once. The player view is built for phones."
+      },
+      "5": {
+        "title": "Combat log and DM control",
+        "text": "Every action is logged. Pick the effect of a natural 20 or 1 yourself, or override a result by hand."
+      },
+      "6": {
+        "title": "Encounter balancing",
+        "text": "Enemy strength scales to your party automatically, or follow an XP budget for 5e-style encounters."
+      }
+    },
+    "demoSteps": {
+      "1": "A player picks a spell",
+      "2": "The dice roll themselves",
+      "3": "Damage is calculated",
+      "4": "Everyone sees it at once"
+    },
+    "demo": {
+      "windowTitle": "DM screen · Tomb of the Nameless · round 2",
+      "tokens": {
+        "wizard": "Eldrin",
+        "dwarf": "Torvald",
+        "bard": "Lyra",
+        "goblin": "Goblin",
+        "orc": "Orc",
+        "owlbear": "Owlbear"
+      },
+      "check": "Goblin: Dexterity 7 + 2 < DC 15 · failed",
+      "logCaster": "Eldrin",
+      "logText": "Fireball → Goblin down, Orc −12",
+      "music": "♫ Battle in the tomb",
+      "phone": {
+        "role": "Wizard · level 5",
+        "slots": "Level 3 slots: ●●○",
+        "spells": {
+          "1": "Fireball",
+          "2": "Shield",
+          "3": "Magic Missile"
+        }
+      },
+      "stepsLabel": "How a turn plays out: "
+    },
+    "fx": {
+      "title": "Magic you can see",
+      "text": "Spells and actions have their own animations, conditions show as auras on tokens, and 3D dice roll on every player's screen.",
+      "names": {
+        "1": "Fireball",
+        "2": "Lightning",
+        "3": "Otherworldly Bolt",
+        "4": "Arcane",
+        "5": "Impact Sparks"
+      },
+      "auras": {
+        "1": "Burning",
+        "2": "Frozen",
+        "3": "Blessing",
+        "4": "Bleeding",
+        "5": "Curse",
+        "6": "Stoneskin",
+        "7": "Blindness",
+        "8": "Haste",
+        "9": "Moon Mark",
+        "10": "Living Shield",
+        "11": "Thorny Vines",
+        "12": "Stunned"
+      },
+      "more": "and more"
+    }
+  },
+  "mechanics": {
+    "eyebrow": "Custom mechanics",
+    "title": "Your rules, set up — not coded",
+    "text": "Shape the world through settings, per campaign, without writing a line of code. Everything you define feeds straight into combat.",
+    "capabilities": {
+      "races": {
+        "title": "Races",
+        "text": "Racial traits, choices and your own unit stat blocks."
+      },
+      "classes": {
+        "title": "Classes",
+        "text": "Hit dice, saves, spellcasting types and class features, with multiclassing."
+      },
+      "units": {
+        "title": "Units and creatures",
+        "text": "A bestiary of your own: tiers, abilities, auras and icons."
+      },
+      "abilities": {
+        "title": "Abilities, formulas and triggers",
+        "text": "Describe what happens and when — the engine applies it in battle."
+      },
+      "spells": {
+        "title": "Spells",
+        "text": "Your own spells with damage, saves, areas and animations."
+      },
+      "artifacts": {
+        "title": "Artifacts and sets",
+        "text": "Items with bonuses and set effects, transferable between heroes."
+      },
+      "rules": {
+        "title": "Rule toggles",
+        "text": "Morale, critical hits, initiative and rests — switch each on or off, or tune it, to fit your table."
+      },
+      "import": {
+        "title": "Structured import",
+        "text": "Bring content in from CSV, TSV or JSON. Every row is validated, and you review the result before it is applied."
+      },
+      "api": {
+        "title": "Open API",
+        "text": "An OpenAPI description and MCP tools let a script or an AI agent fill your world, with scoped tokens."
+      }
+    },
+    "templatesNote": "Start from an official template, or from scratch.",
+    "alt": "Spell library of a campaign: school and level groups, import, CSV export and a card for every spell",
+    "footnote": "Built for D&D-style, turn-based tabletop RPGs. Imported rules are validated row by row; check results before play."
+  },
+  "prep": {
+    "eyebrow": "Campaign preparation",
+    "title": "Prepare once, then just play",
+    "text": "Write the story, bind scenes and battles to it, and keep the whole campaign in one place.",
+    "panels": {
+      "scenario": {
+        "eyebrow": "Scenario editor",
+        "title": "A manuscript you run with one hand",
+        "text": "Write your scenario as a manuscript. Slides and battles bind straight to lines of text — reach the scene, press Show, and players are already looking.",
+        "points": {
+          "1": "Scenes, read-aloud text, secrets and margin notes",
+          "2": "Bind a slide or a battle to any line",
+          "3": "“Played” marks and navigation between scenes",
+          "4": "Page versions"
+        },
+        "alt": "Scenario editor: scene text with linked slides, a Show button and DM notes",
+        "screen": "Scenario · Monastery of Light"
+      },
+      "show": {
+        "eyebrow": "Scene show",
+        "title": "A cinema for your table",
+        "text": "The slide you launch appears on every player's screen at once, together with the scene's music. A curtain hides it all in a click.",
+        "points": {
+          "1": "Slide decks and keyboard control",
+          "2": "In sync on phones, laptops and a TV",
+          "3": "Music and playlists next to the slide",
+          "4": "Image puzzles that players solve together"
+        },
+        "alt": "Show screen: a slide of a castle in fog, music player and slide strip",
+        "screen": "Show · for players"
+      },
+      "world": {
+        "eyebrow": "World map",
+        "title": "Lead your heroes across the continent",
+        "text": "Show the party a map with its own fog of war, drop markers and keep notes about places. Scenario lines and chapters link to locations.",
+        "points": {
+          "1": "Fog of war, separate for each player",
+          "2": "Markers and notes for places",
+          "3": "Travel of the party across the map",
+          "4": "A campaign dashboard with what to run next"
+        },
+        "alt": "World map with fog of war, markers and the party's route",
+        "screen": "World map · the continent"
+      }
+    }
+  },
+  "ai": {
+    "eyebrow": "AI assistant",
+    "title": "A co-author that works from your campaign",
+    "text": "Connect your own key. The assistant reads your scenario and the current scene, suggests edits, and you decide what to accept.",
+    "points": {
+      "1": "Edit proposals with a preview before anything is applied",
+      "2": "Live chat with the scene during a session",
+      "3": "Standing campaign instructions",
+      "4": "Image generation for the show, with your provider key",
+      "5": "An MCP server for external AI agents"
+    },
+    "alt": "AI panel next to the scenario: a DM request, a reply and a proposal for a new scene",
+    "screen": "Scenario · AI co-author",
+    "honesty": "Bring your own Claude, OpenAI or Gemini key. The assistant works from your scenario and scene; every change is a proposal you review before it is applied.",
+    "mock": {
+      "pageTitle": "1.2 The trap at Brezgir",
+      "pageText": "The village settles into its evening, and at first glance everything is fine.",
+      "newSceneLabel": "New scene: ",
+      "newSceneText": "Elder Miroslav hides a wounded imp in his cellar — and asks the heroes to keep quiet.",
+      "pageTail": "Whoever passed the check may warn the people…",
+      "panelTitle": "AI co-author",
+      "userMessage": "Add a moral choice for Semgrun in Brezgir",
+      "reply": "I suggest a scene with the elder: he hides the imp because it saved his daughter. Semgrun must choose — the truth or the village's trust.",
+      "proposal": "Proposal · +1 scene in “1.2”",
+      "accept": "Accept",
+      "reject": "Reject"
+    }
+  },
+  "players": {
+    "eyebrow": "For players",
+    "title": "The table, in every pocket",
+    "text": "Players join with a code and get everything they need on their own device, while the DM stays at the centre of the story.",
+    "panels": {
+      "phone": {
+        "eyebrow": "On the phone",
+        "title": "Your hero, your turn",
+        "text": "A player sees their own hero, whose turn it is, and the spells and abilities available to them — on a phone or a laptop.",
+        "points": {
+          "1": "Own hero, turn and spells",
+          "2": "Scene slides and music on their own screen",
+          "3": "A reference of the spells, races and artifacts the DM allows",
+          "4": "Image puzzles solved together"
+        },
+        "alt": "Player's phone: hero card, hit points and spell list",
+        "screen": "Player · phone"
+      },
+      "hero": {
+        "eyebrow": "Hero sheet",
+        "title": "A hero that grows with the campaign",
+        "text": "An online character sheet with race, ability scores, skill tree, spellbook and gear — equally handy for the DM and the player.",
+        "points": {
+          "1": "Levels, advancement and skill trees",
+          "2": "Spells by circle",
+          "3": "Artifacts and sets with bonuses",
+          "4": "Players can draft a hero for the DM to approve"
+        },
+        "alt": "Hero sheet: portrait, class, level, ability scores and attacks",
+        "screen": "Hero · Kael"
+      }
+    }
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "title": "From idea to first battle in four steps",
+    "steps": {
+      "1": {
+        "title": "Create or import content",
+        "text": "Start from scratch or bring your content in from CSV, TSV or JSON."
+      },
+      "2": {
+        "title": "Prepare scenario and mechanics",
+        "text": "Write the story, set your rules, bind scenes and battles to the text."
+      },
+      "3": {
+        "title": "Invite your players",
+        "text": "Share a campaign code — players join from any browser."
+      },
+      "4": {
+        "title": "Run the session",
+        "text": "Launch scenes and battles; everyone sees them at the same moment."
+      }
+    }
+  },
+  "faq": {
+    "eyebrow": "Questions",
+    "title": "Frequently asked questions",
+    "items": {
+      "1": {
+        "q": "Do I need other apps to run a game?",
+        "a": "No. The initiative tracker, battle map, hero sheets, scenario, scene show, music and AI assistant all work in one browser window — no dice bots, spreadsheets or separate virtual tabletops."
+      },
+      "2": {
+        "q": "Which game systems does it support?",
+        "a": "It is built for D&D-style, turn-based tabletop RPGs, with 5e-style rules and your own custom rules on top. It does not cover every RPG system."
+      },
+      "3": {
+        "q": "Can I create my own world?",
+        "a": "Yes. Races, spells, creatures, artifacts, skills and rules are edited without code, separately in each campaign. Start from scratch or import your content."
+      },
+      "4": {
+        "q": "Can I import my existing content?",
+        "a": "Yes. Import CSV, TSV or JSON; every row is validated, and you review the result before anything is applied."
+      },
+      "5": {
+        "q": "What do players need?",
+        "a": "Just a phone or a laptop with a browser. A player enters your campaign code and sees their hero, the battle and the scene slides."
+      },
+      "6": {
+        "q": "How does the AI assistant work, and what happens to my key?",
+        "a": "You connect your own Claude, OpenAI or Gemini key. It stays on the server and is never sent to the browser. The assistant only proposes changes; nothing is applied until you review and accept it."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to run your next session?",
+    "text": "Create a campaign, invite your players with a code and start your first battle."
+  },
+  "footer": {
+    "navAria": "Account",
+    "tagline": "The all-in-one platform for Dungeon Masters",
+    "credits": "Photos from Unsplash. Token silhouettes from game-icons.net (Delapouite, Lorc), CC BY 3.0.",
+    "disclaimer": "{brand} is an independent project. Dungeons & Dragons is a trademark of Wizards of the Coast; this project is not affiliated with it.",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  }
+}

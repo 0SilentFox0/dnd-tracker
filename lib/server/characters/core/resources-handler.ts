@@ -10,8 +10,17 @@ import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { buildCharacterParticipant } from "@/lib/server/characters/participant";
 import { ContentError } from "@/lib/server/content/errors";
+import { restUses } from "@/lib/utils/abilities/engine/core/usage";
 import { editResources } from "@/lib/utils/characters/resources/edit";
 import { readResources } from "@/lib/utils/characters/resources/schema";
+import type { ResolvedAbility } from "@/types/abilities";
+import type { AbilityPool } from "@/types/battle";
+
+function chargeLimits(data: { pools?: Record<string, AbilityPool>; resolvedAbilities: ResolvedAbility[] } | undefined) {
+  const abilities = (data?.resolvedAbilities ?? []).flatMap((a) => (a.limits?.perRest ? [[a.key, { max: restUses(a.limits) ?? 0, rest: a.limits.perRest.rest, regain: a.limits.perRest.shortRegain }] as const] : []));
+
+  return { ...Object.fromEntries(abilities), ...data?.pools };
+}
 
 export async function editResourcesFor({ access, character }: CharacterGate, body: ResourcesEditInput) {
   const { rules, maxLevel } = access.campaign;
@@ -27,7 +36,7 @@ export async function editResourcesFor({ access, character }: CharacterGate, bod
   const after = await prisma.$transaction(async (tx) => {
     const before = (await lockCharacters(tx, [character.id])).get(character.id)?.resources ?? readResources(character.resources);
 
-    const edited = editResources(before, body, maxHp, built?.battleData?.pools ?? {});
+    const edited = editResources(before, body, maxHp, chargeLimits(built?.battleData));
 
     await tx.character.update({ where: { id: character.id }, data: { resources: edited as Prisma.InputJsonValue } });
     await writeCharacterLog(tx, [{ campaignId: character.campaignId, characterId: character.id, actorUserId: access.userId, kind: CharacterLogKind.RESOURCES_EDIT, data: { before, after: edited } }]);

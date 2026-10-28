@@ -21,7 +21,7 @@ describe("rules: сумісність збережених даних і patch",
   it.each(["2014", "2024"] as const)("disabled механіки зберігають параметри %s після parse і merge", (edition) => {
     const raw = {
       conditions: { enabled: false, exhaustion: edition },
-      actions: { enabled: false, opportunityAttacks: false, variant: edition },
+      actions: { enabled: false, opportunityAttacks: false, retaliation: true, variant: edition },
       concentration: { enabled: false, dcCap: 30 },
       items: { enabled: false, attunementLimit: 5 },
       encounters: { balance: "fair", edition, autoXp: true },

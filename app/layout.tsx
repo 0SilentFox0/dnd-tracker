@@ -8,6 +8,8 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { ScreenBackground } from "@/components/layout/screen-background";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { SITE_INDEXING, SITE_URL } from "@/lib/constants/site";
+import { ClientLocaleProvider } from "@/lib/i18n/client-locale-provider";
+import { loadStaticMessages } from "@/lib/i18n/messages";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
 export const metadata: Metadata = {
@@ -17,11 +19,13 @@ export const metadata: Metadata = {
   robots: SITE_INDEXING ? undefined : { index: false, follow: false },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const messages = await loadStaticMessages(["common", "validation", "auth"]);
+
   return (
     <html lang="uk" className="dark">
       <head>
@@ -31,12 +35,14 @@ export default function RootLayout({
       </head>
       <body className={`font-geist ${hudFontClassName} antialiased`}>
         <ScreenBackground />
-        <QueryProvider>
-          <ConfirmProvider>
-            <HeaderGate />
-            <PageTransition>{children}</PageTransition>
-          </ConfirmProvider>
-        </QueryProvider>
+        <ClientLocaleProvider messages={messages}>
+          <QueryProvider>
+            <ConfirmProvider>
+              <HeaderGate />
+              <PageTransition>{children}</PageTransition>
+            </ConfirmProvider>
+          </QueryProvider>
+        </ClientLocaleProvider>
       </body>
     </html>
   );

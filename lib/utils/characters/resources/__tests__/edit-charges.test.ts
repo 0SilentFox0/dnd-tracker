@@ -11,4 +11,10 @@ describe("editResources: item charges", () => {
     expect(editResources({ charges: { "pool:item:wand": { used: 2, rest: "long" } } }, { charges: { "pool:item:wand": 0 } }, undefined, pools)).toEqual({});
     expect(editResources({}, { charges: { "pool:item:gone": 1 } }, undefined, pools)).toEqual({});
   });
+
+  it("accepts per-rest ability keys and keeps their regain", () => {
+    const limits = { ...pools, "srd-2024_fighter_second-wind": { max: 2, rest: "long" as const, regain: 1 } };
+
+    expect(editResources({}, { charges: { "srd-2024_fighter_second-wind": 1 } }, undefined, limits).charges).toEqual({ "srd-2024_fighter_second-wind": { used: 1, rest: "long", regain: 1 } });
+  });
 });

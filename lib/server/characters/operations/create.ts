@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { type CampaignScope, characterHandler, defineCharacterOperation, dmScope, errorStatusMessage } from "../operation-runner";
 
+import { getCachedBackgrounds } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
@@ -13,11 +14,28 @@ import { ContentError } from "@/lib/server/content/errors";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import type { Actor } from "@/lib/utils/api/actor";
+import { toBackgroundData } from "@/lib/utils/backgrounds/row";
 import { backgroundFields } from "@/lib/utils/backgrounds/selection";
+import { classSkillIssues, skillIdsInPicks } from "@/lib/utils/characters/choices/class-skills";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
+import type { CharacterClassEntry, GameClassData } from "@/types/classes";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
+
+async function assertClassSkills({ campaignId, data, entries, byId }: { campaignId: string; data: CreateCharacterInput; entries: CharacterClassEntry[]; byId: Record<string, GameClassData> | undefined }) {
+  const cls = entries[0] && byId?.[entries[0].classId];
+
+  if (!cls) return;
+
+  const background = data.backgroundId ? (await getCachedBackgrounds(campaignId)).find((b) => b.id === data.backgroundId) : undefined;
+
+  const otherSources = [...(background ? toBackgroundData(background).skillProficiencies : []), ...skillIdsInPicks(data.raceChoices), ...entries.flatMap((e) => skillIdsInPicks(e.choices))];
+
+  const issues = classSkillIssues({ skills: data.skills, cls, otherSources });
+
+  if (issues.length > 0) throw new ContentError(issues[0].message, 422, issues);
+}
 
 async function createCharacterCore({ access, campaignId }: CampaignScope, data: CreateCharacterInput) {
   const { heroMin, heroMax } = access.campaign.rules.initiative;
@@ -39,6 +57,8 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
   const fromClasses = applied.data;
 
   const entries = data.classes ?? [];
+
+  await assertClassSkills({ campaignId, data, entries, byId: applied.classesById });
 
   const withChoices = !!data.backgroundId || hasPicks(data.raceChoices) || (data.feats?.length ?? 0) > 0 || entries.some((e) => hasPicks(e.choices));
 

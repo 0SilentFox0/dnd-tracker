@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 
-import { BRAND } from "@/lib/constants/site";
+import { BRAND, LANDING_PATH } from "@/lib/constants/site";
+import type { Locale } from "@/lib/i18n/config";
 
-export function Brand() {
+export function Brand({ locale }: { locale: Locale }) {
   return (
-    <Link prefetch={false} href="/" className="hud-sc flex items-center gap-2 text-lg text-hud-ink">
+    <Link prefetch={false} href={LANDING_PATH[locale]} className="hud-sc flex items-center gap-2 text-lg text-hud-ink">
       <span aria-hidden className="metal-gold metal-fill grid size-8 place-items-center rounded-md text-sm font-bold">
         {BRAND.mark}
       </span>

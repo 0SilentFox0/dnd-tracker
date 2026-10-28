@@ -10,6 +10,18 @@ function withoutKey<T>(record: Record<string, T> | undefined, drop: (key: string
   return record && Object.fromEntries(Object.entries(record).filter(([k, v]) => !drop(k, v)));
 }
 
+function shortRestCharges(charges: CharacterResources["charges"]): CharacterResources["charges"] {
+  const next = Object.entries(charges ?? {}).flatMap(([key, c]) => {
+    if (c.rest === "short") return [];
+
+    const left = c.rest === "long" && c.regain ? c.used - c.regain : c.used;
+
+    return left > 0 ? [[key, { ...c, used: left }] as const] : [];
+  });
+
+  return charges && Object.fromEntries(next);
+}
+
 export function applyRest(action: RestAction, r: CharacterResources, opts: { pool: HitDiceEntry[]; longRestHitDice: "half" | "all" }): CharacterResources {
   if (action === "close") return compactResources({ ...r, shortRestOpen: undefined });
 
@@ -19,7 +31,7 @@ export function applyRest(action: RestAction, r: CharacterResources, opts: { poo
     return compactResources({
       ...r,
       slotsSpent: withoutKey(r.slotsSpent, (k) => k === PACT_KEY),
-      charges: withoutKey(r.charges, (_k, c) => c.rest === "short"),
+      charges: shortRestCharges(r.charges),
       shortRestOpen: true,
     });
   }

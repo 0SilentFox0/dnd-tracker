@@ -1,26 +1,36 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { getCopy } from "@/components/landing/copy";
 import { LandingPage } from "@/components/landing/LandingPage";
-import { LANDING_LOCALES } from "@/lib/constants/site";
+import { LANDING_PATH } from "@/lib/constants/site";
+import { LOCALES } from "@/lib/i18n/config";
+import en from "@/messages/en/landing.json";
+import uk from "@/messages/uk/landing.json";
 
-const OTHER = { en: { href: "/uk", lang: "uk" }, uk: { href: "/", lang: "en" } } as const;
+vi.unmock("@/lib/i18n/translator");
 
-describe.each(LANDING_LOCALES)("LandingPage (%s)", (locale) => {
-  const copy = getCopy(locale);
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
-  const html = renderToStaticMarkup(<LandingPage copy={copy} />);
+vi.mock("@/lib/hooks/auth", () => ({ useHasSessionCookie: () => false }));
+
+const MESSAGES = { en, uk };
+
+const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+
+describe.each(LOCALES)("LandingPage (%s)", async (locale) => {
+  const m = MESSAGES[locale];
+
+  const html = renderToStaticMarkup(await LandingPage({ locale }));
 
   it("renders one h1 and the wrapper language", () => {
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
     expect(html).toContain(`lang="${locale}"`);
   });
 
-  it("links to the other language and shows the hero CTA", () => {
-    expect(html).toContain(`href="${OTHER[locale].href}"`);
-    expect(html).toContain(copy.hero.primary);
-    expect(html).toContain(copy.nav.signUp);
+  it("links every language and shows the hero CTA", () => {
+    for (const l of LOCALES) expect(html).toContain(`href="${LANDING_PATH[l]}" hrefLang="${l}"`);
+    expect(html).toContain(escape(m.hero.primary));
+    expect(html).toContain(escape(m.nav.signUp));
   });
 
   it("renders each section exactly once", () => {
@@ -29,8 +39,13 @@ describe.each(LANDING_LOCALES)("LandingPage (%s)", (locale) => {
     }
   });
 
+  it("puts the FAQ into JSON-LD", () => {
+    expect(html).toContain('"@type":"FAQPage"');
+    expect(html).toContain(JSON.stringify(m.faq.items["1"].q).slice(1, -1).replace(/</g, "\\u003c"));
+  });
+
   it("hides the templates note while templates are off", () => {
-    expect(html).not.toContain(copy.mechanics.templatesNote);
+    expect(html).not.toContain(escape(m.mechanics.templatesNote));
   });
 
   it("makes no pricing claims", () => {
@@ -39,10 +54,10 @@ describe.each(LANDING_LOCALES)("LandingPage (%s)", (locale) => {
 });
 
 describe("language isolation", () => {
-  it("has no Cyrillic in the EN markup", () => {
-    const html = renderToStaticMarkup(<LandingPage copy={getCopy("en")} />);
+  it("has no Cyrillic in the EN markup besides the switcher's native names", async () => {
+    const html = renderToStaticMarkup(await LandingPage({ locale: "en" }));
 
-    // the UA switch label is the only allowed Cyrillic
-    expect(html.replace(getCopy("en").nav.switchLabel, "")).not.toMatch(/[А-Яа-яІіЇїЄє]/);
+    // eslint-disable-next-line no-restricted-syntax -- the switcher names each language in itself
+    expect(html.replace("Українська", "")).not.toMatch(/[А-Яа-яІіЇїЄє]/);
   });
 });

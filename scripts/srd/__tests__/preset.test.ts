@@ -16,7 +16,7 @@ describe("SRD rules preset", () => {
     expect(SRD_RULES.deathSaves).toEqual({ enabled: true, unitsDieAtZero: true });
     expect(SRD_RULES.concentration.enabled).toBe(true);
     expect(SRD_RULES.conditions).toEqual({ enabled: true, exhaustion: "2024" });
-    expect(SRD_RULES.actions).toEqual({ enabled: true, opportunityAttacks: true, variant: "2024" });
+    expect(SRD_RULES.actions).toEqual({ enabled: true, opportunityAttacks: true, retaliation: false, variant: "2024" });
     expect(SRD_RULES.classes.enabled).toBe(true);
     expect(SRD_RULES.outOfCombat).toEqual({ persistResources: true, longRestHitDice: "all", xp: true, inspiration: true });
     expect(SRD_RULES.encounters).toEqual({ balance: "xp", edition: "2024", autoXp: true });

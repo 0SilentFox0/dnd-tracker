@@ -7,10 +7,10 @@ import { useClassLevelUp } from "./useClassLevelUp";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { useClasses } from "@/lib/hooks/classes";
 import { levelUpChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
-import { classesById } from "@/lib/utils/characters/classes";
+import { buildClassProgression, classesById } from "@/lib/utils/characters/classes";
 import type { Character } from "@/types/characters";
 import type { Picks } from "@/types/choices";
-import type { CharacterClassEntry, GameClassData } from "@/types/classes";
+import type { CharacterClassEntry, GameClassData, ProgressionRow } from "@/types/classes";
 
 export interface LevelUpCharacter {
   campaignId: string;
@@ -69,6 +69,12 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
 
   const raisedEntry: CharacterClassEntry | null = cls ? { classId, level: nextLevel, ...(subclassPicked && { subclassId: subclassPicked }), ...(current?.choices && { choices: current.choices }) } : null;
 
+  const nextRow: ProgressionRow | null = cls && raisedEntry ? (buildClassProgression(cls, raisedEntry).rows.find((r) => r.level === nextLevel) ?? null) : null;
+
+  const gained = nextRow ? [...nextRow.base, ...(raisedEntry?.subclassId ? (nextRow.bySubclass[raisedEntry.subclassId] ?? []) : [])] : [];
+
+  const picksCount = stepDefs.length;
+
   const pickClass = (value: string) => {
     setChoice(value);
     setSubclassId("");
@@ -103,6 +109,10 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
     needsSubclass,
     stepDefs,
     raisedEntry,
+    nextRow,
+    gained,
+    picksCount,
+    nextLevel,
     canSubmit,
     error: levelUp.error,
     actions: { pickClass, pickNewClass, pickSubclass, setPicks, send },

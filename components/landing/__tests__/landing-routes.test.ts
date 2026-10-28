@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import sitemap from "@/app/sitemap";
 import { BRAND, LANDING_PATH, SITE_URL } from "@/lib/constants/site";
+import en from "@/messages/en/landing.json";
+import uk from "@/messages/uk/landing.json";
 
 describe("landing routes", () => {
   it("sitemap lists both landing URLs with hreflang alternates", () => {
@@ -19,18 +21,19 @@ describe("landing routes", () => {
     expect(en?.alternates).toEqual(uk?.alternates);
   });
 
-  it("the product name is not hard-coded outside the copy dictionaries", () => {
+  it("the product name is not hard-coded in landing code", () => {
     const root = join(__dirname, "..");
 
     const files = [
       ...readdirSync(root, { recursive: true, withFileTypes: true })
         .filter((d) => d.isFile() && /\.tsx?$/.test(d.name))
         .map((d) => join(d.parentPath, d.name))
-        .filter((f) => !f.includes("__tests__") && !f.includes(`${join(root, "copy")}/`)),
+        .filter((f) => !f.includes("__tests__")),
       join(root, "../../app/page.tsx"),
       join(root, "../../app/uk/page.tsx"),
     ];
 
     for (const f of files) expect(readFileSync(f, "utf8"), f).not.toContain(BRAND.name);
+    for (const m of [en, uk]) expect(JSON.stringify(m)).not.toContain(BRAND.name);
   });
 });

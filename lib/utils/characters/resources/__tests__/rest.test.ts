@@ -14,6 +14,12 @@ const tired: CharacterResources = {
 };
 
 describe("applyRest", () => {
+  it("short: regain-limited long charge gets one use back", () => {
+    const r = { charges: { sw: { used: 2, rest: "long" as const, regain: 1 }, once: { used: 1, rest: "long" as const, regain: 1 } } };
+
+    expect(applyRest("short", r, opts).charges).toEqual({ sw: { used: 1, rest: "long", regain: 1 } });
+  });
+
   it("short: pact and short charges back, window opens", () => {
     expect(applyRest("short", tired, opts)).toEqual({
       hp: 3, tempHp: 4, slotsSpent: { "1": 2 }, hitDiceSpent: { fig: 4 }, charges: { b: { used: 2, rest: "long" } }, exhaustion: 2, shortRestOpen: true,
