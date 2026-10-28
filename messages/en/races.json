@@ -1,1 +1,78 @@
-{}
+{
+  "page": {
+    "title": "Playable Races",
+    "subtitle": "{count, plural, one {# race} other {# races}}",
+    "create": "Create race",
+    "loading": "Loading races…",
+    "emptyTitle": "No races yet",
+    "emptyDescription": "Create the first race.",
+    "searchLabel": "Search races"
+  },
+  "card": {
+    "availableSkills": "Available skills:",
+    "noRestrictions": "No restrictions (all groups)",
+    "skillsCount": "Skills: {count}",
+    "disabledCount": "Disabled: {count}",
+    "statModifiers": "Ability modifiers:",
+    "modBonus": "Bonus",
+    "modNonNegative": "Non-negative (min. 0)",
+    "modAlwaysZero": "Always 0",
+    "statImprovements": "Ability improvements:",
+    "noPassive": "No passive ability set"
+  },
+  "passive": {
+    "title": "Innate passive:",
+    "defaultName": "Passive ability",
+    "whatItDoes": "What it does:",
+    "appearance": "What it looks like:"
+  },
+  "create": {
+    "title": "Create race",
+    "description": "Fill in the race details and its abilities",
+    "submit": "Create race",
+    "error": "Could not create the race"
+  },
+  "edit": {
+    "title": "Edit race",
+    "aside": "Update the race details",
+    "error": "Could not save the race"
+  },
+  "form": {
+    "tabs": {
+      "basic": "Basics",
+      "stats": "Stats",
+      "abilities": "Abilities",
+      "choices": "Choices and lineages"
+    },
+    "name": "Race name",
+    "nameRequired": "Race name *",
+    "namePlaceholder": "E.g. Humans, Elves, Demons",
+    "icon": "Race icon",
+    "color": "Race color",
+    "colorDescription": "Stripe and chip of the race in the unit list; empty — a palette color",
+    "passiveDescription": "Passive ability description",
+    "passivePlaceholder": "E.g. Fire immunity, Morale always >= 0",
+    "statModifiersTitle": "Ability modifiers",
+    "statModifiersHint": "Pick the effects for each ability",
+    "slotsTitle": "Spell slot progression",
+    "slotsHint": "Set the maximum number of spell slots for each spell level as the character levels up",
+    "statModifiers": {
+      "bonus": "Give + (bonus)",
+      "nonNegative": "Make non-negative (minimum 0)",
+      "alwaysZero": "Always 0"
+    },
+    "spellSlots": {
+      "magicLevel": "Spell level",
+      "maxSlots": "Maximum number of slots",
+      "hint": "This is the maximum at each spell level; slots unlock as the hero levels up (by the 5e caster curve). All zeros — the standard character table.",
+      "level": "Level {level}"
+    }
+  },
+  "list": {
+    "confirmDelete": "Are you sure you want to delete this race?"
+  },
+  "validation": {
+    "iconUrl": "Race icon must be an image link",
+    "color": "Race color must be in #RRGGBB format"
+  }
+}

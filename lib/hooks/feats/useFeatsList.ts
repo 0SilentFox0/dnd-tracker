@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useCreateFeat, useDeleteFeat, useFeats } from "./useFeats";
 
@@ -8,11 +9,13 @@ import { useLibraryList } from "@/lib/hooks/common";
 import type { FeatFormData, FeatType } from "@/types/choices";
 
 export function useFeatsList(campaignId: string) {
+  const t = useTranslations("feats");
+
   const list = useLibraryList({
     query: useFeats(campaignId),
     create: useCreateFeat(campaignId),
     remove: useDeleteFeat(campaignId),
-    texts: { confirmDelete: "Видалити цю рису?", deleteError: "Не вдалося видалити рису", createError: "Не вдалося створити рису" },
+    texts: { confirmDelete: t("list.confirmDelete"), deleteError: t("list.deleteError"), createError: t("list.createError") },
   });
 
   const all = list.items;

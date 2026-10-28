@@ -37,7 +37,7 @@ describe("RaceFormFields", () => {
   it("іконка раси: URL записується у форму", () => {
     renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByLabelText("Іконка раси"), { target: { value: "https://x/elf.png" } });
+    fireEvent.change(screen.getByLabelText("races.form.icon"), { target: { value: "https://x/elf.png" } });
 
     expect(screen.getByTestId("icon").textContent).toBe("https://x/elf.png");
   });
@@ -45,13 +45,13 @@ describe("RaceFormFields", () => {
   it("іконка раси — лише посилання: файл з компʼютера не пропонується", () => {
     renderWithConfirm(<Harness />);
 
-    expect(screen.queryByRole("button", { name: /Завантажити з комп/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /common.ui.uploadFromComputer/ })).toBeNull();
   });
 
   it("колір раси: hex записується у форму", () => {
     renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByLabelText("Колір раси (hex)"), { target: { value: "#123456" } });
+    fireEvent.change(screen.getByLabelText("races.form.color (hex)"), { target: { value: "#123456" } });
 
     expect(screen.getByTestId("color").textContent).toBe("#123456");
   });

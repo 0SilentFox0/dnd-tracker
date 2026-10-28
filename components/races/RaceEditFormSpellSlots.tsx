@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Input } from "@/components/ui/input";
 import type { RaceFormData, SpellSlotProgression } from "@/types/races";
 
@@ -12,13 +14,15 @@ export function RaceEditFormSpellSlots({
   formData,
   setFormData,
 }: RaceEditFormSpellSlotsProps) {
+  const t = useTranslations("races");
+
   return (
     <div className="border rounded-md p-4">
       <div className="mb-2 flex flex-wrap justify-between gap-x-4 border-b pb-2 text-sm font-semibold">
-        <div>Рівень магії</div>
-        <div>Максимальна кількість слотів</div>
+        <div>{t("form.spellSlots.magicLevel")}</div>
+        <div>{t("form.spellSlots.maxSlots")}</div>
       </div>
-      <p className="mb-2 text-xs text-muted-foreground">Це максимум на кожному рівні магії; слоти відкриваються з ростом рівня героя (за кривою заклинача 5e). Усі нулі — стандартна таблиця персонажів.</p>
+      <p className="mb-2 text-xs text-muted-foreground">{t("form.spellSlots.hint")}</p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
       {[1, 2, 3, 4, 5].map((level) => {
         const progression = formData.spellSlotProgression?.find(
@@ -27,7 +31,7 @@ export function RaceEditFormSpellSlots({
 
         return (
           <div key={level} className="space-y-1">
-            <div className="text-xs leading-tight">Рівень {level}</div>
+            <div className="text-xs leading-tight">{t("form.spellSlots.level", { level })}</div>
             <Input
               type="number"
               min={0}

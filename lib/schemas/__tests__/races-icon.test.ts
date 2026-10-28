@@ -11,4 +11,9 @@ describe("races icon", () => {
   it("відхиляє data: URL (base64 у колонці роздуло б кожну відповідь)", () => {
     expect(() => updateRaceSchema.parse({ icon: "data:image/png;base64,AAAA" })).toThrow();
   });
+
+  it("повідомлення — ключі каталогу", () => {
+    expect(updateRaceSchema.safeParse({ icon: "data:image/png;base64,AAAA" }).error?.issues[0].message).toBe("races.validation.iconUrl");
+    expect(updateRaceSchema.safeParse({ color: "red" }).error?.issues[0].message).toBe("races.validation.color");
+  });
 });

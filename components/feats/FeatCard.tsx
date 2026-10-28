@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Edit, Trash2 } from "lucide-react";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
-import { FEAT_TYPE_LABELS } from "@/lib/constants/choices";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { FeatData } from "@/types/choices";
 
 export function FeatCard({ feat, campaignId, onDelete }: { feat: FeatData; campaignId: string; onDelete: (featId: string) => void }) {
+  const t = useTranslations("feats");
+
+  const tc = useTranslations("common");
+
   const href = `/campaigns/${campaignId}/dm/feats/${feat.id}`;
 
   const choices = feat.choices.length;
@@ -25,16 +28,16 @@ export function FeatCard({ feat, campaignId, onDelete }: { feat: FeatData; campa
           triggerSize="sm"
           triggerClassName="h-8 w-8 p-0"
           actions={[
-            { label: "Редагувати", icon: Edit, href },
-            { label: "Видалити", icon: Trash2, onSelect: () => onDelete(feat.id), destructive: true },
+            { label: tc("actions.edit"), icon: Edit, href },
+            { label: tc("actions.delete"), icon: Trash2, onSelect: () => onDelete(feat.id), destructive: true },
           ]}
         />
       </div>
       <Link href={href} className="flex flex-wrap gap-2">
-        <Badge variant="outline">{FEAT_TYPE_LABELS[feat.type]}</Badge>
-        {feat.prerequisite.level && <Badge variant="outline">{`Рівень ${feat.prerequisite.level}+`}</Badge>}
-        {feat.repeatable && <Badge variant="outline">Повторювана</Badge>}
-        {choices > 0 && <Badge variant="outline">{`${choices} ${pluralUk(choices, ["вибір", "вибори", "виборів"])}`}</Badge>}
+        <Badge variant="outline">{t(`types.${feat.type}`)}</Badge>
+        {feat.prerequisite.level && <Badge variant="outline">{t("card.level", { level: feat.prerequisite.level })}</Badge>}
+        {feat.repeatable && <Badge variant="outline">{t("card.repeatable")}</Badge>}
+        {choices > 0 && <Badge variant="outline">{t("card.choices", { count: choices })}</Badge>}
       </Link>
     </HudCard>
   );

@@ -6,7 +6,7 @@ import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const featIconSchema = z.preprocess(
   (v) => (v === "" ? null : v),
-  z.string().max(2000).refine((v) => !v.startsWith("data:"), "Іконка риси — лише посилання на зображення").nullable().optional(),
+  z.string().max(2000).refine((v) => !v.startsWith("data:"), "feats.validation.iconUrl").nullable().optional(),
 );
 
 const featFields = {
@@ -26,8 +26,8 @@ export const createFeatSchema = z.object({
   prerequisite: featFields.prerequisite.prefault({}),
   repeatable: featFields.repeatable.default(false),
   description: featFields.description.optional(),
-  abilities: featFields.abilities.describe("Вміння риси").default([]),
-  choices: featFields.choices.describe("Вкладені вибори риси (без виду feat)").default([]),
+  abilities: featFields.abilities.describe("Feat abilities").default([]),
+  choices: featFields.choices.describe("Nested feat choices (no feat kind)").default([]),
 });
 
 export const updateFeatSchema = z.object(featFields).partial();

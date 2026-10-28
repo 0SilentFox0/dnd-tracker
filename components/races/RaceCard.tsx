@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Circle, Edit, Plus, Shield, Trash2 } from "lucide-react";
 
 import { RacePassiveBlock } from "./RaceInnateSections";
@@ -24,6 +25,10 @@ interface RaceCardProps {
 }
 
 export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
+  const t = useTranslations("races");
+
+  const tc = useTranslations("common");
+
   const { data: allSkills = [] } = useSkills(campaignId);
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
@@ -51,15 +56,15 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             triggerSize="sm"
             triggerClassName="h-8 w-8 p-0"
             actions={[
-              { label: "Редагувати", icon: Edit, href: `/campaigns/${campaignId}/dm/races/${race.id}` },
-              { label: "Видалити", icon: Trash2, onSelect: () => onDelete(race.id), destructive: true },
+              { label: tc("actions.edit"), icon: Edit, href: `/campaigns/${campaignId}/dm/races/${race.id}` },
+              { label: tc("actions.delete"), icon: Trash2, onSelect: () => onDelete(race.id), destructive: true },
             ]}
           />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3">
         <div className="space-y-2">
-          <p className="text-sm font-medium">Доступні навики:</p>
+          <p className="text-sm font-medium">{t("card.availableSkills")}</p>
           <div className="flex flex-wrap gap-2">
             {availableMainSkillsForDisplay.map((ms) => (
               <span
@@ -73,15 +78,15 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             ))}
             {availableMainSkillsForDisplay.length === 0 && (
               <span className="text-sm text-muted-foreground italic">
-                Немає обмежень (усі групи)
+                {t("card.noRestrictions")}
               </span>
             )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">Скілів: {availableSkillsCount}</Badge>
+          <Badge variant="outline">{t("card.skillsCount", { count: availableSkillsCount })}</Badge>
           {disabledSkillsCount > 0 && (
-            <Badge variant="outline">Відключені: {disabledSkillsCount}</Badge>
+            <Badge variant="outline">{t("card.disabledCount", { count: disabledSkillsCount })}</Badge>
           )}
         </div>
 
@@ -91,7 +96,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             {modifiedAbilities.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm font-medium mb-2">
-                  Модифікатори характеристик:
+                  {t("card.statModifiers")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {modifiedAbilities.map((ability) => {
@@ -126,10 +131,10 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                             className="flex items-center"
                             title={
                               iconToShow === "bonus"
-                                ? "Бонус"
+                                ? t("card.modBonus")
                                 : iconToShow === "nonNegative"
-                                  ? "Невід'ємне (мін. 0)"
-                                  : "Завжди 0"
+                                  ? t("card.modNonNegative")
+                                  : t("card.modAlwaysZero")
                             }
                           >
                             {iconToShow === "bonus" && (
@@ -155,7 +160,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
             )}
             {passiveAbility.statImprovements && (
               <div className="mt-2">
-                <p className="text-sm font-medium">Покращення характеристик:</p>
+                <p className="text-sm font-medium">{t("card.statImprovements")}</p>
                 <p className="text-sm text-muted-foreground">
                   {passiveAbility.statImprovements}
                 </p>
@@ -167,7 +172,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
 
         {!passiveAbility && (
           <p className="text-sm text-muted-foreground italic">
-            Пасивна здібність не вказана
+            {t("card.noPassive")}
           </p>
         )}
       </div>

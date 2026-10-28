@@ -25,9 +25,9 @@ describe("FeatForm", () => {
   it("edits type, prerequisites and repeatable, then submits", () => {
     render(<FeatForm campaignId="c1" feat={feat} />);
 
-    fireEvent.change(screen.getByLabelText("Тип риси"), { target: { value: "origin" } });
-    fireEvent.change(screen.getByLabelText("Мінімальний рівень"), { target: { value: "" } });
-    fireEvent.click(screen.getByRole("checkbox", { name: "Повторювана" }));
+    fireEvent.change(screen.getByLabelText("feats.form.type"), { target: { value: "origin" } });
+    fireEvent.change(screen.getByLabelText("feats.form.minLevel"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "feats.form.repeatable" }));
     fireEvent.submit(document.getElementById("feat-form") as HTMLFormElement);
 
     expect(mutate.mock.calls[0][0]).toMatchObject({ featId: "f1", data: { type: "origin", prerequisite: {}, repeatable: true } });

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ABILITY_SCORES } from "@/lib/constants/abilities";
@@ -14,6 +16,8 @@ export function RaceEditFormStatModifiers({
   formData,
   setFormData,
 }: RaceEditFormStatModifiersProps) {
+  const t = useTranslations("races");
+
   return (
     <div className="border rounded-md p-3 space-y-4 max-h-96 overflow-y-auto">
       {ABILITY_SCORES.map((ability) => {
@@ -58,7 +62,7 @@ export function RaceEditFormStatModifiers({
                   htmlFor={`${ability.key}-bonus`}
                   className="text-sm font-normal cursor-pointer"
                 >
-                  Дати + (бонус)
+                  {t("form.statModifiers.bonus")}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
@@ -90,7 +94,7 @@ export function RaceEditFormStatModifiers({
                   htmlFor={`${ability.key}-non-negative`}
                   className="text-sm font-normal cursor-pointer"
                 >
-                  Зробити невід`ємним (мінімум 0)
+                  {t("form.statModifiers.nonNegative")}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
@@ -123,7 +127,7 @@ export function RaceEditFormStatModifiers({
                   htmlFor={`${ability.key}-always-zero`}
                   className="text-sm font-normal cursor-pointer"
                 >
-                  Завжди 0
+                  {t("form.statModifiers.alwaysZero")}
                 </Label>
               </div>
             </div>
