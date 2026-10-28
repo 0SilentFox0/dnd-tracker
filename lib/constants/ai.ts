@@ -76,11 +76,12 @@ export const AI_LIMITS = {
 } as const;
 
 export const API_TOKEN_PREFIX = "dndt_";
-export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write"] as const;
+export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write", "campaign:read", "campaign:write", "scenario:read", "scenario:write", "characters:read", "characters:write", "battles:read", "battles:write", "show:read", "show:write"] as const;
 
 export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
 
-export type ContentScope = Exclude<ApiTokenScope, "ai">;
+export type ContentScope = "content:read" | "content:write";
+export type ActionScope = Exclude<ApiTokenScope, "ai">;
 
 export const CONTENT_SCOPES = ["content:read", "content:write"] as const satisfies readonly ContentScope[];
 
@@ -92,6 +93,16 @@ export const API_TOKEN_SCOPE_LABELS: Record<ApiTokenScope, string> = {
   ai: "AI-асистент (MCP)",
   "content:read": "Читання контенту",
   "content:write": "Запис контенту",
+  "campaign:read": "Читання налаштувань кампанії",
+  "campaign:write": "Керування кампанією",
+  "scenario:read": "Читання сценарію",
+  "scenario:write": "Редагування сценарію",
+  "characters:read": "Читання персонажів",
+  "characters:write": "Керування персонажами",
+  "battles:read": "Читання боїв",
+  "battles:write": "Керування боями",
+  "show:read": "Читання показу",
+  "show:write": "Керування показом",
 };
 
-export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scopes.includes(need) || (need === "content:read" && scopes.includes("content:write"));
+export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scopes.includes(need) || (need.endsWith(":read") && scopes.includes(`${need.slice(0, -5)}:write`));

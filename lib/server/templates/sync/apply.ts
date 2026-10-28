@@ -25,7 +25,7 @@ const keyOf = (i: { scope: string; key: string }) => `${i.scope}:${i.key}`;
 
 const sourceChanged = () => new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
 
-export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
+async function sourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
   const ctx = await loadSyncContext(db, campaignId, access);
 
   const all = new Map(classify(ctx).map((i) => [keyOf(i), i]));
@@ -46,6 +46,25 @@ export async function applySourceChanges(db: SyncDb, campaignId: string, body: S
   const { selected, autoAdded } = closeOverRequires(chosen, all);
 
   const items = [...selected.values()];
+
+  return { ctx, selected, autoAdded, items, ignored };
+}
+
+export async function previewSourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
+  const { ctx, items, ignored, autoAdded } = await sourceSelection(db, campaignId, body, access);
+
+  const index = indexOf(ctx);
+
+  return {
+    sourceId: ctx.source.id,
+    items: items.map((item) => ({ ...item, before: item.localId ? index.localById.get(item.localId)?.row ?? null : item.scope === "rules" ? parseRules(ctx.target.rules)[item.key as keyof ReturnType<typeof parseRules>] : item.scope === "settings" ? ctx.target.settings : null, after: item.status === "deletedInSource" ? null : index.sourceIndex.get(item.key)?.row ?? (item.scope === "rules" ? parseRules(ctx.sourceBundle.rules)[item.key as keyof ReturnType<typeof parseRules>] : item.scope === "settings" ? ctx.sourceBundle.settings : null) })),
+    ignored, autoAdded,
+    credits: { before: ctx.target.credits ?? null, after: ctx.sourceBundle.credits ?? null },
+  };
+}
+
+export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
+  const { ctx, selected, autoAdded, items, ignored } = await sourceSelection(db, campaignId, body, access);
 
   const warnings = await writeTables(db, ctx, selected);
 

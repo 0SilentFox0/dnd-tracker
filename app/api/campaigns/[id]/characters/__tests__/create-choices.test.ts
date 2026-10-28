@@ -47,3 +47,6 @@ describe("create character with choices", () => {
     expect(vi.mocked(prisma.character.create).mock.calls.at(-1)?.[0].data).not.toHaveProperty("raceChoices");
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

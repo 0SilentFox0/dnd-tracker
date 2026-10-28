@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
+import { operationAccess } from "./campaign-access";
+
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { type CampaignAccessResult, requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import type { Actor } from "@/lib/utils/api/actor";
+import { type CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 
@@ -18,8 +21,9 @@ async function gateCharacter<T extends { campaignId: string; controlledBy: strin
   campaignId: string,
   query: PromiseLike<T | null>,
   dmOnly: boolean,
+  actor?: Actor,
 ): Promise<{ access: CampaignAccessResult; character: T } | NextResponse> {
-  const access = await requireCampaignAccess(campaignId, dmOnly);
+  const access = await operationAccess(campaignId, dmOnly, actor);
 
   if (access instanceof NextResponse) return access;
 
@@ -32,10 +36,10 @@ async function gateCharacter<T extends { campaignId: string; controlledBy: strin
   return { access, character };
 }
 
-export function requireCharacterAccess(campaignId: string, characterId: string, opts: { dmOnly?: boolean } = {}) {
-  return gateCharacter(campaignId, loadCharacterWithInventory(characterId), !!opts.dmOnly);
+export function requireCharacterAccess(campaignId: string, characterId: string, opts: { dmOnly?: boolean; actor?: Actor } = {}) {
+  return gateCharacter(campaignId, loadCharacterWithInventory(characterId), !!opts.dmOnly, opts.actor);
 }
 
-export function requireCharacterRow(campaignId: string, characterId: string, opts: { dmOnly?: boolean } = {}) {
-  return gateCharacter(campaignId, loadCharacterRow(characterId), !!opts.dmOnly);
+export function requireCharacterRow(campaignId: string, characterId: string, opts: { dmOnly?: boolean; actor?: Actor } = {}) {
+  return gateCharacter(campaignId, loadCharacterRow(characterId), !!opts.dmOnly, opts.actor);
 }

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { POST } from "@/app/api/mcp/route";
 import { hashToken } from "@/lib/ai/api-tokens";
 import { prisma } from "@/lib/db";
 
@@ -53,12 +54,14 @@ vi.mock("@/lib/server/content/resources", async () => {
   return { CONTENT_RESOURCES: { units: unit } };
 });
 
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({
     apiToken: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     campaignMember: { findMany: vi.fn() },
-  },
-}));
+  }) };
+});
 
 const rpc = (method: string, id: number, params: unknown = {}, token?: string) =>
   new Request("http://x/api/mcp", {
@@ -99,15 +102,12 @@ describe("API tokens + MCP", () => {
   });
 
   it("MCP без токена — 401", async () => {
-    const { POST } = await import("@/app/api/mcp/route");
 
     expect((await POST(mcpReq())).status).toBe(401);
   });
 
   it("відкликаний токен — 401", async () => {
     vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: new Date(), lastUsedAt: null, scopes: ["ai"] } as never);
-
-    const { POST } = await import("@/app/api/mcp/route");
 
     expect((await POST(mcpReq("dndt_abc"))).status).toBe(401);
   });
@@ -116,15 +116,11 @@ describe("API tokens + MCP", () => {
     vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: null, scopes: ["ai"] } as never);
     vi.mocked(prisma.campaignMember.findMany).mockResolvedValue([{ userId: "dm", role: "player" }] as never);
 
-    const { POST } = await import("@/app/api/mcp/route");
-
     expect((await POST(mcpReq("dndt_abc"))).status).toBe(401);
   });
 
   it("валідний токен — tools/list містить інструменти реєстру", async () => {
     vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes: ["ai"] } as never);
-
-    const { POST } = await import("@/app/api/mcp/route");
 
     const res = await POST(mcpReq("dndt_abc"));
 
@@ -143,8 +139,6 @@ describe("API tokens + MCP", () => {
   it("токен без права ai на MCP — 200, ai-інструментів немає", async () => {
     vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes: ["content:write"] } as never);
 
-    const { POST } = await import("@/app/api/mcp/route");
-
     const res = await POST(mcpReq("dndt_abc"));
 
     expect(res.status).toBe(200);
@@ -158,15 +152,12 @@ describe("API tokens + MCP", () => {
     const toolNames = async (scopes: string[]) => {
       asToken(scopes);
 
-      const { POST } = await import("@/app/api/mcp/route");
-
       const text = await (await POST(rpc("tools/list", 1, {}, "dndt_abc"))).text();
 
       return [...text.matchAll(/"name":"([a-z_]+)"/g)].map((m) => m[1]);
     };
 
     const call = async (name: string, args: unknown) => {
-      const { POST } = await import("@/app/api/mcp/route");
 
       const text = await (await POST(rpc("tools/call", 2, { name, arguments: args }, "dndt_abc"))).text();
 
@@ -198,8 +189,6 @@ describe("API tokens + MCP", () => {
     it("токен без жодного відомого права → 403, не порожній сервер", async () => {
       asToken(["legacy:unknown"]);
 
-      const { POST } = await import("@/app/api/mcp/route");
-
       expect((await POST(rpc("tools/list", 1, {}, "dndt_abc"))).status).toBe(403);
     });
 
@@ -217,8 +206,6 @@ describe("API tokens + MCP", () => {
 
     it("POST повертається лише після виконання інструмента (інакше revalidateTag губиться)", async () => {
       asToken(["content:write"]);
-
-      const { POST } = await import("@/app/api/mcp/route");
 
       await POST(rpc("tools/call", 2, { name: "content_create", arguments: { kind: "units", data: { name: "Гоблін" } } }, "dndt_abc"));
 

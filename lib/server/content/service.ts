@@ -11,9 +11,7 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 
-const lockedKinds = new Set(["units", "spells", "spell-groups", "artifacts", "races", "classes", "feats", "backgrounds"]);
-
-const write = <T>(r: AnyContentResource, actor: Actor, callback: () => Promise<T>) => lockedKinds.has(r.kind) ? withCampaignContentWrite(actor.campaignId, callback) : callback();
+const write = <T>(_r: AnyContentResource, actor: Actor, callback: () => Promise<T>) => withCampaignContentWrite(actor.campaignId, callback);
 
 async function found(r: AnyContentResource, actor: Actor, id: string | undefined, purpose: FindPurpose) {
   if (!id) throw new ContentError(r.notFound, 404);

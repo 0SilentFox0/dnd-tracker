@@ -262,3 +262,18 @@ it("background import resolves origin names and rejects unresolved explicit orig
 
   expect(bad.results[0].status).toBe("error");
 });
+
+it("defers import invalidation until outer transaction commits", async () => {
+  const { runContentWriteContext } = await import("@/lib/server/content/write-context");
+
+  const callbacks: Array<() => void> = [];
+
+  invalidateReference.mockClear();
+
+  const report = await runContentWriteContext("c1", {}, () => importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, deps), callbacks);
+
+  expect(report.counts.created).toBe(1);
+  expect(invalidateReference).not.toHaveBeenCalled();
+  for (const callback of callbacks) callback();
+  expect(invalidateReference).toHaveBeenCalledWith(["units"], "c1");
+});

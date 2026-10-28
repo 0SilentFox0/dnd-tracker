@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn() }, characterToken: { create: vi.fn(), findUnique: vi.fn(), delete: vi.fn() } } }));
+vi.mock("@/lib/db", () => ({ prisma: { $queryRaw: vi.fn(async () => [{id:"camp"}]), $transaction: vi.fn(async (fn) => fn({$queryRaw: vi.fn(async () => [{id:"ch",resources:{},experience:0}])})), character: { findUnique: vi.fn() }, characterToken: { create: vi.fn(), findUnique: vi.fn(), delete: vi.fn() } } }));
 
 const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", members: [{ userId, role }] } }) as never;
 

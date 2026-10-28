@@ -1,12 +1,8 @@
-import { createRollbackMutation, rollbackSchema } from "./rollback-mutation";
-
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-
-const mutate = createRollbackMutation();
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  return runBattleMutation(req, { params: await params, access: BattleAccess.DM, allowWhileAwaitingDm: true, schema: rollbackSchema, mutate });
+  return runBattleMutation(req, { params: await params, operation: "rollback" });
 }

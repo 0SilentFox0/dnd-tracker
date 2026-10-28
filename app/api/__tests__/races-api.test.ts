@@ -18,7 +18,11 @@ const db = vi.hoisted(() => {
 
 const revalidateTag = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/db", () => ({ prisma: db }));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble(db) };
+});
 vi.mock("next/cache", () => ({ revalidateTag, unstable_cache: (fn: () => unknown) => fn }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedRaces: vi.fn(async () => [{ id: "r1", name: "Ельф" }]) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
@@ -119,14 +123,16 @@ describe("races API", () => {
     expect(db.race.update).not.toHaveBeenCalled();
   });
 
-  it("перейменування в назву іншої раси (інший регістр) — 409 з текстом, без транзакції", async () => {
+  it("перейменування в назву іншої раси (інший регістр) — 409 з текстом, без запису", async () => {
     nameClash = { id: "r2" };
 
     const res = (await one.PATCH(req("PATCH", { name: "ЕЛЬФ" }), ctxOne)) as NextResponse;
 
     expect(res.status).toBe(409);
     expect(((await getResponseJson(res)) as { error: string }).error).toBe("Раса «ЕЛЬФ» уже є в кампанії");
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(db.race.update).not.toHaveBeenCalled();
+    expect(db.character.updateMany).not.toHaveBeenCalled();
+    expect(db.skillTree.updateMany).not.toHaveBeenCalled();
   });
 
   it("раса іншої кампанії — 404", async () => {

@@ -5,6 +5,8 @@ import { MAX_SLIDES_PER_DECK } from "@/lib/constants/show";
 
 const h = vi.hoisted(() => {
   const tx = {
+    $queryRaw: vi.fn(async () => [{ id: "camp" }]),
+    assistantIntent: { findUnique: vi.fn(async () => null) },
     aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(), findUnique: vi.fn() },
     scenarioPage: { findFirst: vi.fn() },
     slideDeck: { findFirst: vi.fn(), aggregate: vi.fn(), create: vi.fn(), updateMany: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn() },

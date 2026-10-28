@@ -9,10 +9,13 @@ import { createTrackSchema, createYoutubeTrackSchema, updateTrackSchema } from "
 import { isLibraryFull, listTracks, toCampaignTrack } from "@/lib/server/audio/track-store";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
 import { removeTrackFile, trackObjectPath, trackPathOwnedBy, verifyUploadedTrack } from "@/lib/supabase/battle-music-storage";
 import { parseYoutubeId } from "@/lib/utils/audio/youtube-id";
 import { fetchYoutubeTitle } from "@/lib/utils/audio/youtube-oembed";
 import type { Result } from "@/types/common";
+
+const preparedSources = new WeakMap<object, TrackSource>();
 
 type TrackSource = Pick<TrackRow, "kind" | "title" | "url" | "youtubeId" | "durationSec">;
 
@@ -59,12 +62,27 @@ export const tracksResource = defineResource<TrackRow, z.infer<typeof createTrac
   list: (actor) => listTracks(actor.campaignId),
   find: (actor, id) => prisma.campaignTrack.findFirst({ where: { id, campaignId: actor.campaignId } }),
   toItem: toCampaignTrack,
-  async create(actor, body) {
+  async prepareCreate(actor, body) {
     if (body.kind === "file" && actor.via === "token") throw new ContentError(API_ERRORS.TRACK_FILE_SESSION_ONLY, 403);
 
     if (await isLibraryFull(actor.campaignId)) throw new ContentError(API_ERRORS.TRACK_LIMIT, 400);
 
     const source = unwrap(body.kind === "file" ? await fileSource(actor.campaignId, body) : await youtubeSource(body));
+
+    preparedSources.set(body, source);
+
+    return body;
+  },
+  async create(actor, body) {
+    if (body.kind === "file" && actor.via === "token") throw new ContentError(API_ERRORS.TRACK_FILE_SESSION_ONLY, 403);
+
+    if (await isLibraryFull(actor.campaignId)) throw new ContentError(API_ERRORS.TRACK_LIMIT, 400);
+
+    const prepared = preparedSources.get(body);
+
+    const source = prepared ?? unwrap(body.kind === "file" ? await fileSource(actor.campaignId, body) : await youtubeSource(body));
+
+    if (prepared && source.kind === "file" && await prisma.campaignTrack.findFirst({ where: { campaignId: actor.campaignId, url: source.url }, select: { id: true } })) throw new ContentError(API_ERRORS.TRACK_DUPLICATE, 400);
 
     const last = await prisma.campaignTrack.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
 
@@ -85,7 +103,12 @@ export const tracksResource = defineResource<TrackRow, z.infer<typeof createTrac
     if (existing.kind === "file" && url) {
       const path = trackObjectPath(url);
 
-      if (path && trackPathOwnedBy(path, actor.campaignId)) after(() => removeTrackFile(url));
+      if (path && trackPathOwnedBy(path, actor.campaignId)) {
+        const queue = currentContentWrite()?.onTrackFileRemoved;
+
+        if (queue) queue(url);
+        else afterContentCommit(() => after(() => removeTrackFile(url)));
+      }
     }
   },
 });

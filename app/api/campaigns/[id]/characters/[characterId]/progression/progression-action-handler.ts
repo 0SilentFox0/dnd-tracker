@@ -5,6 +5,8 @@ import { loadProgressionContext } from "./load-progression-context";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { guardedCharacterHandler } from "@/lib/server/characters/operation-context";
+import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { canLearn, canUnlearn, normalizeTree, readUnlocked, type TreeNodes, writeUnlocked } from "@/lib/utils/skills/progression";
 
@@ -32,8 +34,8 @@ function unlearnAll(tree: TreeNodes, current: string[], nodeIds: string[]): Outc
   return { ok: true, unlocked };
 }
 
-export async function runProgressionAction(campaignId: string, characterId: string, action: ProgressionAction): Promise<NextResponse> {
-  const ctx = await loadProgressionContext(campaignId, characterId);
+async function runProgressionActionImpl(campaignId: string, characterId: string, action: ProgressionAction, actor?: Actor): Promise<NextResponse> {
+  const ctx = await loadProgressionContext(campaignId, characterId, actor);
 
   if (ctx instanceof NextResponse) return ctx;
 
@@ -73,8 +75,8 @@ export async function runProgressionAction(campaignId: string, characterId: stri
   return NextResponse.json({ unlocked });
 }
 
-export async function markLevelSeen(campaignId: string, characterId: string): Promise<NextResponse> {
-  const ctx = await loadProgressionContext(campaignId, characterId);
+async function markLevelSeenImpl(campaignId: string, characterId: string, actor?: Actor): Promise<NextResponse> {
+  const ctx = await loadProgressionContext(campaignId, characterId, actor);
 
   if (ctx instanceof NextResponse) return ctx;
 
@@ -84,3 +86,7 @@ export async function markLevelSeen(campaignId: string, characterId: string): Pr
 
   return NextResponse.json({ seenLevel: ctx.character.level });
 }
+
+export const runProgressionAction=guardedCharacterHandler(runProgressionActionImpl,"progression");
+
+export const markLevelSeen=guardedCharacterHandler(markLevelSeenImpl,"progression");

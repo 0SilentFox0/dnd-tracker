@@ -105,3 +105,6 @@ it("loads choice references through the same transaction as the locked character
   expect((await put({ raceChoices: {} })).status).toBe(200);
   expect(vi.mocked(loadChoiceRefs).mock.calls[0][2]).toMatchObject({ db: prisma });
 });
+
+// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

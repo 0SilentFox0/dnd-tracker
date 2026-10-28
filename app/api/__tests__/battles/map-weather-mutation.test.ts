@@ -77,9 +77,12 @@ describe("map-weather route", () => {
 
     await POST(new Request("http://x", { method: "POST", body: "{}" }), { params: Promise.resolve({ id: "c1", battleId: "b1" }) });
 
+    const { getBattleOperation } = await import("@/lib/server/battles/operations");
+
+    expect(await getBattleOperation("map-weather", { id: "c1", battleId: "b1" })).toMatchObject({ access: BattleAccess.DM, requireStatus: BattleStatus.ACTIVE, rateLimitScope: "mapWeather", schema: mapWeatherSchema, mutate: mapWeatherMutation });
     expect(runBattleMutation).toHaveBeenCalledWith(
       expect.any(Request),
-      expect.objectContaining({ access: BattleAccess.DM, requireStatus: BattleStatus.ACTIVE, rateLimitScope: "mapWeather", schema: mapWeatherSchema, mutate: mapWeatherMutation }),
+      expect.objectContaining({ operation: "map-weather", params: { id: "c1", battleId: "b1" } }),
     );
   });
 });

@@ -95,3 +95,6 @@ describe("POST /rest", () => {
     expect(prisma.characterLog.createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ characterId: "b" })] });
   });
 });
+
+// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

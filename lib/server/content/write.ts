@@ -25,7 +25,7 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
     return runContentWriteContext(campaignId, tx, () => callback(tx), afterCommit);
   }, { timeout: 30_000, maxWait: 5_000 });
 
-  for (const effect of afterCommit) effect();
+  for (const effect of afterCommit) await effect();
 
   return result;
 }

@@ -22,7 +22,10 @@ vi.mock("@/lib/utils/battle/pipeline/default-deps", () => ({
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn(), requireAuth: vi.fn() }));
 
-vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() } } }));
+vi.mock("@/lib/db", () => ({ prisma: {
+    $transaction: async (callback: (tx: unknown) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    campaignMember: { findUnique: async () => ({ role: "dm" }) },
+ battleScene: { findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() } } }));
 
 const params = { params: Promise.resolve({ id: "c1", battleId: "b1" }) };
 
@@ -187,7 +190,7 @@ describe("GET /battles/[battleId]", () => {
 describe("PATCH /battles/[battleId]", () => {
   beforeEach(() => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm" } as never);
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ id: "b1", campaignId: "c1" } as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ id: "b1", version: 0, campaignId: "c1" } as never);
   });
 
   it("поле поза білим списком — 400, без запису", async () => {
@@ -205,7 +208,7 @@ describe("PATCH /battles/[battleId]", () => {
     const res = await PATCH(new Request("http://x/api", { method: "PATCH", body: JSON.stringify({ name: "Нова назва" }) }), params);
 
     expect(res.status).toBe(200);
-    expect(prisma.battleScene.update).toHaveBeenCalledWith({ where: { id: "b1" }, data: { name: "Нова назва", version: { increment: 1 } } });
+    expect(prisma.battleScene.update).toHaveBeenCalledWith({ where: { id: "b1", version: 0 }, data: { name: "Нова назва", version: { increment: 1 } } });
   });
 
   it("не DM — відповідь requireDM", async () => {

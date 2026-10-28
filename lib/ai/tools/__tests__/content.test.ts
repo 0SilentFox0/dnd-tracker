@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/db", () => ({ prisma: {} }));
+vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }) } }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 
 const state = vi.hoisted(() => ({ rows: new Map<string, Record<string, unknown>>(), seq: 0 }));

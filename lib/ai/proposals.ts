@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
+import { discardSlideFiles, slideUrls } from "./proposal-media";
+
 import "server-only";
 import type { AiToolContext } from "@/lib/ai/tools/define";
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -8,10 +10,14 @@ import { DECK_TITLE_MAX, MAX_DECKS_PER_CAMPAIGN, MAX_SLIDES_PER_DECK } from "@/l
 import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
+import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { afterContentCommit } from "@/lib/server/content/write-context";
+import { scenarioResult } from "@/lib/server/scenario/action-service";
 import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContentStrict, toPage } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
-import { toSlideDeck, urlsUsedElsewhere } from "@/lib/server/show/deck-store";
-import { removeSlideFiles } from "@/lib/supabase/scene-slide-storage";
+import { toSlideDeck } from "@/lib/server/show/deck-store";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
 import type { AddSlideAiOp, AiProposal, AiProposalOp, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
@@ -41,13 +47,28 @@ export async function listProposalSummaries(campaignId: string, filter: { pageId
 
 type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 404 | 409 | 413; error: string };
 
-export async function applyProposal(campaignId: string, userId: string, proposalId: string): Promise<ApplyResult> {
-  return prisma.$transaction(async (tx): Promise<ApplyResult> => {
+export async function applyProposal(campaignId: string, userId: string, proposalId: string, executingIntentId?: string): Promise<ApplyResult> {
+  return withCampaignContentWrite(campaignId, async (tx): Promise<ApplyResult> => {
     const proposal = await tx.aiProposal.findFirst({ where: { id: proposalId, campaignId }, select: SELECT });
 
     if (!proposal) return { ok: false, status: 404, error: API_ERRORS.AI_PROPOSAL_NOT_FOUND };
 
     if (proposal.status !== "pending") return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
+
+    const linked = await tx.assistantIntent.findUnique({ where: { legacyProposalId: proposalId } });
+
+    if (linked && !executingIntentId) {
+      if (linked.userId !== userId || linked.status !== "pending" || linked.expiresAt <= new Date()) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
+
+      const fresh = await legacyPreview({ actor: { campaignId, userId, via: "session", scopes: null, isDM: true }, channel: "chat", threadId: null, tokenId: null }, proposalId);
+
+      if (requestDigest(fresh.preconditions) !== requestDigest(linked.expected)) {
+        await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
+        await reconcileLegacyProposal(tx, campaignId, proposalId, "stale");
+
+        return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
+      }
+    }
 
     const claimed = await tx.aiProposal.updateMany({ where: { id: proposalId, campaignId, status: "pending" }, data: { status: "applied" } });
 
@@ -56,6 +77,9 @@ export async function applyProposal(campaignId: string, userId: string, proposal
     const result = await applyClaimed(tx, campaignId, userId, proposal);
 
     if (!result.ok && !KEEPS_STATUS.has(result.error)) await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
+
+    if (result.ok) await reconcileLegacyProposal(tx, campaignId, proposalId, "applied", scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }), executingIntentId);
+    else if (KEEPS_STATUS.has(result.error)) await reconcileLegacyProposal(tx, campaignId, proposalId, "stale");
 
     return result;
   });
@@ -149,31 +173,20 @@ async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id
   return { ok: true, deck: toSlideDeck(await tx.slideDeck.findUniqueOrThrow({ where: { id: deck.id } })) };
 }
 
-const slideUrls = (ops: AiProposalOp[]) => ops.flatMap((o) => (o.op === "addSlide" ? [o.slide.imageUrl] : []));
-
-export async function discardSlideFiles(campaignId: string, urls: string[]): Promise<void> {
-  if (urls.length === 0) return;
-
-  const used = await urlsUsedElsewhere(campaignId, "");
-
-  await removeSlideFiles(campaignId, urls.filter((u) => !used.has(u)));
-}
-
-/** Read before the page is deleted: its proposals cascade away with it. */
-export async function pendingSlideUrls(campaignId: string, pageId: string): Promise<string[]> {
-  const rows = await prisma.aiProposal.findMany({ where: { campaignId, pageId, status: { in: ["pending", "stale"] } }, select: { ops: true } });
-
-  return rows.flatMap((r) => slideUrls(r.ops as unknown as AiProposalOp[]));
-}
+export { discardSlideFiles, pendingSlideUrls } from "./proposal-media";
 
 export async function rejectProposal(campaignId: string, proposalId: string): Promise<AiProposal | null> {
-  const { count } = await prisma.aiProposal.updateMany({ where: { id: proposalId, campaignId, status: { in: ["pending", "stale"] } }, data: { status: "rejected" } });
+  return withCampaignContentWrite(campaignId, async (tx) => {
+  const { count } = await tx.aiProposal.updateMany({ where: { id: proposalId, campaignId, status: { in: ["pending", "stale"] } }, data: { status: "rejected" } });
 
   if (count === 0) return null;
 
-  const row = await prisma.aiProposal.findUnique({ where: { id: proposalId }, select: SELECT });
+  const row = await tx.aiProposal.findUnique({ where: { id: proposalId }, select: SELECT });
 
-  if (row) await discardSlideFiles(campaignId, slideUrls(row.ops as unknown as AiProposalOp[]));
+  await reconcileLegacyProposal(tx, campaignId, proposalId, "rejected");
+
+  if (row) afterContentCommit(() => discardSlideFiles(campaignId, slideUrls(row.ops as unknown as AiProposalOp[])));
 
   return row && toProposal(row);
+  });
 }

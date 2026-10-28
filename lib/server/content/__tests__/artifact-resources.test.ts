@@ -85,3 +85,17 @@ describe("artifact armor removal", () => {
     expect(await patch({ slot: "armor", modifiers }, { name: "X" })).not.toHaveProperty("modifiers");
   });
 });
+
+it("set icon upload happens before the campaign transaction", async () => {
+  const { currentContentWrite } = await import("@/lib/server/content/write-context");
+
+  resolveIcon.mockImplementation(async (value: string) => {
+    if (value === "https://external.invalid/icon.png") {
+      expect(currentContentWrite()).toBeUndefined();
+      throw new Error("STOP_BEFORE_DB");
+    }
+
+    return { ok: true, value };
+  });
+  await expect(createContent(artifactSetsResource, actor, { name: "Сет", icon: "https://external.invalid/icon.png" })).rejects.toThrow("STOP_BEFORE_DB");
+});

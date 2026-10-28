@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({}) };
+});
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/ai/api-tokens", async (orig) => ({ ...(await orig<typeof import("@/lib/ai/api-tokens")>()), verifyApiToken: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));

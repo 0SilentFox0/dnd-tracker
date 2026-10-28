@@ -1,20 +1,8 @@
-import { auraZoneMutation, auraZoneSchema } from "./aura-zone-mutation";
-
-import { BattleStatus } from "@/lib/constants/battle";
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  return runBattleMutation(req, {
-    params: await params,
-    access: BattleAccess.MEMBER,
-    requireStatus: BattleStatus.ACTIVE,
-    blockedByMode: true,
-    rateLimitScope: "abilityAction",
-    schema: auraZoneSchema,
-    respond: "wrapped",
-    mutate: auraZoneMutation,
-  });
+  return runBattleMutation(req, { params: await params, operation: "aura-zone" });
 }

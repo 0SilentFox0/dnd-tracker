@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { buildSheetFor, loadSheetCharacter } from "./sheet-handler";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { operationAccess } from "@/lib/server/characters/operation-context";
+import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -11,9 +12,9 @@ import type { Ruleset } from "@/lib/utils/rules";
 export type KnownAccess = { userId: string; isDM: boolean; maxLevel: number; rules: Ruleset; allowPlayerEdit?: boolean };
 
 /** `GET …/sheet` with its access rules; the profile pages reuse it for the first HTML (`known` skips the repeated membership query). */
-export async function readCharacterSheet({ id, characterId, known }: { id: string; characterId: string; known?: KnownAccess }): Promise<NextResponse> {
+export async function readCharacterSheet({ id, characterId, known }: { id: string; characterId: string; known?: KnownAccess }, actor?: Actor): Promise<NextResponse> {
   try {
-    const access = known ? null : await requireCampaignAccess(id, false);
+    const access = known ? null : await operationAccess(id, false, actor);
 
     if (access instanceof NextResponse) return access;
 

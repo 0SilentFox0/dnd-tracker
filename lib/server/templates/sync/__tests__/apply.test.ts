@@ -430,3 +430,39 @@ it("guards ASI changes behind a used background origin and selected feat choices
   f.removeRow("feat", FEAT);
   await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
 });
+
+describe("read-only sync selection", () => {
+  it("includes transitive dependencies and automatic credits before any write", async () => {
+    const { previewSourceSelection } = await import("@/lib/server/templates/sync/apply");
+
+    const R2 = id("q"), U2 = id("w");
+
+    f.addRow("race", { id: R2, campaignId: SRC, name: "Inferno" });
+    f.addRow("unit", { id: U2, campaignId: SRC, name: "Imp", raceId: R2, knownSpells: [SPELL] });
+    f.patchCampaign(SRC, { credits: "New attribution" });
+
+    const unit = (await visible()).find((i) => i.key === U2)!;
+
+    const before = structuredClone([...f.store.entries()]);
+
+    const preview = await previewSourceSelection(f.db, TGT, { apply: [ref(unit)], ignore: [] });
+
+    expect(preview.items.map((item) => item.key)).toEqual(expect.arrayContaining([U2, R2]));
+    expect(preview.autoAdded.map((item) => item.key)).toContain(R2);
+    expect(preview.credits).toEqual({ before: null, after: "New attribution" });
+    expect([...f.store.entries()]).toEqual(before);
+  });
+});
+
+it("sync preview includes the actual before for rules and settings", async () => {
+  const { previewSourceSelection } = await import("@/lib/server/templates/sync/apply");
+
+  f.patchCampaign(SRC, { maxLevel: 10, rules: { morale: { enabled: false } } });
+
+  const selected = (await visible()).filter((item) => item.scope === "settings" || item.scope === "rules");
+
+  const preview = await previewSourceSelection(f.db, TGT, { apply: selected.map(ref), ignore: [] });
+
+  expect(preview.items.find((item) => item.scope === "settings")).toMatchObject({ before: { maxLevel: 20 }, after: { maxLevel: 10 } });
+  expect(preview.items.find((item) => item.scope === "rules" && item.key === "morale")).toMatchObject({ before: { enabled: true }, after: { enabled: false } });
+});

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getResponseJson } from "./helpers";
 
 const db = vi.hoisted(() => ({
+  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
   race: { findMany: vi.fn() },
   spell: { count: vi.fn() },
   unit: { findMany: vi.fn(), createMany: vi.fn() },

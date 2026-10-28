@@ -189,3 +189,14 @@ Task21 synthetic integration підтвердила atomic confirm/reimport/idem
 
 
 Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
+
+
+## Етап6: контентні дії асистента (T5)
+
+`lib/server/assistant/actions/content.ts` експортує `CONTENT_ACTIONS` над усіма12 чинними `CONTENT_RESOURCES` і `CONTENT_OPERATIONS`; `content-coverage.ts` пов’язує кожен HTTP method/path цього блоку з action id та тестами. Адаптери використовують спільні services, схеми та actor scopes. У review запис повертає pending intent, auto виконує звичайну зміну один раз із receipt; delete/clear та session-only масові операції потребують session-підтвердження людини. DryRun імпорту залишається читанням без intent; звіт зберігає помилки окремих рядків і явно позначає частковий результат.
+
+Preview містить валідований patch, актуальне before, залежності й FK-каскади; source-sync показує також dependency closure та автоматичну зміну credits. Некешований fingerprint читається під shared campaign lock із locks на наявних персонажах, inventory та progression: зміна контенту чи залежностей дає stale. Fingerprint консервативний — стороння правка контенту цієї кампанії також може вимагати нового preview. Під час імпорту в outer transaction кожен рядок має savepoint; SQL-помилка рядка не залишає його часткових записів і не блокує commit наступних рядків та receipt.
+
+Підготовка не вантажить іконки/файли та не викликає платні сервіси. Іконки артефактів/сетів і файли треків передаються чинному UI; для YouTube без назви адаптер задає явний `YouTube <id>` без oEmbed під lock. Native HTTP media preparation виконується до lock. Інвалідація й очищення файлів виконуються після commit; `CONTENT_EFFECT_HANDLERS` підтримує повтор лише durable effect, без повторного доменного запису. `additionalSpells`, спорядження й золото не автоматизуються; ScenarioPage source-sync відсутній.
+
+**Межа активації:** T5 готує каталог, `dispatchContentAlias` та handlers, але не перемикає чинні model/MCP transports. T14 має одночасно підключити trusted actor/token identity, executable default catalog, handlers і legacy aliases. До цього старі `content_create/update/delete/import`, `update_rules`, `save_skill_tree`, `source_apply` зберігають чинний прямий transport; T5 сам по собі ще не є доставленим MCP review flow. Після перемикання ці aliases повертають pending у review замість прямого запису; наявний `content:write` не отримує нових scopes.

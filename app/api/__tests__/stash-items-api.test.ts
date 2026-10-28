@@ -179,3 +179,6 @@ describe("inventory PATCH and transfer: magic items", () => {
     expect((await res.json()).error).toBe(API_ERRORS.ITEM_ALREADY_IN_STASH);
   });
 });
+
+// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { verifyApiToken } from "@/lib/ai/api-tokens";
-import { type ApiTokenScope, type ContentScope } from "@/lib/constants/ai";
+import { type ActionScope, type ApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -10,7 +10,7 @@ import { needFailure } from "@/lib/utils/api/need";
 
 export type AccessLevel = "member" | "dm";
 
-export type ActorNeed = { access: AccessLevel; scope: ContentScope; sessionOnly?: true };
+export type ActorNeed = { access: AccessLevel; scope: ActionScope; sessionOnly?: true };
 
 export type Actor = { campaignId: string; userId: string; isDM: boolean; via: "session" | "token"; scopes: readonly ApiTokenScope[] | null };
 

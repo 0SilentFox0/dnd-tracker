@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { operationDM } from "@/lib/server/characters/operation-context";
+import type { Actor } from "@/lib/utils/api/actor";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
 import { matchesAppliesTo } from "@/lib/utils/items/compose";
@@ -9,8 +10,8 @@ import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { uniqueChecker } from "@/lib/utils/items/resolve";
 import type { EquippedItems, FreeArtifact } from "@/types/inventory";
 
-export async function readFreeArtifacts(campaignId: string): Promise<NextResponse> {
-  const access = await requireDM(campaignId);
+export async function readFreeArtifacts(campaignId: string, actor?: Actor): Promise<NextResponse> {
+  const access = await operationDM(campaignId, actor);
 
   if (access instanceof NextResponse) return access;
 

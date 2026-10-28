@@ -3,7 +3,6 @@ import { z } from "zod";
 import { type AiToolContext, defineTool } from "./define";
 
 import "server-only";
-import { AI_LIMITS } from "@/lib/constants/ai";
 import { SYNC_SCOPES } from "@/lib/constants/source-sync";
 import { contentImportSchema } from "@/lib/schemas/content-import";
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
@@ -16,11 +15,11 @@ import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { EXTRA, KINDS, SCHEMA_TARGETS } from "@/lib/server/content/schema-targets";
 import { createContent, getContent, listContent, removeContent, updateContent } from "@/lib/server/content/service";
 import { readSkillTree, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
+import { pageSourceDiff } from "@/lib/server/templates/sync/page-diff";
 import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { type Actor, tokenActorOf } from "@/lib/utils/api/actor";
 import { IMPORT_KINDS, IMPORT_MODES } from "@/lib/utils/content/import/kinds";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
-import type { SourceDiff } from "@/types/campaigns";
 
 const kindSchema = z.enum(KINDS);
 
@@ -32,22 +31,6 @@ const treeView = (tree: { id: string; race: string; skills: unknown }) => ({ id:
 
 const DEFAULT_LIMIT = 20;
 
-function pageDiff(diff: SourceDiff, offset: number, limit: number) {
-  const total = diff.items.length;
-
-  const counts: Record<string, number> = {};
-
-  for (const { scope } of diff.items) counts[scope] = (counts[scope] ?? 0) + 1;
-
-  // shrink the page until the JSON fits: define.ts clipping would cut it mid-structure
-  for (let n = limit; ; n = Math.max(1, Math.floor(n / 2))) {
-    const end = Math.min(offset + n, total);
-
-    const page = { ...diff, total, offset, items: diff.items.slice(offset, end), counts, nextOffset: end < total ? end : null };
-
-    if (n === 1 || JSON.stringify(page).length <= AI_LIMITS.toolResultChars) return page;
-  }
-}
 
 const OPS = ["list", "get", "create", "update", "delete"] as const;
 
@@ -202,7 +185,7 @@ export const sourceDiffTool = defineTool({
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(50).default(DEFAULT_LIMIT),
   }),
-  handler: async (ctx, { scope, offset, limit }) => pageDiff(await getSourceDiff(toolActor(ctx), scope), offset, limit),
+  handler: async (ctx, { scope, offset, limit }) => pageSourceDiff(await getSourceDiff(toolActor(ctx), scope), offset, limit),
 });
 
 export const sourceApplyTool = defineTool({
@@ -246,3 +229,6 @@ export const CONTENT_TOOLS = [
   sourceDiffTool,
   sourceApplyTool,
 ];
+
+// T14 connects these aliases together with trusted caller identity and catalog.
+export { dispatchContentAlias } from "@/lib/server/assistant/actions/content-aliases";

@@ -11,7 +11,7 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { nextClassEntries } from "@/lib/utils/characters/level-up/class-level-up";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 
-const LevelUpBodySchema = z.object({ classId: z.string().min(1).optional(), subclassId: z.string().min(1).nullable().optional(), choices: PicksSchema.optional() });
+export const LevelUpBodySchema = z.object({ classId: z.string().min(1).optional(), subclassId: z.string().min(1).nullable().optional(), choices: PicksSchema.optional() });
 
 export type LevelUpPick = z.infer<typeof LevelUpBodySchema>;
 

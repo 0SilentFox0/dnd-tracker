@@ -66,6 +66,7 @@ describe("context tools", () => {
     });
 
     vi.mocked(loadBattle).mockResolvedValue({
+      isDM: true, isMember: true,
       meta: { name: "Засідка" },
       scene: { status: "active", round: 2, turnIndex: 1 },
       participants: [part("Годрик", "ally", 12, 20), part("Гоблін", "enemy", 3, 7)],
@@ -82,6 +83,15 @@ describe("context tools", () => {
     });
   });
 
+  it("get_battle_state rejects lost DM membership without exposing participants", async () => {
+    const { loadBattle } = await import("@/lib/utils/battle/store");
+
+    vi.mocked(loadBattle).mockResolvedValue({ isDM: false, isMember: true, meta: {}, scene: {}, participants: [] } as never);
+
+    const { getBattleStateTool } = await import("@/lib/ai/tools/battle");
+
+    await expect(getBattleStateTool.handler(ctx, { battleId: "b1" })).rejects.toMatchObject({ status: 403 });
+  });
   it("search_reference: збіг за назвою без урахування регістру", async () => {
     const { searchReferenceTool } = await import("@/lib/ai/tools/reference");
 

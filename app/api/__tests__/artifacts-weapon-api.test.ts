@@ -7,9 +7,11 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("server-only", () => ({}));
 
-vi.mock("@/lib/db", () => ({
-  prisma: { artifact: { findFirst: vi.fn(), update: vi.fn(), create: vi.fn() } },
-}));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({ artifact: { findFirst: vi.fn(), update: vi.fn(), create: vi.fn() } }) };
+});
 
 import { prisma } from "@/lib/db";
 

@@ -4,10 +4,11 @@ import { CHARACTER_LOG_PAGE_SIZE } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
 import { requireCharacterRow } from "@/lib/server/characters/access";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
+import type { Actor } from "@/lib/utils/api/actor";
 import type { CharacterLogEntry } from "@/types/characters";
 
-export async function readCharacterLog(campaignId: string, characterId: string, cursor: string | null): Promise<NextResponse> {
-  const gate = await requireCharacterRow(campaignId, characterId);
+export async function readCharacterLog(campaignId: string, characterId: string, cursor: string | null, actor?: Actor): Promise<NextResponse> {
+  const gate = await requireCharacterRow(campaignId, characterId, { actor });
 
   if (gate instanceof NextResponse) return gate;
 

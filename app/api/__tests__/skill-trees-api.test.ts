@@ -15,6 +15,7 @@ vi.mock("@/lib/db", () => ({
     character: { findMany: vi.fn(), updateMany: vi.fn(), findUnique: vi.fn() },
     mainSkill: { findMany: vi.fn() },
     skill: { findMany: vi.fn() },
+    $queryRaw: vi.fn(async () => [{ id: "camp" }]),
     $transaction: vi.fn(),
   },
 }));

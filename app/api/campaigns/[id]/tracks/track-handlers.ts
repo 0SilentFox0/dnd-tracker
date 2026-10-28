@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import type { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
 import { reorderTracksSchema, trackUploadRequestSchema } from "@/lib/schemas/music";
-import { isLibraryFull, listTracks } from "@/lib/server/audio/track-store";
+import { isLibraryFull } from "@/lib/server/audio/track-store";
+import { runContentOperation } from "@/lib/server/content/operation-service";
 import { createTrackUploadTicket } from "@/lib/supabase/battle-music-storage";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -39,13 +39,6 @@ export async function issueUploadTicketHandler(req: Request, campaignId: string)
 }
 
 export async function reorderTracks({ actor, body }: { actor: Actor; body: z.infer<typeof reorderTracksSchema> }) {
-  const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId: actor.campaignId }, select: { id: true } })).map((r) => r.id));
-
-  const exact = body.ids.length === known.size && new Set(body.ids).size === body.ids.length && body.ids.every((id) => known.has(id));
-
-  if (!exact) return errorResponse(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
-
-  await prisma.$transaction(body.ids.map((id, sortOrder) => prisma.campaignTrack.update({ where: { id }, data: { sortOrder } })));
-
-  return NextResponse.json(await listTracks(actor.campaignId));
+  try { return NextResponse.json(await runContentOperation("tracks.reorder", actor, { body })); }
+  catch (error) { return handleApiError(error, { action: "reorder tracks" }); }
 }

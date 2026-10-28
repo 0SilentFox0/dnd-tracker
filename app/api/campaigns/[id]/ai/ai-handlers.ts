@@ -26,7 +26,7 @@ export async function aiGuard(campaignId: string) {
 const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional() });
 
 export const listProposalsHandler = (req: Request, campaignId: string) =>
-  guarded("list ai proposals", () => aiGuard(campaignId), async () => {
+  guarded("list ai proposals", () => requireDM(campaignId), async () => {
     const query = listQuery.safeParse(Object.fromEntries(new URL(req.url).searchParams));
 
     if (!query.success) return errorResponse(API_ERRORS.INVALID_QUERY, 400, query.error.issues);
@@ -37,14 +37,14 @@ export const listProposalsHandler = (req: Request, campaignId: string) =>
   });
 
 export const applyProposalHandler = (campaignId: string, proposalId: string) =>
-  guarded("apply ai proposal", () => aiGuard(campaignId), async (access) => {
+  guarded("apply ai proposal", () => requireDM(campaignId), async (access) => {
     const result = await applyProposal(campaignId, access.userId, proposalId);
 
     return result.ok ? NextResponse.json("deck" in result ? { deck: result.deck } : result.page) : errorResponse(result.error, result.status);
   });
 
 export const rejectProposalHandler = (campaignId: string, proposalId: string) =>
-  guarded("reject ai proposal", () => aiGuard(campaignId), async () => {
+  guarded("reject ai proposal", () => requireDM(campaignId), async () => {
     const row = await rejectProposal(campaignId, proposalId);
 
     return row ? NextResponse.json(row) : errorResponse(API_ERRORS.AI_PROPOSAL_DONE, 409);

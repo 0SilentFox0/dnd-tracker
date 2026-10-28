@@ -14,6 +14,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
     campaign: {
       findUnique: vi.fn(),
       update: vi.fn(),

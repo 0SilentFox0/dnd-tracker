@@ -105,3 +105,6 @@ describe("PATCH archetype", () => {
     expect(vi.mocked(prisma.character.update).mock.calls[0][0].data.avatar).toBeUndefined();
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

@@ -63,6 +63,7 @@ model Campaign {
   slideDecks      SlideDeck[]
   show            CampaignShow?
   units           Unit[]
+  assistantIntents AssistantIntent[]
   aiThreads       AiThread[]
   aiProposals     AiProposal[]
   apiTokens       ApiToken[]
@@ -830,6 +831,9 @@ model AiThread {
   userId         String
   mode           String
   scenarioPageId String?
+  executionMode  String        @default("review")
+  assistantIntents AssistantIntent[]
+  assistantRuns AssistantRun[]
   title          String
   provider       String
   model          String
@@ -881,6 +885,8 @@ model ApiToken {
   id         String    @id @default(cuid())
   campaignId String
   userId     String
+  executionMode String @default("review")
+  assistantIntents AssistantIntent[]
   name       String
   tokenHash  String    @unique
   prefix     String
@@ -915,4 +921,84 @@ model UserOnboardingFlag {
 
   @@unique([userId, key])
   @@map("user_onboarding_flags")
+}
+
+// Intent content follows campaign lifetime; receipts intentionally do not.
+model AssistantIntent {
+  id               String @id @default(cuid())
+  campaignId       String
+  userId           String
+  channel          String
+  threadId         String?
+  tokenId          String?
+  originThreadId   String?
+  originTokenId    String?
+  originKey        String
+  requestId        String
+  requestHash      String
+  actionId         String
+  summary          String
+  targets          Json @default("[]")
+  payload          Json
+  preview          Json
+  expected         Json
+  status           String @default("pending")
+  expiresAt        DateTime
+  redactedAt       DateTime?
+  legacyProposalId String? @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  thread           AiThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  token            ApiToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, originKey, requestId])
+  @@index([campaignId, userId, status, createdAt, id])
+  @@index([threadId])
+  @@index([tokenId])
+  @@index([status, updatedAt])
+  @@map("assistant_intents")
+}
+
+model AssistantReceipt {
+  id            String @id @default(cuid())
+  intentId      String @unique
+  campaignId    String
+  userId        String
+  originTokenId String?
+  originKey     String
+  requestId     String
+  requestHash   String
+  actionId      String
+  status        String
+  result        Json
+  effects       Json @default("[]")
+  effectsStatus String @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, originKey, requestId])
+  @@index([campaignId, userId, createdAt])
+  @@index([status, effectsStatus, updatedAt])
+  @@map("assistant_receipts")
+}
+
+model AssistantRun {
+  id             String @id @default(cuid())
+  threadId       String
+  requestId      String
+  requestHash    String
+  activeThreadId String? @unique
+  status         String @default("running")
+  expiresAt      DateTime
+  abortRequested Boolean @default(false)
+  resultRefs     Json @default("[]")
+  errorCode      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  thread         AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, requestId])
+  @@index([status, expiresAt])
+  @@map("assistant_runs")
 }

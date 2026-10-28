@@ -8,7 +8,7 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] }),
     $queryRaw: vi.fn(),
-    scenarioPage: { findUnique: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
+    scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), findMany: vi.fn(async () => []), create: vi.fn(), deleteMany: vi.fn() },
     unit: { findMany: vi.fn(async () => [{ id: "u1", name: "Біс" }]) },
     artifact: { findMany: vi.fn(async () => []) },
@@ -33,6 +33,7 @@ describe("scenario aux API", () => {
     vi.clearAllMocks();
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
     vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.findFirst).mockImplementation((args) => prisma.scenarioPage.findUnique({ where: { id: String(args?.where?.id) } }) as never);
     vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 1 } as never);
   });
 
@@ -82,7 +83,7 @@ describe("scenario aux API", () => {
 
     expect(res.status).toBe(200);
     expect(prisma.scenarioPageVersion.create).toHaveBeenCalledWith({ data: { pageId: "p1", content, createdBy: "dm" } });
-    expect(vi.mocked(prisma.scenarioPage.update).mock.calls[0][0].data).toMatchObject({ content: old, version: { increment: 1 } });
+    expect(vi.mocked(prisma.scenarioPage.updateMany).mock.calls[0][0].data).toMatchObject({ content: old, version: { increment: 1 } });
   });
 
   it("відкат версії іншої сторінки — 404", async () => {

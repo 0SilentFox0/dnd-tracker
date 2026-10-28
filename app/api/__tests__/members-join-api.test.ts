@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CampaignRole } from "@/lib/constants/campaigns";
 
 const db = vi.hoisted(() => ({
+  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
   campaign: { findFirst: vi.fn() },
   campaignMember: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   user: { upsert: vi.fn() },

@@ -3,14 +3,15 @@ import { NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { LOG_PAGE_SIZE } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
+import { operationAccess } from "@/lib/server/characters/operation-context";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import type { InventoryLogEntry } from "@/types/inventory";
 
-export async function readLog(campaignId: string, characterId: string, cursor: string | null): Promise<NextResponse> {
-  const access = await requireCampaignAccess(campaignId);
+export async function readLog(campaignId: string, characterId: string, cursor: string | null, actor?: Actor): Promise<NextResponse> {
+  const access = await operationAccess(campaignId, false, actor);
 
   if (access instanceof NextResponse) return access;
 

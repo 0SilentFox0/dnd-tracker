@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
     campaignMember: { create: vi.fn() },
     campaignSourceSync: { create: vi.fn() },
     $transaction: vi.fn(),
+    $queryRaw: vi.fn(async () => [{ id: "c1" }]),
   },
   kvDel: vi.fn(),
   requireDM: vi.fn(),

@@ -3,7 +3,8 @@ import { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { operationAccess } from "@/lib/server/characters/operation-context";
+import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 
 export interface ProgressionContext {
@@ -14,8 +15,8 @@ export interface ProgressionContext {
   isOwner: boolean;
 }
 
-export async function loadProgressionContext(campaignId: string, characterId: string): Promise<ProgressionContext | NextResponse> {
-  const access = await requireCampaignAccess(campaignId);
+export async function loadProgressionContext(campaignId: string, characterId: string, actor?: Actor): Promise<ProgressionContext | NextResponse> {
+  const access = await operationAccess(campaignId, false, actor);
 
   if (access instanceof NextResponse) return access;
 

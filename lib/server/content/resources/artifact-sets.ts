@@ -46,6 +46,8 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
   list: (actor) => listArtifactSets(actor.campaignId),
   find: (actor, id) => findArtifactSetInCampaign(actor.campaignId, id),
   toItem: (row) => withAbilityIssues("artifactSet", row),
+  prepareCreate: async (actor, data) => data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) },
+  prepareUpdate: async (actor, existing, data) => data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) },
   async create(actor, data) {
     const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
 

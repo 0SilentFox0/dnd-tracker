@@ -8,7 +8,11 @@ const db = vi.hoisted(() => ({
 
 const revalidateTag = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/db", () => ({ prisma: db }));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble(db) };
+});
 vi.mock("next/cache", () => ({ revalidateTag, unstable_cache: (fn: () => unknown) => fn }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedUnits: vi.fn(async () => []) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({

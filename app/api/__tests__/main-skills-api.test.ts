@@ -13,7 +13,11 @@ const auth = vi.hoisted(() => ({
   requireCampaignAccess: vi.fn(),
 }));
 
-vi.mock("@/lib/db", () => ({ prisma: db }));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble(db) };
+});
 vi.mock("next/cache", () => ({ revalidateTag, unstable_cache: (fn: () => unknown) => fn }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedMainSkills: vi.fn(async () => []) }));
 vi.mock("@/lib/utils/api/api-auth", async (orig) => ({

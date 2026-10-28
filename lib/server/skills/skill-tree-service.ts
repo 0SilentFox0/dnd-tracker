@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
@@ -25,6 +26,10 @@ export function readSkillTree(actor: Actor, race: string): Promise<SkillTree | n
 export async function saveSkillTree(actor: Actor, input: { treeId?: string; race: string; skills: unknown }): Promise<SkillTree> {
   assertCan(actor, CONTENT_OPERATIONS["skill-trees.save"].need);
 
+  return withCampaignContentWrite(actor.campaignId, () => saveLockedSkillTree(actor, input));
+}
+
+async function saveLockedSkillTree(actor: Actor, input: { treeId?: string; race: string; skills: unknown }): Promise<SkillTree> {
   const { campaignId } = actor;
 
   const { treeId, race, skills } = input;
@@ -58,5 +63,5 @@ export async function saveSkillTree(actor: Actor, input: { treeId?: string; race
 }
 
 async function moveProgressKey(campaignId: string, race: string, from: string, to: string) {
-  await prisma.$transaction((tx) => moveSkillTreeProgress(tx, campaignId, race, from, to));
+  await withCampaignContentWrite(campaignId, (tx) => moveSkillTreeProgress(tx, campaignId, race, from, to));
 }

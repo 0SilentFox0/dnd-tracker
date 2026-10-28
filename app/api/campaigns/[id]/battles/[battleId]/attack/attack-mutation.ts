@@ -90,7 +90,7 @@ async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, dep
   return new Map(rows.map((r) => [r.id, toCastableSpell(r)]));
 }
 
-export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
+export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
   return async (ctx: BattleMutationContext, body: AttackBody): Promise<MutationResult> => {
     const { endTurn, ...data } = body;
 
@@ -114,6 +114,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
       userId: ctx.userId,
       isDM: ctx.isDM,
       rng: ctx.rng,
+      serverRolls: options.serverRolls,
       map: ctx.meta.map,
       rules: ctx.meta.rules,
       hitSpells,

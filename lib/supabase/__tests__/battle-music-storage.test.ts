@@ -72,3 +72,10 @@ describe("battle-music storage", () => {
     expect(bucketApi.remove).not.toHaveBeenCalled();
   });
 });
+
+it("durable cleanup propagates Storage failure for receipt reconciliation", async () => {
+  const failure = new Error("offline");
+
+  bucketApi.remove.mockRejectedValueOnce(failure);
+  await expect(removeTrackFile(`https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`, { strict: true })).rejects.toThrow("offline");
+});

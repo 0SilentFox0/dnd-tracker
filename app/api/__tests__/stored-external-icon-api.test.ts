@@ -9,9 +9,11 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
 }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: { artifact: { findFirst: vi.fn(), update: vi.fn() } },
-}));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({ artifact: { findFirst: vi.fn(), update: vi.fn() } }) };
+});
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({

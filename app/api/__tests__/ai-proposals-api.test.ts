@@ -9,7 +9,9 @@ import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => {
   const tx = {
-    aiProposal: { findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    $queryRaw: vi.fn(async () => [{ id: "camp" }]),
+    assistantIntent: { findUnique: vi.fn(async () => null) },
+    aiProposal: { findUnique: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
   };
@@ -52,6 +54,26 @@ describe("AI proposals API", () => {
   });
 
   afterEach(() => vi.unstubAllEnvs());
+
+  it("review and apply do not require AI_KEYS_SECRET", async () => {
+    vi.stubEnv("AI_KEYS_SECRET", "");
+    expect((await apply()).status).toBe(200);
+
+    const { listProposalsHandler } = await import("@/app/api/campaigns/[id]/ai/ai-handlers");
+
+    vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([]);
+    expect((await listProposalsHandler(new Request("http://x"), "camp1")).status).toBe(200);
+  });
+
+  it("keyless reject remains available while paid generation remains guarded", async () => {
+    vi.stubEnv("AI_KEYS_SECRET", "");
+    vi.mocked(prisma.aiProposal.findUnique).mockResolvedValue(proposal({ status: "rejected" }) as never);
+
+    const { rejectProposalHandler, generateSlideImageHandler } = await import("@/app/api/campaigns/[id]/ai/ai-handlers");
+
+    expect((await rejectProposalHandler("camp1", "ap1")).status).toBe(200);
+    expect((await generateSlideImageHandler(new Request("http://x", { method: "POST" }), "camp1")).status).toBe(503);
+  });
 
   it("не DM — 403", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);

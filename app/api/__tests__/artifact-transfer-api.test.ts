@@ -218,3 +218,6 @@ describe("PATCH inventory — унікальність артефакта", () =
     expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });
+
+// Shared campaign and sorted character locks are covered by real storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

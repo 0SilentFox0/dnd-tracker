@@ -8,6 +8,7 @@ import { attackBodySchema } from "@/app/api/campaigns/[id]/battles/[battleId]/at
 import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
 import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
 import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
+import { getBattleOperation } from "@/lib/server/battles/operations";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -103,11 +104,18 @@ function routes(dir: string): string[] {
 }
 
 describe("blockedByMode", () => {
-  it("стоїть на всіх діях учасника, але не на русі (ДМ розставляє) і не на next-turn", () => {
-    const blocked = routes(ROOT)
-      .filter((file) => /blockedByMode:\s*true/.test(readFileSync(file, "utf8")))
-      .map((file) => relative(ROOT, join(file, "..")))
-      .sort();
+  it("стоїть на всіх діях учасника, але не на русі (ДМ розставляє) і не на next-turn", async () => {
+    const definitions = await Promise.all(routes(ROOT).map(async file => {
+      const operation = /operation: "([^"]+)"/.exec(readFileSync(file, "utf8"))?.[1];
+
+      if (!operation) return null;
+
+      const definition = await getBattleOperation(operation, { id: "campaign", battleId: "battle", participantId: "participant" });
+
+      return definition.blockedByMode ? relative(ROOT, join(file, "..")) : null;
+    }));
+
+    const blocked = definitions.filter((name): name is string => name !== null).sort();
 
     expect(blocked).toEqual(["ability-action", "attack", "aura-zone", "bonus-action", "core-action", "maze-mark", "morale-check", "spell"]);
   });

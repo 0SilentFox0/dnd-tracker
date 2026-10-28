@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
-export interface ContentWriteContext { campaignId: string; db: object; afterCommit: Array<() => void> }
+export interface ContentWriteContext { campaignId: string; db: object; afterCommit: Array<() => void>; onTrackFileRemoved?: (url: string) => void }
 
 const context = new AsyncLocalStorage<ContentWriteContext>();
 

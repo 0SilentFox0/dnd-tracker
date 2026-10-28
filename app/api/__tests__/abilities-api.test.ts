@@ -5,8 +5,11 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
 }));
 
+vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
     skill: { findFirst: vi.fn(), findMany: vi.fn(async () => [{ id: "s1", name: "Лють" }]), update: vi.fn(), create: vi.fn() },
     race: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     artifact: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
@@ -58,7 +61,7 @@ describe("abilities API", () => {
 
     const abilities = [{ id: "a1", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] }];
 
-    await PATCH(req("/api/campaigns/c1/skills/s1", { method: "PATCH", body: JSON.stringify({ abilities }) }), ctx({ skillId: "s1" }));
+    expect((await PATCH(req("/api/campaigns/c1/skills/s1", { method: "PATCH", body: JSON.stringify({ abilities }) }), ctx({ skillId: "s1" }))).status).toBe(200);
 
     expect(vi.mocked(prisma.skill.update).mock.calls[0][0].data).toMatchObject({ abilities });
 
@@ -82,4 +85,15 @@ describe("abilities API", () => {
     expect(res.status).toBe(400);
     expect(JSON.stringify(await res.json())).toContain('"abilities"');
   });
+});
+
+it("unknown ability owner keeps the existing 400 error contract", async () => {
+  const { API_ERRORS } = await import("@/lib/constants/api-errors");
+
+  const { GET } = await import("@/app/api/campaigns/[id]/abilities/[kind]/[ownerId]/route");
+
+  const response = await GET(req("/api/campaigns/c1/abilities/unknown/x"), ctx({ kind: "unknown", ownerId: "x" }));
+
+  expect(response.status).toBe(400);
+  expect(await response.json()).toMatchObject({ error: API_ERRORS.UNKNOWN_OWNER_KIND });
 });

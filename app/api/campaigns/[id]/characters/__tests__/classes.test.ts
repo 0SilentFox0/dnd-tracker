@@ -148,3 +148,6 @@ describe("PATCH character classes", () => {
     expect(updateCharacterSchema.safeParse({ class: "", classes: [] }).success).toBe(false);
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

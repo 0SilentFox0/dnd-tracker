@@ -4,6 +4,7 @@ import { beforeEach,describe, expect, it, vi } from "vitest";
 import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
 import { prisma } from "@/lib/db";
+import { currentContentWrite } from "@/lib/server/content/write-context";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -19,6 +20,9 @@ vi.mock("@/lib/supabase/battle-map-storage", () => ({ resolveMapBackgroundForPer
 
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: unknown) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    campaignMember: { findUnique: async () => ({ role: "dm" }) },
+
     battleScene: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -255,6 +259,14 @@ describe("POST /api/campaigns/[id]/battles — map background", () => {
     });
   });
 
+  it("HTTP prepares external map assets before opening the transaction", async () => {
+    resolveMock.mockImplementation(async () => {
+      expect(currentContentWrite()).toBeUndefined();
+
+      return { ok: true, background: "/battle-maps/test.webp" };
+    });
+    expect(await getResponseStatus(await post("data:image/webp;base64,AAAA"))).toBe(200);
+  });
   it("помилка завантаження дає 400", async () => {
     resolveMock.mockResolvedValue({ ok: false, message: "Файл завеликий" });
 
@@ -284,7 +296,7 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
 
   async function patch(map: Record<string, unknown>) {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1", map: null } as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ id: "b1", version: 0, campaignId: "c1", map: null } as never);
     vi.mocked(prisma.battleScene.update).mockResolvedValue({} as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
@@ -316,7 +328,7 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
   it("передає збережений фон як current", async () => {
     resolveMock.mockResolvedValue({ ok: true, background: "https://game.example/a.svg" });
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm as never);
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1", map: { cols: 10, rows: 10, background: "https://game.example/a.svg" } } as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ id: "b1", version: 0, campaignId: "c1", map: { cols: 10, rows: 10, background: "https://game.example/a.svg" } } as never);
     vi.mocked(prisma.battleScene.update).mockResolvedValue({} as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");

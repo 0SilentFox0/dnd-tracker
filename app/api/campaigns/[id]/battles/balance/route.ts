@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getBalancePayload } from "./balance-get";
-import { postBalanceResponse } from "./balance-post";
 import { balanceSchema } from "./balance-schema";
 
+import { battleBalance } from "@/lib/server/battles/action-service";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -20,7 +19,7 @@ export async function GET(
 
     if (accessResult instanceof NextResponse) return accessResult;
 
-    const payload = await getBalancePayload(campaignId, accessResult.campaign.rules);
+    const payload = await battleBalance(campaignId, undefined, accessResult.campaign.rules);
 
     return NextResponse.json(payload);
   } catch (e) {
@@ -44,7 +43,7 @@ export async function POST(
 
     if (data instanceof NextResponse) return data;
 
-    const response = await postBalanceResponse(campaignId, data, accessResult.campaign.rules);
+    const response = await battleBalance(campaignId, data, accessResult.campaign.rules);
 
     return NextResponse.json(response);
   } catch (e) {

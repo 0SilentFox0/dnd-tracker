@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn(), update: vi.fn() } } }));
+vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }), campaign: { findUnique: vi.fn(), update: vi.fn() } } }));
 
 const dm = { userId: "dm", isDM: true, campaign: { id: "camp1" } } as never;
 

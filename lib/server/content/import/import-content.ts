@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import "server-only";
 import { invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
 import { AI_LIMITS } from "@/lib/constants/ai";
@@ -9,6 +11,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { loadNames } from "@/lib/server/content/import/names";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -232,7 +235,23 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
         plan.body = await resource.prepareUpdate(actor, current, plan.body);
       }
 
-      if (deps === DEFAULT_IMPORT_DEPS || deps === OFFLINE_IMPORT_DEPS) await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan));
+      if (deps === DEFAULT_IMPORT_DEPS || deps === OFFLINE_IMPORT_DEPS) {
+        const current = currentContentWrite();
+
+        if (current) {
+          const tx = current.db as Prisma.TransactionClient;
+
+          await tx.$executeRaw`SAVEPOINT assistant_import_row`;
+          try {
+            await writePlan(resource, actor, plan);
+            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+          } catch (error) {
+            await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;
+            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+            throw error;
+          }
+        } else await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan));
+      }
       else await writePlan(resource, actor, plan);
 
       wrote = true;
@@ -244,7 +263,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
     }
   }
 
-  if (wrote && resource.invalidates.length > 0) (deps.invalidate ?? invalidateReference)(resource.invalidates, actor.campaignId);
+  if (wrote && resource.invalidates.length > 0) afterContentCommit(() => (deps.invalidate ?? invalidateReference)(resource.invalidates, actor.campaignId));
 
   return report(false, results);
 }

@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
-import { prisma } from "@/lib/db";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
-import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { saveCampaignAsTemplate } from "@/lib/server/campaigns/action-service";
+import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { bundleErrorResponse } from "@/lib/utils/api/bundle-error";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -23,22 +21,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     if (data instanceof NextResponse) return data;
 
-    const bundle = await exportCampaign(prisma, id);
-
-    const { campaign } = await createCampaignFromBundle({
-      userId: accessResult.userId,
-      name: data.name,
-      description: data.description,
-      bundle,
-      kind: CampaignKind.TEMPLATE,
-      visibility: CampaignVisibility.PRIVATE,
-      createdFromId: id,
-    });
-
-    await invalidateCampaignLists([accessResult.userId]);
+    const { campaign } = await saveCampaignAsTemplate({ campaignId: id, userId: accessResult.userId, isDM: true, via: "session", scopes: null }, data);
 
     return NextResponse.json(campaign);
   } catch (error) {
+    if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
+
     return bundleErrorResponse(error) ?? handleApiError(error, { action: "save campaign as template" });
   }
 }

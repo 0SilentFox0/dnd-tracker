@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { restoreScenarioVersionSchema } from "@/lib/schemas/scenario";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { ContentError } from "@/lib/server/content/errors";
+import { runScenarioOperation } from "@/lib/server/scenario/action-service";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
-import { contentWrite, OWNED_SELECT, parseContent, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
-import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
+import { OWNED_SELECT } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -27,6 +26,8 @@ export async function listVersionsHandler(campaignId: string, pageId: string) {
 
     return NextResponse.json(rows.map((v) => ({ ...v, createdAt: v.createdAt.toISOString() })));
   } catch (error) {
+    if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
+
     return handleApiError(error, { action: "list scenario versions" });
   }
 }
@@ -41,31 +42,12 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
 
     if (body instanceof NextResponse) return body;
 
-    return await withCampaignContentWrite(campaignId, async () => {
-    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
+    const result = await runScenarioOperation({ campaignId, userId: access.userId, isDM: true, via: "session", scopes: null }, "restore", { id: pageId, versionId: body.versionId });
 
-    if (page instanceof NextResponse) return page;
-
-    const version = await prisma.scenarioPageVersion.findFirst({ where: { id: body.versionId, pageId } });
-
-    if (!version) return errorResponse(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
-
-    const restored = parseContent(version.content);
-
-    if (!restored) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
-
-    await snapshotIfDue(prisma, pageId, access.userId, { force: true });
-    await pruneVersions(prisma, pageId);
-
-    const row = await prisma.scenarioPage.update({
-      where: { id: pageId },
-      data: { ...contentWrite(page.title, restored), version: { increment: 1 } },
-      select: { ...SUMMARY_SELECT, content: true },
-    });
-
-    return NextResponse.json(toPage(row));
-    });
+    return NextResponse.json(result.data);
   } catch (error) {
+    if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
+
     return handleApiError(error, { action: "restore scenario version" });
   }
 }

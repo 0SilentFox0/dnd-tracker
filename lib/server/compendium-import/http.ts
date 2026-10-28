@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { resolveActor } from "@/lib/utils/api/actor";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
+import { isSameOriginRequest } from "@/lib/utils/api/same-origin";
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
 
@@ -65,13 +66,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       const mutation = mode === "preview" || mode === "confirm";
 
-      // Next can normalize req.url to localhost in development. Use the browser-facing
-      // Host (also checked by middleware), never an untrusted forwarded-host header.
-      const requestUrl = new URL(req.url);
-
-      const requestOrigin = `${requestUrl.protocol}//${req.headers.get("host") ?? requestUrl.host}`;
-
-      if (mutation && req.headers.get("origin") !== requestOrigin) return json({ code: "FORBIDDEN" }, 403);
+      if (mutation && !isSameOriginRequest(req)) return json({ code: "FORBIDDEN" }, 403);
 
       const actor = await resolveActor(req, id, { access: "dm", scope: "content:write", sessionOnly: true });
 

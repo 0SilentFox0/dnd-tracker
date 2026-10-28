@@ -21,7 +21,7 @@ vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/ser
 vi.mock("@/lib/db", () => ({
   prisma: {
     campaignTrack: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), aggregate: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn(), deleteMany: vi.fn() },
-    $transaction: vi.fn(async (ops: unknown[]) => ops),
+    $transaction: vi.fn(async (callback: unknown) => typeof callback === "function" ? callback({ $queryRaw: async () => [{ id: "camp1" }] }) : callback),
   },
 }));
 
@@ -242,4 +242,22 @@ describe("tracks API", () => {
     expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "b" }, data: { sortOrder: 0 } });
     expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "a" }, data: { sortOrder: 1 } });
   });
+});
+
+it("network title lookup runs before the content lock", async () => {
+  const { currentContentWrite } = await import("@/lib/server/content/write-context");
+
+  vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+  vi.mocked(prisma.campaignTrack.count).mockResolvedValue(0);
+  vi.mocked(prisma.$transaction).mockImplementation((async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] })) as never);
+  vi.mocked(oembed.fetchYoutubeTitle).mockImplementation(async () => {
+    expect(currentContentWrite()).toBeUndefined();
+    throw new Error("STOP_BEFORE_DB");
+  });
+
+  const { createContent } = await import("@/lib/server/content/service");
+
+  const { tracksResource } = await import("@/lib/server/content/resources/tracks");
+
+  await expect(createContent(tracksResource, { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" })).rejects.toThrow("STOP_BEFORE_DB");
 });

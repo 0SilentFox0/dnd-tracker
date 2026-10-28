@@ -4,7 +4,8 @@ import type { Prisma } from "@prisma/client";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CARRIED_SLOTS } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { operationAccess } from "@/lib/server/characters/operation-context";
+import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
@@ -68,8 +69,8 @@ export async function buildStashView(tx: Prisma.TransactionClient, campaignId: s
   };
 }
 
-export async function readStash(campaignId: string, characterId: string): Promise<NextResponse> {
-  const access = await requireCampaignAccess(campaignId);
+export async function readStash(campaignId: string, characterId: string, actor?: Actor): Promise<NextResponse> {
+  const access = await operationAccess(campaignId, false, actor);
 
   if (access instanceof NextResponse) return access;
 

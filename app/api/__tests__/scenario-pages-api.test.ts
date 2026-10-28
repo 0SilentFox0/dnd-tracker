@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { discardSlideFiles } from "@/lib/ai/proposals";
+import { discardSlideFiles } from "@/lib/ai/proposal-media";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
-vi.mock("@/lib/ai/proposals", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));
+vi.mock("@/lib/ai/proposal-media", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -13,6 +13,7 @@ vi.mock("@/lib/db", () => ({
     scenarioPage: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn(), aggregate: vi.fn(), updateMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
     character: { findFirst: vi.fn() },
+    compendiumEntry: { deleteMany: vi.fn() },
   },
 }));
 
@@ -37,6 +38,7 @@ describe("scenario pages API", () => {
     vi.clearAllMocks();
     vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
     vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.findFirst).mockImplementation((args) => prisma.scenarioPage.findUnique({ where: { id: String(args?.where?.id) } }) as never);
     vi.mocked(prisma.scenarioPage.aggregate).mockResolvedValue({ _max: { sortOrder: 4 } } as never);
     vi.mocked(prisma.scenarioPage.create).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => row({ ...data, id: "new", version: 0 })) as never);
     vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 1 } as never);
@@ -103,7 +105,7 @@ describe("scenario pages API", () => {
     expect(await res.json()).toEqual({ version: 3 });
     expect(prisma.scenarioPageVersion.create).toHaveBeenCalled();
     expect(prisma.scenarioPage.updateMany).toHaveBeenCalledWith({
-      where: { id: "p1", version: 2 },
+      where: { id: "p1", campaignId: "camp1", version: 2 },
       data: expect.objectContaining({ content, version: { increment: 1 }, searchText: expect.stringContaining("Дзвони") }),
     });
   });

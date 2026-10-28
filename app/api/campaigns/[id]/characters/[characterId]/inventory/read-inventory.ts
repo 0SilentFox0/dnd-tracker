@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import type { Actor } from "@/lib/utils/api/actor";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { isDmMember } from "@/lib/utils/api/is-dm";
 
-export async function readInventory(campaignId: string, characterId: string): Promise<NextResponse> {
-  const authResult = await requireAuth();
+export async function readInventory(campaignId: string, characterId: string, actor?: Actor, readOnly = false): Promise<NextResponse> {
+  const authResult = actor ? {userId:actor.userId} : await requireAuth();
 
   if (authResult instanceof NextResponse) return authResult;
 
@@ -25,6 +26,8 @@ export async function readInventory(campaignId: string, characterId: string): Pr
   }
 
   if (character.inventory) return NextResponse.json(character.inventory);
+
+  if (readOnly) return NextResponse.json({ characterId, gold: 0, silver: 0, copper: 0, equipped: {}, backpack: [], items: [], stash: [], attuned: [] });
 
   const created = await prisma.characterInventory.create({
     data: { characterId, gold: 0, silver: 0, copper: 0, equipped: {}, backpack: [], items: [] },

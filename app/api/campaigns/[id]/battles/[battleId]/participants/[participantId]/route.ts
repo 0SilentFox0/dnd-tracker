@@ -1,22 +1,8 @@
-import { patchParticipantMutation } from "./patch-participant-mutation";
-import { patchParticipantSchema } from "./patch-participant-schema";
-
-import { BattleStatus } from "@/lib/constants/battle";
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string; participantId: string }> },
 ) {
-  const { id, battleId, participantId } = await params;
-
-  return runBattleMutation(req, {
-    params: { id, battleId },
-    access: BattleAccess.DM,
-    requireStatus: BattleStatus.ACTIVE,
-    allowWhileAwaitingDm: true,
-    rateLimitScope: "participantPatch",
-    schema: patchParticipantSchema,
-    mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body),
-  });
+  return runBattleMutation(req, { params: await params, operation: "participants.patch" });
 }

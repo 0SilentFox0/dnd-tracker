@@ -122,3 +122,11 @@ describe("content service", () => {
     await rejectsWith(removeAllContent(thing, { ...actor, via: "token", scopes: ["content:write"] }), 403);
   });
 });
+
+it.each(["main-skills", "skills", "artifact-sets", "tracks"] as const)("%s writes share the campaign transaction", async (kind) => {
+  const { currentContentWrite } = await import("@/lib/server/content/write-context");
+
+  const resource = { ...thing, kind, create: async () => ({ id: "new", name: currentContentWrite()?.campaignId ?? "unlocked", campaignId: actor.campaignId }) };
+
+  expect(await createContent(resource, actor, { name: "Нове" })).toMatchObject({ name: "c1" });
+});

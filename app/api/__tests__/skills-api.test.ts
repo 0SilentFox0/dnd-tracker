@@ -15,8 +15,10 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({
     skill: {
       findMany: vi.fn(),
       create: vi.fn(),
@@ -27,8 +29,8 @@ vi.mock("@/lib/db", () => ({
       deleteMany: vi.fn(),
     },
     spell: { count: vi.fn() },
-  },
-}));
+  }) };
+});
 
 describe("GET /api/campaigns/[id]/skills", () => {
   beforeEach(() => {

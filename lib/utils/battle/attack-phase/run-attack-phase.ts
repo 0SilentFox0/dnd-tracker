@@ -13,7 +13,7 @@ import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { damageDiceSlots,heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
@@ -31,6 +31,7 @@ export type AttackPhaseInput = {
   userId: string;
   isDM: boolean;
   rng?: Rng;
+  serverRolls?: boolean;
   map?: BattleMapConfig | null;
   rules?: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
@@ -83,11 +84,13 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const strikeAt = (target: BattleParticipant, i: number, opts: { serverRolled: boolean; multiplier?: number; cover: boolean }) => {
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const strike = opts.serverRolled ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = (input.serverRolls || opts.serverRolled) ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
-    const strikeDice = dice.next();
+    const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
 
-    const second = opts.serverRolled ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+    const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : dice.next();
+
+    const second = (input.serverRolls || opts.serverRolled) ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
     const victim = live(target);
 

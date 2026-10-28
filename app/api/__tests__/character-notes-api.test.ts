@@ -49,3 +49,6 @@ describe("PUT notes", () => {
     expect((await put("a".repeat(5001))).status).toBe(400);
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
