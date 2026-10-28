@@ -45,7 +45,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const consumeOn = effect.kind === "flag" && effect.flag === "advantage" ? effect.consumeOn : undefined;
 
-  const until = effect.kind === "flag" && effect.flag === "advantage" ? effect.until : undefined;
+  const until = (effect.kind === "flag" && effect.flag === "advantage") || effect.kind === "modifyStat" ? effect.until : undefined;
 
   const nature = abilityNature(ability.effects);
 
@@ -99,6 +99,7 @@ export const modifyStatFields: readonly FieldMeta[] = [
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
   DURATION_FIELD,
+  { name: "until", label: "Зникає в кінці мого ходу", input: "select", optional: true, options: [{ value: "turnEnd", label: "так" }] },
 ];
 
 export const damageBonusFields: readonly FieldMeta[] = [

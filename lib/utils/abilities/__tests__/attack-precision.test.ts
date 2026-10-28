@@ -22,7 +22,10 @@ const steady = resolved({
   name: "Steady Aim",
   trigger: { event: "bonusAction" },
   condition: { type: "notMoved" },
-  effects: [{ kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" }],
+  effects: [
+    { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" },
+    { kind: "modifyStat", stat: "speed", percent: -100, until: "turnEnd", duration: { rounds: 1 }, target: "self" },
+  ],
 });
 
 const hero = (abilities = [reckless, steady], movementUsed?: number): BattleParticipant => {
@@ -95,6 +98,23 @@ describe("Steady Aim accuracy", () => {
     const later = { ...p, battleData: { ...p.battleData, activeEffects: updatedEffects } };
 
     expect(rollModeReasons(later, bow, [later]).advantage).toHaveLength(0);
+  });
+
+  it("the speed lock is a turn-end effect too and is gone after the turn", () => {
+    const p = use(hero(), "skill:s1:steady");
+
+    const lock = p.battleData.activeEffects.filter((e) => e.abilityEffects?.some((a) => a.kind === "modifyStat"));
+
+    expect(lock).toHaveLength(1);
+    expect(lock[0].expireAtTurnEnd).toBe(true);
+
+    const { updatedEffects } = decreaseEffectDurations(p);
+
+    expect(updatedEffects).toHaveLength(0);
+  });
+
+  it("schema accepts until on modifyStat", () => {
+    expect(AbilitySchema.safeParse({ ...steady, effects: steady.effects }).success).toBe(true);
   });
 
   it("notMoved holds only while no cells were walked", () => {

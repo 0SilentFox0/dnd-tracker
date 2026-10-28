@@ -89,7 +89,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
     condition: { type: "notMoved" },
     effects: [
       { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" },
-      { kind: "modifyStat", stat: "speed", percent: -100, duration: { rounds: 1 }, target: "self" },
+      { kind: "modifyStat", stat: "speed", percent: -100, until: "turnEnd", duration: { rounds: 1 }, target: "self" },
     ],
   },
   "srd-2024_barbarian_unarmored-defense": passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "max(0, con_mod)" } }], UNARMORED),

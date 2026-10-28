@@ -37,6 +37,7 @@ const ModifyStatSchema = z
     atLeast: z.number().int().min(1).max(30).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
+    until: z.literal("turnEnd").optional(),
     ...timed,
   })
   .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })

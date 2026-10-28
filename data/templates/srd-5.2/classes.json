@@ -5716,6 +5716,7 @@
                 "kind": "modifyStat",
                 "stat": "speed",
                 "percent": -100,
+                "until": "turnEnd",
                 "duration": {
                   "rounds": 1
                 },
