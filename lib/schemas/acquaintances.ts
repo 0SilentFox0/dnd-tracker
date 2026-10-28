@@ -3,8 +3,11 @@ import { z } from "zod";
 import { ACQUAINTANCE_KINDS, ACQUAINTANCE_LIMITS } from "@/lib/constants/acquaintances";
 
 const nameField = z.string().trim().min(1).max(ACQUAINTANCE_LIMITS.name);
+
 const descriptionField = z.string().max(ACQUAINTANCE_LIMITS.description);
+
 const avatarField = z.string().url().max(2000).nullable();
+
 const characterIdField = z.string().min(1).nullable();
 
 export const createAcquaintanceSchema = z
