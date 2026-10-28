@@ -1,5 +1,5 @@
 import type { PublicUser } from "./campaigns";
-import type { CharacterClassEntry } from "./classes";
+import type { CharacterClassEntry, ClassProgression } from "./classes";
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { StoryChapter } from "./scenario";
 import type { BookSpell } from "./spells";
@@ -253,6 +253,7 @@ export interface CharacterSheet {
   hitDice: string | null;
   classTable?: string[];
   classFeatureDescriptions?: Array<{ source: string; level: number; description: string }>;
+  classProgression?: ClassProgression[];
   pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number; current: number }[];
   rest: SheetRest | null;
