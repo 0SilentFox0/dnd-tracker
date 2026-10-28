@@ -6,7 +6,7 @@ const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "s
 
 vi.mock("@/lib/server/assistant/catalog", () => ({ assistantCatalog: { listActions: () => [{ id: "campaign.read" }] } }));
 vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async (c) => c.actor) }));
-vi.mock("@/lib/server/assistant/actions/handoffs", () => ({ readCompendiumSummary: vi.fn() }));
+vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendiumSummary: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn() }, scenarioPage: { findFirst: vi.fn() } } }));
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => [{ id: "c1", name: "Годрик", level: 5, class: "Лицар", race: "Людина", armorClass: 16, notes: "боїться вогню" }]) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => "Слайд: Собор") }));

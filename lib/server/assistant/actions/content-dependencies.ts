@@ -10,6 +10,23 @@ const tableKey = (kind: string) => ({ "spell-groups": "spellGroups", "main-skill
 
 type Row = Record<string, unknown>;
 
+// Prisma relation metadata is immutable for this process. Preserve table/field
+// order; campaign rows, dependency projections and preconditions stay uncached.
+const cascadeRelations = new Map<string, Array<{ table: string; column: string; onDelete: string }>>();
+
+for (const table of BUNDLE_TABLES) {
+  const model = Prisma.dmmf.datamodel.models.find(entry => entry.name === table.model);
+
+  for (const relation of model?.fields ?? []) {
+    if (relation.kind !== "object" || relation.relationFromFields?.length !== 1) continue;
+
+    const entries = cascadeRelations.get(relation.type) ?? [];
+
+    entries.push({ table: table.key, column: relation.relationFromFields[0], onDelete: relation.relationOnDelete ?? (relation.isRequired ? "Restrict" : "SetNull") });
+    cascadeRelations.set(relation.type, entries);
+  }
+}
+
 const object = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
 
 export function contentIds(state: unknown, kind: string): string[] {
@@ -32,7 +49,13 @@ export function contentDependencies(state: unknown, kind: string, id: string | u
 
   for (const rows of Object.values(tables)) if (Array.isArray(rows)) for (const row of rows) if (incoming.has(row.id)) ids.add(row.id);
 
-  const matches = (row: unknown) => [...collectKeysAndStrings(row)].some((value) => ids.has(value) || value.split("+").some((part) => ids.has(part)));
+  const matches = (row: unknown) => {
+    for (const value of collectKeysAndStrings(row)) {
+      if (ids.has(value) || (value.includes("+") && value.split("+").some(part => ids.has(part)))) return true;
+    }
+
+    return false;
+  };
 
   const result: Record<string, unknown> = {};
 
@@ -55,25 +78,19 @@ export function contentDeleteCascades(state: unknown, kind: string, ids: readonl
 
   const selected = new Set(ids);
 
-  for (const table of BUNDLE_TABLES) {
-    const model = Prisma.dmmf.datamodel.models.find((entry) => entry.name === table.model);
+  for (const relation of targetModel ? cascadeRelations.get(targetModel) ?? [] : []) {
+    const { column } = relation;
 
-    const relations = model?.fields.filter((field) => field.kind === "object" && field.type === targetModel && field.relationFromFields?.length === 1) ?? [];
+    const rows = Array.isArray(tables[relation.table]) ? tables[relation.table] as Row[] : [];
 
-    const rows = Array.isArray(tables[table.key]) ? tables[table.key] as Row[] : [];
+    for (const row of rows) {
+      if (!selected.has(String(row[column]))) continue;
 
-    for (const relation of relations) {
-      const column = relation.relationFromFields![0];
+      const target: TargetRef = { domain: relation.table, id: String(row.id), name: String(row.name ?? row.title ?? row.id) };
 
-      for (const row of rows) {
-        if (!selected.has(String(row[column]))) continue;
+      if (relation.onDelete === "SetNull") changes.push({ target, path: column, before: jsonContent(row[column]), after: null });
 
-        const target: TargetRef = { domain: table.key, id: String(row.id), name: String(row.name ?? row.title ?? row.id) };
-
-        if ((relation.relationOnDelete ?? (relation.isRequired ? "Restrict" : "SetNull")) === "SetNull") changes.push({ target, path: column, before: jsonContent(row[column]), after: null });
-
-        if (relation.relationOnDelete === "Cascade") changes.push({ target, path: "$record", before: jsonContent(row), after: null });
-      }
+      if (relation.onDelete === "Cascade") changes.push({ target, path: "$record", before: jsonContent(row), after: null });
     }
   }
 

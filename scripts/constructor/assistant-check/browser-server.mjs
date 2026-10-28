@@ -2,15 +2,12 @@ import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
 import tailwindcss from '@tailwindcss/postcss';
+import * as esbuild from 'esbuild';
 
-// esbuild is a pinned dependency of tsx in pnpm-lock.yaml; no .pnpm layout scan.
-const require = createRequire(import.meta.resolve('tsx'));
-const esbuild = require('esbuild');
 const sourceDir = path.dirname(fileURLToPath(import.meta.url));
 const output = process.argv[2];
 if (!output || !path.isAbsolute(output)) throw Error('Expected an absolute fresh output directory');
@@ -38,7 +35,7 @@ process.on('disconnect', stop);
 
 try {
   await esbuild.build({
-    entryPoints: [path.join(sourceDir, 'app.tsx')], outfile: path.join(output, 'bundle.js'),
+    entryPoints: [path.join(sourceDir, 'browser-app.tsx')], outfile: path.join(output, 'bundle.js'),
     bundle: true, format: 'esm', jsx: 'automatic', define: { 'process.env.NODE_ENV': '"development"' },
     alias: { '@': process.cwd() },
     plugins: [{ name: 'next-browser-stubs', setup(build) {

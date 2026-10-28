@@ -7,12 +7,14 @@ import { ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS, featNameTakenMessage } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createFeatSchema, updateFeatSchema } from "@/lib/schemas";
+import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { featNameTaken } from "@/lib/server/feats/feat-name";
 import { featAsiUsedByBackground, featInUse } from "@/lib/server/feats/feat-usage";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
+import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
 import { toFeatData } from "@/lib/utils/feats/row";
 
 type CreateInput = z.infer<typeof createFeatSchema>;
@@ -42,6 +44,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
   find: (actor, id) => prisma.feat.findFirst({ where: { id, campaignId: actor.campaignId } }),
   async create(actor, data) {
     await assertNameFree(actor.campaignId, data.name);
+    await assertCampaignRefs(actor.campaignId, { spell: choiceSpellIds(data.choices) });
 
     return prisma.feat.create({
       data: {
@@ -58,6 +61,8 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
     });
   },
   async update(actor, existing, data) {
+    await assertCampaignRefs(actor.campaignId, { spell: addedIds(choiceSpellIds(data.choices), choiceSpellIds(readChoices(existing.choices)) ?? []) });
+
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
 
     if (data.type !== undefined && data.type !== "origin" && existing.type === "origin" && await prisma.background.findFirst({ where: { campaignId: actor.campaignId, originFeatId: existing.id }, select: { id: true } })) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);

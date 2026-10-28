@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import type {ReactNode} from 'react';
-import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
+import {QueryClient,QueryClientProvider,useQuery} from '@tanstack/react-query';
 import {act,cleanup,renderHook,waitFor} from '@testing-library/react';
 import {afterEach,expect,it,vi} from 'vitest';
 
-import {registerAssistantBeforeApply,useAssistantEffects} from '../useAssistantEffects';
+import {flushAssistantBeforeApply,registerAssistantBeforeApply,useAssistantEffects} from '../useAssistantEffects';
 import {useAssistantIntents} from '../useAssistantIntents';
 
 import * as ai from '@/lib/api/ai';
@@ -111,4 +111,72 @@ return receipt; });
 await waitFor(()=>expect(result.current.detail.data?.status).toBe('pending'));
  await act(()=>result.current.confirm('i1'));
  await waitFor(()=>expect(result.current.receipt.data).toMatchObject({id:'delete-receipt',status:'applied'}));
+});
+
+it('failed invalidation can retry and dedup is independent per campaign and QueryClient', async () => {
+ const first = setup(), second = setup();
+
+ const receipt = { id: 'retry', status: 'applied' as const, effectsStatus: 'complete' as const, result: { data: null, affected: [{ domain: 'characters', id: 'h', name: 'Hero' }], warnings: [] } };
+
+ const invalidate = vi.spyOn(first.client, 'invalidateQueries').mockRejectedValueOnce(new Error('temporary'));
+
+ const a = renderHook(() => useAssistantEffects('c1'), { wrapper: first.wrapper });
+
+ await act(async () => { await expect(a.result.current.consumeReceipt(receipt)).rejects.toThrow(/оновити/); });
+ await act(() => a.result.current.consumeReceipt(receipt));
+ await act(() => a.result.current.consumeReceipt(receipt));
+ expect(invalidate).toHaveBeenCalledTimes(2);
+
+ const b = renderHook(() => useAssistantEffects('c2'), { wrapper: first.wrapper });
+
+ await act(() => b.result.current.consumeReceipt(receipt));
+ expect(invalidate).toHaveBeenCalledTimes(3);
+
+ const other = vi.spyOn(second.client, 'invalidateQueries');
+
+ const c = renderHook(() => useAssistantEffects('c1'), { wrapper: second.wrapper });
+
+ await act(() => c.result.current.consumeReceipt(receipt));
+ expect(other).toHaveBeenCalledTimes(1);
+});
+
+it('throwing editor blocks confirmation and unregister removes the mounted editor', async () => {
+ const { wrapper } = setup();
+
+ const dispose = registerAssistantBeforeApply({ campaignId: 'throwing', domain: 'scenario', id: 'p' }, async () => { throw Error('private editor error'); });
+
+ try {
+  const { result } = renderHook(() => useAssistantIntents('throwing'), { wrapper });
+
+  await act(async () => { await expect(result.current.confirm('i1')).rejects.toThrow(/зберегти/); });
+  expect(api.confirmAssistantIntent).not.toHaveBeenCalled();
+ } finally { dispose(); }
+
+ await expect(flushAssistantBeforeApply('throwing')).resolves.toBeUndefined();
+});
+
+it('one receipt refetches each active campaign query once and keeps other campaigns fresh', async () => {
+ const { wrapper } = setup();
+
+ const reads = { own: vi.fn(async () => 'own'), cascade: vi.fn(async () => 'cascade'), other: vi.fn(async () => 'other') };
+
+ const { result } = renderHook(() => {
+  const own = useQuery({ queryKey: ['characters', 'count-c1'], queryFn: reads.own });
+
+  const cascade = useQuery({ queryKey: ['unknown-domain', 'count-c1'], queryFn: reads.cascade });
+
+  const other = useQuery({ queryKey: ['characters', 'count-c2'], queryFn: reads.other });
+
+  return { own, cascade, other, ...useAssistantEffects('count-c1') };
+ }, { wrapper });
+
+ await waitFor(() => expect(result.current.other.isSuccess && result.current.own.isSuccess && result.current.cascade.isSuccess).toBe(true));
+
+ const receipt = { id: 'count', status: 'applied' as const, effectsStatus: 'complete' as const, result: { data: null, affected: [{ domain: 'unknown-domain', id: 'x', name: 'Cascade' }], warnings: [] } };
+
+ await act(() => result.current.consumeReceipt(receipt));
+ await act(() => result.current.consumeReceipt(receipt));
+ expect(reads.own).toHaveBeenCalledTimes(2);
+ expect(reads.cascade).toHaveBeenCalledTimes(2);
+ expect(reads.other).toHaveBeenCalledTimes(1);
 });

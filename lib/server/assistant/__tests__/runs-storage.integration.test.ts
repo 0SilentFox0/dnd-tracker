@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
+import { writeFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
@@ -18,14 +19,15 @@ function localUrl(name: string) {
 
   if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
 
-  url.searchParams.set("connection_limit", "4");
+  url.searchParams.set("connection_limit", "1");
 
   return url.toString();
 }
 
 const databaseUrl = localUrl("DATABASE_URL");
 
-localUrl("DIRECT_URL");
+process.env.DATABASE_URL = databaseUrl;
+process.env.DIRECT_URL = localUrl("DIRECT_URL");
 
 const raw = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
 
@@ -86,6 +88,9 @@ describe("T15 real constructor run storage", () => {
       await db.user.delete({ where: { id: marker } });
     }
 
+    expect(await db.assistantReceipt.count({ where: { campaignId, userId: marker } })).toBe(0);
+    expect(await db.assistantRun.count({ where: { threadId } })).toBe(0);
+    expect(await db.user.count({ where: { id: marker } })).toBe(0);
     await raw.$disconnect();
   });
   it("concurrent duplicate submit creates one run and one user message; second request conflicts", async () => {
@@ -157,6 +162,76 @@ describe("T15 real constructor run storage", () => {
 
     expect(next.run.id).not.toBe(repeated.run.id);
     expect(await loadMessages(threadId)).toHaveLength(10);
+  });
+  it("emptyRunHistoryHasNoIntentsOrReceipts", async () => {
+    const emptyThread = await db.aiThread.create({ data: { campaignId, userId: marker, title: marker, provider: "anthropic", model: "test", mode: "live" } });
+
+    // The owner already has committed history in another thread.
+    expect(await db.assistantReceipt.count({ where: { campaignId, userId: marker } })).toBeGreaterThan(0);
+    expect(await store.readAssistantRuns({ ...caller(), threadId: emptyThread.id })).toEqual({ runs: [], receipts: [], intents: [] });
+    expect(await store.readAssistantRuns(caller(), "missing-request")).toEqual({ runs: [], receipts: [], intents: [] });
+  });
+  it("bounds recovery history to 30 runs and 100 related receipts/intents", async () => {
+    const profileThread = await db.aiThread.create({ data: { campaignId, userId: marker, title: marker, provider: "anthropic", model: "test", mode: "live" } });
+
+    const blob = "x".repeat(4096);
+
+    const runIds = Array.from({ length: 32 }, (_, i) => `${marker}-profile-${i}`);
+
+    await db.assistantRun.createMany({ data: runIds.map((id, i) => ({ id, threadId: profileThread.id, requestId: `profile-${i}`, requestHash: "fixture", status: "complete", expiresAt: new Date(0), createdAt: new Date(i * 1000), resultRefs: { status: "completed", padding: blob } })) });
+
+    const related = Array.from({ length: 102 }, (_, i) => ({
+      campaignId, userId: marker, originKey: profileThread.id, requestId: `${runIds[31]}_tool-${i}`, requestHash: "fixture", actionId: "campaign.settings", createdAt: new Date(i * 1000),
+    }));
+
+    await db.assistantIntent.createMany({ data: related.map((row, i) => ({ ...row, id: `${marker}-profile-intent-${i}`, channel: "chat", threadId: profileThread.id, summary: `Fixture ${i}`, targets: [], expiresAt: new Date(9999999999999), payload: { padding: blob }, preview: { padding: blob }, expected: { padding: blob } })) });
+    await db.assistantReceipt.createMany({ data: related.map((row, i) => ({ ...row, intentId: `${marker}-profile-applied-${i}`, status: "applied", result: { data: { saved: i }, affected: [], warnings: [] }, effectsStatus: "complete", effects: { padding: blob } })) });
+
+    let resultJsonBytes = 0;
+
+    let queryCount = 0;
+
+    const measuredDb = raw.$extends({ query: { $allModels: { async $allOperations({ model, operation, args, query }) {
+      queryCount++;
+
+      const value = await query(args);
+
+      if (["AssistantRun", "AssistantReceipt", "AssistantIntent"].includes(model) && operation === "findMany") resultJsonBytes += Buffer.byteLength(JSON.stringify(value));
+
+      return value;
+    } } } });
+
+    const measuredStore = createAssistantRunStore({ db: measuredDb as unknown as PrismaClient, now: () => new Date(0) });
+
+    const who = { ...caller(), threadId: profileThread.id };
+
+    const history = await measuredStore.readAssistantRuns(who);
+
+    expect(history.runs).toHaveLength(30);
+    expect(history.runs[0]).toMatchObject({ requestId: "profile-31", status: "completed" });
+    expect(history.runs.at(-1)).toMatchObject({ requestId: "profile-2" });
+    expect(history.receipts).toHaveLength(100);
+    expect(history.receipts[0].result).toMatchObject({ data: { saved: 101 } });
+    expect(history.intents).toHaveLength(100);
+    expect(history.intents[0]).toMatchObject({ summary: "Fixture 101", status: "pending" });
+    expect(JSON.stringify(history)).not.toContain(blob);
+    expect(await measuredStore.readAssistantRuns(who, "profile-0")).toMatchObject({ receipts: [], intents: [], runs: [{ requestId: "profile-0" }] });
+
+    if (process.env.S4_RECOVERY_PROFILE) {
+      const samples = [];
+
+      for (let i = 0; i < 35; i++) {
+        resultJsonBytes = 0;
+        queryCount = 0;
+
+        const start = performance.now();
+
+        await measuredStore.readAssistantRuns(who);
+
+        if (i >= 5) samples.push({ resultJsonBytes, queryCount, elapsedMs: performance.now() - start });
+      }
+      writeFileSync(process.env.S4_RECOVERY_PROFILE, JSON.stringify({ node: process.version, fixtures: { runs: 32, intents: 102, receipts: 102, paddingChars: 4096 }, warmups: 5, samples }, null, 2));
+    }
   });
   it("expired claim stays held while an unknown result cannot be reconciled", async () => {
     const next = await store.beginAssistantRun(caller(), "next", { text: "Наступний" });

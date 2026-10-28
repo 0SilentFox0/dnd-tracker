@@ -6,6 +6,8 @@
 import { AttackType } from "@/lib/constants/battle";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { heroHpFormula } from "@/lib/utils/rules/formulas";
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
@@ -17,10 +19,6 @@ export interface HeroScalingOptions {
   /** Те саме для ranged */
   rangedDiceByLevel?: Record<number, string>;
 }
-
-const HP_CON_COEFFICIENT = 1.5;
-
-const HP_BASE_LEVELS = 3;
 
 /**
  * Рівномірна прогресія кубиків за рівнем (d4, d6, d8).
@@ -66,7 +64,7 @@ export function getHeroMaxHpBreakdown(
   level: number,
   constitution: number,
   archetype: string | null | undefined,
-  hp: HeroHpFormula = { baseLevels: HP_BASE_LEVELS, conCoefficient: HP_CON_COEFFICIENT },
+  hp: HeroHpFormula = heroHpFormula(DEFAULT_RULES.heroScaling),
 ): { total: number; breakdown: string[] } {
   const a = heroArchetype(archetype);
 

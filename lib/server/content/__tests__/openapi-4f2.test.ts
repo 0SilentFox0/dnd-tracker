@@ -18,6 +18,6 @@ describe("OpenAPI 4f-2", () => {
   });
 
   it("stays compact", () => {
-    expect(json(doc).length).toBeLessThan(145_000);
+    expect(json(doc).length).toBeLessThan(146_000);
   });
 });

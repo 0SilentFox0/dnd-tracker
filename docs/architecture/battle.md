@@ -173,3 +173,11 @@ Expect to touch the mutation, the engine util, and possibly the hook and UI unde
 
 
 Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
+
+## Refactor S6–S8: власники механік
+
+Participant assembly зберігає class pool precedence і persisted resource application. `participant/character-spell-grants.ts` — чисте складання grants/item/consumable pools; `load-character-context.ts` передає campaign-scoped feat/background maps, явна порожня map вимикає fallback.
+
+Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection — `spell-flow-types.ts`, `spell-costs.ts`, `spell-pick.ts`. Turn start/end/round — відповідні `turn-*.ts`/`round-start.ts`; `run-advance-turn-loop.ts` зберігає orchestration, RNG/event order. Version/hash/snapshot/delta інваріанти пройшли integrated gate S7.4.
+
+`useSpellBook` зберігає public API і submit/reducer. `useBattleSpellLibrary` володіє viewer-scoped IDs/loading, bonus/reaction/prefetch; `useSpellMapTargeting` — live callbacks, map registrations, hover і Escape cleanup. S8 extraction на synthetic scenarios не збільшив requests/renders; загальне прискорення battle engine не доведене.

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { discardGeneratedImageSchema, generateSlideImageSchema } from "@/lib/schemas/ai";
 import { readSlides } from "@/lib/schemas/show";
 import { createDeckSchema, deckSceneSchema, saveDeckSchema, showCommandSchema } from "@/lib/schemas/show";
+import { jsonContent } from "@/lib/server/assistant/json";
 import { ContentError } from "@/lib/server/content/errors";
 import { prepareShowAction, runShowOperation, type ShowInput } from "@/lib/server/show/action-service";
 import { persistSlideImages } from "@/lib/server/show/deck-store";
@@ -60,7 +61,7 @@ export const SHOW_ACTIONS: readonly AssistantActionDef[] = Object.entries(SHOW_I
 
       if (!result.ok) throw new ContentError("Не вдалося підготувати медіа", 400);
 
-      return JSON.parse(JSON.stringify({ slides: result.value }));
+      return jsonContent({ slides: result.value });
     } }),
     execute: (ctx: ActionExecutionContext, raw: unknown) => runShowOperation(ctx.caller.actor, operation, input.parse(raw) as ShowInput, ctx.expected, ctx),
   };

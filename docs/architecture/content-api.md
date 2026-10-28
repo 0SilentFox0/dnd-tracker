@@ -36,7 +36,7 @@
 
 ## OpenAPI
 
-`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~100 КБ), статичний (`force-static`, `s-maxage`).
+`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~145 КБ), статичний (`force-static`, `s-maxage`).
 - Його будує `lib/server/content/openapi.ts` з обох реєстрів.
 - Тіла запитів — ті самі Zod-схеми через `toJsonSchemas` (`json-schema.ts`, локальний реєстр Zod). Спільні підсхеми підставляються через `$ref`: здібність, тригер, умова, кожен вид ефекту, `SpellFx`, `WeaponStats`, `RulesetPatch`. Спільні схеми 4f-2: `Formula`, `Flat`, `Amount`, `ArmorStats`, `ClassColumn`.
 - Помилки й успішні відповіді винесені в `components.responses`.
@@ -110,7 +110,7 @@
 
 ## Імпорт і експорт (етап 4f-0)
 
-Масове перенесення контенту з CSV/TSV/JSON для `units`, `spells`, `skills`, `main-skills`, `spell-groups`, `races`, `classes`, `artifacts`, `artifact-sets` (треки — ні).
+Масове перенесення контенту з CSV/TSV/JSON для `units`, `spells`, `skills`, `main-skills`, `spell-groups`, `races`, `classes`, `feats`, `backgrounds`, `artifacts`, `artifact-sets` (треки — ні).
 
 - **Реєстр полів** — `lib/utils/content/import/fields/` (`IMPORT_SPECS`, без `server-only`): ключ (= ключ тіла create; у `skills` плоскі, вкладає `toBody`), підпис колонки, синоніми, тип (`string|int|number|bool|enum|list|dice|cr|ref|refList|json|attacks|abilitiesText`), посилання, обов'язковість, два приклади. Синоніми юнітів покривають заголовки старого CSV-імпорту (`docs/units/units-all.csv` дає ті самі дані), «Спасброски» не зіставляється; юніт без колонки «Майстерність» і без CR отримує майстерність за рівнем.
 - **Ядро** — `lib/utils/content/import/`: `parseTable` (`csv-parse/browser/esm/sync`: BOM, рядок `sep=`, автороздільник `;`/`\t`/`,`, лапки з переносами; JSON — масив або об'єкт), `autoMap` (ключ/підпис/синоніми без регістру; `_` = пробіл, `’` = `'`), `applyMapping` (кілька колонок здібностей з'єднуються «. »), `coerceRecord`/`parseFieldValue` (ідемпотентні), `toCsv`/`recordToCells` (BOM, `;`, посилання — назвами, вкладене — JSON, списки з комою в назві — через « | »).
@@ -120,7 +120,7 @@
   - CR розбирається з початку клітинки (`1/4 (50 XP)`, `CR 5`); зіпсовані Excel дати (`01.апр`, `1-Apr`) — не CR (попередження). В експорті CR — десяткове (`0.25`), щоб Excel не робив дату.
   - Захист формул Excel: у експорті клітинки, що починаються з `= + - @`, табуляції або CR (крім простих чисел), а також з `'` перед такими символами, отримують `'` попереду; імпорт знімає один такий `'`.
   - Кодування: спершу строгий UTF-8, інакше windows-1251 (`decodeImportBytes`).
-- **Сервер** — `importContent` (`lib/server/content/import/import-content.ts`): `assertCan(write)`; усі рядки перевіряються до першого запису (назва, дублі у файлі, режим, посилання за назвою без регістру або точним id, Zod create/update ресурсу); валідні пишуться по одному через `resource.create/update` (без однієї транзакції — ресурси пишуть через Storage й каскади), помилка рядка не зупиняє решту; кеш довідника — один раз. Режими: `create` (дубль — помилка), `update` (за назвою; порожні клітинки не змінюють поле; `refList` з опечаткою не розриває зв'язки), `skip`. `dryRun` нічого не пише. До 500 рядків за запит (`IMPORT_LIMITS`); клієнт ділить: перевірка по 500, запис по 100 і ≤ 3 МБ.
+- **Сервер** — `importContent` (`lib/server/content/import/import-content.ts`): `assertCan(write)`; усі рядки перевіряються до першого запису (назва, дублі у файлі, режим, посилання за назвою без регістру або точним id, Zod create/update ресурсу); валідні пишуться по одному через `resource.create/update`: у звичайному HTTP кожен рядок має власну guarded transaction; усередині assistant outer transaction кожен рядок використовує SAVEPOINT/ROLLBACK TO SAVEPOINT, тож помилка рядка не скасовує успішні рядки, а результат і receipt комітяться атомарно; кеш довідника — один раз. Режими: `create` (дубль — помилка), `update` (за назвою; порожні клітинки не змінюють поле; `refList` з опечаткою не розриває зв'язки), `skip`. `dryRun` нічого не пише. До 500 рядків за запит (`IMPORT_LIMITS`); клієнт ділить: перевірка по 500, запис по 100 і ≤ 3 МБ.
 - **API**: `POST /content-import/{kind}` (`content.import`, `content:write`), `GET /content-import/{kind}/example.csv` (`content.import-example`) і `GET /content-export/{kind}` (`content.export`) — `content:read`, `text/csv`, ім'я файлу `<kind>.csv` — із `Content-Disposition`. `POST /units/import` лишився як був (старий формат, `createMany`).
 - **MCP** `content_import(kind, rows, mode, dryRun)` (`content:write`) — стислий звіт (`compactImportReport`): `counts` + рядки з помилками/попередженнями, кількість зменшується, доки відповідь вміщається в `AI_LIMITS.toolResultChars`.
 - **AI-мапінг** — `GET/POST /content-import/{kind}/ai-map` (лише ДМ із сесії, не в OpenAPI): `pickDmTextModel` + `generateObject`, відповідь лише з відомими колонками й полями; без ключа — 409 `IMPORT_AI_NO_KEY`; ліміт `AI_PLAYER_RATE_LIMIT`.
@@ -204,3 +204,11 @@ Preview містить валідований patch, актуальне before, 
 ### MCP assistant contract v2 (stage6 T14)
 
 Legacy content tool names збережено, але записи проходять shared assistant dispatcher та review/auto policy. Відповідь тепер має `version: 2`, зовнішній `kind: result|error`; `data.kind: pending` і `reviewUrl` означають, що доменний запис ще не виконаний. Scopes не розширюються. Підтвердження та auto policy змінює тільки ДМ у session UI; model-callable apply/confirm немає. Великі JSON/schema/data читаються bounded projections/pagination через `assistant_schema/read`, без невалідного clipped JSON. Деталі контракту, міграції proposal aliases і статусів — [Assistant transport v2](ai.md#assistant-transport-v2--stage6-t14). Чинні REST API contracts не змінено.
+
+## Refactor S9/S10 — контракти та перевірки
+
+Class/feat writers перевіряють нові nested choice spell refs через `assertCampaignRefs` у scoped transaction; update використовує `addedIds`, тому старі stale refs не блокують metadata-only save. Class column guard окремо перевіряє stored features при зміні columns. DELETE usage409 класів/рис/передісторій задокументовано в OpenAPI.
+
+`abilities.sources/get` обслуговує всі OwnerKind, включно з class/feat, у межах кампанії. Class projection збирає прямі abilities base/subclass features через `toGameClassData`, не вибирає option grants і не застосовує їх персонажу; feat використовує чинний `readAbilities`.
+
+Compendium orchestration — `adapt.ts`, nested class/optional feature resolution — `feature-resolution.ts`, без іншого adapter registry. SQL export→import→source-update roundtrip і5warm/30sample measurements — [S9 checkpoint](../superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md). Реальна source contention підтверджує NOWAIT refusal до intent; tool transport повертає sanitized500. API/MCP ids/payloads і persisted JSON сумісні; writer validation defects виправлено окремо від extraction.

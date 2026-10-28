@@ -216,11 +216,19 @@ describe("confirmed assistant execution", () => {
   it("a failed undeclared legacy effect is unknown, not a successful publication", async () => {
     const { db, action, state } = fixture();
 
+    const order: string[] = [];
+
     const executor = createAssistantExecutor({ db, catalog: createActionCatalog([{ ...action, execute: async (ctx: ActionExecutionContext, input: unknown) => {
-      afterContentCommit(() => { throw new Error("private publication error"); });
+      afterContentCommit(() => {
+        expect(state.receipts.get(ctx.intentId)?.status).toBe("applied");
+        order.push("first callback");
+        throw new Error("private publication error");
+      });
+      afterContentCommit(() => { order.push("second callback"); });
+      ctx.afterCommit({ key: "stable-effect", kind: "publish", payload: null });
 
       return action.execute(ctx, input);
-    } }]) });
+    } }]), effects: { publish: async (_payload, key) => { order.push(key); } } });
 
     const prepared = await executor.dispatchAction(caller, request);
 
@@ -229,5 +237,32 @@ describe("confirmed assistant execution", () => {
     expect(await executor.confirmIntent(caller.actor, prepared.intent.id)).toMatchObject({ status: "applied", effectsStatus: "unknown" });
     expect(await executor.reconcileEffects(caller, prepared.intent.id)).toMatchObject({ effectsStatus: "unknown" });
     expect(state.counter).toBe(1);
+    expect(order).toEqual(["first callback", "second callback", "stable-effect"]);
   });
+  it("malformed persisted external state cannot finalize a write or repeat a charge", async () => {
+    const { db, action, state } = fixture();
+
+    let externalCalls = 0;
+
+    const executor = createAssistantExecutor({ db, catalog: createActionCatalog([{ ...action, effect: "paid", confirmation: "always", external: async () => { externalCalls++;
+
+      return null;
+    } }]) });
+
+    const prepared = await executor.dispatchAction({ ...caller, runId: "run-1" }, request);
+
+    if (prepared.kind !== "pending") throw new Error("expected review");
+
+    const row = state.intents.get(prepared.intent.id);
+
+    if (!row) throw new Error("missing fixture intent");
+
+    row.status = "executing";
+    state.receipts.set(prepared.intent.id, { ...row, id: "receipt", intentId: prepared.intent.id, status: "executing", result: null, effectsStatus: "pending", effects: { external: { phase: "result", runId: "run-1", result: null } } });
+    expect(await executor.confirmIntent(caller.actor, prepared.intent.id)).toMatchObject({ status: "executing", result: null });
+    expect(await executor.reconcileEffects(caller, prepared.intent.id)).toMatchObject({ status: "executing", result: null });
+    expect(state.counter).toBe(0);
+    expect(externalCalls).toBe(0);
+  });
+
 });

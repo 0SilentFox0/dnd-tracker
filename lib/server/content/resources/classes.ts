@@ -7,17 +7,23 @@ import { ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS, classNameTakenMessage } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createClassSchema, updateClassSchema } from "@/lib/schemas";
+import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { classNameTaken } from "@/lib/server/classes/class-name";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { choiceColumnIssues } from "@/lib/utils/characters/choices/columns";
+import { choiceSpellIds } from "@/lib/utils/characters/choices/read";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
+import type { ClassFeature, Subclass } from "@/types/classes";
 
 type CreateInput = z.infer<typeof createClassSchema>;
 type UpdateInput = z.infer<typeof updateClassSchema>;
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
+
+const spellRefs = (features: readonly ClassFeature[], subclasses: readonly Subclass[]) =>
+  [...features, ...subclasses.flatMap(s => s.features)].flatMap(f => choiceSpellIds(f.choices) ?? []);
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
   if (await classNameTaken(campaignId, name, exceptId)) throw new ContentError(classNameTakenMessage(name), 409);
@@ -54,6 +60,7 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
   find: (actor, id) => prisma.gameClass.findFirst({ where: { id, campaignId: actor.campaignId } }),
   async create(actor, data) {
     await assertNameFree(actor.campaignId, data.name);
+    await assertCampaignRefs(actor.campaignId, { spell: spellRefs(data.features, data.subclasses) });
 
     return prisma.gameClass.create({
       data: {
@@ -79,6 +86,8 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
 
     const stored = toGameClassData(existing);
+
+    await assertCampaignRefs(actor.campaignId, { spell: addedIds(spellRefs(data.features ?? stored.features, data.subclasses ?? stored.subclasses), spellRefs(stored.features, stored.subclasses)) });
 
     const columns = data.columns ?? stored.columns ?? [];
 

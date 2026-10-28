@@ -1,8 +1,7 @@
-import type { Prisma } from "@prisma/client";
-
 import "server-only";
 import { prisma } from "@/lib/db";
 import { requestDigest } from "@/lib/server/assistant/intent-store";
+import { jsonContent } from "@/lib/server/assistant/json";
 import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import type { Actor } from "@/lib/utils/api/actor";
 
@@ -34,5 +33,5 @@ export async function contentSnapshot(actor: Actor) {
   return { tables, characters, inventory, skills, campaign };
 }
 
-export const jsonContent = (value: unknown): Prisma.JsonValue => JSON.parse(JSON.stringify(value ?? null));
+export { jsonContent } from "@/lib/server/assistant/json";
 export const snapshotHash = (value: unknown) => requestDigest(jsonContent(value));

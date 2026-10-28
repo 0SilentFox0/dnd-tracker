@@ -5,7 +5,7 @@ import type { AssistantCaller, ReceiptDto } from "./types";
 
 import "server-only";
 import { prisma } from "@/lib/db";
-import { actionResultSchema, intentStatusSchema } from "@/lib/schemas/assistant";
+import { actionResultSchema, intentStatusSchema, receiptEffectsStatusSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 
 export async function readReceipt(caller: AssistantCaller, intentId: string, db: Pick<Prisma.TransactionClient, "assistantReceipt"> = prisma): Promise<ReceiptDto> {
@@ -13,11 +13,11 @@ export async function readReceipt(caller: AssistantCaller, intentId: string, db:
 
   if (!row) throw new ContentError("Результат дії не знайдено", 404);
 
-  const effectsStatus = row.effectsStatus;
+  const effectsStatus = receiptEffectsStatusSchema.safeParse(row.effectsStatus);
 
-  if (!["pending", "complete", "failed", "unknown"].includes(effectsStatus)) throw new ContentError("Некоректний статус результату", 500);
+  if (!effectsStatus.success) throw new ContentError("Некоректний статус результату", 500);
 
-  return { id: row.id, status: parseInput(intentStatusSchema, row.status), result: row.result === null ? null : parseInput(actionResultSchema, row.result), effectsStatus: effectsStatus as ReceiptDto["effectsStatus"] };
+  return { id: row.id, status: parseInput(intentStatusSchema, row.status), result: row.result === null ? null : parseInput(actionResultSchema, row.result), effectsStatus: effectsStatus.data };
 }
 
 /** A narrow tombstone grant survives the deleted campaign; it exposes no old data.

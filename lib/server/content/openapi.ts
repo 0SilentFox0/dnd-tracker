@@ -55,7 +55,7 @@ function resourceSpecs(r: AnyContentResource): OpSpec[] {
     { ...base, id: `${r.kind}.create`, method: "POST", path: r.path, summary: `${r.label}: створити`, description: r.description, need: NEED.write, body: r.schemas.apiCreate ?? r.schemas.create, errors: r.errors, status: 201, notFound: false },
     { ...base, id: `${r.kind}.get`, method: "GET", path: item, summary: `${r.label}: один запис`, need: NEED.read(r.access.item) },
     { ...base, id: `${r.kind}.update`, method: "PATCH", path: item, summary: `${r.label}: змінити`, need: NEED.write, body: r.schemas.update, errors: r.errors },
-    { ...base, id: `${r.kind}.delete`, method: "DELETE", path: item, summary: `${r.label}: видалити`, need: NEED.write, response: "ok" },
+    { ...base, id: `${r.kind}.delete`, method: "DELETE", path: item, summary: `${r.label}: видалити`, need: NEED.write, response: "ok", errors: r.errors },
   ];
 }
 

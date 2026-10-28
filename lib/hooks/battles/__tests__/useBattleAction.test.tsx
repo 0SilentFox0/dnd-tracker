@@ -76,7 +76,7 @@ describe("useBattleAction", () => {
     expect(settled).toBe(true);
   });
 
-  it("пропуск версії — інвалідація замість патчу", async () => {
+  it("пропуск версії — одна інвалідація замість патчу", async () => {
     const { qc, wrapper } = setup();
 
     const spy = vi.spyOn(qc, "invalidateQueries");
@@ -88,6 +88,7 @@ describe("useBattleAction", () => {
     });
 
     expect(spy).toHaveBeenCalledWith({ queryKey: key });
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5);
   });
 

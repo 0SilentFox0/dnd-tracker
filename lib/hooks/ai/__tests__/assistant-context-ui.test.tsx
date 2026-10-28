@@ -6,6 +6,7 @@ import {useAssistantContext} from '../useAssistantContext';
 
 import * as api from '@/lib/api/assistant';
 import {chatRequestSchema} from '@/lib/schemas/ai';
+import type { AiFocus, AssistantContextPreview } from '@/types/ai';
 vi.mock('@/lib/api/assistant',()=>({previewAssistantContext:vi.fn(async()=>({provider:'anthropic',model:'actual-model',labels:['Система','Кампанія (дані)'],characters:1200,truncated:false,focusAvailable:true,sourceNoteCount:0,historyLimit:30})),getAssistantSourceNotes:vi.fn(async()=>({items:[{canonicalKey:'chosen',title:'Вибране джерело'}],nextOffset:null}))}));
 afterEach(()=>vi.clearAllMocks());
 it('selectionStartsEmptyAndDisclosurePrecedesProviderSend',async()=>{
@@ -77,4 +78,32 @@ let approval!:Promise<void>;
 
  act(()=>{ approval=result.current.approve(send); });act(()=>result.current.cancel());await act(async()=>{ finish(true);await approval; });expect(send).not.toHaveBeenCalled();
  }finally{ dispose(); }
+});
+
+it.each(['campaign', 'thread', 'focus', 'notes'] as const)('%s change rejects an old preview and requires fresh disclosure', async change => {
+ let finish!: (value: AssistantContextPreview) => void;
+
+ vi.mocked(api.previewAssistantContext).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+
+ const initial = { campaign: 'c1', thread: 't1', focus: undefined as AiFocus | undefined };
+
+ const { result, rerender } = renderHook(p => useAssistantContext(p.campaign, p.thread, p.focus), { initialProps: initial });
+
+ let request!: Promise<void>;
+
+ act(() => { request = result.current.requestSend('Old prompt'); });
+
+ if (change === 'notes') act(() => result.current.selectNotes(['chosen']));
+ else rerender({ ...initial, ...(change === 'campaign' ? { campaign: 'c2' } : change === 'thread' ? { thread: 't2' } : { focus: { kind: 'campaign' } as AiFocus }) });
+
+ await act(async () => { finish({ provider: 'anthropic', model: 'old-model', labels: [], characters: 1, truncated: false, focusAvailable: false, sourceNoteCount: 0, historyLimit: 30 }); await request; });
+ expect(result.current.disclosure).toBeNull();
+ expect(result.current.canSend).toBe(false);
+
+ const send = vi.fn();
+
+ await act(() => result.current.approve(send));
+ expect(send).not.toHaveBeenCalled();
+ await act(() => result.current.requestSend('Fresh prompt'));
+ expect(result.current.canSend).toBe(true);
 });

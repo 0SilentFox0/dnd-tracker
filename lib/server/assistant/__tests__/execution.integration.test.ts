@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
@@ -9,8 +9,11 @@ import { CHARACTER_ACTIONS } from "@/lib/server/assistant/actions/characters";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { readDeletionReceipt } from "@/lib/server/assistant/receipts";
+import { readReceipt } from "@/lib/server/assistant/receipts";
 import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
-import type { AssistantCaller, DurableEffect } from "@/lib/server/assistant/types";
+import type { ActionExecutionContext, AssistantCaller, DurableEffect } from "@/lib/server/assistant/types";
+import { ContentError } from "@/lib/server/content/errors";
+import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
 
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger: vi.fn(async () => {}) } }));
 vi.mock("@/lib/server/assistant/runtime-effects", () => ({ ASSISTANT_EFFECT_HANDLERS: {} }));
@@ -105,17 +108,65 @@ describe("T19 local constructor execution integration (connection_limit=1)", () 
   });
 
   it("serializes two concurrent confirmations into one receipt and one domain update", async () => {
-    const action = executor();
+    const original = CAMPAIGN_ACTIONS.find(action => action.id === "campaign.settings");
 
-    const pending = await action.dispatchAction(caller(), { actionId: "campaign.settings", requestId: randomUUID(), input: { patch: { description: "once" } } });
+    if (!original || original.effect !== "write") throw new Error("campaign.settings missing");
 
-    if (pending.kind !== "pending") throw new Error("expected review intent");
+    const catalog = createActionCatalog([{ ...original, execute: async (ctx: ActionExecutionContext, input: unknown) => {
+      const result = await original.execute(ctx, input);
 
-    const receipts = await Promise.all([action.confirmIntent(actor(), pending.intent.id), action.confirmIntent(actor(), pending.intent.id)]);
+      await ctx.db.campaign.update({ where: { id: fixture.campaignId }, data: { maxLevel: { increment: 1 } } });
 
-    expect(receipts[0].id).toBe(receipts[1].id);
-    expect(await db.assistantReceipt.count({ where: { intentId: pending.intent.id } })).toBe(1);
-    expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: "once" });
+      return result;
+    } }]);
+
+    // Two independent pools, each capped at one connection. Both transactions
+    // must open before either reaches the executor's campaign/intent locks.
+    const other = new PrismaClient({ datasources: { db: { url: url.toString() } }, log: [] });
+
+    const sessions = new Set<number>();
+
+    let release = () => {};
+
+    const ready = new Promise<void>(resolve => { release = resolve; });
+
+    const simultaneous = (client: PrismaClient) => new Proxy(client, { get(target, key) {
+      if (key === "$transaction") return (body: (tx: Prisma.TransactionClient) => Promise<unknown>, options: { timeout: number; maxWait: number }) => target.$transaction(async tx => {
+        const [session] = await tx.$queryRaw<Array<{ pid: number }>>`SELECT pg_backend_pid() AS pid`;
+
+        sessions.add(session.pid);
+
+        if (sessions.size === 2) release();
+
+        await ready;
+
+        return body(tx);
+      }, options);
+
+      const value = Reflect.get(target, key);
+
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+
+    const action = createAssistantExecutor({ db: simultaneous(db), catalog });
+
+    const contender = createAssistantExecutor({ db: simultaneous(other), catalog });
+
+    try {
+      const pending = await action.dispatchAction(caller(), { actionId: "campaign.settings", requestId: randomUUID(), input: { patch: { description: "once" } } });
+
+      if (pending.kind !== "pending") throw new Error("expected review intent");
+
+      const receipts = await Promise.all([action.confirmIntent(actor(), pending.intent.id), contender.confirmIntent(actor(), pending.intent.id)]);
+
+      expect(sessions.size).toBe(2);
+      expect(receipts[0].id).toBe(receipts[1].id);
+      expect(await db.assistantReceipt.count({ where: { intentId: pending.intent.id } })).toBe(1);
+      expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: "once", maxLevel: 21 });
+    } finally {
+      release();
+      await other.$disconnect();
+    }
   });
 
   it("competing HTTP PATCH invalidates the MCP preview before confirm", async () => {
@@ -224,6 +275,7 @@ describe("T19 local constructor execution integration (connection_limit=1)", () 
 
     await expect(action.confirmIntent(actor(), pending.intent.id)).rejects.toMatchObject({ status: 403 });
     expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: null });
+    expect(await db.assistantReceipt.count({ where: { intentId: pending.intent.id, status: "applied" } })).toBe(0);
   });
 
   it("crash/retry reuses the receipt and idempotency key without repeating durable effect", async () => {
@@ -271,4 +323,143 @@ describe("T19 local constructor execution integration (connection_limit=1)", () 
     expect(delivered).toEqual(new Set([effect.key]));
     expect(replay.effectsStatus).toBe("complete");
   });
+  it.each([404, 409])("fresh prepare %i persists stale without a partial domain write", async status => {
+    const original = CAMPAIGN_ACTIONS.find(action => action.id === "campaign.settings");
+
+    if (!original || original.effect !== "write") throw new Error("campaign.settings missing");
+
+    let stale = false;
+
+    const action = executor([{ ...original, prepare: async (who: AssistantCaller, input: unknown) => {
+      if (stale) throw new ContentError("Synthetic stale preview", status);
+
+      return original.prepare(who, input);
+    } }]);
+
+    const pending = await action.dispatchAction(caller(), { actionId: original.id, requestId: randomUUID(), input: { patch: { description: "must not apply" } } });
+
+    if (pending.kind !== "pending") throw new Error("expected review");
+
+    stale = true;
+    await expect(action.confirmIntent(actor(), pending.intent.id)).rejects.toMatchObject({ status: 409 });
+    expect(await db.assistantIntent.findUniqueOrThrow({ where: { id: pending.intent.id } })).toMatchObject({ status: "stale" });
+    expect(await db.assistantReceipt.count({ where: { intentId: pending.intent.id } })).toBe(0);
+    expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: null, maxLevel: 20 });
+  });
+
+  it.each(["result", "unknown"] as const)("durable external %s survives executor recreation without repeating payment", async phase => {
+    let externalCalls = 0;
+
+    let failFinalize = true;
+
+    const actionDef: import("@/lib/server/assistant/types").AssistantWriteAction = {
+      id: "campaign.integration-paid", title: "Synthetic paid", description: "No network; owned fixture only", input: z.object({}),
+      need: { access: "dm", scope: "campaign:write" }, effect: "paid", confirmation: "always",
+      prepare: async () => ({ summary: "Paid fixture", targets: [], changes: [], warnings: [], effects: [], preconditions: null }),
+      external: async (_who, _input, signal) => {
+        externalCalls++;
+        expect(currentContentWrite()).toBeUndefined();
+        expect(signal?.aborted).toBe(false);
+        expect(await db.assistantReceipt.findFirstOrThrow({ where: { campaignId: fixture.campaignId, actionId: "campaign.integration-paid" } })).toMatchObject({ status: "unknown", result: null, effects: { external: { phase: "started" } } });
+
+        if (phase === "unknown") throw new Error("UNKNOWN_PROVIDER_OUTCOME");
+
+        return null;
+      },
+      execute: async ctx => {
+        if (failFinalize) throw new Error("CRASH_AFTER_EXTERNAL_RESULT");
+
+        expect(ctx.externalResult).toBeNull();
+        await ctx.db.campaign.update({ where: { id: fixture.campaignId }, data: { maxLevel: { increment: 1 } } });
+
+        return { data: ctx.externalResult ?? null, affected: [], warnings: [] };
+      },
+    };
+
+    const engine = () => executor([actionDef]);
+
+    const request = { actionId: actionDef.id, requestId: randomUUID(), input: {} };
+
+    const pending = await engine().dispatchAction({ ...caller(), runId: randomUUID() }, request);
+
+    if (pending.kind !== "pending") throw new Error("expected paid review");
+
+    if (phase === "result") {
+      await expect(engine().confirmIntent(actor(), pending.intent.id)).rejects.toThrow("CRASH_AFTER_EXTERNAL_RESULT");
+      expect(await db.assistantReceipt.findUniqueOrThrow({ where: { intentId: pending.intent.id } })).toMatchObject({ status: "executing", effects: { external: { phase: "result", result: null } } });
+      expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ maxLevel: 20 });
+      failFinalize = false;
+      expect(await engine().confirmIntent(actor(), pending.intent.id)).toMatchObject({ status: "applied", result: { data: null } });
+      expect(await engine().dispatchAction({ ...caller(), runId: randomUUID() }, request)).toMatchObject({ kind: "result", result: { data: null } });
+    } else {
+      expect(await engine().confirmIntent(actor(), pending.intent.id)).toMatchObject({ status: "unknown", result: null, effectsStatus: "unknown" });
+      expect(await engine().confirmIntent(actor(), pending.intent.id)).toMatchObject({ status: "unknown", result: null });
+      await expect(engine().dispatchAction({ ...caller(), runId: randomUUID() }, request)).rejects.toMatchObject({ status: 409 });
+    }
+
+    expect(await engine().reconcileEffects(caller(), pending.intent.id)).toMatchObject({ status: phase === "result" ? "applied" : "unknown" });
+    expect(externalCalls).toBe(1);
+    expect(await db.assistantReceipt.count({ where: { intentId: pending.intent.id } })).toBe(1);
+    expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ maxLevel: phase === "result" ? 21 : 20 });
+  });
+
+  it("legacy pending intent and receipt JSON remain readable after payload redaction", async () => {
+    const original = CAMPAIGN_ACTIONS.find(action => action.id === "campaign.settings");
+
+    if (!original || original.effect !== "write") throw new Error("campaign.settings missing");
+
+    const payload = { patch: { description: "legacy pending" } };
+
+    const preview = await original.prepare(caller(), payload);
+
+    // Seed the persisted pre-extraction format directly, without dispatch/new envelope builders.
+    const intent = await db.assistantIntent.create({ data: {
+      campaignId: fixture.campaignId, userId: fixture.userId, channel: "chat", threadId: fixture.threadId, originThreadId: fixture.threadId,
+      originKey: "legacy-fixture", requestId: randomUUID(), requestHash: "legacy-hash", actionId: original.id,
+      summary: preview.summary, targets: [], payload, preview: JSON.parse(JSON.stringify(preview)), expected: JSON.parse(JSON.stringify(preview.preconditions)),
+      status: "pending", expiresAt: new Date(Date.now() + 900_000),
+    } });
+
+    const receipt = await executor().confirmIntent(actor(), intent.id);
+
+    expect(receipt.status).toBe("applied");
+    expect(await db.assistantReceipt.findUniqueOrThrow({ where: { intentId: intent.id } })).toMatchObject({ effects: { items: [], completed: [] } });
+    await db.assistantReceipt.update({ where: { intentId: intent.id }, data: { effects: { items: [], completed: [] } } });
+    await db.assistantIntent.update({ where: { id: intent.id }, data: { payload: Prisma.JsonNull, preview: Prisma.JsonNull, expected: Prisma.JsonNull, redactedAt: new Date() } });
+    expect(await readReceipt(caller(), intent.id, db)).toEqual(receipt);
+    expect(await executor().confirmIntent(actor(), intent.id)).toEqual(receipt);
+    expect(await executor().reconcileEffects(caller(), intent.id)).toEqual(receipt);
+    expect(await db.assistantReceipt.count({ where: { intentId: intent.id } })).toBe(1);
+    expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: "legacy pending" });
+  });
+
+  it("throwing after-commit callback leaves the SQL domain write applied and never replays it", async () => {
+    const original = CAMPAIGN_ACTIONS.find(action => action.id === "campaign.settings");
+
+    if (!original || original.effect !== "write") throw new Error("campaign.settings missing");
+
+    let callbackCalls = 0;
+
+    const action = executor([{ ...original, execute: async (ctx: ActionExecutionContext, input: unknown) => {
+      const result = await original.execute(ctx, input);
+
+      await ctx.db.campaign.update({ where: { id: fixture.campaignId }, data: { maxLevel: { increment: 1 } } });
+      afterContentCommit(() => { callbackCalls++; throw new Error("AFTER_COMMIT_FAILURE"); });
+
+      return result;
+    } }]);
+
+    const pending = await action.dispatchAction(caller(), { actionId: original.id, requestId: randomUUID(), input: { patch: { description: "committed" } } });
+
+    if (pending.kind !== "pending") throw new Error("expected review");
+
+    const receipt = await action.confirmIntent(actor(), pending.intent.id);
+
+    expect(receipt).toMatchObject({ status: "applied", effectsStatus: "unknown" });
+    expect(await action.confirmIntent(actor(), pending.intent.id)).toEqual(receipt);
+    expect(await action.reconcileEffects(caller(), pending.intent.id)).toEqual(receipt);
+    expect(callbackCalls).toBe(1);
+    expect(await db.campaign.findUniqueOrThrow({ where: { id: fixture.campaignId } })).toMatchObject({ description: "committed", maxLevel: 21 });
+  });
+
 });

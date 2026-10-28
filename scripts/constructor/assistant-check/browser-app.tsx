@@ -2,8 +2,18 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 
+import { ConstructorUiCheck } from './constructor-ui';
+
 import {AssistantHandoff} from '@/components/ai/AssistantHandoff';
 import {AssistantWorkspace} from '@/components/ai/AssistantWorkspace';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { AiThread } from '@/types/ai';
+
+const chatMode = new URLSearchParams(location.search).get('flow') === 'chat';
+
+const chatThread: AiThread = { id: 'synthetic-thread', title: 'Synthetic chat controls', mode: 'scenario', scenarioPageId: null, provider: 'anthropic', model: 'synthetic', updatedAt: '2026-10-27T00:00:00Z', usage: { inputTokens: null, outputTokens: null }, executionMode: 'review' };
+
+let stopped = false;
 
 const actions=[
   ['content-rule','content.units.create','Контент і правило','units'],
@@ -41,7 +51,19 @@ window.fetch=async(input: RequestInfo | URL,init: RequestInit={})=>{
 
 let status=200,data:unknown=[];
 
- if(url.includes('/assistant/intents/')&&url.includes('/confirm')){
+ if(chatMode && url.includes('/ai/credentials'))data=[{provider:'anthropic',last4:'test',defaultModel:'synthetic',updatedAt:chatThread.updatedAt}];
+ else if(chatMode && url.includes('/assistant/policy')){ chatThread.executionMode='auto';data=body; }
+ else if(chatMode && url.includes('/context-preview'))data={provider:'anthropic',model:'synthetic',labels:['Synthetic context'],characters:12,truncated:false,focusAvailable:false,sourceNoteCount:0,historyLimit:30};
+ else if(chatMode && url.endsWith('/messages'))data={thread:chatThread,messages:[]};
+ else if(chatMode && url.includes('/chat')){
+   if(method==='DELETE')stopped=true;
+
+   data={runs:[],messages:[],intents:[],receipts:stopped?[{id:'synthetic-chat-receipt',status:'applied',effectsStatus:'complete',result:{data:null,affected:[{domain:'characters',id:'synthetic-hero',name:'Synthetic hero'}],warnings:[]}}]:[]};
+ }
+ else if(chatMode && /\/ai\/threads(?:\?|$)/.test(url))data=[chatThread];
+ else if(url.endsWith('/rules'))data=DEFAULT_RULES;
+ else if(method==='PATCH' && /\/(backgrounds|classes)\//.test(url))data=body;
+ else if(url.includes('/assistant/intents/')&&url.includes('/confirm')){
    if(intentId==='stale-preview'){ status=409;data={error:'Пропозиція застаріла'}; }
    else { intent.status='applied';data={id:`receipt-${intentId}`,status:'applied',effectsStatus:'complete',result:{data:{actionId:intent.actionId,domainResult:'applied-once'},affected:intent.targets,warnings:[]}}; }
  }else if(url.includes('/assistant/intents/')&&url.endsWith('/receipt'))data={id:`receipt-${intentId}`,status:intent.status==='applied'?'applied':'pending',effectsStatus:'complete',result:{data:{actionId:intent.actionId,domainResult:'applied-once'},affected:intent.targets,warnings:[]}};
@@ -49,6 +71,13 @@ let status=200,data:unknown=[];
  else if(url.includes('/assistant/intents/'))data=intent;
 
  requests.push({url,method,status,actionId:intent.actionId,intentId,body});
+
+ if(chatMode && url.includes('/chat') && method==='POST')return new Promise<Response>((_resolve,reject)=>{
+   const signal=init.signal ?? (input instanceof Request ? input.signal : undefined);
+
+   if(signal?.aborted)reject(new DOMException('Aborted','AbortError'));
+   else signal?.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true});
+ });
 
  return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
 };
@@ -63,4 +92,6 @@ const root = document.getElementById('root');
 
 if (!root) throw new Error('Synthetic browser root missing');
 
-createRoot(root).render(<App/>);
+const flow = new URLSearchParams(location.search).get('flow');
+
+createRoot(root).render(flow && !chatMode ? <QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})}><ConstructorUiCheck flow={flow}/></QueryClientProvider> : <App/>);

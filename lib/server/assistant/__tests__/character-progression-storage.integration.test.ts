@@ -9,6 +9,11 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { runCharacterOperation } from "@/lib/server/characters/action-service";
 import { runCharacterProgression } from "@/lib/server/characters/progression-service";
+import { runContentWriteContext } from "@/lib/server/content/write-context";
+import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
+import { loadCharacterContext } from "@/lib/utils/battle/participant/load-character-context";
+import { loadBattle, saveBattle } from "@/lib/utils/battle/store";
+import { parseRules } from "@/lib/utils/rules/schema";
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", async original => ({ ...await original<object>(), invalidateReference: vi.fn() }));
 
@@ -135,6 +140,62 @@ describe("character progression real constructor, connection_limit=1", () => {
     expect(await db.characterInventory.findUnique({ where: { characterId: to } })).toMatchObject({ stash: [artifact.id] });
     expect(await db.inventoryLog.count({ where: { campaignId, kind: "artifact_transfer" } })).toBe(2);
     expect(first.result?.affected.map(t => t.id).sort()).toEqual([from, to].sort());
+  });
+  it("create choices level-up rest battle finish sheet preserves derived and spent resources", async () => {
+    const rules = parseRules({ classes: { enabled: true }, outOfCombat: { persistResources: true } });
+
+    await db.campaign.update({ where: { id: campaignId }, data: { rules } });
+
+    const cls = await db.gameClass.create({ data: { campaignId, name: "Scholar", hitDie: 8, caster: "full", spellcastingAbility: "intelligence" } });
+
+    const feat = await db.feat.create({ data: { campaignId, name: "Origin", type: "origin", choices: [], abilities: [] } });
+
+    const background = await db.background.create({ data: { campaignId, name: "Scholar", originFeatId: feat.id, skillProficiencies: ["arcana"] } });
+
+    const created = await runCharacterOperation(actor(), "create", { name: "Lifecycle", type: "npc_hero", controlledBy: "", race: "Людина", classes: [{ classId: cls.id, level: 1 }] });
+
+    const id = (created.data as { id: string }).id;
+
+    for (let repeat = 0; repeat < 2; repeat++) await runCharacterProgression(actor(), "choices", { characterId: id, backgroundId: background.id });
+
+    await runCharacterProgression(actor(), "level-up", { characterId: id, classId: cls.id });
+    await runCharacterProgression(actor(), "rest", { characterIds: [id], kind: "long" });
+
+    const battle = await db.battleScene.create({ data: { campaignId, name: marker, rules } });
+
+    // Real scoped readers bypass Next cache, as they do inside guarded writes.
+    const participant = await db.$transaction(tx => runContentWriteContext(campaignId, tx, async () => {
+      const row = await tx.character.findUniqueOrThrow({ where: { id }, include: { inventory: true } });
+
+      const { context } = await loadCharacterContext(row, { rules, maxLevel: 20 });
+
+      expect(context.backgroundsById?.[background.id].originFeatId).toBe(feat.id);
+
+      return createBattleParticipantFromCharacter(row, battle.id, "ally", undefined, context);
+    }));
+
+    expect(participant.spellcasting.spellSlots["1"]).toEqual({ max: 3, current: 3 });
+
+    const before = await loadBattle(db, { battleId: battle.id, campaignId, userId });
+
+    if (!before) throw Error("FIXTURE_BATTLE_MISSING");
+
+    await saveBattle(db, before, { participants: [participant], pending: [], events: [], scene: { status: "active" } });
+
+    const active = await loadBattle(db, { battleId: battle.id, campaignId, userId });
+
+    if (!active) throw Error("FIXTURE_BATTLE_MISSING");
+
+    const spent = { ...participant, combatStats: { ...participant.combatStats, currentHp: 3 }, spellcasting: { ...participant.spellcasting, spellSlots: { "1": { max: 3, current: 2 } } } };
+
+    await saveBattle(db, active, { participants: [spent], pending: [], events: [], scene: { status: "completed" } });
+
+    expect(await db.character.findUnique({ where: { id } })).toMatchObject({ level: 2, backgroundId: background.id, resources: { hp: 3, slotsSpent: { "1": 1 } } });
+    expect(await db.characterLog.count({ where: { characterId: id, kind: "battle_result" } })).toBe(1);
+
+    const sheet = await runCharacterProgression(actor(), "sheet", { characterId: id });
+
+    expect(sheet.data).toMatchObject({ identity: { level: 2 }, rest: { hp: { current: 3 } } });
   });
   it("repeatXpAndRestOnce", async () => {
     await enableOoc();

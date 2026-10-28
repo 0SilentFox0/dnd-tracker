@@ -15,6 +15,8 @@ vi.mock("@/lib/db", () => ({
     artifact: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     artifactSet: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     unit: { findMany: vi.fn(async () => [{ id: "u1", name: "Гоблін" }]), findFirst: vi.fn() },
+    gameClass: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
+    feat: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     mainSkill: { count: vi.fn(async () => 1) },
   },
 }));

@@ -14,6 +14,8 @@ const KIND_LABELS: Record<AbilitySourceRef["kind"], string> = {
   artifact: "Артефакти",
   artifactSet: "Сети",
   unit: "Юніти",
+  class: "Класи",
+  feat: "Риси",
 };
 
 export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: string; onPick: (abilities: Ability[]) => void }) {

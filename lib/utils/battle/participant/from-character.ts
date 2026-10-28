@@ -1,4 +1,5 @@
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
+import { buildCharacterSpellGrants } from "./character-spell-grants";
 import { type EquippedArtifactRow, loadConsumableEntries, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
@@ -31,16 +32,10 @@ import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
-import { consumablePools } from "@/lib/utils/items/consumables";
-import { itemStatsFromRow } from "@/lib/utils/items/item-row";
-import { consumablePoolKey, itemPoolKey, itemPools } from "@/lib/utils/items/pools";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { BattleParticipant } from "@/types/battle";
-import type { SelectedSpellGrant } from "@/types/choices";
-
-const heroGrantPool = (sourceKey: string, policy: SelectedSpellGrant["grantPolicy"]) => `pool:grant:${policy.sharedPool ? `${sourceKey.slice(0, sourceKey.lastIndexOf(":"))}:shared:${encodeURIComponent(policy.sharedPool)}` : sourceKey}`;
 
 const uniqueById = <T extends { id: string }>(rows: T[]): T[] => [...new Map(rows.map((r) => [r.id, r])).values()];
 
@@ -108,13 +103,17 @@ export async function createBattleParticipantFromCharacter(
     raceChoiceDefs.length > 0 || classMode
       ? choiceSelections({
           race: race && raceChoiceDefs.length > 0 ? { id: race.id, name: race.name, choices: raceChoiceDefs } : null,
-          background: classMode ? await loadBackground(character.campaignId, choiceState.backgroundId) : null,
+          background: classMode
+            ? context?.backgroundsById !== undefined
+              ? context.backgroundsById[choiceState.backgroundId ?? ""] ?? null
+              : await loadBackground(character.campaignId, choiceState.backgroundId)
+            : null,
           backgroundChoices: choiceState.backgroundChoices,
           backgroundFeatPicks: choiceState.backgroundFeatPicks,
           raceChoices: choiceState.raceChoices,
           classes: resolvedClasses ?? [],
           feats: classMode ? choiceState.feats : [],
-          featsById: await loadFeatsById(character.campaignId, selectionNeedsFeats(choiceState, classMode)),
+          featsById: await loadFeatsById(character.campaignId, selectionNeedsFeats(choiceState, classMode), context?.featsById),
           level: character.level,
         })
       : null;
@@ -176,47 +175,9 @@ export async function createBattleParticipantFromCharacter(
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
-  const grantPools = Object.fromEntries((selections?.spellGrants ?? []).flatMap(({ label, sourceKey, grantPolicy }) => {
-    const key = heroGrantPool(sourceKey, grantPolicy);
+  const { grants, pools: grantPools } = buildCharacterSpellGrants({ selections, artifactRows, consumables, proficiencyBonus });
 
-    const max = grantPolicy.uses === "proficiency" ? proficiencyBonus : grantPolicy.uses;
-
-    return max > 0 ? [[key, { label, max, rest: grantPolicy.rest }]] : [];
-  }));
-
-  const spellGrants = (selections?.spellGrants ?? []).map(({ spellId, label, sourceKey, grantPolicy }) => {
-    const pool = grantPolicy.uses === "proficiency" || grantPolicy.uses > 0 ? heroGrantPool(sourceKey, grantPolicy) : undefined;
-
-    return { spellId, key: sourceKey, label, via: grantPolicy.via ?? "grant", ...(pool && { pool, cost: 1 }), ...(grantPolicy.castLevel !== undefined && { castLevel: grantPolicy.castLevel }), ...(grantPolicy.dcAbility && { dcAbility: grantPolicy.dcAbility }) };
-  });
-
-  const itemSpellGrants = uniqueById(artifactRows.map(({ row }) => row)).flatMap((row) => {
-    const stats = itemStatsFromRow(row);
-
-    const pool = itemPoolKey(row.id);
-
-    return (stats?.spells ?? []).map((spell) => ({
-      spellId: spell.spellId,
-      key: `item:${row.id}:spell:${spell.spellId}`,
-      label: row.name,
-      ...(stats?.charges && { pool }),
-      cost: spell.cost,
-      ...(spell.castLevel !== undefined && { castLevel: spell.castLevel }),
-      ...(spell.dc !== undefined && { dc: spell.dc }),
-      ...(spell.attackBonus !== undefined && { attackBonus: spell.attackBonus }),
-      ...(spell.upcast && { upcast: spell.upcast }),
-    }));
-  });
-
-  const scrollGrants = consumables.flatMap(({ itemId, row, spellId, label }) => {
-    const spell = spellId && itemStatsFromRow(row)?.spells?.find((candidate) => candidate.spellId === spellId);
-
-    if (!spell || !spellId) return [];
-
-    return [{ spellId, key: `consumable:${itemId}:spell:${spellId}`, label: label ?? row.name, pool: consumablePoolKey(itemId), cost: 1, ...(spell.castLevel !== undefined && { castLevel: spell.castLevel }), ...(spell.dc !== undefined && { dc: spell.dc }), ...(spell.attackBonus !== undefined && { attackBonus: spell.attackBonus }) }];
-  });
-
-  const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...itemPools(uniqueById(artifactRows.map(({ row }) => row))), ...consumablePools(consumables), ...grantPools };
+  const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 
   const participant: BattleParticipant = {
     basicInfo: {
@@ -276,8 +237,8 @@ export async function createBattleParticipantFromCharacter(
         | undefined,
       spellSlots: resolvedSpellSlots,
       slotSpells: [...new Set([...knownSpells, ...(selections?.slotSpells ?? [])])],
-      knownSpells: [...new Set([...knownSpells, ...granted, ...itemSpellGrants.map(({ spellId }) => spellId), ...scrollGrants.map(({ spellId }) => spellId)])],
-      ...((spellGrants.length > 0 || itemSpellGrants.length > 0 || scrollGrants.length > 0) && { grants: [...spellGrants, ...itemSpellGrants, ...scrollGrants] }),
+      knownSpells: [...new Set([...knownSpells, ...granted, ...grants.map(({ spellId }) => spellId)])],
+      ...(grants.length > 0 && { grants }),
     },
     battleData: {
       attacks,

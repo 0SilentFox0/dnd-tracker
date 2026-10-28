@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+import { ASSISTANT_EFFECT_STATUSES,ASSISTANT_INTENT_STATUSES } from "@/lib/constants/assistant";
+
 export const executionModeSchema = z.enum(["review", "auto"]);
-export const intentStatusSchema = z.enum(["pending", "executing", "applied", "rejected", "stale", "expired", "failed", "unknown"]);
+export const intentStatusSchema = z.enum(ASSISTANT_INTENT_STATUSES);
+export const receiptEffectsStatusSchema = z.enum(ASSISTANT_EFFECT_STATUSES);
 export const assistantRequestSchema = z.strictObject({
   actionId: z.string().regex(/^[a-z][a-z-]*(?:\.[a-z][a-z-]*)+$/).max(150),
   requestId: z.string().regex(/^[A-Za-z0-9_-]{1,100}$/),

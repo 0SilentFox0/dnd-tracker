@@ -3,14 +3,14 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { buildInstructions } from "../prompt";
 
 import { prisma } from "@/lib/db";
-import { readCompendiumSummary } from "@/lib/server/assistant/actions/handoffs";
+import { readCompendiumSummary } from "@/lib/server/assistant/actions/compendium-reads";
 import { revalidateAssistantCaller } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn() }, scenarioPage: { findFirst: vi.fn() }, character: { findFirst: vi.fn() }, battleScene: { findFirst: vi.fn() }, aiThread: { findFirst: vi.fn() } } }));
 vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async (c: AssistantCaller) => c.actor) }));
 vi.mock("@/lib/server/assistant/catalog", () => ({ assistantCatalog: { listActions: () => [{ id: "campaign.read", effect: "read" }] } }));
-vi.mock("@/lib/server/assistant/actions/handoffs", () => ({ readCompendiumSummary: vi.fn(async () => ({ data: { entries: [{ notes: "Вибрані примітки" }] } })) }));
+vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendiumSummary: vi.fn(async () => ({ data: { entries: [{ notes: "Вибрані примітки" }] } })) }));
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => []) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => null) }));
 

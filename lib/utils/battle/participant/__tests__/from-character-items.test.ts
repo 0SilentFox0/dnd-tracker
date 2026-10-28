@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
@@ -118,5 +118,72 @@ describe("battle participant: item refs", () => {
       ["homm", "helmet", false],
       ["ring", "ring", true],
     ]);
+  });
+
+  it("frozen complete participant keeps grant order, stable keys and persisted pools", async () => {
+    const clock = vi.spyOn(Date, "now").mockReturnValue(1793016000000);
+
+    try {
+      const race = {
+        id: "race:dragon/one", name: "Людина", choices: [{
+          id: "gift", label: "Gift", kind: "option", level: 1, count: 1,
+          options: [{
+            id: "fire", name: "Fire", abilities: [],
+            spells: [
+              { level: 1, spellId: "cone", grant: { uses: "proficiency", rest: "long", sharedPool: "breath / fire", dcAbility: "constitution", castLevel: 0 } },
+              { level: 1, spellId: "line", grant: { uses: "proficiency", rest: "long", sharedPool: "breath / fire", dcAbility: "constitution", castLevel: 0 } },
+              { level: 1, spellId: "free", grant: { uses: 0, rest: "short", via: "slotOrGrant" } },
+            ],
+          }],
+        }],
+      };
+
+      const ring = art("ring", "Charged Ring", "ring", {
+        unique: false, charges: { max: 5, rest: "long" },
+        spells: [
+          { spellId: "sp-item", cost: 2, castLevel: 1, dc: 16, attackBonus: 6, upcast: { maxLevel: 4, extraCost: 2 } },
+          { spellId: "free", cost: 0, castLevel: 0, dc: 1, attackBonus: 0 },
+        ],
+      });
+
+      const scroll = art("scroll", "Scroll", "item", {
+        unique: false, consumable: true,
+        spells: [{ spellId: "unselected", cost: 1 }, { spellId: "sp-scroll", cost: 1, castLevel: 3, dc: 15, attackBonus: 5 }],
+      });
+
+      const classesById = {
+        item: { ...fighter, id: "item", columns: [{ key: "ring", label: "Class pool", values: Array(20).fill("9"), pool: { rest: "short" } }] },
+        fighter: { ...fighter, columns: [{ key: "energy", label: "Energy", values: Array(20).fill("3"), pool: { rest: "short" } }] },
+      };
+
+      const grantPool = "pool:grant:race:race%3Adragon%2Fone:gift:fire:shared:breath%20%2F%20fire";
+
+      const p = await createBattleParticipantFromCharacter({
+        ...base, knownSpells: ["sp-known", "sp-item", "sp-known"],
+        classes: [{ classId: "item", level: 2 }, { classId: "fighter", level: 3 }],
+        raceChoices: { gift: [{ id: "fire" }] },
+        inventory: {
+          equipped: { ring1: "ring", ring2: "ring" }, stash: [], attuned: [],
+          items: [{ id: "scroll-stack", name: "Chosen scroll", quantity: 2, consumable: true, artifactId: "scroll", spellId: "sp-scroll" }],
+        },
+        resources: { hp: 7, tempHp: 2, charges: { "pool:item:ring": { used: 2, rest: "long" }, [grantPool]: { used: 1, rest: "long" }, "pool:fighter:energy": { used: 1, rest: "short" } } },
+      } as never, "b1", ParticipantSide.ALLY, 2, {
+        skillTreeByRace: {}, mainSkills: [], spells: [], allSkills: [], racesByName: { "Людина": race },
+        campaign: { maxLevel: 20 }, skillsById: {}, artifactsById: { ring, scroll }, artifactSetsById: {}, artifactSetMemberIds: {},
+        rules: parseRules({ classes: { enabled: true }, items: { enabled: true }, outOfCombat: { persistResources: true } }),
+        classesById, featsById: {}, backgroundsById: {},
+      } as never);
+
+      expect(p.spellcasting.knownSpells).toEqual(["sp-known", "sp-item", "cone", "line", "free", "sp-scroll"]);
+      expect(p.spellcasting.grants).toHaveLength(6);
+      expect(p.spellcasting.grants?.[2]).toEqual({ spellId: "free", key: "race:race%3Adragon%2Fone:gift:fire:free", label: "Людина: Fire", via: "slotOrGrant" });
+      expect(p.battleData.pools?.[grantPool]).toEqual({ label: "Людина: Fire", max: 3, rest: "long" });
+      expect(p.battleData.pools?.["pool:item:ring"]).toEqual({ label: "Charged Ring", max: 5, rest: "long" });
+      expect(p.battleData.abilityUsage?.[grantPool]?.battle).toBe(1);
+      expect(p.combatStats.currentHp).toBe(7);
+      expect(p).toMatchSnapshot();
+    } finally {
+      clock.mockRestore();
+    }
   });
 });

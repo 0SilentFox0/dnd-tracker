@@ -3,11 +3,12 @@ import { item, materialPage, monster, spell } from "./adapters/content";
 import {
   array,
   description,
+  effectiveEdition,
   object,
   str,
   unsupported,
 } from "./adapters/shared";
-import { renderEntries } from "./entries";
+import { type FeatureResolutionContext, resolveCompendiumFeatures } from "./feature-resolution";
 import { canonicalKey, nestedId } from "./identity";
 import {
   byteLength,
@@ -22,7 +23,6 @@ import {
   type Adapter,
   type AdapterContext,
   type AdaptOptions,
-  type Edition,
   issue,
 } from "./types";
 
@@ -56,12 +56,7 @@ const nestedKinds = new Set([
   "adventureData",
 ]);
 
-export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
-  value === "classic" || value === "one"
-    ? value
-    : fallback === "classic" || fallback === "one"
-    ? fallback
-    : "unknown";
+export { effectiveEdition } from "./adapters/shared";
 
 export function adaptCompendium(
   root: Compendium,
@@ -86,6 +81,14 @@ export function adaptCompendium(
   const usedOptionals = new Set<string>();
 
   const embedded: Record<string, number> = Object.create(null);
+
+  const featureContext: FeatureResolutionContext = {
+    root,
+    editionFallback: meta.edition,
+    issues,
+    embedded,
+    usedOptionals,
+  };
 
   let selected = 0;
 
@@ -271,227 +274,14 @@ export function adaptCompendium(
     });
   }
 
-  // Explicit feature UIDs include parent identities. No guessing by first matching display name.
-  function features(
-    raw: unknown,
-    kind: "classFeature" | "subclassFeature",
-    ownerPath: string
-  ): JsonRecord[] {
-    const out: JsonRecord[] = [];
-
-    for (const [i, ref] of array(raw).entries()) {
-      const uid = typeof ref === "string" ? ref : str(object(ref)[kind]);
-
-      const parts = uid.split("|");
-
-      const candidates = array(root[kind])
-        .map(object)
-        .filter(
-          (r) =>
-            normalized(str(r.name)) === normalized(parts[0] ?? "") &&
-            normalized(str(r.className)) === normalized(parts[1] ?? "") &&
-            normalized(str(r.classSource)) === normalized(parts[2] ?? "") &&
-            (kind !== "subclassFeature" ||
-              (normalized(str(r.subclassShortName)) ===
-                normalized(parts[3] ?? "") &&
-                normalized(str(r.subclassSource)) ===
-                  normalized(parts[4] ?? ""))) &&
-            Number(r.level) ===
-              Number(parts[kind === "classFeature" ? 3 : 5]) &&
-            (!parts[kind === "classFeature" ? 4 : 6] ||
-              normalized(str(r.source)) ===
-                normalized(parts[kind === "classFeature" ? 4 : 6]))
-        );
-
-      if (candidates.length !== 1) {
-        issues.push(
-          issue(
-            "FEATURE_REF_UNRESOLVED",
-            `${ownerPath}[${i}]`,
-            "error",
-            "Додайте точне визначення feature або виключіть залежний клас/підклас"
-          )
-        );
-        continue;
-      }
-
-      const row = candidates[0];
-
-      embedded[kind] = (embedded[kind] ?? 0) + 1;
-      issues.push(
-        issue(
-          "MANUAL_CLASS_FEATURE",
-          ownerPath,
-          "warning",
-          "Особливість перенесено як опис; застосовуйте її правила вручну"
-        )
-      );
-
-      const rendered = renderEntries(row.entries, `${kind}.${i}`);
-
-      const featureContext: AdapterContext = {
-        root,
-        inputKind: kind,
-        path: ownerPath,
-        source: str(row.source),
-        edition: effectiveEdition(row.edition, meta.edition),
-        key: ownerPath,
-        issues,
-      };
-
-      const featureNotes = unsupported(
-        row,
-        [
-          "className",
-          "classSource",
-          "subclassShortName",
-          "subclassSource",
-          "level",
-          "header",
-        ],
-        featureContext
-      );
-
-      issues.push(...rendered.issues);
-
-      const choices: JsonRecord[] = [];
-
-      const optional = (v: JsonRecord): JsonRecord | undefined => {
-        const uid = str(v.optionalfeature);
-
-        const [name, source] = uid.split("|");
-
-        const candidates = array(root.optionalfeature)
-          .map(object)
-          .filter(
-            (r) =>
-              normalized(str(r.name)) === normalized(name) &&
-              normalized(str(r.source)) === normalized(source ?? "")
-          );
-
-        if (candidates.length !== 1) {
-          issues.push(
-            issue(
-              "OPTIONAL_FEATURE_REF",
-              ownerPath,
-              "error",
-              "Додайте визначення опційної особливості"
-            )
-          );
-
-          return;
-        }
-
-        usedOptionals.add(
-          canonicalKey(
-            "optionalfeature",
-            name,
-            source ?? "",
-            effectiveEdition(candidates[0].edition, meta.edition)
-          )
-        );
-
-        return {
-          id: nestedId(uid),
-          name,
-          description: [
-            renderEntries(candidates[0].entries).text,
-            unsupported(
-              candidates[0],
-              ["prerequisite", "featureType"],
-              featureContext
-            ),
-            candidates[0].prerequisite
-              ? `Вимоги (ДМ перевіряє вручну): ${JSON.stringify(
-                  candidates[0].prerequisite
-                )}`
-              : "",
-          ]
-            .filter(Boolean)
-            .join("\n"),
-          abilities: [],
-        };
-      };
-
-      const visit = (v: unknown) => {
-        if (Array.isArray(v)) {
-          v.forEach(visit);
-
-          return;
-        }
-
-        const o = object(v);
-
-        if (o.type === "options") {
-          const children = array(o.entries).map(object);
-
-          if (
-            children.length &&
-            children.every((child) => child.type === "refOptionalfeature") &&
-            Number.isInteger(o.count) &&
-            Number(o.count) > 0 &&
-            Number(o.count) <= children.length
-          ) {
-            const options = children.flatMap((child) => optional(child) ?? []);
-
-            if (options.length === children.length)
-              choices.push({
-                id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}`),
-                label: "Особливості на вибір",
-                kind: "option",
-                count: o.count,
-                options,
-              });
-          } else
-            issues.push(
-              issue(
-                "MANUAL_OPTIONAL_PROGRESSION",
-                ownerPath,
-                "warning",
-                "Налаштуйте неоднозначний вибір особливостей вручну"
-              )
-            );
-
-          return;
-        }
-
-        if (o.type === "refOptionalfeature") {
-          const option = optional(o);
-
-          if (option)
-            choices.push({
-              id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}:${str(o.optionalfeature)}`),
-              label: option.name,
-              kind: "option",
-              count: 1,
-              options: [option],
-            });
-
-          return;
-        }
-
-        Object.values(o).forEach(visit);
-      };
-
-      visit(row.entries);
-      out.push({
-        level: row.level,
-        description: [str(row.name), rendered.text, featureNotes].filter(Boolean).join("\n"),
-        abilities: [],
-        ...(choices.length && { choices }),
-      });
-    }
-
-    return out;
-  }
-
   for (const entry of entries.filter((e) => e.inputKind === "class")) {
     const row = sourceRows.get(entry.key);
 
-    entry.body.features = features(
+    entry.body.features = resolveCompendiumFeatures(
       row?.classFeatures,
       "classFeature",
-      `${entry.key}.classFeatures`
+      `${entry.key}.classFeatures`,
+      featureContext
     );
   }
 
@@ -512,10 +302,11 @@ export function adaptCompendium(
                 {
                   id: nestedId(ctx.key),
                   name: row.name,
-                  features: features(
+                  features: resolveCompendiumFeatures(
                     row.subclassFeatures,
                     "subclassFeature",
-                    `${ctx.key}.subclassFeatures`
+                    `${ctx.key}.subclassFeatures`,
+                    featureContext
                   ),
                 },
               ],

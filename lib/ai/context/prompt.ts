@@ -8,7 +8,7 @@ import { showSummary } from "@/lib/ai/tools/show";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { readCompendiumSummary } from "@/lib/server/assistant/actions/handoffs";
+import { readCompendiumSummary } from "@/lib/server/assistant/actions/compendium-reads";
 import { revalidateAssistantCaller } from "@/lib/server/assistant/authorize";
 import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import type { AssistantCaller } from "@/lib/server/assistant/types";

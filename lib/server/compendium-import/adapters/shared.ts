@@ -1,10 +1,17 @@
 import { renderEntries } from "../entries";
 import { stableJson } from "../identity";
 import type { JsonRecord } from "../parse";
-import { type AdapterContext, type CompendiumRef, issue } from "../types";
+import { type AdapterContext, type CompendiumRef, type Edition, issue } from "../types";
 
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { isRecord } from "@/lib/utils/common/is-record";
+
+export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
+  value === "classic" || value === "one"
+    ? value
+    : fallback === "classic" || fallback === "one"
+    ? fallback
+    : "unknown";
 
 export const object = (v: unknown): JsonRecord => isRecord(v) ? v : {};
 export const array = (v: unknown): unknown[] => Array.isArray(v) ? v : [];

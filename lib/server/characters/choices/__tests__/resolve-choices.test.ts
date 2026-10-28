@@ -38,4 +38,24 @@ describe("resolveCharacterChoices", () => {
     expect(result.response.status).toBe(422);
     expect(await result.response.json()).toMatchObject({ error: expect.stringContaining("Навичка"), issues: [{ code: "SKILL_NOT_ALLOWED", path: "raceChoices.keen-senses" }] });
   });
+
+  it("reapplying ASI choices has zero delta; swapping only moves the selected points", async () => {
+    const before = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4, choices: { "ability-score-improvement-4": [{ id: "f-asi", picks: { asi: [{ id: "strength" }, { id: "strength" }] } }] } }] };
+
+    const current = { ...character, strength: scores.strength + 2 };
+
+    const unchanged = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character: current, before, after: before, refs });
+
+    expect(unchanged.ok).toBe(true);
+
+    if (!unchanged.ok) return;
+
+    for (const ability of Object.keys(scores)) expect(unchanged.fields).not.toHaveProperty(ability);
+
+    const after = { ...before, classes: [{ classId: sorcerer.id, level: 4, choices: { "ability-score-improvement-4": [{ id: "f-asi", picks: { asi: [{ id: "dexterity" }, { id: "dexterity" }] } }] } }] };
+
+    const swapped = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character: current, before, after, refs });
+
+    expect(swapped).toMatchObject({ ok: true, fields: { strength: scores.strength, dexterity: scores.dexterity + 2 } });
+  });
 });

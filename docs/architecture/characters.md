@@ -30,3 +30,9 @@
 - Передісторія й аватар: `guardDraftAi` (DM, або гравець без активного героя) + `limitDraftAi` (10 викликів / 10 хв на користувача й кампанію, окремий `scope` на кожну функцію).
 - Ліміт — Upstash (`lib/utils/api/rate-limit.ts`). Без Upstash (на проді його зараз немає) виклики з `memoryFallback: true` рахуються ковзним вікном у пам'яті інстанса (ключ scope+користувач+кампанія, обмежений розмір мапи); інші ендпоінти лишаються fail-open. Ліміт per-instance, тобто на кількох інстансах ефективно ширший.
 - Доступність AI для форми (`GET …/draft/backstory`) перевіряє лише наявність ключів DM (`readDmAiAvailability`), без розшифрування; клієнт кешує відповідь 5 хв.
+
+## Refactor S6/S8: derivation і lifecycle
+
+Чистий `lib/utils/characters/classes/application.ts` володіє class validation/derivation, server `apply-classes.ts` — loading та compatibility exports. Participant context підтримує scoped preloaded feat/background refs; grants/pools складає `character-spell-grants.ts`. Integrated SQL lifecycle create→choices→level-up→rest→battle→finish→sheet перевіряє збереження derived slots, origin feat, HP і spent resources; це local store/service evidence, не browser auth end-to-end.
+
+`useBackgroundForm` володіє state/patch/validation/submit/cancel; mutation — чинний `useUpdateBackground`/`useCrudMutation`, navigation — `useNavigateFresh`. BackgroundForm рендерить HUD/choices. Class/feat body normalization лишається доменною. Докази — [S6](../superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md) і [S8](../superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md).

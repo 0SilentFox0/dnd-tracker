@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
@@ -18,6 +19,7 @@ describe("assistant retention", () => {
     expect(where).toMatchObject({ status: { in: ["expired", "rejected", "failed", "applied", "stale"] }, updatedAt: { lt: new Date("2026-10-18T00:00:00Z") }, redactedAt: null });
     expect(data).toHaveProperty("redactedAt", new Date("2026-10-25T00:00:00Z"));
     expect(data).not.toHaveProperty("originTokenId");
+    expect(data).toMatchObject({ payload: Prisma.JsonNull, preview: Prisma.JsonNull, expected: Prisma.JsonNull });
   });
 
   it("retains unknown receipts and pending effects instead of enabling blind retries", async () => {

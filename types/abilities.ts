@@ -1,4 +1,5 @@
 import { AttackType } from "@/lib/constants/battle";
+import type { OwnerKind } from "@/lib/utils/abilities/read";
 import type { Ability, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { GridPoint } from "@/types/battle";
 
@@ -44,7 +45,7 @@ export type AbilityEvent =
   | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint };
 
 export interface AbilitySourceRef {
-  kind: "skill" | "race" | "artifact" | "artifactSet" | "unit";
+  kind: OwnerKind;
   id: string;
   name: string;
 }

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { isAssistantHandoffHref } from "@/lib/schemas/assistant-handoff";
 import { BATTLE_ACTION_COVERAGE } from "@/lib/server/assistant/actions/battle-coverage";
 import { BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battles";
 import { ASSISTANT_ROUTE_COVERAGE, exportedHttpMethods } from "@/lib/server/assistant/coverage";
@@ -127,6 +128,21 @@ describe("T11 battle adapters", () => {
   });
   it("foreign setup refs rejected", async () => {
     await expect(prepareBattleAction(caller, "create", { body: { name: "New", participants: [{ id: "foreign", type: "character", side: "ally" }] } })).rejects.toMatchObject({ status: 404 });
+  });
+  it.each([
+    { input: {}, href: "/campaigns/c/dm/battles" },
+    { input: { battleId: "battle-1" }, href: "/campaigns/c/dm/battles/battle-1" },
+  ])("map-background opens the allowed map editor at $href without a write", async ({ input, href }) => {
+    const handoff = BATTLE_ACTIONS.find(a => a.id === "battles.map-background");
+
+    if (!handoff || handoff.effect !== "handoff") throw new Error("Missing map handoff");
+
+    const result = await handoff.execute(caller, input);
+
+    expect(result.href).toBe(href);
+    expect(isAssistantHandoffHref(result.href)).toBe(true);
+    expect(fixture.rolls).toBe(0);
+    expect(fixture.saves).toEqual([]);
   });
   it("external backgrounds use existing UI", async () => {
     await expect(prepareBattleAction(caller, "patch", { battleId: "b", body: { map: { cols: 10, rows: 10, opacity: 1, background: "https://external.example/map.png" } } })).rejects.toMatchObject({ status: 400 });

@@ -21,6 +21,6 @@ export const BATTLE_ACTIONS: readonly AssistantActionDef[] = [...operations, {
   execute: async (caller, raw) => {
     const { battleId } = battleActionInput.parse(raw);
 
-    return { href: `/campaigns/${caller.actor.campaignId}/battles${battleId ? `/${encodeURIComponent(battleId)}` : ""}`, reason: "Додайте зображення у редакторі карти; після збереження можна використовувати його посилання." };
+    return { href: `/campaigns/${caller.actor.campaignId}/dm/battles${battleId ? `/${encodeURIComponent(battleId)}` : ""}`, reason: "Додайте зображення у редакторі карти; після збереження можна використовувати його посилання." };
   },
 }];

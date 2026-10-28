@@ -46,6 +46,7 @@ const MODE_OWNED_FILES = [
 ];
 
 const eslintConfig = defineConfig([
+  { ignores: [".superpowers/**"] },
   ...nextVitals,
   ...nextTs,
   {

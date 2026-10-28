@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withAllTargets, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
+import { castSpell } from "@/lib/utils/battle/spell/cast";
+import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -536,4 +539,45 @@ describe("SET_SLOT", () => {
     expect(s.saves).toEqual({ a: 5 });
     expect(s.attacks).toEqual({ a: 11 });
   });
+});
+
+it("AoE preview і server cast вражають невидимого учасника в геометрії шаблону", () => {
+  const map: BattleMapConfig = { cols: 20, rows: 20, background: null, opacity: 0.3 };
+
+  const base = makeParticipant({ id: "caster" });
+
+  const caster = { ...base, spellcasting: { ...base.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } }, battleData: { ...base.battleData, position: { x: 1, y: 1 } } };
+
+  const enemy = makeParticipant({ id: "invisible", side: ParticipantSide.ENEMY });
+
+  const invisible = { ...enemy, battleData: { ...enemy.battleData, position: { x: 5, y: 5 }, activeEffects: [makeEffect("invisible", { effects: [{ type: "invisible", value: 1 }] })] } };
+
+  const participants = [caster, invisible];
+
+  const spell: CastableSpell = {
+    id: "aoe", name: "Вогонь", groupId: null, level: 1,
+    definition: {
+      dice: 1, cost: "action", targeting: { kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 10, range: 60 },
+      resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
+    },
+  };
+
+  const pick = buildSpellPick(participants, caster, { id: spell.id, name: spell.name, level: spell.level, ...spell.definition } as BookSpell, map);
+
+  const aim = { x: 5, y: 5 };
+
+  const preview = spellAimTargets({ map, participants, caster }, pick, aim).map((p) => p.basicInfo.id);
+
+  const resolution = resolveSpellTargets(participants, caster, spell, spell.definition.targeting, [], { map, targetCell: aim });
+
+  expect(preview).toEqual(["invisible"]);
+  expect(resolution).toMatchObject({ ok: true, targetIds: preview });
+
+  if (!resolution.ok) throw new Error(resolution.error);
+
+  const result = castSpell({ caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
+
+  expect(result.success).toBe(true);
+  expect(result.allParticipantsUpdated.find((p) => p.basicInfo.id === "invisible")?.combatStats.currentHp).toBe(16);
+  expect(invisible.combatStats.currentHp).toBe(20);
 });

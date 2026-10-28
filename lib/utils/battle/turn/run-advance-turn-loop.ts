@@ -6,11 +6,9 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
-import {
-  processEndOfTurn,
-  processStartOfRound,
-  processStartOfTurn,
-} from "@/lib/utils/battle/turn/start-end";
+import { processStartOfRound } from "@/lib/utils/battle/turn/round-start";
+import { processEndOfTurn } from "@/lib/utils/battle/turn/turn-end";
+import { processStartOfTurn } from "@/lib/utils/battle/turn/turn-start";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";

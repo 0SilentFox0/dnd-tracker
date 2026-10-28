@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ASSISTANT_POLLING } from "./assistant-polling";
 import { aiKeys } from "./keys";
 import { flushAssistantBeforeApply, useAssistantEffects } from "./useAssistantEffects";
 
@@ -14,17 +15,17 @@ export function useAssistantIntents(campaignId: string, filters: IntentFilters &
 
  const {consumeReceipt}=useAssistantEffects(campaignId);
 
- const query = useQuery({queryKey: aiKeys.intents(campaignId, filters.cursor, filters.limit), queryFn: () => getAssistantIntents(campaignId, { ...filters, status: "pending" }), refetchInterval: 10000});
+ const query = useQuery({queryKey: aiKeys.intents(campaignId, filters.cursor, filters.limit), queryFn: () => getAssistantIntents(campaignId, { ...filters, status: "pending" }), refetchInterval: ASSISTANT_POLLING.intentsMs});
 
- const legacy = useQuery({queryKey:["ai-proposals",campaignId,"workspace"],queryFn:()=>getAiProposals(campaignId,{status:"pending",workspace:true})});
+ const legacy = useQuery({queryKey:aiKeys.workspaceProposals(campaignId),queryFn:()=>getAiProposals(campaignId,{status:"pending",workspace:true})});
 
  const detail = useQuery({queryKey: aiKeys.intent(campaignId, filters.intentId ?? ""), queryFn: () => getAssistantIntent(campaignId, filters.intentId ?? ""), enabled: !!filters.intentId});
 
- const receipt = useQuery({queryKey: aiKeys.receipt(campaignId, filters.intentId ?? ""), queryFn: () => getAssistantReceipt(campaignId, filters.intentId ?? ""), enabled: !!filters.intentId && ["applied", "executing", "unknown", "failed"].includes(detail.data?.status ?? ""), refetchInterval: detail.data?.status === "executing" ? 2000 : false});
+ const receipt = useQuery({queryKey: aiKeys.receipt(campaignId, filters.intentId ?? ""), queryFn: () => getAssistantReceipt(campaignId, filters.intentId ?? ""), enabled: !!filters.intentId && ["applied", "executing", "unknown", "failed"].includes(detail.data?.status ?? ""), refetchInterval: detail.data?.status === "executing" ? ASSISTANT_POLLING.executingReceiptMs : false});
 
  useEffect(()=>{ if(receipt.data && !("deleted" in receipt.data))void consumeReceipt(receipt.data); },[receipt.data,consumeReceipt]);
 
- const refresh = async () => { await Promise.all([client.invalidateQueries({queryKey:["assistant-intents",campaignId]}), client.invalidateQueries({queryKey:["assistant-intent",campaignId]}),client.invalidateQueries({queryKey:["assistant-receipt",campaignId]}),client.invalidateQueries({queryKey:["ai-proposals",campaignId]})]); };
+ const refresh = async () => { await Promise.all([client.invalidateQueries({queryKey:aiKeys.intentsRoot(campaignId)}), client.invalidateQueries({queryKey:aiKeys.intentRoot(campaignId)}),client.invalidateQueries({queryKey:aiKeys.receiptsRoot(campaignId)}),client.invalidateQueries({queryKey:aiKeys.proposalsRoot(campaignId)})]); };
 
  const applyLegacy = useMutation({mutationFn:async(id:string)=>{ await flushAssistantBeforeApply(campaignId);
 

@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 
+import type { ASSISTANT_EFFECT_STATUSES,ASSISTANT_INTENT_STATUSES } from "@/lib/constants/assistant";
 import type { Actor, ActorNeed } from "@/lib/utils/api/actor";
 
 export type JsonValue = Prisma.JsonValue;
@@ -16,10 +17,10 @@ export type ActionPreview = { summary: string; targets: TargetRef[]; changes: Fi
 export type ActionResult = { data: JsonValue; affected: TargetRef[]; warnings: string[] };
 export type DurableEffect = { key: string; kind: "invalidate" | "publish" | "media-cleanup"; payload: JsonValue };
 export type ActionExecutionContext = { caller: AssistantCaller; intentId: string; expected: JsonValue; db: Prisma.TransactionClient; afterCommit(effect: DurableEffect): void; externalResult?: JsonValue };
-export type IntentStatus = "pending" | "executing" | "applied" | "rejected" | "stale" | "expired" | "failed" | "unknown";
+export type IntentStatus = (typeof ASSISTANT_INTENT_STATUSES)[number];
 export type IntentSummary = { id: string; actionId: string; status: IntentStatus; summary: string; targets: TargetRef[]; expiresAt: string; channel: AssistantChannel; legacyProposalId?: string | null };
 export type IntentDetail = IntentSummary & { preview: ActionPreview };
-export type ReceiptDto = { id: string; status: IntentStatus; result: ActionResult | null; effectsStatus: "pending" | "complete" | "failed" | "unknown" };
+export type ReceiptDto = { id: string; status: IntentStatus; result: ActionResult | null; effectsStatus: (typeof ASSISTANT_EFFECT_STATUSES)[number] };
 export type HandoffResult = { href: string; reason: string };
 export type DispatchResult = { kind: "result"; result: ActionResult } | { kind: "pending"; intent: IntentSummary; reviewUrl: string } | ({ kind: "handoff" } & HandoffResult);
 

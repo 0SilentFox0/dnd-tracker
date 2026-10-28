@@ -3,11 +3,18 @@ import type { Prisma } from "@prisma/client";
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 import { referencedSkillIds } from "./extract-skills";
 import { loadClassesById } from "./load-classes";
+import { loadFeatsById } from "./load-feats";
 
 import { prisma } from "@/lib/db";
+import { CharacterClassesSchema } from "@/lib/schemas/classes";
+import { loadBackground } from "@/lib/server/backgrounds/load";
+import { readChoiceList } from "@/lib/utils/abilities/read";
+import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
+import { selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
 import { inventoryArtifactIds } from "@/lib/utils/items/resolve";
 import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 
 export interface CharacterContext {
   context: CampaignSpellContext;
@@ -30,8 +37,9 @@ function learnedNeeds(character: CharacterFromPrisma, tree: Prisma.SkillTreeGetP
 }
 
 /**
- * Контекст одного персонажа за 3 виклики Prisma: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
+ * Контекст персонажа: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
  * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
+ * Класи й потрібні choice refs читаються campaign-scoped кешованими loaders.
  */
 export async function loadCharacterContext(character: CharacterFromPrisma, settings: { maxLevel: number; rules: Ruleset }): Promise<CharacterContext> {
   const { campaignId, race: raceName } = character;
@@ -89,6 +97,18 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
 
   const classesById = rules.classes.enabled ? await loadClassesById(campaignId) : undefined;
 
+  const parsedClasses = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
+
+  const classMode = parsedClasses?.success ? resolveClassEntries(parsedClasses.data, classesById ?? {}).some((e) => e.class) : false;
+
+  const state = choicesStateOf(character);
+
+  const needsSelections = classMode || (race ? readChoiceList(race.choices).length > 0 : false);
+
+  const featsById = await loadFeatsById(campaignId, needsSelections && selectionNeedsFeats(state, classMode));
+
+  const background = classMode ? await loadBackground(campaignId, state.backgroundId) : null;
+
   const artifactsById: NonNullable<CampaignSpellContext["artifactsById"]> = {};
 
   const artifactSetsById: NonNullable<CampaignSpellContext["artifactSetsById"]> = {};
@@ -119,6 +139,8 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
       artifactsById,
       artifactSetsById,
       artifactSetMemberIds,
+      featsById,
+      backgroundsById: background ? { [background.id]: background } : {},
       ...(classesById && { classesById }),
     },
   };

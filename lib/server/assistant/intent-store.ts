@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentStatus,IntentSummary } from "./types";
 
 import "server-only";
+import { ASSISTANT_LIMITS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
 import { actionPreviewSchema, assistantRequestSchema, assistantTargetSchema, intentPageSchema, intentStatusSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -12,10 +13,6 @@ import type { IntentPage } from "@/types/assistant";
 
 type IntentDb = Pick<Prisma.TransactionClient, "assistantIntent">;
 type StoreOptions = { db?: IntentDb; now?: Date };
-
-const TTL_MS = 15 * 60_000;
-
-const MAX_PAYLOAD_BYTES = 3_000_000;
 
 const SUMMARY_SELECT = { id: true, actionId: true, status: true, summary: true, targets: true, expiresAt: true, channel: true, createdAt: true, legacyProposalId: true } as const;
 
@@ -52,7 +49,7 @@ export async function createIntent(caller: AssistantCaller, rawRequest: ActionRe
 
   const validatedPreview = parseInput(actionPreviewSchema, preview);
 
-  if (Buffer.byteLength(JSON.stringify({ request, preview: validatedPreview })) > MAX_PAYLOAD_BYTES) throw new ContentError("Завелика пропозиція змін", 413);
+  if (Buffer.byteLength(JSON.stringify({ request, preview: validatedPreview })) > ASSISTANT_LIMITS.maxPayloadBytes) throw new ContentError("Завелика пропозиція змін", 413);
 
   const originKey = requestDigest({ campaignId: owner.campaignId, channel: caller.channel, threadId: caller.threadId, tokenId: caller.tokenId });
 
@@ -68,7 +65,7 @@ export async function createIntent(caller: AssistantCaller, rawRequest: ActionRe
       originKey, requestId: request.requestId, requestHash, actionId: request.actionId,
       summary: validatedPreview.summary, targets: validatedPreview.targets,
       payload: jsonInput(request.input), preview: validatedPreview as Prisma.InputJsonValue, expected: jsonInput(validatedPreview.preconditions),
-      status: "pending", expiresAt: new Date(now.getTime() + TTL_MS),
+      status: "pending", expiresAt: new Date(now.getTime() + ASSISTANT_LIMITS.intentTtlMs),
     },
     update: {},
     select: { ...SUMMARY_SELECT, requestHash: true },

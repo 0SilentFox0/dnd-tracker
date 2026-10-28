@@ -1,0 +1,217 @@
+{
+  "head": "046396d29a9701276f308c83a2663725691b495a",
+  "versions": {
+    "node": "v22.0.0",
+    "prisma": "6.19.2",
+    "pnpm": "9.15.5",
+    "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "fixtures": {
+    "small": {
+      "spells": 10,
+      "artifacts": 10,
+      "characters": 2
+    },
+    "large": {
+      "spells": 500,
+      "artifacts": 500,
+      "characters": 20
+    }
+  },
+  "source": {
+    "spells": 1,
+    "artifacts": 0,
+    "characters": 0
+  },
+  "fixtureClock": "2026-10-26T12:00:00.000Z",
+  "warmups": 5,
+  "iterations": 30,
+  "productionBlobs": {
+    "lib/server/assistant/actions/content-dependencies.ts": "262b14c2c28348f761985c80e8ef4f35ff37e7d0",
+    "lib/server/assistant/actions/content-snapshot.ts": "0b2f036b8ead13d224a26ec37635cb92dad5ecd4",
+    "lib/server/assistant/json.ts": "d0de2a9bd8e65077eaa6cfa0ccace1f8d72aac71"
+  },
+  "methodology": "Sequential current action.prepare inside campaign-locked scoped transaction; no executor/auth/intent writes. queryCount: owned Prisma query events, including transaction/lock statements. resultJsonBytes: sum of UTF-8 JSON sizes of returned model/raw query results, NOT PostgreSQL network traffic. serializeMs: separately timed harness result serialization included in elapsedMs. elapsedMs: entire transaction call including commit and instrumentation. prepare is read-only: seed/size checks/source diff/cleanup/migration reads are outside measured intervals. Fixed logical rows/IDs/clock across runs via same explicit marker. transactionMs, lock wait/duration, snapshot/hash CPU and PostgreSQL wire bytes unavailable.",
+  "cleanupResults": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "rawSamples": ".superpowers/sdd/2026-10-26-constructor-refactor-s10-final-review/assistant-final/s3-bench-20261027-fixed-MkyEwL/samples.json",
+  "summaries": [
+    {
+      "size": "small",
+      "scenario": "rules.update",
+      "count": 30,
+      "medianMs": 52.122666499999696,
+      "p95Ms": 60.53191700000002,
+      "queryCounts": [
+        23
+      ],
+      "resultJsonBytes": [
+        22486
+      ]
+    },
+    {
+      "size": "small",
+      "scenario": "content.spells.update",
+      "count": 30,
+      "medianMs": 53.01587450000079,
+      "p95Ms": 58.474459000000024,
+      "queryCounts": [
+        24
+      ],
+      "resultJsonBytes": [
+        23847
+      ]
+    },
+    {
+      "size": "small",
+      "scenario": "content.spells.delete",
+      "count": 30,
+      "medianMs": 53.644562499999665,
+      "p95Ms": 58.85295900000165,
+      "queryCounts": [
+        24,
+        25
+      ],
+      "resultJsonBytes": [
+        23847
+      ]
+    },
+    {
+      "size": "small",
+      "scenario": "source.apply",
+      "count": 30,
+      "medianMs": 112.42258349999975,
+      "p95Ms": 125.62837500000023,
+      "queryCounts": [
+        57
+      ],
+      "resultJsonBytes": [
+        42908
+      ]
+    },
+    {
+      "size": "large",
+      "scenario": "rules.update",
+      "count": 30,
+      "medianMs": 119.42829150000034,
+      "p95Ms": 127.78125,
+      "queryCounts": [
+        23,
+        24
+      ],
+      "resultJsonBytes": [
+        1058348
+      ]
+    },
+    {
+      "size": "large",
+      "scenario": "content.spells.update",
+      "count": 30,
+      "medianMs": 115.76056299999618,
+      "p95Ms": 125.07491700000537,
+      "queryCounts": [
+        24
+      ],
+      "resultJsonBytes": [
+        1059709
+      ]
+    },
+    {
+      "size": "large",
+      "scenario": "content.spells.delete",
+      "count": 30,
+      "medianMs": 123.54218749999563,
+      "p95Ms": 136.4328749999986,
+      "queryCounts": [
+        24,
+        25
+      ],
+      "resultJsonBytes": [
+        1059709
+      ]
+    },
+    {
+      "size": "large",
+      "scenario": "source.apply",
+      "count": 30,
+      "medianMs": 144.92193750000297,
+      "p95Ms": 162.0401669999992,
+      "queryCounts": [
+        57
+      ],
+      "resultJsonBytes": [
+        2012350
+      ]
+    }
+  ],
+  "normalizedQueryCounts": {
+    "small.rules.update": [
+      23
+    ],
+    "small.content.spells.update": [
+      24
+    ],
+    "small.content.spells.delete": [
+      24
+    ],
+    "small.source.apply": [
+      57
+    ],
+    "large.rules.update": [
+      23
+    ],
+    "large.content.spells.update": [
+      24
+    ],
+    "large.content.spells.delete": [
+      24
+    ],
+    "large.source.apply": [
+      57
+    ]
+  },
+  "cpu": [
+    {
+      "size": "small",
+      "scenario": "cpu.cascades",
+      "medianMs": 0.0001866599999993923,
+      "p95Ms": 0.0004479200000059791
+    },
+    {
+      "size": "small",
+      "scenario": "cpu.dependencies",
+      "medianMs": 0.08189854500000365,
+      "p95Ms": 0.08350500000000466
+    },
+    {
+      "size": "large",
+      "scenario": "cpu.cascades",
+      "medianMs": 7.124999989173375e-05,
+      "p95Ms": 0.00017041999992216007
+    },
+    {
+      "size": "large",
+      "scenario": "cpu.dependencies",
+      "medianMs": 3.761901039999975,
+      "p95Ms": 3.9919833300000755
+    }
+  ],
+  "trackedRawSamples": {
+    "path": "2026-10-27-constructor-refactor-assistant-samples.json",
+    "run": "s10Final",
+    "baselineRun": "s3Before",
+    "afterRun": "s3After"
+  }
+}

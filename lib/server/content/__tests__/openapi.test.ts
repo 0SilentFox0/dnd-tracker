@@ -15,6 +15,14 @@ const ops = Object.entries(doc.paths).flatMap(([path, methods]) => Object.entrie
 
 const opById = (id: string) => ops.find((o) => o.op.operationId === id);
 
+function requiredOp(id: string) {
+  const found = opById(id);
+
+  if (!found) throw Error(`Missing OpenAPI operation: ${id}`);
+
+  return found;
+}
+
 describe("buildOpenApi", () => {
   it("OpenAPI 3.1 з bearerAuth", () => {
     expect(doc.openapi).toBe("3.1.0");
@@ -35,9 +43,9 @@ describe("buildOpenApi", () => {
 
   it("кожна операція має x-scopes і operationId; scope читання/запису відповідає методу ресурсу", () => {
     for (const { op } of ops) expect(op["x-scopes"]).toHaveLength(1);
-    expect(opById("units.list")!.op["x-scopes"]).toEqual(["content:read"]);
-    expect(opById("units.create")!.op["x-scopes"]).toEqual(["content:write"]);
-    expect(opById("abilities.get")!.op["x-scopes"]).toEqual(["content:read"]);
+    expect(requiredOp("units.list").op["x-scopes"]).toEqual(["content:read"]);
+    expect(requiredOp("units.create").op["x-scopes"]).toEqual(["content:write"]);
+    expect(requiredOp("abilities.get").op["x-scopes"]).toEqual(["content:read"]);
   });
 
   it("шляхи документа відповідають route.ts з тим самим методом", async () => {
@@ -54,16 +62,16 @@ describe("buildOpenApi", () => {
 
     expect(JSON.stringify(doc.components.schemas.UnitsCreate)).toContain("#/components/schemas/Ability");
     expect(json.match(/"trigger":\{"\$ref"/g)?.length ?? 0).toBeLessThanOrEqual(1);
-    expect(json.length).toBeLessThan(145_000);
+    expect(json.length).toBeLessThan(146_000);
   });
 
   it("query-параметри spells?ids і skills?mainSkillId", () => {
-    expect(opById("spells.list")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", in: "query" })]));
-    expect(opById("skills.list")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "mainSkillId", in: "query" })]));
+    expect(requiredOp("spells.list").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", in: "query" })]));
+    expect(requiredOp("skills.list").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "mainSkillId", in: "query" })]));
   });
 
   it("треки через API — лише YouTube", () => {
-    const body = JSON.stringify(opById("tracks.create")!.op.requestBody);
+    const body = JSON.stringify(requiredOp("tracks.create").op.requestBody);
 
     expect(body).toContain("TracksApiCreate");
     expect(doc.components.schemas).not.toHaveProperty("TracksCreate");
@@ -88,23 +96,24 @@ describe("buildOpenApi", () => {
   });
 
   it("коди помилок ресурсу лише на create/update; 404 не на list/create", () => {
-    for (const verb of ["list", "get", "delete"]) expect(opById(`races.${verb}`)!.op.responses).not.toHaveProperty("409");
+    for (const verb of ["list", "get"]) expect(requiredOp(`races.${verb}`).op.responses).not.toHaveProperty("409");
 
-    expect(opById("races.create")!.op.responses).toHaveProperty("409");
-    expect(opById("races.update")!.op.responses).toHaveProperty("409");
-    expect(opById("artifacts.create")!.op.responses).toHaveProperty("422");
-    expect(opById("skill-trees.save")!.op.responses).toHaveProperty("409");
-    expect(opById("artifacts.get")!.op.responses).not.toHaveProperty("422");
-    expect(opById("units.list")!.op.responses).not.toHaveProperty("404");
-    expect(opById("units.create")!.op.responses).not.toHaveProperty("404");
-    expect(opById("units.get")!.op.responses).toHaveProperty("404");
+    expect(requiredOp("races.create").op.responses).toHaveProperty("409");
+    expect(requiredOp("races.update").op.responses).toHaveProperty("409");
+    for (const kind of ["classes", "feats", "backgrounds"]) expect(requiredOp(`${kind}.delete`).op.responses).toHaveProperty("409");
+    expect(requiredOp("artifacts.create").op.responses).toHaveProperty("422");
+    expect(requiredOp("skill-trees.save").op.responses).toHaveProperty("409");
+    expect(requiredOp("artifacts.get").op.responses).not.toHaveProperty("422");
+    expect(requiredOp("units.list").op.responses).not.toHaveProperty("404");
+    expect(requiredOp("units.create").op.responses).not.toHaveProperty("404");
+    expect(requiredOp("units.get").op.responses).toHaveProperty("404");
   });
 
   it("abilities.get: kind — enum власників; skill-trees під тегом «Скіли»; ids має опис", () => {
-    expect(opById("abilities.get")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "kind", schema: { type: "string", enum: ["skill", "race", "class", "artifact", "artifactSet", "unit", "feat"] } })]));
-    expect(opById("skill-trees.save")!.op.tags).toEqual(["Скіли"]);
-    expect(opById("skill-trees.list")!.op.tags).toEqual(["Скіли"]);
-    expect(opById("spells.list")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", schema: expect.objectContaining({ description: expect.any(String) }) })]));
+    expect(requiredOp("abilities.get").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "kind", schema: { type: "string", enum: ["skill", "race", "class", "artifact", "artifactSet", "unit", "feat"] } })]));
+    expect(requiredOp("skill-trees.save").op.tags).toEqual(["Скіли"]);
+    expect(requiredOp("skill-trees.list").op.tags).toEqual(["Скіли"]);
+    expect(requiredOp("spells.list").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", schema: expect.objectContaining({ description: expect.any(String) }) })]));
   });
 
 });

@@ -3,6 +3,9 @@ import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+import { assistantCheckPreflight, browserSources } from "./assistant-check/preflight";
+import { integrationCounts } from "./assistant-check/results";
+
 import { constructorDatabaseTarget } from "@/lib/server/assistant/test-support";
 
 async function main() {
@@ -29,6 +32,8 @@ async function main() {
   }
 
   constructorDatabaseTarget({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
+
+  const { outputRoot, chromePath } = assistantCheckPreflight(process.argv.slice(3));
 
   const runId = process.env.ASSISTANT_CHECK_RUN_ID;
 
@@ -65,17 +70,13 @@ async function main() {
 
     if (!before.includes("20261108000000_assistant_intents")) throw new Error("ASSISTANT_MIGRATION_NOT_APPLIED");
 
-    const outputRoot = path.resolve(".superpowers/assistant-check");
-
     mkdirSync(outputRoot, { recursive: true });
 
     const dir = mkdtempSync(path.join(outputRoot, `${runId}-`));
 
-    const harness = path.resolve("scripts/constructor/assistant-browser");
-
     process.stderr.write(`ASSISTANT_CHECK_OUTPUT=${dir}\n`);
 
-    const test = spawnSync("pnpm", ["exec", "vitest", "run", "--config", "vitest.integration.config.mts", "lib/server/assistant/__tests__/execution.integration.test.ts"], {
+    const test = spawnSync("pnpm", ["exec", "vitest", "run", "--config", "vitest.integration.config.mts", "--reporter=default", "--reporter=json", `--outputFile=${path.join(dir, "integration.json")}`, "lib/server/assistant/__tests__/execution.integration.test.ts"], {
       cwd: process.cwd(), encoding: "utf8", env: { ...process.env, ASSISTANT_CHECK_RUN_ID: runId }, maxBuffer: 10 * 1024 * 1024, timeout: 180_000,
     });
 
@@ -83,10 +84,12 @@ async function main() {
 
     if (test.status !== 0) throw new Error("ASSISTANT_INTEGRATION_FAILED");
 
-    // Synthetic browser processes get neither DB/provider credentials nor cookies.
-    const browserEnv: NodeJS.ProcessEnv = { NODE_ENV: "test", PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR, CHROME_BIN: process.env.CHROME_BIN };
+    const integration = integrationCounts(JSON.parse(readFileSync(path.join(dir, "integration.json"), "utf8")));
 
-    const server = spawn(process.execPath, [path.join(harness, "server.mjs"), dir], { cwd: process.cwd(), env: browserEnv, stdio: ["ignore", "ignore", "ignore", "ipc"] });
+    // Synthetic browser processes get neither DB/provider credentials nor cookies.
+    const browserEnv: NodeJS.ProcessEnv = { NODE_ENV: "test", PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR, CHROME_BIN: chromePath };
+
+    const server = spawn(process.execPath, [browserSources.server, dir], { cwd: process.cwd(), env: browserEnv, stdio: ["ignore", "ignore", "ignore", "ipc"] });
 
     const stopServer = () => { server.kill("SIGTERM"); };
 
@@ -115,7 +118,7 @@ async function main() {
 
       if (!ready) throw new Error("ASSISTANT_BROWSER_SERVER_TIMEOUT");
 
-      const browser = spawnSync(process.execPath, [path.join(harness, "check.mjs"), dir], { cwd: process.cwd(), encoding: "utf8", env: browserEnv, maxBuffer: 2 * 1024 * 1024, timeout: 120_000 });
+      const browser = spawnSync(process.execPath, [browserSources.check, dir], { cwd: process.cwd(), encoding: "utf8", env: browserEnv, maxBuffer: 2 * 1024 * 1024, timeout: 120_000 });
 
       writeFileSync(path.join(dir, "browser-run.log"), `${browser.stdout ?? ""}${browser.stderr ?? ""}`);
 
@@ -166,9 +169,11 @@ async function main() {
 
     if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error("ASSISTANT_MIGRATION_LIST_CHANGED");
 
-    const browserEvidence = JSON.parse(readFileSync(path.join(dir, "browser.json"), "utf8")) as { evidence: unknown[]; apiBoundary: string };
+    const browserEvidence = JSON.parse(readFileSync(path.join(dir, "browser.json"), "utf8")) as { evidence: unknown[]; total: number; passed: number; failed: number; skipped: number; apiBoundary: string };
 
-    process.stdout.write(`${JSON.stringify({ database: "constructor", local: true, bothUrls: true, connectionLimit: 1, runId, output: dir, appliedMigrationsBefore: before.length, appliedMigrationsAfter: after.length, migrationsUnchanged: true, integration: "6/6 passed", browserCases: browserEvidence.evidence.length, browserViewports: [1440, 390], ownedFixtureLeftovers: leftovers, apiBoundary: browserEvidence.apiBoundary })}\n`);
+    if (browserEvidence.total !== 18 || browserEvidence.passed !== browserEvidence.total || browserEvidence.failed !== 0 || browserEvidence.skipped !== 0 || browserEvidence.evidence.length !== browserEvidence.passed) throw new Error("ASSISTANT_BROWSER_REPORT_FAILED");
+
+    process.stdout.write(`${JSON.stringify({ database: "constructor", local: true, bothUrls: true, connectionLimit: 1, runId, output: dir, appliedMigrationsBefore: before.length, appliedMigrationsAfter: after.length, migrationsUnchanged: true, integration, browser: { total: browserEvidence.total, passed: browserEvidence.passed, failed: browserEvidence.failed, skipped: browserEvidence.skipped }, browserCases: browserEvidence.evidence.length, browserViewports: [1440, 390], ownedFixtureLeftovers: leftovers, apiBoundary: browserEvidence.apiBoundary })}\n`);
   } finally {
     await db.$disconnect();
   }

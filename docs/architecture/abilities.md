@@ -16,3 +16,11 @@ Skills, races, artifacts, sets and units share one model in `lib/utils/abilities
 - Етап 4f-4 (риси й вибори): джерело `AbilitySource.type: "feat"` (`id` риси); вміння з виборів — `collectCharacterAbilities({ choiceGroups })` після класових (опції раси — `race`, опції класу — `class` з масштабом класу, синтетичні навички — `character:choices`); прапорець `skillExpertise { skills }` — `checkBonus` подвоює майстерність навички, лише якщо вона є; `read.ts` — `featAbilities`, `readChoiceList` (вміння опцій виборів). Деталі — [battle.md](battle.md) «5e: риси й вибори».
 
 - Етап 4f-5a (монстри): `perform: { kind: "attack", attack } | { kind: "spell", spellId }` — посилання на конкретну дію, дозволене лише з `limits.legendaryCost` або `limits.lair`; `limits.lair: true` — ручна дія лігва з тригером `action`. Посилання перевіряються на наявність атаки/заклинання; редактор має поле «Виконує». Прапорець `{ flag: "sense", sense, range }` додає чуття через `collectModifiers` без прямого читання JSON у рушії. Деталі грантів, опорів і лігва — [battle.md](battle.md) «5e: повні монстри й площі».
+
+## Refactor constants та read projection
+
+Rule default values належать `DEFAULT_RULES`; rules schema зберігає validation/fallback/patch semantics, `MECHANIC_REGISTRY` — перелік механік і labels. Domain constants не об'єднано за самим числом; gameplay defaults/formulas не змінено.
+
+`abilities.sources/get` у content operation service підтримує campaign-scoped class/feat owners. Клас віддає прямі abilities base/subclass features через canonical class reader; опційні choices і level eligibility далі належать character derivation. Ця read projection не є другим ability registry чи writer.
+
+Class/feat джерела копіювання підтримуються наскрізно: `AbilitySourceRef`, labels у `AbilityCopySourcePicker`, discovery/owner service та OpenAPI descriptions. Client callback передає abilities; class/feat picker regressions і guarded content-storage SQL перевіряють ці межі окремо.

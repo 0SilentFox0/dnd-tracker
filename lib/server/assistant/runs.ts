@@ -9,14 +9,15 @@ import "server-only";
 import { appendMessageInTransaction } from "@/lib/ai/threads";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { RUN_GRACE_MS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
 import { actionResultSchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
 import type { AiFocus, AiUsage } from "@/types/ai";
 
-export const RUN_GRACE_MS = 30_000;
 export { createRunSignal } from "@/lib/ai/chat/run-signal";
 export { toolRequestKey } from "@/lib/ai/tools/request-key";
+export { RUN_GRACE_MS } from "@/lib/constants/assistant";
 
 function terminalStatus(refs: Prisma.JsonValue): "complete" | "failed" | "aborted" | null {
   if (!refs || typeof refs !== "object" || Array.isArray(refs)) return null;
@@ -123,11 +124,13 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
 
     const threadId = await own(caller);
 
-    const rows = await db.assistantRun.findMany({ where: { threadId: threadId, ...(requestId && { requestId }) }, orderBy: { createdAt: "desc" }, take: 30 });
+    const rows = await db.assistantRun.findMany({ where: { threadId: threadId, ...(requestId && { requestId }) }, orderBy: { createdAt: "desc" }, take: 30, select: { id: true, requestId: true, status: true, expiresAt: true, abortRequested: true, resultRefs: true } });
 
-    const receipts = await db.assistantReceipt.findMany({ where: { ...intentOwner(caller), OR: rows.map(r => ({ requestId: { startsWith: `${r.id}_` } })) }, orderBy: { createdAt: "desc" }, take: 100 });
+    if (!rows.length) return { runs: [], receipts: [], intents: [] };
 
-    const intents = await db.assistantIntent.findMany({ where: { ...intentOwner(caller), OR: rows.map(r => ({ requestId: { startsWith: `${r.id}_` } })), status: { in: ["pending", "executing", "unknown"] } }, orderBy: { createdAt: "desc" }, take: 100 });
+    const receipts = await db.assistantReceipt.findMany({ where: { ...intentOwner(caller), OR: rows.map(r => ({ requestId: { startsWith: `${r.id}_` } })) }, orderBy: { createdAt: "desc" }, take: 100, select: { id: true, intentId: true, status: true, effectsStatus: true, result: true } });
+
+    const intents = await db.assistantIntent.findMany({ where: { ...intentOwner(caller), OR: rows.map(r => ({ requestId: { startsWith: `${r.id}_` } })), status: { in: ["pending", "executing", "unknown"] } }, orderBy: { createdAt: "desc" }, take: 100, select: { id: true, actionId: true, status: true, summary: true, targets: true, expiresAt: true, channel: true, createdAt: true, legacyProposalId: true } });
 
     return {
       intents: intents.map(intentSummary),

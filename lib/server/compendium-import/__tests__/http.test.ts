@@ -10,6 +10,7 @@ vi.mock("../service", () => ({ previewImport: mocks.preview, confirmImport: mock
 vi.mock("@/lib/db", () => ({ prisma: { compendiumImportRun: { findMany: mocks.runs }, compendiumEntry: { findMany: mocks.entry } } }));
 vi.mock("@/lib/utils/api/rate-limit", () => ({ checkRateLimit: mocks.rate, rateLimitResponse: () => NextResponse.json({}, { status: 429 }) }));
 import { compendiumRoute } from "../http";
+import { COMPENDIUM_LIMITS } from "../parse";
 
 const ctx = { params: Promise.resolve({ id: "c" }) };
 
@@ -45,6 +46,44 @@ it("rejects oversized transport before parsing or planning", async () => {
 
  request.headers.set("content-length", "3000001");
  expect((await compendiumRoute("preview")(request, ctx)).status).toBe(413); expect(mocks.preview).not.toHaveBeenCalled();
+});
+
+it.each([0, 1])("bounds actual streamed UTF8 bytes without content-length (over: %s)", async (over) => {
+  const body = JSON.stringify({ input: { json: "{}" } });
+
+  const bytes = new TextEncoder().encode(body + " ".repeat(COMPENDIUM_LIMITS.requestBytes - body.length + over));
+
+  const stream = new ReadableStream<Uint8Array>({ start(controller) {
+    controller.enqueue(bytes.slice(0, 123));
+    controller.enqueue(bytes.slice(123));
+    controller.close();
+  } });
+
+  const request = new Request("http://localhost/api", { method: "POST", headers: { origin: "http://localhost" }, body: stream, duplex: "half" } as RequestInit);
+
+  mocks.preview.mockResolvedValue({ token: "t", report: {} });
+
+  const response = await compendiumRoute("preview")(request, ctx);
+
+  expect(response.status).toBe(over ? 413 : 200);
+
+  if (over) {
+    expect(await response.json()).toEqual({ code: "REQUEST_SIZE" });
+    expect(mocks.preview).not.toHaveBeenCalled();
+  } else expect(mocks.preview).toHaveBeenCalledOnce();
+
+  expect(mocks.confirm).not.toHaveBeenCalled();
+});
+
+it("rejects invalid transport UTF8 before planning", async () => {
+  const request = new Request("http://localhost/api", { method: "POST", headers: { origin: "http://localhost" }, body: new Uint8Array([0xff]) });
+
+  const response = await compendiumRoute("preview")(request, ctx);
+
+  expect(response.status).toBe(422);
+  expect(await response.json()).toEqual({ code: "INVALID_INPUT" });
+  expect(mocks.preview).not.toHaveBeenCalled();
+  expect(mocks.confirm).not.toHaveBeenCalled();
 });
 it("scopes source notes to the authorized campaign and exact native target", async () => {
  mocks.entry.mockResolvedValue([]);

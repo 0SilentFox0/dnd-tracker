@@ -1,0 +1,26 @@
+# Відтворювана перевірка assistant
+
+Запускати з кореня checkout після `pnpm install --frozen-lockfile` та генерації Prisma client. Потрібні Node 22+ (глобальний WebSocket), локальна PostgreSQL із уже застосованими constructor migrations і Google Chrome. На macOS використовується стандартний шлях Chrome; в іншому середовищі передати `--chrome-path /absolute/browser` (або `CHROME_BIN`). Відсутній чи невиконуваний browser path відхиляється preflight до DB init.
+
+```sh
+pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/assistant-check.ts --check-target
+ASSISTANT_CHECK_RUN_ID=s1-local-unique-marker pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/assistant-check.ts --run --output-dir .superpowers/refactor/s1
+```
+
+Guard приймає **обидва** `DATABASE_URL` і `DIRECT_URL` лише для `constructor` на loopback:54322. Runner встановлює `connection_limit=1` для обох до створення client/дочірніх тестів. Він не застосовує міграцій, не викликає prod/prodcopy, provider, Storage, Pusher чи Redis. `execution.integration.test.ts` перевіряє реальні locks/rollback/ownership/receipt idempotency; auth route mock і after-commit integrations залишаються synthetic.
+
+Фінальний JSON містить фактичні `total/passed/failed/skipped` з Vitest `integration.json` і `browser.json`. Ненульовий exit, відсутній/невалідний report, zero tests, skip або неповне browser покриття завершують runner помилкою; фіксованого повідомлення про кількість успіхів немає.
+
+Tracked fixture — `fixtures/campaign.synthetic.ts` (існував до S1). Кожен fixture має випадковий suffix і явний run marker. Cleanup працює з конкретними campaign/user ids, перевіряє ownership і зберігає чужі дані. Runner лише рахує залишки свого marker; не виконує глобальних delete. При аварійному завершенні тестового процесу можливі залишки: не видаляти за широким prefix без перевірки ownership.
+
+`browser-app.tsx` бандлить справжні AssistantWorkspace/AssistantHandoff із deterministic synthetic HTTP. `browser-server.mjs` збирає JS через пряму devDependency esbuild 0.27.3 та CSS через PostCSS/Tailwind; попередні `.next` чи `.superpowers` не потрібні. `browser-check.mjs` перевіряє 9 сценаріїв на 1440/390 px. Це доказ UI/response mapping; labels fixture не доводять покриття відповідних domain writers.
+
+За замовчуванням output створюється в **новому** `.superpowers/assistant-check/<runId>-<random>/`; `--output-dir <root>` задає інший root для цієї нової directory: логи, bundle/CSS, process metadata, `browser.json`, screenshots, окремий Chrome profile. Усе ignored; не додавати ці файли до Git. `.superpowers` використовується тільки як output. Ні credentials, ні session cookies не передаються в browser subprocesses. У кожного запуску власні ephemeral HTTP/CDP ports і новий profile; runner перевіряє pid свого child, а harness завершує лише свій Chrome при SIGTERM/SIGINT/IPC disconnect. Runner перевіряє відсутність цього Chrome після завершення.
+
+Окреме складання без DB/Chrome: створити нову абсолютну output directory і виконати `node scripts/constructor/assistant-check/browser-server.mjs /absolute/output --bundle-only`. При помилці runner друкує тільки безпечний код і шлях до ignored evidence; raw DB/provider exceptions у stdout не потрапляють.
+
+S8.4: browser harness додатково перевіряє rules save, background/class choices save та spell-map pick/Escape cleanup на1440/390. Окремий `constructor-ui.json` містить8 cases; базовий `browser.json` зберігає18 assistant cases. `constructor-ui.tsx` — synthetic fixture для справжніх production forms і extracted map hook; HTTP/router synthetic, DB authority цим не доводиться. Screenshots: `<flow>-<width>.png`.
+
+S10 final: `constructor-ui.json` тепер10 cases — додано auto-consent, disclosure-before-send, Stop та recovery/reconnect без повторного POST на обох viewport-ах. Chat HTTP stream deterministic і чекає AbortSignal; жодного реального provider call. `until` перевіряє Boolean після появи document.body, щоб navigation races/DOM serialization не давали хибних failures.
+
+Constructor UI harness також проходить справжній `AttackWizard`/`useAttackWizard`: вибір цілі → d20 → шкода → summary → один synthetic POST, без write до submit. Разом6flows ×2viewports =12UI cases; assistant review має окремі18cases. Synthetic battle context/API не доводять реального session auth або DB mutation — їх перевіряють named guarded SQL suites.

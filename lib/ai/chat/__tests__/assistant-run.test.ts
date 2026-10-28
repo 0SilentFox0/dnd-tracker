@@ -74,6 +74,13 @@ function fixture() {
 afterEach(() => vi.useRealTimers());
 
 describe("T15 run acceptance", () => {
+  it("emptyRunHistoryHasNoIntentsOrReceipts", async () => {
+    const f = fixture();
+
+    // Other requests owned by the same user must never enter an empty thread's recovery.
+    f.receipts.push({ id: "unrelated", intentId: "unrelated", status: "applied", effectsStatus: "complete", result: { data: null, affected: [], warnings: [] } });
+    expect(await f.store.readAssistantRuns(caller)).toEqual({ runs: [], receipts: [], intents: [] });
+  });
   it("doubleSubmitOneUserMessage", async () => {
     const f = fixture();
 

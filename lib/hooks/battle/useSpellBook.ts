@@ -1,11 +1,13 @@
 "use client";
 
-import { type Dispatch, useCallback, useEffect, useEffectEvent, useMemo, useReducer, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useReducer, useState } from "react";
 
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
+import { useBattleSpellLibrary } from "./useBattleSpellLibrary";
+import { useSpellMapTargeting } from "./useSpellMapTargeting";
 
-import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+export { useBonusSpells, useReactionSpells,useSpellBookPrefetch } from "./useBattleSpellLibrary";
 import { poolLeft } from "@/lib/utils/abilities/engine/core/usage";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import {
@@ -17,8 +19,6 @@ import {
   spellBlockedBySlots,
   spellDefinition,
   spellFlow,
-  type SpellFlowAction,
-  type SpellFlowState,
   spellPayload,
   spellSaveTargets,
   spellSlotCostLabel,
@@ -30,19 +30,17 @@ import {
   withChainTargets,
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
-import { isOnMap, type MapAim, type MapPick } from "@/lib/utils/battle/grid";
+import { isOnMap } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleParticipant, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 export type { BookSpell };
-
-const NO_SPELLS: string[] = [];
 
 /** Сумарна зміна HP на учасника: шкода > 0, лікування < 0. */
 function hpTotals(changes: { participantId: string; participantName: string; change: number }[]): { name: string; change: number }[] {
@@ -57,144 +55,8 @@ function hpTotals(changes: { participantId: string; participantName: string; cha
   return [...byId.values()].filter((c) => c.change !== 0);
 }
 
-/** Відомі закляття одним набором: DM бачить усіх учасників, гравець лише своїх (без витоку ворожих і без рефетчу при кожному призові). */
-function useBattleSpellIds(): string[] {
-  const { battle, viewer, roster } = useBattleScene();
-
-  const source = viewer.isDM ? battle.initiativeOrder : roster.myParticipants;
-
-  const key = useMemo(() => [...new Set(source.flatMap((p) => [...p.spellcasting.knownSpells, ...(p.spellcasting.grants ?? []).map((g) => g.spellId), ...p.battleData.resolvedAbilities.flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])]))].sort().join(","), [source]);
-
-  return useMemo(() => (key ? key.split(",") : NO_SPELLS), [key]);
-}
-
-const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null) => {
-  const ids = new Set([...(who?.spellcasting.knownSpells ?? []), ...(who?.spellcasting.grants ?? []).map((g) => g.spellId)]);
-
-  return (spells ?? []).filter((s) => ids.has(s.id));
-};
-
-/** Прогріває закляття бою, поки він простоює. */
-export function useSpellBookPrefetch() {
-  const { campaignId } = useBattleScene();
-
-  usePrefetchSpellsByIds(campaignId, useBattleSpellIds());
-}
-
-const BONUS_NONE: BookSpell[] = [];
-
-/** Відомі гравцеві заклинання за бонусну дію (з кешу книги, яку прогріває useSpellBookPrefetch). */
-function useSpellsWithCost(hero: BattleParticipant, cost: "bonusAction" | "reaction"): BookSpell[] {
-  const { campaignId } = useBattleScene();
-
-  const known = useSpellsByIds(campaignId, useBattleSpellIds());
-
-  return useMemo(() => {
-    const bonus = knownBy(known.data, hero).filter((s) => s.cost === cost);
-
-    return bonus.length ? bonus : BONUS_NONE;
-  }, [known.data, hero, cost]);
-}
-
-export const useBonusSpells = (hero: BattleParticipant) => useSpellsWithCost(hero, "bonusAction");
-
-export const useReactionSpells = (hero: BattleParticipant) => useSpellsWithCost(hero, "reaction");
-
 const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
   Object.keys(byLevel).map(Number).filter((l) => byLevel[l].length > 0);
-
-interface MapTargetingContext {
-  caster: BattleParticipant | null;
-  order: BattleParticipant[];
-  map: BattleMapConfig | null;
-  active: boolean;
-  candidates: BattleParticipant[];
-  inRange(t: BattleParticipant): boolean;
-  setMapAim(aim: MapAim | null): void;
-  setMapPick(pick: MapPick | null): void;
-}
-
-/** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер віддає точку прев'ю, Escape скасовує. */
-function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext) {
-  const { caster, order, map, active, candidates, inRange, setMapAim, setMapPick } = ctx;
-
-  const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
-
-  const pickAt = useRef<(id: string) => void>(() => undefined);
-
-  const latest = useRef({ candidates, inRange });
-
-  const [hover, setHover] = useState<GridPoint | null>(null);
-
-  useEffect(() => {
-    latest.current = { candidates, inRange };
-    aimAt.current = (cell) => {
-      if (!map || !caster || !state.pick) return;
-
-      const ids = spellAimTargets({ map, participants: order, caster }, state.pick, cell).map((p) => p.basicInfo.id);
-
-      dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
-      // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
-      dispatch({ type: "CONFIRM_TARGETS" });
-    };
-    pickAt.current = (id) => {
-      const target = order.find((p) => p.basicInfo.id === id);
-
-      if (target && inRange(target)) dispatch({ type: "PICK_TARGET", id });
-    };
-  });
-
-  const onAim = useCallback((cell: GridPoint) => aimAt.current(cell), []);
-
-  const onPick = useCallback((id: string) => pickAt.current(id), []);
-
-  const template = active && state.pick?.targetMode === "template" ? state.pick.template : undefined;
-
-  const picking = active && !!state.pick && state.pick.targetMode !== "template";
-
-  const range = state.pick?.range;
-
-  const casterId = caster?.basicInfo.id;
-
-  useEffect(() => {
-    if (!template || !casterId) return;
-
-    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim, onHover: setHover });
-
-    return () => {
-      setMapAim(null);
-      setHover(null);
-    };
-  }, [template, casterId, range, state.aim, onAim, setMapAim]);
-
-  const pickSignature = picking ? candidates.map((p) => `${p.basicInfo.id}${inRange(p) ? "+" : "-"}`).join(",") : "";
-
-  const pickedIds = state.targetIds.join(",");
-
-  useEffect(() => {
-    if (!picking || !casterId) return;
-
-    const { candidates: list, inRange: reach } = latest.current;
-
-    setMapPick({ casterId, targets: list.map((p) => ({ id: p.basicInfo.id, reachable: reach(p) })), selectedIds: pickedIds ? pickedIds.split(",") : [], onPick });
-
-    return () => setMapPick(null);
-  }, [picking, casterId, pickSignature, pickedIds, onPick, setMapPick]);
-
-  useEffect(() => {
-    if (!active) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dispatch({ type: "CLOSE" });
-    };
-
-    window.addEventListener("keydown", onKey);
-
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active, dispatch]);
-
-  return template ? hover : null;
-}
 
 export function useSpellBook(caster: BattleParticipant | null, options: { reactionsOnly?: boolean; allSpells?: boolean; onDone?: () => void; legendary?: { abilityKey: string; spellId: string } } = {}) {
   const scene = useBattleScene();
@@ -207,19 +69,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const free = !!options.allSpells;
 
-  const library = useSpells(scene.campaignId, { enabled: isOpen && free });
-
-  const known = useSpellsByIds(scene.campaignId, useBattleSpellIds(), { enabled: isOpen && !free });
-
   const special = options.legendary;
-
-  const specialSpellId = special?.spellId;
 
   const bypassCost = free || !!special;
 
-  const availableSpells = free ? ((library.data ?? []) as BookSpell[]) : specialSpellId ? (known.data ?? []).filter((s) => s.id === specialSpellId) : knownBy(known.data, caster);
-
-  const spells = options.reactionsOnly ? availableSpells.filter((s) => s.cost === "reaction") : availableSpells;
+  const spells = useBattleSpellLibrary(caster, { isOpen, free, specialSpellId: special?.spellId, reactionsOnly: options.reactionsOnly });
 
   const byLevel = groupSpellsByLevel(spells);
 

@@ -12,53 +12,84 @@ const INITIATIVE_ORDER_MESSAGE = "Мінімум ініціативи більш
 
 const CRITICALS_ORDER_MESSAGE = "Фумбл має бути нижчим за крит";
 
-const sections = {
-  morale: z.strictObject({ enabled: z.boolean().default(true), cap: z.number().int().min(1).max(10).default(3) }),
+const sectionSchemas = {
+  morale: z.strictObject({ enabled: z.boolean(), cap: z.number().int().min(1).max(10) }),
   criticals: z.strictObject({
-    critOn: z.number().int().min(2).max(20).default(20),
-    fumbleOn: z.number().int().min(0).max(5).default(1),
-    effects: z.boolean().default(true),
-    doubleDice: z.boolean().default(false),
-    disabledSuccess: z.array(z.string()).default([]),
-    disabledFail: z.array(z.string()).default([]),
+    critOn: z.number().int().min(2).max(20),
+    fumbleOn: z.number().int().min(0).max(5),
+    effects: z.boolean(),
+    doubleDice: z.boolean(),
+    disabledSuccess: z.array(z.string()),
+    disabledFail: z.array(z.string()),
   }),
   formulas: z.strictObject({
-    saveDcBase: z.number().int().min(0).max(20).default(8),
-    proficiencyBase: z.number().int().min(0).max(10).default(2),
-    proficiencyEvery: z.number().int().min(1).max(20).default(4),
+    saveDcBase: z.number().int().min(0).max(20),
+    proficiencyBase: z.number().int().min(0).max(10),
+    proficiencyEvery: z.number().int().min(1).max(20),
   }),
   heroScaling: z.strictObject({
-    meleeDiceByLevel: DiceTable.nullable().default(null),
-    rangedDiceByLevel: DiceTable.nullable().default(null),
-    hpBaseLevels: z.number().int().min(0).max(10).default(3),
-    hpConCoefficient: z.number().min(0).max(5).default(1.5),
+    meleeDiceByLevel: DiceTable.nullable(),
+    rangedDiceByLevel: DiceTable.nullable(),
+    hpBaseLevels: z.number().int().min(0).max(10),
+    hpConCoefficient: z.number().min(0).max(5),
   }),
   initiative: z.strictObject({
-    heroMin: z.number().int().min(0).max(50).default(10),
-    heroMax: z.number().int().min(0).max(50).default(16),
+    heroMin: z.number().int().min(0).max(50),
+    heroMax: z.number().int().min(0).max(50),
   }),
   defaultAttacks: z.strictObject({
-    meleeName: z.string().trim().min(1).max(60).default("Звичайний удар"),
-    rangedName: z.string().trim().min(1).max(60).default("Звичайний постріл"),
+    meleeName: z.string().trim().min(1).max(60),
+    rangedName: z.string().trim().min(1).max(60),
   }),
-  saves: z.strictObject({ proficiency: z.boolean().default(false) }),
-  deathSaves: z.strictObject({ enabled: z.boolean().default(false), unitsDieAtZero: z.boolean().default(true) }),
-  concentration: z.strictObject({ enabled: z.boolean().default(false), dcCap: z.number().int().min(10).max(99).nullable().default(null) }),
-  conditions: z.strictObject({ enabled: z.boolean().default(false), exhaustion: z.enum(["2014", "2024"]).default("2014") }),
-  actions: z.strictObject({ enabled: z.boolean().default(false), opportunityAttacks: z.boolean().default(true), variant: z.enum(["2014", "2024"]).default("2014") }),
-  classes: z.strictObject({ enabled: z.boolean().default(false) }),
+  saves: z.strictObject({ proficiency: z.boolean() }),
+  deathSaves: z.strictObject({ enabled: z.boolean(), unitsDieAtZero: z.boolean() }),
+  concentration: z.strictObject({ enabled: z.boolean(), dcCap: z.number().int().min(10).max(99).nullable() }),
+  conditions: z.strictObject({ enabled: z.boolean(), exhaustion: z.enum(["2014", "2024"]) }),
+  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), variant: z.enum(["2014", "2024"]) }),
+  classes: z.strictObject({ enabled: z.boolean() }),
   outOfCombat: z.strictObject({
-    persistResources: z.boolean().default(false),
-    longRestHitDice: z.enum(["half", "all"]).default("half"),
-    xp: z.boolean().default(false),
-    inspiration: z.boolean().default(false),
+    persistResources: z.boolean(),
+    longRestHitDice: z.enum(["half", "all"]),
+    xp: z.boolean(),
+    inspiration: z.boolean(),
   }),
   encounters: z.strictObject({
-    balance: z.enum(["fair", "xp"]).default("fair"),
-    edition: z.enum(["2014", "2024"]).default("2014"),
-    autoXp: z.boolean().default(false),
+    balance: z.enum(["fair", "xp"]),
+    edition: z.enum(["2014", "2024"]),
+    autoXp: z.boolean(),
   }),
-  items: z.strictObject({ enabled: z.boolean().default(false), attunementLimit: z.number().int().min(1).max(10).default(3) }),
+  items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
+};
+
+// Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.
+export type Ruleset = { [K in keyof typeof sectionSchemas]: z.output<(typeof sectionSchemas)[K]> };
+
+function withDefaults<S extends Record<string, z.ZodType>>(section: z.ZodObject<S>, defaults: { [K in keyof S]: z.core.util.NoUndefined<z.output<S[K]>> }) {
+  const fields = Object.entries(section.shape) as [keyof S, S[keyof S]][];
+
+  const shape = Object.fromEntries(
+    fields.map(([key, field]) => [key, field.default(defaults[key])]),
+  ) as { [K in keyof S]: z.ZodDefault<S[K]> };
+
+  return z.strictObject(shape);
+}
+
+const sections = {
+  morale: withDefaults(sectionSchemas.morale, DEFAULT_RULES.morale),
+  criticals: withDefaults(sectionSchemas.criticals, DEFAULT_RULES.criticals),
+  formulas: withDefaults(sectionSchemas.formulas, DEFAULT_RULES.formulas),
+  heroScaling: withDefaults(sectionSchemas.heroScaling, DEFAULT_RULES.heroScaling),
+  initiative: withDefaults(sectionSchemas.initiative, DEFAULT_RULES.initiative),
+  defaultAttacks: withDefaults(sectionSchemas.defaultAttacks, DEFAULT_RULES.defaultAttacks),
+  saves: withDefaults(sectionSchemas.saves, DEFAULT_RULES.saves),
+  deathSaves: withDefaults(sectionSchemas.deathSaves, DEFAULT_RULES.deathSaves),
+  concentration: withDefaults(sectionSchemas.concentration, DEFAULT_RULES.concentration),
+  conditions: withDefaults(sectionSchemas.conditions, DEFAULT_RULES.conditions),
+  actions: withDefaults(sectionSchemas.actions, DEFAULT_RULES.actions),
+  classes: withDefaults(sectionSchemas.classes, DEFAULT_RULES.classes),
+  outOfCombat: withDefaults(sectionSchemas.outOfCombat, DEFAULT_RULES.outOfCombat),
+  encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
+  items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
 };
 
 type Sections = typeof sections;
@@ -93,8 +124,6 @@ export const RulesetSchema = z
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
-
-export type Ruleset = z.infer<typeof RulesetSchema>;
 
 export function parseRules(raw: unknown): Ruleset {
   const obj = isRecord(raw) ? raw : {};

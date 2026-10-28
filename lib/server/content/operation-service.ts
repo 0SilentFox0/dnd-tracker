@@ -20,6 +20,7 @@ import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
+import { toGameClassData } from "@/lib/utils/characters/classes/row";
 import { IMPORT_KINDS } from "@/lib/utils/content/import/kinds";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
@@ -58,6 +59,8 @@ async function owner(kind: OwnerKind, actor: Actor, ownerId: string) {
     case OwnerKind.ARTIFACT: return prisma.artifact.findFirst({ where });
     case OwnerKind.ARTIFACT_SET: return prisma.artifactSet.findFirst({ where });
     case OwnerKind.UNIT: return prisma.unit.findFirst({ where });
+    case OwnerKind.CLASS: return prisma.gameClass.findFirst({ where });
+    case OwnerKind.FEAT: return prisma.feat.findFirst({ where });
   }
 }
 
@@ -92,9 +95,9 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "abilities.sources": {
         const where = { campaignId: actor.campaignId }, select = { id: true, name: true } as const;
 
-        const groups = await Promise.all([prisma.skill.findMany({ where, select }), prisma.race.findMany({ where, select }), prisma.artifact.findMany({ where, select }), prisma.artifactSet.findMany({ where, select }), prisma.unit.findMany({ where, select })]);
+        const groups = await Promise.all([prisma.skill.findMany({ where, select }), prisma.race.findMany({ where, select }), prisma.artifact.findMany({ where, select }), prisma.artifactSet.findMany({ where, select }), prisma.unit.findMany({ where, select }), prisma.gameClass.findMany({ where, select }), prisma.feat.findMany({ where, select })]);
 
-        const kinds = ["skill", "race", "artifact", "artifactSet", "unit"];
+        const kinds = ["skill", "race", "artifact", "artifactSet", "unit", "class", "feat"];
 
         return { sources: groups.flatMap((rows, i) => rows.map((row) => ({ kind: kinds[i], id: row.id, name: row.name })).sort((a, b) => a.name.localeCompare(b.name, "uk"))) };
       }
@@ -104,6 +107,12 @@ export async function runContentOperation(operationId: ContentOperationId, actor
         const row = await owner(kind, actor, param("ownerId"));
 
         if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+        if (kind === OwnerKind.CLASS && "features" in row) {
+          const cls = toGameClassData(row);
+
+          return { abilities: [...cls.features, ...cls.subclasses.flatMap(s => s.features)].flatMap(f => f.abilities) };
+        }
 
         return { abilities: readAbilities(kind, row).abilities };
       }

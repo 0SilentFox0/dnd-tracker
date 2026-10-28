@@ -1,0 +1,1959 @@
+{
+  "commit": "52d4e11226c3eeaded0f640c996bba59e0a4564c",
+  "fixtureSizes": {
+    "small": {
+      "spells": 10,
+      "artifacts": 10,
+      "heroes": 2
+    },
+    "large": {
+      "spells": 500,
+      "artifacts": 500,
+      "heroes": 20
+    }
+  },
+  "node": "v22.0.0",
+  "postgres": [
+    {
+      "server_version": "17.11 (Debian 17.11-1.pgdg13+2)"
+    }
+  ],
+  "warmups": 5,
+  "iterations": 30,
+  "seed": "synthetic-index",
+  "clock": "no timing-dependent payloads",
+  "metrics": "queryCount counts Prisma operations excluding BEGIN/COMMIT; JSON bytes are returned query results, not wire traffic; heap delta includes GC",
+  "beforeAfter": "no new optimization; comparative baseline unavailable",
+  "samples": {
+    "small.import": [
+      {
+        "elapsedMs": 6.189374999999984,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": -10676840
+      },
+      {
+        "elapsedMs": 5.788665999999978,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1793888
+      },
+      {
+        "elapsedMs": 5.499167,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1780056
+      },
+      {
+        "elapsedMs": 5.696167000000003,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1854192
+      },
+      {
+        "elapsedMs": 5.881332999999984,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1713304
+      },
+      {
+        "elapsedMs": 5.999459000000002,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1683896
+      },
+      {
+        "elapsedMs": 5.50933299999997,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1682216
+      },
+      {
+        "elapsedMs": 5.24795899999998,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": -11094280
+      },
+      {
+        "elapsedMs": 5.728958999999975,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1699184
+      },
+      {
+        "elapsedMs": 5.343542000000014,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1621648
+      },
+      {
+        "elapsedMs": 5.228832999999952,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1632928
+      },
+      {
+        "elapsedMs": 5.227457999999956,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1616168
+      },
+      {
+        "elapsedMs": 4.995916000000079,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1617416
+      },
+      {
+        "elapsedMs": 5.152666999999951,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1618600
+      },
+      {
+        "elapsedMs": 5.494583000000034,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": -10502408
+      },
+      {
+        "elapsedMs": 5.361667000000011,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1620064
+      },
+      {
+        "elapsedMs": 4.849124999999958,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1584768
+      },
+      {
+        "elapsedMs": 5.084208000000103,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1605360
+      },
+      {
+        "elapsedMs": 5.578959000000054,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1573232
+      },
+      {
+        "elapsedMs": 5.2604160000000775,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1573768
+      },
+      {
+        "elapsedMs": 5.15300000000002,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1576680
+      },
+      {
+        "elapsedMs": 5.267291,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": -10562336
+      },
+      {
+        "elapsedMs": 5.2010420000000295,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1575272
+      },
+      {
+        "elapsedMs": 5.027375000000006,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1574400
+      },
+      {
+        "elapsedMs": 4.928749999999923,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1583752
+      },
+      {
+        "elapsedMs": 5.582374999999956,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1571088
+      },
+      {
+        "elapsedMs": 4.700708000000077,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1570800
+      },
+      {
+        "elapsedMs": 5.356374999999957,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1582120
+      },
+      {
+        "elapsedMs": 5.547374999999988,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": 1571160
+      },
+      {
+        "elapsedMs": 5.647624999999948,
+        "queryCount": 5,
+        "resultJsonBytes": 57,
+        "heapDeltaBytes": -11407016
+      }
+    ],
+    "small.export": [
+      {
+        "elapsedMs": 7.151124999999979,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 876920
+      },
+      {
+        "elapsedMs": 6.906041999999957,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 930480
+      },
+      {
+        "elapsedMs": 7.054957999999942,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 888568
+      },
+      {
+        "elapsedMs": 7.390041999999994,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 878152
+      },
+      {
+        "elapsedMs": 8.354665999999952,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 882000
+      },
+      {
+        "elapsedMs": 7.5621660000000475,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 878224
+      },
+      {
+        "elapsedMs": 6.929834000000028,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 882792
+      },
+      {
+        "elapsedMs": 6.974917000000005,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": -11006832
+      },
+      {
+        "elapsedMs": 7.029874999999947,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 779992
+      },
+      {
+        "elapsedMs": 6.3174999999999955,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 779928
+      },
+      {
+        "elapsedMs": 7.289582999999993,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 779848
+      },
+      {
+        "elapsedMs": 6.260499999999979,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 778840
+      },
+      {
+        "elapsedMs": 7.047957999999994,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 778872
+      },
+      {
+        "elapsedMs": 6.353875000000016,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 788944
+      },
+      {
+        "elapsedMs": 6.873457999999914,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 782232
+      },
+      {
+        "elapsedMs": 6.78733299999999,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 792416
+      },
+      {
+        "elapsedMs": 7.0063749999999345,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 778176
+      },
+      {
+        "elapsedMs": 6.509707999999932,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 779096
+      },
+      {
+        "elapsedMs": 6.2970000000000255,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 777816
+      },
+      {
+        "elapsedMs": 6.528957999999989,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 785424
+      },
+      {
+        "elapsedMs": 6.5455839999999625,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 766736
+      },
+      {
+        "elapsedMs": 6.297416999999996,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 761696
+      },
+      {
+        "elapsedMs": 6.780542000000082,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 731040
+      },
+      {
+        "elapsedMs": 6.352791000000025,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 727552
+      },
+      {
+        "elapsedMs": 8.926208000000088,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": -16986920
+      },
+      {
+        "elapsedMs": 6.99087499999996,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 741008
+      },
+      {
+        "elapsedMs": 7.060000000000059,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 727128
+      },
+      {
+        "elapsedMs": 6.239958999999999,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 730376
+      },
+      {
+        "elapsedMs": 6.501666999999998,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 735232
+      },
+      {
+        "elapsedMs": 6.242166999999995,
+        "queryCount": 15,
+        "resultJsonBytes": 11132,
+        "heapDeltaBytes": 723376
+      }
+    ],
+    "small.diff": [
+      {
+        "elapsedMs": 12.578916000000163,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2719712
+      },
+      {
+        "elapsedMs": 12.24591600000008,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2707040
+      },
+      {
+        "elapsedMs": 11.958041999999978,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2713256
+      },
+      {
+        "elapsedMs": 12.705875000000106,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -9409208
+      },
+      {
+        "elapsedMs": 12.336667000000034,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2497776
+      },
+      {
+        "elapsedMs": 11.660917000000154,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2497208
+      },
+      {
+        "elapsedMs": 12.414040999999997,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2503032
+      },
+      {
+        "elapsedMs": 11.677625000000035,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2477056
+      },
+      {
+        "elapsedMs": 12.355416999999989,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -9568352
+      },
+      {
+        "elapsedMs": 12.43275000000017,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2467792
+      },
+      {
+        "elapsedMs": 11.54774999999995,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2471040
+      },
+      {
+        "elapsedMs": 12.260416999999961,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2467992
+      },
+      {
+        "elapsedMs": 11.763916999999992,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2473104
+      },
+      {
+        "elapsedMs": 12.041915999999901,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -9474856
+      },
+      {
+        "elapsedMs": 12.044834000000037,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2469824
+      },
+      {
+        "elapsedMs": 12.297667000000047,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2515856
+      },
+      {
+        "elapsedMs": 11.861707999999908,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2398848
+      },
+      {
+        "elapsedMs": 11.3140420000002,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2402176
+      },
+      {
+        "elapsedMs": 12.367582999999968,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -9238992
+      },
+      {
+        "elapsedMs": 12.01883399999997,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2404032
+      },
+      {
+        "elapsedMs": 11.978249999999889,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2399880
+      },
+      {
+        "elapsedMs": 12.075415999999905,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2401160
+      },
+      {
+        "elapsedMs": 12.107709000000114,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2393232
+      },
+      {
+        "elapsedMs": 11.76258299999995,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2388264
+      },
+      {
+        "elapsedMs": 12.361667000000125,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -10230536
+      },
+      {
+        "elapsedMs": 12.149875000000065,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2389832
+      },
+      {
+        "elapsedMs": 12.178292000000056,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2389632
+      },
+      {
+        "elapsedMs": 11.458667000000105,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2391520
+      },
+      {
+        "elapsedMs": 11.66379199999983,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": 2391816
+      },
+      {
+        "elapsedMs": 12.226832999999942,
+        "queryCount": 31,
+        "resultJsonBytes": 24664,
+        "heapDeltaBytes": -9599008
+      }
+    ],
+    "small.apply": [
+      {
+        "elapsedMs": 15.265583000000106,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2833664
+      },
+      {
+        "elapsedMs": 16.124874999999975,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2828168
+      },
+      {
+        "elapsedMs": 16.15566600000011,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": -8723472
+      },
+      {
+        "elapsedMs": 15.523750000000064,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2847512
+      },
+      {
+        "elapsedMs": 15.519708000000037,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2822520
+      },
+      {
+        "elapsedMs": 15.67533400000002,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": -8835840
+      },
+      {
+        "elapsedMs": 15.953584000000092,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2834416
+      },
+      {
+        "elapsedMs": 16.12520799999993,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2828504
+      },
+      {
+        "elapsedMs": 15.787832999999864,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2825352
+      },
+      {
+        "elapsedMs": 15.92037500000015,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2812408
+      },
+      {
+        "elapsedMs": 15.799458999999842,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2780816
+      },
+      {
+        "elapsedMs": 15.910667000000103,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2784152
+      },
+      {
+        "elapsedMs": 15.54620900000009,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2793696
+      },
+      {
+        "elapsedMs": 15.566082999999935,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2791512
+      },
+      {
+        "elapsedMs": 15.713999999999942,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2783968
+      },
+      {
+        "elapsedMs": 16.204291999999896,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2784192
+      },
+      {
+        "elapsedMs": 16.32183400000008,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2786616
+      },
+      {
+        "elapsedMs": 16.081292000000076,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2786840
+      },
+      {
+        "elapsedMs": 16.475208000000293,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2794488
+      },
+      {
+        "elapsedMs": 17.356166999999914,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2774144
+      },
+      {
+        "elapsedMs": 15.927874999999858,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2784904
+      },
+      {
+        "elapsedMs": 15.332832999999937,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2784984
+      },
+      {
+        "elapsedMs": 16.401957999999922,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2781688
+      },
+      {
+        "elapsedMs": 16.674082999999882,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2791424
+      },
+      {
+        "elapsedMs": 15.939666000000216,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2774712
+      },
+      {
+        "elapsedMs": 15.514083000000028,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2778352
+      },
+      {
+        "elapsedMs": 15.389625000000251,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2772160
+      },
+      {
+        "elapsedMs": 15.399708999999802,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2776648
+      },
+      {
+        "elapsedMs": 15.365374999999858,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2770208
+      },
+      {
+        "elapsedMs": 16.201542000000245,
+        "queryCount": 33,
+        "resultJsonBytes": 27458,
+        "heapDeltaBytes": 2764352
+      }
+    ],
+    "small.features": [
+      {
+        "elapsedMs": 0.05766700000003766,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79528
+      },
+      {
+        "elapsedMs": 0.11341600000014296,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79416
+      },
+      {
+        "elapsedMs": 0.25929199999973207,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -262808
+      },
+      {
+        "elapsedMs": 0.08904200000006313,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 82040
+      },
+      {
+        "elapsedMs": 0.05070900000009715,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 80280
+      },
+      {
+        "elapsedMs": 0.044249999999919964,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79672
+      },
+      {
+        "elapsedMs": 0.044249999999919964,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 710296
+      },
+      {
+        "elapsedMs": 0.06024999999999636,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -541416
+      },
+      {
+        "elapsedMs": 0.039707999999791355,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79320
+      },
+      {
+        "elapsedMs": 0.043374999999741704,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79328
+      },
+      {
+        "elapsedMs": 0.051458999999795196,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79320
+      },
+      {
+        "elapsedMs": 0.037915999999768246,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79320
+      },
+      {
+        "elapsedMs": 0.03829200000018318,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79416
+      },
+      {
+        "elapsedMs": 0.037832999999864114,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79320
+      },
+      {
+        "elapsedMs": 0.04874999999992724,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 80040
+      },
+      {
+        "elapsedMs": 0.03933400000005349,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79328
+      },
+      {
+        "elapsedMs": 0.040332999999918684,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79320
+      },
+      {
+        "elapsedMs": 0.05074999999987995,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 82832
+      },
+      {
+        "elapsedMs": 0.038333999999849766,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.037792000000081316,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79176
+      },
+      {
+        "elapsedMs": 0.03720900000007532,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.04066700000021228,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.05287499999985812,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79880
+      },
+      {
+        "elapsedMs": 0.040874999999687134,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.03779100000019753,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.04287500000009459,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79176
+      },
+      {
+        "elapsedMs": 0.037792000000081316,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.038000000000010914,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      },
+      {
+        "elapsedMs": 0.06408299999975497,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 80672
+      },
+      {
+        "elapsedMs": 0.04829100000006292,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 79160
+      }
+    ],
+    "large.import": [
+      {
+        "elapsedMs": 127.10679200000004,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 13497616
+      },
+      {
+        "elapsedMs": 125.88479099999995,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3339824
+      },
+      {
+        "elapsedMs": 125.88604200000009,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -2196480
+      },
+      {
+        "elapsedMs": 125.36670800000002,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 11975448
+      },
+      {
+        "elapsedMs": 123.68433400000004,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3602192
+      },
+      {
+        "elapsedMs": 124.29133400000046,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -2795200
+      },
+      {
+        "elapsedMs": 125.6802090000001,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -11823264
+      },
+      {
+        "elapsedMs": 124.36487500000021,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -110448
+      },
+      {
+        "elapsedMs": 124.1137090000002,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 13496392
+      },
+      {
+        "elapsedMs": 126.16550000000007,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3290560
+      },
+      {
+        "elapsedMs": 124.84879099999944,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -2252680
+      },
+      {
+        "elapsedMs": 125.31933300000037,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 12250976
+      },
+      {
+        "elapsedMs": 123.31983300000047,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 13654624
+      },
+      {
+        "elapsedMs": 123.75320800000009,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3550704
+      },
+      {
+        "elapsedMs": 122.68158299999959,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -1946936
+      },
+      {
+        "elapsedMs": 126.43629099999998,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 14063320
+      },
+      {
+        "elapsedMs": 122.28620800000044,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3269536
+      },
+      {
+        "elapsedMs": 126.16558299999997,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -2512808
+      },
+      {
+        "elapsedMs": 124.02608399999917,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -593168
+      },
+      {
+        "elapsedMs": 125.68779199999972,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 269184
+      },
+      {
+        "elapsedMs": 125.62750000000051,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -70920
+      },
+      {
+        "elapsedMs": 127.43120900000031,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 13495264
+      },
+      {
+        "elapsedMs": 127.746083,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3399544
+      },
+      {
+        "elapsedMs": 126.46404199999961,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -2146480
+      },
+      {
+        "elapsedMs": 124.9619589999993,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 12255680
+      },
+      {
+        "elapsedMs": 124.54162499999984,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": 13731360
+      },
+      {
+        "elapsedMs": 122.44183399999929,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -3654664
+      },
+      {
+        "elapsedMs": 125.89808300000004,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -1973504
+      },
+      {
+        "elapsedMs": 130.66016600000057,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -17451024
+      },
+      {
+        "elapsedMs": 122.34479199999987,
+        "queryCount": 5,
+        "resultJsonBytes": 59,
+        "heapDeltaBytes": -86664
+      }
+    ],
+    "large.export": [
+      {
+        "elapsedMs": 26.23162500000035,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6389088
+      },
+      {
+        "elapsedMs": 27.107292000000598,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9743112
+      },
+      {
+        "elapsedMs": 29.50158300000112,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6074272
+      },
+      {
+        "elapsedMs": 25.284041000000798,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -3492872
+      },
+      {
+        "elapsedMs": 24.602457999999388,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9826432
+      },
+      {
+        "elapsedMs": 26.765583000000333,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6378560
+      },
+      {
+        "elapsedMs": 27.23516699999891,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9736408
+      },
+      {
+        "elapsedMs": 27.83075000000099,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6084168
+      },
+      {
+        "elapsedMs": 26.496124999999665,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -3492176
+      },
+      {
+        "elapsedMs": 26.53795799999898,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9826080
+      },
+      {
+        "elapsedMs": 29.19750000000022,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -28439032
+      },
+      {
+        "elapsedMs": 25.932832999998936,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9888168
+      },
+      {
+        "elapsedMs": 26.262667000000874,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6856384
+      },
+      {
+        "elapsedMs": 26.588999999999942,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9736744
+      },
+      {
+        "elapsedMs": 25.846208999999362,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -5798232
+      },
+      {
+        "elapsedMs": 25.696083000000726,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -2809424
+      },
+      {
+        "elapsedMs": 28.638166999999157,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9740840
+      },
+      {
+        "elapsedMs": 30.237457999999606,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6579248
+      },
+      {
+        "elapsedMs": 27.867207999999664,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -2788808
+      },
+      {
+        "elapsedMs": 26.75799999999981,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9817264
+      },
+      {
+        "elapsedMs": 25.7762500000008,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6364400
+      },
+      {
+        "elapsedMs": 25.128833000000668,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9885232
+      },
+      {
+        "elapsedMs": 26.971040999998877,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6243584
+      },
+      {
+        "elapsedMs": 24.705250000000888,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -3541784
+      },
+      {
+        "elapsedMs": 25.87670900000012,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9874688
+      },
+      {
+        "elapsedMs": 27.362334000001283,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6404600
+      },
+      {
+        "elapsedMs": 26.96916699999929,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9742408
+      },
+      {
+        "elapsedMs": 27.176375000000917,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -6059304
+      },
+      {
+        "elapsedMs": 42.393207999999504,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": -3468536
+      },
+      {
+        "elapsedMs": 30.369792000001326,
+        "queryCount": 15,
+        "resultJsonBytes": 500462,
+        "heapDeltaBytes": 9802232
+      }
+    ],
+    "large.diff": [
+      {
+        "elapsedMs": 70.28145799999947,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3775216
+      },
+      {
+        "elapsedMs": 73.65458300000137,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": -32056944
+      },
+      {
+        "elapsedMs": 73.00958400000127,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3656656
+      },
+      {
+        "elapsedMs": 72.37624999999935,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5421224
+      },
+      {
+        "elapsedMs": 71.46495800000048,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3682656
+      },
+      {
+        "elapsedMs": 71.72354199999972,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3733856
+      },
+      {
+        "elapsedMs": 68.45537500000137,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5661448
+      },
+      {
+        "elapsedMs": 69.06950000000143,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": -10163272
+      },
+      {
+        "elapsedMs": 69.48041700000067,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3638176
+      },
+      {
+        "elapsedMs": 64.25933400000031,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3613696
+      },
+      {
+        "elapsedMs": 66.32424999999967,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3593016
+      },
+      {
+        "elapsedMs": 70.03279199999997,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5202064
+      },
+      {
+        "elapsedMs": 64.9497080000001,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3630952
+      },
+      {
+        "elapsedMs": 71.11812499999905,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3550816
+      },
+      {
+        "elapsedMs": 72.55266599999959,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5865312
+      },
+      {
+        "elapsedMs": 69.03533400000015,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": -10150384
+      },
+      {
+        "elapsedMs": 68.74187499999971,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3548504
+      },
+      {
+        "elapsedMs": 71.67033300000003,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3536528
+      },
+      {
+        "elapsedMs": 72.71362500000032,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3585392
+      },
+      {
+        "elapsedMs": 70.75245800000084,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5348888
+      },
+      {
+        "elapsedMs": 53.14191600000049,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3512384
+      },
+      {
+        "elapsedMs": 51.52649999999994,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3598536
+      },
+      {
+        "elapsedMs": 51.830417000001034,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 6014264
+      },
+      {
+        "elapsedMs": 60.28520899999967,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": -10133392
+      },
+      {
+        "elapsedMs": 60.41241699999955,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3621032
+      },
+      {
+        "elapsedMs": 64.95650000000023,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3515176
+      },
+      {
+        "elapsedMs": 66.50875000000087,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3542408
+      },
+      {
+        "elapsedMs": 69.70391600000039,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 5323600
+      },
+      {
+        "elapsedMs": 68.71508399999948,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": -66691960
+      },
+      {
+        "elapsedMs": 70.15004200000112,
+        "queryCount": 31,
+        "resultJsonBytes": 1096424,
+        "heapDeltaBytes": 3456560
+      }
+    ],
+    "large.apply": [
+      {
+        "elapsedMs": 74.71604200000002,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8923056
+      },
+      {
+        "elapsedMs": 78.99333399999887,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8960984
+      },
+      {
+        "elapsedMs": 80.4627500000006,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8932008
+      },
+      {
+        "elapsedMs": 81.54283299999952,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8950528
+      },
+      {
+        "elapsedMs": 79.0487919999996,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8926552
+      },
+      {
+        "elapsedMs": 78.93133400000079,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8905016
+      },
+      {
+        "elapsedMs": 81.79774999999972,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8942608
+      },
+      {
+        "elapsedMs": 82.02783400000044,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 10372624
+      },
+      {
+        "elapsedMs": 81.21345799999835,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8292560
+      },
+      {
+        "elapsedMs": 80.7491659999996,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8919648
+      },
+      {
+        "elapsedMs": 78.10000000000036,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8922656
+      },
+      {
+        "elapsedMs": 80.14749999999913,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8887104
+      },
+      {
+        "elapsedMs": 83.71049999999923,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8936696
+      },
+      {
+        "elapsedMs": 79.95629200000076,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8906008
+      },
+      {
+        "elapsedMs": 85.43404100000225,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7147704
+      },
+      {
+        "elapsedMs": 80.54408300000068,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7258512
+      },
+      {
+        "elapsedMs": 85.54925000000003,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7260880
+      },
+      {
+        "elapsedMs": 86.49462499999936,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7280128
+      },
+      {
+        "elapsedMs": 83.23162500000035,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7300016
+      },
+      {
+        "elapsedMs": 91.60337499999878,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7282768
+      },
+      {
+        "elapsedMs": 87.5627080000013,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -7264544
+      },
+      {
+        "elapsedMs": 85.24250000000029,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 10960160
+      },
+      {
+        "elapsedMs": 85.40320799999972,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8335080
+      },
+      {
+        "elapsedMs": 92.3368330000012,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8338136
+      },
+      {
+        "elapsedMs": 87.5559170000015,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8941592
+      },
+      {
+        "elapsedMs": 84.24508400000195,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 10866848
+      },
+      {
+        "elapsedMs": 84.53112500000134,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8412104
+      },
+      {
+        "elapsedMs": 89.25975000000108,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8362664
+      },
+      {
+        "elapsedMs": 79.48658400000204,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": 8927040
+      },
+      {
+        "elapsedMs": 88.25283299999865,
+        "queryCount": 33,
+        "resultJsonBytes": 1168798,
+        "heapDeltaBytes": -13696936
+      }
+    ],
+    "large.features": [
+      {
+        "elapsedMs": 30.362041999997018,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 4107776
+      },
+      {
+        "elapsedMs": 29.499124999998457,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3917296
+      },
+      {
+        "elapsedMs": 29.45287499999904,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3866368
+      },
+      {
+        "elapsedMs": 30.5523749999993,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12530432
+      },
+      {
+        "elapsedMs": 30.629415999999765,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 4101872
+      },
+      {
+        "elapsedMs": 29.101375000002008,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3951712
+      },
+      {
+        "elapsedMs": 29.249291000000085,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3834904
+      },
+      {
+        "elapsedMs": 30.238624999998137,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12556200
+      },
+      {
+        "elapsedMs": 29.979208000000654,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3983576
+      },
+      {
+        "elapsedMs": 29.843709000000672,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3908992
+      },
+      {
+        "elapsedMs": 29.95183299999917,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3841704
+      },
+      {
+        "elapsedMs": 31.199249999997846,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12553728
+      },
+      {
+        "elapsedMs": 29.405833999997412,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 4049984
+      },
+      {
+        "elapsedMs": 31.117958000002545,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3897504
+      },
+      {
+        "elapsedMs": 29.774124999999913,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3851656
+      },
+      {
+        "elapsedMs": 30.237291000001278,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3896944
+      },
+      {
+        "elapsedMs": 29.6384169999983,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12641336
+      },
+      {
+        "elapsedMs": 29.21416599999793,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3936504
+      },
+      {
+        "elapsedMs": 29.902333000001818,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3839728
+      },
+      {
+        "elapsedMs": 29.264333999999508,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3762288
+      },
+      {
+        "elapsedMs": 30.306165999998484,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12629120
+      },
+      {
+        "elapsedMs": 30.817166999997426,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3953176
+      },
+      {
+        "elapsedMs": 29.626083000002836,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3840904
+      },
+      {
+        "elapsedMs": 29.028833000000304,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3761912
+      },
+      {
+        "elapsedMs": 29.91595800000141,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12626048
+      },
+      {
+        "elapsedMs": 29.369249999999738,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3949112
+      },
+      {
+        "elapsedMs": 29.660499999998137,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3801744
+      },
+      {
+        "elapsedMs": 29.438874999999825,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3785280
+      },
+      {
+        "elapsedMs": 29.382582999998704,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": 3755360
+      },
+      {
+        "elapsedMs": 29.567917000000307,
+        "queryCount": 0,
+        "resultJsonBytes": 0,
+        "heapDeltaBytes": -12642208
+      }
+    ]
+  },
+  "explain": [
+    {
+      "size": "small",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Index Scan",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "spells_campaignId_idx",
+                "Relation Name": "spells",
+                "Alias": "spells",
+                "Startup Cost": 0.28,
+                "Total Cost": 4.31,
+                "Plan Rows": 1,
+                "Plan Width": 26,
+                "Actual Startup Time": 0.007,
+                "Actual Total Time": 0.008,
+                "Actual Rows": 10,
+                "Actual Loops": 1,
+                "Rows Removed by Index Recheck": 0,
+                "Shared Hit Blocks": 3,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.031,
+              "Triggers": [],
+              "Execution Time": 0.017
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "size": "large",
+      "plan": [
+        {
+          "QUERY PLAN": [
+            {
+              "Plan": {
+                "Node Type": "Index Scan",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Forward",
+                "Index Name": "spells_campaignId_idx",
+                "Relation Name": "spells",
+                "Alias": "spells",
+                "Startup Cost": 0.28,
+                "Total Cost": 4.31,
+                "Plan Rows": 1,
+                "Plan Width": 26,
+                "Actual Startup Time": 0.03,
+                "Actual Total Time": 0.234,
+                "Actual Rows": 500,
+                "Actual Loops": 1,
+                "Rows Removed by Index Recheck": 0,
+                "Shared Hit Blocks": 20,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning": {
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              },
+              "Planning Time": 0.089,
+              "Triggers": [],
+              "Execution Time": 0.3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
