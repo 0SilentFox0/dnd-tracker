@@ -73,7 +73,10 @@ export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.litera
 
 const ChooseOneSchema = z.object({ kind: z.literal("chooseOne"), options: z.array(NonRandomEffectSchema).min(2).max(7) });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema] as const;
+/** Кубики заклинання = число з введення кастера (обрізане до max); у ефекти рушія не потрапляє. */
+const InputDiceSchema = z.object({ kind: z.literal("inputDice"), label: z.string().trim().min(1).max(40), max: z.number().int().min(1).max(40) });
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 

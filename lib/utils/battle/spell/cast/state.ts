@@ -68,7 +68,7 @@ function amountOf(e: Effect): Amount | undefined {
 export const usesRoll = (e: Effect) => {
   const a = amountOf(e);
 
-  return typeof a === "object" && a !== null && "spellRoll" in a;
+  return (typeof a === "object" && a !== null && "spellRoll" in a) || (e.kind === "dealDamage" && !!e.byDistance);
 };
 
 export const isDamageEffect = (e: Effect) => e.kind === "dealDamage" || e.kind === "dot";
@@ -82,14 +82,21 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : [e]));
+export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : e.kind === "inputDice" ? [] : [e]));
+
+export const inputDiceOf = (effects: SpellEffect[]): { label: string; max: number } | undefined => {
+  const found = effects.find((e) => e.kind === "inputDice");
+
+  return found?.kind === "inputDice" ? { label: found.label, max: found.max } : undefined;
+};
 
 export const needsOption = (effects: SpellEffect[]) => effects.some((e) => e.kind === "chooseOne");
 
 export const optionInRange = (effects: SpellEffect[], index: number | undefined) =>
   effects.every((e) => e.kind !== "chooseOne" || (index !== undefined && Number.isInteger(index) && index >= 0 && index < e.options.length));
 
-export const expandChosen = (effects: SpellEffect[], index = 0): Effect[] => effects.map((e) => (e.kind === "chooseOne" ? (e.options[index] ?? e.options[0]) : e));
+export const expandChosen = (effects: SpellEffect[], index = 0): Effect[] =>
+  effects.flatMap((e) => (e.kind === "chooseOne" ? [e.options[index] ?? e.options[0]] : e.kind === "inputDice" ? [] : [e]));
 
 export function abilityOf(spell: ChosenSpell): ResolvedAbility {
   return {

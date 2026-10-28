@@ -6,6 +6,7 @@ import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { canStand, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
+import { awayStep } from "@/lib/utils/battle/grid/push";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -133,7 +134,7 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
 
   const at = target.battleData.position;
 
-  const dest = mode === "push" && from && at ? { x: at.x + Math.sign(at.x - from.x), y: at.y + Math.sign(at.y - from.y) } : null;
+  const dest = mode === "push" && from && at ? awayStep(from, at) : null;
 
   if (dest && map && canStand(map, participants, target, dest)) {
     messages.push(`${target.basicInfo.name} відштовхнуто на клітинку`);

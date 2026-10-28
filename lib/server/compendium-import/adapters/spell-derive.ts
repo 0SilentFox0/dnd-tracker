@@ -69,6 +69,8 @@ const UP_TO_CREATURES = /\bup to (\w+) (?:other |willing |hostile |(?:tiny|small
 
 const SHAPE_TEXT = /(\d+)-foot(?:-radius)?(?:, \d+-foot-(?:high|tall))? (sphere|cube|cone|cylinder)\b|(\d+)-foot-long[^.]{0,20}\bline\b|(\d+)-foot line\b|\bline up to (\d+) feet long/i;
 
+const PUSH = /\bpushed (?:up to )?(\d+) feet (?:away )?from you\b/i;
+
 const RIDERS: Array<[RegExp, string]> = [
   [/\bpush(?:ed)?\b|\bpull(?:ed)?\b|\bknock(?:ed)?\b|carried along/i, "поштовх/притягання"],
   [/difficult terrain/i, "складна місцевість"],
@@ -224,7 +226,13 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   const applied = kind === "condition" ? condition : null;
 
-  const riders = RIDERS.filter(([re]) => re.test(text)).map(([, label]) => label);
+  const pushed = PUSH.exec(text);
+
+  const pushFeet = pushed ? Number(pushed[1]) : 0;
+
+  const push = pushFeet >= 5 && pushFeet <= 30 && pushFeet % 5 === 0 && (kind === "damage" || kind === "condition") ? pushFeet : 0;
+
+  const riders = RIDERS.filter(([re, label]) => re.test(text) && !(push && label === "поштовх/притягання")).map(([, label]) => label);
 
   if (applied === "immobilized") riders.push("утримання цілей: умови й переміщення (див. опис)");
 
@@ -239,7 +247,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
       fields: {
         targeting: withTargetFilter(targeting, text, higher),
         resolution: spellResolution(facts, kind, targeting),
-        spellEffects: spellEffects(facts, kind),
+        spellEffects: [...spellEffects(facts, kind), ...(push ? [{ kind: "push", feet: push, from: "caster" }] : [])],
         dice: dice?.count ?? 0,
         ...(dice && { dieSides: dice.sides }),
         ...spellUpcast(facts, kind),

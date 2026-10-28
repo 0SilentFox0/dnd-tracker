@@ -22,7 +22,7 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
-import { flatEffects, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
+import { flatEffects, inputDiceOf, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
@@ -138,7 +138,13 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
-    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
+    const inputDice = inputDiceOf(definition.effects);
+
+    if (inputDice && data.inputCount === undefined && !data.preview) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_INPUT_REQUIRED);
+
+    const sized = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
+
+    const expected = inputDice ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) } : sized;
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
 

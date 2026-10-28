@@ -69,6 +69,12 @@ function RollsStep({ book }: { book: Book }) {
       <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
       <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title="Кидок атаки" />
       {view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">Порожній d20 кине сервер.</p>}
+      {state.pick?.inputDice && (
+        <label className="mt-3 flex items-center justify-between gap-3 text-sm">
+          <span className="hud-sc font-bold">{state.pick.inputDice.label}</span>
+          <input type="number" inputMode="numeric" min={1} max={state.pick.inputDice.max} value={state.inputCount ?? 1} onChange={(e) => actions.setInputCount(Number(e.target.value))} className="w-20 rounded border border-white/25 bg-transparent px-2 py-1 text-right" />
+        </label>
+      )}
       {state.pick && state.pick.diceSlots.length > 0 && (
         <>
           <div className="hud-sc mt-4 text-lg font-bold">Кубики{selected ? ` · ${view.formulaOf(selected)}` : ""}</div>

@@ -28,3 +28,12 @@ Class/feat джерела копіювання підтримуються нас
 ## Premerge refactor (part 2, 2026-10)
 
 `collectModifiers` accepts several flags in one pass; aura de-duplication per `auraKey` sums strength over the requested flags. Item limits live in `ITEM_LIMITS` (read by `readStats` and the zod schema alike); `itemStatsFromRow` caches by row object (WeakMap), so callers must not mutate its result. Choice owners (class/subclass/feat/race/background) are walked by `forEachChoiceOwner` (`visit` gives both state `path` and `legacyPath`); `plan.ts` uses it only for the class loop. Edition and dice parsing use `RULES_EDITIONS`, `normalizeDiceText` and `DICE_PATTERN`; remaining ad-hoc dice regexes are listed in the findings register (A23).
+
+## Spell engine coverage (P1)
+
+- **Спел-only ефекти** — `SpellEffectSchema` (`lib/utils/spells/model/schema.ts`) = `BASE_EFFECTS` + `randomOf` + `chooseOne` + `inputDice`; їх приймають спел-схеми (форма, REST, OpenAPI `SpellEffect`), але не `AbilitySchema` (вміння `chooseOne`/`inputDice` відхиляє). Ці види не мають `EFFECT_REGISTRY`-запису: `castSpell` розгортає їх до рушія (`expandChosen`); у `describeEffect` лише підпис. Новий спел-only вид — Zod у `SPELL_ONLY_EFFECTS` + розгортання в `expandChosen`/`flatEffects`.
+- **`help`** — ефект у `BASE_EFFECTS` (`registry/effects/state.ts` `applyHelp`, той самий `helpEffect`, що й дія «Допомога»): ціль отримує перевагу на наступну атаку.
+- **`push`** — `registry/effects/push.ts` (`feet` 5..30, `from: "caster"`); логіка геометрії в `battle/grid/push.ts`; без мапи не застосовується.
+- **`dealDamage.byDistance`** — таблиця дальностей (`maxFeet` кратне 5, зростає), працює лише в заклинаннях (у вмінні без `spellRoll`-контексту береться `amount`).
+- **`modifyStat.atLeast`** — нижня межа стату; окрім характеристик (`build/bake.ts`) діє для `armor` і `speed` (до 120) з тривалістю: `collectModifiers` повертає максимум `atLeast`, `statWithModifiers` його застосовує.
+- **`damageBonus.flat: { spellRoll: ±N }`** — відсоток від кидка заклинання (наприклад −100 = мінус кидок); лише в ефектах заклинань (`validateAbilities` відхиляє у вміннях), `freezeSpellRoll` підставляє кидок перед застосуванням.

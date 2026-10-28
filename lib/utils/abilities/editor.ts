@@ -41,6 +41,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
   maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
   help: { target: "eventTarget" },
+  push: { feet: 10, from: "caster", target: "eventTarget" },
   randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
 };
 

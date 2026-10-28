@@ -334,6 +334,7 @@ export const API_ERRORS = {
   BATTLE_SOURCE_LEVEL_TOO_LOW: "Рівень джерела нижчий за рівень заклинання",
   BATTLE_SPELL_CONFIGURE_OR_MANUAL: "Налаштуйте механіку заклинання або застосуйте його вручну",
   BATTLE_SPELL_OPTION_REQUIRED: "Оберіть один із варіантів заклинання",
+  BATTLE_SPELL_INPUT_REQUIRED: "Вкажіть значення для кубиків заклинання",
   BATTLE_SPELL_TARGET_FILTER: "Ціль не підходить під обмеження заклинання (тип істоти, небезпека чи політ)",
   BATTLE_SPELL_NOT_FOUND: "Заклинання не знайдено",
   BATTLE_SPELL_SLOT_OR_SOURCE: "Оберіть слот або джерело заклинання",

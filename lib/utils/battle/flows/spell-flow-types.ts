@@ -25,6 +25,8 @@ export interface SpellPick {
   castLevel?: number;
   /** підписи варіантів chooseOne; гравець обирає один перед кастом */
   options?: string[];
+  /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
+  inputDice?: { label: string; max: number; sides: number };
   needsSaves: boolean;
   needsAttackRolls?: boolean;
   diceSlots: number[];
@@ -51,6 +53,7 @@ export interface SpellFlowState {
   grantKey?: string;
   castLevel?: number;
   optionIndex?: number;
+  inputCount?: number;
   damage: (number | undefined)[];
   error?: string;
   /** сервер зупинив каст: ДМ обирає ефект крита */
@@ -66,6 +69,7 @@ export type SpellFlowAction =
   | { type: "SET_GRANT"; grantKey: string; pick: SpellPick; castLevel?: number }
   | { type: "SET_CAST_LEVEL"; castLevel: number; pick: SpellPick }
   | { type: "SET_OPTION"; index: number }
+  | { type: "SET_INPUT"; count: number }
   | { type: "SET_ATTACK"; id: string; value: number | undefined }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }

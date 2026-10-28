@@ -1,6 +1,7 @@
 import type { SpellCast } from "../spell-cast";
 import type { SpellDerivation } from "../spell-derive";
 import { chooseOneSpell, helpAlly, reduceDamageRoll } from "./choice-help";
+import { byDistanceDamage, fallingDamage } from "./distance";
 import { selfDamageTransfer } from "./self-damage-transfer";
 import { controlAnimal, speedAtLeast } from "./target-filter";
 
@@ -19,7 +20,7 @@ export interface SpellPatternInput {
 export type SpellRecognizer = (i: SpellPatternInput) => SpellDerivation | null;
 
 // narrow patterns first
-export const SPELL_RECOGNIZERS: SpellRecognizer[] = [selfDamageTransfer, controlAnimal, speedAtLeast, chooseOneSpell, reduceDamageRoll, helpAlly];
+export const SPELL_RECOGNIZERS: SpellRecognizer[] = [selfDamageTransfer, byDistanceDamage, fallingDamage, controlAnimal, speedAtLeast, chooseOneSpell, reduceDamageRoll, helpAlly];
 
 export function recognizeSpell(input: SpellPatternInput): SpellDerivation | null {
   for (const recognize of SPELL_RECOGNIZERS) {

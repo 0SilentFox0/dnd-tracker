@@ -2,11 +2,12 @@ import { renderEntries } from "../../entries";
 import type { SpellRecognizer } from "./index";
 
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";
+import { numberWord } from "@/lib/utils/spells/derive/text";
 import type { SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
 
-const CHOOSE_ONE = /\bchoose one of the following\b/i;
+const CHOOSE_ONE = /\b(?:choose|gaining|gain|have) one of the following\b/i;
 
-const HEAL = /\bregains? (?:a number of )?(\d+d(?:4|6|8|10|12|20))\b(?:\s*\+\s*(?:\d+|your [a-z]+ modifier))?[^.]*?\bhit points\b/i;
+const HEAL = /\bregains? (?:a number of )?(\d+d(?:4|6|8|10|12|20))\b(?:\s*\+\s*(?:\d+|your [a-z ]+ modifier))?[^.]*?\bhit points\b|\bregains? hit points equal to (\d+d(?:4|6|8|10|12|20))\b/i;
 
 const SPEED = /\bspeed increases by (\d+) feet/i;
 
@@ -21,9 +22,13 @@ function optionTexts(entries: unknown): string[] | null {
 
   if (at < 0) return null;
 
-  const items = list.slice(at + 1).find((e) => isRecord(e) && e.type === "list");
+  const after = list.slice(at + 1);
 
-  const texts = isRecord(items) && Array.isArray(items.items) ? items.items.map((i) => renderEntries(i).text.trim()).filter(Boolean) : [];
+  const items = after.find((e) => isRecord(e) && e.type === "list");
+
+  const plain = after.filter((e): e is string => typeof e === "string");
+
+  const texts = isRecord(items) && Array.isArray(items.items) ? items.items.map((i) => renderEntries(i).text.trim()).filter(Boolean) : plain.map((e) => renderEntries(e).text.trim()).filter(Boolean);
 
   return texts.length >= 2 && texts.length <= 7 ? texts : null;
 }
@@ -33,7 +38,7 @@ type Option = { effect: SpellEffect; known: boolean };
 function optionOf(text: string, rounds: number): Option {
   const heal = HEAL.exec(text);
 
-  if (heal) return { effect: { kind: "heal", amount: heal[1] }, known: true };
+  if (heal) return { effect: { kind: "heal", amount: heal[1] ?? heal[2] }, known: true };
 
   const speed = SPEED.exec(text);
 
@@ -89,24 +94,33 @@ export const helpAlly: SpellRecognizer = ({ text, cast, ability, damageTypes }) 
   };
 };
 
-const REDUCE_DAMAGE = /\broll a d(4|6|8|10|12|20)\b[^.]*\bsubtract the number rolled from\b[^.]*\bdamage\b/i;
+const REDUCE_DAMAGE = /\broll a d(4|6|8|10|12|20)\b[^.]*\bsubtract the number rolled from\b[^.]*\bdamage\b|\broll a d(4|6|8|10|12|20)\b[^.]*\bdamage\b[^.]*\bis reduced by the number (?:you )?rolled\b/i;
 
-export const reduceDamageRoll: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
+const UP_TO_WEAPONS = /\bup to (\w+) weapons\b/i;
+
+const EXTRA_WEAPONS = /\b(?:target|affect) (\w+) additional weapons? for each (?:spell )?slot level above/i;
+
+export const reduceDamageRoll: SpellRecognizer = ({ text, higher, cast, ability, damageTypes }) => {
   const m = REDUCE_DAMAGE.exec(text);
 
   if (!m || damageTypes.length > 0) return null;
 
   const range = spellRange(cast.facts);
 
+  const weapons = numberWord(UP_TO_WEAPONS.exec(text)?.[1] ?? "");
+
+  const extra = numberWord(EXTRA_WEAPONS.exec(higher)?.[1] ?? "");
+
   return {
     native: {
       narrative: false,
       riders: [],
       fields: {
-        targeting: { kind: "enemy", ...(range !== "self" && { range }) },
+        targeting: weapons && weapons > 1 && weapons <= 20 ? { kind: "area", side: "enemy", maxTargets: weapons, ...(range !== "self" && { range }) } : { kind: "enemy", ...(range !== "self" && { range }) },
         resolution: ability ? { kind: "save", ability, onSuccess: "none" } : { kind: "auto" },
         dice: 1,
-        dieSides: Number(m[1]),
+        dieSides: Number(m[1] ?? m[2]),
+        ...(extra && weapons && extra <= 10 && { upcastTargets: extra }),
         spellEffects: [{ kind: "damageBonus", filter: { kind: "physical" }, flat: { spellRoll: -100 }, duration: { rounds: durationRounds(cast.facts.duration) } }],
       },
     },

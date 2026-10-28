@@ -239,6 +239,7 @@ export interface SpellCastData {
   free?: boolean;
   slotKey?: string;
   optionIndex?: number;
+  inputCount?: number;
 }
 
 // Skill Trees API

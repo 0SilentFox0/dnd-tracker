@@ -1,3 +1,4 @@
+import { CELL_FEET } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
@@ -5,9 +6,13 @@ import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyFlowDamage, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { bothOnMap, cellsOf, footprintDistance } from "@/lib/utils/battle/grid";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
 import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
+import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { rollDice } from "@/lib/utils/common/dice";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
@@ -75,12 +80,48 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   if (resisted.finalDamage === 0 && resisted.immunityApplied) flow.messages.push(immunityNote(target.basicInfo.name, resisted.steps));
 }
 
-const baseFor = (state: SpellCastState, e: Effect) => (isDamageEffect(e) ? state.power.damage : state.power.heal);
+const DICE_COUNT = /^(\d+)d(\d+)$/;
+
+function rangeDice(state: SpellCastState, dice: string): string {
+  const { definition, level } = state.spell;
+
+  const extra = definition.fixedDice ? 0 : (definition.upcastDice ?? 0) * upcastSteps(level, state.castLevel);
+
+  const m = DICE_COUNT.exec(dice);
+
+  return m && extra > 0 ? `${Number(m[1]) + extra}d${m[2]}` : dice;
+}
+
+function distanceDamage(state: SpellCastState, ranges: NonNullable<Extract<Effect, { kind: "dealDamage" }>["byDistance"]>, id: string): number {
+  const { flow } = state;
+
+  const me = getP(flow, casterIdOf(state));
+
+  const target = getP(flow, id);
+
+  const onMap = bothOnMap(flow.ctx.map, me, target);
+
+  const feet = onMap ? footprintDistance(cellsOf(me), cellsOf(target)) * CELL_FEET : 0;
+
+  if (!onMap) flow.messages.push(`📏 ${state.spell.name}: без мапи — найближчий діапазон`);
+
+  const range = ranges.find((r) => r.maxFeet >= feet) ?? ranges[ranges.length - 1];
+
+  const rolled = rollDice(rangeDice(state, range.dice), state.rng);
+
+  return computeSpellPower({ caster: me, groupId: state.spell.groupId, rolls: [rolled], participants: flow.ps, extra: state.actionModifiers[casterIdOf(state)], addAbilityMod: state.spell.definition.addAbilityMod, damageBonus: state.spell.definition.damageBonus }).damage;
+}
+
+const baseFor = (state: SpellCastState, e: Effect, id: string) => {
+  if (e.kind === "dealDamage" && e.byDistance) return distanceDamage(state, e.byDistance, id);
+
+  return isDamageEffect(e) ? state.power.damage : state.power.heal;
+};
 
 export function applyTo(state: SpellCastState, effect: Effect, effectIndex: number, id: string, index: number): void {
   state.touchedIds.add(id);
 
-  if (NO_TARGET_KINDS.has(effect.kind)) return runEffect(state, effect, effectIndex, [id], baseFor(state, effect));
+  if (NO_TARGET_KINDS.has(effect.kind)) return runEffect(state, effect, effectIndex, [id], baseFor(state, effect, id));
 
   const outcome = outcomeFor(state, id);
 
@@ -88,7 +129,7 @@ export function applyTo(state: SpellCastState, effect: Effect, effectIndex: numb
 
   if (outcome.skip || (outcome.factor < 1 && !usesRoll(effect))) return;
 
-  const base = baseFor(state, effect) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
+  const base = baseFor(state, effect, id) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
 
   const roll = Math.floor(base * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
 

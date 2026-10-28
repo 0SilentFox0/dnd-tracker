@@ -8,6 +8,7 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
+import { inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice, upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
@@ -72,6 +73,8 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const choose = s.spellEffects?.find((e) => e.kind === "chooseOne");
 
+  const input = inputDiceOf(s.spellEffects ?? []);
+
   return {
     spellId: s.id,
     level: s.level,
@@ -87,8 +90,19 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(choose && { options: choose.options.map(describeEffect) }),
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
-    diceSlots: Array.from({ length: dice.count }, () => dice.sides),
+    ...(input && { inputDice: { ...input, sides: dice.sides } }),
+    diceSlots: Array.from({ length: input ? 1 : dice.count }, () => dice.sides),
   };
+}
+
+export function withInputCount(pick: SpellPick, count: number): SpellPick {
+  const { inputDice } = pick;
+
+  if (!inputDice) return pick;
+
+  const n = Math.max(1, Math.min(inputDice.max, Math.floor(count) || 1));
+
+  return { ...pick, diceSlots: Array.from({ length: n }, () => inputDice.sides) };
 }
 
 /** Кого зачіпає наведення в точці: та сама функція, що й на сервері. */

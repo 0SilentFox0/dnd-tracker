@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS, type StatKey } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, DICE_RE, STAT_KEYS, type StatKey } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { DND_SKILLS } from "@/lib/constants/skills";
@@ -170,6 +170,12 @@ const DealDamageSchema = z.object({
   amount: AmountSchema,
   damageType: z.string().min(1).optional(),
   falloff: z.array(z.number().min(0).max(100)).min(1).optional(),
+  byDistance: z
+    .array(z.object({ maxFeet: z.number().int().min(5).max(600).multipleOf(5), dice: z.string().regex(DICE_RE) }))
+    .min(2)
+    .max(6)
+    .refine((r) => r.every((x, i) => i === 0 || x.maxFeet > r[i - 1].maxFeet), { message: "Межі відстані мають зростати" })
+    .optional(),
   ...target,
 });
 
@@ -238,6 +244,8 @@ const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.nu
 
 const HelpSchema = z.object({ kind: z.literal("help"), ...target });
 
+const PushSchema = z.object({ kind: z.literal("push"), feet: z.number().int().min(5).max(30).multipleOf(5), from: z.literal("caster"), ...target });
+
 const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
@@ -272,6 +280,7 @@ export const BASE_EFFECTS = [
   RaiseDeadSchema,
   ManeuverSchema,
   HelpSchema,
+  PushSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

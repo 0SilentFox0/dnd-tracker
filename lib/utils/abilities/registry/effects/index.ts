@@ -6,6 +6,7 @@ import { applyCopySpellBuffs } from "./copy-buffs";
 import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver, MANEUVER_LABELS } from "./maneuver";
+import { applyPush, describePush } from "./push";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -71,7 +72,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
-  dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
+  dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, { name: "byDistance", label: "Кубики за відстанню (футів:кубики, лише в заклинаннях)", input: "distanceDice", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
   heal: { kind: "heal", label: "Лікування", static: false, fields: [AMOUNT, { name: "revive", label: "Воскрешає", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
   dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
   hot: { kind: "hot", label: "Лікування щораунду (HOT)", static: false, fields: [{ ...AMOUNT, name: "healPerRound", label: "Лікування/раунд (число, кубики, формула)" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
@@ -134,6 +135,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     apply: applyManeuver,
   },
   help: { kind: "help", label: "Допомога союзнику", static: false, fields: [TARGET_FIELD], describe: () => "перевага союзнику на наступну атаку", apply: applyHelp },
+  push: { kind: "push", label: "Відштовхнути", static: false, fields: [{ name: "feet", label: "Футів (5–30)", input: "number" }, { name: "from", label: "Від", input: "select", options: [{ value: "caster", label: "Від кастера" }] }, TARGET_FIELD], describe: describePush, apply: applyPush },
   randomOf: {
     kind: "randomOf",
     label: "Випадковий з варіантів",
@@ -156,7 +158,9 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect | { kind: "chooseOne"; options: Effect[] }): string {
+export function describeEffect(effect: Effect | { kind: "chooseOne"; options: Effect[] } | { kind: "inputDice"; label: string; max: number }): string {
+  if (effect.kind === "inputDice") return `кубики з введення (до ${effect.max}): ${effect.label}`;
+
   if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
 
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;

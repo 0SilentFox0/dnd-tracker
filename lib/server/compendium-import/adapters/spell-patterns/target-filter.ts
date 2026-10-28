@@ -32,9 +32,9 @@ export const withTargetFilter = (targeting: SpellDefinition["targeting"], text: 
   return { ...targeting, filter } as SpellDefinition["targeting"];
 };
 
-const INCAPACITATED_SELF = /\byou (?:are|become|remain) \{@condition incapacitated/i;
+const INCAPACITATED_SELF = /\byou (?:are|become|remain) \{@condition incapacitated|\byour body is (?:considered )?(?:\{@condition )?(?:unconscious|incapacitated)/i;
 
-const CHARM = /\{@condition charmed/i;
+const CHARM = /\{@condition charmed|\byou take (?:total )?(?:and precise )?control of (?:it|the (?:beast|creature))/i;
 
 export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, ability }) => {
   const filter = targetFilterFromText(text, higher);
@@ -62,14 +62,14 @@ export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, abilit
   };
 };
 
-const AT_LEAST_SPEED = /\byour (?:walking )?speed (?:becomes|is) at least (\d+) feet|\byou have a (?:walking )?speed of (\d+) feet/i;
+const AT_LEAST_SPEED = /\byour (?:walking )?speed (?:becomes|is) at least (\d+) feet|\byou have a (?:walking )?speed of (\d+) feet|\bwalking speed of (\d+) feet, which you can use while (?:riding|operating)\b/i;
 
 export const speedAtLeast: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
   const m = AT_LEAST_SPEED.exec(text);
 
   if (!m || ability || damageTypes.length > 0) return null;
 
-  const atLeast = Number(m[1] ?? m[2]);
+  const atLeast = Number(m[1] ?? m[2] ?? m[3]);
 
   return {
     native: {
