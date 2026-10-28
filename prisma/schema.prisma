@@ -23,64 +23,67 @@ model User {
   worldNotes          WorldNote[]
   worldTravelLog      WorldTravelLog[]
   playerNotifications PlayerNotification[]
+  acquaintanceNotes   AcquaintanceNote[]
 
   @@map("users")
 }
 
 model Campaign {
-  id                  String                @id @default(cuid())
-  sourceSync          CampaignSourceSync?
-  name                String
-  description         String?
-  inviteCode          String                @unique
-  dmUserId            String
-  maxLevel            Int                   @default(20)
-  xpMultiplier        Float                 @default(2.5)
-  allowPlayerEdit     Boolean               @default(true)
-  critChoiceByDm      Boolean               @default(false)
-  status              String                @default("active")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  friendlyFire        Boolean               @default(false)
-  rules               Json                  @default("{}")
-  kind                String                @default("campaign")
-  visibility          String                @default("private")
-  createdFromId       String?
-  aiInstructions      String?
-  credits             String?
-  artifactSets        ArtifactSet[]
-  artifacts           Artifact[]
-  battles             BattleScene[]
-  members             CampaignMember[]
-  dm                  User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
-  characters          Character[]
-  mainSkills          MainSkill[]
-  races               Race[]
-  classes             GameClass[]
-  backgrounds         Background[]
-  feats               Feat[]
-  scenarioPages       ScenarioPage[]
-  skillTrees          SkillTree[]
-  skills              Skill[]
-  spellGroups         SpellGroup[]
-  spells              Spell[]
-  tracks              CampaignTrack[]
-  slideDecks          SlideDeck[]
-  show                CampaignShow?
-  units               Unit[]
-  assistantIntents    AssistantIntent[]
-  aiThreads           AiThread[]
-  aiProposals         AiProposal[]
-  apiTokens           ApiToken[]
-  compendiumSources   CompendiumSource[]
-  compendiumEntries   CompendiumEntry[]
-  compendiumRuns      CompendiumImportRun[]
-  inventoryLog        InventoryLog[]
-  characterLog        CharacterLog[]
-  worldMaps           WorldMap[]
-  worldPositions      WorldPosition[]
-  worldTravelLog      WorldTravelLog[]
-  playerNotifications PlayerNotification[]
+  id                   String                @id @default(cuid())
+  sourceSync           CampaignSourceSync?
+  name                 String
+  description          String?
+  inviteCode           String                @unique
+  dmUserId             String
+  maxLevel             Int                   @default(20)
+  xpMultiplier         Float                 @default(2.5)
+  allowPlayerEdit      Boolean               @default(true)
+  critChoiceByDm       Boolean               @default(false)
+  acquaintancesEnabled Boolean               @default(false)
+  status               String                @default("active")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  friendlyFire         Boolean               @default(false)
+  rules                Json                  @default("{}")
+  kind                 String                @default("campaign")
+  visibility           String                @default("private")
+  createdFromId        String?
+  aiInstructions       String?
+  credits              String?
+  artifactSets         ArtifactSet[]
+  artifacts            Artifact[]
+  battles              BattleScene[]
+  members              CampaignMember[]
+  dm                   User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
+  characters           Character[]
+  mainSkills           MainSkill[]
+  races                Race[]
+  classes              GameClass[]
+  backgrounds          Background[]
+  feats                Feat[]
+  scenarioPages        ScenarioPage[]
+  skillTrees           SkillTree[]
+  skills               Skill[]
+  spellGroups          SpellGroup[]
+  spells               Spell[]
+  tracks               CampaignTrack[]
+  slideDecks           SlideDeck[]
+  show                 CampaignShow?
+  units                Unit[]
+  assistantIntents     AssistantIntent[]
+  aiThreads            AiThread[]
+  aiProposals          AiProposal[]
+  apiTokens            ApiToken[]
+  compendiumSources    CompendiumSource[]
+  compendiumEntries    CompendiumEntry[]
+  compendiumRuns       CompendiumImportRun[]
+  inventoryLog         InventoryLog[]
+  characterLog         CharacterLog[]
+  worldMaps            WorldMap[]
+  worldPositions       WorldPosition[]
+  worldTravelLog       WorldTravelLog[]
+  playerNotifications  PlayerNotification[]
+  acquaintances        Acquaintance[]
 
   @@index([dmUserId])
   @@index([kind, visibility])
@@ -170,6 +173,7 @@ model Character {
   worldPosition       WorldPosition?
   worldReveals        WorldReveal[]
   worldNotes          WorldNote[]
+  acquaintances       Acquaintance[]
 
   @@index([backgroundId])
   @@index([campaignId])
@@ -1148,4 +1152,55 @@ model PlayerNotification {
   @@index([userId, campaignId, readAt])
   @@index([readAt])
   @@map("player_notifications")
+}
+
+model Acquaintance {
+  id              String              @id @default(cuid())
+  campaignId      String
+  kind            String
+  characterId     String?
+  name            String
+  avatarUrl       String?
+  description     String              @default("")
+  sourcePageId    String
+  sourceSectionId String
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  campaign        Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character       Character?          @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  entries         AcquaintanceEntry[]
+  notes           AcquaintanceNote[]
+
+  @@index([campaignId, sourcePageId])
+  @@index([characterId])
+  @@map("acquaintances")
+}
+
+model AcquaintanceEntry {
+  id             String       @id @default(cuid())
+  acquaintanceId String
+  pageId         String
+  sectionId      String
+  text           String
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  acquaintance   Acquaintance @relation(fields: [acquaintanceId], references: [id], onDelete: Cascade)
+
+  @@index([acquaintanceId])
+  @@index([pageId])
+  @@map("acquaintance_entries")
+}
+
+model AcquaintanceNote {
+  id             String       @id @default(cuid())
+  acquaintanceId String
+  authorUserId   String
+  text           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  acquaintance   Acquaintance @relation(fields: [acquaintanceId], references: [id], onDelete: Cascade)
+  author         User         @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([acquaintanceId, authorUserId])
+  @@map("acquaintance_notes")
 }
