@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { createWorldMarkerSchema, updateWorldMarkerSchema } from "@/lib/schemas/world";
 import { clearShowAfterDelete, deleteSubtreeWithFiles, ownedMap, ownedMarker, subtreeTargets } from "@/lib/server/world/map-handlers";
 import { toWorldMarker } from "@/lib/server/world/map-store";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { withDM } from "@/lib/utils/api/as-dm";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -43,6 +44,8 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
       },
     });
 
+    publishWorldChanged(campaignId, body.mapId);
+
     return NextResponse.json(toWorldMarker(created), { status: 201 });
   });
 }
@@ -72,6 +75,8 @@ export function updateWorldMarkerHandler(req: Request, campaignId: string, marke
 
     const updated = await prisma.worldMarker.update({ where: { id: markerId }, data, include: { childMap: { select: { id: true } } } });
 
+    publishWorldChanged(campaignId, owned.mapId);
+
     return NextResponse.json(toWorldMarker(updated));
   });
 }
@@ -90,6 +95,7 @@ export function deleteWorldMarkerHandler(campaignId: string, markerId: string) {
     else await remove();
 
     clearShowAfterDelete(campaignId, { mapIds: child.mapIds, markerIds: [markerId, ...child.markerIds] });
+    publishWorldChanged(campaignId, owned.mapId);
 
     return NextResponse.json({ ok: true });
   });

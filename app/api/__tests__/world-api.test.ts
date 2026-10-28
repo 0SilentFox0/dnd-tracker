@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import * as storage from "@/lib/supabase/world-map-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 const afterCallbacks = vi.hoisted(() => [] as Array<() => unknown>);
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/server/world/world-events", () => ({ publishWorldChanged: vi.fn() }));
 vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/server")>()), after: (cb: () => unknown) => afterCallbacks.push(cb) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/world-map-storage", () => ({
@@ -294,6 +296,7 @@ describe("world API", () => {
       expect(data.y).toBeCloseTo(0.2);
       expect(data.color).toBe("#d3b060");
       expect(data.sortOrder).toBe(5);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
     });
 
     it("ліміт маркерів — 409", async () => {
@@ -398,6 +401,7 @@ describe("world API", () => {
       await (await mapById()).DELETE(json("DELETE"), ctx({ mapId: "m2" }));
       await runAfter();
 
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", null);
       expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "c1", seq: 3 }, data: { seq: 4 } });
       expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0].data).toHaveProperty("world");
     });
@@ -410,6 +414,7 @@ describe("world API", () => {
       await (await markerById()).DELETE(json("DELETE"), ctx({ markerId: "k1" }));
       await runAfter();
 
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ data: { world: { mapId: "m1" }, seq: 4 } });
     });
 

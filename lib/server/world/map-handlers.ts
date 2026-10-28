@@ -8,6 +8,7 @@ import { createWorldMapSchema, updateWorldMapSchema } from "@/lib/schemas/world"
 import { clearShowWorld } from "@/lib/server/show/show-store";
 import { listWorldMaps, orphanedImagesOfSubtree, readWorldMapDetail, toWorldMap } from "@/lib/server/world/map-store";
 import { listHeroesOnMap } from "@/lib/server/world/travel-store";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { ownedWorldMapPath, removeWorldMapFiles } from "@/lib/supabase/world-map-storage";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { withDM } from "@/lib/utils/api/as-dm";
@@ -125,6 +126,8 @@ export function updateWorldMapHandler(req: Request, campaignId: string, mapId: s
       if (stillUsed === 0) after(() => removeWorldMapFiles(campaignId, [owned.imageUrl]));
     }
 
+    publishWorldChanged(campaignId, mapId);
+
     return NextResponse.json(toWorldMap(updated));
   });
 }
@@ -140,6 +143,7 @@ export function deleteWorldMapHandler(campaignId: string, mapId: string) {
     await deleteSubtreeWithFiles(campaignId, mapId, () => prisma.worldMap.delete({ where: { id: mapId } }));
 
     clearShowAfterDelete(campaignId, gone);
+    publishWorldChanged(campaignId, null);
 
     return NextResponse.json({ ok: true });
   });

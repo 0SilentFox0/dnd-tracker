@@ -28,3 +28,6 @@ export const showChannelName = (campaignId: string): string => `${SHOW_CHANNEL_P
 
 /** Повний стан показу: він малий, дельти не потрібні. */
 export const SHOW_STATE_EVENT = "show-state";
+
+/** Лише сигнал «світ змінився»: дані клієнт дочитує власним відфільтрованим view. */
+export const WORLD_CHANGED_EVENT = "world-changed";

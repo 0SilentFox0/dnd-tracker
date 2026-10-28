@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/server/world/world-events", () => ({ publishWorldChanged: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/world-map-storage", () => ({ ownedWorldMapPath: vi.fn(), removeWorldMapFiles: vi.fn(), createWorldMapUploadTicket: vi.fn() }));
 vi.mock("@/lib/db", () => ({
@@ -119,6 +121,7 @@ describe("world travel API", () => {
       const res = await (await route("travel")).POST(post(body()), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect((await res.json()).positions).toEqual([{ id: "h1", name: "Hero h1", avatar: null, mapId: "m1", x: 0.5, y: 0.5, own: true }]);
       expect(vi.mocked(prisma.worldReveal.createMany).mock.calls[0][0]?.data).toEqual([{ mapId: "m1", characterId: "h1", shape: { t: "p", x: 0.5, y: 0.5 } }]);
       expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m1", from: undefined, to: { mapId: "m1", x: 0.5, y: 0.5 }, byUserId: "dm", rest: "none" });
@@ -194,6 +197,7 @@ describe("world travel API", () => {
       const res = await (await route("enter")).POST(post({ markerId: "k1", characterIds: ["h1"], rest: "none" }), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m2");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m2", x: 0.3, y: 0.4 });
       expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m2", from: { mapId: "m1", x: 0.1, y: 0.1 }, to: { mapId: "m2", x: 0.3, y: 0.4 } });
     });
@@ -218,6 +222,7 @@ describe("world travel API", () => {
       const res = await (await route("exit")).POST(post(body), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m1", x: 0.1, y: 0.1 });
     });
   });

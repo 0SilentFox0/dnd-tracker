@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/server/world/world-events", () => ({ publishWorldChanged: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/world-map-storage", () => ({ ownedWorldMapPath: vi.fn(), removeWorldMapFiles: vi.fn(), createWorldMapUploadTicket: vi.fn() }));
 vi.mock("@/lib/db", () => ({
@@ -57,7 +59,7 @@ const noteRow = (over: Record<string, unknown> = {}) => ({
   createdAt: new Date(0),
   updatedAt: new Date(0),
   author: { displayName: "A" },
-  marker: { map: { campaignId: "c1" } },
+  marker: { mapId: "m1", map: { campaignId: "c1" } },
   ...over,
 });
 
@@ -76,6 +78,14 @@ describe("world notes API", () => {
 
   describe("POST", () => {
     const body = (over: Record<string, unknown> = {}) => ({ markerId: "near", text: "привіт", visibility: "private", ...over });
+
+    it("публічна нотатка шле world-changed, приватна — ні", async () => {
+      await (await notes()).POST(json("POST", body()), ctx());
+      expect(publishWorldChanged).not.toHaveBeenCalled();
+
+      await (await notes()).POST(json("POST", body({ visibility: "public" })), ctx());
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
+    });
 
     it("гравець: нотатка до видимого маркера — 201, mine", async () => {
       const res = await (await notes()).POST(json("POST", body({ characterId: "h1" })), ctx());
@@ -109,6 +119,19 @@ describe("world notes API", () => {
   });
 
   describe("PATCH / DELETE", () => {
+    it("зміна приватної нотатки не шле подію, публічної — шле; видалення так само", async () => {
+      vi.mocked(prisma.worldNote.findUnique).mockResolvedValue(noteRow({ authorUserId: "u1", visibility: "private" }) as never);
+      vi.mocked(prisma.worldNote.update).mockResolvedValue(noteRow({ authorUserId: "u1", visibility: "private" }) as never);
+
+      await (await noteById()).PATCH(json("PATCH", { text: "a" }), ctx({ noteId: "n1" }));
+      await (await noteById()).DELETE(json("DELETE"), ctx({ noteId: "n1" }));
+      expect(publishWorldChanged).not.toHaveBeenCalled();
+
+      vi.mocked(prisma.worldNote.findUnique).mockResolvedValue(noteRow({ authorUserId: "u1", visibility: "public" }) as never);
+      await (await noteById()).DELETE(json("DELETE"), ctx({ noteId: "n1" }));
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
+    });
+
     it("чужа приватна — 404 на PATCH і DELETE", async () => {
       vi.mocked(prisma.worldNote.findUnique).mockResolvedValue(noteRow({ visibility: "private" }) as never);
 

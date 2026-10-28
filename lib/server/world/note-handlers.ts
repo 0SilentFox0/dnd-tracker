@@ -7,6 +7,7 @@ import { ownedMarker } from "@/lib/server/world/map-handlers";
 import { readWorldMapDetail } from "@/lib/server/world/map-store";
 import { activePlayerHeroes } from "@/lib/server/world/travel-store";
 import { readViewerScope } from "@/lib/server/world/view-handlers";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { type CampaignAccessResult, requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -81,12 +82,14 @@ export function createNoteHandler(req: Request, campaignId: string) {
 
     const created = await prisma.worldNote.create({ data: { markerId: marker.id, authorUserId: access.userId, characterId, visibility: body.visibility, text: body.text }, include });
 
+    if (created.visibility === "public") publishWorldChanged(campaignId, marker.mapId);
+
     return NextResponse.json(toNote(created, access.userId), { status: 201 });
   });
 }
 
 async function ownedNote(campaignId: string, noteId: string) {
-  const note = await prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { map: { select: { campaignId: true } } } } } });
+  const note = await prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { mapId: true, map: { select: { campaignId: true } } } } } });
 
   return note && note.marker.map.campaignId === campaignId ? note : errorResponse(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
 }
@@ -107,6 +110,8 @@ export function updateNoteHandler(req: Request, campaignId: string, noteId: stri
 
     const updated = await prisma.worldNote.update({ where: { id: noteId }, data: body, include });
 
+    if (note.visibility === "public" || updated.visibility === "public") publishWorldChanged(campaignId, note.marker.mapId);
+
     return NextResponse.json(toNote(updated, access.userId));
   });
 }
@@ -124,6 +129,8 @@ export function deleteNoteHandler(campaignId: string, noteId: string) {
     }
 
     await prisma.worldNote.delete({ where: { id: noteId } });
+
+    if (note.visibility === "public") publishWorldChanged(campaignId, note.marker.mapId);
 
     return NextResponse.json({ ok: true });
   });
