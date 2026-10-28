@@ -65,3 +65,9 @@ describe("AiPanel resize", () => {
     expect(handle().getAttribute("aria-valuenow")).toBe("600");
   });
 });
+
+it("shared queue replaces the old pending list rather than rendering a second copy", () => {
+ render(<AiPanel campaignId="c1" page={page} mode="scenario" proposals={{pending:[{id:"old1"}],refresh:vi.fn()} as never} showPending renderProposal={()=><div>Duplicate legacy card</div>} review={<section aria-label="Єдина черга" />} actions={{onClose:vi.fn(),onClearFocus:vi.fn()}} />);
+ expect(screen.queryByText("Duplicate legacy card")).toBeNull();
+ expect(screen.getByRole("region",{name:"Єдина черга"})).toBeTruthy();
+});

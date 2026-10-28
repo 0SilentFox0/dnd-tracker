@@ -7,12 +7,15 @@ import { KeyRound } from "lucide-react";
 import { AiComposer } from "./AiComposer";
 import { AiMessageList } from "./AiMessageList";
 import { AiThreadHeader } from "./AiThreadHeader";
+import { AssistantContextDisclosure } from "./AssistantContextDisclosure";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AI_MODE_LABELS, type AiProvider, type AiThreadMode } from "@/lib/constants/ai";
 import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
+import { useAssistantContext } from "@/lib/hooks/ai/useAssistantContext";
+import { useAssistantEffects } from "@/lib/hooks/ai/useAssistantEffects";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
@@ -24,10 +27,13 @@ export type RenderProposal = (proposalId: string, helpers: { send?: (text: strin
 
 interface AiPanelProps {
   campaignId: string;
-  page: ScenarioPage;
+  page?: ScenarioPage;
   mode: AiThreadMode;
-  focus: AiFocus | undefined;
-  proposals: Proposals;
+  focus?: AiFocus;
+  proposals?: Proposals;
+  campaignName?: string;
+  embedded?: boolean;
+  review?: ReactNode;
   showPending?: boolean;
   renderProposal?: RenderProposal;
   actions: { onClose: () => void; onClearFocus: () => void };
@@ -35,8 +41,16 @@ interface AiPanelProps {
 
 const rowWord = (n: number) => pluralUk(n, ["рядок", "рядки", "рядків"]);
 
-function focusLabelOf(page: ScenarioPage, focus: AiFocus | undefined): string | null {
-  if (!focus || focus.pageId !== page.id) return null;
+function focusLabelOf(page: ScenarioPage | undefined, focus: AiFocus | undefined): string | null {
+  if (!focus) return null;
+
+  if (focus.kind === "character") return `Фокус: герой ${focus.characterId}`;
+
+  if (focus.kind === "battle") return `Фокус: бій ${focus.battleId}`;
+
+  if (focus.kind === "campaign") return "Фокус: кампанія";
+
+  if (!page || focus.pageId !== page.id) return `Фокус: сторінка ${focus.pageId}`;
 
   const section = page.content.sections.find((s) => s.id === focus.sectionId);
 
@@ -50,7 +64,7 @@ function focusLabelOf(page: ScenarioPage, focus: AiFocus | undefined): string | 
 interface ThreadChatProps {
   campaignId: string;
   thread: AiThread;
-  focus: AiFocus | undefined;
+  focus?: AiFocus;
   focusLabel: string | null;
   renderProposal?: RenderProposal;
   actions: { onFinish: () => void; onClearFocus: () => void };
@@ -69,24 +83,24 @@ function AiThreadChat({ campaignId, thread, focus, focusLabel, renderProposal, a
 function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLabel, renderProposal, actions }: ThreadChatProps & { initialMessages: AiChatMessage[] }) {
   const getFocus = useCallback(() => focus, [focus]);
 
-  const chat = useAiChat({ campaignId, thread, initialMessages, getFocus, onFinish: actions.onFinish });
+  const context = useAssistantContext(campaignId,thread.id,focus,`${thread.provider}:${thread.model}`);
+
+  const {consumeReceipt}=useAssistantEffects(campaignId);
+
+  const chat = useAiChat({ campaignId, thread, initialMessages, getFocus, getSessionContext:context.getSessionContext, onReceipt:consumeReceipt, onFinish: actions.onFinish });
 
   const busy = chat.status === "streaming" || chat.status === "submitted";
 
-  const redo = () => {
-    const last = [...chat.messages].reverse().find((m) => m.role === "user");
-
-    const text = last?.parts.find((p) => p.type === "text");
-
-    if (text && "text" in text) chat.send(text.text);
-  };
+  const redo = () => { void chat.recover(); };
 
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto py-2">
-        <AiMessageList messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal && ((id) => renderProposal(id, { send: chat.send }))} onRedo={redo} />
+        <AiMessageList campaignId={campaignId} messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal && ((id) => renderProposal(id, { send: (text)=>void context.requestSend(text) }))} onRedo={redo} />
       </div>
-      <AiComposer mode={thread.mode} busy={busy} focusLabel={focusLabel} actions={{ onSend: chat.send, onStop: chat.stop, onClearFocus: actions.onClearFocus }} />
+      {chat.blockedUntil&&<p role="status" className="text-sm">Новий запит після захисного інтервалу: {new Date(chat.blockedUntil).toLocaleTimeString("uk-UA")}. «Відновити стан» лише читає дані.</p>}
+      <AssistantContextDisclosure context={context} onSend={chat.send} />
+      <AiComposer mode={thread.mode} busy={busy} focusLabel={focusLabel} actions={{ onSend: (text)=>void context.requestSend(text), onStop: chat.stop, onClearFocus: actions.onClearFocus }} />
     </>
   );
 }
@@ -130,18 +144,18 @@ function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) 
   );
 }
 
-export function AiPanel({ campaignId, page, mode, focus, proposals, showPending = false, renderProposal, actions }: AiPanelProps) {
+export function AiPanel({ campaignId, campaignName, embedded = false, review, page, mode, focus, proposals, showPending = false, renderProposal, actions }: AiPanelProps) {
   const desktop = useMediaQuery(DESKTOP_QUERY);
 
   const panel = useAiPanelWidth();
 
   const { query: credentialsQuery, credentials } = useAiCredentials();
 
-  const { query: threadsQuery, threads: all, create, patch } = useAiThreads(campaignId, page.id);
+  const { query: threadsQuery, threads: all, create, patch } = useAiThreads(campaignId, page?.id);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const threads = all.filter((t) => t.mode === mode);
+  const threads = all.filter((t) => t.mode === mode && (page || t.scenarioPageId === null));
 
   const thread = threads.find((t) => t.id === selectedId) ?? threads[0] ?? null;
 
@@ -152,15 +166,15 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
 
     if (!provider) return;
 
-    const created = await create({ mode, scenarioPageId: page.id, provider });
+    const created = await create({ mode, scenarioPageId: page?.id ?? null, provider });
 
-    setSelectedId(created.id);
+    if (created) setSelectedId(created.id);
   };
 
   const { refetch } = threadsQuery;
 
   const onFinish = () => {
-    proposals.refresh();
+    proposals?.refresh();
     refetch();
   };
 
@@ -168,7 +182,7 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
 
   if (credentialsQuery.isLoading || threadsQuery.isLoading) {
     body = <LoadingState rows={2} />;
-  } else if (!providers.length) {
+  } else if (!providers.length && !thread) {
     body = (
       <EmptyState
         icon={KeyRound}
@@ -182,15 +196,17 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
       />
     );
   } else if (!thread) {
-    body = <EmptyState title={`Немає тредів: ${AI_MODE_LABELS[mode]}`} action={<Button onClick={createThread}>Новий тред</Button>} />;
+    body = <EmptyState title={`Немає тредів: ${AI_MODE_LABELS[mode]}`} />;
   } else {
     body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focus} focusLabel={focusLabelOf(page, focus)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus: actions.onClearFocus }} />;
   }
 
   const content = (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      {providers.length ? (
+      {campaignName && <h1 className="font-semibold">Асистент · {campaignName}</h1>}
+      {providers.length || thread ? (
         <AiThreadHeader
+          campaignId={campaignId}
           threads={threads}
           thread={thread}
           providers={providers}
@@ -202,7 +218,7 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
           }}
         />
       ) : null}
-      {showPending && renderProposal && proposals.pending.length ? (
+      {showPending && !review && renderProposal && proposals && proposals.pending.length ? (
         <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label="Пропозиції AI">
           <h3 className="text-sm font-medium">Пропозиції AI</h3>
           {proposals.pending.map((p) => (
@@ -210,9 +226,12 @@ export function AiPanel({ campaignId, page, mode, focus, proposals, showPending 
           ))}
         </section>
       ) : null}
+      {review}
       {body}
     </div>
   );
+
+  if (embedded) return <div className="@container flex h-full min-h-0 flex-col">{content}</div>;
 
   if (!desktop) {
     return (

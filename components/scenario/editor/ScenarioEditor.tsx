@@ -22,12 +22,12 @@ import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; column: CellColumn } | null;
 
-export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady, toc }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean> }) => void; toc: TocControl }) {
+export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady, toc }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean>; hasUnsavedChanges?: () => boolean }) => void; toc: TocControl }) {
   const draft = useScenarioDraft(campaignId, page);
 
   useEffect(() => {
-    onDraftReady?.({ flush: draft.flush });
-  }, [onDraftReady, draft.flush]);
+    onDraftReady?.({ flush: draft.flush, hasUnsavedChanges: draft.hasUnsavedChanges });
+  }, [onDraftReady, draft.flush, draft.hasUnsavedChanges]);
 
   const searchMentions = useMentionSearch(campaignId);
 
@@ -76,7 +76,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
       <div ref={toolbarRef} className="sb-toolbar-wrap">
         <ScenarioToolbar editor={active ? editor : null} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
-          <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} />
+          <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} onRetain={draft.retainLocal} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>
             Властивості
           </button>

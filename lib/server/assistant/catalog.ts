@@ -1,3 +1,4 @@
+import { ASSISTANT_ACTIONS } from "./action-definitions";
 import type { AssistantActionDef } from "./types";
 
 import "server-only";
@@ -32,6 +33,6 @@ export function createActionCatalog(definitions: readonly AssistantActionDef[]) 
 }
 
 // Domain adapters are connected only after the guarded executor is ready.
-const catalog = createActionCatalog([]);
+export const assistantCatalog = createActionCatalog(ASSISTANT_ACTIONS);
 
-export const getAction = catalog.getAction;
+export const getAction = assistantCatalog.getAction;

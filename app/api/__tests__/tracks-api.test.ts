@@ -62,7 +62,7 @@ describe("tracks API", () => {
   });
 
   it("токен: файл — 403 без запису, YouTube — 201", async () => {
-    vi.mocked(apiTokens.verifyApiToken).mockResolvedValue({ campaignId: "camp1", userId: "dm", scopes: ["content:write"] });
+    vi.mocked(apiTokens.verifyApiToken).mockResolvedValue({ id: "verified-token", campaignId: "camp1", userId: "dm", scopes: ["content:write"] });
 
     const { POST } = await tracksRoute();
 

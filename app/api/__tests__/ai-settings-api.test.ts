@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/settings/route";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -23,7 +24,7 @@ describe("AI settings API", () => {
   it("не-ДМ — 403 (GET і PUT)", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);
 
-    const { GET, PUT } = await import("@/app/api/campaigns/[id]/ai/settings/route");
+    const { GET, PUT } = preloadedModule0;
 
     expect((await GET(req("GET"), params())).status).toBe(403);
     expect((await PUT(req("PUT", { instructions: "a" }), params())).status).toBe(403);
@@ -33,7 +34,7 @@ describe("AI settings API", () => {
   it("GET повертає збережене значення", async () => {
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ aiInstructions: "Темне фентезі" } as never);
 
-    const { GET } = await import("@/app/api/campaigns/[id]/ai/settings/route");
+    const { GET } = preloadedModule0;
 
     const res = await GET(req("GET"), params());
 
@@ -43,7 +44,7 @@ describe("AI settings API", () => {
   });
 
   it("PUT обрізає пробіли і зберігає", async () => {
-    const { PUT } = await import("@/app/api/campaigns/[id]/ai/settings/route");
+    const { PUT } = preloadedModule0;
 
     const res = await PUT(req("PUT", { instructions: "  Говори архаїчно \n" }), params());
 
@@ -53,7 +54,7 @@ describe("AI settings API", () => {
   });
 
   it("PUT лише з пробілів зберігає null", async () => {
-    const { PUT } = await import("@/app/api/campaigns/[id]/ai/settings/route");
+    const { PUT } = preloadedModule0;
 
     const res = await PUT(req("PUT", { instructions: "  \n " }), params());
 
@@ -62,7 +63,7 @@ describe("AI settings API", () => {
   });
 
   it("PUT понад 8000 — 400", async () => {
-    const { PUT } = await import("@/app/api/campaigns/[id]/ai/settings/route");
+    const { PUT } = preloadedModule0;
 
     expect((await PUT(req("PUT", { instructions: "a".repeat(8001) }), params())).status).toBe(400);
     expect(prisma.campaign.update).not.toHaveBeenCalled();

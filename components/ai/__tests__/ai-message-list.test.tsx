@@ -48,3 +48,14 @@ describe("AiMessageList", () => {
     expect(screen.getByText("card ap1")).toBeTruthy();
   });
 });
+
+it("canonical pending has an exact local review link and is not a completed action", () => {
+ render(<AiMessageList campaignId="c1" messages={[{id:"m",role:"assistant",parts:[{type:"tool-assistant_action",state:"output-available",output:{version:2,kind:"result",data:{kind:"pending",intent:{id:"intent1"},reviewUrl:"https://evil.invalid"}}}]}] as never} />);
+ expect(screen.getByRole("link",{name:"Переглянути дію"}).getAttribute("href")).toBe("/campaigns/c1/dm/assistant?intent=intent1");
+ expect(screen.getByText("Очікує перегляду")).toBeTruthy();
+});
+
+it("showsActualMessageModelAndPartialUnknownUsage",()=>{
+ render(<AiMessageList messages={[{id:"actual",role:"assistant",parts:[{type:"text",text:"Відповідь"}],metadata:{model:"actual-model",usage:{inputTokens:null,outputTokens:12,partial:true}}}]}/>);
+ expect(screen.getByText(/actual-model/)).toBeTruthy();expect(screen.getByText(/↑невідомо.*↓12/)).toBeTruthy();expect(screen.getByText(/неповні/)).toBeTruthy();
+});

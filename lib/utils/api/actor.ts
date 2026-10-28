@@ -14,16 +14,16 @@ export type ActorNeed = { access: AccessLevel; scope: ActionScope; sessionOnly?:
 
 export type Actor = { campaignId: string; userId: string; isDM: boolean; via: "session" | "token"; scopes: readonly ApiTokenScope[] | null };
 
-export const tokenActorOf = (t: { campaignId: string; userId: string; scopes: readonly ApiTokenScope[] }): Actor => ({ ...t, isDM: true, via: "token" });
+export const tokenActorOf = (t: { campaignId: string; userId: string; scopes: readonly ApiTokenScope[] }): Actor => ({ campaignId: t.campaignId, userId: t.userId, scopes: t.scopes, isDM: true, via: "token" });
 
-export async function verifyBearer(raw: string | null, campaignId: string | null): Promise<{ campaignId: string; userId: string; scopes: ApiTokenScope[] } | NextResponse> {
+export async function verifyBearer(raw: string | null, campaignId: string | null): Promise<{ tokenId: string; campaignId: string; userId: string; scopes: ApiTokenScope[] } | NextResponse> {
   const token = raw ? await verifyApiToken(raw) : null;
 
   if (!token) return errorResponse(API_ERRORS.UNAUTHORIZED, 401);
 
   if (campaignId !== null && token.campaignId !== campaignId) return errorResponse(API_ERRORS.API_TOKEN_WRONG_CAMPAIGN, 403);
 
-  return { campaignId: token.campaignId, userId: token.userId, scopes: token.scopes };
+  return { tokenId: token.id, campaignId: token.campaignId, userId: token.userId, scopes: token.scopes };
 }
 
 export async function authenticateToken(raw: string | null, campaignId: string | null, need: ActorNeed): Promise<Actor | NextResponse> {

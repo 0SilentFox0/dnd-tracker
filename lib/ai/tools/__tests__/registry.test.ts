@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
+import * as preloadedModule2 from "zod";
+
+import * as preloadedModule0 from "@/lib/ai/tools";
+import * as preloadedModule1 from "@/lib/ai/tools/define";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
 describe("AI tool registry", () => {
   it("імена унікальні, snake_case, є опис", async () => {
-    const { AI_TOOLS } = await import("@/lib/ai/tools");
+    const { AI_TOOLS } = preloadedModule0;
 
     const names = AI_TOOLS.map((t) => t.name);
 
@@ -14,22 +18,22 @@ describe("AI tool registry", () => {
   });
 
   it("кожен інструмент має scopes; наявні — ai", async () => {
-    const { AI_TOOLS, toolsFor } = await import("@/lib/ai/tools");
+    const { AI_TOOLS, toolsFor } = preloadedModule0;
 
     for (const t of AI_TOOLS) expect(t.scopes.length).toBeGreaterThan(0);
     expect(toolsFor(["ai"]).map((t) => t.name)).toContain("search_reference");
   });
 
   it("content:read не бачить ai-інструментів", async () => {
-    const { toolsFor } = await import("@/lib/ai/tools");
+    const { toolsFor } = preloadedModule0;
 
     expect(toolsFor(["content:read"]).some((t) => t.name === "search_reference")).toBe(false);
   });
 
   it("toAiSdkTools і registerMcpTools покривають усі інструменти", async () => {
-    const { AI_TOOLS, registerMcpTools, toAiSdkTools, toolsFor } = await import("@/lib/ai/tools");
+    const { AI_TOOLS, registerMcpTools, toAiSdkTools, toolsFor } = preloadedModule0;
 
-    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write"] as const, threadId: null };
+    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write", "scenario:write", "show:write"] as const, threadId: null };
 
     const chatCtx = { ...ctx, scopes: ["ai"] as const };
 
@@ -43,9 +47,9 @@ describe("AI tool registry", () => {
   });
 
   it("runTool: AiToolError → текст, обрізання довгих результатів", async () => {
-    const { AiToolError, clip, defineTool, runTool } = await import("@/lib/ai/tools/define");
+    const { AiToolError, clip, defineTool, runTool } = preloadedModule1;
 
-    const { z } = await import("zod");
+    const { z } = preloadedModule2;
 
     const failing = defineTool({
       name: "x",
@@ -58,14 +62,14 @@ describe("AI tool registry", () => {
       },
     });
 
-    expect(await runTool(failing, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null }, {})).toBe("Помилка: нема");
+    expect(await runTool(failing, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null }, {})).toContain('"message":"нема"');
     expect(clip("a".repeat(30_000))).toMatch(/…\[обрізано\]$/);
   });
 
   it("runTool: невідома помилка → загальний текст для будь-якого інструмента", async () => {
-    const { defineTool, runTool } = await import("@/lib/ai/tools/define");
+    const { defineTool, runTool } = preloadedModule1;
 
-    const { z } = await import("zod");
+    const { z } = preloadedModule2;
 
     const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
@@ -73,7 +77,7 @@ describe("AI tool registry", () => {
 
     const text = await runTool(boom, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null }, {});
 
-    expect(text).toMatch(/^Помилка: Внутрішня/);
+    expect(JSON.parse(text)).toMatchObject({ version: 2, kind: "error", error: { status: 500 } });
     expect(text).not.toContain("secret");
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();

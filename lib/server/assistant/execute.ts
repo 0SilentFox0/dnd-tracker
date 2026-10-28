@@ -1,13 +1,14 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
-import { createActionCatalog } from "./catalog";
+import { assistantCatalog, createActionCatalog } from "./catalog";
 import { type EffectHandlers, runDurableEffects } from "./effects";
 import { createIntent, intentOwner, intentSummary, requestDigest } from "./intent-store";
 import { confirmationFor } from "./policy";
 import { identifyActionRequest } from "./prepare";
 import { readReceipt } from "./receipts";
-import type { ActionExecutionContext, ActionRequest, AssistantCaller, DispatchResult, DurableEffect, ExecutionMode, ReceiptDto } from "./types";
+import { ASSISTANT_EFFECT_HANDLERS } from "./runtime-effects";
+import type { ActionExecutionContext, ActionRequest, AssistantCaller, DispatchResult, DurableEffect, ExecutionMode, JsonValue, ReceiptDto } from "./types";
 
 import "server-only";
 import { isApiTokenScope } from "@/lib/constants/ai";
@@ -20,6 +21,26 @@ import type { Actor } from "@/lib/utils/api/actor";
 type Catalog = ReturnType<typeof createActionCatalog>;
 type Options = { db?: PrismaClient; catalog?: Catalog; now?: () => Date; effects?: EffectHandlers };
 
+function externalRun(expected: JsonValue): string | undefined {
+  return expected && typeof expected === "object" && !Array.isArray(expected) && typeof expected.assistantExternalRun === "string" ? expected.assistantExternalRun : undefined;
+}
+
+function actionExpected(expected: JsonValue): JsonValue {
+  return externalRun(expected) ? (expected as Prisma.JsonObject).action ?? null : expected;
+}
+
+function externalState(value: unknown): { phase: string; runId: string; result?: JsonValue } | undefined {
+  if (!value || typeof value !== "object" || !("external" in value)) return undefined;
+
+  return (value as { external: { phase: string; runId: string; result?: JsonValue } }).external;
+}
+
+function actionExternalResult(value: unknown): JsonValue | undefined {
+  const state = externalState(value);
+
+  return state?.phase === "result" ? state.result : undefined;
+}
+
 const forbidden = () => new ContentError("Дія недоступна", 403);
 
 const conflict = () => new ContentError("Пропозиція вже неактуальна або завершена", 409);
@@ -27,7 +48,7 @@ const conflict = () => new ContentError("Пропозиція вже неакт�
 export function createAssistantExecutor(options: Options = {}) {
   const db = options.db ?? prisma;
 
-  const catalog = options.catalog ?? createActionCatalog([]);
+  const catalog = options.catalog ?? assistantCatalog;
 
   const now = options.now ?? (() => new Date());
 
@@ -76,15 +97,15 @@ export function createAssistantExecutor(options: Options = {}) {
 
       const done = await tx.assistantReceipt.findFirst({ where: { intentId, ...intentOwner(caller) } });
 
-      if (done) {
+      if (done && !(done.status === "executing" && actionExternalResult(done.effects) !== undefined)) {
         await authorizeAssistant(caller, catalog.getAction(done.actionId).need, "prepare", tx);
 
         return { receipt: done };
       }
 
-      if (row.status !== "pending" || row.redactedAt) throw conflict();
+      if ((row.status !== "pending" && !(done?.status === "executing")) || row.redactedAt) throw conflict();
 
-      if (row.expiresAt <= now()) {
+      if (!done && row.expiresAt <= now()) {
         await tx.assistantIntent.update({ where: { id: row.id }, data: { status: "expired" } });
 
         return { error: conflict() };
@@ -92,7 +113,7 @@ export function createAssistantExecutor(options: Options = {}) {
 
       const action = catalog.getAction(row.actionId);
 
-      if (action.effect !== "write") throw new ContentError("Ця дія потребує іншого способу виконання", 409);
+      if (action.effect !== "write" && action.effect !== "paid") throw new ContentError("Ця дія потребує іншого способу виконання", 409);
 
       await tx.$queryRaw`SELECT id FROM campaign_members WHERE "campaignId" = ${row.campaignId} AND "userId" = ${caller.actor.userId} FOR SHARE`;
       await authorizeAssistant(caller, action.need, "execute", tx);
@@ -121,8 +142,10 @@ export function createAssistantExecutor(options: Options = {}) {
 
         const fresh = prepared === null ? null : parseInput(actionPreviewSchema, prepared);
 
-        if (!fresh || requestDigest(fresh.preconditions) !== requestDigest(row.expected)) {
+        if (!fresh || requestDigest(fresh.preconditions) !== requestDigest(actionExpected(row.expected))) {
           await tx.assistantIntent.update({ where: { id: row.id }, data: { status: "stale" } });
+
+          if (done) await tx.assistantReceipt.update({ where: { intentId }, data: { status: "stale" } });
 
           if (row.legacyProposalId) await tx.aiProposal.updateMany({ where: { id: row.legacyProposalId, campaignId: row.campaignId, status: "pending" }, data: { status: "stale" } });
 
@@ -133,17 +156,44 @@ export function createAssistantExecutor(options: Options = {}) {
 
         if (!human && confirmationFor(action, await modeFor(policyCaller, tx), fresh) === "human") throw conflict();
 
+        if (action.effect === "paid" && !action.external) throw conflict();
+
+        if (action.external && !done) {
+          // The campaign lock serializes image budget claims as well as domain writes.
+          const runId = externalRun(row.expected) ?? row.id;
+
+          if (action.effect === "paid") {
+            const priorImages = await tx.assistantReceipt.findMany({ where: { campaignId: row.campaignId, userId: row.userId, actionId: row.actionId } });
+
+            if (priorImages.some(r => externalState(r.effects)?.runId === runId)) throw new ContentError("Лише одне зображення за запуск", 409);
+          }
+
+          const receipt = await tx.assistantReceipt.create({ data: {
+            intentId: row.id, campaignId: row.campaignId, userId: row.userId, originTokenId: row.originTokenId,
+            originKey: row.originKey, requestId: row.requestId, requestHash: row.requestHash, actionId: row.actionId,
+            status: "unknown", result: Prisma.JsonNull, effectsStatus: "unknown", effects: { items: [], completed: [], external: { phase: "started", runId } },
+          } });
+
+          await tx.assistantIntent.update({ where: { id: row.id }, data: { status: "executing" } });
+
+          return { receipt, external: { action, input } };
+        }
+
         const effects: DurableEffect[] = [];
 
-        const ctx: ActionExecutionContext = { caller, intentId: row.id, expected: row.expected, db: tx, afterCommit: (effect) => { effects.push(effect); } };
+        const ctx: ActionExecutionContext = { caller, intentId: row.id, expected: actionExpected(row.expected), db: tx, externalResult: done ? actionExternalResult(done.effects) : undefined, afterCommit: (effect) => { effects.push(effect); } };
 
         const result = parseInput(actionResultSchema, await action.execute(ctx, input));
 
-        const receipt = await tx.assistantReceipt.create({ data: {
+        const data = {
           intentId: row.id, campaignId: row.campaignId, userId: row.userId, originTokenId: row.originTokenId,
           originKey: row.originKey, requestId: row.requestId, requestHash: row.requestHash, actionId: row.actionId,
-          status: "applied", result: result as Prisma.InputJsonValue, effects: { items: effects, completed: [] } as unknown as Prisma.InputJsonValue, effectsStatus: effects.length ? "pending" : "complete",
-        } });
+          status: "applied", result: result as Prisma.InputJsonValue,
+          effects: { items: effects, completed: [], ...(done && { external: externalState(done.effects) }) } as unknown as Prisma.InputJsonValue,
+          effectsStatus: effects.length ? "pending" : "complete",
+        };
+
+        const receipt = done ? await tx.assistantReceipt.update({ where: { intentId }, data }) : await tx.assistantReceipt.create({ data });
 
         // Campaign deletion may already have cascaded the intent away.
         if (await tx.assistantIntent.findFirst({ where: { id: row.id } })) await tx.assistantIntent.update({ where: { id: row.id }, data: { status: "applied" } });
@@ -154,14 +204,40 @@ export function createAssistantExecutor(options: Options = {}) {
 
     if ("error" in outcome && outcome.error) throw outcome.error;
 
+    if ("external" in outcome && outcome.external) {
+      const { action, input } = outcome.external;
+
+      let result;
+
+      try {
+        signal?.throwIfAborted();
+
+        if (!action.external) throw conflict();
+
+        result = await action.external(caller, input, AbortSignal.any([AbortSignal.timeout(270_000), ...(signal ? [signal] : [])]));
+      } catch {
+        // A timeout/cancellation is not proof the provider did not charge or upload.
+        return readReceipt(caller, intentId, db);
+      }
+
+      const stored = outcome.receipt.effects as Prisma.JsonObject;
+
+      await db.assistantReceipt.update({ where: { intentId }, data: {
+        status: "executing", effectsStatus: "pending",
+        effects: { ...stored, external: { ...externalState(stored), phase: "result", result } } as Prisma.InputJsonValue,
+      } });
+
+      return executeIntent(caller, intentId, human, signal);
+    }
+
     let callbacksFailed = false;
 
     for (const callback of callbacks) { try { await callback(); } catch { callbacksFailed = true; } }
 
     if ("effects" in outcome && outcome.effects?.length && outcome.receipt) {
-      const effects = await runDurableEffects(outcome.effects, options.effects ?? {}, []);
+      const effects = await runDurableEffects(outcome.effects, options.effects ?? ASSISTANT_EFFECT_HANDLERS, []);
 
-      await db.assistantReceipt.update({ where: { intentId }, data: { effectsStatus: effects.status, effects: { items: outcome.effects, completed: effects.completed } as unknown as Prisma.InputJsonValue } });
+      await db.assistantReceipt.update({ where: { intentId }, data: { effectsStatus: effects.status, effects: { items: outcome.effects, completed: effects.completed, ...(externalState(outcome.receipt.effects) && { external: externalState(outcome.receipt.effects) }) } as unknown as Prisma.InputJsonValue } });
     }
 
     if (callbacksFailed) await db.assistantReceipt.update({ where: { intentId }, data: { effectsStatus: "unknown" } });
@@ -178,11 +254,19 @@ export function createAssistantExecutor(options: Options = {}) {
 
     const input = parseInput(action.input, raw.input);
 
-    if (action.effect === "read") return { kind: "result", result: parseInput(actionResultSchema, await action.execute(caller, input)) };
+    if (action.effect === "read") {
+      const handoff = await action.handoff?.(caller, input);
+
+      if (handoff) return { kind: "handoff", ...handoff };
+
+      return { kind: "result", result: parseInput(actionResultSchema, await action.execute(caller, input)) };
+    }
 
     if (action.effect === "handoff") return { kind: "handoff", ...await action.execute(caller, input) };
 
-    if (action.effect === "paid") throw new ContentError("Платний адаптер ще недоступний", 409);
+    if (action.effect === "paid" && !action.external) throw new ContentError("Платний адаптер ще недоступний", 409);
+
+    if (action.effect === "paid" && !caller.runId) throw new ContentError("Потрібний ідентифікатор запуску", 409);
 
     const { request, originKey, requestHash } = identifyActionRequest(caller, { ...raw, input });
 
@@ -197,6 +281,8 @@ export function createAssistantExecutor(options: Options = {}) {
     }
 
     const preview = parseInput(actionPreviewSchema, await action.prepare(caller, input));
+
+    if (action.external && caller.runId) preview.preconditions = { assistantExternalRun: caller.runId, action: preview.preconditions };
 
     const intent = await createIntent(caller, request, preview, { db, now: now() });
 
@@ -260,9 +346,9 @@ export function createAssistantExecutor(options: Options = {}) {
 
     const stored = parseInput(receiptEffectsSchema, row.effects);
 
-    const effects = await runDurableEffects(stored.items, options.effects ?? {}, stored.completed);
+    const effects = await runDurableEffects(stored.items, options.effects ?? ASSISTANT_EFFECT_HANDLERS, stored.completed);
 
-    await db.assistantReceipt.update({ where: { intentId }, data: { effectsStatus: effects.status, effects: { items: stored.items, completed: effects.completed } } });
+    await db.assistantReceipt.update({ where: { intentId }, data: { effectsStatus: effects.status, effects: { ...stored, items: stored.items, completed: effects.completed } } });
 
     return readReceipt(caller, intentId, db);
   }

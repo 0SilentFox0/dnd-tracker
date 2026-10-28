@@ -142,6 +142,7 @@ export function Header() {
                         </Link>
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem asChild><Link href={`/campaigns/${campaignId}/dm/assistant`}>Асистент</Link></DropdownMenuItem>
                     {isDmLinkVisible("ai", isTemplate) && (
                       <DropdownMenuItem asChild>
                         <Link href={`/campaigns/${campaignId}/dm/ai`}>

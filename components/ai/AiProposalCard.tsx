@@ -115,6 +115,7 @@ export function AiProposalCard({ proposal, actions, busy, campaignId }: AiPropos
   return (
     <div className="space-y-2 rounded-lg border bg-card p-3 text-card-foreground" data-slot="ai-proposal-card">
       <p className="text-sm font-medium">{proposal.summary}</p>
+      <p className="break-words text-xs">Ціль: сторінка {proposal.pageId}. Застосування лише після людського підтвердження.</p>
       {status === "pending" || status === "stale" ? proposal.ops.map((op, i) => <OpView key={i} op={op} campaignId={campaignId} />) : null}
       {status === "stale" ? <p className="text-sm text-muted-foreground">Фрагмент змінився після пропозиції</p> : null}
       {status === "applied" || status === "rejected" ? <p className="text-xs text-muted-foreground">{STATUS_LABELS[status]}</p> : null}

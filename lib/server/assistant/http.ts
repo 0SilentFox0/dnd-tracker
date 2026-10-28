@@ -73,7 +73,7 @@ export function assistantRoute(mode: RouteMode) {
 
         const limit = url.searchParams.has("limit") ? Number(url.searchParams.get("limit")) : undefined;
 
-        return json(await listIntents(caller, { cursor, limit }));
+        return json(await listIntents(caller, { cursor, limit, ...(url.searchParams.has("status") && { status: url.searchParams.get("status") as never }) }));
       }
 
       if (mode === "policy") {

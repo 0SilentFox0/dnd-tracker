@@ -137,3 +137,12 @@ describe("assistant intent repository", () => {
     await expect(readDeletionReceipt("dm", "campaign", "intent")).rejects.toMatchObject({ status: 404 });
   });
 });
+
+it("pending queue filters at the server before pagination and exposes persisted legacy identity", async () => {
+ dbMocks.assistantIntent.findMany.mockResolvedValue([{id:"canonical",actionId:"scenario.legacy-proposal",status:"pending",summary:"Legacy",targets:[],expiresAt:now,createdAt:now,channel:"chat",legacyProposalId:"legacy-real-id"}]);
+
+ const page = await listIntents(caller,{status:"pending",limit:20});
+
+ expect(dbMocks.assistantIntent.findMany).toHaveBeenLastCalledWith(expect.objectContaining({where:expect.objectContaining({status:"pending"}),take:21}));
+ expect(page.items[0]).toMatchObject({id:"canonical",legacyProposalId:"legacy-real-id"});
+});

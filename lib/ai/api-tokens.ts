@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { isDmMember } from "@/lib/utils/api/is-dm";
 import type { ApiTokenSummary, CreateApiTokenInput, CreatedApiToken } from "@/types/ai";
 
-const SELECT = { id: true, name: true, prefix: true, scopes: true, lastUsedAt: true, createdAt: true } as const;
+const SELECT = { id: true, name: true, prefix: true, scopes: true, executionMode: true, lastUsedAt: true, createdAt: true } as const;
 
 const LAST_USED_THROTTLE_MS = 60_000;
 
@@ -14,8 +14,9 @@ export const hashToken = (raw: string) => createHash("sha256").update(raw).diges
 
 const knownScopes = (raw: string[]): ApiTokenScope[] => raw.filter(isApiTokenScope);
 
-const toSummary = (r: { id: string; name: string; prefix: string; scopes: string[]; lastUsedAt: Date | null; createdAt: Date }): ApiTokenSummary => ({
+const toSummary = (r: { id: string; name: string; prefix: string; scopes: string[]; lastUsedAt: Date | null; createdAt: Date; executionMode?: string }): ApiTokenSummary => ({
   ...r,
+  executionMode: r.executionMode === "auto" ? "auto" : "review",
   scopes: knownScopes(r.scopes),
   lastUsedAt: r.lastUsedAt?.toISOString() ?? null,
   createdAt: r.createdAt.toISOString(),
@@ -42,7 +43,7 @@ export async function revokeApiToken(campaignId: string, userId: string, tokenId
   return (await prisma.apiToken.updateMany({ where: { id: tokenId, campaignId, userId, revokedAt: null }, data: { revokedAt: new Date() } })).count > 0;
 }
 
-export async function verifyApiToken(raw: string): Promise<{ campaignId: string; userId: string; scopes: ApiTokenScope[] } | null> {
+export async function verifyApiToken(raw: string): Promise<{ id: string; campaignId: string; userId: string; scopes: ApiTokenScope[] } | null> {
   if (!raw.startsWith(API_TOKEN_PREFIX)) return null;
 
   const row = await prisma.apiToken.findUnique({
@@ -61,5 +62,5 @@ export async function verifyApiToken(raw: string): Promise<{ campaignId: string;
     data: { lastUsedAt: new Date() },
   });
 
-  return { campaignId: row.campaignId, userId: row.userId, scopes: knownScopes(row.scopes) };
+  return { id: row.id, campaignId: row.campaignId, userId: row.userId, scopes: knownScopes(row.scopes) };
 }

@@ -8,7 +8,7 @@ export const AI_PROPOSAL_STATUSES = ["pending", "applied", "rejected", "stale"] 
 
 export const AI_PROVIDER_LABELS: Record<AiProvider, string> = { anthropic: "Claude (Anthropic)", openai: "ChatGPT (OpenAI)", google: "Gemini (Google)" };
 
-export const AI_MODE_LABELS: Record<AiThreadMode, string> = { scenario: "Співавтор", live: "Живий режим" };
+export const AI_MODE_LABELS: Record<AiThreadMode, string> = { scenario: "Помічник кампанії / співавтор", live: "Живий режим" };
 
 export type AiModelOption = { id: string; label: string; tier: "fast" | "smart" };
 

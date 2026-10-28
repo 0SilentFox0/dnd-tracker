@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 
+const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: null };
+
+vi.mock("@/lib/server/assistant/catalog", () => ({ assistantCatalog: { listActions: () => [{ id: "campaign.read" }] } }));
+vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async (c) => c.actor) }));
+vi.mock("@/lib/server/assistant/actions/handoffs", () => ({ readCompendiumSummary: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn() }, scenarioPage: { findFirst: vi.fn() } } }));
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => [{ id: "c1", name: "Годрик", level: 5, class: "Лицар", race: "Людина", armorClass: 16, notes: "боїться вогню" }]) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => "Слайд: Собор") }));
@@ -20,7 +25,7 @@ describe("buildInstructions", () => {
   it("live: роль, стислість, партія, показ, поточний розділ повністю, зіграні — лише назвами", async () => {
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-    const out = await buildInstructions({ campaignId: "camp1", mode: "live", pageId: "p1" });
+    const out = await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: "p1" });
 
     expect(out).toContain("Асхан");
     expect(out).toContain("українською");
@@ -35,7 +40,7 @@ describe("buildInstructions", () => {
   it("scenario: вся сторінка + focus", async () => {
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-    const out = await buildInstructions({ campaignId: "camp1", mode: "scenario", pageId: "p1", focus: { pageId: "p1", sectionId: "s3", rowIds: ["r-s3"] } });
+    const out = await buildInstructions({ caller, campaignId: "camp1", mode: "scenario", pageId: "p1", focus: { pageId: "p1", sectionId: "s3", rowIds: ["r-s3"] } });
 
     expect(out).toContain("зіграний текст");
     expect(out).toContain("майбутній текст");
@@ -50,16 +55,16 @@ describe("buildInstructions", () => {
 
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-    const out = await buildInstructions({ campaignId: "camp1", mode: "scenario", pageId: "p1" });
+    const out = await buildInstructions({ caller, campaignId: "camp1", mode: "scenario", pageId: "p1" });
 
-    expect(out.length).toBeLessThanOrEqual(AI_LIMITS.contextChars + 2000);
+    expect(out.length).toBeLessThanOrEqual(AI_LIMITS.contextChars);
     expect(out).toContain("[обрізано]");
   });
 
   it("без сторінки — тільки роль, режим, партія", async () => {
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-    const out = await buildInstructions({ campaignId: "camp1", mode: "live", pageId: null });
+    const out = await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: null });
 
     expect(out).toContain("Годрик");
     expect(prisma.scenarioPage.findFirst).not.toHaveBeenCalled();
@@ -73,7 +78,7 @@ describe("buildInstructions", () => {
 
       const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-      const out = await buildInstructions({ campaignId: "camp1", mode, pageId: null });
+      const out = await buildInstructions({ caller, campaignId: "camp1", mode, pageId: null });
 
       expect(out).toContain("Постійні інструкції ДМ для цієї кампанії");
       expect(out.indexOf("Говори архаїчно")).toBeGreaterThan(out.indexOf("Відповідай українською"));
@@ -88,7 +93,7 @@ describe("buildInstructions", () => {
 
       const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-      const out = await buildInstructions({ campaignId: "camp1", mode: "scenario", pageId: "p1" });
+      const out = await buildInstructions({ caller, campaignId: "camp1", mode: "scenario", pageId: "p1" });
 
       expect(out).toContain(text);
       expect(out).toContain("[обрізано]");
@@ -99,7 +104,7 @@ describe("buildInstructions", () => {
 
       const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
-      expect(await buildInstructions({ campaignId: "camp1", mode: "live", pageId: null })).not.toContain("Постійні інструкції");
+      expect(await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: null })).not.toContain("Постійні інструкції");
     });
   });
 });

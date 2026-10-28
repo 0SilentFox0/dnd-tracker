@@ -14,11 +14,13 @@ export interface AiCredentialSummary {
 }
 
 export interface AiUsage {
-  inputTokens: number;
-  outputTokens: number;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  partial?: boolean;
 }
 
 export interface AiThread {
+  executionMode?: "review" | "auto";
   id: string;
   mode: AiThreadMode;
   scenarioPageId: string | null;
@@ -43,11 +45,11 @@ export interface AiChatMessage {
   metadata?: AiMessageMetadata;
 }
 
-export interface AiFocus {
-  pageId: string;
-  sectionId?: string;
-  rowIds?: string[];
-}
+export type AiFocus =
+  | { kind?: "scenario"; pageId: string; sectionId?: string; rowIds?: string[] }
+  | { kind: "character"; characterId: string }
+  | { kind: "battle"; battleId: string }
+  | { kind: "campaign" };
 
 export type ScenarioAiOpInput =
   | { op: "replaceRow"; sectionId: string; rowId: string; story?: string; notes?: string; allowRemoval?: boolean }
@@ -66,6 +68,7 @@ export type AddSlideAiOp = { op: "addSlide"; deckId: string | null; deckTitle?: 
 export type AiProposalOp = ScenarioAiOp | AddSlideAiOp;
 
 export interface AiProposal {
+  assistantIntentId?: string;
   id: string;
   pageId: string;
   threadId: string | null;
@@ -81,6 +84,7 @@ export interface AiSettings {
 }
 
 export interface ApiTokenSummary {
+  executionMode?: "review" | "auto";
   id: string;
   name: string;
   prefix: string;
@@ -97,3 +101,7 @@ export interface CreateApiTokenInput {
 export interface CreatedApiToken extends ApiTokenSummary {
   token: string;
 }
+
+export type AssistantSessionContext = { sourceNoteKeys: string[] };
+export type AssistantContextDisclosure = { labels: string[]; characters: number; truncated: boolean; focusAvailable: boolean; sourceNoteCount: number };
+export type AssistantContextPreview = AssistantContextDisclosure & { provider: AiProvider; model: string; historyLimit: number };

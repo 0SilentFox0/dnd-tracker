@@ -7,10 +7,15 @@ import { aiErrorMessage } from "@/lib/ai/errors";
 import { createModel } from "@/lib/ai/providers";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
 import { toAiSdkTools } from "@/lib/ai/tools";
-import { AI_LIMITS, CHAT_SCOPES } from "@/lib/constants/ai";
+import { publicToolData } from "@/lib/ai/tools/projection";
+import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, readAssistantRuns, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
+import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import type { AiChatMessage, AiFocus, AiMessageMetadata } from "@/types/ai";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
+import type { AiChatMessage, AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
 
 const COMPACTED = "[результат інструменту стиснуто]";
 
@@ -22,80 +27,140 @@ export function compactHistory(messages: AiChatMessage[]): AiChatMessage[] {
   return messages.map((m, i) => (i >= keepFrom ? m : { ...m, parts: m.parts.map((p) => (isToolPart(p) && "output" in p ? { ...p, output: COMPACTED } : p)) }));
 }
 
-type RunChatArgs = { campaignId: string; userId: string; threadId: string; text: string; focus?: AiFocus; abortSignal?: AbortSignal };
+type RunChatArgs = { campaignId: string; userId: string; threadId: string; requestId: string; text: string; focus?: AiFocus; sessionContext?: AssistantSessionContext; abortSignal?: AbortSignal };
 
-export async function runChat({ campaignId, userId, threadId, text, focus, abortSignal }: RunChatArgs, deps: { model?: LanguageModel } = {}): Promise<Response> {
+export async function runChat({ campaignId, userId, threadId, requestId, text, focus, sessionContext, abortSignal }: RunChatArgs, deps: { model?: LanguageModel } = {}): Promise<Response> {
   const thread = await loadThread(campaignId, userId, threadId);
 
   if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-  let model = deps.model;
+  const caller: AssistantCaller = { actor: { campaignId, userId, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null };
 
-  if (!model) {
-    let apiKey: string | null;
+  let claim;
 
-    try {
-      apiKey = await loadApiKey(userId, thread.provider);
-    } catch (error) {
-      if (error instanceof AiKeyUnreadableError) return errorResponse(API_ERRORS.AI_KEY_UNREADABLE, 400);
+  try {
+    claim = await beginAssistantRun(caller, requestId, { text, ...(focus && { focus }), ...(sessionContext?.sourceNoteKeys.length && { sessionContext }) });
+  } catch (e) {
+    if (e instanceof ContentError) return errorResponse(e.message, e.status);
 
-      throw error;
-    }
-
-    if (!apiKey) return errorResponse(API_ERRORS.AI_KEY_MISSING, 400);
-
-    model = createModel(thread.provider, apiKey, thread.model);
+    throw e;
   }
 
-  const userMessage = { id: crypto.randomUUID(), role: "user" as const, parts: [{ type: "text" as const, text }] };
+  if (claim.replayed) return Response.json({ recovered: true, ...await readAssistantRuns(caller, requestId), messages: await loadMessages(threadId, AI_LIMITS.historyMessages * 2) }, { headers: PRIVATE_NO_STORE_HEADERS });
 
-  await appendMessage(threadId, userMessage);
+  caller.runId = claim.run.id;
 
-  const toolSignal = AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), ...(abortSignal ? [abortSignal] : [])]);
+  const cancellation = new AbortController();
 
-  const tools = toAiSdkTools({ campaignId, userId, scopes: CHAT_SCOPES, threadId, abortSignal: toolSignal });
+  const runSignal = createRunSignal(AbortSignal.any([cancellation.signal, ...(abortSignal ? [abortSignal] : [])]), claim.run.expiresAt.getTime() - RUN_GRACE_MS - Date.now());
 
-  const [stored, instructions] = await Promise.all([
-    loadMessages(threadId, AI_LIMITS.historyMessages),
-    buildInstructions({ campaignId, mode: thread.mode, pageId: focus?.pageId ?? thread.scenarioPageId, focus }),
-  ]);
+  const toolSignal = runSignal.signal;
 
-  const history = compactHistory(stored) as unknown as UIMessage[];
+  let checking = false;
 
-  const result = streamText({
-    model,
-    instructions: { role: "system", content: instructions, providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } } },
-    messages: await convertToModelMessages(history, { tools, ignoreIncompleteToolCalls: true }),
-    tools,
-    stopWhen: isStepCount(AI_LIMITS.maxSteps),
-    abortSignal,
-    onError: ({ error: e }) => console.error("[ai chat]", APICallError.isInstance(e) ? e.statusCode : e instanceof Error ? e.name : "unknown"),
-  });
+  const poll = setInterval(async () => {
+    if (checking) return;
 
-  let usage: AiMessageMetadata["usage"];
+    checking = true;
+    try { if (await isAssistantRunCancelled(claim.run.id)) cancellation.abort(); }
+    catch { cancellation.abort(); }
+    finally { checking = false; }
+  }, 500);
+
+  const dispose = () => { clearInterval(poll); runSignal.dispose(); };
+
+  let usage: AiMessageMetadata["usage"] = { inputTokens: null, outputTokens: null, partial: true };
 
   let error: string | undefined;
 
-  return createUIMessageStreamResponse({
-    stream: toUIMessageStream({
-      stream: result.stream,
+  let completedSteps = 0;
+
+  try {
+    let model = deps.model;
+
+    if (!model) {
+      let apiKey: string | null;
+
+      try {
+        apiKey = await loadApiKey(userId, thread.provider);
+      } catch (error) {
+        if (error instanceof AiKeyUnreadableError) throw new ContentError(API_ERRORS.AI_KEY_UNREADABLE, 400);
+
+        throw error;
+      }
+
+      if (!apiKey) throw new ContentError(API_ERRORS.AI_KEY_MISSING, 400);
+
+      model = createModel(thread.provider, apiKey, thread.model);
+    }
+
+    const tools = toAiSdkTools({ campaignId, userId, scopes: API_TOKEN_SCOPES, threadId, abortSignal: toolSignal, caller });
+
+    const [stored, instructions] = await Promise.all([
+      loadMessages(threadId, AI_LIMITS.historyMessages),
+      buildInstructions({ campaignId, mode: thread.mode, pageId: focus && "pageId" in focus ? focus.pageId : thread.scenarioPageId, focus, caller, ...(sessionContext?.sourceNoteKeys.length && { sourceNoteSelection: { source: "session-ui", selectedKeys: sessionContext.sourceNoteKeys } }) }),
+    ]);
+
+    // Historical tool outputs predate the current transport redaction boundary.
+    const history = publicToolData(compactHistory(stored)) as UIMessage[];
+
+    const result = streamText({
+      model,
+      instructions: { role: "system", content: instructions, providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } } },
+      messages: await convertToModelMessages(history, { tools, ignoreIncompleteToolCalls: true }),
       tools,
-      originalMessages: history,
-      generateMessageId: () => crypto.randomUUID(),
-      onError: (e) => (error = aiErrorMessage(e)),
-      messageMetadata: ({ part }) => {
-        if (part.type !== "finish") return undefined;
+      stopWhen: isStepCount(AI_LIMITS.maxSteps),
+      abortSignal: toolSignal,
+      maxRetries: 0,
+      onStepFinish: async step => {
+        const u = step.usage;
 
-        usage = { inputTokens: part.totalUsage.inputTokens ?? 0, outputTokens: part.totalUsage.outputTokens ?? 0 };
+        const previous = completedSteps++ ? usage : { inputTokens: 0, outputTokens: 0 };
 
-        return { usage, model: thread.model } satisfies AiMessageMetadata;
+        usage = {
+          inputTokens: previous?.inputTokens === null || u.inputTokens === undefined ? null : (previous?.inputTokens ?? 0) + u.inputTokens,
+          outputTokens: previous?.outputTokens === null || u.outputTokens === undefined ? null : (previous?.outputTokens ?? 0) + u.outputTokens,
+          partial: true,
+        };
+        await recordAssistantRunUsage(claim.run.id, usage);
       },
-      onEnd: async ({ responseMessage }) => {
-        if (responseMessage.role !== "assistant" || responseMessage.parts.length === 0) return;
+      onError: ({ error: e }) => console.error("[ai chat]", APICallError.isInstance(e) ? e.statusCode : e instanceof Error ? e.name : "unknown"),
+    });
 
-        await appendMessage(threadId, { id: responseMessage.id, role: "assistant", parts: responseMessage.parts, metadata: { usage, model: thread.model, ...(error && { error }) } });
-      },
-    }),
-    consumeSseStream: consumeStream,
-  });
+
+    return createUIMessageStreamResponse({
+      headers: PRIVATE_NO_STORE_HEADERS,
+      stream: toUIMessageStream({
+        stream: result.stream,
+        tools,
+        originalMessages: history,
+        generateMessageId: () => crypto.randomUUID(),
+        onError: (e) => (error = aiErrorMessage(e)),
+        messageMetadata: ({ part }) => {
+          if (part.type !== "finish") return undefined;
+
+          usage = { inputTokens: part.totalUsage.inputTokens ?? null, outputTokens: part.totalUsage.outputTokens ?? null };
+
+          return { usage, model: thread.model } satisfies AiMessageMetadata;
+        },
+        onEnd: async ({ responseMessage }) => {
+          try {
+            if (toolSignal.aborted || error) usage = { ...usage, inputTokens: usage?.inputTokens ?? null, outputTokens: usage?.outputTokens ?? null, partial: true };
+
+            if (responseMessage.role === "assistant") {
+              await appendMessage(threadId, { id: `assistant-${claim.run.id}`, role: "assistant", parts: responseMessage.parts, metadata: { usage, model: thread.model, ...(error && { error }) } });
+            }
+
+            await finishAssistantRun(claim.run.id, { status: toolSignal.aborted ? "cancelled" : error ? "failed" : "completed", usage, ...(error && { errorCode: "PROVIDER_ERROR" }) });
+          } finally { dispose(); }
+        },
+      }),
+      consumeSseStream: consumeStream,
+    });
+  } catch (e) {
+    dispose();
+    await finishAssistantRun(claim.run.id, { status: toolSignal.aborted ? "cancelled" : "failed", usage, errorCode: "CHAT_FAILED" });
+
+    return errorResponse(e instanceof ContentError ? e.message : aiErrorMessage(e), e instanceof ContentError ? e.status : 500);
+  }
 }

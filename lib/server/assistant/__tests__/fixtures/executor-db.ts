@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 // Transaction/ORM boundary double only. Real SQL locking/rollback is verified by
 // execution.integration.test.ts on constructor, not by this deterministic fixture.
@@ -37,9 +37,10 @@ export function executorDatabase() {
       },
     },
     assistantReceipt: {
+      findMany: async ({ where }: { where: Record<string, unknown> }) => [...state.receipts.values()].filter((r) => matches(r, where)),
       findFirst: async ({ where }: { where: Record<string, unknown> }) => [...state.receipts.values()].find((r) => matches(r, where)) ?? null,
       create: async ({ data }: { data: Record<string, unknown> }) => {
-        const row = { id: `receipt${state.receipts.size + 1}`, ...data };
+        const row = { id: `receipt${state.receipts.size + 1}`, ...data, result: data.result === Prisma.JsonNull ? null : data.result };
 
         state.receipts.set(String(data.intentId), row);
 

@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 import { formatIssues } from "./issues";
+import { project, publicToolData } from "./projection";
 
 import "server-only";
 import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
+import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
+import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 
-export type AiToolContext = { campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
+export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
 
 export class AiToolError extends Error {}
 
@@ -25,34 +28,58 @@ export function defineTool<S extends z.ZodType>(
   return def as AiToolDef;
 }
 
-export function clip(value: unknown): string {
-  const text = typeof value === "string" ? value : JSON.stringify(value);
+export type ToolResult = { version: 2; kind: "result"; data: unknown } | { version: 2; kind: "error"; error: { code: string; status: number; message: string; issues?: unknown } };
 
-  return text.length > AI_LIMITS.toolResultChars ? `${text.slice(0, AI_LIMITS.toolResultChars)}…[обрізано]` : text;
+export function clip(value: unknown): string {
+  if (typeof value === "string") return value.length > AI_LIMITS.toolResultChars ? `${value.slice(0, AI_LIMITS.toolResultChars - 20)}…[обрізано]` : value;
+
+  const text = JSON.stringify(value);
+
+  return text.length <= AI_LIMITS.toolResultChars ? text : JSON.stringify(project(value));
 }
 
-const INTERNAL_ERROR = "Внутрішня помилка сервера. Спробуй ще раз пізніше.";
+function boundedOutput(value: unknown): unknown {
+  if (JSON.stringify(value ?? null).length < 22000) return value;
 
-function errorText(tool: string, error: unknown): string {
-  if (error instanceof z.ZodError) return ["Помилка: некоректні параметри", ...formatIssues(error.issues)].join("\n");
+  if (value && typeof value === "object" && "kind" in value) {
+    if (value.kind === "pending" && "intent" in value) {
+      const intent = value.intent as Record<string, unknown>;
 
-  if (error instanceof AiToolError) return `Помилка: ${error.message}`;
+      return { ...value, intent: { ...intent, targets: project(intent.targets, { budget: 12000 }) } };
+    }
 
-  if (error instanceof ContentError) {
-    const issues = Array.isArray(error.issues) ? error.issues : [];
+    if (value.kind === "result" && "result" in value) {
+      const result = value.result as Record<string, unknown>;
 
-    return [`Помилка: ${error.message}`, ...formatIssues(issues)].join("\n");
+      return { ...value, result: { ...result, data: project(result.data, { force: true, limit: 8, budget: 12000 }), affected: project(result.affected, { force: true, limit: 1, budget: 3000 }), warnings: project(result.warnings, { force: true, limit: 1, budget: 3000 }) } };
+    }
   }
 
-  console.error(`tool ${tool} failed`, error);
+  return project(value);
+}
 
-  return `Помилка: ${INTERNAL_ERROR}`;
+export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput: unknown): Promise<ToolResult> {
+  try {
+    ctx.abortSignal?.throwIfAborted();
+
+    if (ctx.caller && def.scopes.includes("ai")) {
+      if (ctx.caller.actor.campaignId !== ctx.campaignId || ctx.caller.actor.userId !== ctx.userId) throw new ContentError("Дія недоступна", 403);
+
+      await authorizeLegacyAssistantRead(ctx.caller);
+    }
+
+    return { version: 2, kind: "result", data: boundedOutput(publicToolData(await def.handler(ctx, def.input.parse(rawInput)))) };
+  } catch (error) {
+    if (error instanceof z.ZodError) return { version: 2, kind: "error", error: { code: "INVALID_INPUT", status: 400, message: "Некоректні параметри", issues: formatIssues(error.issues).slice(0, 20).map(s => s.slice(0, 200)) } };
+
+    if (error instanceof ContentError || error instanceof AiToolError) return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: error.message.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(error.issues.map(({ path, code, message }) => ({ path, code, message }))).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
+
+    console.error(`tool ${def.name} failed`);
+
+    return { version: 2, kind: "error", error: { code: "ASSISTANT_FAILED", status: 500, message: "Внутрішня помилка сервера. Спробуй ще раз пізніше." } };
+  }
 }
 
 export async function runTool(def: AiToolDef, ctx: AiToolContext, rawInput: unknown): Promise<string> {
-  try {
-    return clip(await def.handler(ctx, def.input.parse(rawInput)));
-  } catch (error) {
-    return errorText(def.name, error);
-  }
+  return JSON.stringify(await runToolResult(def, ctx, rawInput));
 }

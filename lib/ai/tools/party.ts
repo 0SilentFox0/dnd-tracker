@@ -12,8 +12,8 @@ const PARTY_SELECT = { id: true, name: true, level: true, class: true, race: tru
 
 export type PartyMember = { id: string; name: string; level: number; class: string; race: string; armorClass: number; notes: string | null };
 
-export async function partySummary(campaignId: string): Promise<PartyMember[]> {
-  return prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER, ...ACTIVE_CHARACTER }, select: PARTY_SELECT, orderBy: { name: "asc" } });
+export async function partySummary(campaignId: string, limit?: number): Promise<PartyMember[]> {
+  return prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER, ...ACTIVE_CHARACTER }, select: PARTY_SELECT, orderBy: { name: "asc" }, ...(limit !== undefined && { take: limit }) });
 }
 
 export const getPartyTool = defineTool({

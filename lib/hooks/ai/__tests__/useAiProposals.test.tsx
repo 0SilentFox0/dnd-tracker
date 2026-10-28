@@ -65,7 +65,7 @@ describe("useAiProposals", () => {
 });
 
 describe("useAiProposals addSlide", () => {
-  it("слайд: без beforeApply, інвалідує набори, сторінку не чіпає", async () => {
+  it("слайд: теж очікує beforeApply, інвалідує набори, сторінку не чіпає", async () => {
     vi.mocked(aiApi.getAiProposals).mockResolvedValueOnce([{ id: "ap2", status: "pending", ops: [{ op: "addSlide", deckId: null, slide: {} }] }] as never);
     vi.mocked(aiApi.applyAiProposal).mockResolvedValueOnce({ deck: { id: "d1" } } as never);
 
@@ -80,7 +80,7 @@ describe("useAiProposals addSlide", () => {
     await waitFor(() => expect(result.current.pending).toHaveLength(1));
     await act(() => result.current.apply("ap2"));
 
-    expect(beforeApply).not.toHaveBeenCalled();
+    expect(beforeApply).toHaveBeenCalledOnce();
     expect(onApplied).not.toHaveBeenCalled();
     expect(spy).toHaveBeenCalledWith({ queryKey: showKeys.decks("camp1") });
   });

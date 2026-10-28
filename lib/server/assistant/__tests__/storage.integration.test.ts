@@ -158,6 +158,25 @@ describe("assistant real constructor storage, connection_limit=1", () => {
     expect(await executor.dispatchAction(caller(), request())).toMatchObject({ kind: "result", result: { data: { maxLevel: 11 } } });
   });
 
+  it("T18 new thread/token default review; enabling auto leaves old pending untouched", async () => {
+    const thread = await db.aiThread.create({data:{campaignId,userId,mode:"scenario",provider:"anthropic",model:"synthetic",title:marker}});
+
+    const token = await db.apiToken.create({data:{campaignId,userId,name:marker,prefix:"synthetic",tokenHash:randomUUID(),scopes:["ai"]}});
+
+    expect(thread.executionMode).toBe("review"); expect(token.executionMode).toBe("review"); expect(thread.scenarioPageId).toBeNull();
+
+    const executor = createAssistantExecutor({db,catalog:createActionCatalog([action()])});
+
+    const pending = await executor.dispatchAction(caller(),request());
+
+    if(pending.kind!=="pending")throw Error("Expected pending");
+
+    await db.aiThread.update({where:{id:threadId},data:{executionMode:"auto"}});
+    expect((await db.assistantIntent.findUniqueOrThrow({where:{id:pending.intent.id}})).status).toBe("pending");
+    expect(await db.assistantReceipt.count({where:{intentId:pending.intent.id}})).toBe(0);
+    expect((await db.campaign.findUniqueOrThrow({where:{id:campaignId}})).maxLevel).toBe(10);
+  });
+
   it("new tables have RLS and database constraints reject invalid states", async () => {
     const rows = await db.$queryRaw<Array<{ relname: string; relrowsecurity: boolean }>>`SELECT relname, relrowsecurity FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relname IN ('assistant_intents', 'assistant_receipts', 'assistant_runs')`;
 

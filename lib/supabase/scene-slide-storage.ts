@@ -39,7 +39,7 @@ export function ownedSlidePath(campaignId: string, url: string): string | null {
   return path?.startsWith(`${campaignId}/`) && OBJECT_NAME.test(path.slice(campaignId.length + 1)) ? path : null;
 }
 
-export async function removeSlideFiles(campaignId: string, urls: string[]): Promise<void> {
+export async function removeSlideFiles(campaignId: string, urls: string[], options: { strict?: boolean } = {}): Promise<void> {
   const paths = urls.flatMap((url) => ownedSlidePath(campaignId, url) ?? []);
 
   if (paths.length === 0) return;
@@ -47,8 +47,12 @@ export async function removeSlideFiles(campaignId: string, urls: string[]): Prom
   try {
     const { error } = await createAdminClient().storage.from(SCENE_SLIDES_BUCKET).remove(paths);
 
+    if (error && options.strict) throw new Error("Не вдалося очистити медіа");
+
     if (error) console.warn("[scene-slides] remove failed", paths, error.message);
   } catch (e) {
+    if (options.strict) throw new Error("Не вдалося очистити медіа");
+
     console.warn("[scene-slides] remove failed", paths, e);
   }
 }

@@ -51,8 +51,10 @@ export async function writeShowState(campaignId: string, prev: ShowState | null,
 }
 
 /** Викликати з after(): Pusher не повинен затримувати відповідь. */
-export function publishShow(campaignId: string, show: ShowState): Promise<void> {
+export function publishShow(campaignId: string, show: ShowState, options: { strict?: boolean } = {}): Promise<void> {
   const event: ShowEvent = { campaignId, show };
+
+  if (options.strict) return pusherServer.trigger(showChannelName(campaignId), SHOW_STATE_EVENT, event).then(() => undefined);
 
   return safePusherTrigger(pusherServer, showChannelName(campaignId), SHOW_STATE_EVENT, event, { action: "show state" });
 }
@@ -60,22 +62,30 @@ export function publishShow(campaignId: string, show: ShowState): Promise<void> 
 const CLEAR_BATTLE_ATTEMPTS = 3;
 
 /** Бій завершено — виклик «До бою!» для нього знімається; помилки лише логуються. */
-export async function clearShowBattle(campaignId: string, battleId: string): Promise<void> {
+export async function clearShowBattle(campaignId: string, battleId: string, options: { strict?: boolean } = {}): Promise<void> {
   try {
     for (let attempt = 0; attempt < CLEAR_BATTLE_ATTEMPTS; attempt++) {
       const show = await readShowState(campaignId);
 
       const next = withoutBattle(show, battleId);
 
-      if (!show || !next) return;
+      if (!show) return;
+
+      if (!next) { if (options.strict) await publishShow(campaignId, show, options);
+
+ return; }
 
       if (await writeShowState(campaignId, show, next)) {
-        await publishShow(campaignId, next);
+        await publishShow(campaignId, next, options);
 
         return;
       }
     }
+
+    if (options.strict) throw new Error("Show update conflict");
   } catch (error) {
+    if (options.strict) throw error;
+
     console.error("[show] clear battle call failed", error);
   }
 }

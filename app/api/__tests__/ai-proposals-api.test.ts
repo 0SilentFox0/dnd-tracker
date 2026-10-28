@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as preloadedModule1 from "@/app/api/campaigns/[id]/ai/ai-handlers";
+import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route";
+import * as preloadedModule2 from "@/app/api/campaigns/[id]/ai/proposals/route";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
@@ -39,7 +42,7 @@ const proposal = (over: Record<string, unknown> = {}) => ({ id: "ap1", pageId: "
 
 const params = { params: Promise.resolve({ id: "camp1", proposalId: "ap1" }) } as never;
 
-const apply = async () => (await import("@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route")).POST(new Request("http://x", { method: "POST" }), params);
+const apply = async () => (preloadedModule0).POST(new Request("http://x", { method: "POST" }), params);
 
 describe("AI proposals API", () => {
   beforeEach(() => {
@@ -59,7 +62,7 @@ describe("AI proposals API", () => {
     vi.stubEnv("AI_KEYS_SECRET", "");
     expect((await apply()).status).toBe(200);
 
-    const { listProposalsHandler } = await import("@/app/api/campaigns/[id]/ai/ai-handlers");
+    const { listProposalsHandler } = preloadedModule1;
 
     vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([]);
     expect((await listProposalsHandler(new Request("http://x"), "camp1")).status).toBe(200);
@@ -69,7 +72,7 @@ describe("AI proposals API", () => {
     vi.stubEnv("AI_KEYS_SECRET", "");
     vi.mocked(prisma.aiProposal.findUnique).mockResolvedValue(proposal({ status: "rejected" }) as never);
 
-    const { rejectProposalHandler, generateSlideImageHandler } = await import("@/app/api/campaigns/[id]/ai/ai-handlers");
+    const { rejectProposalHandler, generateSlideImageHandler } = preloadedModule1;
 
     expect((await rejectProposalHandler("camp1", "ap1")).status).toBe(200);
     expect((await generateSlideImageHandler(new Request("http://x", { method: "POST" }), "camp1")).status).toBe(503);
@@ -129,7 +132,7 @@ describe("AI proposals API", () => {
   it("GET ?summary=1 вибирає лише id і status, без ops", async () => {
     vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([{ id: "ap1", status: "pending" }] as never);
 
-    const { GET } = await import("@/app/api/campaigns/[id]/ai/proposals/route");
+    const { GET } = preloadedModule2;
 
     const res = await GET(new Request("http://x?pageId=p1&status=pending&summary=1"), { params: Promise.resolve({ id: "camp1" }) } as never);
 

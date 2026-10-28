@@ -2,6 +2,8 @@
 
 import { type FormEvent, useState } from "react";
 
+import { AssistantPolicyControl } from "./AssistantPolicyControl";
+
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,12 +20,13 @@ interface ApiTokenListActions {
 }
 
 interface ApiTokenListProps {
+  campaignId?: string;
   tokens: ApiTokenSummary[];
   scopes: readonly ApiTokenScope[];
   actions: ApiTokenListActions;
 }
 
-export function ApiTokenList({ tokens, scopes, actions }: ApiTokenListProps) {
+export function ApiTokenList({ campaignId, tokens, scopes, actions }: ApiTokenListProps) {
   const confirm = useConfirm();
 
   const initialScopes = scopes.slice(0, 1);
@@ -71,6 +74,7 @@ export function ApiTokenList({ tokens, scopes, actions }: ApiTokenListProps) {
             <p className="text-sm text-hud-muted">
               {token.prefix}… · {token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleString("uk") : "ще не використовувався"}
             </p>
+            {campaignId && <AssistantPolicyControl key={token.id} campaignId={campaignId} target="token" id={token.id} executionMode={token.executionMode} />}
             <div className="mt-1 flex flex-wrap gap-1">
               {token.scopes.map((s) => (
                 <Badge key={s} variant="outline">

@@ -204,4 +204,30 @@ describe("scenario adapters real constructor, connection_limit=1", () => {
     expect(await db.scenarioPageVersion.count({ where: { pageId: p.id } })).toBe(0);
   });
 
+  it("T14 legacy chat alias stages canonical intent; one T6 apply and receipt on confirm", async () => {
+    const { runTool } = await import("@/lib/ai/tools/define");
+
+    const { proposeScenarioEditTool } = await import("@/lib/ai/tools/propose");
+
+    const p = await page();
+
+    const ctx = { campaignId, userId, threadId, scopes: ["scenario:write"] as const, caller: caller() };
+
+    const out = JSON.parse(await runTool(proposeScenarioEditTool, ctx, { pageId: p.id, summary: "T14 edit", ops: [{ op: "renameSection", sectionId: "s", title: "T14" }] }));
+
+    expect(out).toMatchObject({ version: 2, kind: "result", data: { kind: "pending", intent: { actionId: "scenario.propose-edit" } } });
+    expect(await db.aiProposal.count({ where: { pageId: p.id } })).toBe(0);
+    expect((await db.scenarioPage.findUniqueOrThrow({ where: { id: p.id } })).version).toBe(p.version);
+
+    const engine = createAssistantExecutor({ db });
+
+    const receipt = await engine.confirmIntent(actor(), out.data.intent.id);
+
+    expect(receipt.status).toBe("applied");
+    expect(await engine.confirmIntent(actor(), out.data.intent.id)).toEqual(receipt);
+    expect(await db.aiProposal.count({ where: { pageId: p.id, status: "applied" } })).toBe(1);
+    expect(await db.scenarioPageVersion.count({ where: { pageId: p.id } })).toBe(1);
+    expect((await db.scenarioPage.findUniqueOrThrow({ where: { id: p.id } })).version).toBe(p.version + 1);
+  });
+
 });

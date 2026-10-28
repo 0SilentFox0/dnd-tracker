@@ -9,6 +9,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
@@ -199,7 +200,9 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
-  const seen = modeView ? participants.filter((p) => modeView.visibleIds.has(p.basicInfo.id)) : participants;
+  const seen = (modeView ? participants.filter((p) => modeView.visibleIds.has(p.basicInfo.id)) : participants).filter(
+    (p) => !hasCondition(p, "invisible") || isDM || p.basicInfo.controlledBy === viewer.userId,
+  );
 
   const canMove = !aim && !pick && !placing && !tool && canAct && current?.battleData.position;
 
@@ -316,5 +319,5 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     return { kind: "none" };
   }
 
-  return { participants, view, aiming: !!aim, cellClick, tokenClick };
+  return { participants: participants.filter((p) => !hasCondition(p, "invisible") || isDM || p.basicInfo.controlledBy === viewer.userId), view, aiming: !!aim, cellClick, tokenClick };
 }

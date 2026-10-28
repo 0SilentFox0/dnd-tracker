@@ -15,13 +15,13 @@ describe("assistant retention", () => {
 
     const { where, data } = calls[1][0];
 
-    expect(where).toMatchObject({ status: { in: ["expired", "rejected", "failed", "applied"] }, updatedAt: { lt: new Date("2026-10-18T00:00:00Z") }, redactedAt: null });
+    expect(where).toMatchObject({ status: { in: ["expired", "rejected", "failed", "applied", "stale"] }, updatedAt: { lt: new Date("2026-10-18T00:00:00Z") }, redactedAt: null });
     expect(data).toHaveProperty("redactedAt", new Date("2026-10-25T00:00:00Z"));
     expect(data).not.toHaveProperty("originTokenId");
   });
 
   it("retains unknown receipts and pending effects instead of enabling blind retries", async () => {
     await cleanupAssistantData(new Date("2026-10-25T00:00:00Z"));
-    expect(vi.mocked(prisma.assistantReceipt.deleteMany).mock.calls.at(-1)?.[0]).toMatchObject({ where: { updatedAt: { lt: new Date("2026-07-27T00:00:00Z") }, status: { in: ["applied", "rejected", "expired", "failed"] }, effectsStatus: "complete" } });
+    expect(vi.mocked(prisma.assistantReceipt.deleteMany).mock.calls.at(-1)?.[0]).toMatchObject({ where: { updatedAt: { lt: new Date("2026-07-27T00:00:00Z") }, status: { in: ["applied", "rejected", "expired", "failed", "stale"] }, effectsStatus: "complete" } });
   });
 });

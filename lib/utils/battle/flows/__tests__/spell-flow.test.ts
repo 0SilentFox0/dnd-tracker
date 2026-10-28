@@ -449,7 +449,9 @@ describe("шаблон і дальність", () => {
     it("spellAimTargets: радіус бере лише сторону заклинання, найближчих до точки, до ліміту; шаблон — усіх", () => {
       const area = widened("area");
 
-      const participants = [area, foe, near, friend];
+      const invisible = { ...friend, battleData: { ...friend.battleData, activeEffects: [{ id: "inv", name: "Невидимий", type: "condition" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "invisible", value: 1 }] }] } };
+
+      const participants = [area, foe, near, invisible];
 
       const pick = buildSpellPick(participants, area, bolt, map);
 

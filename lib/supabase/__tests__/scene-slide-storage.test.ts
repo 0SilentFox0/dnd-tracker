@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ownedSlidePath } from "../scene-slide-storage";
+import { ownedSlidePath, removeSlideFiles } from "../scene-slide-storage";
 
-vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({ storage: { from: () => ({ remove: async () => ({ error: { message: "SECRET_STORAGE_ERROR" } }) }) } }) }));
 
 const id = "a".repeat(32);
 
@@ -29,4 +29,8 @@ describe("ownedSlidePath", () => {
   it("декодує ключ публічного URL", () => {
     expect(ownedSlidePath("c1", url(`c1%2F${id}.webp`))).toBe(`c1/${id}.webp`);
   });
+});
+
+it("strict durable cleanup reports failure rather than completed effect", async () => {
+  await expect(removeSlideFiles("c1", [url(`c1/${id}.webp`)], { strict: true })).rejects.toThrow("Не вдалося очистити медіа");
 });

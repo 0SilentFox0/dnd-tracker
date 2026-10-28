@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createMcpHandler } from "mcp-handler";
 
+import { boundMcpRequest } from "@/lib/ai/mcp-request";
 import { registerMcpTools, toolsFor } from "@/lib/ai/tools";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -20,11 +21,15 @@ async function handler(req: Request): Promise<Response> {
 
   if (tools.length === 0) return errorResponse(API_ERRORS.API_TOKEN_SCOPE_MISSING, 403);
 
-  const mcp = createMcpHandler((server) => registerMcpTools(server, tools, { campaignId: auth.campaignId, userId: auth.userId, scopes: auth.scopes, threadId: null, abortSignal: AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), req.signal]) }), {
+  const bounded = await boundMcpRequest(req);
+
+  if (bounded instanceof Response) return bounded;
+
+  const mcp = createMcpHandler((server) => registerMcpTools(server, tools, { campaignId: auth.campaignId, userId: auth.userId, scopes: auth.scopes, threadId: null, caller: { actor: { campaignId: auth.campaignId, userId: auth.userId, isDM: true, via: "token", scopes: auth.scopes }, channel: "mcp", threadId: null, tokenId: auth.tokenId }, abortSignal: AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), req.signal]) }), {
     serverInfo: { name: "dnd-tracker", version: "1.0.0" },
   });
 
-  const res = await mcp(req);
+  const res = await mcp(bounded);
 
   if (req.method !== "POST" || !res.body) return res;
 

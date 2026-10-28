@@ -2,19 +2,22 @@
 
 import { Plus, X } from "lucide-react";
 
+import { AssistantPolicyControl } from "./AssistantPolicyControl";
+
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import { AI_MODE_LABELS, AI_MODELS, AI_PROVIDER_LABELS, type AiProvider } from "@/lib/constants/ai";
 import type { AiThread } from "@/types/ai";
 
 interface AiThreadHeaderProps {
+  campaignId?: string;
   threads: AiThread[];
   thread: AiThread | null;
   providers: AiProvider[];
   actions: { onSelect: (threadId: string) => void; onCreate: () => void; onChangeModel: (provider: AiProvider, model?: string) => void; onClose: () => void };
 }
 
-export function AiThreadHeader({ threads, thread, providers, actions }: AiThreadHeaderProps) {
+export function AiThreadHeader({ campaignId, threads, thread, providers, actions }: AiThreadHeaderProps) {
   const providerOptions = providers.map((p) => ({ value: p, label: AI_PROVIDER_LABELS[p] }));
 
   return (
@@ -47,8 +50,10 @@ export function AiThreadHeader({ threads, thread, providers, actions }: AiThread
               options={AI_MODELS[thread.provider].map((m) => ({ value: m.id, label: m.label }))}
             />
           </div>
+          <p className="break-words text-xs">Провайдер: {AI_PROVIDER_LABELS[thread.provider]} · Модель: {thread.model}</p>
+          {campaignId && <AssistantPolicyControl key={thread.id} campaignId={campaignId} target="thread" id={thread.id} executionMode={thread.executionMode} />}
           <p className="text-xs text-muted-foreground" title="Токени треду">
-            ↑{thread.usage.inputTokens} ↓{thread.usage.outputTokens}
+            ↑{thread.usage.inputTokens ?? "невідомо"} ↓{thread.usage.outputTokens ?? "невідомо"}{thread.usage.partial ? " (неповні дані)" : ""}
           </p>
         </>
       ) : null}

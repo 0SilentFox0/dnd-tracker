@@ -1,4 +1,7 @@
 export const aiKeys = {
+  intents: (campaignId: string, cursor?: string, limit?: number) => ["assistant-intents", campaignId, cursor ?? null, limit ?? 20] as const,
+  intent: (campaignId: string, id: string) => ["assistant-intent", campaignId, id] as const,
+  receipt: (campaignId: string, id: string) => ["assistant-receipt", campaignId, id] as const,
   credentials: () => ["ai-credentials"] as const,
   threads: (campaignId: string, pageId?: string) => ["ai-threads", campaignId, pageId ?? null] as const,
   messages: (campaignId: string, threadId: string) => ["ai-messages", campaignId, threadId] as const,

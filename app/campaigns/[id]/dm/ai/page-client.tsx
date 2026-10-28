@@ -28,7 +28,7 @@ function TokensPanel({ campaignId, scopes }: { campaignId: string; scopes: reado
   return (
     <HudPanel>
       <h2 className="mb-3 font-semibold text-hud-ink">API-токени</h2>
-      <QueryState query={tokens.query}>{(list) => <ApiTokenList tokens={list} scopes={scopes} actions={{ onCreate: tokens.create, onRevoke: (id) => void tokens.revoke(id) }} />}</QueryState>
+      <QueryState query={tokens.query}>{(list) => <ApiTokenList campaignId={campaignId} tokens={list} scopes={scopes} actions={{ onCreate: tokens.create, onRevoke: (id) => void tokens.revoke(id) }} />}</QueryState>
     </HudPanel>
   );
 }

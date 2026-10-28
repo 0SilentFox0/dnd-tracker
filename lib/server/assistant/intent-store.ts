@@ -1,7 +1,7 @@
 import { type AssistantIntent,Prisma } from "@prisma/client";
 import { createHash } from "node:crypto";
 
-import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentSummary } from "./types";
+import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentStatus,IntentSummary } from "./types";
 
 import "server-only";
 import { prisma } from "@/lib/db";
@@ -17,7 +17,7 @@ const TTL_MS = 15 * 60_000;
 
 const MAX_PAYLOAD_BYTES = 3_000_000;
 
-const SUMMARY_SELECT = { id: true, actionId: true, status: true, summary: true, targets: true, expiresAt: true, channel: true, createdAt: true } as const;
+const SUMMARY_SELECT = { id: true, actionId: true, status: true, summary: true, targets: true, expiresAt: true, channel: true, createdAt: true, legacyProposalId: true } as const;
 
 type SummaryRow = Pick<AssistantIntent, keyof typeof SUMMARY_SELECT>;
 
@@ -42,7 +42,7 @@ export function intentOwner(caller: AssistantCaller): { campaignId: string; user
 
 export function intentSummary(row: SummaryRow): IntentSummary {
 
-  return { id: row.id, actionId: row.actionId, status: parseInput(intentStatusSchema, row.status), summary: row.summary, targets: parseInput(assistantTargetSchema.array(), row.targets), expiresAt: row.expiresAt.toISOString(), channel: row.channel === "mcp" ? "mcp" : "chat" };
+  return { ...(row.legacyProposalId && { legacyProposalId: row.legacyProposalId }), id: row.id, actionId: row.actionId, status: parseInput(intentStatusSchema, row.status), summary: row.summary, targets: parseInput(assistantTargetSchema.array(), row.targets), expiresAt: row.expiresAt.toISOString(), channel: row.channel === "mcp" ? "mcp" : "chat" };
 }
 
 export async function createIntent(caller: AssistantCaller, rawRequest: ActionRequest, preview: ActionPreview, options: StoreOptions = {}): Promise<IntentSummary> {
@@ -89,8 +89,8 @@ export async function getIntent(caller: AssistantCaller, id: string, db: IntentD
   return { ...intentSummary(row), preview: parseInput(actionPreviewSchema, row.preview) };
 }
 
-export async function listIntents(caller: AssistantCaller, input: { cursor?: string; limit?: number } = {}, db: IntentDb = prisma): Promise<IntentPage> {
-  const { cursor, limit } = parseInput(intentPageSchema, input);
+export async function listIntents(caller: AssistantCaller, input: { cursor?: string; limit?: number; status?: IntentStatus } = {}, db: IntentDb = prisma): Promise<IntentPage> {
+  const { cursor, limit, status } = parseInput(intentPageSchema, input);
 
   let after: { createdAt: string; id: string } | undefined;
 
@@ -105,7 +105,7 @@ export async function listIntents(caller: AssistantCaller, input: { cursor?: str
   }
 
   const rows = await db.assistantIntent.findMany({
-    where: { ...intentOwner(caller), ...(after && { OR: [{ createdAt: { lt: new Date(after.createdAt) } }, { createdAt: new Date(after.createdAt), id: { lt: after.id } }] }) },
+    where: { ...intentOwner(caller), ...(status && { status }), ...(after && { OR: [{ createdAt: { lt: new Date(after.createdAt) } }, { createdAt: new Date(after.createdAt), id: { lt: after.id } }] }) },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: limit + 1, select: SUMMARY_SELECT,
   });
 

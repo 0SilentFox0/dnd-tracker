@@ -13,8 +13,12 @@ import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { aiSettingsSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { cancelAssistantRun, readAssistantRuns } from "@/lib/server/assistant/runs";
+import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
 export async function aiGuard(campaignId: string) {
@@ -23,17 +27,25 @@ export async function aiGuard(campaignId: string) {
   return requireDM(campaignId);
 }
 
-const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional() });
+const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional(), workspace: z.literal("true").optional() });
 
 export const listProposalsHandler = (req: Request, campaignId: string) =>
-  guarded("list ai proposals", () => requireDM(campaignId), async () => {
+  guarded("list ai proposals", () => requireDM(campaignId), async (access) => {
     const query = listQuery.safeParse(Object.fromEntries(new URL(req.url).searchParams));
 
     if (!query.success) return errorResponse(API_ERRORS.INVALID_QUERY, 400, query.error.issues);
 
-    const { summary, ...filter } = query.data;
+    const { summary, workspace, ...filter } = query.data;
 
-    return NextResponse.json(summary ? await listProposalSummaries(campaignId, filter) : await listProposals(campaignId, filter));
+    if (summary) return NextResponse.json(await listProposalSummaries(campaignId, filter));
+
+    const proposals = await listProposals(campaignId, filter);
+
+    if (!workspace) return NextResponse.json(proposals);
+
+    const links = await prisma.assistantIntent.findMany({ where: { campaignId, userId: access.userId, legacyProposalId: { in: proposals.map(p => p.id) } }, select: { id: true, legacyProposalId: true } });
+
+    return NextResponse.json(proposals.map(p => ({ ...p, assistantIntentId: links.find(link => link.legacyProposalId === p.id)?.id })), { headers: PRIVATE_NO_STORE_HEADERS });
   });
 
 export const applyProposalHandler = (campaignId: string, proposalId: string) =>
@@ -122,7 +134,7 @@ export const chatHandler = (req: Request, campaignId: string, threadId: string) 
 
     if (body instanceof NextResponse) return body;
 
-    return runChat({ campaignId, userId: access.userId, threadId, text: body.text, focus: body.focus, abortSignal: req.signal });
+    return runChat({ campaignId, userId: access.userId, threadId, requestId: body.requestId, text: body.text, focus: body.focus, sessionContext: body.sessionContext, abortSignal: req.signal });
   });
 
 export const generateSlideImageHandler = (req: Request, campaignId: string) =>
@@ -152,3 +164,43 @@ export const discardGeneratedImageHandler = (req: Request, campaignId: string) =
 
     return outcome === "foreign" ? errorResponse(API_ERRORS.AI_IMAGE_NOT_OWNED, 400) : NextResponse.json({ removed: outcome === "removed" });
   });
+
+const chatCaller = (campaignId: string, userId: string, threadId: string): AssistantCaller => ({ actor: { campaignId, userId, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null });
+
+export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string) =>
+  guarded("recover ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
+    const caller = chatCaller(campaignId, access.userId, threadId);
+
+    const state = requestId ? await readAssistantRuns(caller, requestId) : await readAssistantRuns(caller);
+
+    return NextResponse.json({ ...state, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+  }));
+export const cancelChatHandler = (req: Request, campaignId: string, threadId: string) =>
+  guarded("cancel ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
+    const id = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/).safeParse(new URL(req.url).searchParams.get("requestId"));
+
+    if (!id.success) return errorResponse("Некоректний ідентифікатор запиту", 400);
+
+    const state = await cancelAssistantRun(chatCaller(campaignId, access.userId, threadId), id.data);
+
+    return NextResponse.json({ ...state, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+  }));
+
+async function runResponse(run: () => Promise<Response>): Promise<Response> {
+  try { const response = await run();
+
+    response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
+
+    return response; }
+  catch (error) {
+    if (error instanceof ContentError) {
+      const response = errorResponse(error.message, error.status);
+
+      response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
+
+      return response;
+    }
+
+    throw error;
+  }
+}

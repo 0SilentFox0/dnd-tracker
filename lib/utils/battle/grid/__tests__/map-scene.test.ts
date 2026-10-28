@@ -71,6 +71,17 @@ describe("deriveMapScene: danger", () => {
 });
 
 describe("deriveMapScene", () => {
+  it("не показує невидимий чужий токен у звичайній мапі, але лишає власний і зберігає DM-керування", () => {
+    const invisible = (p: BattleParticipant) => ({ ...p, battleData: { ...p.battleData, activeEffects: [{ id: "inv", name: "Невидимий", type: "condition" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "invisible", value: 1 }] }] } });
+
+    const own = { ...invisible(hero), basicInfo: { ...hero.basicInfo, controlledBy: "u1" } };
+
+    const hidden = invisible(near);
+
+    expect(deriveMapScene(input({ participants: [own, hidden] })).participants.map((p) => p.basicInfo.id)).toEqual(["h"]);
+    expect(deriveMapScene(input({ participants: [own, hidden], actor: { isDM: true, viewer: { userId: "dm", isDM: true, canSeeEnemyHp: true } } })).participants.map((p) => p.basicInfo.id)).toEqual(["h", "e1"]);
+  });
+
   it("клік по якірній клітинці ходячого вибирає його, інші клітинки ходять", () => {
     const s = deriveMapScene(input());
 

@@ -3,3 +3,5 @@ export type { ActionPreview, ActionResult, DispatchResult, ExecutionMode, FieldC
 import type { IntentSummary } from "@/lib/server/assistant/types";
 
 export type IntentPage = { items: IntentSummary[]; nextCursor: string | null };
+
+export type AssistantReviewReceipt = import("@/lib/server/assistant/types").ReceiptDto | { id: string; status: "applied"; deleted: true };

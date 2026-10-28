@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { AssistantActionDef } from "../types";
 import { LEGACY_PROPOSAL_ACTION } from "./legacy-proposal";
+import { SCENARIO_EDIT_ACTION } from "./scenario-edit";
 
 import { createScenarioPageSchema, scenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -21,7 +22,7 @@ const definitions = {
   "row.delete": page.extend({ sectionId: id, rowId: id }), "row.move": page.extend({ sectionId: id, rowId: id, direction: z.union([z.literal(-1), z.literal(1)]) }),
 };
 
-export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_ACTION, ...Object.entries(definitions).map(([operation, input]): AssistantActionDef => {
+export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_ACTION, SCENARIO_EDIT_ACTION, ...Object.entries(definitions).map(([operation, input]): AssistantActionDef => {
   const read = ["list", "get", "search", "mentions", "versions"].includes(operation);
 
   const base = { id: `scenario.${operation}`, title: `Сценарій: ${operation}`, description: "Поточна кампанія, версії та rich content", input, need: { access: "dm" as const, scope: read ? "scenario:read" as const : "scenario:write" as const } };
