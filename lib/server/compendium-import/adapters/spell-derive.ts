@@ -5,7 +5,8 @@ import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObj
 import { recognizeSpell } from "./spell-patterns";
 
 import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
-import { type AnyConditionKey, CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import type { Effect } from "@/lib/utils/abilities/schema/effects";
+import { CONDITION_5E_KEYS, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { ADDS_MOD, durationRounds, spellEffects, type SpellFacts, spellKind, spellRange, spellResolution, spellSide, spellTargeting, spellUpcast, validDice } from "@/lib/utils/spells/derive/mechanics";
 import { numberWord } from "@/lib/utils/spells/derive/text";
 
@@ -79,26 +80,43 @@ const RIDERS: Array<[RegExp, string]> = [
   [CHOICE, "вибір варіанта"],
 ];
 
+const EXTRA_FILTERED_TARGETS = /\bone additional humanoid\b/i;
+
+const REPEAT_SAVING_THROW = /\brepeat the saving throw\b/i;
+
+const withSaveEnds = (effects: Effect[], ability: AbilityKey | null, text: string, applied: string | null): Effect[] =>
+  isCustomConditionKey(applied) && ability && REPEAT_SAVING_THROW.test(text) ? effects.map((e) => (e.kind === "applyCondition" && !e.saveEnds ? { ...e, saveEnds: { ability } } : e)) : effects;
+
 const tags = (raw: string, name: string): string[] => [...new Set([...raw.matchAll(new RegExp(`\\{@${name} ([^}|]*)`, "g"))].map((m) => m[1].trim()))];
 
 const strings = (v: unknown): string[] => array(v).map(str).filter(Boolean);
 
 const isCondition = (c: string): c is (typeof CONDITION_5E_KEYS)[number] => (CONDITION_5E_KEYS as readonly string[]).includes(c);
 
-function conditionOf(row: Record<string, unknown>, raw: string, text: string, hasSave: boolean): { condition: AnyConditionKey | null; beneficial: boolean } {
+type CustomKeys = ReadonlyMap<string, string>;
+
+type DerivedCondition = NonNullable<SpellFacts["condition"]>;
+
+const resolveCondition = (c: string, custom: CustomKeys): DerivedCondition | null => (isCondition(c) ? c : ((custom.get(c) as DerivedCondition | undefined) ?? null));
+
+function conditionOf(row: Record<string, unknown>, raw: string, text: string, hasSave: boolean, custom: CustomKeys): { condition: DerivedCondition | null; beneficial: boolean } {
   const inflicted = strings(row.conditionInflict).map((c) => c.toLowerCase());
 
-  if (inflicted.length === 1 && isCondition(inflicted[0])) return { condition: inflicted[0], beneficial: false };
+  const only = inflicted.length === 1 ? resolveCondition(inflicted[0], custom) : null;
+
+  if (only) return { condition: only, beneficial: false };
 
   const self = SELF_CONDITION.exec(raw)?.[1]?.toLowerCase();
 
-  if (self && isCondition(self)) return { condition: self, beneficial: true };
+  const selfCondition = self ? resolveCondition(self, custom) : null;
+
+  if (selfCondition) return { condition: selfCondition, beneficial: true };
 
   if (hasSave && IMMOBILIZING.test(text)) return { condition: "immobilized", beneficial: false };
 
   const target = hasSave ? TARGET_CONDITION.exec(raw)?.[1]?.toLowerCase() : undefined;
 
-  return { condition: target && isCondition(target) ? target : null, beneficial: false };
+  return { condition: target ? resolveCondition(target, custom) : null, beneficial: false };
 }
 
 function shape(text: string, cast: SpellCast): Pick<SpellFacts, "shape_type" | "shape_size"> {
@@ -113,7 +131,7 @@ function shape(text: string, cast: SpellCast): Pick<SpellFacts, "shape_type" | "
   return { shape_type: "line", shape_size: Number(m[3] ?? m[4] ?? m[5]) };
 }
 
-export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast): SpellDerivation {
+export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast, customConditions: CustomKeys = new Map()): SpellDerivation {
   const raw = JSON.stringify(row.entries ?? []);
 
   const misc = strings(row.miscTags);
@@ -134,7 +152,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
     return "";
   });
 
-  const unknownConditions = [...tags(raw, "condition"), ...strings(row.conditionInflict)].map((c) => c.toLowerCase()).filter((c) => !isCondition(c));
+  const unknownConditions = [...tags(raw, "condition"), ...strings(row.conditionInflict)].map((c) => c.toLowerCase()).filter((c) => !resolveCondition(c, customConditions));
 
   const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || ["damageImmune", "damageResist", "damageVulnerable", "conditionImmune"].some((k) => array(row[k]).length > 0) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
 
@@ -204,7 +222,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   if (VARIABLE.test(text) || (damageTypes.length > 0 && damageDice.length > 1)) return { blocker: "VARIABLE_DAMAGE" };
 
-  const { condition, beneficial } = conditionOf(row, raw, text, ability !== null);
+  const { condition, beneficial } = conditionOf(row, raw, text, ability !== null, customConditions);
 
   const upTo = UP_TO_CREATURES.exec(text);
 
@@ -236,7 +254,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   if (applied === "immobilized") riders.push("утримання цілей: умови й переміщення (див. опис)");
 
-  const otherConditions = tags(raw, "condition").filter((c) => c.toLowerCase() !== applied);
+  const otherConditions = tags(raw, "condition").filter((c) => c.toLowerCase() !== applied && customConditions.get(c.toLowerCase()) !== applied);
 
   if (otherConditions.length > 0) riders.push(`стани: ${otherConditions.join(", ")}`);
 
@@ -247,10 +265,11 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
       fields: {
         targeting: withTargetFilter(targeting, text, higher),
         resolution: spellResolution(facts, kind, targeting),
-        spellEffects: [...spellEffects(facts, kind), ...(push ? [{ kind: "push", feet: push, from: "caster" }] : [])],
+        spellEffects: [...withSaveEnds(spellEffects(facts, kind), ability as AbilityKey | null, text, applied), ...(push ? [{ kind: "push", feet: push, from: "caster" }] : [])],
         dice: dice?.count ?? 0,
         ...(dice && { dieSides: dice.sides }),
         ...spellUpcast(facts, kind),
+        ...(isCustomConditionKey(applied) && EXTRA_FILTERED_TARGETS.test(higher) && { upcastTargets: 1 }),
         ...(kind === "heal" && ADDS_MOD.test(text) && { addAbilityMod: true }),
       },
     },

@@ -14,10 +14,12 @@ const crOf = (s: string): number => {
   return d ? n / d : n;
 };
 
+const SINGLE_HUMANOID = /\b(?:a|one) humanoid(?: that)? you can see within range\b/i;
+
 export function targetFilterFromText(text: string, higher: string): SpellTargetFilter | null {
   const beast = BEAST_CR.exec(text);
 
-  if (!beast) return null;
+  if (!beast) return SINGLE_HUMANOID.test(text) ? { creatureTypes: ["humanoid"] } : null;
 
   const perLevel = numberWord(CR_PER_LEVEL.exec(higher)?.[1] ?? "") ?? 0;
 

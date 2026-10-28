@@ -83,7 +83,11 @@ export function describeRulesPatch(patch: JsonRecord | undefined) {
 
   if (isRecord(patch.classes) && typeof patch.classes.enabled === "boolean") parts.push(patch.classes.enabled ? "увімкнути режим класів 5e" : "вимкнути режим класів 5e");
 
-  const other = Object.keys(patch).filter((key) => key !== "classes").length;
+  const custom = isRecord(patch.conditions) && Array.isArray(patch.conditions.custom) ? patch.conditions.custom.length : 0;
+
+  if (custom) parts.push(`власні стани з книги: ${custom}`);
+
+  const other = Object.keys(patch).filter((key) => key !== "classes" && !(key === "conditions" && custom)).length;
 
   if (other) parts.push(`інших розділів правил: ${other}`);
 

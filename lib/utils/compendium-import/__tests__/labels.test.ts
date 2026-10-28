@@ -22,6 +22,7 @@ describe("compendium labels", () => {
     expect(metaSummary({ edition: "classic", sources: [{ json: "X", full: "Book", abbreviation: "BK", authors: ["A", "B"], version: "1.0" }] })).toEqual({ sources: ["Book (BK) — A, B v1.0"], edition: "класична 5e" });
     expect(describeRulesPatch({ classes: { enabled: true } })).toBe("увімкнути режим класів 5e");
     expect(describeRulesPatch(undefined)).toBe("немає");
+    expect(describeRulesPatch({ classes: { enabled: true }, conditions: { custom: [{}, {}] } })).toBe("увімкнути режим класів 5e; власні стани з книги: 2");
     expect(summaryLines({ choices: [1], skills: [1, 2], tools: [], originFeat: [{ name: "Gift" }] }).join("|")).toContain("Origin feat: «Gift»");
   });
 

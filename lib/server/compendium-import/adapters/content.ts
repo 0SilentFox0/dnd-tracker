@@ -1,6 +1,7 @@
 import { renderEntries } from "../entries";
 import { nestedId, stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
+import { customConditionKeys } from "./custom-conditions";
 import { EFFECT_FIELDS, itemEffects } from "./item-effects";
 import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./monster-attacks";
 import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
@@ -31,7 +32,7 @@ export const spell: Adapter = (row, ctx) => {
 
   const text = renderEntries(row.entries, `${ctx.path}.entries`);
 
-  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast);
+  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast, customConditionKeys(ctx.root));
 
   const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
 

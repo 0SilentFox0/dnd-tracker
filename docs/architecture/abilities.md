@@ -37,3 +37,8 @@ Class/feat джерела копіювання підтримуються нас
 - **`dealDamage.byDistance`** — таблиця дальностей (`maxFeet` кратне 5, зростає), працює лише в заклинаннях (у вмінні без `spellRoll`-контексту береться `amount`).
 - **`modifyStat.atLeast`** — нижня межа стату; окрім характеристик (`build/bake.ts`) діє для `armor` і `speed` (до 120) з тривалістю: `collectModifiers` повертає максимум `atLeast`, `statWithModifiers` його застосовує.
 - **`damageBonus.flat: { spellRoll: ±N }`** — відсоток від кидка заклинання (наприклад −100 = мінус кидок); лише в ефектах заклинань (`validateAbilities` відхиляє у вміннях), `freezeSpellRoll` підставляє кидок перед застосуванням.
+
+## Spell engine coverage (P2)
+
+- **`applyCondition.condition`** — 5e-ключ, маркер із `CONDITION_KEYS` або власний `custom:<slug>` (`CUSTOM_CONDITION_KEY_RE`, `isCustomConditionKey`); визначення живе в `rules.conditions.custom`, розібрані правила спільні (`parseRulesCached`) — не мутувати. `abilityEffects` власного стану — `StaticEffectSchema` (`modifyStat`/`damageBonus`/`flag`). `AnyConditionKey` не розширено: `conditionImmunity` і умови вмінь власних ключів не бачать.
+- Маркери `no_hostile_spells` і `no_damage_dealt` читаються через `hasEffectMarker` (це не модифікатори, `collectModifiers` їх не повертає); докладно — [battle.md](battle.md).
