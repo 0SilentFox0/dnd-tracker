@@ -1,0 +1,10 @@
+{
+  "kinds": {
+    "option": "Options",
+    "feat": "Feat",
+    "skill": "Skills",
+    "expertise": "Expertise",
+    "abilityScore": "Ability score improvement",
+    "spell": "Spell"
+  }
+}

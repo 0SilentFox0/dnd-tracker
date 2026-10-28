@@ -441,5 +441,9 @@
   "safeFetchFailed": "Could not download the image",
   "slideImageFailed": "Slide {index}: {detail}",
   "battleCasterArmorNotProficient": "Armor or shield without proficiency: the caster cannot cast",
-  "multiclassRequirement": "Multiclassing: class \"{name}\" requires at least 13 in its key ability"
+  "multiclassRequirement": "Multiclassing: class \"{name}\" requires at least 13 in its key ability",
+  "backgroundOriginFeatInvalid": "The background's origin feat must be an origin feat of this campaign",
+  "backgroundSpellUnknown": "The background references an unknown spell",
+  "artifactSetMembersInvalid": "All artifacts must belong to this campaign and exist in the database.",
+  "trackFileDeleteFailed": "Failed to delete the music file"
 }

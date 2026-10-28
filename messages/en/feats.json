@@ -1,0 +1,8 @@
+{
+  "types": {
+    "origin": "Origin",
+    "general": "General",
+    "fightingStyle": "Fighting Style",
+    "epicBoon": "Epic Boon"
+  }
+}

@@ -178,5 +178,43 @@
       "artifacts": "Artifact",
       "sets": "Set"
     }
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "create": "Create",
+    "creating": "Creating...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "back": "Back"
+  },
+  "form": {
+    "nameRequired": "Enter a name",
+    "createFailed": "Failed to create",
+    "updateFailed": "Failed to update",
+    "saveFailed": "Failed to save"
+  },
+  "dndSkills": {
+    "acrobatics": "Acrobatics",
+    "animalHandling": "Animal Handling",
+    "arcana": "Arcana",
+    "athletics": "Athletics",
+    "deception": "Deception",
+    "history": "History",
+    "insight": "Insight",
+    "intimidation": "Intimidation",
+    "investigation": "Investigation",
+    "medicine": "Medicine",
+    "nature": "Nature",
+    "perception": "Perception",
+    "performance": "Performance",
+    "persuasion": "Persuasion",
+    "religion": "Religion",
+    "sleightOfHand": "Sleight of Hand",
+    "stealth": "Stealth",
+    "survival": "Survival"
   }
 }

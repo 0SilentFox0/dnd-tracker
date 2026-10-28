@@ -1,0 +1,14 @@
+{
+  "mainSkills": {
+    "roles": {
+      "attack": "Напад",
+      "ranged": "Стрільба",
+      "defense": "Захист",
+      "magic": "Магія",
+      "leadership": "Лідерство",
+      "race": "Раса",
+      "ultimate": "Ультимат",
+      "personal": "Персональні"
+    }
+  }
+}

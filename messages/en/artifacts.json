@@ -1,0 +1,21 @@
+{
+  "rarity": {
+    "common": "Common",
+    "uncommon": "Uncommon",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "slots": {
+    "weapon": "Weapon",
+    "range_weapon": "Ranged weapon",
+    "shield": "Shield",
+    "cloak": "Cloak",
+    "ring": "Ring",
+    "helmet": "Helmet",
+    "amulet": "Amulet",
+    "armor": "Armor",
+    "boots": "Boots",
+    "item": "Artifact"
+  }
+}

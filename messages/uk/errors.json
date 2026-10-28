@@ -441,5 +441,9 @@
   "safeFetchFailed": "Не вдалося завантажити зображення",
   "slideImageFailed": "Слайд {index}: {detail}",
   "battleCasterArmorNotProficient": "Броня чи щит без володіння: кастер не може чаклувати",
-  "multiclassRequirement": "Мультиклас: для класу «{name}» потрібно мінімум 13 у ключовій характеристиці"
+  "multiclassRequirement": "Мультиклас: для класу «{name}» потрібно мінімум 13 у ключовій характеристиці",
+  "backgroundOriginFeatInvalid": "Риса походження передісторії має бути origin-рисою цієї кампанії",
+  "backgroundSpellUnknown": "Передісторія посилається на невідоме заклинання",
+  "artifactSetMembersInvalid": "Усі артефакти мають належати цій кампанії та існувати в базі.",
+  "trackFileDeleteFailed": "Не вдалося видалити файл музики"
 }

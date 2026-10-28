@@ -1,0 +1,14 @@
+{
+  "mainSkills": {
+    "roles": {
+      "attack": "Attack",
+      "ranged": "Ranged",
+      "defense": "Defense",
+      "magic": "Magic",
+      "leadership": "Leadership",
+      "race": "Race",
+      "ultimate": "Ultimate",
+      "personal": "Personal"
+    }
+  }
+}

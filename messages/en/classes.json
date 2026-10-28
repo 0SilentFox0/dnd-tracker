@@ -1,0 +1,9 @@
+{
+  "casters": {
+    "none": "Non-caster",
+    "full": "Full caster",
+    "half": "Half caster",
+    "third": "Third caster",
+    "pact": "Pact"
+  }
+}
