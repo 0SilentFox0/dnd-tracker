@@ -54,6 +54,9 @@ export function DmNextSteps({ campaignId, data }: { campaignId: string; data: Dm
               <Link href={`${base}/dm/show`}>Показ</Link>
             </Button>
             <Button asChild variant="outline">
+              <Link href={`${base}/dm/world`}>Глобальна карта</Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link href={`${base}/dm/music`}>Музика</Link>
             </Button>
           </div>
