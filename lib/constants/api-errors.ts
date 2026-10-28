@@ -108,5 +108,11 @@ export const API_ERRORS = {
   WORLD_MARKERS_LIMIT: "Забагато маркерів на карті",
   WORLD_IMAGE_FOREIGN: "Картинка карти має бути завантажена у сховище цієї кампанії",
   WORLD_POLYGON_INVALID: "Контур можна задати лише для зони",
+  WORLD_HERO_INVALID: "Героя не можна поставити на карту",
+  WORLD_NOTE_FORBIDDEN: "Немає доступу до цієї нотатки",
+  WORLD_NOTE_NOT_FOUND: "Нотатку не знайдено",
+  WORLD_NOT_NESTED: "Ця карта не вкладена — виходити нікуди",
+  WORLD_MARKER_NO_CHILD: "У маркера немає вкладеної карти",
+  WORLD_AS_HERO_DM_ONLY: "Дивитися очима героя може лише DM",
   AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;

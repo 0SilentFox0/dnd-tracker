@@ -62,3 +62,60 @@ export type WorldUploadRequest = { size: number; contentType: "image/webp" | "im
 
 export type RevealShape = { t: "p"; x: number; y: number } | { t: "s"; x1: number; y1: number; x2: number; y2: number };
 export type TravelRest = "none" | "short" | "long";
+
+export interface WorldHero {
+  id: string;
+  name: string;
+  avatar: string | null;
+  mapId: string;
+  x: number;
+  y: number;
+  own: boolean;
+}
+
+export interface WorldNote {
+  id: string;
+  markerId: string;
+  authorUserId: string;
+  authorName: string;
+  characterId: string | null;
+  visibility: "public" | "private";
+  text: string;
+  mine: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorldView {
+  map: WorldMap;
+  markers: WorldMarker[];
+  heroes: WorldHero[];
+  reveals: RevealShape[];
+  maps: WorldMapSummary[];
+  notes: WorldNote[];
+  fog: boolean;
+}
+
+export interface HeroPosition {
+  characterId: string;
+  mapId: string;
+  x: number;
+  y: number;
+}
+
+export interface WorldTravelEntry {
+  id: string;
+  mapId: string;
+  mapName: string;
+  heroes: { id: string; name: string }[];
+  from: { mapId: string; x: number; y: number } | null;
+  to: { mapId: string; x: number; y: number };
+  toMarkerName: string | null;
+  rest: TravelRest;
+  createdAt: string;
+}
+
+export type TravelRequest = { mapId: string; characterIds: string[]; to: MapPoint; toMarkerId?: string; rest: TravelRest };
+export type EnterRequest = { markerId: string; characterIds: string[]; rest: TravelRest };
+export type ExitRequest = { mapId: string; characterIds: string[]; rest: TravelRest };
+export type CreateWorldNoteData = { markerId: string; text: string; visibility: "public" | "private"; characterId?: string };

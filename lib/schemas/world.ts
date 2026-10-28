@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  MAX_TRAVEL_HEROES,
   MAX_WORLD_MAP_BYTES,
   POLYGON_MAX_VERTICES,
   REVEAL_RADIUS_RANGE,
@@ -9,6 +10,7 @@ import {
   WORLD_MAP_UPLOAD_TYPES,
   WORLD_MARKER_ICONS,
   WORLD_NAME_MAX,
+  WORLD_NOTE_MAX,
 } from "@/lib/constants/world";
 
 const coord = z.number().min(0, "Координата поза межами карти").max(1, "Координата поза межами карти");
@@ -99,3 +101,42 @@ export const worldUploadRequestSchema = z.object({
 });
 
 export const worldDiscardUploadSchema = z.object({ imageUrl: z.string().url().max(2048) });
+
+const restSchema = z.enum(["none", "short", "long"]);
+
+const characterIds = z
+  .array(z.string().min(1))
+  .min(1, "Оберіть хоча б одного героя")
+  .max(MAX_TRAVEL_HEROES, `Забагато героїв (максимум ${MAX_TRAVEL_HEROES})`)
+  .refine((ids) => new Set(ids).size === ids.length, "Герої не мають повторюватися");
+
+export const travelSchema = z.object({
+  mapId: z.string().min(1),
+  characterIds,
+  to: z.object({ x: coord, y: coord }),
+  toMarkerId: z.string().min(1).optional(),
+  rest: restSchema,
+});
+
+export const enterSchema = z.object({ markerId: z.string().min(1), characterIds, rest: restSchema });
+
+export const exitSchema = z.object({ mapId: z.string().min(1), characterIds, rest: restSchema });
+
+const noteText = z.string().trim().min(1, "Нотатка порожня").max(WORLD_NOTE_MAX, `Нотатка — до ${WORLD_NOTE_MAX} символів`);
+
+const noteVisibility = z.enum(["public", "private"]);
+
+export const createWorldNoteSchema = z.object({
+  markerId: z.string().min(1),
+  text: noteText,
+  visibility: noteVisibility,
+  characterId: z.string().min(1).optional(),
+});
+
+export const updateWorldNoteSchema = z
+  .object({ text: noteText, visibility: noteVisibility })
+  .partial()
+  .strict()
+  .refine((o) => Object.keys(o).length > 0, "Немає полів для оновлення");
+
+export const worldViewQuerySchema = z.object({ mapId: z.string().min(1), asHeroId: z.string().min(1).optional() });
