@@ -40,6 +40,17 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits enemies adjacent to both attacker and target; the server rolls d20/damage for them (`attack-phase/targets.ts`).
 - **FX**: `originId` on a spec is where the projectile starts (chain jumps); secondary victims get a splash spec (`fx/impact.ts`); the queue is trimmed by whole actions. The result card lists every target (`view/volley-results.ts`).
 
+## Crit choice (DM-chosen critical effects)
+
+Campaign setting `critChoiceByDm` (off by default). Triggers: natural 20/1 on an attack and on a **target's saving throw** of a spell (`SAVE_SUCCESS_EFFECTS` / `SAVE_FAIL_EFFECTS` in `lib/constants/save-critical-effects.ts`; spells have no to-hit roll). With the setting off, every trigger gets a random effect (also for saves).
+
+- **Gate:** `attack-mutation` / `spell-mutation` run inside `runWithCritChoice` (`lib/utils/battle/crit-choice/`). All server rolls go through a seeded `rng` (`mulberry32`, `lib/utils/common/rng.ts`) and `CritPicker`; each trigger gets a stable `key` (`source:actor:target:n`) and always consumes exactly one `rng()`, so a replay with the same seed gives the same dice whatever is chosen.
+- **Pending:** setting on and triggers found → nothing is applied; `battle_scenes.pendingCritChoice` stores `{ action, actorId, triggers, request, seed }`, `version` grows, the response is `{ pendingCritChoice: true }` with no events. Previews / `dryRun` never create it. The same path serves the DM's own attacks.
+- **Projection:** clients only get `PendingCritChoice` (`toPublicPendingCrit`: no `request`/`seed`) on `BattleScene.pendingCritChoice` and in the delta scene.
+- **Resolve:** `POST …/crit-choice` (DM only, body `{ choices: Record<key, effectId | "random"> }`) replays the stored request with the stored seed and the choices, then clears pending.
+- **Guard:** while pending, every other mutation answers 422 `crit_pending` (`run-battle-mutation.ts`; only `crit-choice`, rollback and reset opt out). Rollback, reset, start and complete clear it. A DM who is offline stalls the battle — roll back or reset.
+- **Client:** `useCritChoiceDialog` + `CritChoiceDialog` (DM, `ResponsiveDialog hud`, not dismissible) and `CritChoiceWaitingBanner` (everyone else) are mounted in `BattleScreen`. The attack/spell wizards stay in `submitting` with `waitingCrit` (`WAIT_CRIT` in `attack-flow`/`spell-flow`) when the response is `pendingCritChoice`, and finish through the usual result path once `scene.pendingCritChoice` becomes null (new log entries since the pause are read via `readBattle`).
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

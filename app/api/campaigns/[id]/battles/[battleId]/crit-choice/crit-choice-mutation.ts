@@ -1,5 +1,5 @@
-import { attackMutation } from "../attack/attack-mutation";
 import type { AttackBody } from "../attack/attack-mutation";
+import { attackMutation } from "../attack/attack-mutation";
 import type { SpellRequestData } from "../spell/cast-spell-schema";
 import { createSpellMutation } from "../spell/spell-mutation";
 
