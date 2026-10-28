@@ -111,4 +111,10 @@ export const moraleCheckSchema = z.object({
   d10Roll: z.number().min(1).max(10),
 });
 
+export const critChoiceSchema = z.object({
+  choices: z.record(z.string(), z.union([z.number().int(), z.literal("random")])),
+});
+
+export type CritChoiceBody = z.infer<typeof critChoiceSchema>;
+
 export type MoraleCheckInput = z.infer<typeof moraleCheckSchema>;

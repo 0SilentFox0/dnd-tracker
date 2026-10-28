@@ -12,6 +12,7 @@ export async function POST(
     access: BattleAccess.DM,
     requireStatus: BattleStatus.ACTIVE,
     allowWhileAwaitingDm: true,
+    allowWhileCritPending: true,
     schema: completeBattleSchema,
     mutate: completeMutation,
   });
