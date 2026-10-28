@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { MARKER_ICON } from "@/components/world/marker-icons";
 import { DEFAULT_ZONE_COLOR, WORLD_DM_NOTE_MAX, WORLD_MARKER_ICONS, WORLD_NAME_MAX } from "@/lib/constants/world";
-import { useConfirm } from "@/lib/hooks/common";
+import { useRemoveMarker } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
 import type { UpdateWorldMarkerData, WorldMarker } from "@/types/world";
 
@@ -33,8 +33,6 @@ export function WorldMarkerPanel() {
 
 function MarkerForm({ marker }: { marker: WorldMarker }) {
   const { detail, editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
-
-  const confirm = useConfirm();
 
   const [name, setName] = useState(marker.name);
 
@@ -89,16 +87,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
     colorTimer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
   };
 
-  const remove = async () => {
-    const ok = await confirm({
-      title: `Видалити «${marker.name}»?`,
-      description: marker.childMapId ? "Разом із маркером буде видалено прив'язану карту та всі вкладені карти з їхніми маркерами й картинками." : "Маркер буде видалено.",
-      confirmLabel: "Видалити",
-      destructive: true,
-    });
-
-    if (ok && (await editor.marker.remove.mutateOk(marker.id))) select(null);
-  };
+  const remove = useRemoveMarker({ marker, editor, select });
 
   const redrawing = redrawId === marker.id;
 

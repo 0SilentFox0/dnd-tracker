@@ -16,7 +16,7 @@ const TOOLS: { key: WorldTool; label: string; hotkey: string; Icon: LucideIcon }
   { key: "entry", label: "Точка входу", hotkey: "E", Icon: LogIn },
 ];
 
-const BUTTON = "inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-transparent text-hud-ink transition-colors hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-transparent lg:size-10";
+const BUTTON = "inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10";
 
 function ToolButton({ label, hotkey, Icon, active, disabled, onClick }: { label: string; hotkey?: string; Icon: LucideIcon; active?: boolean; disabled?: boolean; onClick(): void }) {
   return (
@@ -43,7 +43,7 @@ export function WorldToolbar({ drawing, onSettings, children }: { drawing: Retur
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto rounded-md border border-hud-rule bg-black/75 p-1">
+      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto rounded-md border border-hud-rule bg-[rgba(17,14,11,.97)] p-1">
         {TOOLS.map(({ key, label, hotkey, Icon }) => (
           <ToolButton key={key} label={label} hotkey={hotkey} Icon={Icon} active={tool === key} onClick={() => setTool(key)} />
         ))}

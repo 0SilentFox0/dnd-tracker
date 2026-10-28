@@ -19,7 +19,7 @@ import { CompassRose } from "@/components/world/marker-icons";
 import { WorldMapView } from "@/components/world/WorldMapView";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
-import { useMapDrawing, useWorldEditor, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
+import { useMapDrawing, useRemoveMarker, useWorldEditor, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
 
@@ -79,6 +79,8 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
   });
 
   const { tool, setTool } = drawing;
+
+  useRemoveMarker({ marker: detail.data?.markers.find((m) => m.id === selectedId), editor, select, hotkey: tool === "select" });
 
   const closePanel = useCallback(() => {
     select(null);
