@@ -4,6 +4,8 @@ import { toImportRows } from "./data-files";
 import { type SpellRow, SRD_KINDS, type SrdData, type SrdKind } from "./types";
 
 import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import type { Translator } from "@/lib/i18n/translator";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { ImportReport } from "@/types/content-import";
 
@@ -90,12 +92,12 @@ export async function importSrdData(data: SrdData, run: RunImport, prepare?: Pre
 
 export const hasRowErrors = (results: SrdImportResult[]) => results.some((r) => r.report.counts.error > 0);
 
-export function formatImportSummary(results: SrdImportResult[]): string[] {
+export function formatImportSummary(results: SrdImportResult[], t?: Translator): string[] {
   return results.flatMap(({ kind, report: { counts, results: rows } }) => [
     `${kind}: created ${counts.created}, updated ${counts.updated}, skipped ${counts.skipped}, error ${counts.error}`,
     ...rows
       .filter((r) => r.status === "error")
       .slice(0, 10)
-      .map((r) => `  #${r.row} ${r.name ?? "?"}: ${r.issues.filter((i) => i.level === "error").map((i) => i.message).join("; ")}`),
+      .map((r) => `  #${r.row} ${r.name ?? "?"}: ${r.issues.filter((i) => i.level === "error").map((i) => (t ? translateIssue(t, i) : i.message)).join("; ")}`),
   ]);
 }

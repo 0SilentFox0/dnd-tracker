@@ -9,7 +9,9 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import { getTranslator, type Translator } from "@/lib/i18n/translator";
 
-export type ApiErrorInput = { error: string; issues?: unknown; params?: ErrorParams } & Record<string, unknown>;
+export type ApiErrorSource = { error: string; issues?: unknown; params?: ErrorParams };
+
+export type ApiErrorInput = ApiErrorSource & Record<string, unknown>;
 
 export type TranslatedIssue = Record<string, unknown> & { message: string; pathLabel?: string };
 
@@ -58,7 +60,7 @@ function translateParams(t: Translator, params: ErrorParams | undefined): ErrorP
   return Object.fromEntries(Object.entries(params).map(([name, value]) => [name, typeof value === "string" && t.has(value) ? t(value) : value]));
 }
 
-export function translateErrorBody(t: Translator, body: { error: string; issues?: unknown; params?: ErrorParams }): ApiErrorBody {
+export function translateErrorBody(t: Translator, body: ApiErrorSource): ApiErrorBody {
   const issues = body.issues === undefined ? {} : { issues: translateIssues(t, body.issues) };
 
   if (!t.has(body.error)) return { error: body.error, ...issues };
@@ -72,7 +74,7 @@ export async function requestTranslator(): Promise<Translator> {
   return getTranslator(await getRequestLocale().catch(() => DEFAULT_LOCALE));
 }
 
-async function translateInRequest(body: { error: string; issues?: unknown; params?: ErrorParams }): Promise<ApiErrorBody> {
+async function translateInRequest(body: ApiErrorSource): Promise<ApiErrorBody> {
   try {
     return translateErrorBody(await requestTranslator(), body);
   } catch {
@@ -81,8 +83,6 @@ async function translateInRequest(body: { error: string; issues?: unknown; param
 }
 
 export const API_ERROR_SOURCE = Symbol("apiErrorSource");
-
-export type ApiErrorSource = { error: string; issues?: unknown; params?: ErrorParams };
 
 export const apiErrorSourceOf = (response: Response): ApiErrorSource | undefined => (response as unknown as Record<symbol, ApiErrorSource | undefined>)[API_ERROR_SOURCE];
 
