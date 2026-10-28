@@ -114,10 +114,6 @@ export function SelectField({
           </>
         )}
       </SelectContent>
-      {/* Radix's hidden native select auto-picks its first option when value is "", so `required` never blocks submit */}
-      {required && !disabled && !displayValue && (
-        <input aria-hidden tabIndex={-1} required value="" onChange={() => {}} className="sr-only" />
-      )}
     </Select>
   );
 }

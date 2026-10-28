@@ -27,10 +27,9 @@ export async function GET(
 
     const campaign = await prisma.campaign.findUnique({
       where: { id },
-      select: {
+      include: {
         members: {
           where: { userId },
-          select: { userId: true },
         },
       },
     });

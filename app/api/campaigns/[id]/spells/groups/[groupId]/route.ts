@@ -38,6 +38,8 @@ export async function PATCH(
       where: { id: groupId },
       data: {
         name: data.name,
+        color: data.color,
+        icon: data.icon,
       },
     });
 

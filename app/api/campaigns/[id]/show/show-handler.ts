@@ -1,7 +1,6 @@
 import { after, NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
 import { showCommandSchema } from "@/lib/schemas/show";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
 import { loadShowDeck } from "@/lib/server/show/deck-store";
@@ -14,11 +13,7 @@ import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/uti
 import { applyShowCommand, showNeedsLibrary } from "@/lib/utils/show/show-command";
 import type { ShowCommand, ShowResponse, ShowState } from "@/types/show";
 
-function deckIdFor(cmd: ShowCommand, prev: ShowState | null): string | null {
-  if (cmd.action === "open" || cmd.action === "setCover") return cmd.deckId;
-
-  return cmd.action === "next" || cmd.action === "prev" ? (prev?.deckId ?? null) : null;
-}
+const deckIdFor = (cmd: ShowCommand, prev: ShowState | null) => (cmd.action === "open" ? cmd.deckId : cmd.action === "next" || cmd.action === "prev" ? prev?.deckId ?? null : null);
 
 export async function readShow(campaignId: string): Promise<NextResponse> {
   try {
@@ -52,13 +47,9 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     const deck = deckId ? await loadShowDeck(campaignId, deckId) : null;
 
-    const battle = cmd.action === "battle" ? await prisma.battleScene.findFirst({ where: { id: cmd.battleId, campaignId }, select: { id: true, name: true, status: true } }) : null;
-
-    if (cmd.action === "battle" && !battle) return errorResponse(API_ERRORS.NOT_FOUND, 404);
-
     const library = showNeedsLibrary(prev, cmd, deck) ? await loadAudioLibrary(campaignId) : [];
 
-    const result = applyShowCommand(prev, cmd, { now: Date.now(), deck, library, battle });
+    const result = applyShowCommand(prev, cmd, { now: Date.now(), deck, library });
 
     if (!result.ok) return errorResponse(result.message, 422);
 

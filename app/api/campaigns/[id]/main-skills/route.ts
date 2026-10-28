@@ -56,6 +56,7 @@ export async function POST(
         icon: data.icon || null,
         isEnableInSkillTree: data.isEnableInSkillTree ?? false,
         spellGroupId: data.spellGroupId || null,
+        role: data.role ?? null,
       },
     });
 

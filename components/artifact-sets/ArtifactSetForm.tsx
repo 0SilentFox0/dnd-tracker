@@ -102,10 +102,14 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
 
   return (
     <>
+      {editor.status.error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {editor.status.error}
+        </p>
+      )}
       <HudForm
         id="artifact-set-form"
         onSubmit={editor.actions.submit}
-        error={editor.status.error}
         tabs={tabs}
         actions={
           <>
@@ -117,7 +121,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
             <Button type="button" variant="outline" asChild>
               <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>Скасувати</Link>
             </Button>
-            <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
+            <Button type="submit" disabled={editor.status.isBusy || !data.name.trim() || !editor.abilities.valid}>
               {editor.status.isBusy ? "Збереження…" : withAbilityErrors(setId ? "Зберегти зміни" : "Створити сет", editor.abilities.errors)}
             </Button>
           </>

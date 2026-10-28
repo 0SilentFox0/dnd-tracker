@@ -28,6 +28,8 @@ export async function POST(
       data: {
         campaignId: id,
         name: data.name,
+        color: data.color ?? null,
+        icon: data.icon ?? null,
       },
     });
 

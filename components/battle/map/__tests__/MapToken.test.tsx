@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: true, userEnabled: true, motionAllowed: true, setEnabled: vi.fn() }) }));
@@ -7,7 +7,6 @@ vi.mock("@/components/battle/fx/auras/AuraCanvas", () => ({ AuraCanvas: ({ kinds
 vi.mock("@/components/battle/fx/frames/ImpactFrame", () => ({ ImpactFrame: ({ impact }: { impact: FxImpact }) => <i data-testid="impact-frame" data-element={impact.element} /> }));
 
 import { MapToken } from "@/components/battle/map/MapToken";
-import { fireFxImpact } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import type { ActiveEffect } from "@/types/battle";
@@ -18,23 +17,19 @@ const p = (hp: number) => {
   return { ...b, basicInfo: { ...b.basicInfo, id: "gob", name: "Гоблін" }, combatStats: { ...b.combatStats, currentHp: hp, maxHp: 30 } };
 };
 
-const fire: FxImpact = { element: "fire", kind: "damage", delayMs: 400, actionId: "map-a1", waitMs: 5000 };
+const fire: FxImpact = { element: "fire", kind: "damage", delayMs: 400 };
 
 const token = (hp: number, impact: FxImpact | null) => <MapToken participant={p(hp)} box={{ cx: 50, cy: 50, size: 100 }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={0.5} impact={impact} />;
 
 afterEach(cleanup);
 
 describe("MapToken hit fx", () => {
-  it("втрата HP з ударом: рамка удару, спалах на сигнал удару, якір FX на тій самій кнопці", async () => {
+  it("втрата HP з ударом: рамка удару, спалах із затримкою удару, якір FX на тій самій кнопці", async () => {
     const { rerender, container } = render(token(30, null));
 
     expect(screen.queryByTestId("impact-frame")).toBeNull();
 
     rerender(token(22, fire));
-
-    expect(container.querySelector("[data-map-token-flash]")).toBeNull();
-
-    act(() => fireFxImpact("map-a1"));
 
     const frame = await screen.findByTestId("impact-frame");
 
@@ -49,6 +44,7 @@ describe("MapToken hit fx", () => {
 
     expect(flash?.dataset.mapTokenFlash).toBe("damage");
     expect(flash?.className).toContain("animate-[hud-flash-red");
+    expect(flash?.style.animationDelay).toBe("400ms");
   });
 
   it("без удару (DOT, ручна зміна HP) — лише спалах, рамки немає", () => {

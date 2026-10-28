@@ -6,24 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { TRACK_TITLE_MAX } from "@/lib/constants/music";
-import { BATTLE_TRACK_GROUP, OTHER_TRACK_GROUP } from "@/lib/utils/audio/playlist-groups";
 import { buildTrackPatch, trackToDraft } from "@/lib/utils/audio/track-edit";
 import { trackLink } from "@/lib/utils/audio/track-link";
 import type { CampaignTrack, UpdateTrackData } from "@/types/audio";
 
 const FORM_ID = "edit-track";
 
-const GROUPS_ID = "edit-track-groups";
-
 export interface EditTrackDialogProps {
   track: CampaignTrack | null;
   onClose(): void;
   onSave(id: string, patch: UpdateTrackData): Promise<boolean>;
   pending: boolean;
-  groups: string[];
 }
 
-function EditTrackForm({ track, onClose, onSave, pending, groups }: EditTrackDialogProps & { track: CampaignTrack }) {
+function EditTrackForm({ track, onClose, onSave, pending }: EditTrackDialogProps & { track: CampaignTrack }) {
   const [draft, setDraft] = useState(() => trackToDraft(track));
 
   const built = buildTrackPatch(track, draft);
@@ -51,17 +47,9 @@ function EditTrackForm({ track, onClose, onSave, pending, groups }: EditTrackDia
         }}
       >
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
-          Група
-          <Input aria-label="Група" list={GROUPS_ID} placeholder={OTHER_TRACK_GROUP} maxLength={TRACK_TITLE_MAX} value={draft.group} onChange={(e) => setDraft({ ...draft, group: e.target.value })} />
-          <datalist id={GROUPS_ID}>
-            {groups.map((g) => <option key={g} value={g} />)}
-          </datalist>
-          <span>Оберіть наявну або введіть нову. Порожня — «{OTHER_TRACK_GROUP}». Усі «Раса - Битва N» показуються в групі «{BATTLE_TRACK_GROUP}».</span>
-        </label>
-        <label className="flex flex-col gap-1 text-xs text-hud-muted">
           Назва
-          <Input aria-label="Назва" maxLength={TRACK_TITLE_MAX} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-          {!built.ok && built.error.title && <span className="text-[var(--enemy)]">{built.error.title}</span>}
+          <Input aria-label="Назва" maxLength={TRACK_TITLE_MAX} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
+          <span>Група — частина до « - ». Усі «Раса - Битва N» потрапляють у групу «Битва».</span>
         </label>
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
           Посилання

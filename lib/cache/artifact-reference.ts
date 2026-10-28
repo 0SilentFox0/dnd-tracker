@@ -1,7 +1,6 @@
 import { artifactSlotLabel } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { normalizeStash } from "@/lib/utils/inventory/items";
 import type { ArtifactForReference, ArtifactSetForReference } from "@/types/info-reference";
 
 export interface ArtifactReference {
@@ -39,7 +38,7 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
     }),
     prisma.characterInventory.findMany({
       where: { character: { campaignId } },
-      select: { equipped: true, stash: true, character: { select: { name: true } } },
+      select: { equipped: true, character: { select: { name: true } } },
     }),
   ]);
 
@@ -49,8 +48,6 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
     for (const id of Object.values((inv.equipped as Record<string, string | undefined> | null) ?? {})) {
       if (id) holderById.set(id, inv.character.name);
     }
-
-    for (const id of normalizeStash(inv.stash)) holderById.set(id, inv.character.name);
   }
 
   return {

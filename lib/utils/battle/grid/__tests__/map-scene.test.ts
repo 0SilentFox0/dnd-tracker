@@ -228,7 +228,7 @@ describe("deriveMapScene: наведення шаблону", () => {
   it("без зони ходу й цілей; клітинка в дальності — aim, поза — reject «Поза дальністю»", () => {
     const s = deriveMapScene(input({ mode: { aim: aim() } }));
 
-    expect(new Set(s.view.marks?.values())).toEqual(new Set(["out-of-range"]));
+    expect([...(s.view.marks?.values() ?? [])]).toEqual([]);
     expect(s.aiming).toBe(true);
     expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
     expect(s.cellClick({ x: 4, y: 0 })).toEqual({ kind: "reject", reason: "Поза дальністю" });
@@ -256,19 +256,7 @@ describe("deriveMapScene: наведення шаблону", () => {
     expect(s.view.aim).toEqual({ x: 2, y: 2 });
     expect(s.view.marks?.get("2:2")).toBe("template");
     expect(s.view.marks?.get("3:2")).toBe("template");
-    expect(s.view.marks?.get("4:2")).toBe("out-of-range");
-  });
-
-  it("клітинки поза дальністю затемнені; конус і лінія без затемнення", () => {
-    const s = deriveMapScene(input({ mode: { aim: aim() } }));
-
-    expect(s.view.marks?.has("3:3")).toBe(false);
-    expect(s.view.marks?.get("4:0")).toBe("out-of-range");
-    expect(s.view.marks?.get("9:4")).toBe("out-of-range");
-
-    const cone = deriveMapScene(input({ mode: { aim: aim({ template: { shape: "cone", size: 15 } }) } }));
-
-    expect(cone.view.marks?.size).toBe(0);
+    expect(s.view.marks?.has("4:2")).toBe(false);
   });
 
   it("aimView: поза дальністю — null; конус без дальності — від заклинателя", () => {

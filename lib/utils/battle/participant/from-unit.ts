@@ -13,7 +13,6 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import type { BattleParticipant } from "@/types/battle";
-import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
 export async function createBattleParticipantFromUnit(
@@ -133,8 +132,7 @@ export async function createBattleParticipantFromUnit(
     },
     spellcasting: {
       spellcastingAbility: undefined,
-      // юніти без заклинальної характеристики: СК росте з тіром (level = тір)
-      spellSaveDC: 8 + unit.proficiencyBonus + unit.level,
+      spellSaveDC: undefined,
       spellAttackBonus: undefined,
       spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],
@@ -145,7 +143,7 @@ export async function createBattleParticipantFromUnit(
       equippedArtifacts: [],
       resolvedAbilities: [
         ...collectUnitAbilities(unit, race),
-        ...immunityAbilities(getUnitImmunities(unit as unknown as Unit, race as unknown as Race | null), { type: "unit", id: unit.id }),
+        ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
       ],
       abilityUsage: {},
       pendingExtraActions: 0,

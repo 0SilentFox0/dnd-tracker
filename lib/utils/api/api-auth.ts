@@ -77,13 +77,9 @@ export async function requireCampaignAccess(
 
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
-    select: {
-      id: true,
-      maxLevel: true,
-      allowPlayerEdit: true,
+    include: {
       members: {
         where: { userId },
-        select: { userId: true, role: true },
       },
     },
   });

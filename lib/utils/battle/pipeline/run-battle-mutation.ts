@@ -66,7 +66,6 @@ export interface PipelineDeps {
   loadBattle(args: { battleId: string; campaignId: string; userId: string }): Promise<(LoadedBattle & { isMember: boolean }) | null>;
   saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
   publish(messages: PusherMessage[]): void;
-  onLeftActive?(campaignId: string, battleId: string): void;
   loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
   loadKnowledge?(battleId: string): Promise<BattleKnowledge>;
   rng?: Rng;
@@ -330,8 +329,6 @@ export async function runBattleMutation<TBody>(
       knowledge,
       map: result.scene?.map,
     });
-
-    if (loaded.scene.status === BattleStatus.ACTIVE && after.status !== BattleStatus.ACTIVE) deps.onLeftActive?.(campaignId, battleId);
 
     deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));
 

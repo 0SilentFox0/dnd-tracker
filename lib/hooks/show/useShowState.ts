@@ -9,7 +9,7 @@ import { getShow } from "@/lib/api/show";
 import type { ShowSnapshot, ShowState } from "@/types/show";
 
 /** Сервер кладе стан у кеш через PrefetchedQuery; далі — Pusher і повторний GET після перепідписки. */
-export function useShowState(campaignId: string, enabled = true): { show: ShowState | null } {
+export function useShowState(campaignId: string): { show: ShowState | null } {
   const queryClient = useQueryClient();
 
   const { data } = useQuery<ShowSnapshot>({
@@ -19,7 +19,6 @@ export function useShowState(campaignId: string, enabled = true): { show: ShowSt
 
       return queryClient.getQueryData<ShowSnapshot>(showKeys.state(campaignId)) ?? { show: null, clockOffsetMs: null };
     },
-    enabled,
     staleTime: Infinity,
     // без Pusher стан не доходить подіями — повільний polling
     refetchInterval: process.env.NEXT_PUBLIC_PUSHER_KEY ? false : 30_000,

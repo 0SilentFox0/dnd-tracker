@@ -7,12 +7,10 @@ import { Images, Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { DeckCard } from "@/components/show/editor/DeckCard";
 import { NewDeckDialog } from "@/components/show/editor/NewDeckDialog";
 import { Button } from "@/components/ui/button";
 import { useNotify } from "@/lib/hooks/common";
-import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { SlideDeckSummary } from "@/types/show";
@@ -23,8 +21,6 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
   const notify = useNotify();
 
   const { data: decks = [] } = useDecks(campaignId, { initial: initialDecks });
-
-  const { data: pages = [] } = useScenarioPages(campaignId);
 
   const mutations = useDeckMutations(campaignId);
 
@@ -55,7 +51,6 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
           </>
         }
       />
-      <OnboardingHint id="dm.show" />
       {decks.length === 0 ? (
         <EmptyState icon={Images} title="Ще немає наборів" description="Створіть набір слайдів із картинок і музики та покажіть його гравцям." />
       ) : (
@@ -67,7 +62,6 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
               href={`${base}/dm/show/${deck.id}`}
               actions={{ start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) }}
               pending={mutations.pending || control.pending}
-              scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
             />
           ))}
         </div>

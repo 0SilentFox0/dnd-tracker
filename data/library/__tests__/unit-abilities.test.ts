@@ -11,7 +11,6 @@ const SAMPLES: Record<string, Ability[]> = {
   unlimitedRetaliation: [catalog.unlimitedRetaliation()],
   extraRetaliations: [catalog.extraRetaliations(), catalog.extraRetaliations(2)],
   falloff: [catalog.falloff("Залп")],
-  chainShot: [catalog.chainShot("Ланцюговий постріл"), catalog.chainShot("Блискавка", 3, 70)],
   doubleStrike: [catalog.doubleStrike("Подвійний удар", 30)],
   firstStrike: [catalog.firstStrike("Таран"), catalog.firstStrike("Засідка", 75)],
   deathBlow: [catalog.deathBlow("Точний постріл", 25)],

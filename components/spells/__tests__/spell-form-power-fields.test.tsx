@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 const form = (targeting: SpellFormData["targeting"]): SpellFormData => ({
   name: "Ланцюгова блискавка", level: 4, groupId: null, icon: null, description: null, appearanceDescription: null, cost: "action", dice: 2,
-  targeting, resolution: { kind: "auto" }, spellEffects: [], raceModifiers: [], stackable: false, maxStacks: null,
+  targeting, resolution: { kind: "auto" }, spellEffects: [], raceModifiers: [], stackable: false, maxStacks: null, fx: {},
 });
 
 describe("SpellFormPowerFields: ланцюг", () => {

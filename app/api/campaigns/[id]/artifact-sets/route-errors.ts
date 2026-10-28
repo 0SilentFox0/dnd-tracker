@@ -1,20 +1,18 @@
-import type { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SyncArtifactSetError } from "@/lib/server/artifacts/sync-artifact-set-members";
-import { errorResponse } from "@/lib/utils/api/api-response";
 
 /** Відповідь 400 для відомих помилок валідації / синхронізації сету. */
 export function toArtifactSetErrorResponse(
   error: unknown,
 ): NextResponse | null {
   if (error instanceof z.ZodError) {
-    return errorResponse(API_ERRORS.INVALID_BODY, 400, error.issues);
+    return NextResponse.json({ error: error.issues }, { status: 400 });
   }
 
   if (error instanceof SyncArtifactSetError) {
-    return errorResponse(error.message, 400);
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
   return null;

@@ -42,18 +42,17 @@ describe("refreshFromSource", () => {
     expect(out.battleData.damageMultiplier).toBe(1.2);
   });
 
-  it("takes grid size and speed from the library, keeps live morale", () => {
-    const base = makeParticipant({ id: "p", hp: 7 });
-
-    const live = { ...base, combatStats: { ...base.combatStats, speed: 30, morale: 3 } };
+  it("takes grid size from the library (battles started before units got gridSize)", () => {
+    const live = makeParticipant({ id: "p", hp: 7 });
 
     const fresh = makeParticipant({ id: "p", hp: 99 });
 
-    fresh.combatStats = { ...fresh.combatStats, gridSize: 2, speed: 40, morale: 1 };
+    fresh.combatStats = { ...fresh.combatStats, gridSize: 2 };
 
     const out = refreshFromSource(live, fresh);
 
-    expect(out.combatStats).toMatchObject({ gridSize: 2, speed: 40, morale: 3, currentHp: 7 });
+    expect(out.combatStats.gridSize).toBe(2);
+    expect(out.combatStats.currentHp).toBe(7);
   });
 
   describe("spell slots", () => {

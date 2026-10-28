@@ -1,3 +1,4 @@
+import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
 
 
@@ -31,6 +32,7 @@ export interface SpellForReference {
   appearanceDescription: string | null;
   groupName: string | null;
   icon: string | null;
+  fx?: SpellFx | null;
   rules?: SpellRules;
 }
 

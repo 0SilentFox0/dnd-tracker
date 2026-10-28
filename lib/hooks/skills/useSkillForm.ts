@@ -42,13 +42,7 @@ export function useSkillForm(
   const submit = async (event: FormEvent) => {
     event.preventDefault();
 
-    if (!values.name.trim()) {
-      setError("Вкажіть назву");
-
-      return;
-    }
-
-    if (!validity.valid) return;
+    if (!values.name.trim() || !validity.valid) return;
 
     setError(null);
 
@@ -60,7 +54,7 @@ export function useSkillForm(
 
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, initialData ? "Помилка оновлення" : "Помилка створення"));
+      setError(abilitySaveError(err, "Помилка створення"));
     }
   };
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addRow, addSection, emptyContent, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import { addRow, addSection, emptyContent, moveRow, moveSection, removeRow, removeSection, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 
 describe("structure", () => {
   it("addSection додає розділ з одним порожнім рядком і унікальними id", () => {
@@ -38,22 +38,5 @@ describe("structure", () => {
     const story = { type: "doc" as const, content: [{ type: "paragraph" as const }] };
 
     expect(updateRow(c, sid, r1.id, { story }).sections[0].rows[0].story).toBe(story);
-  });
-
-  it("setRowSlide / setRowBattle ставлять і знімають прив'язку без зайвих ключів", () => {
-    const base = addSection(emptyContent(), "Р");
-
-    const sectionId = base.sections[0].id;
-
-    const rowId = base.sections[0].rows[0].id;
-
-    const bound = setRowBattle(setRowSlide(base, sectionId, rowId, { deckId: "d1", slideId: "s1" }), sectionId, rowId, "b1");
-
-    expect(bound.sections[0].rows[0]).toMatchObject({ slide: { deckId: "d1", slideId: "s1" }, battleId: "b1" });
-
-    const cleared = setRowBattle(setRowSlide(bound, sectionId, rowId, undefined), sectionId, rowId, undefined);
-
-    expect(cleared.sections[0].rows[0]).not.toHaveProperty("slide");
-    expect(cleared.sections[0].rows[0]).not.toHaveProperty("battleId");
   });
 });

@@ -134,7 +134,7 @@ export function unitRow(unit: LibraryUnit, maps: Pick<IdMaps, "groups" | "spells
     ...scores,
     armorClass: unit.ac,
     initiative: unit.initiative,
-    speed: unit.speed ?? 30,
+    speed: 30,
     maxHp: unit.hp,
     proficiencyBonus: proficiencyForTier(unit.tier),
     attacks: unit.attacks.map((a) => ({ name: a.name, type: a.type, attackBonus: weaponBonus(a.type), damageDice: a.dice, damageType: a.damageType, maxTargets: a.targets })),

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
@@ -85,6 +85,7 @@ export async function PATCH(
         raceModifiers: asJson(data.raceModifiers),
         stackable: data.stackable,
         maxStacks: data.stackable === false ? null : data.maxStacks,
+        fx: data.fx === null ? Prisma.DbNull : asJson(data.fx),
       },
       include: {
         spellGroup: true,

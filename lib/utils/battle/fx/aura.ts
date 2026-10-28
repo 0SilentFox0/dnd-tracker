@@ -1,5 +1,4 @@
 import { elementOf } from "./element";
-import { spellFx } from "./spells";
 import type { FxAuraKind, FxElement } from "./types";
 
 import type { ActiveEffect } from "@/types/battle";
@@ -46,7 +45,7 @@ const isShield = (effect: ActiveEffect) =>
 export function auraOf(effect: ActiveEffect): FxAuraKind | null {
   if (effect.permanent || effect.zone || effect.duration < 1) return null;
 
-  const named = spellFx(effect.name)?.aura;
+  const named = effect.fxAura;
 
   if (named) return named;
 

@@ -1,5 +1,4 @@
-export type { MagicMainSkillId } from "./dpr";
-export { getNonMagicBranchDpr, getSpellDprFromBranchLevels, MAGIC_MAIN_SKILL_IDS } from "./dpr";
+export { getNonMagicBranchDpr, getSpellDprFromBranchLevels } from "./dpr";
 export type {
   BalanceHint,
   BalanceHintChange,
@@ -15,7 +14,7 @@ export { buildPartyPower, computeFairScaling, effectiveUnit, heroMember, targetE
 export { armorFactors, hitChance } from "./hit-chance";
 export type { LiveScaleDirection } from "./live-scale";
 export { isLiveScalable, liveScaleEnemyUnits } from "./live-scale";
-export { isMagicMainSkill, magicMainSkillIds } from "./magic-school";
+export { magicMainSkillIds } from "./magic-school";
 export type { PickedEnemy, PickResult } from "./pick";
 export { pickEnemyRoster } from "./pick";
 export type { GetCharacterStatsParams, UnitStats } from "./stats";

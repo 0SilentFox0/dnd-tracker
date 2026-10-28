@@ -4,7 +4,6 @@ import { Dna, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
 import { RaceCard } from "@/components/races/RaceCard";
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,6 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
           </Button>
         }
       />
-      <OnboardingHint id="dm.races" />
 
       {list.isLoading && races.length === 0 ? (
         <LoadingState rows={6} label="Завантаження рас…" />
@@ -47,7 +45,6 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
         onOpenChange={list.createDialog.setOpen}
         campaignId={campaignId}
         onCreateRace={list.actions.createRace}
-        status={list.createDialog.status}
       />
     </HudPage>
   );

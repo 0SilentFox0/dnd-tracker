@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateScenarioPageDialog, ScenarioBook, ScenarioIndex, ScenarioSearch } from "@/components/scenario";
 import { Button } from "@/components/ui/button";
 import { useScenarioPageActions, useScenarioPages } from "@/lib/hooks/scenario";
@@ -24,7 +23,6 @@ export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaign
       <div className="sb-index">
         <h1>{campaignName}</h1>
         <p className="lead">Книга майстра: сцени для ведення, кожна на окремій сторінці.</p>
-        <OnboardingHint id="dm.scenario" className="my-3 text-left" />
         <div className="sb-tools">
           <ScenarioSearch campaignId={campaignId} />
           <Button onClick={() => setCreating(true)} className="gap-2">

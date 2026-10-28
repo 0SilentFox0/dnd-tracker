@@ -4,7 +4,6 @@ import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d6", damageType: "piercing" };
@@ -110,55 +109,14 @@ describe("multi-target advantage resolution", () => {
       expect(losses[1]).toBe(losses[2]);
       expect(r.allBattleActions.filter((e) => e.actionType === "attack").slice(1).every((e) => e.resultText.includes("кубики шкоди кинув сервер"))).toBe(true);
     });
-  });
 
-  it("melee cleave: player picks one, adjacent enemies get server-rolled strikes with falloff", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
+    it("without the flag melee is still one target", () => {
+      expect(() => run([sweeper(false), ...enemies()], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: [4, 4, 4] })).toThrow(/Забагато цілей/);
 
-    const falloff = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "multiTargetFalloff", percent: 50 }] });
+      const r = run([sweeper(false), ...enemies()], { targetId: "t1", attackRoll: 17, damageRolls: [4] });
 
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite], abilities: [falloff] });
-
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 }), placed("y", { at: { x: 6, y: 6 }, hp: 50 })];
-
-    const r = runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
-
-    const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
-
-    const dmg = (id: string) => attacks.flatMap((e) => e.hpChanges).filter((h) => h.participantId === id).reduce((s, h) => s + h.change, 0);
-
-    expect(attacks.map((e) => e.targets[0].participantId)).toEqual(["t", "x", "y"]);
-    expect(dmg("x")).toBeLessThanOrEqual(dmg("t"));
-    expect(dmg("y")).toBeLessThanOrEqual(dmg("t"));
-  });
-
-  it("melee cleave: server-rolled heads do not reuse the player's second die", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
-
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite] });
-
-    const hindered = (id: string, at: { x: number; y: number }) => placed(id, { at, hp: 50, abilities: [hindering] });
-
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), hindered("x", { x: 6, y: 4 }), hindered("y", { x: 6, y: 6 })];
-
-    const r = runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, disadvantageRoll: 1, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
-
-    const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
-
-    expect(attacks.map((e) => e.targets[0].participantId)).toEqual(["t", "x", "y"]);
-    expect(attacks.slice(1).map((e) => e.actionDetails.isHit)).toEqual([true, true]);
-  });
-
-  it("melee cleave on the map rejects a second chosen target", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
-
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite] });
-
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 })];
-
-    expect(() =>
-      runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t", "x"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() }),
-    ).toThrow("Забагато цілей. Максимум: 1");
+      expect(["t2", "t3"].every((id) => lost(r, id) === 0)).toBe(true);
+    });
   });
 
   it("a consumable advantage effect applies to the first target only and is spent", () => {

@@ -1,7 +1,5 @@
-import { diceThrowsOf } from "./dice/from-action";
+import { diceThrowOf } from "./dice/from-action";
 import { elementOf } from "./element";
-import { splashTargetIds } from "./impact";
-import { spellFx } from "./spells";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
@@ -37,7 +35,7 @@ function spellRules(action: BattleAction): { archetype: FxArchetype; element: Fx
 function spellArchetype(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
   const computed = spellRules(action);
 
-  const signature = spellFx(action.actionDetails.spellName);
+  const signature = action.actionDetails.spellFx;
 
   return { archetype: signature?.archetype ?? computed.archetype, element: signature?.element ?? computed.element };
 }
@@ -45,10 +43,10 @@ function spellArchetype(action: BattleAction): { archetype: FxArchetype; element
 function primary(action: BattleAction): FxSpec | null {
   const d = action.actionDetails;
 
-  const base = { key: `${action.id}:0`, actionId: action.id, actorId: action.actorId, actorSide: action.actorSide, targetIds: action.targets.map((t) => t.participantId), critical: d.isCritical === true };
+  const base = { key: `${action.id}:0`, actorId: action.actorId, actorSide: action.actorSide, targetIds: action.targets.map((t) => t.participantId), critical: d.isCritical === true };
 
   if (action.actionType === "attack" || action.actionType === "retaliation") {
-    return { ...base, archetype: d.attackKind === "ranged" ? "ranged" : "melee", element: elementOf(d.damageRolls?.[0]?.damageType, "physical"), hit: d.isHit !== false && d.isCriticalFail !== true, ...(d.chainFromId && { originId: d.chainFromId }) };
+    return { ...base, archetype: d.attackKind === "ranged" ? "ranged" : "melee", element: elementOf(d.damageRolls?.[0]?.damageType, "physical"), hit: d.isHit !== false && d.isCriticalFail !== true };
   }
 
   if (action.actionType === "spell") return { ...base, ...spellArchetype(action), hit: true, ...(d.aimCell && { at: d.aimCell }) };
@@ -61,15 +59,13 @@ export function mapAction(action: BattleAction): FxSpec[] {
 
   const main = primary(action);
 
-  const dice: FxSpec[] = diceThrowsOf(action).map((spec, i) => ({ key: `${action.id}:dice:${i}`, actionId: action.id, archetype: "dice", element: "arcane", actorId: action.actorId, actorSide: action.actorSide, targetIds: [], hit: true, critical: false, dice: spec }));
+  const throwSpec = diceThrowOf(action);
+
+  const dice: FxSpec[] = throwSpec ? [{ key: `${action.id}:dice`, archetype: "dice", element: "arcane", actorId: action.actorId, actorSide: action.actorSide, targetIds: [], hit: true, critical: false, dice: throwSpec }] : [];
 
   const deaths: FxSpec[] = action.hpChanges
     .filter((h) => h.oldHp > 0 && h.newHp <= 0)
-    .map((h) => ({ key: `${action.id}:death:${h.participantId}`, actionId: action.id, archetype: "death", element: "necrotic", actorId: action.actorId, actorSide: action.actorSide, targetIds: [h.participantId], hit: true, critical: false }));
+    .map((h) => ({ key: `${action.id}:death:${h.participantId}`, archetype: "death", element: "necrotic", actorId: action.actorId, actorSide: action.actorSide, targetIds: [h.participantId], hit: true, critical: false }));
 
-  const splashIds = splashTargetIds(action, main ?? undefined);
-
-  const splash: FxSpec[] = main && splashIds.length > 0 ? [{ ...main, key: `${action.id}:splash`, archetype: "ranged", targetIds: splashIds, originId: main.targetIds[0], critical: false }] : [];
-
-  return [...dice, ...(main ? [main] : []), ...splash, ...deaths];
+  return [...dice, ...(main ? [main] : []), ...deaths];
 }

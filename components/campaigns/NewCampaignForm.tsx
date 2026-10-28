@@ -12,7 +12,6 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCampaign } from "@/lib/hooks/campaigns";
 import { useNotify } from "@/lib/hooks/common";
-import { errorMessage } from "@/lib/utils/common/error-message";
 
 export function NewCampaignForm() {
   const notify = useNotify();
@@ -34,7 +33,7 @@ export function NewCampaignForm() {
     e.preventDefault();
     create.mutate(formData, {
       onSuccess: (campaign) => router.push(`/campaigns/${campaign.id}`),
-      onError: (e) => void notify(errorMessage(e, "Помилка при створенні кампанії")),
+      onError: () => void notify("Помилка при створенні кампанії"),
     });
   };
 
@@ -62,7 +61,6 @@ export function NewCampaignForm() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              maxLength={100}
               placeholder="Назва вашої кампанії"
             />
             <div>
@@ -88,7 +86,7 @@ export function NewCampaignForm() {
                 min="1"
                 max="30"
                 value={formData.maxLevel}
-                onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) || formData.maxLevel })}
+                onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) })}
               />
             </div>
             <div className="flex items-center space-x-2">

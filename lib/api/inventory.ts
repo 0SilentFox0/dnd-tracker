@@ -1,6 +1,5 @@
-import { campaignGet, campaignPatch, campaignPost } from "@/lib/api/client";
-import type { StashAction } from "@/lib/utils/inventory/stash-actions";
-import type { FreeArtifact, Inventory, InventoryFormData, InventoryLogEntry, StashView } from "@/types/inventory";
+import { campaignPatch, campaignPost } from "@/lib/api/client";
+import type { Inventory, InventoryFormData } from "@/types/inventory";
 
 /**
  * Оновлює інвентар персонажа
@@ -17,19 +16,5 @@ export async function updateInventory(
   );
 }
 
-export const transferArtifact = (campaignId: string, characterId: string, body: { toCharacterId: string; slot?: string; artifactId?: string }) =>
+export const transferArtifact = (campaignId: string, characterId: string, body: { slot: string; toCharacterId: string }) =>
   campaignPost<{ from: Inventory; to: Inventory }>(campaignId, `/characters/${characterId}/artifacts/transfer`, body);
-
-export const getStash = (campaignId: string, characterId: string) => campaignGet<StashView>(campaignId, `/characters/${characterId}/stash`);
-
-export const getFreeArtifacts = (campaignId: string, characterId: string) =>
-  campaignGet<FreeArtifact[]>(campaignId, `/characters/${characterId}/stash/free-artifacts`);
-
-export const postStashAction = (campaignId: string, characterId: string, action: StashAction) =>
-  campaignPost<StashView>(campaignId, `/characters/${characterId}/stash`, action);
-
-export const getInventoryLog = (campaignId: string, characterId: string, cursor?: string) =>
-  campaignGet<{ entries: InventoryLogEntry[]; nextCursor: string | null }>(
-    campaignId,
-    `/characters/${characterId}/stash/log${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
-  );

@@ -6,7 +6,6 @@ import { Printer, Wand2 } from "lucide-react";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
@@ -50,7 +49,6 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
           </>
         }
       />
-      <OnboardingHint id="dm.spells" />
 
       {list.isLoading && count === 0 ? (
         <LoadingState rows={6} label="Завантаження заклинань…" />

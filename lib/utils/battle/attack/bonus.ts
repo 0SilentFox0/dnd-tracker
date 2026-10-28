@@ -1,4 +1,3 @@
-import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -40,7 +39,6 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     collectModifiers(ps, pid, { flag }, extra).entries;
 
   const advantage = [
-    ...(attacker.abilities.race?.toLowerCase().includes("elf") && kind === AttackType.RANGED ? ["Ельфійське око"] : []),
     ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
   ];

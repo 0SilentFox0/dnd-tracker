@@ -16,6 +16,7 @@ import {
   removeSpellFromGroup,
   renameSpellGroup,
   updateSpell,
+  updateSpellGroup,
 } from "@/lib/api/spells";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
@@ -55,6 +56,21 @@ export function useRenameSpellGroup(campaignId: string) {
       renameSpellGroup(campaignId, data.groupId, data.name),
     invalidateKeys: [
       spellKeys.list(campaignId),
+      spellKeys.groups(campaignId),
+    ],
+  });
+}
+
+export function useUpdateSpellGroup(campaignId: string) {
+  return useCrudMutation({
+    mutationFn: (data: { groupId: string; name?: string; color?: string | null; icon?: string | null }) => {
+      const { groupId, ...patch } = data;
+
+      return updateSpellGroup(campaignId, groupId, patch);
+    },
+    invalidateKeys: [
+      spellKeys.list(campaignId),
+      spellKeys.byIds(campaignId, ""),
       spellKeys.groups(campaignId),
     ],
   });

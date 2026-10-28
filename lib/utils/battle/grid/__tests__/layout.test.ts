@@ -80,18 +80,6 @@ describe("fitMapView", () => {
   it("порожній контейнер — без повороту", () => {
     expect(fitMapView({ width: 0, height: 0 }, wide, { rotatable: true })).toEqual({ width: 0, height: 0, rotated: false });
   });
-
-  it("minCell: дрібні клітинки — рамка росте до мінімальної клітинки зі збереженням пропорцій", () => {
-    expect(fitMapView({ width: 300, height: 200 }, wide, { minCell: 32 })).toEqual({ width: 640, height: 384, rotated: false });
-  });
-
-  it("minCell: клітинки й так достатні — рамка не змінюється", () => {
-    expect(fitMapView({ width: 1000, height: 600 }, wide, { minCell: 32 })).toEqual({ width: 1000, height: 600, rotated: false });
-  });
-
-  it("minCell: порожній контейнер не роздувається", () => {
-    expect(fitMapView({ width: 0, height: 0 }, wide, { minCell: 32 })).toEqual({ width: 0, height: 0, rotated: false });
-  });
 });
 
 describe("cellAtScreenPoint", () => {

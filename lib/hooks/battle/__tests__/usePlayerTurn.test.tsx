@@ -2,13 +2,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { moraleDiceDone } from "../morale-dice";
 import { usePlayerTurn } from "../usePlayerTurn";
 import { fakeScene } from "./fake-scene";
-
-const fx = vi.hoisted(() => ({ enabled: false }));
-
-vi.mock("../useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: fx.enabled }) }));
 
 describe("usePlayerTurn", () => {
   it("мораль ≠ 0 — фаза morale; «додатковий хід» → оверлей і дії", async () => {
@@ -23,29 +18,6 @@ describe("usePlayerTurn", () => {
     expect(moraleCheck).toHaveBeenCalledWith({ participantId: me.basicInfo.id, d10Roll: 9 });
     expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "morale-extra", d10: 9 }));
     expect(result.current.phase).toBe("acting");
-  });
-
-  it("з FX оверлей моралі чекає, поки ляже кубик d10", async () => {
-    fx.enabled = true;
-
-    const { me, wrapper, showResult } = fakeScene({ morale: 2 });
-
-    const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
-
-    let rolled: Promise<void> | undefined;
-
-    await act(async () => {
-      rolled = result.current.actions.rollMorale(9);
-    });
-    expect(result.current.phase).toBe("acting");
-    expect(showResult).not.toHaveBeenCalled();
-
-    await act(async () => {
-      moraleDiceDone();
-      await rolled;
-    });
-    expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "morale-extra", d10: 9 }));
-    fx.enabled = false;
   });
 
   it("після вичерпаної дії — відлік; «Залишитись» — назад до дій", () => {

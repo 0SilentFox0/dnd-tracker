@@ -44,7 +44,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     chapters,
     character,
     raceIcon: race?.icon ?? null,
-    immunities: getCharacterImmunities(character, race as never),
+    immunities: getCharacterImmunities(character),
     artifacts,
     spells,
     personalSkill: personal ? { id: personal.id, name: personal.name, icon: personal.icon, description: personal.description } : null,

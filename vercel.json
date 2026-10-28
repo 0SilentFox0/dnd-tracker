@@ -2,8 +2,5 @@
   "buildCommand": "node scripts/vercel-build.mjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
-  "regions": ["fra1"],
-  "functions": {
-    "app/api/campaigns/[id]/ai/threads/[threadId]/chat/route.ts": { "supportsCancellation": true }
-  }
+  "regions": ["fra1"]
 }

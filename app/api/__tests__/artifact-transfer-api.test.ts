@@ -9,7 +9,6 @@ vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), req
 
 const tx = vi.hoisted(() => ({
   $executeRaw: vi.fn(),
-  inventoryLog: { createMany: vi.fn() },
   characterInventory: { upsert: vi.fn(), update: vi.fn(), create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
 }));
 
@@ -24,8 +23,6 @@ vi.mock("@/lib/db", () => ({
 const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", members: [{ userId, role }] } }) as never;
 
 const params = { params: Promise.resolve({ id: "camp", characterId: "a" }) };
-
-const stashes: Record<string, string[]> = {};
 
 const post = async (body: unknown) => {
   const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/artifacts/transfer/route");
@@ -46,8 +43,6 @@ describe("artifact transfer API", () => {
     vi.clearAllMocks();
     inventories.a = { helmet: "h1" };
     inventories.b = {};
-    stashes.a = [];
-    stashes.b = [];
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
     vi.mocked(apiAuth.requireDM).mockResolvedValue(access("dm", "dm"));
     vi.mocked(prisma.character.findUnique).mockImplementation((async ({ where }: { where: { id: string } }) => {
@@ -59,8 +54,8 @@ describe("artifact transfer API", () => {
 
       return null;
     }) as never);
-    tx.characterInventory.upsert.mockImplementation(async ({ where }: { where: { characterId: string } }) => ({ characterId: where.characterId, equipped: inventories[where.characterId] ?? {}, stash: stashes[where.characterId] ?? [] }));
-    tx.characterInventory.update.mockImplementation(async ({ where, data }: { where: { characterId: string }; data: { equipped?: unknown } }) => ({ characterId: where.characterId, ...data }));
+    tx.characterInventory.upsert.mockImplementation(async ({ where }: { where: { characterId: string } }) => ({ characterId: where.characterId, equipped: inventories[where.characterId] ?? {} }));
+    tx.characterInventory.update.mockImplementation(async ({ where, data }: { where: { characterId: string }; data: { equipped: unknown } }) => ({ characterId: where.characterId, equipped: data.equipped }));
     tx.characterInventory.create.mockImplementation(async ({ data }: { data: unknown }) => data);
     tx.characterInventory.findMany.mockResolvedValue([]);
   });
@@ -70,28 +65,8 @@ describe("artifact transfer API", () => {
 
     expect(res.status).toBe(200);
     expect(tx.$executeRaw).toHaveBeenCalled();
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: {}, stash: [] } });
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["h1"] } });
-    expect(tx.inventoryLog.createMany).toHaveBeenCalled();
-  });
-
-  it("передача з власного сховку за artifactId", async () => {
-    stashes.a = ["s1", "s2"];
-
-    expect((await post({ artifactId: "s1", toCharacterId: "b" })).status).toBe(200);
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: { helmet: "h1" }, stash: ["s2"] } });
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["s1"] } });
-  });
-
-  it("артефакта немає в сховку — 400", async () => {
-    const res = await post({ artifactId: "nope", toCharacterId: "b" });
-
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_NOT_IN_STASH);
-  });
-
-  it("slot і artifactId разом — 400", async () => {
-    expect((await post({ slot: "helmet", artifactId: "s1", toCharacterId: "b" })).status).toBe(400);
+    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: {} } });
+    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { equipped: { helmet: "h1" } } });
   });
 
   it("гравець-власник передає свій артефакт", async () => {
@@ -125,11 +100,12 @@ describe("artifact transfer API", () => {
     expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_SLOT_EMPTY);
   });
 
-  it("зайнятий слот одержувача не чіпається — артефакт іде в сховок", async () => {
+  it("зайнятий слот — обмін", async () => {
     inventories.b = { helmet: "h2" };
 
     expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(200);
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["h1"] } });
+    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: { helmet: "h2" } } });
+    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { equipped: { helmet: "h1" } } });
   });
 
   it("невалідне тіло — 400", async () => {
@@ -173,7 +149,7 @@ describe("PATCH inventory — унікальність артефакта", () =
 
     expect(res.status).toBe(200);
     expect(tx.characterInventory.findUnique).toHaveBeenCalledWith({ where: { characterId: "a" } });
-    expect(tx.characterInventory.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { equipped: { helmet: "h1", cape: "c1" }, stash: [] } }));
+    expect(tx.characterInventory.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { equipped: { helmet: "h1", cape: "c1" } } }));
   });
 
   it("equipSlot з artifactId, уже в іншому слоті цього героя — 409", async () => {

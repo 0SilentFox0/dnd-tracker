@@ -6,7 +6,6 @@ import type { FxImpact } from "@/lib/utils/battle/fx";
 
 export interface HpChange {
   delta: number;
-  hp: number;
   id: number;
   impact: FxImpact | null;
 }
@@ -19,7 +18,7 @@ export function useHpChange(hp: number, impact: FxImpact | null = null): HpChang
 
   if (hp !== prev) {
     setPrev(hp);
-    setChange({ delta: hp - prev, hp, id: (change?.id ?? 0) + 1, impact });
+    setChange({ delta: hp - prev, id: (change?.id ?? 0) + 1, impact });
   }
 
   return change;
@@ -33,9 +32,15 @@ export function useDamageShake<T extends HTMLElement>(change: HpChange | null) {
 
   const id = change && change.delta < 0 ? change.id : null;
 
+  const delayMs = change?.impact?.delayMs ?? 0;
+
   useEffect(() => {
-    if (id !== null) ref.current?.animate?.(SHAKE, { duration: 350 });
-  }, [id]);
+    if (id === null) return;
+
+    const timer = setTimeout(() => ref.current?.animate?.(SHAKE, { duration: 350 }), delayMs);
+
+    return () => clearTimeout(timer);
+  }, [id, delayMs]);
 
   return ref;
 }

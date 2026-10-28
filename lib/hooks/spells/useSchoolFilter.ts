@@ -10,7 +10,7 @@ export const ALL_SCHOOLS = "__all";
 export function useSchoolFilter(byLevel: Record<number, BookSpell[]>, level: number) {
   const [school, setSchool] = useState(ALL_SCHOOLS);
 
-  const schools = useMemo(() => groupSpellsBySchool(Object.values(byLevel).flat()).map((g) => g.name), [byLevel]);
+  const schools = useMemo(() => groupSpellsBySchool(Object.values(byLevel).flat()).map(({ name, color }) => ({ name, color })), [byLevel]);
 
   const groups = useMemo(() => groupSpellsBySchool(byLevel[level] ?? []), [byLevel, level]);
 

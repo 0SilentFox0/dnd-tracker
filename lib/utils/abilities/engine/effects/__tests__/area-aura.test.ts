@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { applyAuraZone, areaAuras, auraZoneEffect, pendingAreaAuras, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
+import { applyAuraZone, areaAuras, pendingAreaAuras, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
@@ -25,16 +25,6 @@ const setup = () => {
 const dead = (p: BattleParticipant): BattleParticipant => ({ ...p, combatStats: { ...p.combatStats, status: "dead" as const } });
 
 describe("аури в області", () => {
-  it("тип зони — за самими ефектами: шкідлива аура на союзників — дебафф, змішана — за метою", () => {
-    const owner = makeParticipant({ id: "o", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: -1, target: "nearbyAllies" }] }, { id: "curse" }), resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: -1, target: "nearbyAllies" }, { kind: "modifyStat", stat: "speed", flat: 10, target: "nearbyAllies" }] }, { id: "mixed" })] });
-
-    const [harmful, mixed] = areaAuras(owner);
-
-    expect(auraZoneEffect(owner, harmful, 1).type).toBe("debuff");
-    expect(auraZoneEffect(owner, mixed, 1).type).toBe("buff");
-    expect(auraZoneEffect(setup().nightmare, areaAuras(setup().nightmare)[0], 1).type).toBe("debuff");
-  });
-
   it("без вказаної зони аура не діє ні на кого", () => {
     const { ps } = setup();
 

@@ -19,10 +19,20 @@ interface UnitFormFieldsProps {
   abilityIssues?: ConversionIssue[];
 }
 
+export function UnitFormError({ error }: { error: Error | null }) {
+  if (!error) return null;
+
+  return (
+    <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
+      <strong>Помилка:</strong> {error.message || "Помилка"}
+    </p>
+  );
+}
+
 export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
   const { data: formData, change } = editor.form;
 
-  const { races, race, spells } = editor.options;
+  const { races, spells } = editor.options;
 
   return [
     {
@@ -50,7 +60,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <>
           <UnitAttacks formData={formData} onChange={change} />
-          <UnitImmunities formData={formData} race={race} onChange={change} />
+          <UnitImmunities formData={formData} onChange={change} />
         </>
       ),
     },

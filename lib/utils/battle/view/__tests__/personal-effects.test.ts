@@ -22,14 +22,6 @@ describe("personalPassiveEffects", () => {
     expect(personalPassiveEffects(foe, order)).toHaveLength(0);
   });
 
-  it("тип аури — за її ефектами: шкідлива аура на союзників показується як дебафф", () => {
-    const owner = makeParticipant({ id: "ow", abilities: [personal([{ kind: "modifyStat", stat: "speed", flat: -10, target: "allAllies" }], "slow")] });
-
-    const friend = makeParticipant({ id: "fr" });
-
-    expect(personalPassiveEffects(friend, [owner, friend])[0]).toMatchObject({ type: "debuff" });
-  });
-
   it("дедуп аур рахує силу лише по ефектах-аурах; власні ефекти лишаються окремим записом", () => {
     const mixed = (id: string, own: number) => makeParticipant({ id, abilities: [personal([{ kind: "modifyStat", stat: "armor", flat: own, target: "self" }, { kind: "modifyStat", stat: "armor", flat: 1, target: "allAllies" }], "shared")] });
 

@@ -6,7 +6,6 @@ import { Flame } from "lucide-react";
 import { WeatherLayer } from "./weather/WeatherLayer";
 import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
-import { MapHitFloat } from "./MapHitFloat";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
@@ -30,8 +29,6 @@ import {
   isFallen,
   isMoveMark,
   mapSize,
-  MIN_TAP_CELL_PX,
-  parseCellKey,
   playableBounds,
   tokenBox,
   UNIT,
@@ -87,8 +84,6 @@ function markFill(mark: MarkValue): string {
   if (mark === "pick") return "rgba(110,170,255,.3)";
 
   if (mark === "picked") return "rgba(240,200,70,.5)";
-
-  if (mark === "out-of-range") return "rgba(0,0,0,.45)";
 
   return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
 }
@@ -440,13 +435,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone, minCell: MIN_TAP_CELL_PX });
+  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone });
 
-  const scrollsX = fit.width > avail.width + 0.5;
-
-  const scrollsY = fit.height > avail.height + 0.5;
-
-  const scrolls = scrollsX || scrollsY;
+  const scrolls = phone && fit.height > avail.height + 0.5;
 
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || !!modeTools?.panLocked, wheelScrolls: scrolls });
 
@@ -458,11 +449,10 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const modeView = view?.mode;
 
-  // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
-  const placed = useMemo(
+  const tokens = useMemo(
     () =>
       participants
-        .filter((p) => !p.battleData.reserved)
+        .filter((p) => !p.battleData.reserved && !isFallen(p))
         .filter((p) => !modeView || (!isEscaped(p) && modeView.visibleIds.has(p.basicInfo.id)))
         .flatMap((p) => {
           const box = tokenBox(p);
@@ -471,8 +461,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
         }),
     [participants, modeView],
   );
-
-  const tokens = useMemo(() => placed.filter(({ p }) => !isFallen(p)), [placed]);
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
@@ -501,7 +489,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
   useEffect(() => {
     const outer = outerRef.current;
 
-    if (!currentId || !outer || !scrolls) return;
+    if (!phone || !currentId || !outer || outer.scrollHeight <= outer.clientHeight) return;
 
     const token = [...(containerRef.current?.querySelectorAll<HTMLElement>('[data-fx-anchor="map"]') ?? [])].find((el) => el.dataset.fxParticipant === currentId);
 
@@ -513,21 +501,16 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
     const dy = t.top < o.top ? t.top - o.top : t.bottom > o.bottom ? t.bottom - o.bottom : 0;
 
-    const dx = t.left < o.left ? t.left - o.left : t.right > o.right ? t.right - o.right : 0;
-
-    if (dy !== 0 || dx !== 0) outer.scrollBy({ top: dy, left: dx, behavior: "smooth" });
+    if (dy !== 0) outer.scrollBy({ top: dy, behavior: "smooth" });
     // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
-  }, [currentId, containerRef, scrolls]);
+  }, [phone, currentId, containerRef, scrolls]);
 
-  // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
-  const touch = scrolls && zoom === 1 && !painting ? cn(scrollsX && "touch-pan-x", scrollsY && "touch-pan-y") : "touch-none";
+  // свайп угору-вниз віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
+  const touch = phone && scrolls && zoom === 1 && !painting ? "touch-pan-y" : "touch-none";
 
   return (
-    // карта, більша за екран, прокручується; по центру вона обрізала б край без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
-    <div
-      ref={outerRef}
-      className={cn("flex h-full w-full", (phone || scrolls) && "overflow-auto", phone && "[scrollbar-gutter:stable]", scrollsX ? "justify-start" : "justify-center", scrollsY ? "items-start" : "items-center", className)}
-    >
+    // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
+    <div ref={outerRef} className={cn("flex h-full w-full justify-center", phone && "overflow-y-auto [scrollbar-gutter:stable]", scrolls ? "items-start" : "items-center", className)}>
     <div
       ref={containerRef}
       data-fx-clip
@@ -570,24 +553,14 @@ export function BattleMap({ map, participants, view, actions, className, editing
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">
-              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke={trajectory?.cover ? "#e0603a" : "#f2c14e"} strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
-              <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill={trajectory?.cover ? "#e0603a" : "#f2c14e"} />
-              {trajectory?.cover?.map((key) => {
-                const c = cellCenter(parseCellKey(key));
-
-                return <rect key={key} x={c.x - UNIT / 2} y={c.y - UNIT / 2} width={UNIT} height={UNIT} fill="rgba(224,96,58,.3)" stroke="#e0603a" strokeWidth={2} vectorEffect="non-scaling-stroke" />;
-              })}
-              {trajectory?.cover && (
-                <text x={end.x} y={end.y - UNIT * 0.45} textAnchor="middle" fontSize={UNIT * 0.32} fontWeight={700} fill="#ffd2b8" stroke="#3a1a10" strokeWidth={3} paintOrder="stroke">
-                  🧱 ×0.5
-                </text>
-              )}
+              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
+              <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill="#f2c14e" />
             </g>
           )}
         </svg>
         {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
         <div data-map-tokens className={cn(fit.rotated && "*:-rotate-90")} style={painting ? { opacity: 0.35 } : undefined}>
-        {placed.map(({ p, box }) => (
+        {tokens.map(({ p, box }) => (
           <MapToken
             key={p.basicInfo.id}
             participant={p}
@@ -604,7 +577,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             dormant={!!modeView?.showDormant && isDormant(p)}
           />
         ))}
-        {placed.map(({ p, box }) => {
+        {tokens.map(({ p, box }) => {
           const id = p.basicInfo.id;
 
           const hud = view?.hud?.get(id);
@@ -624,9 +597,6 @@ export function BattleMap({ map, participants, view, actions, className, editing
             />
           );
         })}
-        {placed.map(({ p, box }) => (
-          <MapHitFloat key={`float:${p.basicInfo.id}`} participant={p} box={box} mapSize={size} pxPerUnit={pxPerUnit} impact={view?.impactFor?.(p.basicInfo.id)} />
-        ))}
         </div>
       </div>
       </div>

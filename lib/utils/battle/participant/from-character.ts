@@ -90,7 +90,7 @@ export async function createBattleParticipantFromCharacter(
     artifacts: artifactRows.map(({ row, slot }) => ({ ...row, slot })),
     completedSets: completed.sets,
   }),
-    ...immunityAbilities(getCharacterImmunities(character, race as never), { type: "character", id: character.id }),
+    ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
   const participant: BattleParticipant = {

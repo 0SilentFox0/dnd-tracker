@@ -23,7 +23,7 @@ const artifact = { id: "h1", name: "Шолом Світла", slot: "helmet", ef
 const renderIt = () =>
   renderWithConfirm(
     <ProfileContext.Provider value={{ campaignId: "camp", characterId: "a", sheet: sheetFixture, canEdit: true }}>
-      <TransferArtifactDialog artifact={artifact} source={{ slot: "helmet" }} open onOpenChange={vi.fn()} />
+      <TransferArtifactDialog artifact={artifact} open onOpenChange={vi.fn()} />
     </ProfileContext.Provider>,
   );
 
@@ -40,7 +40,7 @@ describe("TransferArtifactDialog", () => {
     expect(screen.getByText("Боромир")).toBeTruthy();
     expect(screen.getByText("Гімлі")).toBeTruthy();
     expect(screen.queryByText("Ліра")).toBeNull();
-    expect(screen.getAllByText("у підсумок")).toHaveLength(2);
+    expect(screen.getByText("обмін на Шолом Ночі")).toBeTruthy();
   });
 
   it("клік і підтвердження викликає передачу", async () => {

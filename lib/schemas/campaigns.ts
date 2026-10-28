@@ -18,5 +18,5 @@ export const updateCampaignSchema = z.object({
 });
 
 export const joinCampaignSchema = z.object({
-  inviteCode: z.string().trim().min(1),
+  inviteCode: z.string().min(1),
 });

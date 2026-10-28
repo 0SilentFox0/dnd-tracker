@@ -3,14 +3,13 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
+import { Home, LogOut, Menu, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,17 +19,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
-import { useSessionEmail } from "@/lib/hooks/auth";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
-export function Header() {
+export function Header({ email }: { email: string | null }) {
   const pathname = usePathname();
 
-  const email = useSessionEmail();
-
   const signOutForm = useRef<HTMLFormElement>(null);
+
+  if (
+    pathname?.startsWith("/sign-in") ||
+    pathname?.startsWith("/sign-up") ||
+    pathname === "/"
+  ) {
+    return null;
+  }
 
   const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
@@ -96,6 +100,11 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/spell-groups`}>
+                        Школи магії
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/artifacts`}>
                         Артефакти
                       </Link>
@@ -120,11 +129,6 @@ export function Header() {
                         Сценарій
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/ai`}>
-                        AI і API
-                      </Link>
-                    </DropdownMenuItem>
                   </>
                 )}
                 {isPlayerPage && (
@@ -145,7 +149,6 @@ export function Header() {
         <div className="flex items-center gap-2">
           <JoinBattleButton />
           <WatchShowButton />
-          {email && <WhatsNewButton />}
           <AbbreviationsInfoDialog />
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">
@@ -168,24 +171,6 @@ export function Header() {
                   <DropdownMenuSeparator />
                 </>
               )}
-              <DropdownMenuItem asChild>
-                <Link href="/help">
-                  <CircleHelp className="h-4 w-4 mr-2" />
-                  Довідка
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/password">
-                  <KeyRound className="h-4 w-4 mr-2" />
-                  Пароль
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/ai">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI-ключі
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Вийти

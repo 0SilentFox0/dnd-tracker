@@ -1,67 +1,14 @@
-/** Код категорії (англ.) → назва базового навику в UI та БД */
-export const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
-  Attack: "Напад",
-  Ranged: "Стрільба",
-  Defense: "Захист",
-  MagicLight: "Магія Світла",
-  MagicDark: "Магія Темряви",
-  MagicChaos: "Магія Хаосу",
-  MagicSummon: "Магія Призиву",
-  Leadership: "Лідерство",
-  Race: "Раса",
-  Ultimate: "Ультимат",
-  Personal: "Персональні",
+export const MAIN_SKILL_ROLES = ["attack", "ranged", "defense", "magic", "leadership", "race", "ultimate", "personal"] as const;
+
+export type MainSkillRole = (typeof MAIN_SKILL_ROLES)[number];
+
+export const MAIN_SKILL_ROLE_LABELS: Record<MainSkillRole, string> = {
+  attack: "Напад",
+  ranged: "Стрільба",
+  defense: "Захист",
+  magic: "Магія",
+  leadership: "Лідерство",
+  race: "Раса",
+  ultimate: "Ультимат",
+  personal: "Персональні",
 };
-
-/** Аліаси (різні написання) → канонічна назва базового навику */
-const MAIN_SKILL_ALIASES: Record<string, string> = {
-  "Темна Магія": "Магія Темряви",
-  "Темна магія": "Магія Темряви",
-  "Темрява": "Магія Темряви",
-  "Світло": "Магія Світла",
-  "Хаос": "Магія Хаосу",
-  "Призив": "Магія Призиву",
-};
-
-/** Усі канонічні назви базових навиків (для валідації) */
-const MAIN_SKILL_NAMES = new Set([
-  ...Object.values(MAIN_SKILL_BY_CATEGORY),
-]);
-
-/**
- * Повертає канонічну назву базового навику за кодом категорії або аліасом.
- */
-export function getCanonicalMainSkillName(
-  categoryOrAlias: string,
-  mainSkillFromSkill?: string
-): string {
-  if (mainSkillFromSkill?.trim()) {
-    const alias = MAIN_SKILL_ALIASES[mainSkillFromSkill.trim()];
-
-    if (alias) return alias;
-
-    if (MAIN_SKILL_NAMES.has(mainSkillFromSkill.trim()))
-      return mainSkillFromSkill.trim();
-  }
-
-  const byCategory = MAIN_SKILL_BY_CATEGORY[categoryOrAlias];
-
-  if (byCategory) return byCategory;
-
-  const byAlias = MAIN_SKILL_ALIASES[categoryOrAlias];
-
-  if (byAlias) return byAlias;
-
-  return categoryOrAlias;
-}
-
-/** Усі варіанти назв для канонічної назви (сама назва + аліаси, що на неї вказують) */
-export function getMainSkillNameVariants(canonicalName: string): string[] {
-  const aliases = Object.entries(MAIN_SKILL_ALIASES)
-    .filter(([, v]) => v === canonicalName)
-    .map(([k]) => k);
-
-  return [canonicalName, ...aliases];
-}
-
-export const MAIN_SKILL_NAME_MAX = 100;

@@ -26,7 +26,7 @@ describe("CreateRaceDialog", () => {
     fireEvent.change(screen.getByLabelText(/Назва раси/), { target: { value: "Гном" } });
     fireEvent.click(screen.getByRole("button", { name: "Створити расу" }));
 
-    expect(onCreateRace).toHaveBeenCalledWith(expect.objectContaining({ name: "Гном" }), expect.any(Function));
+    expect(onCreateRace).toHaveBeenCalledWith(expect.objectContaining({ name: "Гном" }));
 
     if (mobile) expect(document.querySelector("[data-slot=sheet-footer]")).not.toBeNull();
   });

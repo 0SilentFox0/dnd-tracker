@@ -17,10 +17,6 @@ import { loadSkillsFromDoc } from "./import-skills-library-parse";
 import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
 
-import {
-  getCanonicalMainSkillName,
-  getMainSkillNameVariants,
-} from "@/lib/constants/main-skills";
 import { DEFAULT_CAMPAIGN_ID } from "@/scripts/shared/default-campaign";
 
 export { loadSkillsFromDoc, stripJsonComments } from "./import-skills-library-parse";
@@ -28,6 +24,72 @@ export { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
 export type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
 
 const prisma = new PrismaClient();
+
+/** Код категорії (англ.) → назва базового навику в UI та БД */
+const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
+  Attack: "Напад",
+  Ranged: "Стрільба",
+  Defense: "Захист",
+  MagicLight: "Магія Світла",
+  MagicDark: "Магія Темряви",
+  MagicChaos: "Магія Хаосу",
+  MagicSummon: "Магія Призиву",
+  Leadership: "Лідерство",
+  Race: "Раса",
+  Ultimate: "Ультимат",
+  Personal: "Персональні",
+};
+
+/** Аліаси (різні написання) → канонічна назва базового навику */
+const MAIN_SKILL_ALIASES: Record<string, string> = {
+  "Темна Магія": "Магія Темряви",
+  "Темна магія": "Магія Темряви",
+  "Темрява": "Магія Темряви",
+  "Світло": "Магія Світла",
+  "Хаос": "Магія Хаосу",
+  "Призив": "Магія Призиву",
+};
+
+/** Усі канонічні назви базових навиків (для валідації) */
+const MAIN_SKILL_NAMES = new Set([
+  ...Object.values(MAIN_SKILL_BY_CATEGORY),
+]);
+
+/**
+ * Повертає канонічну назву базового навику за кодом категорії або аліасом.
+ */
+function getCanonicalMainSkillName(
+  categoryOrAlias: string,
+  mainSkillFromSkill?: string
+): string {
+  if (mainSkillFromSkill?.trim()) {
+    const alias = MAIN_SKILL_ALIASES[mainSkillFromSkill.trim()];
+
+    if (alias) return alias;
+
+    if (MAIN_SKILL_NAMES.has(mainSkillFromSkill.trim()))
+      return mainSkillFromSkill.trim();
+  }
+
+  const byCategory = MAIN_SKILL_BY_CATEGORY[categoryOrAlias];
+
+  if (byCategory) return byCategory;
+
+  const byAlias = MAIN_SKILL_ALIASES[categoryOrAlias];
+
+  if (byAlias) return byAlias;
+
+  return categoryOrAlias;
+}
+
+/** Усі варіанти назв для канонічної назви (сама назва + аліаси, що на неї вказують) */
+function getMainSkillNameVariants(canonicalName: string): string[] {
+  const aliases = Object.entries(MAIN_SKILL_ALIASES)
+    .filter(([, v]) => v === canonicalName)
+    .map(([k]) => k);
+
+  return [canonicalName, ...aliases];
+}
 
 function effectsToBonuses(effects: LibraryEffect[]): Record<string, number> {
   const bonuses: Record<string, number> = {};

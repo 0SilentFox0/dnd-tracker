@@ -7,7 +7,6 @@ import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
-import { clearShowBattle } from "@/lib/server/show/show-store";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
 import {
   loadAllEvents,
@@ -28,9 +27,6 @@ export const defaultPipelineDeps: PipelineDeps = {
   saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
   loadRecentEvents: (battleId, limit) => loadRecentEvents(prisma, battleId, limit),
   loadKnowledge: async (battleId) => summarizeKnowledge(await loadKnowledgeEvents(prisma, battleId)),
-  onLeftActive(campaignId, battleId) {
-    after(() => clearShowBattle(campaignId, battleId));
-  },
   publish(messages) {
     after(() =>
       Promise.all(

@@ -34,8 +34,8 @@ describe("takeNewActions", () => {
   });
 
   it(`keeps only the newest ${MAX_FX_BATCH}`, () => {
-    const log = Array.from({ length: MAX_FX_BATCH + 4 }, (_, i) => at(i + 1));
+    const log = Array.from({ length: 10 }, (_, i) => at(i + 1));
 
-    expect(takeNewActions(log, 0).actions.map((a) => a.actionIndex)).toEqual(Array.from({ length: MAX_FX_BATCH }, (_, i) => i + 5));
+    expect(takeNewActions(log, 0).actions.map((a) => a.actionIndex)).toEqual([5, 6, 7, 8, 9, 10]);
   });
 });

@@ -2,11 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { applyObstacle } from "@/lib/utils/battle/damage/obstacle";
-import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
 
@@ -115,47 +114,30 @@ describe("Перешкода в атаці", () => {
 
     expect(miss.success).toBe(false);
   });
-});
 
-describe("auto cover", () => {
-  const bow: BattleAttack = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 2 };
+  it("мультицільова атака: кожне влучання ×0.5", () => {
+    const bow: BattleAttack = { id: "bow", name: "Лук", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d8", damageType: "piercing" };
 
-  const archer = placed("a", { side: ParticipantSide.ALLY, at: { x: 0, y: 5 }, attacks: [bow] });
+    const archer = (() => {
+      const p = attacker();
 
-  const run = (order: BattleParticipant[], targetIds: string[], map: BattleMapConfig | null = testMap()) =>
-    runAttackPhase({
-      battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", targetIds, attackRolls: targetIds.map(() => 15), damageRolls: targetIds.map(() => 6) },
-      battleId: "b",
-      userId: "u",
-      isDM: true,
-      rng: seq(0.5),
-      map,
-    });
+      return { ...p, battleData: { ...p.battleData, attacks: [bow] }, combatStats: { ...p.combatStats, maxTargets: 2 } };
+    })();
 
-  const covered = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => e.resultText.includes("перешкода"));
+    const run = (obstacle: boolean) =>
+      runAttackPhase({
+        battle: { initiativeOrder: [archer, enemy("e1"), enemy("e2")], currentRound: 1, currentTurnIndex: 0 },
+        data: { attackerId: "a", targetIds: ["e1", "e2"], attackId: "bow", attackRolls: [15, 16], damageRolls: [6, 7], obstacle },
+        battleId: "b",
+        userId: "u",
+        isDM: true,
+        rng: seq(0.5),
+      });
 
-  it("ціль за союзником — штраф, вільна ціль того ж залпу — ні", () => {
-    const order = [archer, placed("ally", { side: ParticipantSide.ALLY, at: { x: 2, y: 5 } }), placed("t1", { at: { x: 5, y: 5 }, hp: 50 }), placed("t2", { at: { x: 0, y: 8 }, hp: 50 })];
+    const damageOf = (r: ReturnType<typeof run>) => r.allBattleActions.filter((a) => a.actionType === "attack").map((a) => a.hpChanges[0]?.change ?? 0);
 
-    expect(covered(run(order, ["t1", "t2"]))).toEqual([true, false]);
-  });
+    const full = damageOf(run(false));
 
-  it("стіна місцевості — штраф", () => {
-    const order = [archer, placed("t1", { at: { x: 5, y: 5 }, hp: 50 })];
-
-    expect(covered(run(order, ["t1"], testMap(10, 10, { terrain: { "3:5": { kind: "wall" } } })))).toEqual([true]);
-  });
-
-  it("ближня атака — без штрафу навіть через союзника", () => {
-    const knight = placed("a", { side: ParticipantSide.ALLY, at: { x: 4, y: 5 } });
-
-    const order = [knight, placed("ally", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 } }), placed("t1", { at: { x: 6, y: 5 }, hp: 50 })];
-
-    expect(covered(run(order, ["t1"]))).toEqual([false]);
-  });
-
-  it("без карти — без штрафу", () => {
-    expect(covered(run([archer, placed("t1", { hp: 50 })], ["t1"], null))).toEqual([false]);
+    expect(damageOf(run(true))).toEqual(full.map(applyObstacle));
   });
 });

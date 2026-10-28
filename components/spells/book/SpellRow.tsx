@@ -17,7 +17,7 @@ interface SpellRowExtras {
   badge?: string;
 }
 
-export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: string; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
+export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: { name: string; color?: string | null }; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
   const { formula, badge } = extras;
 
   const size = wide ? SIZES.wide : SIZES.narrow;

@@ -17,7 +17,7 @@ vi.mock("@/lib/api/decks", () => ({ saveDeck: vi.fn(), getDeck: vi.fn(), getDeck
 
 const slide = (n: number) => ({ id: `slide-000${n}`, imageUrl: `https://x/${n}.webp` });
 
-const deck = (updatedAt: string, slides = [slide(1)]): SlideDeck => ({ id: "d1", title: "Таверна", scenarioPageId: null, slides, updatedAt });
+const deck = (updatedAt: string, slides = [slide(1)]): SlideDeck => ({ id: "d1", title: "Таверна", slides, updatedAt });
 
 const T1 = "2026-01-01T00:00:00.000Z";
 

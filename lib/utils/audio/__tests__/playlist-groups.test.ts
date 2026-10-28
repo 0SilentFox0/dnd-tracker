@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BATTLE_TRACK_GROUP, filterTracks, groupTracks, joinTrackTitle, listGroupPrefixes, listTrackGroups, OTHER_TRACK_GROUP, splitTrackTitle, trackGroupName, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
+import { BATTLE_TRACK_GROUP, filterTracks, groupTracks, listTrackGroups, OTHER_TRACK_GROUP, trackGroupName, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
 
 const t = (title: string, kind: "file" | "youtube" = "youtube") => ({ title, kind });
 
@@ -59,23 +59,5 @@ describe("filterTracks", () => {
   it("група і тип звужують разом", () => {
     expect(filterTracks(library, { ...none, group: BATTLE_TRACK_GROUP, kind: "file" }).map((x) => x.title)).toEqual(["Ельфи - Битва"]);
     expect(filterTracks(library, { ...none, group: OTHER_TRACK_GROUP }).map((x) => x.title)).toEqual(["Бій у таверні"]);
-  });
-});
-
-describe("splitTrackTitle / joinTrackTitle", () => {
-  it("розбиває по першому « - » і збирає назад без втрат", () => {
-    expect(splitTrackTitle("Люди - Битва 1")).toEqual({ group: "Люди", name: "Битва 1" });
-    expect(splitTrackTitle("Бій у таверні")).toEqual({ group: "", name: "Бій у таверні" });
-    expect(joinTrackTitle("Люди", "Битва 1")).toBe("Люди - Битва 1");
-  });
-
-  it("порожня група чи «Інше» — назва без префікса; порожня назва — порожньо", () => {
-    expect(joinTrackTitle(" ", "Бій")).toBe("Бій");
-    expect(joinTrackTitle(OTHER_TRACK_GROUP, "Бій")).toBe("Бій");
-    expect(joinTrackTitle("Люди", " ")).toBe("");
-  });
-
-  it("підказки груп — унікальні префікси, включно з расами битв", () => {
-    expect(listGroupPrefixes(library)).toEqual(["Люди", "Ельфи"]);
   });
 });

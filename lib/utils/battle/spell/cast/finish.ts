@@ -95,7 +95,9 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const meta = fxMeta(def);
 
-  if (meta.spellDamageType) {
+  const stamp = { ...(meta.spellDamageType && { fxElement: meta.spellDamageType }), ...(spell.fx?.aura && { fxAura: spell.fx.aura }) };
+
+  if (Object.keys(stamp).length > 0) {
     // only the spell's own effects: one applied by a trigger during the cast keeps its own look
     for (const { id, name, targetId } of applied) {
       if (name !== spell.name) continue;
@@ -104,7 +106,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
       if (!target) continue;
 
-      put(flow, { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => (e.id === id ? { ...e, fxElement: meta.spellDamageType } : e)) } });
+      put(flow, { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => (e.id === id ? { ...e, ...stamp } : e)) } });
     }
   }
 

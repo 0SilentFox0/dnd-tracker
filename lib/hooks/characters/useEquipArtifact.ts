@@ -16,6 +16,6 @@ export function useEquipArtifact(campaignId: string, characterId?: string) {
       return updateInventory(campaignId, characterId, { equipSlot });
     },
     awaitInvalidation: true,
-    invalidateKeys: [characterKeys.sheet(campaignId, characterId), characterKeys.roster(campaignId), characterKeys.stashes(campaignId), characterKeys.freeArtifacts(campaignId)],
+    invalidateKeys: [characterKeys.sheet(campaignId, characterId), characterKeys.roster(campaignId)],
   });
 }

@@ -7,7 +7,7 @@ import { mazeMoveZone } from "./move-zone";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
 import { nearestMazeCell } from "./revive";
-import { mazeAimHidden, mazeLineBlocked, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
+import { mazeAimHidden, mazeTargetHidden, meleeWallBetween, seesTarget } from "./sight";
 import { startMaze } from "./start";
 import { MAZE_TEXTS } from "./texts";
 import { mazeFxVisible, mazeLogVisible } from "./view";
@@ -52,7 +52,6 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? MAZE_TEXTS.targetOutOfSight : null),
     meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? MAZE_TEXTS.wallBetween : null),
     engages: ({ map, attacker, neighbour }) => inPlay(neighbour) && !meleeWallBetween(gridOf(map), attacker, neighbour),
-    lineBlocked: ({ map, line }) => mazeLineBlocked(gridOf(map), line),
     moveZone: mazeMoveZone,
   },
   client: {

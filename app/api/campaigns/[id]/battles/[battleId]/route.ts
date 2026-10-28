@@ -1,4 +1,4 @@
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -6,7 +6,6 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { battleMapSchema, createBattleSchema } from "@/lib/schemas";
-import { clearShowBattle } from "@/lib/server/show/show-store";
 import { resolveMapBackgroundForPersistence } from "@/lib/supabase/battle-map-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -103,8 +102,6 @@ export async function DELETE(
     await prisma.battleScene.deleteMany({
       where: { id: battleId },
     });
-
-    after(() => clearShowBattle(id, battleId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

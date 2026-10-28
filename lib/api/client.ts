@@ -1,5 +1,4 @@
 import { getCampaignApiUrl } from "@/lib/api/api-helpers";
-import { FIELD_LABELS } from "@/lib/constants/field-labels";
 
 export class ApiError extends Error {
   constructor(
@@ -13,22 +12,10 @@ export class ApiError extends Error {
   }
 }
 
-const issuePath = (path: unknown): string =>
-  Array.isArray(path) && path.length
-    ? path.map((key) => (typeof key === "number" ? `#${key + 1}` : (FIELD_LABELS[String(key)] ?? String(key)))).join(" › ")
-    : "";
-
-const issueMessage = (issue: unknown): string => {
-  if (!issue || typeof issue !== "object" || typeof (issue as { message?: unknown }).message !== "string") {
-    return JSON.stringify(issue);
-  }
-
-  const { message, path } = issue as { message: string; path?: unknown };
-
-  const where = issuePath(path);
-
-  return where ? `${where}: ${message}` : message;
-};
+const issueMessage = (issue: unknown): string =>
+  issue && typeof issue === "object" && "message" in issue && typeof (issue as { message: unknown }).message === "string"
+    ? (issue as { message: string }).message
+    : JSON.stringify(issue);
 
 export function bodyErrorMessage(body: unknown, fallback: string): string {
   const { error, issues } = (body ?? {}) as { error?: unknown; issues?: unknown };

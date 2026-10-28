@@ -1,8 +1,11 @@
 import type { Effect } from "@/lib/utils/abilities/schema";
+import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { RaceModifier, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
 
 export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+
+export type SpellGroupRef = IdName & { color?: string | null; icon?: string | null };
 
 export interface Spell {
   id: string;
@@ -20,12 +23,15 @@ export interface Spell {
   raceModifiers: unknown;
   stackable?: boolean;
   maxStacks?: number | null;
-  spellGroup?: IdName | null;
+  spellGroup?: SpellGroupRef | null;
+  fx?: unknown;
 }
 
 export interface SpellGroup {
   id: string;
   name: string;
+  color?: string | null;
+  icon?: string | null;
 }
 
 export interface SpellFormData {
@@ -43,6 +49,7 @@ export interface SpellFormData {
   raceModifiers: RaceModifier[];
   stackable: boolean;
   maxStacks: number | null;
+  fx: SpellFx;
 }
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */
@@ -63,5 +70,6 @@ export type BookSpell = SpellRules & {
   description?: string | null;
   appearanceDescription?: string | null;
   icon?: string | null;
-  spellGroup?: IdName | null;
+  spellGroup?: SpellGroupRef | null;
+  fx?: SpellFx | null;
 };

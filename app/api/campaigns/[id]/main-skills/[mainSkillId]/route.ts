@@ -76,6 +76,7 @@ export async function PATCH(
           data.spellGroupId !== undefined
             ? data.spellGroupId || null
             : undefined,
+        role: data.role,
       },
     });
 

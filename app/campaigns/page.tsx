@@ -24,7 +24,6 @@ export default async function CampaignsPage() {
             };
           };
         };
-        omit: { aiInstructions: true };
       }>
     >
   >;
@@ -48,7 +47,6 @@ export default async function CampaignsPage() {
           },
         },
       },
-      omit: { aiInstructions: true },
       orderBy: {
         updatedAt: "desc",
       },

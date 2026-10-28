@@ -32,7 +32,3 @@ export const LEGEND_LABELS: Record<(typeof LEGEND_KINDS)[number], string> = {
 export const MENTION_LABELS: Record<(typeof MENTION_TYPES)[number], string> = { unit: "Юніт", artifact: "Артефакт", character: "Персонаж", spell: "Заклинання", battle: "Бій" };
 
 export const DEFAULT_SCENE_LEGEND: { kind: (typeof LEGEND_KINDS)[number]; label: string }[] = LEGEND_KINDS.map((kind) => ({ kind, label: LEGEND_LABELS[kind] }));
-export const SECTION_ICON_KEYS = ["scene", "battle", "secret", "choice", "journey", "dialogue", "rest", "prep"] as const;
-export const SECTION_ICON_LABELS: Record<(typeof SECTION_ICON_KEYS)[number], string> = {
-  scene: "Сцена", battle: "Бій", secret: "Таємниця", choice: "Вибір", journey: "Подорож", dialogue: "Діалог", rest: "Відпочинок", prep: "Підготовка",
-};

@@ -1,15 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useModeView } from "./modes/useModeView";
-import { setFxBusy } from "./fx-busy";
-import { fireFxImpact } from "./fx-impact";
-import { moraleDiceDone } from "./morale-dice";
 import { useBattleSceneData } from "./useBattleScene";
 
 import { usePageHidden } from "@/lib/hooks/common";
-import { advanceFxQueue, INITIAL_FX_QUEUE, isMoraleFx, MAX_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
+import { advanceFxQueue, INITIAL_FX_QUEUE, shiftFxQueue } from "@/lib/utils/battle/fx";
 import { moraleThrowOf } from "@/lib/utils/battle/fx/dice";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 
@@ -26,7 +23,7 @@ export function useBattleFxQueue(enabled: boolean) {
   const morale = useMemo(() => {
     const who = pending ? initiativeOrder.find((p) => p.basicInfo.id === pending.participantId) : undefined;
 
-    return moraleThrowOf({ round: currentRound, turnIndex: currentTurnIndex, pending, visible: !!who && visible(who) });
+    return moraleThrowOf({ round: currentRound, turnIndex: currentTurnIndex, pending, participant: who && visible(who) ? { name: who.basicInfo.name } : null });
   }, [pending, currentRound, currentTurnIndex, initiativeOrder, visible]);
 
   const hidden = usePageHidden();
@@ -37,25 +34,7 @@ export function useBattleFxQueue(enabled: boolean) {
 
   if (state.log !== log || state.morale !== (morale?.key ?? null) || (!active && state.queue.length)) setState(advanceFxQueue(state, { log, morale }, active));
 
-  // дія, якої в черзі немає (вже зіграна, пропущена, обрізана, до відкриття сторінки, FX вимкнено), не тримає кадр влучання
-  useEffect(() => {
-    const queued = new Set(state.queue.map((s) => s.actionId));
-
-    for (const action of log.slice(-MAX_FX_QUEUE)) if (!queued.has(action.id)) fireFxImpact(action.id);
-  }, [log, state.queue]);
-
-  const busy = active && state.queue.length > 0;
-
-  // до відмальовування: екран підсумку в тому ж кадрі ще не встигає показатися поверх кидка
-  useLayoutEffect(() => setFxBusy(busy), [busy]);
-
-  useEffect(() => () => setFxBusy(false), []);
-
-  const done = useCallback((key: string) => {
-    if (isMoraleFx(key)) moraleDiceDone();
-
-    setState((s) => shiftFxQueue(s, key));
-  }, []);
+  const done = useCallback((key: string) => setState((s) => shiftFxQueue(s, key)), []);
 
   return { current: active ? (state.queue[0] ?? null) : null, queue: state.queue, done, active };
 }

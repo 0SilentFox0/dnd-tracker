@@ -33,20 +33,4 @@ describe("useCharacterForm", () => {
     expect(result.current.formData.abilityScores.dexterity).toBe(10);
     expect(result.current.basicInfo.data.name).toBe("Ліра");
   });
-
-  it("submit без раси чи класу не викликає onSubmit і дає повідомлення", async () => {
-    const onSubmit = vi.fn();
-
-    const { result } = renderHook(() => useCharacterForm({ onSubmit }));
-
-    const event = { preventDefault: vi.fn() } as unknown as React.FormEvent;
-
-    await act(() => result.current.actions.handleSubmit(event));
-    expect(result.current.status.error).toBe("Оберіть расу");
-
-    act(() => result.current.basicInfo.set("race", "Ельф"));
-    await act(() => result.current.actions.handleSubmit(event));
-    expect(result.current.status.error).toBe("Вкажіть клас");
-    expect(onSubmit).not.toHaveBeenCalled();
-  });
 });

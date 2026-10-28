@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
+import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
 import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const attrsSchema = z.record(z.string(), z.unknown());
@@ -26,30 +26,20 @@ const revealSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("afterSection"), pageId: z.string().min(1), sectionId: z.string().min(1) }),
 ]);
 
-const rowSchema = z.object({
-  id: idSchema,
-  story: docSchema,
-  notes: docSchema,
-  slide: z.object({ deckId: idSchema, slideId: z.string().min(1).max(64) }).optional(),
-  battleId: idSchema.optional(),
-});
-
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string().max(200),
   played: z.boolean(),
-  // схема спільна для читання й збереження: ключ із новішого релізу (після відкату) не має ламати сторінку
-  icon: z.enum(SECTION_ICON_KEYS).optional().catch(undefined),
   reveal: revealSchema.optional(),
   revealedAt: z.string().nullable().optional(),
-  rows: z.array(rowSchema).max(200),
+  rows: z.array(z.object({ id: idSchema, story: docSchema, notes: docSchema })).max(200),
 });
 
 const unique = (ids: string[]) => new Set(ids).size === ids.length;
 
 export const scenarioContentSchema: z.ZodType<ScenarioContent> = z
   .object({
-    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80), color: z.string().regex(/^#[0-9a-f]{6}$/i).optional() })).max(SCENARIO_MAX_LEGEND),
+    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80) })).max(SCENARIO_MAX_LEGEND),
     sections: z.array(sectionSchema).max(200),
   })
   .refine((c) => unique(c.sections.map((s) => s.id)) && unique(c.sections.flatMap((s) => s.rows.map((r) => r.id))), { message: "Дубльовані id розділів або рядків" });

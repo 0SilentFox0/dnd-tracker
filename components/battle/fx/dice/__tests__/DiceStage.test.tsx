@@ -14,7 +14,7 @@ import { DiceStage, type DiceStageHandle, sceneLoader } from "../DiceStage";
 
 import type { DiceThrowSpec } from "@/lib/utils/battle/fx/dice";
 
-const spec: DiceThrowSpec = { seed: 3, groups: [[{ sides: 20, value: 15 }]] };
+const spec: DiceThrowSpec = { seed: 3, groups: [[{ sides: 20, value: 15 }]], caption: "Айвен · атака", extraSaves: 0 };
 
 const mount = () => {
   const ref = createRef<DiceStageHandle>();

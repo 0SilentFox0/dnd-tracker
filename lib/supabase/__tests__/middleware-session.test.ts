@@ -82,18 +82,8 @@ describe("updateSession", () => {
   it("публічні сторінки без сесії — пропускає", async () => {
     signedOut();
 
-    for (const path of ["/", "/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/auth/callback"]) {
+    for (const path of ["/sign-in", "/sign-up", "/auth/callback"]) {
       expect((await updateSession(request(path))).headers.get("location")).toBeNull();
     }
-  });
-
-  it("/?code=… (Site URL fallback) — довершує вхід через /auth/callback", async () => {
-    signedOut();
-
-    const res = await updateSession(request("/?code=abc&type=recovery"));
-
-    const location = new URL(res.headers.get("location") ?? "");
-
-    expect(location.pathname + location.search).toBe("/auth/callback?code=abc&type=recovery");
   });
 });

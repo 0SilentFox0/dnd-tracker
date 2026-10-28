@@ -2,12 +2,6 @@ export const CharacterType = { PLAYER: "player", NPC_HERO: "npc_hero" } as const
 
 export type CharacterTypeValue = (typeof CharacterType)[keyof typeof CharacterType];
 
-export const CharacterStatus = { ACTIVE: "active", PENDING: "pending" } as const;
-
-export type CharacterStatusValue = (typeof CharacterStatus)[keyof typeof CharacterStatus];
-
-export const ACTIVE_CHARACTER = { status: CharacterStatus.ACTIVE } as const;
-
 export const CONTROLLED_BY_DM = "dm";
 
 // Як у HoMM5: стала величина без кидка, задає порядок ходу; юніти мають 5–19
@@ -23,8 +17,6 @@ export type GoalAuthorValue = (typeof GoalAuthor)[keyof typeof GoalAuthor];
 export const MAX_GOALS = 30;
 
 export const GOAL_TEXT_MAX = 600;
-
-export const NOTES_MAX = 5000;
 
 export const GOAL_TITLE_MAX = 80;
 

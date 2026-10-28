@@ -15,12 +15,7 @@ export function TargetStep({ wizard: { state, view, actions } }: { wizard: Attac
             tone="enemy"
             selected={state.targetIds.includes(t.basicInfo.id)}
             onClick={() => actions.toggleTarget(t.basicInfo.id)}
-            trailing={
-              <span className="ml-auto flex items-center gap-2">
-                {view.cover.has(t.basicInfo.id) && <span className="text-xs text-[#e0a050]" title="Між стрільцем і ціллю є перешкода">🧱 ×0.5</span>}
-                <HealthLabel participant={t} />
-              </span>
-            }
+            trailing={<span className="ml-auto"><HealthLabel participant={t} /></span>}
           />
         ))}
       </div>

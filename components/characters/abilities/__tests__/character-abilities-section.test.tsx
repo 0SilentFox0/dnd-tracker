@@ -3,7 +3,6 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
-import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
 
 const hooks = vi.hoisted(() => ({ useMainSkills: vi.fn(), usePersonalSkills: vi.fn() }));
 
@@ -35,7 +34,7 @@ describe("CharacterAbilitiesSection", () => {
     hooks.useMainSkills.mockReturnValue({
       data: [
         { id: "m1", name: "Бойові" },
-        { id: "m2", name: MAIN_SKILL_BY_CATEGORY.Personal },
+        { id: "m2", name: "Персональні", role: "personal" },
       ],
     });
     render(<CharacterAbilitiesSection campaignId="c" abilities={abilities} />);

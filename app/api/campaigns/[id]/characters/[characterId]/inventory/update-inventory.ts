@@ -4,17 +4,14 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
-import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
-import { writeInventoryLog } from "@/lib/server/inventory/log";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
-import { normalizeStash } from "@/lib/utils/inventory/items";
 import type { EquippedItems } from "@/types/inventory";
 
 const inventoryItemSchema = z.object({ name: z.string(), quantity: z.number().optional() }).passthrough();
@@ -53,15 +50,8 @@ export async function updateInventory(request: Request, campaignId: string, char
 
     let nextEquipped: EquippedItems | undefined = data.equipped as EquippedItems | undefined;
 
-    let displaced: string | undefined;
-
     if (data.equipSlot) {
-      const equippedNow = (current?.equipped ?? {}) as EquippedItems;
-
-      const occupant = equippedNow[data.equipSlot.slot] as string | undefined;
-
-      displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
-      nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
+      nextEquipped = buildEquipped((current?.equipped ?? {}) as EquippedItems, data.equipSlot.slot, data.equipSlot.artifactId);
     }
 
     if (nextEquipped) {
@@ -74,10 +64,10 @@ export async function updateInventory(request: Request, campaignId: string, char
       if (checkIds.length > 0) {
         const others = await tx.characterInventory.findMany({
           where: { character: { campaignId }, characterId: { not: characterId } },
-          select: { characterId: true, equipped: true, stash: true, character: { select: { name: true } } },
+          select: { characterId: true, equipped: true, character: { select: { name: true } } },
         });
 
-        const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) }));
+        const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems }));
 
         for (const artifactId of checkIds) {
           const holderId = findHolder(held, artifactId);
@@ -96,7 +86,6 @@ export async function updateInventory(request: Request, campaignId: string, char
       ...(data.silver !== undefined && { silver: data.silver }),
       ...(data.copper !== undefined && { copper: data.copper }),
       ...(nextEquipped && { equipped: nextEquipped as Prisma.InputJsonValue }),
-      ...(data.equipSlot && { stash: [...normalizeStash(current?.stash).filter((id) => id !== data.equipSlot?.artifactId && id !== displaced), ...(displaced ? [displaced] : [])] }),
       ...(data.backpack && { backpack: data.backpack as Prisma.InputJsonValue }),
       ...(data.items && { items: data.items as Prisma.InputJsonValue }),
     };
@@ -104,23 +93,8 @@ export async function updateInventory(request: Request, campaignId: string, char
     const inventory = await tx.characterInventory.upsert({
       where: { characterId },
       update: scalars,
-      create: { characterId, equipped: {}, backpack: [], items: [], stash: [], ...scalars },
+      create: { characterId, equipped: {}, backpack: [], items: [], ...scalars },
     });
-
-    if (data.equipSlot && displaced) {
-      await writeInventoryLog(tx, [
-        {
-          campaignId,
-          characterId,
-          actorUserId: accessResult.userId,
-          kind: data.equipSlot.artifactId ? InventoryLogKind.ARTIFACT_EQUIP : InventoryLogKind.ARTIFACT_UNEQUIP,
-          delta: data.equipSlot.artifactId
-            ? { artifactId: data.equipSlot.artifactId, slot: data.equipSlot.slot, swappedArtifactId: displaced }
-            : { artifactId: displaced, slot: data.equipSlot.slot },
-          note: null,
-        },
-      ]);
-    }
 
     return NextResponse.json(inventory);
   });

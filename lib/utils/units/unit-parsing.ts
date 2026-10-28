@@ -144,10 +144,6 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   return abilities;
 }
 
-export function convertCSVRowsToUnits(rows: CSVUnitRow[]): ImportUnit[] {
-  return rows.map(convertCSVRowToUnit).filter((unit) => unit.name !== "");
-}
-
 export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
   const name = (row.Назва || row.name || row.Name || "").trim();
 

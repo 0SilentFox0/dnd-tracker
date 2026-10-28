@@ -16,7 +16,6 @@ import { pluralUk } from "@/lib/utils/common/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
-import type { Race } from "@/types/races";
 import type { Unit, UnitAttack } from "@/types/units";
 
 function primaryAttackIndex(attacks: UnitAttack[]): number {
@@ -32,11 +31,10 @@ function primaryAttackIndex(attacks: UnitAttack[]): number {
 interface UnitCardProps {
   unit: Unit;
   campaignId: string;
-  race?: Race | null;
   onDelete: (unitId: string) => void;
 }
 
-export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
+export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
   const confirm = useConfirm();
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -51,7 +49,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const abilitySummary = unit.abilitySummary ?? [];
 
-  const allImmunities = getUnitImmunities(unit, race);
+  const allImmunities = getUnitImmunities(unit);
 
   const damage = unitDamageSummary(unit, attacks);
 

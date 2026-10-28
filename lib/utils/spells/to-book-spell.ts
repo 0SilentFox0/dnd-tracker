@@ -1,6 +1,6 @@
+import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
-import type { IdName } from "@/types/common";
-import type { BookSpell, SpellDefinition, SpellRules } from "@/types/spells";
+import type { BookSpell, SpellDefinition, SpellGroupRef, SpellRules } from "@/types/spells";
 
 interface BookSpellRow {
   id: string;
@@ -9,7 +9,7 @@ interface BookSpellRow {
   description: string | null;
   appearanceDescription?: string | null;
   icon: string | null;
-  spellGroup: IdName | null;
+  spellGroup: SpellGroupRef | null;
   dice?: number;
   cost?: string;
   targeting?: unknown;
@@ -17,6 +17,7 @@ interface BookSpellRow {
   spellEffects?: unknown;
   stackable?: boolean;
   maxStacks?: number | null;
+  fx?: unknown;
 }
 
 /** Rules for the battle-effect preview; stacking only when on, so the common case adds no keys. */
@@ -32,7 +33,9 @@ export function spellRules(def: SpellDefinition): SpellRules {
 }
 
 export function toBookSpell(row: BookSpellRow): BookSpell {
-  const { id, name, level, description, appearanceDescription, icon, spellGroup } = row;
+  const { id, name, level, description, appearanceDescription, icon, spellGroup, fx } = row;
 
-  return { id, name, level, description, appearanceDescription, icon, spellGroup, ...spellRules(readSpellDefinition(row)) };
+  const parsedFx = parseSpellFx(fx);
+
+  return { id, name, level, description, appearanceDescription, icon, spellGroup, ...(parsedFx && { fx: parsedFx }), ...spellRules(readSpellDefinition(row)) };
 }

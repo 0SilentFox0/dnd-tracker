@@ -1,10 +1,10 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { FxImpact } from "@/lib/utils/battle/fx";
+import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -43,6 +43,7 @@ export interface ActiveEffect {
   };
   /** Сирий тип шкоди заклинання, що наклало ефект (для візуалу ауры) */
   fxElement?: string;
+  fxAura?: FxAuraKind;
   breakOnDamage?: boolean;
   consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
   expireAtTurnEnd?: boolean;
@@ -184,9 +185,9 @@ export interface MazeConfig {
   moved?: boolean;
 }
 
-export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross";
+export type TemplateShape = "circle" | "cube" | "cone" | "line";
 
-/** size у футах: радіус кола, сторона куба, довжина конуса/лінії, промінь хреста */
+/** size у футах: радіус кола, сторона куба, довжина конуса/лінії */
 export interface SpellTemplate {
   shape: TemplateShape;
   size: number;
@@ -241,15 +242,15 @@ export interface TerrainDiff {
   removed?: string[];
 }
 
-export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template" | "pick" | "picked" | "out-of-range";
+export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template" | "pick" | "picked";
 
 export interface BattleMapView {
   selectedId?: string | null;
   currentId?: string | null;
   /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */
   marks?: Map<string, BattleMapMark | number>;
-  /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі; cover — клітинки перешкоди (порожньо — заважає стіна лабіринту), відсутній — лінія вільна */
-  trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged"; cover?: string[] } | null;
+  /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі */
+  trajectory?: { fromId: string; targetId: string; to: GridPoint; kind: "melee" | "ranged" } | null;
   /** Точка наведення шаблону заклинання */
   aim?: GridPoint | null;
   /** Звідки біжить хвиля пульсу превʼю шаблону */
@@ -461,8 +462,6 @@ export interface BattleAction {
     weaponName?: string;
     /** Тип атаки: melee / ranged */
     attackKind?: AttackType;
-    /** Стрибок ланцюгового пострілу: від кого летить снаряд */
-    chainFromId?: string;
     attackRoll?: number;
     attackBonus?: number;
     totalAttackValue?: number;
@@ -486,6 +485,7 @@ export interface BattleAction {
     // Для заклинань:
     spellId?: string;
     spellName?: string;
+    spellFx?: SpellFx;
     spellLevel?: number;
     spellSlotUsed?: number;
     /** Приклик юніта після касту */
@@ -572,9 +572,3 @@ export type AddParticipantData = {
   reserved?: boolean;
   position?: GridPoint;
 };
-
-export interface BattleBrief {
-  id: string;
-  name: string;
-  status: BattleStatus;
-}

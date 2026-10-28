@@ -77,10 +77,14 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   return (
     <HudFormPage title="Створити нового персонажа" aside="Заповніть основну інформацію про персонажа">
+      {error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          <strong>Помилка:</strong> {error}
+        </p>
+      )}
       <HudForm
         id="character-form"
         onSubmit={handleSubmit}
-        error={error}
         tabs={tabs}
         actions={
           <>

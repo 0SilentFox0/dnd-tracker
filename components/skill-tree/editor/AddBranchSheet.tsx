@@ -13,15 +13,13 @@ export function AddBranchSheet({ open, branches, actions }: {
 
   const [color, setColor] = useState("#8a6414");
 
-  const [creating, setCreating] = useState(false);
-
   return (
     <ResponsiveDialog
       hud
       open={open}
       onOpenChange={(o) => !o && actions.onClose()}
       title="Додати гілку"
-      footer={<Button form="new-branch" type="submit" disabled={!name.trim() || creating}>Створити нову</Button>}
+      footer={<Button form="new-branch" type="submit" disabled={!name.trim()}>Створити нову</Button>}
     >
       <div className="flex flex-col gap-1">
         {branches.map((b) => (
@@ -37,15 +35,7 @@ export function AddBranchSheet({ open, branches, actions }: {
         onSubmit={async (e) => {
           e.preventDefault();
 
-          if (creating || !name.trim()) return;
-
-          setCreating(true);
-
-          try {
-            if (await actions.onCreate({ name: name.trim(), color })) setName("");
-          } finally {
-            setCreating(false);
-          }
+          if (await actions.onCreate({ name: name.trim(), color })) setName("");
         }}
       >
         <Input placeholder="Назва нової гілки" value={name} onChange={(e) => setName(e.target.value)} />

@@ -1,52 +1,40 @@
 import { NextResponse } from 'next/server'
-import type { EmailOtpType } from '@supabase/supabase-js'
 
 import { getRedirectOrigin } from './redirect-origin'
 
-import { RESET_PASSWORD_PATH } from '@/lib/constants/auth'
 import { ensureDbUser } from '@/lib/server/users/db-user'
 import { createClient } from '@/lib/supabase/server'
-import { safeNextPath } from '@/lib/utils/auth'
 
-// Lands every emailed or OAuth link: Google sign-in, email confirmation, password recovery.
 export async function GET(request: Request) {
-  const url = new URL(request.url)
+  const requestUrl = new URL(request.url)
 
   const origin = getRedirectOrigin(request)
 
-  const code = url.searchParams.get('code')
+  const code = requestUrl.searchParams.get('code')
 
-  const tokenHash = url.searchParams.get('token_hash')
+  const error = requestUrl.searchParams.get('error')
 
-  const type = url.searchParams.get('type') as EmailOtpType | null
+  if (error) {
+    console.error('OAuth error:', error)
 
-  const recovery = type === 'recovery' || url.searchParams.get('next') === RESET_PASSWORD_PATH
+    return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent(error)}`)
+  }
 
-  const next = recovery ? RESET_PASSWORD_PATH : safeNextPath(url.searchParams.get('next'))
+  if (!code) {
+    console.error('No code parameter in callback')
 
-  const fail = (reason: string) => NextResponse.redirect(`${origin}${recovery ? '/forgot-password' : '/sign-in'}?error=${encodeURIComponent(reason)}`)
-
-  const providerError = url.searchParams.get('error_code') ?? url.searchParams.get('error')
-
-  if (providerError) {
-    console.error('Auth callback error:', providerError)
-
-    return fail(providerError)
+    return NextResponse.redirect(`${origin}/sign-in?error=no_code`)
   }
 
   try {
     const supabase = await createClient()
+    
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (exchangeError) {
+      console.error('Error exchanging code for session:', exchangeError)
 
-    let failure
-
-    if (code) failure = (await supabase.auth.exchangeCodeForSession(code)).error
-    else if (tokenHash && type) failure = (await supabase.auth.verifyOtp({ type, token_hash: tokenHash })).error
-    else return fail('no_code')
-
-    if (failure) {
-      console.error('Auth callback exchange failed:', failure)
-
-      return fail(failure.code ?? 'exchange_failed')
+      return NextResponse.redirect(`${origin}/sign-in?error=exchange_failed`)
     }
 
     const {
@@ -57,20 +45,20 @@ export async function GET(request: Request) {
     if (userError || !user) {
       console.error('Error getting user:', userError)
 
-      return fail('user_not_found')
+      return NextResponse.redirect(`${origin}/sign-in?error=user_not_found`)
     }
 
     try {
       await ensureDbUser(user, { refresh: true })
     } catch (dbError) {
-      // the session is valid either way; the row is created again on the first campaign create/join
       console.error('Database error:', dbError)
+      // Продовжуємо навіть якщо є помилка з базою - користувач все одно авторизований
     }
 
-    return NextResponse.redirect(`${origin}${next}`)
+    return NextResponse.redirect(`${origin}/campaigns`)
   } catch (error) {
     console.error('Unexpected error in callback:', error)
 
-    return fail('unexpected')
+    return NextResponse.redirect(`${origin}/sign-in?error=unexpected`)
   }
 }

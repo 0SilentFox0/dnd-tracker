@@ -70,7 +70,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, maxLe
           select: {
             ...(needs.skillIds.length > 0 && { skills: { where: { id: { in: needs.skillIds } } } }),
             ...(needs.learned && {
-              mainSkills: { where: { id: { in: needs.branchIds } }, select: { id: true, spellGroupId: true, name: true } },
+              mainSkills: { where: { id: { in: needs.branchIds } }, select: { id: true, spellGroupId: true, name: true, role: true } },
               spells: {
                 where: {
                   OR: [

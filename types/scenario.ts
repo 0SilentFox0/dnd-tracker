@@ -1,4 +1,4 @@
-import type { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, MENTION_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
+import type { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, MENTION_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES } from "@/lib/constants/scenario";
 
 export type ScenarioPageKind = (typeof PAGE_KINDS)[number];
 export type ScenarioPageStatus = (typeof PAGE_STATUSES)[number];
@@ -7,7 +7,6 @@ export type LegendKind = (typeof LEGEND_KINDS)[number];
 export type MentionType = (typeof MENTION_TYPES)[number];
 export type RichNodeType = (typeof NODE_TYPES)[number];
 export type RichMarkType = (typeof MARK_TYPES)[number];
-export type SectionIconKey = (typeof SECTION_ICON_KEYS)[number];
 
 export interface RichMark {
   type: RichMarkType;
@@ -27,17 +26,10 @@ export interface RichDoc {
   content: RichNode[];
 }
 
-export interface ScenarioRowSlide {
-  deckId: string;
-  slideId: string;
-}
-
 export interface ScenarioRow {
   id: string;
   story: RichDoc;
   notes: RichDoc;
-  slide?: ScenarioRowSlide;
-  battleId?: string;
 }
 
 export type RevealRule = { mode: "manual" } | { mode: "afterSection"; pageId: string; sectionId: string };
@@ -46,7 +38,6 @@ export interface ScenarioSection {
   id: string;
   title: string;
   played: boolean;
-  icon?: SectionIconKey;
   reveal?: RevealRule;
   revealedAt?: string | null;
   rows: ScenarioRow[];
@@ -55,7 +46,6 @@ export interface ScenarioSection {
 export interface LegendEntry {
   kind: LegendKind;
   label: string;
-  color?: string;
 }
 
 export interface ScenarioContent {

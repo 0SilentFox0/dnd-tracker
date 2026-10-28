@@ -35,7 +35,7 @@ export function JoinCampaignDialog() {
 
     setError(null);
     setSuccess(false);
-    join.mutate(inviteCode.trim().toUpperCase(), {
+    join.mutate(inviteCode.trim(), {
       onSuccess: (result) => {
         setSuccess(true);
         setTimeout(() => {

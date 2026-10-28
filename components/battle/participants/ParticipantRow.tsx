@@ -12,7 +12,7 @@ import { isDown } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, current, impact, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant, effects, exact, acText, current, impact, onSelect }: {
   participant: BattleParticipant;
   effects: readonly ActiveEffect[];
   exact: boolean;
@@ -21,9 +21,9 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
   impact: FxImpact | null;
   onSelect: (id: string) => void;
 }) {
-  const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impact);
-
   const { currentHp, maxHp } = participant.combatStats;
+
+  const { change, shakeRef, delayStyle } = useHitFx<HTMLDivElement>(currentHp, impact);
 
   const down = isDown(participant);
 
@@ -31,7 +31,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
     <div ref={shakeRef} className={cn("relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] py-2", down && "opacity-40")}>
       <button type="button" aria-label={participant.basicInfo.name} onClick={() => onSelect(participant.basicInfo.id)} className="absolute inset-0" />
       <HitFrame change={change} />
-      <HitFloat change={change} className="left-6 top-2 text-[26px]" />
+      <HitFloat change={change} delayStyle={delayStyle} className="left-6 top-2 text-[26px]" />
       <PortraitFx effects={effects} size={48}>
         <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="main" size={48} current={current} className={cn("pointer-events-none", !change?.impact && hitFlashClass(change))} />
       </PortraitFx>

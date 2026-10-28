@@ -19,7 +19,8 @@ export const BOOK_SPELL_SELECT = {
   spellEffects: true,
   stackable: true,
   maxStacks: true,
-  spellGroup: { select: { id: true, name: true } },
+  fx: true,
+  spellGroup: { select: { id: true, name: true, color: true, icon: true } },
 } satisfies Prisma.SpellSelect;
 
 export async function loadBookSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {

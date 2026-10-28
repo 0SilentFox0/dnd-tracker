@@ -67,12 +67,6 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
 
     if (!abilities.valid) return;
 
-    if (!fields.name.trim()) {
-      setError("Вкажіть назву сету");
-
-      return;
-    }
-
     setError(null);
 
     try {

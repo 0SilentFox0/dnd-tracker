@@ -71,14 +71,6 @@ export const falloff = (name: string): Ability => ({
   effects: [{ kind: "flag", flag: "multiTargetFalloff", percent: 50 }],
 });
 
-export const chainShot = (name: string, jumps = 2, percent = 50): Ability => ({
-  id: "unit-chain-shot",
-  name,
-  description: `Після влучання постріл перескакує на найближчого ворога до ${jumps} разів; кожен стрибок — ${percent} % шкоди попереднього, промах обриває ланцюг.`,
-  trigger: passive,
-  effects: [{ kind: "flag", flag: "chainShot", jumps, percent }],
-});
-
 export const doubleStrike = (name: string, chance: number): Ability => ({
   id: "unit-double-strike",
   name,

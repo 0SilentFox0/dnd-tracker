@@ -1,13 +1,9 @@
 export { scenarioKeys } from "./keys";
-export { useActiveSection } from "./useActiveSection";
 export { useMentionSearch } from "./useMentionSearch";
 export { type DraftError, type DraftState, useScenarioDraft } from "./useScenarioDraft";
 export { useScenarioPage } from "./useScenarioPage";
 export { useScenarioPageActions } from "./useScenarioPageActions";
 export { useScenarioPages } from "./useScenarioPages";
-export { type ScenarioPlay, useScenarioPlay } from "./useScenarioPlay";
 export { useScenarioSearch } from "./useScenarioSearch";
 export { useScenarioVersions } from "./useScenarioVersions";
-export { type SectionCollapse, useSectionCollapse } from "./useSectionCollapse";
 export { useSectionProgress } from "./useSectionProgress";
-export { useShowDockExpanded } from "./useShowDockExpanded";

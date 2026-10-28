@@ -12,7 +12,6 @@ import { UploadTrackButton } from "@/components/music/UploadTrackButton";
 import { Button } from "@/components/ui/button";
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL } from "@/lib/constants/music";
 import { useMusicLibrary } from "@/lib/hooks/music";
-import { listGroupPrefixes } from "@/lib/utils/audio/playlist-groups";
 import type { CampaignTrack } from "@/types/audio";
 
 export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: string; initialTracks: CampaignTrack[] }) {
@@ -46,7 +45,7 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
       ) : (
         <TrackGroups tracks={library.tracks} busy={library.isBusy} actions={{ onRename: library.rename, onEdit: setEditing, onDelete: (t) => void library.remove(t), onMove: library.move }} />
       )}
-      <EditTrackDialog track={editing} onClose={() => setEditing(null)} onSave={library.update} pending={library.isBusy} groups={listGroupPrefixes(library.tracks)} />
+      <EditTrackDialog track={editing} onClose={() => setEditing(null)} onSave={library.update} pending={library.isBusy} />
       <AddYoutubeTrackDialog open={youtubeOpen} onOpenChange={setYoutubeOpen} onSubmit={library.addYoutube} pending={library.isBusy} />
     </HudPage>
   );

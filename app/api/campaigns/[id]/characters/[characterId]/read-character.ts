@@ -19,7 +19,7 @@ export async function readCharacter(campaignId: string, characterId: string): Pr
     include: {
       user: { select: PUBLIC_USER_SELECT },
       inventory: true,
-      campaign: { omit: { aiInstructions: true }, include: { members: { where: { userId } } } },
+      campaign: { include: { members: { where: { userId } } } },
     },
   });
 
@@ -29,10 +29,7 @@ export async function readCharacter(campaignId: string, characterId: string): Pr
     return errorResponse(API_ERRORS.FORBIDDEN, 403);
   }
 
-  const { notes, ...rest } = character;
+  const knownSpells = Array.isArray(character.knownSpells) ? character.knownSpells : [];
 
-  const knownSpells = Array.isArray(rest.knownSpells) ? rest.knownSpells : [];
-
-  // нотатки — особисті: майстер їх не бачить
-  return NextResponse.json({ ...rest, ...(character.controlledBy === userId && { notes }), knownSpells });
+  return NextResponse.json({ ...character, knownSpells });
 }

@@ -8,10 +8,10 @@ import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm
 const deleteAllCharacters = vi.fn(async () => ({}));
 
 const getCharacters = vi.hoisted(() =>
-  vi.fn(async (_campaignId?: string, opts?: { status?: string }) => (opts?.status === "pending" ? [] : [
+  vi.fn(async () => [
     { id: "ch1", name: "Арвен", type: "player", race: "Ельф", class: "Лучник", level: 3, strength: 10, armorClass: 14, initiative: 2, avatar: null },
     { id: "ch2", name: "Борин", type: "npc_hero", race: "Гном", class: "Воїн", level: 4, strength: 14, armorClass: 16, initiative: 1, avatar: null },
-  ])),
+  ]),
 );
 
 vi.mock("@/lib/api/characters", () => ({
@@ -83,7 +83,7 @@ describe("DMCharactersClient tabs", () => {
 
     await screen.findByText("Арвен");
 
-    expect(getCharacters).toHaveBeenCalledWith("c1", undefined);
+    expect(getCharacters).toHaveBeenLastCalledWith("c1", undefined);
     expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
   });

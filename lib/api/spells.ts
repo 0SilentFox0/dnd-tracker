@@ -63,6 +63,14 @@ export async function renameSpellGroup(
   );
 }
 
+export async function updateSpellGroup(
+  campaignId: string,
+  groupId: string,
+  data: { name?: string; color?: string | null; icon?: string | null },
+): Promise<SpellGroup> {
+  return campaignPatch<SpellGroup>(campaignId, `/spells/groups/${groupId}`, data);
+}
+
 export async function removeAllSpellsFromGroup(
   campaignId: string,
   groupId: string,

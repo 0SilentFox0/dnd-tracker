@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  convertCSVRowsToUnits,
   convertCSVRowToUnit,
   parseAbilityScore,
   parseArmorClass,
@@ -59,14 +58,6 @@ describe("unit-parsing", () => {
     });
     it("повертає 1 за замовчуванням", () => {
       expect(parseLevel("")).toBe(1);
-    });
-  });
-
-  describe("convertCSVRowsToUnits", () => {
-    it("пропускає рядки з порожньою назвою", () => {
-      const units = convertCSVRowsToUnits([{ Назва: "Гоблін" }, { Назва: "  " }, {}]);
-
-      expect(units.map((u) => u.name)).toEqual(["Гоблін"]);
     });
   });
 

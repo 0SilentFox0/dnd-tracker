@@ -4,18 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { CharacterSelect } from "@/components/scenario/CharacterSelect";
-import { LegendColorPicker } from "@/components/scenario/editor/LegendColorPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
-import { LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
+import { LEGEND_KINDS, LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
 import { useConfirm } from "@/lib/hooks/common";
 import { useScenarioPageActions } from "@/lib/hooks/scenario";
-import type { LegendEntry, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
+import type { LegendEntry, LegendKind, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
 
 const STATUS_OPTIONS = PAGE_STATUSES.map((s) => ({ value: s, label: PAGE_STATUS_LABELS[s] }));
+
+const LEGEND_OPTIONS = LEGEND_KINDS.map((k) => ({ value: k, label: LEGEND_LABELS[k] }));
 
 export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClose }: { campaignId: string; page: ScenarioPage; legend: LegendEntry[]; onLegend: (legend: LegendEntry[]) => void; onClose: () => void }) {
   const actions = useScenarioPageActions(campaignId);
@@ -85,8 +86,8 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         }}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="sp-title">Назва *</Label>
-          <Input id="sp-title" required value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} />
+          <Label htmlFor="sp-title">Назва</Label>
+          <Input id="sp-title" value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="sp-subtitle">Підзаголовок</Label>
@@ -111,9 +112,15 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         <div className="space-y-2">
           <Label>Легенда</Label>
           {items.map((item, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-              <LegendColorPicker entry={item} onChange={(color) => patchItem(i, { color })} />
-              <Input aria-label="Підпис позначки" className="min-w-0 flex-1" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
+            <div key={i} className="flex gap-2">
+              <SelectField
+                aria-label="Колір позначки"
+                value={item.kind}
+                onValueChange={(v) => patchItem(i, { kind: v as LegendKind })}
+                options={LEGEND_OPTIONS}
+                className="w-40 shrink-0"
+              />
+              <Input aria-label="Підпис позначки" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
               <Button type="button" variant="outline" onClick={() => setItems((l) => l.filter((_, j) => j !== i))}>
                 Прибрати
               </Button>

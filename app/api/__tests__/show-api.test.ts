@@ -17,7 +17,6 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
     slideDeck: { findFirst: vi.fn() },
-    battleScene: { findFirst: vi.fn() },
     campaignTrack: { findMany: vi.fn(async () => []) },
   },
 }));
@@ -108,40 +107,5 @@ describe("show API", () => {
     expect(await res.json()).toEqual({ show: state });
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(prisma.slideDeck.findFirst).not.toHaveBeenCalled();
-  });
-
-  it("battle: активний бій — стан з battle, Pusher", async () => {
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b1", name: "Засідка", status: "active" } as never);
-
-    const res = await post({ action: "battle", battleId: "b1" });
-
-    expect(res.status).toBe(200);
-    expect((await res.json()).show).toMatchObject({ battle: { id: "b1", name: "Засідка" }, seq: 1 });
-    expect(vi.mocked(prisma.battleScene.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "b1", campaignId: "c1" } });
-    expect(vi.mocked(prisma.campaignShow.createMany).mock.calls[0][0]).toMatchObject({ data: [{ battle: { id: "b1", name: "Засідка" } }] });
-
-    await Promise.all(afterCallbacks.map((cb) => cb()));
-    expect(trigger).toHaveBeenCalled();
-  });
-
-  it("battle: чужий/відсутній бій — 404 без запису", async () => {
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue(null);
-
-    expect((await post({ action: "battle", battleId: "zz" })).status).toBe(404);
-    expect(prisma.campaignShow.createMany).not.toHaveBeenCalled();
-  });
-
-  it("battle: завершений бій — 422", async () => {
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b1", name: "Засідка", status: "completed" } as never);
-
-    expect((await post({ action: "battle", battleId: "b1" })).status).toBe(422);
-  });
-
-  it("стан без battle у БД — поле відсутнє у відповіді", async () => {
-    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ deckId: "d1", deckTitle: "Таверна", slide: deckRow.slides[0], nextImageUrl: url(2), audio: null, battle: null, seq: 4 } as never);
-
-    const res = await post({ action: "next" });
-
-    expect((await res.json()).show).not.toHaveProperty("battle");
   });
 });

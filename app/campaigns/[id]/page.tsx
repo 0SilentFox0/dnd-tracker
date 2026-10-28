@@ -5,14 +5,8 @@ import { CampaignSettingsButton } from "@/components/campaigns/settings/Campaign
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
-import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import { CharacterStatus } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
-import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
-import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
 import { pluralUk } from "@/lib/utils/common/plural";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
@@ -28,15 +22,9 @@ export default async function CampaignDetailPage({
 
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
-  const [pendingDrafts, onboarding] = await Promise.all([
-    isDM ? prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0,
-    // онбординг не має валити сторінку кампанії
-    readCampaignOnboarding(id, user.id, isDM).catch(() => null),
-  ]);
-
   const dmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
-    { path: "characters", icon: Users, title: "Персонажі", subtitle: pendingDrafts ? `Управління персонажами гравців · ${pendingDrafts} на схваленні` : "Управління персонажами гравців" },
+    { path: "characters", icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців" },
     { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
     { path: "spells", icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії" },
     { path: "artifacts", icon: Gem, title: "Артефакти", subtitle: "Управління артефактами та сетами" },
@@ -55,10 +43,6 @@ export default async function CampaignDetailPage({
         subtitle={campaign.description}
         actions={<span className="self-center break-all text-sm text-hud-muted">{user.email}</span>}
       />
-
-      <PrefetchedQuery queryKey={onboardingKeys.campaign(id)} data={onboarding}>
-        <OnboardingChecklist campaignId={id} />
-      </PrefetchedQuery>
 
       <HudPanel>
         <HudSection
@@ -85,7 +69,7 @@ export default async function CampaignDetailPage({
               <p className={LABEL}>Макс. рівень</p>
               <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
             </div>
-            <div id="invite" className="scroll-mt-20">
+            <div>
               <p className={`${LABEL} mb-2`}>Код запрошення</p>
               <InviteCodeDisplay inviteCode={campaign.inviteCode} />
             </div>

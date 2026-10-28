@@ -10,7 +10,7 @@ import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
-  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup);
+  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup);
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">

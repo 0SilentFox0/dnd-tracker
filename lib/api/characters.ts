@@ -5,11 +5,11 @@ import {
   campaignPost,
   campaignPut,
 } from "@/lib/api/client";
-import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characters";
+import { type CharacterTypeValue } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, DraftInput, RosterHero } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, RosterHero } from "@/types/characters";
 
 export async function getCharacter(
   campaignId: string,
@@ -24,9 +24,6 @@ export async function getCharacter(
 export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[], seen?: string[]) =>
   campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals, seen });
 
-export const putCharacterNotes = (campaignId: string, characterId: string, notes: string) =>
-  campaignPut<{ notes: string | null }>(campaignId, `/characters/${characterId}/notes`, { notes });
-
 export const createCharacterToken = (campaignId: string, characterId: string, body: CreateTokenInput) =>
   campaignPost<{ token: CharacterToken }>(campaignId, `/characters/${characterId}/tokens`, body);
 
@@ -37,13 +34,11 @@ export const getCharacterSheet = (campaignId: string, characterId: string) => ca
 
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; status?: "pending"; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; compact?: boolean },
 ): Promise<CharacterListItem[]> {
   const params = new URLSearchParams();
 
   if (opts?.type) params.set("type", opts.type);
-
-  if (opts?.status) params.set("status", opts.status);
 
   if (opts?.compact) params.set("compact", "1");
 
@@ -108,21 +103,3 @@ export async function deleteAllCharacters(
 }
 
 export const getCharacterRoster = (campaignId: string) => campaignGet<RosterHero[]>(campaignId, "/characters/roster");
-
-export const createDraft = (campaignId: string, body: DraftInput) => campaignPost<Character>(campaignId, "/characters/draft", body);
-
-export const updateDraft = (campaignId: string, characterId: string, body: DraftInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
-
-export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ available: boolean; image: boolean }>(campaignId, "/characters/draft/backstory");
-
-export const getDraftPortraitPools = (campaignId: string) => campaignGet<{ pools: Record<string, string[]> }>(campaignId, "/characters/draft/portraits");
-
-export const generateDraftAvatar = (campaignId: string, body: { name: string; race: string; archetype: string; class: string }) => campaignPost<{ url: string }>(campaignId, "/characters/draft/avatar", body);
-
-export const generateBackstory = (campaignId: string, body: { name: string; race: string; archetype: string; class: string; background?: string }) =>
-  campaignPost<{ background: string; goals: Array<{ text: string; kind: GoalKind }> }>(campaignId, "/characters/draft/backstory", body);
-
-export type ReviewBody = { action: "approve" } | { action: "return"; note: string };
-
-export const reviewCharacter = (campaignId: string, characterId: string, body: ReviewBody) =>
-  campaignPost<{ id: string; status: string; reviewNote: string | null }>(campaignId, `/characters/${characterId}/review`, body);

@@ -38,18 +38,6 @@ describe("bodyErrorMessage / request errors", () => {
     );
   });
 
-  it("issue з path — підпис поля перед повідомленням", () => {
-    const issues = [
-      { path: ["name"], message: "Обов'язкове поле" },
-      { path: ["attacks", 0, "damageDice"], message: "Не більше 30 символів" },
-      { path: ["customField"], message: "x" },
-    ];
-
-    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues }, "x")).toBe(
-      "Некоректні дані запиту: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x",
-    );
-  });
-
   it("старий формат (error — масив issues) досі читається", () => {
     expect(bodyErrorMessage({ error: [{ message: "Required" }] }, "x")).toBe("Required");
   });

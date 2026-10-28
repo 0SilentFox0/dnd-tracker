@@ -6,7 +6,6 @@ import { toArtifactSetErrorResponse } from "./route-errors";
 
 import { createArtifactSetSchema } from "@/lib/schemas/artifact-sets";
 import {
-  deleteArtifactSetAndClearArtifacts,
   insertArtifactSet,
   reloadArtifactSetWithArtifacts,
 } from "@/lib/server/artifacts/artifact-set-queries";
@@ -66,12 +65,7 @@ export async function POST(
     });
 
     if (data.artifactIds?.length) {
-      try {
-        await syncArtifactSetMembers(id, created.id, data.artifactIds);
-      } catch (syncError) {
-        await deleteArtifactSetAndClearArtifacts(id, created.id).catch(() => undefined);
-        throw syncError;
-      }
+      await syncArtifactSetMembers(id, created.id, data.artifactIds);
     }
 
     const full = await reloadArtifactSetWithArtifacts(created.id);

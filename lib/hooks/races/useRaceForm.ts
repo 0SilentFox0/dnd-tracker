@@ -43,7 +43,7 @@ export function useRaceForm(campaignId: string, raceId: string, initial: RaceFor
   return {
     form: { data: formData, set: setFormData },
     abilities,
-    status: { isSaving: update.isPending, error: update.error },
+    status: { isSaving: update.isPending },
     actions: { submit, cancel: () => router.push(listHref) },
   };
 }

@@ -14,11 +14,11 @@ describe("useHpChange", () => {
 
     rerender({ hp: 12 });
 
-    expect(result.current).toEqual({ delta: -8, hp: 12, id: 1, impact: null });
+    expect(result.current).toEqual({ delta: -8, id: 1, impact: null });
 
     rerender({ hp: 20 });
 
-    expect(result.current).toEqual({ delta: 8, hp: 20, id: 2, impact: null });
+    expect(result.current).toEqual({ delta: 8, id: 2, impact: null });
   });
 
   it("вплив знімається в момент зміни HP; пізніший вплив без зміни HP його не змінює", () => {
@@ -30,7 +30,7 @@ describe("useHpChange", () => {
 
     const snap = result.current;
 
-    expect(snap).toEqual({ delta: -8, hp: 12, id: 1, impact: hit });
+    expect(snap).toEqual({ delta: -8, id: 1, impact: hit });
 
     rerender({ hp: 12, impact: null });
 
@@ -45,7 +45,9 @@ describe("useHpChange", () => {
 describe("useDamageShake", () => {
   afterEach(() => vi.useRealTimers());
 
-  it("тремтіння стартує одразу, без затримки", () => {
+  it("тремтіння стартує після delayMs", () => {
+    vi.useFakeTimers();
+
     const animate = vi.fn();
 
     const { rerender } = renderHook(
@@ -59,7 +61,15 @@ describe("useDamageShake", () => {
       { initialProps: { change: null as HpChange | null } },
     );
 
-    rerender({ change: { delta: -5, hp: 25, id: 1, impact: { element: "fire", kind: "damage", delayMs: 300 } } });
+    rerender({ change: { delta: -5, id: 1, impact: { element: "fire", kind: "damage", delayMs: 300 } } });
+
+    expect(animate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(299);
+
+    expect(animate).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
 
     expect(animate).toHaveBeenCalledTimes(1);
   });

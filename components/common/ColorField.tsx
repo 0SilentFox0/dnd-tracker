@@ -15,7 +15,7 @@ export function ColorField({ id, label, value, onChange, description, required }
     <FormField label={label} htmlFor={id} required={required} description={description}>
       <div className="flex items-center gap-2">
         <Input id={id} type="color" value={value || "#888888"} onChange={(e) => onChange(e.target.value)} className="h-10 w-20" />
-        <Input aria-label={`${label} (hex)`} value={value} onChange={(e) => onChange(e.target.value.trim())} placeholder="#000000" pattern="#[0-9a-fA-F]{6}" title="Формат #RRGGBB" className="flex-1" />
+        <Input aria-label={`${label} (hex)`} value={value} onChange={(e) => onChange(e.target.value)} placeholder="#000000" className="flex-1" />
       </div>
     </FormField>
   );

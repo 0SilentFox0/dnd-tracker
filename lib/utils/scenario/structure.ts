@@ -1,6 +1,6 @@
 import { EMPTY_DOC } from "./doc";
 
-import type { ScenarioContent, ScenarioRow, ScenarioRowSlide, ScenarioSection } from "@/types/scenario";
+import type { ScenarioContent, ScenarioRow, ScenarioSection } from "@/types/scenario";
 
 export const newId = () => crypto.randomUUID().replaceAll("-", "").slice(0, 10);
 
@@ -28,8 +28,6 @@ const mapSection = (c: ScenarioContent, sectionId: string, fn: (s: ScenarioSecti
   ...c,
   sections: c.sections.map((s) => (s.id === sectionId ? fn(s) : s)),
 });
-
-export const pickLiveSection = (c: ScenarioContent): ScenarioSection | null => c.sections.find((s) => !s.played) ?? null;
 
 export const addSection = (c: ScenarioContent, title: string): ScenarioContent => ({ ...c, sections: [...c.sections, newSection(title)] });
 
@@ -59,17 +57,3 @@ export function moveRow(c: ScenarioContent, sectionId: string, rowId: string, di
 
   return rows ? mapSection(c, sectionId, (s) => ({ ...s, rows })) : c;
 }
-
-function without(row: ScenarioRow, key: "slide" | "battleId"): ScenarioRow {
-  const next = { ...row };
-
-  delete next[key];
-
-  return next;
-}
-
-export const setRowSlide = (c: ScenarioContent, sectionId: string, rowId: string, slide: ScenarioRowSlide | undefined): ScenarioContent =>
-  mapSection(c, sectionId, (s) => ({ ...s, rows: s.rows.map((r) => (r.id !== rowId ? r : slide ? { ...r, slide } : without(r, "slide"))) }));
-
-export const setRowBattle = (c: ScenarioContent, sectionId: string, rowId: string, battleId: string | undefined): ScenarioContent =>
-  mapSection(c, sectionId, (s) => ({ ...s, rows: s.rows.map((r) => (r.id !== rowId ? r : battleId ? { ...r, battleId } : without(r, "battleId"))) }));

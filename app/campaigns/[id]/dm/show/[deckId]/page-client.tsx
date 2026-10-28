@@ -8,22 +8,19 @@ import { Images } from "lucide-react";
 import { EmptyState } from "@/components/common/states";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { AddSlidesBar } from "@/components/show/editor/AddSlidesBar";
-import { DeckSceneSelect } from "@/components/show/editor/DeckSceneSelect";
 import { SlideDialog } from "@/components/show/editor/SlideDialog";
 import { SlideGrid } from "@/components/show/editor/SlideGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DECK_TITLE_MAX } from "@/lib/constants/show";
 import { useNotify } from "@/lib/hooks/common";
-import { useDeck, useDeckEditor, useShowControl } from "@/lib/hooks/show";
+import { useDeckEditor, useShowControl } from "@/lib/hooks/show";
 import type { SlideDeck } from "@/types/show";
 
 export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string; deck: SlideDeck }) {
   const router = useRouter();
 
   const notify = useNotify();
-
-  const { data: live = deck } = useDeck(campaignId, deck.id, { initial: deck });
 
   const editor = useDeckEditor(campaignId, deck);
 
@@ -56,14 +53,13 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
     >
       <HudForm
         id="deck-editor-form"
-        error={draft.title.trim() ? null : "Вкажіть назву набору"}
         onSubmit={(e) => {
           e.preventDefault();
           void editor.save();
         }}
         actions={
           <>
-            <Button type="submit" disabled={!dirty || saving || !draft.title.trim()}>
+            <Button type="submit" disabled={!dirty || saving}>
               Зберегти
             </Button>
             <Button type="button" variant="outline" disabled={saving || control.pending || draft.slides.length === 0} onClick={() => void startShow()}>
@@ -74,8 +70,7 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
       >
         <div className="flex flex-col gap-4">
           <Input aria-label="Назва набору" placeholder="Назва набору" maxLength={DECK_TITLE_MAX} value={draft.title} onChange={(e) => dispatch({ type: "rename", title: e.target.value })} />
-          <DeckSceneSelect campaignId={campaignId} deck={live} />
-          <AddSlidesBar campaignId={campaignId} upload={editor.upload} count={draft.slides.length} />
+          <AddSlidesBar upload={editor.upload} count={draft.slides.length} />
           {draft.slides.length === 0 ? (
             <EmptyState icon={Images} title="Ще немає слайдів" description="Додайте картинки — файли або посилання" />
           ) : (

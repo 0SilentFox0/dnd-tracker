@@ -7,14 +7,11 @@ const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => 
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioDraft: (_c: string, page: { content: unknown }) => ({ content: page.content, state: "saved", ...draft }),
   useMentionSearch: () => async () => [],
-  useActiveSection: () => null,
   useScenarioPages: () => ({ data: [] }),
   useScenarioPage: () => ({ data: undefined }),
   useScenarioPageActions: () => ({ updateMeta: vi.fn(), isPending: false }),
   useScenarioVersions: () => ({ versions: [], isLoading: false, restore: vi.fn(), isRestoring: false }),
 }));
-vi.mock("@/lib/hooks/show", () => ({ useDeck: () => ({ data: undefined }), useDecks: () => ({ data: [] }) }));
-vi.mock("@/lib/hooks/battles", () => ({ useBattleBriefs: () => ({ data: [] }) }));
 vi.mock("@/components/scenario/editor/RichTextEditor", () => ({ RichTextEditor: ({ label }: { label: string }) => <div data-testid="tiptap">{label}</div> }));
 
 import ScenarioEditor from "@/components/scenario/editor";
@@ -39,11 +36,9 @@ const apply = () => {
   return fn(page().content);
 };
 
-const toc = { inline: true, drawer: { open: false, onOpenChange: vi.fn() } };
-
 describe("ScenarioEditor", () => {
   it("комірка відкриває Tiptap лише по кліку; одночасно один редактор", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     expect(screen.queryByTestId("tiptap")).toBeNull();
     fireEvent.click(screen.getByText("Дзвони"));
@@ -51,7 +46,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("назва розділу, новий рядок, новий розділ — через setContent", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText("Назва розділу"), { target: { value: "1.0 Собор" } });
     expect(apply().sections[0].title).toBe("1.0 Собор");
@@ -64,7 +59,7 @@ describe("ScenarioEditor", () => {
   });
 
   it("видалення розділу питає підтвердження", async () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити розділ: Собор" }));
     expect(await screen.findByText(/Видалити розділ «Собор»/)).toBeTruthy();
@@ -72,14 +67,14 @@ describe("ScenarioEditor", () => {
   });
 
   it("на героєві є налаштування відкриття глави", () => {
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page("hero")} onExit={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Відкрити гравцеві зараз" })).toBeTruthy();
   });
 
   it("«Готово» виходить після успішного збереження", async () => {
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     await waitFor(() => expect(onExit).toHaveBeenCalled());
   });
@@ -89,7 +84,7 @@ describe("ScenarioEditor", () => {
 
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     expect(await screen.findByText(/Є незбережені зміни/)).toBeTruthy();
     expect(onExit).not.toHaveBeenCalled();
@@ -100,7 +95,7 @@ describe("ScenarioEditor", () => {
 
     const onExit = vi.fn();
 
-    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} toc={toc} />);
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={onExit} />);
     fireEvent.click(screen.getByRole("button", { name: "Готово" }));
     fireEvent.click(await screen.findByRole("button", { name: "Вийти" }));
     await waitFor(() => expect(onExit).toHaveBeenCalled());

@@ -1,4 +1,4 @@
-export const MAX_FX_BATCH = 16;
+export const MAX_FX_BATCH = 6;
 
 /**
  * A broken animation is abandoned after this, so it never stalls the queue. The longest run is Відродження лісу

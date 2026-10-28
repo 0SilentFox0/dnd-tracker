@@ -26,7 +26,6 @@ import type {
   MoveParticipantData,
   SpellCastData,
 } from "@/types/api";
-import type { BattleBrief } from "@/types/battle";
 import type {
   AddParticipantData,
   BattleBalanceBody,
@@ -245,5 +244,3 @@ export async function updateBattleParticipant(
 ): Promise<BattleMutationResponse> {
   return campaignPatch<BattleMutationResponse>(campaignId, `/battles/${battleId}/participants/${participantId}`, data);
 }
-
-export const getBattleBriefs = (campaignId: string) => campaignGet<BattleBrief[]>(campaignId, "/battles?brief=1", { cache: "no-store" });

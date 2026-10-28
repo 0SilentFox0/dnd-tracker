@@ -11,12 +11,10 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { myTurnKey } from "@/lib/utils/battle/view";
 import type { BattlePreparationParticipant } from "@/types/battle";
 
 type DesktopLayout = ComponentType<{ onComplete: () => void }>;
@@ -65,7 +63,7 @@ const sideCount = (participants: BattlePreparationParticipant[], side: string) =
 const onFieldCount = (participants: BattlePreparationParticipant[]) => participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
 export function BattleScreen() {
-  const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero } } = useBattleScene();
+  const { battle, viewer: { isDM }, actions } = useBattleScene();
 
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -73,9 +71,6 @@ export function BattleScreen() {
   const Desktop = useDesktopLayout(wide);
 
   const [completeOpen, setCompleteOpen] = useState(false);
-
-  // як на телефоні: новий хід згортає плеєр, інакше розгорнута панель лежить на кнопках моралі й дій
-  const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
   const [notices, setNotices] = useState<HTMLElement | null>(null);
 
@@ -96,7 +91,6 @@ export function BattleScreen() {
     <BattleAudioProvider>
       {battle.status === BattleStatus.PREPARED ? (
         <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
-          {isDM && <OnboardingHint id="dm.battle-scene" className="mx-auto mt-3 max-w-md" />}
           <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
           <CornerStack>
             <AudioDock placement="corner" />
@@ -109,13 +103,11 @@ export function BattleScreen() {
           {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
           <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
             <BattleToast />
-            {/* не над мапою у свій хід і не для глядачів; ДМ бачить свою підказку на підготовці */}
-            {!isDM && hero && !isMyTurn && <OnboardingHint id="player.battle" />}
           </div>
           {Desktop && (
             <CornerStack>
               <ActionResultCard />
-              <AudioDock placement="corner" collapseOn={turnKey} />
+              <AudioDock placement="corner" />
             </CornerStack>
           )}
           {isDM && <DmRevivePrompt />}

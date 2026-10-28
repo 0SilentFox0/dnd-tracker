@@ -32,7 +32,7 @@ export type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 /** Опціональний контекст для batch-завантаження (спільні дані кампанії) */
 export interface CampaignSpellContext {
   skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
-  mainSkills: Array<{ id: string; spellGroupId: string | null; name: string }>;
+  mainSkills: Array<{ id: string; spellGroupId: string | null; name: string; role: string | null }>;
   spells: Array<{ id: string; level: number; spellGroup?: { id: string } | null }>;
   allSkills: Array<Prisma.SkillGetPayload<object>>;
   racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;

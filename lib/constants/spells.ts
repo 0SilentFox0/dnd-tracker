@@ -1,3 +1,4 @@
+import { SPELL_GROUP_FALLBACK_COLOR } from "@/lib/constants/spell-groups";
 import type { SpellSlotProgression } from "@/types/races";
 
 export const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [1, 2, 3, 4, 5].map((level) => ({ level, slots: 0 }));
@@ -30,15 +31,8 @@ export function spellLevelRoman(level: number): string {
   return ROMAN_NUMERALS[Math.max(0, level)] ?? String(level);
 }
 
-const SPELL_SCHOOL_COLORS: Record<string, string> = {
-  Природа: "#12a52b",
-  Світло: "#f2b300",
-  Темрява: "#7a1fe6",
-  Хаос: "#ec1c0c",
-};
-
-export function spellSchoolColor(name: string | null | undefined): string {
-  return (name && SPELL_SCHOOL_COLORS[name]) || "#6d7177";
+export function spellSchoolColor(group: { color?: string | null } | null | undefined): string {
+  return group?.color || SPELL_GROUP_FALLBACK_COLOR;
 }
 
 export const SPELL_COST_LABELS = {
@@ -64,7 +58,6 @@ export const TEMPLATE_SHAPE_LABELS = {
   cube: "Куб",
   cone: "Конус",
   line: "Лінія",
-  cross: "Хрест",
 } as const;
 
 export const SPELL_SAVE_ON_SUCCESS_LABELS = {
@@ -74,5 +67,3 @@ export const SPELL_SAVE_ON_SUCCESS_LABELS = {
 
 export const labelOptions = <K extends string>(labels: Record<K, string>) =>
   (Object.entries(labels) as [K, string][]).map(([value, label]) => ({ value, label }));
-
-export const SPELL_NAME_MAX = 100;

@@ -154,10 +154,10 @@ describe("Хаос: заклинання", () => {
     expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
   });
 
-  it("Кам'яні шипи: до 3 ворогів, кожен отримує повну шкоду одного кидка; четверта ціль відхилена", () => {
+  it("Кам'яні шипи: до 2 ворогів, кожен отримує повну шкоду одного кидка; третя ціль відхилена", () => {
     const c = hero();
 
-    const order = [c, enemy("e1"), enemy("e2"), enemy("e3"), enemy("e4")];
+    const order = [c, enemy("e1"), enemy("e2"), enemy("e3")];
 
     const r = cast("stone-spikes", c, order, ["e1", "e2"], { rolls: [5, 6] });
 
@@ -165,7 +165,7 @@ describe("Хаос: заклинання", () => {
 
     const sp = spell("stone-spikes");
 
-    expect(resolveSpellTargets(order, c, sp, sp.definition.targeting, ["e1", "e2", "e3", "e4"]).ok).toBe(false);
+    expect(resolveSpellTargets(order, c, sp, sp.definition.targeting, ["e1", "e2", "e3"]).ok).toBe(false);
   });
 
   it("Крижаний болт: шкода холодом + ворог атакує з невигідністю в свій наступний хід (ціль ходить пізніше в тому ж раунді)", () => {

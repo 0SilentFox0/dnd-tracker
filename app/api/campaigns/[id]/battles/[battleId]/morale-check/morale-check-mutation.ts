@@ -19,7 +19,7 @@ export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleChec
     throw new BattleRuleError("action_used", "У додатковому ході мораль не перевіряється");
   }
 
-  const moraleResult = checkMorale(participant, data.d10Roll, ctx.participants);
+  const moraleResult = checkMorale(participant, data.d10Roll, ctx.participants, ctx.rng);
 
   const pendingMoraleCheck: PendingMoraleCheckPayload = {
     participantId: data.participantId,

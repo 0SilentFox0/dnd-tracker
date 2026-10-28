@@ -3,19 +3,14 @@ import { type AttackRequest, validateAttackRequest } from "./request";
 import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
-import { AttackType } from "@/lib/constants/battle";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
-import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { rollDie } from "@/lib/utils/common/dice";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -51,11 +46,11 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const { attacker, attack, chosenTargets, targetIds } = request;
 
-  const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff", "chainShot"]);
+  const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff"]);
 
-  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, isMultiTargetRanged, falloff } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
 
-  const fractions = damageFractions(targets, attack, { volley, falloff });
+  const fractions = damageFractions(targets, attack, { isMultiTargetRanged, falloff });
 
   let currentAttacker = { ...attacker };
 
@@ -65,7 +60,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const summons: SummonRequest[] = [];
 
-  const damageFormula = (volley && (targets.length > 1 || expanded)) || chain ? heroAttackDamageParts(attacker, attack).formula : null;
+  const damageFormula = isMultiTargetRanged && (targets.length > 1 || expanded) ? heroAttackDamageParts(attacker, attack).formula : null;
 
   const dice = damageDiceCursor(data.damageRolls, damageFormula, rng);
 
@@ -73,26 +68,20 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const heldBack: ActiveEffect[] = [];
 
-  const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
+  for (let i = 0; i < targets.length; i++) {
+    const target = targets[i];
 
-  const live = (p: BattleParticipant) => findParticipant(currentInitiativeOrder, p.basicInfo.id) ?? p;
-
-  const strikeAt = (target: BattleParticipant, i: number, opts: { serverRolled: boolean; multiplier?: number; cover: boolean }) => {
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const strike = opts.serverRolled ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
     const strikeDice = dice.next();
 
-    const second = opts.serverRolled ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
-
-    const victim = live(target);
-
-    const obstacle = opts.cover && lineOfFire(input.map, currentInitiativeOrder, currentAttacker, victim).blocked;
+    const second = data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll;
 
     const attackResult = processAttack({
       attacker: currentAttacker,
-      target: victim,
+      target: findParticipant(currentInitiativeOrder, target.basicInfo.id) ?? target,
       attack,
       d20Roll: strike.value,
       advantageRoll: second,
@@ -103,8 +92,8 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
       battleId,
-      damageMultiplier: opts.multiplier,
-      obstacle,
+      damageMultiplier: targets.length > 1 ? fractions[i] : undefined,
+      obstacle: data.obstacle,
       map: input.map,
       hitSpells: input.hitSpells,
       rng,
@@ -154,39 +143,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     currentAttacker = held.attacker;
     heldBack.push(...held.held);
 
-    return attackResult;
-  };
-
-  let firstHit = false;
-
-  for (let i = 0; i < targets.length; i++) {
-    // пробивний летить крізь цілі: штраф лише на першу
-    const result = strikeAt(targets[i], i, { serverRolled: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0) });
-
-    if (i === 0) firstHit = result.success;
-
     if (!isActive(currentAttacker)) break;
-  }
-
-  if (chain && firstHit) {
-    const hit = new Set([targets[0].basicInfo.id]);
-
-    let from = live(targets[0]);
-
-    for (let jump = 1; jump <= chain.jumps && isActive(currentAttacker); jump++) {
-      const next = nextChainTarget({ map: input.map, order: currentInitiativeOrder, attacker: currentAttacker, attack, from, hit });
-
-      if (!next) break;
-
-      const result = strikeAt(next, jump, { serverRolled: true, multiplier: chain.percent ** jump, cover: false });
-
-      result.battleAction.actionDetails.chainFromId = from.basicInfo.id;
-      hit.add(next.basicInfo.id);
-
-      if (!result.success) break;
-
-      from = live(next);
-    }
   }
 
   return {

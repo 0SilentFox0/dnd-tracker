@@ -1,36 +1,30 @@
-import { joinTrackTitle, splitTrackTitle } from "./playlist-groups";
 import { trackLink } from "./track-link";
 import { parseYoutubeId } from "./youtube-id";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import type { CampaignTrack, UpdateTrackData } from "@/types/audio";
 
 export interface TrackDraft {
-  group: string;
-  name: string;
+  title: string;
   url: string;
   durationSec: string;
 }
 
-type TrackDraftError = { title?: string; url?: string; durationSec?: string };
-
-export type TrackPatchResult = { ok: true; patch: UpdateTrackData } | { ok: false; error: TrackDraftError };
+export type TrackPatchResult = { ok: true; patch: UpdateTrackData } | { ok: false; error: { url?: string; durationSec?: string } };
 
 export function trackToDraft(track: CampaignTrack): TrackDraft {
-  return { ...splitTrackTitle(track.title), url: trackLink(track) ?? "", durationSec: track.durationSec ? String(track.durationSec) : "" };
+  return { title: track.title, url: trackLink(track) ?? "", durationSec: track.durationSec ? String(track.durationSec) : "" };
 }
 
-/** Лише змінені поля; назва = «група - назва»; порожня чи задовга назва чи некоректні посилання/тривалість — помилка */
+/** Лише змінені поля; порожня назва чи некоректні посилання/тривалість — помилка */
 export function buildTrackPatch(track: CampaignTrack, draft: TrackDraft): TrackPatchResult {
   const patch: UpdateTrackData = {};
 
-  const error: TrackDraftError = {};
+  const error: { url?: string; durationSec?: string } = {};
 
-  const title = joinTrackTitle(draft.group, draft.name);
+  const title = draft.title.trim();
 
-  if (title.length > TRACK_TITLE_MAX) error.title = `Група й назва разом — до ${TRACK_TITLE_MAX} символів`;
-  else if (title && title !== track.title) patch.title = title;
+  if (title && title !== track.title) patch.title = title;
 
   if (track.kind === "youtube" && draft.url.trim() !== (trackLink(track) ?? "")) {
     const id = parseYoutubeId(draft.url);

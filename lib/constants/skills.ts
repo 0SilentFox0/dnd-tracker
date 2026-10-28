@@ -54,5 +54,3 @@ export const DND_SKILL_META: Record<DndSkill, { label: string; ability: "strengt
   stealth: { label: "Скритність", ability: "dexterity" },
   survival: { label: "Виживання", ability: "wisdom" },
 };
-
-export const SKILL_NAME_MAX = 100;

@@ -116,13 +116,9 @@ export function useBattleMapScene(): BattleMapScene | null {
   const view = useMemo(() => {
     if (!scene || !map) return null;
 
-    // прев'ю під курсором замінює клікнутий шаблон, але не затемнення поза дальністю
-    const marks = hovered ? new Map([...[...(scene.view.marks ?? [])].filter(([, m]) => m === "out-of-range"), ...hovered.marks]) : scene.view.marks;
-
     return {
       ...scene.view,
       ...hovered,
-      marks,
       trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
       ...(returnId && { returnId }),
       ...(pendingStroke.size > 0 && { pendingStroke }),

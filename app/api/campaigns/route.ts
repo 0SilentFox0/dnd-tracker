@@ -51,7 +51,6 @@ export async function POST(request: Request) {
           members: { create: { userId, role: CampaignRole.DM } },
         },
         include: { members: true },
-        omit: { aiInstructions: true },
       });
 
     for (let attempt = 1; ; attempt++) {
@@ -91,7 +90,6 @@ export async function GET() {
     const campaigns = await prisma.campaign.findMany({
       where: { members: { some: { userId } } },
       include: { members: { include: { user: { select: PUBLIC_USER_SELECT } } } },
-      omit: { aiInstructions: true },
       orderBy: { updatedAt: "desc" },
     });
 

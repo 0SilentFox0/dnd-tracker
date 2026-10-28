@@ -168,10 +168,14 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
 
   return (
     <HudFormPage title={labels.title} aside={labels.description}>
+      {editor.status.error && (
+        <p role="alert" className="mx-4 mt-3 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
+          {editor.status.error}
+        </p>
+      )}
       <HudForm
         id="artifact-form"
         onSubmit={editor.actions.submit}
-        error={editor.status.error}
         tabs={tabs}
         tab={activeTab}
         onTabChange={setTab}

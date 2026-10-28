@@ -7,7 +7,7 @@ export const SPELL_COSTS = ["action", "bonusAction"] as const;
 
 export const SpellCostSchema = z.enum(SPELL_COSTS);
 
-export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross"] as const;
+export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line"] as const;
 
 const rangeField = z.number().int().min(5).max(600).optional();
 

@@ -6,7 +6,7 @@ import { withAbilityErrors } from "@/components/abilities";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
-import { unitFormTabs } from "@/components/units/form/UnitFormFields";
+import { UnitFormError, unitFormTabs } from "@/components/units/form/UnitFormFields";
 import { useUnitEditForm } from "@/lib/hooks/units";
 
 export function UnitEditForm({ campaignId: id, unitId }: { campaignId: string; unitId: string }) {
@@ -17,6 +17,7 @@ export function UnitEditForm({ campaignId: id, unitId }: { campaignId: string; u
       <QueryState query={editor.query} loading={<LoadingState rows={8} label="Завантаження юніта…" />}>
         {(unit) => (
           <>
+            <UnitFormError error={editor.status.error} />
             <HudForm
               key={unitId}
               id="unit-form"
@@ -30,11 +31,6 @@ export function UnitEditForm({ campaignId: id, unitId }: { campaignId: string; u
                   <Button type="button" variant="outline" asChild>
                     <Link href={editor.listHref}>Скасувати</Link>
                   </Button>
-                  {editor.status.error && (
-                    <p role="alert" className="w-full text-sm text-destructive">
-                      {editor.status.error.message || "Помилка"}
-                    </p>
-                  )}
                   <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
                     {editor.status.isSaving ? "Збереження..." : withAbilityErrors("Зберегти зміни", editor.abilities.errors)}
                   </Button>

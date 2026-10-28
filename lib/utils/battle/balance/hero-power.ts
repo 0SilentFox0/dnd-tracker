@@ -17,7 +17,5 @@ export function heroPower(built: BattleParticipant, character: { race: string; s
 
   const magic = magicMainSkillIds(mainSkills);
 
-  const spellSchoolIds = new Set(mainSkills.filter((m) => m.spellGroupId).map((m) => m.id));
-
-  return { levels, stats: getCharacterStats({ participant, branchLevels: levels, magicMainSkillIds: magic, spellSchoolIds }) };
+  return { levels, stats: getCharacterStats({ participant, branchLevels: levels, magicMainSkillIds: magic }) };
 }

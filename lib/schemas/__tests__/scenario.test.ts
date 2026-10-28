@@ -43,23 +43,3 @@ describe("scenario schemas", () => {
     expect(createScenarioPageSchema.safeParse({ kind: "scene", title: "   " }).success).toBe(false);
   });
 });
-
-describe("scenarioContentSchema — прив'язки рядка", () => {
-  const doc = { type: "doc", content: [] };
-
-  const content = (row: Record<string, unknown>) => ({ legend: [], sections: [{ id: "s1", title: "Розділ", played: false, rows: [{ id: "r1", story: doc, notes: doc, ...row }] }] });
-
-  it("приймає slide і battleId", () => {
-    const parsed = scenarioContentSchema.parse(content({ slide: { deckId: "d1", slideId: "slide-0001" }, battleId: "b1" }));
-
-    expect(parsed.sections[0].rows[0]).toMatchObject({ slide: { deckId: "d1", slideId: "slide-0001" }, battleId: "b1" });
-  });
-
-  it("без прив'язок рядок як раніше", () => {
-    expect(scenarioContentSchema.parse(content({})).sections[0].rows[0]).not.toHaveProperty("slide");
-  });
-
-  it("відкидає slide без slideId", () => {
-    expect(scenarioContentSchema.safeParse(content({ slide: { deckId: "d1" } })).success).toBe(false);
-  });
-});

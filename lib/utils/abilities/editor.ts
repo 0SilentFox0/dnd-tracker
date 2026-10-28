@@ -32,7 +32,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   changeMorale: { delta: 1 },
   cleanse: {},
   copySpellBuffs: {},
-  summon: { group: "Демони", tier: 1 },
+  summon: { tier: 1 },
   raiseDead: { hpPercent: 50, target: "eventTarget" },
   guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
   mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },

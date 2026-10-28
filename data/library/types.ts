@@ -94,8 +94,6 @@ export interface LibraryUnit {
   ac: number;
   attackBonus: number;
   initiative: number;
-  /** фути; за замовчуванням 30 */
-  speed?: number;
   attacks: LibraryUnitAttack[];
   abilities: Ability[];
   spellKeys?: string[];

@@ -4,12 +4,10 @@ import { describe, expect, it } from "vitest";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 
 describe("getSpellGroupIcon", () => {
-  it("відома група — свій значок", () => {
-    expect(getSpellGroupIcon("Dark")).toBe(Moon);
-  });
+  it("maps the icon key", () => expect(getSpellGroupIcon({ icon: "moon" })).toBe(Moon));
 
-  it("невідома група і «Без групи» — Shell, щоб не плутати з Summ (Sparkles)", () => {
-    expect(getSpellGroupIcon("Без групи")).toBe(Shell);
-    expect(getSpellGroupIcon("Щось нове")).toBe(Shell);
+  it("unknown or missing key → Shell", () => {
+    expect(getSpellGroupIcon({ icon: "skull" })).toBe(Shell);
+    expect(getSpellGroupIcon(undefined)).toBe(Shell);
   });
 });

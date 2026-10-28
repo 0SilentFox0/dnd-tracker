@@ -1,13 +1,13 @@
 "use client";
 
 import { SPELL_COST_OPTIONS, type SpellFormData,spellLevelOptions } from "./spell-form-defaults";
+import { SpellFxFields } from "./SpellFxFields";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
-import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import type { IdName } from "@/types/common";
 import type { SpellCost } from "@/types/spells";
 
@@ -19,7 +19,7 @@ export interface SpellFormFieldsProps {
 export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: IdName[] }) {
   return (
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-      <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required maxLength={SPELL_NAME_MAX} placeholder="Назва заклинання" />
+      <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />
       <div>
         <Label htmlFor="level">Рівень (слот) *</Label>
         <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions(formData.level)} />
@@ -32,6 +32,7 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
         <Label htmlFor="groupId">Школа</Label>
         <SelectField id="groupId" value={formData.groupId ?? ""} onValueChange={(value) => setFormData({ ...formData, groupId: value || null })} placeholder="Виберіть школу" options={spellGroups.map((g) => ({ value: g.id, label: g.name }))} allowNone noneLabel="Без школи" />
       </div>
+      <SpellFxFields value={formData.fx} onChange={(fx) => setFormData({ ...formData, fx })} />
       <div className="col-span-2">
         <Label htmlFor="description">Що робить (точна механіка)</Label>
         <Textarea id="description" value={formData.description ?? ""} onChange={(e) => setFormData({ ...formData, description: e.target.value || null })} placeholder="Живою мовою, з числами" rows={3} />

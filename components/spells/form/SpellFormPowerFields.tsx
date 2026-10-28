@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
 import { SAVE_ABILITY_OPTIONS, SAVE_ON_SUCCESS_OPTIONS, TARGETING_KIND_OPTIONS } from "./spell-form-defaults";
 import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 
-import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -21,21 +18,7 @@ const SHAPE_OPTIONS = labelOptions(TEMPLATE_SHAPE_LABELS);
 
 const SIDE_OPTIONS = [{ value: "enemy", label: "Вороги" }, { value: "ally", label: "Союзники" }];
 
-function RangeInput({ value, onCommit }: { value: number | undefined; onCommit: (value: number | undefined) => void }) {
-  const [draft, setDraft] = useState<string | null>(null);
-
-  const commit = () => {
-    if (draft === null) return;
-
-    setDraft(null);
-
-    const n = parseInt(draft);
-
-    onCommit(Number.isFinite(n) ? Math.max(5, Math.min(600, n)) : undefined);
-  };
-
-  return <Input id="spell-range" type="number" min={5} max={600} step={5} placeholder="без обмеження" value={draft ?? value ?? ""} onChange={(e) => setDraft(e.target.value)} onBlur={commit} className="w-40" />;
-}
+const clamp = (raw: string, min: number, max: number, fallback: number) => Math.max(min, Math.min(max, parseInt(raw) || fallback));
 
 function targetingOf(kind: string, previous: SpellTargeting): SpellTargeting {
   const range = RANGED_KINDS.includes(kind) && "range" in previous ? { range: previous.range } : {};
@@ -62,7 +45,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <div className="col-span-2">
         <Label htmlFor="dice">Базові кубики N</Label>
-        <BoundedNumberInput id="dice" min={0} max={20} value={formData.dice} onCommit={(dice) => setFormData({ ...formData, dice })} className="w-24" />
+        <Input id="dice" type="number" min={0} max={20} value={formData.dice} onChange={(e) => setFormData({ ...formData, dice: Math.max(0, Math.min(20, parseInt(e.target.value) || 0)) })} className="w-24" />
         <p className="mt-1 text-xs text-muted-foreground">Герой: N + ⌊рівень / 3⌋ кубиків, грані — від майстерності школи (к6 / к8 / к10). Юніт: N + ⌊рівень / 2⌋ кубиків, грані — від рівня (1–4 к6, 5–9 к8, 10+ к10). 0 — без кубиків.</p>
       </div>
       <div className="col-span-2">
@@ -77,7 +60,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
           </div>
           <div>
             <Label htmlFor="template-size">Розмір, фути</Label>
-            <BoundedNumberInput id="template-size" min={5} max={120} value={targeting.size} onCommit={(v) => setFormData({ ...formData, targeting: { ...targeting, size: v } })} className="w-24" />
+            <Input id="template-size" type="number" min={5} max={120} step={5} value={targeting.size} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, size: clamp(e.target.value, 5, 120, 5) } })} className="w-24" />
           </div>
         </>
       )}
@@ -95,7 +78,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
           </div>
           <div>
             <Label htmlFor="targeting-max">{targeting.kind === "template" ? "Без карти: макс. цілей" : "Макс. цілей"}</Label>
-            <BoundedNumberInput id="targeting-max" min={1} max={20} value={targeting.maxTargets} onCommit={(v) => setFormData({ ...formData, targeting: { ...targeting, maxTargets: v } })} className="w-24" />
+            <Input id="targeting-max" type="number" min={1} max={20} value={targeting.maxTargets} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, maxTargets: clamp(e.target.value, 1, 20, 1) } })} className="w-24" />
           </div>
         </>
       )}
@@ -108,7 +91,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
       {RANGED_KINDS.includes(targeting.kind) && (
         <div className="col-span-2">
           <Label htmlFor="spell-range">Дальність, фути</Label>
-          <RangeInput value={(targeting as { range?: number }).range} onCommit={(range) => setFormData({ ...formData, targeting: { ...targeting, range } as SpellTargeting })} />
+          <Input id="spell-range" type="number" min={5} max={600} step={5} placeholder="без обмеження" value={(targeting as { range?: number }).range ?? ""} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, range: e.target.value === "" ? undefined : clamp(e.target.value, 5, 600, 5) } as SpellTargeting })} className="w-40" />
         </div>
       )}
       {targeting.kind === "template" && (
@@ -121,7 +104,7 @@ export function SpellFormPowerFields({ formData, setFormData }: SpellFormFieldsP
             <>
               <div>
                 <Label htmlFor="zone-rounds">Раундів</Label>
-                <BoundedNumberInput id="zone-rounds" min={1} max={10} value={zone.rounds} onCommit={(v) => setFormData({ ...formData, targeting: { ...targeting, zone: { ...zone, rounds: v } } })} className="w-24" />
+                <Input id="zone-rounds" type="number" min={1} max={10} value={zone.rounds} onChange={(e) => setFormData({ ...formData, targeting: { ...targeting, zone: { ...zone, rounds: clamp(e.target.value, 1, 10, 1) } } })} className="w-24" />
               </div>
               <div>
                 <Label htmlFor="zone-label">Підпис</Label>

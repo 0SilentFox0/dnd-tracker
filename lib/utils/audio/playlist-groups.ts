@@ -82,25 +82,3 @@ export function groupTracks<T extends { title: string }>(tracks: T[]): TrackGrou
 
   return listTrackGroups(tracks).map((name) => ({ name, tracks: byName.get(name) ?? [] }));
 }
-
-/** Поля редагування: префікс до першого « - » і решта; «Раса - Битва N» → «Раса» + «Битва N», щоб збирання не губило расу */
-export function splitTrackTitle(title: string): { group: string; name: string } {
-  const at = separatorAt(title);
-
-  if (at <= 0) return { group: "", name: title };
-
-  return { group: title.slice(0, at).trim(), name: title.slice(at + TRACK_GROUP_SEPARATOR.length).trim() };
-}
-
-export function joinTrackTitle(group: string, name: string): string {
-  const g = group.trim();
-
-  const n = name.trim();
-
-  return g && g !== OTHER_TRACK_GROUP && n ? `${g}${TRACK_GROUP_SEPARATOR}${n}` : n;
-}
-
-/** Підказки для поля «Група»: усі префікси назв, включно з расами битв */
-export function listGroupPrefixes(tracks: { title: string }[]): string[] {
-  return [...new Set(tracks.map((t) => splitTrackTitle(t.title).group).filter(Boolean))];
-}

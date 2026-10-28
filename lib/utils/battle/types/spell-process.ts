@@ -1,4 +1,5 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
 
@@ -8,6 +9,7 @@ export interface CastableSpell {
   level: number;
   groupId: string | null;
   icon?: string | null;
+  fx?: SpellFx | null;
   definition: SpellDefinition;
 }
 

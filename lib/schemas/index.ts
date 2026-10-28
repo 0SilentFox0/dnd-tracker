@@ -6,7 +6,6 @@ export * from "./character-goals";
 export * from "./character-tokens";
 export * from "./main-skills";
 export * from "./music";
-export * from "./onboarding";
 export * from "./prisma-json";
 export * from "./races";
 export * from "./spells";

@@ -3,7 +3,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import { StashTab } from "./stash/StashTab";
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
 import { LevelUpBadge } from "./LevelUpBadge";
@@ -15,11 +14,8 @@ import { SkillsTab } from "./SkillsTab";
 import { StoryTab } from "./StoryTab";
 
 import "@/components/hud/hud.css";
-import { DraftBanner } from "@/components/characters/player-draft/DraftBanner";
-import { ReviewActions } from "@/components/characters/review/ReviewActions";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
-import { PlayerSheetHint } from "@/components/onboarding/OnboardingHint";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
@@ -27,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
-const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "stash", "story"];
+const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story"];
 
 function viewTabs(): ProfileTab[] {
   return [
@@ -35,7 +31,6 @@ function viewTabs(): ProfileTab[] {
     { id: "skills", label: "Вміння", content: <SkillsTab /> },
     { id: "magic", label: "Магія", content: <MagicTab /> },
     { id: "items", label: "Речі", content: <ItemsTab /> },
-    { id: "stash", label: "Підсумок", content: <StashTab /> },
     { id: "story", label: "Історія", content: <StoryTab /> },
   ];
 }
@@ -105,9 +100,6 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     ) : null
                   }
                 />
-                {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
-                {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
-                {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
                 <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>

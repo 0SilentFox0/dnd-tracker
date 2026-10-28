@@ -1,6 +1,5 @@
 export * from "./crit-outcome";
 export * from "./damage-step";
-export * from "./damage-taken";
 export * from "./downed-heroes";
 export * from "./effect-summary";
 export * from "./health";
@@ -16,4 +15,3 @@ export * from "./scene-maps";
 export * from "./summary";
 export * from "./turn-exhausted";
 export * from "./visibility";
-export * from "./volley-results";

@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { readTreeJson, TREE_ERROR_TEXT, validateTree } from "@/lib/utils/skills/progression";
+import { readTreeJson, validateTree } from "@/lib/utils/skills/progression";
 
 const MOVE_ATTEMPTS = 3;
 
@@ -19,11 +18,7 @@ export async function saveSkillTree(campaignId: string, treeId: string, race: st
 
   const errors = validateTree(raw, { mainSkillIds: new Set(mainSkills.map((m) => m.id)), skillIds: new Set(librarySkills.map((s) => s.id)) });
 
-  if (errors.length > 0) {
-    const text = errors.map((e) => `${TREE_ERROR_TEXT[e.code]}${e.label ? `: ${e.label}` : ""}`).join("; ");
-
-    return errorResponse(text, 400);
-  }
+  if (errors.length > 0) return NextResponse.json({ errors }, { status: 400 });
 
   const existing =
     (await prisma.skillTree.findFirst({ where: { id: treeId, campaignId } })) ??

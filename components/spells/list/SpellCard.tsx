@@ -40,7 +40,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   const groupName = spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup;
 
-  const GroupIcon = getSpellGroupIcon(groupName);
+  const GroupIcon = getSpellGroupIcon(spell.spellGroup);
 
 
   const handleCopyId = async () => {

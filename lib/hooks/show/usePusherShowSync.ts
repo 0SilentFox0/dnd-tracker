@@ -9,11 +9,11 @@ import { usePusherChannel } from "@/lib/hooks/common";
 import { SHOW_STATE_EVENT, showChannelName } from "@/lib/pusher/channels";
 import type { ShowEvent } from "@/types/show";
 
-export function usePusherShowSync(campaignId: string, enabled = true): void {
+export function usePusherShowSync(campaignId: string): void {
   const queryClient = useQueryClient();
 
   usePusherChannel(
-    enabled ? showChannelName(campaignId) : null,
+    showChannelName(campaignId),
     {
       [SHOW_STATE_EVENT]: (data) => {
         const show = (data as Partial<ShowEvent> | null)?.show;

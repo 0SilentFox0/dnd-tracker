@@ -67,7 +67,7 @@ describe("PATCH skill tree", () => {
     const res = await patch("new", raw);
 
     expect(res.status).toBe(400);
-    expect(await getResponseJson(res as never)).toEqual({ error: "Цей скіл уже стоїть в іншому місці дерева" });
+    expect(await getResponseJson(res as never)).toEqual({ errors: [{ code: "duplicateSkill", ref: "o1" }] });
   });
 
   it("прогрес під старим JSON id дерева переноситься під id рядка при збереженні", async () => {

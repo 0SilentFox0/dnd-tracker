@@ -6,7 +6,6 @@ import { Skull } from "lucide-react";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
-import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { UnitImportDialog } from "@/components/units/dialogs/UnitImportDialog";
@@ -59,7 +58,6 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
           />
         )}
       </HudPageHeader>
-      <OnboardingHint id="dm.units" />
 
       {list.isLoading && list.units.length === 0 ? (
         <LoadingState rows={6} label="Завантаження юнітів…" />

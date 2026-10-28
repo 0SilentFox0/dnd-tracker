@@ -15,7 +15,7 @@ export async function readInventory(campaignId: string, characterId: string): Pr
 
   const character = await prisma.character.findUnique({
     where: { id: characterId },
-    include: { inventory: true, campaign: { omit: { aiInstructions: true }, include: { members: { where: { userId } } } } },
+    include: { inventory: true, campaign: { include: { members: { where: { userId } } } } },
   });
 
   if (!character || character.campaignId !== campaignId) return errorResponse(API_ERRORS.NOT_FOUND, 404);

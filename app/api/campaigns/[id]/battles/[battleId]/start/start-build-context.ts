@@ -58,7 +58,7 @@ export async function buildCampaignContextForStart(
           trees,
           prisma.mainSkill.findMany({
             where: { campaignId },
-            select: { id: true, spellGroupId: true, name: true },
+            select: { id: true, spellGroupId: true, name: true, role: true },
           }),
           prisma.spell.findMany({ where: { campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } }),
           skillIds.length > 0 ? prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } } }) : [],

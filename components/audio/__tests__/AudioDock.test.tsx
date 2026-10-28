@@ -174,25 +174,6 @@ describe("AudioDock — гравець", () => {
   });
 });
 
-describe("AudioDock — defaultExpanded", () => {
-  it("defaultExpanded=false: на широкому екрані кут стартує згорнутим, клік розгортає", () => {
-    const scene = fakeScene({ isDM: false, audio: fileState });
-
-    const { container, getByLabelText } = render(
-      <BattleAudioProvider>
-        <AudioDock placement="corner" defaultExpanded={false} />
-      </BattleAudioProvider>,
-      { wrapper: scene.wrapper },
-    );
-
-    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
-
-    fireEvent.click(getByLabelText(/Розгорнути плеєр/));
-
-    expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
-  });
-});
-
 describe("AudioDock — ДМ", () => {
   it("без треку бачить бібліотеку; клік по треку — play", async () => {
     const { findByRole } = dock({ isDM: true, audio: null });

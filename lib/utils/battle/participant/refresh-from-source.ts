@@ -18,11 +18,11 @@ function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: Ba
   return out;
 }
 
-/** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size, speed); HP, morale, effects, usage and flags stay live. */
+/** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size); HP, effects, usage and flags stay live. */
 export function refreshFromSource(live: BattleParticipant, fresh: BattleParticipant): BattleParticipant {
   return {
     ...live,
-    combatStats: { ...live.combatStats, gridSize: fresh.combatStats.gridSize, speed: fresh.combatStats.speed },
+    combatStats: { ...live.combatStats, gridSize: fresh.combatStats.gridSize },
     battleData: {
       ...live.battleData,
       resolvedAbilities: fresh.battleData.resolvedAbilities,

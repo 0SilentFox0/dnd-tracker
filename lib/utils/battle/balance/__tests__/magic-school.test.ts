@@ -1,24 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { isMagicMainSkill, magicMainSkillIds } from "@/lib/utils/battle/balance";
-import { getNonMagicBranchDpr } from "@/lib/utils/battle/balance/dpr";
+import { magicMainSkillIds } from "@/lib/utils/battle/balance/magic-school";
 
-describe("школа магії", () => {
-  it("за slug-ідентифікатором", () => {
-    expect(isMagicMainSkill({ id: "sorcery" })).toBe(true);
+describe("magicMainSkillIds", () => {
+  it("role magic or a linked spell group counts as magic; the name does not", () => {
+    const ids = magicMainSkillIds([
+      { id: "a", role: "magic" },
+      { id: "b", role: null, spellGroupId: "g1" },
+      { id: "c", role: "attack" },
+      { id: "d", role: null, spellGroupId: null },
+    ]);
+
+    expect([...ids].sort()).toEqual(["a", "b"]);
   });
 
-  it("за назвою, без регістру й зайвих пробілів", () => {
-    expect(isMagicMainSkill({ id: "cuid1", name: "Магія світла" })).toBe(true);
-    expect(isMagicMainSkill({ id: "cuid2", name: "  Магія   Хаосу " })).toBe(true);
-    expect(isMagicMainSkill({ id: "cuid3", name: "Напад" })).toBe(false);
-  });
-
-  it("набір ідентифікаторів магічних шкіл кампанії", () => {
-    expect(magicMainSkillIds([{ id: "a", name: "Магія темряви" }, { id: "b", name: "Захист" }, { id: "light_magic", name: "Світло" }])).toEqual(new Set(["a", "light_magic"]));
-  });
-
-  it("DPR без набору кампанії все одно впізнає slug", () => {
-    expect(getNonMagicBranchDpr({ sorcery: "expert" }, null)).toBe(0);
-  });
+  it("empty campaign → empty set", () => expect(magicMainSkillIds([]).size).toBe(0));
 });

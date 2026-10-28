@@ -3,7 +3,6 @@ import { mergeEffectsForDisplay } from "./effect-summary";
 import { appliesTo, auraKey, isAuraTarget } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
 import { isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
-import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
@@ -35,7 +34,7 @@ export function personalPassiveEffects(p: BattleParticipant, order: BattlePartic
       const build = (abilityEffects: typeof hits, suffix = ""): ActiveEffect => ({
         id: `personal:${owner.basicInfo.id}:${a.key}${suffix}`,
         name: a.name,
-        type: abilityNature(abilityEffects) ?? (ally ? "buff" : "debuff"),
+        type: ally ? "buff" : "debuff",
         duration: 0,
         permanent: true,
         appliedAt: { round: 0, timestamp: new Date(0) },

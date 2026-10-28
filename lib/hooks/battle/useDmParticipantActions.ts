@@ -36,7 +36,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
   const refreshSources = async () => {
     const ok = await confirm({
       title: "Оновити з бібліотеки?",
-      description: "Здібності, атаки, закляття, слоти, СК і швидкість учасників оновляться з бази кампанії. HP, мораль, ефекти й використані ліміти залишаться.",
+      description: "Здібності, атаки, закляття і слоти учасників оновляться з бази кампанії. HP, ефекти й використані ліміти залишаться.",
       confirmLabel: "Оновити",
     });
 

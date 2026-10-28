@@ -9,6 +9,6 @@ export const lockCampaignArtifacts = (tx: Prisma.TransactionClient, campaignId: 
 export const ensureInventory = (tx: Prisma.TransactionClient, characterId: string) =>
   tx.characterInventory.upsert({
     where: { characterId },
-    create: { characterId, equipped: {}, backpack: [], items: [], stash: [], gold: 0, silver: 0, copper: 0 },
+    create: { characterId, equipped: {}, backpack: [], items: [], gold: 0, silver: 0, copper: 0 },
     update: {},
   });

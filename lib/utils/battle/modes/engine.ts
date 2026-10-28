@@ -36,12 +36,6 @@ export function modeEngages(map: MapArg, attacker: BattleParticipant, neighbour:
   return active?.mode.engine.engages?.({ config: active.config, map: active.map, attacker, neighbour }) ?? isActive(neighbour);
 }
 
-export function modeLineBlocked(map: MapArg, line: GridPoint[]): boolean {
-  const active = activeModeWithConfig(map);
-
-  return active?.mode.engine.lineBlocked?.({ config: active.config, map: active.map, line }) ?? false;
-}
-
 /** Масові цілі: ворогів, яких каст не бачить, відсіює режим; союзники й невідомі id лишаються. */
 export function modeSightedTargets(map: MapArg, ps: BattleParticipant[], caster: BattleParticipant, ids: string[]): string[] {
   if (!activeModeWithConfig(map)) return ids;

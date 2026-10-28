@@ -75,7 +75,7 @@ export function resolvePoints(spec: FxSpec, root: ParentNode = document): { from
 
   if (spec.archetype === "death") return { from: targets[0].at, targets, actorEl: null };
 
-  const actorEl = findAnchor(spec.originId ?? spec.actorId, root);
+  const actorEl = findAnchor(spec.actorId, root);
 
   const from = actorEl ? centerOf(actorEl) : { x: targets[0].at.x, y: spec.actorSide === "enemy" ? -20 : window.innerHeight + 20 };
 

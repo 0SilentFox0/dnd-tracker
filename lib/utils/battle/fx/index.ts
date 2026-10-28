@@ -2,11 +2,11 @@ export { ARCHETYPE_FX, type ArchetypeFx, FX_ARCHETYPES, type FxImpactKind } from
 export { aurasOf } from "./aura";
 export { frameKindOf, type FxFrameKind } from "./frame-kind";
 export { type HudMotif, hudMotifsOf } from "./hud-motif";
-export { type FxImpact, impactFor, splashTargetIds } from "./impact";
+export { type FxImpact, impactFor } from "./impact";
 export { mapAction } from "./map-action";
 export { PREVIEW_UNITS, type PreviewUnit, type PreviewUnitId } from "./preview-units";
-export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, isMoraleFx, MAX_FX_QUEUE, shiftFxQueue, trimFxQueue } from "./queue";
+export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, shiftFxQueue } from "./queue";
 export type { PreviewSpell, SpellFxPreview, SpellFxTarget } from "./spell-preview";
-export { type SpellFx, spellFx } from "./spells";
-export { MAX_FX_BATCH, MAX_FX_MS } from "./timing";
+export type { SpellFx } from "./spells";
+export { MAX_FX_MS } from "./timing";
 export type { FxArchetype, FxAuraKind, FxElement, FxSpec } from "./types";

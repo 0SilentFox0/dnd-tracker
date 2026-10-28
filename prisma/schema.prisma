@@ -17,8 +17,6 @@ model User {
   campaignMembers CampaignMember[]
   dmCampaigns     Campaign[]       @relation("DMCampaigns")
   characters      Character[]
-  aiCredentials   AiCredential[]
-  onboardingFlags UserOnboardingFlag[]
 
   @@map("users")
 }
@@ -36,7 +34,6 @@ model Campaign {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   friendlyFire    Boolean          @default(false)
-  aiInstructions  String?
   artifactSets    ArtifactSet[]
   artifacts       Artifact[]
   battles         BattleScene[]
@@ -54,10 +51,6 @@ model Campaign {
   slideDecks      SlideDeck[]
   show            CampaignShow?
   units           Unit[]
-  aiThreads       AiThread[]
-  aiProposals     AiProposal[]
-  apiTokens       ApiToken[]
-  inventoryLog    InventoryLog[]
 
   @@index([dmUserId])
   @@map("campaigns")
@@ -90,7 +83,6 @@ model Character {
   subrace             String?
   alignment           String?
   background          String?
-  notes               String?
   experience          Int                 @default(0)
   avatar              String?
   strength            Int                 @default(10)
@@ -124,9 +116,6 @@ model Character {
   archetype           String?
   meleeMultiplier     Float?
   rangedMultiplier    Float?
-  status              String              @default("active")
-  reviewNote          String?
-  inventoryLog        InventoryLog[]
   inventory           CharacterInventory?
   characterSkills     CharacterSkills[]
   scenarioPages       ScenarioPage[]
@@ -165,7 +154,7 @@ model Unit {
   morale           Int      @default(0)
   maxTargets       Int      @default(1)
   minTargets       Int      @default(1)
-  abilities        Json     @default("[]")
+  abilities        Json   @default("[]")
   levelScaling     Json?
   campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
@@ -203,6 +192,7 @@ model Spell {
   diceCount             Int?
   diceType              String?
   appearanceDescription String? // опис вигляду для довідника гравців (редагує DM)
+  fx                    Json?
   damageDistribution    Json? // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
   dice                  Int         @default(0)
   cost                  String      @default("action")
@@ -228,6 +218,8 @@ model SpellGroup {
   id         String      @id @default(cuid())
   campaignId String
   name       String
+  color      String?
+  icon       String?
   createdAt  DateTime    @default(now())
   skills     Skill[]
   campaign   Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -250,7 +242,7 @@ model Artifact {
   setId       String?
   icon        String?
   createdAt   DateTime     @default(now())
-  abilities   Json         @default("[]")
+  abilities   Json   @default("[]")
   campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
 
@@ -266,7 +258,7 @@ model ArtifactSet {
   setBonus    Json?
   icon        String?
   createdAt   DateTime   @default(now())
-  abilities   Json       @default("[]")
+  abilities   Json   @default("[]")
   campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifacts   Artifact[]
 
@@ -283,27 +275,10 @@ model CharacterInventory {
   silver      Int       @default(0)
   copper      Int       @default(0)
   items       Json      @default("[]")
-  stash       Json      @default("[]")
   updatedAt   DateTime  @updatedAt
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("character_inventories")
-}
-
-model InventoryLog {
-  id          String    @id @default(cuid())
-  campaignId  String
-  characterId String
-  actorUserId String
-  kind        String
-  delta       Json      @default("{}")
-  note        String?
-  createdAt   DateTime  @default(now())
-  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-
-  @@index([characterId, createdAt(sort: Desc)])
-  @@map("inventory_log")
 }
 
 model SkillTree {
@@ -375,18 +350,15 @@ model CampaignTrack {
 }
 
 model SlideDeck {
-  id             String        @id @default(cuid())
-  campaignId     String
-  title          String
-  sortOrder      Int           @default(0)
-  slides         Json          @default("[]")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  scenarioPageId String?
-  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
+  id         String   @id @default(cuid())
+  campaignId String
+  title      String
+  sortOrder  Int      @default(0)
+  slides     Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
-  @@index([scenarioPageId])
   @@index([campaignId, sortOrder])
   @@map("slide_decks")
 }
@@ -398,9 +370,6 @@ model CampaignShow {
   slide        Json?
   nextImageUrl String?
   audio        Json?
-  battle       Json?
-  cover        Json?
-  curtain      Boolean  @default(false)
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -498,7 +467,7 @@ model Skill {
   grantedSpellId          String? // скіл додає це заклинання персонажу
   spellEnhancementData    Json        @default("{}")
   appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
-  abilities               Json        @default("[]")
+  abilities               Json   @default("[]")
   campaign                Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   mainSkill               MainSkill?  @relation(fields: [mainSkillId], references: [id])
   spellGroup              SpellGroup? @relation(fields: [spellGroupId], references: [id])
@@ -521,7 +490,7 @@ model Race {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   spellSlotProgression Json     @default("[]")
-  abilities            Json     @default("[]")
+  abilities            Json   @default("[]")
   icon                 String?
   color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -539,6 +508,7 @@ model MainSkill {
   icon                String?
   isEnableInSkillTree Boolean     @default(false)
   spellGroupId        String?
+  role                String?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   campaign            Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -580,9 +550,6 @@ model ScenarioPage {
   campaign    Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   character   Character?            @relation(fields: [characterId], references: [id], onDelete: SetNull)
   versions    ScenarioPageVersion[]
-  decks       SlideDeck[]
-  aiThreads   AiThread[]
-  aiProposals AiProposal[]
 
   @@index([campaignId, sortOrder])
   @@index([characterId])
@@ -599,104 +566,4 @@ model ScenarioPageVersion {
 
   @@index([pageId, createdAt])
   @@map("scenario_page_versions")
-}
-
-model AiCredential {
-  id           String   @id @default(cuid())
-  userId       String
-  provider     String
-  ciphertext   String
-  iv           String
-  authTag      String
-  keyVersion   Int      @default(1)
-  last4        String
-  defaultModel String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, provider])
-  @@map("ai_credentials")
-}
-
-model AiThread {
-  id             String        @id @default(cuid())
-  campaignId     String
-  userId         String
-  mode           String
-  scenarioPageId String?
-  title          String
-  provider       String
-  model          String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
-  messages       AiMessage[]
-  proposals      AiProposal[]
-
-  @@index([campaignId, userId, updatedAt])
-  @@map("ai_threads")
-}
-
-model AiMessage {
-  id        String   @id @default(cuid())
-  threadId  String
-  seq       Int
-  role      String
-  parts     Json
-  metadata  Json     @default("{}")
-  createdAt DateTime @default(now())
-  thread    AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-
-  @@unique([threadId, seq])
-  @@map("ai_messages")
-}
-
-model AiProposal {
-  id             String       @id @default(cuid())
-  campaignId     String
-  threadId       String?
-  pageId         String
-  summary        String
-  ops            Json
-  status         String       @default("pending")
-  appliedVersion Int?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  thread         AiThread?    @relation(fields: [threadId], references: [id], onDelete: SetNull)
-  page           ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
-
-  @@index([pageId, status])
-  @@map("ai_proposals")
-}
-
-model ApiToken {
-  id         String    @id @default(cuid())
-  campaignId String
-  userId     String
-  name       String
-  tokenHash  String    @unique
-  prefix     String
-  scopes     String[]
-  lastUsedAt DateTime?
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@index([campaignId])
-  @@map("api_tokens")
-}
-
-model UserOnboardingFlag {
-  id        String   @id @default(cuid())
-  userId    String
-  key       String
-  value     String?
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, key])
-  @@map("user_onboarding_flags")
 }

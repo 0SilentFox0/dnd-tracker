@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // CSS goes into the HTML instead of render-blocking requests (mobile LCP on the landing)
-  experimental: { inlineCss: true },
-  async headers() {
-    return [{ source: "/fonts/:file*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] }];
-  },
   async redirects() {
     return [
       {

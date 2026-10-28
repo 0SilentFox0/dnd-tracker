@@ -24,14 +24,7 @@ describe("buildTrackPatch", () => {
   });
 
   it("лише змінені поля; порожня тривалість очищає", () => {
-    expect(buildTrackPatch(file, { ...trackToDraft(file), name: " Битва 1 ", durationSec: "" })).toEqual({ ok: true, patch: { title: "Люди - Битва 1", durationSec: null } });
-  });
-
-  it("зміна групи переносить трек; «Інше» чи порожня група знімають префікс; задовга назва — помилка", () => {
-    expect(buildTrackPatch(file, { ...trackToDraft(file), group: "Ельфи" })).toEqual({ ok: true, patch: { title: "Ельфи - Битва" } });
-    expect(buildTrackPatch(file, { ...trackToDraft(file), group: "Інше" })).toEqual({ ok: true, patch: { title: "Битва" } });
-    expect(buildTrackPatch(file, { ...trackToDraft(file), group: "" })).toEqual({ ok: true, patch: { title: "Битва" } });
-    expect(buildTrackPatch(file, { ...trackToDraft(file), group: "x".repeat(120) })).toMatchObject({ ok: false, error: { title: expect.any(String) } });
+    expect(buildTrackPatch(file, { ...trackToDraft(file), title: " Люди - Битва 1 ", durationSec: "" })).toEqual({ ok: true, patch: { title: "Люди - Битва 1", durationSec: null } });
   });
 
   it("нове посилання YouTube іде патчем, те саме відео — ні", () => {
@@ -42,7 +35,7 @@ describe("buildTrackPatch", () => {
   it("помилки: посилання, тривалість, порожня назва; посилання файлу ігнорується", () => {
     expect(buildTrackPatch(youtube, { ...trackToDraft(youtube), url: "нісенітниця" })).toMatchObject({ ok: false, error: { url: expect.any(String) } });
     expect(buildTrackPatch(file, { ...trackToDraft(file), durationSec: "1.5" })).toMatchObject({ ok: false, error: { durationSec: expect.any(String) } });
-    expect(buildTrackPatch(file, { ...trackToDraft(file), name: "  " }).ok).toBe(false);
+    expect(buildTrackPatch(file, { ...trackToDraft(file), title: "  " }).ok).toBe(false);
     expect(buildTrackPatch(file, { ...trackToDraft(file), url: "https://elsewhere" })).toEqual({ ok: true, patch: {} });
   });
 });

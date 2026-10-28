@@ -4,18 +4,19 @@ import { SPELLS } from "@/data/library/spells";
 import { castableOf, previewCastFx, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules, toBookSpell } from "@/lib/utils/spells/to-book-spell";
+import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 const preview = (name: string) => {
   const spell = SPELLS.find((s) => s.name === name);
 
   if (!spell) throw new Error(`no library spell ${name}`);
 
-  return previewSpellFx(spell);
+  return previewSpellFx(spell, SPELL_FX_BY_NAME[name]);
 };
 
 describe("previewSpellFx", () => {
   it("casts every library spell without errors", () => {
-    const failed = SPELLS.map(previewSpellFx).filter((p) => p.error || !p.spec);
+    const failed = SPELLS.map((s) => previewSpellFx(s, SPELL_FX_BY_NAME[s.name])).filter((p) => p.error || !p.spec);
 
     expect(failed.map((p) => `${p.name}: ${p.error}`)).toEqual([]);
   });
@@ -111,8 +112,8 @@ describe("previewCastFx for campaign spells", () => {
 
     const fromBook = previewCastFx(castableOf({ id: book.id, name: book.name, level: book.level, groupId: null, rules: book }));
 
-    // spec.key and spec.actionId carry the cast timestamp
-    const stable = (p: typeof fromBook) => ({ ...p, spec: p.spec && { ...p.spec, key: "", actionId: "" } });
+    // spec.key carries the cast timestamp
+    const stable = (p: typeof fromBook) => ({ ...p, spec: p.spec && { ...p.spec, key: "" } });
 
     expect(stable(fromReference)).toEqual(stable(fromBook));
   });

@@ -4,27 +4,11 @@ import { useEffect, useRef } from "react";
 
 import "@/components/battle/fx/fx.css";
 import { preloadAnimation } from "@/components/battle/fx/animations";
-import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
+import { DICE_TOTAL_MS, DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
 import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { fireFxImpact, useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
-import { ARCHETYPE_FX, type FxSpec, MAX_FX_MS } from "@/lib/utils/battle/fx";
-import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
-
-const DICE_BUDGET_MS = FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300;
-
-const NO_IMPACT = new Set(["dice", "death"]);
-
-// таймер не скасовується: пізній сигнал нешкідливий, а ранній «done» його б загубив
-function impactStarter(spec: FxSpec): (() => void) | undefined {
-  const { actionId } = spec;
-
-  if (!actionId || NO_IMPACT.has(spec.archetype)) return;
-
-  return () => {
-    window.setTimeout(() => fireFxImpact(actionId), ARCHETYPE_FX[spec.archetype].impactMs);
-  };
-}
+import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
+import { MAX_FX_MS } from "@/lib/utils/battle/fx";
 
 function withTimeout(run: Promise<void>, ms: number, onTimeout: () => void) {
   let timer = 0;
@@ -84,11 +68,11 @@ export function BattleFxLayer() {
     };
 
     const play = () => {
-      if (current.archetype !== "dice") return playFx(el, current, document, FX_LOAD_TIMEOUT_MS, impactStarter(current));
+      if (current.archetype !== "dice") return playFx(el, current);
 
       if (!current.dice) return;
 
-      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), DICE_BUDGET_MS, () => dice.current?.cancel());
+      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300, () => dice.current?.cancel());
     };
 
     // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.
@@ -96,7 +80,7 @@ export function BattleFxLayer() {
       cancelLayer(el);
       dice.current?.cancel();
       finish();
-    }, (current.archetype === "dice" ? DICE_BUDGET_MS + 300 : MAX_FX_MS) + FX_LOAD_TIMEOUT_MS);
+    }, MAX_FX_MS + FX_LOAD_TIMEOUT_MS);
 
     // async so done() never runs synchronously inside the effect
     Promise.resolve()
@@ -104,10 +88,6 @@ export function BattleFxLayer() {
       .catch((e: unknown) => console.warn("battle fx", e))
       .finally(() => {
         window.clearTimeout(guard);
-
-        // play() міг повернутись без onStart (інша епоха шару, немає якорів): без сигналу декорації чекали б запобіжник
-        if (!cancelled && current.actionId && !NO_IMPACT.has(current.archetype)) fireFxImpact(current.actionId);
-
         finish();
       });
 

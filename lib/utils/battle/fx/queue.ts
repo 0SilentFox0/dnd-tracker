@@ -18,38 +18,11 @@ export interface FxQueueInput {
   morale: MoraleThrow | null;
 }
 
-export const isMoraleFx = (key: string) => key.startsWith("morale:");
-
 const moraleFx = ({ key, spec }: MoraleThrow): FxSpec => ({ key: `morale:${key}`, archetype: "dice", element: "arcane", actorId: key.split(":")[2], actorSide: "ally", targetIds: [], hit: true, critical: false, dice: spec });
 
 export const INITIAL_FX_QUEUE: FxQueueState = { log: null, seen: null, queue: [] };
 
-export const MAX_FX_QUEUE = 32;
-
-/** Дія, що грає (усі її спеки), лишається; решта обрізається найстарішими діями цілком, щоб залп не втратив середину. */
-export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
-  if (queue.length <= max) return queue;
-
-  const headId = queue[0].actionId;
-
-  const isHead = (s: FxSpec, i: number) => i === 0 || (headId !== undefined && s.actionId === headId);
-
-  const head = queue.filter(isHead);
-
-  let tail = queue.filter((s, i) => !isHead(s, i));
-
-  const groupOf = (s: FxSpec) => s.actionId ?? s.key;
-
-  while (tail.length > 0 && head.length + tail.length > max) {
-    const oldest = groupOf(tail[0]);
-
-    const dropped = tail.filter((s) => groupOf(s) !== oldest);
-
-    tail = dropped.length === tail.length ? tail.slice(1) : dropped;
-  }
-
-  return [...head, ...tail];
-}
+export const MAX_FX_QUEUE = 12;
 
 /** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */
 export function advanceFxQueue(state: FxQueueState, { log, morale }: FxQueueInput, active: boolean): FxQueueState {
@@ -65,7 +38,8 @@ export function advanceFxQueue(state: FxQueueState, { log, morale }: FxQueueInpu
 
   const queue = [...state.queue, ...moraleSpec, ...actions.flatMap(mapAction)];
 
-  return { log, seen, queue: trimFxQueue(queue, MAX_FX_QUEUE), morale: moraleKey };
+  // the head may be playing right now, so trimming keeps it
+  return { log, seen, queue: queue.length > MAX_FX_QUEUE ? [queue[0], ...queue.slice(1 - MAX_FX_QUEUE)] : queue, morale: moraleKey };
 }
 
 /** Знімає голову лише якщо це та сама анімація: запізнілий `done` після очищення черги нічого не пропускає. */

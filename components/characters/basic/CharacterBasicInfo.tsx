@@ -86,7 +86,6 @@ export function CharacterBasicInfo({
           required
           triggerClassName="w-full"
         />
-        {races.length === 0 && <p className="mt-1 text-xs text-muted-foreground">Спершу створіть расу в розділі Раси</p>}
       </div>
 
       <LabeledInput

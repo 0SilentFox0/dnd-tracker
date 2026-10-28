@@ -1,11 +1,10 @@
 import { z } from "zod";
 
-import { SKILL_NAME_MAX } from "@/lib/constants/skills";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 export const createSkillSchema = z.object({
   basicInfo: z.object({
-    name: z.string().min(1).max(SKILL_NAME_MAX),
+    name: z.string().min(1).max(100),
     description: z.string().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),

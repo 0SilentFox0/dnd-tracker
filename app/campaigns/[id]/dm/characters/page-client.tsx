@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Trash2, Users } from "lucide-react";
 
 import { DmCharacterCard } from "@/components/characters/list/DmCharacterCard";
-import { PendingDraftsPanel } from "@/components/characters/review/PendingDraftsPanel";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
@@ -68,8 +67,6 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
           }))}
         />
       </HudPageHeader>
-
-      <PendingDraftsPanel campaignId={campaignId} />
 
       <QueryState
         query={page.query}

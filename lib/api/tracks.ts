@@ -33,5 +33,5 @@ export async function uploadTrackFile(campaignId: string, file: File, meta: { ti
 
   if (error) throw new Error(`Не вдалося завантажити файл: ${error.message}`);
 
-  return createTrack(campaignId, { kind: "file", path: ticket.path, title: meta.title, ...(meta.durationSec ? { durationSec: Math.max(1, Math.round(meta.durationSec)) } : {}) });
+  return createTrack(campaignId, { kind: "file", path: ticket.path, title: meta.title, ...(meta.durationSec ? { durationSec: Math.round(meta.durationSec) } : {}) });
 }

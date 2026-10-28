@@ -79,7 +79,7 @@ export function abilityOf(spell: CastableSpell): ResolvedAbility {
 
 export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: string): BattleAction {
   return newBattleAction(caster, "spell", { battleId, round, targets }, {
-    actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level },
+    actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level, ...(spell.fx && { spellFx: spell.fx }) },
     resultText: text,
   });
 }

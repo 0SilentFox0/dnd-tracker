@@ -20,7 +20,6 @@ export function MainSkillEditForm({ campaignId, mainSkill }: MainSkillEditFormPr
       <HudForm
         id="main-skill-form"
         onSubmit={actions.submit}
-        error={status.error}
         actions={
           <>
             <Button type="button" variant="outline" onClick={actions.cancel}>

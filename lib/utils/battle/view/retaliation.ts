@@ -1,5 +1,3 @@
-import { damageTaken } from "./damage-taken";
-
 import type { BattleAction } from "@/types/battle";
 
 export interface RetaliationOutcome {
@@ -14,7 +12,7 @@ export function retaliationOutcome(log: BattleAction[], seen: ReadonlySet<number
 
   const targetId = e.targets[0]?.participantId;
 
-  const damage = damageTaken(e, targetId);
+  const damage = e.hpChanges.filter((h) => h.participantId === targetId).reduce((sum, h) => sum + Math.max(0, h.change), 0);
 
   return { name: e.actorName, damage };
 }

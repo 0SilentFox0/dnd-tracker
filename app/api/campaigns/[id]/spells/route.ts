@@ -39,6 +39,7 @@ export async function POST(
         icon: data.icon || null,
         description: data.description ?? null,
         appearanceDescription: data.appearanceDescription ?? null,
+        fx: data.fx ?? undefined,
         // старі колонки NOT NULL до пізнішої міграції; нова модель їх не читає
         type: "target",
         damageType: "damage",

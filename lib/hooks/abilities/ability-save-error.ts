@@ -6,7 +6,7 @@ interface Issue {
 }
 
 export function abilitySaveError(err: unknown, fallback: string): string {
-  const issues = err instanceof ApiError ? (err.body as { issues?: unknown } | null)?.issues : undefined;
+  const issues = err instanceof ApiError ? (err.body as { error?: unknown } | null)?.error : undefined;
 
   if (Array.isArray(issues)) {
     const own = (issues as Issue[]).filter((i) => i.path?.[0] === "abilities");

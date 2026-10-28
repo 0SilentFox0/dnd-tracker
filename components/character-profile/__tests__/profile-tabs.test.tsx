@@ -8,7 +8,7 @@ import { sheetFixture, withSheet } from "./sheet-fixture";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
-  useCharacterRoster: () => ({ data: [], isLoading: false }), useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }), useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useCharacterRoster: () => ({ data: [], isLoading: false }), useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div> }));

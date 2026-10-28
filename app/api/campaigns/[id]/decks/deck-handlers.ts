@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { MAX_DECKS_PER_CAMPAIGN } from "@/lib/constants/show";
 import { prisma } from "@/lib/db";
-import { createDeckSchema, deckSceneSchema, readSlides, saveDeckSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
+import { createDeckSchema, readSlides, saveDeckSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
 import { listDecks, persistSlideImages, toSlideDeck, urlsUsedElsewhere } from "@/lib/server/show/deck-store";
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
 import { createSlideUploadTicket, removeSlideFiles } from "@/lib/supabase/scene-slide-storage";
@@ -158,29 +158,6 @@ export function saveDeckHandler(req: Request, campaignId: string, deckId: string
     });
 
     return NextResponse.json(saved);
-  });
-}
-
-export function setDeckSceneHandler(req: Request, campaignId: string, deckId: string) {
-  return asDM(campaignId, "set deck scene", async () => {
-    const body = await parseBody(deckSceneSchema, req);
-
-    if (body instanceof NextResponse) return body;
-
-    const deck = await ownedDeck(campaignId, deckId);
-
-    if (deck instanceof NextResponse) return deck;
-
-    if (body.scenarioPageId) {
-      const page = await prisma.scenarioPage.findFirst({ where: { id: body.scenarioPageId, campaignId, kind: "scene" }, select: { id: true } });
-
-      if (!page) return errorResponse(API_ERRORS.DECK_SCENE_INVALID, 400);
-    }
-
-    // прив'язка — не правка вмісту: expectedUpdatedAt відкритого редактора має лишитися дійсним
-    const row = await prisma.slideDeck.update({ where: { id: deckId }, data: { scenarioPageId: body.scenarioPageId, updatedAt: deck.updatedAt } });
-
-    return NextResponse.json(toSlideDeck(row));
   });
 }
 

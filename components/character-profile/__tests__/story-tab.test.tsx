@@ -4,10 +4,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
-const { save, saveNotes } = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(true), saveNotes: vi.fn().mockResolvedValue(true) }));
+const { save } = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(true) }));
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save, isPending: false }), useCharacterNotes: () => ({ save: saveNotes, isPending: false }), useCharacterTokens: () => ({ add: vi.fn(), remove: vi.fn(), isPending: false }) }));
+vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save, isPending: false }), useCharacterTokens: () => ({ add: vi.fn(), remove: vi.fn(), isPending: false }) }));
 
 import { BiographyText, StoryTab } from "@/components/character-profile";
 import { ProfileContext } from "@/components/character-profile/ProfileContext";
@@ -25,7 +25,6 @@ describe("Історія", () => {
   afterEach(() => {
     cleanup();
     save.mockClear();
-    saveNotes.mockClear();
   });
 
   it("виділення — <mark>, HTML — текст", () => {
@@ -68,7 +67,7 @@ describe("Історія", () => {
   });
 
   it("порожня біографія — підказка", () => {
-    inProfile(withSheet({ story: { biography: null, notes: null, goals: [], tokens: [], chapters: [] } }));
+    inProfile(withSheet({ story: { biography: null, goals: [], tokens: [], chapters: [] } }));
 
     expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
   });
@@ -106,23 +105,5 @@ describe("Історія", () => {
   it("без глав — блок не рендериться", () => {
     inProfile(sheetFixture);
     expect(screen.queryByText(/глави історії/i)).toBeNull();
-  });
-
-  it("власник бачить нотатки і зберігає правку", async () => {
-    inProfile(sheetFixture);
-
-    expect(screen.getByText("Купити мотузку")).toBeTruthy();
-
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати нотатки" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Нотатки" }), { target: { value: "Нове" } });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
-
-    await waitFor(() => expect(saveNotes).toHaveBeenCalledWith("Нове"));
-  });
-
-  it("не власник не бачить блок нотаток", () => {
-    inProfile(withSheet({ viewer: { isDM: true, isOwner: false } }));
-
-    expect(screen.queryByText("НОТАТКИ")).toBeNull();
   });
 });

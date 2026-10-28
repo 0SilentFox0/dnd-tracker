@@ -7,13 +7,10 @@ import { fakeScene } from "./fake-scene";
 
 import type { BattleAction } from "@/types/battle";
 
-const hitLog = (changes: { participantId: string; change: number }[]) =>
-  [{ actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: changes.map((c) => ({ ...c, participantName: c.participantId, oldHp: 20, newHp: 20 - c.change })), actionDetails: { isHit: true } }] as unknown as BattleAction[];
+function start() {
+  const scene = fakeScene();
 
-function start(afterLog: BattleAction[] = hitLog([{ participantId: "gob", change: 9 }])) {
-  const scene = fakeScene({ afterLog });
-
-  scene.mutateAsync.mockResolvedValue(undefined);
+  scene.mutateAsync.mockResolvedValue({ hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }] });
 
   const onDone = vi.fn();
 
@@ -47,7 +44,14 @@ describe("useAttackWizard", () => {
   });
 
   it("шкода — з hpChanges відповіді по цілі, а не з різниці кешу; відсіч по атакувальнику не рахується", async () => {
-    const { result, showResult } = start(hitLog([{ participantId: "gob", change: 7 }, { participantId: "me", change: 4 }]));
+    const { result, mutateAsync, showResult } = start();
+
+    mutateAsync.mockResolvedValueOnce({
+      hpChanges: [
+        { participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 13, change: 7 },
+        { participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 },
+      ],
+    });
 
     act(() => result.current.actions.roll(14));
     act(() => result.current.actions.damage([6]));
@@ -57,24 +61,12 @@ describe("useAttackWizard", () => {
   });
 
   it("промах — відправка одразу, результат «miss»", async () => {
-    const missLog = [{ actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: [], actionDetails: { isHit: false } }] as unknown as BattleAction[];
-
-    const { result, mutateAsync, showResult } = start(missLog);
+    const { result, mutateAsync, showResult } = start();
 
     act(() => result.current.actions.roll(2));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "miss" })));
-  });
-
-  it("у логу немає нових записів — картка бере прогнозований результат ударів, а не «промах»", async () => {
-    const { result, showResult } = start([]);
-
-    act(() => result.current.actions.roll(14));
-    act(() => result.current.actions.damage([6]));
-    act(() => result.current.actions.submit());
-
-    await waitFor(() => expect(showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 0 })));
   });
 
   it("помилка мутації — підсумок із текстом помилки", async () => {
@@ -97,8 +89,7 @@ describe("useAttackWizard", () => {
 
   it("відсіч цілі потрапляє в результат", async () => {
     const afterLog = [
-      ...hitLog([{ participantId: "gob", change: 9 }]),
-      { actionIndex: 10, actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], hpChanges: [{ participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 }], actionDetails: { isHit: true } },
+      { actionIndex: 9, actionType: "retaliation", actorName: "Гоблін", targets: [{ participantId: "me", participantName: "Фрейда" }], hpChanges: [{ participantId: "me", participantName: "Фрейда", oldHp: 20, newHp: 16, change: 4 }], actionDetails: { isHit: true } },
     ] as unknown as BattleAction[];
 
     const scene = fakeScene({ afterLog });

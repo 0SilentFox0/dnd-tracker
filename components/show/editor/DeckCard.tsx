@@ -10,7 +10,7 @@ import { useConfirm } from "@/lib/hooks/common";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideDeckSummary; href: string; actions: { start(): void; remove(): void }; pending: boolean; scene?: string }) {
+export function DeckCard({ deck, href, actions, pending }: { deck: SlideDeckSummary; href: string; actions: { start(): void; remove(): void }; pending: boolean }) {
   const confirm = useConfirm();
 
   const askRemove = async () => {
@@ -29,7 +29,6 @@ export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideD
         <p className="text-sm text-hud-muted">
           {deck.slideCount} {pluralUk(deck.slideCount, ["слайд", "слайди", "слайдів"])}
         </p>
-        {scene && <p className="truncate text-xs text-hud-muted">Сцена: {scene}</p>}
       </div>
       <div className="flex flex-wrap gap-2">
         <Button asChild size="sm" variant="outline">

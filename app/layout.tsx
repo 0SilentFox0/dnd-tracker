@@ -1,39 +1,48 @@
 import type { Metadata } from "next";
+import { Geist } from "next/font/google";
 
 import "./globals.css";
-import "./fonts.css";
-import { HUD_PRELOAD_FONTS, hudFontClassName } from "@/components/hud";
-import { HeaderGate } from "@/components/layout/HeaderGate";
+import { hudFontClassName } from "@/components/hud";
+import { Header } from "@/components/layout/Header";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ScreenBackground } from "@/components/layout/screen-background";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { SITE_INDEXING, SITE_URL } from "@/lib/constants/site";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { createClient } from "@/lib/supabase/server";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin", "cyrillic"],
+  preload: false,
+});
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
   title: "D&D Combat Tracker",
-  description: "Помічник ДМ для кампаній D&D 5e",
-  robots: SITE_INDEXING ? undefined : { index: false, follow: false },
+  description: "Combat tracker for D&D 5e campaigns",
 };
 
-export default function RootLayout({
+async function getSessionEmail(): Promise<string | null> {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getClaims();
+
+  return data?.claims?.email ?? null;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const email = await getSessionEmail();
+
   return (
     <html lang="uk" className="dark">
-      <head>
-        {HUD_PRELOAD_FONTS.map((href) => (
-          <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
-        ))}
-      </head>
-      <body className={`font-geist ${hudFontClassName} antialiased`}>
+      <body className={`${geistSans.variable} ${hudFontClassName} antialiased`}>
         <ScreenBackground />
         <QueryProvider>
           <ConfirmProvider>
-            <HeaderGate />
+            <Header email={email} />
             <PageTransition>{children}</PageTransition>
           </ConfirmProvider>
         </QueryProvider>

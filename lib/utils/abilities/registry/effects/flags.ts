@@ -105,15 +105,6 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { percent: 50 },
     describe: (e) => `додаткові цілі дальньої атаки отримують ${e.percent}% шкоди`,
   },
-  chainShot: {
-    label: "Ланцюговий постріл",
-    fields: [
-      { name: "jumps", label: "Стрибків", input: "number" },
-      { name: "percent", label: "% шкоди від попереднього", input: "number" },
-    ],
-    defaults: { jumps: 2, percent: 50 },
-    describe: (e) => `після влучання постріл перескакує на найближчого ворога (${e.jumps}×), кожен стрибок — ${e.percent}% шкоди попереднього`,
-  },
   lifesteal: {
     label: "Вампіризм (лікування від шкоди атак)",
     fields: [{ name: "percent", label: "% завданої шкоди", input: "number" }],
