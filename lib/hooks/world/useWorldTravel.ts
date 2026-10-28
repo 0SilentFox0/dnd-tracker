@@ -4,6 +4,7 @@ import { worldKeys } from "./keys";
 
 import { enterMarker, exitMap, restHeroes, travelHeroes } from "@/lib/api/world";
 import { useCrudMutation } from "@/lib/hooks/common";
+import type { RestRequest } from "@/types/world";
 
 export function useWorldTravel(campaignId: string) {
   const invalidateKeys = () => [worldKeys.viewAll(campaignId), worldKeys.mapAll(campaignId), worldKeys.log(campaignId)];
@@ -27,7 +28,7 @@ export function useWorldTravel(campaignId: string) {
   });
 
   const rest = useCrudMutation({
-    mutationFn: (data: Parameters<typeof restHeroes>[1]) => restHeroes(campaignId, data),
+    mutationFn: (data: RestRequest) => restHeroes(campaignId, data),
     invalidateKeys,
     errorText: "Не вдалося провести відпочинок",
   });

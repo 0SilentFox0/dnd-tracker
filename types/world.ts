@@ -129,6 +129,7 @@ export interface WorldTravelEntry {
 }
 
 export type TravelRequest = { mapId: string; characterIds: string[]; to: MapPoint; toMarkerId?: string; rest: TravelRest };
+export type RestRequest = { mapId: string; characterIds: string[]; kind: Exclude<TravelRest, "none"> };
 export type EnterRequest = { markerId: string; characterIds: string[]; rest: TravelRest };
 export type ExitRequest = { mapId: string; characterIds: string[]; rest: TravelRest };
 export type CreateWorldNoteData = { markerId: string; text: string; visibility: "public" | "private"; characterId?: string };

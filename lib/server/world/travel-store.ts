@@ -85,7 +85,7 @@ export async function commitTravel(args: {
   ]);
 }
 
-export async function writeRestLog(args: { campaignId: string; userId: string; mapId: string; kind: "short" | "long"; characterIds: string[]; at: { x: number; y: number } }): Promise<void> {
+export async function writeRestLog(args: { campaignId: string; userId: string; mapId: string; kind: Exclude<TravelRest, "none">; characterIds: string[]; at: { x: number; y: number } }): Promise<void> {
   const { mapId, at } = args;
 
   await prisma.worldTravelLog.create({

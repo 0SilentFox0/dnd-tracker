@@ -124,8 +124,6 @@ export const exitSchema = z.object({ mapId: z.string().min(1), characterIds, res
 
 export const restWorldSchema = z.object({ mapId: z.string().min(1), characterIds, kind: z.enum(["short", "long"]) });
 
-export type RestWorldInput = z.infer<typeof restWorldSchema>;
-
 const noteText = z.string().trim().min(1, "Нотатка порожня").max(WORLD_NOTE_MAX, `Нотатка — до ${WORLD_NOTE_MAX} символів`);
 
 const noteVisibility = z.enum(["public", "private"]);

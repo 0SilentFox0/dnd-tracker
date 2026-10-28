@@ -19,6 +19,11 @@ describe("applyWorldRest", () => {
     expect(restParty).not.toHaveBeenCalled();
   });
 
+  it("не відпочиває при none", async () => {
+    await expect(applyWorldRest(accessWith(true), "none", ["a"])).resolves.toEqual({ applied: false });
+    expect(restParty).not.toHaveBeenCalled();
+  });
+
   it("викликає restParty, коли persistResources увімкнено", async () => {
     const access = accessWith(true);
 

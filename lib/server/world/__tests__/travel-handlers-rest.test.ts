@@ -84,10 +84,10 @@ describe("travelHandler rest", () => {
     expect(m.applyWorldRest.mock.invocationCallOrder[0]).toBeLessThan(m.commitTravel.mock.invocationCallOrder[0]);
   });
 
-  it("не відпочиває при rest none", async () => {
+  it("передає rest none в applyWorldRest", async () => {
     await travelHandler(travel("none"), "c1");
 
-    expect(m.applyWorldRest).not.toHaveBeenCalled();
+    expect(m.applyWorldRest).toHaveBeenCalledWith(expect.anything(), "none", ["h1"]);
     expect(m.commitTravel).toHaveBeenCalled();
   });
 

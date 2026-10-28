@@ -46,7 +46,7 @@ export function travelHandler(req: Request, campaignId: string) {
 
     if (heroes instanceof NextResponse) return heroes;
 
-    if (body.rest !== "none") await applyWorldRest(access, body.rest, body.characterIds);
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     const marker = body.toMarkerId ? await prisma.worldMarker.findFirst({ where: { id: body.toMarkerId, mapId: map.id }, select: { id: true } }) : null;
 
@@ -112,7 +112,7 @@ export function enterHandler(req: Request, campaignId: string) {
 
     if (heroes instanceof NextResponse) return heroes;
 
-    if (body.rest !== "none") await applyWorldRest(access, body.rest, body.characterIds);
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     const positions = await readPositions(body.characterIds);
 
@@ -148,7 +148,7 @@ export function exitHandler(req: Request, campaignId: string) {
 
     if (body.characterIds.some((id) => positions.get(id)?.mapId !== map.id)) return errorResponse(API_ERRORS.WORLD_HERO_INVALID, 400);
 
-    if (body.rest !== "none") await applyWorldRest(access, body.rest, body.characterIds);
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     const dest = await prisma.worldMap.findUnique({ where: { id: parentMarker.mapId } });
 
