@@ -68,3 +68,9 @@
 ## Прибирання (локально, за рішенням користувача)
 
 Worktree `../dnd-tracker-homm-base` (detached `183c4dec`); БД `prodcopy_raw`, `prodcopy_base`, `prodcopy`, `prodcopy_sweep`, `prodcopy_base_sweep`, `prodcopy_browser`, `obojima_test`; `.env.production-db.local` скопійовано в обидва worktree (gitignored); untracked `scripts/homm-gate/`. Перед merge у `main` — свіжий бекап prod і rebuild prodcopy за потреби.
+
+## Корекція після деплою (2026-10-28)
+
+- **Пропущений backfill.** Шлюз за спеком мав виконати «міграції + backfill» на копії; на копії застосовувались лише міграції, тому `castable.fx = null` і `spellGroup.color/icon = null` у паритеті були не «новими полями», а станом до backfill (хардкод за іменами видалено з коду, дані ще не перенесені). Після деплою на prod це виявлено; виконано `pnpm constructor:backfill --all --allow-remote` (репетиція на копії prod: 60 змін, повторний запуск 0; prod: 60 змін лише в HOMM5, повторний dry-run 0). Стан prod: 45/55 заклинань з `fx`, 4 групи з кольором, 11 головних навичок з `role`. Кеш довідників оновився протягом 300 с.
+- **Деплой.** Push `main` → `994b1588` (fast-forward), Vercel production Ready, `migrate deploy` 28 → 45 міграцій (репетиція на відновленому бекапі prod пройшла чисто); перед деплоєм — свіжий бекап `~/dnd-tracker-backups/prod_20261028_121600`. Виправлено «Передати» (`710d944e`). Другий merge `origin/main` (`d07c2761`) перевірено Opus.
+- **Офіційні шаблони на prod ще не створені** (`constructor:official-templates <HOMM5 id>`, `constructor:srd-template`, `PLATFORM_ADMIN_USER_IDS` у Vercel): у майстрі створення кампанії вибору шаблону поки немає, лише «Порожня»/імпорт.
