@@ -106,3 +106,11 @@ describe("ScenarioEditor", () => {
     await waitFor(() => expect(onExit).toHaveBeenCalled());
   });
 });
+
+describe("ScenarioEditor: знайомство", () => {
+  it("кнопка «Знайомство» вимкнена без активної клітинки", () => {
+    renderWithConfirm(<ScenarioEditor campaignId="c" page={page()} onExit={vi.fn()} toc={toc} />);
+
+    expect(screen.getByRole("button", { name: "Знайомство" })).toBeDisabled();
+  });
+});
