@@ -85,6 +85,14 @@ export async function commitTravel(args: {
   ]);
 }
 
+export async function writeRestLog(args: { campaignId: string; userId: string; mapId: string; kind: "short" | "long"; characterIds: string[]; at: { x: number; y: number } }): Promise<void> {
+  const { mapId, at } = args;
+
+  await prisma.worldTravelLog.create({
+    data: { campaignId: args.campaignId, mapId, characterIds: args.characterIds, from: { mapId, ...at }, to: { mapId, ...at }, toMarkerId: null, rest: args.kind, kind: "rest", byUserId: args.userId },
+  });
+}
+
 export async function readTravelLog(campaignId: string, limit: number, heroIds?: string[]): Promise<WorldTravelEntry[]> {
   const rows = await prisma.worldTravelLog.findMany({
     where: { campaignId, ...(heroIds ? { characterIds: { hasSome: heroIds } } : {}) },
