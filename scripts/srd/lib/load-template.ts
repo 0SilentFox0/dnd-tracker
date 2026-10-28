@@ -1,3 +1,5 @@
+import type { TokenKind } from "../../assets/tokens-5e/catalog";
+import type { IconsFile } from "../../assets/tokens-5e/icons-file";
 import { toImportRows } from "./data-files";
 import { type SpellRow, SRD_KINDS, type SrdData, type SrdKind } from "./types";
 
@@ -50,6 +52,22 @@ export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, str
   if (!value || typeof value !== "object") return value;
 
   return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === "school" && typeof v === "string" ? (idByName.get(v) ?? v) : resolveSchoolRefs(v, idByName)])) as T;
+}
+
+const ICON_COLUMN: Partial<Record<SrdKind, "icon" | "avatar">> = { spells: "icon", artifacts: "icon", units: "avatar" };
+
+export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unknown>[], icons: IconsFile): Record<string, unknown>[] {
+  const column = ICON_COLUMN[kind];
+
+  if (!column) return rows;
+
+  const urls = icons[kind as TokenKind];
+
+  return rows.map((row, i) => {
+    const url = urls[(data[kind] as ReadonlyArray<{ slug: string }>)[i].slug];
+
+    return url ? { ...row, [column]: url } : row;
+  });
 }
 
 export type PrepareRows = (kind: SrdKind, rows: Record<string, unknown>[]) => Promise<Record<string, unknown>[]>;
