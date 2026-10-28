@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { GripVertical, X } from "lucide-react";
 
@@ -36,7 +37,7 @@ interface UnitCardProps {
   onDelete: (unitId: string) => void;
 }
 
-export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
+export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
   const confirm = useConfirm();
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -160,4 +161,4 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
       </div>
     </HudCard>
   );
-}
+});

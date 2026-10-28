@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
@@ -41,15 +41,21 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const removeAll = () => deleteAll.mutateAsync();
 
+  const { mutate: deleteUnit } = deleteOne;
+
+  const { mutate: updateUnit } = update;
+
+  const drop = useCallback((unitId: string, data: Partial<Unit>) => updateUnit({ unitId, data }), [updateUnit]);
+
   return {
     units,
     isLoading,
     view: { groups, chips: raceChips(allGroups), open, setOpen },
     filter: { query, search, raceFilter, toggleRace },
     actions: {
-      deleteUnit: (unitId: string) => deleteOne.mutate(unitId),
+      deleteUnit,
       removeAll,
-      drop: (unitId: string, data: Partial<Unit>) => update.mutate({ unitId, data }),
+      drop,
     },
   };
 }

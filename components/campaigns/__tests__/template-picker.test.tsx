@@ -7,8 +7,18 @@ import type { TemplateCard } from "@/types/campaigns";
 
 const card = (id: string, name: string): TemplateCard => ({ id, name, description: null, visibility: "official", counts: { races: 2, units: 5, spells: 1 } });
 
+vi.mock("@/components/ui/select-field", () => ({
+  SelectField: ({ value, onValueChange, groups }: { value: string; onValueChange: (v: string) => void; groups: { label: string; options: { value: string; label: string }[] }[] }) => (
+    <select aria-label="Шаблон" value={value} onChange={(e) => onValueChange(e.target.value)}>
+      {groups.flatMap((g) => g.options).map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  ),
+}));
+
 vi.mock("@/lib/hooks/campaigns", () => ({
-  useTemplates: () => ({ data: { official: [card("o1", "Порожня"), card("o2", "HoMM")], mine: [card("m1", "Мій шаблон")] } }),
+  useTemplates: () => ({ data: { official: [card("o1", "Heroes"), card("o2", "HoMM")], mine: [card("m1", "Мій шаблон")] } }),
   useBundleFilePicker: (onPick: (file: unknown) => void) => ({
     file: new File(["{}"], "c.json"),
     status: { error: null, success: null, isLoading: false },
@@ -23,23 +33,21 @@ vi.mock("@/lib/hooks/campaigns", () => ({
 describe("TemplatePicker", () => {
   afterEach(cleanup);
 
-  it("показує офіційні й мої шаблони з лічильниками", () => {
+  it("пояснює, що таке шаблон, і показує лічильники обраного", () => {
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={vi.fn()} />);
 
-    expect(screen.getByText("Порожня")).toBeTruthy();
-    expect(screen.getByText("HoMM")).toBeTruthy();
-    expect(screen.getByText("Мій шаблон")).toBeTruthy();
-    expect(screen.getAllByText("2 раси · 5 юнітів · 1 заклинання").length).toBe(3);
-    expect(screen.getByText("Порожня").closest("button")?.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText(/Шаблон — готова основа кампанії/)).toBeTruthy();
+    expect(screen.getByText("2 раси · 5 юнітів · 1 заклинання")).toBeTruthy();
+    expect(screen.getByRole("option", { name: "Мій шаблон" })).toBeTruthy();
   });
 
-  it("вибір плитки віддає templateId, «Без шаблону» — null", () => {
+  it("вибір віддає templateId, «Без шаблону» — null", () => {
     const onChange = vi.fn();
 
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={onChange} />);
-    fireEvent.click(screen.getByText("HoMM"));
+    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "o2" } });
     expect(onChange).toHaveBeenLastCalledWith({ templateId: "o2" });
-    fireEvent.click(screen.getByText("Без шаблону"));
+    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "__none" } });
     expect(onChange).toHaveBeenLastCalledWith({ templateId: null });
   });
 
@@ -47,7 +55,7 @@ describe("TemplatePicker", () => {
     const onChange = vi.fn();
 
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={onChange} />);
-    fireEvent.click(screen.getByText("Імпорт з файлу"));
+    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "__file" } });
     fireEvent.click(await screen.findByRole("button", { name: "Імпортувати" }));
     await waitFor(() => expect(onChange).toHaveBeenCalledWith({ file: { name: "c.json", bundle: {}, entities: 3 } }));
   });
