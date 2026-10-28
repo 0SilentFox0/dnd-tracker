@@ -1,4 +1,4 @@
-import type { MapPoint, Polygon } from "@/types/world";
+import type { MapPoint, Polygon, RevealShape } from "@/types/world";
 
 const DUPLICATE_EPS = 0.002;
 
@@ -70,4 +70,90 @@ export function fitBox(container: { width: number; height: number }, aspect: num
   const height = width / aspect;
 
   return { left: (container.width - width) / 2, top: (container.height - height) / 2, width, height };
+}
+
+const scaled = (p: MapPoint, aspect: number): MapPoint => ({ x: p.x, y: p.y / aspect });
+
+function distToSegmentScaled(p: MapPoint, a: MapPoint, b: MapPoint): number {
+  const dx = b.x - a.x;
+
+  const dy = b.y - a.y;
+
+  const len2 = dx * dx + dy * dy;
+
+  const t = len2 === 0 ? 0 : Math.min(1, Math.max(0, ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2));
+
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+/** Відстань у частках ширини карти; `aspect = width / height`. */
+export function distToSegment(p: MapPoint, a: MapPoint, b: MapPoint, aspect: number): number {
+  return distToSegmentScaled(scaled(p, aspect), scaled(a, aspect), scaled(b, aspect));
+}
+
+const shapeEnds = (shape: RevealShape): [MapPoint, MapPoint] =>
+  shape.t === "p" ? [{ x: shape.x, y: shape.y }, { x: shape.x, y: shape.y }] : [{ x: shape.x1, y: shape.y1 }, { x: shape.x2, y: shape.y2 }];
+
+export function isRevealed(p: MapPoint, shapes: RevealShape[], radius: number, aspect: number): boolean {
+  return shapes.some((shape) => {
+    const [a, b] = shapeEnds(shape);
+
+    return distToSegment(p, a, b, aspect) <= radius;
+  });
+}
+
+export const coversPoint = (shapes: RevealShape[], p: MapPoint, radius: number, aspect: number) => isRevealed(p, shapes, radius, aspect);
+
+export function pointInPolygon(p: MapPoint, polygon: Polygon): boolean {
+  let inside = false;
+
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+
+    const [xj, yj] = polygon[j];
+
+    if (yi > p.y !== yj > p.y && p.x < ((xj - xi) * (p.y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+
+  return inside;
+}
+
+const cross = (o: MapPoint, a: MapPoint, b: MapPoint) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+function segmentsIntersect(a: MapPoint, b: MapPoint, c: MapPoint, d: MapPoint): boolean {
+  const d1 = cross(a, b, c);
+
+  const d2 = cross(a, b, d);
+
+  const d3 = cross(c, d, a);
+
+  const d4 = cross(c, d, b);
+
+  return d1 * d2 < 0 && d3 * d4 < 0;
+}
+
+function segmentToSegment(a: MapPoint, b: MapPoint, c: MapPoint, d: MapPoint): number {
+  if (segmentsIntersect(a, b, c, d)) return 0;
+
+  return Math.min(distToSegmentScaled(a, c, d), distToSegmentScaled(b, c, d), distToSegmentScaled(c, a, b), distToSegmentScaled(d, a, b));
+}
+
+export function zoneTouchesReveal(polygon: Polygon, shapes: RevealShape[], radius: number, aspect: number): boolean {
+  const ring = polygon.map(([x, y]) => scaled({ x, y }, aspect));
+
+  return shapes.some((shape) => {
+    const [a, b] = shapeEnds(shape);
+
+    if (pointInPolygon(a, polygon) || pointInPolygon(b, polygon)) return true;
+
+    const sa = scaled(a, aspect);
+
+    const sb = scaled(b, aspect);
+
+    for (let i = 0; i < ring.length; i++) {
+      if (segmentToSegment(sa, sb, ring[i], ring[(i + 1) % ring.length]) <= radius) return true;
+    }
+
+    return false;
+  });
 }

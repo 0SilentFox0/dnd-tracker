@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { clamp01, closePolygon, fitBox, polygonCentroid, toMapPoint } from "../geometry";
+import { clamp01, closePolygon, coversPoint, distToSegment, fitBox, isRevealed, pointInPolygon, polygonCentroid, toMapPoint, zoneTouchesReveal } from "../geometry";
+
+import type { Polygon, RevealShape } from "@/types/world";
 
 describe("toMapPoint", () => {
   it("zoom 1 без зсуву: центр → 0.5", () => {
@@ -74,5 +76,104 @@ describe("fitBox", () => {
 
   it("вузький контейнер", () => {
     expect(fitBox({ width: 300, height: 600 }, 1.5)).toEqual({ left: 0, top: 200, width: 300, height: 200 });
+  });
+});
+
+describe("distToSegment", () => {
+  it("degenerate segment is a point distance", () => {
+    expect(distToSegment({ x: 0.5, y: 0.5 }, { x: 0.2, y: 0.5 }, { x: 0.2, y: 0.5 }, 1)).toBeCloseTo(0.3);
+  });
+
+  it("projects onto the segment and clamps at the ends", () => {
+    expect(distToSegment({ x: 0.5, y: 0.6 }, { x: 0.2, y: 0.5 }, { x: 0.8, y: 0.5 }, 1)).toBeCloseTo(0.1);
+    expect(distToSegment({ x: 0.9, y: 0.5 }, { x: 0.2, y: 0.5 }, { x: 0.8, y: 0.5 }, 1)).toBeCloseTo(0.1);
+  });
+
+  it("normalises vertical distance by aspect", () => {
+    expect(distToSegment({ x: 0.5, y: 0.6 }, { x: 0.5, y: 0.3 }, { x: 0.5, y: 0.3 }, 3)).toBeCloseTo(0.1);
+  });
+});
+
+describe("isRevealed / coversPoint", () => {
+  const p: RevealShape = { t: "p", x: 0.5, y: 0.5 };
+
+  it("boundary d == radius is revealed", () => {
+    expect(isRevealed({ x: 0.6, y: 0.5 }, [p], 0.1, 1)).toBe(true);
+    expect(isRevealed({ x: 0.61, y: 0.5 }, [p], 0.1, 1)).toBe(false);
+  });
+
+  it("aspect 3: radius is round in pixels", () => {
+    expect(isRevealed({ x: 0.5, y: 0.5 + 0.3 * 0.9 }, [p], 0.1, 3)).toBe(true);
+    expect(isRevealed({ x: 0.5, y: 0.5 + 0.3 * 1.1 }, [p], 0.1, 3)).toBe(false);
+    expect(isRevealed({ x: 0.5 + 0.09, y: 0.5 }, [p], 0.1, 3)).toBe(true);
+  });
+
+  it("segment covers the capsule around it; empty shapes reveal nothing", () => {
+    const s: RevealShape = { t: "s", x1: 0.2, y1: 0.5, x2: 0.8, y2: 0.5 };
+
+    expect(isRevealed({ x: 0.5, y: 0.55 }, [s], 0.1, 1)).toBe(true);
+    expect(coversPoint([s], { x: 0.5, y: 0.7 }, 0.1, 1)).toBe(false);
+    expect(isRevealed({ x: 0.5, y: 0.5 }, [], 0.1, 1)).toBe(false);
+  });
+});
+
+describe("pointInPolygon", () => {
+  const sq: Polygon = [
+    [0.2, 0.2],
+    [0.6, 0.2],
+    [0.6, 0.6],
+    [0.2, 0.6],
+  ];
+
+  it("inside and outside", () => {
+    expect(pointInPolygon({ x: 0.4, y: 0.4 }, sq)).toBe(true);
+    expect(pointInPolygon({ x: 0.7, y: 0.4 }, sq)).toBe(false);
+  });
+});
+
+describe("zoneTouchesReveal", () => {
+  const sq: Polygon = [
+    [0.4, 0.4],
+    [0.6, 0.4],
+    [0.6, 0.6],
+    [0.4, 0.6],
+  ];
+
+  const pt = (x: number, y: number): RevealShape => ({ t: "p", x, y });
+
+  it("no shapes → false", () => {
+    expect(zoneTouchesReveal(sq, [], 0.1, 1)).toBe(false);
+  });
+
+  it("point inside the polygon", () => {
+    expect(zoneTouchesReveal(sq, [pt(0.5, 0.5)], 0.01, 1)).toBe(true);
+  });
+
+  it("circle on an edge, and edge distance exactly radius", () => {
+    expect(zoneTouchesReveal(sq, [pt(0.7, 0.5)], 0.1, 1)).toBe(true);
+    expect(zoneTouchesReveal(sq, [pt(0.75, 0.5)], 0.1, 1)).toBe(false);
+  });
+
+  it("polygon fully inside the circle", () => {
+    expect(zoneTouchesReveal(sq, [pt(0.5, 0.5)], 0.5, 1)).toBe(true);
+    expect(zoneTouchesReveal(sq, [pt(0.3, 0.3)], 0.5, 1)).toBe(true);
+  });
+
+  it("segment end inside the polygon", () => {
+    expect(zoneTouchesReveal(sq, [{ t: "s", x1: 0.9, y1: 0.9, x2: 0.5, y2: 0.5 }], 0.001, 1)).toBe(true);
+  });
+
+  it("segment crossing straight through without touching vertices", () => {
+    expect(zoneTouchesReveal(sq, [{ t: "s", x1: 0.1, y1: 0.5, x2: 0.9, y2: 0.5 }], 0.001, 1)).toBe(true);
+    expect(zoneTouchesReveal(sq, [{ t: "s", x1: 0.1, y1: 0.9, x2: 0.9, y2: 0.9 }], 0.001, 1)).toBe(false);
+  });
+
+  it("segment passing near but not touching, within radius", () => {
+    expect(zoneTouchesReveal(sq, [{ t: "s", x1: 0.1, y1: 0.7, x2: 0.9, y2: 0.7 }], 0.1, 1)).toBe(true);
+  });
+
+  it("aspect 3 shrinks the vertical reach", () => {
+    expect(zoneTouchesReveal(sq, [pt(0.5, 0.6 + 0.3 * 0.9)], 0.1, 3)).toBe(true);
+    expect(zoneTouchesReveal(sq, [pt(0.5, 0.6 + 0.3 * 1.1)], 0.1, 3)).toBe(false);
   });
 });
