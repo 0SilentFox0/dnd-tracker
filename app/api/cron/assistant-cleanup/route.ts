@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { cleanupAssistantData } from "@/lib/server/assistant/cleanup";
+import { cleanupReadNotifications } from "@/lib/server/notifications/cleanup";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,9 @@ export async function GET(request: Request) {
   try {
     const result = await cleanupAssistantData();
 
-    return NextResponse.json({ ok: true, ...result });
+    const notifications = await cleanupReadNotifications();
+
+    return NextResponse.json({ ok: true, ...result, ...notifications });
   } catch {
     return NextResponse.json({ error: "Assistant cleanup failed" }, { status: 500 });
   }
