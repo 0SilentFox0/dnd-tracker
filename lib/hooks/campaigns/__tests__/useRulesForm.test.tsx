@@ -82,7 +82,7 @@ describe("useRulesForm", () => {
   it("reset returns the server data", async () => {
     const { result } = await setup();
 
-    act(() => result.current.form.set("initiative", { heroMin: 1, heroMax: 2 }));
+    act(() => result.current.form.set("initiative", { heroMin: 1, heroMax: 2, mode: "static" }));
     act(() => result.current.reset());
 
     expect(result.current.form.data).toEqual(DEFAULT_RULES);

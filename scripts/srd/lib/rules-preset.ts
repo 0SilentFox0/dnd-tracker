@@ -5,7 +5,7 @@ export const SRD_RULES: Ruleset = RulesetSchema.parse({
   morale: { enabled: false },
   criticals: { critOn: 20, fumbleOn: 1, effects: false, doubleDice: true },
   formulas: {},
-  initiative: { heroMin: 0, heroMax: 20 },
+  initiative: { heroMin: 0, heroMax: 20, mode: "roll" },
   defaultAttacks: { meleeName: "Unarmed Strike", rangedName: "Ranged Attack" },
   saves: { proficiency: true },
   deathSaves: { enabled: true, unitsDieAtZero: true },
