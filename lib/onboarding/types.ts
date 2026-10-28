@@ -52,14 +52,12 @@ export interface WhatsNewEntry {
   href?: string;
 }
 
-export type HelpBlock = { kind: "p"; text: string } | { kind: "list"; items: string[] } | { kind: "link"; text: string; href: string };
+export type HelpBlockDef = { kind: "p" } | { kind: "list"; count: number } | { kind: "link"; href: string };
 
-export interface HelpArticle {
+export interface HelpArticleDef {
   slug: string;
   audience: OnboardingAudience;
-  title: string;
-  summary: string;
-  sections: { heading: string; blocks: HelpBlock[] }[];
+  sections: { blocks: HelpBlockDef[] }[];
 }
 
 export type ChecklistState = "open" | "collapsed" | "hidden";

@@ -48,7 +48,7 @@ describe("onboarding registry", () => {
   it("статті не порожні", () => {
     for (const a of HELP_ARTICLES) {
       expect(a.sections.length, a.slug).toBeGreaterThan(0);
-      for (const s of a.sections) expect(s.blocks.length, `${a.slug}/${s.heading}`).toBeGreaterThan(0);
+      for (const s of a.sections) expect(s.blocks.length, `${a.slug}/${a.sections.indexOf(s)}`).toBeGreaterThan(0);
     }
   });
 
