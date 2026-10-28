@@ -169,6 +169,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/main-skills', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/members/[memberId]', methods: ['DELETE'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/members', methods: ['GET'], task: 7, adapter: 'campaign/templates', state: "active" },
+  { route: 'campaigns/[id]/notifications', methods: ['GET'], task: 0, adapter: 'handoffs', state: "handoff" },
+  { route: 'campaigns/[id]/notifications/read', methods: ['POST'], task: 0, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/onboarding', methods: ['GET'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/races/[raceId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/races', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },

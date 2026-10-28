@@ -15,6 +15,7 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [world-map.md](world-map.md) | Карта світу: вкладені карти, туман у кожного гравця, подорожі, показ гравцям, прив'язки сценарію |
 | [landing-auth.md](landing-auth.md) | Static landing (`/`), SEO, Google + email/password auth flows |
 | [onboarding.md](onboarding.md) | First-steps checklists, hints, what's new, /help; progress derived from facts |
+| [notifications.md](notifications.md) | Сповіщення «нове»: таблиця, `notify*`, канал `private-notify-*`, тости й піли, retention |
 | [i18n.md](i18n.md) | Мультимовність uk/en: next-intl, потік мови, лендинг `/` і `/en`, ESLint-храповик, перенесення доменів |
 
 The folder-by-folder overview (in Ukrainian) is `ARCHITECTURE.md` in the repo root. When a subsystem changes, update its file here in the same branch.
