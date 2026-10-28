@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { type HudTab, HudTabs } from "@/components/hud/form";
 
-export type ProfileTabId = "basic" | "combat" | "skills" | "magic" | "items" | "stash" | "story";
+export type ProfileTabId = "basic" | "combat" | "skills" | "magic" | "items" | "stash" | "story" | "log";
 
 export type ProfileTab = HudTab<ProfileTabId>;
 

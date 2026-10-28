@@ -37,7 +37,8 @@ export const sheetFixture: CharacterSheet = {
   magic: null,
   hitDice: null,
   pact: null,
-  slots: [{ level: 1, count: 4 }, { level: 2, count: 2 }],
+  slots: [{ level: 1, count: 4, current: 4 }, { level: 2, count: 2, current: 2 }],
+  rest: null,
   spells: [{ id: "mark", name: "Мітка мисливця", level: 1, dice: 1, targeting: { kind: "enemy" } }],
   items: {
     grid: { armor: { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: ["AC +2"] } },

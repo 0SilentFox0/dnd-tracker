@@ -11,6 +11,7 @@ import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
@@ -221,6 +222,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
     rollMode: currentMode,
     forcedMode: currentStrike?.forced,
+    inspirationAvailable: canUseInspiration(attacker, scene.battle.rules),
     offHand: !!state.offHand,
     counter: attacker && !state.offHand ? attackCounter(attacker, order) : null,
     canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
@@ -278,6 +280,13 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
+    setInspiration: (value: boolean) => {
+      const t = byId(state.strikes[0]?.targetId ?? "");
+
+      const forced = attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound, map, { inspiration: value })) : undefined;
+
+      dispatch({ type: "SET_INSPIRATION", value, forced });
+    },
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {
       const d20 = rollDie(20, cryptoRandom);

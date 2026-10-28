@@ -7,8 +7,10 @@ import type { BookSpell } from "./spells";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import type { CharacterLogKindValue } from "@/lib/constants/character-log";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import type { DndSkill } from "@/lib/constants/skills";
 
 export type { AbilityKey };
 
@@ -153,7 +155,7 @@ export interface Character {
 export type CharacterListItem = Pick<
   Character,
   "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative"
-> & { user?: { displayName: string } | null; reviewNote?: string | null };
+> & { user?: { displayName: string } | null; reviewNote?: string | null; experience?: number; inspiration?: boolean; resources?: CharacterResources };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 
@@ -236,7 +238,8 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
   pact: { level: number; max: number; current: number } | null;
-  slots: { level: number; count: number }[];
+  slots: { level: number; count: number; current: number }[];
+  rest: SheetRest | null;
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
@@ -270,4 +273,71 @@ export interface DraftInput {
   charisma: number;
   primaryAbility?: AbilityKey;
   goals?: Array<{ text: string; kind: GoalKind }>;
+}
+
+export type RestKindValue = "short" | "long";
+
+export interface CharacterResources {
+  hp?: number;
+  tempHp?: number;
+  dead?: boolean;
+  /** ключі "1".."9" і "pact" */
+  slotsSpent?: Record<string, number>;
+  /** classId → витрачено */
+  hitDiceSpent?: Record<string, number>;
+  /** ключ вміння (ResolvedAbility.key) → використання perRest */
+  charges?: Record<string, { used: number; rest: RestKindValue }>;
+  exhaustion?: number;
+  shortRestOpen?: boolean;
+}
+
+export type RestBody = { kind: "short" | "long" | "close"; characterIds: string[] };
+
+export type SheetRollSubject = { kind: "check"; skill: DndSkill } | { kind: "check"; ability: AbilityKey } | { kind: "save"; ability: AbilityKey };
+
+export type SheetRollBody = SheetRollSubject & { useInspiration?: boolean };
+
+export interface SheetRollResult {
+  label: string;
+  rolls: number[];
+  roll: number;
+  mod: number;
+  bonus: number;
+  total: number;
+  mode: "advantage" | "disadvantage" | "normal";
+  autoFail: boolean;
+  inspirationUsed: boolean;
+}
+
+export interface HitDieResult {
+  die: number;
+  roll: number;
+  healed: number;
+  hpBefore: number;
+  hpAfter: number;
+  resources: CharacterResources;
+}
+
+export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
+
+export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true };
+
+export interface SheetRest {
+  persist: boolean;
+  hp: { current: number; max: number; temp: number } | null;
+  dead: boolean;
+  exhaustion: number;
+  shortRestOpen: boolean;
+  hitDice: { classId: string; name: string; die: number; total: number; spent: number }[];
+  charges: { key: string; name: string; uses: number; used: number; rest: "short" | "long" }[];
+  inspiration: boolean | null;
+  xp: { value: number; next: number | null; levelUp: boolean } | null;
+}
+
+export interface CharacterLogEntry {
+  id: string;
+  kind: CharacterLogKindValue;
+  data: Record<string, unknown>;
+  createdAt: string;
+  actor: { id: string; displayName: string | null } | null;
 }

@@ -15,6 +15,8 @@ export interface ProcessAttackParams {
   disadvantageRoll?: number;
   /** Вибір гравця; діє лише коли навички не задають перевагу/недолік */
   rollMode?: "normal" | "advantage" | "disadvantage";
+  /** Натхнення дає перевагу цьому кидку */
+  inspiration?: boolean;
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   currentRound: number;

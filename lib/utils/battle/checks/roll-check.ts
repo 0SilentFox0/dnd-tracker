@@ -19,13 +19,13 @@ function exhaustionVariant(p: BattleParticipant, rules?: Ruleset) {
   return p.battleData.activeEffects.find((e) => e.exhaustionVariant)?.exhaustionVariant ?? rules?.conditions.exhaustion ?? "2014";
 }
 
-function checkMode(actor: BattleParticipant, skill: DndSkill | undefined, participants: BattleParticipant[], rules?: Ruleset): D20Mode {
+function checkMode(actor: BattleParticipant, skill: DndSkill | undefined, participants: BattleParticipant[], rules?: Ruleset, extraAdvantage = false): D20Mode {
   const ps = withSelf(participants, actor);
 
   const labels = (flag: "checkAdvantage" | "checkDisadvantage") =>
     collectModifiers(ps, actor.basicInfo.id, { flag }).entries.filter((e) => e.flag?.flag === flag && covers(e.flag.skills, skill));
 
-  const adv = labels("checkAdvantage").length > 0;
+  const adv = labels("checkAdvantage").length > 0 || extraAdvantage;
 
   const dis = labels("checkDisadvantage").length > 0 || (exhaustionLevel(actor) >= 1 && exhaustionVariant(actor, rules) === "2014");
 
@@ -55,10 +55,11 @@ export function rollCheck(input: {
   rules?: Ruleset;
   rng: () => number;
   presetRoll?: number;
+  advantage?: boolean;
 }): { roll: number; rolls: number[]; mod: number; bonus: number; total: number; mode: D20Mode } {
   const { actor, subject, participants, rules, rng, presetRoll } = input;
 
-  const mode = checkMode(actor, skillOf(subject), participants, rules);
+  const mode = checkMode(actor, skillOf(subject), participants, rules, !!input.advantage);
 
   const { roll, rolls } = rollD20WithMode(mode, rng, presetRoll);
 

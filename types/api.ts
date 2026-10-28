@@ -160,6 +160,7 @@ export interface AttackData {
   damageRolls: number[];
   attackId?: string;
   offHand?: boolean;
+  useInspiration?: boolean;
 }
 
 export interface MoraleCheckData {

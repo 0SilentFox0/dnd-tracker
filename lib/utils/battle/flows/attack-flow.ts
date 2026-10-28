@@ -44,6 +44,7 @@ export interface AttackFlowState {
   /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
   picked?: boolean;
   offHand?: boolean;
+  inspiration?: boolean;
 }
 
 export type AttackFlowAction =
@@ -54,6 +55,7 @@ export type AttackFlowAction =
   | { type: "SET_TARGETS"; ids: string[] }
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
+  | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
@@ -96,9 +98,22 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s
-        : { ...s, step: "roll", index: 0, error: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [], ...(a.forced?.[targetId] && { forced: a.forced[targetId] }) })) };
+        : { ...s, step: "roll", index: 0, error: undefined, inspiration: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [], ...(a.forced?.[targetId] && { forced: a.forced[targetId] }) })) };
     case "SET_MODE":
       return s.step === "roll" && s.strikes[s.index]?.forced ? s : { ...s, mode: a.mode };
+    case "SET_INSPIRATION": {
+      if (s.step !== "roll" || s.index !== 0 || s.strikes[0]?.d20 !== undefined) return s;
+
+      const strikes = s.strikes.map((st, i) => {
+        if (i !== 0) return st;
+
+        const { forced: _old, ...rest } = st;
+
+        return a.forced ? { ...rest, forced: a.forced } : rest;
+      });
+
+      return { ...s, strikes, inspiration: a.value || undefined };
+    }
     case "ROLL": {
       const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
 
@@ -168,7 +183,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
   const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
 
-  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(manual && { rollMode: s.mode }), endTurn: false };
+  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(manual && { rollMode: s.mode }), endTurn: false };
 
   if (s.strikes.length === 1) {
     const [st] = s.strikes;

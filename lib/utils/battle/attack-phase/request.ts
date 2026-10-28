@@ -26,6 +26,7 @@ export interface AttackRequest {
   rollMode?: "normal" | "advantage" | "disadvantage";
   damageRolls: number[];
   offHand?: boolean;
+  useInspiration?: boolean;
 }
 
 export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targetIds">): string[] {

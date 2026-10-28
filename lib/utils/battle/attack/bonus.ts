@@ -4,6 +4,7 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackRollModifier } from "@/lib/utils/battle/attack/ability";
+import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
@@ -31,7 +32,7 @@ export type RollMode = "advantage" | "disadvantage" | "normal";
 
 export type RollModeReasons = { advantage: string[]; disadvantage: string[] };
 
-type SourceOpts = { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null };
+type SourceOpts = { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null; inspiration?: boolean };
 
 const labels = (entries: { label: string }[]) => entries.map((e) => e.label);
 
@@ -60,6 +61,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
     ...(adjacent ? proneDefense : []),
+    ...(opts.inspiration ? [INSPIRATION_LABEL] : []),
   ];
 
   const disadvantage = [
@@ -124,10 +126,11 @@ export function predictAttack(
   participants: BattleParticipant[],
   round = 1,
   map?: BattleMapConfig | null,
+  opts: { inspiration?: boolean } = {},
 ): PredictedAttack {
   const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round);
 
-  const reasons = rollModeReasons(self, attack, ps, { extra, targetId: target.basicInfo.id, targetExtra, map });
+  const reasons = rollModeReasons(self, attack, ps, { extra, targetId: target.basicInfo.id, targetExtra, map, inspiration: opts.inspiration });
 
   return {
     totalBonus: calculateAttackBonus(self, attack, ps, extra),

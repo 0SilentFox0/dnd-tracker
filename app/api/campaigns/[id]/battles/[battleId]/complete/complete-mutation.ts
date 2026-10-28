@@ -10,7 +10,7 @@ export const completeBattleSchema = z.object({ result: z.enum(["victory", "defea
 export function completeMutation(ctx: BattleMutationContext, body: z.infer<typeof completeBattleSchema>): MutationResult {
   const result = body.result ?? checkVictoryConditions(ctx.participants).result ?? "victory";
 
-  const { updatedParticipants, battleAction } = completeBattle(ctx.participants, result, ctx.scene.round);
+  const { updatedParticipants, battleAction } = completeBattle(ctx.participants, result, ctx.scene.round, ctx.meta.rules);
 
   return {
     participants: updatedParticipants,

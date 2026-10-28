@@ -102,6 +102,7 @@ async function main() {
         immunities: character.immunities as Prisma.InputJsonValue,
         goals: character.goals as Prisma.InputJsonValue,
         classes: character.classes as Prisma.InputJsonValue,
+        resources: character.resources as Prisma.InputJsonValue,
       },
     });
 

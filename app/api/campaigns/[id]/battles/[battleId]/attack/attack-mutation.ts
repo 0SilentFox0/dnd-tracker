@@ -2,8 +2,10 @@ import type { Spell } from "@prisma/client";
 import { z } from "zod";
 
 import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { canUseInspiration, spendInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -31,6 +33,7 @@ export const attackBodySchema = z
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
+    useInspiration: z.boolean().optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(
@@ -94,10 +97,18 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
     assertAttackInput(ctx, data);
     assertCanAct(ctx, data.attackerId);
 
+    let participants = ctx.participants;
+
+    if (data.useInspiration) {
+      if (!canUseInspiration(findParticipant(participants, data.attackerId), ctx.meta.rules)) throw new BattleRuleError("action_rejected", API_ERRORS.NO_INSPIRATION);
+
+      participants = spendInspiration(participants, data.attackerId);
+    }
+
     const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
 
     const phase = runAttackPhase({
-      battle: { initiativeOrder: ctx.participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
+      battle: { initiativeOrder: participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
       data,
       battleId: ctx.scene.id,
       userId: ctx.userId,

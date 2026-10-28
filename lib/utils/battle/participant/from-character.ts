@@ -20,6 +20,7 @@ import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
@@ -211,5 +212,7 @@ export async function createBattleParticipantFromCharacter(
   // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
   const spell = spellcastingDerived(character.level, spellcastingAbility, baked.abilities, rules.formulas);
 
-  return { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
+  const ready = { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
+
+  return applyCharacterResources(ready, storedCharacterState(character, rules), rules);
 }

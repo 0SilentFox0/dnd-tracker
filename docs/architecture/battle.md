@@ -96,6 +96,18 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Атака заклинанням** — `resolution: "attack"`: кидок проти AC (`attackRolls` у запиті), крит додає кубики з `doubleDice`; цілі не-вороги — автоматично.
 - **UI**: лічильник «Атака N/M», «Атака другою рукою» у `BonusActionPicker`, вибір слота в `SpellCastDialog` (лише 5e), d20-поля для атаки заклинанням.
 
+## 5e: поза боєм
+
+Усе керується `rules.outOfCombat` (`persistResources`, `longRestHitDice`, `xp`, `inspiration`); за замовчуванням вимкнено, від `classes.enabled` не залежить. Вимкнене правило → 409 на відповідних роутах.
+
+- **Зберігання** — `characters.resources` тримає витрачене (`lib/utils/characters/resources/`: `schema` з толерантним `readResources`, `hp` — `currentHp`/`withHp`/`compactResources`), `characters.inspiration`; журнал `character_logs` (`writeCharacterLog` у `lib/server/characters/log.ts`, види — `lib/constants/character-log.ts`).
+- **Старт бою** — `createBattleParticipantFromCharacter` → `applyCharacterResources` (HP з обрізанням, 0 HP → непритомний/умирає, `dead`, слоти й пакт, заряди `perRest` → `abilityUsage`, виснаження через `applyCondition5e`, `battleData.inspiration`); той самий шлях використовують лист і баланс.
+- **Завершення** — `saveBattle` (гілка `completing`) → `persistCharacterResources` (`store/persist-resources.ts`): лише герої в полі, один раз на `sourceId`, журнал `battle_result`; натхнення записується назад лише коли витрачене (`inspirationSpent`). Перемога при `persistResources` повертає непритомних з 1 HP (`completeBattle(…, rules)`). Відомо: відкат завершеного бою повторно виконує запис (зайвий рядок `battle_result` у журналі).
+- **Роути** — `POST /rest` (ДМ), `…/hit-dice`, `…/roll` (власник або ДМ, `rollCheck`/`rollSave` з `advantage`), `POST /experience`, `…/inspiration`, `PATCH …/resources` (ДМ), `GET …/log`.
+- **Блокування під час бою** — `lib/server/characters/battle-lock.ts` (`rejectIfInActiveBattle`): герої на мапі чи в резерві активного бою → 409 `CHARACTER_IN_BATTLE` для відпочинку, кісток хітів, натхненного кидка, правки ресурсів і видачі натхнення (досвід дозволено). Інакше запис після бою перезаписав би правки.
+- **Паралельність** — read-modify-write іде в транзакції з `lockCharacters` (`lib/server/characters/lock.ts`, `SELECT … FOR UPDATE` по відсортованих id).
+- **Натхнення в атаці** — `useInspiration` → причина переваги «Натхнення» в `rollModeReasons` (лише перший удар), знімається в мутації; клієнт — `SET_INSPIRATION` у майстрі атаки.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

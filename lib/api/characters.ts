@@ -9,7 +9,7 @@ import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characte
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, DraftInput, RosterHero } from "@/types/characters";
+import type { AwardXpBody, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { ClassLevelUpPick } from "@/types/classes";
 
 export async function getCharacter(
@@ -128,3 +128,18 @@ export type ReviewBody = { action: "approve" } | { action: "return"; note: strin
 
 export const reviewCharacter = (campaignId: string, characterId: string, body: ReviewBody) =>
   campaignPost<{ id: string; status: string; reviewNote: string | null }>(campaignId, `/characters/${characterId}/review`, body);
+
+export const postRest = (campaignId: string, body: RestBody) => campaignPost<{ characters: { id: string; resources: CharacterResources }[] }>(campaignId, "/rest", body);
+
+export const postHitDie = (campaignId: string, characterId: string, classId: string) => campaignPost<HitDieResult>(campaignId, `/characters/${characterId}/hit-dice`, { classId });
+
+export const postSheetRoll = (campaignId: string, characterId: string, body: SheetRollBody) => campaignPost<SheetRollResult>(campaignId, `/characters/${characterId}/roll`, body);
+
+export const postExperience = (campaignId: string, body: AwardXpBody) => campaignPost<{ characters: { id: string; experience: number }[] }>(campaignId, "/experience", body);
+
+export const postInspiration = (campaignId: string, characterId: string, value: boolean) => campaignPost<{ inspiration: boolean }>(campaignId, `/characters/${characterId}/inspiration`, { value });
+
+export const patchResources = (campaignId: string, characterId: string, body: ResourcesEditBody) => campaignPatch<{ resources: CharacterResources }>(campaignId, `/characters/${characterId}/resources`, body);
+
+export const getCharacterLog = (campaignId: string, characterId: string, cursor?: string) =>
+  campaignGet<{ entries: CharacterLogEntry[]; nextCursor: string | null }>(campaignId, `/characters/${characterId}/log${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`);

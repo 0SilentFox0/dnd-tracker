@@ -101,6 +101,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       advantageRoll: second,
       disadvantageRoll: second,
       rollMode: data.rollMode,
+      inspiration: !!data.useInspiration && i === 0,
       actionSpent: i > 0,
       offHand: data.offHand,
       damageRolls: strikeDice.rolls,

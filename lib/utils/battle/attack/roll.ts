@@ -16,7 +16,7 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean } = {},
 ): AttackRollResult {
   const c = (opts.rules ?? DEFAULT_RULES).criticals;
 

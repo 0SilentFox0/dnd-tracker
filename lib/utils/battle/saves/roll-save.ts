@@ -58,12 +58,17 @@ export function rollSave(input: {
   rng: () => number;
   presetRoll?: number;
   vsSpell?: boolean;
+  advantage?: boolean;
 }): { roll: number; rolls: number[]; mod: number; bonus: number; total: number; success: boolean; mode: SaveRollMode; autoFail: boolean } {
   const { target, ability, dc, participants, rules, rng, presetRoll, vsSpell } = input;
 
   const mod = target.abilities.modifiers[ability];
 
-  const { mode, autoFail } = saveRollMode(target, ability, participants, { vsSpell });
+  const sm = saveRollMode(target, ability, participants, { vsSpell });
+
+  const mode: SaveRollMode = input.advantage ? (sm.reasons.disadvantage.length > 0 ? "normal" : "advantage") : sm.mode;
+
+  const { autoFail } = sm;
 
   if (autoFail) return { roll: 0, rolls: [], mod, bonus: 0, total: 0, success: false, mode, autoFail: true };
 

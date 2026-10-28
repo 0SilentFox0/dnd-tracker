@@ -26,6 +26,9 @@ const LIST_SELECT = {
   classes: true,
   armorClass: true,
   initiative: true,
+  experience: true,
+  inspiration: true,
+  resources: true,
   user: { select: { displayName: true } },
 } as const;
 

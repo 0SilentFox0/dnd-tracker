@@ -1,5 +1,6 @@
 "use client";
 
+import { ChargesList } from "./rest/ChargesList";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
@@ -14,6 +15,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
   return (
     <>
       <RacePassive />
+      <ChargesList />
       {personal && (
         <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-gold/40 bg-hud-field p-3">
           <EntityIcon src={sheet.identity.avatar || personal.icon} name={personal.name} alt={sheet.identity.name} size={48} className="hud-sc size-12 rounded-md border border-hud-line bg-[#2a2016] text-inherit" />

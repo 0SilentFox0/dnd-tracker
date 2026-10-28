@@ -11,6 +11,7 @@ export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEd
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 export { useEquipArtifact } from "./useEquipArtifact";
+export { useAwardXp, useCharacterLog, useEditResources, useInspiration, useRest, useSheetRoll, useSpendHitDie } from "./useOutOfCombat";
 export { type PlayerDraftFormOptions, type RollKey, usePlayerDraftForm } from "./usePlayerDraftForm";
 export { useReviewCharacter } from "./useReviewCharacter";
 export { useRollReveal } from "./useRollReveal";

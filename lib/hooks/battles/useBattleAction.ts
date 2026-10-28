@@ -4,6 +4,8 @@ import { battleKeys, battleQueryKey } from "./keys";
 import { writeBattleDelta } from "./write-battle-delta";
 
 import { ApiError } from "@/lib/api/client";
+import { BattleStatus } from "@/lib/constants/battle";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 
@@ -41,7 +43,13 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
         return send();
       });
 
+      const wasCompleted = queryClient.getQueryData<BattleScene>(key)?.status === BattleStatus.COMPLETED;
+
       await writeBattleDelta(queryClient, key, delta);
+
+      if (!wasCompleted && queryClient.getQueryData<BattleScene>(key)?.status === BattleStatus.COMPLETED) {
+        for (const characterKey of [characterKeys.sheet(campaignId), characterKeys.lists(campaignId), characterKeys.logs(campaignId)]) void queryClient.invalidateQueries({ queryKey: characterKey });
+      }
 
       for (const list of options.invalidate ?? []) {
         void queryClient.invalidateQueries({ queryKey: list === "battles" ? battleKeys.list(campaignId) : battleKeys.active() });

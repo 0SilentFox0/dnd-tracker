@@ -13,6 +13,7 @@ import { FormulasSection } from "./sections/FormulasSection";
 import { HeroScalingSection } from "./sections/HeroScalingSection";
 import { InitiativeSection } from "./sections/InitiativeSection";
 import { MoraleSection } from "./sections/MoraleSection";
+import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 
 import { LoadingState } from "@/components/common/states";
@@ -36,6 +37,7 @@ const SECTIONS = {
   conditions: ConditionsSection,
   actions: ActionsSection,
   classes: ClassesSection,
+  outOfCombat: OutOfCombatSection,
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {

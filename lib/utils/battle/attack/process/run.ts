@@ -74,7 +74,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map, inspiration: params.inspiration }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -91,6 +91,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     manualMode: params.rollMode,
     rules: flow.ctx.rules,
     map: flow.ctx.map,
+    inspiration: params.inspiration,
   });
 
   const second = rolled.secondRoll;

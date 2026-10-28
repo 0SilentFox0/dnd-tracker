@@ -9,13 +9,13 @@ datasource db {
 }
 
 model User {
-  id              String           @id
-  email           String           @unique
+  id              String               @id
+  email           String               @unique
   displayName     String
   avatar          String?
-  createdAt       DateTime         @default(now())
+  createdAt       DateTime             @default(now())
   campaignMembers CampaignMember[]
-  dmCampaigns     Campaign[]       @relation("DMCampaigns")
+  dmCampaigns     Campaign[]           @relation("DMCampaigns")
   characters      Character[]
   aiCredentials   AiCredential[]
   onboardingFlags UserOnboardingFlag[]
@@ -24,29 +24,29 @@ model User {
 }
 
 model Campaign {
-  id              String           @id @default(cuid())
+  id              String              @id @default(cuid())
   sourceSync      CampaignSourceSync?
   name            String
   description     String?
-  inviteCode      String           @unique
+  inviteCode      String              @unique
   dmUserId        String
-  maxLevel        Int              @default(20)
-  xpMultiplier    Float            @default(2.5)
-  allowPlayerEdit Boolean          @default(true)
-  status          String           @default("active")
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  friendlyFire    Boolean          @default(false)
-  rules           Json             @default("{}")
-  kind            String           @default("campaign")
-  visibility      String           @default("private")
+  maxLevel        Int                 @default(20)
+  xpMultiplier    Float               @default(2.5)
+  allowPlayerEdit Boolean             @default(true)
+  status          String              @default("active")
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  friendlyFire    Boolean             @default(false)
+  rules           Json                @default("{}")
+  kind            String              @default("campaign")
+  visibility      String              @default("private")
   createdFromId   String?
   aiInstructions  String?
   artifactSets    ArtifactSet[]
   artifacts       Artifact[]
   battles         BattleScene[]
   members         CampaignMember[]
-  dm              User             @relation("DMCampaigns", fields: [dmUserId], references: [id])
+  dm              User                @relation("DMCampaigns", fields: [dmUserId], references: [id])
   characters      Character[]
   mainSkills      MainSkill[]
   races           Race[]
@@ -64,6 +64,7 @@ model Campaign {
   aiProposals     AiProposal[]
   apiTokens       ApiToken[]
   inventoryLog    InventoryLog[]
+  characterLog    CharacterLog[]
 
   @@index([dmUserId])
   @@index([kind, visibility])
@@ -128,6 +129,8 @@ model Character {
   primaryAbility      String?
   goals               Json                @default("[]")
   classes             Json                @default("[]")
+  resources           Json                @default("{}")
+  inspiration         Boolean             @default(false)
   hpMultiplier        Float?
   archetype           String?
   meleeMultiplier     Float?
@@ -135,6 +138,7 @@ model Character {
   status              String              @default("active")
   reviewNote          String?
   inventoryLog        InventoryLog[]
+  characterLog        CharacterLog[]
   inventory           CharacterInventory?
   characterSkills     CharacterSkills[]
   scenarioPages       ScenarioPage[]
@@ -329,6 +333,21 @@ model InventoryLog {
 
   @@index([characterId, createdAt(sort: Desc)])
   @@map("inventory_log")
+}
+
+model CharacterLog {
+  id          String    @id @default(cuid())
+  campaignId  String
+  characterId String
+  actorUserId String?
+  kind        String
+  data        Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@index([characterId, createdAt(sort: Desc)])
+  @@map("character_logs")
 }
 
 model SkillTree {

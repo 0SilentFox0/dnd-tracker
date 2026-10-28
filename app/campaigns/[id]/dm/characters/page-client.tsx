@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Trash2, Users } from "lucide-react";
 
 import { DmCharacterCard } from "@/components/characters/list/DmCharacterCard";
+import { PartyRestActions } from "@/components/characters/rest/PartyRestActions";
 import { PendingDraftsPanel } from "@/components/characters/review/PendingDraftsPanel";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState, QueryState } from "@/components/common/states";
@@ -40,6 +41,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
         subtitle="Гравці та NPC герої"
         actions={
           <>
+            <PartyRestActions campaignId={campaignId} characters={page.query.data ?? []} />
             <DeleteAllButton
               count={characterCount}
               nouns={["персонаж", "персонажі", "персонажів"]}
@@ -95,6 +97,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
                 character={character}
                 campaignId={campaignId}
                 busy={page.status.levelingUpId === character.id}
+                maxLevel={maxLevel}
                 actions={{ onLevelUp: character.level < maxLevel ? () => page.actions.levelUp(character) : undefined, onDelete: () => void page.actions.confirmDelete(character) }}
               />
             ))}

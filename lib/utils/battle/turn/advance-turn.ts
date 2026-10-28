@@ -145,6 +145,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
     currentBattleLogLength: scene.eventSeq + actions.length,
     newLogEntries,
     reserve,
+    rules,
     getStateBeforeForEntry: () => undefined,
   });
 

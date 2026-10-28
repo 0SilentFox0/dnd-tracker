@@ -1,13 +1,10 @@
-import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
+import { buildCharacterParticipant } from "@/lib/server/characters/participant";
 import { loadStoryChapters } from "@/lib/server/scenario/player-story";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
-import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
 import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract-artifacts";
-import { loadCharacterContext } from "@/lib/utils/battle/participant/load-character-context";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -20,11 +17,7 @@ export const loadSheetCharacter = (characterId: string) => prisma.character.find
 export type SheetCharacter = NonNullable<Awaited<ReturnType<typeof loadSheetCharacter>>>;
 
 export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], campaign: { maxLevel: number; rules: Ruleset }): Promise<CharacterSheet> {
-  const { context, race, tree } = await loadCharacterContext(character, campaign);
-
-  const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, context);
-
-  const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
+  const { context, race, tree, participant } = await buildCharacterParticipant(character, campaign);
 
   const known = participant.spellcasting.knownSpells ?? [];
 

@@ -4,6 +4,7 @@ import type { ParticipantsDiff, ParticipantUpdate } from "./diff-participants";
 import { diffParticipants } from "./diff-participants";
 import { BattleConflictError } from "./errors";
 import type { BattleDb } from "./load-battle";
+import { persistCharacterResources } from "./persist-resources";
 import { buildSnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type {
@@ -229,7 +230,10 @@ export async function saveBattle(
       });
     }
 
-    if (completing) await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+    if (completing) {
+      await persistCharacterResources(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants);
+      await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+    }
   });
 
   return delta;

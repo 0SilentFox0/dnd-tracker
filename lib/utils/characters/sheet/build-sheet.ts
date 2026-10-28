@@ -10,6 +10,7 @@ import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { pactSlot, slotLevels } from "@/lib/utils/battle/view";
 import { hitDiceLabel } from "@/lib/utils/characters/classes";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
@@ -46,6 +47,9 @@ export interface SheetInput {
     background: string | null;
     goals: unknown;
     notes?: string | null;
+    resources?: unknown;
+    inspiration?: boolean;
+    experience?: number;
     status?: string;
     reviewNote?: string | null;
     tokens?: { id: string; color: string; label: string; createdAt: Date }[];
@@ -128,7 +132,8 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     hitDice: classEntries ? hitDiceLabel(classEntries) : null,
     pact: pactSlot(p),
-    slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max })),
+    slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),
+    rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules: input.rules, maxLevel: input.maxLevel }),
     spells: input.spells,
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
     personalSkill: input.personalSkill,

@@ -3,6 +3,8 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
+import { CharacterLogTab } from "./rest/CharacterLogTab";
+import { DmRestActions } from "./rest/DmRestActions";
 import { StashTab } from "./stash/StashTab";
 import { CombatTab } from "./CombatTab";
 import { ItemsTab } from "./ItemsTab";
@@ -27,10 +29,10 @@ import { cn } from "@/lib/utils";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
-const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "stash", "story"];
+const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "stash", "story", "log"];
 
-function viewTabs(): ProfileTab[] {
-  return [
+function viewTabs(withLog: boolean): ProfileTab[] {
+  const tabs: ProfileTab[] = [
     { id: "combat", label: "Бій", content: <CombatTab /> },
     { id: "skills", label: "Вміння", content: <SkillsTab /> },
     { id: "magic", label: "Магія", content: <MagicTab /> },
@@ -38,6 +40,8 @@ function viewTabs(): ProfileTab[] {
     { id: "stash", label: "Підсумок", content: <StashTab /> },
     { id: "story", label: "Історія", content: <StoryTab /> },
   ];
+
+  return withLog ? [...tabs, { id: "log", label: "Журнал", content: <CharacterLogTab /> }] : tabs;
 }
 
 function useScrolledPast() {
@@ -99,16 +103,19 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                   badge={<LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />}
                   actions={
                     canEdit && sheet.viewer.isDM ? (
-                      <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-                        Редагувати
-                      </Button>
+                      <>
+                        <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
+                          Редагувати
+                        </Button>
+                        <DmRestActions />
+                      </>
                     ) : null
                   }
                 />
                 {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
-                <ProfileTabs value={tab} onValueChange={setTab} tabs={viewTabs()} header={hero.past ? <CompactHero /> : null} />
+                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest)} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>
             )}

@@ -27,11 +27,12 @@ const ALLOWED: Record<string, string> = {
   "lib/hooks/battle/useBattleMapPlayground.ts: Вогняна стіна": "dev-only playground hazard label",
 };
 
+// статичний маркетинг, не рушій: демо-копірайт може згадувати назви з бібліотеки
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
 
-    if (statSync(p).isDirectory()) return f === "__tests__" ? [] : files(p);
+    if (statSync(p).isDirectory()) return f === "__tests__" || p === "components/landing" ? [] : files(p);
 
     return /\.(ts|tsx)$/.test(f) ? [p] : [];
   });

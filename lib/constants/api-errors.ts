@@ -143,6 +143,17 @@ export const API_ERRORS = {
   DRAFT_CLASS_REQUIRED: "Оберіть клас персонажа",
   DRAFT_NOT_PENDING: "Персонаж уже схвалений — редагує DM",
   REVIEW_NOT_PENDING: "Персонаж не очікує схвалення",
+  OOC_RESOURCES_DISABLED: "Ресурси між боями вимкнені в правилах кампанії",
+  OOC_XP_DISABLED: "Досвід за таблицею вимкнений у правилах кампанії",
+  OOC_INSPIRATION_DISABLED: "Натхнення вимкнене в правилах кампанії",
+  NO_INSPIRATION: "У героя немає натхнення",
+  REST_CHARACTERS_INVALID: "Відпочинок — лише для схвалених героїв цієї кампанії",
+  XP_CHARACTERS_INVALID: "Досвід — лише для схвалених героїв цієї кампанії",
+  SHORT_REST_CLOSED: "Кістки хітів витрачають лише під час короткого відпочинку",
+  CHARACTER_DEAD: "Герой мертвий",
+  NO_HIT_DICE: "Невитрачених кісток хітів цього класу немає",
+  HP_FULL: "Здоров'я вже повне",
+  CHARACTER_IN_BATTLE: "Герой зараз у бою — дочекайтеся завершення",
   AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;
 

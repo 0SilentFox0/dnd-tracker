@@ -2,6 +2,8 @@
 
 import { type ReactNode, type Ref, useState } from "react";
 
+import { HitDicePanel } from "./rest/HitDicePanel";
+import { RestBadges } from "./rest/RestBadges";
 import { Breakdown } from "./Breakdown";
 import { HeroPortrait } from "./HeroPortrait";
 import { useProfile } from "./ProfileContext";
@@ -9,6 +11,13 @@ import { useProfile } from "./ProfileContext";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudStatChip } from "@/components/hud/page";
 import { signed } from "@/lib/utils/common/format";
+import type { CharacterSheet } from "@/types/characters";
+
+const hpText = (sheet: CharacterSheet) => {
+  const hp = sheet.rest?.hp;
+
+  return hp ? `HP ${hp.current} / ${hp.max}${hp.temp ? ` (+${hp.temp})` : ""}` : `HP ${sheet.hp.total}`;
+};
 
 export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
   const { sheet, canEdit } = useProfile();
@@ -38,9 +47,11 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
                 </span>
               </p>
               <button type="button" aria-expanded={hpOpen} onClick={() => setHpOpen((v) => !v)} className="mt-1 text-sm text-hud-bone underline-offset-2 hover:underline">
-                HP {sheet.hp.total}
+                {hpText(sheet)}
                 {sheet.hitDice && ` · ${sheet.hitDice}`}
               </button>
+              {sheet.rest && <RestBadges />}
+              {sheet.rest && <HitDicePanel />}
             </div>
             {actions && <div className="flex shrink-0 flex-col gap-1.5">{actions}</div>}
           </div>
@@ -67,7 +78,7 @@ export function CompactHero() {
         {sheet.identity.name} · {sheet.identity.level}
       </span>
       <span className="shrink-0 tabular-nums">
-        HP {sheet.hp.total} · AC {sheet.armorClass.total} · Влуч {sheet.bestToHit === null ? "—" : signed(sheet.bestToHit)}
+        {sheet.rest?.hp ? `HP ${sheet.rest.hp.current} / ${sheet.rest.hp.max}` : `HP ${sheet.hp.total}`} · AC {sheet.armorClass.total} · Влуч {sheet.bestToHit === null ? "—" : signed(sheet.bestToHit)}
       </span>
     </div>
   );

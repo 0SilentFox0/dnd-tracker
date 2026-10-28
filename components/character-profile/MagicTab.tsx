@@ -44,8 +44,8 @@ export function MagicTab() {
         <HudSection title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">
             {sheet.slots.map((s) => (
-              <span key={s.level} aria-label={`${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
-                {spellLevelRoman(s.level)} · {s.count}
+              <span key={s.level} aria-label={sheet.rest?.persist ? `${spellLevelRoman(s.level)} коло: залишилось ${s.current} з ${s.count}` : `${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
+                {spellLevelRoman(s.level)} · {sheet.rest?.persist ? `${s.current}/${s.count}` : s.count}
               </span>
             ))}
           </div>

@@ -39,6 +39,7 @@ import {
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -113,7 +114,7 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
   }
 }
 
-function withVictory(scene: BattleSceneState, result: MutationResult): MutationResult {
+function withVictory(scene: BattleSceneState, result: MutationResult, rules: Ruleset): MutationResult {
   const status = result.scene?.status ?? scene.status;
 
   if (status !== BattleStatus.ACTIVE) return result;
@@ -124,7 +125,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
 
   const round = result.scene?.round ?? scene.round;
 
-  const { updatedParticipants, battleAction } = completeBattle(result.participants, victory.result, round);
+  const { updatedParticipants, battleAction } = completeBattle(result.participants, victory.result, round, rules);
 
   return {
     ...result,
@@ -279,7 +280,7 @@ export async function runBattleMutation<TBody>(
 
     const placed = withPlacement(map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
 
-    const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed));
+    const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 
     if (isDryRun) {
       const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
