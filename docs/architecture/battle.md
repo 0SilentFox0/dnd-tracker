@@ -81,6 +81,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Вміння**: джерело `class` (див. [abilities.md](abilities.md)); `limits.perRest` = `perBattle` до 4d.
 - **Кола заклинань 0–9** по всьому стеку (Zod, форми, `SlotGrid`, `.circle-0…9`); кантрип = коло 0. Обмеження HOMM (раса 1–5, крива до рівня 10, відкриття кіл школою) лишаються даними HOMM.
 - **Підвищення рівня** (`POST …/level-up`, ДМ): у режимі класів тіло `{ classId, subclassId? }` — наявний клас або мультиклас; підклас обов'язковий на `subclassLevel` і заборонений раніше; `campaign.maxLevel` — на суму; випадкового +1 до характеристики немає; слоти перераховуються.
+- **Карта класу**: `buildClassProgression` (`lib/utils/characters/classes/progression.ts`) — чиста функція, що з `GameClassData` (+ рівень героя) будує `ClassProgression` — рядки по рівнях з пунктами `ProgressionItem` (вміння з описом, підклас, вибори, колонки чисел, open-вибір). Рендерить `ClassProgressionMap` (`components/classes/progression/`) у трьох місцях: вкладка «Карта» у `ClassForm` (ДМ, `onOpenLevel` веде до вкладки вмінь/підкласів), `SkillsTab` листа героя (`sheet.classProgression`, поточний/наступний рівень і невибрані вибори) та діалог `ClassLevelUpDialog`. Вибір підкласу з листа не робиться — лише через level-up.
 
 ## 5e: атаки й заклинання
 
