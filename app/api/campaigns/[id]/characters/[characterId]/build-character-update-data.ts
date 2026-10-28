@@ -29,7 +29,7 @@ export function resolveFinalLevel(character: { level: number }, data: { level?: 
   return data.level ?? character.level;
 }
 
-function tableSlots(level: number, existing: SpellSlots | null | undefined, progression: SpellSlotProgression[] | null, maxLevel: number): SpellSlots {
+export function tableSlots(level: number, existing: SpellSlots | null | undefined, progression: SpellSlotProgression[] | null, maxLevel: number): SpellSlots {
   const slots: SpellSlots = Object.fromEntries(
     Object.entries(fullSpellSlots(level, progression, maxLevel)).map(([k, v]) => {
       const current = existing?.[k]?.current;

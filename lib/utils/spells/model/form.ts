@@ -50,8 +50,7 @@ export function spellToForm(spell: Spell): SpellFormData {
 }
 
 export function formToPayload(form: SpellFormData) {
-  // заклинання 0-го рівня зі старих даних зберігає рівень, нові — лише 1–5 (перевіряє createSpellSchema на сервері)
-  const parsed = createSpellSchema.parse({ ...form, level: Math.max(1, form.level), icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null });
+  const parsed = createSpellSchema.parse({ ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null });
 
   return { ...parsed, level: form.level };
 }

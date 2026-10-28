@@ -118,4 +118,13 @@ describe("randomOf", () => {
 
     expect(r.participants.map((p) => p.battleData.activeEffects.length)).toEqual([0, 0, 1]);
   });
+
+  it("restoreSpellSlot/drainSpellSlot з ключем pact: pact останній при відновленні, за level при втраті", () => {
+    const base = makeParticipant({ id: "o" });
+
+    const p = { ...base, spellcasting: { ...base.spellcasting, spellSlots: { "1": { max: 2, current: 1 }, "4": { max: 1, current: 1 }, pact: { level: 5, max: 2, current: 0 } } } };
+
+    expect(run({ kind: "restoreSpellSlot", count: 1 }, ["o"], [p]).participants[0].spellcasting.spellSlots["1"].current).toBe(2);
+    expect(run({ kind: "drainSpellSlot", count: 1 }, ["o"], [{ ...p, spellcasting: { ...p.spellcasting, spellSlots: { ...p.spellcasting.spellSlots, pact: { level: 5, max: 2, current: 1 } } } }]).participants[0].spellcasting.spellSlots.pact.current).toBe(0);
+  });
 });

@@ -10,7 +10,7 @@ import { createFakeDb } from "./fake-db";
 
 const id = (c: string) => "c" + c.repeat(24);
 
-const G = id("a"), R = id("b"), U = id("c"), SP = id("d"), M = id("e"), SK = id("f"), T = id("g"), AS = id("h"), AR = id("i"), TR = id("j");
+const G = id("a"), R = id("b"), U = id("c"), SP = id("d"), M = id("e"), SK = id("f"), T = id("g"), AS = id("h"), AR = id("i"), TR = id("j"), CL = id("k");
 
 const settings = { maxLevel: 20, xpMultiplier: 2.5, allowPlayerEdit: true, friendlyFire: false };
 
@@ -21,6 +21,7 @@ function fullBundle(): Bundle {
     rules: {},
     spellGroups: [{ id: G, name: "g" }],
     races: [{ id: R, name: "Human" }],
+    classes: [{ id: CL, name: "Fighter" }],
     units: [{ id: U, name: "u", raceId: R, abilities: [], levelScaling: null }],
     spells: [{ id: SP, name: "s", groupId: G, summonUnitId: U, fx: null, spellEffects: [{ summon: { unitId: U } }] }],
     mainSkills: [{ id: M, name: "m", spellGroupId: G }],

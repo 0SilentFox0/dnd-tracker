@@ -2,6 +2,8 @@ export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intellige
 
 export type AbilityKey = (typeof ABILITY_KEYS)[number];
 
+export const isAbilityKey = (v: unknown): v is AbilityKey => (ABILITY_KEYS as readonly unknown[]).includes(v);
+
 export const SPELLCASTING_ABILITIES = ["intelligence", "wisdom", "charisma"] as const;
 
 export type SpellcastingAbility = (typeof SPELLCASTING_ABILITIES)[number];

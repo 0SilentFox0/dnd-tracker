@@ -14,6 +14,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
+import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -157,9 +158,7 @@ export function applyRestoreSpellSlot(input: EffectApplyInput<Of<"restoreSpellSl
     (p) => {
       const slots = p.spellcasting.spellSlots;
 
-      const level = Object.keys(slots)
-        .sort((a, b) => Number(a) - Number(b))
-        .find((l) => slots[l].current < slots[l].max);
+      const level = slotRestoreOrder(slots).find((l) => slots[l].current < slots[l].max);
 
       if (!level) return null;
 
@@ -193,7 +192,7 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
     for (let i = 0; i < effect.count; i++) {
       const level = Object.keys(slots)
         .filter((l) => slots[l].current > 0)
-        .sort((a, b) => (Number(b) || 0) - (Number(a) || 0))[0];
+        .sort((a, b) => slotLevel(slots, b) - slotLevel(slots, a))[0];
 
       if (!level) break;
 

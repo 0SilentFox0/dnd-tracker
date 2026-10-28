@@ -22,7 +22,7 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
       <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />
       <div>
         <Label htmlFor="level">Рівень (слот) *</Label>
-        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions(formData.level)} />
+        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions()} />
       </div>
       <div>
         <Label htmlFor="cost">Вартість</Label>

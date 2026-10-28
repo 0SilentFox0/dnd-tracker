@@ -5,11 +5,12 @@ import {
   campaignPost,
   campaignPut,
 } from "@/lib/api/client";
-import { type CharacterTypeValue } from "@/lib/constants/characters";
+import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characters";
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, RosterHero } from "@/types/characters";
+import type { Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterSheet, CharacterToken, DraftInput, RosterHero } from "@/types/characters";
+import type { ClassLevelUpPick } from "@/types/classes";
 
 export async function getCharacter(
   campaignId: string,
@@ -37,11 +38,13 @@ export const getCharacterSheet = (campaignId: string, characterId: string) => ca
 
 export async function getCharacters(
   campaignId: string,
-  opts?: { type?: CharacterTypeValue; compact?: boolean },
+  opts?: { type?: CharacterTypeValue; status?: "pending"; compact?: boolean },
 ): Promise<CharacterListItem[]> {
   const params = new URLSearchParams();
 
   if (opts?.type) params.set("type", opts.type);
+
+  if (opts?.status) params.set("status", opts.status);
 
   if (opts?.compact) params.set("compact", "1");
 
@@ -81,11 +84,12 @@ export async function updateCharacter(
 export async function levelUpCharacter(
   campaignId: string,
   characterId: string,
+  pick: ClassLevelUpPick = {},
 ): Promise<Character & { levelUpDetails?: unknown }> {
   return campaignPost<Character & { levelUpDetails?: unknown }>(
     campaignId,
     `/characters/${characterId}/level-up`,
-    {},
+    pick,
   );
 }
 
@@ -106,3 +110,21 @@ export async function deleteAllCharacters(
 }
 
 export const getCharacterRoster = (campaignId: string) => campaignGet<RosterHero[]>(campaignId, "/characters/roster");
+
+export const createDraft = (campaignId: string, body: DraftInput) => campaignPost<Character>(campaignId, "/characters/draft", body);
+
+export const updateDraft = (campaignId: string, characterId: string, body: DraftInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
+
+export const getBackstoryAvailability = (campaignId: string) => campaignGet<{ available: boolean; image: boolean }>(campaignId, "/characters/draft/backstory");
+
+export const getDraftPortraitPools = (campaignId: string) => campaignGet<{ pools: Record<string, string[]> }>(campaignId, "/characters/draft/portraits");
+
+export const generateDraftAvatar = (campaignId: string, body: { name: string; race: string; archetype: string; class: string }) => campaignPost<{ url: string }>(campaignId, "/characters/draft/avatar", body);
+
+export const generateBackstory = (campaignId: string, body: { name: string; race: string; archetype: string; class: string; background?: string }) =>
+  campaignPost<{ background: string; goals: Array<{ text: string; kind: GoalKind }> }>(campaignId, "/characters/draft/backstory", body);
+
+export type ReviewBody = { action: "approve" } | { action: "return"; note: string };
+
+export const reviewCharacter = (campaignId: string, characterId: string, body: ReviewBody) =>
+  campaignPost<{ id: string; status: string; reviewNote: string | null }>(campaignId, `/characters/${characterId}/review`, body);

@@ -11,6 +11,7 @@ import type { BattleParticipant, DamageStep } from "@/types/battle";
 const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
   skill: "Бонус зі скілів",
   race: "Расовий бонус",
+  class: "Бонус класу",
   artifact: "Бонус артефакту",
   artifactSet: "Бонус сету",
   unit: "Бонус істоти",

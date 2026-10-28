@@ -1,4 +1,4 @@
-import { BookOpen, Gem, GitBranch, Images, Info, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+import { BookOpen, Gem, GitBranch, GraduationCap, Images, Info, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
 
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
@@ -7,12 +7,15 @@ import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncBut
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
 import { CampaignKind, CampaignStatus } from "@/lib/constants/campaigns";
+import { CharacterStatus } from "@/lib/constants/characters";
+import { prisma } from "@/lib/db";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
 import { pluralUk } from "@/lib/utils/common/plural";
+import { parseRules } from "@/lib/utils/rules/schema";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
 
-const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "units", "artifacts", "music"]);
+const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "classes", "units", "artifacts", "music"]);
 
 const LABEL = "text-sm text-hud-muted";
 
@@ -27,15 +30,20 @@ export default async function CampaignDetailPage({
 
   const isTemplate = campaign.kind === CampaignKind.TEMPLATE;
 
+  const classesEnabled = parseRules(campaign.rules).classes.enabled;
+
+  const pendingDrafts = isDM ? await prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0;
+
   const allDmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
-    { path: "characters", icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців" },
+    { path: "characters", icon: Users, title: "Персонажі", subtitle: pendingDrafts ? `Управління персонажами гравців · ${pendingDrafts} на схваленні` : "Управління персонажами гравців" },
     { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
     { path: "spells", icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії" },
     { path: "artifacts", icon: Gem, title: "Артефакти", subtitle: "Управління артефактами та сетами" },
     { path: "skills", icon: BookOpen, title: "Бібліотека Скілів", subtitle: "Управління скілами та їх ефектами" },
     { path: "skill-trees", icon: GitBranch, title: "Дерева Прокачки", subtitle: "Налаштування дерев прокачки для рас" },
     { path: "races", icon: Shield, title: "Ігрові Раси", subtitle: "Управління расами та їх здібностями" },
+    ...(classesEnabled ? [{ path: "classes", icon: GraduationCap, title: "Класи", subtitle: "Класи, підкласи і вміння за рівнями" }] : []),
     { path: "battles", icon: Swords, title: "Сцени Боїв", subtitle: "Створення та управління боями" },
     { path: "music", icon: Music, title: "Музика бою", subtitle: "Бібліотека треків для плеєра в бою" },
     { path: "show", icon: Images, title: "Показ сцен", subtitle: "Набори слайдів із музикою для гравців" },

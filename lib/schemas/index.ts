@@ -4,6 +4,7 @@ export * from "./battles";
 export * from "./campaigns";
 export * from "./character-goals";
 export * from "./character-tokens";
+export * from "./classes";
 export * from "./list-skills-query";
 export * from "./list-spells-query";
 export * from "./main-skills";

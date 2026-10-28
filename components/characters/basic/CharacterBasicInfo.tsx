@@ -1,5 +1,6 @@
 "use client";
 
+import { CharacterClassesField } from "@/components/characters/basic/CharacterClassesField";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
@@ -7,8 +8,11 @@ import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
+import { classesLabel, classTotalLevel, subclassesLabel } from "@/lib/utils/characters/classes";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { CampaignMember } from "@/types/campaigns";
+import type { CharacterClassEntry, GameClassData } from "@/types/classes";
 import type { Race } from "@/types/races";
 
 interface CharacterBasicInfoProps {
@@ -16,6 +20,7 @@ interface CharacterBasicInfoProps {
   campaignMembers?: CampaignMember[];
   races?: Race[];
   isPlayerView?: boolean;
+  classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
 export function CharacterBasicInfo({
@@ -23,8 +28,21 @@ export function CharacterBasicInfo({
   campaignMembers = [],
   races = [],
   isPlayerView = false,
+  classMode,
 }: CharacterBasicInfoProps) {
   const { data, set } = basicInfo;
+
+  const setClasses = (entries: CharacterClassEntry[]) => {
+    const resolved = resolveClassEntries(entries, classMode?.byId ?? {});
+
+    set("classes", entries);
+
+    if (entries.length === 0) return;
+
+    set("class", classesLabel(resolved));
+    set("subclass", subclassesLabel(resolved) ?? undefined);
+    set("level", classTotalLevel(entries));
+  };
 
   const { name, type, controlledBy, level, class: className, subclass, archetype, race, subrace, alignment, avatar } = data;
 
@@ -97,26 +115,32 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
-      <LabeledInput
-        id="class"
-        label="Клас"
-        value={className}
-        onChange={(e) => set("class", e.target.value)}
-        required
-        placeholder="Наприклад: Паладин"
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      <LabeledInput
-        id="subclass"
-        label="Підклас"
-        value={subclass || ""}
-        onChange={(e) => set("subclass", e.target.value)}
-        placeholder="Наприклад: Клятва Месника"
-        containerClassName="w-full min-w-0"
-        className="w-full"
-      />
-      {!isPlayerView && (
+      {classMode ? (
+        <CharacterClassesField value={data.classes ?? []} classes={classMode.classes} onChange={setClasses} />
+      ) : (
+        <>
+        <LabeledInput
+          id="class"
+          label="Клас"
+          value={className}
+          onChange={(e) => set("class", e.target.value)}
+          required
+          placeholder="Наприклад: Паладин"
+          containerClassName="w-full min-w-0"
+          className="w-full"
+        />
+        <LabeledInput
+          id="subclass"
+          label="Підклас"
+          value={subclass || ""}
+          onChange={(e) => set("subclass", e.target.value)}
+          placeholder="Наприклад: Клятва Месника"
+          containerClassName="w-full min-w-0"
+          className="w-full"
+        />
+        </>
+      )}
+      {!isPlayerView && !classMode && (
         <div className="w-full min-w-0">
           <Label htmlFor="archetype">Архетип</Label>
           <SelectField
@@ -144,20 +168,22 @@ export function CharacterBasicInfo({
         />
       </div>
 
-      <div className="col-span-2 grid grid-cols-3 gap-2">
-        <LabeledInput
-          id="level"
-          label="Рівень"
-          labelClassName="text-xs leading-tight"
-          type="number"
-          min="1"
-          max="30"
-          value={level}
-          onChange={(e) => set("level", parseInt(e.target.value) || 1)}
-          containerClassName="w-full min-w-0"
-          className="w-full"
-        />
-      </div>
+      {!classMode && (
+        <div className="col-span-2 grid grid-cols-3 gap-2">
+          <LabeledInput
+            id="level"
+            label="Рівень"
+            labelClassName="text-xs leading-tight"
+            type="number"
+            min="1"
+            max="30"
+            value={level}
+            onChange={(e) => set("level", parseInt(e.target.value) || 1)}
+            containerClassName="w-full min-w-0"
+            className="w-full"
+          />
+        </div>
+      )}
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
           <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={(value) => set("avatar", value)} fallbackText={name} maxSide={1200} />

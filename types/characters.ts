@@ -1,4 +1,5 @@
 import type { PublicUser } from "./campaigns";
+import type { CharacterClassEntry } from "./classes";
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { StoryChapter } from "./scenario";
 import type { BookSpell } from "./spells";
@@ -7,6 +8,7 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
+import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 
 export type { AbilityKey };
 
@@ -40,6 +42,7 @@ export interface CharacterFormData {
     level: number;
     class: string;
     subclass?: string;
+    classes?: CharacterClassEntry[];
     archetype?: string;
     race: string;
     subrace?: string;
@@ -96,6 +99,7 @@ export interface Character {
   level: number;
   class: string;
   subclass?: string;
+  classes?: CharacterClassEntry[];
   race: string;
   subrace?: string;
   alignment?: string;
@@ -148,8 +152,8 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative"
-> & { user?: { displayName: string } | null };
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative"
+> & { user?: { displayName: string } | null; reviewNote?: string | null };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 
@@ -209,6 +213,7 @@ export interface SetProgress {
 
 export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
+  review: { pending: boolean; note: string | null };
   maxLevel: number;
   identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
@@ -229,6 +234,8 @@ export interface CharacterSheet {
   skills: SheetCheck[];
   passives: { perception: number; investigation: number; insight: number };
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
+  hitDice: string | null;
+  pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number }[];
   spells: BookSpell[];
   items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
@@ -243,4 +250,24 @@ export interface RosterHero {
   avatar: string | null;
   type: CharacterTypeValue;
   equipped: Record<string, { id: string; name: string }>;
+}
+
+export interface DraftInput {
+  name: string;
+  race: string;
+  class: string;
+  classId?: string;
+  archetype: HeroArchetypeKey;
+  alignment?: string;
+  background?: string;
+  avatar?: string;
+  method: "standard" | "pointBuy";
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  primaryAbility?: AbilityKey;
+  goals?: Array<{ text: string; kind: GoalKind }>;
 }

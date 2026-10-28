@@ -3,14 +3,16 @@ import { z } from "zod";
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 import { CharacterType, HERO_INITIATIVE, HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
+import { CharacterClassesSchema } from "@/lib/schemas/classes";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
   type: z.enum([CharacterType.PLAYER, CharacterType.NPC_HERO]),
   controlledBy: z.string(),
   level: z.number().min(1).max(30).default(1),
-  class: z.string().min(1),
+  class: z.string().optional(),
   subclass: z.string().optional(),
+  classes: CharacterClassesSchema.optional(),
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
   race: z.string().min(1),
   subrace: z.string().optional(),
@@ -56,6 +58,8 @@ export const createCharacterSchema = z.object({
   // Уміння (персональний скіл з групи «Персональні»)
   personalSkillId: z.string().optional().nullable(),
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
+}).superRefine((value, ctx) => {
+  if (!value.class && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
 });
 
 export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;

@@ -40,6 +40,11 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
 }
 
 describe("buildCharacterSheet", () => {
+  it("review: чернетка з приміткою, активний без", () => {
+    expect(buildCharacterSheet(lira({ status: "pending", reviewNote: "додай ціль" })).review).toEqual({ pending: true, note: "додай ціль" });
+    expect(buildCharacterSheet(lira({ status: "active", reviewNote: "стара" })).review).toEqual({ pending: false, note: null });
+  });
+
   it("майстерність від рівня і модифікатори характеристик", () => {
     const s = buildCharacterSheet(lira());
 
@@ -150,5 +155,16 @@ describe("buildCharacterSheet", () => {
     input.participant.battleData.artifactSets = [set];
 
     expect(buildCharacterSheet(input).items.sets).toEqual([set]);
+  });
+
+  it("рятівні від класу (участник) показані з майстерністю в режимі класів", () => {
+    const input = lira({ savingThrows: {} });
+
+    input.participant.abilities = { ...input.participant.abilities, saveProficiencies: ["strength", "constitution"] };
+
+    const saves = buildCharacterSheet(input).saves;
+
+    expect(saves.find((x) => x.key === "strength")).toMatchObject({ proficient: true, bonus: 0 + 9 });
+    expect(saves.find((x) => x.key === "dexterity")?.proficient).toBe(false);
   });
 });

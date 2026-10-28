@@ -14,6 +14,14 @@ export const API_ERRORS = {
   SOURCE_FOREIGN_IDS: "Запис джерела посилається на вміст іншої кампанії",
   CHARACTER_NOT_FOUND: "Персонажа не знайдено",
   RACE_NOT_FOUND: "Расу не знайдено",
+  CLASS_NOT_FOUND: "Клас не знайдено",
+  CLASS_IN_USE: "Клас використовують персонажі — спершу змініть їхні класи",
+  CLASSES_DISABLED: "Класи вимкнені в правилах кампанії",
+  SUBCLASS_REQUIRED: "Оберіть підклас",
+  CLASS_REQUIRED: "Оберіть клас для нового рівня",
+  SUBCLASS_NOT_FOUND: "Підклас не знайдено в цьому класі",
+  SUBCLASS_ALREADY_SET: "Підклас уже обрано — змінити його при підвищенні рівня не можна",
+  CONVERT_TO_CLASSES_FIRST: "Спершу переведіть персонажа на класи",
   SKILL_NOT_FOUND: "Навик не знайдено",
   MEMBER_NOT_FOUND: "Учасника не знайдено",
   BATTLE_RESERVE_NOT_FOUND: "Учасника резерву не знайдено",
@@ -53,6 +61,12 @@ export const API_ERRORS = {
   ARTIFACT_TRANSFER_SELF: "Не можна передати артефакт самому собі",
   ARTIFACT_UNKNOWN_SLOT: "Невідомий слот",
   ARTIFACT_ALREADY_EQUIPPED: "Цей артефакт уже вдягнено в інший слот",
+  NOT_ENOUGH_MONEY: "Недостатньо коштів",
+  MONEY_OVERFLOW: "Забагато монет — перевищено ліміт гаманця",
+  ITEM_NOT_FOUND: "Річ не знайдено",
+  ARTIFACT_NOT_IN_STASH: "Цього артефакта немає в підсумку",
+  ARTIFACT_NO_SLOT: "Цей артефакт не вдягається — він лежить у підсумку",
+  ARTIFACT_NOT_FOUND: "Артефакт не знайдено",
   ARTIFACT_HELD_BY_OTHER: "Артефакт уже носить інший герой",
   TRACK_NOT_FOUND: "Трек не знайдено",
   TRACK_LIMIT: `У бібліотеці вже ${MAX_TRACKS_PER_CAMPAIGN} треків — видаліть зайві`,
@@ -112,6 +126,20 @@ export const API_ERRORS = {
   API_TOKEN_WRONG_CAMPAIGN: "Токен належить іншій кампанії",
   API_TOKEN_SESSION_ONLY: "Ця дія доступна лише з інтерфейсу",
   API_TOKEN_AI_ON_TEMPLATE: "На шаблоні немає AI-асистента — оберіть лише права на контент",
+  DRAFT_PLAYERS_ONLY: "Створити персонажа може лише гравець кампанії",
+  DRAFT_ALREADY_EXISTS: "У вас уже є персонаж у цій кампанії",
+  DRAFT_INVALID_SCORES: "Характеристики мають відповідати стандартному масиву або point-buy (27)",
+  DRAFT_EDIT_VIA_DRAFT: "Чернетку редагують через форму чернетки, а не загальне збереження",
+  DRAFT_CLASS_REQUIRED: "Оберіть клас персонажа",
+  DRAFT_NOT_PENDING: "Персонаж уже схвалений — редагує DM",
+  REVIEW_NOT_PENDING: "Персонаж не очікує схвалення",
+  AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
 } as const;
 
+export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
+
 export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;
+
+export const subclassTooEarlyMessage = (level: number) => `Підклас доступний з рівня ${level}`;
+
+export const maxLevelMessage = (max: number) => `Максимальний рівень кампанії — ${max}`;

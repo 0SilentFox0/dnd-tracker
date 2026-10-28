@@ -1,3 +1,4 @@
+import type { Limits } from "@/lib/utils/abilities/schema";
 import type { AbilityUsageCounter, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -17,6 +18,8 @@ export function cooldownLeft(p: BattleParticipant, ability: ResolvedAbility, rou
   return Math.max(0, lastRound + cooldown + 1 - round);
 }
 
+export const battleLimit = (l: Limits): number | undefined => l.perBattle ?? l.perRest?.uses;
+
 export function withinCountLimits(p: BattleParticipant, ability: ResolvedAbility): boolean {
   const l = ability.limits;
 
@@ -25,7 +28,7 @@ export function withinCountLimits(p: BattleParticipant, ability: ResolvedAbility
   const u = usageOf(p, ability.key);
 
   return !(
-    (l.perBattle !== undefined && u.battle >= l.perBattle) ||
+    (battleLimit(l) !== undefined && u.battle >= (battleLimit(l) as number)) ||
     (l.perRound !== undefined && u.round >= l.perRound) ||
     (l.perTurn !== undefined && u.turn >= l.perTurn)
   );

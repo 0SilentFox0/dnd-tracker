@@ -7,8 +7,10 @@ import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
 import { CharacterType } from "@/lib/constants/characters";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { useClassMode } from "@/lib/hooks/classes";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { heroHpFormula } from "@/lib/utils/rules";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { CharacterListItem } from "@/types/characters";
 
 interface DmCharacterCardProps {
@@ -20,6 +22,10 @@ interface DmCharacterCardProps {
 
 export function DmCharacterCard({ character, campaignId, busy, actions }: DmCharacterCardProps) {
   const { data: rules } = useCampaignRules(campaignId);
+
+  const classMode = useClassMode(campaignId);
+
+  const entries = classMode.enabled && character.classes?.length ? resolveClassEntries(character.classes, classMode.byId) : null;
 
   const isNpc = character.type === CharacterType.NPC_HERO;
 
@@ -53,7 +59,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
       </div>
       <div className="flex gap-1.5">
         <HudStatChip short="Рів" value={character.level} />
-        <HudStatChip short="HP" value={heroBaseHp(character, rules && heroHpFormula(rules.heroScaling)).total} />
+        <HudStatChip short="HP" value={characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling) }).total} />
         <HudStatChip short="AC" value={character.armorClass} />
         <HudStatChip short="Ініц" value={character.initiative} />
       </div>

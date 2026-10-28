@@ -1,13 +1,20 @@
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 
 import { prisma } from "@/lib/db";
+import { classSpellSlots } from "@/lib/utils/spells/class-slots";
 import { calculateSpellSlotsForLevel } from "@/lib/utils/spells/spell-slots";
+import type { ResolvedClassEntry } from "@/types/classes";
 import type { SpellSlotProgression } from "@/types/races";
 
 export async function resolveSpellSlotsFromCharacter(
   character: CharacterFromPrisma,
   context?: CampaignSpellContext,
-): Promise<Record<string, { max: number; current: number }>> {
+  classes?: ResolvedClassEntry[],
+): Promise<Record<string, { max: number; current: number; level?: number }>> {
+  if (classes) {
+    return Object.fromEntries(Object.entries(classSpellSlots(classes)).map(([k, v]) => [k, { ...v, current: v.max }]));
+  }
+
   const existingSlots =
     (character.spellSlots as Record<string, { max: number; current: number }>) || {};
 

@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { createCharacterSchema } from "./create-character-schema";
+import { deriveCharacterDefaults } from "./derive-character-defaults";
 import { resolveCharacterOwner } from "./resolve-character-owner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { applyClasses } from "@/lib/server/characters/apply-classes";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
-import type { SpellSlotProgression } from "@/types/races";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
@@ -30,6 +30,20 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
   if (data.initiative < heroMin || data.initiative > heroMax) return errorResponse(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
 
+  const { campaign } = accessResult;
+
+  const applied = await applyClasses({
+    campaignId,
+    rules: campaign.rules,
+    maxLevel: campaign.maxLevel,
+    entries: data.classes ?? [],
+    spellcastingAbility: data.spellcastingAbility ?? null,
+  });
+
+  if (!applied.ok) return errorResponse(applied.error, applied.status);
+
+  const fromClasses = applied.data;
+
   const owner = await resolveCharacterOwner(campaignId, accessResult.userId, data);
 
   if ("error" in owner) return owner.error;
@@ -38,13 +52,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
-  let spellSlots = data.spellSlots;
-
-  if (!spellSlots || typeof spellSlots !== "object" || Object.keys(spellSlots).length === 0) {
-    const race = await prisma.race.findFirst({ where: { campaignId, name: data.race }, select: { spellSlotProgression: true } });
-
-    spellSlots = fullSpellSlots(data.level, Array.isArray(race?.spellSlotProgression) ? (race.spellSlotProgression as unknown as SpellSlotProgression[]) : null);
-  }
+  const spellSlots = fromClasses?.spellSlots ?? (await deriveCharacterDefaults(campaignId, data)).spellSlots;
 
   try {
     const character = await prisma.character.create({
@@ -53,9 +61,10 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         type: data.type,
         controlledBy: owner.controlledBy,
         name: data.name,
-        level: data.level,
-        class: data.class,
-        subclass: data.subclass,
+        level: fromClasses?.level ?? data.level,
+        class: fromClasses?.class ?? data.class ?? "",
+        subclass: fromClasses ? fromClasses.subclass : data.subclass,
+        classes: (data.classes ?? []) as unknown as Prisma.InputJsonValue,
         archetype: data.archetype ?? null,
         race: data.race,
         subrace: data.subrace,
@@ -77,7 +86,7 @@ export async function createCharacter(request: Request, campaignId: string): Pro
         savingThrows: data.savingThrows as Record<string, boolean>,
         skills: data.skills as Record<string, boolean>,
 
-        spellcastingAbility: data.spellcastingAbility,
+        spellcastingAbility: fromClasses?.spellcastingAbility ?? data.spellcastingAbility,
         spellSlots,
         knownSpells: data.knownSpells,
 

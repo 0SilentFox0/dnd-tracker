@@ -3,12 +3,14 @@ import { z } from "zod";
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 import { HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
+import { CharacterClassesSchema } from "@/lib/schemas/classes";
 
 export const updateCharacterSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   level: z.number().min(1).max(30).optional(),
-  class: z.string().min(1).optional(),
+  class: z.string().optional(),
   subclass: z.string().nullable().optional(),
+  classes: CharacterClassesSchema.optional(),
   race: z.preprocess(
     (v) => (v === "" || v === null ? undefined : v),
     z.string().min(1).optional(),
@@ -61,4 +63,6 @@ export const updateCharacterSchema = z.object({
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
 
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
+}).superRefine((value, ctx) => {
+  if (value.class === "" && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
 });

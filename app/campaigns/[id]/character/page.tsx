@@ -1,7 +1,6 @@
 import { readCharacterSheet } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet";
 import { CharacterProfile } from "@/components/character-profile";
-import { EmptyState } from "@/components/common/states";
-import { HudPage } from "@/components/hud/page";
+import { NoCharacterState } from "@/components/characters/player-draft/NoCharacterState";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { characterKeys } from "@/lib/hooks/characters/keys";
@@ -22,11 +21,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
   });
 
   if (!character) {
-    return (
-      <HudPage>
-        <EmptyState title="У вас поки немає персонажа в цій кампанії" />
-      </HudPage>
-    );
+    return <NoCharacterState campaignId={id} canCreate={!isDM} />;
   }
 
   const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules: parseRules(campaign.rules) } }));

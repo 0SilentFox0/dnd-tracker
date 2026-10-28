@@ -12,7 +12,9 @@ function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: Ba
 
     const spent = old ? old.max - old.current : 0;
 
-    out[key] = { max, current: Math.min(Math.max(max - spent, 0), max) };
+    const level = fresh?.[key]?.level;
+
+    out[key] = { max, current: Math.min(Math.max(max - spent, 0), max), ...(level !== undefined && { level }) };
   }
 
   return out;

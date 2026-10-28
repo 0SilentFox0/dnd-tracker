@@ -6,6 +6,7 @@ import { useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
+import type { Character } from "@/types/characters";
 
 export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
   const confirm = useConfirm();
@@ -51,7 +52,9 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     }
   };
 
-  return { ...editor, artifacts, dmActions: { levelUp, remove } };
+  const applyClassLevelUp = (updated: Character) => editor.form.actions.setFormData((prev) => mergeLevelUpIntoForm(prev, updated));
+
+  return { ...editor, artifacts, dmActions: { levelUp, applyClassLevelUp, remove } };
 }
 
 export type DmCharacterEditor = ReturnType<typeof useDmCharacterEditor>;

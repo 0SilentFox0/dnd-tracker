@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 
 import { ActionsSection } from "./sections/ActionsSection";
+import { ClassesSection } from "./sections/ClassesSection";
 import { ConcentrationSection } from "./sections/ConcentrationSection";
 import { ConditionsSection } from "./sections/ConditionsSection";
 import { CriticalsSection } from "./sections/CriticalsSection";
@@ -34,6 +35,7 @@ const SECTIONS = {
   concentration: ConcentrationSection,
   conditions: ConditionsSection,
   actions: ActionsSection,
+  classes: ClassesSection,
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {

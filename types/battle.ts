@@ -7,6 +7,7 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -325,7 +326,7 @@ export interface BattleParticipantSpellcasting {
   spellcastingAbility?: SpellcastingAbility;
   spellSaveDC?: number;
   spellAttackBonus?: number;
-  spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"
+  spellSlots: StoredSpellSlots;
   knownSpells: string[]; // масив ID заклинань
 }
 

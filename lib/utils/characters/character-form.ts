@@ -26,6 +26,7 @@ export function characterToFormData(
       level: character.level || 1,
       class: character.class || "",
       subclass: character.subclass,
+      ...(character.classes?.length && { classes: character.classes }),
       archetype: character.archetype ?? "",
       race: character.race || "",
       subrace: character.subrace,
@@ -85,9 +86,13 @@ export function mergeLevelUpIntoForm(prev: CharacterFormData, updated: Partial<C
 
   return {
     ...prev,
-    basicInfo: { ...prev.basicInfo, level: next.basicInfo.level },
+    basicInfo: {
+      ...prev.basicInfo,
+      level: next.basicInfo.level,
+      ...(next.basicInfo.classes && { classes: next.basicInfo.classes, class: next.basicInfo.class, subclass: next.basicInfo.subclass }),
+    },
     abilityScores: { ...prev.abilityScores, ...Object.fromEntries(ABILITY_KEYS.map((k) => [k, next.abilityScores[k]])) },
-    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots },
+    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots, spellcastingAbility: next.spellcasting.spellcastingAbility ?? prev.spellcasting.spellcastingAbility },
   };
 }
 
@@ -108,6 +113,7 @@ export function formDataToCharacter(
     level: formData.basicInfo.level,
     class: formData.basicInfo.class,
     subclass: formData.basicInfo.subclass,
+    ...(formData.basicInfo.classes && { classes: formData.basicInfo.classes.filter((e) => e.classId) }),
     archetype: formData.basicInfo.archetype || null,
     race: formData.basicInfo.race,
     subrace: formData.basicInfo.subrace,

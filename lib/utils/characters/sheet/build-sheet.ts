@@ -2,17 +2,20 @@ import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from 
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { CharacterStatus } from "@/lib/constants/characters";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
-import { slotLevels } from "@/lib/utils/battle/view";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { pactSlot, slotLevels } from "@/lib/utils/battle/view";
+import { hitDiceLabel } from "@/lib/utils/characters/classes";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
+import type { ResolvedClassEntry } from "@/types/classes";
 import type { StoryChapter } from "@/types/scenario";
 import type { BookSpell } from "@/types/spells";
 
@@ -21,6 +24,7 @@ export interface SheetInput {
   viewer: CharacterSheet["viewer"];
   maxLevel: number;
   rules?: Ruleset;
+  classes?: ResolvedClassEntry[];
   chapters?: StoryChapter[];
   character: Record<AbilityKey, number> & {
     id: string;
@@ -42,6 +46,8 @@ export interface SheetInput {
     background: string | null;
     goals: unknown;
     notes?: string | null;
+    status?: string;
+    reviewNote?: string | null;
     tokens?: { id: string; color: string; label: string; createdAt: Date }[];
   };
   raceIcon: string | null;
@@ -68,7 +74,9 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const primary = p.abilities.primaryAbility ?? null;
 
-  const savingThrows = flags(c.savingThrows);
+  const manualSaves = flags(c.savingThrows);
+
+  const isSaveProficient = (key: AbilityKey) => !!manualSaves[key] || !!p.abilities.saveProficiencies?.includes(key);
 
   const skillFlags = flags(c.skills);
 
@@ -82,7 +90,9 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const attacks = p.battleData.attacks.map((a) => attackSheet(p, a));
 
-  const hp = heroBaseHp(c, input.rules && heroHpFormula(input.rules.heroScaling));
+  const classEntries = input.classes?.some((e) => e.class) ? input.classes : null;
+
+  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling) });
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 
@@ -92,6 +102,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   return {
     viewer: input.viewer,
+    review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
@@ -111,10 +122,12 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiencies: proficiencyList(c.proficiencies),
     attacks,
     bestToHit: attacks.length ? Math.max(...attacks.map((a) => a.toHit.total)) : null,
-    saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: !!savingThrows[key], bonus: checkBonus(scores[key], !!savingThrows[key], prof) })),
+    saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
     skills,
     passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
+    hitDice: classEntries ? hitDiceLabel(classEntries) : null,
+    pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max })),
     spells: input.spells,
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },

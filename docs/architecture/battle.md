@@ -69,6 +69,19 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **UI**: `components/battle/turn/CoreActionsDialog.tsx` (плитка «Дії» в `ActionGrid`), `ReadiedAttackButton.tsx` (картка учасника з `readied`, поза ходом), хук `lib/hooks/battle/useCoreActions.ts`, клієнт `lib/api/battles`. Вкладка «Дії 5e» на `dm/rules`.
 - **OpenAPI**: бюджет тесту розміру збільшено до 120_000.
 
+## 5e: класи й рівні
+
+Вмикається `rules.classes { enabled: false }`; без нього і для персонажа з порожнім `classes` — шлях HOMM без змін (архетип, HP за формулою, слоти раси). Чисті функції — `lib/utils/characters/classes/`, слоти — `lib/utils/spells/class-slots.ts`.
+
+- **Дані персонажа**: `Character.classes [{ classId, subclassId?, level }]` (перший запис — стартовий клас). Змінює лише ДМ; при вимкнених правилах — 422. Сервер виводить `level` (сума), текстові `class`/`subclass` і `spellSlots` (`apply-classes.ts`, `applyClasses`; для порожнього списку повертає `data: null` і пише лише `classes: []`). Невідомий `classId` пропускається.
+- **Режим класів у бою** — лише якщо розв'язано ≥ 1 запис класу (`resolveClassEntries`); інакше (усі невідомі) учасник збирається по-HOMM-івськи. Архетип ігнорується (множники 1).
+- **HP** — середнє за кістками: 1-й рівень стартового класу — максимум кістки + мод. Тіл, далі `кістка/2 + 1` + мод. Тіл, мінімум 1 за рівень; нічого не зберігається.
+- **Рятівні**: стартовий клас ∪ ручні `Character.savingThrows`.
+- **Слоти** (`classSpellSlots`): рівень заклинача = Σ (`full` — рівень, `half`/`third` — ⌊·⌋; єдиний клас — ⌈·⌉ з 2-го/3-го рівня), таблиця мультикласу 5e → кола 1–9; пакт — окремо за рівнем класу `pact` (кілька різних pact-класів сумують рівні). Слот пакту — `spellSlots.pact { level, max, current }`; `spellSlotKey` для каста кола N бере слот кола N, а якщо немає — пакт з колом ≥ N. Вибір слота й підсилення вищим колом — 4c-2.
+- **Вміння**: джерело `class` (див. [abilities.md](abilities.md)); `limits.perRest` = `perBattle` до 4d.
+- **Кола заклинань 0–9** по всьому стеку (Zod, форми, `SlotGrid`, `.circle-0…9`); кантрип = коло 0. Обмеження HOMM (раса 1–5, крива до рівня 10, відкриття кіл школою) лишаються даними HOMM.
+- **Підвищення рівня** (`POST …/level-up`, ДМ): у режимі класів тіло `{ classId, subclassId? }` — наявний клас або мультиклас; підклас обов'язковий на `subclassLevel` і заборонений раніше; `campaign.maxLevel` — на суму; випадкового +1 до характеристики немає; слоти перераховуються.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

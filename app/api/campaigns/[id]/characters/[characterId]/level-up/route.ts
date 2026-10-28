@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { loadRaceProgression } from "../load-race-progression";
 
 import { prisma } from "@/lib/db";
+import { classLevelUp, readLevelUpPick } from "@/lib/server/characters/class-level-up";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -34,6 +35,34 @@ export async function POST(
     );
 
     if (character instanceof NextResponse) return character;
+
+    const pick = await readLevelUpPick(request);
+
+    if (pick instanceof NextResponse) return pick;
+
+    const classResult = await classLevelUp({ campaign, character, pick });
+
+    if (classResult instanceof NextResponse) return classResult;
+
+    if (classResult) {
+      const seenLevel = seenLevelOnLevelChange(character.level, classResult.level, character.seenLevel);
+
+      const updated = await prisma.character.update({
+        where: { id: characterId },
+        data: {
+          classes: classResult.classes as unknown as Prisma.InputJsonValue,
+          level: classResult.level,
+          class: classResult.class,
+          subclass: classResult.subclass,
+          spellSlots: classResult.spellSlots as Prisma.InputJsonValue,
+          ...(classResult.spellcastingAbility && { spellcastingAbility: classResult.spellcastingAbility }),
+          ...(seenLevel !== undefined && { seenLevel }),
+        },
+        include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+      });
+
+      return NextResponse.json({ ...updated, levelUpDetails: { abilityIncreased: null, classId: pick.classId } });
+    }
 
     const newLevel = character.level + 1;
 

@@ -4,7 +4,7 @@ export type { SpellTier };
 
 export const metalClass = (tier: SpellTier) => `metal-${tier}`;
 
-export const spellLevelMetal = (level: number) => `circle-${Math.max(0, Math.min(5, level))}`;
+export const spellLevelMetal = (level: number) => `circle-${Math.max(0, Math.min(9, level))}`;
 
 export const BRANCH_LEVEL_METAL = { basic: "metal-bronze", advanced: "metal-silver", expert: "metal-gold" } as const;
 

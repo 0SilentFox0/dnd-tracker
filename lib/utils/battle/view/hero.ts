@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { battleLimit, cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { HARMFUL_FLAGS } from "@/lib/utils/abilities/engine/effects/harmful-flags";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
@@ -11,23 +11,36 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { spellNeedsSlot, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
+import { PACT_KEY } from "@/lib/utils/spells/slot-keys";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-export type SpellTier = "iron" | "bronze" | "silver" | "gold" | "mithril" | "platinum";
+export type SpellTier = "iron" | "bronze" | "silver" | "gold" | "mithril" | "platinum" | "adamant" | "orichalcum" | "starmetal" | "void";
 
-const TIERS: SpellTier[] = ["iron", "bronze", "silver", "gold", "mithril", "platinum"];
+const TIERS: SpellTier[] = ["iron", "bronze", "silver", "gold", "mithril", "platinum", "adamant", "orichalcum", "starmetal", "void"];
 
 export function spellTier(level: number): SpellTier {
-  return TIERS[Math.max(0, Math.min(5, level))];
+  return TIERS[Math.max(0, Math.min(9, level))];
 }
 
-export function slotLevels(p: BattleParticipant): { level: 1 | 2 | 3 | 4 | 5; max: number; current: number }[] {
-  return ([1, 2, 3, 4, 5] as const).map((level) => {
+export type SlotLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+const SLOT_LEVELS: SlotLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+export function slotLevels(p: BattleParticipant): { level: SlotLevel; max: number; current: number }[] {
+  return SLOT_LEVELS.flatMap((level) => {
     const s = p.spellcasting?.spellSlots?.[String(level)];
 
-    return { level, max: s?.max ?? 0, current: s?.current ?? 0 };
+    if (level > 5 && !(s && s.max > 0)) return [];
+
+    return [{ level, max: s?.max ?? 0, current: s?.current ?? 0 }];
   });
+}
+
+export function pactSlot(p: BattleParticipant): { level: number; max: number; current: number } | null {
+  const pact = p.spellcasting?.spellSlots?.[PACT_KEY];
+
+  return pact ? { level: pact.level ?? 1, max: pact.max, current: pact.current } : null;
 }
 
 /** Чи лишилося заклинання за бонусну дію з вільним слотом (слоти — як у castSpell). */
@@ -43,7 +56,7 @@ export interface AbilityCharge {
   icon?: string | null;
   left: number;
   limit: number | null;
-  per: "battle" | "round" | "turn" | null;
+  per: "battle" | "round" | "turn" | "rest" | null;
   cooldownLeft: number;
 }
 
@@ -51,7 +64,7 @@ export function abilityCharges(p: BattleParticipant, round: number, triggers: re
   return (p.battleData.resolvedAbilities ?? []).flatMap((a): AbilityCharge[] => {
     if (!triggers.includes(a.trigger.event) || !a.limits) return [];
 
-    const per = a.limits.perBattle ? "battle" : a.limits.perRound ? "round" : a.limits.perTurn ? "turn" : null;
+    const per = a.limits.perBattle ? "battle" : a.limits.perRest ? "rest" : a.limits.perRound ? "round" : a.limits.perTurn ? "turn" : null;
 
     const cooldown = cooldownLeft(p, a, round);
 
@@ -61,9 +74,9 @@ export function abilityCharges(p: BattleParticipant, round: number, triggers: re
 
     if (!per) return [{ ...base, left: cooldown > 0 ? 0 : 1, limit: null, per: null }];
 
-    const limit = (per === "battle" ? a.limits.perBattle : per === "round" ? a.limits.perRound : a.limits.perTurn) as number;
+    const limit = (per === "battle" || per === "rest" ? battleLimit(a.limits) : per === "round" ? a.limits.perRound : a.limits.perTurn) as number;
 
-    const used = p.battleData.abilityUsage?.[a.key]?.[per] ?? 0;
+    const used = p.battleData.abilityUsage?.[a.key]?.[per === "rest" ? "battle" : per] ?? 0;
 
     return [{ ...base, left: Math.max(0, limit - used), limit, per }];
   });

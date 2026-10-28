@@ -21,6 +21,7 @@ vi.mock("@/lib/utils/battle/participant", () => ({
 
 import { buildStartOrder } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-battle-handler";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { prisma } from "@/lib/db";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 
 describe("buildStartOrder: резерв", () => {
@@ -37,6 +38,7 @@ describe("buildStartOrder: резерв", () => {
       { id: "u1", type: "unit", side: "ally", quantity: 2, reserved: 1 },
     ]);
 
+    expect(prisma.character.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ status: "active" }) }));
     expect(order.map((p) => p.basicInfo.id).sort()).toEqual(["h1", "w1"]);
     expect(reserve.map((p) => p.basicInfo.id)).toEqual(["w2"]);
     expect(reserve[0].battleData).toMatchObject({ reserved: true, hpMultiplier: 1.5 });

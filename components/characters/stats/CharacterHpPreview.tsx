@@ -12,7 +12,7 @@ export function CharacterHpPreview({ hp }: CharacterHpPreviewProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1.5">
             <h3 className="text-base font-semibold leading-none">Здоровʼя (HP)</h3>
-            <p className="text-sm text-muted-foreground">Як у бою: рівень, статура, архетип і бонуси. Оновлюється після збереження.</p>
+            <p className="text-sm text-muted-foreground">Як у бою: рівень, статура, архетип (або класи) і бонуси. Оновлюється після збереження.</p>
           </div>
         </div>
       </div>

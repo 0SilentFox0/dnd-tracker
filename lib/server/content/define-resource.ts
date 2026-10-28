@@ -4,7 +4,7 @@ import "server-only";
 import type { ReferenceKindValue } from "@/lib/cache/tags";
 import type { AccessLevel, Actor } from "@/lib/utils/api/actor";
 
-export type ContentKind = "units" | "races" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
+export type ContentKind = "units" | "races" | "classes" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
 
 export type FindPurpose = "read" | "write";
 

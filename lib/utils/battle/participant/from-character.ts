@@ -4,6 +4,7 @@ import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
+import { loadClassesById } from "./load-classes";
 import { loadRace } from "./load-race";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
@@ -11,14 +12,17 @@ import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/const
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { DND_SKILLS } from "@/lib/constants/skills";
+import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
+import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { BattleParticipant } from "@/types/battle";
 
 /**
@@ -77,9 +81,17 @@ export async function createBattleParticipantFromCharacter(
     context,
   );
 
-  const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context);
+  const classEntries = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
 
-  const archetype = heroArchetype((character as { archetype?: string | null }).archetype);
+  const entries = classEntries?.success ? classEntries.data : [];
+
+  const resolvedEntries = entries.length > 0 ? resolveClassEntries(entries, await loadClassesById(character.campaignId, context)) : [];
+
+  const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
+
+  const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context, resolvedClasses ?? undefined);
+
+  const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
 
   const meleeDice = heroDiceTable(rules, "melee");
 
@@ -91,9 +103,11 @@ export async function createBattleParticipantFromCharacter(
 
   const rawSaves = character.savingThrows;
 
-  const saveProficiencies = rawSaves && typeof rawSaves === "object" && !Array.isArray(rawSaves)
-    ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
-    : [];
+  const saveProficiencies = resolvedClasses
+    ? classSaves(resolvedClasses, rawSaves)
+    : rawSaves && typeof rawSaves === "object" && !Array.isArray(rawSaves)
+      ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
+      : [];
 
   const rawSkills = character.skills;
 
@@ -101,7 +115,9 @@ export async function createBattleParticipantFromCharacter(
     ? DND_SKILLS.filter((k) => (rawSkills as Record<string, unknown>)[k] === true)
     : [];
 
-  const computedMaxHp = heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
+  const computedMaxHp = resolvedClasses ? classHp(resolvedClasses, character.constitution) : heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
+
+  const spellcastingAbility = resolvedClasses ? classSpellcastingAbility(resolvedClasses, character.spellcastingAbility) : character.spellcastingAbility;
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({
@@ -109,6 +125,7 @@ export async function createBattleParticipantFromCharacter(
     race,
     artifacts: artifactRows.map(({ row, slot }) => ({ ...row, slot })),
     completedSets: completed.sets,
+    ...(resolvedClasses && { classes: resolvedClasses }),
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
@@ -162,7 +179,7 @@ export async function createBattleParticipantFromCharacter(
       maxTargets: character.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingAbility: character.spellcastingAbility as
+      spellcastingAbility: spellcastingAbility as
         | "intelligence"
         | "wisdom"
         | "charisma"
@@ -191,7 +208,7 @@ export async function createBattleParticipantFromCharacter(
   const baked = bakePassives(participant);
 
   // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
-  const spell = spellcastingDerived(character.level, character.spellcastingAbility, baked.abilities, rules.formulas);
+  const spell = spellcastingDerived(character.level, spellcastingAbility, baked.abilities, rules.formulas);
 
   return { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
 }

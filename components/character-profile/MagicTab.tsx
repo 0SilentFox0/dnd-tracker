@@ -33,6 +33,13 @@ export function MagicTab() {
           <span>{sheet.magic.ability}</span>
         </div>
       )}
+      {sheet.pact && (
+        <HudSection title="ПАКТ">
+          <span aria-label={`Слоти пакту: ${sheet.pact.current} з ${sheet.pact.max}, ${spellLevelRoman(sheet.pact.level)} коло`} className={cn("hud-sc metal-fill inline-block rounded-md px-3 py-1.5 text-sm", spellLevelMetal(sheet.pact.level))}>
+            {spellLevelRoman(sheet.pact.level)} · {sheet.pact.current}/{sheet.pact.max}
+          </span>
+        </HudSection>
+      )}
       {sheet.slots.length > 0 && (
         <HudSection title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">

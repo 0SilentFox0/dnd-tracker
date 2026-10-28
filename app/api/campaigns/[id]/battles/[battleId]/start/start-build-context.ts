@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
 import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
+import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -151,6 +152,8 @@ export async function buildCampaignContextForStart(
       artifactsById:
         Object.keys(artifactsById).length > 0 ? artifactsById : undefined,
     };
+
+    if (campaignContext.rules.classes.enabled) campaignContext.classesById = await loadClassesById(campaignId);
 
     await attachArtifactSetsToSpellContext(campaignId, campaignContext);
   }

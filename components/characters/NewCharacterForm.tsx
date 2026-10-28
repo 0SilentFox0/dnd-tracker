@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useCharacterForm, useCreateCharacter } from "@/lib/hooks/characters";
+import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
 
 export function NewCharacterForm({ campaignId: id, characterType }: { campaignId: string; characterType: CharacterTypeValue }) {
@@ -24,6 +25,8 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
   const { members, isLoading: membersLoading } = useCampaignMembers(id);
 
   const { data: races = [] } = useRaces(id);
+
+  const classMode = useClassMode(id);
 
   const {
     status: { isLoading, error },
@@ -45,7 +48,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     {
       id: CHARACTER_FORM_TAB.basic,
       label: "Основне",
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} classMode={classMode.enabled ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,

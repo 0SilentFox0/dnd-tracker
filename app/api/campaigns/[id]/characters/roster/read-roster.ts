@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
+import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import type { RosterHero } from "@/types/characters";
@@ -13,7 +14,7 @@ export async function readRoster(campaignId: string): Promise<NextResponse> {
   if (access instanceof NextResponse) return access;
 
   const heroes = await prisma.character.findMany({
-    where: { campaignId },
+    where: { campaignId, ...ACTIVE_CHARACTER },
     select: { id: true, name: true, avatar: true, type: true, inventory: { select: { equipped: true } } },
     orderBy: { name: "asc" },
   });

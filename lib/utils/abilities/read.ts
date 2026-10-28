@@ -1,8 +1,9 @@
 import type { Prisma } from "@prisma/client";
 
 import { type Ability, AbilitySchema, type ConversionIssue, parseAbilities } from "@/lib/utils/abilities/schema";
+import type { ClassFeature } from "@/types/classes";
 
-export const OwnerKind = { SKILL: "skill", RACE: "race", ARTIFACT: "artifact", ARTIFACT_SET: "artifactSet", UNIT: "unit" } as const;
+export const OwnerKind = { SKILL: "skill", RACE: "race", CLASS: "class", ARTIFACT: "artifact", ARTIFACT_SET: "artifactSet", UNIT: "unit" } as const;
 
 export type OwnerKind = (typeof OwnerKind)[keyof typeof OwnerKind];
 
@@ -68,4 +69,18 @@ export function withAbilityIssues<R extends OwnerRow, B extends object = R>(kind
   const { abilities, issues: abilityIssues } = readAbilities(kind, row);
 
   return { ...base, abilities, abilityIssues };
+}
+
+export function classFeatureAbilities(features: unknown): ClassFeature[] {
+  if (!Array.isArray(features)) return [];
+
+  return features.flatMap((f): ClassFeature[] => {
+    if (!f || typeof f !== "object") return [];
+
+    const { level, abilities } = f as { level?: unknown; abilities?: unknown };
+
+    if (typeof level !== "number" || !Number.isInteger(level) || level < 1 || level > 20) return [];
+
+    return [{ level, abilities: read({ id: `class-feature@${level}`, abilities }) }];
+  });
 }

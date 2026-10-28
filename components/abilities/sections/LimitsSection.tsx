@@ -15,6 +15,11 @@ const LIMIT_FIELDS: readonly FieldMeta[] = [
   { name: "chance", label: "Шанс, %", input: "number", optional: true },
 ];
 
+const REST_OPTIONS = [
+  { value: "short", label: "Короткий" },
+  { value: "long", label: "Довгий" },
+];
+
 export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) {
   if (ability.trigger.event === "passive") {
     return (
@@ -47,6 +52,18 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
     onChange(Object.keys(next).length ? { ...rest, limits: next } : rest);
   };
 
+  const setRest = (patch: { rest?: string; uses?: number }) => {
+    const current = ability.limits?.perRest;
+
+    const rest = "rest" in patch ? patch.rest : (current?.rest ?? "long");
+
+    const uses = "uses" in patch ? patch.uses : (current?.uses ?? 1);
+
+    const clearing = "rest" in patch ? !patch.rest : "uses" in patch && patch.uses === undefined;
+
+    set("perRest", clearing ? undefined : { rest, uses });
+  };
+
   return (
     <div className="space-y-2">
       <SectionTitle>Ліміти</SectionTitle>
@@ -54,6 +71,8 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
         {LIMIT_FIELDS.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />
         ))}
+        <FieldRenderer meta={{ name: "perRestKind", label: "Відпочинок", input: "select", options: REST_OPTIONS, optional: true }} path={`${path}.limits.perRest.rest`} value={ability.limits?.perRest?.rest} onChange={(v) => setRest({ rest: v as string | undefined })} />
+        <FieldRenderer meta={{ name: "perRestUses", label: "Разів", input: "number", optional: true }} path={`${path}.limits.perRest.uses`} value={ability.limits?.perRest?.uses} onChange={(v) => setRest({ uses: v as number | undefined })} />
       </div>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />

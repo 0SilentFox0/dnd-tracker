@@ -10,7 +10,7 @@ export interface PlaylistView {
   groupNames: string[];
   groups: TrackGroup<CampaignTrack>[];
   shownCount: number;
-  collapsed: { has(name: string): boolean; toggle(name: string): void };
+  collapsed: { has(name: string): boolean; toggle(name: string): void; all: boolean; toggleAll(): void };
 }
 
 const NO_FILTER: PlaylistFilter = { query: "", group: null, kind: null };
@@ -31,6 +31,10 @@ export function usePlaylistView(tracks: CampaignTrack[]): PlaylistView {
 
   const active = !!(effective.query.trim() || effective.group || effective.kind);
 
+  const searching = !!effective.query.trim();
+
+  const allCollapsed = !searching && groups.length > 0 && groups.every((g) => collapsed.has(g.name));
+
   return {
     filter: { data: effective, set: (patch) => setFilter((f) => ({ ...f, ...patch })), active, reset: () => setFilter(NO_FILTER) },
     groupNames,
@@ -38,7 +42,7 @@ export function usePlaylistView(tracks: CampaignTrack[]): PlaylistView {
     shownCount: shown.length,
     collapsed: {
       // під час пошуку все розгорнуто, щоб збіги не ховались у згорнутих групах
-      has: (name) => !effective.query.trim() && collapsed.has(name),
+      has: (name) => !searching && collapsed.has(name),
       toggle: (name) =>
         setCollapsed((s) => {
           const next = new Set(s);
@@ -47,6 +51,8 @@ export function usePlaylistView(tracks: CampaignTrack[]): PlaylistView {
 
           return next;
         }),
+      all: allCollapsed,
+      toggleAll: () => setCollapsed(allCollapsed ? new Set() : new Set(groupNames)),
     },
   };
 }

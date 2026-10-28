@@ -3,7 +3,7 @@ import { MockImageModelV4 } from "ai/test";
 import sharp from "sharp";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { generateSlideImage } from "../images";
+import { generateAvatarImage, generateSlideImage } from "../images";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 
@@ -19,6 +19,7 @@ vi.mock("@/lib/ai/credentials", () => {
 });
 vi.mock("@/lib/ai/settings", () => ({ getAiSettings: vi.fn(async () => ({ instructions: "Темне фентезі" })) }));
 vi.mock("@/lib/ai/providers", () => ({ createImageModel: vi.fn(() => generateImageModel.model) }));
+vi.mock("@/lib/supabase/buckets", () => ({ ensureBucket: vi.fn(async () => ({ ok: true })) }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ensureSlidesBucket: vi.fn(async () => ({ ok: true })) }));
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({ storage: { from: () => ({ upload, getPublicUrl: (p: string) => ({ data: { publicUrl: `https://x.supabase.co/storage/v1/object/public/scene-slides/${p}` } }) }) } }),
@@ -142,5 +143,38 @@ describe("generateSlideImage", () => {
 
     await expect(generateSlideImage({ ...input, abortSignal: controller.signal })).rejects.toThrow();
     expect(upload).not.toHaveBeenCalled();
+  });
+});
+
+describe("generateAvatarImage", () => {
+  const avatarInput = { campaignId: "camp1", userId: "u1", prompt: "Ліра", provider: "google" as const, model: "gemini-2.5-flash-image" };
+
+  it("квадрат 1:1, найдовша грань 512 px, WebP у бакеті avatars зі стилем кампанії", async () => {
+    const calls: { prompt?: string; aspectRatio?: string }[] = [];
+
+    generateImageModel.model = modelReturning(calls);
+
+    const { url } = await generateAvatarImage(avatarInput);
+
+    const [path, buffer] = upload.mock.calls[0];
+
+    const meta = await sharp(buffer).metadata();
+
+    expect(calls[0].aspectRatio).toBe("1:1");
+    expect(JSON.stringify(calls[0].prompt)).toContain("Стиль кампанії: Темне фентезі");
+    expect(meta.format).toBe("webp");
+    expect(Math.max(meta.width ?? 0, meta.height ?? 0)).toBe(512);
+    expect(url).toContain(path);
+
+    const { ensureBucket } = await import("@/lib/supabase/buckets");
+
+    expect(vi.mocked(ensureBucket).mock.calls[0][1]).toBe("avatars");
+  });
+
+  it("помилка завантаження — 500", async () => {
+    generateImageModel.model = modelReturning([]);
+    upload.mockResolvedValueOnce({ error: { message: "x" } });
+
+    expect((await generateAvatarImage(avatarInput).catch((e) => e)).status).toBe(500);
   });
 });

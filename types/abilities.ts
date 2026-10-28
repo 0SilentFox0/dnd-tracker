@@ -5,7 +5,7 @@ import type { GridPoint } from "@/types/battle";
 export type { Ability, StaticEffect };
 
 export interface AbilitySource {
-  type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character";
+  type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "class";
   id: string;
   name: string;
   icon?: string | null;

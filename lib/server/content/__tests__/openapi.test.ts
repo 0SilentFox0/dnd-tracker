@@ -54,7 +54,7 @@ describe("buildOpenApi", () => {
 
     expect(JSON.stringify(doc.components.schemas.UnitsCreate)).toContain("#/components/schemas/Ability");
     expect(json.match(/"trigger":\{"\$ref"/g)?.length ?? 0).toBeLessThanOrEqual(1);
-    expect(json.length).toBeLessThan(120_000);
+    expect(json.length).toBeLessThan(130_000);
   });
 
   it("query-параметри spells?ids і skills?mainSkillId", () => {
@@ -101,7 +101,7 @@ describe("buildOpenApi", () => {
   });
 
   it("abilities.get: kind — enum власників; skill-trees під тегом «Скіли»; ids має опис", () => {
-    expect(opById("abilities.get")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "kind", schema: { type: "string", enum: ["skill", "race", "artifact", "artifactSet", "unit"] } })]));
+    expect(opById("abilities.get")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "kind", schema: { type: "string", enum: ["skill", "race", "class", "artifact", "artifactSet", "unit"] } })]));
     expect(opById("skill-trees.save")!.op.tags).toEqual(["Скіли"]);
     expect(opById("skill-trees.list")!.op.tags).toEqual(["Скіли"]);
     expect(opById("spells.list")!.op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", schema: expect.objectContaining({ description: expect.any(String) }) })]));

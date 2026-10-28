@@ -45,6 +45,7 @@ const sections = {
   concentration: z.strictObject({ enabled: z.boolean().default(false), dcCap: z.number().int().min(10).max(99).nullable().default(null) }),
   conditions: z.strictObject({ enabled: z.boolean().default(false), exhaustion: z.enum(["2014", "2024"]).default("2014") }),
   actions: z.strictObject({ enabled: z.boolean().default(false), opportunityAttacks: z.boolean().default(true), variant: z.enum(["2014", "2024"]).default("2014") }),
+  classes: z.strictObject({ enabled: z.boolean().default(false) }),
 };
 
 type Sections = typeof sections;
@@ -72,6 +73,7 @@ export const RulesetSchema = z
     concentration: sections.concentration.prefault({}),
     conditions: sections.conditions.prefault({}),
     actions: sections.actions.prefault({}),
+    classes: sections.classes.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -108,6 +110,7 @@ export const RulesetPatchSchema = z
     concentration: patchSection("concentration").optional(),
     conditions: patchSection("conditions").optional(),
     actions: patchSection("actions").optional(),
+    classes: patchSection("classes").optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
 

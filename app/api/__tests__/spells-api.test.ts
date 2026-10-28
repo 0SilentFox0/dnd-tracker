@@ -123,8 +123,8 @@ describe("spells API", () => {
     expect(db.spell.create).not.toHaveBeenCalled();
   });
 
-  it("POST: нове заклинання лише 1–5 рівня", async () => {
-    for (const level of [0, 6]) expect((await list.POST(req("POST", { ...spellBody, level }), ctx)).status).toBe(400);
+  it("POST: нове заклинання лише 0–9 рівня", async () => {
+    for (const level of [-1, 10]) expect((await list.POST(req("POST", { ...spellBody, level }), ctx)).status).toBe(400);
 
     expect(db.spell.create).not.toHaveBeenCalled();
   });

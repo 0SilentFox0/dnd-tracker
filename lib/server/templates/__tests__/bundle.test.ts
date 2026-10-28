@@ -8,6 +8,7 @@ const empty = {
   rules: {},
   spellGroups: [],
   races: [],
+  classes: [],
   units: [],
   spells: [],
   mainSkills: [],
@@ -69,6 +70,7 @@ describe("derived foreign keys", () => {
     expect(fks).toEqual({
       spellGroups: {},
       races: {},
+      classes: {},
       units: { raceId: "races" },
       spells: { groupId: "spellGroups", [summonFk]: "units" },
       mainSkills: { spellGroupId: "spellGroups" },
@@ -78,5 +80,15 @@ describe("derived foreign keys", () => {
       artifacts: { setId: "artifactSets" },
       tracks: {},
     });
+  });
+});
+
+describe("старі бандли без таблиці classes", () => {
+  it("імпортуються з порожніми класами", () => {
+    const { classes: _classes, ...old } = empty;
+
+    const parsed = BundleSchema.parse(old);
+
+    expect(parsed.classes).toEqual([]);
   });
 });

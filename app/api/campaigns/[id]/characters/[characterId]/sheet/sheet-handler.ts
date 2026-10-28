@@ -1,5 +1,6 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { loadStoryChapters } from "@/lib/server/scenario/player-story";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -11,6 +12,7 @@ import { getCharacterImmunities } from "@/lib/utils/characters/character-race-ef
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
 import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, readUnlocked, skillPoints } from "@/lib/utils/skills/progression";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
 export const loadSheetCharacter = (characterId: string) => prisma.character.findUnique({ where: { id: characterId }, include: { inventory: true, tokens: { orderBy: { createdAt: "desc" } } } });
@@ -36,6 +38,10 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const personal = character.personalSkillId ? context.skillsById?.[character.personalSkillId] : undefined;
 
+  const classEntries = context.classesById ? CharacterClassesSchema.safeParse(character.classes) : null;
+
+  const classes = classEntries?.success && classEntries.data.length > 0 ? resolveClassEntries(classEntries.data, context.classesById ?? {}) : undefined;
+
   const normalized = tree ? normalizeTree(tree) : null;
 
   return buildCharacterSheet({
@@ -43,6 +49,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     viewer,
     maxLevel: campaign.maxLevel,
     rules: campaign.rules,
+    classes,
     chapters,
     character,
     raceIcon: race?.icon ?? null,

@@ -27,7 +27,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               <h1 className="hud-sc truncate text-xl leading-7 text-hud-ink">{id.name}</h1>
               <p className="flex min-w-0 items-center gap-1.5 text-xs text-hud-muted">
                 <span className="truncate">
-                  {id.level} рів. · {id.archetype} · {id.className}
+                  {id.level} рів. · {sheet.hitDice === null && `${id.archetype} · `}{id.className}
                   {id.subclass ? ` (${id.subclass})` : ""} ·
                 </span>
                 {badge}
@@ -39,6 +39,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               </p>
               <button type="button" aria-expanded={hpOpen} onClick={() => setHpOpen((v) => !v)} className="mt-1 text-sm text-hud-bone underline-offset-2 hover:underline">
                 HP {sheet.hp.total}
+                {sheet.hitDice && ` · ${sheet.hitDice}`}
               </button>
             </div>
             {actions && <div className="flex shrink-0 flex-col gap-1.5">{actions}</div>}

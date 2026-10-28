@@ -3,6 +3,7 @@ import { pickHighestPerLine, resolveAbilities } from "./resolve";
 import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
+import type { ResolvedClassEntry } from "@/types/classes";
 
 export interface SkillRowLike {
   id: string;
@@ -81,11 +82,25 @@ function raceResolved(race: RaceRowLike | null): ResolvedAbility[] {
   return race ? resolveAbilities({ type: "race", id: race.id, name: race.name }, raceAbilities(race)) : [];
 }
 
+function classResolved(entries: ResolvedClassEntry[]): ResolvedAbility[] {
+  return entries.flatMap(({ class: cls, subclass, level }) => {
+    if (!cls) return [];
+
+    const upTo = (features: { level: number; abilities: Ability[] }[]) => features.filter((f) => f.level <= level).flatMap((f) => f.abilities);
+
+    return [
+      ...resolveAbilities({ type: "class", id: cls.id, name: cls.name, icon: cls.icon }, upTo(cls.features)),
+      ...(subclass ? resolveAbilities({ type: "class", id: subclass.id, name: `${cls.name}: ${subclass.name}` }, upTo(subclass.features)) : []),
+    ];
+  });
+}
+
 export function collectCharacterAbilities(input: {
   skills: SkillEntry[];
   race: RaceRowLike | null;
   artifacts: ArtifactRowLike[];
   completedSets: ArtifactSetRowLike[];
+  classes?: ResolvedClassEntry[];
 }): ResolvedAbility[] {
   const fromSkills = pickSkillEntries(input.skills).flatMap((entry) =>
     resolveAbilities(skillSource(entry), inheritSchool(skillAbilities(entry.row), entry.row.spellGroupId ?? entry.mainSkillSpellGroupId)),
@@ -99,7 +114,7 @@ export function collectCharacterAbilities(input: {
     resolveAbilities({ type: "artifactSet", id: s.id, name: s.name, icon: s.icon ?? null }, artifactSetAbilities(s)),
   );
 
-  return [...fromSkills, ...raceResolved(input.race), ...fromArtifacts, ...fromSets];
+  return [...fromSkills, ...raceResolved(input.race), ...classResolved(input.classes ?? []), ...fromArtifacts, ...fromSets];
 }
 
 export function collectUnitAbilities(unit: UnitRowLike, race: RaceRowLike | null): ResolvedAbility[] {

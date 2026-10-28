@@ -62,10 +62,8 @@ describe("форма заклинання", () => {
     expect(form).toMatchObject({ targeting: { kind: "enemy" }, spellEffects: [], raceModifiers: [] });
   });
 
-  it("рівень 0 лишається лише у старого заклинання; у списку для нового — 1–5", () => {
+  it("рівні 0–9 доступні для нового заклинання", () => {
     expect(formToPayload(spellToForm({ ...row, level: 0 })).level).toBe(0);
-    expect(spellLevelOptions().map((o) => o.value)).toEqual(["1", "2", "3", "4", "5"]);
-    expect(spellLevelOptions(0).map((o) => o.value)).toEqual(["0", "1", "2", "3", "4", "5"]);
-    expect(spellLevelOptions(3).map((o) => o.value)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(spellLevelOptions().map((o) => o.value)).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
   });
 });

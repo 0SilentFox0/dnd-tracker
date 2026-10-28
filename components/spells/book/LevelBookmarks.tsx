@@ -2,13 +2,13 @@ import { spellLevelMetal } from "@/components/hud";
 import { spellLevelRoman } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
 
-const LEVELS = [0, 1, 2, 3, 4, 5] as const;
+const LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
 export function LevelBookmarks({ level, slotOf, onLevel }: { level: number; slotOf: (level: number) => number; onLevel: (level: number) => void }) {
   return (
     <div className="absolute bottom-0 right-1.5 top-6 z-10">
       <div className="sticky top-6 flex flex-col gap-1.5">
-        {LEVELS.map((l) => (
+        {LEVELS.filter((l) => l <= 5 || slotOf(l) > 0 || level === l).map((l) => (
           <button
             key={l}
             type="button"

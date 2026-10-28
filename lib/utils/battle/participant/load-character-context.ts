@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
 import { referencedSkillIds } from "./extract-skills";
+import { loadClassesById } from "./load-classes";
 
 import { prisma } from "@/lib/db";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -91,6 +92,8 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
 
   const skills = library?.skills ?? [];
 
+  const classesById = rules.classes.enabled ? await loadClassesById(campaignId) : undefined;
+
   const artifactsById: NonNullable<CampaignSpellContext["artifactsById"]> = {};
 
   const artifactSetsById: NonNullable<CampaignSpellContext["artifactSetsById"]> = {};
@@ -121,6 +124,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
       artifactsById,
       artifactSetsById,
       artifactSetMemberIds,
+      ...(classesById && { classesById }),
     },
   };
 }

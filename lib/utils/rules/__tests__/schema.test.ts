@@ -22,6 +22,7 @@ describe("parseRules", () => {
       concentration: { enabled: false, dcCap: null },
       conditions: { enabled: false, exhaustion: "2014" },
       actions: { enabled: false, opportunityAttacks: true, variant: "2014" },
+      classes: { enabled: false },
     });
   });
 

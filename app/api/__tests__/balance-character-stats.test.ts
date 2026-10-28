@@ -53,6 +53,12 @@ describe("loadCharacterBalanceStats", () => {
     expect(total).toBeLessThanOrEqual(4 + 2 * CHARACTERS.length);
   });
 
+  it("враховує лише активних персонажів (чернетки не впливають на баланс)", async () => {
+    await loadCharacterBalanceStats("camp");
+
+    expect(calls.args["character.findMany"]).toMatchObject({ where: { campaignId: "camp", status: "active" } });
+  });
+
   it("egress: спели без описів, скіли лише за посиланнями (тут жодних — запиту немає)", async () => {
     await loadCharacterBalanceStats("camp");
 

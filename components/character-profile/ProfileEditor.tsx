@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "@/lib/constants/abilities";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
@@ -36,6 +37,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const editor = useDmCharacterEditor({ campaignId, characterId, onSaved: onDone });
 
   const [tab, setTab] = useState<ProfileTabId>("basic");
+
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
   const roster = useCharacterRoster(campaignId);
 
@@ -60,7 +63,18 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   return (
     <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
-        actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.dmActions.levelUp()} />}
+        actions={
+          <LevelUpAction
+            level={formData.basicInfo.level}
+            maxLevel={sheet.maxLevel}
+            onLevelUp={() => void editor.dmActions.levelUp()}
+            classLevelUp={
+              classesEnabled && (formData.basicInfo.classes ?? []).length > 0
+                ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [] }, onLeveled: editor.dmActions.applyClassLevelUp }
+                : undefined
+            }
+          />
+        }
       />
       {form.status.error && (
         <p role="alert" className="mx-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
