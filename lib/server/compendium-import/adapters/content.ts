@@ -8,6 +8,7 @@ import { ABILITIES, array, description, num, object, str, unsupported } from "./
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
+import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { ScenarioContent } from "@/types/scenario";
 
 export const spell: Adapter = (row, ctx) => {
@@ -21,11 +22,20 @@ const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "sp
 const renderRaw = (entries: unknown[]): string => entries.map((e) => (typeof e === "string" ? e : "")).join(" ");
 
 export const monster: Adapter = (row, ctx) => {
+  const movement = object(row.speed);
+
   const ac = array(row.ac).map((v) => num(v) ?? num(object(v).ac)).find((v) => v !== undefined);
 
-  const hp = num(object(row.hp).average);
+  const hpRow = object(row.hp);
 
-  if (ac === undefined || hp === undefined || hp < 1) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error", "Укажіть числові HP та AC або виключіть монстра"));
+  const special = /^\s*(\d[\d,]*)\s*\(/.exec(str(hpRow.special))?.[1];
+
+  const parsedHp = num(hpRow.average) ?? (special ? Number(special.replace(/,/g, "")) : undefined);
+
+  const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
+
+  if (hp === undefined && typeof hpRow.special === "string") ctx.issues.push(issue("MANUAL_MONSTER_HP", `${ctx.path}.hp`, "warning", `HP «${hpRow.special}» не розпізнано: встановлено 1, задайте значення вручну`));
+  else if (ac === undefined || hp === undefined) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error", "Укажіть числові HP та AC або виключіть монстра"));
 
   const scores = Object.fromEntries(Object.entries(ABILITIES).map(([short, long]) => [long, num(row[short])]));
 
@@ -35,7 +45,7 @@ export const monster: Adapter = (row, ctx) => {
 
   const cr = /^\d+\/\d+$/.test(rawCr) ? Number(rawCr.split("/")[0]) / Number(rawCr.split("/")[1]) : rawCr ? Number(rawCr) : null;
 
-  const movement = object(row.speed);
+  const speeds = Object.fromEntries(["walk", "fly", "swim", "climb", "burrow"].map((k) => [k, num(movement[k]) ?? num(object(movement[k]).number)]));
 
   const type = str(row.type) || str(object(row.type).type);
 
@@ -79,6 +89,13 @@ export const monster: Adapter = (row, ctx) => {
       }
 
       const entries = array(entry.entries);
+
+      const core = field === "trait" ? coreTrait(name, renderRaw(entries)) : undefined;
+
+      if (core) {
+        abilities.push({ id: `trait-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || index}`, name, description: renderEntries(entries).text, ...core });
+        continue;
+      }
 
       if (field === "trait" && /^Legendary Resistance \(\d+\/Day/i.test(name)) {
         resistances = legendaryResistances([item]);
@@ -140,7 +157,7 @@ export const monster: Adapter = (row, ctx) => {
 
   for (const key of built?.unresolved ?? []) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${key}`, "warning", "Це обмеження заклинань не автоматизовано"));
 
-  const statblock = { ...(type && { creatureType: type }), ...(sizes[str(array(row.size)[0])] && { size: sizes[str(array(row.size)[0])] }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), ...(resistances?.lair !== undefined && { lairResistances: resistances.lair }), movement: Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((s) => num(movement[s]) !== undefined).map((s) => [s, movement[s]])) };
+  const statblock = { ...(type && { creatureType: type }), ...(sizes[str(array(row.size)[0])] && { size: sizes[str(array(row.size)[0])] }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), ...(resistances?.lair !== undefined && { lairResistances: resistances.lair }), movement: { ...Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((k) => (speeds[k] ?? 0) >= 5).map((k) => [k, speeds[k]])), ...(movement.canHover === true && { hover: true }) } };
 
   const notes = [description(row, ctx), ...MONSTER_FIELDS.map((field) => {
     const rendered = renderEntries(unhandled[field] ?? [], `${ctx.path}.${field}`);
@@ -155,7 +172,7 @@ export const monster: Adapter = (row, ctx) => {
   return {
     kind: "units",
     refs: built?.refs,
-    body: { name: row.name, ...scores, armorClass: ac, maxHp: hp, speed: num(movement.walk) ?? (num(row.speed) ?? 0), gridSize: str(array(row.size)[0]) === "L" ? 2 : ["H", "G"].includes(str(array(row.size)[0])) ? 3 : 1, cr, statblock, attacks, abilities, multiattack, saveProficiencies: saveProficiencies(row.save, stats.scores), legendaryActions: Math.min(5, legendaryCount), legendaryResistances: Math.min(10, resistances?.count ?? 0), ...(built && { spellcasting: built.config }) },
+    body: { name: row.name, ...scores, armorClass: ac, maxHp: hp ?? 1, speed: battleSpeed(speeds) || (num(row.speed) ?? 0), gridSize: str(array(row.size)[0]) === "L" ? 2 : ["H", "G"].includes(str(array(row.size)[0])) ? 3 : 1, cr, statblock, attacks, abilities, multiattack, saveProficiencies: saveProficiencies(row.save, stats.scores), legendaryActions: Math.min(5, legendaryCount), legendaryResistances: Math.min(10, resistances?.count ?? 0), ...(built && { spellcasting: built.config }) },
     notes,
   };
 };

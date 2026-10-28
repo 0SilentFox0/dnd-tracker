@@ -165,3 +165,40 @@ describe("monster defenses and resources (B3)", () => {
     expect(createUnitSchema.safeParse(entry.body).success).toBe(true);
   });
 });
+
+describe("monster speed, hp and core traits (B4/B5)", () => {
+  it("fly-only creature gets a battle speed and schema-valid movement", () => {
+    const entry = adapt({ speed: { walk: 0, fly: { number: 40, condition: "(hover)" }, canHover: true } });
+
+    expect(entry.body).toMatchObject({ speed: 40, statblock: { movement: { fly: 40, hover: true } } });
+    expect(createUnitSchema.safeParse(entry.body).success).toBe(true);
+  });
+
+  it("swim/climb-only creatures move; walk wins when faster", () => {
+    expect(adapt({ speed: { walk: 0, swim: 30 } }).body.speed).toBe(30);
+    expect(adapt({ speed: { walk: 20, climb: 30 } }).body.speed).toBe(20);
+  });
+
+  it("parses hp.special formula, and keeps an unparseable one as a warning, not an error", () => {
+    const ok = adaptCompendium({ _meta: { edition: "classic" }, monster: [{ ...base, hp: { special: "1,110 (60d20 + 480)" } }] });
+
+    expect(ok.entries[0].body.maxHp).toBe(1110);
+    expect(ok.issues.some((i) => i.severity === "error")).toBe(false);
+
+    const bad = adaptCompendium({ _meta: { edition: "classic" }, monster: [{ ...base, hp: { special: "0 + three times your druid level" } }] });
+
+    expect(bad.issues.map((i) => i.code)).toContain("MANUAL_MONSTER_HP");
+    expect(bad.issues.some((i) => i.severity === "error")).toBe(false);
+    expect(createUnitSchema.safeParse(bad.entries[0].body).success).toBe(true);
+  });
+
+  it("Magic Resistance and Regeneration become engine abilities", () => {
+    const entry = adapt({ trait: [{ name: "Magic Resistance", entries: ["The golem has advantage on saving throws against spells and other magical effects."] }, { name: "Regeneration", entries: ["The spirit regains 4 hit points at the start of each of its turns if it has at least 1 hit point."] }] });
+
+    const abilities = entry.body.abilities as Array<{ name: string; effects: Array<Record<string, unknown>> }>;
+
+    expect(abilities.find((a) => a.name === "Magic Resistance")?.effects[0]).toMatchObject({ kind: "flag", flag: "saveAdvantage", vsSpells: true });
+    expect(abilities.find((a) => a.name === "Regeneration")?.effects[0]).toMatchObject({ kind: "heal", amount: 4, target: "self" });
+    expect(createUnitSchema.safeParse(entry.body).success).toBe(true);
+  });
+});

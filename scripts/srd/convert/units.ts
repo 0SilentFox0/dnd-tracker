@@ -12,6 +12,7 @@ import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { groupBy } from "@/lib/utils/common/collections";
 import { engineAttackMod, multiattackCount, withFlat } from "@/lib/utils/units/monster-attacks";
+import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
 
 export { multiattackCount };
@@ -23,8 +24,6 @@ const TEXT_ATTACK = /^(Melee or Ranged|Melee|Ranged) Attack Roll: \+(\d+)(?: to 
 const TEXT_EXTRA = /^,? plus \d+ \((\d+d\d+)\) (\w+) damage/i;
 
 const LEGENDARY_RES = /^Legendary Resistance \((\d+)\/Day/i;
-
-const REGEN = /regains (\d+) Hit Points at the start of (?:each of )?its turns?/i;
 
 const score = (c: O5Creature, k: AbilityKey) => c[`ability_score_${k}`];
 
@@ -205,11 +204,9 @@ export function convertUnits(data: Open5eData): UnitRow[] {
 
         const id = uniqueId(seen, slugTail(t.pk));
 
-        const regen = REGEN.exec(t.fields.desc);
+        const core = coreTrait(t.fields.name, t.fields.desc);
 
-        if (t.fields.name.startsWith("Magic Resistance")) abilities.push(coreAbility(id, t.fields.name, t.fields.desc, { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "saveAdvantage", abilities: "all", vsSpells: true }] }));
-        else if (t.fields.name.startsWith("Regeneration") && regen) abilities.push(coreAbility(id, t.fields.name, t.fields.desc, { trigger: { event: "turnStart" }, effects: [{ kind: "heal", amount: Number(regen[1]), target: "self" }] }));
-        else abilities.push(noteAbility(id, t.fields.name, t.fields.desc));
+        abilities.push(core ? coreAbility(id, t.fields.name, t.fields.desc, core) : noteAbility(id, t.fields.name, t.fields.desc));
       }
 
       const immunities = [
@@ -330,7 +327,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
         cr,
         armorClass: c.armor_class,
         maxHp: c.hit_points,
-        speed: Math.max(c.walk ?? 0, c.fly ?? 0) || c.swim || 30,
+        speed: battleSpeed(c) || 30,
         initiative: c.initiative_bonus,
         strength: clamp(c.ability_score_strength, 1, 30),
         dexterity: clamp(c.ability_score_dexterity, 1, 30),
