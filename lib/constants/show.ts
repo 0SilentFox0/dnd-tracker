@@ -34,3 +34,11 @@ export const SLIDE_BUCKET_TYPES = Object.keys(SLIDE_FORMATS);
 export const SLIDE_FILE_ACCEPT = SLIDE_BUCKET_TYPES.join(",");
 
 export const SLIDE_CROSSFADE_MS = 600;
+
+export const PUZZLE_MIN_PIECES = 4;
+
+export const PUZZLE_MAX_PIECES = 100;
+
+export const PUZZLE_HOLD_MS = 30_000;
+
+export const PUZZLE_SNAP = 0.25;

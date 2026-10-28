@@ -1,11 +1,23 @@
 import type { BattleAudioCommand, BattleAudioState } from "@/types/audio";
 
+export type PuzzleCut = "classic" | "organic" | "straight";
+
+export interface PuzzleSpec {
+  cut: PuzzleCut;
+  count: number;
+  seed: number;
+  imageWidth: number;
+  imageHeight: number;
+}
+
 export interface Slide {
   id: string;
   imageUrl: string;
   title?: string;
   caption?: string;
   trackId?: string;
+  kind?: "puzzle";
+  puzzle?: PuzzleSpec;
 }
 
 /** Заглушка кампанії: знімок обраного слайда (без треку). */
