@@ -235,7 +235,7 @@ export type Maneuver = (typeof MANEUVERS)[number];
 
 const ManeuverSchema = z.object({ kind: z.literal("maneuver"), maneuver: z.enum(MANEUVERS), percentOfAttack: z.number().int().min(1).max(500) });
 
-const BASE_EFFECTS = [
+export const BASE_EFFECTS = [
   ModifyStatSchema,
   DamageBonusSchema,
   FlagSchema,
@@ -262,7 +262,7 @@ const BASE_EFFECTS = [
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);
 
-const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
+export const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
 
 export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
 

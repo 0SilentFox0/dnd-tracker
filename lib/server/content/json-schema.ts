@@ -15,7 +15,7 @@ import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { capitalize } from "@/lib/utils/common/text";
 import { ItemStatsSchema } from "@/lib/utils/items/item-stats";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
-import { SpellCastingTimeSchema, SpellCostSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
+import { SpellCastingTimeSchema, SpellCostSchema, SpellEffectSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 export const pascal = (s: string) => s.split(/[^a-zA-Z0-9]+/).filter(Boolean).map(capitalize).join("");
 
@@ -35,6 +35,7 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [ConditionSchema, "Condition"],
   [LimitsSchema, "AbilityLimits"],
   [EffectSchema, "Effect"],
+  [SpellEffectSchema, "SpellEffect"],
   [NonRandomEffectSchema, "NonRandomEffect"],
   ...(NonRandomEffectSchema.options as readonly ZodType[]).map((s): Entry => [s, `Effect.${effectKind(s)}`]),
   [FormulaSchema, "Formula"],

@@ -26,7 +26,7 @@ const resolutionOptions = [{ value: "auto", label: "Автоматично" }, {
 
 const SIDE_OPTIONS = [{ value: "enemy", label: "Вороги" }, { value: "ally", label: "Союзники" }];
 
-const DIE_SIDES_OPTIONS = [4, 6, 8, 10, 12].map((n) => ({ value: String(n), label: `к${n}` }));
+const DIE_SIDES_OPTIONS = [4, 6, 8, 10, 12, 20].map((n) => ({ value: String(n), label: `к${n}` }));
 
 const clamp = (raw: string, min: number, max: number, fallback: number) => Math.max(min, Math.min(max, parseInt(raw) || fallback));
 

@@ -30,10 +30,10 @@ describe("contentSchema", () => {
     expect(s.$defs.Ability.description).toContain('content_schema(kind: "abilities")');
   });
 
-  it("спел: Effect — заглушка з підказкою", () => {
+  it("спел: SpellEffect — заглушка з підказкою", () => {
     const s = contentSchema({ kind: "spells" }) as { $defs: Record<string, { description?: string }> };
 
-    expect(s.$defs.Effect.description).toContain('content_schema(kind: "abilities", effectKind');
+    expect(s.$defs.SpellEffect.description).toContain('content_schema(kind: "abilities", effectKind');
   });
 
   it("abilities — вміщається, ефекти перелічені, а не вбудовані", () => {

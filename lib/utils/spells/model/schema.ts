@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { EffectSchema } from "@/lib/utils/abilities/schema";
+import { BASE_EFFECTS, RandomOfSchema } from "@/lib/utils/abilities/schema/effects";
 
 export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
 
@@ -57,7 +57,13 @@ export const RaceModifierSchema = z.object({
 
 export const SpellDiceSchema = z.number().int().min(0).max(40);
 
-export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
+export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12), z.literal(20)]);
+
+const SPELL_ONLY_EFFECTS = [] as const;
+
+export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
+
+export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 
 export const SpellDefinitionSchema = z.object({
   executionMode: z.enum(["native", "manual"]).optional(),
@@ -66,7 +72,7 @@ export const SpellDefinitionSchema = z.object({
   casting: SpellCastingTimeSchema.optional(),
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,
-  effects: z.array(EffectSchema),
+  effects: z.array(SpellEffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean().optional(),
   maxStacks: z.number().int().min(1).max(10).optional(),
