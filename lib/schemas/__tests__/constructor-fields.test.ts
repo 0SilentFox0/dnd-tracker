@@ -13,7 +13,7 @@ describe("constructor content fields", () => {
   it("spell group: hex color and known icon", () => {
     expect(updateSpellGroupSchema.safeParse({ color: "#12a52b", icon: "moon" }).success).toBe(true);
     expect(updateSpellGroupSchema.safeParse({ color: "green" }).success).toBe(false);
-    expect(updateSpellGroupSchema.safeParse({ icon: "skull" }).success).toBe(false);
+    expect(updateSpellGroupSchema.safeParse({ icon: "unknown-icon" }).success).toBe(false);
   });
 
   it("main skill role: known role or null", () => {

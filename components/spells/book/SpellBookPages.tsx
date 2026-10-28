@@ -1,14 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { LevelBookmarks } from "@/components/spells/book/LevelBookmarks";
 import { SchoolHeading } from "@/components/spells/book/SchoolHeading";
 import { SchoolTabs } from "@/components/spells/book/SchoolTabs";
 import { SpellRow } from "@/components/spells/book/SpellRow";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { spellLevelName, spellSchoolColor } from "@/lib/constants/spells";
 import { useSchoolFilter } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
@@ -83,7 +82,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
     <>
       <div className="flex items-center gap-4">
         <span className="flex size-16 items-center justify-center border border-[#2a2018] bg-[#7a2a1f]/10 text-[#7a2a1f]">
-          {spell.icon ? <OptimizedImage src={spell.icon} alt="" width={44} height={44} /> : <Sparkles className="size-10" />}
+          <SpellIcon spell={spell} size={44} iconClassName="size-10" />
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>

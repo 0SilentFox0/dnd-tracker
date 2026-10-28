@@ -31,6 +31,16 @@ describe("createCampaignFromBundle", () => {
     m.importBundle.mockResolvedValue({ idMap: new Map([["a", "b"]]), warnings: ["w"], hashes: {} });
   });
 
+  it("credits з бандла записуються в кампанію; бандл без поля credits не задає", async () => {
+    m.tx.campaign.create.mockResolvedValue({ id: "c1" });
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle: { ...bundle, credits: "SRD 5.2" } });
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle });
+
+    expect(m.tx.campaign.create.mock.calls[0][0].data).toMatchObject({ credits: "SRD 5.2" });
+    expect(m.tx.campaign.create.mock.calls[1][0].data).not.toHaveProperty("credits");
+  });
+
   it("без бандла створює кампанію й DM-учасника без транзакції", async () => {
     m.db.campaign.create.mockResolvedValue({ id: "c1" });
 

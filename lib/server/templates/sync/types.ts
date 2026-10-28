@@ -13,7 +13,7 @@ export interface SyncContext {
   campaignId: string;
   source: { id: string; name: string; kind: string };
   sourceBundle: Bundle;
-  target: { settings: Bundle["settings"]; rules: unknown; rows: LocalRow[] };
+  target: { settings: Bundle["settings"]; rules: unknown; credits?: string | null; rows: LocalRow[] };
   baseline: SyncState;
   ignored: SyncState;
   syncedAt: Date | null;

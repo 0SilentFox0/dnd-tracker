@@ -23,6 +23,7 @@ export interface TemplateCard {
   description: string | null;
   visibility: string;
   counts: Record<string, number>;
+  credits?: string | null;
 }
 
 export interface TemplateList {
@@ -70,6 +71,7 @@ export interface CampaignSettings {
 export interface CampaignSettingsMeta {
   createdFromId: string | null;
   isTemplate: boolean;
+  credits?: string | null;
 }
 
 export interface ActiveBattleRef {

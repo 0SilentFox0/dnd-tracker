@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { CreditsText } from "@/components/campaigns/templates/CreditsText";
 import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
 import { SourceSyncDialog } from "@/components/campaigns/templates/SourceSyncDialog";
 import { HudSection } from "@/components/hud/form";
@@ -159,6 +160,11 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
           </Button>
         </div>
       </HudSection>
+      {meta.credits && (
+        <HudSection title="Джерела й ліцензії">
+          <CreditsText credits={meta.credits} />
+        </HudSection>
+      )}
       <HudSection title="Небезпечна зона">
         <Button variant="destructive" onClick={handleDelete} disabled={isSaving}>
           {remove.isPending ? "Видалення..." : "Видалити кампанію"}

@@ -37,7 +37,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
   const isTemplate = (id: string) => !value.file && value.templateId === id;
 
   const renderCard = (t: TemplateCard) => (
-    <TemplateTile key={t.id} title={t.name} subtitle={[t.description, countsLabel(t)].filter(Boolean).join(" — ")} selected={isTemplate(t.id)} onClick={() => onChange({ templateId: t.id })} />
+    <TemplateTile key={t.id} title={t.name} footnote={t.credits ?? undefined} subtitle={[t.description, countsLabel(t)].filter(Boolean).join(" — ")} selected={isTemplate(t.id)} onClick={() => onChange({ templateId: t.id })} />
   );
 
   return (

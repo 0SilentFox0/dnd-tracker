@@ -6,8 +6,8 @@ import { Copy, Move, Pencil, Sparkles, X } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudCard, HudPill } from "@/components/hud/page";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -49,17 +49,11 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const fallbackIcon = <Sparkles className="size-5 text-hud-muted" />;
-
   return (
     <HudCard className="flex h-full flex-col gap-2">
       <div className="flex items-start gap-3">
         <div className="metal-bronze relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] shadow-[inset_0_0_0_2px_var(--m2)]">
-          {spell.icon ? (
-            <OptimizedImage src={spell.icon} alt={spell.name} width={44} height={44} className="size-full object-cover p-0.5" fallback={fallbackIcon} />
-          ) : (
-            fallbackIcon
-          )}
+          <SpellIcon spell={spell} size={44} className="size-full object-cover p-0.5" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>

@@ -1,0 +1,191 @@
+[
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "10.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A battleaxe.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Battleaxe",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_battleaxe",
+      "weight": "4.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_battleaxe"
+  },
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "10.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A blowgun.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Blowgun",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_blowgun",
+      "weight": "1.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_blowgun"
+  },
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "2.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A dagger.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Dagger",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_dagger",
+      "weight": "1.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_dagger"
+  },
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "50.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A greatsword.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Greatsword",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_greatsword",
+      "weight": "6.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_greatsword"
+  },
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "0.50",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A javelin.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Javelin",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_javelin",
+      "weight": "2.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_javelin"
+  },
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "weapon",
+      "cost": "50.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A longbow.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Longbow",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": "srd-2024_longbow",
+      "weight": "2.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_longbow"
+  },
+  {
+    "fields": {
+      "armor": "srd-2024_shield",
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "armor",
+      "cost": "10.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A shield.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Shield",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "6.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_shield"
+  }
+]

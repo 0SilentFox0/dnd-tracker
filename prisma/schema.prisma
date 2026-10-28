@@ -42,6 +42,7 @@ model Campaign {
   visibility      String              @default("private")
   createdFromId   String?
   aiInstructions  String?
+  credits         String?
   artifactSets    ArtifactSet[]
   artifacts       Artifact[]
   battles         BattleScene[]

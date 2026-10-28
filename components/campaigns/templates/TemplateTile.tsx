@@ -5,11 +5,12 @@ import { cn } from "@/lib/utils";
 interface TemplateTileProps {
   title: ReactNode;
   subtitle?: ReactNode;
+  footnote?: ReactNode;
   selected?: boolean;
   onClick: () => void;
 }
 
-export function TemplateTile({ title, subtitle, selected = false, onClick }: TemplateTileProps) {
+export function TemplateTile({ title, subtitle, footnote, selected = false, onClick }: TemplateTileProps) {
   return (
     <button
       type="button"
@@ -22,6 +23,7 @@ export function TemplateTile({ title, subtitle, selected = false, onClick }: Tem
     >
       <span className="hud-sc block text-[15px] text-hud-ink">{title}</span>
       {subtitle && <span className="block text-xs text-hud-muted">{subtitle}</span>}
+      {footnote && <span className="line-clamp-2 block text-[11px] leading-4 text-hud-muted/80">{footnote}</span>}
     </button>
   );
 }

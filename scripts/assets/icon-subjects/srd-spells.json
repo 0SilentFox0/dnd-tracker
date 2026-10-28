@@ -1,0 +1,1358 @@
+{
+ "acid-arrow": {
+  "palette": "acid",
+  "subject": "a shimmering green arrow streaking forward and bursting into a spray of corrosive acid droplets"
+ },
+ "acid-splash": {
+  "palette": "acid",
+  "subject": "a glob of bubbling green acid splashing outward into a round burst of droplets that sizzle"
+ },
+ "aid": {
+  "palette": "abjuration",
+  "subject": "three glowing silver-blue hands of light placed on a warrior's shoulder, strengthening aura and rising sparkles"
+ },
+ "alarm": {
+  "palette": "abjuration",
+  "subject": "a silver-blue ward bell hanging in a magical cube of faint light, ringing with ripples across a doorway"
+ },
+ "alter-self": {
+  "palette": "transmutation",
+  "subject": "a human silhouette shifting its face and limbs midway into gills and claws, emerald swirl of transformation"
+ },
+ "animal-friendship": {
+  "palette": "enchantment",
+  "subject": "a gentle hand held out to a calm wolf and deer, pink hearts of light drifting between them"
+ },
+ "animal-messenger": {
+  "palette": "enchantment",
+  "subject": "a small raven with a rolled scroll tied to its leg, taking off in a swirl of pink sparkles"
+ },
+ "animal-shapes": {
+  "palette": "transmutation",
+  "subject": "a group of figures transforming into a bear, an eagle and a wolf in mid-change, emerald swirl"
+ },
+ "animate-dead": {
+  "palette": "necrotic",
+  "subject": "a skeletal hand clawing out of a grave soil, sickly green glow in the eye sockets of a skull rising"
+ },
+ "animate-objects": {
+  "palette": "transmutation",
+  "subject": "a sword, a chair, a candlestick and a chest floating and marching on tiny legs, emerald sparkles"
+ },
+ "antilife-shell": {
+  "palette": "abjuration",
+  "subject": "a shimmering silver-blue dome shielding a figure while creatures bounce off its barrier, ripples of energy"
+ },
+ "antimagic-field": {
+  "palette": "abjuration",
+  "subject": "a translucent silver sphere with extinguished spell sigils fading around a lone figure, dead calm silence"
+ },
+ "antipathysympathy": {
+  "palette": "enchantment",
+  "subject": "an ornate chest glowing with a pink lure on one side and a repelling dark ward on the other, swirling wisps"
+ },
+ "arcane-eye": {
+  "palette": "divination",
+  "subject": "a floating glowing teal eye with a faint mist trail drifting down a dark corridor"
+ },
+ "arcane-hand": {
+  "palette": "force",
+  "subject": "a huge translucent pale blue magical hand with glowing runes closing its fingers, crushing sparkles"
+ },
+ "arcane-lock": {
+  "palette": "abjuration",
+  "subject": "a heavy wooden door sealed by a glowing silver-blue arcane padlock with magical sigils"
+ },
+ "arcane-sword": {
+  "palette": "force",
+  "subject": "a spectral sword of pale blue force energy hovering and slashing with a swift arc"
+ },
+ "arcanists-magic-aura": {
+  "palette": "illusion",
+  "subject": "a plain wooden chest wearing a false glowing purple magical aura, shimmering mask of illusion"
+ },
+ "astral-projection": {
+  "palette": "necrotic",
+  "subject": "a silver cord stretching from a sleeping body to a ghostly twin drifting among the stars"
+ },
+ "augury": {
+  "palette": "divination",
+  "subject": "a set of glowing runed bones and stones in a teal light, omens appearing in the air above"
+ },
+ "aura-of-life": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue ring of life energy radiating from a standing figure, healing the nearby warriors"
+ },
+ "awaken": {
+  "palette": "transmutation",
+  "subject": "a tree opening its bark eyes and a beast gaining intelligence, emerald glimmer and a spark of awareness"
+ },
+ "bane": {
+  "palette": "enchantment",
+  "subject": "a dark pink cloud of curse symbols hovering over a trembling warrior's head, dread"
+ },
+ "banishment": {
+  "palette": "abjuration",
+  "subject": "a figure pulled into a swirling silver-blue portal and vanishing, streaks of energy"
+ },
+ "barkskin": {
+  "palette": "transmutation",
+  "subject": "a forearm covered in rough oak bark with tiny leaves, emerald glow beneath"
+ },
+ "beacon-of-hope": {
+  "palette": "abjuration",
+  "subject": "a bright silver-blue beacon lantern radiating hopeful light to several raised hands, warm ray"
+ },
+ "befuddlement": {
+  "palette": "psychic",
+  "subject": "a head with swirling magenta spirals and scrambled thought-fragments exploding, psychic confusion"
+ },
+ "bestow-curse": {
+  "palette": "necrotic",
+  "subject": "a hand marked by a glowing sickly green curse sigil with dark tendrils creeping up the arm"
+ },
+ "black-tentacles": {
+  "palette": "conjuration",
+  "subject": "writhing black tentacles bursting from the ground and wrapping around ankles, amber glimmer"
+ },
+ "blade-barrier": {
+  "palette": "force",
+  "subject": "a swirling wall of spinning pale blue magical blades whirling in a ring"
+ },
+ "bless": {
+  "palette": "enchantment",
+  "subject": "a golden halo and light rays above three heads, a pink-gold blessing sparkle"
+ },
+ "blight": {
+  "palette": "necrotic",
+  "subject": "a withered twisted tree and blackened leaves crumbling to dust as sickly green energy drains"
+ },
+ "blindnessdeafness": {
+  "palette": "transmutation",
+  "subject": "a pair of closed eyes and a covered ear with dark emerald mist and a muffled silence"
+ },
+ "blink": {
+  "palette": "transmutation",
+  "subject": "a figure flickering in and out of reality as translucent copies, emerald blur and sparks"
+ },
+ "blur": {
+  "palette": "illusion",
+  "subject": "a warrior's outline smeared into several overlapping shimmering purple afterimages"
+ },
+ "burning-hands": {
+  "palette": "fire",
+  "subject": "a pair of hands held together with a fan of flame bursting outward in a cone"
+ },
+ "call-lightning": {
+  "palette": "lightning",
+  "subject": "a storm cloud above a caster pointing a hand, a lightning bolt striking down, violet flashes"
+ },
+ "calm-emotions": {
+  "palette": "enchantment",
+  "subject": "a soft pink ripple spreading from a lowered sword, hands unclenching, a dove of calm"
+ },
+ "chain-lightning": {
+  "palette": "lightning",
+  "subject": "a bright violet-white arc leaping between several enemies in a chain of forking branches"
+ },
+ "charm-monster": {
+  "palette": "enchantment",
+  "subject": "a dragon-like monster gazing with pink hearts in its eyes, tamed by a gesture, pink swirl"
+ },
+ "charm-person": {
+  "palette": "enchantment",
+  "subject": "a humanoid with glowing pink heart-shaped eyes, gentle smiling face, pink sparkles"
+ },
+ "chill-touch": {
+  "palette": "necrotic",
+  "subject": "a ghostly skeletal hand of sickly green glow reaching forward to grasp, cold mist"
+ },
+ "chromatic-orb": {
+  "palette": "force",
+  "subject": "a sphere of swirling colours (red, blue, green) in a caster's palm launching forward, vivid sparks"
+ },
+ "circle-of-death": {
+  "palette": "necrotic",
+  "subject": "a wide ring of sickly green-black energy expanding over the ground, withered grass and rising skulls"
+ },
+ "clairvoyance": {
+  "palette": "divination",
+  "subject": "a teal glowing scrying circle floating in the air showing a distant room, shimmering eye"
+ },
+ "clone": {
+  "palette": "necrotic",
+  "subject": "two identical sleeping humanoid bodies in glass cocoons joined by a glowing thread, sickly green light"
+ },
+ "cloudkill": {
+  "palette": "poison",
+  "subject": "a rolling sphere of thick green poison fog with skulls in the vapour, creeping across the ground"
+ },
+ "color-spray": {
+  "palette": "illusion",
+  "subject": "a fan of shimmering rainbow-coloured light in a cone, dazzling bright, purple core"
+ },
+ "command": {
+  "palette": "enchantment",
+  "subject": "a pointing finger and a bold single glowing word sigil forcing a kneeling figure, pink aura"
+ },
+ "commune": {
+  "palette": "divination",
+  "subject": "a robed figure kneeling before a glowing teal question mark of light, divine answers in the air"
+ },
+ "commune-with-nature": {
+  "palette": "divination",
+  "subject": "a hand on the bark of an old tree with teal light flowing across the forest map, living voices"
+ },
+ "comprehend-languages": {
+  "palette": "divination",
+  "subject": "a scroll with glowing letters rearranging themselves into understandable symbols, teal glow"
+ },
+ "compulsion": {
+  "palette": "enchantment",
+  "subject": "a pointing figure with hypnotic pink spirals pulling a crowd to move in one direction"
+ },
+ "cone-of-cold": {
+  "palette": "cold",
+  "subject": "a wide cone of icy blue frost blast with shards of ice and swirling snow from a palm"
+ },
+ "confusion": {
+  "palette": "enchantment",
+  "subject": "a spinning head with swirling pink spirals and arrows pointing in every direction, dazed"
+ },
+ "conjure-animals": {
+  "palette": "conjuration",
+  "subject": "spectral glowing amber wolves, bears and hawks leaping from a swirl of light"
+ },
+ "conjure-celestial": {
+  "palette": "conjuration",
+  "subject": "a radiant winged celestial with a golden aura descending from a column of amber light"
+ },
+ "conjure-elemental": {
+  "palette": "conjuration",
+  "subject": "a hulking elemental of rock and flame emerging from a swirling amber portal on the ground"
+ },
+ "conjure-fey": {
+  "palette": "conjuration",
+  "subject": "a luminous fey creature with butterfly wings and a thorn spear stepping out of a twirl of amber leaves"
+ },
+ "conjure-minor-elementals": {
+  "palette": "conjuration",
+  "subject": "several small imp-like elementals of fire, water, earth and wind swirling around a caster's hand"
+ },
+ "conjure-woodland-beings": {
+  "palette": "conjuration",
+  "subject": "small glowing sprites and fey figures with twig spears appearing from an amber light in a forest"
+ },
+ "contact-other-plane": {
+  "palette": "divination",
+  "subject": "a mind reaching into a starry rift with strange eyes watching back, teal cosmos and a hint of madness"
+ },
+ "contagion": {
+  "palette": "necrotic",
+  "subject": "a pale hand covered in glowing sickly green blotches and sores, a plague mist drifting"
+ },
+ "contingency": {
+  "palette": "abjuration",
+  "subject": "an hourglass-shaped glowing silver-blue sigil held in a hand, a spell waiting inside a crystal"
+ },
+ "continual-flame": {
+  "palette": "transmutation",
+  "subject": "a torch topped by a cold unburning magical flame, steady orange glow without smoke"
+ },
+ "control-water": {
+  "palette": "transmutation",
+  "subject": "a split sea parting into two walls of water around a caster's raised hand, emerald glow"
+ },
+ "control-weather": {
+  "palette": "transmutation",
+  "subject": "a hand beneath a split sky half sun and half storm, swirling clouds, emerald glow"
+ },
+ "counterspell": {
+  "palette": "abjuration",
+  "subject": "two spell energies colliding and shattering against a silver-blue shield-like sigil, sparks scatter"
+ },
+ "create-food-and-water": {
+  "palette": "conjuration",
+  "subject": "a table with bread, fruit and a pitcher of water appearing from a swirl of amber light"
+ },
+ "create-or-destroy-water": {
+  "palette": "transmutation",
+  "subject": "a cupped hand pouring a stream of clear water and a drying puddle, emerald glow"
+ },
+ "create-undead": {
+  "palette": "necrotic",
+  "subject": "three skeletal ghouls rising from open graves under a dark sky with a green necromantic glow"
+ },
+ "creation": {
+  "palette": "illusion",
+  "subject": "a hand shaping a glowing purple cloud of shadow into a solid statuette, shimmering particles"
+ },
+ "cure-wounds": {
+  "palette": "healing",
+  "subject": "a hand touching a bandaged wound with warm gold-green light closing it, sparkles"
+ },
+ "dancing-lights": {
+  "palette": "illusion",
+  "subject": "four small glowing orbs of purple light floating in the dark and drifting along"
+ },
+ "darkness": {
+  "palette": "force",
+  "subject": "a sphere of impenetrable black darkness swallowing a candle's light, faint pale blue edge"
+ },
+ "darkvision": {
+  "palette": "transmutation",
+  "subject": "a pair of glowing eyes seeing through absolute darkness with a lit-up cave outline, emerald glow"
+ },
+ "daylight": {
+  "palette": "radiant",
+  "subject": "a bright glowing golden sun orb hovering and lighting a dark cave in a wide sphere"
+ },
+ "death-ward": {
+  "palette": "abjuration",
+  "subject": "a protective silver-blue amulet with a skull being rejected by a halo ring, a repelled dark mist"
+ },
+ "delayed-blast-fireball": {
+  "palette": "fire",
+  "subject": "a glowing orange bead pulsing and growing brighter ahead of an enormous fiery explosion"
+ },
+ "demiplane": {
+  "palette": "conjuration",
+  "subject": "a magical door made of shadows opening onto an empty gray room, amber rim light"
+ },
+ "detect-evil-and-good": {
+  "palette": "divination",
+  "subject": "a holy symbol held up with teal rings of light revealing a dark spot and a gold spot"
+ },
+ "detect-magic": {
+  "palette": "divination",
+  "subject": "a hand revealing glowing magical auras around objects, teal rings of sensing magic"
+ },
+ "detect-poison-and-disease": {
+  "palette": "divination",
+  "subject": "a goblet with swirling green warning wisps and a teal sensing ring around it"
+ },
+ "detect-thoughts": {
+  "palette": "divination",
+  "subject": "a head in profile with glowing thoughts visible as teal bubbles and symbols floating out"
+ },
+ "dimension-door": {
+  "palette": "force",
+  "subject": "a doorway of pale blue light between two distant places, a stride stepping through"
+ },
+ "disguise-self": {
+  "palette": "illusion",
+  "subject": "a figure's face melting into another face in a shimmering purple mist, like a mask changing"
+ },
+ "disintegrate": {
+  "palette": "force",
+  "subject": "a green-blue ray striking a statue that dissolves into drifting ash and sparkling dust"
+ },
+ "dispel-evil-and-good": {
+  "palette": "abjuration",
+  "subject": "a holy sigil casting out a dark fiendish silhouette, silver-blue shockwave"
+ },
+ "dispel-magic": {
+  "palette": "abjuration",
+  "subject": "a silver-blue burst unravelling a tangle of magical threads and runes, sparks scatter"
+ },
+ "dissonant-whispers": {
+  "palette": "psychic",
+  "subject": "a head with magenta sound waves of whispers crawling from a mouth in jagged shapes, flinching"
+ },
+ "divination": {
+  "palette": "divination",
+  "subject": "a crystal ball showing a symbol and a teal eye, runes circling in the air"
+ },
+ "divine-favor": {
+  "palette": "radiant",
+  "subject": "a sword glowing with golden radiance and a halo above, holy glow trailing"
+ },
+ "divine-smite": {
+  "palette": "radiant",
+  "subject": "a sword striking with an explosion of golden holy light and a halo-shaped flare"
+ },
+ "divine-word": {
+  "palette": "radiant",
+  "subject": "a thunderous golden glyph word blasting outward as concentric rings with fleeing dark shapes"
+ },
+ "dominate-beast": {
+  "palette": "enchantment",
+  "subject": "a snarling bear with pink glowing eyes and strings of pink energy on its head, tamed"
+ },
+ "dominate-monster": {
+  "palette": "enchantment",
+  "subject": "a huge monster bowing its head with glowing pink chains of will wrapped around, pink eyes"
+ },
+ "dominate-person": {
+  "palette": "enchantment",
+  "subject": "a humanoid soldier marching with a glowing pink puppet-string on the forehead, empty gaze"
+ },
+ "dragons-breath": {
+  "palette": "transmutation",
+  "subject": "a caster exhaling a cone of fire as dragon-like jaws appear around the mouth, emerald glow with orange flame"
+ },
+ "dream": {
+  "palette": "psychic",
+  "subject": "a sleeping figure on a bed floating in a swirling cloud of magenta dream images, drifting stars"
+ },
+ "druidcraft": {
+  "palette": "transmutation",
+  "subject": "a druid's palm with a blooming flower, a small glowing sprout, a gust and a tiny flame, emerald glow"
+ },
+ "earthquake": {
+  "palette": "earth",
+  "subject": "ground splitting in a huge crack with collapsing buildings and rocks tumbling, dust clouds"
+ },
+ "eldritch-blast": {
+  "palette": "force",
+  "subject": "a crackling beam of pale blue and violet eldritch energy streaking from an outstretched hand"
+ },
+ "elementalism": {
+  "palette": "transmutation",
+  "subject": "four small glowing elemental effects (flame, water drop, rock, wind swirl) orbiting a hand, emerald glow"
+ },
+ "enhance-ability": {
+  "palette": "transmutation",
+  "subject": "a flexed arm and a glowing animal totem silhouette (bull) behind, bright emerald muscle aura"
+ },
+ "enlargereduce": {
+  "palette": "transmutation",
+  "subject": "a hand and a small copy of the hand beside a huge version, shifting size, emerald glow"
+ },
+ "ensnaring-strike": {
+  "palette": "conjuration",
+  "subject": "a thorny vine bursting from the tip of a weapon's strike and binding a target, amber glow"
+ },
+ "entangle": {
+  "palette": "conjuration",
+  "subject": "tall grasses and thorny vines grabbing at legs, green-brown tangle, amber glimmer"
+ },
+ "enthrall": {
+  "palette": "enchantment",
+  "subject": "a speaker with a glowing pink aura and entranced listeners with unfocused eyes"
+ },
+ "etherealness": {
+  "palette": "force",
+  "subject": "a ghostly translucent figure passing through a stone wall in swirling pale blue mist"
+ },
+ "expeditious-retreat": {
+  "palette": "transmutation",
+  "subject": "a pair of running boots with motion streaks and a swirl of emerald wind, speeding figure"
+ },
+ "eyebite": {
+  "palette": "necrotic",
+  "subject": "a pair of glowing sickly green eyes with spiralling dark beams, sleep, fear and sickness"
+ },
+ "fabricate": {
+  "palette": "transmutation",
+  "subject": "raw planks and ore transforming into a finished bridge and a sculpted bowl, emerald sparkles"
+ },
+ "faerie-fire": {
+  "palette": "radiant",
+  "subject": "outlines of creatures and plants glowing with golden-green sparkling light in the darkness, outlined silhouettes"
+ },
+ "faithful-hound": {
+  "palette": "force",
+  "subject": "a spectral ghostly hound of pale blue light standing guard, alert ears, glowing eyes"
+ },
+ "false-life": {
+  "palette": "necrotic",
+  "subject": "a figure surrounded by a thin ghostly green-black shell of borrowed life, a faint heartbeat of light"
+ },
+ "fear": {
+  "palette": "illusion",
+  "subject": "a terrified figure fleeing from a huge dark shadow of a fanged face in a purple cone of dread"
+ },
+ "feather-fall": {
+  "palette": "transmutation",
+  "subject": "a floating feather and a falling figure slowing down, drifting in air with an emerald swirl"
+ },
+ "find-familiar": {
+  "palette": "conjuration",
+  "subject": "a small owl, a cat and a toad appearing from a circle of amber light, curious eyes"
+ },
+ "find-steed": {
+  "palette": "conjuration",
+  "subject": "a spectral warhorse with glowing mane materialising from golden amber sparks, noble stance"
+ },
+ "find-the-path": {
+  "palette": "divination",
+  "subject": "a glowing teal trail of light winding through a dark maze toward a distant door"
+ },
+ "find-traps": {
+  "palette": "divination",
+  "subject": "a floor with a glowing teal outline of a hidden pit and tripwire revealed, a lit rune"
+ },
+ "finger-of-death": {
+  "palette": "necrotic",
+  "subject": "a pointing skeletal finger shooting a green-black ray at a figure collapsing into a zombie"
+ },
+ "fireball": {
+  "palette": "fire",
+  "subject": "a roaring orange-red fireball erupting into a spherical explosion with a bright core and smoke"
+ },
+ "fire-bolt": {
+  "palette": "fire",
+  "subject": "a bright orange streak of fire flying from a palm trailing sparks and smoke"
+ },
+ "fire-shield": {
+  "palette": "fire",
+  "subject": "a figure surrounded by a flaming red aura on one side and a cold blue aura on the other"
+ },
+ "fire-storm": {
+  "palette": "fire",
+  "subject": "a rain of roaring fire columns filling a wide forest area, sky glowing orange"
+ },
+ "flame-blade": {
+  "palette": "fire",
+  "subject": "a blade of pure flames held in a hand, bright orange fire with a white-hot core, sparks"
+ },
+ "flame-strike": {
+  "palette": "fire",
+  "subject": "a column of orange fire with a golden holy light falling from the sky to the ground"
+ },
+ "flaming-sphere": {
+  "palette": "fire",
+  "subject": "a rolling blazing sphere of fire with sparks trailing along the ground"
+ },
+ "flesh-to-stone": {
+  "palette": "transmutation",
+  "subject": "a figure's legs turned to gray stone, cracks spreading upward, emerald glow fading to gray"
+ },
+ "floating-disk": {
+  "palette": "conjuration",
+  "subject": "a flat shimmering disc of amber force floating at waist height with crates on it"
+ },
+ "fly": {
+  "palette": "transmutation",
+  "subject": "a caster soaring in the air with arms out, trailing emerald sparkles and clouds below"
+ },
+ "fog-cloud": {
+  "palette": "conjuration",
+  "subject": "a thick sphere of white-gray fog hiding a landscape, soft amber edge light"
+ },
+ "forbiddance": {
+  "palette": "abjuration",
+  "subject": "a protective ring of silver-blue glyphs around a temple, repelling a dark flicker"
+ },
+ "forcecage": {
+  "palette": "force",
+  "subject": "a gleaming translucent cube cage of pale blue bars of force with a trapped figure"
+ },
+ "foresight": {
+  "palette": "divination",
+  "subject": "an eye showing glimpses of the future as multiple misty teal timelines branching in a golden hourglass"
+ },
+ "freedom-of-movement": {
+  "palette": "abjuration",
+  "subject": "a chain and a net slipping off a freely striding figure, silver-blue spark"
+ },
+ "freezing-sphere": {
+  "palette": "cold",
+  "subject": "a hand-sized sphere of frozen blue-white ice mist about to shatter with frost and ice shards"
+ },
+ "gaseous-form": {
+  "palette": "transmutation",
+  "subject": "a figure dissolving into drifting wisps of mist flowing through a keyhole, emerald vapour"
+ },
+ "gate": {
+  "palette": "conjuration",
+  "subject": "a huge ornate circular portal with a giant figure stepping through, amber and white light"
+ },
+ "geas": {
+  "palette": "psychic",
+  "subject": "a glowing magenta binding sigil wrapped around a head with chains of oath, relentless"
+ },
+ "gentle-repose": {
+  "palette": "necrotic",
+  "subject": "a hand resting a coin on a shrouded corpse's eyes, a green-white soft peaceful glow, preserved"
+ },
+ "giant-insect": {
+  "palette": "conjuration",
+  "subject": "a giant spider, wasp and centipede materialising from a swirl of amber light"
+ },
+ "glibness": {
+  "palette": "enchantment",
+  "subject": "a mouth with a smooth golden-pink tongue and silver words flowing out like ribbons"
+ },
+ "globe-of-invulnerability": {
+  "palette": "abjuration",
+  "subject": "a glowing shimmering silver-blue sphere with a caster inside, spells bouncing off its surface"
+ },
+ "glyph-of-warding": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue arcane glyph engraved on a stone door waiting to be triggered"
+ },
+ "goodberry": {
+  "palette": "conjuration",
+  "subject": "a handful of glowing berries on a branch giving off warm golden-amber light"
+ },
+ "grease": {
+  "palette": "conjuration",
+  "subject": "a slick shiny puddle of amber-brown grease with a stumbling boot slipping"
+ },
+ "greater-invisibility": {
+  "palette": "illusion",
+  "subject": "a half-visible outline of an armoured figure fading into transparency with a purple shimmer"
+ },
+ "greater-restoration": {
+  "palette": "abjuration",
+  "subject": "a hand pouring silver-blue light onto a mind and body, chains and cracks fading away"
+ },
+ "guardian-of-faith": {
+  "palette": "radiant",
+  "subject": "a huge hovering spectral guardian with glowing golden sword and wings standing watch"
+ },
+ "guards-and-wards": {
+  "palette": "abjuration",
+  "subject": "a castle corridor sealed by webs, glyph-lit doors and mist, silver-blue protective runes"
+ },
+ "guidance": {
+  "palette": "divination",
+  "subject": "a hand with a faint teal glowing star hovering above, a guiding spark of light"
+ },
+ "guiding-bolt": {
+  "palette": "radiant",
+  "subject": "a streak of brilliant golden-white light flying toward a dark target leaving a sparkling mark"
+ },
+ "gust-of-wind": {
+  "palette": "force",
+  "subject": "a strong stream of swirling pale blue wind lines pushing dust and leaves in a line"
+ },
+ "hallow": {
+  "palette": "abjuration",
+  "subject": "a sacred ground ringed with glowing silver-blue runes and a gentle light, holy boundary"
+ },
+ "hallucinatory-terrain": {
+  "palette": "illusion",
+  "subject": "a meadow that is secretly a shimmering illusion of a swamp, purple heat haze"
+ },
+ "harm": {
+  "palette": "necrotic",
+  "subject": "a hand of sickly green-black energy draining a figure's vitality, dark tendrils"
+ },
+ "haste": {
+  "palette": "transmutation",
+  "subject": "a running figure with blurred multiple afterimages and bright emerald wind trails"
+ },
+ "heal": {
+  "palette": "healing",
+  "subject": "a radiant column of warm gold-green light healing a kneeling warrior, sparkles rising"
+ },
+ "healing-word": {
+  "palette": "healing",
+  "subject": "a spoken glowing word of gold-green light flying across a battlefield to a wounded ally"
+ },
+ "heat-metal": {
+  "palette": "fire",
+  "subject": "a glowing red-hot steel armour piece with a hand recoiling and steam rising"
+ },
+ "hellish-rebuke": {
+  "palette": "fire",
+  "subject": "a retaliating burst of hellish red-black flames rising from the ground around an attacker"
+ },
+ "heroes-feast": {
+  "palette": "poison",
+  "subject": "a grand banquet table with glowing golden dishes and a green-purple aura, feasting"
+ },
+ "heroism": {
+  "palette": "enchantment",
+  "subject": "a warrior with a glowing pink-gold aura and a raised sword, a courage heart of light"
+ },
+ "hex": {
+  "palette": "necrotic",
+  "subject": "a glowing cursed sickly green rune hovering over a victim's head, dark tendrils"
+ },
+ "hideous-laughter": {
+  "palette": "enchantment",
+  "subject": "a laughing figure collapsing with tears and giggling, pink swirls of mirth"
+ },
+ "hold-monster": {
+  "palette": "enchantment",
+  "subject": "a huge monster frozen mid-lunge held by glowing pink chains of will"
+ },
+ "hold-person": {
+  "palette": "enchantment",
+  "subject": "a humanoid soldier frozen mid-step with pink magical chains binding him, wide eyes"
+ },
+ "holy-aura": {
+  "palette": "abjuration",
+  "subject": "a radiant silver-blue halo of light surrounding a figure and blinding enemies, glorious"
+ },
+ "hunters-mark": {
+  "palette": "force",
+  "subject": "a glowing pale blue crosshair mark on a fleeing stag, a bow ready in the foreground"
+ },
+ "hypnotic-pattern": {
+  "palette": "illusion",
+  "subject": "a swirling mesmerising purple and gold pattern of colours in the air with dazed onlookers"
+ },
+ "ice-knife": {
+  "palette": "cold",
+  "subject": "a shard dagger of ice flying and exploding into frost shards at impact, cold mist"
+ },
+ "ice-storm": {
+  "palette": "cold",
+  "subject": "hailstones and sleet hammering a field with ice-covered ground, swirling blue-white storm"
+ },
+ "identify": {
+  "palette": "divination",
+  "subject": "a hand holding a magical amulet under a glowing teal magnifying rune circle revealing its properties"
+ },
+ "illusory-script": {
+  "palette": "illusion",
+  "subject": "a letter whose handwriting hides a second secret shimmering purple script visible only to the reader"
+ },
+ "imprisonment": {
+  "palette": "abjuration",
+  "subject": "a figure sealed inside a tiny glowing silver-blue crystal prison buried under layers of chains and runes"
+ },
+ "incendiary-cloud": {
+  "palette": "fire",
+  "subject": "a roiling cloud of smoke and embers glowing orange with fire flickering inside"
+ },
+ "inflict-wounds": {
+  "palette": "necrotic",
+  "subject": "a hand clawing forward with dark green necrotic energy and dripping black wounds"
+ },
+ "insect-plague": {
+  "palette": "poison",
+  "subject": "a dense swarm of locusts and biting insects swirling in a sphere, green-purple murk"
+ },
+ "instant-summons": {
+  "palette": "conjuration",
+  "subject": "a gemstone returning to a hand through a flash of amber light with a streak and a faint portal"
+ },
+ "irresistible-dance": {
+  "palette": "enchantment",
+  "subject": "a figure forced into a wild dance with comically rapid legs, pink swirling musical notes"
+ },
+ "invisibility": {
+  "palette": "illusion",
+  "subject": "a figure's outline vanishing from the feet up into faint purple shimmer, only footprints remain"
+ },
+ "jump": {
+  "palette": "transmutation",
+  "subject": "a figure leaping a great distance over a chasm with emerald trail streaks"
+ },
+ "knock": {
+  "palette": "transmutation",
+  "subject": "a heavy padlock springing open as a key-shaped burst of emerald light unlocks it with a loud knock"
+ },
+ "legend-lore": {
+  "palette": "divination",
+  "subject": "an ancient open book with glowing pages of champions and dragons in teal ink, whispering lore"
+ },
+ "lesser-restoration": {
+  "palette": "abjuration",
+  "subject": "a hand pouring a small silver-blue light on a limp arm with fading dark spots, mending"
+ },
+ "levitate": {
+  "palette": "transmutation",
+  "subject": "a figure floating cross-legged above the ground with a swirl of emerald glow below"
+ },
+ "light": {
+  "palette": "radiant",
+  "subject": "a glowing golden orb of light at the end of a sword hilt, softly illuminating a dark room"
+ },
+ "lightning-bolt": {
+  "palette": "lightning",
+  "subject": "a long straight line of violet-white lightning striking across the frame, crackling energy"
+ },
+ "locate-animals-or-plants": {
+  "palette": "divination",
+  "subject": "a hand reading teal glowing pawprints and leaf trails across a forest floor"
+ },
+ "locate-creature": {
+  "palette": "divination",
+  "subject": "a glowing teal compass pointing at a faint footprint trail through a dark landscape"
+ },
+ "locate-object": {
+  "palette": "divination",
+  "subject": "a glowing teal arrow of light pointing across a room toward a hidden key"
+ },
+ "longstrider": {
+  "palette": "transmutation",
+  "subject": "a pair of sturdy traveller's boots striding with emerald speed trails across a road"
+ },
+ "mage-armor": {
+  "palette": "abjuration",
+  "subject": "a shimmering silver-blue translucent armour of magic around an unarmoured robed figure"
+ },
+ "mage-hand": {
+  "palette": "conjuration",
+  "subject": "a floating spectral hand made of amber glowing light holding a key"
+ },
+ "magic-circle": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue summoning circle with runes and a bright border on the ground, holding a shadow inside"
+ },
+ "magic-jar": {
+  "palette": "necrotic",
+  "subject": "a glowing green soul spark escaping into a gem jar while a body slumps, a sickly flicker"
+ },
+ "magic-missile": {
+  "palette": "force",
+  "subject": "three glowing pale blue darts of force streaking toward a target in a curved trail"
+ },
+ "magic-mouth": {
+  "palette": "illusion",
+  "subject": "a stone with a glowing purple mouth speaking out of the wall, eerie voice waves"
+ },
+ "magic-weapon": {
+  "palette": "transmutation",
+  "subject": "a sword with glowing emerald runs along the blade and a magical sparkle"
+ },
+ "magnificent-mansion": {
+  "palette": "conjuration",
+  "subject": "a glowing amber doorway opening into a lavish hallway with a grand banquet table inside a mansion"
+ },
+ "major-image": {
+  "palette": "illusion",
+  "subject": "a magnificent shimmering purple illusion of a dragon swooping above a field, slightly translucent"
+ },
+ "mass-cure-wounds": {
+  "palette": "healing",
+  "subject": "a wave of gold-green light washing over a group of wounded warriors healing them"
+ },
+ "mass-heal": {
+  "palette": "healing",
+  "subject": "an enormous burst of radiant gold-green light washing over a battlefield healing dozens"
+ },
+ "mass-healing-word": {
+  "palette": "healing",
+  "subject": "several golden-green light words flying to wounded allies simultaneously like glowing doves"
+ },
+ "mass-suggestion": {
+  "palette": "enchantment",
+  "subject": "a crowd of silhouettes with pink glowing thought bubbles all pointing the same way"
+ },
+ "maze": {
+  "palette": "conjuration",
+  "subject": "a figure trapped inside a glowing amber labyrinth within a dimensional rift, impossible walls"
+ },
+ "meld-into-stone": {
+  "palette": "transmutation",
+  "subject": "a figure sinking into a stone wall, only a hand and a cloak edge visible, emerald glimmer"
+ },
+ "mending": {
+  "palette": "transmutation",
+  "subject": "a broken cup whose cracks glow with emerald light, closing together"
+ },
+ "message": {
+  "palette": "transmutation",
+  "subject": "a whisper trailing from a cupped hand along a wire of emerald light to a distant ear"
+ },
+ "meteor-swarm": {
+  "palette": "fire",
+  "subject": "four giant flaming meteors falling from the sky with fiery trails toward the ground, enormous explosion glow"
+ },
+ "mind-blank": {
+  "palette": "abjuration",
+  "subject": "a silver-blue shielded head with shimmering swirling ripples reflecting away psychic thoughts"
+ },
+ "mind-spike": {
+  "palette": "psychic",
+  "subject": "a magenta glowing spike piercing a head in a flash of psychic energy, a tracking glow"
+ },
+ "minor-illusion": {
+  "palette": "illusion",
+  "subject": "a purple shimmering hand-sized illusion of a barrel and a faint sound, slightly translucent"
+ },
+ "mirage-arcane": {
+  "palette": "illusion",
+  "subject": "a vast desert terrain dissolving into a lush cityscape in a purple heat shimmer"
+ },
+ "mirror-image": {
+  "palette": "illusion",
+  "subject": "three or four identical translucent copies of a robed figure surrounding the caster, purple shimmer"
+ },
+ "mislead": {
+  "palette": "illusion",
+  "subject": "an invisible figure sneaking away while a glowing double stands visible, purple shimmer"
+ },
+ "misty-step": {
+  "palette": "conjuration",
+  "subject": "a figure dissolving in a swirl of silver amber mist and re-forming a short distance away"
+ },
+ "modify-memory": {
+  "palette": "enchantment",
+  "subject": "a hand in a glowing pink mist rewriting a memory bubble inside a head, wisps shifting"
+ },
+ "moonbeam": {
+  "palette": "radiant",
+  "subject": "a silver-white column of moonlight shining down from a crescent moon, shimmering motes"
+ },
+ "move-earth": {
+  "palette": "transmutation",
+  "subject": "a hand shifting a hillside and a river course of soil like rippling cloth, emerald glow"
+ },
+ "nondetection": {
+  "palette": "abjuration",
+  "subject": "a silver-blue veil cloaking a figure from a probing teal eye scrying, blocked"
+ },
+ "passwall": {
+  "palette": "transmutation",
+  "subject": "a figure stepping through a wall that opens a temporary passage with a glowing emerald rim"
+ },
+ "pass-without-trace": {
+  "palette": "abjuration",
+  "subject": "a hooded figure leaving no footprints in snow with a silver-blue veil of silence around him"
+ },
+ "phantasmal-force": {
+  "palette": "psychic",
+  "subject": "a magenta phantom of a nightmare hanging in the air before a fearful face, imagination made real"
+ },
+ "phantasmal-killer": {
+  "palette": "psychic",
+  "subject": "a ghastly nightmare creature of magenta-black shadow with claws looming over a terrified figure"
+ },
+ "phantom-steed": {
+  "palette": "illusion",
+  "subject": "a translucent spectral horse of shimmering purple mist galloping, mane flowing"
+ },
+ "planar-ally": {
+  "palette": "conjuration",
+  "subject": "a radiant otherworldly being stepping through a glowing amber portal to answer a plea"
+ },
+ "planar-binding": {
+  "palette": "abjuration",
+  "subject": "a bound outsider chained inside a glowing silver-blue circle with runic chains"
+ },
+ "plane-shift": {
+  "palette": "conjuration",
+  "subject": "a tuning-fork-shaped glowing amber gate opening onto another colourful plane"
+ },
+ "plant-growth": {
+  "palette": "transmutation",
+  "subject": "a field of crops and wild vines growing explosively with flowers blooming, emerald glow"
+ },
+ "poison-spray": {
+  "palette": "poison",
+  "subject": "a puff of purple-green poison gas from a palm with skull wisps, toxic cloud"
+ },
+ "polymorph": {
+  "palette": "transmutation",
+  "subject": "a humanoid figure transforming midway into a large beast in a swirl of emerald light"
+ },
+ "power-word-heal": {
+  "palette": "enchantment",
+  "subject": "a powerful golden-pink word of power rune healing and restoring a fallen figure to full vitality"
+ },
+ "power-word-kill": {
+  "palette": "psychic",
+  "subject": "a stark glowing magenta death rune above a collapsing figure, a skull-like silhouette"
+ },
+ "power-word-stun": {
+  "palette": "enchantment",
+  "subject": "a booming pink glowing rune word striking a figure to freeze in stunned shock, spinning stars"
+ },
+ "prayer-of-healing": {
+  "palette": "abjuration",
+  "subject": "a group in prayer with glowing silver-blue light descending and mending their wounds"
+ },
+ "prestidigitation": {
+  "palette": "transmutation",
+  "subject": "small trick effects, a spark, a puff of smoke, a floating coin and a color-changing handkerchief, emerald sparkle"
+ },
+ "prismatic-spray": {
+  "palette": "force",
+  "subject": "a fan of seven vivid rainbow rays of colour spraying from a palm in a cone"
+ },
+ "prismatic-wall": {
+  "palette": "abjuration",
+  "subject": "a shimmering vertical wall made of seven glowing layers of rainbow colours, translucent"
+ },
+ "private-sanctum": {
+  "palette": "abjuration",
+  "subject": "a sealed room dome with silver-blue protective runes, closed curtains and a muted outside"
+ },
+ "produce-flame": {
+  "palette": "fire",
+  "subject": "a small flame flickering above an open palm, orange glow lighting the hand"
+ },
+ "programmed-illusion": {
+  "palette": "illusion",
+  "subject": "a shimmering purple illusion of a ghostly figure appearing at a doorway, replaying a scene"
+ },
+ "project-image": {
+  "palette": "illusion",
+  "subject": "a robed figure's ghostly double speaking in a far-off hall, purple shimmer"
+ },
+ "protection-from-energy": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue shield deflecting a rainbow of fire, frost, lightning and acid bolts"
+ },
+ "protection-from-evil-and-good": {
+  "palette": "abjuration",
+  "subject": "a silver-blue circle of light around a figure repelling shadowy fiend, undead and fey silhouettes"
+ },
+ "protection-from-poison": {
+  "palette": "abjuration",
+  "subject": "a goblet and a hand surrounded by silver-blue sparkles pushing back green poison mist"
+ },
+ "purify-food-and-drink": {
+  "palette": "transmutation",
+  "subject": "spoiled food and murky water cleansed in a bright emerald light, rot fading away"
+ },
+ "raise-dead": {
+  "palette": "necrotic",
+  "subject": "a grave opening with a restored pale hand rising into golden-green light, a returning breath"
+ },
+ "ray-of-enfeeblement": {
+  "palette": "necrotic",
+  "subject": "a sickly black-green ray draining a warrior's weapon and arm into limp weakness"
+ },
+ "ray-of-frost": {
+  "palette": "cold",
+  "subject": "a thin beam of icy blue frost from a fingertip with frozen sparkling crystals along its path"
+ },
+ "regenerate": {
+  "palette": "transmutation",
+  "subject": "a severed hand regrowing from stump with emerald glowing tendrils, closing wounds"
+ },
+ "ray-of-sickness": {
+  "palette": "poison",
+  "subject": "a green-purple ray hitting a figure who turns pale and ill, toxic mist and queasy swirl"
+ },
+ "reincarnate": {
+  "palette": "necrotic",
+  "subject": "a swirl of leaves and ashes forming a new body from a pile of bones, green-gold glow"
+ },
+ "remove-curse": {
+  "palette": "abjuration",
+  "subject": "a cursed ring cracking and dissolving as dark chains fall off a hand, silver-blue light"
+ },
+ "resilient-sphere": {
+  "palette": "abjuration",
+  "subject": "a shimmering transparent silver-blue sphere enclosing a figure, rolling slowly"
+ },
+ "resistance": {
+  "palette": "abjuration",
+  "subject": "a tiny protective silver-blue rune glowing on a shoulder, a faint shielding aura"
+ },
+ "resurrection": {
+  "palette": "necrotic",
+  "subject": "a radiant column of sunlight lifting a fallen hero back to life, lilies and gold-green light"
+ },
+ "reverse-gravity": {
+  "palette": "transmutation",
+  "subject": "a landscape with objects and creatures falling upward toward the sky, emerald swirl"
+ },
+ "rope-trick": {
+  "palette": "transmutation",
+  "subject": "a rope rising straight into the air to an open shimmering extradimensional doorway, emerald glow"
+ },
+ "sacred-flame": {
+  "palette": "radiant",
+  "subject": "a column of white-gold fire descending from above onto a target, holy sparks"
+ },
+ "sanctuary": {
+  "palette": "abjuration",
+  "subject": "a calm silver-blue ward dome around a kneeling figure and enemies lowering their weapons"
+ },
+ "scorching-ray": {
+  "palette": "fire",
+  "subject": "three streaking rays of searing orange-red fire flying from a hand toward a target"
+ },
+ "scrying": {
+  "palette": "divination",
+  "subject": "a reflective bowl of water showing a distant figure's face, teal glow ripples"
+ },
+ "searing-smite": {
+  "palette": "fire",
+  "subject": "a weapon strike igniting a target with an orange flame burst, fire on the blade"
+ },
+ "secret-chest": {
+  "palette": "conjuration",
+  "subject": "a small ornate chest sparkling with amber glow, half-fading into another dimension"
+ },
+ "see-invisibility": {
+  "palette": "divination",
+  "subject": "a pair of eyes with teal glowing irises outlining a hidden invisible figure"
+ },
+ "seeming": {
+  "palette": "illusion",
+  "subject": "a group of figures wearing different faces of shimmering illusions, purple mask-like shimmer"
+ },
+ "sending": {
+  "palette": "divination",
+  "subject": "a whispering message of glowing teal letters travelling to a far-off listener's ear"
+ },
+ "sequester": {
+  "palette": "transmutation",
+  "subject": "a sealed chest vanishing, with a ghostly translucent outline, emerald time-frozen glow"
+ },
+ "shapechange": {
+  "palette": "transmutation",
+  "subject": "a figure morphing through multiple creature forms, dragon, eagle and bear overlapped, emerald swirl"
+ },
+ "shatter": {
+  "palette": "thunder",
+  "subject": "a vase and a stone wall exploding into pieces in a deep blue shockwave of ringing sound"
+ },
+ "shield": {
+  "palette": "abjuration",
+  "subject": "a flash of silver-blue shimmering shield of force appearing before a caster, an arrow bouncing off"
+ },
+ "shield-of-faith": {
+  "palette": "abjuration",
+  "subject": "a shimmering silver-blue halo shield glowing around a kneeling figure's head"
+ },
+ "shillelagh": {
+  "palette": "transmutation",
+  "subject": "a gnarled wooden club glowing with emerald light, leaves around it, a druid's grip"
+ },
+ "shining-smite": {
+  "palette": "radiant",
+  "subject": "a weapon strike releasing brilliant golden light that outlines the target, radiant glow"
+ },
+ "shocking-grasp": {
+  "palette": "lightning",
+  "subject": "a hand crackling with violet lightning arcs reaching to touch a metal door handle"
+ },
+ "silence": {
+  "palette": "thunder",
+  "subject": "a sphere of eerie quiet with sound waves vanishing into a deep blue-black bubble, muffled"
+ },
+ "silent-image": {
+  "palette": "illusion",
+  "subject": "a faint purple illusion of a ghostly tree in a clearing, wavering shimmer"
+ },
+ "simulacrum": {
+  "palette": "illusion",
+  "subject": "an ice-and-snow statue sculpted to resemble a mage, coming to life with purple shimmer"
+ },
+ "sleep": {
+  "palette": "enchantment",
+  "subject": "a sleepy yawning figure under drifting pink sparkles and dreamy clouds, drooping eyelids"
+ },
+ "sleet-storm": {
+  "palette": "conjuration",
+  "subject": "swirling sleet and ice storm over a hillside, slippery frozen ground, amber-blue glow"
+ },
+ "slow": {
+  "palette": "transmutation",
+  "subject": "a figure moving as if stuck in honey with stretched blurry slow motion trails and drifting bubbles"
+ },
+ "sorcerous-burst": {
+  "palette": "force",
+  "subject": "a raw burst of crackling pale blue arcane energy from a sorcerer's palm, wild sparks"
+ },
+ "spare-the-dying": {
+  "palette": "necrotic",
+  "subject": "a hand touching a dying warrior's chest with a pale green-white flicker stabilizing the breath"
+ },
+ "speak-with-animals": {
+  "palette": "divination",
+  "subject": "a hand and a fox, owl and deer gathered around a speaker with glowing teal speech swirls"
+ },
+ "speak-with-dead": {
+  "palette": "necrotic",
+  "subject": "a skull with glowing green eyes whispering to a robed figure, ghostly breath, candlelit gloom"
+ },
+ "speak-with-plants": {
+  "palette": "transmutation",
+  "subject": "a hand touching a talking tree with a face in the bark and leaves whispering, emerald glow"
+ },
+ "spider-climb": {
+  "palette": "transmutation",
+  "subject": "a hand and boot sticking to a ceiling with glowing emerald spider threads, upside-down climber"
+ },
+ "spike-growth": {
+  "palette": "transmutation",
+  "subject": "a field of sharp thorny spikes erupting from grass and rock, hidden danger, emerald glow"
+ },
+ "spirit-guardians": {
+  "palette": "radiant",
+  "subject": "ghostly glowing angelic spirits circling around a caster with golden and dark green light"
+ },
+ "spiritual-weapon": {
+  "palette": "force",
+  "subject": "a floating translucent pale blue spectral hammer swinging by itself"
+ },
+ "starry-wisp": {
+  "palette": "radiant",
+  "subject": "a small bright golden star-like wisp trailing sparkling dust streaking toward a target"
+ },
+ "stinking-cloud": {
+  "palette": "poison",
+  "subject": "a billowing yellow-green stinking cloud with nauseated figures and a skull in the vapour"
+ },
+ "stone-shape": {
+  "palette": "transmutation",
+  "subject": "a hand sculpting a stone wall like clay into a doorway shape, emerald glow"
+ },
+ "stoneskin": {
+  "palette": "transmutation",
+  "subject": "a warrior with skin like gray granite and glimmering cracks, blades glancing off, emerald light"
+ },
+ "storm-of-vengeance": {
+  "palette": "thunder",
+  "subject": "a massive churning black storm cloud with acid rain, hail and lightning descending, deep blue thunder"
+ },
+ "suggestion": {
+  "palette": "enchantment",
+  "subject": "a whispering lips beside a head with a pink glowing thought bubble planted in, gentle swirl"
+ },
+ "summon-dragon": {
+  "palette": "conjuration",
+  "subject": "a small spectral dragon with glowing amber scales emerging from a swirling circle, wings spread"
+ },
+ "sunbeam": {
+  "palette": "radiant",
+  "subject": "a blinding beam of golden sunlight blasting in a straight line from a palm, radiant glare"
+ },
+ "sunburst": {
+  "palette": "radiant",
+  "subject": "a massive explosion of golden-white sunlight bursting in a sphere, rays and a blinding flash"
+ },
+ "symbol": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue rune sigil engraved on a stone floor releasing a burst of power"
+ },
+ "telekinesis": {
+  "palette": "force",
+  "subject": "a hand lifting a heavy stone and a figure in the air with pale blue force lines"
+ },
+ "telepathic-bond": {
+  "palette": "divination",
+  "subject": "two heads connected by a glowing teal thread linking their minds with flowing thought symbols"
+ },
+ "teleport": {
+  "palette": "conjuration",
+  "subject": "a group of figures vanishing in a bright flash of amber light and swirling rune ring"
+ },
+ "teleportation-circle": {
+  "palette": "conjuration",
+  "subject": "a glowing amber teleport circle on the floor with a pillar of light rising from it"
+ },
+ "thaumaturgy": {
+  "palette": "transmutation",
+  "subject": "a booming voice effect, flickering candle flames, trembling ground and glowing eyes, emerald sparks"
+ },
+ "thunderwave": {
+  "palette": "thunder",
+  "subject": "a deep blue concussive shockwave blasting from a palm as a cube-shaped wall of sound toppling targets"
+ },
+ "time-stop": {
+  "palette": "transmutation",
+  "subject": "a frozen clock with a figure moving while a shattered hourglass and floating motionless sparks hover, emerald glow"
+ },
+ "tiny-hut": {
+  "palette": "radiant",
+  "subject": "a small glowing dome hut of pale gold light with a campfire inside, protective and cosy"
+ },
+ "tongues": {
+  "palette": "divination",
+  "subject": "a mouth speaking with glowing teal letters of different alphabets flowing out and merging"
+ },
+ "transport-via-plants": {
+  "palette": "conjuration",
+  "subject": "a giant tree with a glowing amber doorway in its trunk and a figure stepping into it"
+ },
+ "tree-stride": {
+  "palette": "conjuration",
+  "subject": "a figure stepping into an oak trunk and emerging from another tree, amber glimmer"
+ },
+ "true-polymorph": {
+  "palette": "transmutation",
+  "subject": "a figure transforming into a mighty dragon in a vast spiralling emerald swirl of energy"
+ },
+ "true-resurrection": {
+  "palette": "necrotic",
+  "subject": "a radiant vast golden-green burst of light bringing a hero back from dust and ash"
+ },
+ "true-seeing": {
+  "palette": "divination",
+  "subject": "a large glowing teal eye seeing through illusions, shimmering masks falling away"
+ },
+ "true-strike": {
+  "palette": "radiant",
+  "subject": "a sword and a glowing golden target eye aligned, gleaming certainty of a perfect strike"
+ },
+ "tsunami": {
+  "palette": "cold",
+  "subject": "a gigantic wall of water towering over a coast with white foam and a tiny city, deep blue"
+ },
+ "unseen-servant": {
+  "palette": "conjuration",
+  "subject": "a floating broom, a tray and a candlestick moving by themselves with faint amber sparkle"
+ },
+ "vampiric-touch": {
+  "palette": "necrotic",
+  "subject": "a hand of sickly green-black glow draining life force that flows as red wisps into the caster"
+ },
+ "vicious-mockery": {
+  "palette": "psychic",
+  "subject": "a sneering mouth with sharp magenta insult words flying and stabbing into a flinching ear"
+ },
+ "vitriolic-sphere": {
+  "palette": "acid",
+  "subject": "a glowing bubbling green acid orb bursting with sizzling droplets and smoke"
+ },
+ "wall-of-fire": {
+  "palette": "fire",
+  "subject": "a long curving wall of raging fire with bright orange flames and smoke rising"
+ },
+ "wall-of-force": {
+  "palette": "force",
+  "subject": "a clear shimmering pale blue invisible wall with a faint grid of force and a hand pressed against it"
+ },
+ "wall-of-ice": {
+  "palette": "cold",
+  "subject": "a towering translucent wall of crystalline blue ice with frost and glints of light"
+ },
+ "wall-of-stone": {
+  "palette": "earth",
+  "subject": "a massive grey rough stone wall erupting from the ground with crumbs of dust"
+ },
+ "wall-of-thorns": {
+  "palette": "nature",
+  "subject": "a dense wall of thick thorny brambles with long spikes and tiny red berries"
+ },
+ "warding-bond": {
+  "palette": "abjuration",
+  "subject": "a glowing silver-blue thread linking two hands with a shared protective ring"
+ },
+ "water-breathing": {
+  "palette": "transmutation",
+  "subject": "a figure breathing underwater with a stream of bubbles and gills glowing emerald"
+ },
+ "water-walk": {
+  "palette": "transmutation",
+  "subject": "a boot stepping on the surface of a lake with emerald ripples and a glimmering sheen"
+ },
+ "web": {
+  "palette": "conjuration",
+  "subject": "a thick sticky spider web across a cavern ceiling trapping a figure, amber sheen"
+ },
+ "weird": {
+  "palette": "psychic",
+  "subject": "a terrifying nightmare face of swirling magenta shadows engulfing a crowd of screaming silhouettes"
+ },
+ "wind-walk": {
+  "palette": "transmutation",
+  "subject": "a group of figures turning into windy clouds and streaking across the sky, emerald swirl"
+ },
+ "wind-wall": {
+  "palette": "force",
+  "subject": "a vertical wall of roaring wind and flying debris with a stream of arrows being blown aside"
+ },
+ "wish": {
+  "palette": "conjuration",
+  "subject": "a golden shooting star above an open palm, a glowing amber wish orb and reality bending around it"
+ },
+ "word-of-recall": {
+  "palette": "conjuration",
+  "subject": "a handful of runes and a silver coin leading a group of figures back to a sanctuary in a flash, amber light"
+ },
+ "zone-of-truth": {
+  "palette": "enchantment",
+  "subject": "a pink glowing circle of runes on the ground with a figure unable to speak lies, a gentle sphere"
+ },
+ "revivify": {
+  "palette": "necrotic",
+  "subject": "a glowing diamond crumbling into dust above a freshly fallen warrior whose chest rises with golden-green light, a returning breath"
+ }
+}

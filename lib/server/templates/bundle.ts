@@ -97,6 +97,7 @@ export const BundleSchema = z.object({
     friendlyFire: z.boolean(),
   }),
   rules: z.unknown(),
+  credits: z.string().max(10_000).nullable().optional(),
   ...perTable(() => rowSchema),
   classes: rowSchema.default([]),
 }) as unknown as z.ZodType<Bundle>;
@@ -105,6 +106,7 @@ export type Bundle = {
   formatVersion: 1;
   settings: { maxLevel: number; xpMultiplier: number; allowPlayerEdit: boolean; friendlyFire: boolean };
   rules: unknown;
+  credits?: string | null;
 } & Record<BundleTable, Array<Record<string, unknown> & { id: string }>>;
 
 export function emptyBundle(): Bundle {

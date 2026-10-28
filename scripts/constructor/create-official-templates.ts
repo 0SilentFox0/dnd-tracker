@@ -36,20 +36,20 @@ async function main() {
   const existingHomm5 = await prisma.campaign.findFirst({ where: { createdFromId: source.id, ...official }, select: { id: true } });
 
   if (existingHomm5) {
-    console.info(`HOMM5: вже існує (${existingHomm5.id})`);
+    console.info(`Heroes: вже існує (${existingHomm5.id})`);
   } else {
     const bundle = await exportCampaign(prisma, source.id);
 
     const result = await createCampaignFromBundle({
       userId: owner ?? source.dmUserId,
-      name: "HOMM5",
-      description: "Герої Меча і Магії V: раси, юніти, заклинання, артефакти і музика",
+      name: "Heroes",
+      description: "Six fantasy factions: races, units, spells, artifacts, skills and music",
       bundle,
       createdFromId: source.id,
       ...official,
     });
 
-    report("HOMM5", result, bundle);
+    report("Heroes", result, bundle);
   }
 
   const existingEmpty = await prisma.campaign.findFirst({ where: { name: "Порожня", ...official }, select: { id: true } });

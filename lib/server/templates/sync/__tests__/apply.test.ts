@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { clone, createFakeSyncDb } from "./fake-sync-db";
 import { id, visible as visibleItems } from "./helpers";
@@ -7,6 +7,7 @@ import { id, visible as visibleItems } from "./helpers";
 import { SYNC_SCOPES } from "@/lib/constants/source-sync";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
+import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
@@ -330,5 +331,38 @@ describe("source access", () => {
 describe("sync scopes", () => {
   it("SYNC_SCOPES = bundle tables + rules + settings", () => {
     expect([...SYNC_SCOPES].sort()).toEqual([...BUNDLE_TABLES.map((t) => t.key), "rules", "settings"].sort());
+  });
+});
+
+describe("credits", () => {
+  it("exportCampaign віддає credits; null, коли їх немає", async () => {
+    expect((await exportCampaign(f.db, SRC)).credits).toBeNull();
+
+    f.patchCampaign(SRC, { credits: "SRD 5.2" });
+
+    expect((await exportCampaign(f.db, SRC)).credits).toBe("SRD 5.2");
+  });
+
+  it("застосування змін копіює credits джерела", async () => {
+    f.patchCampaign(SRC, { credits: "SRD 5.2" });
+    f.patchRow("spell", SPELL, { name: "Bless II" });
+
+    const [item] = await visible();
+
+    await applySourceChanges(f.db, TGT, { apply: [ref(item)], ignore: [] });
+
+    expect(f.campaign(TGT).credits).toBe("SRD 5.2");
+  });
+
+  it("без змін credits, правил і налаштувань кампанія не оновлюється", async () => {
+    f.patchRow("spell", SPELL, { name: "Bless II" });
+
+    const [item] = await visible();
+
+    const update = vi.spyOn((f.db as unknown as { campaign: { update: (a: unknown) => Promise<unknown> } }).campaign, "update");
+
+    await applySourceChanges(f.db, TGT, { apply: [ref(item)], ignore: [] });
+
+    expect(update).not.toHaveBeenCalled();
   });
 });

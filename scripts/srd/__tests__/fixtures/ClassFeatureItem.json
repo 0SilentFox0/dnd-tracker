@@ -1,0 +1,5892 @@
+[
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_ability-score-improvement-12"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_ability-score-improvement-16"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_ability-score-improvement-4"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_ability-score-improvement-8"
+  },
+  {
+    "fields": {
+      "column_value": "D6",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_1"
+  },
+  {
+    "fields": {
+      "column_value": "D10",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_10"
+  },
+  {
+    "fields": {
+      "column_value": "D10",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_11"
+  },
+  {
+    "fields": {
+      "column_value": "D10",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_12"
+  },
+  {
+    "fields": {
+      "column_value": "D10",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_13"
+  },
+  {
+    "fields": {
+      "column_value": "D10",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_14"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_15"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_16"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_17"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_18"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_19"
+  },
+  {
+    "fields": {
+      "column_value": "D6",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_2"
+  },
+  {
+    "fields": {
+      "column_value": "D12",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_20"
+  },
+  {
+    "fields": {
+      "column_value": "D6",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_3"
+  },
+  {
+    "fields": {
+      "column_value": "D6",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_4"
+  },
+  {
+    "fields": {
+      "column_value": "D8",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_5"
+  },
+  {
+    "fields": {
+      "column_value": "D8",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_6"
+  },
+  {
+    "fields": {
+      "column_value": "D8",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_7"
+  },
+  {
+    "fields": {
+      "column_value": "D8",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_8"
+  },
+  {
+    "fields": {
+      "column_value": "D8",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_bardic-die"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-die_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_bardic-inspiration"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_bardic-inspiration"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_1"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_10"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_11"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_12"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_13"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_14"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_15"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_16"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_17"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_18"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_2"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_3"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_4"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_cantrips_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_countercharm"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_countercharm"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_epic-boon"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_epic-boon"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_expertise"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_expertise"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_font-of-inspiration"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_font-of-inspiration"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_jack-of-all-trades"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_jack-of-all-trades"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_magical-secrets"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_magical-secrets"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_1"
+  },
+  {
+    "fields": {
+      "column_value": "15",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_10"
+  },
+  {
+    "fields": {
+      "column_value": "16",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_11"
+  },
+  {
+    "fields": {
+      "column_value": "16",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_12"
+  },
+  {
+    "fields": {
+      "column_value": "17",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_13"
+  },
+  {
+    "fields": {
+      "column_value": "17",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_14"
+  },
+  {
+    "fields": {
+      "column_value": "18",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_15"
+  },
+  {
+    "fields": {
+      "column_value": "18",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_16"
+  },
+  {
+    "fields": {
+      "column_value": "19",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_17"
+  },
+  {
+    "fields": {
+      "column_value": "20",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_18"
+  },
+  {
+    "fields": {
+      "column_value": "21",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_19"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_2"
+  },
+  {
+    "fields": {
+      "column_value": "22",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_20"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_3"
+  },
+  {
+    "fields": {
+      "column_value": "7",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_4"
+  },
+  {
+    "fields": {
+      "column_value": "9",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_5"
+  },
+  {
+    "fields": {
+      "column_value": "10",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_6"
+  },
+  {
+    "fields": {
+      "column_value": "11",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_7"
+  },
+  {
+    "fields": {
+      "column_value": "12",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_8"
+  },
+  {
+    "fields": {
+      "column_value": "14",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_prepared-spells_9"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_1"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_10"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_11"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_12"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_13"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_14"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_15"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_16"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_17"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_18"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_19"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_2"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_20"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_3"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_4"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_5"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_6"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_7"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_8"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_proficiency-bonus_9"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_1"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_10"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_11"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_12"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_13"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_14"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_15"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_16"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_17"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_18"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_2"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_20"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_3"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_4"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_5"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_6"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_7"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_8"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-1_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_3"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_4"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-2_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-3_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_7"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-4_9"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_10"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_11"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_12"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_13"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_14"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_15"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_16"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_bard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-5_9"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_11"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_12"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_13"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_14"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_18"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-6_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_13"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_14"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-7_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_19"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-8_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_bard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-9_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-9_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_bard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-9_19"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spell-slots-level-9_20"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_bard_spellcasting"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_spellcasting_1"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_bard_superior-inspiration"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_superior-inspiration"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_bard_words-of-creation"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_bard_words-of-creation"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_12"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_14"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_16"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_4"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_6"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_fighter_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_ability-score-improvement_8"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": "one use",
+      "level": 2,
+      "parent": "srd-2024_fighter_action-surge"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_action-surge-one-use"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": "two uses",
+      "level": 17,
+      "parent": "srd-2024_fighter_action-surge"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_action-surge-two-uses"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_fighter_epic-boon"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_epic-boon"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_fighter_extra-attack"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_extra-attack"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_fighter-subclass"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_fighter-subclass"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_fighting-style"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_fighting-style"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": "one use",
+      "level": 9,
+      "parent": "srd-2024_fighter_indomitable"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_indomitable-one-use"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": "three uses",
+      "level": 17,
+      "parent": "srd-2024_fighter_indomitable"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_indomitable-three-uses"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": "two uses",
+      "level": 13,
+      "parent": "srd-2024_fighter_indomitable"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_indomitable-two-uses"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_1"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_10"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_11"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_12"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_13"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_14"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_15"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_16"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_17"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_18"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_19"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_2"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_20"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_3"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_4"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_5"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_6"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_7"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_8"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_fighter_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_proficiency-bonus_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_second-wind"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_1"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_10"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_11"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_12"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_13"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_14"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_15"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_16"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_17"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_18"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_2"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_3"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_4"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_fighter_second-wind-uses"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_second-wind-uses_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_fighter_studied-attacks"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_studied-attacks"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_fighter_tactical-master"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_tactical-master"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_fighter_tactical-mind"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_tactical-mind"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_fighter_tactical-shift"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_tactical-shift"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_fighter_two-extra-attacks"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_two-extra-attacks"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_fighter_three-extra-attacks"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_three-extra-attacks"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_weapon-mastery"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_1"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_10"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_11"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_12"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_13"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_14"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_15"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_16"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_17"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_18"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_2"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_20"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_3"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_4"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_5"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_6"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_7"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_8"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery-count_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_fighter_weapon-mastery-count"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_weapon-mastery_count-1"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_monk_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_ability-score-improvement_12"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_monk_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_ability-score-improvement_16"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_ability-score-improvement_4"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_monk_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_ability-score-improvement_8"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_monk_acrobatic-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_acrobatic-movement"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_monk_body-and-mind"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_body-and-mind"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_stunning-strike"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_deflect-attacks"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_monk_deflect-energy"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_deflect-energy"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_monk_disciplined-survivor"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_disciplined-survivor"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_empowered-strikes"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_empowered-strikes"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_monk_epic-boon"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_epic-boon"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_monk_evasion"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_evasion"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_extra-attack"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_extra-attack"
+  },
+  {
+    "fields": {
+      "column_value": "10",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_10"
+  },
+  {
+    "fields": {
+      "column_value": "11",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_11"
+  },
+  {
+    "fields": {
+      "column_value": "12",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_12"
+  },
+  {
+    "fields": {
+      "column_value": "13",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_13"
+  },
+  {
+    "fields": {
+      "column_value": "14",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_14"
+  },
+  {
+    "fields": {
+      "column_value": "15",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_15"
+  },
+  {
+    "fields": {
+      "column_value": "16",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_16"
+  },
+  {
+    "fields": {
+      "column_value": "17",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_17"
+  },
+  {
+    "fields": {
+      "column_value": "18",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_18"
+  },
+  {
+    "fields": {
+      "column_value": "19",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_2"
+  },
+  {
+    "fields": {
+      "column_value": "20",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_20"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_3"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_4"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_5"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_6"
+  },
+  {
+    "fields": {
+      "column_value": "7",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_7"
+  },
+  {
+    "fields": {
+      "column_value": "8",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_8"
+  },
+  {
+    "fields": {
+      "column_value": "9",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_monk_focus-points"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_focus-points_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_heightened-focus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_heightened-focus"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_monk_martial-arts"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts"
+  },
+  {
+    "fields": {
+      "column_value": "1d6",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_1"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_10"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_11"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_12"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_13"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_14"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_15"
+  },
+  {
+    "fields": {
+      "column_value": "1d10",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_16"
+  },
+  {
+    "fields": {
+      "column_value": "1d12",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_17"
+  },
+  {
+    "fields": {
+      "column_value": "1d12",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_18"
+  },
+  {
+    "fields": {
+      "column_value": "1d12",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_19"
+  },
+  {
+    "fields": {
+      "column_value": "1d6",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_2"
+  },
+  {
+    "fields": {
+      "column_value": "1d12",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_20"
+  },
+  {
+    "fields": {
+      "column_value": "1d6",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_3"
+  },
+  {
+    "fields": {
+      "column_value": "1d6",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_4"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_5"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_6"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_7"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_8"
+  },
+  {
+    "fields": {
+      "column_value": "1d8",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_monk_martial-arts-dice"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_martial-arts-dice_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_monk-subclass"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_monk-subclass"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_monks-focus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_monks-focus"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_monk_perfect-focus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_perfect-focus"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_1"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_10"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_11"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_12"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_13"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_14"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_15"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_16"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_17"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_18"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_19"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_2"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_20"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_3"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_4"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_5"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_6"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_7"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_8"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_monk_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_proficiency-bonus_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_self-restoration"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_self-restoration"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_slow-fall"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_slow-fall"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_stunning-strike"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_stunning-strike"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_monk_superior-defense"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_superior-defense"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_monk_unarmored-defense"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-defense"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement"
+  },
+  {
+    "fields": {
+      "column_value": "+20 ft.",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_10"
+  },
+  {
+    "fields": {
+      "column_value": "+20 ft.",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_11"
+  },
+  {
+    "fields": {
+      "column_value": "+20 ft.",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_12"
+  },
+  {
+    "fields": {
+      "column_value": "+20 ft.",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_13"
+  },
+  {
+    "fields": {
+      "column_value": "+25 ft.",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_14"
+  },
+  {
+    "fields": {
+      "column_value": "+25 ft.",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_15"
+  },
+  {
+    "fields": {
+      "column_value": "+25 ft.",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_16"
+  },
+  {
+    "fields": {
+      "column_value": "+25 ft.",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_17"
+  },
+  {
+    "fields": {
+      "column_value": "+30 ft.",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_18"
+  },
+  {
+    "fields": {
+      "column_value": "+30 ft.",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_19"
+  },
+  {
+    "fields": {
+      "column_value": "+10 ft.",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_2"
+  },
+  {
+    "fields": {
+      "column_value": "+30 ft.",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_20"
+  },
+  {
+    "fields": {
+      "column_value": "+10 ft.",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_3"
+  },
+  {
+    "fields": {
+      "column_value": "+10 ft.",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_4"
+  },
+  {
+    "fields": {
+      "column_value": "+10 ft.",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_5"
+  },
+  {
+    "fields": {
+      "column_value": "+15 ft.",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_6"
+  },
+  {
+    "fields": {
+      "column_value": "+15 ft.",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_7"
+  },
+  {
+    "fields": {
+      "column_value": "+15 ft.",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_8"
+  },
+  {
+    "fields": {
+      "column_value": "+15 ft.",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_monk_unarmored-movement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_unarmored-movement_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_monk_uncanny-metabolism"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_uncanny-metabolism"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_monk_warrior-of-the-open-hand_fleet-step"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_warrior-of-the-open-hand_fleet-step"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_monk_warrior-of-the-open-hand_open-hand-technique"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_warrior-of-the-open-hand_open-hand-technique"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_monk_warrior-of-the-open-hand_quivering-palm"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_warrior-of-the-open-hand_quivering-palm"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_monk_warrior-of-the-open-hand_wholeness-of-body"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_monk_warrior-of-the-open-hand_wholeness-of-body"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_arcane-recovery"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_ability-score-improvement_12"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_ability-score-improvement_16"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_ability-score-improvement_4"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_ability-score-improvement"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_ability-score-improvement_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_1"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_10"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_11"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_12"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_13"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_14"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_15"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_16"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_17"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_18"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_2"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_20"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_3"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_4"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_5"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_6"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_7"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_8"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_cantrips"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_cantrips_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_epic-boon"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_epic-boon"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_evoker_empowered-evocation"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_evoker_empowered-evocation"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_evoker_evocation-savant"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_evoker_evocation-savant"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_evoker_overchannel"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_evoker_overchannel"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_evoker_potent-cantrip"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_evoker_potent-cantrip"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_evoker_sculpt-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_evoker_sculpt-spells"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_memorize-spell"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_memorize-spell"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_1"
+  },
+  {
+    "fields": {
+      "column_value": "15",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_10"
+  },
+  {
+    "fields": {
+      "column_value": "16",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_11"
+  },
+  {
+    "fields": {
+      "column_value": "16",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_12"
+  },
+  {
+    "fields": {
+      "column_value": "17",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_13"
+  },
+  {
+    "fields": {
+      "column_value": "18",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_14"
+  },
+  {
+    "fields": {
+      "column_value": "19",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_15"
+  },
+  {
+    "fields": {
+      "column_value": "21",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_16"
+  },
+  {
+    "fields": {
+      "column_value": "22",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_17"
+  },
+  {
+    "fields": {
+      "column_value": "23",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_18"
+  },
+  {
+    "fields": {
+      "column_value": "24",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_19"
+  },
+  {
+    "fields": {
+      "column_value": "5",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_2"
+  },
+  {
+    "fields": {
+      "column_value": "25",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_20"
+  },
+  {
+    "fields": {
+      "column_value": "6",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_3"
+  },
+  {
+    "fields": {
+      "column_value": "7",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_4"
+  },
+  {
+    "fields": {
+      "column_value": "9",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_5"
+  },
+  {
+    "fields": {
+      "column_value": "10",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_6"
+  },
+  {
+    "fields": {
+      "column_value": "11",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_7"
+  },
+  {
+    "fields": {
+      "column_value": "12",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_8"
+  },
+  {
+    "fields": {
+      "column_value": "14",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_prepared-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_prepared-spells_9"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_1"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_10"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_11"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_12"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_13"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_14"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_15"
+  },
+  {
+    "fields": {
+      "column_value": "+5",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_16"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_17"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_18"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_19"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_2"
+  },
+  {
+    "fields": {
+      "column_value": "+6",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_20"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_3"
+  },
+  {
+    "fields": {
+      "column_value": "+2",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_4"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_5"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_6"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_7"
+  },
+  {
+    "fields": {
+      "column_value": "+3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_8"
+  },
+  {
+    "fields": {
+      "column_value": "+4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_proficiency-bonus"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_proficiency-bonus_9"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_ritual-adept"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_ritual-adept"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_wizard_scholar"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_scholar"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_signature-spells"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_signature-spells"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_spell-mastery"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-mastery"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_1"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_10"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_11"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_12"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_13"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_14"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_15"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_16"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_17"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_18"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 2,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_2"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_20"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_3"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_4"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_5"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_6"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_7"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_8"
+  },
+  {
+    "fields": {
+      "column_value": "4",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_slots-1st"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-1_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_3"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 4,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_4"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_slots-2nd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-2_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_20"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 5,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_5"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_6"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_7"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_slots-3rd"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-3_9"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_10"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_11"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_12"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_13"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_14"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_15"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_16"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_7"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 8,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_8"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_slots-4th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-4_9"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_10"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_11"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_12"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_13"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_14"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_15"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_16"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_17"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_18"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_19"
+  },
+  {
+    "fields": {
+      "column_value": "3",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 9,
+      "parent": "srd-2024_wizard_slots-5th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-5_9"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 11,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_11"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 12,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_12"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_13"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_14"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_18"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-6th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-6_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 13,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_13"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_14"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_19"
+  },
+  {
+    "fields": {
+      "column_value": "2",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-7th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-7_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_15"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 16,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_16"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_19"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-8th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-8_20"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 17,
+      "parent": "srd-2024_wizard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-9_17"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_wizard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-9_18"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 19,
+      "parent": "srd-2024_wizard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-9_19"
+  },
+  {
+    "fields": {
+      "column_value": "1",
+      "detail": null,
+      "level": 20,
+      "parent": "srd-2024_wizard_slots-9th"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spell-slots-level-9_20"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 1,
+      "parent": "srd-2024_wizard_spellcasting"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_spellcasting"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_wizard_wizard-subclass"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_wizard_wizard-subclass"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_champion_improved-critical"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_improved-critical"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_fighter_champion_remarkable-athlete"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_remarkable-athlete"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 7,
+      "parent": "srd-2024_fighter_champion_additional-fighting-style"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_additional-fighting-style"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 10,
+      "parent": "srd-2024_fighter_champion_heroic-warrior"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_heroic-warrior"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 15,
+      "parent": "srd-2024_fighter_champion_superior-critical"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_superior-critical"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 18,
+      "parent": "srd-2024_fighter_champion_survivor"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_fighter_champion_survivor"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_college-of-lore_bonus-proficiencies"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_college-of-lore_bonus-proficiencies"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 3,
+      "parent": "srd-2024_college-of-lore_cutting-words"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_college-of-lore_cutting-words"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 6,
+      "parent": "srd-2024_college-of-lore_magical-discoveries"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_college-of-lore_magical-discoveries"
+  },
+  {
+    "fields": {
+      "column_value": null,
+      "detail": null,
+      "level": 14,
+      "parent": "srd-2024_college-of-lore_peerless-skill"
+    },
+    "model": "api_v2.classfeatureitem",
+    "pk": "srd-2024_college-of-lore_peerless-skill"
+  }
+]

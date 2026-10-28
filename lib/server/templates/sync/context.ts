@@ -22,7 +22,7 @@ const asState = (v: unknown): SyncState => {
 export async function loadSyncContext(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SyncContext> {
   const campaign = await db.campaign.findUnique({
     where: { id: campaignId },
-    select: { createdFromId: true, rules: true, ...SETTINGS_SELECT },
+    select: { createdFromId: true, rules: true, credits: true, ...SETTINGS_SELECT },
   });
 
   if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
@@ -56,7 +56,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
     campaignId,
     source,
     sourceBundle,
-    target: { settings: settingsOf(campaign), rules: campaign.rules, rows },
+    target: { settings: settingsOf(campaign), rules: campaign.rules, credits: campaign.credits ?? null, rows },
     baseline,
     ignored,
     syncedAt: state?.syncedAt ?? null,

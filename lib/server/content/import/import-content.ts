@@ -1,5 +1,5 @@
 import "server-only";
-import { invalidateReference } from "@/lib/cache/tags";
+import { invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { ContentImportInput } from "@/lib/schemas/content-import";
@@ -18,9 +18,12 @@ import type { ImportField, ImportIssue, ImportKind, ImportMode, ImportRecord, Im
 export interface ImportDeps {
   resource(kind: ImportKind): AnyContentResource;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
+  invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
 }
 
-const DEFAULT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames };
+export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames };
+
+export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined };
 
 type NameIndex = { byName: Map<string, string[]>; ids: Set<string> };
 
@@ -154,7 +157,7 @@ function report(dryRun: boolean, results: ImportRowResult[]): ImportReport {
   return { dryRun, results, counts };
 }
 
-export async function importContent(actor: Actor, kind: ImportKind, input: ContentImportInput, deps: ImportDeps = DEFAULT_DEPS): Promise<ImportReport> {
+export async function importContent(actor: Actor, kind: ImportKind, input: ContentImportInput, deps: ImportDeps = DEFAULT_IMPORT_DEPS): Promise<ImportReport> {
   assertCan(actor, NEED.write);
 
   const spec = IMPORT_SPECS[kind];
@@ -192,7 +195,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
     }
   }
 
-  if (wrote && resource.invalidates.length > 0) invalidateReference(resource.invalidates, actor.campaignId);
+  if (wrote && resource.invalidates.length > 0) (deps.invalidate ?? invalidateReference)(resource.invalidates, actor.campaignId);
 
   return report(false, results);
 }

@@ -80,3 +80,21 @@ describe("CampaignSettingsDialog: оновлення з шаблону", () => {
     expect(body).not.toHaveProperty("isTemplate");
   });
 });
+
+describe("CampaignSettingsDialog: джерела й ліцензії", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it("показує credits лише для читання, коли вони є", () => {
+    renderDialog({ credits: "SRD 5.2 by Wizards of the Coast LLC" });
+    expect(screen.getByText("Джерела й ліцензії")).toBeInTheDocument();
+    expect(screen.getByText("SRD 5.2 by Wizards of the Coast LLC")).toBeInTheDocument();
+  });
+
+  it("без credits розділу немає", () => {
+    renderDialog();
+    expect(screen.queryByText("Джерела й ліцензії")).toBeNull();
+  });
+});

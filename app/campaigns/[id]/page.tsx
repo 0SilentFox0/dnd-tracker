@@ -3,6 +3,7 @@ import { BookOpen, Gem, GitBranch, GraduationCap, Images, Info, Music, Scale, Sc
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
+import { CreditsText } from "@/components/campaigns/templates/CreditsText";
 import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncButton";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
@@ -76,6 +77,7 @@ export default async function CampaignDetailPage({
         <HudPanel className="flex flex-wrap items-start gap-2 border-hud-gold/60">
           <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
           <p className="min-w-0 flex-1 text-sm text-hud-bone">Це шаблон: зміни потрапляють у нові кампанії, створені з нього; наявні кампанії не змінюються.</p>
+          {campaign.credits && <CreditsText credits={campaign.credits} className="basis-full" />}
           {isDM && campaign.createdFromId && (
             <div className="ml-auto">
               <SourceSyncButton campaignId={id} isTemplate />
@@ -105,7 +107,7 @@ export default async function CampaignDetailPage({
                     allowPlayerEdit: campaign.allowPlayerEdit,
                     status: campaign.status,
                   }}
-                  meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate }}
+                  meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate, credits: campaign.credits ?? null }}
                 />
               )}
             </div>

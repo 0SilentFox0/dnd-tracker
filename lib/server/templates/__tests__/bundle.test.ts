@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BUNDLE_TABLES, BundleSchema } from "../bundle";
+import { type Bundle, BUNDLE_TABLES, BundleSchema } from "../bundle";
 
 const empty = {
   formatVersion: 1,
@@ -90,5 +90,15 @@ describe("старі бандли без таблиці classes", () => {
     const parsed = BundleSchema.parse(old);
 
     expect(parsed.classes).toEqual([]);
+  });
+});
+
+describe("BundleSchema credits", () => {
+  it("accepts a string, null or no field; rejects a number", () => {
+    expect(BundleSchema.safeParse({ ...empty, credits: "CC-BY" }).success).toBe(true);
+    expect(BundleSchema.safeParse({ ...empty, credits: null }).success).toBe(true);
+    expect(BundleSchema.safeParse(empty).success).toBe(true);
+    expect(BundleSchema.safeParse({ ...empty, credits: 5 }).success).toBe(false);
+    expect((BundleSchema.parse({ ...empty, credits: "CC-BY" }) as Bundle).credits).toBe("CC-BY");
   });
 });

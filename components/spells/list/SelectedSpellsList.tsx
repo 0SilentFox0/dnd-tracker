@@ -1,10 +1,9 @@
 "use client";
 
 import { X } from "lucide-react";
-import { Sparkles } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudCard } from "@/components/hud/page";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { spellLevelName } from "@/lib/constants/spells";
@@ -37,22 +36,7 @@ export function SelectedSpellsList({
             <HudCard key={spell.id} className="relative">
               <div className="flex items-start gap-3">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
-                  {spell.icon ? (
-                    <OptimizedImage
-                      src={spell.icon}
-                      alt={spell.name}
-                      width={64}
-                      height={64}
-                      className="w-full h-full object-cover"
-                      fallback={
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Sparkles className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      }
-                    />
-                  ) : (
-                    <Sparkles className="h-6 w-6 text-muted-foreground" />
-                  )}
+                  <SpellIcon spell={spell} size={64} className="w-full h-full object-cover" iconClassName="h-6 w-6" />
                 </div>
 
                 {/* Інформація про заклинання */}

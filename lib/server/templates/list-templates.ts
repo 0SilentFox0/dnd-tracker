@@ -9,10 +9,11 @@ const select = {
   name: true,
   description: true,
   visibility: true,
+  credits: true,
   _count: { select: Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, true])) },
 } as const;
 
-const toCard = ({ _count, ...t }: { id: string; name: string; description: string | null; visibility: string; _count: Record<string, number> }): TemplateCard => ({
+const toCard = ({ _count, ...t }: { id: string; name: string; description: string | null; visibility: string; credits: string | null; _count: Record<string, number> }): TemplateCard => ({
   ...t,
   counts: _count,
 });

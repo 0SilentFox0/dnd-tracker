@@ -5,7 +5,7 @@ import { parseRules } from "@/lib/utils/rules/schema";
 export async function exportCampaign(db: TemplateDb, campaignId: string): Promise<Bundle> {
   const campaign = await db.campaign.findUnique({
     where: { id: campaignId },
-    select: { ...SETTINGS_SELECT, rules: true },
+    select: { ...SETTINGS_SELECT, rules: true, credits: true },
   });
 
   if (!campaign) throw new BundleInvalidError("Кампанію не знайдено");
@@ -14,6 +14,7 @@ export async function exportCampaign(db: TemplateDb, campaignId: string): Promis
     formatVersion: 1,
     settings: settingsOf(campaign),
     rules: parseRules(campaign.rules),
+    credits: campaign.credits ?? null,
   };
 
   for (const t of BUNDLE_TABLES) {

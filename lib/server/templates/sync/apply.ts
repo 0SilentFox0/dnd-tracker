@@ -185,7 +185,11 @@ async function writeCampaign(db: SyncDb, ctx: SyncContext, selected: SyncItem[])
 
   const settings = selected.some((i) => i.scope === "settings");
 
-  if (rules.length === 0 && !settings) return;
+  const credits = ctx.sourceBundle.credits ?? null;
+
+  const creditsChanged = credits !== (ctx.target.credits ?? null);
+
+  if (rules.length === 0 && !settings && !creditsChanged) return;
 
   const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
 
@@ -195,7 +199,11 @@ async function writeCampaign(db: SyncDb, ctx: SyncContext, selected: SyncItem[])
 
   await db.campaign.update({
     where: { id: ctx.campaignId },
-    data: { ...(rules.length > 0 && { rules: next as Prisma.InputJsonObject }), ...(settings && settingsOf(ctx.sourceBundle.settings)) },
+    data: {
+      ...(rules.length > 0 && { rules: next as Prisma.InputJsonObject }),
+      ...(settings && settingsOf(ctx.sourceBundle.settings)),
+      ...(creditsChanged && { credits }),
+    },
   });
 }
 

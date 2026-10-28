@@ -197,6 +197,15 @@ describe("importContent", () => {
 
     expect(invalidateReference).not.toHaveBeenCalled();
   });
+
+  it("deps.invalidate замінює інвалідацію кешу Next (скрипти поза Next)", async () => {
+    const invalidate = vi.fn();
+
+    await importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, { resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [], invalidate });
+
+    expect(invalidate).toHaveBeenCalledWith(["units"], "c1");
+    expect(invalidateReference).not.toHaveBeenCalled();
+  });
 });
 
 const CREATE: Record<ImportKind, ZodType> = {

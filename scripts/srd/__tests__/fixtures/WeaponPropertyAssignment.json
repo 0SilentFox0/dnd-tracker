@@ -1,0 +1,182 @@
+[
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_topple-mastery",
+      "weapon": "srd-2024_battleaxe"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_battleaxe_topple"
+  },
+  {
+    "fields": {
+      "detail": "1d10",
+      "document": "srd-2024",
+      "property": "srd-2024_versatile-wp",
+      "weapon": "srd-2024_battleaxe"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_battleaxe_versatile"
+  },
+  {
+    "fields": {
+      "detail": "Range 25/100; Needle",
+      "document": "srd-2024",
+      "property": "srd-2024_ammunition-wp",
+      "weapon": "srd-2024_blowgun"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_blowgun_ammunition"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_loading-wp",
+      "weapon": "srd-2024_blowgun"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_blowgun_loading"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_vex-mastery",
+      "weapon": "srd-2024_blowgun"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_blowgun_vex"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_finesse-wp",
+      "weapon": "srd-2024_dagger"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_dagger_finesse"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_light-wp",
+      "weapon": "srd-2024_dagger"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_dagger_light"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_nick-mastery",
+      "weapon": "srd-2024_dagger"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_dagger_nick"
+  },
+  {
+    "fields": {
+      "detail": "Range 20/60",
+      "document": "srd-2024",
+      "property": "srd-2024_thrown-wp",
+      "weapon": "srd-2024_dagger"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_dagger_thrown"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_graze-mastery",
+      "weapon": "srd-2024_greatsword"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_greatsword_graze"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_heavy-wp",
+      "weapon": "srd-2024_greatsword"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_greatsword_heavy"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_two-handed-wp",
+      "weapon": "srd-2024_greatsword"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_greatsword_two-handed"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_slow-mastery",
+      "weapon": "srd-2024_javelin"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_javelin_slow"
+  },
+  {
+    "fields": {
+      "detail": "Range 30/120",
+      "document": "srd-2024",
+      "property": "srd-2024_thrown-wp",
+      "weapon": "srd-2024_javelin"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_javelin_thrown"
+  },
+  {
+    "fields": {
+      "detail": "Range 150/600; Arrow",
+      "document": "srd-2024",
+      "property": "srd-2024_ammunition-wp",
+      "weapon": "srd-2024_longbow"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_longbow_ammunition"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_heavy-wp",
+      "weapon": "srd-2024_longbow"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_longbow_heavy"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_slow-mastery",
+      "weapon": "srd-2024_longbow"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_longbow_slow"
+  },
+  {
+    "fields": {
+      "detail": null,
+      "document": "srd-2024",
+      "property": "srd-2024_two-handed-wp",
+      "weapon": "srd-2024_longbow"
+    },
+    "model": "api_v2.weaponpropertyassignment",
+    "pk": "srd-2024_longbow_two-handed"
+  }
+]

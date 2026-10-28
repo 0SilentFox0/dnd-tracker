@@ -1,0 +1,668 @@
+[
+  {
+    "slug": "srd-2024_battleaxe",
+    "name": "Battleaxe",
+    "description": "Martial Melee Weapon. Damage: 1d8 slashing. Properties: Versatile (1d10). Mastery: Topple. Cost: 10 GP. Weight: 4 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "versatile"
+      ],
+      "versatileDice": "1d10",
+      "properties": "Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_blowgun",
+    "name": "Blowgun",
+    "description": "Martial Ranged Weapon. Damage: 1 piercing. Properties: Ammunition (Range 25/100; Needle), Loading. Mastery: Vex. Cost: 10 GP. Weight: 1 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "25/100",
+      "traits": [
+        "ammunition"
+      ],
+      "properties": "Loading. Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_club",
+    "name": "Club",
+    "description": "Simple Melee Weapon. Damage: 1d4 bludgeoning. Properties: Light. Mastery: Slow. Cost: 0.1 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "traits": [
+        "light"
+      ],
+      "properties": "Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_dagger",
+    "name": "Dagger",
+    "description": "Simple Melee Weapon. Damage: 1d4 piercing. Properties: Finesse, Light, Thrown (Range 20/60). Mastery: Nick. Cost: 2 GP. Weight: 1 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "range": "20/60",
+      "traits": [
+        "light",
+        "finesse",
+        "thrown"
+      ],
+      "properties": "Mastery: Nick"
+    }
+  },
+  {
+    "slug": "srd-2024_dart",
+    "name": "Dart",
+    "description": "Simple Ranged Weapon. Damage: 1d4 piercing. Properties: Finesse, Thrown (Range 20/60). Mastery: Vex. Cost: 0.05 GP. Weight: 0.25 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "20/60",
+      "traits": [
+        "finesse",
+        "thrown"
+      ],
+      "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_flail",
+    "name": "Flail",
+    "description": "Martial Melee Weapon. Damage: 1d8 bludgeoning. Properties: —. Mastery: Sap. Cost: 10 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_glaive",
+    "name": "Glaive",
+    "description": "Martial Melee Weapon. Damage: 1d10 slashing. Properties: Heavy, Reach, Two-Handed. Mastery: Graze. Cost: 20 GP. Weight: 6 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded",
+        "reach"
+      ],
+      "properties": "Heavy. Mastery: Graze"
+    }
+  },
+  {
+    "slug": "srd-2024_greataxe",
+    "name": "Greataxe",
+    "description": "Martial Melee Weapon. Damage: 1d12 slashing. Properties: Heavy, Two-Handed. Mastery: Cleave. Cost: 30 GP. Weight: 7 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d12",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded"
+      ],
+      "properties": "Heavy. Mastery: Cleave"
+    }
+  },
+  {
+    "slug": "srd-2024_greatclub",
+    "name": "Greatclub",
+    "description": "Simple Melee Weapon. Damage: 1d8 bludgeoning. Properties: Two-Handed. Mastery: Push. Cost: 0.2 GP. Weight: 10 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded"
+      ],
+      "properties": "Mastery: Push"
+    }
+  },
+  {
+    "slug": "srd-2024_greatsword",
+    "name": "Greatsword",
+    "description": "Martial Melee Weapon. Damage: 2d6 slashing. Properties: Heavy, Two-Handed. Mastery: Graze. Cost: 50 GP. Weight: 6 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "2d6",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded"
+      ],
+      "properties": "Heavy. Mastery: Graze"
+    }
+  },
+  {
+    "slug": "srd-2024_halberd",
+    "name": "Halberd",
+    "description": "Martial Melee Weapon. Damage: 1d10 slashing. Properties: Heavy, Reach, Two-Handed. Mastery: Cleave. Cost: 20 GP. Weight: 6 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded",
+        "reach"
+      ],
+      "properties": "Heavy. Mastery: Cleave"
+    }
+  },
+  {
+    "slug": "srd-2024_hand-crossbow",
+    "name": "Hand Crossbow",
+    "description": "Martial Ranged Weapon. Damage: 1d6 piercing. Properties: Ammunition (Range 30/120; Bolt), Light, Loading. Mastery: Vex. Cost: 75 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "30/120",
+      "traits": [
+        "light",
+        "ammunition"
+      ],
+      "properties": "Loading. Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_handaxe",
+    "name": "Handaxe",
+    "description": "Simple Melee Weapon. Damage: 1d6 slashing. Properties: Light, Thrown (Range 20/60). Mastery: Vex. Cost: 5 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "range": "20/60",
+      "traits": [
+        "light",
+        "thrown"
+      ],
+      "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_heavy-crossbow",
+    "name": "Heavy Crossbow",
+    "description": "Martial Ranged Weapon. Damage: 1d10 piercing. Properties: Ammunition (Range 100/400; Bolt), Heavy, Loading, Two-Handed. Mastery: Push. Cost: 50 GP. Weight: 18 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "100/400",
+      "traits": [
+        "twoHanded",
+        "ammunition"
+      ],
+      "properties": "Heavy. Loading. Mastery: Push"
+    }
+  },
+  {
+    "slug": "srd-2024_javelin",
+    "name": "Javelin",
+    "description": "Simple Melee Weapon. Damage: 1d6 piercing. Properties: Thrown (Range 30/120). Mastery: Slow. Cost: 0.5 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "range": "30/120",
+      "traits": [
+        "thrown"
+      ],
+      "properties": "Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_lance",
+    "name": "Lance",
+    "description": "Martial Melee Weapon. Damage: 1d10 piercing. Properties: Heavy, Reach, Two-Handed (unless mounted). Mastery: Topple. Cost: 10 GP. Weight: 6 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded",
+        "reach"
+      ],
+      "properties": "Heavy. Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_light-crossbow",
+    "name": "Light Crossbow",
+    "description": "Simple Ranged Weapon. Damage: 1d8 piercing. Properties: Ammunition (Range 80/320; Bolt), Loading, Two-Handed. Mastery: Slow. Cost: 25 GP. Weight: 5 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "80/320",
+      "traits": [
+        "twoHanded",
+        "ammunition"
+      ],
+      "properties": "Loading. Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_light-hammer",
+    "name": "Light Hammer",
+    "description": "Simple Melee Weapon. Damage: 1d4 bludgeoning. Properties: Light, Thrown (Range 20/60). Mastery: Nick. Cost: 2 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "range": "20/60",
+      "traits": [
+        "light",
+        "thrown"
+      ],
+      "properties": "Mastery: Nick"
+    }
+  },
+  {
+    "slug": "srd-2024_longbow",
+    "name": "Longbow",
+    "description": "Martial Ranged Weapon. Damage: 1d8 piercing. Properties: Ammunition (Range 150/600; Arrow), Heavy, Two-Handed. Mastery: Slow. Cost: 50 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "150/600",
+      "traits": [
+        "twoHanded",
+        "ammunition"
+      ],
+      "properties": "Heavy. Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_longsword",
+    "name": "Longsword",
+    "description": "Martial Melee Weapon. Damage: 1d8 slashing. Properties: Versatile (1d10). Mastery: Sap. Cost: 15 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "versatile"
+      ],
+      "versatileDice": "1d10",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_mace",
+    "name": "Mace",
+    "description": "Simple Melee Weapon. Damage: 1d6 bludgeoning. Properties: —. Mastery: Sap. Cost: 5 GP. Weight: 4 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_maul",
+    "name": "Maul",
+    "description": "Martial Melee Weapon. Damage: 2d6 bludgeoning. Properties: Heavy, Two-Handed. Mastery: Topple. Cost: 10 GP. Weight: 10 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "2d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded"
+      ],
+      "properties": "Heavy. Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_morningstar",
+    "name": "Morningstar",
+    "description": "Martial Melee Weapon. Damage: 1d8 piercing. Properties: —. Mastery: Sap. Cost: 15 GP. Weight: 4 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_musket",
+    "name": "Musket",
+    "description": "Martial Ranged Weapon. Damage: 1d12 piercing. Properties: Ammunition (Range 40/120; Bullet), Loading, Two-Handed. Mastery: Slow. Cost: 500 GP. Weight: 10 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d12",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "40/120",
+      "traits": [
+        "twoHanded",
+        "ammunition"
+      ],
+      "properties": "Loading. Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_pike",
+    "name": "Pike",
+    "description": "Martial Melee Weapon. Damage: 1d10 piercing. Properties: Heavy, Reach, Two-Handed. Mastery: Push. Cost: 5 GP. Weight: 18 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "traits": [
+        "twoHanded",
+        "reach"
+      ],
+      "properties": "Heavy. Mastery: Push"
+    }
+  },
+  {
+    "slug": "srd-2024_pistol",
+    "name": "Pistol",
+    "description": "Martial Ranged Weapon. Damage: 1d10 piercing. Properties: Ammunition (Range 30/90; Bullet), Loading. Mastery: Vex. Cost: 250 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d10",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "30/90",
+      "traits": [
+        "ammunition"
+      ],
+      "properties": "Loading. Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_quarterstaff",
+    "name": "Quarterstaff",
+    "description": "Simple Melee Weapon. Damage: 1d6 bludgeoning. Properties: Versatile (1d8). Mastery: Topple. Cost: 0.2 GP. Weight: 4 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "traits": [
+        "versatile"
+      ],
+      "versatileDice": "1d8",
+      "properties": "Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_rapier",
+    "name": "Rapier",
+    "description": "Martial Melee Weapon. Damage: 1d8 piercing. Properties: Finesse. Mastery: Vex. Cost: 25 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "traits": [
+        "finesse"
+      ],
+      "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_scimitar",
+    "name": "Scimitar",
+    "description": "Martial Melee Weapon. Damage: 1d6 slashing. Properties: Finesse, Light. Mastery: Nick. Cost: 25 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "light",
+        "finesse"
+      ],
+      "properties": "Mastery: Nick"
+    }
+  },
+  {
+    "slug": "srd-2024_shield",
+    "name": "Shield",
+    "description": "Shield. Armor Class: +2. Cost: 10 GP. Weight: 6 lb.",
+    "rarity": "common",
+    "slot": "shield",
+    "abilities": [
+      {
+        "id": "shield-ac",
+        "name": "Shield",
+        "description": "+2 Armor Class while you hold the Shield.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_shortbow",
+    "name": "Shortbow",
+    "description": "Simple Ranged Weapon. Damage: 1d6 piercing. Properties: Ammunition (Range 80/320; Arrow), Two-Handed. Mastery: Vex. Cost: 25 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "piercing",
+      "attackType": "ranged",
+      "range": "80/320",
+      "traits": [
+        "twoHanded",
+        "ammunition"
+      ],
+      "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_shortsword",
+    "name": "Shortsword",
+    "description": "Martial Melee Weapon. Damage: 1d6 piercing. Properties: Finesse, Light. Mastery: Vex. Cost: 10 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "traits": [
+        "light",
+        "finesse"
+      ],
+      "properties": "Mastery: Vex"
+    }
+  },
+  {
+    "slug": "srd-2024_sickle",
+    "name": "Sickle",
+    "description": "Simple Melee Weapon. Damage: 1d4 slashing. Properties: Light. Mastery: Nick. Cost: 1 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "light"
+      ],
+      "properties": "Mastery: Nick"
+    }
+  },
+  {
+    "slug": "srd-2024_sling",
+    "name": "Sling",
+    "description": "Simple Ranged Weapon. Damage: 1d4 bludgeoning. Properties: Ammunition (Range 30/120; Bullet). Mastery: Slow. Cost: 0.1 GP. Weight: 0 lb.",
+    "rarity": "common",
+    "slot": "range_weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "bludgeoning",
+      "attackType": "ranged",
+      "range": "30/120",
+      "traits": [
+        "ammunition"
+      ],
+      "properties": "Mastery: Slow"
+    }
+  },
+  {
+    "slug": "srd-2024_spear",
+    "name": "Spear",
+    "description": "Simple Melee Weapon. Damage: 1d6 piercing. Properties: Thrown (Range 20/60), Versatile (1d8). Mastery: Sap. Cost: 1 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "range": "20/60",
+      "traits": [
+        "versatile",
+        "thrown"
+      ],
+      "versatileDice": "1d8",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_trident",
+    "name": "Trident",
+    "description": "Martial Melee Weapon. Damage: 1d8 piercing. Properties: Thrown (Range 20/60), Versatile (1d10). Mastery: Topple. Cost: 5 GP. Weight: 4 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "range": "20/60",
+      "traits": [
+        "versatile",
+        "thrown"
+      ],
+      "versatileDice": "1d10",
+      "properties": "Mastery: Topple"
+    }
+  },
+  {
+    "slug": "srd-2024_war-pick",
+    "name": "War Pick",
+    "description": "Martial Melee Weapon. Damage: 1d8 piercing. Properties: Versatile (1d10). Mastery: Sap. Cost: 5 GP. Weight: 2 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "melee",
+      "traits": [
+        "versatile"
+      ],
+      "versatileDice": "1d10",
+      "properties": "Mastery: Sap"
+    }
+  },
+  {
+    "slug": "srd-2024_warhammer",
+    "name": "Warhammer",
+    "description": "Martial Melee Weapon. Damage: 1d8 bludgeoning. Properties: Versatile (1d10). Mastery: Push. Cost: 15 GP. Weight: 5 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "bludgeoning",
+      "attackType": "melee",
+      "traits": [
+        "versatile"
+      ],
+      "versatileDice": "1d10",
+      "properties": "Mastery: Push"
+    }
+  },
+  {
+    "slug": "srd-2024_whip",
+    "name": "Whip",
+    "description": "Martial Melee Weapon. Damage: 1d4 slashing. Properties: Finesse, Reach. Mastery: Slow. Cost: 2 GP. Weight: 3 lb.",
+    "rarity": "common",
+    "slot": "weapon",
+    "weapon": {
+      "damageDice": "1d4",
+      "damageType": "slashing",
+      "attackType": "melee",
+      "traits": [
+        "finesse",
+        "reach"
+      ],
+      "properties": "Mastery: Slow"
+    }
+  }
+]

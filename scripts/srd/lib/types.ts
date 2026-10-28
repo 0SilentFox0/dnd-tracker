@@ -1,0 +1,96 @@
+import type { AbilityKey } from "@/lib/constants/abilities";
+import type { ClassCaster } from "@/lib/constants/classes";
+import type { DndSkill } from "@/lib/constants/skills";
+import type { SpellGroupIconKey } from "@/lib/constants/spell-groups";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { Ability, Effect } from "@/lib/utils/abilities/schema";
+import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+
+export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "units", "artifacts"] as const;
+
+export type SrdKind = (typeof SRD_KINDS)[number];
+
+export interface SpellGroupRow { slug: string; name: string; color: string; icon: SpellGroupIconKey }
+
+export interface SpellRow {
+  slug: string;
+  name: string;
+  level: number;
+  groupId: string;
+  description: string;
+  cost: "action" | "bonusAction";
+  dice: number;
+  dieSides?: 4 | 6 | 8 | 10 | 12;
+  concentration: boolean;
+  upcastDice?: number;
+  upcastTargets?: number;
+  addAbilityMod?: boolean;
+  targeting: SpellTargeting;
+  resolution: SpellResolution;
+  spellEffects: Effect[];
+}
+
+export interface RaceRow { slug: string; name: string; passiveAbility: { name: string; description: string }; abilities: Ability[] }
+
+export interface ClassFeatureGroup { level: number; abilities: Ability[] }
+
+export interface ClassRow {
+  slug: string;
+  name: string;
+  hitDie: 6 | 8 | 10 | 12;
+  savingThrows: AbilityKey[];
+  proficiencies: { armor: string[]; weapons: string[]; tools: string[] };
+  skillChoices: { count: number; from: DndSkill[] };
+  caster: ClassCaster;
+  spellcastingAbility: AbilityKey | null;
+  features: ClassFeatureGroup[];
+  subclassLevel: number;
+  subclasses: Array<{ id: string; name: string; features: ClassFeatureGroup[] }>;
+}
+
+export interface UnitAttackRow {
+  name: string;
+  type: "melee" | "ranged";
+  attackBonus: number;
+  damageType: string;
+  damageDice: string;
+  range?: string;
+  properties?: string;
+  traits?: WeaponTrait[];
+}
+
+export interface UnitRow {
+  slug: string;
+  name: string;
+  level: number;
+  cr: number;
+  armorClass: number;
+  maxHp: number;
+  speed: number;
+  initiative: number;
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  gridSize: 1 | 2 | 3;
+  multiattack: number;
+  legendaryActions: number;
+  legendaryResistances: number;
+  saveProficiencies: AbilityKey[];
+  attacks: UnitAttackRow[];
+  abilities: Ability[];
+}
+
+export interface ArtifactRow { slug: string; name: string; description: string; rarity: "common"; slot: "weapon" | "range_weapon" | "shield"; weapon?: WeaponStats; abilities?: Ability[] }
+
+export interface SrdData {
+  "spell-groups": SpellGroupRow[];
+  spells: SpellRow[];
+  races: RaceRow[];
+  classes: ClassRow[];
+  units: UnitRow[];
+  artifacts: ArtifactRow[];
+}
