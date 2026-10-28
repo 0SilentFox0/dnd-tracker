@@ -37,7 +37,7 @@ const fighter: GameClassData = {
   skillChoices: { count: 0, from: [] },
   caster: "none",
   spellcastingAbility: null,
-  features: [{ level: 5, abilities: [{ id: "ea", name: "Extra Attack", description: "x" }] }],
+  features: [{ level: 5, abilities: [{ id: "ea", name: "Extra Attack", description: "x" } as never] }],
   subclassLevel: 3,
   subclasses: [{ id: "champion", name: "Чемпіон", features: [] }],
 };
