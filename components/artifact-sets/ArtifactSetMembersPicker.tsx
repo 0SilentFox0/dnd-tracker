@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { artifactSlotLabel } from "@/lib/constants/artifacts";
+import type { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { ArtifactListItem } from "@/types/artifacts";
 
 export interface ArtifactSetMembersPickerProps {
@@ -16,16 +18,17 @@ export function ArtifactSetMembersPicker({
   selectedIds,
   onToggle,
 }: ArtifactSetMembersPickerProps) {
+  const t = useTranslations("artifacts");
+
   return (
-    <HudSection title="Артефакти в сеті" className="space-y-3">
+    <HudSection title={t("sets.members.title")} className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Бонус спрацьовує лише якщо персонаж екіпірував усі обрані тут артефакти.
-        Доступні лише артефакти без іншого сету або вже з цього сету.
+        {t("sets.members.hint")}
       </p>
       <div className="border rounded-md divide-y max-h-72 overflow-y-auto">
         {artifacts.length === 0 ? (
           <p className="p-4 text-sm text-muted-foreground">
-            Немає доступних артефактів. Створіть артефакти в розділі «Артефакти».
+            {t("sets.members.empty")}
           </p>
         ) : (
           artifacts.map((a) => (
@@ -41,7 +44,7 @@ export function ArtifactSetMembersPicker({
                 <span className="font-medium">{a.name}</span>
                 <span className="text-muted-foreground">
                   {" "}
-                  — {artifactSlotLabel(a.slot)}
+                  — {t(`slots.${a.slot as ArtifactSlot}`)}
                 </span>
               </span>
             </label>

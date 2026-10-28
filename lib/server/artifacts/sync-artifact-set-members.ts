@@ -1,4 +1,5 @@
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 export class SyncArtifactSetError extends Error {
@@ -24,9 +25,7 @@ export async function syncArtifactSetMembers(
     });
 
     if (count !== unique.length) {
-      throw new SyncArtifactSetError(
-        "Усі артефакти мають належати цій кампанії та існувати в базі.",
-      );
+      throw new SyncArtifactSetError(API_ERRORS.ARTIFACT_SET_MEMBERS_INVALID);
     }
   }
 

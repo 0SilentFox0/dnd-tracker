@@ -53,9 +53,9 @@ describe("картки артефактів", () => {
     );
 
     fireEvent.pointerDown(screen.getByRole("combobox"), { button: 0, ctrlKey: false, pointerType: "mouse" });
-    fireEvent.click(await screen.findByRole("option", { name: "Кільце" }));
+    fireEvent.click(await screen.findByRole("option", { name: "artifacts.slots.ring" }));
 
-    expect(await screen.findByText("Не вдалося змінити слот")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { hidden: true })).toHaveTextContent("Зброя");
+    expect(await screen.findByText("artifacts.card.slotChangeFailed")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { hidden: true })).toHaveTextContent("artifacts.slots.weapon");
   });
 });

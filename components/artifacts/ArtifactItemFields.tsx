@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
-import { ARMOR_CATEGORY_LABELS } from "@/components/artifacts/ArtifactArmorFields";
 import { ItemCastingFields } from "@/components/artifacts/ItemCastingFields";
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
@@ -22,21 +22,11 @@ type Property = NonNullable<ItemStats["property"]>;
 
 type AppliesTo = Property["appliesTo"];
 
-const KINDS: Array<{ value: ItemKind; label: string }> = [
-  { value: "weapon", label: "Зброя" },
-  { value: "armor", label: "Броня" },
-  { value: "shield", label: "Щит" },
-];
-
-const CATEGORIES = ARMOR_CATEGORIES.map((value) => ({ value, label: ARMOR_CATEGORY_LABELS[value] }));
+const KIND_VALUES: ItemKind[] = ["weapon", "armor", "shield"];
 
 const [MIN_CHARGES, MAX_CHARGES] = ITEM_LIMITS.charges;
 
-const REST_OPTIONS = [
-  { value: "long", label: "Довгий відпочинок" },
-  { value: "short", label: "Короткий відпочинок" },
-  { value: "none", label: "Не відновлюються" },
-];
+const REST_VALUES = ["long", "short", "none"] as const;
 
 const defaultKind = (slot: string): ItemKind => (slot === ArtifactSlot.ARMOR ? "armor" : slot === ArtifactSlot.SHIELD ? "shield" : "weapon");
 
@@ -57,6 +47,14 @@ function ChipRow({ options, selected, onToggle }: { options: Array<{ value: stri
 }
 
 function PropertyFields({ campaignId, name, property, onChange }: { campaignId: string; name: string; property: Property; onChange: (next: Property) => void }) {
+  const t = useTranslations("artifacts.item");
+
+  const tArmor = useTranslations("artifacts.armor");
+
+  const kinds = KIND_VALUES.map((value) => ({ value, label: t(`kinds.${value}`) }));
+
+  const categories = ARMOR_CATEGORIES.map((value) => ({ value, label: tArmor(`categories.${value}`) }));
+
   const artifacts = useArtifactsList(campaignId).data;
 
   const applies = property.appliesTo;
@@ -85,31 +83,31 @@ function PropertyFields({ campaignId, name, property, onChange }: { campaignId: 
   return (
     <div className="space-y-3 rounded-md border border-hud-line p-3">
       <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Застосовується до</span>
-        <ChipRow options={KINDS} selected={applies.kinds} onToggle={(v) => setApplies({ kinds: toggleItem(applies.kinds, v as ItemKind) })} />
+        <span className="text-xs text-muted-foreground">{t("appliesTo")}</span>
+        <ChipRow options={kinds} selected={applies.kinds} onToggle={(v) => setApplies({ kinds: toggleItem(applies.kinds, v as ItemKind) })} />
       </div>
       {applies.kinds.includes("weapon") && (
         <div className="space-y-1">
           <Label htmlFor="item-attack-type" className="text-xs text-muted-foreground">
-            Тип атаки
+            {t("attackType")}
           </Label>
           <select id="item-attack-type" className={`${HUD_SELECT_CLASS} w-full`} value={applies.attackType ?? ""} onChange={(e) => setApplies({ attackType: (e.target.value || undefined) as AppliesTo["attackType"] })}>
-            <option value="">будь-яка</option>
-            <option value="melee">ближня</option>
-            <option value="ranged">дальня</option>
+            <option value="">{t("attackAny")}</option>
+            <option value="melee">{t("attackMelee")}</option>
+            <option value="ranged">{t("attackRanged")}</option>
           </select>
         </div>
       )}
       {applies.kinds.includes("armor") && (
-        <ChipRow options={[...CATEGORIES]} selected={applies.armorCategories} onToggle={(v) => setApplies({ armorCategories: toggleItem(applies.armorCategories, v as (typeof CATEGORIES)[number]["value"]) })} />
+        <ChipRow options={categories} selected={applies.armorCategories} onToggle={(v) => setApplies({ armorCategories: toggleItem(applies.armorCategories, v as (typeof ARMOR_CATEGORIES)[number]) })} />
       )}
       <div className="space-y-1">
-        <span className="text-xs text-muted-foreground">Лише бази (порожньо — усі підхожі)</span>
+        <span className="text-xs text-muted-foreground">{t("bases")}</span>
         <ChipRow options={candidates.map((a) => ({ value: a.name, label: a.name }))} selected={applies.bases} onToggle={(v) => setApplies({ bases: toggleItem(applies.bases, v) })} />
       </div>
       <div className="space-y-1">
         <Label htmlFor="item-name-template" className="text-xs text-muted-foreground">
-          Шаблон назви ({"{base}"} — назва бази)
+          {t("nameTemplate", { token: "{base}" })}
         </Label>
         <Input
           id="item-name-template"
@@ -118,7 +116,7 @@ function PropertyFields({ campaignId, name, property, onChange }: { campaignId: 
           value={property.nameTemplate ?? ""}
           onChange={(e) => onChange({ ...property, nameTemplate: e.target.value.trim() ? e.target.value : undefined })}
         />
-        {first && <p className="text-xs text-hud-muted">Прев&apos;ю: {composedName(first, { name }, property.nameTemplate)}</p>}
+        {first && <p className="text-xs text-hud-muted">{t("preview", { name: composedName(first, { name }, property.nameTemplate) })}</p>}
       </div>
     </div>
   );
@@ -134,6 +132,8 @@ interface ArtifactItemFieldsProps {
 }
 
 export function ArtifactItemFields({ campaignId, name, slot, value, onChange, itemsEnabled }: ArtifactItemFieldsProps) {
+  const t = useTranslations("artifacts.item");
+
   const stats: ItemStats = value ?? {};
 
   const set = (patch: Partial<ItemStats>) => {
@@ -145,12 +145,12 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
   const charges = stats.charges;
 
   return (
-    <HudSection title="Предмет" className="space-y-3">
-      <SwitchField id="item-gear" label="Звичайне спорядження (неунікальне)" checked={stats.unique === false} onCheckedChange={(v) => set({ unique: v ? false : undefined })} />
+    <HudSection title={t("title")} className="space-y-3">
+      <SwitchField id="item-gear" label={t("gear")} checked={stats.unique === false} onCheckedChange={(v) => set({ unique: v ? false : undefined })} />
       {PROPERTY_SLOTS.has(slot) && (
         <SwitchField
           id="item-property"
-          label="Властивість (видається разом із базою)"
+          label={t("property")}
           checked={!!stats.property}
           onCheckedChange={(v) => set({ property: v ? { appliesTo: { kinds: [defaultKind(slot)] } } : undefined, ...(v && { consumable: undefined }) })}
         />
@@ -159,11 +159,11 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
       {itemsEnabled && (
         <>
           <ItemCastingFields campaignId={campaignId} value={stats} onChange={set} />
-          <SwitchField id="item-attunement" label="Потребує налаштування" checked={!!stats.attunement} onCheckedChange={(v) => set({ attunement: v || undefined })} />
+          <SwitchField id="item-attunement" label={t("attunement")} checked={!!stats.attunement} onCheckedChange={(v) => set({ attunement: v || undefined })} />
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="item-charges" className="text-xs text-muted-foreground">
-                Заряди
+                {t("charges")}
               </Label>
               <Input
                 id="item-charges"
@@ -180,7 +180,7 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
             </div>
             <div className="space-y-1">
               <Label htmlFor="item-charges-rest" className="text-xs text-muted-foreground">
-                Відновлення
+                {t("recharge")}
               </Label>
               <select
                 id="item-charges-rest"
@@ -189,9 +189,9 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
                 value={charges ? (charges.rest ?? "none") : "long"}
                 onChange={(e) => charges && set({ charges: { max: charges.max, rest: e.target.value === "none" ? null : (e.target.value as "short" | "long") } })}
               >
-                {REST_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                {REST_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`rest.${value}`)}
                   </option>
                 ))}
               </select>
@@ -199,7 +199,7 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
           </div>
           <SwitchField
             id="item-consumable"
-            label="Витратний (видається кількістю)"
+            label={t("consumable")}
             checked={!!stats.consumable}
             disabled={!!stats.property}
             onCheckedChange={(v) => set({ consumable: v || undefined, ...(v && charges && { charges: { max: charges.max, rest: null } }) })}

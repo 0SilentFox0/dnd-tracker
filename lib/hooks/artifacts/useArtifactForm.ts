@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useConfirm } from "@/lib/hooks/common";
@@ -21,6 +22,8 @@ interface UseArtifactFormOptions {
 }
 
 export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifactFormOptions) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const [fields, setFields] = useState<ArtifactFormState>({ ...initial, weapon: initial.weapon ?? {}, armor: initial.armor ?? null });
@@ -40,7 +43,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
     if (!abilities.valid) return;
 
     if (!fields.name.trim()) {
-      setError("Вкажіть назву");
+      setError(t("common.form.nameRequired"));
 
       return;
     }
@@ -51,7 +54,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
     try {
       await onSubmit(buildArtifactPayload(fields, mode));
     } catch (err) {
-      setError(abilitySaveError(err, mode === "edit" ? "Помилка оновлення" : "Помилка створення"));
+      setError(abilitySaveError(err, mode === "edit" ? t("common.form.updateFailed") : t("common.form.createFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -59,7 +62,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
 
   const remove = () =>
     onDelete
-      ? confirm({ title: "Ви впевнені, що хочете видалити цей артефакт?", confirmLabel: "Видалити", destructive: true, onConfirm: onDelete })
+      ? confirm({ title: t("artifacts.list.confirmDelete"), confirmLabel: t("common.actions.delete"), destructive: true, onConfirm: onDelete })
       : Promise.resolve(false);
 
   return {

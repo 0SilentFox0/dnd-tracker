@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 
 import { AbilitySummary } from "@/components/abilities";
@@ -17,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_SLOT_OPTIONS, artifactRarityLabel } from "@/lib/constants/artifacts";
+import { ARTIFACT_SLOT_VALUES, type ArtifactRarity, type ArtifactSlot } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 import type { ArtifactCardData } from "@/types/artifacts";
@@ -33,6 +34,8 @@ export function ArtifactCard({
   artifact,
   variant = "full",
 }: ArtifactCardProps) {
+  const t = useTranslations("artifacts");
+
   const notify = useNotify();
 
   const update = useUpdateArtifact(campaignId);
@@ -50,7 +53,7 @@ export function ArtifactCard({
       {
         onError: () => {
           setSlot(prev);
-          void notify("Не вдалося змінити слот");
+          void notify(t("card.slotChangeFailed"));
         },
       },
     );
@@ -69,12 +72,12 @@ export function ArtifactCard({
             : "h-9 w-full max-w-[180px]"
         }
       >
-        <SelectValue placeholder="Слот" />
+        <SelectValue placeholder={t("card.slotPlaceholder")} />
       </SelectTrigger>
       <SelectContent>
-        {ARTIFACT_SLOT_OPTIONS.map((opt) => (
-          <SelectItem key={opt.value} value={opt.value}>
-            {opt.label}
+        {ARTIFACT_SLOT_VALUES.map((value) => (
+          <SelectItem key={value} value={value}>
+            {t(`slots.${value as ArtifactSlot}`)}
           </SelectItem>
         ))}
       </SelectContent>
@@ -91,7 +94,7 @@ export function ArtifactCard({
               <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-hud-ink [overflow-wrap:anywhere]">{artifact.name}</p>
               <div className="-mr-1 -mt-1 flex shrink-0">
                 <Button variant="ghost" size="icon" className="size-7 text-hud-muted hover:text-hud-ink" asChild>
-                  <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label="Редагувати" title="Редагувати">
+                  <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label={t("card.edit")} title={t("card.edit")}>
                     <Pencil className="size-3.5" />
                   </Link>
                 </Button>
@@ -101,12 +104,12 @@ export function ArtifactCard({
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
-                  {artifactRarityLabel(artifact.rarity)}
+                  {t(`rarity.${artifact.rarity as ArtifactRarity}`)}
                 </Badge>
               )}
               {artifact.itemKind && (
                 <Badge variant="outline" className="text-xs">
-                  {artifact.itemKind === "property" ? "Властивість" : "Спорядження"}
+                  {artifact.itemKind === "property" ? t("card.kindProperty") : t("card.kindGear")}
                 </Badge>
               )}
               {slotSelect}
@@ -135,7 +138,7 @@ export function ArtifactCard({
           <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (
             <Badge variant="outline" className="shrink-0">
-              {artifactRarityLabel(artifact.rarity)}
+              {t(`rarity.${artifact.rarity as ArtifactRarity}`)}
             </Badge>
           )}
         </div>
@@ -143,12 +146,12 @@ export function ArtifactCard({
       <div className="flex flex-wrap items-center gap-2">
         {artifact.itemKind && (
           <Badge variant="outline" className="text-xs">
-            {artifact.itemKind === "property" ? "Властивість" : "Спорядження"}
+            {artifact.itemKind === "property" ? t("card.kindProperty") : t("card.kindGear")}
           </Badge>
         )}
         {slotSelect}
         {artifact.artifactSet && (
-          <Badge variant="outline">Сет: {artifact.artifactSet.name}</Badge>
+          <Badge variant="outline">{t("card.set", { name: artifact.artifactSet.name })}</Badge>
         )}
       </div>
       {artifact.description && (
@@ -161,7 +164,7 @@ export function ArtifactCard({
       )}
       <div className="flex gap-2">
         <Button variant="outline" size="sm" className="flex-1" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>Редагувати</Link>
+          <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>{t("card.edit")}</Link>
         </Button>
         <ArtifactDeleteButton
           campaignId={campaignId}
