@@ -5,8 +5,15 @@ import "@/components/landing/landing.css";
 import { HUD_SURFACE } from "@/components/hud";
 import type { LandingCopy } from "@/components/landing/copy/types";
 import { Brand } from "@/components/landing/parts";
+import { AiSection } from "@/components/landing/sections/AiSection";
 import { Combat } from "@/components/landing/sections/Combat";
+import { Faq } from "@/components/landing/sections/Faq";
+import { FinalCta } from "@/components/landing/sections/FinalCta";
 import { Hero } from "@/components/landing/sections/Hero";
+import { HowItWorks } from "@/components/landing/sections/HowItWorks";
+import { Mechanics } from "@/components/landing/sections/Mechanics";
+import { Players } from "@/components/landing/sections/Players";
+import { Prep } from "@/components/landing/sections/Prep";
 import { Problem } from "@/components/landing/sections/Problem";
 import { SessionSwitch } from "@/components/landing/SessionSwitch";
 import { cn } from "@/lib/utils";
@@ -93,6 +100,13 @@ export function LandingPage({ copy }: { copy: LandingCopy }) {
         <Hero copy={copy.hero} />
         <Problem copy={copy.problem} />
         <Combat copy={copy.combat} />
+        <Mechanics copy={copy.mechanics} />
+        <Prep copy={copy.prep} />
+        <AiSection copy={copy.ai} />
+        <Players copy={copy.players} />
+        <HowItWorks copy={copy.how} />
+        <Faq copy={copy.faq} />
+        <FinalCta copy={copy} />
       </main>
       <LandingFooter copy={copy.footer} />
     </div>

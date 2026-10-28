@@ -24,7 +24,7 @@ describe.each(LANDING_LOCALES)("LandingPage (%s)", (locale) => {
   });
 
   it("renders each section exactly once", () => {
-    for (const id of ["combat"]) {
+    for (const id of ["combat", "mechanics", "prep", "ai", "players", "how", "faq"]) {
       expect(html.match(new RegExp(`id="${id}"`, "g")), id).toHaveLength(1);
     }
   });
