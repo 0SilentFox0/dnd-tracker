@@ -31,7 +31,7 @@ describe("generic compendium adapters", () => {
 
     expect(row.kind).toBe("backgrounds");
     expect(row.body).toMatchObject({ skillProficiencies: ["arcana"], toolProficiencies: [], choices: [], originFeatId: null });
-    expect(row.body.equipmentText).toContain("50");
+    expect(row.body.equipmentText).toBe("5 см");
     expect(row.issues.some((i) => i.code === "MANUAL_CUSTOM_SKILL")).toBe(true);
     expect(row.notes).toContain("anyArtisansTool");
   });

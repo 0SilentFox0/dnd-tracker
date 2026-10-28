@@ -93,7 +93,17 @@ export function abilityChoices(raw: unknown, ctx: AdapterContext): JsonRecord[] 
 
   const weights = array(weighted.weights);
 
-  if (from.length === 3 && new Set(from).size === 3 && weights.length === 2 && [...weights].sort().join() === "1,2") return [{ id: "ability-scores", label: "Характеристики", kind: "abilityScore", count: 3, points: 3, abilities: from, maxPerAbility: 2, max: 20 }];
+  if (from.length >= 2 && new Set(from).size === from.length && weights.length === 2 && [...weights].sort().join() === "1,2") return [{ id: "ability-scores", label: "Характеристики", kind: "abilityScore", count: 3, points: 3, abilities: from, maxPerAbility: 2, max: 20 }];
+
+  const choose = object(row.choose);
+
+  const pool = array(choose.from).map((v) => ABILITIES[str(v)]).filter(Boolean);
+
+  const amount = num(choose.amount) ?? 1;
+
+  const count = num(choose.count) ?? 1;
+
+  if (Object.keys(row).length === 1 && pool.length > 0 && pool.length === array(choose.from).length && new Set(pool).size === pool.length && Number.isInteger(amount) && Number.isInteger(count) && amount >= 1 && count >= 1 && amount * count <= 4) return [{ id: "ability-scores", label: "Характеристики", kind: "abilityScore", count: 1, points: amount * count, abilities: pool, maxPerAbility: amount, max: 20 }];
 
   const fixed = Object.entries(row).filter(([k, v]) => ABILITIES[k] && typeof v === "number" && Number.isInteger(v) && v > 0 && v <= 3);
 

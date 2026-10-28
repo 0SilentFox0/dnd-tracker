@@ -163,6 +163,11 @@ function mergeIntoParent(ps: PlanState, entry: AdaptedEntry, parent: Resolved, b
   if (parentWrite) {
     parentWrite.body = merged;
 
+    if (entry.refs.length > 0) {
+      ps.writes.splice(ps.writes.indexOf(parentWrite), 1);
+      ps.writes.push(parentWrite);
+    }
+
     if (parentWrite.operation === "unchanged") parentWrite.operation = "update";
 
     return;

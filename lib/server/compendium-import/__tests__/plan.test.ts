@@ -85,6 +85,22 @@ describe("source aware atomic import plan", () => {
     expect(plan.writes.find((r) => !r.nested)?.body.choices).toMatchObject([{ lineage: true, options: [{ name: "Hill" }] }]);
   });
 
+  it("writes a race after the spells its subrace lineage grants", () => {
+    const spell = { name: "Spark", source: "T", level: 1, school: "V", entries: ["Synthetic"] };
+
+    const plan = buildImportPlan(adaptCompendium({ race: [{ name: "People", source: "T" }], spell: [spell], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", additionalSpells: [{ innate: { _: { daily: { "1e": ["spark|T"] } } } }] }] }), { campaignId: "c", existing: [] });
+
+    const order = plan.writes.filter((r) => !r.nested).map((r) => r.kind);
+
+    expect(plan.errors).toEqual([]);
+    expect(order.indexOf("spells")).toBeLessThan(order.indexOf("races"));
+
+    const option = (plan.writes.find((r) => r.kind === "races")?.body.choices as Array<{ options: Array<{ spells: Array<{ spellId: string; grant: unknown }> }> }>)[0].options[0];
+
+    expect(option.spells[0].spellId).toMatch(/^[a-z0-9-]+$/);
+    expect(option.spells[0].grant).toEqual({ uses: 1, rest: "long" });
+  });
+
   it("validates target schemas and never silently truncates long descriptions", () => {
     const plan = buildImportPlan(adaptCompendium({ feat: [{ name: "Large", source: "T", entries: ["x".repeat(8001)] }] }), { campaignId: "c", existing: [] });
 

@@ -1,4 +1,5 @@
-import { array, num, str } from "./shared";
+import { resistFlags } from "./character-traits";
+import { num } from "./shared";
 
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 
@@ -59,11 +60,11 @@ export function itemEffects(row: Record<string, unknown>, opts: { consumable: bo
   }
 
   if (row.resist !== undefined) {
-    const types = array(row.resist).map(str).filter(Boolean);
+    const resist = resistFlags(row.resist);
 
-    if (types.length === 0 || types.length !== array(row.resist).length) manual.push("resist");
+    if (!resist.complete) manual.push("resist");
 
-    for (const damageType of new Set(types)) effects.push({ kind: "flag", flag: "resistance", damageType: damageType.toLowerCase(), percent: 50 });
+    effects.push(...resist.effects);
   }
 
   const rounds = opts.consumable && effects.length > 0 ? durationRounds(opts.text) : undefined;
