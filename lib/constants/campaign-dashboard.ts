@@ -49,6 +49,10 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "rules", href: dm("rules"), icon: Scale, title: "Правила", subtitle: "Правила кампанії", keywords: ["налаштування"], group: "libraries" },
 ];
 
+export function dashboardHiddenKeys({ isDM, hasWorld, acquaintancesEnabled }: { isDM: boolean; hasWorld: boolean; acquaintancesEnabled: boolean }): string[] {
+  return [...(hasWorld ? [] : ["player-world"]), ...(isDM || acquaintancesEnabled ? [] : ["acquaintances"])];
+}
+
 const CAMPAIGN_LEVEL_KEYS = new Set(["info", "acquaintances"]);
 
 export interface DashboardContext {

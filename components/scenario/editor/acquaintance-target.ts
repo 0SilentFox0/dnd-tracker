@@ -4,6 +4,9 @@ export type AcquaintanceDialogTarget =
   | { mode: "create"; name: string; pageId: string; sectionId: string }
   | { mode: "edit"; id: string; pageId: string; sectionId: string };
 
+// hero chapters open via revealedAt and never get played=true, so an acquaintance made there would never reveal
+export const acquaintanceToolEnabled = (pageKind: string) => pageKind !== "hero";
+
 export function acquaintanceTargetFor(editor: Editor, where: { pageId: string; sectionId: string }): { target: AcquaintanceDialogTarget; range: { from: number; to: number } } {
   const { from, to } = editor.state.selection;
 

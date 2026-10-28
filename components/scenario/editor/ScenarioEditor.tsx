@@ -3,7 +3,7 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 
-import { type AcquaintanceDialogTarget,acquaintanceTargetFor } from "./acquaintance-target";
+import { type AcquaintanceDialogTarget, acquaintanceTargetFor, acquaintanceToolEnabled } from "./acquaintance-target";
 import { AcquaintanceDialog } from "./AcquaintanceDialog";
 import { OrderButtons } from "./OrderButtons";
 import { PagePropertiesDialog } from "./PagePropertiesDialog";
@@ -90,7 +90,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
   return (
     <>
       <div ref={toolbarRef} className="sb-toolbar-wrap">
-        <ScenarioToolbar editor={active ? editor : null} onAcquaintance={openAcquaintance} />
+        <ScenarioToolbar editor={active ? editor : null} onAcquaintance={acquaintanceToolEnabled(page.kind) ? openAcquaintance : undefined} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} onRetain={draft.retainLocal} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>

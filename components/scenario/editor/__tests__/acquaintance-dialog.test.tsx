@@ -26,7 +26,7 @@ vi.mock("@/components/scenario/CharacterSelect", () => ({
   ),
 }));
 
-import { acquaintanceTargetFor } from "@/components/scenario/editor/acquaintance-target";
+import { acquaintanceTargetFor, acquaintanceToolEnabled } from "@/components/scenario/editor/acquaintance-target";
 import { AcquaintanceDialog } from "@/components/scenario/editor/AcquaintanceDialog";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { AcquaintanceView } from "@/types/acquaintances";
@@ -159,5 +159,12 @@ describe("acquaintanceTargetFor", () => {
 
   it("opens edit when the cursor is on an acquaintance chip", () => {
     expect(acquaintanceTargetFor(fakeEditor({ isChip: true, id: "a9" }), { pageId: "p1", sectionId: "s1" }).target).toEqual({ mode: "edit", id: "a9", pageId: "p1", sectionId: "s1" });
+  });
+});
+
+describe("acquaintanceToolEnabled", () => {
+  it("is off on hero pages, whose sections are opened by revealedAt and never become played", () => {
+    expect(acquaintanceToolEnabled("hero")).toBe(false);
+    expect(acquaintanceToolEnabled("scene")).toBe(true);
   });
 });

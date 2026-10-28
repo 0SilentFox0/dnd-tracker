@@ -10,6 +10,7 @@ import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncBut
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { dashboardHiddenKeys } from "@/lib/constants/campaign-dashboard";
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
@@ -42,7 +43,7 @@ export default async function CampaignDetailPage({
     isTemplate ? null : readCampaignOnboarding(id, user.id, isDM).catch(() => null),
   ]);
 
-  const hiddenKeys = [...(player?.hasWorld ? [] : ["player-world"]), ...(campaign.acquaintancesEnabled ? [] : ["acquaintances"])];
+  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
 
   return (
     <HudPage>
