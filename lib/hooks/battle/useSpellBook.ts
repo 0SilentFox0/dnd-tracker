@@ -280,6 +280,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     setCastLevel: (castLevel: number) => {
       if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: buildSpellPick(order, caster, selected, map, { castLevel }) });
     },
+    setOption: (index: number) => dispatch({ type: "SET_OPTION", index }),
     setAttack: (id: string, v: number | undefined) => dispatch({ type: "SET_ATTACK", id, value: v }),
     prepareCast: async (cancel = false) => {
       if (!caster || !selected) return;

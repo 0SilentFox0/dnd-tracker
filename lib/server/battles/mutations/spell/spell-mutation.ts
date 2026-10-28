@@ -22,7 +22,7 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
-import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
+import { flatEffects, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
@@ -66,6 +66,8 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     const { definition } = spell;
 
     if (definition.executionMode === "manual" && !data.cancelCasting) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL);
+
+    if (!data.cancelCasting && !optionInRange(definition.effects, data.optionIndex)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_OPTION_REQUIRED);
 
     if (data.legendaryKey && !ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
 
@@ -168,6 +170,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
           isLegendaryCast: !!legendaryAbility,
           grant,
           castLevel,
+          optionIndex: data.optionIndex,
           ...(chosen?.ok && { slotKey: data.slotKey }),
           rng,
           crit,

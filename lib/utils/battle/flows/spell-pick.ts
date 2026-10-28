@@ -1,5 +1,6 @@
 import type { SpellFlowState, SpellPick, SpellWidening } from "./spell-flow-types";
 
+import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
@@ -69,6 +70,8 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, opts.castLevel) : { count: def.dice, sides: 6 };
 
+  const choose = s.spellEffects?.find((e) => e.kind === "chooseOne");
+
   return {
     spellId: s.id,
     level: s.level,
@@ -81,6 +84,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(chain && { chain }),
     ...(range !== undefined && { range }),
     ...("filter" in targeting && targeting.filter && { filter: targeting.filter, ...(opts.castLevel !== undefined && { castLevel: opts.castLevel }) }),
+    ...(choose && { options: choose.options.map(describeEffect) }),
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),

@@ -1,5 +1,5 @@
-import type { Effect } from "@/lib/utils/abilities/schema";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
 
@@ -57,7 +57,7 @@ export interface SpellFormData {
   dice: number;
   targeting: SpellTargeting;
   resolution: SpellResolution;
-  spellEffects: Effect[];
+  spellEffects: SpellEffect[];
   raceModifiers: RaceModifier[];
   stackable: boolean;
   maxStacks: number | null;
@@ -80,7 +80,7 @@ export interface SpellRules {
   casting?: SpellCastingTime;
   targeting?: SpellTargeting;
   resolution?: SpellResolution;
-  spellEffects?: Effect[];
+  spellEffects?: SpellEffect[];
   stackable?: boolean;
   maxStacks?: number | null;
   concentration?: boolean;

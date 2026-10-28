@@ -4,8 +4,11 @@ import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import type { SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
+
+export type ChosenSpell = Omit<CastableSpell, "definition"> & { definition: Omit<SpellDefinition, "effects"> & { effects: Effect[] } };
 
 export interface Outcome {
   skip: boolean;
@@ -18,7 +21,7 @@ export interface Outcome {
 
 export interface SpellCastState {
   flow: ActionFlow;
-  spell: CastableSpell;
+  spell: ChosenSpell;
   /** Кастер до каста: сторона й множник балансу. */
   caster: BattleParticipant;
   targetIds: string[];
@@ -79,9 +82,16 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const flatEffects = (effects: Effect[]): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" ? e.options : [e]));
+export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : [e]));
 
-export function abilityOf(spell: CastableSpell): ResolvedAbility {
+export const needsOption = (effects: SpellEffect[]) => effects.some((e) => e.kind === "chooseOne");
+
+export const optionInRange = (effects: SpellEffect[], index: number | undefined) =>
+  effects.every((e) => e.kind !== "chooseOne" || (index !== undefined && Number.isInteger(index) && index >= 0 && index < e.options.length));
+
+export const expandChosen = (effects: SpellEffect[], index = 0): Effect[] => effects.map((e) => (e.kind === "chooseOne" ? (e.options[index] ?? e.options[0]) : e));
+
+export function abilityOf(spell: ChosenSpell): ResolvedAbility {
   return {
     id: `spell-${spell.id}`,
     name: spell.name,

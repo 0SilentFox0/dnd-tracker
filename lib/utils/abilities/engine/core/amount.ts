@@ -31,7 +31,7 @@ function formulaContext(p: BattleParticipant): Record<(typeof FORMULA_VARIABLES)
   };
 }
 
-export function resolveFlat(flat: Flat, owner: BattleParticipant): number {
+export function resolveFlat(flat: Flat | { spellRoll: number }, owner: BattleParticipant): number {
   if (typeof flat === "number") return flat;
 
   return "formula" in flat ? Math.floor(evaluateFormula(flat.formula, formulaContext(owner))) : 0;

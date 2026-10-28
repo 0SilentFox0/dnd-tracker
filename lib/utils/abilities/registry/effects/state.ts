@@ -10,6 +10,7 @@ import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/m
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
@@ -145,6 +146,18 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
       };
     },
     (names) => `⚔️ ${ability.name}: ${names} — ${describeGrantAction(effect)}`,
+  );
+}
+
+export function applyHelp(input: EffectApplyInput<Of<"help">>): EffectApplyResult {
+  const { ability, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  return each(
+    input,
+    (p) => upsertTimedEffect(p, { ...helpEffect(input.ownerId), source: effectSource(owner, ability) }, ctx.round),
+    (names) => `🤝 ${ability.name}: ${names} має перевагу на наступну атаку`,
   );
 }
 

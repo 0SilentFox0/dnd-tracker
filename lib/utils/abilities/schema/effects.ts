@@ -53,11 +53,13 @@ const ModifyStatSchema = z
     path: ["atLeast"],
   });
 
+const SpellRollFlatSchema = z.object({ spellRoll: z.number().int().min(-500).max(500).refine((n) => n !== 0) });
+
 const DamageBonusSchema = z
   .object({
     kind: z.literal("damageBonus"),
     filter: z.object({ kind: z.enum(DAMAGE_FILTER_KINDS), school: z.string().min(1).optional() }),
-    flat: FlatSchema.optional(),
+    flat: z.union([FlatSchema, SpellRollFlatSchema]).optional(),
     percent: FlatSchema.optional(),
     perMark: z.string().min(1).optional(),
     ...timed,
@@ -234,6 +236,8 @@ const SummonSchema = z
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 
+const HelpSchema = z.object({ kind: z.literal("help"), ...target });
+
 const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
@@ -267,6 +271,7 @@ export const BASE_EFFECTS = [
   SummonSchema,
   RaiseDeadSchema,
   ManeuverSchema,
+  HelpSchema,
 ] as const;
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);

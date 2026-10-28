@@ -29,8 +29,10 @@ export const DAMAGE_FILTER_LABELS: Record<DamageFilterKind, string> = {
   all: "вся",
 };
 
-export function flatLabel(flat: Flat): string {
+export function flatLabel(flat: Flat | { spellRoll: number }): string {
   if (typeof flat === "number") return signed(flat);
+
+  if ("spellRoll" in flat) return flat.spellRoll === 100 ? "+кидок" : flat.spellRoll === -100 ? "−кидок" : `${signed(flat.spellRoll)}% кидка`;
 
   return "formula" in flat ? `+(${flat.formula})` : `+[${flat.scale}]`;
 }

@@ -23,6 +23,8 @@ export interface SpellPick {
   /** обмеження цілей (тип, CR, політ) разом із колом, від якого рахується CR */
   filter?: SpellTargetFilter;
   castLevel?: number;
+  /** підписи варіантів chooseOne; гравець обирає один перед кастом */
+  options?: string[];
   needsSaves: boolean;
   needsAttackRolls?: boolean;
   diceSlots: number[];
@@ -48,6 +50,7 @@ export interface SpellFlowState {
   slotKey?: string;
   grantKey?: string;
   castLevel?: number;
+  optionIndex?: number;
   damage: (number | undefined)[];
   error?: string;
   /** сервер зупинив каст: ДМ обирає ефект крита */
@@ -62,6 +65,7 @@ export type SpellFlowAction =
   | { type: "SET_SLOT"; slotKey: string; pick: SpellPick }
   | { type: "SET_GRANT"; grantKey: string; pick: SpellPick; castLevel?: number }
   | { type: "SET_CAST_LEVEL"; castLevel: number; pick: SpellPick }
+  | { type: "SET_OPTION"; index: number }
   | { type: "SET_ATTACK"; id: string; value: number | undefined }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }

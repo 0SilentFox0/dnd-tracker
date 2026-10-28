@@ -13,6 +13,7 @@ import {
   applyDrainSpellSlot,
   applyGrantAction,
   applyGuard,
+  applyHelp,
   applyMark,
   applyRestoreSpellSlot,
   CONDITION_LABELS,
@@ -132,6 +133,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: describeManeuver,
     apply: applyManeuver,
   },
+  help: { kind: "help", label: "Допомога союзнику", static: false, fields: [TARGET_FIELD], describe: () => "перевага союзнику на наступну атаку", apply: applyHelp },
   randomOf: {
     kind: "randomOf",
     label: "Випадковий з варіантів",
@@ -154,7 +156,9 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect): string {
+export function describeEffect(effect: Effect | { kind: "chooseOne"; options: Effect[] }): string {
+  if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
+
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
   return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;

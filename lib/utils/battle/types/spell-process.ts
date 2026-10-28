@@ -32,6 +32,7 @@ export interface CastSpellParams {
   isLegendaryCast?: boolean;
   slotKey?: string;
   castLevel?: number;
+  optionIndex?: number;
   grant?: SpellGrant;
   rng?: () => number;
   crit?: CritPicker;

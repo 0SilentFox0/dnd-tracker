@@ -9,7 +9,7 @@ import { findParticipant, participantNames, updateParticipant } from "@/lib/util
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
+import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
@@ -104,9 +104,9 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
+const percentLabel = (p: Flat) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
 
-function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Parameters<typeof flatLabel>[0] }): string {
+function valueLabel(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): string {
   return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]
     .filter(Boolean)
     .join(" ");

@@ -12,6 +12,8 @@ const selfCentered = (p: SpellPick | undefined) => p?.template?.shape === "emana
 
 const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
 
+export const optionMissing = (s: SpellFlowState): boolean => !!s.pick?.options && s.optionIndex === undefined;
+
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
 
@@ -63,13 +65,15 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "SET_SLOT":
       return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
     case "SET_GRANT":
       return reconcileSpellPick(s, a.pick, { grantKey: a.grantKey, castLevel: a.castLevel, slotKey: undefined });
     case "SET_CAST_LEVEL":
       return reconcileSpellPick(s, a.pick, { castLevel: a.castLevel });
+    case "SET_OPTION":
+      return s.pick?.options && a.index >= 0 && a.index < s.pick.options.length ? { ...s, optionIndex: a.index } : s;
     case "SET_ATTACK": {
       const { [a.id]: _cleared, ...rest } = s.attacks;
 
@@ -184,5 +188,6 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     ...(s.slotKey && { slotKey: s.slotKey }),
     ...(s.grantKey && { grantKey: s.grantKey }),
     ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
+    ...(s.pick?.options && s.optionIndex !== undefined && { optionIndex: s.optionIndex }),
   };
 }

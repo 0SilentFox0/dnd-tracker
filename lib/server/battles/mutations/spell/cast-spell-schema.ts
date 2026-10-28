@@ -17,6 +17,7 @@ export const spellSchema = z.object({
   castingRounds: z.number().int().min(1).max(144000).optional(),
   cancelCasting: z.boolean().optional(),
   free: z.boolean().optional(),
+  optionIndex: z.number().int().min(0).max(6).optional(),
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
 });
 

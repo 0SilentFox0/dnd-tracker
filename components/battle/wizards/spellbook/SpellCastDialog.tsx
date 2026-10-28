@@ -11,7 +11,7 @@ import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { canGoBack, rollsComplete } from "@/lib/utils/battle/flows";
+import { canGoBack, optionMissing, rollsComplete } from "@/lib/utils/battle/flows";
 
 type Book = ReturnType<typeof useSpellBook>;
 
@@ -84,6 +84,24 @@ function RollsStep({ book }: { book: Book }) {
   );
 }
 
+function OptionPicker({ book }: { book: Book }) {
+  const { state, actions } = book;
+
+  if (!state.pick?.options) return null;
+
+  return (
+    <fieldset className="mt-3 space-y-1 text-sm">
+      <legend className="hud-sc mb-1 font-bold">Оберіть варіант</legend>
+      {state.pick.options.map((label, i) => (
+        <label key={i} className="flex items-start gap-2">
+          <input type="radio" name="spell-option" checked={state.optionIndex === i} onChange={() => actions.setOption(i)} className="mt-1" />
+          {label}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 function SummaryStep({ book }: { book: Book }) {
   const { state, view, actions } = book;
 
@@ -94,7 +112,8 @@ function SummaryStep({ book }: { book: Book }) {
   return (
     <>
       {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.slotCostLabel(selected)} />}
-      <button type="button" disabled={submitting} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
+      <OptionPicker book={book} />
+      <button type="button" disabled={submitting || optionMissing(state)} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
         {submitting ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />Застосувати</>}
       </button>
       <BackCancel book={book} disabled={submitting} />

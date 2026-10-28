@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { BASE_EFFECTS, RandomOfSchema } from "@/lib/utils/abilities/schema/effects";
+import { BASE_EFFECTS, NonRandomEffectSchema, RandomOfSchema } from "@/lib/utils/abilities/schema/effects";
 
 export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
 
@@ -71,7 +71,9 @@ export const SpellDiceSchema = z.number().int().min(0).max(40);
 
 export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12), z.literal(20)]);
 
-const SPELL_ONLY_EFFECTS = [] as const;
+const ChooseOneSchema = z.object({ kind: z.literal("chooseOne"), options: z.array(NonRandomEffectSchema).min(2).max(7) });
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 

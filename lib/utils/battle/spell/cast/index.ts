@@ -7,7 +7,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
-import { abilityOf, actionOf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
+import { abilityOf, actionOf, type ChosenSpell, expandChosen, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
@@ -17,7 +17,9 @@ import type { AbilityEvent } from "@/types/abilities";
 const DEFAULT_CONCENTRATION_ROUNDS = 10;
 
 export function castSpell(params: CastSpellParams): CastSpellResult {
-  const { caster, spell, targetIds, allParticipants, currentRound, battleId, diceRolls, saveRolls = [], attackRolls = [], isDMCast = false } = params;
+  const { caster, spell: source, targetIds, allParticipants, currentRound, battleId, diceRolls, saveRolls = [], attackRolls = [], isDMCast = false } = params;
+
+  const spell: ChosenSpell = { ...source, definition: { ...source.definition, effects: expandChosen(source.definition.effects, params.optionIndex) } };
 
   const def = spell.definition;
 

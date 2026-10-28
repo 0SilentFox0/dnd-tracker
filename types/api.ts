@@ -238,6 +238,7 @@ export interface SpellCastData {
   attackRolls?: Array<{ participantId: string; roll: number }>;
   free?: boolean;
   slotKey?: string;
+  optionIndex?: number;
 }
 
 // Skill Trees API

@@ -12,8 +12,16 @@ import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
 
-function runEffect(state: SpellCastState, effect: Effect, effectIndex: number, ids: string[], roll: number): void {
+function freezeSpellRoll(effect: Effect, roll: number): Effect {
+  if (effect.kind !== "damageBonus" || typeof effect.flat !== "object" || !("spellRoll" in effect.flat)) return effect;
+
+  return { ...effect, flat: Math.trunc((roll * effect.flat.spellRoll) / 100) };
+}
+
+function runEffect(state: SpellCastState, source: Effect, effectIndex: number, ids: string[], roll: number): void {
   const { flow } = state;
+
+  const effect = freezeSpellRoll(source, roll);
 
   const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterIdOf(state), targetIds: state.targetIds, ...state.info, roll, damage: state.dealt };
 

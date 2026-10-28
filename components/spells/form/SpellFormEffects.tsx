@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useRaces } from "@/lib/hooks/races";
 import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
-import { EffectSchema, type Trigger } from "@/lib/utils/abilities/schema";
+import type { Effect, Trigger } from "@/lib/utils/abilities/schema";
+import { SpellEffectSchema } from "@/lib/utils/spells/model/schema";
 
 const TRIGGER: Trigger = { event: "action" };
 
@@ -23,7 +24,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
 
   const errorsByPath = Object.fromEntries(
     formData.spellEffects.flatMap((effect, i) => {
-      const parsed = EffectSchema.safeParse(effect);
+      const parsed = SpellEffectSchema.safeParse(effect);
 
       return parsed.success ? [] : [[`effects.${i}`, parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`)]];
     }),
@@ -40,7 +41,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
             {formData.spellEffects.map((effect, i) => (
               <EffectCard
                 key={i}
-                effect={effect}
+                effect={effect as Effect}
                 trigger={TRIGGER}
                 path={`effects.${i}`}
                 actions={{
