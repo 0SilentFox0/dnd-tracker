@@ -31,7 +31,7 @@ describe("ChoicePicker", () => {
     render(<Harness choice={choiceById("metamagic")} context={ctx(2)} />);
 
     expect(screen.getByText("0 / 2")).toBeTruthy();
-    expect(screen.getByText("З рівня 3")).toBeTruthy();
+    expect(screen.getByText('choices.picker.fromLevel {"level":3}')).toBeTruthy();
     fireEvent.click(screen.getByRole("checkbox", { name: /Quickened Spell/ }));
 
     expect(json()).toEqual([{ id: "quickened" }]);

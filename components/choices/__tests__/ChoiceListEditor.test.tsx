@@ -27,18 +27,18 @@ describe("ChoiceListEditor", () => {
 
   it("edits the grant policy of a spell choice", () => {
     render(<Harness owner="class" initial={[{ id: "signature", label: "Signature", level: 20, count: 2, kind: "spell", spells: { lists: ["Wizard"], minLevel: 3, maxLevel: 3 } }]} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Безкоштовний каст" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "choices.grant.freeCast" }));
     expect(json()[0].grant).toMatchObject({ uses: 1, rest: "long", via: "grant" });
-    fireEvent.change(screen.getByLabelText("Відпочинок гранту"), { target: { value: "short" } });
-    fireEvent.change(screen.getByLabelText("Коло гранту"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("choices.grant.restAria"), { target: { value: "short" } });
+    fireEvent.change(screen.getByLabelText("choices.grant.circleAria"), { target: { value: "3" } });
     expect(json()[0].grant).toMatchObject({ rest: "short", castLevel: 3 });
   });
 
   it("adds a choice and switches its kind", () => {
     render(<Harness owner="class" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Додати вибір" }));
-    fireEvent.change(screen.getByLabelText("Вид вибору"), { target: { value: "abilityScore" } });
+    fireEvent.click(screen.getByRole("button", { name: "choices.list.add" }));
+    fireEvent.change(screen.getByLabelText("choices.header.kind"), { target: { value: "abilityScore" } });
 
     expect(json()[0]).toMatchObject({ kind: "abilityScore", points: 2, max: 20 });
   });
@@ -46,30 +46,30 @@ describe("ChoiceListEditor", () => {
   it("class: count from a table column; race: lineage; feat: no nested feat kind", () => {
     render(<Harness owner="class" initial={[{ id: "m", label: "Metamagic", level: 2, count: 1, kind: "option", options: [] }]} />);
 
-    fireEvent.change(screen.getByLabelText("Кількість з таблиці класу"), { target: { value: "metamagic" } });
+    fireEvent.change(screen.getByLabelText("choices.list.scale"), { target: { value: "metamagic" } });
 
     expect(json()[0].count).toEqual({ scale: "metamagic" });
 
     cleanup();
     render(<Harness owner="race" initial={[{ id: "l", label: "Lineage", level: 1, count: 1, kind: "option", options: [] }]} />);
 
-    fireEvent.click(screen.getByLabelText("Лінія (назва опції → підраса)"));
+    fireEvent.click(screen.getByLabelText("choices.list.lineage"));
 
     expect(json()[0].lineage).toBe(true);
 
     cleanup();
     render(<Harness owner="feat" initial={[{ id: "s", label: "S", level: 1, count: 1, kind: "skill" }]} />);
 
-    expect(Array.from(screen.getByLabelText("Вид вибору").querySelectorAll("option")).map((o) => o.getAttribute("value"))).not.toContain("feat");
-    expect(screen.queryByLabelText("Рівень вибору")).toBeNull();
+    expect(Array.from(screen.getByLabelText("choices.header.kind").querySelectorAll("option")).map((o) => o.getAttribute("value"))).not.toContain("feat");
+    expect(screen.queryByLabelText("choices.header.level")).toBeNull();
   });
 
   it("options: add, name gives the id, race options take spells", () => {
     render(<Harness owner="race" initial={[{ id: "l", label: "Lineage", level: 1, count: 1, kind: "option", options: [] }]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Додати опцію" }));
-    fireEvent.change(screen.getByLabelText("Назва опції"), { target: { value: "Wood Elf" } });
-    fireEvent.click(screen.getByRole("button", { name: "Додати заклинання" }));
+    fireEvent.click(screen.getByRole("button", { name: "choices.options.add" }));
+    fireEvent.change(screen.getByLabelText("choices.options.name"), { target: { value: "Wood Elf" } });
+    fireEvent.click(screen.getByRole("button", { name: "choices.optionSpells.add" }));
 
     expect(json()[0].options?.[0]).toMatchObject({ id: "wood-elf", name: "Wood Elf", spells: [{ level: 1, spellId: "sp1" }] });
     expect(screen.getAllByTestId("ability-editor")).toHaveLength(1);
@@ -78,7 +78,7 @@ describe("ChoiceListEditor", () => {
   it("removes a choice", () => {
     render(<Harness owner="class" initial={[{ id: "a", label: "A", level: 1, count: 1, kind: "skill" }]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вибір A" }));
+    fireEvent.click(screen.getByRole("button", { name: 'choices.header.remove {"label":"A"}' }));
 
     expect(json()).toEqual([]);
   });

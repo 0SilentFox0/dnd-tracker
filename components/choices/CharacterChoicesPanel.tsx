@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ChoicesEditor } from "./ChoicesEditor";
 
@@ -22,13 +23,17 @@ interface CharacterChoicesPanelProps {
 }
 
 export function CharacterChoicesPanel({ campaignId, characterId, initial, hero, onSaved }: CharacterChoicesPanelProps) {
+  const t = useTranslations("choices");
+
+  const tc = useTranslations("common");
+
   const refs = useChoiceRefs(campaignId, hero.race);
 
   const [data, set] = useState<ChoicesState>(initial);
 
   const choices = useCharacterChoices({ campaignId, characterId, onSaved });
 
-  if (!refs.ready) return <LoadingState rows={3} label="Завантаження виборів…" />;
+  if (!refs.ready) return <LoadingState rows={3} label={t("editor.loading")} />;
 
   const submit = () => void choices.save(choicesBodyOf(prunePicks(data, refs).state));
 
@@ -41,7 +46,7 @@ export function CharacterChoicesPanel({ campaignId, characterId, initial, hero, 
         </p>
       )}
       <Button type="button" onClick={submit} disabled={choices.isPending}>
-        {choices.isPending ? "Збереження..." : "Зберегти вибори"}
+        {choices.isPending ? tc("actions.saving") : t("editor.save")}
       </Button>
     </div>
   );

@@ -25,11 +25,11 @@ describe("ClassFeaturesEditor: choices per level", () => {
   it("adds a choice to the level section; empty choices leave no key", () => {
     render(<Harness />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Додати вибір" }));
+    fireEvent.click(screen.getByRole("button", { name: "choices.list.add" }));
 
     expect(JSON.parse(screen.getByTestId("json").textContent ?? "[]")[0].choices).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: /^Видалити вибір/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^choices\.header\.remove/ }));
 
     expect(JSON.parse(screen.getByTestId("json").textContent ?? "[]")[0]).toEqual({ level: 4, abilities: [] });
   });

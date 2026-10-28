@@ -29,8 +29,8 @@ describe("ChoicesEditor", () => {
   it("race section without class mode; server issue under its choice", () => {
     render(<Harness initial={empty} classMode={false} />);
 
-    expect(screen.getByRole("heading", { name: "Раса: Elf" })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Риса походження" })).toBeNull();
+    expect(screen.getByRole("heading", { name: 'choices.editor.race {"name":"Elf"}' })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "choices.editor.originFeat" })).toBeNull();
     fireEvent.click(screen.getByRole("checkbox", { name: /Wood Elf/ }));
 
     expect(json().raceChoices).toEqual({ "elven-lineage": [{ id: "wood-elf" }] });

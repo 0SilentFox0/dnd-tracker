@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ChoicePicker,type PickerContext } from "./ChoicePicker";
 
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { DND_SKILL_META } from "@/lib/constants/skills";
 import type { ChoiceRefsView } from "@/lib/hooks/characters";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { abilityPicksOf, abilityScoreDelta } from "@/lib/utils/characters/choices/ability";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
@@ -27,6 +29,10 @@ interface ChoicesEditorProps {
 const issueFor = (issues: ChoiceIssue[] | undefined, path: string) => issues?.find((i) => i.path === path || i.path.startsWith(`${path}.`))?.message;
 
 export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved, only }: ChoicesEditorProps) {
+  const t = useTranslations("choices");
+
+  const tc = useTranslator("common");
+
   const visits = visitPicks(data, refs, { level: hero.level, classMode: hero.classMode });
 
   const delta = abilityScoreDelta(saved ? abilityPicksOf(visitPicks(saved, refs, { level: hero.level, classMode: hero.classMode })) : [], abilityPicksOf(visits));
@@ -61,24 +67,24 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
   return (
     <div className="space-y-4">
       {!only && hero.classMode && (
-        <HudSection title="Передісторія">
-          <label className="block space-y-2">Передісторія
-            <select aria-label="Передісторія" className={`${HUD_SELECT_CLASS} w-full`} value={data.backgroundId ?? ""} onChange={(e) => set({ ...data, ...mergeBackground(data, { backgroundId: e.target.value || null }) })}>
-              <option value="">Без передісторії</option>
+        <HudSection title={t("editor.background")}>
+          <label className="block space-y-2">{t("editor.background")}
+            <select aria-label={t("editor.background")} className={`${HUD_SELECT_CLASS} w-full`} value={data.backgroundId ?? ""} onChange={(e) => set({ ...data, ...mergeBackground(data, { backgroundId: e.target.value || null }) })}>
+              <option value="">{t("editor.noBackground")}</option>
               {Object.values(refs.backgroundsById ?? {}).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           </label>
-          <p className="text-xs text-hud-muted">Зміна замінить бонуси передісторії. Спорядження й гроші видає ДМ вручну.</p>
+          <p className="text-xs text-hud-muted">{t("editor.backgroundHint")}</p>
           {background && <div className="space-y-3">
             {background.description && <p className="whitespace-pre-line text-sm">{background.description}</p>}
-            <p>{background.skillProficiencies.map((s) => DND_SKILL_META[s].label).join(", ")}</p>
+            <p>{background.skillProficiencies.map((s) => tc(`dndSkills.${s}`)).join(", ")}</p>
             <p>{background.toolProficiencies.join(", ")}</p>
             {background.equipmentText && <p className="whitespace-pre-line text-sm">{background.equipmentText}</p>}
-            {origin && <div role="alert" className="text-sm text-hud-danger">Спочатку зніміть вільну рису походження.
-              <button type="button" className="ml-2 underline" onClick={() => set({ ...data, feats: data.feats.filter((f) => f.source !== "origin") })}>Замінити рисою передісторії</button>
+            {origin && <div role="alert" className="text-sm text-hud-danger">{t("editor.originFirst")}
+              <button type="button" className="ml-2 underline" onClick={() => set({ ...data, feats: data.feats.filter((f) => f.source !== "origin") })}>{t("editor.replaceOrigin")}</button>
             </div>}
             {pickers(background.choices, data.backgroundChoices ?? {}, { ...base, level: hero.level, maxSlotLevel: 0 }, "backgroundChoices", (backgroundChoices) => set({ ...data, backgroundChoices }), (c) => isChoiceOpen(c, hero.level, "background"))}
-            {backgroundFeat && <div className="space-y-3"><p className="hud-sc">Риса: {backgroundFeat.name}</p>
+            {backgroundFeat && <div className="space-y-3"><p className="hud-sc">{t("editor.backgroundFeat", { name: backgroundFeat.name })}</p>
               {pickers(backgroundFeat.choices, data.backgroundFeatPicks ?? {}, { ...base, level: hero.level, maxSlotLevel: 0 }, "backgroundFeatPicks", (backgroundFeatPicks) => set({ ...data, backgroundFeatPicks }), () => true)}
             </div>}
           </div>}
@@ -86,7 +92,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
         </HudSection>
       )}
       {!only && raceDefs.length > 0 && (
-        <HudSection title={`Раса: ${refs.race?.name}`}>
+        <HudSection title={t("editor.race", { name: refs.race?.name ?? "" })}>
           <div className="space-y-4">
             {pickers(raceDefs, data.raceChoices, { ...base, level: hero.level, maxSlotLevel: 0 }, "raceChoices", (raceChoices) => set({ ...data, raceChoices }), (c) => isChoiceOpen(c, hero.level, "race"))}
           </div>
@@ -94,9 +100,9 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
       )}
 
       {!only && !background && hero.classMode && originFeats.length > 0 && (
-        <HudSection title="Риса походження">
+        <HudSection title={t("editor.originFeat")}>
           <ChoicePicker
-            choice={{ id: "origin", label: "Риса походження", level: 1, count: 1, kind: "feat", featTypes: ["origin"] }}
+            choice={{ id: "origin", label: t("editor.originFeat"), level: 1, count: 1, kind: "feat", featTypes: ["origin"] }}
             value={origin ? [{ id: origin.id, ...(origin.picks && { picks: origin.picks }) }] : []}
             onChange={(list) => set({ ...data, feats: [...data.feats.filter((f) => f.source !== "origin"), ...list.map((p) => ({ id: p.id, source: "origin" as const, ...(p.picks && { picks: p.picks }) }))] })}
             ctx={{ ...base, level: hero.level, maxSlotLevel: 0 }}
