@@ -76,7 +76,7 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
 
     if (wasDragged()) return;
 
-    const zoneId = tool === "select" && e.target instanceof Element ? e.target.closest<SVGElement>("[data-zone-id]")?.dataset.zoneId : undefined;
+    const zoneId = (tool === "select" || tool === "move") && e.target instanceof Element ? e.target.closest<SVGElement>("[data-zone-id]")?.dataset.zoneId : undefined;
 
     if (zoneId) handlers.onMarkerClick?.(zoneId);
     else handlers.onMapClick?.(pointAt(e.clientX, e.clientY));
@@ -110,7 +110,7 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
             {size.width > 0 ? (
             <div className="absolute inset-0" style={layerStyle}>
               <Image src={map.imageUrl} alt={map.name} fill priority draggable={false} sizes={`${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`} className="pointer-events-none select-none object-fill" />
-              <WorldZones markers={markers} selectedId={selectedId} draft={draft} cursor={tool === "zone" ? cursor : null} interactive={tool === "select"} />
+              <WorldZones markers={markers} selectedId={selectedId} draft={draft} cursor={tool === "zone" ? cursor : null} interactive={tool === "select" || tool === "move"} />
               {draft?.map((p, i) => (
                 <span
                   key={i}

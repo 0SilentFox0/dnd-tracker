@@ -24,7 +24,7 @@ const mapSummary = (id: string, parentMarkerId: string | null) => ({ id, name: i
 const renderPanel = (over: Partial<TravelPanelProps> = {}) =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <TravelPanel campaignId="c1" mapId="m1" heroes={heroes} target={{ x: 0.3, y: 0.6 }} selectedMarker={null} onPickTarget={vi.fn()} {...over} />
+      <TravelPanel campaignId="c1" mapId="m1" heroes={heroes} onMapIds={["h1", "h2"]} target={{ x: 0.3, y: 0.6 }} selectedMarker={null} onPickTarget={vi.fn()} {...over} />
     </QueryClientProvider>,
   );
 
@@ -103,6 +103,21 @@ describe("TravelPanel", () => {
     renderPanel();
 
     expect(await screen.findByRole("button", { name: /Вийти/ })).toBeTruthy();
+  });
+
+  it("disables Exit when a selected hero is not on this map", async () => {
+    vi.mocked(api.getWorldMaps).mockResolvedValue([mapSummary("m1", "k0")]);
+    renderPanel({ onMapIds: ["h1"] });
+
+    const exit = (await screen.findByRole("button", { name: /Вийти/ })) as HTMLButtonElement;
+
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+
+    expect(exit.disabled).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Borin" }));
+
+    expect(exit.disabled).toBe(true);
   });
 
   it("lists the journal", async () => {

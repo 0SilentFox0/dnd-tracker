@@ -51,20 +51,21 @@ describe("useWorldTravel", () => {
 
     const spy = vi.spyOn(client, "invalidateQueries");
 
-    const { result } = renderHook(() => useWorldTravel("c1", "m1"), { wrapper });
+    const { result } = renderHook(() => useWorldTravel("c1"), { wrapper });
 
     await act(async () => void (await result.current.travel.mutateOk({ mapId: "m1", characterIds: ["h"], to: { x: 0, y: 0 }, rest: "none" })));
 
     const keys = spy.mock.calls.map(([f]) => f?.queryKey);
 
     expect(keys).toContainEqual(["world-view", "c1"]);
+    expect(keys).toContainEqual(worldKeys.mapAll("c1"));
     expect(keys).toContainEqual(worldKeys.log("c1"));
   });
 
   it("notifies the error text on failure", async () => {
     vi.mocked(travelHeroes).mockRejectedValue(new Error("x"));
 
-    const { result } = renderHook(() => useWorldTravel("c1", "m1"), { wrapper });
+    const { result } = renderHook(() => useWorldTravel("c1"), { wrapper });
 
     await act(async () => void (await result.current.travel.mutateOk({ mapId: "m1", characterIds: ["h"], to: { x: 0, y: 0 }, rest: "none" })));
 

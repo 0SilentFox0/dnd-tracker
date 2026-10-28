@@ -68,6 +68,25 @@ describe("WorldFog", () => {
   });
 });
 
+describe("WorldFog canvas size", () => {
+  it("assigns width/height only when the box changes, not on pan", () => {
+    const setWidth = vi.spyOn(HTMLCanvasElement.prototype, "width", "set");
+
+    const { rerender } = render(<WorldFog {...props} />);
+
+    const initial = setWidth.mock.calls.length;
+
+    rerender(<WorldFog {...props} offset={{ x: 10, y: 5 }} />);
+    rerender(<WorldFog {...props} offset={{ x: 20, y: 5 }} />);
+
+    expect(setWidth.mock.calls.length).toBe(initial);
+
+    rerender(<WorldFog {...props} box={{ width: 400, height: 300 }} />);
+
+    expect(setWidth.mock.calls.length).toBe(initial + 1);
+  });
+});
+
 describe("WorldMapView layers", () => {
   it("renders no fog canvas without the fog prop", () => {
     const { container } = render(<WorldMapView detail={detail} />);
@@ -97,5 +116,11 @@ describe("WorldHeroes", () => {
     fireEvent.pointerUp(screen.getByRole("button", { name: "Борін" }));
 
     expect(onHeroClick).toHaveBeenCalledWith("b");
+  });
+
+  it("falls back to the initial for a non-image avatar string", () => {
+    render(<WorldHeroes zoom={1} heroes={[hero({ name: "Арвен", avatar: "not-an-url" })]} />);
+
+    expect(screen.getByRole("button", { name: "Арвен" }).textContent).toBe("А");
   });
 });

@@ -5,8 +5,8 @@ import { worldKeys } from "./keys";
 import { enterMarker, exitMap, travelHeroes } from "@/lib/api/world";
 import { useCrudMutation } from "@/lib/hooks/common";
 
-export function useWorldTravel(campaignId: string, mapId: string | null) {
-  const invalidateKeys = () => [worldKeys.viewAll(campaignId), worldKeys.map(campaignId, mapId ?? ""), worldKeys.log(campaignId)];
+export function useWorldTravel(campaignId: string) {
+  const invalidateKeys = () => [worldKeys.viewAll(campaignId), worldKeys.mapAll(campaignId), worldKeys.log(campaignId)];
 
   const travel = useCrudMutation({
     mutationFn: (data: Parameters<typeof travelHeroes>[1]) => travelHeroes(campaignId, data),

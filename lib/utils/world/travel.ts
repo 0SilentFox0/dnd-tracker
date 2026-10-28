@@ -29,6 +29,7 @@ export function planTravel(args: {
     const from = args.positions.get(characterId) ?? null;
 
     plan.moves.push({ characterId, from, to });
+
     const segment = from && from.mapId === args.mapId && !isSameSpot(from, to);
 
     plan.reveals.push({

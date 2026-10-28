@@ -12,16 +12,17 @@ interface Options {
   campaignId: string;
   mapId: string;
   heroes: RosterHero[];
+  onMapIds: string[];
   target: MapPoint | null;
   selectedMarker: WorldMarker | null;
 }
 
-export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMarker }: Options) {
+export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker }: Options) {
   const [picked, setPicked] = useState<string[]>([]);
 
   const [rest, setRest] = useState<TravelRest>("none");
 
-  const { travel, enter, exit, isPending } = useWorldTravel(campaignId, mapId);
+  const { travel, enter, exit, isPending } = useWorldTravel(campaignId);
 
   const maps = useWorldMaps(campaignId);
 
@@ -47,6 +48,8 @@ export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMark
 
   const nested = !!maps.data?.find((m) => m.id === mapId)?.parentMarkerId;
 
+  const canExit = ready && nested && selected.every((id) => onMapIds.includes(id));
+
   const childMapId = selectedMarker?.childMapId ?? null;
 
   return {
@@ -59,7 +62,8 @@ export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMark
     isPending,
     canMove: ready && !!target,
     canEnter: !!childMapId,
-    canExit: nested,
+    nested,
+    canExit,
     canAct: ready,
     move: () => {
       if (ready && target) run(() => travel.mutateOk({ mapId, characterIds: selected, to: target, toMarkerId: selectedMarker?.id, rest }));
@@ -68,7 +72,7 @@ export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMark
       if (ready && selectedMarker && childMapId) run(() => enter.mutateOk({ markerId: selectedMarker.id, characterIds: selected, rest }));
     },
     exitMap: () => {
-      if (ready && nested) run(() => exit.mutateOk({ mapId, characterIds: selected, rest }));
+      if (canExit) run(() => exit.mutateOk({ mapId, characterIds: selected, rest }));
     },
   };
 }

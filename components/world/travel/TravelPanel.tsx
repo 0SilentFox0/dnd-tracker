@@ -19,13 +19,14 @@ export interface TravelPanelProps {
   campaignId: string;
   mapId: string;
   heroes: RosterHero[];
+  onMapIds: string[];
   target: MapPoint | null;
   selectedMarker: WorldMarker | null;
   onPickTarget(): void;
 }
 
-export function TravelPanel({ campaignId, mapId, heroes, target, selectedMarker, onPickTarget }: TravelPanelProps) {
-  const panel = useTravelPanel({ campaignId, mapId, heroes, target, selectedMarker });
+export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker, onPickTarget }: TravelPanelProps) {
+  const panel = useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker });
 
   return (
     <HudPanel as="div" className="flex flex-col gap-3">
@@ -70,8 +71,8 @@ export function TravelPanel({ campaignId, mapId, heroes, target, selectedMarker,
             Зайти
           </Button>
         ) : null}
-        {panel.canExit ? (
-          <Button type="button" variant="outline" disabled={!panel.canAct} onClick={panel.exitMap}>
+        {panel.nested ? (
+          <Button type="button" variant="outline" disabled={!panel.canExit} onClick={panel.exitMap}>
             <DoorOpen className="size-4" aria-hidden />
             Вийти
           </Button>

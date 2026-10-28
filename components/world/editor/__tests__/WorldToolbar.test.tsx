@@ -21,10 +21,10 @@ const ctx = (parentMapId: string | null) =>
 
 const drawing = (over: Partial<ReturnType<typeof useMapDrawing>> = {}) => ({ tool: "select", setTool: vi.fn(), draft: [], finish: vi.fn(), undoVertex: vi.fn(), ...over }) as unknown as ReturnType<typeof useMapDrawing>;
 
-const renderBar = (d: ReturnType<typeof useMapDrawing>, parentMapId: string | null = null, onSettings?: () => void, extra?: ReactNode) =>
+const renderBar = (d: ReturnType<typeof useMapDrawing>, parentMapId: string | null = null, onSettings?: () => void, extra?: ReactNode, readOnly = false) =>
   render(
     <WorldEditorContext.Provider value={ctx(parentMapId)}>
-      <WorldToolbar drawing={d} onSettings={onSettings}>
+      <WorldToolbar drawing={d} readOnly={readOnly} onSettings={onSettings}>
         {extra}
       </WorldToolbar>
     </WorldEditorContext.Provider>,
@@ -42,6 +42,14 @@ describe("WorldToolbar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Точка входу" }));
 
     expect(d.setTool).toHaveBeenCalledWith("entry");
+  });
+
+  it("read-only disables every tool and settings", () => {
+    const d = drawing();
+
+    renderBar(d, null, vi.fn(), undefined, true);
+
+    for (const name of ["Вибір", "Точка", "Зона", "Точка входу", "Герої", "Налаштування карти"]) expect((screen.getByRole("button", { name }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("offers finishing the zone only with three vertices", () => {

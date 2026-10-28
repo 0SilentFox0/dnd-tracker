@@ -23,7 +23,7 @@ export const TOOL_HOTKEYS: Record<string, WorldTool> = { v: "select", м: "selec
 
 const isTyping = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
 
-export function useMapDrawing(actions: Actions) {
+export function useMapDrawing(actions: Actions, enabled = true) {
   const [tool, setToolState] = useState<WorldTool>("select");
 
   const [draft, setDraft] = useState<MapPoint[]>([]);
@@ -49,6 +49,8 @@ export function useMapDrawing(actions: Actions) {
   }, [draft, actions]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
 
@@ -65,7 +67,7 @@ export function useMapDrawing(actions: Actions) {
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [tool, draft.length, cancel, undoVertex, setTool]);
+  }, [enabled, tool, draft.length, cancel, undoVertex, setTool]);
 
   const handlers = useMemo<{ onMapClick(p: MapPoint): void; onMapDoubleClick(p: MapPoint): void }>(
     () => ({

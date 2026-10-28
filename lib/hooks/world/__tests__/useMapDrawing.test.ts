@@ -142,6 +142,16 @@ describe("useMapDrawing", () => {
     input.remove();
   });
 
+  it("hotkeys are ignored when disabled (hero-eyes mode)", () => {
+    const actions = { onPoint: vi.fn(), onZone: vi.fn(), onEntry: vi.fn() };
+
+    const { result } = renderHook(() => useMapDrawing(actions, false));
+
+    key("p");
+
+    expect(result.current.tool).toBe("select");
+  });
+
   it("changing the tool resets the draft", () => {
     const { result } = setup();
 

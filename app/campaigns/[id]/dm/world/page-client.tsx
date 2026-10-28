@@ -92,7 +92,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
       if (mapId) void editor.map.update.mutateOk({ id: mapId, data: { entryX: p.x, entryY: p.y } });
     },
     onMove: (p: MapPoint) => setTravelTarget({ point: p, markerId: null }),
-  });
+  }, !eyes.asHeroId);
 
   const { tool, setTool } = drawing;
 
@@ -173,7 +173,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                       />
                       <div className={FRAME_HEIGHT}>
                         <div className="mb-2 shrink-0">
-                          <WorldToolbar drawing={drawing} onSettings={() => setSettingsOpen(true)} inspector={isDesktop ? <WorldInspectorBar open={panelOpen} onClose={closePanel} /> : undefined}>
+                          <WorldToolbar drawing={drawing} readOnly={!!eyes.asHeroId} onSettings={() => setSettingsOpen(true)} inspector={isDesktop ? <WorldInspectorBar open={panelOpen} onClose={closePanel} /> : undefined}>
                             <HeroEyesSelect heroes={roster.heroes} value={eyes.asHeroId} onChange={changeEyes} />
                           </WorldToolbar>
                         </div>
@@ -234,6 +234,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                                 campaignId={campaignId}
                                 mapId={d.map.id}
                                 heroes={roster.heroes}
+                                onMapIds={(d.heroes ?? []).map((h) => h.id)}
                                 target={travelTarget?.point ?? null}
                                 selectedMarker={d.markers.find((m) => m.id === travelTarget?.markerId) ?? null}
                                 onPickTarget={() => setTool("move")}

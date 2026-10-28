@@ -182,6 +182,22 @@ describe("WorldMapView", () => {
     expect((container.querySelector("polygon") as Element).getAttribute("data-interactive")).toBe("false");
   });
 
+  it("clicking a zone area in move mode resolves the zone as a target", () => {
+    const onMarkerClick = vi.fn();
+
+    const zone = marker({ id: "z", kind: "zone", name: "Forest", polygon: ring([[0.1, 0.1], [0.4, 0.1], [0.2, 0.4]]) });
+
+    const { container } = render(<WorldMapView detail={detail([zone])} tool="move" handlers={{ onMarkerClick }} />);
+
+    const poly = container.querySelector("polygon") as Element;
+
+    fireEvent.pointerDown(poly, { pointerId: 1, clientX: 200, clientY: 150 });
+    fireEvent.pointerUp(poly, { pointerId: 1, clientX: 200, clientY: 150 });
+
+    expect(onMarkerClick).toHaveBeenCalledWith("z");
+    expect(poly.getAttribute("data-interactive")).toBe("true");
+  });
+
   it("shows the pin label state for selected pins and hides zone labels at high zoom", () => {
     const zone = marker({ id: "z", kind: "zone", name: "Forest", x: 0.8, y: 0.8, polygon: ring([[0.7, 0.7], [0.9, 0.7], [0.8, 0.9]]) });
 

@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { cn } from "@/lib/utils";
 import type { WorldHero } from "@/types/world";
 
@@ -8,8 +7,6 @@ interface WorldHeroesProps {
   zoom: number;
   onHeroClick?(id: string): void;
 }
-
-const initial = (name: string) => name.trim().charAt(0).toUpperCase();
 
 export function WorldHeroes({ heroes, zoom, onHeroClick }: WorldHeroesProps) {
   return (
@@ -29,7 +26,7 @@ export function WorldHeroes({ heroes, zoom, onHeroClick }: WorldHeroesProps) {
           }}
           onDoubleClick={(e) => e.stopPropagation()}
         >
-          {h.avatar ? <Image src={h.avatar} alt="" width={30} height={30} draggable={false} className="size-full rounded-full object-cover" /> : <span aria-hidden>{initial(h.name)}</span>}
+          <EntityIcon src={h.avatar} name={h.name} size={30} className="size-full rounded-full bg-transparent text-inherit" />
         </button>
       ))}
     </>

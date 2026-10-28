@@ -69,8 +69,13 @@ export function WorldFog({ shapes, radius, box, zoom, offset, still = false }: W
 
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
 
-    canvas.width = Math.round(box.width * dpr);
-    canvas.height = Math.round(box.height * dpr);
+    const w = Math.round(box.width * dpr);
+
+    const h = Math.round(box.height * dpr);
+
+    if (canvas.width !== w) canvas.width = w;
+
+    if (canvas.height !== h) canvas.height = h;
 
     const fill = getComputedStyle(canvas).getPropertyValue("--atlas-fog").trim() || FALLBACK_FOG;
 
