@@ -4,11 +4,12 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import {
   artifactSearchText,
+  classSearchText,
   matchSearch,
   skillSearchText,
   spellSearchText,
 } from "@/lib/utils/campaigns/info-reference";
-import type { ArtifactForReference, ReferenceFilters, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ClassForReference, ReferenceFilters, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 interface FilterValues {
   mainSkill: string | null;
@@ -42,7 +43,9 @@ function uniqueSorted<T, V extends string | number>(items: T[], pick: (item: T) 
   return [...values].sort(compare);
 }
 
-export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = []) {
+export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = [], classes: ClassForReference[] | null = null) {
+  const classMode = classes !== null;
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const [section, setSection] = useState<SectionTab>("all");
@@ -96,6 +99,8 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
   );
 
+  const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classSearchText(c), deferredSearch)), [classes, deferredSearch]);
+
   const field = <K extends keyof FilterValues>(key: K) => ({
     value: values[key],
     set: (value: FilterValues[K] | null) => setValues((prev) => ({ ...prev, [key]: value })),
@@ -108,11 +113,15 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     setValues(NO_FILTERS);
   };
 
-  const showSkills = section === "all" || section === "skills";
+  const showSkills = !classMode && (section === "all" || section === "skills");
 
   const showSpells = section === "all" || section === "spells";
 
   const showArtifacts = section === "all" || section === "artifacts";
+
+  const showClasses = classMode && (section === "all" || section === "classes");
+
+  const classesEmpty = showClasses && filteredClasses.length === 0;
 
   const skillsEmpty = showSkills && filteredSkills.length === 0;
 
@@ -125,8 +134,9 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     section: { value: section, set: setSection },
     panel: { open: filtersOpen, setOpen: setFiltersOpen },
     hasActive: hasActiveFilters,
+    classMode,
     clearAll: clearAllFilters,
-    visible: { skills: showSkills, spells: showSpells, artifacts: showArtifacts },
+    visible: { skills: showSkills, spells: showSpells, artifacts: showArtifacts, classes: showClasses },
     skill: {
       mainSkill: { ...field("mainSkill"), options: options.mainSkill },
     },
@@ -144,17 +154,19 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
 
   return {
     filters,
-    results: { filteredSkills, filteredSpells, filteredArtifacts },
+    results: { filteredSkills, filteredSpells, filteredArtifacts, filteredClasses },
     ui: {
       shown: {
         skills: showSkills && !skillsEmpty,
         spells: showSpells && !spellsEmpty,
         artifacts: showArtifacts && !artifactsEmpty,
+        classes: showClasses && !classesEmpty,
       },
       skillsEmpty,
       spellsEmpty,
       artifactsEmpty,
-      nothingFound: skillsEmpty && spellsEmpty && artifactsEmpty,
+      classesEmpty,
+      nothingFound: section === "all" && (!showSkills || skillsEmpty) && spellsEmpty && artifactsEmpty && (!showClasses || classesEmpty),
     },
   };
 }

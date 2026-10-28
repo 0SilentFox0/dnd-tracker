@@ -805,7 +805,30 @@
         "armor": [
           "Light armor"
         ],
-        "weapons": []
+        "weapons": [],
+        "skills": {
+          "count": 1,
+          "from": [
+            "acrobatics",
+            "animalHandling",
+            "arcana",
+            "athletics",
+            "deception",
+            "history",
+            "insight",
+            "intimidation",
+            "investigation",
+            "medicine",
+            "nature",
+            "perception",
+            "performance",
+            "persuasion",
+            "religion",
+            "sleightOfHand",
+            "stealth",
+            "survival"
+          ]
+        }
       }
     },
     "caster": "full",
@@ -4862,7 +4885,20 @@
         ],
         "weapons": [
           "Martial weapons"
-        ]
+        ],
+        "skills": {
+          "count": 1,
+          "from": [
+            "animalHandling",
+            "athletics",
+            "insight",
+            "investigation",
+            "nature",
+            "perception",
+            "stealth",
+            "survival"
+          ]
+        }
       }
     },
     "caster": "half",
@@ -5557,7 +5593,22 @@
         "armor": [
           "Light armor"
         ],
-        "weapons": []
+        "weapons": [],
+        "skills": {
+          "count": 1,
+          "from": [
+            "acrobatics",
+            "athletics",
+            "deception",
+            "insight",
+            "intimidation",
+            "investigation",
+            "perception",
+            "persuasion",
+            "sleightOfHand",
+            "stealth"
+          ]
+        }
       }
     },
     "caster": "none",

@@ -21,7 +21,7 @@ interface ChoicesEditorProps {
   issues?: ChoiceIssue[];
   /** збережені вибори, чий приріст уже входить у hero.scores */
   saved?: ChoicesState;
-  only?: { classId: string; level: number };
+  only?: { classId: string; level: number; multiclass?: boolean };
 }
 
 const issueFor = (issues: ChoiceIssue[] | undefined, path: string) => issues?.find((i) => i.path === path || i.path.startsWith(`${path}.`))?.message;
@@ -115,7 +115,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
 
             const subclass = cls.subclasses.find((s) => s.id === entry.subclassId) ?? null;
 
-            const defs = classChoiceDefs(cls, subclass);
+            const defs = classChoiceDefs(cls, subclass, only ? !!only.multiclass : data.classes.indexOf(entry) > 0);
 
             const ctx: PickerContext = { ...base, level: entry.level, columns: cls.columns ?? [], maxSlotLevel: maxSlotLevelFor({ ...entry, class: cls, subclass }) };
 

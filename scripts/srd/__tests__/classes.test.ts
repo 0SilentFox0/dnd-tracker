@@ -25,6 +25,11 @@ describe("convertClasses", () => {
     expect(cls("Fighter").skillChoices.from).toEqual(["acrobatics", "animalHandling", "athletics", "history", "insight", "intimidation", "persuasion", "perception", "survival"]);
   });
 
+  it("multiclass skill grant: Bard any skill, Fighter none", () => {
+    expect(cls("Bard").proficiencies.multiclass).toMatchObject({ skills: { count: 1, from: [...DND_SKILLS] } });
+    expect(cls("Fighter").proficiencies.multiclass?.skills).toBeUndefined();
+  });
+
   it("Extra Attack, Second Wind, Action Surge (2 only, scaled by the table), no table columns", () => {
     expect(at("Fighter", 5).find((a) => a.name === "Extra Attack")).toMatchObject({ id: "extra-attack-5", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: 1 }] });
     expect(at("Fighter", 1).find((a) => a.name === "Second Wind")).toMatchObject({

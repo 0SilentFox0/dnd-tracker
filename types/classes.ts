@@ -37,7 +37,7 @@ export interface GameClassData {
   savingThrows: AbilityKey[];
   proficiencies: { armor: string[]; weapons: string[]; tools: string[] };
   /** що клас додає, коли береться не першим (SRD «Multiclass proficiencies»); відсутнє — нічого */
-  multiclassProficiencies?: { armor: string[]; weapons: string[] };
+  multiclassProficiencies?: { armor: string[]; weapons: string[]; skills?: { count: number; from: string[] } };
   skillChoices: { count: number; from: string[] };
   caster: ClassCaster;
   spellcastingAbility: AbilityKey | null;

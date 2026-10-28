@@ -6,16 +6,17 @@ import type { Condition, Effect } from "@/lib/utils/abilities/schema";
 import type { ClassColumn } from "@/types/classes";
 
 // SRD 5.2 "Multiclass proficiencies": what a class grants when it is not the first one
-export const MULTICLASS_PROFICIENCIES: Record<string, { armor: string[]; weapons: string[] }> = {
+// skills: 2024 grants one skill (Bard: any; Ranger/Rogue: from the class list); "class" = the class' own skill list
+export const MULTICLASS_PROFICIENCIES: Record<string, { armor: string[]; weapons: string[]; skills?: { count: number; from: "any" | "class" } }> = {
   barbarian: { armor: ["Shields"], weapons: ["Martial weapons"] },
-  bard: { armor: ["Light armor"], weapons: [] },
+  bard: { armor: ["Light armor"], weapons: [], skills: { count: 1, from: "any" } },
   cleric: { armor: ["Light armor", "Medium armor", "Shields"], weapons: [] },
   druid: { armor: ["Light armor", "Shields"], weapons: [] },
   fighter: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
   monk: { armor: [], weapons: [] },
   paladin: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
-  ranger: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
-  rogue: { armor: ["Light armor"], weapons: [] },
+  ranger: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"], skills: { count: 1, from: "class" } },
+  rogue: { armor: ["Light armor"], weapons: [], skills: { count: 1, from: "class" } },
   sorcerer: { armor: [], weapons: [] },
   warlock: { armor: ["Light armor"], weapons: [] },
   wizard: { armor: [], weapons: [] },

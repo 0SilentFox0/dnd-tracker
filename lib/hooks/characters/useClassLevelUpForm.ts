@@ -65,7 +65,9 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
 
   const subclass = cls?.subclasses.find((s) => s.id === subclassPicked) ?? null;
 
-  const stepDefs = cls && character.hero ? levelUpChoiceDefs(cls, subclass, nextLevel) : [];
+  const multiclass = entries.length > 0 && entries[0].classId !== classId;
+
+  const stepDefs = cls && character.hero ? levelUpChoiceDefs(cls, subclass, nextLevel, multiclass) : [];
 
   const raisedEntry: CharacterClassEntry | null = cls ? { classId, level: nextLevel, ...(subclassPicked && { subclassId: subclassPicked }), ...(current?.choices && { choices: current.choices }) } : null;
 
@@ -108,6 +110,7 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
     cls,
     needsSubclass,
     stepDefs,
+    multiclass,
     raisedEntry,
     nextRow,
     gained,

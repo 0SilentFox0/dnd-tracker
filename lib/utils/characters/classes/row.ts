@@ -33,6 +33,12 @@ function columnsOf(v: unknown): ClassColumn[] {
   });
 }
 
+function multiclassSkills(raw: unknown) {
+  const skills = asObject(raw);
+
+  return typeof skills.count === "number" && skills.count > 0 ? { skills: { count: skills.count, from: strings(skills.from) } } : {};
+}
+
 export function toGameClassData(row: GameClass): GameClassData {
   const proficiencies = asObject(row.proficiencies);
 
@@ -48,7 +54,7 @@ export function toGameClassData(row: GameClass): GameClassData {
     hitDie: ((HIT_DICE as readonly number[]).includes(row.hitDie) ? row.hitDie : 8) as HitDie,
     savingThrows: strings(row.savingThrows).flatMap((k) => abilityKey(k) ?? []),
     proficiencies: { armor: strings(proficiencies.armor), weapons: strings(proficiencies.weapons), tools: strings(proficiencies.tools) },
-    ...(multiclass && { multiclassProficiencies: { armor: strings(multiclass.armor), weapons: strings(multiclass.weapons) } }),
+    ...(multiclass && { multiclassProficiencies: { armor: strings(multiclass.armor), weapons: strings(multiclass.weapons), ...multiclassSkills(multiclass.skills) } }),
     skillChoices: { count: typeof skillChoices.count === "number" ? skillChoices.count : 0, from: strings(skillChoices.from) },
     caster: ((CLASS_CASTERS as readonly string[]).includes(row.caster) ? row.caster : "none") as ClassCaster,
     spellcastingAbility: abilityKey(row.spellcastingAbility),

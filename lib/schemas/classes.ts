@@ -68,7 +68,7 @@ const refineTable = (c: TableInput, ctx: z.RefinementCtx) => {
 
 const profList = z.array(z.string().max(60)).max(20).default([]);
 
-const multiclassProfs = z.object({ armor: profList, weapons: profList }).optional();
+const multiclassProfs = z.object({ armor: profList, weapons: profList, skills: z.object({ count: z.number().int().min(0).max(18), from: profList }).optional() }).optional();
 
 const hitDieSchema = z.union([z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
 

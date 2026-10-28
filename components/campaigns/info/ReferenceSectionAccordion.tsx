@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { ArtifactReferenceCard } from "./ArtifactReferenceCard";
 import { ArtifactSetReferenceCard } from "./ArtifactSetReferenceCard";
+import { ClassReferenceCard } from "./ClassReferenceCard";
 import { ReferenceGroupSection } from "./ReferenceGroupSection";
 import { SkillReferenceCard } from "./SkillReferenceCard";
 import { SpellReferenceCard } from "./SpellReferenceCard";
@@ -11,22 +12,23 @@ import { SpellReferenceCard } from "./SpellReferenceCard";
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
 import { groupDisplayName, UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
-import type { ArtifactForReference, ArtifactSetForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ArtifactSetForReference, ClassForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 interface ReferenceSectionAccordionProps {
   campaignId: string;
   isDM: boolean;
-  shown: { skills: boolean; spells: boolean; artifacts: boolean };
+  shown: { skills: boolean; spells: boolean; artifacts: boolean; classes: boolean };
   items: {
     skills: SkillForReference[];
     spells: SpellForReference[];
     artifacts: ArtifactForReference[];
     artifactSets: ArtifactSetForReference[];
+    classes: ClassForReference[];
   };
 }
 
 export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: ReferenceSectionAccordionProps) {
-  const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets } = items;
+  const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets, classes: filteredClasses } = items;
 
   const skillsByMain = useMemo(() => {
     const map = new Map<string, SkillForReference[]>();
@@ -73,14 +75,36 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
     return map;
   }, [filteredArtifacts]);
 
-  const { skills: skillsVisible, spells: spellsVisible, artifacts: artifactsVisible } = shown;
+  const { skills: skillsVisible, spells: spellsVisible, artifacts: artifactsVisible, classes: classesVisible } = shown;
 
-  if (!skillsVisible && !spellsVisible && !artifactsVisible) return null;
+  if (!skillsVisible && !spellsVisible && !artifactsVisible && !classesVisible) return null;
 
-  const showBoth = [skillsVisible, spellsVisible, artifactsVisible].filter(Boolean).length > 1;
+  const showBoth = [skillsVisible, spellsVisible, artifactsVisible, classesVisible].filter(Boolean).length > 1;
 
   return (
     <div className="space-y-3">
+      {classesVisible && (
+        <HudPanel className="space-y-3">
+          {showBoth && (
+            <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-classes">
+              Класи
+            </h2>
+          )}
+          <p className="text-sm text-hud-muted">
+            Класи кампанії: особливості, вміння за рівнями та підкласи.
+          </p>
+          <Accordion
+            type="multiple"
+            defaultValue={[]}
+            className="grid grid-cols-1 gap-3 w-full sm:grid-cols-2"
+          >
+            {filteredClasses.map((c) => (
+              <ClassReferenceCard key={c.id} gameClass={c} />
+            ))}
+          </Accordion>
+        </HudPanel>
+      )}
+
       {skillsVisible && (
         <HudPanel className="space-y-3">
           {showBoth && (

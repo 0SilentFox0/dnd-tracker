@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { useInfoReferenceFilters } from "@/lib/hooks/campaigns/useInfoReferenceFilters";
-import type { ArtifactForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ClassForReference } from "@/types/info-reference";
 
 const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
   id: "x",
@@ -50,5 +50,31 @@ describe("useInfoReferenceFilters: артефакти", () => {
 
     expect(result.current.results.filteredArtifacts).toHaveLength(2);
     expect(result.current.filters.hasActive).toBe(false);
+  });
+});
+
+describe("useInfoReferenceFilters: класи", () => {
+  const cls: ClassForReference = { id: "k", name: "Воїн", icon: null, color: null, summary: ["Кістка здоров'я: к10"], features: [{ level: 2, name: "Сплеск дій", description: null }], subclasses: [] };
+
+  it("у класовому режимі ховає скіли та шукає за вміннями класу", () => {
+    const { result } = renderHook(() => useInfoReferenceFilters([], [], [], [cls]));
+
+    expect(result.current.filters.classMode).toBe(true);
+    expect(result.current.filters.visible).toMatchObject({ skills: false, classes: true });
+
+    act(() => result.current.filters.search.set("сплеск"));
+
+    expect(result.current.results.filteredClasses).toHaveLength(1);
+
+    act(() => result.current.filters.search.set("нема"));
+
+    expect(result.current.ui.nothingFound).toBe(true);
+  });
+
+  it("без класів показує скіли, не класи", () => {
+    const { result } = renderHook(() => useInfoReferenceFilters([], [], [], null));
+
+    expect(result.current.filters.classMode).toBe(false);
+    expect(result.current.filters.visible).toMatchObject({ skills: true, classes: false });
   });
 });

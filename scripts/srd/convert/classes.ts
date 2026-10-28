@@ -83,9 +83,15 @@ export function parseCoreTraits(desc: string): Pick<ClassRow, "skillChoices" | "
 }
 
 function withMulticlass(traits: ReturnType<typeof parseCoreTraits>, classSlug: string) {
-  const multiclass = MULTICLASS_PROFICIENCIES[classSlug];
+  const entry = MULTICLASS_PROFICIENCIES[classSlug];
 
-  return multiclass ? { ...traits, proficiencies: { ...traits.proficiencies, multiclass } } : traits;
+  if (!entry) return traits;
+
+  const { skills, ...lists } = entry;
+
+  const multiclass = skills ? { ...lists, skills: { count: skills.count, from: skills.from === "any" ? [...DND_SKILLS] : traits.skillChoices.from } } : lists;
+
+  return { ...traits, proficiencies: { ...traits.proficiencies, multiclass } };
 }
 
 function featureAbilities(f: Fixture<O5Feature>, level: number): Ability[] {
