@@ -40,7 +40,7 @@ import {
 } from "@/lib/utils/battle/flows";
 import { isOnMap } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
-import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
+import { spellEffectsFormula, spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import { slotLevels } from "@/lib/utils/battle/view";
@@ -109,7 +109,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide).filter(visible), [order, caster, pickSide, visible]);
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
+  const filteredOut = (t: BattleParticipant) => !matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
+
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && !filteredOut(t);
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
@@ -128,7 +130,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const mapCandidates = useMemo(() => targets.filter(isOnMap), [targets]);
 
   const hover = useSpellMapTargeting(flow, dispatch, {
-    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
+    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
   });
 
   const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster?.basicInfo.side })) });
@@ -161,8 +163,17 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)?.castLevel;
   };
 
-  const formulaOf = (s: BookSpell): string =>
-    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s)) : "";
+  const formulaOf = (s: BookSpell): string => {
+    if (!caster) return "";
+
+    const def = spellDefinition(s);
+
+    if (flow.pick?.spellId === s.id && flow.pick.inputDice) return `${flow.pick.diceSlots.length}к${flow.pick.inputDice.sides}`;
+
+    if (def.dice === 0) return spellEffectsFormula(s.spellEffects ?? []);
+
+    return spellFormulaLabel(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s));
+  };
 
   const grantsOf = (s: BookSpell) => grantsFor(caster, s.id);
 

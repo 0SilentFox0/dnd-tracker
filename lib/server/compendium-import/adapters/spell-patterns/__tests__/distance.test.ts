@@ -55,6 +55,12 @@ describe("fallingDamage", () => {
     });
   });
 
+  it("recognises the 'pulled to the ground' wording as prone", () => {
+    const text = ["A flying creature must make a Strength saving throw. On a failure it is pulled to the ground and takes {@dice 1d6} bludgeoning damage for every 10 feet it fell, to a maximum of 20d6."];
+
+    expect(spellRow(text, row)).toMatchObject({ native: { fields: { spellEffects: [{ kind: "inputDice" }, { kind: "dealDamage" }, { kind: "applyCondition", condition: "prone" }] } } });
+  });
+
   it("without the maximum it stays a variable-damage blocker", () => {
     const text = ["A creature takes {@dice 1d6} damage for every 10 feet it fell."];
 

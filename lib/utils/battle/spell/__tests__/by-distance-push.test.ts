@@ -52,6 +52,10 @@ describe("dealDamage.byDistance", () => {
     expect(hpLost(cast(byDistance, foe(cells)))).toBe(damage);
   });
 
+  it("logs the distance and the band", () => {
+    expect(cast(byDistance, foe(6)).messages.join(" ")).toContain("дистанція 30 фт → 4d6");
+  });
+
   it("falls back to the first range without a map", () => {
     const r = cast(byDistance, foe(17), { map: undefined });
 
@@ -156,5 +160,22 @@ describe("Plummet-like cast", () => {
 
     expect(hpLost(r)).toBe(0);
     expect(prone(r)).toBe(false);
+  });
+});
+
+describe("onlyIfAffected self effect (Control Animal)", () => {
+  const control = spellOf(
+    [{ kind: "applyCondition", condition: "charmed", duration: { rounds: 5 } }, { kind: "applyCondition", condition: "incapacitated", target: "self", onlyIfAffected: true, duration: { rounds: 5 } }],
+    { resolution: { kind: "save", ability: "wisdom", onSuccess: "none" } },
+  );
+
+  const incapacitated = (r: ReturnType<typeof castSpell>) => JSON.stringify(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "c")?.battleData.activeEffects).includes("incapacitated");
+
+  it("the caster is incapacitated when the target fails", () => {
+    expect(incapacitated(cast(control, foe(3), { saveRolls: [{ participantId: "f", roll: 1 }] }))).toBe(true);
+  });
+
+  it("the caster is not when the target saves", () => {
+    expect(incapacitated(cast(control, foe(3), { saveRolls: [{ participantId: "f", roll: 20 }] }))).toBe(false);
   });
 });

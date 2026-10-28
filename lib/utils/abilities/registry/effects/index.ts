@@ -93,6 +93,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       { name: "saveEnds", label: "Рятівний кидок наприкінці ходу", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
       { name: "percent", label: "Шанс, % (для втрати дії)", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
       { name: "breakOnDamage", label: "Знімається при отриманні шкоди", input: "toggle", optional: true },
+      { name: "onlyIfAffected", label: "Лише якщо хоч одну ціль заклинання уражено (для себе)", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],

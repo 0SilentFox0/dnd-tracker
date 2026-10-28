@@ -1,6 +1,7 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { type SpellDice, spellDice, spellDice5e } from "@/lib/utils/spells/model/dice";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export const upcastSteps = (spellLevel: number, castLevel: number): number => Math.max(0, castLevel - spellLevel);
@@ -24,4 +25,21 @@ export function spellFormulaLabel(caster: BattleParticipant, spell: Parameters<t
   const { count, sides } = casterSpellDice(caster, spell, castLevel);
 
   return count === 0 ? "без кубиків" : `${count}к${sides}`;
+}
+
+const diceLabel = (dice: string) => dice.replace("d", "к");
+
+/** Сила заклинання без кубиків каста: діапазон byDistance або кубики лікування варіантів; "" — шкоди/лікування немає. */
+export function spellEffectsFormula(effects: SpellEffect[]): string {
+  const list = effects.flatMap((e) => (e.kind === "chooseOne" ? e.options : [e]));
+
+  const ranges = list.flatMap((e) => (e.kind === "dealDamage" && e.byDistance ? [e.byDistance] : []))[0];
+
+  if (ranges) return `${diceLabel(ranges[0].dice)}…${diceLabel(ranges[ranges.length - 1].dice)}`;
+
+  const heals = [...new Set(list.flatMap((e) => (e.kind === "heal" && typeof e.amount === "string" ? [diceLabel(e.amount)] : [])))];
+
+  if (heals.length > 0) return heals.join(" / ");
+
+  return list.some((e) => e.kind === "dealDamage" || e.kind === "heal") ? "без кубиків" : "";
 }

@@ -55,7 +55,7 @@ export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, abilit
         dice: 0,
         spellEffects: [
           { kind: "applyCondition", condition: "charmed", duration: { rounds } },
-          { kind: "applyCondition", condition: "incapacitated", target: "self", duration: { rounds } },
+          { kind: "applyCondition", condition: "incapacitated", target: "self", onlyIfAffected: true, duration: { rounds } },
         ],
       },
     },

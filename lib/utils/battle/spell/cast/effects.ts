@@ -107,7 +107,11 @@ function distanceDamage(state: SpellCastState, ranges: NonNullable<Extract<Effec
 
   const range = ranges.find((r) => r.maxFeet >= feet) ?? ranges[ranges.length - 1];
 
-  const rolled = rollDice(rangeDice(state, range.dice), state.rng);
+  const dice = rangeDice(state, range.dice);
+
+  if (onMap) flow.messages.push(`📏 ${target.basicInfo.name}: дистанція ${feet} фт → ${dice}`);
+
+  const rolled = rollDice(dice, state.rng);
 
   return computeSpellPower({ caster: me, groupId: state.spell.groupId, rolls: [rolled], participants: flow.ps, extra: state.actionModifiers[casterIdOf(state)], addAbilityMod: state.spell.definition.addAbilityMod, damageBonus: state.spell.definition.damageBonus }).damage;
 }

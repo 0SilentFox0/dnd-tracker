@@ -399,6 +399,12 @@ describe("deriveMapScene: вибір цілей заклинання", () => {
     expect(s.tokenClick("h")).toMatchObject({ kind: "reject" });
   });
 
+  it("ціль, відхилена фільтром заклинання — «не підходить», а не «Поза дальністю»", () => {
+    const s = deriveMapScene(input({ mode: { pick: pick({ targets: [{ id: "e2", reachable: false, filteredOut: true }] }) } }));
+
+    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: "Ця ціль не підходить для заклинання" });
+  });
+
   it("клік по клітинці: зайнята кандидатом — pick, порожня — none (не ходить)", () => {
     const s = deriveMapScene(input({ mode: { pick: pick() } }));
 

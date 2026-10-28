@@ -13,6 +13,7 @@ export interface MapTargetingContext {
   active: boolean;
   candidates: BattleParticipant[];
   inRange(t: BattleParticipant): boolean;
+  filteredOut?(t: BattleParticipant): boolean;
   setMapAim(aim: MapAim | null): void;
   setMapPick(pick: MapPick | null): void;
 }
@@ -46,18 +47,18 @@ function createAimHoverStore(): AimHoverStore {
 
 /** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер пишеться у стор, щоб прев'ю перемальовувало лише своїх підписників, Escape скасовує. */
 export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext): AimHoverStore {
-  const { caster, order, map, active, candidates, inRange, setMapAim, setMapPick } = ctx;
+  const { caster, order, map, active, candidates, inRange, filteredOut, setMapAim, setMapPick } = ctx;
 
   const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
 
   const pickAt = useRef<(id: string) => void>(() => undefined);
 
-  const latest = useRef({ candidates, inRange });
+  const latest = useRef({ candidates, inRange, filteredOut });
 
   const [hover] = useState(createAimHoverStore);
 
   useEffect(() => {
-    latest.current = { candidates, inRange };
+    latest.current = { candidates, inRange, filteredOut };
     aimAt.current = (cell) => {
       if (!map || !caster || !state.pick) return;
 
@@ -104,9 +105,9 @@ export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<S
   useEffect(() => {
     if (!picking || !casterId) return;
 
-    const { candidates: list, inRange: reach } = latest.current;
+    const { candidates: list, inRange: reach, filteredOut } = latest.current;
 
-    setMapPick({ casterId, targets: list.map((p) => ({ id: p.basicInfo.id, reachable: reach(p) })), selectedIds: pickedIds ? pickedIds.split(",") : [], onPick });
+    setMapPick({ casterId, targets: list.map((p) => ({ id: p.basicInfo.id, reachable: reach(p), ...(filteredOut?.(p) && { filteredOut: true }) })), selectedIds: pickedIds ? pickedIds.split(",") : [], onPick });
 
     return () => setMapPick(null);
   }, [picking, casterId, pickSignature, pickedIds, onPick, setMapPick]);

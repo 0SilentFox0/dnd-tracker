@@ -213,6 +213,7 @@ const ApplyConditionSchema = z.object({
   saveEnds: z.object({ ability: AbilityKeySchema }).optional(),
   percent: z.number().int().min(1).max(100).optional(),
   breakOnDamage: z.boolean().optional(),
+  onlyIfAffected: z.boolean().optional(),
   ...target,
 });
 

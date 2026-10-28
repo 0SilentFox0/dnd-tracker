@@ -123,6 +123,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   def.effects.forEach((effect, effectIndex) => {
     if (isPerTarget(effect)) return;
 
+    if ("onlyIfAffected" in effect && effect.onlyIfAffected && targetIds.every((id) => state.outcomes.get(id)?.skip !== false)) return;
+
     const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterId, targetIds, ...info };
 
     resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps, flow.ctx).forEach((id, index) => applyTo(state, effect, effectIndex, id, index));

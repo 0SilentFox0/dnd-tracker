@@ -72,7 +72,7 @@ export const fallingDamage: SpellRecognizer = ({ text, cast, ability, damageType
 
   const flying = /\bflying creature\b/i.test(text);
 
-  const prone = /\bprone\b/i.test(text);
+  const prone = /\bprone\b|\bpulled to the ground\b/i.test(text);
 
   const effects: SpellEffect[] = [
     { kind: "inputDice", label: "Висота, ×10 фт", max },

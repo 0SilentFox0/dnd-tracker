@@ -96,7 +96,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
         </p>
       )}
       {spell.executionMode !== "manual" && <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
-        {[["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")], ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
+        {[...(formula === "" ? [] : [["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")]]), ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
             <span className="text-xs italic text-[#7a6650]">{a}</span>
             <span className="text-base">{b}</span>

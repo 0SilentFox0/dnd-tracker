@@ -56,6 +56,7 @@ _Оновлено: 2026-10-28._
 
 - **Stage6 T19 завершено локально на `feat/constructor` (2026-10-26):** локальна assistant execution integration6/6, browser18/18 на Chrome1440/390, guard unit5/5, tsc/lint clean. Guarded target: local `constructor`; migration status41 up-to-date before/after; own fixtures and browser process cleaned. Браузер запускає production AssistantWorkspace з deterministic synthetic HTTP; DB integrity доведено окремо реальною PostgreSQL. Це історичний T19 evidence; T20 завершено (див. handoff). HOMM gateway не запускався.
 
+- Імпорт компендіуму: зображення (`fluff.images`, `foundryImg`, `image`/`gallery` у `entries`; ~400 у Obojima, зовнішні URL) пропускаються (`MEDIA_OR_FOUNDRY_SKIPPED`/`MEDIA_SKIPPED`). Домени не можна whitelist-ити (користувач імпортує довільні компендіуми) — рішення з прод-інфрою: окреме середовище/сховище на користувача + ліміти контенту; до того — без картинок.
 - Візард атаки показує цілі поза досяжністю на мапі (сервер відхиляє з тостом) — є запропонований фікс, не зроблено.
 - Видалити тестовий бій на prod «ТЕСТ Лабіринт» (`cmvguwoiq0001js07uchzx3fb`).
 - Баланс: перекіс на L10 (і L3 через низький AC юнітів T1); варіант виправлення — REF-константи за тіром.
