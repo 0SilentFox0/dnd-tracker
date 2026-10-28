@@ -11,4 +11,5 @@ export const DEFAULT_RULES: Ruleset = {
   deathSaves: { enabled: false, unitsDieAtZero: true },
   concentration: { enabled: false, dcCap: null },
   conditions: { enabled: false, exhaustion: "2014" },
+  actions: { enabled: false, opportunityAttacks: true, variant: "2014" },
 };

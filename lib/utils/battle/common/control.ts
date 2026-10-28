@@ -26,6 +26,7 @@ export interface ActorGuardTexts {
   missing: string;
   forbidden: string;
   inactive?: { code: BattleRuleCode; message: string };
+  anyTurn?: boolean;
 }
 
 export function requireActor(ctx: ActorScope, id: string, texts: ActorGuardTexts): BattleParticipant {
@@ -33,7 +34,7 @@ export function requireActor(ctx: ActorScope, id: string, texts: ActorGuardTexts
 
   if (!actor) throw new BattleAccessError(404, texts.missing);
 
-  if (!canActNow(ctx, actor, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, texts.forbidden);
+  if (!(texts.anyTurn ? controls(ctx, actor) : canActNow(ctx, actor, ctx.participants[ctx.scene.turnIndex]))) throw new BattleAccessError(403, texts.forbidden);
 
   if (texts.inactive && !isActive(actor)) throw new BattleRuleError(texts.inactive.code, texts.inactive.message);
 

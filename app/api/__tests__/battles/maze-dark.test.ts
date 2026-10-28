@@ -109,6 +109,6 @@ describe("blockedByMode", () => {
       .map((file) => relative(ROOT, join(file, "..")))
       .sort();
 
-    expect(blocked).toEqual(["ability-action", "attack", "aura-zone", "bonus-action", "maze-mark", "morale-check", "spell"]);
+    expect(blocked).toEqual(["ability-action", "attack", "aura-zone", "bonus-action", "core-action", "maze-mark", "morale-check", "spell"]);
   });
 });

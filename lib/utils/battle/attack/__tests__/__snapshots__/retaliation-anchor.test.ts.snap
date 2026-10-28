@@ -1,0 +1,207 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`resolveRetaliation якір (байт-у-байт) > rng 0.05 1`] = `
+{
+  "action": {
+    "actionDetails": {
+      "attackBonus": 9,
+      "attackKind": "melee",
+      "attackRoll": 2,
+      "isCritical": false,
+      "isCriticalFail": false,
+      "isHit": false,
+      "targetAC": 14,
+      "totalAttackValue": 11,
+      "weaponName": "Меч",
+    },
+    "actionIndex": 0,
+    "actionType": "retaliation",
+    "actorId": "d",
+    "actorName": "d",
+    "actorSide": "enemy",
+    "battleId": "b1",
+    "hpChanges": [],
+    "id": "~",
+    "isCancelled": false,
+    "resultText": "Відсіч: d → a: d20 2, промах",
+    "round": 1,
+    "targets": [
+      {
+        "participantId": "a",
+        "participantName": "a",
+      },
+    ],
+    "timestamp": "~",
+  },
+  "calls": 2,
+  "hp": [
+    300,
+    300,
+  ],
+}
+`;
+
+exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
+{
+  "action": {
+    "actionDetails": {
+      "attackBonus": 9,
+      "attackKind": "melee",
+      "attackRoll": 18,
+      "damageBreakdown": "Сума кубиків: 5; + бонус 2 (Сила); = 7 (база); ──────────; Сума 7.0 = 7 шкоди",
+      "damageRolls": [
+        {
+          "damageType": "slashing",
+          "dice": "1d6",
+          "results": [
+            5,
+          ],
+          "total": 5,
+        },
+      ],
+      "damageSteps": {
+        "a": [
+          {
+            "after": 5,
+            "kind": "dice",
+            "label": "Кубики",
+            "side": "attacker",
+            "value": 5,
+          },
+          {
+            "after": 7,
+            "kind": "flat",
+            "label": "Сила",
+            "side": "attacker",
+            "value": 2,
+          },
+        ],
+      },
+      "isCritical": false,
+      "isCriticalFail": false,
+      "isHit": true,
+      "targetAC": 14,
+      "totalAttackValue": 27,
+      "totalDamage": 7,
+      "weaponName": "Меч",
+    },
+    "actionIndex": 0,
+    "actionType": "retaliation",
+    "actorId": "d",
+    "actorName": "d",
+    "actorSide": "enemy",
+    "battleId": "b1",
+    "hpChanges": [
+      {
+        "change": 7,
+        "newHp": 293,
+        "oldHp": 300,
+        "participantId": "a",
+        "participantName": "a",
+      },
+    ],
+    "id": "~",
+    "isCancelled": false,
+    "resultText": "Відсіч: d → a: d20 18, 7 шкоди",
+    "round": 1,
+    "targets": [
+      {
+        "participantId": "a",
+        "participantName": "a",
+      },
+    ],
+    "timestamp": "~",
+  },
+  "calls": 3,
+  "hp": [
+    293,
+    300,
+  ],
+}
+`;
+
+exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
+{
+  "action": {
+    "actionDetails": {
+      "attackBonus": 9,
+      "attackKind": "melee",
+      "attackRoll": 20,
+      "criticalEffect": {
+        "description": "Атака ігнорує реакції цілі",
+        "flavor": "Удар зі сліпої зони — a не бачить, звідки прийшла смерть.",
+        "id": "~",
+        "name": "Ігнорування реакцій",
+        "type": "success",
+      },
+      "damageBreakdown": "Сума кубиків: 2; + бонус 2 (Сила); = 4 (база); ──────────; Сума 4.0 = 4 шкоди",
+      "damageRolls": [
+        {
+          "damageType": "slashing",
+          "dice": "1d6",
+          "results": [
+            2,
+          ],
+          "total": 2,
+        },
+      ],
+      "damageSteps": {
+        "a": [
+          {
+            "after": 2,
+            "kind": "dice",
+            "label": "Кубики",
+            "side": "attacker",
+            "value": 2,
+          },
+          {
+            "after": 4,
+            "kind": "flat",
+            "label": "Сила",
+            "side": "attacker",
+            "value": 2,
+          },
+        ],
+      },
+      "isCritical": true,
+      "isCriticalFail": false,
+      "isHit": true,
+      "targetAC": 14,
+      "totalAttackValue": 29,
+      "totalDamage": 4,
+      "weaponName": "Меч",
+    },
+    "actionIndex": 0,
+    "actionType": "retaliation",
+    "actorId": "d",
+    "actorName": "d",
+    "actorSide": "enemy",
+    "battleId": "b1",
+    "hpChanges": [
+      {
+        "change": 4,
+        "newHp": 296,
+        "oldHp": 300,
+        "participantId": "a",
+        "participantName": "a",
+      },
+    ],
+    "id": "~",
+    "isCancelled": false,
+    "resultText": "Відсіч: d → a: d20 20, 4 шкоди. Критичне влучання — Ігнорування реакцій! Удар зі сліпої зони — a не бачить, звідки прийшла смерть.",
+    "round": 1,
+    "targets": [
+      {
+        "participantId": "a",
+        "participantName": "a",
+      },
+    ],
+    "timestamp": "~",
+  },
+  "calls": 4,
+  "hp": [
+    296,
+    300,
+  ],
+}
+`;

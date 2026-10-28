@@ -4,6 +4,7 @@ import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from ".
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { DND_SKILLS } from "@/lib/constants/skills";
 
 export {
   type AnyConditionKey,
@@ -54,6 +55,10 @@ const flagBase = { kind: z.literal("flag"), ...timed };
 export const AbilityKeySchema = z.enum(ABILITY_KEYS);
 
 export const AnyConditionSchema = z.enum([...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+
+const DndSkillSchema = z.enum(DND_SKILLS);
+
+const SkillsOrAll = z.union([z.literal("all"), z.array(DndSkillSchema).min(1)]);
 
 const AbilitiesOrAll = z.union([z.literal("all"), z.array(AbilityKeySchema).min(1)]);
 
@@ -111,6 +116,9 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("saveDisadvantage"), abilities: AbilitiesOrAll }),
   z.object({ ...flagBase, flag: z.literal("autoFailSave"), abilities: z.array(AbilityKeySchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("saveProficiency"), abilities: z.array(AbilityKeySchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("checkAdvantage"), skills: SkillsOrAll }),
+  z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
+  z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({

@@ -14,6 +14,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
+import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
@@ -33,6 +34,7 @@ import {
   BattleConflictError,
   BattleRuleError,
   eventToBattleAction,
+  systemEvent,
 } from "@/lib/utils/battle/store";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
@@ -132,10 +134,14 @@ function withVictory(scene: BattleSceneState, result: MutationResult): MutationR
   };
 }
 
-function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
   const cleared = clearFallenEffects(result.participants);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
+
+  const released = releaseInvalidGrapples(result.participants, map);
+
+  if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 
@@ -271,7 +277,7 @@ export async function runBattleMutation<TBody>(
 
     const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-    const placed = withPlacement(map, { status: loaded.scene.status, participants: loaded.participants }, mutated, !isDryRun);
+    const placed = withPlacement(map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
 
     const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed));
 

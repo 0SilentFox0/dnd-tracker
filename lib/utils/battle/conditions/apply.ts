@@ -1,4 +1,5 @@
-import { exhaustionLevel, MAX_EXHAUSTION, syncExhaustion } from "./query";
+import { releaseGrapples } from "./grapple-links";
+import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "./query";
 import { CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffectInput } from "./registry";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
@@ -6,7 +7,9 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { DODGE_KEY_PREFIX } from "@/lib/utils/battle/actions/effects";
 import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
@@ -91,11 +94,17 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
     }
   }
 
+  if (hasCondition(next, "incapacitated") || hasEffectMarker(next, "immobilized")) next = removeEffects(next, (e) => !!e.abilityKey?.startsWith(DODGE_KEY_PREFIX)).participant;
+
   const applied = updateParticipant(ps, targetId, () => next);
 
   const dropped = dropConcentrationIfIncapacitated(applied, targetId);
 
-  return { participants: dropped.participants, messages: [...messages, ...dropped.messages], blocked: false };
+  if (!hasCondition(next, "incapacitated")) return { participants: dropped.participants, messages: [...messages, ...dropped.messages], blocked: false };
+
+  const released = releaseGrapples(dropped.participants, targetId, "недієздатний");
+
+  return { participants: released.participants, messages: [...messages, ...dropped.messages, ...released.messages], blocked: false };
 }
 
 export function saveEndsFor(owner: BattleParticipant | undefined, ability: AbilityKey): { ability: AbilityKey; dc: number } {

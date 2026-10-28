@@ -15,6 +15,8 @@ export interface TimedEffectInput {
   breakOnDamage?: boolean;
   charmOrigin?: ActiveEffect["charmOrigin"];
   countdownAtTurnStart?: boolean;
+  until?: "turnEnd" | "nextTurnStart";
+  consumeOn?: ActiveEffect["consumeOn"];
   source?: ActiveEffect["source"];
   permanent?: boolean;
   saveEnds?: ActiveEffect["saveEnds"];
@@ -52,7 +54,9 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.hotHeal && { hotHeal: input.hotHeal }),
     ...(input.breakOnDamage && { breakOnDamage: true }),
     ...(input.charmOrigin && { charmOrigin: input.charmOrigin }),
-    ...(input.countdownAtTurnStart && { countdownAtTurnStart: true }),
+    ...((input.countdownAtTurnStart || input.until === "nextTurnStart") && { countdownAtTurnStart: true }),
+    ...(input.until === "turnEnd" && { armed: true, expireAtTurnEnd: true }),
+    ...(input.consumeOn && { consumeOn: input.consumeOn }),
     ...(input.source && { source: input.source }),
     ...(input.permanent && { permanent: true }),
     ...(input.saveEnds && { saveEnds: input.saveEnds }),

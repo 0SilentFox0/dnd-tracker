@@ -37,6 +37,20 @@ export function findAttack(attacker: BattleParticipant, attackId: string | undef
   return (attackId ? attacks.find((a) => a.id === attackId || a.name === attackId) : undefined) ?? attacks[0];
 }
 
+export function assertAttackAllowed(attacker: BattleParticipant, attack: BattleAttack, targets: BattleParticipant[]): void {
+  const attackKind = attackKindOf(attack.type);
+
+  if (getDisabledAttackKinds(attacker)[attackKind]) {
+    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
+  }
+
+  const charmers = conditionSourceIds(attacker, "charmed");
+
+  if (targets.some((t) => charmers.includes(t.basicInfo.id))) {
+    throw new BattleRuleError("invalid_target", `${attacker.basicInfo.name} не може атакувати того, хто його зачарував`);
+  }
+}
+
 export interface ValidatedAttackRequest {
   attacker: BattleParticipant;
   attack: BattleAttack;
@@ -81,17 +95,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
 
   if (!attack) throw new BattleRuleError("action_rejected", "У атакуючого немає доступної атаки");
 
-  const attackKind = attackKindOf(attack.type);
-
-  if (getDisabledAttackKinds(attacker)[attackKind]) {
-    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
-  }
-
-  const charmers = conditionSourceIds(attacker, "charmed");
-
-  if (chosenTargets.some((t) => charmers.includes(t.basicInfo.id))) {
-    throw new BattleRuleError("invalid_target", `${attacker.basicInfo.name} не може атакувати того, хто його зачарував`);
-  }
+  assertAttackAllowed(attacker, attack, chosenTargets);
 
   return { attacker, attack, targetIds, chosenTargets, singleRoll, usePerTargetRolls };
 }

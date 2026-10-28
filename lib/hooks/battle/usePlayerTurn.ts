@@ -96,7 +96,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     afterAction: () => {
       if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
-      if (turnExhausted(fresh(), bonusSpells, canReturnNow())) dispatch({ type: "EXHAUSTED" });
+      if (turnExhausted(fresh(), bonusSpells, { canReturn: canReturnNow(), coreActions: !!scene.battle.rules?.actions.enabled })) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {
       let res;

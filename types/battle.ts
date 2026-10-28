@@ -4,6 +4,7 @@ import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { DndSkill } from "@/lib/constants/skills";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -167,6 +168,7 @@ export interface BattleParticipantAbilities {
   archetypeName?: string;
   /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
   saveProficiencies?: AbilityKey[];
+  skillProficiencies?: DndSkill[];
   /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
   heroDice?: { melee?: Record<number, string>; ranged?: Record<number, string> };
 }
@@ -372,6 +374,10 @@ export interface BattleParticipantBattleData {
   mazeWakeRound?: number;
   /** Клітинок пройдено в поточному ході */
   movementUsed?: number;
+  /** Додаткові клітинки руху цього ходу (Ривок) */
+  extraMovement?: number;
+  /** Підготовлена атака: чекає тригера до початку наступного ходу власника */
+  readied?: { kind: "attack"; round: number };
   /** Якір на початок поточного ходу (для «Удару і повернення») */
   turnStartPosition?: GridPoint;
   /** Вже поверталася на стартову клітинку цього ходу */

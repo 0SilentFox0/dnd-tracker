@@ -140,7 +140,7 @@ export function buildAbortedAttackAction(
   });
 }
 
-export interface BuildRetaliationParams {
+export interface BuildOffTurnParams {
   retaliator: BattleParticipant;
   target: BattleParticipant;
   attack: BattleAttack;
@@ -151,9 +151,10 @@ export interface BuildRetaliationParams {
   battleId: string;
   currentRound: number;
   critFlavorText?: string;
+  title?: string;
 }
 
-export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction {
+export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
   const { retaliator, target, attack, attackRoll, hit } = p;
 
   const d20 = attackRoll.totalAttackValue - attackRoll.attackBonus;
@@ -162,7 +163,7 @@ export function buildRetaliationAction(p: BuildRetaliationParams): BattleAction 
 
   const critText = crit ? `. ${critSummary(crit, p.critFlavorText, attackRoll.isCriticalFail)}` : "";
 
-  const summary = `Відсіч: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
+  const summary = `${p.title ?? "Відсіч"}: ${retaliator.basicInfo.name} → ${target.basicInfo.name}: d20 ${d20}, ${
     hit ? `${hit.hitDamage.totalFinalDamage} шкоди${!crit && attackRoll.isCritical ? " (КРИТИЧНЕ ПОПАДАННЯ!)" : ""}` : "промах"
   }${critText}`;
 

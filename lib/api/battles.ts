@@ -233,6 +233,15 @@ export async function applyBattleCondition(campaignId: string, battleId: string,
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/conditions`, data);
 }
 
+export type CoreActionBody =
+  | { action: "dash" | "disengage" | "dodge" | "hide" | "ready" | "standUp" | "escape"; participantId: string }
+  | { action: "help" | "grapple" | "readiedAttack"; participantId: string; targetId: string }
+  | { action: "shove"; participantId: string; targetId: string; mode: "prone" | "push" };
+
+export async function runCoreAction(campaignId: string, battleId: string, data: WithVersion<CoreActionBody>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/core-action`, data);
+}
+
 export async function scaleBattleUnits(campaignId: string, battleId: string, data: WithVersion<{ direction: "buff" | "debuff" }>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/scale-units`, data);
 }

@@ -590,3 +590,38 @@ describe("резерв і рішення ДМ", () => {
     expect(saved[0].battleData.position).toBeDefined();
   });
 });
+
+describe("runBattleMutation: недійсні захоплення", () => {
+  const grappledBy = (target: BattleParticipant, grapplerId: string): BattleParticipant => ({
+    ...target,
+    battleData: {
+      ...target.battleData,
+      activeEffects: [{ id: "g1", type: "condition", abilityKey: `core:grapple:${grapplerId}`, name: "Схоплений", effects: [{ type: "grappled", value: 1 }], remainingRounds: 99, source: { participantId: grapplerId, name: grapplerId } } as never],
+    },
+  });
+
+  const savedAfter = async (participants: BattleParticipant[]) => {
+    const d = deps();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: () => ({ participants, pending: [], events: [] }) }, d);
+
+    return vi.mocked(d.saveBattle).mock.calls[0][1];
+  };
+
+  it("схоплювач упав до 0 HP — ціль звільнено, подія в журналі", async () => {
+    const deadGrappler = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
+
+    const out = await savedAfter([grappledBy(hero, "gob"), deadGrappler, { ...goblin, basicInfo: { ...goblin.basicInfo, id: "gob2" } }]);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")!.battleData.activeEffects).toEqual([]);
+    expect(out.events.some((e) => e.resultText?.includes("відпускає"))).toBe(true);
+  });
+
+  it("живий суміжний схоплювач — без змін і без подій", async () => {
+    const out = await savedAfter([grappledBy(hero, "gob"), goblin]);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")!.battleData.activeEffects).toHaveLength(1);
+    expect(out.events).toEqual([]);
+  });
+});
+

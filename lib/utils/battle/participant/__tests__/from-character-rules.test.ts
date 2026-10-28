@@ -34,3 +34,15 @@ describe("createBattleParticipantFromCharacter: правила бою без п�
     expect(p.abilities.moraleCap).toBe(3);
   });
 });
+
+describe("createBattleParticipantFromCharacter: навички героя", () => {
+  it("skills { stealth: true, foo: true } -> skillProficiencies [stealth]; без навичок поля немає", async () => {
+    const p = await createBattleParticipantFromCharacter({ ...character, skills: { stealth: true, foo: true } } as never, "b1", ParticipantSide.ALLY, undefined, context);
+
+    expect(p.abilities.skillProficiencies).toEqual(["stealth"]);
+
+    const q = await createBattleParticipantFromCharacter({ ...character, skills: {} } as never, "b1", ParticipantSide.ALLY, undefined, context);
+
+    expect("skillProficiencies" in q.abilities).toBe(false);
+  });
+});

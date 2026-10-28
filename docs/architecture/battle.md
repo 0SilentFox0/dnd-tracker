@@ -52,6 +52,23 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Концентрація** (`lib/utils/battle/concentration/`): прапорець зберігається в існуючій колонці `Spell.concentration` (не в JSON `definition`). Каст створює на кастері ефект «Концентрація: …» (`concentration: { castId }`), а ефекти й зони цього касту — тег `concentrationOf`; новий каст спершу знімає попередню (`beginConcentration`, `dropConcentration`). Шкода → `concentrationCheck` (Вит проти `max(10, ⌊шкода/2⌋)`, межа `dcCap`); провал, недієздатність, смерть, 0 HP — концентрація зникає з усіма ефектами. **Зони згасають лениво**: `isZoneConcentrationLive` — зона скинутої концентрації просто перестає діяти, не видаляючись одразу.
 - **Роут `conditions`** (`POST …/battles/[battleId]/conditions`, Zod `apply|remove` + `runBattleMutation`): лише ДМ (`BattleAccess.DM`), бій `ACTIVE`, не дозволений, поки чекає рішення ДМ про перемогу (`awaiting_dm`). UI — `components/battle/dm/ConditionsDialog.tsx` (меню станів у швидких діях ДМ).
 
+## 5e: базові дії
+
+Вмикається `rules.actions` (`{ enabled: false, opportunityAttacks: true, variant: "2014" | "2024" }`); `enabled: false` — жодних кнопок і атак при відході, HOMM без змін. Рушій у `lib/utils/battle/actions/`.
+
+- **Каталог**: `CORE_ACTION_REGISTRY` (`registry.ts`) — `dash`, `disengage`, `dodge`, `help`, `hide`, `ready`, `standUp`, `grapple`, `shove`, `escape` (підпис, вартість, тип цілі). `validateCoreAction` / `coreActionAvailability` (`availability.ts`) — єдине джерело причин відмови для сервера й діалогу.
+- **Роут `core-action`** (`POST …/battles/[battleId]/core-action`, Zod `discriminatedUnion("action")` + `runBattleMutation`, `BattleAccess.MEMBER`, `blockedByMode`): `core-action-mutation.ts` перевіряє права й хід, `runCoreAction` (`run.ts`) — чистий рушій. Керує власник учасника або ДМ. Виняток — `readiedAttack`: **реакція поза ходом**, доступна керівнику й ДМ у будь-який момент.
+- **Ефекти** (`effects.ts`): «Відхід» (маркер `disengaged`), «Ухилення» (`disadvantageForAttackers` + перевага СПР; згасає з недієздатністю чи швидкістю 0), «Допомога» (перевага на одну атаку), «Схований» (маркер `hidden`, знімається після атаки/заклинання). Ключ — `coreTimedKey(action, participantId)`.
+- **Рух**: Ривок додає базовий рух (`baseMovement` + `battleData.extraMovement`, `grid/path.ts`); `standUp` коштує половину базової швидкості й неможливий при швидкості 0. Без мапи дії руху лише пишуться в лог.
+- **Реакції** (`reaction.ts`): `reactionBlocker`/`canReact` — витрачена реакція, недієздатність, `no_reaction`.
+- **`rollCheck`** (`checks/roll-check.ts`): `rollCheck`, `checkBonus`, `passivePerception` — навичка чи характеристика, майстерність, `checkAdvantage`/`checkDisadvantage`, виснаження. «Сховатися» — Скритність проти найбільшої пасивної Уважності ворогів. Ту саму функцію візьме 4d.
+- **`resolveServerAttack`** (`attack/server-attack.ts`): серверна ближня атака без гравця, спільна з HOMM-відплатою (`retaliation`); мітки `retaliation | opportunity | readied`.
+- **Атаки при відході** (`opportunity.ts`, `movement.ts` → `resolveMovement5e`, викликається з `move-mutation`): шлях будує сервер (`pathTo` у `grid/path.ts`, один BFS, той самий граф, що `reachable`). Атаки автоматичні (реакція ворога, ближня атака), провокує вихід із досяжності; `disengaged` блокує; якщо мувер падає — рух зупиняється в цій клітинці. Рух ДМ у режимі розстановки не провокує.
+- **Схоплення** (`grapple.ts`, `conditions/grapple-links.ts`): зв'язок — ефект `grappled` з ключем `core:grapple:<grapplerId>`. 2014: змагання Атлетики з більшим з Атлетики/Акробатики; 2024: рятівний кидок проти СК. `shove` — `prone` або відштовхування на 5 фт (якщо клітинка вільна). `escape` знімає зв'язок. Рух схоплювача тягне ціль у звільнену клітинку (`planDrag`) і коштує подвійно. **Зняття зв'язків** — `releaseInvalidGrapples` у пайплайні (`run-battle-mutation.ts`) після кожної мутації: схоплювач упав/недієздатний/не суміжний → ціль вільна.
+- **Хід**: у 5e хід не завершується автоматично, поки на мапі лишається рух (`view/turn-exhausted.ts`).
+- **UI**: `components/battle/turn/CoreActionsDialog.tsx` (плитка «Дії» в `ActionGrid`), `ReadiedAttackButton.tsx` (картка учасника з `readied`, поза ходом), хук `lib/hooks/battle/useCoreActions.ts`, клієнт `lib/api/battles`. Вкладка «Дії 5e» на `dm/rules`.
+- **OpenAPI**: бюджет тесту розміру збільшено до 120_000.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

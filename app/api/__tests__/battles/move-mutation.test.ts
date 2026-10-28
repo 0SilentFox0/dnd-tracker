@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
 
@@ -229,6 +229,82 @@ describe("move mutation", () => {
       const plain = moveMutation(withTerrain({ "1:0": { kind: "hazard", label: "Калюжа" } }), { participantId: "hero", to: { x: 1, y: 0 } });
 
       expect(plain.events).toEqual([]);
+    });
+  });
+
+  describe("атаки при відході (5e)", () => {
+    const sword = { id: "sw", name: "Меч", type: "melee", attackBonus: 5, damageDice: "1d6", damageType: "slashing" } as BattleParticipant["battleData"]["attacks"][number];
+
+    const foe = { ...at(goblin, { x: 0, y: 1 }), battleData: { ...at(goblin, { x: 0, y: 1 }).battleData, attacks: [sword] } };
+
+    const withRules = (actions: Partial<{ enabled: boolean; opportunityAttacks: boolean }>, hp?: number) => {
+      const h = at(hero, { x: 1, y: 0 });
+
+      const base = ctx({ participants: [hp ? { ...h, combatStats: { ...h.combatStats, currentHp: hp } } : h, foe] });
+
+      return { ...base, rng: () => 0.99, meta: { ...base.meta, rules: { ...base.meta.rules, actions: { ...base.meta.rules.actions, ...actions } } } };
+    };
+
+    it("увімкнено — атака, подія в журналі, витрачена реакція", () => {
+      const out = moveMutation(withRules({ enabled: true, opportunityAttacks: true }), { participantId: "hero", to: { x: 4, y: 0 } });
+
+      expect(out.events.some((e) => e.type === "retaliation" && e.resultText?.startsWith("Атака можливості: Гоблін"))).toBe(true);
+      expect(out.events.some((e) => e.resultText === "⚔ Атака при відході: Гоблін → Тест")).toBe(true);
+      expect(out.participants[1].actionFlags.hasUsedReaction).toBe(true);
+      expect(out.participants[0].battleData).toMatchObject({ position: { x: 4, y: 0 }, movementUsed: 3 });
+    });
+
+    it("падіння від атаки зупиняє рух на клітинці виходу", () => {
+      const out = moveMutation(withRules({ enabled: true, opportunityAttacks: true }, 1), { participantId: "hero", to: { x: 4, y: 0 } });
+
+      expect(out.participants[0].battleData).toMatchObject({ position: { x: 1, y: 0 }, movementUsed: 0 });
+    });
+
+    it("перший ворог збиває мувера — другий не атакує, реакція друга лишається", () => {
+      const sword2 = foe.battleData.attacks;
+
+      const place = (p: BattleParticipant, id: string, position: GridPoint) => ({ ...p, basicInfo: { ...p.basicInfo, id, name: id }, battleData: { ...p.battleData, position, attacks: sword2 } });
+
+      const first = place(goblin, "gob1", { x: 3, y: 1 });
+
+      const second = place(goblin, "gob2", { x: 3, y: 3 });
+
+      const h = at(hero, { x: 1, y: 2 });
+
+      const base = ctx({ participants: [{ ...h, combatStats: { ...h.combatStats, currentHp: 1 } }, first, second] });
+
+      const withOa = { ...base, rng: () => 0.99, meta: { ...base.meta, rules: { ...base.meta.rules, actions: { ...base.meta.rules.actions, enabled: true, opportunityAttacks: true } } } };
+
+      const out = moveMutation(withOa, { participantId: "hero", to: { x: 6, y: 2 } });
+
+      const [mover, ...foes] = out.participants;
+
+      const stop = mover.battleData.position!;
+
+      expect(mover.combatStats.currentHp).toBe(0);
+      expect(foes.filter((f) => f.actionFlags.hasUsedReaction)).toHaveLength(1);
+      expect(stop).not.toEqual({ x: 6, y: 2 });
+      expect(mover.battleData.movementUsed).toBe(Math.max(Math.abs(stop.x - 1), Math.abs(stop.y - 2)));
+      expect(out.events.filter((e) => e.type === "retaliation")).toHaveLength(1);
+    });
+
+    it("вимкнено або opportunityAttacks: false — без атак і без rng", () => {
+      const rng = vi.fn(() => 0.99);
+
+      for (const actions of [{ enabled: false }, { enabled: true, opportunityAttacks: false }]) {
+        const out = moveMutation({ ...withRules(actions), rng }, { participantId: "hero", to: { x: 4, y: 0 } });
+
+        expect(out.events).toEqual([]);
+        expect(out.participants[1].actionFlags.hasUsedReaction).toBe(false);
+      }
+
+      expect(rng).not.toHaveBeenCalled();
+    });
+
+    it("розстановка ДМ — без атак", () => {
+      const out = moveMutation({ ...withRules({ enabled: true, opportunityAttacks: true }), isDM: true }, { participantId: "hero", to: { x: 4, y: 0 }, free: true });
+
+      expect(out.events).toEqual([]);
     });
   });
 });

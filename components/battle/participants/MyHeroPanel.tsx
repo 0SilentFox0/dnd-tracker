@@ -5,6 +5,7 @@ import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
+import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}
+      <ReadiedAttackButton participant={hero} />
     </div>
   );
 });

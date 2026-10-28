@@ -7,12 +7,14 @@ import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
+import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
+import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
+import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
+import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
-import type { BattleMapConfig, BattleParticipant, TerrainCell } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export const moveSchema = z.object({
   participantId: z.string(),
@@ -40,37 +42,68 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   if (data.returnToStart) return returnToStart(ctx, participants, mover, ownTurn);
 
-  let movementUsed = mover.battleData.movementUsed;
+  const { rules } = ctx.meta;
 
-  let hazard: TerrainCell | null = null;
+  const at = (p: BattleParticipant, position: GridPoint, movementUsed?: number) => ({ ...p, battleData: { ...p.battleData, position, ...(movementUsed !== undefined && { movementUsed }) } });
 
   // розстановка ДМ (чужий хід або free) — без бюджету й шляху
-  const placement = !ownTurn || (ctx.isDM && data.free === true);
+  if (!ownTurn || (ctx.isDM && data.free === true)) {
+    if (!canStand(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
 
-  if (!placement) {
-    assertCanAct(ctx, mover.basicInfo.id);
+    const moved = at(mover, data.to, mover.battleData.movementUsed);
 
-    const cost = reachable(map, participants, mover, moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover)).get(cellKey(data.to));
+    const placed = replaceParticipant(participants, moved);
 
-    if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
+    const released = rules.actions.enabled ? releaseInvalidGrapples(placed, map) : { participants: placed, messages: [] };
 
-    if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Наляканий не може наблизитись до джерела страху");
-
-    movementUsed = (movementUsed ?? 0) + cost;
-    hazard = hazardOnMove(map, participants, mover, data.to, cost);
-  } else if (!canStand(map, participants, mover, data.to)) {
-    throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
+    return finishMove(ctx, { participants: released.participants, moved, hazard: null, messages: released.messages, events: [] });
   }
 
-  const moved = { ...mover, battleData: { ...mover.battleData, position: data.to, ...(movementUsed !== undefined && { movementUsed }) } };
+  assertCanAct(ctx, mover.basicInfo.id);
 
-  const after = replaceParticipant(participants, moved);
+  const budget = moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover);
 
-  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, after, ctx.rng ?? Math.random, ctx.meta.rules);
+  const search = searchPaths(map, participants, mover, budget);
 
-  if (!hazard || !hit) return { participants: after, pending: ctx.pending, events: [] };
+  const cost = search.cost.get(cellKey(data.to));
 
-  return { ...resolveHazardHit(ctx, after, moved, hazard, hit), pending: ctx.pending };
+  if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
+
+  if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Наляканий не може наблизитись до джерела страху");
+
+  if (!rules.actions.enabled) {
+    const moved = at(mover, data.to, (mover.battleData.movementUsed ?? 0) + cost);
+
+    const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost) : null;
+
+    return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [] });
+  }
+
+  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: ctx.rng ?? Math.random });
+
+  const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
+
+  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events });
+}
+
+interface MoveOutcome {
+  participants: BattleParticipant[];
+  moved: BattleParticipant;
+  hazard: TerrainCell | null;
+  messages: string[];
+  events: NewBattleEvent[];
+}
+
+function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents }: MoveOutcome): MutationResult {
+  const events = [...(messages.length ? [systemEvent(ctx.scene.round, messages.join("; "))] : []), ...attackEvents];
+
+  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, ctx.rng ?? Math.random, ctx.meta.rules);
+
+  if (!hazard || !hit) return { participants, pending: ctx.pending, events };
+
+  const resolved = resolveHazardHit(ctx, participants, moved, hazard, hit);
+
+  return { ...resolved, events: [...events, ...resolved.events], pending: ctx.pending };
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {

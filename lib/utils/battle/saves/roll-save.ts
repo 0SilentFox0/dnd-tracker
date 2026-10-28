@@ -1,7 +1,8 @@
+import { rollD20WithMode } from "./roll-d20";
+
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -66,11 +67,7 @@ export function rollSave(input: {
 
   if (autoFail) return { roll: 0, rolls: [], mod, bonus: 0, total: 0, success: false, mode, autoFail: true };
 
-  const first = presetRoll ?? rollDie(20, rng);
-
-  const rolls = mode === "normal" ? [first] : [first, rollDie(20, rng)];
-
-  const roll = mode === "advantage" ? Math.max(...rolls) : mode === "disadvantage" ? Math.min(...rolls) : first;
+  const { roll, rolls } = rollD20WithMode(mode, rng, presetRoll);
 
   const bonus = proficiencyBonus(target, ability, participants, rules) + collectModifiers(withSelf(participants, target), target.basicInfo.id, { stat: "savingThrow" }).flat;
 

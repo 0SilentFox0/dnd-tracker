@@ -1,7 +1,9 @@
 import { findParticipant, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
+import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
 import { beginConcentration, castIdFor, tagConcentration } from "@/lib/utils/battle/concentration";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
@@ -22,7 +24,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const casterId = caster.basicInfo.id;
 
-  const flow: ActionFlow = { ps: withSelf(allParticipants, caster), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules } };
+  const unhidden = removeEffects(caster, (e) => e.effects.some((x) => x.type === HIDDEN_MARKER));
+
+  const flow: ActionFlow = { ps: withSelf(allParticipants, unhidden.participant), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules } };
 
   const before = flow.ps;
 
@@ -54,7 +58,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   const state: SpellCastState = {
     flow,
     spell,
-    caster,
+    caster: unhidden.participant,
     targetIds,
     touchedIds: new Set(targetIds),
     info,

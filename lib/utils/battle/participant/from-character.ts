@@ -10,6 +10,7 @@ import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
+import { DND_SKILLS } from "@/lib/constants/skills";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -94,6 +95,12 @@ export async function createBattleParticipantFromCharacter(
     ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
     : [];
 
+  const rawSkills = character.skills;
+
+  const dndSkillProficiencies = rawSkills && typeof rawSkills === "object" && !Array.isArray(rawSkills)
+    ? DND_SKILLS.filter((k) => (rawSkills as Record<string, unknown>)[k] === true)
+    : [];
+
   const computedMaxHp = heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
 
   const resolvedAbilities = [
@@ -141,6 +148,7 @@ export async function createBattleParticipantFromCharacter(
       magicMultiplier: archetype.magic,
       archetypeName: archetype.name,
       ...(saveProficiencies.length && { saveProficiencies }),
+      ...(dndSkillProficiencies.length && { skillProficiencies: dndSkillProficiencies }),
     },
     combatStats: {
       maxHp: computedMaxHp,

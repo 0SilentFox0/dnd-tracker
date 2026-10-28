@@ -5,7 +5,7 @@ import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
-import type { AddParticipantData, BattleConditionsBody, CreateBattleData, UnitControlData } from "@/lib/api/battles";
+import type { AddParticipantData, BattleConditionsBody, CoreActionBody, CreateBattleData, UnitControlData } from "@/lib/api/battles";
 import {
   abilityAction,
   addBattleParticipant,
@@ -27,6 +27,7 @@ import {
   resetBattle,
   revealBattleParticipants,
   rollbackBattleAction,
+  runCoreAction,
   scaleBattleUnits,
   setAuraZone,
   setBattleUnitControl,
@@ -208,6 +209,9 @@ export const useRevealBattleParticipants = (c: string, b: string, o: ActionOpts 
 
 export const useBattleConditions = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<BattleConditionsBody>(c, b, (body) => applyBattleCondition(c, b, body), o);
+
+export const useBattleCoreAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<CoreActionBody>(c, b, (body) => runCoreAction(c, b, body), o);
 
 export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);

@@ -99,6 +99,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     maze: mutation(),
     unitControl: mutation(),
     conditions: mutation(),
+    coreAction: mutation(),
     refreshSources: mutation(),
   };
 
@@ -162,5 +163,6 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     nextTurn: actions.nextTurn.mutateAsync,
     move: actions.move.mutate,
     moraleCheck: actions.moraleCheck.mutateAsync,
+    coreAction: actions.coreAction.mutateAsync,
   };
 }
