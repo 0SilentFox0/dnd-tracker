@@ -52,18 +52,21 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col-reverse bg-black md:flex-row">
-      <aside className="max-h-36 shrink-0 border-t border-white/15 md:max-h-none md:w-52 md:overflow-y-auto md:border-r md:border-t-0">
-        {isDM && (
-          <div className="flex gap-2 p-2">
-            <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
-              Відпустити всі
-            </Button>
-            <Button size="sm" variant="destructive" onClick={() => void reset()}>
-              Скинути
-            </Button>
-          </div>
-        )}
-        <PuzzleTray scene={scene} />
+      <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-r md:border-t-0">
+        <div aria-hidden className="hidden h-40 shrink-0 md:block" />
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {isDM && (
+            <div className="flex gap-2 p-2">
+              <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
+                Відпустити всі
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => void reset()}>
+                Скинути
+              </Button>
+            </div>
+          )}
+          <PuzzleTray scene={scene} />
+        </div>
       </aside>
       <div ref={areaRef} className="flex min-h-0 min-w-0 flex-1 items-center justify-center p-2">
         <div style={boardStyle} className="max-h-full max-w-full">
