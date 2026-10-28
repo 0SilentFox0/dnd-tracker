@@ -35,7 +35,16 @@
     "csvUnsupported": "CSV parsing is not supported",
     "jsonUnsupported": "JSON parsing is not supported",
     "unsupportedFormat": "Unsupported file format",
-    "failed": "Import failed"
+    "failed": "Import failed",
+    "triggerLabel": "Import",
+    "title": "Import",
+    "description": "Upload a CSV or JSON file for bulk import",
+    "fileLabel": "File",
+    "result": "Imported {imported} of {total} records",
+    "skipped": ", skipped {skipped}",
+    "cancel": "Cancel",
+    "submit": "Import",
+    "submitting": "Importing..."
   },
   "notFound": {
     "title": "Page not found",
@@ -52,5 +61,106 @@
     "alreadyMember": "You are already a member of this campaign.",
     "campaignNotActive": "The campaign is not active.",
     "failed": "Failed to join the campaign"
+  },
+  "renameGroup": {
+    "title": "Rename group",
+    "description": "Enter a new name for the group “{name}”",
+    "cancel": "Cancel",
+    "save": "Save",
+    "label": "Group name",
+    "placeholder": "Group name"
+  },
+  "abbreviations": {
+    "title": "Abbreviations reference",
+    "srOnly": "Abbreviations information",
+    "description": "What the ability and stat abbreviations mean",
+    "main": "Core abilities:",
+    "other": "Other stats:"
+  },
+  "weaponTraits": {
+    "label": "Weapon properties",
+    "versatileDice": "Two-handed die"
+  },
+  "color": {
+    "format": "Format #RRGGBB",
+    "pick": "Pick a color"
+  },
+  "monster": {
+    "distance": "{label} {value} ft",
+    "passivePerception": "Passive Perception {value}",
+    "fly": "Fly",
+    "swim": "Swim",
+    "climb": "Climb",
+    "burrow": "Burrow",
+    "hover": "Hover",
+    "languages": "Languages: {value}",
+    "telepathy": "Telepathy {value} ft"
+  },
+  "search": {
+    "noResults": "Nothing found for “{query}”",
+    "clear": "Clear search",
+    "placeholder": "Search by name"
+  },
+  "iconUrl": {
+    "invalid": "Enter a link starting with https:// or http://"
+  },
+  "dice": {
+    "open": "Roll dice",
+    "dialog": "Dice roll",
+    "count": "Count",
+    "fewer": "Fewer dice",
+    "more": "More dice",
+    "roll": "Roll {count}d{sides}"
+  },
+  "deleteAll": {
+    "label": "Delete all",
+    "title": "Delete all {nouns}?"
+  },
+  "states": {
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "loading": "Loading…"
+  },
+  "header": {
+    "home": "Home",
+    "campaignMenu": "Campaign menu",
+    "campaignOverview": "Campaign overview",
+    "npcHeroes": "NPC Heroes",
+    "myCharacter": "My character",
+    "profile": "Profile",
+    "help": "Help",
+    "password": "Password",
+    "aiKeys": "AI keys",
+    "switchAccount": "Switch account",
+    "signOut": "Sign out"
+  },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "details": "Details",
+    "segments": {
+      "campaigns": "Campaigns",
+      "dm": "DM",
+      "character": "Character",
+      "inventory": "Inventory",
+      "new": "Create",
+      "edit": "Edit",
+      "sets": "Sets",
+      "groups": "Groups",
+      "main-skills": "Main skills",
+      "info": "Reference",
+      "print": "Print",
+      "world": "World map",
+      "show": "Show",
+      "scenario": "Scenario"
+    },
+    "ids": {
+      "campaigns": "Campaign",
+      "battles": "Battle",
+      "characters": "Character",
+      "units": "Unit",
+      "spells": "Spell",
+      "artifacts": "Artifact",
+      "sets": "Set"
+    }
   }
 }

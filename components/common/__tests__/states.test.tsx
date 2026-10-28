@@ -38,13 +38,13 @@ describe("стани сторінки", () => {
 
     render(<ErrorState error={new ApiError("Немає доступу", 403, "/x")} onRetry={onRetry} />);
     expect(screen.getByText("Немає доступу")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Спробувати ще раз" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.states.retry" }));
     expect(onRetry).toHaveBeenCalled();
   });
 
   it("ErrorState: невідома помилка — загальний текст", () => {
     render(<ErrorState error={42} />);
-    expect(screen.getByText("Щось пішло не так")).toBeInTheDocument();
+    expect(screen.getByText("common.states.error")).toBeInTheDocument();
   });
 
   it("QueryState: усі гілки", () => {

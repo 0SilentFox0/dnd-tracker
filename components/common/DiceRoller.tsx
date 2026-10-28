@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Dices, Minus, Plus } from "lucide-react";
 
 import "@/components/battle/fx/fx.css";
@@ -13,6 +14,8 @@ const stepClass = "flex size-8 items-center justify-center rounded-full border b
 
 /** Віртуальні кубики для перевірок, коли своїх під рукою немає; кидок бачить лише той, хто кидає. */
 export function DiceRoller() {
+  const t = useTranslations("common.dice");
+
   const [open, setOpen] = useState(false);
 
   const stage = useRef<DiceStageHandle>(null);
@@ -29,13 +32,13 @@ export function DiceRoller() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label="Кинути кубики"
+        aria-label={t("open")}
         className="flex size-9 items-center justify-center rounded-full border border-hud-rule bg-black/70 text-hud-bone hover:bg-black/90"
       >
         <Dices className="size-4" />
       </button>
       {open && (
-        <div role="dialog" aria-label="Кидок кубиків" className="absolute right-0 top-11 w-64 space-y-3 rounded-lg border border-hud-rule bg-black/85 p-3 text-hud-bone shadow-2xl backdrop-blur">
+        <div role="dialog" aria-label={t("dialog")} className="absolute right-0 top-11 w-64 space-y-3 rounded-lg border border-hud-rule bg-black/85 p-3 text-hud-bone shadow-2xl backdrop-blur">
           <div className="grid grid-cols-3 gap-1.5">
             {ROLLER_SIDES.map((s) => (
               <button
@@ -50,13 +53,13 @@ export function DiceRoller() {
             ))}
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-hud-muted">Кількість</span>
+            <span className="text-sm text-hud-muted">{t("count")}</span>
             <div className="flex items-center gap-2">
-              <button type="button" aria-label="Менше кубиків" disabled={count <= 1} onClick={() => pick.set({ count: count - 1 })} className={stepClass}>
+              <button type="button" aria-label={t("fewer")} disabled={count <= 1} onClick={() => pick.set({ count: count - 1 })} className={stepClass}>
                 <Minus className="size-3.5" />
               </button>
               <span className="w-5 text-center font-semibold tabular-nums">{count}</span>
-              <button type="button" aria-label="Більше кубиків" disabled={count >= ROLLER_MAX_COUNT} onClick={() => pick.set({ count: count + 1 })} className={stepClass}>
+              <button type="button" aria-label={t("more")} disabled={count >= ROLLER_MAX_COUNT} onClick={() => pick.set({ count: count + 1 })} className={stepClass}>
                 <Plus className="size-3.5" />
               </button>
             </div>
@@ -67,7 +70,7 @@ export function DiceRoller() {
             onClick={() => void roll()}
             className="h-10 w-full rounded border-2 border-hud-gold-strong bg-hud-gold-strong/20 font-semibold text-hud-gold-bright hover:bg-hud-gold-strong/30 disabled:opacity-50"
           >
-            Кинути {count}d{sides}
+            {t("roll", { count, sides })}
           </button>
           <div aria-live="polite" className="min-h-12 text-center">
             {result && (

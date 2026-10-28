@@ -5,5 +5,14 @@
   "app/uk/**",
   "app/page.tsx",
   "lib/i18n/**",
-  "components/common/LocaleSwitcher.tsx"
+  "components/common/LocaleSwitcher.tsx",
+  "components/common/**",
+  "components/ui/**",
+  "components/layout/**",
+  "components/hud/**",
+  "lib/hooks/common/**",
+  "app/error.tsx",
+  "app/not-found.tsx",
+  "app/campaigns/**/loading.tsx",
+  "app/settings/password/**"
 ]

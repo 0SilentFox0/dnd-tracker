@@ -19,7 +19,7 @@ describe("ImageUpload", () => {
   it("невалідний URL — підказка і літера фолбеку", () => {
     renderWithConfirm(<ImageUpload label="Іконка" value="abc" onChange={vi.fn()} fallbackText="Дракон" />);
 
-    expect(screen.getByText("Вкажіть посилання, що починається з https:// або http://")).toBeTruthy();
+    expect(screen.getByText("common.iconUrl.invalid")).toBeTruthy();
     expect(screen.getByText("Д")).toBeTruthy();
   });
 

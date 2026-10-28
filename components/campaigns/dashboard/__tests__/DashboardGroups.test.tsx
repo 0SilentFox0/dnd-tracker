@@ -75,9 +75,9 @@ describe("DashboardGroups", () => {
 
     type("zzz");
 
-    expect(await screen.findByText(/Нічого не знайдено/)).toBeTruthy();
+    expect(await screen.findByText(/common.search.noResults/)).toBeTruthy();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Очистити пошук" }).at(-1)!);
+    fireEvent.click(screen.getAllByRole("button", { name: "common.search.clear" }).at(-1)!);
 
     expect(await screen.findAllByRole("link")).toHaveLength(12);
   });
@@ -108,7 +108,7 @@ describe("DashboardGroups", () => {
     push.mockClear();
     type("zzz");
 
-    await screen.findByText(/Нічого не знайдено/);
+    await screen.findByText(/common.search.noResults/);
 
     fireEvent.submit(screen.getByLabelText("Пошук розділу").closest("form")!);
 

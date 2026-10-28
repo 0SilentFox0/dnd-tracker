@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +20,8 @@ interface RenameGroupDialogProps {
 }
 
 export function RenameGroupDialog({ groupName, dialog, rename }: RenameGroupDialogProps) {
+  const t = useTranslations("common.renameGroup");
+
   const { value, onChange, onConfirm, onCancel, isPending } = rename;
 
   return (
@@ -25,27 +29,27 @@ export function RenameGroupDialog({ groupName, dialog, rename }: RenameGroupDial
       hud
       open={dialog.open}
       onOpenChange={dialog.onOpenChange}
-      title="Перейменувати групу"
-      description={<>Введіть нову назву для групи &quot;{groupName}&quot;</>}
+      title={t("title")}
+      description={t("description", { name: groupName })}
       footer={
         <>
           <Button variant="outline" onClick={onCancel} disabled={isPending}>
-            Скасувати
+            {t("cancel")}
           </Button>
           <Button onClick={onConfirm} disabled={isPending}>
-            Зберегти
+            {t("save")}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <div>
-          <Label htmlFor="groupName">Назва групи</Label>
+          <Label htmlFor="groupName">{t("label")}</Label>
           <Input
             id="groupName"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Назва групи"
+            placeholder={t("placeholder")}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();

@@ -35,7 +35,16 @@
     "csvUnsupported": "CSV парсинг не підтримується",
     "jsonUnsupported": "JSON парсинг не підтримується",
     "unsupportedFormat": "Непідтримуваний формат файлу",
-    "failed": "Помилка при імпорті"
+    "failed": "Помилка при імпорті",
+    "triggerLabel": "Імпортувати",
+    "title": "Імпорт",
+    "description": "Завантажте CSV або JSON файл для масового імпорту",
+    "fileLabel": "Файл",
+    "result": "Успішно імпортовано {imported} з {total} записів",
+    "skipped": ", пропущено {skipped}",
+    "cancel": "Скасувати",
+    "submit": "Імпортувати",
+    "submitting": "Імпорт..."
   },
   "notFound": {
     "title": "Сторінку не знайдено",
@@ -52,5 +61,106 @@
     "alreadyMember": "Ви вже є учасником цієї кампанії.",
     "campaignNotActive": "Кампанія неактивна.",
     "failed": "Помилка приєднання до кампанії"
+  },
+  "renameGroup": {
+    "title": "Перейменувати групу",
+    "description": "Введіть нову назву для групи «{name}»",
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "label": "Назва групи",
+    "placeholder": "Назва групи"
+  },
+  "abbreviations": {
+    "title": "Довідка про абревіатури",
+    "srOnly": "Інформація про абревіатури",
+    "description": "Пояснення скорочень характеристик та параметрів",
+    "main": "Основні характеристики:",
+    "other": "Інші параметри:"
+  },
+  "weaponTraits": {
+    "label": "Властивості зброї",
+    "versatileDice": "Кубик двома руками"
+  },
+  "color": {
+    "format": "Формат #RRGGBB",
+    "pick": "Обрати колір"
+  },
+  "monster": {
+    "distance": "{label} {value} фт",
+    "passivePerception": "Пасивна Уважність {value}",
+    "fly": "Політ",
+    "swim": "Плавання",
+    "climb": "Лазіння",
+    "burrow": "Риття",
+    "hover": "Зависання",
+    "languages": "Мови: {value}",
+    "telepathy": "Телепатія {value} фт"
+  },
+  "search": {
+    "noResults": "Нічого не знайдено за «{query}»",
+    "clear": "Очистити пошук",
+    "placeholder": "Пошук за назвою"
+  },
+  "iconUrl": {
+    "invalid": "Вкажіть посилання, що починається з https:// або http://"
+  },
+  "dice": {
+    "open": "Кинути кубики",
+    "dialog": "Кидок кубиків",
+    "count": "Кількість",
+    "fewer": "Менше кубиків",
+    "more": "Більше кубиків",
+    "roll": "Кинути {count}d{sides}"
+  },
+  "deleteAll": {
+    "label": "Видалити всі",
+    "title": "Видалити всі {nouns}?"
+  },
+  "states": {
+    "error": "Щось пішло не так",
+    "retry": "Спробувати ще раз",
+    "loading": "Завантаження…"
+  },
+  "header": {
+    "home": "На головну",
+    "campaignMenu": "Меню кампанії",
+    "campaignOverview": "Огляд кампанії",
+    "npcHeroes": "NPC Герої",
+    "myCharacter": "Мій персонаж",
+    "profile": "Профіль",
+    "help": "Довідка",
+    "password": "Пароль",
+    "aiKeys": "AI-ключі",
+    "switchAccount": "Змінити акаунт",
+    "signOut": "Вийти"
+  },
+  "breadcrumbs": {
+    "label": "Навігація",
+    "details": "Деталі",
+    "segments": {
+      "campaigns": "Кампанії",
+      "dm": "DM",
+      "character": "Персонаж",
+      "inventory": "Інвентар",
+      "new": "Створити",
+      "edit": "Редагувати",
+      "sets": "Сети",
+      "groups": "Групи",
+      "main-skills": "Основні навики",
+      "info": "Довідник",
+      "print": "Друк",
+      "world": "Карта світу",
+      "show": "Показ",
+      "scenario": "Сценарій"
+    },
+    "ids": {
+      "campaigns": "Кампанія",
+      "battles": "Бій",
+      "characters": "Персонаж",
+      "units": "Юніт",
+      "spells": "Заклинання",
+      "artifacts": "Артефакт",
+      "sets": "Сет"
+    }
   }
 }

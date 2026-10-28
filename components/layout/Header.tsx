@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
@@ -29,6 +30,8 @@ import { cn } from "@/lib/utils";
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
 export function Header() {
+  const t = useTranslations("common.header");
+
   const pathname = usePathname();
 
   const email = useSessionEmail();
@@ -65,7 +68,7 @@ export function Header() {
           <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong" asChild>
             <Link href="/campaigns">
               <Home className="h-4 w-4" />
-              <span className="sr-only">На головну</span>
+              <span className="sr-only">{t("home")}</span>
             </Link>
           </Button>
 
@@ -74,13 +77,13 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
                   <Menu className="h-4 w-4" />
-                  <span className="sr-only">Меню кампанії</span>
+                  <span className="sr-only">{t("campaignMenu")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem asChild>
                   <Link href={`/campaigns/${campaignId}`}>
-                    Огляд кампанії
+                    {t("campaignOverview")}
                   </Link>
                 </DropdownMenuItem>
                 {isDMPage && (
@@ -93,7 +96,7 @@ export function Header() {
                         </DropdownMenuItem>
                         {path === "characters" && (
                           <DropdownMenuItem asChild>
-                            <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>NPC Герої</Link>
+                            <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>{t("npcHeroes")}</Link>
                           </DropdownMenuItem>
                         )}
                       </Fragment>
@@ -105,7 +108,7 @@ export function Header() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/character`}>
-                        Мій персонаж
+                        {t("myCharacter")}
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -130,7 +133,7 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
                 <User className="h-4 w-4" />
-                <span className="sr-only">Профіль</span>
+                <span className="sr-only">{t("profile")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -145,28 +148,28 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link href="/help">
                   <CircleHelp className="h-4 w-4 mr-2" />
-                  Довідка
+                  {t("help")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings/password">
                   <KeyRound className="h-4 w-4 mr-2" />
-                  Пароль
+                  {t("password")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings/ai">
                   <Sparkles className="h-4 w-4 mr-2" />
-                  AI-ключі
+                  {t("aiKeys")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => void switchAccount.start()}>
                 <UserRoundCog className="h-4 w-4 mr-2" />
-                Змінити акаунт
+                {t("switchAccount")}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Вийти
+                {t("signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

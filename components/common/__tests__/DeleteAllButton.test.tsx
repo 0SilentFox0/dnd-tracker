@@ -21,15 +21,15 @@ describe("DeleteAllButton", () => {
 
     renderWithConfirm(<DeleteAllButton count={3} nouns={nouns} confirm={{ description: "Буде видалено 3 юнітів." }} actions={{ onConfirm }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити всі" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.deleteAll.label" }));
 
     const dialog = await screen.findByRole("alertdialog");
 
-    expect(within(dialog).getByText("Видалити всі юніти?")).toBeTruthy();
+    expect(within(dialog).getByText('common.deleteAll.title {"nouns":"юніти"}')).toBeTruthy();
     expect(within(dialog).getByText("Буде видалено 3 юнітів.")).toBeTruthy();
     expect(onConfirm).not.toHaveBeenCalled();
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всі" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "common.deleteAll.label" }));
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
   });
