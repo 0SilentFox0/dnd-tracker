@@ -5,9 +5,8 @@ import { useSetLocale } from "@/lib/hooks/common";
 import type { Locale } from "@/lib/i18n/config";
 
 const LABELS: Record<Locale, string> = {
-   
+  // eslint-disable-next-line no-restricted-syntax -- native language name
   uk: "Українська",
-   
   en: "English",
 };
 
