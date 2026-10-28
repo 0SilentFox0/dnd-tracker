@@ -58,6 +58,7 @@ const sections = {
     edition: z.enum(["2014", "2024"]).default("2014"),
     autoXp: z.boolean().default(false),
   }),
+  items: z.strictObject({ enabled: z.boolean().default(false), attunementLimit: z.number().int().min(1).max(10).default(3) }),
 };
 
 type Sections = typeof sections;
@@ -88,6 +89,7 @@ export const RulesetSchema = z
     classes: sections.classes.prefault({}),
     outOfCombat: sections.outOfCombat.prefault({}),
     encounters: sections.encounters.prefault({}),
+    items: sections.items.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -127,6 +129,7 @@ export const RulesetPatchSchema = z
     classes: patchSection("classes").optional(),
     outOfCombat: patchSection("outOfCombat").optional(),
     encounters: patchSection("encounters").optional(),
+    items: patchSection("items").optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
 

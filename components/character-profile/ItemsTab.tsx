@@ -42,6 +42,12 @@ export function ItemsTab() {
       (e: Error) => notify(e.message || "Не вдалося зняти артефакт"),
     );
 
+  const attune = (a: SheetArtifact) =>
+    stash.mutateAsync(a.attunement === "attuned" ? { action: "unattune", ref: a.id } : { action: "attune", ref: a.id }).then(
+      () => setOpen(false),
+      (e: Error) => notify(e.message || "Не вдалося змінити налаштування"),
+    );
+
   return (
     <>
       <div className="mx-auto grid w-[216px] max-w-full grid-cols-3 gap-1.5">
@@ -60,6 +66,7 @@ export function ItemsTab() {
         })}
       </div>
       <HudSection title="ЩО ДАЮТЬ РЕЧІ">
+        {sheet.items.attunement && <p className="text-xs text-hud-muted">{`Налаштування ${sheet.items.attunement.used}/${sheet.items.attunement.limit}`}</p>}
         {sheet.items.artifacts.length === 0 && <p className="text-sm text-hud-muted">Нічого не вдягнено.</p>}
         <ul>
           {sheet.items.artifacts.map((a) => (
@@ -69,6 +76,13 @@ export function ItemsTab() {
                 <span className="min-w-0">
                   <span className="block text-sm text-hud-ink">{a.name}</span>
                   <span className="block text-xs text-hud-muted">{a.effects.length ? a.effects.join(" · ") : "без ефектів"}</span>
+                  {(a.carried || a.attunement) && (
+                    <span className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-hud-muted">
+                      {a.carried && <span>Носиться</span>}
+                      {a.attunement === "attuned" && <span>Налаштовано</span>}
+                      {a.attunement === "required" && <span>Не діє без налаштування</span>}
+                    </span>
+                  )}
                 </span>
               </button>
             </li>
@@ -82,9 +96,14 @@ export function ItemsTab() {
         title={shown?.name ?? ""}
         footer={
           <>
-            {canAct && shown && (
+            {canAct && shown && !shown.carried && (
               <Button variant="outline" disabled={stash.isPending} onClick={() => void unequip(shown.slot)}>
                 Зняти в підсумок
+              </Button>
+            )}
+            {canAct && shown?.attunement && (
+              <Button variant="outline" disabled={stash.isPending} onClick={() => void attune(shown)}>
+                {shown.attunement === "attuned" ? "Зняти налаштування" : "Налаштувати"}
               </Button>
             )}
             <Button
@@ -100,6 +119,13 @@ export function ItemsTab() {
         }
       >
         {shown?.description && <p className="text-sm">{shown.description}</p>}
+        {shown && (shown.carried || shown.attunement) && (
+          <span className="mt-1 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
+            {shown.carried && <span>Носиться</span>}
+            {shown.attunement === "attuned" && <span>Налаштовано</span>}
+            {shown.attunement === "required" && <span>Не діє без налаштування</span>}
+          </span>
+        )}
         {shown && shown.effects.length > 0 ? (
           <ul className="mt-2 list-disc pl-5 text-sm">
             {shown.effects.map((e, i) => (
@@ -110,7 +136,7 @@ export function ItemsTab() {
           <p className="mt-2 text-sm text-muted-foreground">Без ефектів.</p>
         )}
       </ResponsiveDialog>
-      <TransferArtifactDialog artifact={shown} source={{ slot: shown?.slot ?? "" }} open={transferOpen} onOpenChange={setTransferOpen} />
+      <TransferArtifactDialog artifact={shown} source={shown?.carried ? { artifactId: shown.id } : { slot: shown?.slot ?? "" }} open={transferOpen} onOpenChange={setTransferOpen} />
     </>
   );
 }

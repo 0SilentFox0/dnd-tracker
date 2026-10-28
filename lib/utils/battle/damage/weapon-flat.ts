@@ -3,9 +3,9 @@ import type { BattleAttack, DamageStep } from "@/types/battle";
 
 export const WEAPON_FLAT_LABEL = "Бонус зброї";
 
-/** Тільки «+N» формули зброї: кубики рівня героя її не містять (`mergeDiceFormulas` відкидає flat). */
+/** «+N» формули зброї й +N магічного предмета: кубики рівня героя їх не містять (`mergeDiceFormulas` відкидає flat). */
 export function weaponFlatOf(attack: BattleAttack): number {
-  return parseDice(attack.damageDice ?? "")?.flat ?? 0;
+  return (parseDice(attack.damageDice ?? "")?.flat ?? 0) + (attack.damageBonus ?? 0);
 }
 
 export function applyWeaponFlat(damage: number, attack: BattleAttack): { damage: number; step?: DamageStep; line?: string } {

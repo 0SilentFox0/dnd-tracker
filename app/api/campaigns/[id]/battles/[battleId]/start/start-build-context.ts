@@ -5,6 +5,7 @@ import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-se
 import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
 import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { inventoryArtifactIds } from "@/lib/utils/items/resolve";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
@@ -23,17 +24,6 @@ export async function buildCampaignContextForStart(
   characters: CharacterWithRelations[],
   units: UnitRow[],
 ): Promise<BuildContextResult> {
-  const allArtifactIds = new Set<string>();
-
-  for (const c of characters) {
-    const equipped =
-      (c.inventory?.equipped as Record<string, string | unknown>) ?? {};
-
-    for (const val of Object.values(equipped)) {
-      if (typeof val === "string" && val) allArtifactIds.add(val);
-    }
-  }
-
   const uniqueRaceNames = [...new Set(characters.map((c) => c.race).filter(Boolean))];
 
   const unitRaceIds = [...new Set(units.map((u) => u.raceId).filter((id): id is string => !!id))];
@@ -45,16 +35,21 @@ export async function buildCampaignContextForStart(
 
   const treeWhere = { campaignId, race: { in: uniqueRaceNames } };
 
-  const trees = characters.length > 0 && uniqueRaceNames.length > 0 ? await prisma.skillTree.findMany({ where: treeWhere }) : [];
+  const [trees, campaign] = await Promise.all([
+    characters.length > 0 && uniqueRaceNames.length > 0 ? prisma.skillTree.findMany({ where: treeWhere }) : [],
+    prisma.campaign.findUnique({ where: { id: campaignId }, select: { maxLevel: true, rules: true } }),
+  ]);
+
+  const rules = parseRules(campaign?.rules ?? {});
+
+  const itemsEnabled = rules.items.enabled;
+
+  const allArtifactIds = [...new Set(characters.flatMap((c) => inventoryArtifactIds(c.inventory, { stash: itemsEnabled, consumables: itemsEnabled })))];
 
   const skillIds = referencedSkillIds(characters, trees);
 
-  const [races, campaign, ...characterContext] = await Promise.all([
+  const [races, ...characterContext] = await Promise.all([
     raceFilters.length > 0 ? prisma.race.findMany({ where: { campaignId, OR: raceFilters } }) : [],
-    prisma.campaign.findUnique({
-      where: { id: campaignId },
-      select: { maxLevel: true, rules: true },
-    }),
     ...(characters.length > 0
       ? [
           trees,
@@ -64,9 +59,9 @@ export async function buildCampaignContextForStart(
           }),
           prisma.spell.findMany({ where: { campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } }),
           skillIds.length > 0 ? prisma.skill.findMany({ where: { campaignId, id: { in: skillIds } } }) : [],
-          allArtifactIds.size > 0
+          allArtifactIds.length > 0
             ? prisma.artifact.findMany({
-                where: { id: { in: Array.from(allArtifactIds) }, campaignId },
+                where: { id: { in: allArtifactIds }, campaignId },
               })
             : [],
         ]
@@ -147,7 +142,7 @@ export async function buildCampaignContextForStart(
       campaign: {
         maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20,
       },
-      rules: parseRules(campaign?.rules ?? {}),
+      rules,
       skillsById,
       artifactsById:
         Object.keys(artifactsById).length > 0 ? artifactsById : undefined,

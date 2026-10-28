@@ -48,7 +48,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (!triggerMatches(ability.trigger, event, owner, ps)) continue;
 
-      if (ability.condition && !evaluateCondition(ability.condition, { owner, event, participants: ps })) continue;
+      if (ability.condition && !evaluateCondition(ability.condition, { owner, event, participants: ps, sourceId: ability.source.id })) continue;
 
       if (!withinLimits(owner, ability, ctx.round)) continue;
 

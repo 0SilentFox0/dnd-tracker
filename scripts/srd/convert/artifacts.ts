@@ -64,7 +64,7 @@ function convertWeapon(w: Fixture<O5Weapon>, data: Open5eData, assignments: Map<
     `Cost: ${amount(item?.cost)} GP. Weight: ${amount(item?.weight)} lb.`,
   ].join(" ");
 
-  return { slug: w.pk, name: w.fields.name, description, rarity: "common", slot: ranged ? "range_weapon" : "weapon", weapon };
+  return { slug: w.pk, name: w.fields.name, description, rarity: "common", slot: ranged ? "range_weapon" : "weapon", weapon, item: { unique: false } };
 }
 
 // Open5e has no category: no Dex → heavy, Dex capped at 2 → medium, otherwise light
@@ -106,6 +106,7 @@ function convertArmor(data: Open5eData): ArtifactRow[] {
         description,
         rarity: "common" as const,
         slot: "armor" as const,
+        item: { unique: false },
         armor: { category, base: f.ac_base, ...(f.strength_score_required && { strength: f.strength_score_required }), ...(f.grants_stealth_disadvantage && { stealthDisadvantage: true }) },
       };
     });
@@ -125,6 +126,7 @@ function convertShield(data: Open5eData): ArtifactRow[] {
       description: `Shield. Armor Class: +${shield.fields.ac_base}. Cost: ${amount(item?.cost)} GP. Weight: ${amount(item?.weight)} lb.`,
       rarity: "common",
       slot: "shield",
+      item: { unique: false },
       abilities: [{ id: "shield-ac", name: "Shield", description: `+${shield.fields.ac_base} Armor Class while you hold the Shield.`, trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: shield.fields.ac_base }] }],
     },
   ];

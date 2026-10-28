@@ -13,6 +13,7 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { planTransfer, TransferError, type TransferErrorCode } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
+import { pruneAttuned } from "@/lib/utils/items/resolve";
 import type { EquippedItems } from "@/types/inventory";
 
 const transferSchema = z
@@ -64,7 +65,13 @@ export async function transferArtifact(request: Request, campaignId: string, cha
 
     if (!plan.ok) return errorResponse(ERROR_TEXT[plan.error], 400);
 
-    const fromSaved = await tx.characterInventory.update({ where: { characterId: from.id }, data: { equipped: plan.fromEquipped, stash: plan.fromStash } });
+    if (normalizeStash(toInv.stash).includes(plan.artifactId)) return errorResponse(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
+
+    const attunedBefore = normalizeStash(fromInv.attuned);
+
+    const attuned = pruneAttuned(attunedBefore, { equipped: plan.fromEquipped, stash: plan.fromStash });
+
+    const fromSaved = await tx.characterInventory.update({ where: { characterId: from.id }, data: { equipped: plan.fromEquipped, stash: plan.fromStash, ...(attuned.length !== attunedBefore.length && { attuned }) } });
 
     const toSaved = await tx.characterInventory.update({ where: { characterId: to.id }, data: { stash: plan.toStash } });
 

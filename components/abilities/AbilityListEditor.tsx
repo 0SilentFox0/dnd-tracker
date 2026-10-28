@@ -15,6 +15,7 @@ import type { ClassColumn } from "@/types/classes";
 
 interface AbilityListEditorProps {
   classColumns?: readonly ClassColumn[];
+  itemCharges?: boolean;
   campaignId: string;
   value: Ability[];
   onChange: (next: Ability[]) => void;
@@ -22,12 +23,12 @@ interface AbilityListEditorProps {
   onValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
-export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns }: AbilityListEditorProps) {
+export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns, itemCharges }: AbilityListEditorProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const [selectedId, setSelectedId] = useState<string | null>(value[0]?.id ?? null);
 
-  const validation = useMemo(() => validateAbilities(value, { classColumns }), [value, classColumns]);
+  const validation = useMemo(() => validateAbilities(value, { classColumns, itemCharges }), [value, classColumns, itemCharges]);
 
   const errorCount = Object.keys(validation.errorsByPath).length;
 
@@ -64,7 +65,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
   };
 
   return (
-    <AbilityEditorProvider value={{ campaignId, errorsByPath: validation.errorsByPath, classColumns }}>
+    <AbilityEditorProvider value={{ campaignId, errorsByPath: validation.errorsByPath, classColumns, itemCharges }}>
       <HudSection
         title={
           <>

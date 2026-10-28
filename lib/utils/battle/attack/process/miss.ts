@@ -1,6 +1,7 @@
 import { buildBattleActionForMiss } from "./actions";
 import { applyDamageToTarget } from "./damage";
 
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
@@ -44,6 +45,7 @@ export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, 
     actorId: attackerId,
     targetId,
     attackKind: attackKindOf(attack.type),
+    ...attackSourceOf(attack),
   });
 
   const battleAction = buildBattleActionForMiss({

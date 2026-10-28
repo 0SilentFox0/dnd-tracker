@@ -47,6 +47,7 @@ export interface ArtifactForReference {
   effects: string[];
   setName: string | null;
   holderName: string | null;
+  gear?: true;
 }
 
 export interface ArtifactSetForReference {

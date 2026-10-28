@@ -44,6 +44,7 @@ export interface Inventory {
   silver: number;
   copper: number;
   items: InventoryItem[];
+  attuned?: string[];
   updatedAt: string;
 }
 
@@ -53,6 +54,7 @@ export interface SpecialItem {
   description?: string;
   quantity: number;
   consumable: boolean;
+  artifactId?: string;
 }
 
 export type Purse = Record<Coin, number>;
@@ -60,6 +62,7 @@ export type Purse = Record<Coin, number>;
 export interface StashState {
   equipped: EquippedItems;
   stash: string[];
+  attuned?: string[];
   items: SpecialItem[];
   purse: Purse;
 }
@@ -81,12 +84,17 @@ export interface StashArtifact {
   slot: string;
   description: string | null;
   light?: boolean;
+  attunement?: "attuned" | "required";
+  carried?: true;
+  charges?: { max: number; left: number; rest: "short" | "long" | null };
+  gear?: true;
 }
 
-export type FreeArtifact = Omit<StashArtifact, "description">;
+export type FreeArtifact = Omit<StashArtifact, "description" | "attunement" | "carried" | "charges"> & { property?: { nameTemplate?: string; bases: string[] }; consumable?: true };
 
 export interface StashView {
   purse: Purse;
   items: SpecialItem[];
   artifacts: StashArtifact[];
+  attunement?: { used: number; limit: number };
 }

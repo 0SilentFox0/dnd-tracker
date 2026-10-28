@@ -14,8 +14,10 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
-import { findHolder } from "@/lib/utils/artifacts/ownership";
+import { findHolder, uniqueConflict } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
+import { isComposedRef, parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
+import { uniqueChecker } from "@/lib/utils/items/resolve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -63,13 +65,16 @@ export async function updateInventory(request: Request, campaignId: string, char
       const occupant = equippedNow[data.equipSlot.slot] as string | undefined;
 
       displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
+
+      if (displaced && normalizeStash(current?.stash).includes(displaced)) return errorResponse(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
+
       nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
     }
 
     const shieldId = nextEquipped?.shield;
 
     if (typeof shieldId === "string" && shieldId && shieldId !== (current?.equipped as EquippedItems | undefined)?.shield) {
-      const shieldArtifact = await tx.artifact.findFirst({ where: { id: shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
+      const shieldArtifact = await tx.artifact.findFirst({ where: { id: parseItemRef(shieldId)?.baseId ?? shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
 
       if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
         const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
@@ -81,7 +86,17 @@ export async function updateInventory(request: Request, campaignId: string, char
     if (nextEquipped) {
       const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
 
-      if (new Set(ids).size !== ids.length) return errorResponse(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
+      const rules = parseRules(accessResult.campaign?.rules);
+
+      // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
+      const rows =
+        (rules.items.enabled || ids.some(isComposedRef)) && ids.length > 0
+          ? new Map((await tx.artifact.findMany({ where: { id: { in: [...new Set(ids.flatMap(refArtifactIds))] }, campaignId }, select: { id: true, name: true, slot: true, modifiers: true } })).map((r) => [r.id, r]))
+          : null;
+
+      const isUnique = rows ? uniqueChecker(rows) : undefined;
+
+      if (uniqueConflict(ids, isUnique)) return errorResponse(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
 
       const checkIds = data.equipSlot ? (data.equipSlot.artifactId ? [data.equipSlot.artifactId] : []) : ids;
 
@@ -94,7 +109,7 @@ export async function updateInventory(request: Request, campaignId: string, char
         const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) }));
 
         for (const artifactId of checkIds) {
-          const holderId = findHolder(held, artifactId);
+          const holderId = findHolder(held, artifactId, undefined, isUnique);
 
           if (holderId) {
             const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";

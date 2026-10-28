@@ -115,6 +115,8 @@ export interface BattleAttack {
   traits?: WeaponTrait[];
   versatileDice?: string;
   hand?: "off";
+  /** +N до шкоди цією зброєю (магічний предмет) */
+  damageBonus?: number;
 }
 
 /**
@@ -359,7 +361,7 @@ export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: s
 export interface AbilityPool {
   label: string;
   max: number;
-  rest: "short" | "long";
+  rest: "short" | "long" | null;
 }
 
 export interface BattleParticipantBattleData {

@@ -9,6 +9,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
@@ -80,6 +81,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     actorId: attackerId,
     targetId,
     attackKind: attackKindOf(attack.type),
+    ...attackSourceOf(attack),
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
     ...eventRollMode(p.attackRoll),
   });

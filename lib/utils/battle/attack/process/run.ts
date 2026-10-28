@@ -9,8 +9,10 @@ import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { cancelCritIfImmune } from "@/lib/utils/battle/attack/crit-immunity";
 import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { calculateAttackRoll, eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -64,7 +66,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return { ...r, summons: flow.summons, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
   };
 
-  const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
+  const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind, ...attackSourceOf(attack) });
 
   if (!isAttackable(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
@@ -132,9 +134,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const adjacentCrit =
     isHit && !rolled.isCritical && collectModifiers(flow.ps, targetId, { flag: "autoCritAdjacent" }, actionModifiers[targetId]).entries.length > 0 && isAdjacentAttack(getP(flow, attackerId), getP(flow, targetId), attack);
 
-  const attackRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
+  const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
 
   if (adjacentCrit) flow.messages.push("💥 влучання впритул — критичне");
+
+  const immune = isHit ? cancelCritIfImmune(critRoll, flow.ps, targetId, actionModifiers[targetId]) : { roll: critRoll, cancelled: false };
+
+  const attackRoll = immune.roll;
+
+  if (immune.cancelled) flow.messages.push("🛡 крит скасовано — звичайне влучання");
 
   const critFlavorText = attackRoll.criticalEffect
     ? critFlavorFor(attackRoll.criticalEffect, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, {
@@ -194,7 +202,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 
-  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind, ...eventRollMode(attackRoll) });
+  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind, ...attackSourceOf(attack), ...eventRollMode(attackRoll) });
 
   const battleAction = buildBattleActionForHit({
     attacker: getP(flow, attackerId),

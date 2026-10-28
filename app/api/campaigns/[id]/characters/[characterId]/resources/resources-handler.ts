@@ -24,12 +24,14 @@ export async function editResourcesFor(access: CampaignAccessResult, character: 
 
   if (inBattle) return inBattle;
 
-  const maxHp = body.hp === undefined ? undefined : (await buildCharacterParticipant(character, { maxLevel, rules })).participant.combatStats.maxHp;
+  const built = body.hp !== undefined || body.charges !== undefined ? (await buildCharacterParticipant(character, { maxLevel, rules })).participant : null;
+
+  const maxHp = body.hp === undefined ? undefined : built?.combatStats.maxHp;
 
   const after = await prisma.$transaction(async (tx) => {
     const before = (await lockCharacters(tx, [character.id])).get(character.id)?.resources ?? readResources(character.resources);
 
-    const edited = editResources(before, body, maxHp);
+    const edited = editResources(before, body, maxHp, built?.battleData?.pools ?? {});
 
     await tx.character.update({ where: { id: character.id }, data: { resources: edited as Prisma.InputJsonValue } });
     await writeCharacterLog(tx, [{ campaignId: character.campaignId, characterId: character.id, actorUserId: access.userId, kind: CharacterLogKind.RESOURCES_EDIT, data: { before, after: edited } }]);

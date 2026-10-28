@@ -15,6 +15,7 @@ export function normalizeItems(raw: unknown): SpecialItem[] {
         ...(typeof o.description === "string" && o.description ? { description: o.description } : {}),
         quantity: typeof o.quantity === "number" && o.quantity > 0 ? Math.floor(o.quantity) : 1,
         consumable: o.consumable === true,
+        ...(typeof o.artifactId === "string" && o.artifactId ? { artifactId: o.artifactId } : {}),
       },
     ];
   });

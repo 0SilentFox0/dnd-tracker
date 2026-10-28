@@ -104,6 +104,11 @@ export function ArtifactCard({
                   {artifactRarityLabel(artifact.rarity)}
                 </Badge>
               )}
+              {artifact.itemKind && (
+                <Badge variant="outline" className="text-xs">
+                  {artifact.itemKind === "property" ? "Властивість" : "Спорядження"}
+                </Badge>
+              )}
               {slotSelect}
             </div>
           </div>
@@ -136,6 +141,11 @@ export function ArtifactCard({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        {artifact.itemKind && (
+          <Badge variant="outline" className="text-xs">
+            {artifact.itemKind === "property" ? "Властивість" : "Спорядження"}
+          </Badge>
+        )}
         {slotSelect}
         {artifact.artifactSet && (
           <Badge variant="outline">Сет: {artifact.artifactSet.name}</Badge>

@@ -15,6 +15,7 @@ export const ARTIFACTS_IMPORT: ImportSpec = {
     textField("icon", "Іконка", ["icon"]),
     jsonField("weapon", "Зброя (JSON)", ["weapon"], ['{"damageDice":"1d8","damageType":"slashing","attackType":"melee"}', ""]),
     jsonField("armor", "Броня (JSON)", ["armor"]),
+    jsonField("item", "Предмет 5e (JSON)", ["item"], ['{"unique":false}', '{"unique":false,"attunement":true,"charges":{"max":7,"rest":"long"}}']),
     abilitiesField(),
   ],
 };

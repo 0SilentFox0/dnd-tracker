@@ -6,6 +6,7 @@ import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { readAbilities } from "@/lib/utils/abilities/read";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
+import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 
 export default async function EditArtifactPage({
   params,
@@ -48,6 +49,7 @@ export default async function EditArtifactPage({
         abilityIssues: issues,
         weapon: weaponStatsFromRow(artifact),
         armor: armorStatsFromRow(artifact),
+        item: itemStatsFromRow(artifact),
       }}
       artifactSets={artifactSets}
     />

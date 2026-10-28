@@ -13,7 +13,7 @@
     "races": 9,
     "classes": 12,
     "units": 331,
-    "artifacts": 51
+    "artifacts": 331
   },
   "credits": "This work includes material from the System Reference Document 5.2 (\"SRD 5.2\") by Wizards of the Coast LLC, available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.\n\nData via Open5e (open5e/open5e-api, commit e69ac13b49dae6a9d84abf38fc674fe1db5b392b)."
 }

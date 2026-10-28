@@ -202,6 +202,8 @@ export interface SheetArtifact {
   rarity: string | null;
   description: string | null;
   effects: string[];
+  attunement?: "attuned" | "required";
+  carried?: true;
 }
 
 export interface SetProgress {
@@ -242,7 +244,7 @@ export interface CharacterSheet {
   slots: { level: number; count: number; current: number }[];
   rest: SheetRest | null;
   spells: BookSpell[];
-  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
+  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[]; attunement?: { used: number; limit: number } };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; notes: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
@@ -253,7 +255,7 @@ export interface RosterHero {
   name: string;
   avatar: string | null;
   type: CharacterTypeValue;
-  equipped: Record<string, { id: string; name: string }>;
+  equipped: Record<string, { id: string; name: string; gear?: true }>;
 }
 
 export interface DraftInput {
@@ -287,7 +289,7 @@ export interface CharacterResources {
   /** classId → витрачено */
   hitDiceSpent?: Record<string, number>;
   /** ключ вміння (ResolvedAbility.key) → використання perRest */
-  charges?: Record<string, { used: number; rest: RestKindValue }>;
+  charges?: Record<string, { used: number; rest: RestKindValue | null }>;
   exhaustion?: number;
   shortRestOpen?: boolean;
 }
@@ -321,7 +323,7 @@ export interface HitDieResult {
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
 
-export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true };
+export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 
 export interface SheetRest {
   persist: boolean;
@@ -330,7 +332,7 @@ export interface SheetRest {
   exhaustion: number;
   shortRestOpen: boolean;
   hitDice: { classId: string; name: string; die: number; total: number; spent: number }[];
-  charges: { key: string; name: string; uses: number; used: number; rest: "short" | "long" }[];
+  charges: { key: string; name: string; uses: number; used: number; rest: "short" | "long" | null }[];
   inspiration: boolean | null;
   xp: { value: number; next: number | null; levelUp: boolean } | null;
 }

@@ -320,6 +320,7 @@ model CharacterInventory {
   copper      Int       @default(0)
   items       Json      @default("[]")
   stash       Json      @default("[]")
+  attuned     Json      @default("[]")
   updatedAt   DateTime  @updatedAt
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 

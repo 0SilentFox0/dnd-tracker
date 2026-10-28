@@ -16,6 +16,7 @@ export interface ConditionContext {
   owner: BattleParticipant;
   event: AbilityEvent | null;
   participants: BattleParticipant[];
+  sourceId?: string;
 }
 
 const WHO: FieldMeta = {
@@ -55,6 +56,7 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
     fields: [{ name: "mode", label: "Режим", input: "select", options: [{ value: "advantage", label: "перевага" }, { value: "disadvantage", label: "недолік" }, { value: "normal", label: "звичайний" }] }],
   },
   allyAdjacent: { label: "Союзник поруч із ціллю", fields: [] },
+  withThisItem: { label: "Атака цим предметом", fields: [] },
   not: { label: "НЕ (заперечення)", fields: [{ name: "condition", label: "Умова", input: "effects" }] },
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
   any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
@@ -122,6 +124,11 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       return eventRollModeOf(ctx.event) === c.mode;
     case "allyAdjacent":
       return allyNextToTarget(ctx);
+    case "withThisItem": {
+      const e = ctx.event;
+
+      return !!ctx.sourceId && !!e && (e.type === "attack" || e.type === "hit") && e.actorId === ctx.owner.basicInfo.id && e.attackSourceId === ctx.sourceId;
+    }
     case "not":
       return !evaluateCondition(c.condition, ctx);
     case "all":

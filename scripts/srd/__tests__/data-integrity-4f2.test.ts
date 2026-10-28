@@ -32,7 +32,7 @@ const ARMOR = {
 
 describe("SRD 5.2 data: 4f-2", () => {
   it("12 armors match the SRD table", () => {
-    expect(Object.fromEntries(data.artifacts.filter((a) => a.slot === "armor").map((a) => [a.name, a.armor]))).toEqual(ARMOR);
+    expect(Object.fromEntries(data.artifacts.filter((a) => a.slot === "armor" && a.rarity === "common").map((a) => [a.name, a.armor]))).toEqual(ARMOR);
   });
 
   it("class tables: ≤ 12 columns, 20 cells, unique keys, numeric pools", () => {

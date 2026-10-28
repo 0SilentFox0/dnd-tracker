@@ -1,6 +1,7 @@
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ItemStats } from "@/lib/utils/items/item-stats";
 
 export interface ArtifactListItem {
   id: string;
@@ -12,6 +13,7 @@ export interface ArtifactListItem {
   description?: string | null;
   abilitySummary?: string[];
   artifactSet?: { id: string; name: string } | null;
+  itemKind?: "property" | "gear";
   [key: string]: unknown;
 }
 
@@ -24,6 +26,7 @@ export interface ArtifactCardData {
   description: string | null;
   abilitySummary: string[];
   artifactSet?: { name: string } | null;
+  itemKind?: "property" | "gear";
 }
 
 export type Artifact = ArtifactListItem & Record<string, unknown>;
@@ -45,4 +48,5 @@ export interface ArtifactData {
   abilityIssues: ConversionIssue[];
   weapon: WeaponStats;
   armor?: ArmorStats | null;
+  item?: ItemStats | null;
 }

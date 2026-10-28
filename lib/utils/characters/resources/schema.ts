@@ -11,7 +11,7 @@ const shape = {
   dead: z.boolean().optional(),
   slotsSpent: z.record(z.string().regex(/^([1-9]|pact)$/), count).optional(),
   hitDiceSpent: z.record(z.string().min(1).max(100), count).optional(),
-  charges: z.record(z.string().min(1).max(300), z.object({ used: count, rest: z.enum(["short", "long"]) })).optional(),
+  charges: z.record(z.string().min(1).max(300), z.object({ used: count, rest: z.enum(["short", "long"]).nullable() })).optional(),
   exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
   shortRestOpen: z.boolean().optional(),
 };

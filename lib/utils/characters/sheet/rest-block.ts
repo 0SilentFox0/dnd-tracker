@@ -2,6 +2,7 @@ import { levelUpAvailable, xpForLevel } from "@/lib/constants/experience";
 import { restUses } from "@/lib/utils/abilities/engine/core/usage";
 import { hitDicePool } from "@/lib/utils/characters/resources/hit-dice";
 import { readResources } from "@/lib/utils/characters/resources/schema";
+import { isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { SheetRest } from "@/types/characters";
@@ -36,7 +37,9 @@ export function buildRestBlock(input: {
     charges: persist
       ? [
           ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, name: a.name, uses: restUses(a.limits) ?? 0, used: p.battleData.abilityUsage?.[a.key]?.battle ?? 0, rest: a.limits.perRest.rest }] : [])),
-          ...Object.entries(p.battleData.pools ?? {}).map(([key, pool]) => ({ key, name: pool.label, uses: pool.max, used: p.battleData.abilityUsage?.[key]?.battle ?? 0, rest: pool.rest })),
+          ...Object.entries(p.battleData.pools ?? {})
+            .filter(([key]) => !isConsumablePool(key))
+            .map(([key, pool]) => ({ key, name: pool.label, uses: pool.max, used: p.battleData.abilityUsage?.[key]?.battle ?? 0, rest: pool.rest })),
         ]
       : [],
     inspiration: ooc.inspiration ? !!c.inspiration : null,

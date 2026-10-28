@@ -28,6 +28,7 @@ export interface SheetInput {
   rules?: Ruleset;
   classes?: ResolvedClassEntry[];
   chapters?: StoryChapter[];
+  attunement?: { used: number; limit: number } | null;
   character: Record<AbilityKey, number> & {
     id: string;
     name: string;
@@ -137,7 +138,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),
     rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules: input.rules, maxLevel: input.maxLevel }),
     spells: input.spells,
-    items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [] },
+    items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [], ...(input.attunement && { attunement: input.attunement }) },
     personalSkill: input.personalSkill,
     progression: input.progression,
     story: { biography: c.background?.trim() ? c.background : null, goals: parseGoals(c.goals), notes: input.viewer.isOwner ? (c.notes ?? null) : null, chapters: input.chapters ?? [],

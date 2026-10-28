@@ -3,6 +3,7 @@ import { DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
@@ -87,6 +88,7 @@ const VALUE_FIELDS: readonly FieldMeta[] = [
 export const modifyStatFields: readonly FieldMeta[] = [
   { name: "stat", label: "Стат", input: "select", options: Object.entries(STAT_LABELS).map(([value, label]) => ({ value, label })) },
   ...VALUE_FIELDS,
+  { name: "atLeast", label: "Не менше (значення характеристики)", input: "number", optional: true, visibleWhen: (e) => (ABILITY_KEYS as readonly string[]).includes(String(e.stat)) },
   { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
@@ -111,6 +113,8 @@ function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Param
 }
 
 export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): string {
+  if (e.atLeast !== undefined) return `${STAT_LABELS[e.stat]} не менше ${e.atLeast}`;
+
   const levels = e.spellLevels ? ` (рівні ${e.spellLevels.join(", ")})` : "";
 
   return `${STAT_LABELS[e.stat]}${levels} ${valueLabel(e)}`;

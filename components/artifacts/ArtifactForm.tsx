@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { ARTIFACT_FORM_TAB, type ArtifactFormTabId } from "./artifact-form-tabs";
 import { ArtifactArmorFields } from "./ArtifactArmorFields";
+import { ArtifactItemFields } from "./ArtifactItemFields";
 import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
@@ -28,6 +29,7 @@ import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { ArtifactFormSubmitPayload } from "@/lib/utils/artifacts/artifact-form";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ItemStats } from "@/lib/utils/items/item-stats";
 import type { ArtifactSetOption } from "@/types/artifacts";
 
 export type { ArtifactFormSubmitPayload };
@@ -43,6 +45,7 @@ export interface ArtifactFormInitial {
   abilityIssues: ConversionIssue[];
   weapon?: WeaponStats;
   armor?: ArmorStats | null;
+  item?: ItemStats | null;
 }
 
 export interface ArtifactFormProps {
@@ -66,9 +69,13 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
 
   const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
 
-  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
+  const rules = useCampaignRules(campaignId).data;
 
-  const hasArmor = classesEnabled && data.slot === ArtifactSlot.ARMOR;
+  const classesEnabled = !!rules?.classes.enabled;
+
+  const itemsEnabled = !!rules?.items?.enabled;
+
+  const hasArmor = classesEnabled && data.slot === ArtifactSlot.ARMOR && !data.item?.property;
 
   const tabMissing = (id: ArtifactFormTabId) => (id === ARTIFACT_FORM_TAB.weapon && !hasWeapon) || (id === ARTIFACT_FORM_TAB.armor && !hasArmor);
 
@@ -157,7 +164,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
           {
             id: ARTIFACT_FORM_TAB.weapon,
             label: "Зброя",
-            content: <ArtifactWeaponFields value={data.weapon} onChange={(w) => set("weapon", w)} />,
+            content: <ArtifactWeaponFields value={data.weapon} onChange={(w) => set("weapon", w)} bonusOnly={!!data.item?.property} />,
           },
         ]
       : []),
@@ -165,12 +172,18 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
       ? [{ id: ARTIFACT_FORM_TAB.armor, label: "Броня", content: <ArtifactArmorFields value={data.armor ?? null} onChange={(a) => set("armor", a)} /> }]
       : []),
     {
+      id: ARTIFACT_FORM_TAB.item,
+      label: "Предмет",
+      content: <ArtifactItemFields campaignId={campaignId} name={data.name} slot={data.slot} value={data.item} onChange={(item) => set("item", item)} itemsEnabled={itemsEnabled} />,
+    },
+    {
       id: ARTIFACT_FORM_TAB.abilities,
       label: "Вміння",
       invalid: editor.abilities.errors > 0 || initial.abilityIssues.length > 0,
       content: (
         <AbilityListEditor
           campaignId={campaignId}
+          itemCharges={!!data.item?.charges || !!data.item?.consumable}
           value={data.abilities}
           onChange={(a) => set("abilities", a)}
           issues={initial.abilityIssues}

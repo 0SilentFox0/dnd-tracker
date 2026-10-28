@@ -42,6 +42,7 @@ export const resourcesEditSchema = z
     exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
     dead: z.boolean().optional(),
     reset: z.literal(true).optional(),
+    charges: z.record(z.string().min(1).max(300), z.number().int().min(0).max(999)).optional(),
   })
   .refine((b) => Object.values(b).some((v) => v !== undefined), "Порожня правка");
 

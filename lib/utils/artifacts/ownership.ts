@@ -1,6 +1,7 @@
 import { buildEquipped } from "./equipment";
 
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { refArtifactIds } from "@/lib/utils/items/ref";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface HeldInventory {
@@ -22,12 +23,24 @@ export type TransferPlan =
   | { ok: true; artifactId: string; fromEquipped: EquippedItems; fromStash: string[]; toStash: string[] }
   | { ok: false; error: TransferErrorCode };
 
-export function findHolder(inventories: HeldInventory[], artifactId: string, exceptCharacterId?: string): string | null {
-  const holder = inventories.find(
-    (inv) => inv.characterId !== exceptCharacterId && (Object.values(inv.equipped).includes(artifactId) || inv.stash.includes(artifactId)),
-  );
+export type IsUnique = (artifactId: string) => boolean;
 
-  return holder?.characterId ?? null;
+const ALL_UNIQUE: IsUnique = () => true;
+
+const heldIds = (inv: HeldInventory) => [...Object.values(inv.equipped), ...inv.stash].filter((v): v is string => !!v).flatMap(refArtifactIds);
+
+export function findHolder(inventories: HeldInventory[], ref: string, exceptCharacterId?: string, isUnique: IsUnique = ALL_UNIQUE): string | null {
+  const ids = refArtifactIds(ref).filter(isUnique);
+
+  if (ids.length === 0) return null;
+
+  return inventories.find((inv) => inv.characterId !== exceptCharacterId && heldIds(inv).some((id) => ids.includes(id)))?.characterId ?? null;
+}
+
+export function uniqueConflict(refs: readonly string[], isUnique: IsUnique = ALL_UNIQUE): boolean {
+  const ids = refs.flatMap(refArtifactIds).filter(isUnique);
+
+  return new Set(ids).size !== ids.length;
 }
 
 export function planTransfer({

@@ -13,6 +13,7 @@ export const WeaponStatsSchema = z.object({
   range: z.string().trim().max(30).optional(),
   properties: z.string().trim().max(200).optional(),
   attackBonus: z.number().int().min(-20).max(20).optional(),
+  damageBonus: z.number().int().min(-20).max(20).optional(),
   minTargets: z.number().int().min(1).max(20).optional(),
   maxTargets: z.number().int().min(1).max(20).optional(),
   traits: z.array(z.enum(WEAPON_TRAITS)).max(7).optional(),
@@ -23,7 +24,7 @@ export type WeaponStats = z.infer<typeof WeaponStatsSchema>;
 
 const STRING_FIELDS = ["damageDice", "damageType", "attackType", "range", "properties", "versatileDice"] as const;
 
-const NUMBER_FIELDS = ["minTargets", "maxTargets"] as const;
+const NUMBER_FIELDS = ["minTargets", "maxTargets", "damageBonus"] as const;
 
 const MODIFIER_TYPES = new Set<string>(Object.values(ArtifactModifierType));
 

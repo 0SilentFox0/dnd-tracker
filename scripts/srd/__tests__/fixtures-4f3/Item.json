@@ -1,0 +1,26 @@
+[
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "potion",
+      "cost": "0.00",
+      "damage_immunities": [],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "You regain Hit Points when you drink this potion. The number of Hit Points depends on the potion's rarity, as shown in the table below.\n\nWhatever its potency, the potion's red liquid glimmers when agitated.\n\n| Potion                       | HP Regained | Rarity    |\n|------------------------------|-------------|-----------|\n| Potion of Healing            | 2d4 + 2     | Common    |\n| Potion of Healing (greater)  | 4d4 + 4     | Uncommon  |\n| Potion of Healing (superior) | 8d4 + 8     | Rare      |\n| Potion of Healing (supreme)  | 10d4 + 20   | Very Rare |",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Potions of Healing",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "0.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_potions-of-healing"
+  }
+]

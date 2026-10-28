@@ -5,6 +5,7 @@ import { referencedSkillIds } from "./extract-skills";
 import { loadClassesById } from "./load-classes";
 
 import { prisma } from "@/lib/db";
+import { inventoryArtifactIds } from "@/lib/utils/items/resolve";
 import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
@@ -12,12 +13,6 @@ export interface CharacterContext {
   context: CampaignSpellContext;
   race: Prisma.RaceGetPayload<object> | null;
   tree: Prisma.SkillTreeGetPayload<object> | null;
-}
-
-function equippedArtifactIds(character: CharacterFromPrisma): string[] {
-  const equipped = (character.inventory?.equipped as Record<string, unknown> | null) ?? {};
-
-  return [...new Set(Object.values(equipped).filter((v): v is string => typeof v === "string" && !!v))];
 }
 
 /** Learned-вузли дерева й особистий скіл персонажа: що саме з бібліотеки кампанії йому потрібне. */
@@ -43,7 +38,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
 
   const { maxLevel, rules } = settings;
 
-  const artifactIds = equippedArtifactIds(character);
+  const artifactIds = inventoryArtifactIds(character.inventory, { stash: rules.items.enabled, consumables: rules.items.enabled });
 
   const [campaign, artifacts] = await Promise.all([
     prisma.campaign.findUnique({

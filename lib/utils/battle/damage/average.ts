@@ -1,6 +1,7 @@
 import { heroAttackDamageParts, heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiers } from "./index";
+import { WEAPON_FLAT_LABEL } from "./weapon-flat";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
@@ -41,7 +42,11 @@ export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, 
     statLabel: attackAbilityLabelFor(p, attack),
   });
 
-  const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage);
+  const bonus = attack.damageBonus ?? 0;
 
-  return { total: dm.damage, statLabel: attackAbilityLabelFor(p, attack), weaponAvg, heroDice, heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0, statMod, steps: calc.steps, multiplier: dm.multiplier };
+  const steps = bonus ? [...calc.steps, { label: WEAPON_FLAT_LABEL, side: "attacker" as const, kind: "flat" as const, value: bonus, after: calc.totalDamage + bonus }] : calc.steps;
+
+  const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage + bonus);
+
+  return { total: dm.damage, statLabel: attackAbilityLabelFor(p, attack), weaponAvg, heroDice, heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0, statMod, steps, multiplier: dm.multiplier };
 }

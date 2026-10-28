@@ -48,7 +48,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     for (const hero of roster.data ?? []) {
       if (hero.id === characterId) continue;
 
-      for (const item of Object.values(hero.equipped)) map[item.id] = hero.name;
+      for (const item of Object.values(hero.equipped)) if (!item.gear) map[item.id] = hero.name;
     }
 
     return map;

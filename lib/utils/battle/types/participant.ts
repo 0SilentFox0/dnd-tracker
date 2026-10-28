@@ -25,6 +25,7 @@ export type ExtractedAttack = {
   traits?: WeaponTrait[];
   versatileDice?: string;
   hand?: "off";
+  damageBonus?: number;
 };
 
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{

@@ -52,7 +52,7 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
 
       const stat = e.stat as (typeof ABILITY_KEYS)[number];
 
-      const score = p.abilities[stat] + flat;
+      const score = e.atLeast !== undefined ? Math.max(p.abilities[stat], e.atLeast) : p.abilities[stat] + flat;
 
       return { ...p, abilities: { ...p.abilities, [stat]: score, modifiers: { ...p.abilities.modifiers, [stat]: getAbilityModifier(score) } } };
     }
@@ -71,6 +71,7 @@ function bakedEffects(p: BattleParticipant): { ability: ResolvedAbility; effect:
 export function bakePassives(p: BattleParticipant): BattleParticipant {
   return bakedEffects(p)
     .filter((x) => x.target === "self")
+    .sort((a, b) => Number(a.effect.atLeast !== undefined) - Number(b.effect.atLeast !== undefined))
     .reduce((acc, { effect }) => bakeOne(acc, effect, p), p);
 }
 

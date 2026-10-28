@@ -115,7 +115,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     const { formula, weaponDice } = heroAttackDamageParts(updatedAttacker, attack);
 
-    const weaponFlat = updatedAttacker.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? (parseDice(weaponDice)?.flat ?? 0) : 0;
+    const weaponFlat = updatedAttacker.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? (parseDice(weaponDice)?.flat ?? 0) + (attack.damageBonus ?? 0) : 0;
 
     physicalDamage = maxOf(parseDiceLenient(formula)) + weaponFlat + statModifier;
     damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });

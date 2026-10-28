@@ -8,6 +8,8 @@ const ARTIFACT_VERB: Record<string, string> = {
   artifact_grant: "отримано від DM",
   artifact_revoke: "забрано DM",
   artifact_transfer: "передано",
+  artifact_attune: "налаштовано",
+  artifact_unattune: "знято налаштування",
 };
 
 const ITEM_VERB: Record<string, string> = { item_add: "додано", item_use: "використано", item_edit: "змінено", item_remove: "викинуто" };

@@ -9,7 +9,7 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
 import type { StashAction } from "@/lib/utils/inventory/stash-actions";
 
-const ARTIFACT_ACTIONS: ReadonlySet<StashAction["action"]> = new Set(["stash", "equip", "grant", "revoke"]);
+const ARTIFACT_ACTIONS: ReadonlySet<StashAction["action"]> = new Set(["stash", "equip", "grant", "revoke", "attune", "unattune"]);
 
 export function useStash(campaignId: string, characterId: string, opts?: { enabled?: boolean }) {
   return useQuery({

@@ -9,6 +9,7 @@ import { SectionTitle } from "./SectionTitle";
 
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import type { Limits } from "@/lib/utils/abilities/schema";
+import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 
 const LIMIT_FIELDS: readonly FieldMeta[] = [
   { name: "perBattle", label: "Разів за бій", input: "number", optional: true },
@@ -24,7 +25,7 @@ const REST_OPTIONS = [
 ];
 
 export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) {
-  const columns = useAbilityEditor().classColumns;
+  const { classColumns: columns, itemCharges } = useAbilityEditor();
 
   if (ability.trigger.event === "passive") {
     return (
@@ -92,6 +93,17 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
               <ScaleColumnSelect id={`${path}.limits.pool.key`} poolsOnly value={ability.limits?.pool?.key} onChange={(key) => set("pool", { key, cost: ability.limits?.pool?.cost ?? 1 })} />
               <input aria-label="Ціна пулу" type="number" min={1} max={20} className="h-9 w-16 rounded-md border border-hud-line bg-hud-field px-2 text-sm" value={ability.limits?.pool?.cost ?? ""} onChange={(e) => set("pool", e.target.value === "" ? undefined : { key: ability.limits?.pool?.key ?? "", cost: Number(e.target.value) })} />
             </div>
+          </div>
+        )}
+        {itemCharges && !columns && isButton && (
+          <div className="col-span-3 space-y-1">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <input type="checkbox" aria-label="Витрачає заряди предмета" checked={ability.limits?.pool?.key === ITEM_CHARGES_KEY} onChange={(e) => set("pool", e.target.checked ? { key: ITEM_CHARGES_KEY, cost: ability.limits?.pool?.cost ?? 1 } : undefined)} />
+              Витрачає заряди предмета
+            </label>
+            {ability.limits?.pool?.key === ITEM_CHARGES_KEY && (
+              <input aria-label="Зарядів за раз" type="number" min={1} max={20} className="h-9 w-16 rounded-md border border-hud-line bg-hud-field px-2 text-sm" value={ability.limits.pool.cost} onChange={(e) => set("pool", { key: ITEM_CHARGES_KEY, cost: Math.max(1, Number(e.target.value) || 1) })} />
+            )}
           </div>
         )}
       </div>

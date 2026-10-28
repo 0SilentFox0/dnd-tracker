@@ -1,17 +1,42 @@
 "use client";
 
+import { useState } from "react";
+
 import { useProfile } from "../ProfileContext";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { EmptyState } from "@/components/common/states";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { artifactSlotLabel } from "@/lib/constants/artifacts";
+import { artifactRarityLabel, artifactSlotLabel, ITEM_LIMITS } from "@/lib/constants/artifacts";
 import { useFreeArtifacts, useStashAction } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
+import { composedName } from "@/lib/utils/items/compose";
+import type { FreeArtifact } from "@/types/inventory";
+
+const [MIN_QTY, MAX_QTY] = ITEM_LIMITS.grantQuantity;
 
 interface GrantArtifactDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+const ROW = "flex min-h-11 w-full items-center gap-3 border-b border-[#2a2218] py-2 text-left disabled:opacity-50";
+
+function ArtifactRow({ a, subtitle, disabled, onClick }: { a: FreeArtifact; subtitle: string; disabled: boolean; onClick: () => void }) {
+  return (
+    <li>
+      <button type="button" disabled={disabled} onClick={onClick} className={ROW}>
+        <span aria-hidden="true"><EntityIcon src={a.icon} name={a.name} size={36} className="hud-sc size-9 rounded-md border border-hud-line bg-transparent text-inherit" /></span>
+        <span className="min-w-0">
+          <span className="block truncate text-sm text-hud-ink">{a.name}</span>
+          <span className="block text-xs text-hud-muted">{subtitle}</span>
+        </span>
+      </button>
+    </li>
+  );
 }
 
 export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogProps) {
@@ -25,30 +50,81 @@ export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogP
 
   const notify = useNotify();
 
-  const grant = (artifactId: string) =>
-    action.mutateAsync({ action: "grant", artifactId }).then(
-      () => onOpenChange(false),
+  const [picked, setPicked] = useState<FreeArtifact | null>(null);
+
+  const [query, setQuery] = useState("");
+
+  const [quantity, setQuantity] = useState("1");
+
+  const close = (o: boolean) => {
+    if (!o) {
+      setPicked(null);
+      setQuery("");
+      setQuantity("1");
+    }
+
+    onOpenChange(o);
+  };
+
+  const grant = (body: { artifactId: string; baseId?: string; quantity?: number }) =>
+    action.mutateAsync({ action: "grant", ...body }).then(
+      () => close(false),
       (e: Error) => notify(e.message || "Не вдалося видати артефакт"),
     );
 
+  const pick = (a: FreeArtifact) => (a.property || a.consumable ? setPicked(a) : void grant({ artifactId: a.id }));
+
+  const kindLabel = (a: FreeArtifact) => (a.property ? "властивість" : a.consumable ? "витратний" : a.gear ? "спорядження" : null);
+
+  const subtitle = (a: FreeArtifact) => [artifactSlotLabel(a.slot), kindLabel(a)].filter(Boolean).join(" · ");
+
+  const property = picked?.property;
+
+  const bases = property ? artifacts.filter((b) => property.bases.includes(b.id) && b.name.toLowerCase().includes(query.trim().toLowerCase())) : [];
+
+  const qty = Math.min(MAX_QTY, Math.max(MIN_QTY, Math.trunc(Number(quantity)) || 1));
+
   return (
-    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title="Видати артефакт">
+    <ResponsiveDialog hud open={open} onOpenChange={close} title={picked?.property ? `База для «${picked.name}»` : "Видати артефакт"}>
       {free.isLoading ? (
         <p className="text-sm text-hud-muted">Завантаження…</p>
+      ) : picked && property ? (
+        <div className="space-y-2">
+          <Label htmlFor="grant-base-search" className="sr-only">Пошук бази</Label>
+          <Input id="grant-base-search" placeholder="Пошук бази" value={query} onChange={(e) => setQuery(e.target.value)} />
+          {bases.length === 0 ? (
+            <EmptyState title="Немає підхожих вільних баз" />
+          ) : (
+            <ul>
+              {bases.map((b) => (
+                <ArtifactRow
+                  key={b.id}
+                  a={b}
+                  subtitle={`${composedName(b, picked, property.nameTemplate)} · ${artifactRarityLabel(picked.rarity ?? "")}`}
+                  disabled={action.isPending}
+                  onClick={() => void grant({ artifactId: picked.id, baseId: b.id })}
+                />
+              ))}
+            </ul>
+          )}
+          <Button type="button" variant="ghost" size="sm" onClick={() => setPicked(null)}>Назад</Button>
+        </div>
+      ) : picked?.consumable ? (
+        <div className="space-y-2">
+          <p className="text-sm text-hud-ink">{picked.name}</p>
+          <Label htmlFor="grant-quantity">Кількість</Label>
+          <Input id="grant-quantity" type="number" min={MIN_QTY} max={MAX_QTY} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+          <div className="flex gap-2">
+            <Button type="button" disabled={action.isPending} onClick={() => void grant({ artifactId: picked.id, quantity: qty })}>Видати</Button>
+            <Button type="button" variant="ghost" onClick={() => setPicked(null)}>Назад</Button>
+          </div>
+        </div>
       ) : artifacts.length === 0 ? (
         <EmptyState title="Немає вільних артефактів" />
       ) : (
         <ul>
           {artifacts.map((a) => (
-            <li key={a.id}>
-              <button type="button" disabled={action.isPending} onClick={() => void grant(a.id)} className="flex min-h-11 w-full items-center gap-3 border-b border-[#2a2218] py-2 text-left disabled:opacity-50">
-                <EntityIcon src={a.icon} name={a.name} size={36} className="hud-sc size-9 rounded-md border border-hud-line bg-transparent text-inherit" />
-                <span className="min-w-0">
-                  <span className="block truncate text-sm text-hud-ink">{a.name}</span>
-                  <span className="block text-xs text-hud-muted">{artifactSlotLabel(a.slot)}</span>
-                </span>
-              </button>
-            </li>
+            <ArtifactRow key={a.id} a={a} subtitle={subtitle(a)} disabled={action.isPending} onClick={() => pick(a)} />
           ))}
         </ul>
       )}

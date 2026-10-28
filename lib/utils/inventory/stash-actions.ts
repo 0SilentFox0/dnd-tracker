@@ -1,9 +1,12 @@
 import { gainCoins, spendCoins } from "./money";
 
-import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { ARTIFACT_GRID_9, ITEM_LIMITS } from "@/lib/constants/artifacts";
 import { type Coin, InventoryLogKind, type InventoryLogKindValue } from "@/lib/constants/inventory";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
+import type { GrantPlan } from "@/lib/utils/items/grant";
+import { isComposedRef } from "@/lib/utils/items/ref";
+import { heldRefs } from "@/lib/utils/items/resolve";
 import type { Purse, SpecialItem, StashState } from "@/types/inventory";
 
 type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean };
@@ -18,8 +21,10 @@ export type StashAction =
   | { action: "removeItem"; itemId: string }
   | { action: "stash"; slot: string }
   | { action: "equip"; artifactId: string; slot?: "shield" }
-  | { action: "grant"; artifactId: string }
-  | { action: "revoke"; artifactId: string };
+  | { action: "grant"; artifactId: string; baseId?: string; quantity?: number }
+  | { action: "revoke"; artifactId: string }
+  | { action: "attune"; ref: string }
+  | { action: "unattune"; ref: string };
 
 export type StashActionName = StashAction["action"];
 
@@ -31,6 +36,13 @@ export const StashError = {
   UNKNOWN_SLOT: "UNKNOWN_SLOT",
   NOT_IN_STASH: "NOT_IN_STASH",
   NO_SLOT_FOR_ARTIFACT: "NO_SLOT_FOR_ARTIFACT",
+  ALREADY_IN_STASH: "ALREADY_IN_STASH",
+  ITEMS_DISABLED: "ITEMS_DISABLED",
+  ITEM_NOT_HELD: "ITEM_NOT_HELD",
+  ATTUNEMENT_NOT_REQUIRED: "ATTUNEMENT_NOT_REQUIRED",
+  ALREADY_ATTUNED: "ALREADY_ATTUNED",
+  ATTUNEMENT_LIMIT: "ATTUNEMENT_LIMIT",
+  ITEM_NOT_ATTUNED: "ITEM_NOT_ATTUNED",
 } as const;
 
 export type StashErrorCode = (typeof StashError)[keyof typeof StashError];
@@ -60,7 +72,24 @@ const itemFields = ({ name, description, quantity, consumable }: ItemFields) => 
   consumable,
 });
 
-export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId: string; artifactSlotType?: string; artifact?: { slot: string; bonuses?: unknown; modifiers?: unknown }; classesEnabled?: boolean }): StashResult {
+const named = (ref: string, name?: string) => (name && isComposedRef(ref) ? { artifactName: name } : {});
+
+const keepAttuned = (s: StashState, next: StashState, keep: (ref: string) => boolean): StashState => (s.attuned ? { ...next, attuned: s.attuned.filter(keep) } : next);
+
+export function applyStashAction(
+  s: StashState,
+  a: StashAction,
+  ctx: {
+    newItemId: string;
+    artifactSlotType?: string;
+    artifact?: { slot: string; bonuses?: unknown; modifiers?: unknown };
+    classesEnabled?: boolean;
+    grant?: GrantPlan;
+    items?: { enabled: boolean; limit: number; attunable: boolean };
+    name?: string;
+    isDM?: boolean;
+  },
+): StashResult {
   switch (a.action) {
     case "spend": {
       const purse = spendCoins(s.purse, a.amount, a.coin);
@@ -89,8 +118,11 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
     case "editItem": {
       if (!s.items.some((i) => i.id === a.itemId)) return fail(StashError.ITEM_NOT_FOUND);
 
+      // a player may not raise a DM-granted (mechanical) consumable: raising it unlinks the item
+      const keepLink = (i: SpecialItem) => !!i.artifactId && (ctx.isDM !== false || a.quantity <= i.quantity);
+
       return ok(
-        { ...s, items: s.items.map((i) => (i.id === a.itemId ? { id: i.id, ...itemFields(a) } : i)) },
+        { ...s, items: s.items.map((i) => (i.id === a.itemId ? { id: i.id, ...itemFields(a), ...(keepLink(i) && { artifactId: i.artifactId }) } : i)) },
         InventoryLogKind.ITEM_EDIT,
         { item: a.name, qty: a.quantity },
       );
@@ -119,8 +151,12 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
 
       if (!id) return fail(StashError.SLOT_EMPTY);
 
+      if (s.stash.includes(id)) return fail(StashError.ALREADY_IN_STASH);
+
+      const equipped = buildEquipped(s.equipped, a.slot, null);
+
       return ok(
-        { ...s, equipped: buildEquipped(s.equipped, a.slot, null), stash: [...s.stash, id] },
+        keepAttuned(s, { ...s, equipped, stash: [...s.stash, id] }, (r) => r !== id || Object.values(equipped).includes(id)),
         InventoryLogKind.ARTIFACT_STASH,
         { artifactId: id, slot: a.slot },
       );
@@ -137,6 +173,8 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
 
       const occupant = s.equipped[cell.key];
 
+      if (occupant && occupant !== a.artifactId && s.stash.includes(occupant)) return fail(StashError.ALREADY_IN_STASH);
+
       const stash = s.stash.filter((id) => id !== a.artifactId);
 
       return ok(
@@ -145,11 +183,53 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
         { artifactId: a.artifactId, slot: cell.key, ...(occupant ? { swappedArtifactId: occupant } : {}) },
       );
     }
-    case "grant":
-      return ok({ ...s, stash: [...s.stash, a.artifactId] }, InventoryLogKind.ARTIFACT_GRANT, { artifactId: a.artifactId });
-    case "revoke":
+    case "grant": {
+      const plan = ctx.grant;
+
+      if (plan?.kind === "consumable") {
+        const existing = s.items.find((i) => i.artifactId === plan.artifactId);
+
+        const items = existing
+          ? s.items.map((i) => (i === existing ? { ...i, quantity: Math.min(ITEM_LIMITS.quantity, i.quantity + plan.quantity) } : i))
+          : [...s.items, { id: ctx.newItemId, name: plan.name, ...(plan.description && { description: plan.description }), quantity: plan.quantity, consumable: true, artifactId: plan.artifactId }];
+
+        return ok({ ...s, items }, InventoryLogKind.ITEM_ADD, { item: plan.name, qty: plan.quantity, artifactId: plan.artifactId });
+      }
+
+      const ref = plan?.ref ?? a.artifactId;
+
+      if (plan && s.stash.includes(ref)) return fail(StashError.ALREADY_IN_STASH);
+
+      return ok({ ...s, stash: [...s.stash, ref] }, InventoryLogKind.ARTIFACT_GRANT, { artifactId: ref, ...named(ref, plan?.name) });
+    }
+    case "revoke": {
       if (!s.stash.includes(a.artifactId)) return fail(StashError.NOT_IN_STASH);
 
-      return ok({ ...s, stash: s.stash.filter((id) => id !== a.artifactId) }, InventoryLogKind.ARTIFACT_REVOKE, { artifactId: a.artifactId });
+      const next = { ...s, stash: s.stash.filter((id) => id !== a.artifactId) };
+
+      return ok(keepAttuned(s, next, (r) => heldRefs(next).includes(r)), InventoryLogKind.ARTIFACT_REVOKE, { artifactId: a.artifactId });
+    }
+    case "attune": {
+      if (!ctx.items?.enabled) return fail(StashError.ITEMS_DISABLED);
+
+      if (!heldRefs(s).includes(a.ref)) return fail(StashError.ITEM_NOT_HELD);
+
+      if (!ctx.items.attunable) return fail(StashError.ATTUNEMENT_NOT_REQUIRED);
+
+      const attuned = s.attuned ?? [];
+
+      if (attuned.includes(a.ref)) return fail(StashError.ALREADY_ATTUNED);
+
+      if (attuned.length >= ctx.items.limit) return fail(StashError.ATTUNEMENT_LIMIT);
+
+      return ok({ ...s, attuned: [...attuned, a.ref] }, InventoryLogKind.ITEM_ATTUNE, { artifactId: a.ref, ...named(a.ref, ctx.name) });
+    }
+    case "unattune": {
+      if (!ctx.items?.enabled) return fail(StashError.ITEMS_DISABLED);
+
+      if (!(s.attuned ?? []).includes(a.ref)) return fail(StashError.ITEM_NOT_ATTUNED);
+
+      return ok({ ...s, attuned: (s.attuned ?? []).filter((r) => r !== a.ref) }, InventoryLogKind.ITEM_UNATTUNE, { artifactId: a.ref, ...named(a.ref, ctx.name) });
+    }
   }
 }

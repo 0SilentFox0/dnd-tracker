@@ -2,6 +2,7 @@ import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
+import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 import type { ClassColumn } from "@/types/classes";
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
@@ -134,7 +135,7 @@ export function setAtPath<T>(obj: T, path: string, value: unknown): T {
   return copy as T;
 }
 
-export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[] } = {}): { ok: boolean; errorsByPath: Record<string, string[]> } {
+export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[]; itemCharges?: boolean } = {}): { ok: boolean; errorsByPath: Record<string, string[]> } {
   const errorsByPath: Record<string, string[]> = {};
 
   const push = (path: PropertyKey[], message: string) => (errorsByPath[path.map(String).join(".")] ??= []).push(message);
@@ -148,7 +149,9 @@ export function validateAbilities(list: unknown[], opts: { classColumns?: readon
 
     if (!one.success) return;
 
-    for (const issue of columnRefIssues([one.data], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message);
+    const checked = opts.itemCharges && one.data.limits?.pool?.key === ITEM_CHARGES_KEY ? { ...one.data, limits: { ...one.data.limits, pool: undefined } } : one.data;
+
+    for (const issue of columnRefIssues([checked], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message);
   });
 
   return { ok: Object.keys(errorsByPath).length === 0, errorsByPath };

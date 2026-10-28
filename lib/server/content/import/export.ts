@@ -12,6 +12,7 @@ import { IMPORT_SPECS } from "@/lib/utils/content/import/fields";
 import { refKindsOf } from "@/lib/utils/content/import/kinds";
 import { recordToCells } from "@/lib/utils/content/import/mapping";
 import { toCsv } from "@/lib/utils/content/import/table";
+import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import type { IdName } from "@/types/common";
 import type { ImportKind, ImportRecord } from "@/types/content-import";
 
@@ -33,7 +34,7 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
   races: async (c) => asRecords((await prisma.race.findMany(query(c))).map((r) => ({ ...r, abilities: raceAbilities(r) }))),
   classes: async (c) => asRecords(await prisma.gameClass.findMany(query(c))),
   artifacts: async (c) =>
-    asRecords((await prisma.artifact.findMany(query(c))).map((r) => ({ ...r, abilities: artifactAbilities(r), weapon: isWeaponSlot(r.slot) ? weaponStatsFromRow(r) : undefined, armor: r.slot === ArtifactSlot.ARMOR ? (armorStatsFromRow(r) ?? undefined) : undefined }))),
+    asRecords((await prisma.artifact.findMany(query(c))).map((r) => ({ ...r, abilities: artifactAbilities(r), weapon: isWeaponSlot(r.slot) ? weaponStatsFromRow(r) : undefined, armor: r.slot === ArtifactSlot.ARMOR ? (armorStatsFromRow(r) ?? undefined) : undefined, item: itemStatsFromRow(r) ?? undefined }))),
   "artifact-sets": async (c) =>
     asRecords(
       (await prisma.artifactSet.findMany({ ...query(c), include: { artifacts: { select: { id: true }, orderBy: { createdAt: "asc" } } } })).map(({ artifacts, ...r }) => ({

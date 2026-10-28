@@ -131,6 +131,8 @@ export interface O5Armor {
 
 export interface O5Item { name: string; weapon: string | null; armor: string | null; cost: string; weight: string; desc: string }
 
+export interface O5MagicItem { name: string; desc: string; category: string; rarity: string; requires_attunement: boolean; weapon: string | null; armor: string | null }
+
 export interface O5Document { name: string; licenses: string[] }
 
 export interface Open5eData {
@@ -151,6 +153,7 @@ export interface Open5eData {
   weaponAssignments: Fixture<O5WeaponAssignment>[];
   armor: Fixture<O5Armor>[];
   items: Fixture<O5Item>[];
+  magicItems: Fixture<O5MagicItem>[];
 }
 
 export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
@@ -171,13 +174,23 @@ export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
   weaponAssignments: "WeaponPropertyAssignment",
   armor: "Armor",
   items: "Item",
+  magicItems: "MagicItem",
 };
 
 export const FIXTURE_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures");
 export const FIXTURE_4F2_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f2");
 
+export const FIXTURE_4F3_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f3");
+
+// MagicItem arrived in 4f-3: the 4f-1/4f-2 fixture dirs do not carry it
+const OPTIONAL_FILES = new Set<Open5eFile>(["MagicItem"]);
+
 export function loadOpen5e(dir: string): Open5eData {
-  const read = (file: Open5eFile) => JSON.parse(fs.readFileSync(path.join(dir, `${file}.json`), "utf8")) as unknown;
+  const read = (file: Open5eFile) => {
+    const full = path.join(dir, `${file}.json`);
+
+    return OPTIONAL_FILES.has(file) && !fs.existsSync(full) ? [] : (JSON.parse(fs.readFileSync(full, "utf8")) as unknown);
+  };
 
   return Object.fromEntries(Object.entries(OPEN5E_FILE_OF).map(([key, file]) => [key, read(file)])) as unknown as Open5eData;
 }

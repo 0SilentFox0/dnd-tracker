@@ -1,5 +1,5 @@
 import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-import { type EquippedArtifactRow, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
+import { type EquippedArtifactRow, loadConsumableEntries, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { resolveCharacterSkillEntries } from "./extract-skills";
 import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
@@ -25,9 +25,14 @@ import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { consumablePools } from "@/lib/utils/items/consumables";
+import { itemPools } from "@/lib/utils/items/pools";
+import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { BattleParticipant } from "@/types/battle";
+
+const uniqueById = <T extends { id: string }>(rows: T[]): T[] => [...new Map(rows.map((r) => [r.id, r])).values()];
 
 /**
  * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
@@ -61,9 +66,11 @@ export async function createBattleParticipantFromCharacter(
     context ? (context.skillTreeByRace[character.race] ?? null) : undefined,
   );
 
-  const artifactRows = preloaded?.artifactRows ?? (await loadEquippedArtifactRows(character, context?.artifactsById));
+  const artifactRows = preloaded?.artifactRows ?? (await loadEquippedArtifactRows(character, context?.artifactsById, { rules }));
 
   const artifactsById = context?.artifactsById ?? (preloaded?.artifactRows ? Object.fromEntries(preloaded.artifactRows.map(({ row }) => [row.id, row])) : undefined);
+
+  const consumables = await loadConsumableEntries(character, artifactsById, rules);
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
@@ -77,7 +84,7 @@ export async function createBattleParticipantFromCharacter(
 
   const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
 
-  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses });
+  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses, items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) } });
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
@@ -127,14 +134,15 @@ export async function createBattleParticipantFromCharacter(
     ...collectCharacterAbilities({
     skills,
     race,
-    artifacts: artifactRows.map(({ row, slot }) => ({ ...row, slot })),
+    artifacts: uniqueById(artifactRows.map(({ row, slot }) => ({ ...row, slot }))),
     completedSets: completed.sets,
+    consumables: consumables.map(({ itemId, row }) => ({ itemId, row })),
     ...(resolvedClasses && { classes: resolvedClasses }),
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
-  const pools = resolvedClasses ? classPools(resolvedClasses) : {};
+  const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...itemPools(uniqueById(artifactRows.map(({ row }) => row))), ...consumablePools(consumables) };
 
   const participant: BattleParticipant = {
     basicInfo: {

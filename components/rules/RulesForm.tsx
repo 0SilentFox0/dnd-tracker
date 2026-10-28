@@ -13,6 +13,7 @@ import { EncountersSection } from "./sections/EncountersSection";
 import { FormulasSection } from "./sections/FormulasSection";
 import { HeroScalingSection } from "./sections/HeroScalingSection";
 import { InitiativeSection } from "./sections/InitiativeSection";
+import { ItemsSection } from "./sections/ItemsSection";
 import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
@@ -40,6 +41,7 @@ const SECTIONS = {
   classes: ClassesSection,
   outOfCombat: OutOfCombatSection,
   encounters: EncountersSection,
+  items: ItemsSection,
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {

@@ -6,6 +6,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ItemStats } from "@/lib/utils/items/item-stats";
 import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { ClassColumn } from "@/types/classes";
 
@@ -87,7 +88,17 @@ export interface UnitRow {
   abilities: Ability[];
 }
 
-export interface ArtifactRow { slug: string; name: string; description: string; rarity: "common"; slot: "weapon" | "range_weapon" | "shield" | "armor"; weapon?: WeaponStats; armor?: ArmorStats; abilities?: Ability[] }
+export interface ArtifactRow {
+  slug: string;
+  name: string;
+  description: string;
+  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
+  slot: "weapon" | "range_weapon" | "shield" | "armor" | "ring" | "amulet" | "boots" | "cloak" | "helmet" | "item";
+  weapon?: WeaponStats;
+  armor?: ArmorStats;
+  item?: ItemStats;
+  abilities?: Ability[];
+}
 
 export interface SrdData {
   "spell-groups": SpellGroupRow[];

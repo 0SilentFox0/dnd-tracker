@@ -50,6 +50,7 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
         title="АРТЕФАКТИ В ПІДСУМКУ"
         action={isDM && <Button size="sm" variant="outline" onClick={() => setGrantOpen(true)}>Видати артефакт</Button>}
       >
+        {view.attunement && <p className="mb-2 text-xs text-hud-muted">{`Налаштування ${view.attunement.used}/${view.attunement.limit}`}</p>}
         {view.artifacts.length === 0 && <p className="text-sm text-hud-muted">Підсумок порожній.</p>}
         <ul className="space-y-2">
           {view.artifacts.map((a) => (
@@ -61,6 +62,14 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
                 <span className="min-w-0">
                   <span className="block truncate text-sm text-hud-ink">{a.name}</span>
                   <span className="block text-xs text-hud-muted">{artifactSlotLabel(a.slot)}</span>
+                  {(a.carried || a.attunement || a.charges) && (
+                    <span className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-hud-muted">
+                      {a.carried && <span>Носиться</span>}
+                      {a.attunement === "attuned" && <span>Налаштовано</span>}
+                      {a.attunement === "required" && <span>Не діє без налаштування</span>}
+                      {a.charges && <span>{`Заряди ${a.charges.left}/${a.charges.max}`}</span>}
+                    </span>
+                  )}
                 </span>
               </div>
               {canAct && (
@@ -69,6 +78,8 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
                   {classesEnabled && a.light && (
                     <Button size="sm" variant="outline" disabled={action.isPending} onClick={() => void run({ action: "equip", artifactId: a.id, slot: "shield" })}>У другу руку</Button>
                   )}
+                  {a.attunement === "required" && <Button size="sm" variant="outline" disabled={action.isPending} onClick={() => void run({ action: "attune", ref: a.id })}>Налаштувати</Button>}
+                  {a.attunement === "attuned" && <Button size="sm" variant="outline" disabled={action.isPending} onClick={() => void run({ action: "unattune", ref: a.id })}>Зняти налаштування</Button>}
                   <Button size="sm" variant="outline" onClick={() => setTransfer(a)}>Передати</Button>
                   {isDM && <Button size="sm" variant="outline" onClick={() => revoke(a)}>Забрати</Button>}
                 </div>

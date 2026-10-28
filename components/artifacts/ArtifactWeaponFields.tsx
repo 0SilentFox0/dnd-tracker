@@ -9,7 +9,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { ATTACK_KIND_LABELS, AttackType } from "@/lib/constants/battle";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 
-type NumberKey = "attackBonus" | "minTargets" | "maxTargets";
+type NumberKey = "attackBonus" | "damageBonus" | "minTargets" | "maxTargets";
 
 type TextKey = "damageDice" | "damageType" | "range" | "properties";
 
@@ -17,6 +17,7 @@ const TEXT_MAX: Record<TextKey, number> = { damageDice: 30, damageType: 30, rang
 
 const NUMBER_RANGE: Record<NumberKey, { min: number; max: number }> = {
   attackBonus: { min: -20, max: 20 },
+  damageBonus: { min: -20, max: 20 },
   minTargets: { min: 1, max: 20 },
   maxTargets: { min: 1, max: 20 },
 };
@@ -30,6 +31,7 @@ const TEXT_FIELDS: Array<{ key: TextKey; label: string; placeholder: string }> =
 
 const NUMBER_FIELDS: Array<{ key: NumberKey; label: string }> = [
   { key: "attackBonus", label: "Бонус атаки" },
+  { key: "damageBonus", label: "+N до шкоди" },
   { key: "minTargets", label: "Мін. цілей" },
   { key: "maxTargets", label: "Макс. цілей" },
 ];
@@ -41,7 +43,7 @@ const ATTACK_TYPE_OPTIONS = [
 
 const clamp = (v: number, { min, max }: { min: number; max: number }) => Math.min(max, Math.max(min, v));
 
-export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; onChange: (next: WeaponStats) => void }) {
+export function ArtifactWeaponFields({ value, onChange, bonusOnly = false }: { value: WeaponStats; onChange: (next: WeaponStats) => void; bonusOnly?: boolean }) {
   const set = <K extends keyof WeaponStats>(key: K, v: WeaponStats[K]) => {
     const next = { ...value, [key]: v };
 
@@ -49,6 +51,29 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
 
     onChange(next);
   };
+
+  const numberFields = bonusOnly ? NUMBER_FIELDS.filter((f) => f.key === "attackBonus" || f.key === "damageBonus") : NUMBER_FIELDS;
+
+  const numberGrid = (
+    <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
+      {numberFields.map((f) => (
+        <div key={f.key} className="flex flex-col justify-end space-y-1">
+          <Label htmlFor={`weapon-${f.key}`} className="text-xs leading-tight text-muted-foreground">
+            {f.label}
+          </Label>
+          <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v === undefined ? v : clamp(v, NUMBER_RANGE[f.key]))} />
+        </div>
+      ))}
+    </div>
+  );
+
+  if (bonusOnly) {
+    return (
+      <HudSection title="Бонуси властивості" className="space-y-3">
+        {numberGrid}
+      </HudSection>
+    );
+  }
 
   return (
     <HudSection title="Зброя" className="space-y-3">
@@ -85,16 +110,7 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
         value={value}
         onChange={onChange}
       />
-      <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
-        {NUMBER_FIELDS.map((f) => (
-          <div key={f.key} className="flex flex-col justify-end space-y-1">
-            <Label htmlFor={`weapon-${f.key}`} className="text-xs leading-tight text-muted-foreground">
-              {f.label}
-            </Label>
-            <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v === undefined ? v : clamp(v, NUMBER_RANGE[f.key]))} />
-          </div>
-        ))}
-      </div>
+      {numberGrid}
     </HudSection>
   );
 }

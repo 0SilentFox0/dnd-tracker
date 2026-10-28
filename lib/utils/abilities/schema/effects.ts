@@ -33,11 +33,16 @@ const ModifyStatSchema = z
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
     percent: FlatSchema.optional(),
+    atLeast: z.number().int().min(1).max(30).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     ...timed,
   })
-  .refine(hasValue, { message: "Потрібен flat або percent" });
+  .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })
+  .refine((e) => e.atLeast === undefined || ((ABILITY_KEYS as readonly string[]).includes(e.stat) && e.flat === undefined && e.percent === undefined), {
+    message: "atLeast — лише для характеристик і без flat/percent",
+    path: ["atLeast"],
+  });
 
 const DamageBonusSchema = z
   .object({
@@ -123,6 +128,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),
   z.object({ ...flagBase, flag: z.literal("evasion") }),
+  z.object({ ...flagBase, flag: z.literal("critImmunity") }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),

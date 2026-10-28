@@ -226,6 +226,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
   },
   autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
   twoWeaponFighting: plain("Бій двома зброями", "модифікатор до шкоди другої руки"),
+  critImmunity: plain("Імунітет до критів", "критичне влучання по власнику стає звичайним"),
   evasion: plain("Ухилення (Evasion)", "рятівний кидок Спритності з половиною шкоди: успіх — 0, провал — половина"),
   proneDefense: plain("Захист повалених", "ближні атаки по цілі з перевагою, дальні — з недоліком"),
   conditionImmunity: {

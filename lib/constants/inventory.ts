@@ -20,6 +20,8 @@ export const InventoryLogKind = {
   ARTIFACT_GRANT: "artifact_grant",
   ARTIFACT_REVOKE: "artifact_revoke",
   ARTIFACT_TRANSFER: "artifact_transfer",
+  ITEM_ATTUNE: "artifact_attune",
+  ITEM_UNATTUNE: "artifact_unattune",
 } as const;
 
 export type InventoryLogKindValue = (typeof InventoryLogKind)[keyof typeof InventoryLogKind];

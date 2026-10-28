@@ -27,7 +27,7 @@ export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForRefer
             </span>
             <span className="text-xs text-hud-muted">{meta}</span>
             <p className="mt-1.5 text-xs text-hud-muted">
-              {artifact.holderName ? `у ${artifact.holderName}` : "вільний"}
+              {artifact.gear ? "спорядження" : artifact.holderName ? `у ${artifact.holderName}` : "вільний"}
             </p>
           </div>
         </div>

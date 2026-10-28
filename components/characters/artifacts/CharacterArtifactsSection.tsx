@@ -10,6 +10,9 @@ import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
+import { composeItemRow } from "@/lib/utils/items/compose";
+import { isPropertyRow, isUniqueRow } from "@/lib/utils/items/item-row";
+import { parseItemRef } from "@/lib/utils/items/ref";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactOption {
@@ -27,6 +30,20 @@ interface CharacterArtifactsSectionProps {
   artifacts: ArtifactOption[];
   holders?: Record<string, string>;
   onEquippedChange: (equipped: EquippedItems) => void;
+}
+
+function optionFor(ref: string, artifacts: ArtifactOption[]): ArtifactOption | undefined {
+  const direct = artifacts.find((a) => a.id === ref);
+
+  if (direct) return direct;
+
+  const parsed = parseItemRef(ref);
+
+  const base = parsed?.propertyId ? artifacts.find((a) => a.id === parsed.baseId) : undefined;
+
+  const property = base && artifacts.find((a) => a.id === parsed?.propertyId);
+
+  return base && property ? composeItemRow(base, property) : undefined;
 }
 
 const CELL =
@@ -64,13 +81,14 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
           {ARTIFACT_GRID_9.map((cell) => {
             const equippedId = equipped[cell.key] as string | undefined;
 
-            const current = equippedId ? artifacts.find((a) => a.id === equippedId) : undefined;
+            const current = equippedId ? optionFor(equippedId, artifacts) : undefined;
 
             const available = artifacts.filter(
               (a) =>
-                a.slot === cell.slotType ||
+                !isPropertyRow(a) &&
+                (a.slot === cell.slotType ||
                 (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON) ||
-                (cell.slotType === ArtifactSlot.SHIELD && canEquipOffHand(a, classesEnabled)),
+                (cell.slotType === ArtifactSlot.SHIELD && canEquipOffHand(a, classesEnabled))),
             );
 
             return (
@@ -98,7 +116,7 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
                     available.map((a) => {
                       const holder = holders?.[a.id];
 
-                      const wornElsewhere = Object.entries(equipped).some(([key, id]) => id === a.id && key !== cell.key);
+                      const wornElsewhere = isUniqueRow(a) && Object.entries(equipped).some(([key, id]) => id === a.id && key !== cell.key);
 
                       return (
                         <DropdownMenuItem key={a.id} disabled={Boolean(holder) || wornElsewhere} onClick={() => handleSlotChange(cell.key, a.id)} className="flex items-center gap-2">

@@ -5,6 +5,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackRollModifier } from "@/lib/utils/battle/attack/ability";
 import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
@@ -109,7 +110,7 @@ const CERTAIN_ONLY = () => 0.9999;
 function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number) {
   const ps = withSelf(withSelf(participants, target), attacker);
 
-  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type) }, { round, rng: CERTAIN_ONLY });
+  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type), ...attackSourceOf(attack) }, { round, rng: CERTAIN_ONLY });
 
   const self = findParticipant(r.participants, attacker.basicInfo.id) ?? attacker;
 

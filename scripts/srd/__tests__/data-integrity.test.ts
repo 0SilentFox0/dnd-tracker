@@ -25,7 +25,7 @@ const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
   artifacts: { create: createArtifactSchema, update: patchArtifactSchema },
 };
 
-const EXPECTED: Record<SrdKind, number> = { "spell-groups": 8, spells: 339, races: 9, classes: 12, units: 331, artifacts: 51 };
+const EXPECTED: Record<SrdKind, number> = { "spell-groups": 8, spells: 339, races: 9, classes: 12, units: 331, artifacts: 331 };
 
 const actor: Actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session", scopes: null };
 

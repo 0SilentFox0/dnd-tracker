@@ -11,9 +11,10 @@ import {
   buildArtifactPayload,
 } from "@/lib/utils/artifacts/artifact-form";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ItemStats } from "@/lib/utils/items/item-stats";
 
 interface UseArtifactFormOptions {
-  initial: Omit<ArtifactFormState, "weapon" | "armor"> & { weapon?: WeaponStats; armor?: ArmorStats | null };
+  initial: Omit<ArtifactFormState, "weapon" | "armor" | "item"> & { weapon?: WeaponStats; armor?: ArmorStats | null; item?: ItemStats | null };
   mode: "create" | "edit";
   onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
   onDelete?: () => Promise<void>;

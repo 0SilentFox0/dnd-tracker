@@ -126,6 +126,15 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Пули** — `battleData.pools: Record<key, { label, max, rest }>` (`classPools`), лічильник `abilityUsage[poolKey].battle`; `withinCountLimits`/`recordUse` враховують `limits.pool { key, cost }`; нестача — відмова `ABILITY_POOL_EMPTY`, вміння зникає з вибору; плитка й картка героя показують залишок. При `persistResources` пул переживає бій у `resources.charges[poolKey]` і скидається відпочинком за `rest` колонки.
 - **Події атаки** `hit` і `attack` (after) несуть `rollMode` (лише перевага/недолік) — для умов `attackRollMode` і `allyAdjacent` (Sneak Attack). **`evasion`** — рятівний Спр з половиною: успіх 0, провал половина; не діє на недієздатного (`spell/cast/outcome.ts`, `maneuvers/fire-burst.ts`).
 
+## 5e: магічні предмети (етап 4f-3)
+
+- **Ref предмета.** Значення `character_inventories.equipped`/`stash`/`attuned` — `"<artifactId>"` або складений `"<baseId>+<propertyId>"` (`lib/utils/items/ref.ts`). Єдиний вхід для читачів — `resolveItemRow(s)` (`lib/utils/items/resolve.ts`): розбирає ref, складає синтетичний рядок `composeItemRow` (id = ref, назва за шаблоном властивості, статі бази + `overrides`, `bonuses`/`damageBonus` — сума, уміння бази ++ уміння властивості з префіксом `p-`), тихо пропускає видалене. Тест-сторож `lib/__tests__/item-readers-guard.test.ts` не пускає нових читачів `.equipped`/`.stash` повз `lib/utils/items`.
+- **`rules.items.enabled`**: предмети слотів `item`/`ring` зі сховища носяться (`activeItemRefs`, `carried`), налаштування (`attuned`, ліміт `attunementLimit`) — неналаштований предмет з `attunement` дає лише статі бази (складений) або нічого (унікальний), витратні з `artifactId` потрапляють у бій. Вимкнено — усе як HOMM (налаштування ігнорується).
+- **Унікальність** — `findHolder(…, isUnique)`: перевіряються лише артефакти без `item.unique === false` і не-властивості; унікальна база в складеному ref — одна на кампанію. Дублікати в клітинках — лише неунікальні (`uniqueConflict`); сховище лишається множиною (`ITEM_ALREADY_IN_STASH`).
+- **Атаки**: id атаки = ref (`:off` — друга рука), `BattleAttack.damageBonus` додається у `weaponFlatOf` (прев'ю й сервер); події `attack`/`hit` несуть `attackSourceId` (ref без `:off`) для умови `withThisItem`. `critImmunity` скасовує крит після кидка (`cancelCritIfImmune`).
+- **Заряди** — пул `pool:item:<ref>` (`itemPools`, лише активні предмети з `charges`; однакові ref ділять пул); уміння з `limits.pool.key: "charges"` отримують цей ключ при збиранні. `rest: null` — не відновлюються (довгий відпочинок їх лишає). ДМ правит витрачене через `PATCH …/resources { charges }`.
+- **Витратні** — `SpecialItem.artifactId`, пул `pool:consumable:<itemId>` (max = кількість, `rest: null`), у `resources.charges` не пишеться; `saveBattle` (гілка `completing`, та сама транзакція) віднімає витрачене (`persistConsumables`), запис на 0 видаляється, журнал `item_use` від `campaigns.dmUserId`.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

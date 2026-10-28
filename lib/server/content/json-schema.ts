@@ -11,6 +11,7 @@ import { ArmorStatsSchema } from "@/lib/utils/artifacts/armor-stats";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { capitalize } from "@/lib/utils/common/text";
+import { ItemStatsSchema } from "@/lib/utils/items/item-stats";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
 
 export const pascal = (s: string) => s.split(/[^a-zA-Z0-9]+/).filter(Boolean).map(capitalize).join("");
@@ -37,6 +38,7 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [SpellFxSchema, "SpellFx"],
   [WeaponStatsSchema, "WeaponStats"],
   [ArmorStatsSchema, "ArmorStats"],
+  [ItemStatsSchema, "ItemStats"],
   [ClassColumnSchema, "ClassColumn"],
   [RulesetPatchSchema, "RulesetPatch"],
 ];

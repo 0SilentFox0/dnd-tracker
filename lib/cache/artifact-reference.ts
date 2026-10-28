@@ -1,7 +1,9 @@
 import { artifactSlotLabel } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { normalizeStash } from "@/lib/utils/inventory/items";
+import { isUniqueRow } from "@/lib/utils/items/item-row";
+import { refArtifactIds } from "@/lib/utils/items/ref";
+import { heldRefs } from "@/lib/utils/items/resolve";
 import type { ArtifactForReference, ArtifactSetForReference } from "@/types/info-reference";
 
 export interface ArtifactReference {
@@ -21,6 +23,7 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
         slot: true,
         description: true,
         abilities: true,
+        modifiers: true,
         artifactSet: { select: { name: true } },
       },
       orderBy: { name: "asc" },
@@ -46,15 +49,14 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
   const holderById = new Map<string, string>();
 
   for (const inv of inventories) {
-    for (const id of Object.values((inv.equipped as Record<string, string | undefined> | null) ?? {})) {
-      if (id) holderById.set(id, inv.character.name);
-    }
-
-    for (const id of normalizeStash(inv.stash)) holderById.set(id, inv.character.name);
+    for (const ref of heldRefs(inv)) for (const id of refArtifactIds(ref)) holderById.set(id, inv.character.name);
   }
 
   return {
-    artifacts: artifacts.map((a) => ({
+    artifacts: artifacts.map((a) => {
+      const gear = !isUniqueRow(a);
+
+      return {
       id: a.id,
       name: a.name,
       icon: a.icon,
@@ -64,8 +66,10 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
       description: a.description,
       effects: abilitySummary("artifact", a),
       setName: a.artifactSet?.name ?? null,
-      holderName: holderById.get(a.id) ?? null,
-    })),
+      holderName: gear ? null : (holderById.get(a.id) ?? null),
+      ...(gear && { gear: true as const }),
+      };
+    }),
     sets: sets.map((s) => ({
       id: s.id,
       name: s.name,

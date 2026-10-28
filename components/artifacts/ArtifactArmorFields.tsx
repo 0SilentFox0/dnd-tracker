@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ARMOR_CATEGORIES, armorDexCap,type ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 
-const CATEGORY_LABELS: Record<ArmorStats["category"], string> = { light: "Легка", medium: "Середня", heavy: "Важка" };
+export const ARMOR_CATEGORY_LABELS: Record<ArmorStats["category"], string> = { light: "Легка", medium: "Середня", heavy: "Важка" };
 
 const intOrUndefined = (v: string) => (v.trim() === "" || !Number.isFinite(Number(v)) ? undefined : Math.trunc(Number(v)));
 
@@ -37,7 +37,7 @@ export function ArtifactArmorFields({ value, onChange }: { value: ArmorStats | n
           <Label htmlFor="armor-category" className="text-xs text-muted-foreground">Категорія броні</Label>
           <select id="armor-category" className={`${HUD_SELECT_CLASS} w-full`} value={value.category} onChange={(e) => set("category", e.target.value as ArmorStats["category"])}>
             {ARMOR_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+              <option key={c} value={c}>{ARMOR_CATEGORY_LABELS[c]}</option>
             ))}
           </select>
         </div>

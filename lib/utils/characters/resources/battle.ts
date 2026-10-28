@@ -4,6 +4,7 @@ import { readResources } from "./schema";
 import { CombatStatus } from "@/lib/constants/battle";
 import { applyCondition5e, exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
 import { startDying } from "@/lib/utils/battle/death-saves";
+import { isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterResources } from "@/types/characters";
@@ -61,7 +62,7 @@ function withCharges(p: BattleParticipant, charges: CharacterResources["charges"
     if (used > 0) usage[a.key] = { battle: used, round: 0, turn: 0 };
   }
 
-  for (const key of Object.keys(p.battleData.pools ?? {})) {
+  for (const key of Object.keys(p.battleData.pools ?? {}).filter((k) => !isConsumablePool(k))) {
     const used = charges[key]?.used ?? 0;
 
     if (used > 0) usage[key] = { battle: used, round: 0, turn: 0 };
@@ -105,7 +106,9 @@ export function spentSlots(p: BattleParticipant): Record<string, number> {
 function battleCharges(prev: CharacterResources["charges"], p: BattleParticipant): CharacterResources["charges"] {
   const perRest = [
     ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, rest: a.limits.perRest.rest }] : [])),
-    ...Object.entries(p.battleData.pools ?? {}).map(([key, pool]) => ({ key, rest: pool.rest })),
+    ...Object.entries(p.battleData.pools ?? {})
+      .filter(([key]) => !isConsumablePool(key))
+      .map(([key, pool]) => ({ key, rest: pool.rest })),
   ];
 
   const own = new Set(perRest.map((a) => a.key));
