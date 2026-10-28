@@ -2,7 +2,6 @@ import { matchCampaignRows, matchTemplateRows, pendingRefs } from "./auto-bind";
 import { buildDependencyClosure, type TemplateSnapshot } from "./dependencies";
 import { domainSchemas } from "./domain-schemas";
 import { digest } from "./identity";
-import { digest as identityDigest } from "./identity";
 import { CompendiumError, type JsonRecord, normalized } from "./parse";
 import type { ExistingEntry, PlannedWrite } from "./plan";
 import { ADAPTER_VERSION } from "./plan";
@@ -216,7 +215,7 @@ export const prismaImportRepository: ImportRepository = {
     for (const [refKey, key] of Object.entries(dependencies.aliases)) {
       const entry = dependencies.entries.find((e) => e.key === key)!;
 
-      const localId = existing.find((e) => e.key === key && !e.missing)?.localId ?? `c${identityDigest([actor.campaignId, key]).slice(0, 24)}`;
+      const localId = existing.find((e) => e.key === key && !e.missing)?.localId ?? `c${digest([actor.campaignId, key]).slice(0, 24)}`;
 
       bindings[refKey] = { key, edition: entry.edition, kind: entry.kind, localId, body: entry.body, baseline: entry.body };
     }

@@ -1,31 +1,28 @@
-import { canonicalKey, nameKey, sameEdition } from "./identity";
-import { expectedKind } from "./plan";
+import { nameKey, sameEdition } from "./identity";
+import { normalized } from "./parse";
+import { expectedKind, refKey } from "./plan";
 import type { AdaptedEntry, CompendiumRef, TargetKind } from "./types";
 
 export interface NamedRow { id: string; name: string }
 export interface PendingRef { key: string; ref: CompendiumRef; kind: TargetKind; parent: boolean }
 
-export const refKeyOf = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent);
-
-const norm = (v: string) => v.normalize("NFC").trim().toLowerCase();
-
 export function pendingRefs(entries: AdaptedEntry[], isKnown: (key: string) => boolean): PendingRef[] {
   const ownKeys = new Set(entries.map((e) => e.key));
 
-  const own = new Set(entries.map((e) => `${e.kind}:${nameKey(e.name)}:${norm(e.source)}`));
+  const own = new Set(entries.map((e) => `${e.kind}:${nameKey(e.name)}:${normalized(e.source)}`));
 
   const pending = new Map<string, PendingRef>();
 
-  const parents = new Set(entries.flatMap((e) => e.mergeParent ? [refKeyOf(e.mergeParent)] : []));
+  const parents = new Set(entries.flatMap((e) => e.mergeParent ? [refKey(e.mergeParent)] : []));
 
-  const editionOf = new Map(entries.map((e) => [`${e.kind}:${nameKey(e.name)}:${norm(e.source)}`, e.edition]));
+  const editionOf = new Map(entries.map((e) => [`${e.kind}:${nameKey(e.name)}:${normalized(e.source)}`, e.edition]));
 
   for (const ref of entries.flatMap((e) => [...e.refs, ...(e.mergeParent ? [e.mergeParent] : [])])) {
     const kind = expectedKind(ref);
 
-    const key = refKeyOf(ref);
+    const key = refKey(ref);
 
-    const ownId = `${kind}:${nameKey(ref.name)}:${norm(ref.source)}`;
+    const ownId = `${kind}:${nameKey(ref.name)}:${normalized(ref.source)}`;
 
     if (!kind || ownKeys.has(key) || isKnown(key) || (own.has(ownId) && sameEdition(editionOf.get(ownId) ?? "unknown", ref.edition))) continue;
 

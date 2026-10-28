@@ -85,7 +85,7 @@ interface PlanState {
 
 type Resolved = { localId: string; body: JsonRecord; key: string };
 
-const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent);
+export const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent);
 
 const REF_KINDS: Record<string, AdaptedEntry["kind"]> = { feat: "feats", spell: "spells", class: "classes", race: "races", background: "backgrounds", monster: "units", item: "artifacts", spellSchool: "spell-groups" };
 
@@ -341,12 +341,14 @@ function reuseNamedSchools(entries: AdaptedEntry[], context: PlanContext, existi
   return { entries: kept, context: { ...context, bindings } };
 }
 
+const isExcludedPath = (excludedPaths: string[], path: string) => excludedPaths.some((p) => path === p || path.startsWith(`${p}.`));
+
 function createPlanState(adapted: AdaptedCompendium, context: PlanContext): PlanState {
   const excluded = new Set(context.excludedKeys);
 
   const excludedPaths = [...(adapted.blocked ?? []).filter((b) => b.key && excluded.has(b.key)).map((b) => b.path), ...adapted.entries.filter((e) => excluded.has(e.key)).flatMap((e) => [e.key, ...(e.inputPath ? [e.inputPath] : [])])];
 
-  const errors = adapted.issues.filter((i) => i.severity === "error" && !excludedPaths.some((p) => i.path === p || i.path.startsWith(`${p}.`)));
+  const errors = adapted.issues.filter((i) => i.severity === "error" && !isExcludedPath(excludedPaths, i.path));
 
   const existing = new Map(context.existing.map((e) => [e.key, e]));
 
@@ -371,7 +373,7 @@ export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext
 
   const { writes, errors } = ps;
 
-  const warnings = [...adapted.issues.filter((i) => i.severity !== "error" && !ps.excludedPaths.some((p) => i.path === p || i.path.startsWith(`${p}.`))), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
+  const warnings = [...adapted.issues.filter((i) => i.severity !== "error" && !isExcludedPath(ps.excludedPaths, i.path)), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
 
   return { writes, errors, warnings, hash: digest({ version: ADAPTER_VERSION, writes, errors, baseline: context.existing.map((r) => [r.key, r.localId, r.body]), bindings: context.bindings ?? {}, settingsHash: context.settingsHash }) };
 }
