@@ -22,11 +22,11 @@ describe("WhatsNewButton", () => {
     render(<WhatsNewButton />, { wrapper: createWrapper() });
 
     expect(await screen.findByText(String(WHATS_NEW.length - 1))).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Що нового/ }));
+    fireEvent.click(screen.getByRole("button", { name: /whatsNew\.ui\.button/ }));
 
-    expect(await screen.findByText(WHATS_NEW[0].title)).toBeTruthy();
+    expect(await screen.findByText(`whatsNew.${WHATS_NEW[0].id}.title`)).toBeTruthy();
     expect(vi.mocked(api.setOnboardingFlag).mock.calls[0][0]).toEqual({ key: "whats-new", value: WHATS_NEW[0].id });
     await waitFor(() => expect(screen.queryByText(String(WHATS_NEW.length - 1))).toBeNull());
-    expect(screen.getAllByText(/· нове/)).toHaveLength(WHATS_NEW.length - 1);
+    expect(screen.getAllByText(/whatsNew\.ui\.new/)).toHaveLength(WHATS_NEW.length - 1);
   });
 });
