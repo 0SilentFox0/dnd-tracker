@@ -435,5 +435,6 @@
   "safeFetchDnsFailed": "Не вдалося визначити адресу сервера",
   "safeFetchTooLarge": "Файл завеликий (макс. 5 МБ)",
   "safeFetchTooManyRedirects": "Забагато перенаправлень",
-  "safeFetchFailed": "Не вдалося завантажити зображення"
+  "safeFetchFailed": "Не вдалося завантажити зображення",
+  "slideImageFailed": "Слайд {index}: {detail}"
 }

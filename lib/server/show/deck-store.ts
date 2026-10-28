@@ -1,6 +1,7 @@
 import type { SlideDeck as DeckRow } from "@prisma/client";
 
 import "server-only";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { SCENE_SLIDES_BUCKET } from "@/lib/constants/show";
 import { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
 import { prisma } from "@/lib/db";
@@ -41,7 +42,7 @@ export async function urlsUsedElsewhere(campaignId: string, exceptDeckId: string
   return new Set(rows.flatMap((r) => readSlides(r.slides).map((s) => s.imageUrl)));
 }
 
-export async function persistSlideImages(campaignId: string, slides: Slide[], previous: Slide[]): Promise<Result<Slide[]>> {
+export async function persistSlideImages(campaignId: string, slides: Slide[], previous: Slide[]): Promise<Result<Slide[]> | { ok: false; message: string; params?: ErrorParams }> {
   const known = new Set(previous.map((s) => s.imageUrl));
 
   const foreign = slides.filter((s) => !known.has(s.imageUrl) && !isHostedOnProjectStorage(s.imageUrl));
@@ -59,7 +60,7 @@ export async function persistSlideImages(campaignId: string, slides: Slide[], pr
 
     const stored = await resolveImageForPersistence(slide.imageUrl, { bucket: SCENE_SLIDES_BUCKET, campaignId, cacheControl: YEAR_CACHE_SECONDS });
 
-    if (!stored.ok) return { ok: false, message: `Слайд ${slides.indexOf(slide) + 1}: ${stored.message}` };
+    if (!stored.ok) return { ok: false, message: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: slides.indexOf(slide) + 1, detail: stored.message } };
 
     if (stored.value) mirrored.set(slide.imageUrl, stored.value);
   }

@@ -50,4 +50,17 @@ describe("translateErrorBody with the real catalogs", () => {
   it("an unknown text passes through", () => {
     expect(translateErrorBody(uk, { error: "plain" })).toEqual({ error: "plain" });
   });
+
+  it("translates a param that is itself a key (composed slide error)", () => {
+    expect(translateErrorBody(en, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 2, detail: API_ERRORS.SAFE_FETCH_FAILED } }).error).toBe(`Slide 2: ${en(API_ERRORS.SAFE_FETCH_FAILED)}`);
+    expect(translateErrorBody(uk, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 1, detail: "сирий текст" } }).error).toBe("Слайд 1: сирий текст");
+    expect(translateErrorBody(en, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 2, detail: API_ERRORS.SAFE_FETCH_FAILED } }).error).not.toMatch(/errors\./);
+  });
+
+  it("issues do not leak params into the body", () => {
+    const body = translateErrorBody(en, { error: API_ERRORS.INVALID_BODY, issues: [{ message: "validation.minLength", minimum: 3, params: { detail: "x" }, path: ["name"] }] });
+
+    expect(JSON.stringify(body)).not.toContain('"params"');
+    expect((body.issues as Array<{ message: string }>)[0].message).toContain("3");
+  });
 });

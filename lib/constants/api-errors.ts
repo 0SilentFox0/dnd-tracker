@@ -142,6 +142,7 @@ export const API_ERRORS = {
   DECK_LIMIT: "errors.deckLimit",
   SLIDE_NOT_FOUND: "errors.slideNotFound",
   SLIDE_FILE_INVALID: "errors.slideFileInvalid",
+  SLIDE_IMAGE_FAILED: "errors.slideImageFailed",
   SHOW_DECK_EMPTY: "errors.showDeckEmpty",
   SHOW_NOT_RUNNING: "errors.showNotRunning",
   SHOW_CONFLICT: "errors.showConflict",

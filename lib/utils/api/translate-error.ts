@@ -38,8 +38,10 @@ function translateIssues(t: Translator, issues: unknown): unknown {
 
     const label = pathLabel(t, issue.path);
 
+    const { params: _params, ...rest } = issue;
+
     const translated: TranslatedIssue = {
-      ...issue,
+      ...rest,
       message: translateIssue(t, issue as Parameters<typeof translateIssue>[1]),
     };
 
@@ -49,12 +51,19 @@ function translateIssues(t: Translator, issues: unknown): unknown {
   });
 }
 
+// a param that is itself a key (e.g. the detail of a composed message) is translated before formatting
+function translateParams(t: Translator, params: ErrorParams | undefined): ErrorParams | undefined {
+  if (!params) return params;
+
+  return Object.fromEntries(Object.entries(params).map(([name, value]) => [name, typeof value === "string" && t.has(value) ? t(value) : value]));
+}
+
 export function translateErrorBody(t: Translator, body: { error: string; issues?: unknown; params?: ErrorParams }): ApiErrorBody {
   const issues = body.issues === undefined ? {} : { issues: translateIssues(t, body.issues) };
 
   if (!t.has(body.error)) return { error: body.error, ...issues };
 
-  const params = { ...API_ERROR_PARAMS[body.error as ApiErrorKey], ...body.params };
+  const params = { ...API_ERROR_PARAMS[body.error as ApiErrorKey], ...translateParams(t, body.params) };
 
   return { error: t(body.error, params), errorKey: body.error, ...issues };
 }

@@ -41,7 +41,7 @@ describe("translateErrorBody", () => {
 
     expect(result.issues).toEqual([
       { message: 'validation.minLength {"minimum":3}', minimum: 3, path: ["name"], pathLabel: "errors.fields.name" },
-      { message: 'errors.limited {"max":5,"who":"x"}', params: { who: "x" } },
+      { message: 'errors.limited {"max":5,"who":"x"}' },
     ]);
   });
 

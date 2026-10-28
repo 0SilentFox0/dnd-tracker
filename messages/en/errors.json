@@ -435,5 +435,6 @@
   "safeFetchDnsFailed": "Could not resolve the server address",
   "safeFetchTooLarge": "The file is too large (max 5 MB)",
   "safeFetchTooManyRedirects": "Too many redirects",
-  "safeFetchFailed": "Could not download the image"
+  "safeFetchFailed": "Could not download the image",
+  "slideImageFailed": "Slide {index}: {detail}"
 }
