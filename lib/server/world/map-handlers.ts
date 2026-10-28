@@ -6,6 +6,7 @@ import { MAX_WORLD_MAPS } from "@/lib/constants/world";
 import { prisma } from "@/lib/db";
 import { createWorldMapSchema, updateWorldMapSchema } from "@/lib/schemas/world";
 import { listWorldMaps, orphanedImagesOfSubtree, readWorldMapDetail, toWorldMap } from "@/lib/server/world/map-store";
+import { listHeroesOnMap } from "@/lib/server/world/travel-store";
 import { ownedWorldMapPath, removeWorldMapFiles } from "@/lib/supabase/world-map-storage";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { withDM } from "@/lib/utils/api/as-dm";
@@ -79,7 +80,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
     if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
-    return NextResponse.json({ map: detail.map, markers: detail.markers });
+    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId) });
   });
 }
 

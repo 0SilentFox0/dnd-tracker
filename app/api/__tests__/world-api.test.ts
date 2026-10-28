@@ -18,6 +18,7 @@ vi.mock("@/lib/supabase/world-map-storage", () => ({
 vi.mock("@/lib/db", () => ({
   prisma: {
     worldMap: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(async () => 0), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    worldPosition: { findMany: vi.fn(async () => []) },
     worldMarker: { findUnique: vi.fn(), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }));
@@ -83,6 +84,7 @@ describe("world API", () => {
     vi.mocked(storage.ownedWorldMapPath).mockImplementation(((campaignId: string, url: string) => (url.includes(`/world-maps/${campaignId}/`) ? url : null)) as never);
     vi.mocked(prisma.worldMap.findMany).mockResolvedValue([]);
     vi.mocked(prisma.worldMap.count).mockResolvedValue(0);
+    vi.mocked(prisma.worldPosition.findMany).mockResolvedValue([]);
     vi.mocked(prisma.worldMarker.aggregate).mockResolvedValue({ _count: 0, _max: { sortOrder: null } } as never);
   });
 
@@ -119,6 +121,14 @@ describe("world API", () => {
 
     vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(null);
     expect((await mi.GET(json("GET"), ctx({ mapId: "m1" }))).status).toBe(404);
+  });
+
+  it("GET карти віддає heroes (порожній список без позицій)", async () => {
+    vi.mocked(prisma.worldMap.findUnique).mockResolvedValue(mapRow({ markers: [] }) as never);
+
+    const res = await (await mapById()).GET(json("GET"), ctx({ mapId: "m1" }));
+
+    expect((await res.json()).heroes).toEqual([]);
   });
 
   it("GET списку віддає DTO з parentMapId", async () => {

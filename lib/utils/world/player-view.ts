@@ -15,8 +15,10 @@ export interface WorldViewInput {
   heroNames: Map<string, HeroInfo>;
   reveals: { mapId: string; characterId: string; shape: RevealShape }[];
   notes: NoteRow[];
-  viewer: { userId: string; heroIds: string[] };
+  viewer: { userId: string; heroIds: string[]; asHero?: boolean };
 }
+
+type MarkerVisibilityInput = Pick<WorldViewInput, "map" | "markers" | "reveals" | "viewer">;
 
 function pointOnMap(pos: HeroPosition, mapId: string, byId: Map<string, WorldMapSummary>, markers: WorldMarker[]): MapPoint | null {
   if (pos.mapId === mapId) return { x: pos.x, y: pos.y };
@@ -36,8 +38,8 @@ function pointOnMap(pos: HeroPosition, mapId: string, byId: Map<string, WorldMap
   return null;
 }
 
-export function buildWorldView(input: WorldViewInput): WorldView {
-  const { map, allMaps, viewer } = input;
+function visibility(input: MarkerVisibilityInput) {
+  const { map, viewer } = input;
 
   const own = new Set(viewer.heroIds);
 
@@ -45,19 +47,47 @@ export function buildWorldView(input: WorldViewInput): WorldView {
 
   const aspect = map.width / map.height;
 
-  const byId = new Map(allMaps.map((m) => [m.id, m]));
-
   const shapes = fog ? input.reveals.filter((r) => r.mapId === map.id && own.has(r.characterId)).map((r) => r.shape) : [];
 
   const visible = (p: MapPoint) => !fog || isRevealed(p, shapes, map.revealRadius, aspect);
 
-  const markers = input.markers
-    .filter((m) => {
-      if (!fog || m.alwaysVisible) return true;
+  const markers = input.markers.filter((m) => {
+    if (!fog || m.alwaysVisible) return true;
 
-      return visible({ x: m.x, y: m.y }) || (m.kind === "zone" && !!m.polygon && zoneTouchesReveal(m.polygon, shapes, map.revealRadius, aspect));
-    })
-    .map((m) => ({ ...m, dmNote: null }));
+    return visible({ x: m.x, y: m.y }) || (m.kind === "zone" && !!m.polygon && zoneTouchesReveal(m.polygon, shapes, map.revealRadius, aspect));
+  });
+
+  return { own, fog, shapes, visible, markers };
+}
+
+export function visibleMarkerIds(input: MarkerVisibilityInput): Set<string> {
+  return new Set(visibility(input).markers.map((m) => m.id));
+}
+
+export function knownMapIds(allMaps: WorldMapSummary[], heroIds: string[], positions: HeroPosition[], reveals: { mapId: string; characterId: string }[], currentMapId?: string): Set<string> {
+  const own = new Set(heroIds);
+
+  const known = new Set<string>(currentMapId ? [currentMapId] : []);
+
+  for (const pos of positions) if (own.has(pos.characterId)) known.add(pos.mapId);
+
+  for (const r of reveals) if (own.has(r.characterId)) known.add(r.mapId);
+
+  const withPath = new Set<string>();
+
+  for (const id of known) for (const m of mapPath(allMaps, id)) withPath.add(m.id);
+
+  return withPath;
+}
+
+export function buildWorldView(input: WorldViewInput): WorldView {
+  const { map, allMaps, viewer } = input;
+
+  const { own, fog, shapes, visible, markers: visibleMarkers } = visibility(input);
+
+  const byId = new Map(allMaps.map((m) => [m.id, m]));
+
+  const markers = visibleMarkers.map((m) => ({ ...m, dmNote: null }));
 
   const heroes: WorldHero[] = [];
 
@@ -73,21 +103,13 @@ export function buildWorldView(input: WorldViewInput): WorldView {
     if (isOwn || visible(at)) heroes.push({ id: pos.characterId, name: info.name, avatar: info.avatar, mapId: map.id, x: at.x, y: at.y, own: isOwn });
   }
 
-  const known = new Set<string>([map.id]);
-
-  for (const pos of input.positions) if (own.has(pos.characterId)) known.add(pos.mapId);
-
-  for (const r of input.reveals) if (own.has(r.characterId)) known.add(r.mapId);
-
-  const withPath = new Set<string>();
-
-  for (const id of known) for (const m of mapPath(allMaps, id)) withPath.add(m.id);
+  const withPath = knownMapIds(allMaps, viewer.heroIds, input.positions, input.reveals, map.id);
 
   const markerIds = new Set(markers.map((m) => m.id));
 
   const notes: WorldNote[] = input.notes
-    .filter((n) => markerIds.has(n.markerId) && (n.visibility === "public" || n.authorUserId === viewer.userId))
-    .map((n) => ({ ...n, mine: n.authorUserId === viewer.userId }));
+    .filter((n) => markerIds.has(n.markerId) && (n.visibility === "public" || (!viewer.asHero && n.authorUserId === viewer.userId)))
+    .map((n) => ({ ...n, mine: !viewer.asHero && n.authorUserId === viewer.userId }));
 
   return {
     map,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildWorldView, type NoteRow, type WorldViewInput } from "../player-view";
+import { buildWorldView, knownMapIds, type NoteRow, visibleMarkerIds,type WorldViewInput } from "../player-view";
 
 import type { HeroPosition, WorldMap, WorldMapSummary, WorldMarker } from "@/types/world";
 
@@ -179,5 +179,33 @@ describe("buildWorldView", () => {
     const v = buildWorldView(input({ map: wide, markers: [marker("v", 0.5, 0.5 + 0.3 * 1.1)] }));
 
     expect(v.markers).toEqual([]);
+  });
+
+  it("DM as hero never gets the DM's own private notes", () => {
+    const v = buildWorldView(
+      input({
+        notes: [note("dmPrivate", "near", "dm", "private"), note("dmPublic", "near", "dm", "public"), note("heroPrivate", "near", "u1", "private")],
+        viewer: { userId: "dm", heroIds: ["h1"], asHero: true },
+      }),
+    );
+
+    expect(v.notes.map((n) => n.id)).toEqual(["dmPublic"]);
+    expect(v.notes[0].mine).toBe(false);
+  });
+
+  it("visibleMarkerIds matches the markers of the view", () => {
+    const i = input();
+
+    expect([...visibleMarkerIds(i)]).toEqual(buildWorldView(i).markers.map((m) => m.id));
+    expect(visibleMarkerIds(input({ viewer: { userId: "u9", heroIds: [] } })).has("near")).toBe(false);
+  });
+
+  it("knownMapIds adds ancestors of maps the heroes touched", () => {
+    const child: WorldMap = { ...map, id: "child", parentMarkerId: "near", parentMapId: "root" };
+
+    const all = [summary(map), summary(child)];
+
+    expect([...knownMapIds(all, ["h1"], [{ characterId: "h1", mapId: "child", x: 0, y: 0 }], [])].sort()).toEqual(["child", "root"]);
+    expect([...knownMapIds(all, [], [{ characterId: "h1", mapId: "child", x: 0, y: 0 }], [])]).toEqual([]);
   });
 });
