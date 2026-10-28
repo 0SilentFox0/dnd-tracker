@@ -9,6 +9,8 @@ const srd: TemplateCard = { id: "s1", name: "5e SRD 5.2", description: null, vis
 
 const heroes: TemplateCard = { id: "h1", name: "Heroes", description: null, visibility: "official", counts: { races: 7, units: 152, spells: 90 } };
 
+vi.mock("@/components/ui/select-field", () => ({ SelectField: () => null }));
+
 vi.mock("@/lib/hooks/campaigns", () => ({
   useTemplates: () => ({ data: { official: [srd, heroes], mine: [] } }),
   useBundleFilePicker: () => ({
@@ -21,12 +23,12 @@ vi.mock("@/lib/hooks/campaigns", () => ({
 describe("TemplatePicker: credits", () => {
   afterEach(cleanup);
 
-  it("показує атрибуцію на картці шаблону, де вона є", () => {
-    render(<TemplatePicker value={{ templateId: null }} onChange={vi.fn()} />);
+  it("показує атрибуцію лише для обраного шаблону, де вона є", () => {
+    const { rerender } = render(<TemplatePicker value={{ templateId: "s1" }} onChange={vi.fn()} />);
 
-    const note = screen.getByText(/System Reference Document 5\.2/);
+    expect(screen.getByText(/System Reference Document 5\.2/)).toBeTruthy();
 
-    expect(note.closest("button")?.textContent).toContain("5e SRD 5.2");
-    expect(screen.getByText("Heroes").closest("button")?.textContent).not.toContain("System Reference");
+    rerender(<TemplatePicker value={{ templateId: "h1" }} onChange={vi.fn()} />);
+    expect(screen.queryByText(/System Reference/)).toBeNull();
   });
 });
