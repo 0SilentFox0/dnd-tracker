@@ -1,17 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
-import { worldKeys } from "./keys";
 import type { RosterHero } from "./useWorldHeroes";
 import { useWorldMaps } from "./useWorldMaps";
 import { useWorldTravel } from "./useWorldTravel";
 
-import { getTravelLog } from "@/lib/api/world";
-import type { MapPoint, TravelRest, WorldMarker, WorldTravelEntry } from "@/types/world";
-
-const LOG_STALE_MS = 15_000;
+import type { MapPoint, TravelRest, WorldMarker } from "@/types/world";
 
 interface Options {
   campaignId: string;
@@ -29,8 +24,6 @@ export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMark
   const { travel, enter, exit, isPending } = useWorldTravel(campaignId, mapId);
 
   const maps = useWorldMaps(campaignId);
-
-  const log = useQuery<WorldTravelEntry[]>({ queryKey: worldKeys.log(campaignId), queryFn: () => getTravelLog(campaignId), staleTime: LOG_STALE_MS });
 
   const selected = picked.filter((id) => heroes.some((h) => h.id === id));
 
@@ -64,7 +57,6 @@ export function useTravelPanel({ campaignId, mapId, heroes, target, selectedMark
     rest,
     setRest,
     isPending,
-    log,
     canMove: ready && !!target,
     canEnter: !!childMapId,
     canExit: nested,

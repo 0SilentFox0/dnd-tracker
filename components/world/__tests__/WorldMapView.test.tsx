@@ -259,4 +259,10 @@ describe("WorldMapView", () => {
     expect(after(screen.getByRole("button", { name: "Aria" }))).toBe(true);
     expect(fog.compareDocumentPosition(screen.getByAltText("World")) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
   });
+
+  it("centres on a focus point", () => {
+    render(<WorldMapView detail={detail([])} focus={{ point: { x: 0.5, y: 0.5 }, seq: 1 }} />);
+
+    expect((box().firstElementChild as HTMLElement).style.transform).toBe("translate(-800px, -600px) scale(3)");
+  });
 });

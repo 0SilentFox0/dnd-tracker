@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, type ReactNode, useRef, useState } from "react";
+import { type PointerEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 
@@ -22,6 +22,8 @@ const ZOOM_STEP = 1.5;
 
 const MAX_SIZES_ZOOM = 2;
 
+const FOCUS_ZOOM = 3;
+
 export interface WorldMapViewProps {
   detail: WorldMapDetail;
   selectedId?: string | null;
@@ -30,26 +32,31 @@ export interface WorldMapViewProps {
   handlers?: { onMapClick?(p: MapPoint): void; onMapDoubleClick?(p: MapPoint): void; onMarkerClick?(id: string): void; onMarkerDrag?(id: string, p: MapPoint): void; onHeroClick?(id: string): void };
   fog?: { shapes: RevealShape[]; radius: number };
   heroes?: WorldHero[];
+  focus?: { point: MapPoint; seq: number };
   overlay?: ReactNode;
   hint?: ReactNode;
   compact?: boolean;
   className?: string;
 }
 
-export function WorldMapView({ detail, selectedId, draft, tool = "select", handlers = {}, fog, heroes, overlay, hint, compact = false, className }: WorldMapViewProps) {
+export function WorldMapView({ detail, selectedId, draft, tool = "select", handlers = {}, fog, heroes, focus, overlay, hint, compact = false, className }: WorldMapViewProps) {
   const { map, markers } = detail;
 
   const { ref: outerRef, size } = useElementSize<HTMLDivElement>();
 
   const box = fitBox(size, map.width / map.height);
 
-  const { zoom, offset, containerRef, wasDragged, bind, reset, zoomBy } = useViewport({ maxZoom: WORLD_MAX_ZOOM });
+  const { zoom, offset, containerRef, wasDragged, bind, reset, zoomBy, focusOn } = useViewport({ maxZoom: WORLD_MAX_ZOOM });
 
   const [dragging, setDragging] = useState<{ id: string; point: MapPoint } | null>(null);
 
   const pointAt = (clientX: number, clientY: number) => toMapPoint({ x: clientX, y: clientY }, containerRef.current?.getBoundingClientRect() ?? box, { zoom, offset });
 
   const [cursor, setCursor] = useState<MapPoint | null>(null);
+
+  useEffect(() => {
+    if (focus) focusOn(focus.point.x, focus.point.y, FOCUS_ZOOM);
+  }, [focus, focusOn]);
 
   const layerStyle = { transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: "0 0" };
 

@@ -180,6 +180,20 @@ export function useViewport({ panLocked = false, wheelScrolls = false, minZoom =
     setView((v) => zoomAt(v, v.zoom * factor, w / 2, h / 2, w, h, bounds.current));
   }, []);
 
+  const focusOn = useCallback((nx: number, ny: number, zoom: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+
+    const w = rect?.width ?? 0;
+
+    const h = rect?.height ?? 0;
+
+    setView((v) => {
+      const next = clampZoom(Math.max(v.zoom, zoom), bounds.current);
+
+      return { zoom: next, x: clampOffset(w / 2 - nx * w * next, next, w), y: clampOffset(h / 2 - ny * h * next, next, h) };
+    });
+  }, []);
+
   return {
     zoom: view.zoom,
     offset: { x: view.x, y: view.y },
@@ -188,5 +202,6 @@ export function useViewport({ panLocked = false, wheelScrolls = false, minZoom =
     bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
     reset,
     zoomBy,
+    focusOn,
   };
 }

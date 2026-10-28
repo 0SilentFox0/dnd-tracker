@@ -2,7 +2,8 @@
 
 import { Crosshair, DoorOpen, LogIn, Route } from "lucide-react";
 
-import { QueryState } from "@/components/common/states";
+import { TravelLog } from "./TravelLog";
+
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { type RosterHero, useTravelPanel } from "@/lib/hooks/world";
@@ -13,8 +14,6 @@ const RESTS: { value: TravelRest; label: string }[] = [
   { value: "short", label: "Короткий" },
   { value: "long", label: "Довгий" },
 ];
-
-const REST_LABEL: Record<TravelRest, string> = { none: "", short: "короткий відпочинок", long: "довгий відпочинок" };
 
 export interface TravelPanelProps {
   campaignId: string;
@@ -81,18 +80,7 @@ export function TravelPanel({ campaignId, mapId, heroes, target, selectedMarker,
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-hud-ink">Журнал</h2>
-        <QueryState query={panel.log} empty={<p className="text-xs text-hud-muted">Подорожей ще не було.</p>}>
-          {(entries) => (
-            <ul className="flex max-h-60 flex-col gap-1 overflow-y-auto text-xs text-hud-muted">
-              {entries.map((e) => (
-                <li key={e.id}>
-                  <span className="text-hud-ink">{e.heroes.map((h) => h.name).join(", ")}</span> → {e.toMarkerName ?? e.mapName}
-                  {e.rest !== "none" ? `, ${REST_LABEL[e.rest]}` : ""}
-                </li>
-              ))}
-            </ul>
-          )}
-        </QueryState>
+        <TravelLog campaignId={campaignId} />
       </div>
     </HudPanel>
   );
