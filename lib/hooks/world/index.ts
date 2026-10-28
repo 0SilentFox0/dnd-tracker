@@ -1,5 +1,7 @@
 export { worldKeys } from "./keys";
 export { useMapDrawing, type WorldTool } from "./useMapDrawing";
+export { useMapFields } from "./useMapFields";
+export { useMarkerFields } from "./useMarkerFields";
 export { useRemoveMarker } from "./useRemoveMarker";
 export { useWorldEditor } from "./useWorldEditor";
 export { useWorldMap } from "./useWorldMap";

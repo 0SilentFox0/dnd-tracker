@@ -7,7 +7,7 @@ import { WorldMapSettings } from "../WorldMapSettings";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 
-vi.mock("@/lib/hooks/world", () => ({ useWorldMapUpload: () => ({ upload: vi.fn(), uploading: false }) }));
+vi.mock("@/lib/hooks/world/useWorldMapUpload", () => ({ useWorldMapUpload: () => ({ upload: vi.fn(), discard: vi.fn(), uploading: false }) }));
 
 const update = vi.fn();
 

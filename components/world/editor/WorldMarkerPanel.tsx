@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { MapPin, MapPinned, PenLine,Pentagon } from "lucide-react";
+import { useState } from "react";
+import { MapPinned, PenLine } from "lucide-react";
 
+import { ICON_OPTIONS,markerIcon } from "./marker-icon-options";
 import { NewWorldMapDialog } from "./NewWorldMapDialog";
 import { useWorldEditorContext } from "./WorldEditorContext";
 import { QuietDeleteButton, WorldPanelHeader } from "./WorldPanelHeader";
@@ -13,15 +14,10 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { MARKER_ICON } from "@/components/world/marker-icons";
-import { DEFAULT_ZONE_COLOR, WORLD_DM_NOTE_MAX, WORLD_MARKER_ICONS, WORLD_NAME_MAX } from "@/lib/constants/world";
-import { useRemoveMarker } from "@/lib/hooks/world";
+import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from "@/lib/constants/world";
+import { useMarkerFields } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
-import type { UpdateWorldMarkerData, WorldMarker } from "@/types/world";
-
-const ICON_OPTIONS = Object.entries(WORLD_MARKER_ICONS).map(([value, { label }]) => ({ value, label, Icon: MARKER_ICON[value] ?? MapPin }));
-
-const COLOR_DEBOUNCE_MS = 400;
+import type { WorldMarker } from "@/types/world";
 
 export function WorldMarkerPanel() {
   const { detail, selectedId } = useWorldEditorContext();
@@ -34,64 +30,13 @@ export function WorldMarkerPanel() {
 function MarkerForm({ marker }: { marker: WorldMarker }) {
   const { detail, editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
 
-  const [name, setName] = useState(marker.name);
-
-  const [note, setNote] = useState(marker.dmNote ?? "");
-
-  const [color, setColor] = useState(marker.color ?? DEFAULT_ZONE_COLOR);
-
   const [creating, setCreating] = useState(false);
 
-  const colorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const save = (data: UpdateWorldMarkerData) => editor.marker.update.mutateOk({ id: marker.id, data });
-
-  const pendingColor = useRef<string | null>(null);
-
-  const saveRef = useRef(save);
-
-  useEffect(() => {
-    saveRef.current = save;
-  });
-
-  const flushColor = useCallback(() => {
-    clearTimeout(colorTimer.current);
-
-    if (pendingColor.current === null) return;
-
-    const color = pendingColor.current;
-
-    pendingColor.current = null;
-    void saveRef.current({ color });
-  }, []);
-
-  useEffect(() => flushColor, [flushColor]);
-
-  const commitName = () => {
-    const next = name.trim();
-
-    if (!next) setName(marker.name);
-    else if (next !== marker.name) void save({ name: next });
-  };
-
-  const commitNote = () => {
-    const next = note.trim();
-
-    if (next !== (marker.dmNote ?? "")) void save({ dmNote: next || null });
-  };
-
-  const pickColor = (c: string) => {
-    setColor(c);
-    clearTimeout(colorTimer.current);
-    pendingColor.current = c;
-    colorTimer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
-  };
-
-  const remove = useRemoveMarker({ marker, editor, select });
+  const { name, setName, commitName, note, setNote, commitNote, color, pickColor, save, remove } = useMarkerFields({ marker, editor, select });
 
   const redrawing = redrawId === marker.id;
 
-  const HeaderIcon = (marker.icon && MARKER_ICON[marker.icon]) || (marker.kind === "zone" ? Pentagon : MapPin);
+  const HeaderIcon = markerIcon(marker);
 
   return (
     <div>

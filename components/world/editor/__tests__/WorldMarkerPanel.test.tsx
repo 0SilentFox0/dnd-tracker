@@ -8,8 +8,6 @@ import { WorldMarkerPanel } from "../WorldMarkerPanel";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { WorldMarker } from "@/types/world";
 
-vi.mock("@/lib/hooks/world", async (orig) => ({ ...(await orig<object>()), useWorldMapUpload: () => ({ upload: vi.fn(), uploading: false }) }));
-
 const update = vi.fn();
 
 const remove = vi.fn();

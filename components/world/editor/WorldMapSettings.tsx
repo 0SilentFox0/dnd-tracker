@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useRef, useState } from "react";
+import { type CSSProperties, useRef } from "react";
 import { ChevronRight, Crosshair, ImageUp, Map as MapIcon } from "lucide-react";
 
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -11,96 +11,23 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Switch } from "@/components/ui/switch";
 import { REVEAL_RADIUS_RANGE, WORLD_NAME_MAX } from "@/lib/constants/world";
-import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { useWorldMapUpload } from "@/lib/hooks/world";
-import { errorMessage } from "@/lib/utils/common/error-message";
-import { subtreeMapIds } from "@/lib/utils/world/tree";
+import { useMapFields } from "@/lib/hooks/world";
+import type { WorldMapDetail } from "@/types/world";
 
-const ASPECT_TOLERANCE = 0.01;
-
-const RADIUS_STEP = 0.005;
+export const RADIUS_STEP = 0.005;
 
 export function WorldMapSettings() {
-  const { campaignId, detail, maps, editor, openMap, tool, setTool } = useWorldEditorContext();
+  const { detail } = useWorldEditorContext();
 
-  const confirm = useConfirm();
+  return detail ? <MapForm detail={detail} /> : null;
+}
 
-  const notify = useNotify();
-
-  const { upload, discard } = useWorldMapUpload(campaignId);
+function MapForm({ detail }: { detail: WorldMapDetail }) {
+  const { campaignId, maps, editor, openMap, tool, setTool } = useWorldEditorContext();
 
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const [name, setName] = useState(detail?.map.name ?? "");
-
-  const [radius, setRadius] = useState(detail?.map.revealRadius ?? REVEAL_RADIUS_RANGE.min);
-
-  const lastRadius = useRef(detail?.map.revealRadius ?? REVEAL_RADIUS_RANGE.min);
-
-  if (!detail) return null;
-
-  const { map } = detail;
-
-  const children = maps.filter((m) => m.parentMapId === map.id);
-
-  const fill = ((radius - REVEAL_RADIUS_RANGE.min) / (REVEAL_RADIUS_RANGE.max - REVEAL_RADIUS_RANGE.min)) * 100;
-
-  const save = (data: Parameters<typeof editor.map.update.mutateOk>[0]["data"]) => editor.map.update.mutateOk({ id: map.id, data });
-
-  const commitName = () => {
-    const next = name.trim();
-
-    if (!next) setName(map.name);
-    else if (next !== map.name) void save({ name: next });
-  };
-
-  const commitRadius = () => {
-    if (radius === lastRadius.current) return;
-
-    lastRadius.current = radius;
-    void save({ revealRadius: radius });
-  };
-
-  const replaceImage = async (file: File) => {
-    const bitmap = await createImageBitmap(file).catch(() => null);
-
-    const changed = bitmap ? Math.abs(bitmap.width / bitmap.height - map.width / map.height) > ASPECT_TOLERANCE : false;
-
-    bitmap?.close();
-
-    const ok = await confirm({
-      title: "Замінити картинку?",
-      description: changed ? "Пропорції нової картинки відрізняються — маркери та зони можуть зсунутися." : "Маркери й зони залишаться на своїх місцях.",
-      confirmLabel: "Замінити",
-    });
-
-    if (!ok) return;
-
-    let image;
-
-    try {
-      image = await upload(file);
-    } catch (err) {
-      void notify(errorMessage(err, "Не вдалося завантажити картинку"));
-
-      return;
-    }
-
-    if (!(await save({ ...image }))) void discard(image.imageUrl);
-  };
-
-  const remove = async () => {
-    const nested = subtreeMapIds(maps, map.id).length - 1;
-
-    const ok = await confirm({
-      title: `Видалити карту «${map.name}»?`,
-      description: nested > 0 ? `Разом із нею буде видалено ${nested} вкладених карт, їхні маркери та картинки.` : "Маркери й картинка карти будуть видалені.",
-      confirmLabel: "Видалити",
-      destructive: true,
-    });
-
-    if (ok && (await editor.map.remove.mutateOk(map.id))) openMap(map.parentMapId);
-  };
+  const { map, name, setName, commitName, radius, setRadius, commitRadius, fill, children, save, replaceImage, remove } = useMapFields({ campaignId, detail, maps, editor, openMap });
 
   return (
     <div>
