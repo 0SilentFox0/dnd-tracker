@@ -5,6 +5,7 @@ import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema";
 import { canUseInspiration, spendInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
@@ -36,6 +37,7 @@ export const attackBodySchema = z
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
+    cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(

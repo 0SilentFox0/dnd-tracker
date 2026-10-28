@@ -29,3 +29,12 @@ describe("attack flow: inspiration", () => {
     expect(attackFlow(rolled, { type: "SET_INSPIRATION", value: true })).toBe(rolled);
   });
 });
+
+describe("attack flow: Cunning Strike", () => {
+  it("SET_CUNNING_STRIKE goes into the payload, empty list drops it", () => {
+    const on = attackFlow(atRoll, { type: "SET_CUNNING_STRIKE", effects: ["trip"] });
+
+    expect(attackPayload(on, "r")).toMatchObject({ cunningStrike: ["trip"] });
+    expect(attackPayload(attackFlow(on, { type: "SET_CUNNING_STRIKE", effects: [] }), "r")).not.toHaveProperty("cunningStrike");
+  });
+});

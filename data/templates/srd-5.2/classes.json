@@ -5601,6 +5601,9 @@
             "limits": {
               "perTurn": 1
             },
+            "params": {
+              "sneakAttack": true
+            },
             "effects": [
               {
                 "kind": "dealDamage",
@@ -5749,6 +5752,25 @@
             "trigger": {
               "event": "passive"
             },
+            "params": {
+              "cunningStrike": {
+                "options": [
+                  {
+                    "effect": "poison",
+                    "dice": 1
+                  },
+                  {
+                    "effect": "trip",
+                    "dice": 1
+                  },
+                  {
+                    "effect": "withdraw",
+                    "dice": 1
+                  }
+                ],
+                "maxEffects": 1
+              }
+            },
             "effects": [
               {
                 "kind": "note",
@@ -5872,6 +5894,11 @@
             "description": "You can use up to two Cunning Strike effects when you deal Sneak Attack damage, paying the die cost for each effect.",
             "trigger": {
               "event": "passive"
+            },
+            "params": {
+              "cunningStrike": {
+                "maxEffects": 2
+              }
             },
             "effects": [
               {
