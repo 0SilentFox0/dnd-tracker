@@ -124,7 +124,7 @@ describe("world travel API", () => {
       expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect((await res.json()).positions).toEqual([{ id: "h1", name: "Hero h1", avatar: null, mapId: "m1", x: 0.5, y: 0.5, own: true }]);
       expect(vi.mocked(prisma.worldReveal.createMany).mock.calls[0][0]?.data).toEqual([{ mapId: "m1", characterId: "h1", shape: { t: "p", x: 0.5, y: 0.5 } }]);
-      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m1", from: undefined, to: { mapId: "m1", x: 0.5, y: 0.5 }, byUserId: "dm", rest: "none" });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m1", from: undefined, to: { mapId: "m1", x: 0.5, y: 0.5 }, byUserId: "dm", rest: "none", kind: "travel" });
     });
 
     it("другий візит на тій же карті — відрізок s, з поправкою from", async () => {
@@ -199,7 +199,7 @@ describe("world travel API", () => {
       expect(res.status).toBe(200);
       expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m2");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m2", x: 0.3, y: 0.4 });
-      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m2", from: { mapId: "m1", x: 0.1, y: 0.1 }, to: { mapId: "m2", x: 0.3, y: 0.4 } });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m2", from: { mapId: "m1", x: 0.1, y: 0.1 }, to: { mapId: "m2", x: 0.3, y: 0.4 }, kind: "enter" });
     });
   });
 
@@ -224,6 +224,7 @@ describe("world travel API", () => {
       expect(res.status).toBe(200);
       expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m1", x: 0.1, y: 0.1 });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ kind: "exit" });
     });
   });
 
@@ -361,6 +362,15 @@ describe("world travel API", () => {
 
       expect(vi.mocked(prisma.worldTravelLog.findMany).mock.calls[0][0]?.where).toMatchObject({ campaignId: "c1", characterIds: { hasSome: ["h1"] } });
       expect((await res.json())[0].heroes).toEqual([{ id: "h1", name: "Hero h1" }]);
+    });
+
+    it("kind віддається в журналі; невідоме значення -> travel", async () => {
+      vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(dm);
+      vi.mocked(prisma.character.findMany).mockResolvedValue([hero("h1")] as never);
+      vi.mocked(prisma.worldTravelLog.findMany).mockResolvedValue([{ ...entry, kind: "enter" }, { ...entry, id: "l2", kind: "weird" }] as never);
+      vi.mocked(prisma.worldMarker.findMany).mockResolvedValue([]);
+
+      expect((await (await (await route("log")).GET(get(), ctx())).json()).map((e: { kind: string }) => e.kind)).toEqual(["enter", "travel"]);
     });
 
     it("гравець не бачить координат `from`, ДМ бачить", async () => {
