@@ -1,5 +1,6 @@
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
+import { resolvedPickCount } from "@/lib/utils/characters/choices/pending";
 import type { CharacterClassEntry, ClassFeature, ClassProgression, GameClassData, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 const SUMMARY_MAX = 120;
@@ -43,7 +44,7 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
 
         if (required === 0) continue;
 
-        const done = entry ? (entry.choices?.[choice.id]?.length ?? 0) : null;
+        const done = entry ? resolvedPickCount(choice, entry.choices?.[choice.id] ?? []) : null;
 
         rowAt(choice.level).picks.push({ key: `${prefix}${choice.id}`, kind: choice.kind, label: choice.label, required, done, status: statusOf(choice.level, required, done ?? 0) });
       }
@@ -64,7 +65,7 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
   }
 
   if (cls.subclassLevel !== null && cls.subclasses.length > 0) {
-    const done = entry?.subclassId ? 1 : 0;
+    const done = entry?.subclassId && cls.subclasses.some((s) => s.id === entry.subclassId) ? 1 : 0;
 
     rowAt(cls.subclassLevel).picks.push({ key: "subclass", kind: "subclass", label: "Підклас", required: 1, done: entry ? done : null, status: statusOf(cls.subclassLevel, 1, done) });
   }

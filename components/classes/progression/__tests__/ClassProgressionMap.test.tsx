@@ -4,19 +4,29 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ClassProgressionMap } from "@/components/classes/progression";
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
-import type { GameClassData } from "@/types/classes";
+import type { ClassFeature, GameClassData } from "@/types/classes";
 
-const cls = {
+const cls: GameClassData = {
   id: "f",
   name: "Fighter",
+  icon: null,
   color: "#c33",
-  features: [{ level: 4, abilities: [], choices: [{ id: "asi4", label: "ASI", level: 4, count: 1, kind: "feat" }] }],
+  hitDie: 10,
+  savingThrows: [],
+  proficiencies: { armor: [], weapons: [], tools: [] },
+  skillChoices: { count: 0, from: [] },
+  caster: "none",
+  spellcastingAbility: null,
+  features: [
+    { level: 1, abilities: [{ id: "a1", name: "Second Wind", description: "Heal", trigger: { event: "passive" }, effects: [] } as unknown as ClassFeature["abilities"][number]] },
+    { level: 4, abilities: [], choices: [{ id: "asi4", label: "ASI", level: 4, count: 1, kind: "feat" }] },
+  ],
   subclassLevel: 3,
   subclasses: [
     { id: "champ", name: "Champion", features: [] },
     { id: "bm", name: "Battle Master", features: [] },
   ],
-} as unknown as GameClassData;
+};
 
 const sheet = () => buildClassProgression(cls, { classId: "f", level: 4 });
 
@@ -49,6 +59,24 @@ describe("ClassProgressionMap", () => {
 
     expect(screen.queryAllByRole("button", { name: /Оберіть підклас/ })).toEqual([]);
     expect(screen.getAllByRole("row")).toHaveLength(21);
+  });
+
+  it("onOpenLevel fires from table cells and mobile rows, not from details clicks", () => {
+    const onOpenLevel = vi.fn();
+
+    const { container } = render(<ClassProgressionMap progression={sheet()} mode="sheet" actions={{ onOpenLevel }} />);
+
+    fireEvent.click(screen.getByTestId("base-4"));
+    expect(onOpenLevel).toHaveBeenLastCalledWith(4, "base");
+
+    fireEvent.click(screen.getByTestId("row-4"));
+    expect(onOpenLevel).toHaveBeenLastCalledWith(4, "base");
+    expect(onOpenLevel).toHaveBeenCalledTimes(2);
+
+    onOpenLevel.mockClear();
+    fireEvent.click(container.querySelector("td summary") as HTMLElement);
+    fireEvent.click(container.querySelector("li summary") as HTMLElement);
+    expect(onOpenLevel).not.toHaveBeenCalled();
   });
 
   it("omits subclass columns when there are none and shows chips otherwise", () => {

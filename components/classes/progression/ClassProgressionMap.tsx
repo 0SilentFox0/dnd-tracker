@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 
 import { Items, Picks, type ProgressionActions, STATE_CLASS } from "./ProgressionRowView";
 
@@ -13,6 +13,12 @@ interface Props {
   mode: "dm" | "sheet";
   actions?: ProgressionActions;
 }
+
+const INTERACTIVE = "a,button,summary,details,input,select,textarea";
+
+const open = (e: MouseEvent<HTMLElement>, fn: () => void) => {
+  if (!(e.target as HTMLElement).closest(INTERACTIVE)) fn();
+};
 
 const CELL = "border-t border-hud-rule px-2 py-1.5 align-top";
 
@@ -47,14 +53,14 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
                 {row.level}
                 {row.state === "next" ? <span className="ml-1 text-xs text-hud-muted">наступний</span> : null}
               </td>
-              <td className={cn(CELL, actions?.onOpenLevel && "cursor-pointer")} data-testid={`base-${row.level}`} onClick={() => actions?.onOpenLevel?.(row.level, "base")}>
+              <td className={cn(CELL, actions?.onOpenLevel && "cursor-pointer")} data-testid={`base-${row.level}`} onClick={(e) => open(e, () => actions?.onOpenLevel?.(row.level, "base"))}>
                 <Items items={row.base} accent={color} />
               </td>
               {subclasses.map((s) => (
                 <td
                   key={s.id}
                   className={cn(CELL, !isTemplate && !s.chosen && "opacity-50", actions?.onOpenLevel && "cursor-pointer")}
-                  onClick={() => actions?.onOpenLevel?.(row.level, "subclass")}
+                  onClick={(e) => open(e, () => actions?.onOpenLevel?.(row.level, "subclass"))}
                 >
                   <Items items={row.bySubclass[s.id] ?? []} />
                 </td>
@@ -78,7 +84,10 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
             const isEmpty = row.base.length === 0 && sub.length === 0 && row.picks.length === 0;
 
             return (
-            <li key={row.level} data-state={row.state} className={cn("rounded-lg border border-hud-rule p-2", STATE_CLASS[row.state])}>
+            <li key={row.level} data-state={row.state} className={cn("rounded-lg border border-hud-rule p-2", STATE_CLASS[row.state], actions?.onOpenLevel && "cursor-pointer")}
+              data-testid={`row-${row.level}`}
+              onClick={(e) => open(e, () => actions?.onOpenLevel?.(row.level, sub.length > 0 && row.base.length === 0 ? "subclass" : "base"))}
+            >
               <div className="mb-1 text-sm font-semibold">
                 Рівень {row.level}
                 {row.state === "next" ? <span className="ml-1 text-xs font-normal text-hud-muted">наступний</span> : null}

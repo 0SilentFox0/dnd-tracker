@@ -101,6 +101,20 @@ describe("buildClassProgression", () => {
     expect(p.rows[3].picks[0].done).toBe(0);
   });
 
+  it("counts only picks that still resolve to an option", () => {
+    const opt = make({ features: [{ level: 1, abilities: [], choices: [choice({ id: "o", level: 1, kind: "option", count: 2, options: [{ id: "k1", name: "K1", abilities: [] }, { id: "k2", name: "K2", abilities: [] }] })] }] });
+
+    const p = buildClassProgression(opt, { classId: "fighter", level: 1, choices: { o: [{ id: "k1" }, { id: "gone" }] } });
+
+    expect(p.rows[0].picks[0]).toMatchObject({ done: 1, required: 2, status: "open" });
+  });
+
+  it("does not mark the subclass done when the chosen subclass was deleted", () => {
+    const p = buildClassProgression(rich(), { classId: "fighter", level: 4, subclassId: "deleted" });
+
+    expect(p.rows[2].picks).toEqual([expect.objectContaining({ key: "subclass", status: "open", done: 0 })]);
+  });
+
   it("truncates summary to 120 chars", () => {
     const p = buildClassProgression(make({ features: [{ level: 1, abilities: [ability("l", "Long", "x".repeat(300))] }] }));
 
