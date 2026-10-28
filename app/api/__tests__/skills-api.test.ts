@@ -3,6 +3,7 @@ import { beforeEach,describe, expect, it, vi } from "vitest";
 
 import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -429,7 +430,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
 
     const data = await getResponseJson<{ error: string }>(response);
 
-    expect(data.error).toBe("Навик не знайдено");
+    expect(data.error).toBe(API_ERRORS.SKILL_NOT_FOUND);
   });
 
   it("повертає 404, якщо скіл належить іншій кампанії", async () => {

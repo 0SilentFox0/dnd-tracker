@@ -33,7 +33,7 @@ describe("DialogContent", () => {
       </Dialog>,
     );
 
-    expect(screen.getByRole("button", { name: "Закрити" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "common.ui.close" })).toBeInTheDocument();
   });
 
   it("заголовок не залазить під кнопку закриття", () => {

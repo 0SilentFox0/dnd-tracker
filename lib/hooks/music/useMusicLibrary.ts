@@ -10,6 +10,8 @@ import { useTracks } from "./useTracks";
 import { createTrack, deleteTrack, reorderTracks, updateTrack, uploadTrackFile } from "@/lib/api/tracks";
 import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { useConfirm, useCrudMutation, useNotify } from "@/lib/hooks/common";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { moveTrackInGroup } from "@/lib/utils/audio/order";
 import { readAudioDuration } from "@/lib/utils/audio/read-duration";
 import { errorMessage } from "@/lib/utils/common/error-message";
@@ -42,9 +44,11 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const notify = useNotify();
 
+  const t = useTranslator();
+
   const { data: tracks = initial, isLoading } = useTracks(campaignId, { initial });
 
-  const onError = useCallback((e: unknown) => void notify(errorMessage(e, "Не вдалося зберегти")), [notify]);
+  const onError = useCallback((e: unknown) => void notify(translateIssue(t, { message: errorMessage(e, "Не вдалося зберегти") })), [notify, t]);
 
   const invalidateKeys = [trackKeys.list(campaignId)];
 

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
 
-const HINT = "Вкажіть посилання, що починається з https:// або http://";
+const HINT = "common.iconUrl.invalid";
 
 function Harness({ initial = "" }: { initial?: string }) {
   const [value, setValue] = useState(initial);

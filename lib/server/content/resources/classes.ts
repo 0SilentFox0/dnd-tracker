@@ -4,7 +4,7 @@ import type { z } from "zod";
 import "server-only";
 import { getCachedClasses } from "@/lib/cache/reference-data";
 import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS, classNameTakenMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createClassSchema, updateClassSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
@@ -26,7 +26,7 @@ const spellRefs = (features: readonly ClassFeature[], subclasses: readonly Subcl
   [...features, ...subclasses.flatMap(s => s.features)].flatMap(f => choiceSpellIds(f.choices) ?? []);
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
-  if (await classNameTaken(campaignId, name, exceptId)) throw new ContentError(classNameTakenMessage(name), 409);
+  if (await classNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.CLASS_NAME_TAKEN, 409, undefined, { name });
 }
 
 function updateData(data: UpdateInput): Prisma.GameClassUncheckedUpdateInput {

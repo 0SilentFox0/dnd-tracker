@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bodyErrorMessage, campaignGet, campaignRequest, request } from "../client";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 describe("campaignRequest", () => {
   afterEach(() => vi.unstubAllGlobals());
 
@@ -29,24 +31,24 @@ describe("bodyErrorMessage / request errors", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("рядок error показується як є", () => {
-    expect(bodyErrorMessage({ error: "Недостатньо прав" }, "x")).toBe("Недостатньо прав");
+    expect(bodyErrorMessage({ error: API_ERRORS.FORBIDDEN }, "x")).toBe(API_ERRORS.FORBIDDEN);
   });
 
   it("error + issues — повідомлення з деталями", () => {
-    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
-      "Некоректні дані запиту: Required; Too short",
+    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
+      `${API_ERRORS.INVALID_BODY}: Required; Too short`,
     );
   });
 
-  it("issue з path — підпис поля перед повідомленням", () => {
+  it("issue з pathLabel — підпис поля перед повідомленням, pathLabel важить більше за path", () => {
     const issues = [
-      { path: ["name"], message: "Обов'язкове поле" },
-      { path: ["attacks", 0, "damageDice"], message: "Не більше 30 символів" },
+      { path: ["name"], pathLabel: "Назва", message: "Обов'язкове поле" },
+      { path: ["attacks", 0, "damageDice"], pathLabel: "Атаки › #1 › Кубики шкоди", message: "Не більше 30 символів" },
       { path: ["customField"], message: "x" },
     ];
 
-    expect(bodyErrorMessage({ error: "Некоректні дані запиту", issues }, "x")).toBe(
-      "Некоректні дані запиту: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x",
+    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues }, "x")).toBe(
+      `${API_ERRORS.INVALID_BODY}: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x`,
     );
   });
 
@@ -59,9 +61,25 @@ describe("bodyErrorMessage / request errors", () => {
   });
 
   it("request кидає ApiError з українським повідомленням сервера", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Некоректний JSON у тілі запиту" }), { status: 400 })));
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: API_ERRORS.INVALID_JSON }), { status: 400 })));
 
-    await expect(request("/api/x")).rejects.toMatchObject({ message: "Некоректний JSON у тілі запиту", status: 400 });
+    await expect(request("/api/x")).rejects.toMatchObject({ message: API_ERRORS.INVALID_JSON, status: 400 });
+  });
+});
+
+describe("request errorKey", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("ApiError.errorKey береться з тіла", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Forbidden", errorKey: "errors.forbidden" }), { status: 403 })));
+
+    await expect(request("/api/x")).rejects.toMatchObject({ message: "Forbidden", errorKey: "errors.forbidden" });
+  });
+
+  it("тіло без error — HTTP <status>", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 502, statusText: "" })));
+
+    await expect(request("/api/x")).rejects.toMatchObject({ message: "HTTP 502" });
   });
 });
 

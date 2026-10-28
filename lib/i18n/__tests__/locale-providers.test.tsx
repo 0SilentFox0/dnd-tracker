@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ClientLocaleProvider } from "../client-locale-provider";
 import { FixedLocaleProvider } from "../fixed-locale-provider";
+import { resetHtmlLangForTests } from "../html-lang";
 
 vi.unmock("next-intl");
 
@@ -21,7 +22,7 @@ const clearCookie = () => {
 beforeEach(() => {
   clearCookie();
   document.documentElement.removeAttribute("lang");
-  document.documentElement.removeAttribute("data-lang-lock");
+  resetHtmlLangForTests();
 });
 
 afterEach(() => {

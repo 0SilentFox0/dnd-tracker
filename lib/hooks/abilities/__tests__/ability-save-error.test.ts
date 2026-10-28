@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { ApiError } from "@/lib/api/client";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { abilitySaveError } from "@/lib/hooks/abilities";
 
 describe("abilitySaveError", () => {
   it("збирає лише помилки вмінь з 400", () => {
-    const err = new ApiError("x", 400, "/u", { error: "Некоректні дані запиту", issues: [{ path: ["abilities", 0, "effects"], message: "погано" }, { path: ["name"], message: "інше" }] });
+    const err = new ApiError("x", 400, "/u", { error: API_ERRORS.INVALID_BODY, issues: [{ path: ["abilities", 0, "effects"], message: "погано" }, { path: ["name"], message: "інше" }] });
 
     expect(abilitySaveError(err, "fb")).toBe("Помилки у вміннях: 0.effects: погано");
   });

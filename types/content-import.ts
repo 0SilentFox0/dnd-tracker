@@ -38,6 +38,9 @@ export interface ImportIssue {
   field?: string;
   level: "error" | "warning";
   message: string;
+  params?: Record<string, string | number>;
+  minimum?: number;
+  maximum?: number;
 }
 
 export type ImportRowStatus = "created" | "updated" | "skipped" | "error";

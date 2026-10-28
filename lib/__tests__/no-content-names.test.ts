@@ -25,7 +25,6 @@ const ALLOWED: Record<string, string> = {
   "lib/constants/skills.ts: Природа": "label of the built-in skill (ability check)",
   "lib/constants/abilities.ts: Захист": "label of the built-in armorClass stat",
   "lib/hooks/battle/useBattleMapPlayground.ts: Вогняна стіна": "dev-only playground hazard label",
-  "lib/constants/field-labels.ts: Аватар": "form field label (avatar image), not the library name",
 };
 
 // landing: статичний маркетинг; import/fields: приклади значень і назви колонок, не рушій

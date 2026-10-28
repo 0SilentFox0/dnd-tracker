@@ -152,7 +152,7 @@ async function applyStashCore({ access, campaignId, characterId }: CampaignScope
           uniqueChecker(rows),
         );
 
-        if (holder) throw new ContentError(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${all.find((o) => o.characterId === holder)?.character.name ?? ""}`, 409);
+        if (holder) throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: all.find((o) => o.characterId === holder)?.character.name ?? "" });
       }
     }
 

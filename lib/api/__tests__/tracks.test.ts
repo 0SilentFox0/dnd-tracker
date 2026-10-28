@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { uploadTrackFile } from "../tracks";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 const uploadToSignedUrl = vi.hoisted(() => vi.fn(async () => ({ data: { path: "p", fullPath: "p" }, error: null })));
 
 vi.mock("@/lib/supabase/client", () => ({ createClient: () => ({ storage: { from: () => ({ uploadToSignedUrl }) } }) }));
@@ -34,7 +36,7 @@ describe("uploadTrackFile", () => {
 
     vi.stubGlobal("fetch", fetch);
 
-    await expect(uploadTrackFile("c1", new File(["x"], "a.wav", { type: "audio/wav" }), { title: "a", durationSec: null })).rejects.toThrow("Потрібен файл MP3 або M4A до 10 МБ");
+    await expect(uploadTrackFile("c1", new File(["x"], "a.wav", { type: "audio/wav" }), { title: "a", durationSec: null })).rejects.toThrow(API_ERRORS.TRACK_FILE_INVALID);
     expect(fetch).not.toHaveBeenCalled();
   });
 

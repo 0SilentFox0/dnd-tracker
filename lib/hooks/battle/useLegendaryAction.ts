@@ -6,6 +6,8 @@ import { useBattleScene } from "./useBattleScene";
 import { useSendCoreAction } from "./useCoreActions";
 
 import { useSpellsByIds } from "@/lib/hooks/spells";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
@@ -39,6 +41,8 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
   const spells = useSpellsByIds(campaignId, spellIds);
 
+  const t = useTranslator();
+
   const choices = useMemo<LegendaryChoice[]>(() => {
     const field = (order ?? []).filter((p) => !p.battleData.reserved);
 
@@ -64,8 +68,8 @@ export function useLegendaryAction(participant: BattleParticipant) {
       return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant), blocked };
     });
 
-    return [...attacks, ...abilities];
-  }, [order, participant, current, spells.data, battle.currentRound]);
+    return [...attacks, ...abilities].map((c) => (c.blocked ? { ...c, blocked: translateIssue(t, { message: c.blocked }) } : c));
+  }, [order, participant, current, spells.data, battle.currentRound, t]);
 
   const { send, isPending } = useSendCoreAction();
 

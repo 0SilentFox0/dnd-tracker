@@ -5,7 +5,7 @@ import { AiToolError, defineTool } from "./define";
 import "server-only";
 import { getCachedRaces, getCachedSpells, getCachedUnits } from "@/lib/cache/reference-data";
 import { AI_LIMITS } from "@/lib/constants/ai";
-import { referenceEntryMissingMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
@@ -60,7 +60,7 @@ export const readReferenceTool = defineTool({
   handler: async (ctx, { kind, id }) => {
     const entry = await findEntry(ctx.campaignId, kind, id);
 
-    if (!entry) throw new AiToolError(referenceEntryMissingMessage(kind, id));
+    if (!entry) throw new AiToolError(API_ERRORS.REFERENCE_ENTRY_MISSING, { kind, id });
 
     return entry;
   },

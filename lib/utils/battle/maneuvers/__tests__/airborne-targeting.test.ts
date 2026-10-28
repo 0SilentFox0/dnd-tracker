@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ABILITIES, byId, MAP, perform,unit } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { participantAttackIntent } from "@/lib/utils/battle/flows/attack-intent";
 import { placeParticipants } from "@/lib/utils/battle/grid";
@@ -29,7 +30,7 @@ describe("у повітрі — поза досяжністю", () => {
 
     const r = resolveSpellTargets(ps, byId(ps, "e"), { id: "bolt", groupId: null, level: 1 }, { kind: "enemy" } as never, ["g"]);
 
-    expect(r).toMatchObject({ ok: false, error: expect.stringContaining("повітрі") });
+    expect(r).toMatchObject({ ok: false, error: API_ERRORS.TARGET_AIRBORNE });
   });
 
   it("маневр потребує цілі лише без карти", () => {

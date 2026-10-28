@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { context, goblin, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
@@ -145,7 +146,7 @@ describe("monster spell grants", () => {
   });
 
   it("rejects a stale grant key", async () => {
-    await expect(cast(monster(), { grantKey: "stale" })).rejects.toMatchObject({ code: "action_rejected", message: "Джерело заклинання більше недоступне" });
+    await expect(cast(monster(), { grantKey: "stale" })).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.BATTLE_SPELL_SOURCE_UNAVAILABLE });
   });
 
   it("derives a granted spell save DC from its configured ability", async () => {
@@ -211,7 +212,7 @@ describe("monster spell grants", () => {
 
     const next = { ...after, actionFlags: { ...after.actionFlags, hasUsedAction: false } };
 
-    await expect(cast(next)).rejects.toMatchObject({ code: "action_rejected", message: "Не лишилося використань цього заклинання" });
+    await expect(cast(next)).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.SPELL_USES_EMPTY });
     expect(next.battleData.abilityUsage?.[pool].battle).toBe(2);
     expect(next.actionFlags.hasUsedAction).toBe(false);
   });
@@ -219,16 +220,16 @@ describe("monster spell grants", () => {
   it("rejects a missing pool and a pool below the requested cost", async () => {
     const missing = monster({ pool: "missing", cost: 1 });
 
-    await expect(cast(missing)).rejects.toMatchObject({ code: "action_rejected", message: "Не лишилося використань цього заклинання" });
-    await expect(cast(monster({ pool, cost: 2 }, 1))).rejects.toMatchObject({ code: "action_rejected", message: "Не лишилося використань цього заклинання" });
+    await expect(cast(missing)).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.SPELL_USES_EMPTY });
+    await expect(cast(monster({ pool, cost: 2 }, 1))).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.SPELL_USES_EMPTY });
   });
 
   it("rejects slotKey even for a cantrip grant", async () => {
-    await expect(cast(monster(), { slotKey: "1" }, { ...row, level: 0 })).rejects.toMatchObject({ code: "action_rejected", message: "Для цього заклинання слот не потрібен" });
+    await expect(cast(monster(), { slotKey: "1" }, { ...row, level: 0 })).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.GRANT_NO_SLOT });
   });
 
   it("rejects a legendary-only grant on the normal cast path", async () => {
-    await expect(cast(monster({ legendaryOnly: true }))).rejects.toMatchObject({ code: "action_rejected", message: "Це заклинання доступне лише як легендарна дія або дія лігва" });
+    await expect(cast(monster({ legendaryOnly: true }))).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.SPELL_LEGENDARY_ONLY });
   });
 
   it("preview and rejected targeting or dice leave resources and action intact", async () => {
@@ -273,9 +274,9 @@ describe("monster spell grants", () => {
   });
 
   it.each([
-    [{ pool, cost: 3 }, {}, "Не лишилося використань цього заклинання"],
-    [{}, { slotKey: "1" }, "Для цього заклинання слот не потрібен"],
-    [{ legendaryOnly: true }, {}, "Це заклинання доступне лише як легендарна дія або дія лігва"],
+    [{ pool, cost: 3 }, {}, API_ERRORS.SPELL_USES_EMPTY],
+    [{}, { slotKey: "1" }, API_ERRORS.GRANT_NO_SLOT],
+    [{ legendaryOnly: true }, {}, API_ERRORS.SPELL_LEGENDARY_ONLY],
   ] as const)("returns a 422 API refusal without saving (%j)", async (grant, data, error) => {
     const ctx = context({ participants: [monster(grant), goblin] });
 
@@ -291,6 +292,6 @@ describe("monster spell grants", () => {
     });
 
     expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ code: "action_rejected", error });
+    expect(await response.json()).toMatchObject({ code: "action_rejected", error });
   });
 });

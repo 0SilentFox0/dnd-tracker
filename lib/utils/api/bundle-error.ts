@@ -7,5 +7,5 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 export function bundleErrorResponse(error: unknown): NextResponse | null {
   if (!(error instanceof BundleInvalidError)) return null;
 
-  return errorResponse(error.message || API_ERRORS.BUNDLE_INVALID, 400, error.issues);
+  return errorResponse(error.message || API_ERRORS.BUNDLE_INVALID, 400, error.issues, error.params);
 }

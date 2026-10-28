@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +16,8 @@ interface WeaponTraitsFieldProps<T extends TraitsValue> {
 }
 
 export function WeaponTraitsField<T extends TraitsValue>({ idPrefix, value, onChange }: WeaponTraitsFieldProps<T>) {
+  const t = useTranslations("common.weaponTraits");
+
   const traits = value.traits ?? [];
 
   const emit = (next: TraitsValue) => {
@@ -34,7 +38,7 @@ export function WeaponTraitsField<T extends TraitsValue>({ idPrefix, value, onCh
 
   return (
     <div className="space-y-2">
-      <Label className="text-xs text-muted-foreground">Властивості зброї</Label>
+      <Label className="text-xs text-muted-foreground">{t("label")}</Label>
       <div className="flex flex-wrap gap-x-4 gap-y-2">
         {WEAPON_TRAITS.map((trait) => (
           <label key={trait} htmlFor={`${idPrefix}-trait-${trait}`} className="flex items-center gap-2 text-sm">
@@ -46,7 +50,7 @@ export function WeaponTraitsField<T extends TraitsValue>({ idPrefix, value, onCh
       {traits.includes("versatile") && (
         <div className="max-w-40 space-y-1">
           <Label htmlFor={`${idPrefix}-versatileDice`} className="text-xs text-muted-foreground">
-            Кубик двома руками
+            {t("versatileDice")}
           </Label>
           <Input
             id={`${idPrefix}-versatileDice`}

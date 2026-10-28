@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { isPrivateIp, safeFetchBuffer, sniffImageMime } from "@/lib/utils/api/safe-fetch";
 
 const lookupMock = vi.hoisted(() => vi.fn());
@@ -41,11 +42,11 @@ describe("safe-fetch", () => {
     vi.stubGlobal("fetch", fetchMock);
     lookupMock.mockResolvedValue([{ address: "93.184.216.34", family: 4 }, { address: "10.0.0.5", family: 4 }]);
 
-    await expect(safeFetchBuffer("https://evil.example/a.png", OPTS)).rejects.toThrow("внутрішню");
-    await expect(safeFetchBuffer("https://127.0.0.1/a.png", OPTS)).rejects.toThrow("внутрішню");
-    await expect(safeFetchBuffer("https://[::1]/a.png", OPTS)).rejects.toThrow("внутрішню");
-    await expect(safeFetchBuffer("https://foo.localhost/a.png", OPTS)).rejects.toThrow("внутрішню");
-    await expect(safeFetchBuffer("http://example.com/a.png", OPTS)).rejects.toThrow("https");
+    await expect(safeFetchBuffer("https://evil.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+    await expect(safeFetchBuffer("https://127.0.0.1/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+    await expect(safeFetchBuffer("https://[::1]/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+    await expect(safeFetchBuffer("https://foo.localhost/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+    await expect(safeFetchBuffer("http://example.com/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_HTTPS_ONLY);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -55,22 +56,22 @@ describe("safe-fetch", () => {
     vi.stubGlobal("fetch", fetchMock);
     lookupMock.mockImplementation(async (h: string) => [{ address: h === "internal.example" ? "192.168.0.1" : "93.184.216.34", family: 4 }]);
 
-    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("внутрішню");
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("follows at most 3 redirects", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => new Response(null, { status: 302, headers: { location: "https://ok.example/n" } })));
 
-    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("перенаправлень");
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TOO_MANY_REDIRECTS);
   });
 
   it("rejects oversize by content-length and by streamed bytes", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(imgResponse(PNG, { "content-length": "101" })));
-    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("завеликий");
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TOO_LARGE);
 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(imgResponse(new Uint8Array(150))));
-    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("завеликий");
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TOO_LARGE);
   });
 
   it("returns body for a valid response", async () => {
@@ -87,7 +88,7 @@ describe("safe-fetch", () => {
     vi.useFakeTimers();
     vi.stubGlobal("fetch", vi.fn().mockImplementation((_u: unknown, init: RequestInit) => new Promise((_res, rej) => init.signal?.addEventListener("abort", () => rej(new Error("aborted"))))));
 
-    const assertion = expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow("Час очікування");
+    const assertion = expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TIMEOUT);
 
     await vi.advanceTimersByTimeAsync(10_001);
     await assertion;
@@ -98,7 +99,7 @@ describe("safe-fetch", () => {
     vi.stubGlobal("fetch", vi.fn());
     lookupMock.mockImplementation(() => new Promise(() => {}));
 
-    const assertion = expect(safeFetchBuffer("https://slow.example/a.png", OPTS)).rejects.toThrow("Час очікування");
+    const assertion = expect(safeFetchBuffer("https://slow.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TIMEOUT);
 
     await vi.advanceTimersByTimeAsync(10_001);
     await assertion;

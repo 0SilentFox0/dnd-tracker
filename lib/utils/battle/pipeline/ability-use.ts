@@ -38,7 +38,7 @@ export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext
 export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
   const participant = findParticipant(ctx.participants, req.participantId);
 
-  if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
+  if (!participant) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
   if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 

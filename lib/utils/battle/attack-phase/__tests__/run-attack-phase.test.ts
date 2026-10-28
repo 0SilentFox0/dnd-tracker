@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { findAttack, requestedTargetIds } from "../request";
 import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -216,7 +217,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect(e).toMatchObject({ code: "action_used", message: "Дію цього ходу вже використано" });
+      expect(e).toMatchObject({ code: "action_used", message: API_ERRORS.ACTION_USED });
     }
   });
 

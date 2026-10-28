@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 vi.mock("@/lib/db", async () => {
   const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
 
@@ -90,7 +92,7 @@ describe("content routes", () => {
       const res = await json(await col.POST(req("POST", body), ctx));
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe("Некоректний JSON у тілі запиту");
+      expect(res.body.error).toBe(API_ERRORS.INVALID_JSON);
     }
   });
 
@@ -102,11 +104,11 @@ describe("content routes", () => {
   });
 
   it("PATCH відсутнього → 404 з повідомленням ресурсу", async () => {
-    expect(await json(await one.PATCH(req("PATCH", "{}"), ctxOne("zzz")))).toEqual({ status: 404, body: { error: "Немає" } });
+    expect(await json(await one.PATCH(req("PATCH", "{}"), ctxOne("zzz")))).toMatchObject({ status: 404, body: { error: "Немає" } });
   });
 
   it("ContentError із хука → його статус і текст", async () => {
-    expect(await json(await one.DELETE(req("DELETE"), ctxOne("a")))).toEqual({ status: 409, body: { error: "Зайнято" } });
+    expect(await json(await one.DELETE(req("DELETE"), ctxOne("a")))).toMatchObject({ status: 409, body: { error: "Зайнято" } });
   });
 
   it("DELETE колекції без removeAll → 405", async () => {

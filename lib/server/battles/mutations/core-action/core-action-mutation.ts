@@ -10,7 +10,7 @@ function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
   const offTurn = body.action === "readiedAttack";
 
   const actor = requireActor(ctx, body.participantId, {
-    missing: "Учасника немає в бою",
+    missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
     forbidden: offTurn ? "Діяти може лише DM або власник учасника" : "Діяти може лише DM або той, хто зараз ходить",
     inactive: { code: "action_rejected", message: "Учасник не може діяти (непритомний або мертвий)" },
     anyTurn: offTurn,

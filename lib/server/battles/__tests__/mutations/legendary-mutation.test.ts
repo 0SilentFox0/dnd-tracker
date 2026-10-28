@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { context, hero, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -57,7 +58,7 @@ describe("legendary mutation", () => {
   });
 
   it("звичайне вміння легендарною дією не використовується", async () => {
-    await expect(legendaryMutation(dm(dragonOf()), ability(plain.key))).rejects.toMatchObject({ message: "У учасника немає такої легендарної дії" });
+    await expect(legendaryMutation(dm(dragonOf()), ability(plain.key))).rejects.toMatchObject({ message: API_ERRORS.BATTLE_NO_SUCH_LEGENDARY });
   });
 
   it("свій хід, бюджет, мертвий, атака по союзнику — відмова без змін", async () => {

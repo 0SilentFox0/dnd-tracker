@@ -23,7 +23,7 @@ export function useSetLocale(): { locale: Locale; set: (locale: Locale, hardNavi
         return;
       }
 
-      await localeApi.set(next);
+      await localeApi.set(next).catch(() => writeLocaleCookie(next));
       window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT));
       router.refresh();
     },

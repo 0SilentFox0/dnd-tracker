@@ -4,8 +4,11 @@ const auth = vi.hoisted(() => ({ exchangeCodeForSession: vi.fn(), verifyOtp: vi.
 
 const ensureDbUser = vi.hoisted(() => vi.fn());
 
+const syncUserLocale = vi.hoisted(() => vi.fn());
+
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth }) }));
 vi.mock("@/lib/server/users/db-user", () => ({ ensureDbUser }));
+vi.mock("@/lib/server/users/locale", () => ({ syncUserLocale }));
 
 import { GET } from "../route";
 
@@ -22,10 +25,20 @@ beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => undefined);
   auth.exchangeCodeForSession.mockResolvedValue({ error: null });
   auth.verifyOtp.mockResolvedValue({ error: null });
+  syncUserLocale.mockResolvedValue(null);
   auth.getUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.test" } }, error: null });
 });
 
 describe("GET /auth/callback", () => {
+  it("passes the pre-login cookie locale to syncUserLocale and sets the cookie for a profile locale", async () => {
+    syncUserLocale.mockResolvedValue("uk");
+
+    const res = await GET(new Request("http://app.test/auth/callback?code=c1", { headers: { cookie: "NEXT_LOCALE=en" } }));
+
+    expect(syncUserLocale).toHaveBeenCalledWith("u1", "en");
+    expect(res.headers.get("set-cookie")).toContain("NEXT_LOCALE=uk");
+  });
+
   it("exchanges the code, syncs the user and goes to the campaigns", async () => {
     expect(await call("?code=c1")).toBe("/campaigns");
     expect(auth.exchangeCodeForSession).toHaveBeenCalledWith("c1");

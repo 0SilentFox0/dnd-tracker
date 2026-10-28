@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { API_ERRORS, featNameTakenMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { CHOICE_ID_RE, CHOICE_KIND_LABELS, CHOICE_KINDS, FEAT_TYPE_LABELS, FEAT_TYPES } from "@/lib/constants/choices";
 import { describeCharacterLog } from "@/lib/utils/characters/resources/describe-log";
@@ -20,9 +20,8 @@ describe("choices constants", () => {
     expect(CHOICE_ID_RE.test("-x")).toBe(false);
   });
 
-  it("errors, name message and log line", () => {
-    expect(API_ERRORS.FEAT_IN_USE).toMatch(/Рису/);
-    expect(featNameTakenMessage("Alert")).toBe("Риса «Alert» уже є в кампанії");
+  it("error key and log line", () => {
+    expect(API_ERRORS.FEAT_IN_USE).toBe("errors.featInUse");
     expect(CharacterLogKind.CHOICES_EDIT).toBe("choices_edit");
     expect(describeCharacterLog({ kind: "choices_edit", data: {} })).toBe("✎ Змінено вибори (раса, риси, опції класу)");
   });

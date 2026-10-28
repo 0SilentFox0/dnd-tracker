@@ -50,6 +50,6 @@ describe("assistant cleanup cron route", () => {
     }));
 
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({ error: "Assistant cleanup failed" });
+    expect(await response.json()).toMatchObject({ error: "Assistant cleanup failed" });
   });
 });

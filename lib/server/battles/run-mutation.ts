@@ -6,6 +6,7 @@ import { defaultPipelineDeps } from "./pipeline-deps";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
+import { apiErrorJson } from "@/lib/utils/api/translate-error";
 import type { BattleOperationOutcome, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleOperationError, runGuardedBattleOperationCore } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -28,24 +29,24 @@ export function battleErrorResponse(err: unknown): NextResponse {
   if (err instanceof BattleOperationError) {
     if (err.rate) return rateLimitResponse(err.rate);
 
-    return NextResponse.json({ error: err.message, ...(err.issues !== undefined && { issues: err.issues }) }, { status: err.status });
+    return apiErrorJson({ error: err.message, issues: err.issues }, { status: err.status });
   }
 
   if (err instanceof BattleConflictError) {
-    return NextResponse.json({ code: "conflict", error: err.message, version: err.currentVersion }, { status: 409 });
+    return apiErrorJson({ code: "conflict", error: err.message, version: err.currentVersion }, { status: 409 });
   }
 
-  if (err instanceof BattleAccessError || err instanceof ContentError) {
-    return NextResponse.json({ error: err.message }, { status: err.status });
-  }
+  if (err instanceof BattleAccessError) return apiErrorJson({ error: err.message }, { status: err.status });
+
+  if (err instanceof ContentError) return apiErrorJson({ error: err.message, params: err.params }, { status: err.status });
 
   if (err instanceof BattleRuleError) {
-    return NextResponse.json({ code: err.code, error: err.message }, { status: 422 });
+    return apiErrorJson({ code: err.code, error: err.message, params: err.params }, { status: 422 });
   }
 
   console.error("[battle-pipeline] unexpected error", err);
 
-  return NextResponse.json({ error: API_ERRORS.INTERNAL }, { status: 500 });
+  return apiErrorJson({ error: API_ERRORS.INTERNAL }, { status: 500 });
 }
 
 export async function runBattleMutation<TBody>(

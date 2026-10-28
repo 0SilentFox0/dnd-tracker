@@ -107,7 +107,7 @@ export function saveDeckHandler(req: Request, campaignId: string, deckId: string
 
     const slides = await persistSlideImages(campaignId, body.slides, previous);
 
-    if (!slides.ok) return errorResponse(slides.message, 400);
+    if (!slides.ok) return errorResponse(slides.message, 400, undefined, "params" in slides ? slides.params : undefined);
 
     const row = await saveDeckRecord(campaignId, deckId, deck.updatedAt, body.title, slides.value);
 

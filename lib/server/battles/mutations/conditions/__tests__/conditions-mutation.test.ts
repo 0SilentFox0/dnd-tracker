@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { battleConditionsMutation, battleConditionsSchema } from "../conditions-mutation";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { beginConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { applyCondition5e, hasCondition } from "@/lib/utils/battle/conditions";
@@ -32,7 +33,7 @@ describe("battleConditionsMutation", () => {
   it("імунітет блокує", () => {
     const withFlag = applyCondition5e([hero, goblin], "gob", { key: "petrified", rounds: 3, source: undefined, sourceName: "X", timedKey: "t", round: 1 }).participants;
 
-    expect(() => battleConditionsMutation(dmCtx(withFlag), { action: "apply", participantId: "gob", condition: "poisoned" })).toThrow("імунітет");
+    expect(() => battleConditionsMutation(dmCtx(withFlag), { action: "apply", participantId: "gob", condition: "poisoned" })).toThrow(API_ERRORS.CONDITION_IMMUNE);
   });
 
   it("remove prone знімає всі ефекти з цим ключем, але не чужі через implies", () => {
@@ -52,7 +53,7 @@ describe("battleConditionsMutation", () => {
   it("remove incapacitated не знімає paralyzed", () => {
     const ps = applyCondition5e([hero, goblin], "gob", { key: "paralyzed", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "c", round: 1 }).participants;
 
-    expect(() => battleConditionsMutation(dmCtx(ps), { action: "remove", participantId: "gob", condition: "incapacitated" })).toThrow("немає");
+    expect(() => battleConditionsMutation(dmCtx(ps), { action: "remove", participantId: "gob", condition: "incapacitated" })).toThrow(API_ERRORS.CONDITION_ABSENT);
     expect(hasCondition(byId(ps, "gob"), "paralyzed")).toBe(true);
   });
 

@@ -9,10 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useJoinCampaign } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { joinErrorMessage } from "@/lib/utils/campaigns/join-error";
 
 export function JoinCampaignDialog() {
   const router = useRouter();
+
+  const t = useTranslator();
 
   const [open, setOpen] = useState(false);
 
@@ -43,7 +46,7 @@ export function JoinCampaignDialog() {
           router.refresh();
         }, 1000);
       },
-      onError: (err) => setError(joinErrorMessage(err)),
+      onError: (err) => setError(joinErrorMessage(err, t)),
     });
   };
 

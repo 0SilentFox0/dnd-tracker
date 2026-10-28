@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as imageStorage from "@/lib/supabase/image-storage";
 import * as storage from "@/lib/supabase/scene-slide-storage";
@@ -149,7 +150,7 @@ describe("decks API", () => {
     const res = await put({ title: "a", slides: [] });
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toMatchObject({ error: "Набір змінено в іншому місці — оновіть сторінку" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.DECK_CONFLICT });
     await runAfter();
     expect(storage.removeSlideFiles).not.toHaveBeenCalled();
   });

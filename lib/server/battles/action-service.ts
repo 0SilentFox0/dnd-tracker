@@ -174,7 +174,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 
 export function prepareBattleAction(caller: AssistantCaller, operation: string, raw: unknown): Promise<ActionPreview> {
   return withCampaignContentWrite(caller.actor.campaignId, () => prepared(caller, operation, raw)).catch(error => {
-    if (error instanceof BattleRuleError) throw new ContentError(error.message, 422);
+    if (error instanceof BattleRuleError) throw new ContentError(error.message, 422, undefined, error.params);
 
     if (error instanceof BattleAccessError) throw new ContentError(error.message, error.status);
 

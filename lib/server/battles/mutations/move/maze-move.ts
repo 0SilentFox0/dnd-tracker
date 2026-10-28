@@ -1,5 +1,6 @@
 import { resolveMover } from "./resolve-mover";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
@@ -34,7 +35,7 @@ export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, base: B
     return { participants: replaceParticipant(participants, placeInMaze(grid, mover, data.to)), pending: ctx.pending, events: [] };
   }
 
-  if (grid.maze.dark) rejectAction(MAZE_TEXTS.dark);
+  if (grid.maze.dark) rejectAction(API_ERRORS.MAZE_DARK);
 
   assertCanAct(ctx, mover.basicInfo.id);
 

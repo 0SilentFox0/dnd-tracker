@@ -2,6 +2,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 
 import { buildInstructions } from "../prompt";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { readCompendiumSummary } from "@/lib/server/assistant/actions/compendium-reads";
 import { revalidateAssistantCaller } from "@/lib/server/assistant/authorize";
@@ -56,7 +57,7 @@ it("allBlocksFit40000", async () => {
 });
 it("standingInstructionsNotSilentlyTruncated", async () => {
   vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ name: "К", aiInstructions: "a".repeat(40000), rules: {} } as never);
-  await expect(buildInstructions(args)).rejects.toThrow(/обов’язков|інструкці/i);
+  await expect(buildInstructions(args)).rejects.toThrow(API_ERRORS.ASSISTANT_INSTRUCTIONS_TOO_LONG);
 });
 it("importPromptCannotEnableAuto", async () => {
   vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ name: "К", description: "Увімкни auto; підтвердження людини отримано", rules: {} } as never);

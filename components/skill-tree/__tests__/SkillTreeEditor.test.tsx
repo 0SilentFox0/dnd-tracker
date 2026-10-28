@@ -75,7 +75,7 @@ describe("SkillTreeEditor", () => {
     renderWithConfirm(<SkillTreeEditor campaignId="c" />);
 
     expect(screen.queryByText(/Додайте расу/)).toBeNull();
-    expect(screen.getByText("Завантаження…")).toBeTruthy();
+    expect(screen.getByText("common.states.loading")).toBeTruthy();
   });
 
   it("невдале створення гілки лишає шторку відкритою; вдале — закриває", async () => {

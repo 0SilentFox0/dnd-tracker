@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { API_ERRORS, conditionAbsentMessage, conditionImmuneMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applyCondition5e, CONDITION_5E_KEYS, MAX_EXHAUSTION, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
@@ -45,14 +45,14 @@ export function battleConditionsMutation(ctx: BattleMutationContext, body: Battl
       rules: ctx.meta.rules,
     });
 
-    if (result.blocked) throw new BattleRuleError("invalid_target", conditionImmuneMessage(target.basicInfo.name));
+    if (result.blocked) throw new BattleRuleError("invalid_target", API_ERRORS.CONDITION_IMMUNE, { name: target.basicInfo.name });
 
     return { participants: result.participants, pending: ctx.pending, events: [dmEvent(round, result.messages.join("; "), targets)] };
   }
 
   const { participants, removed } = removeCondition5e(ctx.participants, body.participantId, body.condition);
 
-  if (removed.length === 0) throw new BattleRuleError("invalid_target", conditionAbsentMessage(target.basicInfo.name));
+  if (removed.length === 0) throw new BattleRuleError("invalid_target", API_ERRORS.CONDITION_ABSENT, { name: target.basicInfo.name });
 
   return { participants, pending: ctx.pending, events: [dmEvent(round, `ДМ: ${target.basicInfo.name} — стан знято: ${removed[0].name}`, targets)] };
 }

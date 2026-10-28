@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
@@ -19,15 +20,17 @@ interface DeleteAllButtonProps {
 const SOFT = "text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30";
 
 export function DeleteAllButton({ count, nouns, confirm: texts, actions, view, status }: DeleteAllButtonProps) {
+  const t = useTranslations("common.deleteAll");
+
   const confirm = useConfirm();
 
-  const { description, label = "Видалити всі", title } = texts;
+  const { description, label = t("label"), title } = texts;
 
   const { variant = "solid", icon } = view ?? {};
 
   if (count === 0) return null;
 
-  const heading = title ?? `Видалити всі ${pluralUk(2, nouns)}?`;
+  const heading = title ?? t("title", { nouns: pluralUk(2, nouns) });
 
   const ask = () => confirm({ title: heading, description, confirmLabel: label, destructive: true, onConfirm: actions.onConfirm });
 

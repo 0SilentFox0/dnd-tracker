@@ -29,7 +29,7 @@ export function buildTrackPatch(track: CampaignTrack, draft: TrackDraft): TrackP
 
   const title = joinTrackTitle(draft.group, draft.name);
 
-  if (title.length > TRACK_TITLE_MAX) error.title = `Група й назва разом — до ${TRACK_TITLE_MAX} символів`;
+  if (title.length > TRACK_TITLE_MAX) error.title = API_ERRORS.TRACK_TITLE_TOO_LONG;
   else if (title && title !== track.title) patch.title = title;
 
   if (track.kind === "youtube" && draft.url.trim() !== (trackLink(track) ?? "")) {
@@ -44,7 +44,7 @@ export function buildTrackPatch(track: CampaignTrack, draft: TrackDraft): TrackP
   if (raw !== (track.durationSec ? String(track.durationSec) : "")) {
     const sec = Number(raw);
 
-    if (raw && !(Number.isInteger(sec) && sec > 0 && sec <= 86_400)) error.durationSec = "Ціле число секунд від 1 до 86400";
+    if (raw && !(Number.isInteger(sec) && sec > 0 && sec <= 86_400)) error.durationSec = API_ERRORS.TRACK_DURATION_INVALID;
     else patch.durationSec = raw ? sec : null;
   }
 

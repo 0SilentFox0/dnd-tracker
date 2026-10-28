@@ -5,14 +5,23 @@ import { project, publicToolData } from "./projection";
 
 import "server-only";
 import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
+import { translateIssue } from "@/lib/i18n/translate-issue";
 import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
+import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate-error";
 
 export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
 
-export class AiToolError extends Error {}
+export class AiToolError extends Error {
+  constructor(
+    message: string,
+    readonly params?: ErrorParams,
+  ) {
+    super(message);
+  }
+}
 
 export type AiToolDef = {
   name: string;
@@ -59,6 +68,12 @@ function boundedOutput(value: unknown): unknown {
   return project(value);
 }
 
+async function translatedIssues(issues: ReadonlyArray<{ path: PropertyKey[]; code: string; message: string; minimum?: unknown; maximum?: unknown; params?: ErrorParams }>) {
+  const t = await requestTranslator();
+
+  return issues.map((issue) => ({ path: issue.path, code: issue.code, message: translateIssue(t, issue) }));
+}
+
 export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput: unknown): Promise<ToolResult> {
   try {
     ctx.abortSignal?.throwIfAborted();
@@ -71,9 +86,13 @@ export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput
 
     return { version: 2, kind: "result", data: boundedOutput(publicToolData(await def.handler(ctx, def.input.parse(rawInput)))) };
   } catch (error) {
-    if (error instanceof z.ZodError) return { version: 2, kind: "error", error: { code: "INVALID_INPUT", status: 400, message: "Некоректні параметри", issues: formatIssues(error.issues).slice(0, 20).map(s => s.slice(0, 200)) } };
+    if (error instanceof z.ZodError) return { version: 2, kind: "error", error: { code: "INVALID_INPUT", status: 400, message: "Некоректні параметри", issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } };
 
-    if (error instanceof ContentError || error instanceof AiToolError) return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: error.message.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(error.issues.map(({ path, code, message }) => ({ path, code, message }))).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
+    if (error instanceof ContentError || error instanceof AiToolError) {
+      const t = await requestTranslator();
+
+      return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params: error.params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
+    }
 
     console.error(`tool ${def.name} failed`);
 

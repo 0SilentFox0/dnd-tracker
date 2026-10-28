@@ -2,6 +2,7 @@
 
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmContext, type ConfirmOptions } from "@/lib/hooks/common/confirm-context";
@@ -13,6 +14,8 @@ const ResponsiveDialog = dynamic(() => import("@/components/ui/responsive-dialog
 type Pending = ConfirmOptions & { resolve: (ok: boolean) => void; detach?: () => void };
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("common");
+
   const [pending, setPending] = useState<Pending | null>(null);
 
   // last options stay rendered while the dialog/sheet animates closed
@@ -77,7 +80,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       if (current.current !== p) return;
 
       setBusy(false);
-      setError(errorMessage(e, "Не вдалося виконати дію"));
+      setError(errorMessage(e, t("confirm.failed")));
     }
   };
 
@@ -98,11 +101,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <>
             {shown?.cancelLabel === null ? null : (
               <Button variant="outline" onClick={() => settle(false)} disabled={busy}>
-                {shown?.cancelLabel ?? "Скасувати"}
+                {shown?.cancelLabel ?? t("confirm.cancel")}
               </Button>
             )}
             <Button variant={shown?.destructive ? "destructive" : "default"} onClick={accept} disabled={busy}>
-              {busy ? "…" : (shown?.confirmLabel ?? "Підтвердити")}
+              {busy ? "…" : (shown?.confirmLabel ?? t("confirm.confirm"))}
             </Button>
           </>
         }
