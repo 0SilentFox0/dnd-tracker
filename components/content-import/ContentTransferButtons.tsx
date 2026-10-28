@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { Download, Upload } from "lucide-react";
+import Link from "next/link";
+import { Download, FileJson, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useContentTransferUrls } from "@/lib/hooks/content-import";
@@ -28,7 +29,12 @@ export function ContentTransferButtons({ campaignId, kind }: { campaignId: strin
           Експорт CSV
         </a>
       </Button>
-      <a className="text-xs underline" href={`/campaigns/${campaignId}/dm/compendium`}>JSON-компендіум і звіти</a>
+      <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+        <Link href={`/campaigns/${campaignId}/dm/compendium`}>
+          <FileJson className="h-4 w-4" />
+          JSON-компендіум і звіти
+        </Link>
+      </Button>
       {open && <ContentImportWizard campaignId={campaignId} kind={kind} open={open} onOpenChange={setOpen} />}
     </>
   );
