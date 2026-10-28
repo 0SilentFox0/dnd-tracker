@@ -55,20 +55,20 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
       <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-r md:border-t-0">
         <div aria-hidden className="hidden h-40 shrink-0 md:block" />
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {isDM && (
-            <div className="flex gap-2 p-2">
-              <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
-                Відпустити всі
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => void reset()}>
-                Скинути
-              </Button>
-            </div>
-          )}
           <PuzzleTray scene={scene} />
         </div>
       </aside>
-      <div ref={areaRef} className="flex min-h-0 min-w-0 flex-1 items-center justify-center p-2">
+      <div ref={areaRef} className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-2">
+        {isDM && (
+          <div className="absolute right-2 top-2 z-20 flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
+              Відпустити всі
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => void reset()}>
+              Скинути
+            </Button>
+          </div>
+        )}
         <div style={boardStyle} className="max-h-full max-w-full">
           <PuzzleBoard scene={scene} boardRef={boardRef} />
         </div>

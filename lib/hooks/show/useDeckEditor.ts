@@ -13,6 +13,7 @@ import { SLIDE_MAX_EDGE_PX } from "@/lib/constants/show";
 import { useConfirm, useNotify, useUnsavedChangesGuard } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { fitWithin } from "@/lib/utils/common/image-resize";
+import { randomPuzzleSeed } from "@/lib/utils/puzzle/generate";
 import { type DeckDraft, deckDraftReducer, newSlideId, sameDraft } from "@/lib/utils/show/deck-draft";
 import type { SlideDeck } from "@/types/show";
 
@@ -70,7 +71,7 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
 
       const [slide] = await upload([file]);
 
-      if (slide) dispatch({ type: "add", slides: [{ ...slide, kind: "puzzle", puzzle: { cut: "classic", count: 24, seed: Math.floor(Math.random() * 2 ** 31), imageWidth: width, imageHeight: height } }] });
+      if (slide) dispatch({ type: "add", slides: [{ ...slide, kind: "puzzle", puzzle: { cut: "classic", count: 24, seed: randomPuzzleSeed(), imageWidth: width, imageHeight: height } }] });
     },
     [upload],
   );

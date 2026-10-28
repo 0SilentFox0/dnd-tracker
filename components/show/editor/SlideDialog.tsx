@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { PUZZLE_MAX_PIECES, PUZZLE_MIN_PIECES, SLIDE_CAPTION_MAX, SLIDE_TITLE_MAX } from "@/lib/constants/show";
+import { randomPuzzleSeed } from "@/lib/utils/puzzle/generate";
 import type { DeckDraftAction } from "@/lib/utils/show/deck-draft";
 import type { PuzzleCut, Slide } from "@/types/show";
 
@@ -51,7 +52,7 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
                 {label}
               </Button>
             ))}
-            <Button type="button" size="sm" variant="outline" onClick={() => setPuzzle({ ...puzzle, seed: Math.floor(Math.random() * 2 ** 31) })}>
+            <Button type="button" size="sm" variant="outline" onClick={() => setPuzzle({ ...puzzle, seed: randomPuzzleSeed() })}>
               Перемішати
             </Button>
           </div>

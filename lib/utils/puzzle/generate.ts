@@ -13,6 +13,8 @@ export interface PuzzlePiece {
   home: { x: number; y: number };
 }
 
+export const randomPuzzleSeed = (): number => Math.floor(Math.random() * 2 ** 31);
+
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
 

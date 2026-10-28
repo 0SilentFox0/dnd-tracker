@@ -4,7 +4,7 @@ import { applyAudioCommand, type AudioLibraryEntry, commandNeedsLibrary } from "
 import { initPuzzle } from "@/lib/utils/puzzle/puzzle-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { Result } from "@/types/common";
-import type { ShowBattle, ShowCommand, ShowState, Slide } from "@/types/show";
+import type { PuzzleSpec, ShowBattle, ShowCommand, ShowState, Slide } from "@/types/show";
 
 export interface ShowDeck {
   id: string;
@@ -62,6 +62,8 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 
   return played.ok ? played.value : audio;
 }
+
+const samePuzzleSpec = (a?: PuzzleSpec, b?: PuzzleSpec) => a === b || (!!a && !!b && a.cut === b.cut && a.count === b.count && a.seed === b.seed && a.imageWidth === b.imageWidth && a.imageHeight === b.imageHeight);
 
 const puzzleFor = (slide: Slide) => (slide.kind === "puzzle" && slide.puzzle ? { puzzle: initPuzzle(slide.puzzle) } : {});
 
@@ -195,7 +197,7 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
   }
 }
 
-const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && JSON.stringify(a.puzzle) === JSON.stringify(b.puzzle);
+const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && samePuzzleSpec(a.puzzle, b.puzzle);
 
 /** Після збереження набору: знімок поточного слайда без перемикання і без автотреку; видалений слайд замінює сусід, порожній набір завершує показ. */
 export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before: Slide[]; now: number }): ShowState | null {
@@ -217,7 +219,7 @@ export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before:
 
   const { puzzle: _puzzle, ...rest } = prev;
 
-  const keepPuzzle = prev.puzzle && prev.slide?.id === slide.id && JSON.stringify(prev.slide.puzzle) === JSON.stringify(slide.puzzle);
+  const keepPuzzle = prev.puzzle && prev.slide?.id === slide.id && samePuzzleSpec(prev.slide.puzzle, slide.puzzle);
 
   return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(keepPuzzle ? { puzzle: prev.puzzle } : puzzleFor(slide)), seq: prev.seq + 1 };
 }
