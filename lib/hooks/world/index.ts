@@ -7,3 +7,6 @@ export { useWorldEditor } from "./useWorldEditor";
 export { useWorldMap } from "./useWorldMap";
 export { useWorldMaps } from "./useWorldMaps";
 export { useWorldMapUpload } from "./useWorldMapUpload";
+export { useWorldNotes } from "./useWorldNotes";
+export { useWorldTravel } from "./useWorldTravel";
+export { useWorldView } from "./useWorldView";

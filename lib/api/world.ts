@@ -6,13 +6,21 @@ import type { SlideUploadTicket } from "@/types/show";
 import type {
   CreateWorldMapData,
   CreateWorldMarkerData,
+  CreateWorldNoteData,
+  EnterRequest,
+  ExitRequest,
+  TravelRequest,
   UpdateWorldMapData,
   UpdateWorldMarkerData,
+  WorldHero,
   WorldMap,
   WorldMapDetail,
   WorldMapSummary,
   WorldMarker,
+  WorldNote,
+  WorldTravelEntry,
   WorldUploadRequest,
+  WorldView,
 } from "@/types/world";
 
 export const getWorldMaps = (campaignId: string) => campaignGet<WorldMapSummary[]>(campaignId, "/world/maps", { cache: "no-store" });
@@ -47,3 +55,26 @@ export async function uploadWorldMapImage(campaignId: string, blob: Blob): Promi
 
 /** Best-effort: прибирає щойно завантажений файл, якщо створення/оновлення карти не вдалося. */
 export const discardWorldMapUpload = (campaignId: string, imageUrl: string) => campaignPost<{ ok: true }>(campaignId, "/world/discard-upload", { imageUrl });
+
+export const getWorldView = (campaignId: string, { mapId, asHeroId }: { mapId: string; asHeroId?: string }) => {
+  const query = new URLSearchParams({ mapId, ...(asHeroId ? { asHeroId } : {}) });
+
+  return campaignGet<WorldView>(campaignId, `/world/view?${query}`, { cache: "no-store" });
+};
+
+type TravelResult = { ok: true; positions: WorldHero[] };
+
+export const travelHeroes = (campaignId: string, data: TravelRequest) => campaignPost<TravelResult>(campaignId, "/world/travel", data);
+
+export const enterMarker = (campaignId: string, data: EnterRequest) => campaignPost<TravelResult>(campaignId, "/world/enter", data);
+
+export const exitMap = (campaignId: string, data: ExitRequest) => campaignPost<TravelResult>(campaignId, "/world/exit", data);
+
+export const getTravelLog = (campaignId: string) => campaignGet<WorldTravelEntry[]>(campaignId, "/world/log", { cache: "no-store" });
+
+export const createWorldNote = (campaignId: string, data: CreateWorldNoteData) => campaignPost<WorldNote>(campaignId, "/world/notes", data);
+
+export const updateWorldNote = (campaignId: string, noteId: string, data: Partial<Pick<WorldNote, "text" | "visibility">>) =>
+  campaignPatch<WorldNote>(campaignId, `/world/notes/${noteId}`, data);
+
+export const deleteWorldNote = (campaignId: string, noteId: string) => campaignDelete<{ ok: true }>(campaignId, `/world/notes/${noteId}`);
