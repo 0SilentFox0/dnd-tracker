@@ -5,6 +5,8 @@ export const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [1, 2, 3, 
 
 export const SPELL_IDS_QUERY_MAX = 200;
 
+export const MAX_SPELL_LEVEL = 9;
+
 const SPELL_CIRCLE_ORDINALS = ["", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте", "Сьоме", "Восьме", "Дев'яте"];
 
 const CANTRIP_NAME = "Замовляння";

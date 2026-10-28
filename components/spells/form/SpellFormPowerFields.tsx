@@ -8,13 +8,13 @@ import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 import { HudSection } from "@/components/hud/form";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CommaListInput } from "@/components/ui/comma-list-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { labelOptions, TEMPLATE_SHAPE_LABELS } from "@/lib/constants/spells";
-import { parseCommaList } from "@/lib/utils/common/text";
 import type { TemplateShape } from "@/types/battle";
 import type { SpellTargeting } from "@/types/spells";
 
@@ -170,7 +170,7 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
               <div><Label htmlFor="damage-bonus">Добавка до шкоди / лікування</Label><Input id="damage-bonus" type="number" min={-20} max={40} value={formData.damageBonus ?? ""} onChange={(e) => setFormData({ ...formData, damageBonus: e.target.value === "" ? null : Math.max(-20, Math.min(40, Math.trunc(Number(e.target.value)))) })} /></div>
               <div className="col-span-2">
                 <Label htmlFor="spell-lists">Списки</Label>
-                <Input id="spell-lists" placeholder="Wizard, Sorcerer" value={(formData.lists ?? []).join(", ")} onChange={(e) => setFormData({ ...formData, lists: parseCommaList(e.target.value) })} />
+                <CommaListInput id="spell-lists" placeholder="Wizard, Sorcerer" value={formData.lists ?? []} onChange={(lists) => setFormData({ ...formData, lists })} />
               </div>
               <div>
                 <Label htmlFor="die-sides">Грань кубика</Label>

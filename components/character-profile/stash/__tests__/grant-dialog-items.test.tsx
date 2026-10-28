@@ -8,7 +8,7 @@ const h = vi.hoisted(() => ({ mutateAsync: vi.fn(async () => ({})) }));
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 vi.mock("../../ProfileContext", () => ({ useProfile: () => ({ campaignId: "c", characterId: "h" }) }));
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/lib/hooks/characters/useStash", () => ({
   useStashAction: () => ({ mutateAsync: h.mutateAsync, isPending: false }),
   useFreeArtifacts: () => ({
     isLoading: false,

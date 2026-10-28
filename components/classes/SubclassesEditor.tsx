@@ -3,13 +3,13 @@
 import { Plus, Trash2 } from "lucide-react";
 
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
-import { useErrorTotals } from "./use-error-totals";
 
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { DEFAULT_SUBCLASS_LEVEL, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { useErrorTotals } from "@/lib/hooks/common";
 import { shortId } from "@/lib/utils/common/short-id";
 import type { ClassFormData, Subclass } from "@/types/classes";
 
@@ -28,7 +28,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
   const add = () =>
     set((prev) => ({
       ...prev,
-      subclassLevel: prev.subclassLevel ?? 3,
+      subclassLevel: prev.subclassLevel ?? DEFAULT_SUBCLASS_LEVEL,
       subclasses: [...prev.subclasses, { id: shortId(), name: "", features: [] }],
     }));
 

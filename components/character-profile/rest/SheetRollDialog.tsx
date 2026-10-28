@@ -6,10 +6,10 @@ import { useProfile } from "../ProfileContext";
 
 import "@/components/battle/fx/fx.css";
 import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
+import { FormAlert } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import { useSheetRoll } from "@/lib/hooks/characters";
 import { cryptoRandom } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
@@ -71,10 +71,7 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
       }
     >
       {sheet.rest?.inspiration && !result && (
-        <div className="flex items-center gap-3">
-          <Switch id="sheet-roll-inspiration" aria-label="Натхнення" checked={useInspiration} onCheckedChange={setUseInspiration} />
-          <Label htmlFor="sheet-roll-inspiration">✦ Натхнення — перевага, натхнення буде витрачено</Label>
-        </div>
+        <SwitchField id="sheet-roll-inspiration" ariaLabel="Натхнення" label="✦ Натхнення — перевага, натхнення буде витрачено" checked={useInspiration} onCheckedChange={setUseInspiration} />
       )}
       {result && (
         <div aria-live="polite" className="text-center">
@@ -84,7 +81,7 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
           </div>
         </div>
       )}
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {error && <FormAlert>{error}</FormAlert>}
       <DiceStage ref={stage} />
     </ResponsiveDialog>
   );

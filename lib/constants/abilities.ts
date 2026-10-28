@@ -1,5 +1,7 @@
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
+export const ABILITY_SCORE_CAP = 20;
+
 export type AbilityKey = (typeof ABILITY_KEYS)[number];
 
 export const isAbilityKey = (v: unknown): v is AbilityKey => (ABILITY_KEYS as readonly unknown[]).includes(v);

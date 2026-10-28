@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useEditResources } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
+import { MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
 import { GRANT_POOL_PREFIX, ITEM_POOL_PREFIX } from "@/lib/utils/items/pools";
 import type { ResourcesEditBody, SheetRest } from "@/types/characters";
 
@@ -75,7 +76,7 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
         </div>
         <div>
           <Label htmlFor="res-exh">Виснаження</Label>
-          <Input id="res-exh" type="number" min={0} max={6} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
+          <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
         </div>
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">

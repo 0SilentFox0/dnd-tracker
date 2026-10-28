@@ -9,8 +9,10 @@ import { featsById, refs, scores, sorcerer, spells } from "@/lib/utils/character
 const submit = vi.fn().mockResolvedValue(true);
 
 vi.mock("@/lib/hooks/classes", () => ({ useClasses: () => ({ data: [sorcerer] }) }));
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/lib/hooks/characters/useClassLevelUp", () => ({
   useClassLevelUp: () => ({ submit, isPending: false, error: null, clearError: vi.fn() }),
+}));
+vi.mock("@/lib/hooks/characters/useChoiceRefs", () => ({
   useChoiceRefs: () => ({ ...refs, ready: true, feats: Object.values(featsById), spells }),
 }));
 

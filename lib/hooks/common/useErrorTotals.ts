@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 
-/** Sums per-key error counts reported by several AbilityListEditors into one total. */
+/** Sums per-key error counts reported by several AbilityListEditors into one total; `drop(key)` also drops nested `key-…` entries. */
 export function useErrorTotals(onTotal?: (ok: boolean, total: number) => void) {
   const counts = useRef(new Map<string, number>());
 
@@ -24,7 +24,11 @@ export function useErrorTotals(onTotal?: (ok: boolean, total: number) => void) {
 
   const drop = useCallback(
     (key: string) => {
-      if (counts.current.delete(key)) emit();
+      const dropped = [...counts.current.keys()].filter((k) => k === key || k.startsWith(`${key}-`));
+
+      dropped.forEach((k) => counts.current.delete(k));
+
+      if (dropped.length > 0) emit();
     },
     [emit],
   );

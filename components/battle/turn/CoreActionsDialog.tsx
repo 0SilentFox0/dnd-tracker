@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 
-import { OPTION_BUTTON, OPTION_ON } from "./option-button";
-
+import { OptionButton } from "@/components/hud/OptionButton";
+import { TargetRadioList } from "@/components/hud/TargetRadioList";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { SPELL_COST_LABELS } from "@/lib/constants/spells";
 import { useCoreActions } from "@/lib/hooks/battle";
-import { cn } from "@/lib/utils";
 import type { CoreActionKey } from "@/lib/utils/battle/actions/registry";
 import type { BattleParticipant } from "@/types/battle";
 
-const COST_LABEL = { action: "Дія", bonusAction: "Бонусна дія", movement: "Рух" } as const;
+const COST_LABEL = { action: SPELL_COST_LABELS.action, bonusAction: SPELL_COST_LABELS.bonusAction, movement: "Рух" } as const;
 
 const SHOVE_MODES = [
   { mode: "prone", label: "Повалити" },
@@ -75,34 +75,17 @@ function CoreActionsBody({ participant, onOpenChange, onDone }: Omit<CoreActions
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label="Дія">
         {items.map(({ key: k, def, ok, reason }) => (
-          <button key={k} type="button" role="radio" aria-checked={key === k} disabled={!ok} onClick={() => choose(k)} className={cn(OPTION_BUTTON, key === k && OPTION_ON)}>
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="font-medium">{def.label}</span>
-              <span className="text-xs text-[var(--hud-muted)]">{COST_LABEL[def.cost]}</span>
-            </div>
-            <div className="text-xs text-[var(--hud-muted)]">{def.description}</div>
-            {!ok && <div className="pt-0.5 text-xs text-hud-danger">{reason}</div>}
-          </button>
+          <OptionButton key={k} role="radio" checked={key === k} disabled={!ok} title={def.label} meta={COST_LABEL[def.cost]} note={<>{def.description}{!ok && <span className="block text-hud-danger">{reason}</span>}</>} onClick={() => choose(k)} />
         ))}
       </div>
       {key === "shove" && (
         <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Спосіб">
           {SHOVE_MODES.map((m) => (
-            <button key={m.mode} type="button" role="radio" aria-checked={mode === m.mode} onClick={() => setMode(m.mode)} className={cn(OPTION_BUTTON, mode === m.mode && OPTION_ON)}>
-              {m.label}
-            </button>
+            <OptionButton key={m.mode} role="radio" checked={mode === m.mode} title={m.label} onClick={() => setMode(m.mode)} />
           ))}
         </div>
       )}
-      {needsTarget && (
-        <div className="grid gap-1" role="radiogroup" aria-label="Ціль">
-          {targets.map((t) => (
-            <button key={t.basicInfo.id} type="button" role="radio" aria-checked={targetId === t.basicInfo.id} onClick={() => setTargetId(t.basicInfo.id)} className={cn(OPTION_BUTTON, targetId === t.basicInfo.id && OPTION_ON)}>
-              {t.basicInfo.name}
-            </button>
-          ))}
-        </div>
-      )}
+      {needsTarget && <TargetRadioList targets={targets} value={targetId} onChange={setTargetId} />}
     </div>
     </ResponsiveDialog>
   );

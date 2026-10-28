@@ -8,6 +8,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
 import { ATTACK_KIND_LABELS, AttackType } from "@/lib/constants/battle";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import { patchDefined } from "@/lib/utils/common/patch-defined";
 
 type NumberKey = "attackBonus" | "damageBonus" | "minTargets" | "maxTargets";
 
@@ -45,11 +46,7 @@ const clamp = (v: number, { min, max }: { min: number; max: number }) => Math.mi
 
 export function ArtifactWeaponFields({ value, onChange, bonusOnly = false }: { value: WeaponStats; onChange: (next: WeaponStats) => void; bonusOnly?: boolean }) {
   const set = <K extends keyof WeaponStats>(key: K, v: WeaponStats[K]) => {
-    const next = { ...value, [key]: v };
-
-    if (v === undefined || v === "") delete next[key];
-
-    onChange(next);
+    onChange(patchDefined(value, { [key]: v } as Partial<WeaponStats>, (x) => x === undefined || x === ""));
   };
 
   const numberFields = bonusOnly ? NUMBER_FIELDS.filter((f) => f.key === "attackBonus" || f.key === "damageBonus") : NUMBER_FIELDS;

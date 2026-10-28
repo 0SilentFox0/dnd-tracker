@@ -1,24 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
 import { Checkbox } from "@/components/ui/checkbox";
+import type { useCheckedIds } from "@/lib/hooks/common";
 import type { CharacterListItem } from "@/types/characters";
-
-export function useCheckedIds(characters: CharacterListItem[]) {
-  const [picked, setPicked] = useState<Set<string>>(() => new Set(characters.map((c) => c.id)));
-
-  const toggle = (id: string) =>
-    setPicked((prev) => {
-      const next = new Set(prev);
-
-      if (!next.delete(id)) next.add(id);
-
-      return next;
-    });
-
-  return { picked, toggle };
-}
 
 interface CharacterPickListProps {
   characters: CharacterListItem[];

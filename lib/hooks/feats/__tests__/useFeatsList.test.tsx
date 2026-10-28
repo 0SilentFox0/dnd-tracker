@@ -12,7 +12,8 @@ vi.mock("@/lib/hooks/feats/useFeats", () => ({
   useCreateFeat: () => ({ mutate: vi.fn() }),
   useDeleteFeat: () => ({ mutate: vi.fn() }),
 }));
-vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => vi.fn(async () => true), useNotify: () => vi.fn() }));
+vi.mock("@/lib/hooks/common/useConfirm", () => ({ useConfirm: () => vi.fn(async () => true) }));
+vi.mock("@/lib/hooks/common/useNotify", () => ({ useNotify: () => vi.fn() }));
 
 import { useFeatsList } from "@/lib/hooks/feats/useFeatsList";
 

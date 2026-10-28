@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { OPTION_BUTTON, OPTION_ON } from "@/components/battle/turn/option-button";
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
+import { OptionButton } from "@/components/hud/OptionButton";
+import { TargetRadioList } from "@/components/hud/TargetRadioList";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useLegendaryAction } from "@/lib/hooks/battle";
 import { useSpellBook } from "@/lib/hooks/battle/useSpellBook";
-import { cn } from "@/lib/utils";
 import { toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import type { BattleParticipant, LegendaryOption } from "@/types/battle";
 
@@ -68,35 +68,22 @@ function LegendaryActionBody({ participant, onClose }: { participant: BattlePart
       <div className="space-y-3">
         <div className="grid gap-1" role="radiogroup" aria-label="Дія">
           {choices.map((c) => (
-            <button
+            <OptionButton
               key={c.id}
-              type="button"
               role="radio"
-              aria-checked={choiceId === c.id}
+              checked={choiceId === c.id}
               disabled={!!c.blocked}
+              title={c.label}
+              meta={c.cost}
+              note={c.blocked && <span className="text-hud-danger">{c.blocked}</span>}
               onClick={() => {
                 setChoiceId(c.id);
                 setTargets([]);
               }}
-              className={cn(OPTION_BUTTON, choiceId === c.id && OPTION_ON)}
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-medium">{c.label}</span>
-                <span className="text-xs text-[var(--hud-muted)]">{c.cost}</span>
-              </div>
-              {c.blocked && <div className="pt-0.5 text-xs text-hud-danger">{c.blocked}</div>}
-            </button>
+            />
           ))}
         </div>
-        {choice?.needsTarget && (
-          <div className="grid gap-1" role="radiogroup" aria-label="Ціль">
-            {choice.candidates.map((t) => (
-              <button key={t.basicInfo.id} type="button" role="radio" aria-checked={targets.includes(t.basicInfo.id)} onClick={() => pickTarget(t.basicInfo.id)} className={cn(OPTION_BUTTON, targets.includes(t.basicInfo.id) && OPTION_ON)}>
-                {t.basicInfo.name}
-              </button>
-            ))}
-          </div>
-        )}
+        {choice?.needsTarget && <TargetRadioList targets={choice.candidates} value={targets} onChange={pickTarget} />}
       </div>
     </ResponsiveDialog>
     </>

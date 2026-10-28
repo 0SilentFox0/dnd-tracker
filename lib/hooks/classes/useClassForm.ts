@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useUpdateClass } from "./useClasses";
 
+import { DEFAULT_SUBCLASS_LEVEL } from "@/lib/constants/classes";
 import { useAbilityValidity } from "@/lib/hooks/abilities";
 import { useNavigateFresh } from "@/lib/hooks/common";
 import type { ClassFormData } from "@/types/classes";
@@ -17,7 +18,7 @@ export function buildClassBody(data: ClassFormData): ClassFormData {
     color: data.color?.trim() || null,
     spellcastingAbility: data.caster === "none" ? null : data.spellcastingAbility,
     ...(data.spellList !== undefined && { spellList: data.caster === "none" ? null : data.spellList?.trim() || null }),
-    subclassLevel: data.subclasses.length > 0 ? (data.subclassLevel ?? 3) : null,
+    subclassLevel: data.subclasses.length > 0 ? (data.subclassLevel ?? DEFAULT_SUBCLASS_LEVEL) : null,
   };
 }
 

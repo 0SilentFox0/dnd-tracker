@@ -2,8 +2,9 @@ import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CHOICE_ID_RE, CHOICE_KINDS, CHOICE_LIMITS, FEAT_TYPES } from "@/lib/constants/choices";
-import { CLASS_COLUMN_KEY_RE } from "@/lib/constants/classes";
+import { CLASS_COLUMN_KEY_RE, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DND_SKILLS } from "@/lib/constants/skills";
+import { MAX_SPELL_LEVEL } from "@/lib/constants/spells";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 import type { Choice, ChoiceOwner } from "@/types/choices";
 
@@ -13,9 +14,9 @@ const description = z.string().max(CHOICE_LIMITS.description).optional();
 
 export const SpellGrantPolicySchema = z.object({
   sharedPool: choiceId.optional(),
-  uses: z.union([z.number().int().min(1).max(20), z.literal("proficiency")]),
+  uses: z.union([z.number().int().min(1).max(CHOICE_LIMITS.grantUses), z.literal("proficiency")]),
   rest: z.enum(["short", "long"]),
-  castLevel: z.number().int().min(0).max(9).optional(),
+  castLevel: z.number().int().min(0).max(MAX_SPELL_LEVEL).optional(),
   via: z.enum(["grant", "slotOrGrant"]).optional(),
   dcAbility: z.enum(ABILITY_KEYS).optional(),
 });
@@ -26,11 +27,11 @@ export const ChoiceOptionSchema = z.object({
   id: choiceId,
   name: z.string().trim().min(1).max(100),
   description,
-  minLevel: z.number().int().min(1).max(20).optional(),
+  minLevel: z.number().int().min(1).max(MAX_CLASS_LEVEL).optional(),
   requires: z.array(choiceId).max(CHOICE_LIMITS.requires).optional(),
   abilities: AbilitiesSchema.default([]),
   spells: z
-    .array(z.object({ level: z.number().int().min(1).max(20), spellId: z.string().trim().min(1).max(100), grant: SpellGrantPolicySchema.optional() }))
+    .array(z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), spellId: z.string().trim().min(1).max(100), grant: SpellGrantPolicySchema.optional() }))
     .max(CHOICE_LIMITS.optionSpells)
     .optional(),
 });
@@ -62,7 +63,7 @@ export const ChoiceSchema = z
     id: choiceId,
     label: z.string().trim().min(1).max(100),
     description,
-    level: z.number().int().min(1).max(20).default(1),
+    level: z.number().int().min(1).max(MAX_CLASS_LEVEL).default(1),
     count: countSchema.default(1),
     lineage: z.literal(true).optional(),
     kind: z.enum(CHOICE_KINDS),
@@ -74,7 +75,7 @@ export const ChoiceSchema = z
     maxPerAbility: z.number().int().min(1).max(CHOICE_LIMITS.points).optional(),
     max: z.number().int().min(1).max(CHOICE_LIMITS.max).optional(),
     spells: z
-      .object({ lists: SpellListsSchema, minLevel: z.number().int().min(0).max(9), maxLevel: z.union([z.number().int().min(0).max(9), z.literal("slots")]) })
+      .object({ lists: SpellListsSchema, minLevel: z.number().int().min(0).max(MAX_SPELL_LEVEL), maxLevel: z.union([z.number().int().min(0).max(MAX_SPELL_LEVEL), z.literal("slots")]) })
       .optional(),
     grant: SpellGrantPolicySchema.optional(),
   })
@@ -130,7 +131,7 @@ export const DraftChoicesSchema = z.object({ ...BackgroundSelectionFields, raceC
 
 export const FeatPrerequisiteSchema = z.object({
   manualText: z.array(z.string().trim().min(1).max(8000)).max(30).optional(),
-  level: z.number().int().min(1).max(20).optional(),
-  scores: z.object({ abilities: z.array(z.enum(ABILITY_KEYS)).min(1).max(ABILITY_KEYS.length), min: z.number().int().min(1).max(30) }).optional(),
+  level: z.number().int().min(1).max(MAX_CLASS_LEVEL).optional(),
+  scores: z.object({ abilities: z.array(z.enum(ABILITY_KEYS)).min(1).max(ABILITY_KEYS.length), min: z.number().int().min(1).max(CHOICE_LIMITS.max) }).optional(),
   text: z.string().trim().max(200).optional(),
 });

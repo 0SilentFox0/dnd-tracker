@@ -8,11 +8,14 @@ export { useCharacter, useCharacters, useCreateCharacter, useLevelUpCharacter, u
 export { useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterTokens } from "./useCharacterTokens";
 export { type ChoiceRefsView, useChoiceRefs } from "./useChoiceRefs";
+export { deriveClassFields, useClassEntriesField } from "./useClassEntriesField";
 export { useClassLevelUp } from "./useClassLevelUp";
+export { type LevelUpCharacter, NEW_CLASS, useClassLevelUpForm } from "./useClassLevelUpForm";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 export { useEquipArtifact } from "./useEquipArtifact";
+export { clampGrantQuantity, useGrantArtifactForm } from "./useGrantArtifactForm";
 export { useAwardXp, useCharacterLog, useEditResources, useInspiration, useRest, useSheetRoll, useSpendHitDie } from "./useOutOfCombat";
 export { type PlayerDraftFormOptions, type RollKey, usePlayerDraftForm } from "./usePlayerDraftForm";
 export { useReviewCharacter } from "./useReviewCharacter";

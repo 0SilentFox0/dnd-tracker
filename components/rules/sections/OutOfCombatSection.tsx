@@ -1,7 +1,6 @@
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import type { Ruleset } from "@/lib/utils/rules";
 
@@ -22,16 +21,10 @@ export function OutOfCombatSection({ form }: { form: RulesFormState }) {
     <RulesSection mechanic="outOfCombat">
       <div className="space-y-3">
         {TOGGLES.map((t) => (
-          <div key={t.key} className="flex items-center gap-3">
-            <Switch id={`rules-ooc-${t.key}`} checked={section[t.key]} onCheckedChange={(v) => set({ [t.key]: v })} />
-            <Label htmlFor={`rules-ooc-${t.key}`}>{t.label}</Label>
-          </div>
+          <SwitchField key={t.key} id={`rules-ooc-${t.key}`} label={t.label} checked={section[t.key]} onCheckedChange={(v) => set({ [t.key]: v })} />
         ))}
         {section.persistResources && (
-          <div className="flex items-center gap-3">
-            <Switch id="rules-ooc-hit-dice" checked={section.longRestHitDice === "all"} onCheckedChange={(v) => set({ longRestHitDice: v ? "all" : "half" })} />
-            <Label htmlFor="rules-ooc-hit-dice">Правила 2024: довгий відпочинок повертає всі кістки хітів (інакше — половину)</Label>
-          </div>
+          <SwitchField id="rules-ooc-hit-dice" label="Правила 2024: довгий відпочинок повертає всі кістки хітів (інакше — половину)" checked={section.longRestHitDice === "all"} onCheckedChange={(v) => set({ longRestHitDice: v ? "all" : "half" })} />
         )}
       </div>
     </RulesSection>

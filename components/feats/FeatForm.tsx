@@ -6,9 +6,9 @@ import { FeatBasicsTab } from "./FeatBasicsTab";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
-import { useErrorTotals } from "@/components/classes/use-error-totals";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import { useErrorTotals } from "@/lib/hooks/common";
 import { useFeatForm } from "@/lib/hooks/feats";
 import type { FeatData } from "@/types/choices";
 

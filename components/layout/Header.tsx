@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User } from "lucide-react";
@@ -10,7 +10,6 @@ import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { isDmLinkVisible } from "@/components/layout/dm-menu";
 import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
+import { dmSectionsFor } from "@/lib/constants/campaigns";
 import { useSessionEmail } from "@/lib/hooks/auth";
-import { useIsTemplateCampaign } from "@/lib/hooks/campaigns";
+import { useCampaignRules, useIsTemplateCampaign } from "@/lib/hooks/campaigns";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
@@ -45,6 +45,10 @@ export function Header() {
   const isDMPage = pathname?.includes("/dm/") || false;
 
   const isPlayerPage = !isDMPage && isCampaignPage;
+
+  const classesEnabled = !!useCampaignRules(isDMPage ? campaignId ?? "" : "").data?.classes.enabled;
+
+  const dmSections = dmSectionsFor({ isTemplate, classesEnabled });
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
@@ -79,77 +83,18 @@ export function Header() {
                 {isDMPage && (
                   <>
                     <DropdownMenuSeparator />
-                    {isDmLinkVisible("characters", isTemplate) && (
-                      <DropdownMenuItem asChild>
-                        <Link href={`/campaigns/${campaignId}/dm/characters`}>
-                          Персонажі
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    {isDmLinkVisible("characters", isTemplate) && (
-                      <DropdownMenuItem asChild>
-                        <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>
-                          NPC Герої
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/units`}>
-                        NPC Юніти
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/spells`}>
-                        Заклинання
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/spell-groups`}>
-                        Школи магії
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/rules`}>
-                        Правила
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/artifacts`}>
-                        Артефакти
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
-                        Сети артефактів
-                      </Link>
-                    </DropdownMenuItem>
-                    {isDmLinkVisible("battles", isTemplate) && (
-                      <DropdownMenuItem asChild>
-                        <Link href={`/campaigns/${campaignId}/dm/battles`}>
-                          Сцени Боїв
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/music`}>
-                        Музика
-                      </Link>
-                    </DropdownMenuItem>
-                    {isDmLinkVisible("scenario", isTemplate) && (
-                      <DropdownMenuItem asChild>
-                        <Link href={`/campaigns/${campaignId}/dm/scenario`}>
-                          Сценарій
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild><Link href={`/campaigns/${campaignId}/dm/assistant`}>Асистент</Link></DropdownMenuItem>
-                    {isDmLinkVisible("ai", isTemplate) && (
-                      <DropdownMenuItem asChild>
-                        <Link href={`/campaigns/${campaignId}/dm/ai`}>
-                          {isTemplate ? "API" : "AI і API"}
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
+                    {dmSections.map(({ path, label, title }) => (
+                      <Fragment key={path}>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/campaigns/${campaignId}/dm/${path}`}>{title ?? label}</Link>
+                        </DropdownMenuItem>
+                        {path === "characters" && (
+                          <DropdownMenuItem asChild>
+                            <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>NPC Герої</Link>
+                          </DropdownMenuItem>
+                        )}
+                      </Fragment>
+                    ))}
                   </>
                 )}
                 {isPlayerPage && (

@@ -4,37 +4,29 @@ import { useMemo, useState } from "react";
 
 import { useCreateFeat, useDeleteFeat, useFeats } from "./useFeats";
 
-import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { errorMessage } from "@/lib/utils/common/error-message";
-import type { FeatData, FeatFormData, FeatType } from "@/types/choices";
-
-const NO_FEATS: FeatData[] = [];
+import { useLibraryList } from "@/lib/hooks/common";
+import type { FeatFormData, FeatType } from "@/types/choices";
 
 export function useFeatsList(campaignId: string) {
-  const confirm = useConfirm();
+  const list = useLibraryList({
+    query: useFeats(campaignId),
+    create: useCreateFeat(campaignId),
+    remove: useDeleteFeat(campaignId),
+    texts: { confirmDelete: "Видалити цю рису?", deleteError: "Не вдалося видалити рису", createError: "Не вдалося створити рису" },
+  });
 
-  const notify = useNotify();
-
-  const { data: all = NO_FEATS, isLoading } = useFeats(campaignId);
-
-  const create = useCreateFeat(campaignId);
-
-  const remove = useDeleteFeat(campaignId);
-
-  const [createOpen, setCreateOpen] = useState(false);
+  const all = list.items;
 
   const [type, setType] = useState<FeatType | null>(null);
 
   const feats = useMemo(() => (type ? all.filter((f) => f.type === type) : all), [all, type]);
 
-  const deleteFeat = async (featId: string) => {
-    if (!(await confirm({ title: "Видалити цю рису?", confirmLabel: "Видалити", destructive: true }))) return;
-
-    remove.mutate(featId, { onError: (error) => void notify(errorMessage(error, "Не вдалося видалити рису")) });
+  return {
+    feats,
+    all,
+    isLoading: list.isLoading,
+    typeFilter: { value: type, set: setType },
+    createDialog: list.createDialog,
+    actions: { createFeat: (data: FeatFormData) => list.create(data), deleteFeat: list.remove },
   };
-
-  const createFeat = (data: FeatFormData) =>
-    create.mutate(data, { onSuccess: () => setCreateOpen(false), onError: (error) => void notify(errorMessage(error, "Не вдалося створити рису")) });
-
-  return { feats, all, isLoading, typeFilter: { value: type, set: setType }, createDialog: { open: createOpen, setOpen: setCreateOpen }, actions: { createFeat, deleteFeat } };
 }

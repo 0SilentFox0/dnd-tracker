@@ -3,6 +3,8 @@
 import { HUD_SELECT_CLASS } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ITEM_LIMITS } from "@/lib/constants/artifacts";
+import { MAX_SPELL_LEVEL } from "@/lib/constants/spells";
 import { useSpells } from "@/lib/hooks/spells";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
 
@@ -12,6 +14,8 @@ const PARAM_OPTIONS = {
 };
 
 type ItemSpell = NonNullable<ItemStats["spells"]>[number];
+
+const SPELL_NUMBER_FIELDS = [["cost", "Ціна"], ["castLevel", "Коло"], ["dc", "DC"], ["attackBonus", "Бонус атаки"]] as const;
 
 export function ItemCastingFields({ campaignId, value, onChange }: { campaignId: string; value: ItemStats; onChange: (patch: Partial<ItemStats>) => void }) {
   const { data: library = [] } = useSpells(campaignId);
@@ -42,9 +46,20 @@ export function ItemCastingFields({ campaignId, value, onChange }: { campaignId:
         {!library.some((s) => s.id === spell.spellId) && <option value={spell.spellId}>Заклинання не знайдено</option>}
         {library.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.level})</option>)}
       </select>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([['cost', 'Ціна', 0, 50], ['castLevel', 'Коло', 0, 9], ['dc', 'DC', 1, 40], ['attackBonus', 'Бонус атаки', -10, 30]] as const).map(([key, label, min, max]) => <label key={key} className="text-xs">{label}<Input aria-label={`${label} предмета`} type="number" min={min} max={max} value={spell[key] ?? ""} onChange={(e) => setSpell(index, { [key]: e.target.value === "" ? undefined : Number(e.target.value) })} /></label>)}</div>
-      <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={!!spell.upcast} onChange={(e) => setSpell(index, { upcast: e.target.checked ? { maxLevel: Math.min(9, (spell.castLevel ?? 0) + 1), extraCost: 1 } : undefined })} />Дозволити підсилення</label>
-      {spell.upcast && <div className="grid grid-cols-2 gap-2"><label className="text-xs">Максимальне коло<Input aria-label="Максимальне коло предмета" type="number" min={1} max={9} value={spell.upcast.maxLevel} onChange={(e) => setSpell(index, { upcast: { maxLevel: Number(e.target.value), extraCost: spell.upcast?.extraCost ?? 1 } })} /></label><label className="text-xs">Ціна додаткового кола<Input aria-label="Ціна додаткового кола" type="number" min={1} max={50} value={spell.upcast.extraCost} onChange={(e) => setSpell(index, { upcast: { maxLevel: spell.upcast?.maxLevel ?? 9, extraCost: Number(e.target.value) } })} /></label></div>}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {SPELL_NUMBER_FIELDS.map(([key, label]) => {
+          const [min, max] = ITEM_LIMITS[key];
+
+          return (
+            <label key={key} className="text-xs">
+              {label}
+              <Input aria-label={`${label} предмета`} type="number" min={min} max={max} value={spell[key] ?? ""} onChange={(e) => setSpell(index, { [key]: e.target.value === "" ? undefined : Number(e.target.value) })} />
+            </label>
+          );
+        })}
+      </div>
+      <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={!!spell.upcast} onChange={(e) => setSpell(index, { upcast: e.target.checked ? { maxLevel: Math.min(MAX_SPELL_LEVEL, (spell.castLevel ?? 0) + 1), extraCost: 1 } : undefined })} />Дозволити підсилення</label>
+      {spell.upcast && <div className="grid grid-cols-2 gap-2"><label className="text-xs">Максимальне коло<Input aria-label="Максимальне коло предмета" type="number" min={ITEM_LIMITS.upcastMaxLevel[0]} max={ITEM_LIMITS.upcastMaxLevel[1]} value={spell.upcast.maxLevel} onChange={(e) => setSpell(index, { upcast: { maxLevel: Number(e.target.value), extraCost: spell.upcast?.extraCost ?? 1 } })} /></label><label className="text-xs">Ціна додаткового кола<Input aria-label="Ціна додаткового кола" type="number" min={ITEM_LIMITS.upcastExtraCost[0]} max={ITEM_LIMITS.upcastExtraCost[1]} value={spell.upcast.extraCost} onChange={(e) => setSpell(index, { upcast: { maxLevel: spell.upcast?.maxLevel ?? MAX_SPELL_LEVEL, extraCost: Number(e.target.value) } })} /></label></div>}
       <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ spells: spells.filter((_, i) => i !== index) })}>Прибрати заклинання предмета</Button>
     </fieldset>)}
     <Button type="button" variant="outline" size="sm" disabled={library.every((s) => spells.some((g) => g.spellId === s.id))} onClick={() => {

@@ -1,8 +1,10 @@
 "use client";
 
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { OptionButton } from "@/components/hud/OptionButton";
+import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
 import { FEAT_TYPE_LABELS } from "@/lib/constants/choices";
 import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
+import { spellLevelName } from "@/lib/constants/spells";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { featPrerequisiteMet } from "@/lib/utils/characters/choices/validate";
 import type { Choice, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
@@ -30,17 +32,8 @@ interface ChoicePickerProps {
   error?: string;
 }
 
-const CARD = "flex w-full items-start gap-2 rounded-md border border-hud-line/50 p-2 text-left text-sm aria-checked:border-hud-gold disabled:opacity-50";
-
 function Card({ role, checked, disabled, onClick, title, note }: { role: "checkbox" | "radio"; checked: boolean; disabled?: boolean; onClick: () => void; title: string; note?: string }) {
-  return (
-    <button type="button" role={role} aria-checked={checked} disabled={disabled} onClick={onClick} className={CARD}>
-      <span className="flex-1">
-        <span className="block text-hud-ink">{title}</span>
-        {note && <span className="block text-xs text-hud-muted">{note}</span>}
-      </span>
-    </button>
-  );
+  return <OptionButton variant="form" role={role} checked={checked} disabled={disabled} onClick={onClick} title={title} note={note} />;
 }
 
 export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePickerProps) {
@@ -149,7 +142,7 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: { choice: Choice; value: ChoicePick[]; onChange: (next: ChoicePick[]) => void; scores: Record<AbilityKey, number>; after?: Record<AbilityKey, number> }) {
   const points = choice.points ?? 1;
 
-  const max = choice.max ?? 20;
+  const max = choice.max ?? ABILITY_SCORE_CAP;
 
   const allowed = choice.abilities?.length ? choice.abilities : ABILITY_KEYS;
 
@@ -189,7 +182,7 @@ function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string
   return (
     <div className="grid max-h-72 gap-1 overflow-y-auto sm:grid-cols-2">
       {shown.map((s) => (
-        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={s.level === 0 ? "Замовляння" : `Коло ${s.level}`} />
+        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={spellLevelName(s.level)} />
       ))}
       {shown.length === 0 && <p className="text-xs text-hud-muted">У списках {rule.lists.join(", ") || "—"} немає заклинань потрібних кіл</p>}
     </div>

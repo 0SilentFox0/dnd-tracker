@@ -3,13 +3,12 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
-import { useErrorTotals } from "./use-error-totals";
-
 import { AbilityListEditor } from "@/components/abilities";
 import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { useErrorTotals } from "@/lib/hooks/common";
 import type { Ability } from "@/types/abilities";
 import type { Choice } from "@/types/choices";
 import type { ClassColumn, ClassFeature } from "@/types/classes";

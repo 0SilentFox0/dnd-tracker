@@ -6,8 +6,7 @@ import { useProfile } from "../ProfileContext";
 import { ResourcesDialog } from "./ResourcesDialog";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import { useInspiration } from "@/lib/hooks/characters";
 import type { SheetRest } from "@/types/characters";
 
@@ -34,10 +33,7 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
         </Button>
       )}
       {rest.inspiration !== null && (
-        <div className="flex items-center gap-2">
-          <Switch id="dm-inspiration" checked={rest.inspiration} disabled={inspiration.isPending} onCheckedChange={(v) => void inspiration.mutateOk(v)} />
-          <Label htmlFor="dm-inspiration">✦ Натхнення</Label>
-        </div>
+        <SwitchField id="dm-inspiration" label="✦ Натхнення" checked={rest.inspiration} disabled={inspiration.isPending} onCheckedChange={(v) => void inspiration.mutateOk(v)} />
       )}
       {open && <ResourcesDialog rest={rest} open onOpenChange={setOpen} />}
     </>

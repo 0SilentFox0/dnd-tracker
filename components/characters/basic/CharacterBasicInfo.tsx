@@ -8,11 +8,10 @@ import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
-import { classesLabel, classTotalLevel, subclassesLabel } from "@/lib/utils/characters/classes";
+import { useClassEntriesField } from "@/lib/hooks/characters";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
-import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { CampaignMember } from "@/types/campaigns";
-import type { CharacterClassEntry, GameClassData } from "@/types/classes";
+import type { GameClassData } from "@/types/classes";
 import type { Race } from "@/types/races";
 
 interface CharacterBasicInfoProps {
@@ -32,17 +31,7 @@ export function CharacterBasicInfo({
 }: CharacterBasicInfoProps) {
   const { data, set } = basicInfo;
 
-  const setClasses = (entries: CharacterClassEntry[]) => {
-    const resolved = resolveClassEntries(entries, classMode?.byId ?? {});
-
-    set("classes", entries);
-
-    if (entries.length === 0) return;
-
-    set("class", classesLabel(resolved));
-    set("subclass", subclassesLabel(resolved) ?? undefined);
-    set("level", classTotalLevel(entries));
-  };
+  const setClasses = useClassEntriesField(basicInfo, classMode?.byId);
 
   const { name, type, controlledBy, level, class: className, subclass, archetype, race, subrace, alignment, avatar } = data;
 

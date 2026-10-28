@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CreditsText } from "@/components/campaigns/templates/CreditsText";
 import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
 import { SourceSyncDialog } from "@/components/campaigns/templates/SourceSyncDialog";
+import { FormAlert } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -171,9 +172,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
         </Button>
       </HudSection>
       {error && (
-        <p role="alert" className="mt-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {error}
-        </p>
+        <FormAlert className="mt-4">{error}</FormAlert>
       )}
     </ResponsiveDialog>
     <SaveAsTemplateDialog campaignId={campaignId} defaultName={`${campaign.name} (шаблон)`} open={templateOpen} onOpenChange={setTemplateOpen} />

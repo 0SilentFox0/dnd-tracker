@@ -2,15 +2,17 @@
 
 import { type FormEvent, useState } from "react";
 
+import { OptionButton } from "@/components/hud/OptionButton";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
 import { ABILITY_OPTIONS, type AbilityKey } from "@/lib/constants/abilities";
+import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import type { BattleConditionsBody } from "@/lib/hooks/battles";
-import { cn } from "@/lib/utils";
-import { CONDITION_5E_KEYS, CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffects } from "@/lib/utils/battle/conditions";
+import { CONDITION_5E_KEYS, CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffects, MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
 import type { BattleParticipant } from "@/types/battle";
 
 const FORM_ID = "conditions-form";
@@ -20,6 +22,8 @@ const toInt = (v: string): number | undefined => {
 
   return Number.isNaN(n) ? undefined : n;
 };
+
+const inRange = (n: number | undefined, max: number) => n !== undefined && n >= 1 && n <= max;
 
 interface ConditionsDialogProps {
   participant: BattleParticipant | null;
@@ -53,7 +57,14 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: Con
 
   const dc = toInt(saveDc);
 
-  const valid = !saveOn || (dc !== undefined && dc >= 1 && dc <= 40);
+  const roundsCount = toInt(rounds);
+
+  const levelsCount = toInt(levels);
+
+  const valid =
+    (rounds === "" || inRange(roundsCount, CONDITION_LIMITS.rounds)) &&
+    (selected !== "exhaustion" || inRange(levelsCount, MAX_EXHAUSTION)) &&
+    (!saveOn || inRange(dc, CONDITION_LIMITS.dc));
 
   const apply = (e: FormEvent) => {
     e.preventDefault();
@@ -64,8 +75,8 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: Con
       action: "apply",
       participantId,
       condition: selected,
-      rounds: toInt(rounds),
-      ...(selected === "exhaustion" && { levels: toInt(levels) }),
+      rounds: roundsCount,
+      ...(selected === "exhaustion" && { levels: levelsCount }),
       ...(saveOn && dc !== undefined && { saveEnds: { ability: saveAbility, dc } }),
     });
   };
@@ -102,42 +113,32 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: Con
       <form id={FORM_ID} noValidate onSubmit={apply} className="space-y-3 py-2">
         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label="Стан">
           {CONDITION_5E_KEYS.map((key) => (
-            <button
-              key={key}
-              type="button"
-              role="radio"
-              aria-checked={selected === key}
-              onClick={() => setSelected(key)}
-              className={cn("border border-white/15 px-2 py-1.5 text-left text-sm hover:border-[var(--gold)]/50", selected === key && "border-[var(--gold)] bg-[var(--gold)]/10")}
-            >
-              <div className="font-medium text-[var(--ink)]">{CONDITION_5E_REGISTRY[key].label}</div>
-              <div className="text-xs text-[var(--hud-muted)]">{CONDITION_5E_REGISTRY[key].description}</div>
-            </button>
+            <OptionButton key={key} role="radio" checked={selected === key} onClick={() => setSelected(key)} title={CONDITION_5E_REGISTRY[key].label} note={CONDITION_5E_REGISTRY[key].description} />
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label htmlFor="condition-rounds">Раунди (порожньо — доки не знімуть)</Label>
-            <Input id="condition-rounds" type="number" min={1} max={99} value={rounds} onChange={(e) => setRounds(e.target.value)} />
+            <Input id="condition-rounds" type="number" min={1} max={CONDITION_LIMITS.rounds} value={rounds} onChange={(e) => setRounds(e.target.value)} />
           </div>
           {selected === "exhaustion" && (
             <div className="space-y-1">
               <Label htmlFor="condition-levels">Рівні</Label>
-              <Input id="condition-levels" type="number" min={1} max={6} value={levels} onChange={(e) => setLevels(e.target.value)} />
+              <Input id="condition-levels" type="number" min={1} max={MAX_EXHAUSTION} value={levels} onChange={(e) => setLevels(e.target.value)} />
             </div>
           )}
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={saveOn} onChange={(e) => setSaveOn(e.target.checked)} />
+            <Checkbox checked={saveOn} onCheckedChange={(on) => setSaveOn(on === true)} />
             Рятівний кидок наприкінці ходу
           </label>
           {saveOn && (
             <div className="grid grid-cols-2 gap-3">
               <SelectField aria-label="Характеристика" value={saveAbility} options={ABILITY_OPTIONS} onValueChange={(v) => setSaveAbility(v as AbilityKey)} />
-              <Input aria-label="СК" type="number" min={1} max={40} value={saveDc} onChange={(e) => setSaveDc(e.target.value)} />
+              <Input aria-label="СК" type="number" min={1} max={CONDITION_LIMITS.dc} value={saveDc} onChange={(e) => setSaveDc(e.target.value)} />
             </div>
           )}
         </div>

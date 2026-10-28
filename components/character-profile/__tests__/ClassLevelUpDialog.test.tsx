@@ -22,7 +22,7 @@ vi.mock("@/lib/hooks/classes", () => ({ useClasses: () => ({ data: [fighter] }) 
 
 const submit = vi.fn().mockResolvedValue(true);
 
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/lib/hooks/characters/useClassLevelUp", () => ({
   useClassLevelUp: () => ({ submit, isPending: false, error: null, clearError: vi.fn() }),
 }));
 

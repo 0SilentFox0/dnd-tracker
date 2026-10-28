@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useCampaignRules, useUpdateCampaignRules } from "./useCampaignRules";
 
 import { AttackType } from "@/lib/constants/battle";
+import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
 import { useNotify } from "@/lib/hooks/common";
 import { DEFAULT_RULES, type Ruleset, type RulesetPatch } from "@/lib/utils/rules";
 
-export const HERO_LEVELS = Array.from({ length: 20 }, (_, i) => i + 1);
+export const HERO_LEVELS = Array.from({ length: MAX_CLASS_LEVEL }, (_, i) => i + 1);
 
 export interface RulesFormState {
   data: Ruleset;

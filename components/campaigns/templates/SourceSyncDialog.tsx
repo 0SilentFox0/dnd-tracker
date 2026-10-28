@@ -2,7 +2,7 @@
 
 import { memo, useId, useMemo } from "react";
 
-import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
+import { EmptyState, ErrorState, FormAlert, LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -213,9 +213,7 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
       {autoAdded.length > 0 && <p className="mt-4 text-sm text-hud-muted">Також буде додано: {autoAdded.map((n) => n.name).join(", ")}</p>}
       {apply.staleNotice && !diff.isFetching && <p className="mt-4 text-sm text-hud-muted">Джерело змінилося — список оновлено, вибір скинуто до типового.</p>}
       {apply.error && (
-        <p role="alert" className="mt-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-destructive">
-          {apply.error}
-        </p>
+        <FormAlert className="mt-4">{apply.error}</FormAlert>
       )}
     </ResponsiveDialog>
   );

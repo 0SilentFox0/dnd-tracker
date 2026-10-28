@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
-import { FEAT_TYPE_LABELS, FEAT_TYPES } from "@/lib/constants/choices";
+import { CHOICE_LIMITS, FEAT_TYPE_LABELS, FEAT_TYPES } from "@/lib/constants/choices";
+import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { FeatFormData, FeatType } from "@/types/choices";
 
@@ -47,11 +48,11 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
         <legend className="hud-sc text-sm">Передумови</legend>
         <label className="flex items-center gap-2 text-sm">
           Мінімальний рівень
-          <Input type="number" min={1} max={20} className="w-20" value={prereq.level ?? ""} onChange={(e) => setPrereq({ ...prereq, level: e.target.value ? Number(e.target.value) : undefined })} />
+          <Input type="number" min={1} max={MAX_CLASS_LEVEL} className="w-20" value={prereq.level ?? ""} onChange={(e) => setPrereq({ ...prereq, level: e.target.value ? Number(e.target.value) : undefined })} />
         </label>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span>Будь-яка з характеристик не нижче</span>
-          <Input type="number" min={1} max={30} className="w-20" aria-label="Мінімальне значення характеристики" disabled={scoreAbilities.length === 0} value={prereq.scores?.min ?? 13} onChange={(e) => prereq.scores && setPrereq({ ...prereq, scores: { ...prereq.scores, min: Number(e.target.value) || 13 } })} />
+          <Input type="number" min={1} max={CHOICE_LIMITS.max} className="w-20" aria-label="Мінімальне значення характеристики" disabled={scoreAbilities.length === 0} value={prereq.scores?.min ?? 13} onChange={(e) => prereq.scores && setPrereq({ ...prereq, scores: { ...prereq.scores, min: Number(e.target.value) || 13 } })} />
           {ABILITY_KEYS.map((a) => (
             <label key={a} className="flex items-center gap-1">
               <Checkbox checked={scoreAbilities.includes(a)} onCheckedChange={() => toggleAbility(a)} />

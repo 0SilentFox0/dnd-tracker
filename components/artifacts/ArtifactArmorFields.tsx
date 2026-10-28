@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ARMOR_CATEGORIES, armorDexCap,type ArmorStats } from "@/lib/utils/artifacts/armor-stats";
+import { patchDefined } from "@/lib/utils/common/patch-defined";
 
 export const ARMOR_CATEGORY_LABELS: Record<ArmorStats["category"], string> = { light: "Легка", medium: "Середня", heavy: "Важка" };
 
@@ -23,11 +24,7 @@ export function ArtifactArmorFields({ value, onChange }: { value: ArmorStats | n
   }
 
   const set = <K extends keyof ArmorStats>(key: K, v: ArmorStats[K] | undefined) => {
-    const next = { ...value, [key]: v } as ArmorStats;
-
-    if (v === undefined || v === false) delete next[key];
-
-    onChange(next);
+    onChange(patchDefined(value, { [key]: v } as Partial<ArmorStats>, (x) => x === undefined || x === false));
   };
 
   return (

@@ -31,6 +31,20 @@ describe("ConditionsDialog", () => {
     expect(onSubmit).toHaveBeenCalledWith({ action: "apply", participantId: "hero", condition: "prone", rounds: 3 });
   });
 
+  it("100 раундів блокують «Накласти» (межа з CONDITION_LIMITS)", () => {
+    const onSubmit = vi.fn();
+
+    render(<ConditionsDialog participant={hero} onClose={vi.fn()} onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText(/Раунди/), { target: { value: "100" } });
+
+    expect((screen.getByRole("button", { name: "Накласти" }) as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText(/Раунди/), { target: { value: "99" } });
+
+    expect((screen.getByRole("button", { name: "Накласти" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("поточний стан має «Зняти»", () => {
     const onSubmit = vi.fn();
 

@@ -1,7 +1,6 @@
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 
 export function SavesSection({ form }: { form: RulesFormState }) {
@@ -9,10 +8,7 @@ export function SavesSection({ form }: { form: RulesFormState }) {
 
   return (
     <RulesSection mechanic="saves">
-      <div className="flex items-center gap-3">
-        <Switch id="rules-saves-proficiency" checked={saves.proficiency} onCheckedChange={(v) => form.set("saves", { ...saves, proficiency: v })} />
-        <Label htmlFor="rules-saves-proficiency">Майстерність у рятівних кидках</Label>
-      </div>
+      <SwitchField id="rules-saves-proficiency" label="Майстерність у рятівних кидках" checked={saves.proficiency} onCheckedChange={(v) => form.set("saves", { ...saves, proficiency: v })} />
     </RulesSection>
   );
 }

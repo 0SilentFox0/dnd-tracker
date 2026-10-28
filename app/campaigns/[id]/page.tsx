@@ -1,4 +1,4 @@
-import { Award, BookOpen, Gem, GitBranch, GraduationCap, Images, Info, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+import { BookOpen, Images, Info, User } from "lucide-react";
 
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
@@ -8,7 +8,7 @@ import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncBut
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
-import { CampaignKind, CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignStatus, dmTilesFor } from "@/lib/constants/campaigns";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
@@ -19,8 +19,6 @@ import { pluralUk } from "@/lib/utils/common/plural";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
-
-const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "classes", "feats", "backgrounds", "units", "artifacts", "music"]);
 
 const LABEL = "text-sm text-hud-muted";
 
@@ -43,29 +41,10 @@ export default async function CampaignDetailPage({
     readCampaignOnboarding(id, user.id, isDM).catch(() => null),
   ]);
 
-  const allDmTiles = [
-    { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
-    { path: "characters", icon: Users, title: "Персонажі", subtitle: pendingDrafts ? `Управління персонажами гравців · ${pendingDrafts} на схваленні` : "Управління персонажами гравців" },
-    { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
-    { path: "spells", icon: Sparkles, title: "Заклинання", subtitle: "База заклинань кампанії" },
-    { path: "artifacts", icon: Gem, title: "Артефакти", subtitle: "Управління артефактами та сетами" },
-    { path: "skills", icon: BookOpen, title: "Бібліотека Скілів", subtitle: "Управління скілами та їх ефектами" },
-    { path: "skill-trees", icon: GitBranch, title: "Дерева Прокачки", subtitle: "Налаштування дерев прокачки для рас" },
-    { path: "races", icon: Shield, title: "Ігрові Раси", subtitle: "Управління расами та їх здібностями" },
-    ...(classesEnabled ? [{ path: "classes", icon: GraduationCap, title: "Класи", subtitle: "Класи, підкласи і вміння за рівнями" }] : []),
-    ...(classesEnabled ? [{ path: "backgrounds", icon: Award, title: "Передісторії", subtitle: "Походження героя, навички й стартові вибори" }] : []),
-    ...(classesEnabled ? [{ path: "feats", icon: Award, title: "Риси", subtitle: "Риси 5e: походження, загальні, стилі бою, епічні дари" }] : []),
-    { path: "battles", icon: Swords, title: "Сцени Боїв", subtitle: "Створення та управління боями" },
-    { path: "music", icon: Music, title: "Музика бою", subtitle: "Бібліотека треків для плеєра в бою" },
-    { path: "show", icon: Images, title: "Показ сцен", subtitle: "Набори слайдів із музикою для гравців" },
-  ];
+  const dmTiles = dmTilesFor({ isTemplate, classesEnabled });
 
-  const libraryExtras = [
-    { path: "spell-groups", icon: Wand2, title: "Школи магії", subtitle: "Групи заклинань і школи" },
-    { path: "rules", icon: Scale, title: "Правила", subtitle: "Правила кампанії" },
-  ];
-
-  const dmTiles = isTemplate ? [...allDmTiles.filter((t) => LIBRARY_PATHS.has(t.path)), ...libraryExtras] : allDmTiles;
+  const subtitleOf = (path: string, subtitle?: string) =>
+    path === "characters" && pendingDrafts ? `${subtitle} · ${pendingDrafts} на схваленні` : subtitle;
 
   return (
     <HudPage>
@@ -159,8 +138,8 @@ export default async function CampaignDetailPage({
           />
         )}
         {isDM &&
-          dmTiles.map(({ path, icon: Icon, title, subtitle }) => (
-            <HudTile key={path} href={`/campaigns/${id}/dm/${path}`} icon={<Icon className="size-5" />} title={title} subtitle={subtitle} />
+          dmTiles.map(({ path, icon: Icon, label, title, subtitle }) => (
+            <HudTile key={path} href={`/campaigns/${id}/dm/${path}`} icon={<Icon className="size-5" />} title={title ?? label} subtitle={subtitleOf(path, subtitle)} />
           ))}
         {!isDM && !isTemplate && (
           <>

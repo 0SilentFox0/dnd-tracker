@@ -7,6 +7,7 @@ import { SpellGrantEditor } from "./SpellGrantEditor";
 import { HUD_SELECT_CLASS } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { useSpells } from "@/lib/hooks/spells";
 import type { ChoiceOption } from "@/types/choices";
 
@@ -21,7 +22,7 @@ export function OptionSpellsEditor({ campaignId, value, onChange }: { campaignId
     <div className="space-y-2">
       {value.map((row, i) => (
         <div key={i} className="space-y-2"><div className="flex items-center gap-2">
-          <Input type="number" min={1} max={20} aria-label="Загальний рівень" className="w-20" value={row.level} onChange={(e) => set(i, { level: Number(e.target.value) || 1 })} />
+          <Input type="number" min={1} max={MAX_CLASS_LEVEL} aria-label="Загальний рівень" className="w-20" value={row.level} onChange={(e) => set(i, { level: Number(e.target.value) || 1 })} />
           <select aria-label="Заклинання" className={HUD_SELECT_CLASS} value={row.spellId} onChange={(e) => set(i, { spellId: e.target.value })}>
             {spells.map((s) => (
               <option key={s.id} value={s.id}>

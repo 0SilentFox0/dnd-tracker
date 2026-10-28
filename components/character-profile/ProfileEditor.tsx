@@ -21,6 +21,7 @@ import { CharacterAbilityScores } from "@/components/characters/stats/CharacterA
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterChoicesPanel } from "@/components/choices/CharacterChoicesPanel";
 import { ActionBar } from "@/components/common/ActionBar";
+import { FormAlert } from "@/components/common/states";
 import { LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
@@ -84,9 +85,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
         }
       />
       {form.status.error && (
-        <p role="alert" className="mx-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {form.status.error}
-        </p>
+        <FormAlert className="mx-4">{form.status.error}</FormAlert>
       )}
       <ProfileTabs
         value={tab}

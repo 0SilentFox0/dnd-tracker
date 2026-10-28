@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 
-import { CharacterPickList, useCheckedIds } from "./CharacterPickList";
+import { CharacterPickList } from "./CharacterPickList";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import { useAwardXp } from "@/lib/hooks/characters";
+import { useCheckedIds } from "@/lib/hooks/common";
 import type { CharacterListItem } from "@/types/characters";
 
 interface ExperienceDialogProps {
@@ -56,10 +57,7 @@ export function ExperienceDialog({ campaignId, characters, open, onOpenChange }:
           <Label htmlFor="xp-amount">Сума (від’ємна — виправлення)</Label>
           <Input id="xp-amount" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
-        <div className="flex items-center gap-3">
-          <Switch id="xp-split" checked={split} onCheckedChange={setSplit} />
-          <Label htmlFor="xp-split">Поділити між обраними</Label>
-        </div>
+        <SwitchField id="xp-split" label="Поділити між обраними" checked={split} onCheckedChange={setSplit} />
         <div>
           <Label htmlFor="xp-note">Примітка</Label>
           <Input id="xp-note" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />

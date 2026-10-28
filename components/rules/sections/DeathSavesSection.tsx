@@ -1,7 +1,6 @@
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 
 export function DeathSavesSection({ form }: { form: RulesFormState }) {
@@ -10,15 +9,9 @@ export function DeathSavesSection({ form }: { form: RulesFormState }) {
   return (
     <RulesSection mechanic="deathSaves">
       <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <Switch id="rules-death-saves-enabled" checked={deathSaves.enabled} onCheckedChange={(v) => form.set("deathSaves", { ...deathSaves, enabled: v })} />
-        <Label htmlFor="rules-death-saves-enabled">Увімкнені</Label>
-      </div>
+      <SwitchField id="rules-death-saves-enabled" label="Увімкнені" checked={deathSaves.enabled} onCheckedChange={(v) => form.set("deathSaves", { ...deathSaves, enabled: v })} />
       {deathSaves.enabled && (
-        <div className="flex items-center gap-3">
-          <Switch id="rules-death-saves-units" checked={deathSaves.unitsDieAtZero} onCheckedChange={(v) => form.set("deathSaves", { ...deathSaves, unitsDieAtZero: v })} />
-          <Label htmlFor="rules-death-saves-units">Юніти на 0 HP помирають</Label>
-        </div>
+        <SwitchField id="rules-death-saves-units" label="Юніти на 0 HP помирають" checked={deathSaves.unitsDieAtZero} onCheckedChange={(v) => form.set("deathSaves", { ...deathSaves, unitsDieAtZero: v })} />
       )}
       </div>
     </RulesSection>

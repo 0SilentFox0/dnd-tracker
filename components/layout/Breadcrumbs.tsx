@@ -4,29 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
+import { DM_SECTION_LABELS } from "@/lib/constants/campaigns";
+
 const SEGMENT_LABELS: Record<string, string> = {
+  ...DM_SECTION_LABELS,
   campaigns: "Кампанії",
   dm: "DM",
-  characters: "Персонажі",
-  units: "Юніти",
-  spells: "Заклинання",
-  artifacts: "Артефакти",
-  "artifact-sets": "Сети артефактів",
-  battles: "Бої",
-  music: "Музика",
   character: "Персонаж",
   inventory: "Інвентар",
   new: "Створити",
   edit: "Редагувати",
   sets: "Сети",
   groups: "Групи",
-  skills: "Скіли",
-  races: "Раси",
-  classes: "Класи",
-  feats: "Риси",
-  backgrounds: "Передісторії",
   "main-skills": "Основні навики",
-  "skill-trees": "Дерева прокачки",
   info: "Довідник",
   print: "Друк",
 };

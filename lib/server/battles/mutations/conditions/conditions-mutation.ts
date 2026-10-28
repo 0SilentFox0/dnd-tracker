@@ -2,8 +2,9 @@ import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { API_ERRORS, conditionAbsentMessage, conditionImmuneMessage } from "@/lib/constants/api-errors";
+import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { applyCondition5e, CONDITION_5E_KEYS, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
+import { applyCondition5e, CONDITION_5E_KEYS, MAX_EXHAUSTION, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
@@ -12,9 +13,9 @@ export const battleConditionsSchema = z.discriminatedUnion("action", [
     action: z.literal("apply"),
     participantId: z.string().min(1),
     condition: z.enum(CONDITION_5E_KEYS),
-    rounds: z.number().int().min(1).max(99).optional(),
-    levels: z.number().int().min(1).max(6).optional(),
-    saveEnds: z.object({ ability: z.enum(ABILITY_KEYS), dc: z.number().int().min(1).max(40) }).optional(),
+    rounds: z.number().int().min(1).max(CONDITION_LIMITS.rounds).optional(),
+    levels: z.number().int().min(1).max(MAX_EXHAUSTION).optional(),
+    saveEnds: z.object({ ability: z.enum(ABILITY_KEYS), dc: z.number().int().min(1).max(CONDITION_LIMITS.dc) }).optional(),
   }),
   z.object({ action: z.literal("remove"), participantId: z.string().min(1), condition: z.enum(CONDITION_5E_KEYS) }),
 ]);

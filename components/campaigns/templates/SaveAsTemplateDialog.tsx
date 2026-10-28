@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { FormAlert } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
@@ -78,9 +79,7 @@ export function SaveAsTemplateDialog({ campaignId, defaultName, open, onOpenChan
           <Textarea id="template-description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={save.isPending} rows={3} />
         </div>
         {error && (
-          <p role="alert" className="rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-            {error}
-          </p>
+          <FormAlert>{error}</FormAlert>
         )}
       </form>
     </ResponsiveDialog>

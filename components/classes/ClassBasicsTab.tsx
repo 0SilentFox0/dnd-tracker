@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
 import { SpellListHint } from "./SpellListHint";
 
 import { ColorField } from "@/components/common/ColorField";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CommaListInput } from "@/components/ui/comma-list-input";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +13,6 @@ import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/a
 import { CLASS_CASTER_LABELS, CLASS_CASTERS, HIT_DICE } from "@/lib/constants/classes";
 import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { toggleItem } from "@/lib/utils/common/collections";
-import { parseCommaList } from "@/lib/utils/common/text";
 import type { ClassCaster, ClassFormData, HitDie } from "@/types/classes";
 
 interface ClassBasicsTabProps {
@@ -23,20 +21,10 @@ interface ClassBasicsTabProps {
 }
 
 function ListInput({ id, label, value, onChange }: { id: string; label: string; value: string[]; onChange: (next: string[]) => void }) {
-  const [text, setText] = useState(value.join(", "));
-
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          onChange(parseCommaList(e.target.value));
-        }}
-        placeholder="Через кому"
-      />
+      <CommaListInput id={id} value={value} onChange={onChange} />
     </div>
   );
 }

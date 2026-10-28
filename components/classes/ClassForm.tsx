@@ -6,12 +6,12 @@ import { ClassBasicsTab } from "./ClassBasicsTab";
 import { ClassColumnsEditor } from "./ClassColumnsEditor";
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
 import { SubclassesEditor } from "./SubclassesEditor";
-import { useErrorTotals } from "./use-error-totals";
 
 import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useClassForm } from "@/lib/hooks/classes";
+import { useErrorTotals } from "@/lib/hooks/common";
 import type { GameClassData } from "@/types/classes";
 
 type ClassFormTabId = "basics" | "table" | "features" | "subclasses";

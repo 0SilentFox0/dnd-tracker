@@ -1,8 +1,7 @@
 import { NumberField } from "../NumberField";
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 
 export function MoraleSection({ form }: { form: RulesFormState }) {
@@ -10,10 +9,7 @@ export function MoraleSection({ form }: { form: RulesFormState }) {
 
   return (
     <RulesSection mechanic="morale">
-      <div className="flex items-center gap-3">
-        <Switch id="rules-morale-enabled" checked={morale.enabled} onCheckedChange={(enabled) => form.set("morale", { ...morale, enabled })} />
-        <Label htmlFor="rules-morale-enabled">Увімкнена</Label>
-      </div>
+      <SwitchField id="rules-morale-enabled" label="Увімкнена" checked={morale.enabled} onCheckedChange={(enabled) => form.set("morale", { ...morale, enabled })} />
       <NumberField label="Межа ±N" value={morale.cap} range={[1, 10]} disabled={!morale.enabled} onCommit={(cap) => form.set("morale", { ...morale, cap })} />
     </RulesSection>
   );

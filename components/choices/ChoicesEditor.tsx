@@ -2,7 +2,7 @@
 
 import { ChoicePicker,type PickerContext } from "./ChoicePicker";
 
-import { HudSection } from "@/components/hud/form";
+import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { DND_SKILL_META } from "@/lib/constants/skills";
 import type { ChoiceRefsView } from "@/lib/hooks/characters";
@@ -63,7 +63,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
       {!only && hero.classMode && (
         <HudSection title="Передісторія">
           <label className="block space-y-2">Передісторія
-            <select aria-label="Передісторія" className="w-full rounded border border-hud-line bg-hud-panel p-2" value={data.backgroundId ?? ""} onChange={(e) => set({ ...data, ...mergeBackground(data, { backgroundId: e.target.value || null }) })}>
+            <select aria-label="Передісторія" className={`${HUD_SELECT_CLASS} w-full`} value={data.backgroundId ?? ""} onChange={(e) => set({ ...data, ...mergeBackground(data, { backgroundId: e.target.value || null }) })}>
               <option value="">Без передісторії</option>
               {Object.values(refs.backgroundsById ?? {}).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>

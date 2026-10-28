@@ -1,7 +1,6 @@
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 
 export function ClassesSection({ form }: { form: RulesFormState }) {
@@ -9,10 +8,7 @@ export function ClassesSection({ form }: { form: RulesFormState }) {
 
   return (
     <RulesSection mechanic="classes">
-      <div className="flex items-center gap-3">
-        <Switch id="rules-classes-enabled" checked={classes.enabled} onCheckedChange={(v) => form.set("classes", { ...classes, enabled: v })} />
-        <Label htmlFor="rules-classes-enabled">Увімкнути класи 5e</Label>
-      </div>
+      <SwitchField id="rules-classes-enabled" label="Увімкнути класи 5e" checked={classes.enabled} onCheckedChange={(v) => form.set("classes", { ...classes, enabled: v })} />
     </RulesSection>
   );
 }

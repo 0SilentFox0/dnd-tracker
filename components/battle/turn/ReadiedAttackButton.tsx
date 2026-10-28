@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Crosshair } from "lucide-react";
 
-import { OPTION_BUTTON } from "./option-button";
-
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { canReadiedAttack, useBattleSceneData, useReadiedAttack } from "@/lib/hooks/battle";
 import type { BattleParticipant } from "@/types/battle";
+
+const TARGET_BUTTON = "border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-[var(--gold)]/50 disabled:opacity-40";
 
 function ReadiedAttackPicker({ participant }: { participant: BattleParticipant }) {
   const [open, setOpen] = useState(false);
@@ -32,7 +32,7 @@ function ReadiedAttackPicker({ participant }: { participant: BattleParticipant }
               onClick={async () => {
                 if (await attack(t.basicInfo.id)) setOpen(false);
               }}
-              className={OPTION_BUTTON}
+              className={TARGET_BUTTON}
             >
               {t.basicInfo.name}
             </button>

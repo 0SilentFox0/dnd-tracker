@@ -8,7 +8,7 @@ import type { FeatData } from "@/types/choices";
 const mutate = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/lib/hooks/common", () => ({ useNavigateFresh: () => vi.fn(), useNotify: () => vi.fn() }));
+vi.mock("@/lib/hooks/common", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/hooks/common")>()), useNavigateFresh: () => vi.fn(), useNotify: () => vi.fn() }));
 vi.mock("@/lib/hooks/feats/useFeats", () => ({ useUpdateFeat: () => ({ mutate, isPending: false }) }));
 vi.mock("@/lib/hooks/abilities", () => ({ useAbilityValidity: () => ({ valid: true, errors: 0, setErrors: vi.fn() }) }));
 vi.mock("@/components/abilities", () => ({ AbilityListEditor: () => <div data-testid="ability-editor" />, withAbilityErrors: (label: string) => label }));

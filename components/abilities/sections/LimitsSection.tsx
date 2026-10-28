@@ -7,8 +7,11 @@ import { FlatField } from "../fields/FlatField";
 import { ScaleColumnSelect } from "../fields/ScaleColumnSelect";
 import { SectionTitle } from "./SectionTitle";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import type { Limits } from "@/lib/utils/abilities/schema";
+import { patchDefined } from "@/lib/utils/common/patch-defined";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 
 const LIMIT_FIELDS: readonly FieldMeta[] = [
@@ -39,9 +42,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   const isButton = ability.trigger.event === "bonusAction" || ability.trigger.event === "action";
 
   const setTop = (name: "stackable" | "maxStacks" | "maxTargets", v: unknown) => {
-    const next = { ...ability, [name]: v } as typeof ability;
-
-    if (v === undefined || v === false) delete next[name];
+    const next = patchDefined(ability, { [name]: v } as Partial<typeof ability>, (x) => x === undefined || x === false);
 
     if (name === "stackable" && v !== true) delete next.maxStacks;
 
@@ -49,9 +50,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   };
 
   const set = (name: keyof Limits, v: unknown) => {
-    const next: Limits = { ...ability.limits, [name]: v };
-
-    if (v === undefined) delete next[name];
+    const next: Limits = patchDefined(ability.limits ?? {}, { [name]: v } as Partial<Limits>);
 
     if (name === "lair" && v) delete next.legendaryCost;
 
@@ -95,23 +94,23 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
             <span className="text-xs text-muted-foreground">Пул (колонка, ціна)</span>
             <div className="flex gap-1">
               <ScaleColumnSelect id={`${path}.limits.pool.key`} poolsOnly value={ability.limits?.pool?.key} onChange={(key) => set("pool", { key, cost: ability.limits?.pool?.cost ?? 1 })} />
-              <input aria-label="Ціна пулу" type="number" min={1} max={20} className="h-9 w-16 rounded-md border border-hud-line bg-hud-field px-2 text-sm" value={ability.limits?.pool?.cost ?? ""} onChange={(e) => set("pool", e.target.value === "" ? undefined : { key: ability.limits?.pool?.key ?? "", cost: Number(e.target.value) })} />
+              <Input aria-label="Ціна пулу" type="number" min={1} max={20} className="w-16" value={ability.limits?.pool?.cost ?? ""} onChange={(e) => set("pool", e.target.value === "" ? undefined : { key: ability.limits?.pool?.key ?? "", cost: Number(e.target.value) })} />
             </div>
           </div>
         )}
         {itemCharges && !columns && isButton && (
           <div className="col-span-3 space-y-1">
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
-              <input type="checkbox" aria-label="Витрачає заряди предмета" checked={ability.limits?.pool?.key === ITEM_CHARGES_KEY} onChange={(e) => set("pool", e.target.checked ? { key: ITEM_CHARGES_KEY, cost: ability.limits?.pool?.cost ?? 1 } : undefined)} />
+              <Checkbox aria-label="Витрачає заряди предмета" checked={ability.limits?.pool?.key === ITEM_CHARGES_KEY} onCheckedChange={(on) => set("pool", on === true ? { key: ITEM_CHARGES_KEY, cost: ability.limits?.pool?.cost ?? 1 } : undefined)} />
               Витрачає заряди предмета
             </label>
             {ability.limits?.pool?.key === ITEM_CHARGES_KEY && (
-              <input aria-label="Зарядів за раз" type="number" min={1} max={20} className="h-9 w-16 rounded-md border border-hud-line bg-hud-field px-2 text-sm" value={ability.limits.pool.cost} onChange={(e) => set("pool", { key: ITEM_CHARGES_KEY, cost: Math.max(1, Number(e.target.value) || 1) })} />
+              <Input aria-label="Зарядів за раз" type="number" min={1} max={20} className="w-16" value={ability.limits.pool.cost} onChange={(e) => set("pool", { key: ITEM_CHARGES_KEY, cost: Math.max(1, Number(e.target.value) || 1) })} />
             )}
           </div>
         )}
       </div>
-      {ability.trigger.event === "action" && <label className="flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" aria-label="Дія лігва" checked={!!ability.limits?.lair} onChange={(e) => set("lair", e.target.checked ? true : undefined)} />Дія лігва</label>}
+      {ability.trigger.event === "action" && <label className="flex items-center gap-2 text-xs text-muted-foreground"><Checkbox aria-label="Дія лігва" checked={!!ability.limits?.lair} onCheckedChange={(on) => set("lair", on === true ? true : undefined)} />Дія лігва</label>}
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />
         {ability.stackable && (

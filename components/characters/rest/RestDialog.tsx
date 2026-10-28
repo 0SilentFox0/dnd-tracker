@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 
-import { CharacterPickList, useCheckedIds } from "./CharacterPickList";
+import { CharacterPickList } from "./CharacterPickList";
 
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useRest } from "@/lib/hooks/characters";
+import { useCheckedIds } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { CharacterListItem } from "@/types/characters";
 

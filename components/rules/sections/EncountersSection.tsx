@@ -1,7 +1,6 @@
 import { RulesSection } from "../RulesSection";
 
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import type { Ruleset } from "@/lib/utils/rules";
 
@@ -20,10 +19,7 @@ export function EncountersSection({ form }: { form: RulesFormState }) {
     <RulesSection mechanic="encounters">
       <div className="space-y-3">
         {toggles.map(({ id, label, checked, patch }) => (
-          <div key={id} className="flex items-center gap-3">
-            <Switch id={id} checked={checked} onCheckedChange={(v) => set(patch(v))} />
-            <Label htmlFor={id}>{label}</Label>
-          </div>
+          <SwitchField key={id} id={id} label={label} checked={checked} onCheckedChange={(v) => set(patch(v))} />
         ))}
         {section.autoXp && !form.data.outOfCombat.xp && <p className="text-xs text-hud-muted">Діє лише разом із «Досвід за таблицею 5e» на вкладці «Поза боєм».</p>}
       </div>
