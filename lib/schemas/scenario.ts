@@ -26,12 +26,15 @@ const revealSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("afterSection"), pageId: z.string().min(1), sectionId: z.string().min(1) }),
 ]);
 
+const markerRefSchema = z.object({ mapId: idSchema, markerId: idSchema });
+
 const rowSchema = z.object({
   id: idSchema,
   story: docSchema,
   notes: docSchema,
   slide: z.object({ deckId: idSchema, slideId: z.string().min(1).max(64) }).optional(),
   battleId: idSchema.optional(),
+  marker: markerRefSchema.optional(),
 });
 
 const sectionSchema = z.object({
@@ -41,6 +44,7 @@ const sectionSchema = z.object({
   // схема спільна для читання й збереження: ключ із новішого релізу (після відкату) не має ламати сторінку
   icon: z.enum(SECTION_ICON_KEYS).optional().catch(undefined),
   reveal: revealSchema.optional(),
+  marker: markerRefSchema.optional(),
   revealedAt: z.string().nullable().optional(),
   rows: z.array(rowSchema).max(200),
 });

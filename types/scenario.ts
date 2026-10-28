@@ -32,12 +32,18 @@ export interface ScenarioRowSlide {
   slideId: string;
 }
 
+export interface ScenarioMarkerRef {
+  mapId: string;
+  markerId: string;
+}
+
 export interface ScenarioRow {
   id: string;
   story: RichDoc;
   notes: RichDoc;
   slide?: ScenarioRowSlide;
   battleId?: string;
+  marker?: ScenarioMarkerRef;
 }
 
 export type RevealRule = { mode: "manual" } | { mode: "afterSection"; pageId: string; sectionId: string };
@@ -48,6 +54,7 @@ export interface ScenarioSection {
   played: boolean;
   icon?: SectionIconKey;
   reveal?: RevealRule;
+  marker?: ScenarioMarkerRef;
   revealedAt?: string | null;
   rows: ScenarioRow[];
 }
