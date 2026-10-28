@@ -23,6 +23,18 @@ export function SummaryStep({ wizard: { state, view, actions } }: { wizard: Atta
       ))}
       {view.unknownDefense && <div className="flex min-h-9 items-center justify-between text-sm italic text-[var(--hud-muted)]"><span>Захист і опори цілі</span><span>невідомо</span></div>}
       {view.steps.length > 0 && <div className="hud-sc flex h-12 items-center justify-between text-lg font-bold"><span>Орієнтовно</span><span className="text-[26px]">{view.estimate}</span></div>}
+      {view.cunning && (
+        <div className="mt-3 border border-white/15 p-2" data-cunning-strike>
+          <div className="text-sm text-[#cdb87e]">Підступний удар · замість кубиків Прихованої атаки ({view.cunning.sneakDice}d6)</div>
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {view.cunning.options.map((o) => (
+              <button key={o.effect} type="button" aria-pressed={o.selected} disabled={submitting} onClick={() => actions.toggleCunning(o.effect)} className={cn("h-9 border px-3 text-sm", o.selected ? "border-[var(--enemy)] bg-white/10 font-bold text-[var(--ink)]" : "border-white/25 text-[#a89c88]")}>
+                {o.label} · −{o.dice}d6
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {state.waitingCrit && <CritWaitingNote />}
       {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
       <div className="mt-3 grid grid-cols-2 gap-2">

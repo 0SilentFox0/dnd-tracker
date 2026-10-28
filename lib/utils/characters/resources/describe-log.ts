@@ -24,6 +24,8 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
       return "Відпочинок завершено";
     case "hit_die":
       return `🎲 Кістка хітів d${num("die")}: ${num("roll")} → +${num("healed")} HP (${num("hpBefore")} → ${num("hpAfter")})`;
+    case "arcane_recovery":
+      return `🔮 Arcane Recovery: відновлено ${num("levels")} кіл слотів`;
     case "xp":
       return `⭐ Досвід ${num("amount") > 0 ? "+" : ""}${num("amount")} (разом ${num("total")})${typeof d.note === "string" ? ` · ${d.note}` : ""}`;
     case "inspiration":

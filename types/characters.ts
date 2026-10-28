@@ -351,6 +351,7 @@ export interface SheetRest {
   shortRestOpen: boolean;
   hitDice: { classId: string; name: string; die: number; total: number; spent: number }[];
   charges: { key: string; name: string; uses: number; used: number; rest: "short" | "long" | null }[];
+  arcaneRecovery: { budget: number; maxSlotLevel: number; used: boolean; slots: { level: number; spent: number }[] } | null;
   inspiration: boolean | null;
   xp: { value: number; next: number | null; levelUp: boolean } | null;
 }

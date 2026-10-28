@@ -6,6 +6,7 @@ import {
   ChevronUp,
   Filter,
   Gem,
+  GraduationCap,
   Search,
   Sparkles,
   X,
@@ -135,12 +136,13 @@ const SECTION_TABS: {
 }[] = [
   { value: "all", label: "Усі", icon: BookOpen },
   { value: "skills", label: "Скіли", icon: Sparkles },
+  { value: "classes", label: "Класи", icon: GraduationCap },
   { value: "spells", label: "Заклинання", icon: Sparkles },
   { value: "artifacts", label: "Артефакти", icon: Gem },
 ];
 
 export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
-  const { search, section, panel, hasActive, clearAll, visible } = filters;
+  const { search, section, panel, hasActive, clearAll, visible, classMode } = filters;
 
   return (
     <HudPanel as="div" className="sticky top-0 z-10 bg-[rgba(17,14,11,.97)]">
@@ -153,7 +155,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
             value={search.value}
             onChange={(e) => search.set(e.target.value)}
             className="pl-9 min-h-11 md:min-h-10"
-            aria-label="Пошук по скілах, заклинаннях та артефактах"
+            aria-label={classMode ? "Пошук по класах, заклинаннях та артефактах" : "Пошук по скілах, заклинаннях та артефактах"}
           />
           {search.value && (
             <button
@@ -169,7 +171,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
 
         <HudChipTabs
           ariaLabel="Розділ довідника"
-          items={SECTION_TABS.map(({ value, label, icon: Icon }) => ({
+          items={SECTION_TABS.filter(({ value }) => (value === "skills" ? !classMode : value !== "classes" || classMode)).map(({ value, label, icon: Icon }) => ({
             key: value,
             label: (
               <span className="inline-flex items-center gap-1.5">

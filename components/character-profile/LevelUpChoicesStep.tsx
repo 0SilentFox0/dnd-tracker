@@ -11,11 +11,12 @@ interface LevelUpChoicesStepProps {
   campaignId: string;
   hero: { race: string; level: number; scores: Record<AbilityKey, number>; skills: unknown };
   entry: CharacterClassEntry;
+  multiclass: boolean;
   value: Picks;
   onChange: (next: Picks) => void;
 }
 
-export function LevelUpChoicesStep({ campaignId, hero, entry, value, onChange }: LevelUpChoicesStepProps) {
+export function LevelUpChoicesStep({ campaignId, hero, entry, multiclass, value, onChange }: LevelUpChoicesStepProps) {
   const refs = useChoiceRefs(campaignId, hero.race);
 
   if (!refs.ready) return <LoadingState rows={2} label="Завантаження виборів…" />;
@@ -37,7 +38,7 @@ export function LevelUpChoicesStep({ campaignId, hero, entry, value, onChange }:
         refs={refs}
         saved={{ raceChoices: {}, feats: [], classes: [entry] }}
         hero={{ ...hero, level: hero.level + 1, classMode: true }}
-        only={{ classId: entry.classId, level: entry.level }}
+        only={{ classId: entry.classId, level: entry.level, multiclass }}
       />
     </div>
   );

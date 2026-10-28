@@ -73,14 +73,14 @@ export function forEachChoiceOwner(state: ChoiceWalkState, refs: WalkRefs, visit
     if (feat) visit({ owner: { kind: "backgroundFeat", background, feat }, choiceOwner: "feat", defs: feat.choices, picks: state.backgroundFeatPicks ?? {}, level, columns: [], path: "backgroundFeatPicks", legacyPath: `background:${background.id}:feat:${feat.id}` });
   }
 
-  for (const entry of state.classes) {
+  for (const [index, entry] of state.classes.entries()) {
     const cls = refs.classesById[entry.classId];
 
     if (!cls) continue;
 
     const subclass = "subclass" in entry ? (entry as ResolvedClassEntry).subclass : (cls.subclasses.find((s) => s.id === entry.subclassId) ?? null);
 
-    visit({ owner: { kind: "class", entry, cls, subclass }, choiceOwner: "class", defs: classChoiceDefs(cls, subclass), picks: entry.choices ?? {}, level: entry.level, columns: cls.columns ?? [], path: `classes.${entry.classId}`, legacyPath: `class:${entry.classId}` });
+    visit({ owner: { kind: "class", entry, cls, subclass }, choiceOwner: "class", defs: classChoiceDefs(cls, subclass, index > 0), picks: entry.choices ?? {}, level: entry.level, columns: cls.columns ?? [], path: `classes.${entry.classId}`, legacyPath: `class:${entry.classId}` });
   }
 
   state.feats.forEach((entry, index) => {

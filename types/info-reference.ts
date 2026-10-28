@@ -59,7 +59,23 @@ export interface ArtifactSetForReference {
   artifactNames: string[];
 }
 
-export type SectionTab = "all" | "skills" | "spells" | "artifacts";
+export interface ClassFeatureForReference {
+  level: number;
+  name: string | null;
+  description: string | null;
+}
+
+export interface ClassForReference {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  summary: string[];
+  features: ClassFeatureForReference[];
+  subclasses: { id: string; name: string; features: ClassFeatureForReference[] }[];
+}
+
+export type SectionTab = "all" | "skills" | "spells" | "artifacts" | "classes";
 
 export interface FilterField<T, O = T[]> {
   value: T | null;
@@ -72,8 +88,9 @@ export interface ReferenceFilters {
   section: { value: SectionTab; set: (value: SectionTab) => void };
   panel: { open: boolean; setOpen: (value: boolean | ((prev: boolean) => boolean)) => void };
   hasActive: boolean;
+  classMode: boolean;
   clearAll: () => void;
-  visible: { skills: boolean; spells: boolean; artifacts: boolean };
+  visible: { skills: boolean; spells: boolean; artifacts: boolean; classes: boolean };
   skill: { mainSkill: FilterField<string> };
   spell: {
     level: FilterField<number>;

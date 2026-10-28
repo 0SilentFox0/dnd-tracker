@@ -31,6 +31,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   charm: { duration: { rounds: 1 }, target: "eventTarget" },
   applyCondition: { condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" },
   restoreSpellSlot: { count: 1 },
+  restoreSpellSlotLevels: { budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 },
   drainSpellSlot: { count: 1, target: "eventTarget" },
   changeMorale: { delta: 1 },
   cleanse: {},

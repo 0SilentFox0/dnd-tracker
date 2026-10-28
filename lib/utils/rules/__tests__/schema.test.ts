@@ -16,7 +16,7 @@ describe("parseRules", () => {
       criticals: { critOn: 20, fumbleOn: 1, effects: true, doubleDice: false, disabledSuccess: [], disabledFail: [] },
       formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
       heroScaling: { meleeDiceByLevel: null, rangedDiceByLevel: null, hpBaseLevels: 3, hpConCoefficient: 1.5 },
-      initiative: { heroMin: 10, heroMax: 16 },
+      initiative: { heroMin: 10, heroMax: 16, mode: "static" },
       defaultAttacks: { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" },      saves: { proficiency: false },
       deathSaves: { enabled: false, unitsDieAtZero: true },
       concentration: { enabled: false, dcCap: null },
@@ -38,6 +38,12 @@ describe("parseRules", () => {
 
   it("drops unknown top-level keys", () => {
     expect(parseRules({ luck: { enabled: true } })).toEqual(DEFAULT_RULES);
+  });
+
+  it("initiative mode defaults to static and accepts roll", () => {
+    expect(parseRules({ initiative: { heroMin: 1, heroMax: 5 } }).initiative.mode).toBe("static");
+    expect(parseRules({ initiative: { mode: "roll" } }).initiative.mode).toBe("roll");
+    expect(RulesetPatchSchema.safeParse({ initiative: { mode: "bogus" } }).success).toBe(false);
   });
 
   it("falls back for inverted initiative range", () => {

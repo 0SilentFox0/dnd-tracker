@@ -49,7 +49,7 @@ export interface ClassRow {
   name: string;
   hitDie: 6 | 8 | 10 | 12;
   savingThrows: AbilityKey[];
-  proficiencies: { armor: string[]; weapons: string[]; tools: string[] };
+  proficiencies: { armor: string[]; weapons: string[]; tools: string[]; multiclass?: { armor: string[]; weapons: string[]; skills?: { count: number; from: string[] } } };
   skillChoices: { count: number; from: DndSkill[] };
   caster: ClassCaster;
   spellcastingAbility: AbilityKey | null;

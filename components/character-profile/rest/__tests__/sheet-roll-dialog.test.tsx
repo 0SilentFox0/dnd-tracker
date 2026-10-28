@@ -16,7 +16,7 @@ const h = vi.hoisted(() => ({ roll: { mutateAsync: vi.fn(async () => ({ label: "
 vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useSheetRoll: () => h.roll }));
 vi.mock("@/components/battle/fx/dice/DiceStage", () => ({ DiceStage: () => null }));
 
-const rest: SheetRest = { persist: false, hp: null, dead: false, exhaustion: 0, shortRestOpen: false, hitDice: [], charges: [], inspiration: true, xp: null };
+const rest: SheetRest = { persist: false, hp: null, dead: false, exhaustion: 0, shortRestOpen: false, hitDice: [], charges: [], arcaneRecovery: null, inspiration: true, xp: null };
 
 describe("SheetRollDialog", () => {
   afterEach(cleanup);

@@ -37,6 +37,7 @@ const sectionSchemas = {
   initiative: z.strictObject({
     heroMin: z.number().int().min(0).max(50),
     heroMax: z.number().int().min(0).max(50),
+    mode: z.enum(["roll", "static"]),
   }),
   defaultAttacks: z.strictObject({
     meleeName: z.string().trim().min(1).max(60),

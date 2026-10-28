@@ -5,6 +5,22 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-28-arcane-recovery": {
+    "title": "Wizard's Arcane Recovery",
+    "body": "The wizard's sheet now has an Arcane Recovery panel: once a day after a short rest you can restore spell slots within the circle budget."
+  },
+  "2026-10-28-cunning-strike": {
+    "title": "Cunning Strike in attacks",
+    "body": "In the attack dialog the Rogue picks a Cunning Strike effect (poison, trip, withdraw) and spends Sneak Attack dice on it."
+  },
+  "2026-10-28-reckless-steady": {
+    "title": "More accurate Reckless Attack and Steady Aim",
+    "body": "Reckless Attack applies only to Strength attacks; Steady Aim requires the hero not to have moved and is spent by the first attack."
+  },
+  "2026-10-28-proficiencies": {
+    "title": "Proficiencies from races, feats and multiclassing",
+    "body": "Armor and weapon proficiencies now come from races and feats, and multiclassing adds only what the 5e rules table allows."
+  },
   "2026-10-28-class-map": {
     "title": "Class map",
     "body": "A class shows what it grants at each level: abilities, subclass, choices and numbers. The DM sees the map in the class editor; the player sees it on the hero sheet (current level, next level, open choices) and in the level-up dialog."

@@ -5,6 +5,7 @@ export const CharacterLogKind = {
   LONG_REST: "long_rest",
   REST_CLOSED: "rest_closed",
   HIT_DIE: "hit_die",
+  ARCANE_RECOVERY: "arcane_recovery",
   XP: "xp",
   INSPIRATION: "inspiration",
   RESOURCES_EDIT: "resources_edit",

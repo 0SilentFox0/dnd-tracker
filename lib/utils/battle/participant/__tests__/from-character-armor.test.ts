@@ -18,15 +18,20 @@ const base = {
 
 const fighter: GameClassData = {
   id: "fighter", name: "Fighter", icon: null, color: null, hitDie: 10, savingThrows: ["strength", "constitution"],
-  proficiencies: { armor: [], weapons: [], tools: [] }, skillChoices: { count: 0, from: [] },
+  proficiencies: { armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"], tools: [] }, skillChoices: { count: 0, from: [] },
   caster: "none", spellcastingAbility: null, features: [], subclassLevel: 3, subclasses: [],
+  multiclassProficiencies: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+};
+
+const wizard: GameClassData = {
+  ...fighter, id: "wizard", name: "Wizard", hitDie: 6, proficiencies: { armor: [], weapons: ["Simple weapons"], tools: [] }, multiclassProficiencies: { armor: [], weapons: [] },
 };
 
 const build = (rules: Ruleset, character: object) => {
   const context = {
     skillTreeByRace: {}, mainSkills: [], spells: [], allSkills: [],
     racesByName: { "Людина": null }, campaign: { maxLevel: 20 }, skillsById: {}, artifactsById: { art1: chain }, artifactSetsById: {}, artifactSetMemberIds: {},
-    rules, classesById: { fighter },
+    rules, classesById: { fighter, wizard },
   } as never;
 
   return createBattleParticipantFromCharacter({ ...base, ...character } as never, "b1", ParticipantSide.ALLY, undefined, context);
@@ -58,5 +63,19 @@ describe("КЗ героя з класами", () => {
       expect(p.combatStats.speed).toBe(30);
       expect(p.battleData.resolvedAbilities.some((a) => a.id === "armor-penalties")).toBe(false);
     }
+  });
+});
+
+describe("володіння мультикласу", () => {
+  it("Wizard → Fighter: лише таблиця мультикласу Fighter (без важкої броні)", async () => {
+    const p = await build(enabled, { classes: [{ classId: "wizard", level: 1 }, { classId: "fighter", level: 1 }] });
+
+    expect(p.abilities.proficiencies).toEqual({ armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Simple weapons", "Martial weapons"] });
+  });
+
+  it("Fighter → Wizard: Wizard нічого не додає", async () => {
+    const p = await build(enabled, { classes: [{ classId: "fighter", level: 1 }, { classId: "wizard", level: 1 }] });
+
+    expect(p.abilities.proficiencies).toEqual({ armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"] });
   });
 });

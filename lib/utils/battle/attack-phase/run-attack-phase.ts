@@ -115,6 +115,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       battleId,
       damageMultiplier: opts.multiplier,
       obstacle,
+      cunningStrike: i === 0 ? data.cunningStrike : undefined,
       map: input.map,
       rules: input.rules,
       hitSpells: input.hitSpells,

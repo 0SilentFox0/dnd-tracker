@@ -9,10 +9,12 @@ import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
+import { CUNNING_STRIKE_LABELS, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
 import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -247,7 +249,14 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     if (state.step === "submitting") void send();
   }, [state.step]);
 
+  const cunningOffer = useMemo(() => (attacker && !state.offHand && isOpen ? cunningStrikeOffer(attacker, scene.battle.currentRound) : null), [attacker, state.offHand, isOpen, scene.battle.currentRound]);
+
   const view = {
+    cunning: cunningOffer && {
+      options: cunningOffer.options.map((o) => ({ ...o, label: CUNNING_STRIKE_LABELS[o.effect], selected: !!state.cunningStrike?.includes(o.effect) })),
+      maxEffects: cunningOffer.maxEffects,
+      sneakDice: cunningOffer.sneakDice,
+    },
     attack, attacks, targets, steps, estimate, cover, unknownDefense, previews,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
@@ -311,6 +320,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       dispatch({ type: "CONFIRM_TARGETS", forced });
     },
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
+    toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     setInspiration: (value: boolean) => {
       const t = byId(state.strikes[0]?.targetId ?? "");

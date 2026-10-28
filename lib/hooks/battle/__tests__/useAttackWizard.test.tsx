@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useAttackWizard } from "../useAttackWizard";
 import { fakeScene } from "./fake-scene";
 
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleAction } from "@/types/battle";
 
 const hitLog = (changes: { participantId: string; change: number }[]) =>
@@ -216,5 +217,58 @@ describe("useAttackWizard", () => {
     await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, error: "Дію скасовано ДМом" }));
     expect(scene.showResult).not.toHaveBeenCalled();
     expect(hook.result.current.state.step).not.toBe("result");
+  });
+});
+
+describe("useAttackWizard — Cunning Strike", () => {
+  const rogueAbilities = [
+    resolved({ id: "sa", trigger: { event: "hit", role: "attacker" }, limits: { perTurn: 1 }, params: { sneakAttack: true }, effects: [{ kind: "dealDamage", amount: "3d6", target: "eventTarget" }] }, { type: "class", id: "rogue" }),
+    resolved({ id: "cs", trigger: { event: "passive" }, params: { cunningStrike: { options: [{ effect: "poison", dice: 1 }, { effect: "trip", dice: 1 }] } }, effects: [{ kind: "note", text: "Cunning Strike" }] }, { type: "class", id: "rogue" }),
+  ];
+
+  function startRogue() {
+    const scene = fakeScene({ abilities: rogueAbilities });
+
+    scene.mutateAsync.mockResolvedValue(undefined);
+
+    const hook = renderHook(() => useAttackWizard(scene.me, vi.fn()), { wrapper: scene.wrapper });
+
+    act(() => hook.result.current.actions.open());
+
+    return { ...scene, result: hook.result };
+  }
+
+  it("rogue sees the picker; a single-effect budget replaces the selection on toggle", () => {
+    const { result } = startRogue();
+
+    expect(result.current.view.cunning?.options.map((o) => o.effect)).toEqual(["poison", "trip"]);
+
+    act(() => result.current.actions.toggleCunning("poison"));
+    expect(result.current.view.cunning?.options.filter((o) => o.selected).map((o) => o.effect)).toEqual(["poison"]);
+
+    act(() => result.current.actions.toggleCunning("trip"));
+    expect(result.current.view.cunning?.options.filter((o) => o.selected).map((o) => o.effect)).toEqual(["trip"]);
+
+    act(() => result.current.actions.toggleCunning("trip"));
+    expect(result.current.view.cunning?.options.some((o) => o.selected)).toBe(false);
+  });
+
+  it("the chosen effect goes into the attack payload", async () => {
+    const { result, mutateAsync } = startRogue();
+
+    act(() => result.current.actions.toggleTarget("gob"));
+    act(() => result.current.actions.confirmTargets());
+    act(() => result.current.actions.toggleCunning("trip"));
+    act(() => result.current.actions.roll(14));
+    act(() => result.current.actions.damage([6]));
+    act(() => result.current.actions.submit());
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ cunningStrike: ["trip"] })));
+  });
+
+  it("no picker without Sneak Attack and Cunning Strike", () => {
+    const { result } = start();
+
+    expect(result.current.view.cunning).toBeNull();
   });
 });

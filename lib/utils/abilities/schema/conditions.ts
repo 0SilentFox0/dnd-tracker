@@ -21,6 +21,7 @@ export type Condition =
   | { type: "armorWorn"; categories: WornArmorKind[]; shield?: "with" | "without" }
   | { type: "attackRollMode"; mode: "advantage" | "disadvantage" | "normal" }
   | { type: "allyAdjacent" }
+  | { type: "notMoved" }
   | { type: "withThisItem" }
   | { type: "not"; condition: Condition }
   | { type: "all"; conditions: Condition[] }
@@ -44,6 +45,7 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.object({ type: z.literal("armorWorn"), categories: z.array(z.enum(WORN_ARMOR_KINDS)).min(1), shield: z.enum(["with", "without"]).optional() }),
     z.object({ type: z.literal("attackRollMode"), mode: z.enum(["advantage", "disadvantage", "normal"]) }),
     z.object({ type: z.literal("allyAdjacent") }),
+    z.object({ type: z.literal("notMoved") }),
     z.object({ type: z.literal("withThisItem") }),
     z.object({ type: z.literal("not"), condition: ConditionSchema }),
     z.object({ type: z.literal("all"), conditions: z.array(ConditionSchema).min(1) }),

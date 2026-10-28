@@ -20,7 +20,7 @@ interface ClassLevelUpDialogProps {
 export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
   const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, stepDefs, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
+  const { byId, available, selection, cls, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
@@ -96,7 +96,7 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
             {picksCount > 0 && <p className="text-hud-muted">Виборів: {picksCount}</p>}
           </section>
         )}
-        {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} value={selection.picks} onChange={actions.setPicks} />}
+        {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} multiclass={multiclass} value={selection.picks} onChange={actions.setPicks} />}
         {form.error && <FormAlert>{form.error}</FormAlert>}
       </form>
     </ResponsiveDialog>

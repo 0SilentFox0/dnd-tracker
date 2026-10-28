@@ -1,3 +1,4 @@
+export { useArcaneRecovery } from "./useArcaneRecovery";
 export { useCharacterChoices } from "./useCharacterChoices";
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";

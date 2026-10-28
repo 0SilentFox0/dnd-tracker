@@ -1,3 +1,4 @@
+import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import type { PredictedAttack } from "@/lib/utils/battle/attack/bonus";
 import type { AttackData } from "@/types/api";
 
@@ -47,6 +48,7 @@ export interface AttackFlowState {
   picked?: boolean;
   offHand?: boolean;
   inspiration?: boolean;
+  cunningStrike?: CunningStrikeEffect[];
 }
 
 export type AttackFlowAction =
@@ -58,6 +60,7 @@ export type AttackFlowAction =
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
+  | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
   | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
@@ -117,6 +120,8 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
 
       return { ...s, strikes, inspiration: a.value || undefined };
     }
+    case "SET_CUNNING_STRIKE":
+      return { ...s, cunningStrike: a.effects.length > 0 ? a.effects : undefined };
     case "ROLL": {
       const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
 
@@ -188,7 +193,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
   const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
 
-  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(manual && { rollMode: s.mode }), endTurn: false };
+  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(s.cunningStrike && { cunningStrike: s.cunningStrike }), ...(manual && { rollMode: s.mode }), endTurn: false };
 
   if (s.strikes.length === 1) {
     const [st] = s.strikes;

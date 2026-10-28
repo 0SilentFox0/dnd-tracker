@@ -55,6 +55,18 @@ describe("buildRestBlock", () => {
     expect(block?.charges).toContainEqual({ key: grantKey, name: "Magic Initiate: Guidance", uses: 1, used: 1, rest: "long" });
   });
 
+  it("arcane recovery offer: budget, spent slots up to the cap, used flag", () => {
+    const recovery = resolved({ trigger: { event: "passive" }, effects: [{ kind: "restoreSpellSlotLevels", budget: 2, maxSlotLevel: 5 }] }, { type: "class", id: "wizard" });
+
+    const wizard = { ...p, battleData: { ...p.battleData, resolvedAbilities: [recovery] } };
+
+    const input = { participant: wizard, rules: rules({ persistResources: true }), maxLevel: 20 };
+
+    expect(buildRestBlock({ ...input, character: { level: 3, resources: { slotsSpent: { "1": 2, "6": 1 } } } })?.arcaneRecovery).toEqual({ budget: 2, maxSlotLevel: 5, used: false, slots: [{ level: 1, spent: 2 }] });
+    expect(buildRestBlock({ ...input, character: { level: 3, resources: { charges: { [recovery.key]: { used: 1, rest: "long" } } } } })?.arcaneRecovery?.used).toBe(true);
+    expect(buildRestBlock({ participant: p, character: { level: 3 }, rules: rules({ persistResources: true }), maxLevel: 20 })?.arcaneRecovery).toBeNull();
+  });
+
   it("xp and inspiration without persisted resources", () => {
     expect(buildRestBlock({ participant: p, character: { level: 1, experience: 300, inspiration: true }, rules: rules({ xp: true, inspiration: true }), maxLevel: 20 })).toMatchObject({
       persist: false, hp: null, hitDice: [], charges: [], inspiration: true, xp: { value: 300, next: 300, levelUp: true },

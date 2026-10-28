@@ -137,7 +137,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
     let turnIndex = ctx.scene.turnIndex;
 
     for (const newcomer of baked.slice(ctx.participants.length)) {
-      const initiative = calculateInitiative(newcomer, [...order, newcomer]);
+      const initiative = calculateInitiative(newcomer, [...order, newcomer], { rules: ctx.meta.rules });
 
       const p = { ...newcomer, abilities: { ...newcomer.abilities, initiative } };
 
