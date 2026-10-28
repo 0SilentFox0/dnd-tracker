@@ -155,7 +155,7 @@ export const generateSlideImageHandler = (req: Request, campaignId: string) =>
     try {
       return NextResponse.json(await generateSlideImage({ ...body, campaignId, userId: access.userId }));
     } catch (error) {
-      if (error instanceof AiImageError) return errorResponse(error.message, error.status);
+      if (error instanceof AiImageError) return errorResponse(error.message, error.status, undefined, error.params);
 
       throw error;
     }

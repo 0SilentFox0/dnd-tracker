@@ -1,5 +1,5 @@
 export function isSecureRequest(req: Request): boolean {
-  return req.headers.get("x-forwarded-proto") === "https" || new URL(req.url).protocol === "https:";
+  return req.headers.get("x-forwarded-proto")?.split(",")[0].trim() === "https" || new URL(req.url).protocol === "https:";
 }
 
 /** Compare browser-facing Host and URL protocol, never forwarded host headers. */
