@@ -19,6 +19,11 @@ export interface ShowBattle {
   name: string;
 }
 
+export interface ShowWorld {
+  mapId: string;
+  focusMarkerId?: string;
+}
+
 export interface SlideDeck {
   id: string;
   title: string;
@@ -62,6 +67,8 @@ export interface ShowState {
   cover?: ShowCover;
   /** Гравці бачать заглушку замість слайда; позиція в наборі й музика лишаються. */
   curtain?: true;
+  /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
+  world?: ShowWorld;
   seq: number;
 }
 
@@ -73,6 +80,8 @@ export type ShowCommand =
   | { action: "audio"; command: BattleAudioCommand }
   | { action: "battle"; battleId: string }
   | { action: "curtain"; on?: boolean }
+  | { action: "world"; mapId: string; focusMarkerId?: string }
+  | { action: "worldOff" }
   | { action: "setCover"; deckId: string; slideId: string }
   | { action: "clearCover" };
 

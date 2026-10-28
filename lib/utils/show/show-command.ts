@@ -65,7 +65,7 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
 /** Прибирає поле стану й піднімає seq. */
-function without(prev: ShowState, ...keys: ("battle" | "curtain" | "cover")[]): ShowState {
+function without(prev: ShowState, ...keys: ("battle" | "curtain" | "cover" | "world")[]): ShowState {
   const next = { ...prev, seq: prev.seq + 1 };
 
   for (const key of keys) delete next[key];
@@ -101,6 +101,14 @@ export function withoutBattle(prev: ShowState | null, battleId: string): ShowSta
   return prev?.battle?.id === battleId ? without(prev, "battle") : null;
 }
 
+function showWorld(prev: ShowState | null, mapId: string, focusMarkerId?: string): Outcome {
+  if (prev?.world?.mapId === mapId && prev.world.focusMarkerId === focusMarkerId && !prev.curtain) return done(prev);
+
+  const next = without(prev ?? EMPTY, "curtain");
+
+  return done({ ...next, world: focusMarkerId ? { mapId, focusMarkerId } : { mapId } });
+}
+
 function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
   if (cmd.action !== "open" && !prev?.deckId) return fail(API_ERRORS.SHOW_NOT_RUNNING);
 
@@ -114,7 +122,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   if (index === -1) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev.battle || prev.curtain ? without(prev, "battle", "curtain") : prev);
+  if (prev && cmd.action !== "open" && deck.slides[index].id === prev.slide?.id) return done(prev.battle || prev.curtain || prev.world ? without(prev, "battle", "curtain", "world") : prev);
 
   const at = slideAt(deck, index);
 
@@ -156,6 +164,12 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
       return callToBattle(prev, cmd.battleId, ctx);
     case "curtain":
       return setCurtain(prev, cmd.on);
+    case "world":
+      return showWorld(prev, cmd.mapId, cmd.focusMarkerId);
+    case "worldOff":
+      if (!prev) return fail(API_ERRORS.SHOW_NOT_RUNNING);
+
+      return done(prev.world ? without(prev, "world") : prev);
     case "setCover":
       return setCover(prev, cmd.slideId, ctx.deck);
     case "clearCover":
