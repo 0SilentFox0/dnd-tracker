@@ -23,6 +23,7 @@ export {
   useBattleSceneValue,
 } from "./useBattleScene";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
+export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";
 export { useDmCaster } from "./useDmCaster";
 export { type DmParticipantActions, useDmParticipantActions } from "./useDmParticipantActions";
 export { type DownedHeroPrompt, useDownedHeroPrompt } from "./useDownedHeroPrompt";

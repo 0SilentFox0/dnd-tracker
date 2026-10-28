@@ -83,6 +83,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     bonusAction: mutation(),
     abilityAction: mutation(),
     nextTurn: mutation(),
+    critChoice: mutation(),
     moraleCheck: mutation(async () => ({ moraleResult: { hasExtraTurn: true, shouldSkipTurn: false, moralePositive: true, message: "" } })),
     start: mutation(),
     reset: mutation(),

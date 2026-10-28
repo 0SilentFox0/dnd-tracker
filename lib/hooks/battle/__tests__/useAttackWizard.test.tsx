@@ -163,4 +163,33 @@ describe("useAttackWizard", () => {
 
     expect(result.current.state.step).toBe("weapon");
   });
+
+  it("пауза на вибір ДМ: очікування без результату, після зняття pending — результат з нового журналу", async () => {
+    const critLog = [
+      { actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 8, change: 12 }], actionDetails: { isHit: true, criticalEffect: { id: 1, name: "Точний удар", description: "", type: "success" } } },
+    ] as unknown as BattleAction[];
+
+    const scene = fakeScene({ afterLog: critLog });
+
+    scene.battle.pendingCritChoice = { action: "attack", actorId: "me", triggers: [] };
+    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+
+    const hook = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
+
+    act(() => hook.result.current.actions.open());
+    act(() => hook.result.current.actions.toggleTarget("gob"));
+    act(() => hook.result.current.actions.confirmTargets());
+    act(() => hook.result.current.actions.roll(20));
+    act(() => hook.result.current.actions.damage([6]));
+    act(() => hook.result.current.actions.submit());
+
+    await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
+    expect(scene.showResult).not.toHaveBeenCalled();
+
+    scene.battle.pendingCritChoice = null;
+    hook.rerender();
+
+    await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 12, critEffect: expect.objectContaining({ name: "Точний удар" }) })));
+    expect(hook.result.current.state).toMatchObject({ step: "result", waitingCrit: false });
+  });
 });

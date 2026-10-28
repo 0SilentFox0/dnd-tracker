@@ -10,10 +10,12 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 
 import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
+import { CritChoiceDialog } from "@/components/battle/crit-choice/CritChoiceDialog";
+import { CritChoiceWaitingBanner } from "@/components/battle/crit-choice/CritChoiceWaitingBanner";
 import { hudFontClassName } from "@/components/hud";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
+import { useBattleScene, useCritChoiceDialog, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { myTurnKey } from "@/lib/utils/battle/view";
@@ -67,6 +69,8 @@ const onFieldCount = (participants: BattlePreparationParticipant[]) => participa
 export function BattleScreen() {
   const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero } } = useBattleScene();
 
+  const critChoice = useCritChoiceDialog();
+
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
   const wide = useMediaQuery(DESKTOP_QUERY);
 
@@ -109,6 +113,7 @@ export function BattleScreen() {
           {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
           <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
             <BattleToast />
+            <CritChoiceWaitingBanner />
             {/* не над мапою у свій хід і не для глядачів; ДМ бачить свою підказку на підготовці */}
             {!isDM && hero && !isMyTurn && <OnboardingHint id="player.battle" />}
           </div>
@@ -119,6 +124,7 @@ export function BattleScreen() {
             </CornerStack>
           )}
           {isDM && <DmRevivePrompt />}
+          <CritChoiceDialog dialog={critChoice} />
           {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
           <BattleFxLayer />
         </div>

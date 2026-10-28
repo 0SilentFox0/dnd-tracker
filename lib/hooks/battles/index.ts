@@ -15,6 +15,7 @@ export {
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
+  useCritChoice,
   useDeleteAllBattles,
   useMapTerrain,
   useMapWeather,

@@ -41,6 +41,8 @@ export interface AttackFlowState {
   index: number;
   error?: string;
   results: AttackOutcomeSummary[];
+  /** сервер зупинив атаку: ДМ обирає ефект крита */
+  waitingCrit?: boolean;
   /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
   picked?: boolean;
 }
@@ -57,6 +59,7 @@ export type AttackFlowAction =
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
+  | { type: "WAIT_CRIT" }
   | { type: "SUCCESS"; results: AttackOutcomeSummary[] }
   | { type: "FAIL"; error: string }
   | { type: "CLOSE" };
@@ -131,10 +134,12 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     }
     case "SUBMIT":
       return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;
+    case "WAIT_CRIT":
+      return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
     case "SUCCESS":
-      return { ...s, step: "result", results: a.results, error: undefined };
+      return { ...s, step: "result", results: a.results, error: undefined, waitingCrit: false };
     case "FAIL":
-      return { ...s, step: s.strikes.some(isHit) ? "summary" : "roll", index: s.strikes.some(isHit) ? s.index : s.strikes.length - 1, error: a.error };
+      return { ...s, waitingCrit: false, step: s.strikes.some(isHit) ? "summary" : "roll", index: s.strikes.some(isHit) ? s.index : s.strikes.length - 1, error: a.error };
     case "CLOSE":
       return initialAttackFlow;
   }

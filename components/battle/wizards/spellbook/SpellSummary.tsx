@@ -23,6 +23,7 @@ export function SpellSummary({ spell, state, targets, formula, targeting, slotCo
         <p className="mt-2 text-sm italic text-[var(--hud-muted)]">Остаточний результат порахує бій з урахуванням захисту цілей.</p>
         {slotCost && <p className="text-sm italic text-[var(--hud-muted)]">{slotCost}</p>}
       </div>
+      {state.waitingCrit && <p className="mt-2 text-sm italic text-[var(--hud-muted)]">ДМ обирає ефект критичного кидка…</p>}
       {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{state.error}</p>}
     </>
   );

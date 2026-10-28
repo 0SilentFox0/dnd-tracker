@@ -193,6 +193,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const [flow, dispatch] = useReducer(spellFlow, initialSpellFlow);
 
+  const pendingSeen = useRef(new Set<number>());
+
   const isOpen = flow.step !== "closed" && !!caster;
 
   const free = !!options.allSpells;
@@ -255,19 +257,44 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const formulaOf = (s: BookSpell): string => (caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null }) : "");
 
+  const finish = useEffectEvent((changes: { participantId: string; participantName: string; change: number }[]) => {
+    dispatch({ type: "SUCCESS" });
+    scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(changes), targetCount: state.targetIds.length });
+    options.onDone?.();
+  });
+
   const send = useEffectEvent(async () => {
     if (!caster) return;
+
+    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
       const res = await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }) });
 
-      dispatch({ type: "SUCCESS" });
-      scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(res?.hpChanges ?? []), targetCount: state.targetIds.length });
-      options.onDone?.();
+      if (res?.pendingCritChoice) {
+        pendingSeen.current = seen;
+        dispatch({ type: "WAIT_CRIT" });
+
+        return;
+      }
+
+      finish(res?.hpChanges ?? []);
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося застосувати заклинання" });
     }
   });
+
+  const resume = useEffectEvent(() => {
+    const log = scene.readBattle()?.battleLog ?? [];
+
+    finish(log.filter((e) => !pendingSeen.current.has(e.actionIndex) && e.actorId === caster?.basicInfo.id).flatMap((e) => e.hpChanges ?? []));
+  });
+
+  const critPending = !!scene.battle.pendingCritChoice;
+
+  useEffect(() => {
+    if (state.waitingCrit && !critPending) resume();
+  }, [state.waitingCrit, critPending]);
 
   useEffect(() => {
     if (state.step === "submitting") void send();
