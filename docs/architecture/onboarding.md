@@ -4,9 +4,11 @@
 
 ## Реєстр (`lib/onboarding/`, чисті дані й функції)
 
-- `checklists.ts` — кроки ДМ (`DM_STEPS`: 6 обов'язкових + optional) і гравця (`PLAYER_STEPS`); кожен крок має `isDone(facts)`.
+У TS лишаються лише `id`, `date`, `audience`, `href`, `helpSlug`, `optional`, `informational`, `isDone` і скелет help-статей; **тексти — у `messages/{uk,en}/{onboarding,whatsNew,help}.json`** (див. [i18n.md](i18n.md)). Не-React код віддає id/variant, переклад — на межі (клієнт: `useTranslator`; help — сервер).
+
+- `checklists.ts` — кроки ДМ (`DM_STEPS`: 6 обов'язкових + optional) і гравця (`PLAYER_STEPS`); кожен крок має `isDone(facts)`. `StepStatus` несе `id` і необов'язковий `variant` `{ name, params }` (напр. `pending` + `{count}`), а не готові тексти; `step-text.ts` (`stepText(t, role, step)`) дає `checklist.<role>.<id>.title|description[Variant]` для клієнта й MCP.
 - `progress.ts` — `checklistProgress`, `checklistState` (`open` → `collapsed` на 7 днів після першого «все виконано» → `hidden`; збережена дата завершення фіксує результат, регрес фактів чекліст не розгортає), `unseenWhatsNew`/`visibleWhatsNew`, `isHintHidden`.
-- `hints.ts` (`HINTS`), `whats-new.ts` (`WHATS_NEW`, новіші першими), `help/` (`HELP_ARTICLES` — TS-структури, без markdown).
+- `hints.ts` (`HINTS`), `whats-new.ts` (`WHATS_NEW`, новіші першими), `help/` (`HELP_ARTICLES` — скелет статей без текстів: `slug`, секції, форма блоків; текст `help.<slug>.title|summary|sections.s<i>.heading|b<j>`, список — об'єкт `i0..iN`; тест скелет↔JSON ловить розбіжність).
 - `flag-keys.ts` — ключі прапорців і `FLAG_KEY_RE`.
 
 ## Правило: прогрес = факти, у БД лише прапорці
@@ -37,8 +39,8 @@
 
 ## Як додати
 
-- **Крок** — рядок у `DM_STEPS`/`PLAYER_STEPS`; якщо потрібен новий факт — поле в `DmFacts`/`PlayerFacts` і підзапит у `facts.ts`.
+- **Крок** — рядок у `DM_STEPS`/`PLAYER_STEPS` і ключі `onboarding.checklist.<role>.<id>` в обох мовах; якщо потрібен новий факт — поле в `DmFacts`/`PlayerFacts` і підзапит у `facts.ts`.
 - **Підказку в бою** — `BattleScreen`: ДМ бачить `dm.battle-scene` на екрані підготовки, гравець із героєм — `player.battle` у стеку сповіщень лише не у свій хід (не перекриває мапу, коли вона потрібна; глядачам не показується).
-- **Підказку** — рядок у `hints.ts` і `<OnboardingHint id="…" />` на екрані. У тестах `OnboardingHint`/`PlayerSheetHint` глобально замокані в `vitest-setup.ts`; власний тест підказки робить `vi.unmock`.
-- **Запис «Що нового»** — на початок `WHATS_NEW` у коміті фічі.
-- **Статтю** — об'єкт у `help/dm.ts` або `help/player.ts`; тест реєстру перевіряє, що кожен `helpSlug` існує.
+- **Підказку** — рядок у `hints.ts`, ключі `onboarding.hints.<id>.title|body` в обох мовах і `<OnboardingHint id="…" />` на екрані. У тестах `OnboardingHint`/`PlayerSheetHint` глобально замокані в `vitest-setup.ts`; власний тест підказки робить `vi.unmock`.
+- **Запис «Що нового»** — на початок `WHATS_NEW` (id, дата, audience, href) і ключі `whatsNew.<id>.title|body` в `uk` та `en` — у коміті фічі; запис без ключів ламає тест реєстру.
+- **Статтю** — скелет у `help/dm.ts` або `help/player.ts` і ключі `help.<slug>.*` в обох мовах; тест реєстру перевіряє, що кожен `helpSlug` існує.
