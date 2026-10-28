@@ -59,20 +59,20 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_fighter_champion_remarkable-athlete": passive([{ kind: "flag", flag: "checkAdvantage", skills: ["athletics"] }]),
   "srd-2024_fighter_champion_survivor": { trigger: { event: "turnStart" }, condition: { type: "hpBelow", who: "self", percent: 50 }, effects: [{ kind: "heal", amount: { formula: "5 + con_mod" }, target: "self" }] },
   "srd-2024_barbarian_danger-sense": passive([{ kind: "flag", flag: "saveAdvantage", abilities: ["dexterity"] }]),
-  // free in the SRD: the bonus action is refreshed, so use it before Rage; melee approximates "Strength attack rolls"
+  // free in the SRD: the bonus action is refreshed, so use it before Rage
   "srd-2024_barbarian_reckless-attack": {
     trigger: { event: "bonusAction" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "melee", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "melee", attackAbility: "strength", duration: { rounds: 1 }, target: "self" },
       { kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "self" },
       { kind: "grantAction", refreshBonusAction: true, target: "self" },
     ],
   },
-  // advantage lasts until the next turn start (not consumed by the first attack), "haven't moved" is not checked
   "srd-2024_rogue_steady-aim": {
     trigger: { event: "bonusAction" },
+    condition: { type: "notMoved" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "all", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", duration: { rounds: 1 }, target: "self" },
       { kind: "modifyStat", stat: "speed", percent: -100, duration: { rounds: 1 }, target: "self" },
     ],
   },

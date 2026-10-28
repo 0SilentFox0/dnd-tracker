@@ -31,6 +31,7 @@ function defaultFor(type: Condition["type"]): Condition {
     case "targetDead":
     case "actorIsEnemy":
     case "allyAdjacent":
+    case "notMoved":
     case "withThisItem":
       return { type };
     case "attackRollMode":

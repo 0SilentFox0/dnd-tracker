@@ -3,6 +3,7 @@ import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilit
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
 import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -65,6 +66,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
   const wait = cooldownLeft(participant, ability, ctx.scene.round);
 
   if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+
+  if (ability.condition && conditionRequiresStill(ability.condition) && !evaluateCondition(ability.condition, { owner: participant, event: null, participants: ctx.participants })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
   const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell);
 

@@ -69,7 +69,7 @@ const AbilitiesOrAll = z.union([z.literal("all"), z.array(AbilityKeySchema).min(
 
 const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("sense"), sense: z.enum(["darkvision", "blindsight", "tremorsense", "truesight"]), range: z.number().int().min(5).max(1000) }),
-  z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
+  z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]), attackAbility: AbilityKeySchema.optional(), consumeOn: z.literal("ownAttack").optional() }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),
   z.object({ ...flagBase, flag: z.literal("advantageForAttackers") }),

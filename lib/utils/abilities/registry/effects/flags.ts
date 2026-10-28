@@ -46,9 +46,17 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
   },
   advantage: {
     label: "Перевага",
-    fields: [{ name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL }],
+    fields: [
+      { name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL },
+      { name: "attackAbility", label: "Лише атаки цією характеристикою", input: "select", optional: true, options: ABILITY_OPTIONS },
+      { name: "consumeOn", label: "Зникає після першої атаки", input: "select", optional: true, options: [{ value: "ownAttack", label: "так" }] },
+    ],
     defaults: { attackKind: "all" },
-    describe: (e) => (e.attackKind === "all" ? "перевага на атаки" : `перевага на ${e.attackKind === AttackType.MELEE ? "ближні" : "дальні"} атаки`),
+    describe: (e) => {
+      const kind = e.attackKind === "all" ? "атаки" : `${e.attackKind === AttackType.MELEE ? "ближні" : "дальні"} атаки`;
+
+      return `перевага на ${e.attackAbility ? `${kind} (${ABILITY_LABELS[e.attackAbility]})` : kind}${e.consumeOn ? ", до першої атаки" : ""}`;
+    },
   },
   disadvantage: plain("Недолік на свої атаки", "недолік на атаки"),
   disadvantageForAttackers: plain("Недолік для атакувальників", "недолік для атакувальників"),

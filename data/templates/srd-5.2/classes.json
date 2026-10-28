@@ -177,6 +177,7 @@
                 "kind": "flag",
                 "flag": "advantage",
                 "attackKind": "melee",
+                "attackAbility": "strength",
                 "duration": {
                   "rounds": 1
                 },
@@ -5624,11 +5625,15 @@
             "trigger": {
               "event": "bonusAction"
             },
+            "condition": {
+              "type": "notMoved"
+            },
             "effects": [
               {
                 "kind": "flag",
                 "flag": "advantage",
                 "attackKind": "all",
+                "consumeOn": "ownAttack",
                 "duration": {
                   "rounds": 1
                 },
