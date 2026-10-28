@@ -24,6 +24,7 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM, meta }: { cam
                 maxLevel: campaign.maxLevel,
                 allowPlayerEdit: campaign.allowPlayerEdit,
                 critChoiceByDm: campaign.critChoiceByDm,
+                acquaintancesEnabled: campaign.acquaintancesEnabled,
                 status: campaign.status,
               }}
               meta={meta}

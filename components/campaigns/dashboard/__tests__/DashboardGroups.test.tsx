@@ -26,12 +26,12 @@ const type = (value: string) => {
 const tileLinks = () => screen.getAllByRole("link");
 
 describe("DashboardGroups", () => {
-  it("DM without query shows group headings and 12 links", () => {
+  it("DM without query shows group headings and 13 links", () => {
     render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     for (const t of ["Гра", "Герої", "Бібліотеки"]) expect(screen.getByRole("heading", { name: t })).toBeTruthy();
 
-    expect(tileLinks()).toHaveLength(12);
+    expect(tileLinks()).toHaveLength(13);
   });
 
   it("shows pending drafts in the characters subtitle", () => {
@@ -54,7 +54,7 @@ describe("DashboardGroups", () => {
 
     expect(screen.queryByText("Карта")).toBeNull();
     expect(screen.getByText("Показ")).toBeTruthy();
-    expect(tileLinks()).toHaveLength(3);
+    expect(tileLinks()).toHaveLength(4);
   });
 
   it("the world tile links to the player map and is found by search", async () => {
@@ -84,7 +84,7 @@ describe("DashboardGroups", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "common.search.clear" }).at(-1)!);
 
-    expect(await screen.findAllByRole("link")).toHaveLength(12);
+    expect(await screen.findAllByRole("link")).toHaveLength(13);
   });
 
   it("Enter with a padded uppercase query navigates to the match", async () => {
@@ -127,6 +127,31 @@ describe("DashboardGroups", () => {
 
     expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
     expect(useNotifications).toHaveBeenCalledWith("c1", { enabled: true });
+  });
+
+  it("DM in a campaign sees the acquaintances tile in the game group, a template does not", () => {
+    const { unmount } = render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+
+    expect(screen.getByText("Знайомства").closest("a")?.getAttribute("href")).toBe("/campaigns/c1/acquaintances");
+
+    unmount();
+    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} context={{ isTemplate: true, classesEnabled: false }} />);
+
+    expect(screen.queryByText("Знайомства")).toBeNull();
+  });
+
+  it("player does not see the acquaintances tile when the page hides it", () => {
+    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["acquaintances"]} />);
+
+    expect(screen.queryByText("Знайомства")).toBeNull();
+  });
+
+  it("player with an unread acquaintance sees a pill on its tile", () => {
+    vi.mocked(useNotifications).mockReturnValue({ data: [{ id: "n1", type: "acquaintance", refId: "a1", href: "/h", createdAt: "x" }] } as never);
+
+    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+
+    expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
   });
 
   it("DM gets no pill and the query is disabled", () => {

@@ -8,4 +8,5 @@ export const NOTIFICATIONS_LIST_LIMIT = 50;
 
 export const NOTIFICATION_TILE_TYPES: Readonly<Record<string, readonly NotificationType[]>> = {
   "my-character": ["level", "item", "spell"],
+  acquaintances: ["acquaintance"],
 };

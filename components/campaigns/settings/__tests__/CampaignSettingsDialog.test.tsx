@@ -13,7 +13,7 @@ vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ suc
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-const campaign: CampaignSettings = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, status: "active" };
+const campaign: CampaignSettings = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, acquaintancesEnabled: false, status: "active" };
 
 const baseMeta: CampaignSettingsMeta = { createdFromId: null, isTemplate: false };
 
@@ -106,5 +106,25 @@ describe("CampaignSettingsDialog: ефекти крита", () => {
     renderDialog();
     expect(screen.getByLabelText("ДМ обирає ефекти крита/провалу")).not.toBeChecked();
     expect(screen.getByText("Вимкнено — ефект випадковий")).toBeInTheDocument();
+  });
+});
+
+describe("CampaignSettingsDialog: знайомства", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it("перемикач знайомств іде в payload збереження", async () => {
+    renderDialog();
+
+    const toggle = screen.getByLabelText("Знайомства доступні гравцям");
+
+    expect(toggle).toHaveAttribute("data-state", "unchecked");
+
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+
+    await waitFor(() => expect(updateCampaign).toHaveBeenCalledWith("c1", expect.objectContaining({ acquaintancesEnabled: true })));
   });
 });
