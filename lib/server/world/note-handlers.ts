@@ -10,7 +10,6 @@ import { readViewerScope } from "@/lib/server/world/view-handlers";
 import { type CampaignAccessResult, requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { visibleMarkerIds } from "@/lib/utils/world/player-view";
 import type { WorldNote } from "@/types/world";
@@ -86,12 +85,11 @@ export function createNoteHandler(req: Request, campaignId: string) {
   });
 }
 
-const ownedNote = (campaignId: string, noteId: string) =>
-  loadOwned(
-    prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { map: { select: { campaignId: true } } } } } }).then((n) => n && { ...n, campaignId: n.marker.map.campaignId }),
-    campaignId,
-    API_ERRORS.WORLD_NOTE_NOT_FOUND,
-  );
+async function ownedNote(campaignId: string, noteId: string) {
+  const note = await prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { map: { select: { campaignId: true } } } } } });
+
+  return note && note.marker.map.campaignId === campaignId ? note : errorResponse(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
+}
 
 export function updateNoteHandler(req: Request, campaignId: string, noteId: string) {
   return withAccess(campaignId, "update world note", async (access) => {

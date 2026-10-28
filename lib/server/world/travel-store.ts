@@ -7,7 +7,7 @@ import type { RevealShape, TravelRest, WorldHero, WorldTravelEntry } from "@/typ
 type HeroRow = { id: string; name: string; avatar: string | null };
 
 export const activePlayerHeroes = (campaignId: string, where: { id?: { in: string[] }; controlledBy?: string } = {}) =>
-  prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER, status: CharacterStatus.ACTIVE, ...where }, select: { id: true, name: true, avatar: true } });
+  prisma.character.findMany({ where: { campaignId, type: CharacterType.PLAYER, status: CharacterStatus.ACTIVE, ...where }, select: { id: true, name: true, avatar: true, controlledBy: true } });
 
 export async function readPositions(characterIds: string[]): Promise<Map<string, HeroPos>> {
   const rows = await prisma.worldPosition.findMany({ where: { characterId: { in: characterIds } } });
@@ -53,7 +53,7 @@ export async function commitTravel(args: {
 
   const aspect = dest.width / dest.height;
 
-  const reveals = plan.reveals.filter((r) => r.shape.t !== "p" || !dedupePoint(shapesOf(r.characterId), { x: r.shape.x, y: r.shape.y }, dest.revealRadius, aspect));
+  const reveals = plan.reveals.filter((r) => r.shape.t !== "p" || !dedupePoint(shapesOf(r.characterId), { x: r.shape.x, y: r.shape.y }, aspect));
 
   const first = plan.moves[0];
 
@@ -115,7 +115,7 @@ export async function readTravelLog(campaignId: string, limit: number, heroIds?:
     mapId: r.mapId,
     mapName: mapNames.get(r.mapId) ?? "",
     heroes: r.characterIds.flatMap((id) => (names.has(id) && (!allowed || allowed.has(id)) ? [{ id, name: names.get(id) as string }] : [])),
-    from: r.from as WorldTravelEntry["from"],
+    from: heroIds ? null : (r.from as WorldTravelEntry["from"]),
     to: r.to as WorldTravelEntry["to"],
     toMarkerName: r.toMarkerId ? (markerNames.get(r.toMarkerId) ?? null) : null,
     rest: r.rest as TravelRest,

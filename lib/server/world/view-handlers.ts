@@ -87,7 +87,7 @@ export async function viewHandler(req: Request, campaignId: string) {
 
     const positioned = [...new Set(positions.map((p) => p.characterId))];
 
-    const named = positioned.length > 0 ? await prisma.character.findMany({ where: { id: { in: positioned }, campaignId }, select: { id: true, name: true, avatar: true, controlledBy: true } }) : [];
+    const named = positioned.length > 0 ? await activePlayerHeroes(campaignId, { id: { in: positioned } }) : [];
 
     const heroNames = new Map<string, HeroInfo>(named.map((c) => [c.id, { name: c.name, avatar: c.avatar, controlledBy: c.controlledBy }]));
 

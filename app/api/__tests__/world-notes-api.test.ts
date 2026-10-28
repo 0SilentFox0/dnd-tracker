@@ -144,10 +144,10 @@ describe("world notes API", () => {
       expect(prisma.worldNote.delete).toHaveBeenCalledTimes(1);
     });
 
-    it("нотатка іншої кампанії — 403, неіснуюча — 404", async () => {
+    it("нотатка іншої кампанії і неіснуюча — 404", async () => {
       vi.mocked(prisma.worldNote.findUnique).mockResolvedValueOnce(noteRow({ marker: { map: { campaignId: "other" } } }) as never);
 
-      expect((await (await noteById()).DELETE(json("DELETE"), ctx({ noteId: "n1" }))).status).toBe(403);
+      expect((await (await noteById()).DELETE(json("DELETE"), ctx({ noteId: "n1" }))).status).toBe(404);
 
       vi.mocked(prisma.worldNote.findUnique).mockResolvedValueOnce(null);
 

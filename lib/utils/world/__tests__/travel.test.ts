@@ -33,6 +33,12 @@ describe("planTravel", () => {
     expect(ra.shape).not.toEqual(rb.shape);
   });
 
+  it("a zero-length segment becomes a point", () => {
+    const positions = new Map<string, HeroPos>([["a", pos("a", "m1", 0.8, 0.8)]]);
+
+    expect(planTravel({ ...base, positions, characterIds: ["a"] }).reveals[0].shape).toEqual({ t: "p", x: 0.8, y: 0.8 });
+  });
+
   it("clamps the destination to [0,1]", () => {
     const plan = planTravel({ ...base, to: { x: 1.4, y: -0.2 }, positions: new Map(), characterIds: ["a"] });
 
@@ -62,9 +68,10 @@ describe("planEnter / planExit", () => {
 });
 
 describe("dedupePoint", () => {
-  it("true when an existing shape already covers the point", () => {
-    expect(dedupePoint([{ t: "p", x: 0.5, y: 0.5 }], { x: 0.52, y: 0.5 }, 0.05, 1)).toBe(true);
-    expect(dedupePoint([{ t: "p", x: 0.5, y: 0.5 }], { x: 0.7, y: 0.5 }, 0.05, 1)).toBe(false);
-    expect(dedupePoint([], { x: 0.5, y: 0.5 }, 0.05, 1)).toBe(false);
+  it("true only when the point is (nearly) the same as an existing shape", () => {
+    expect(dedupePoint([{ t: "p", x: 0.5, y: 0.5 }], { x: 0.5005, y: 0.5 }, 1)).toBe(true);
+    expect(dedupePoint([{ t: "p", x: 0.5, y: 0.5 }], { x: 0.52, y: 0.5 }, 1)).toBe(false);
+    expect(dedupePoint([{ t: "p", x: 0.5, y: 0.5 }], { x: 0.7, y: 0.5 }, 1)).toBe(false);
+    expect(dedupePoint([], { x: 0.5, y: 0.5 }, 1)).toBe(false);
   });
 });
