@@ -16,8 +16,17 @@ export const critEffectsFor = (source: CritSource, kind: CritKind): readonly Cri
 export const getCritEffect = (source: CritSource, kind: CritKind, id: number): CriticalEffect | undefined =>
   TABLES[source][kind].find((e) => e.id === id);
 
-export const randomCritEffect = (source: CritSource, kind: CritKind, rng: Rng): CriticalEffect => {
-  const table = TABLES[source][kind];
+export type DisabledCrits = { success: readonly string[]; fail: readonly string[] };
+
+/** disabled з rules.criticals стосується лише таблиць атаки; таблиці save мають інші id. */
+export const enabledCritEffects = (source: CritSource, kind: CritKind, disabled?: DisabledCrits): readonly CriticalEffect[] => {
+  const off = source === "attack" ? disabled?.[kind] : undefined;
+
+  return off?.length ? TABLES[source][kind].filter((e) => !off.includes(String(e.id))) : TABLES[source][kind];
+};
+
+export const randomCritEffect = (source: CritSource, kind: CritKind, rng: Rng, disabled?: DisabledCrits): CriticalEffect | undefined => {
+  const table = enabledCritEffects(source, kind, disabled);
 
   return table[Math.min(Math.floor(rng() * table.length), table.length - 1)];
 };

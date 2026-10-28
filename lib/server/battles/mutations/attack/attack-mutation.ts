@@ -93,7 +93,9 @@ async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, dep
 }
 
 export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
-  return async (ctx: BattleMutationContext, body: AttackBody, resume?: CritResume): Promise<MutationResult> => {
+  return async (ctx: BattleMutationContext, body: AttackBody, resume?: CritResume, replay: { serverRolls?: boolean } = {}): Promise<MutationResult> => {
+    const serverRolls = replay.serverRolls ?? options.serverRolls;
+
     const { endTurn, ...data } = body;
 
     assertAttackInput(ctx, data);
@@ -114,6 +116,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
       actorId: data.attackerId,
       request: body,
       enabled: ctx.meta.critChoiceByDm,
+      serverRolls,
       resume,
       run: async ({ rng, crit }) => {
         const phase = runAttackPhase({
@@ -124,7 +127,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
           isDM: ctx.isDM,
           rng,
           crit,
-          serverRolls: options.serverRolls,
+          serverRolls,
           map: ctx.meta.map,
           rules: ctx.meta.rules,
           hitSpells,

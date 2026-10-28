@@ -201,6 +201,7 @@ export const API_ERRORS = {
   NO_HIT_DICE: "Невитрачених кісток хітів цього класу немає",
   HP_FULL: "Здоров'я вже повне",
   CHARACTER_IN_BATTLE: "Герой зараз у бою — дочекайтеся завершення",
+  CRIT_PENDING: "ДМ обирає ефект крита — зачекайте",
   CRIT_CHOICE_NONE: "Немає вибору крита",
   CRIT_CHOICE_INCOMPLETE: "Потрібно обрати ефект для кожного крита",
   CRIT_EFFECT_UNKNOWN: "Невідомий ефект крита",

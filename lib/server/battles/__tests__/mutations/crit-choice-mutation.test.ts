@@ -16,6 +16,7 @@ import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/typ
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const hero = { ...baseHero, battleData: { ...baseHero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] } };
 
@@ -80,6 +81,48 @@ describe("crit-choice mutation", () => {
     await expect(critChoice(ctx, { choices: { [KEY]: effect.id, "attack:x:y:0": "random" } })).rejects.toMatchObject({ code: "action_rejected" });
     await expect(critChoice(ctx, { choices: { "attack:x:y:0": "random" } })).rejects.toMatchObject({ code: "action_rejected" });
     await expect(critChoice(ctx, { choices: { [KEY]: 9999 } })).rejects.toMatchObject({ code: "action_rejected" });
+  });
+
+  it("вимкнений у правилах ефект: випадковий його обходить, явний вибір відхилено", async () => {
+    const all = critEffectsFor("attack", "success");
+
+    const rules = { ...DEFAULT_RULES, criticals: { ...DEFAULT_RULES.criticals, disabledSuccess: all.filter((e) => e.id !== all[1].id).map((e) => String(e.id)) } };
+
+    const c = on();
+
+    const withRules = { ...c, meta: { ...c.meta, rules } };
+
+    const out = await attack(withRules, body());
+
+    const pending = out.scene?.pendingCritChoice as StoredPendingCritChoice;
+
+    const ctx = { ...withRules, scene: { ...withRules.scene, pendingCritChoice: pending } };
+
+    await expect(critChoice(ctx, { choices: { [KEY]: all[0].id } })).rejects.toMatchObject({ message: "Невідомий ефект крита" });
+
+    const done = await critChoice(ctx, { choices: { [KEY]: "random" } });
+
+    expect(done.events[0].resultText).toContain(all[1].name);
+  });
+
+  it("серверні кидки асистента: після вибору атака повторюється з serverRolls", async () => {
+    const c = { ...on(), rng: () => 0.99 };
+
+    const serverAttack = createAttackMutation(deps, { serverRolls: true });
+
+    const out = await serverAttack(c, body({ d20Roll: 1 }));
+
+    const pending = out.scene?.pendingCritChoice as StoredPendingCritChoice;
+
+    expect(pending.serverRolls).toBe(true);
+
+    const replayAttack = vi.fn(async () => out);
+
+    const mutation = createCritChoiceMutation({ attack: replayAttack, spell: createSpellMutation(deps) });
+
+    await mutation({ ...c, scene: { ...c.scene, pendingCritChoice: pending } }, { choices: { [KEY]: effect.id } });
+
+    expect(replayAttack).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ seed: pending.seed }), { serverRolls: true });
   });
 
   it("атака з endTurn завершує хід після вибору", async () => {

@@ -146,7 +146,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     return runWithCritChoice(ctx, {
       action: "spell",
       actorId: data.casterId,
-      request: data,
+      request: { ...data, diceRolls },
       enabled: ctx.meta.critChoiceByDm && !data.preview,
       resume,
       run: async ({ rng, crit }) => {

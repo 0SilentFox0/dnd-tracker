@@ -6,6 +6,7 @@ import { useCritChoiceDialog } from "../useCritChoiceDialog";
 import { fakeScene } from "./fake-scene";
 
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const pending = { action: "attack" as const, actorId: "me", triggers: [{ key: "t0", source: "attack" as const, kind: "success" as const, actorId: "me", targetId: "gob" }, { key: "t1", source: "save" as const, kind: "fail" as const, actorId: "me", targetId: "ally" }] };
 
@@ -27,6 +28,20 @@ describe("useCritChoiceDialog", () => {
 
     expect(result.current.rows.map((r) => [r.trigger.key, r.actorName, r.targetName])).toEqual([["t0", "Фрейда", "Гоблін"], ["t1", "Фрейда", "Годрік"]]);
     expect(result.current.rows[0].options).toBe(critEffectsFor("attack", "success"));
+    expect(result.current.rows[1].options).toBe(critEffectsFor("save", "fail"));
+  });
+
+  it("вимкнені в правилах ефекти атаки прибрано з опцій, save не зачеплено", () => {
+    const scene = fakeScene({ isDM: true });
+
+    const all = critEffectsFor("attack", "success");
+
+    scene.battle.pendingCritChoice = pending;
+    scene.battle.rules = { ...DEFAULT_RULES, criticals: { ...DEFAULT_RULES.criticals, disabledSuccess: [String(all[0].id)] } };
+
+    const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
+
+    expect(result.current.rows[0].options.map((e) => e.id)).toEqual(all.slice(1).map((e) => e.id));
     expect(result.current.rows[1].options).toBe(critEffectsFor("save", "fail"));
   });
 

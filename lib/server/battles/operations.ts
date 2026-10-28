@@ -77,11 +77,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "crit-choice": {
-      const { createCritChoiceMutation } = await import("@/lib/server/battles/mutations/crit-choice/crit-choice-mutation");
-
-      const { attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
-
-      const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
+      const { critChoiceMutation } = await import("@/lib/server/battles/mutations/crit-choice/crit-choice-mutation");
 
       const { critChoiceSchema } = await import("@/lib/schemas");
 
@@ -92,7 +88,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
         allowWhileCritPending: true,
         schema: critChoiceSchema,
         respond: "wrapped",
-        mutate: createCritChoiceMutation({ attack: attackMutation, spell: createSpellMutation() }),
+        mutate: critChoiceMutation,
       });
     }
     case "complete": {

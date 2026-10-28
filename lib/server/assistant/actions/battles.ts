@@ -16,6 +16,14 @@ const operations: readonly AssistantActionDef[] = [...BATTLE_READS, ...BATTLE_RE
 });
 
 export const BATTLE_ACTIONS: readonly AssistantActionDef[] = [...operations, {
+  id: "battles.crit-choice", title: "Вибір ефекту крита", description: "Атака чи закляття зупинились на крит: ефект обирає лише ДМ у діалозі бою, поки бій заблоковано.", input: battleActionInput,
+  need: { access: "dm", scope: "battles:write" }, effect: "handoff",
+  execute: async (caller, raw) => {
+    const { battleId } = battleActionInput.parse(raw);
+
+    return { href: `/campaigns/${caller.actor.campaignId}/dm/battles${battleId ? `/${encodeURIComponent(battleId)}` : ""}`, reason: "ДМ обирає ефект крита, «Випадково» або скасовує дію у діалозі бою; до цього інші команди бою відхиляються." };
+  },
+}, {
   id: "battles.map-background", title: "Завантажити фон карти", description: "Чинний редактор завантажує або дзеркалить зображення перед збереженням бою.", input: battleActionInput,
   need: { access: "dm", scope: "battles:write" }, effect: "handoff",
   execute: async (caller, raw) => {

@@ -316,7 +316,7 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
   }
 
   if (loaded.scene.pendingCritChoice && !options.allowWhileCritPending && !isDryRun) {
-    throw new BattleRuleError("crit_pending", "ДМ обирає ефект крита — зачекайте");
+    throw new BattleRuleError("crit_pending", API_ERRORS.CRIT_PENDING);
   }
 
   const expected = expectedVersion;

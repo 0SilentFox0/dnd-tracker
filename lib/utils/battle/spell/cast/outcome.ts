@@ -101,6 +101,8 @@ function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): Criti
 
   const effect = flow.ctx.crit({ source: "save", kind, actorId: caster.basicInfo.id, targetId: id });
 
+  if (!effect) return undefined;
+
   const target = getP(flow, id);
 
   const flavor = critFlavorFor(effect, caster.basicInfo.name, target.basicInfo.name, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id });
@@ -145,16 +147,18 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
     const r = rollSave({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
 
     // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
-    const resisted = target.basicInfo.side !== state.caster.basicInfo.side ? resolveSave(target, r) : { result: r, participant: target, message: null };
-
-    if (resisted.message) flow.ps = replaceParticipant(flow.ps, resisted.participant);
-
     const { roll, mod, bonus, total } = r;
 
     const saveCrit = !!flow.ctx.crit && (flow.ctx.rules ?? DEFAULT_RULES).criticals.effects && !r.autoFail && (roll === 20 || roll === 1);
 
-    // нат. 20/1 визначають результат лише там, де діють криті (є picker і ефекти крита в правилах)
-    const success = saveCrit ? roll === 20 : resisted.result.success;
+    // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
+    const base = saveCrit ? { ...r, success: roll === 20 } : r;
+
+    const resisted = target.basicInfo.side !== state.caster.basicInfo.side ? resolveSave(target, base) : { result: base, participant: target, message: null };
+
+    if (resisted.message) flow.ps = replaceParticipant(flow.ps, resisted.participant);
+
+    const success = resisted.result.success;
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
 
@@ -173,7 +177,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     if (resisted.message) flow.messages.push(resisted.message);
 
-    const crit = saveCrit ? applySaveCrit(state, id, roll === 20 ? "success" : "fail") : undefined;
+    const crit = saveCrit && (roll === 20 || !success) ? applySaveCrit(state, id, roll === 20 ? "success" : "fail") : undefined;
 
     if (crit?.type === "negate_damage") factor = 0;
 

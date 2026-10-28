@@ -94,4 +94,34 @@ describe("crit picker plumbing", () => {
 
     expect(crit).toHaveBeenCalledWith({ source: "attack", kind: "fail", actorId: "d", targetId: "a" });
   });
+
+  it("disabled виключає ефекти з випадкового вибору атаки рівно одним rng()", () => {
+    const all = critEffectsFor("attack", "success");
+
+    const keep = all[all.length - 1];
+
+    const rng = vi.fn(() => 0);
+
+    const gate = createCritGate({ rng, disabled: { success: all.slice(0, -1).map((e) => String(e.id)), fail: [] } });
+
+    expect(gate.pick(info)).toBe(keep);
+    expect(rng).toHaveBeenCalledTimes(1);
+  });
+
+  it("усі вимкнені: ефекту немає; таблиці save disabled не зачіпає", () => {
+    const all = critEffectsFor("attack", "success").map((e) => String(e.id));
+
+    const gate = createCritGate({ rng: () => 0, disabled: { success: all, fail: [] } });
+
+    expect(gate.pick(info)).toBeUndefined();
+    expect(gate.pick({ ...info, source: "save" })).toBe(critEffectsFor("save", "success")[0]);
+  });
+
+  it("вимкнений обраний id ігнорується (випадковий замість нього)", () => {
+    const [first, second] = critEffectsFor("attack", "success");
+
+    const gate = createCritGate({ rng: () => 0, choices: { "attack:a:t:0": first.id }, disabled: { success: [String(first.id)], fail: [] } });
+
+    expect(gate.pick(info)).toBe(second);
+  });
 });
