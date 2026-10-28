@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
@@ -36,6 +36,7 @@ vi.mock("@/components/character-profile/BasicEditTab", () => ({ BasicEditTab: ()
 import { CharacterProfile } from "@/components/character-profile";
 import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 
 describe("CharacterProfile — перегляд", () => {
   beforeEach(() => {
@@ -73,6 +74,22 @@ describe("CharacterProfile — перегляд", () => {
     expect(replaceState).toHaveBeenCalledWith(null, "", expect.stringMatching(/\?tab=items$/));
     expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
     expect(h.replace).not.toHaveBeenCalled();
+  });
+
+  it("зміна initialTab (перехід за посиланням тосту) перемикає вкладку", () => {
+    const ui = (tab: string) => (
+      <ConfirmProvider>
+        <CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab={tab} />
+      </ConfirmProvider>
+    );
+
+    const { rerender } = render(ui("combat"));
+
+    expect(screen.getByRole("tab", { name: "Бій" })).toHaveAttribute("data-state", "active");
+
+    rerender(ui("items"));
+
+    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
   });
 
   it("старе ?tab=stash відкриває «Інвентар»; вкладки «Підсумок» немає", () => {

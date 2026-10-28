@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { notificationKeys, useNotificationsSync, useSeenOnOpen } from "..";
 
 import { markNotificationsRead } from "@/lib/api/notifications";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { usePusherChannel } from "@/lib/hooks/common/usePusherChannel";
 import type { PlayerNotification } from "@/types/notifications";
 
@@ -44,6 +45,19 @@ describe("useSeenOnOpen", () => {
 
     expect(result.current).toEqual(new Set(["a1", "a2"]));
     expect(markNotificationsRead).toHaveBeenCalledTimes(1);
+  });
+
+  it("picks up notifications that arrive while the tab stays mounted", async () => {
+    const { client, wrapper } = setup([n("item", "a1")]);
+
+    const { result } = renderHook(() => useSeenOnOpen("c1", { types: ["item"] }), { wrapper });
+
+    await waitFor(() => expect(markNotificationsRead).toHaveBeenCalledTimes(1));
+
+    act(() => client.setQueryData(notificationKeys.list("c1"), [n("item", "a2")]));
+
+    await waitFor(() => expect(result.current).toEqual(new Set(["a1", "a2"])));
+    expect(markNotificationsRead).toHaveBeenCalledTimes(2);
   });
 
   it("does nothing when disabled", async () => {
@@ -90,6 +104,7 @@ describe("useNotificationsSync", () => {
 
     handlerFor()({ campaignId: "c1" });
     expect(spy).toHaveBeenCalledWith({ queryKey: notificationKeys.list("c1") });
+    expect(spy).toHaveBeenCalledWith({ queryKey: characterKeys.sheet("c1") });
   });
 
   it("uses a null channel without a user", () => {

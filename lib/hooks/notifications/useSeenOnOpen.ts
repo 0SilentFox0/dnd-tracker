@@ -20,22 +20,22 @@ export function useSeenOnOpen(
 
   const [seen, setSeen] = useState<ReadonlySet<string>>(NONE);
 
-  const done = useRef(false);
+  const handled = useRef<unknown>(null);
 
   const typesKey = types.join(",");
 
   useEffect(() => {
-    if (!enabled || done.current || !data) return;
+    if (!enabled || !data || handled.current === data) return;
 
-    done.current = true;
+    handled.current = data;
 
     const unread = unreadOfTypes(data, types);
 
     if (!unread.length) return;
 
-    setSeen(new Set(unread.map((n) => n.refId)));
+    setSeen((prev) => new Set([...prev, ...unread.map((n) => n.refId)]));
     void markRead({ types: [...types] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- types are keyed by typesKey; markRead is stable enough for a one-shot
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- types are keyed by typesKey
   }, [enabled, data, typesKey]);
 
   return seen;
