@@ -17,7 +17,11 @@ export type CriticalEffectType =
   | "provoke_opportunity_attack"
   | "lose_reaction"
   | "advantage_on_self"
-  | "lose_action";
+  | "lose_action"
+  | "negate_damage"
+  | "ac_buff"
+  | "negate_effects"
+  | "extra_action";
 
 export interface CriticalEffect {
   id: number; // 1-10 для d10

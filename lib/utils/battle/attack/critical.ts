@@ -39,6 +39,14 @@ const SPECS: Record<CriticalEffectType, EffectSpec | ((effect: CriticalEffect) =
   prone: { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE], expireAtTurnEnd: true },
   weakened_next_hit: { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true },
   lose_action: { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: SKIP_ACTION_CERTAIN, duration: 1 },
+  ac_buff: (effect) => ({
+    idPart: "ac-buff",
+    type: "buff",
+    modifiers: [{ kind: "modifyStat", stat: "armor", flat: typeof effect.effect.value === "number" ? effect.effect.value : 2 }],
+  }),
+  negate_damage: null,
+  negate_effects: null,
+  extra_action: null,
   double_damage: null,
   max_damage: null,
   additional_damage: null,
@@ -86,6 +94,8 @@ export function applyCriticalEffect(
       return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedReaction: true } };
     case "free_attack":
       return opts.offTurn ? updated : grantExtraActions(updated, 1);
+    case "extra_action":
+      return grantExtraActions(updated, 1);
   }
 
   const spec = specFor(effect);

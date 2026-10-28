@@ -21,6 +21,29 @@ const apply = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]
 const effectTypes = (p: ReturnType<typeof apply>) => p.battleData.activeEffects.flatMap((e) => e.effects.map((d) => d.type));
 
 describe("applyCriticalEffect", () => {
+  it("ac_buff: +2 до броні на раунд", () => {
+    const p = apply("ac_buff", { value: 2 });
+
+    expect(collectModifiers([p], p.basicInfo.id, { stat: "armor" }).flat).toBe(2);
+    expect(p.battleData.activeEffects[0]).toMatchObject({ type: "buff", duration: 1, appliedAt: { round: 3 } });
+  });
+
+  it("extra_action: +1 дія, навіть поза ходом", () => {
+    const base = createMockParticipant();
+
+    const p = applyCriticalEffect({ ...base, actionFlags: { ...base.actionFlags, hasUsedAction: true } }, crit("extra_action"), 3, { offTurn: true });
+
+    expect(p.actionFlags.hasUsedAction).toBe(false);
+    expect(p.battleData.pendingExtraActions ?? 0).toBe(0);
+    expect(applyCriticalEffect(base, crit("extra_action"), 3, { offTurn: true }).battleData.pendingExtraActions).toBe(1);
+  });
+
+  it.each(["negate_damage", "negate_effects"] as const)("%s не змінює учасника (обробляється в спеллі)", (type) => {
+    const p = createMockParticipant();
+
+    expect(applyCriticalEffect(p, crit(type), 3)).toEqual(p);
+  });
+
   it("ac_debuff: -2 до броні для collectModifiers, значення за замовчуванням і задане", () => {
     const p = apply("ac_debuff");
 
