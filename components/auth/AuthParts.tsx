@@ -1,20 +1,25 @@
 "use client";
 
-import { type ReactNode, Suspense } from "react";
+import { type FormEvent, type ReactNode, Suspense, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { MailCheck } from "lucide-react";
 
 import { HudPage, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useGoogleOAuth, useResendConfirmation } from "@/lib/hooks/auth";
+import { useTranslator } from "@/lib/i18n/use-translator";
+import { parseForm } from "@/lib/utils/auth";
 
 // useSearchParams on a static page needs a Suspense boundary
 export function AuthSuspense({ children }: { children: ReactNode }) {
+  const t = useTranslations("auth");
+
   return (
     <Suspense
       fallback={
         <HudPage width="md" className="flex min-h-[80vh] items-center justify-center">
-          <HudPanel className="w-full max-w-sm text-center">Завантаження...</HudPanel>
+          <HudPanel className="w-full max-w-sm text-center">{t("common.loading")}</HudPanel>
         </HudPage>
       }
     >
@@ -24,6 +29,8 @@ export function AuthSuspense({ children }: { children: ReactNode }) {
 }
 
 export function GoogleAuthButton({ label }: { label: string }) {
+  const t = useTranslations("auth");
+
   const { loading, start } = useGoogleOAuth();
 
   return (
@@ -34,16 +41,18 @@ export function GoogleAuthButton({ label }: { label: string }) {
         <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
         <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
       </svg>
-      {loading ? "Перенаправлення..." : label}
+      {loading ? t("common.redirecting") : label}
     </Button>
   );
 }
 
 export function AuthDivider() {
+  const t = useTranslations("auth");
+
   return (
     <div className="flex items-center gap-3 text-xs text-hud-muted" aria-hidden>
       <span className="h-px flex-1 bg-hud-rule" />
-      або
+      {t("common.or")}
       <span className="h-px flex-1 bg-hud-rule" />
     </div>
   );
@@ -68,12 +77,14 @@ export function AuthLink({ href, children }: { href: string; children: ReactNode
 }
 
 export function ResendConfirmation({ email }: { email: string }) {
+  const t = useTranslations("auth");
+
   const { pending, error, sent, resend } = useResendConfirmation();
 
   return (
     <div className="space-y-2">
       <Button type="button" variant="outline" className="w-full" disabled={pending || sent} onClick={() => void resend(email)}>
-        {sent ? "Лист надіслано ще раз" : pending ? "Надсилання..." : "Надіслати лист ще раз"}
+        {sent ? t("unconfirmed.resent") : pending ? t("unconfirmed.resending") : t("unconfirmed.resend")}
       </Button>
       <FormError message={error} />
     </div>
@@ -81,15 +92,33 @@ export function ResendConfirmation({ email }: { email: string }) {
 }
 
 export function CheckEmailNotice({ email, children }: { email: string; children?: ReactNode }) {
+  const t = useTranslations("auth");
+
   return (
     <div className="space-y-4 text-sm text-hud-bone">
       <div className="flex items-start gap-3">
         <MailCheck aria-hidden className="mt-0.5 size-5 shrink-0 text-hud-gold" />
-        <p>
-          Ми надіслали лист на <span className="font-medium text-hud-ink">{email}</span>. Відкрийте посилання з нього в цьому ж браузері. Якщо листа немає — перевірте «Спам».
-        </p>
+        <p>{t("checkEmail.sent", { email })}</p>
       </div>
       {children}
     </div>
   );
+}
+
+export function useFormErrors() {
+  const t = useTranslator();
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const read = <T,>(schema: Parameters<typeof parseForm<T>>[0], e: FormEvent<HTMLFormElement>): T | null => {
+    e.preventDefault();
+
+    const result = parseForm(schema, e.currentTarget, t);
+
+    setErrors(result.errors ?? {});
+
+    return result.data;
+  };
+
+  return { errors, read };
 }

@@ -4,7 +4,10 @@ import type { EmailOtpType } from '@supabase/supabase-js'
 import { getRedirectOrigin } from './redirect-origin'
 
 import { RESET_PASSWORD_PATH } from '@/lib/constants/auth'
+import type { Locale } from '@/lib/i18n/config'
+import { setLocaleCookie } from '@/lib/i18n/cookie'
 import { ensureDbUser } from '@/lib/server/users/db-user'
+import { readUserLocale } from '@/lib/server/users/locale'
 import { createClient } from '@/lib/supabase/server'
 import { safeNextPath } from '@/lib/utils/auth'
 
@@ -60,14 +63,22 @@ export async function GET(request: Request) {
       return fail('user_not_found')
     }
 
+    let locale: Locale | null = null
+
     try {
       await ensureDbUser(user, { refresh: true })
+
+      locale = await readUserLocale(user.id)
     } catch (dbError) {
       // the session is valid either way; the row is created again on the first campaign create/join
       console.error('Database error:', dbError)
     }
 
-    return NextResponse.redirect(`${origin}${next}`)
+    const res = NextResponse.redirect(`${origin}${next}`)
+
+    if (locale) setLocaleCookie(res, locale)
+
+    return res
   } catch (error) {
     console.error('Unexpected error in callback:', error)
 

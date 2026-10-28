@@ -1,0 +1,9 @@
+[
+  "components/auth/**",
+  "components/landing/**",
+  "app/(auth)/**",
+  "app/uk/**",
+  "app/page.tsx",
+  "lib/i18n/**",
+  "components/common/LocaleSwitcher.tsx"
+]

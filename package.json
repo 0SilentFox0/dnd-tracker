@@ -33,6 +33,7 @@
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/load-template.ts",
+    "i18n:extract": "tsx scripts/i18n/extract-cyrillic.ts",
     "srd:build": "tsx --tsconfig tsconfig.scripts.json scripts/srd/build.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",
     "seed-world-map": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-world-map.ts",
@@ -90,6 +91,7 @@
     "lucide-react": "^0.562.0",
     "mcp-handler": "^2",
     "next": "16.1.1",
+    "next-intl": "^4.14.9",
     "prisma": "^6",
     "pusher": "^5.3.2",
     "pusher-js": "^8.4.0",
@@ -98,10 +100,12 @@
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
     "three": "^0.186.1",
+    "use-intl": "4.14.9",
     "vaul": "^1.1.2",
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "3.5.22",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

@@ -1,10 +1,10 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { AuthCard } from "@/components/auth/AuthCard";
-import { AuthDivider, AuthLink, AuthSuspense, CheckEmailNotice, FormError, GoogleAuthButton, ResendConfirmation } from "@/components/auth/AuthParts";
+import { AuthDivider, AuthLink, AuthSuspense, CheckEmailNotice, FormError, GoogleAuthButton, ResendConfirmation, useFormErrors } from "@/components/auth/AuthParts";
 import { NewPasswordForm } from "@/components/auth/NewPasswordForm";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
@@ -12,25 +12,10 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { AFTER_SIGN_IN_PATH, PASSWORD_MIN_LENGTH } from "@/lib/constants/auth";
 import { useAuthUrlError, useEmailSignIn, useEmailSignUp, usePasswordResetRequest, useRedirectIfSignedIn, useUpdatePassword } from "@/lib/hooks/auth";
 import { emailSchema, signInSchema, signUpSchema } from "@/lib/schemas/auth";
-import { parseForm } from "@/lib/utils/auth";
-
-function useFormErrors() {
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const read = <T,>(schema: Parameters<typeof parseForm<T>>[0], e: FormEvent<HTMLFormElement>): T | null => {
-    e.preventDefault();
-
-    const result = parseForm(schema, e.currentTarget);
-
-    setErrors(result.errors ?? {});
-
-    return result.data;
-  };
-
-  return { errors, read };
-}
 
 function SignInCard() {
+  const t = useTranslations("auth");
+
   useRedirectIfSignedIn();
 
   const urlError = useAuthUrlError();
@@ -41,16 +26,16 @@ function SignInCard() {
 
   return (
     <AuthCard
-      title="Вхід"
-      description="Увійдіть, щоб продовжити кампанію"
+      title={t("signIn.title")}
+      description={t("signIn.description")}
       error={urlError}
       footer={
         <p className="text-center text-sm text-hud-muted">
-          Немає акаунта? <AuthLink href="/sign-up">Зареєструватися</AuthLink>
+          {t("signIn.noAccount")} <AuthLink href="/sign-up">{t("signIn.signUpLink")}</AuthLink>
         </p>
       }
     >
-      <GoogleAuthButton label="Увійти через Google" />
+      <GoogleAuthButton label={t("signIn.google")} />
       <AuthDivider />
       <form
         noValidate
@@ -61,15 +46,15 @@ function SignInCard() {
           if (values) void signIn(values);
         }}
       >
-        <LabeledInput label="Email" id="sign-in-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
-        <PasswordInput label="Пароль" id="sign-in-password" name="password" autoComplete="current-password" error={errors.password} />
+        <LabeledInput label={t("common.email")} id="sign-in-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
+        <PasswordInput label={t("common.password")} id="sign-in-password" name="password" autoComplete="current-password" error={errors.password} />
         <p className="text-right text-sm">
-          <AuthLink href="/forgot-password">Забули пароль?</AuthLink>
+          <AuthLink href="/forgot-password">{t("signIn.forgotLink")}</AuthLink>
         </p>
         <FormError message={error} />
         {unconfirmedEmail && <ResendConfirmation email={unconfirmedEmail} />}
         <Button type="submit" className="w-full" size="lg" disabled={pending}>
-          {pending ? "Вхід..." : "Увійти"}
+          {pending ? t("signIn.submitting") : t("signIn.submit")}
         </Button>
       </form>
     </AuthCard>
@@ -77,6 +62,10 @@ function SignInCard() {
 }
 
 function SignUpCard() {
+  const t = useTranslations("auth");
+
+  const tRoot = useTranslations();
+
   useRedirectIfSignedIn();
 
   const urlError = useAuthUrlError();
@@ -87,15 +76,15 @@ function SignUpCard() {
 
   if (sentTo) {
     return (
-      <AuthCard title="Перевірте пошту" description="Залишився один крок — підтвердити адресу">
+      <AuthCard title={t("signUp.checkTitle")} description={t("signUp.checkDescription")}>
         <CheckEmailNotice email={sentTo}>
-          <p className="text-hud-muted">Якщо акаунт із цією поштою вже існує, лист не прийде — просто увійдіть або відновіть пароль.</p>
+          <p className="text-hud-muted">{t("signUp.existingNote")}</p>
           <ResendConfirmation email={sentTo} />
           <div className="flex justify-between text-sm">
             <button type="button" onClick={reset} className="text-hud-gold hover:text-hud-gold-strong">
-              Змінити email
+              {t("signUp.changeEmail")}
             </button>
-            <AuthLink href="/sign-in">До входу</AuthLink>
+            <AuthLink href="/sign-in">{t("common.backToSignIn")}</AuthLink>
           </div>
         </CheckEmailNotice>
       </AuthCard>
@@ -104,16 +93,16 @@ function SignUpCard() {
 
   return (
     <AuthCard
-      title="Реєстрація"
-      description="Створіть акаунт — це безкоштовно"
+      title={t("signUp.title")}
+      description={t("signUp.description")}
       error={urlError}
       footer={
         <p className="text-center text-sm text-hud-muted">
-          Вже є акаунт? <AuthLink href="/sign-in">Увійти</AuthLink>
+          {t("signUp.haveAccount")} <AuthLink href="/sign-in">{t("signUp.signInLink")}</AuthLink>
         </p>
       }
     >
-      <GoogleAuthButton label="Зареєструватися через Google" />
+      <GoogleAuthButton label={t("signUp.google")} />
       <AuthDivider />
       <form
         noValidate
@@ -124,13 +113,27 @@ function SignUpCard() {
           if (values) void signUp(values);
         }}
       >
-        <LabeledInput label="Ім'я" id="sign-up-name" name="displayName" autoComplete="nickname" error={errors.displayName} description="Так вас бачитимуть у кампаніях" />
-        <LabeledInput label="Email" id="sign-up-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
-        <PasswordInput label="Пароль" id="sign-up-password" name="password" autoComplete="new-password" error={errors.password} description={`Щонайменше ${PASSWORD_MIN_LENGTH} символів`} />
-        <PasswordInput label="Повторіть пароль" id="sign-up-confirm" name="confirm" autoComplete="new-password" error={errors.confirm} />
+        <LabeledInput
+          label={t("signUp.displayName")}
+          id="sign-up-name"
+          name="displayName"
+          autoComplete="nickname"
+          error={errors.displayName}
+          description={t("signUp.displayNameHint")}
+        />
+        <LabeledInput label={t("common.email")} id="sign-up-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
+        <PasswordInput
+          label={t("common.password")}
+          id="sign-up-password"
+          name="password"
+          autoComplete="new-password"
+          error={errors.password}
+          description={tRoot("validation.minLength", { minimum: PASSWORD_MIN_LENGTH })}
+        />
+        <PasswordInput label={t("common.confirmPassword")} id="sign-up-confirm" name="confirm" autoComplete="new-password" error={errors.confirm} />
         <FormError message={error} />
         <Button type="submit" className="w-full" size="lg" disabled={pending}>
-          {pending ? "Створення..." : "Створити акаунт"}
+          {pending ? t("signUp.submitting") : t("signUp.submit")}
         </Button>
       </form>
     </AuthCard>
@@ -138,6 +141,8 @@ function SignUpCard() {
 }
 
 function ForgotPasswordCard() {
+  const t = useTranslations("auth");
+
   const urlError = useAuthUrlError();
 
   const { pending, error, sentTo, send } = usePasswordResetRequest();
@@ -146,14 +151,14 @@ function ForgotPasswordCard() {
 
   if (sentTo) {
     return (
-      <AuthCard title="Перевірте пошту" description="Посилання для нового пароля вже в дорозі">
+      <AuthCard title={t("forgot.checkTitle")} description={t("forgot.checkDescription")}>
         <CheckEmailNotice email={sentTo}>
           <Button type="button" variant="outline" className="w-full" disabled={pending} onClick={() => void send(sentTo)}>
-            {pending ? "Надсилання..." : "Надіслати ще раз"}
+            {pending ? t("common.sending") : t("forgot.resend")}
           </Button>
           <FormError message={error} />
           <p className="text-center text-sm">
-            <AuthLink href="/sign-in">До входу</AuthLink>
+            <AuthLink href="/sign-in">{t("common.backToSignIn")}</AuthLink>
           </p>
         </CheckEmailNotice>
       </AuthCard>
@@ -162,12 +167,12 @@ function ForgotPasswordCard() {
 
   return (
     <AuthCard
-      title="Відновлення пароля"
-      description="Вкажіть пошту акаунта — надішлемо посилання для нового пароля"
+      title={t("forgot.title")}
+      description={t("forgot.description")}
       error={urlError}
       footer={
         <p className="text-center text-sm text-hud-muted">
-          Згадали пароль? <AuthLink href="/sign-in">Увійти</AuthLink>
+          {t("forgot.remembered")} <AuthLink href="/sign-in">{t("forgot.signInLink")}</AuthLink>
         </p>
       }
     >
@@ -180,10 +185,10 @@ function ForgotPasswordCard() {
           if (values) void send(values.email);
         }}
       >
-        <LabeledInput label="Email" id="forgot-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
+        <LabeledInput label={t("common.email")} id="forgot-email" name="email" type="email" autoComplete="email" inputMode="email" error={errors.email} />
         <FormError message={error} />
         <Button type="submit" className="w-full" size="lg" disabled={pending}>
-          {pending ? "Надсилання..." : "Надіслати посилання"}
+          {pending ? t("common.sending") : t("forgot.submit")}
         </Button>
       </form>
     </AuthCard>
@@ -191,15 +196,17 @@ function ForgotPasswordCard() {
 }
 
 export function ResetPasswordScreen() {
+  const t = useTranslations("auth");
+
   const { session, pending, error, done, update } = useUpdatePassword();
 
-  if (session === "checking") return <AuthCard title="Новий пароль">Перевіряємо посилання...</AuthCard>;
+  if (session === "checking") return <AuthCard title={t("reset.title")}>{t("reset.checking")}</AuthCard>;
 
   if (session === "missing") {
     return (
-      <AuthCard title="Посилання недійсне" description="Воно застаріло, уже використане або відкрите в іншому браузері">
+      <AuthCard title={t("reset.invalidTitle")} description={t("reset.invalidDescription")}>
         <Button asChild className="w-full" size="lg">
-          <Link href="/forgot-password">Надіслати новий лист</Link>
+          <Link href="/forgot-password">{t("reset.newLink")}</Link>
         </Button>
       </AuthCard>
     );
@@ -207,17 +214,17 @@ export function ResetPasswordScreen() {
 
   if (done) {
     return (
-      <AuthCard title="Пароль змінено" description="Тепер можна входити з новим паролем">
+      <AuthCard title={t("reset.doneTitle")} description={t("reset.doneDescription")}>
         <Button asChild className="w-full" size="lg">
-          <Link href={AFTER_SIGN_IN_PATH}>До кампаній</Link>
+          <Link href={AFTER_SIGN_IN_PATH}>{t("reset.toCampaigns")}</Link>
         </Button>
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard title="Новий пароль" description="Придумайте пароль для входу">
-      <NewPasswordForm pending={pending} error={error} submitLabel="Зберегти пароль" onSubmit={(v) => void update(v)} />
+    <AuthCard title={t("reset.title")} description={t("reset.description")}>
+      <NewPasswordForm pending={pending} error={error} submitLabel={t("reset.save")} onSubmit={(v) => void update(v)} />
     </AuthCard>
   );
 }

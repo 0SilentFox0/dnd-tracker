@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { defineConfig } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
@@ -49,6 +50,12 @@ const MODE_OWNED_FILES = [
   "lib/server/battles/mutations/maze-mark/**",
   "lib/server/battles/mutations/move/**",
 ];
+
+const I18N_MIGRATED = JSON.parse(readFileSync(new URL("./i18n-migrated.json", import.meta.url), "utf8"));
+
+const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
+
+const CYRILLIC_SELECTORS = ["Literal[value=/[\\u0400-\\u04FF]/]", "JSXText[value=/[\\u0400-\\u04FF]/]", "TemplateElement[value.raw=/[\\u0400-\\u04FF]/]"];
 
 const eslintConfig = defineConfig([
   { ignores: [".superpowers/**"] },
@@ -250,6 +257,13 @@ const eslintConfig = defineConfig([
           patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
         },
       ],
+    },
+  },
+  {
+    files: I18N_MIGRATED,
+    ignores: ["**/__tests__/**"],
+    rules: {
+      "no-restricted-syntax": ["error", ...CYRILLIC_SELECTORS.map((selector) => ({ selector, message: CYRILLIC_MESSAGE }))],
     },
   },
   {

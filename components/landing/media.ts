@@ -34,6 +34,8 @@ export const SHOWCASE_MEDIA = {
 
 export type ShowcaseId = keyof typeof SHOWCASE_MEDIA;
 
+export const PREP_PANELS = ["scenario", "show", "world"] as const satisfies readonly ShowcaseId[];
+
 export const PROBLEM_ICONS: LucideIcon[] = [Map, Swords, ScrollText, MessageSquare, Music, NotebookPen, ImageIcon];
 
 export const CAPABILITY_ICONS: Record<string, LucideIcon> = {

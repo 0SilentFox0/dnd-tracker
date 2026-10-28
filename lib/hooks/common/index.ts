@@ -26,6 +26,7 @@ export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./us
 export { useReducedMotion } from "./useReducedMotion";
 export { useRowKeys } from "./useRowKeys";
 export { type SearchState, useSearch } from "./useSearch";
+export { useSetLocale } from "./useSetLocale";
 export { useSingleFlight } from "./useSingleFlight";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
 export { DRAG_THRESHOLD, useViewport, type ViewportOptions } from "./useViewport";
