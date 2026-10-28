@@ -1,0 +1,38 @@
+import { adaptCompendium } from "./adapt";
+import { canonicalKey } from "./identity";
+import { parseCompendium } from "./parse";
+import { kindTable, prismaImportRepository } from "./repository";
+import type { ImportInput } from "./service";
+
+import { prisma } from "@/lib/db";
+import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
+import type { Actor } from "@/lib/utils/api/actor";
+
+/** Presentation of the same Task19 adapter output; no alternate planner or writes. */
+export function previewPresentation(input: ImportInput) {
+  const adapted = adaptCompendium(parseCompendium(input.json), input);
+
+  return { rulesDiff: input.rulesPatch ?? {}, graph: adapted.entries.map(entry => ({ key: entry.key, name: entry.name, kind: entry.kind, inputPath: entry.inputPath,
+    refs: [...entry.refs, ...(entry.mergeParent ? [entry.mergeParent] : [])].map(ref => ({ key: canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent), kind: ref.kind, name: ref.name, source: ref.source, edition: ref.edition })),
+    summary: entry.kind === "backgrounds" ? { choices: entry.body.choices ?? [], skills: entry.body.skillProficiencies ?? [], tools: entry.body.toolProficiencies ?? [], originFeat: entry.refs.filter(ref => ref.kind === "feat").map(ref => ({ name: ref.name, source: ref.source })), equipment: "manual", currency: "manual" } : undefined,
+  })) };
+}
+
+async function targets(campaignId: string) {
+  return (await Promise.all(Object.entries(kindTable).map(async ([kind, key]) => {
+    const table = BUNDLE_TABLES.find(t => t.key === key)!;
+
+    const rows = await delegateOf(prisma, table).findMany({ where: { campaignId }, orderBy: { name: "asc" }, select: { id: true, name: true } });
+
+    return rows.map(row => ({ kind, id: String(row.id), name: String(row.name) }));
+  }))).flat();
+}
+
+/** Read-only pickers; the Task19 repository revalidates every selected target and edition. */
+export async function importTargetOptions(actor: Actor) {
+  await prismaImportRepository.authorize(actor);
+
+  const templates = await prisma.campaign.findMany({ where: { kind: "template", visibility: "official", name: "5e SRD 5.2" }, select: { id: true, name: true } });
+
+  return { local: await targets(actor.campaignId), templates: await Promise.all(templates.map(async template => ({ ...template, edition: "one" as const, rows: await targets(template.id) }))) };
+}

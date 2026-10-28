@@ -10,9 +10,8 @@ import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
-import { composeItemRow } from "@/lib/utils/items/compose";
 import { isPropertyRow, isUniqueRow } from "@/lib/utils/items/item-row";
-import { parseItemRef } from "@/lib/utils/items/ref";
+import { resolveItemRow } from "@/lib/utils/items/resolve";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactOption {
@@ -37,13 +36,7 @@ function optionFor(ref: string, artifacts: ArtifactOption[]): ArtifactOption | u
 
   if (direct) return direct;
 
-  const parsed = parseItemRef(ref);
-
-  const base = parsed?.propertyId ? artifacts.find((a) => a.id === parsed.baseId) : undefined;
-
-  const property = base && artifacts.find((a) => a.id === parsed?.propertyId);
-
-  return base && property ? composeItemRow(base, property) : undefined;
+  return resolveItemRow(ref, new Map(artifacts.map((a) => [a.id, a]))) ?? undefined;
 }
 
 const CELL =

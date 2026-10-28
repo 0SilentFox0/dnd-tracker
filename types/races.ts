@@ -15,6 +15,7 @@ export interface SpellSlotProgression {
 }
 
 export interface RacePassiveAbility {
+  creatureType?: string;
   name?: string;
   icon?: string;
   description: string;

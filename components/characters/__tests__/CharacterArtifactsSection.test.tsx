@@ -6,6 +6,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { updateInventory } from "@/lib/api/inventory";
+import { itemStatsColumns } from "@/lib/utils/items/item-stats";
+
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { classes: { enabled: false } } }) }));
 
 vi.mock("@/lib/api/inventory", () => ({ updateInventory: vi.fn() }));
 
@@ -20,6 +23,11 @@ const renderIt = (holders?: Record<string, string>) =>
 
 describe("CharacterArtifactsSection", () => {
   afterEach(cleanup);
+
+  it("shows a parameterized equipped item through the canonical resolver", () => {
+    renderWithConfirm(<QueryClientProvider client={new QueryClient()}><CharacterArtifactsSection campaignId="c" characterId="ch" equipped={{ armor: "resist~fire" }} artifacts={[{ id: "resist", name: "Armor ({param})", slot: "armor", ...itemStatsColumns({ parameter: { kind: "damageType", options: [{ key: "fire", label: "Fire" }] } }) }]} onEquippedChange={onEquippedChange} /></QueryClientProvider>);
+    expect(screen.getByTitle("Броня: Armor (fire)")).toBeTruthy();
+  });
 
   it("лише сітка: вдягнена річ з літерою, порожні слоти, без книги й сетів", () => {
     renderIt();

@@ -36,6 +36,12 @@ export function planChoices(input: PlanInput): PlanResult {
 
   if (!classMode && (after.feats.length > 0 || after.classes.some((e) => hasPicks(e.choices)))) return failWith(422, [choiceIssue("feats", "CHOICES_NEED_CLASSES")]);
 
+  const background = after.backgroundId ? refs.backgroundsById?.[after.backgroundId] : null;
+
+  if (after.backgroundId && (!classMode || !background)) return failWith(422, [choiceIssue("backgroundId", !classMode ? "CHOICES_NEED_CLASSES" : "CHOICE_UNKNOWN")]);
+
+  if (background && after.feats.some((f) => f.source === "origin")) return failWith(422, [choiceIssue("feats", "ORIGIN_FEAT_ONLY_ONE", "Передісторія вже визначає рису походження")]);
+
   const dmFeats = (s: ChoicesState) => s.feats.filter((f) => f.source === "dm");
 
   if (!input.isDM && !same(dmFeats(before), dmFeats(after))) return failWith(403, [choiceIssue("feats", "DM_FEAT_ONLY_DM")]);
@@ -48,11 +54,13 @@ export function planChoices(input: PlanInput): PlanResult {
 
   const featCounts = countFeats(visits, after, classMode);
 
+  if (background?.originFeatId) featCounts.set(background.originFeatId, (featCounts.get(background.originFeatId) ?? 0) + 1);
+
   const base: Omit<PickContext, "owner" | "level"> = {
     totalLevel: level,
     featsById: refs.featsById,
     spellsById: refs.spellsById,
-    proficient: new Set([...skillFlags(input.skills), ...skillPicksOf(visits, "skill")]),
+    proficient: new Set([...(background?.skillProficiencies ?? []), ...skillFlags(input.skills), ...skillPicksOf(visits, "skill")]),
     scores: input.scores,
     featCounts,
   };
@@ -63,6 +71,22 @@ export function planChoices(input: PlanInput): PlanResult {
     ...lockedIssues(raceDefs, before.raceChoices, after.raceChoices, level, "raceChoices"),
     ...validatePicks(raceDefs, after.raceChoices, { ...base, owner: "race", level }, "raceChoices"),
   ];
+
+  if (background) {
+    issues.push(...lockedIssues(background.choices, before.backgroundId === after.backgroundId ? before.backgroundChoices ?? {} : {}, after.backgroundChoices ?? {}, level, "backgroundChoices"));
+    issues.push(...validatePicks(background.choices, after.backgroundChoices ?? {}, { ...base, owner: "background", level }, "backgroundChoices"));
+
+    if (background.originFeatId) {
+      const feat = refs.featsById[background.originFeatId];
+
+      if (!feat || feat.type !== "origin") issues.push(choiceIssue("backgroundFeatPicks", "FEAT_TYPE"));
+      else {
+        if (!feat.repeatable && (featCounts.get(feat.id) ?? 0) > 1) issues.push(choiceIssue("backgroundFeatPicks", "FEAT_NOT_REPEATABLE", feat.name));
+
+        issues.push(...validatePicks(feat.choices, after.backgroundFeatPicks ?? {}, { ...base, owner: "feat", level }, "backgroundFeatPicks"));
+      }
+    }
+  }
 
   for (const entry of classMode ? after.classes : []) {
     const cls = refs.classesById[entry.classId];

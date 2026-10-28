@@ -38,6 +38,8 @@ export function spellSchoolColor(group: { color?: string | null } | null | undef
 export const SPELL_COST_LABELS = {
   action: "Дія",
   bonusAction: "Бонусна дія",
+  reaction: "Реакція",
+  long: "Тривале накладання",
 } as const;
 
 export const SPELL_TARGETING_LABELS = {

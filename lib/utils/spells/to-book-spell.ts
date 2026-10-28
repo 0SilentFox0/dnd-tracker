@@ -3,6 +3,7 @@ import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { BookSpell, SpellDefinition, SpellGroupRef, SpellRules } from "@/types/spells";
 
 interface BookSpellRow {
+  executionMode?: string;
   id: string;
   name: string;
   level: number;
@@ -12,6 +13,7 @@ interface BookSpellRow {
   spellGroup: SpellGroupRef | null;
   dice?: number;
   cost?: string;
+  casting?: unknown;
   targeting?: unknown;
   resolution?: unknown;
   spellEffects?: unknown;
@@ -29,8 +31,10 @@ interface BookSpellRow {
 /** Rules for the battle-effect preview; stacking only when on, so the common case adds no keys. */
 export function spellRules(def: SpellDefinition): SpellRules {
   return {
+    ...(def.executionMode && { executionMode: def.executionMode }),
     dice: def.dice,
     cost: def.cost,
+    casting: def.casting,
     targeting: def.targeting,
     resolution: def.resolution,
     spellEffects: def.effects,

@@ -34,12 +34,30 @@ describe("grant with a plan", () => {
     expect(again.ok && again.state.items).toEqual([{ id: "n1", name: "Potion of Healing", quantity: 4, consumable: true, artifactId: "pot" }]);
   });
 
+  it("does not merge stacks with different spell or parameter choices", () => {
+    const initial = base({ items: [{ id: "fire", name: "Scroll Fire", quantity: 1, consumable: true, artifactId: "scroll", parameter: "fire", spellId: "s1" }] });
+
+    const plan = { kind: "consumable" as const, artifactId: "scroll", name: "Scroll Cold", quantity: 1, parameter: "cold", spellId: "s2" };
+
+    const out = applyStashAction(initial, { action: "grant", artifactId: "scroll", quantity: 1, parameter: "cold", spellId: "s2" }, { ...ctx, grant: plan });
+
+    expect(out.ok && out.state.items).toEqual([initial.items[0], { id: "n1", name: "Scroll Cold", quantity: 1, consumable: true, artifactId: "scroll", parameter: "cold", spellId: "s2" }]);
+  });
+
   it("editItem keeps the artifact link", () => {
     const s = base({ items: [{ id: "p", name: "Potion", quantity: 2, consumable: true, artifactId: "pot" }] });
 
     const r = applyStashAction(s, { action: "editItem", itemId: "p", name: "Зілля", quantity: 3, consumable: true }, ctx);
 
     expect(r.ok && r.state.items[0]).toEqual({ id: "p", name: "Зілля", quantity: 3, consumable: true, artifactId: "pot" });
+  });
+
+  it("editing stack label/quantity preserves selected scroll metadata", () => {
+    const s = base({ items: [{ id: "scroll", name: "Scroll Fire", quantity: 2, consumable: true, artifactId: "scroll-artifact", parameter: "fire", spellId: "spell-fire" }] });
+
+    const r = applyStashAction(s, { action: "editItem", itemId: "scroll", name: "Scroll", quantity: 2, consumable: true }, ctx);
+
+    expect(r.ok && r.state.items[0]).toEqual({ id: "scroll", name: "Scroll", quantity: 2, consumable: true, artifactId: "scroll-artifact", parameter: "fire", spellId: "spell-fire" });
   });
 });
 

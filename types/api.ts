@@ -221,6 +221,10 @@ export interface SpellCastData {
   legendaryKey?: string;
   casterId: string;
   spellId: string;
+  grantKey?: string;
+  castingRounds?: number;
+  cancelCasting?: boolean;
+  castLevel?: number;
   targetIds: string[];
   /** точка шаблону на карті */
   targetCell?: GridPoint;

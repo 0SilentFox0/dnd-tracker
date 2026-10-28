@@ -27,8 +27,10 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
       </div>
       <div>
         <Label htmlFor="cost">Вартість</Label>
-        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost })} placeholder="Вартість" options={SPELL_COST_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost, ...(value === "long" && { casting: { ...formData.casting, rounds: formData.casting?.rounds ?? 10 } }) })} placeholder="Вартість" options={SPELL_COST_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
       </div>
+      {formData.cost === "long" && <LabeledInput id="casting-rounds" label="Раундів накладання (1 хв = 10 раундів)" type="number" min={2} max={144000} value={formData.casting?.rounds ?? 10} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, rounds: Number(e.target.value) } })} />}
+      {formData.cost === "reaction" && <LabeledInput containerClassName="col-span-2" id="reaction-trigger" label="Умова реакції" value={formData.casting?.trigger ?? ""} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, trigger: e.target.value || undefined } })} />}
       <div className="col-span-2">
         <Label htmlFor="groupId">Школа</Label>
         <SelectField id="groupId" value={formData.groupId ?? ""} onValueChange={(value) => setFormData({ ...formData, groupId: value || null })} placeholder="Виберіть школу" options={spellGroups.map((g) => ({ value: g.id, label: g.name }))} allowNone noneLabel="Без школи" />

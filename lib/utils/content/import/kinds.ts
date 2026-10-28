@@ -1,6 +1,6 @@
 import type { ImportCounts, ImportKind, ImportMode, ImportRowStatus, ImportSpec } from "@/types/content-import";
 
-export const IMPORT_KINDS = ["units", "spells", "skills", "main-skills", "spell-groups", "races", "classes", "feats", "artifacts", "artifact-sets"] as const satisfies readonly ImportKind[];
+export const IMPORT_KINDS = ["units", "spells", "skills", "main-skills", "spell-groups", "races", "classes", "feats", "backgrounds", "artifacts", "artifact-sets"] as const satisfies readonly ImportKind[];
 
 export const IMPORT_MODES = ["create", "update", "skip"] as const satisfies readonly ImportMode[];
 

@@ -1,10 +1,11 @@
 import { convertArtifacts } from "../convert/artifacts";
+import { backgroundFeatVariants,convertBackgrounds } from "../convert/backgrounds";
 import { applyClassChoices } from "../convert/class-choices";
 import { convertClasses } from "../convert/classes";
 import { convertFeats } from "../convert/feats";
-import { convertMagicItems } from "../convert/magic-items";
+import { applyItemCasting, convertMagicItems } from "../convert/magic-items";
 import { convertMonsterActions } from "../convert/monster-actions";
-import { applyRaceChoices } from "../convert/race-choices";
+import { applyRaceChoices, convertBreathSpells } from "../convert/race-choices";
 import { convertRaces } from "../convert/races";
 import { convertSpellGroups } from "../convert/spell-groups";
 import { convertSpells } from "../convert/spells";
@@ -57,21 +58,27 @@ export function buildSrdData(data: Open5eData): SrdData {
 
   const out: SrdData = {
     "spell-groups": convertSpellGroups(),
-    spells: [...convertSpells(data), ...convertMonsterActions(data)].sort(bySlug),
+    spells: [...convertSpells(data), ...convertMonsterActions(data), ...convertBreathSpells(data)].sort(bySlug),
     races: applyRaceChoices(convertRaces(data), data),
     classes: applyClassChoices(convertClasses(data)),
-    feats: convertFeats(data),
+    feats: (() => { const feats = convertFeats(data);
+
+ return [...feats, ...backgroundFeatVariants(data, feats)].sort(bySlug); })(),
+    backgrounds: convertBackgrounds(data),
     units: convertUnits(data),
     artifacts: (() => {
       const gear = convertArtifacts(data);
 
-      return [...gear, ...convertMagicItems(data, gear)].sort(bySlug);
+      return applyItemCasting([...gear, ...convertMagicItems(data, gear)], data).sort(bySlug);
     })(),
   };
+
+  assertKnown("background origin feats", out.backgrounds.map((b) => b.originFeatId), new Set(out.feats.filter((f) => f.type === "origin").map((f) => f.name)));
 
   const spellNames = new Set(out.spells.map((s) => s.name));
 
   assertKnown("race choice spells", out.races.flatMap((r) => (r.choices ?? []).flatMap((c) => (c.options ?? []).flatMap((o) => (o.spells ?? []).map((s) => s.spellId)))), spellNames);
+  assertKnown("item spell grants", out.artifacts.flatMap((a) => (a.item?.spells ?? []).map((s) => s.spellId)), spellNames);
   assertKnown("unit spell grants", out.units.flatMap((u) => (u.spellcasting?.spells ?? []).map((s) => s.spellId)), spellNames);
   assertKnown("unit linked spells", out.units.flatMap((u) => u.abilities.flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])), spellNames);
 

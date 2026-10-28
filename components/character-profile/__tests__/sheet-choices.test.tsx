@@ -66,3 +66,11 @@ describe("sheet choices UI", () => {
     expect(screen.queryByRole("button", { name: "Обрати" })).toBeNull();
   });
 });
+
+it("shows background and manual equipment even without a feat", () => {
+  current.sheet = { ...sheetFixture, choices: { ...choices, feats: [], options: [], background: { id: "b", name: "Sage", picks: ["+2 ІНТ"], equipmentText: "Book or 50 GP" } } };
+  render(<FeatsBlock />);
+  expect(screen.getByText(/Sage/)).toBeTruthy();
+  expect(screen.getByText(/\+2 ІНТ/)).toBeTruthy();
+  expect(screen.getByText(/Book or 50 GP/)).toBeTruthy();
+});

@@ -105,10 +105,10 @@ export function buildOpenApi(): OpenApiDocument {
     const operation: OpenApiOperation = {
       operationId: spec.id,
       summary: spec.summary,
-      description: `${spec.description ? `${spec.description}\n` : ""}Права: ${scope}${spec.need.access === "dm" ? "; ДМ" : ""}.`,
+      ...(spec.description || spec.need.access === "dm" ? { description: [spec.description, spec.need.access === "dm" ? "Лише ДМ." : ""].filter(Boolean).join("\n") } : {}),
       tags: [spec.tag],
       "x-scopes": [scope],
-      parameters: [...pathParams(p, spec.pathEnums), ...queryParams(spec.query)],
+      ...((spec.pathEnums || spec.query) && { parameters: [...pathParams(p, spec.pathEnums).filter((param) => "schema" in param && param.schema && "enum" in param.schema), ...queryParams(spec.query)] }),
       ...(bodyId && { requestBody: { required: true, content: { "application/json": { schema: ref(bodyId) } } } }),
       responses: {
         [spec.status ?? 200]: responseRef(SUCCESS_RESPONSES[spec.response].id),
@@ -116,7 +116,10 @@ export function buildOpenApi(): OpenApiDocument {
       },
     };
 
-    (paths[p] ??= {})[spec.method.toLowerCase()] = operation;
+    const path = paths[p] ??= {};
+
+    path.parameters = pathParams(p, spec.pathEnums).filter((param) => !("schema" in param && param.schema && "enum" in param.schema)) as unknown as OpenApiOperation;
+    path[spec.method.toLowerCase()] = operation;
   }
 
   return {

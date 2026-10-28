@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => ({
   artifact: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
   artifactSet: { findFirst: vi.fn(), findUnique: vi.fn(), deleteMany: vi.fn() },
-  $transaction: vi.fn(),
+  $transaction: vi.fn(async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] })),
 }));
 
 const resolveIcon = vi.hoisted(() => vi.fn());

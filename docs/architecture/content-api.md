@@ -4,6 +4,8 @@
 
 Контент кампанії можна змінювати з UI, через REST з токеном і через MCP. Усі три шляхи проходять через одні й ті самі Zod-схеми, сервіс і перевірки прав. До контенту належать раси, юніти, заклинання, школи магії, основні скіли, скіли, артефакти, сети, треки музики, класи (`classes`), риси (`feats`), а також правила кампанії й дерева скілів.
 
+Передісторії (`backgrounds`, `backgroundsResource`, модель `Background`) використовують той самий ресурсний реєстр, REST/OpenAPI/MCP, CSV, bundle і source-sync. Поля: `choices`, `skillProficiencies`, `toolProficiencies`, `originFeatId`, `equipmentText`; залежні feats імпортуються перед backgrounds. Сервер перевіряє origin type та належність вкладених refs кампанії. Використаний запис не можна видалити або змінити його ASI-правила (409); source-sync дотримується тих самих обмежень. Старі bundles без backgrounds підтримуються. Спорядження та гроші з опису видає ДМ вручну.
+
 ## Шари
 
 - **Реєстр ресурсів** — `lib/server/content/resources/*.ts`, `CONTENT_RESOURCES`. Опис ресурсу — `ContentResource` (`define-resource.ts`):
@@ -157,3 +159,33 @@
 - `spells.fixedDice` і `damageBonus` — сталі кубики й додаткова шкода. Шаблон площі підтримує точне коло (`exact`) й `emanation`. Міграція `20261104000000_monster_5e_full` лише додає колонки; відсутні поля зберігають стару поведінку.
 - CRUD, CSV/JSON імпорт/експорт, бандл, клон і source sync передають ці поля; `spellId` у грантах і `perform` remap-иться разом з іншими посиланнями, перевіряється належність кампанії; повтори `spellId` у грантах відхиляються спільною схемою, зокрема після розв’язання назв при імпорті. REST, OpenAPI та MCP використовують спільні схеми; поріг розміру OpenAPI — 145 000 символів із дедуплікацією `$ref`.
 - SRD-конвертер створює **149 Monster Actions**, разом **488 заклинань, 331 юніт і 9 груп**. Парсер дій із рятівним кидком генерує заклинання з фіксованими кубиками й грантом; Spellcasting і легендарні дії отримують посилання. Повний SRD-текст залишається в описах; нерозпізнана механіка — текстові нотатки. `N/Day` і відновлення після відпочинку трактуються як ліміт на бій; Recharge — кидок на початку ходу. Завантажувач імпортує групи → заклинання → юнітів; повторний запуск оновлює записи за стабільними ключами.
+
+
+## JSON-компендіуми: backend Task19 (4f-6)
+
+`lib/server/compendium-import/` доповнює CSV bounded 5etools adapter, source+edition identity, generic entry fallback і звіт manual/partial/native. `previewImport` підписує actor/campaign/plan digest з TTL15min, `confirmImport` повторно авторизує й перебудовує план під Campaign lock; idempotency report зберігається разом із native content/provenance/rules. HTTP upload і UI Task20 реалізовано нижче. Не викликати confirm без актуального preview й session DM.
+
+`withCampaignContentWrite` та AsyncLocal transaction context зберігають існуючі resource guards всередині tx; CRUD/CSV/rules/scenario/sync ділять Campaign lock, cache invalidation після commit. Зовнішня підготовка artifact media — до tx. `CompendiumEntry` містить source attribution, baseline власних полів, bindings і notes окремо від template sourceId/sourceHash. Nested provenance не захоплює сусідні підраси. Повторний імпорт зберігає IDs і локальні зміни; немає автоматичного видалення відсутніх записів.
+
+Неперенесені spells мають `executionMode=manual`; cast відхиляється до витрат ресурсів і побічних ефектів, поки ДМ не налаштує механіку. Backgrounds — існуючий backgroundsResource, Choice/Picks, originFeatId і skill/tool proficiencies; equipment/currency тільки вручну. Офіційні SRD dependencies лише явним вибором існуючого локального шаблону, без зовнішніх завантажень.
+
+Bundle/clone переносить optional compendium section й DM notes; source-sync лише provenance обраних native rows, бо ScenarioPage не входить до sync scopes. Дизайн і ліміти: `docs/superpowers/specs/2026-10-23-constructor-compendium-json-import-design.md`. Migration `20261107000000_compendium_import` локально застосована, production deployment не проводили.
+
+
+### Кампанійний JSON-компендіум (Task20)
+
+`POST /api/campaigns/[id]/compendium/preview` приймає `{input}` Task19, повертає signed token/report та read-only graph/coverage metadata. `POST …/confirm` приймає той самий input, token, idempotencyKey і `rightsConfirmed:true`. Єдині writes — через чинний Task19 service/repository. `GET …/reports` дає paginated lightweight runs, `?runId=` — збережений report; `GET …/entries?kind=&targetId=` — paginated source notes/attribution конкретного native row; `GET …/options` — доступні локальні targets та дозволені чинним dependency gate SRD targets. Усе лише session-DM цільової кампанії, private/no-store; mutations same-origin, rate limiting з memory fallback, bounded UTF-8 transport≤3000000bytes, fixed-code errors без payload logging. HMAC `COMPENDIUM_PREVIEW_SECRET`≥32 chars; fail closed без конфігурації. Node routes maxDuration60s покриває наявні planning15s/tx30s/maxWait5s.
+
+UI `/campaigns/[id]/dm/compendium`: повний локальний scanner у Worker(5s/cancel), projection категорій/DM chapters, unsupported roots лише як counts/placeholders, preview без writes, окремі readiness/importability, explicit refs/dependencies/mixed-edition/rules diff/conflicts, rights-confirmation, refreshable report та next actions. Payload не йде до mapping/AI/localStorage/analytics. Source notes доступні у native editors; URLs — текст. Ручне spell executionMode зберігається формою, автоматичне застосування потребує явного рішення ДМ після налаштування; feature descriptions класу/підкласу відображені для отриманих рівнів. Екіпірування/гроші backgrounds не видаються автоматично.
+
+
+### Task21: перевірений контракт і межі
+
+Same-origin mutations порівнюють Origin із browser-facing Host та protocol request URL (Next може нормалізувати hostname до localhost); forwarded-host не використовується. Planned dependency aliases не перетворюють create нового SRD parent на update під час nested assembly. Coverage book/adventure рахує спожитий manifest/data container один раз, незалежно від кількості обраних глав; якщо всі глави виключені, container лишається skipped. Next-action знаходить native row також за власним issue code/path, тому raw `spell[0]` відкриває редактор заклинання.
+
+Task21 synthetic integration підтвердила atomic confirm/reimport/idempotency, conflicts/stale/auth, notes privacy/versioning, clone/remap і scoped native sync, explicit SRD dependency та backgrounds Choices/Picks. Докази: task21 ledger (12 файлів/78 тестів, включно з real local DB6/6), browser/API evidence; це збережений перевірочний checkpoint, не повторні запуски під час документації. Scanner/limits/concurrency успадковано з Tasks19–20. Full suite/build тут не запускали.
+
+`additionalSpells` DSL лишається manual/UNSUPPORTED_FIELD: native spell Choice/Picks перевірено після явного налаштування чинним ресурсом. Gear/gold вручну; ScenarioPage source-sync відсутній, оновлення notes через JSON reimport/вручну. Окремий backgrounds single-connection live PUT/PATCH checkpoint пройдено2026-10-25 (11 HTTP requests); блок закрито. Applied migration20261107000000_compendium_import незмінна. [Користувацька інструкція](../guides/compendium-json-import.md) описує формат, права, edition й різницю readyToImport/readyToPlay. Етап6 AI не починався.
+
+
+Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.

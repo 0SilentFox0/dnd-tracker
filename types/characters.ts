@@ -11,6 +11,7 @@ import type { CharacterLogKindValue } from "@/lib/constants/character-log";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
+import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices } from "@/types/choices";
 
 export type { AbilityKey };
@@ -51,6 +52,9 @@ export interface CharacterFormData {
     subrace?: string;
     alignment?: string;
     background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
     avatar?: string;
   };
   abilityScores: {
@@ -88,7 +92,7 @@ export interface CharacterFormData {
   abilities: {
     personalSkillId: string;
   };
-  choices?: { raceChoices: Picks; feats: CharacterFeat[] };
+  choices?: Partial<BackgroundSelection> & { raceChoices: Picks; feats: CharacterFeat[] };
 }
 
 /**
@@ -110,6 +114,9 @@ export interface Character {
   subrace?: string;
   alignment?: string;
   background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   avatar?: string;
   strength: number;
   dexterity: number;
@@ -245,6 +252,7 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
   classTable?: string[];
+  classFeatureDescriptions?: Array<{ source: string; level: number; description: string }>;
   pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number; current: number }[];
   rest: SheetRest | null;
@@ -272,6 +280,9 @@ export interface DraftInput {
   archetype: HeroArchetypeKey;
   alignment?: string;
   background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   avatar?: string;
   method: "standard" | "pointBuy";
   strength: number;
@@ -282,7 +293,7 @@ export interface DraftInput {
   charisma: number;
   primaryAbility?: AbilityKey;
   goals?: Array<{ text: string; kind: GoalKind }>;
-  choices?: { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
+  choices?: Partial<BackgroundSelection> & { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
 }
 
 export type RestKindValue = "short" | "long";

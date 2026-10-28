@@ -366,3 +366,67 @@ describe("credits", () => {
     expect(update).not.toHaveBeenCalled();
   });
 });
+
+it("refuses ASI changes to a used background but allows cosmetic changes", async () => {
+  const BG = id("b");
+
+  const asi = { id: "asi", label: "ASI", kind: "abilityScore", level: 1, count: 3, points: 3, maxPerAbility: 2, max: 20 };
+
+  f.addRow("background", { id: BG, campaignId: SRC, name: "Sage", choices: [asi] });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+
+  const local = rows("background", TGT)[0];
+
+  f.addRow("character", { id: "hero", campaignId: TGT, backgroundId: local.id });
+  f.patchRow("background", BG, { choices: [{ ...asi, points: 4 }] });
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
+  expect(rows("background", TGT)[0].choices).toEqual([asi]);
+  f.patchRow("background", BG, { choices: [{ ...asi, label: "New label" }] });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+  expect(rows("background", TGT)[0].choices).toEqual([{ ...asi, label: "New label" }]);
+});
+
+it("refuses deleting a feat still referenced by a background", async () => {
+  const FEAT = id("f"), BG = id("b");
+
+  f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Alert", type: "origin" });
+  f.addRow("background", { id: BG, campaignId: SRC, name: "Sage", originFeatId: FEAT, choices: [] });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+  f.removeRow("feat", FEAT);
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
+  expect(rows("feat", TGT)).toHaveLength(1);
+});
+
+it("validates new background origin refs and prevents changing a referenced origin's type", async () => {
+  const FEAT = id("f"), BG = id("b");
+
+  f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Alert", type: "general" });
+  f.addRow("background", { id: BG, campaignId: SRC, name: "Criminal", originFeatId: FEAT, choices: [] });
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] })).rejects.toMatchObject({ status: 422 });
+  expect(rows("background", TGT)).toEqual([]);
+});
+
+it("guards ASI changes behind a used background origin and selected feat choices", async () => {
+  const FEAT = id("f"), BG = id("b");
+
+  const asi = { id: "asi", label: "ASI", kind: "abilityScore", level: 1, count: 1, points: 1 };
+
+  f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Origin ASI", type: "origin", choices: [asi] });
+  f.addRow("background", { id: BG, campaignId: SRC, name: "Custom", originFeatId: FEAT, choices: [] });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+
+  const localBackground = rows("background", TGT)[0], localFeat = rows("feat", TGT)[0];
+
+  f.addRow("character", { id: "hero", campaignId: TGT, backgroundId: localBackground.id, backgroundChoices: { gift: [{ id: localFeat.id, picks: { asi: [{ id: "strength" }] } }] } });
+  f.patchRow("background", BG, { originFeatId: null });
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
+  f.patchRow("background", BG, { originFeatId: FEAT });
+  f.patchRow("feat", FEAT, { choices: [{ ...asi, points: 2 }] });
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
+  f.patchRow("background", BG, { originFeatId: null });
+  f.patchRow("feat", FEAT, { choices: [asi] });
+  // Simulate a background with no fixed origin, but a stored configurable feat pick.
+  f.patchRow("background", localBackground.id as string, { originFeatId: null });
+  f.removeRow("feat", FEAT);
+  await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
+});

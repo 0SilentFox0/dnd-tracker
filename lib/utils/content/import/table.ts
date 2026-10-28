@@ -2,10 +2,12 @@ import { parse } from "csv-parse/browser/esm/sync";
 
 import { guardFormula, isEmptyValue } from "./values";
 
+import { COMPENDIUM_KINDS } from "@/lib/server/compendium-import/parse";
 import { isRecord } from "@/lib/utils/common/is-record";
 import type { ParsedTable } from "@/types/content-import";
 
 export class ImportFileError extends Error {}
+export class AggregateImportFileError extends ImportFileError { constructor() { super("JSON_COMPENDIUM: відкрийте кампанійний імпорт JSON-компендіуму"); } }
 
 const DELIMITERS = [";", "\t", ","] as const;
 
@@ -88,6 +90,8 @@ function parseJsonTable(text: string): ParsedTable {
   } catch {
     throw new ImportFileError("Некоректний JSON");
   }
+
+  if (isRecord(data) && ("_meta" in data || COMPENDIUM_KINDS.some(kind => Array.isArray(data[kind])))) throw new AggregateImportFileError();
 
   const list = Array.isArray(data) ? data : [data];
 

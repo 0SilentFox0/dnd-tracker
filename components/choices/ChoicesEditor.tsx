@@ -4,7 +4,9 @@ import { ChoicePicker,type PickerContext } from "./ChoicePicker";
 
 import { HudSection } from "@/components/hud/form";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
+import { DND_SKILL_META } from "@/lib/constants/skills";
 import type { ChoiceRefsView } from "@/lib/hooks/characters";
+import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { abilityPicksOf, abilityScoreDelta } from "@/lib/utils/characters/choices/ability";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen } from "@/lib/utils/characters/choices/count";
@@ -36,7 +38,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
     feats: refs.feats,
     featsById: refs.featsById,
     spells: refs.spells,
-    proficient: new Set([...skillFlags(hero.skills), ...skillPicksOf(visits, "skill")]),
+    proficient: new Set([...(data.backgroundId ? refs.backgroundsById?.[data.backgroundId]?.skillProficiencies ?? [] : []), ...skillFlags(hero.skills), ...skillPicksOf(visits, "skill")]),
     scores: hero.scores,
     scoreAfter,
   };
@@ -48,12 +50,41 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
 
   const raceDefs = refs.race?.choices ?? [];
 
+  const background = data.backgroundId ? refs.backgroundsById?.[data.backgroundId] : null;
+
+  const backgroundFeat = background?.originFeatId ? refs.featsById[background.originFeatId] : null;
+
   const originFeats = refs.feats.filter((f) => f.type === "origin");
 
   const origin = data.feats.find((f) => f.source === "origin");
 
   return (
     <div className="space-y-4">
+      {!only && hero.classMode && (
+        <HudSection title="Передісторія">
+          <label className="block space-y-2">Передісторія
+            <select aria-label="Передісторія" className="w-full rounded border border-hud-line bg-hud-panel p-2" value={data.backgroundId ?? ""} onChange={(e) => set({ ...data, ...mergeBackground(data, { backgroundId: e.target.value || null }) })}>
+              <option value="">Без передісторії</option>
+              {Object.values(refs.backgroundsById ?? {}).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </label>
+          <p className="text-xs text-hud-muted">Зміна замінить бонуси передісторії. Спорядження й гроші видає ДМ вручну.</p>
+          {background && <div className="space-y-3">
+            {background.description && <p className="whitespace-pre-line text-sm">{background.description}</p>}
+            <p>{background.skillProficiencies.map((s) => DND_SKILL_META[s].label).join(", ")}</p>
+            <p>{background.toolProficiencies.join(", ")}</p>
+            {background.equipmentText && <p className="whitespace-pre-line text-sm">{background.equipmentText}</p>}
+            {origin && <div role="alert" className="text-sm text-hud-danger">Спочатку зніміть вільну рису походження.
+              <button type="button" className="ml-2 underline" onClick={() => set({ ...data, feats: data.feats.filter((f) => f.source !== "origin") })}>Замінити рисою передісторії</button>
+            </div>}
+            {pickers(background.choices, data.backgroundChoices ?? {}, { ...base, level: hero.level, maxSlotLevel: 0 }, "backgroundChoices", (backgroundChoices) => set({ ...data, backgroundChoices }), (c) => isChoiceOpen(c, hero.level, "background"))}
+            {backgroundFeat && <div className="space-y-3"><p className="hud-sc">Риса: {backgroundFeat.name}</p>
+              {pickers(backgroundFeat.choices, data.backgroundFeatPicks ?? {}, { ...base, level: hero.level, maxSlotLevel: 0 }, "backgroundFeatPicks", (backgroundFeatPicks) => set({ ...data, backgroundFeatPicks }), () => true)}
+            </div>}
+          </div>}
+          {issueFor(issues, "backgroundId") && <p role="alert">{issueFor(issues, "backgroundId")}</p>}
+        </HudSection>
+      )}
       {!only && raceDefs.length > 0 && (
         <HudSection title={`Раса: ${refs.race?.name}`}>
           <div className="space-y-4">
@@ -62,7 +93,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
         </HudSection>
       )}
 
-      {!only && hero.classMode && originFeats.length > 0 && (
+      {!only && !background && hero.classMode && originFeats.length > 0 && (
         <HudSection title="Риса походження">
           <ChoicePicker
             choice={{ id: "origin", label: "Риса походження", level: 1, count: 1, kind: "feat", featTypes: ["origin"] }}

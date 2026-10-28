@@ -1,6 +1,7 @@
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
+import { loadBackground } from "@/lib/server/backgrounds/load";
 import { buildCharacterParticipant } from "@/lib/server/characters/participant";
 import { loadStoryChapters } from "@/lib/server/scenario/player-story";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
@@ -69,11 +70,13 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const featsById = choiceRace || classMode ? await loadFeatsById(character.campaignId, selectionNeedsFeats(state, classMode)) : {};
 
+  const background = classMode ? await loadBackground(character.campaignId, state.backgroundId) : null;
+
   const choices =
     choiceRace || classMode
       ? {
-          selections: choiceSelections({ race: choiceRace, raceChoices: state.raceChoices, classes: classMode ? (classes ?? []) : [], feats: classMode ? state.feats : [], featsById, level: character.level }),
-          pending: pendingCount(visitPicks(state, { race: choiceRace, classesById: context.classesById ?? {}, featsById }, { level: character.level, classMode }), { featsById }),
+          selections: choiceSelections({ background, backgroundChoices: state.backgroundChoices, backgroundFeatPicks: state.backgroundFeatPicks, race: choiceRace, raceChoices: state.raceChoices, classes: classMode ? (classes ?? []) : [], feats: classMode ? state.feats : [], featsById, level: character.level }),
+          pending: pendingCount(visitPicks(state, { backgroundsById: background ? { [background.id]: background } : {}, race: choiceRace, classesById: context.classesById ?? {}, featsById }, { level: character.level, classMode }), { featsById }),
         }
       : undefined;
 

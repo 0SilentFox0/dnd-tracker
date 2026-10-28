@@ -16,7 +16,8 @@ describe("featInUse", () => {
     const [strings, ...values] = queryRaw.mock.calls[0] as [TemplateStringsArray, ...unknown[]];
 
     expect(strings.join("?")).toContain(`"raceChoices"::text LIKE`);
-    expect(values).toEqual(["c1", `%"f1"%`, `%"f1"%`, `%"f1"%`]);
+    expect(strings.join("?")).toContain(`"backgroundChoices"::text LIKE`);
+    expect(values).toEqual(["c1", `%"f1"%`, `%"f1"%`, `%"f1"%`, `%"f1"%`, "c1", "f1", `%"f1"%`]);
 
     queryRaw.mockResolvedValueOnce([{ count: BigInt(0) }]);
 

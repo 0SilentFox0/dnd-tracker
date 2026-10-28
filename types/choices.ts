@@ -8,7 +8,23 @@ export type ChoiceKind = (typeof CHOICE_KINDS)[number];
 
 export type FeatType = (typeof FEAT_TYPES)[number];
 
-export type ChoiceOwner = "race" | "class" | "feat";
+export type ChoiceOwner = "race" | "class" | "feat" | "background";
+
+export interface SpellGrantPolicy {
+  sharedPool?: string;
+  uses: number | "proficiency";
+  rest: "short" | "long";
+  castLevel?: number;
+  via?: "grant" | "slotOrGrant";
+  dcAbility?: AbilityKey;
+}
+
+export interface SelectedSpellGrant {
+  spellId: string;
+  label: string;
+  sourceKey: string;
+  grantPolicy: SpellGrantPolicy;
+}
 
 export interface ChoiceOption {
   id: string;
@@ -20,7 +36,7 @@ export interface ChoiceOption {
   requires?: string[];
   abilities: Ability[];
   /** лише раса: відомі з загального рівня `level` */
-  spells?: { level: number; spellId: string }[];
+  spells?: { level: number; spellId: string; grant?: SpellGrantPolicy }[];
 }
 
 export interface Choice {
@@ -37,7 +53,9 @@ export interface Choice {
   abilities?: AbilityKey[];
   points?: number;
   max?: number;
+  maxPerAbility?: number;
   spells?: { lists: string[]; minLevel: number; maxLevel: number | "slots" };
+  grant?: SpellGrantPolicy;
 }
 
 export interface ChoicePick {
@@ -55,6 +73,7 @@ export interface CharacterFeat {
 }
 
 export interface FeatPrerequisite {
+  manualText?: string[];
   level?: number;
   /** «будь-яка з» характеристик не нижче `min` */
   scores?: { abilities: AbilityKey[]; min: number };
@@ -89,6 +108,9 @@ export interface ChoiceRace {
 }
 
 export interface ChoicesState {
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   raceChoices: Picks;
   feats: CharacterFeat[];
   classes: CharacterClassEntry[];
@@ -120,12 +142,16 @@ export interface ChoiceIssue {
 }
 
 export interface ChoicesBody {
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   raceChoices?: Picks;
   feats?: CharacterFeat[];
   classChoices?: Record<string, Picks>;
 }
 
 export interface SheetChoices {
+  background?: { id: string; name: string; equipmentText: string | null; picks: string[] };
   pending: number;
   /** ДМ, або власник при allowPlayerEdit і не на розгляді */
   canEdit?: boolean;

@@ -25,6 +25,12 @@ export async function readFreeArtifacts(campaignId: string): Promise<NextRespons
 
   const freeRows = all.filter((a) => !findHolder(held, a.id, undefined, isUnique));
 
+  const spellIds = [...new Set(freeRows.flatMap((row) => itemStatsFromRow(row)?.spells?.map(({ spellId }) => spellId) ?? []))];
+
+  const spellRows = spellIds.length ? await prisma.spell.findMany({ where: { campaignId, id: { in: spellIds } }, select: { id: true, name: true } }) : [];
+
+  const spellNames = new Map(spellRows.map(({ id, name }) => [id, name]));
+
   const free: FreeArtifact[] = freeRows.map(({ modifiers, ...a }) => {
     const stats = itemStatsFromRow({ modifiers });
 
@@ -33,6 +39,8 @@ export async function readFreeArtifacts(campaignId: string): Promise<NextRespons
     return {
       ...a,
       ...(stats?.property && { property: { ...(template && { nameTemplate: template }), bases: freeRows.filter((b) => matchesAppliesTo(b, { ...a, modifiers })).map((b) => b.id) } }),
+      ...(stats?.parameter && { parameter: stats.parameter }),
+      ...(stats?.spells && { spells: stats.spells.map(({ spellId, castLevel }) => ({ spellId, castLevel, label: spellNames.get(spellId) ?? spellId })) }),
       ...(stats?.consumable && { consumable: true as const }),
       ...(stats && !stats.property && stats.unique === false && { gear: true as const }),
     };

@@ -47,8 +47,8 @@ export function createFakeSyncDb() {
       },
     },
     character: {
-      findMany: async ({ where }: { where: { campaignId: string; race?: string } }) =>
-        (store.get("character") ?? []).filter((r) => r.campaignId === where.campaignId && (!where.race || r.race === where.race)).map(copy),
+      findMany: async ({ where }: { where: { campaignId: string; race?: string; backgroundId?: string } }) =>
+        (store.get("character") ?? []).filter((r) => r.campaignId === where.campaignId && (!where.race || r.race === where.race) && (!where.backgroundId || r.backgroundId === where.backgroundId)).map(copy),
       findUnique: async ({ where }: { where: { id: string } }) => readCopy((store.get("character") ?? []).find((r) => r.id === where.id)),
       updateMany: async ({ where, data }: { where: { id: string }; data: Row }) => {
         const c = (store.get("character") ?? []).find((r) => r.id === where.id);

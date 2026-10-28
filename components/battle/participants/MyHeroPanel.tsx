@@ -5,6 +5,7 @@ import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
+import { ReactionSpellButton } from "@/components/battle/turn/ReactionSpellButton";
 import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
@@ -65,7 +66,9 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}
+      {hero.battleData.pendingCast && <p className="mt-2 text-sm">⏳ {hero.battleData.pendingCast.spellName}: ще {hero.battleData.pendingCast.remainingRounds} раундів · концентрація</p>}
       <ReadiedAttackButton participant={hero} />
+      {battle.status === BattleStatus.ACTIVE && <ReactionSpellButton participant={hero} />}
     </div>
   );
 });

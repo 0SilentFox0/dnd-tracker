@@ -27,6 +27,8 @@ export const OPEN5E_FILES = {
   MagicItem: "bb43403c17dea6aebed685d3626fdf14",
   Feat: "00522a4edd44236cc9dd6d95775d930b",
   FeatBenefit: "515b253cb2e00aba2c7886115cb043c7",
+  Background: "55ae16e8385b1ab7e5cd0a3503aa20aa",
+  BackgroundBenefit: "8114f8244bc5fe8575228aeda396a88c",
 } as const;
 
 export type Open5eFile = keyof typeof OPEN5E_FILES;

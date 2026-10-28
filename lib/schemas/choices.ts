@@ -11,6 +11,15 @@ const choiceId = z.string().regex(CHOICE_ID_RE, "Id — малі латинсь�
 
 const description = z.string().max(CHOICE_LIMITS.description).optional();
 
+export const SpellGrantPolicySchema = z.object({
+  sharedPool: choiceId.optional(),
+  uses: z.union([z.number().int().min(1).max(20), z.literal("proficiency")]),
+  rest: z.enum(["short", "long"]),
+  castLevel: z.number().int().min(0).max(9).optional(),
+  via: z.enum(["grant", "slotOrGrant"]).optional(),
+  dcAbility: z.enum(ABILITY_KEYS).optional(),
+});
+
 export const SpellListsSchema = z.array(z.string().trim().min(1).max(CHOICE_LIMITS.listLength)).max(CHOICE_LIMITS.lists);
 
 export const ChoiceOptionSchema = z.object({
@@ -21,7 +30,7 @@ export const ChoiceOptionSchema = z.object({
   requires: z.array(choiceId).max(CHOICE_LIMITS.requires).optional(),
   abilities: AbilitiesSchema.default([]),
   spells: z
-    .array(z.object({ level: z.number().int().min(1).max(20), spellId: z.string().trim().min(1).max(100) }))
+    .array(z.object({ level: z.number().int().min(1).max(20), spellId: z.string().trim().min(1).max(100), grant: SpellGrantPolicySchema.optional() }))
     .max(CHOICE_LIMITS.optionSpells)
     .optional(),
 });
@@ -38,6 +47,8 @@ function kindIssues(c: Choice, ctx: z.RefinementCtx) {
   need(c.kind !== "abilityScore" || !!c.points, ["points"], "Вкажіть, скільки разів +1");
   need(c.kind !== "spell" || !!c.spells, ["spells"], "Вкажіть списки й кола");
   need(!c.spells || c.spells.maxLevel === "slots" || c.spells.maxLevel >= c.spells.minLevel, ["spells", "maxLevel"], "Найвище коло менше за найнижче");
+  need(c.maxPerAbility === undefined || c.kind === "abilityScore", ["maxPerAbility"], "Обмеження характеристики — лише для abilityScore");
+  need(!c.grant || c.kind === "spell", ["grant"], "Безкоштовний каст можна задати лише вибору заклинань");
 
   const ids = (c.options ?? []).map((o) => o.id);
 
@@ -60,10 +71,12 @@ export const ChoiceSchema = z
     skills: z.array(z.enum(DND_SKILLS)).max(DND_SKILLS.length).optional(),
     abilities: z.array(z.enum(ABILITY_KEYS)).min(1).max(ABILITY_KEYS.length).optional(),
     points: z.number().int().min(1).max(CHOICE_LIMITS.points).optional(),
+    maxPerAbility: z.number().int().min(1).max(CHOICE_LIMITS.points).optional(),
     max: z.number().int().min(1).max(CHOICE_LIMITS.max).optional(),
     spells: z
       .object({ lists: SpellListsSchema, minLevel: z.number().int().min(0).max(9), maxLevel: z.union([z.number().int().min(0).max(9), z.literal("slots")]) })
       .optional(),
+    grant: SpellGrantPolicySchema.optional(),
   })
   .superRefine((c, ctx) => kindIssues(c as Choice, ctx));
 
@@ -103,13 +116,20 @@ export const CharacterFeatsSchema = z
   .array(z.object({ id: pickId, picks: leafPicks.optional(), source: z.enum(["origin", "dm"]) }))
   .max(CHOICE_LIMITS.characterFeats);
 
-export const ChoicesBodySchema = z
-  .object({ raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: z.record(z.string().min(1).max(100), PicksSchema).optional() })
-  .refine((b) => b.raceChoices !== undefined || b.feats !== undefined || b.classChoices !== undefined, { message: "Немає виборів для збереження" });
+export const BackgroundSelectionFields = {
+  backgroundId: z.string().trim().min(1).max(100).nullable().optional(),
+  backgroundChoices: PicksSchema.optional(),
+  backgroundFeatPicks: PicksSchema.optional(),
+};
 
-export const DraftChoicesSchema = z.object({ raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: PicksSchema.optional() });
+export const ChoicesBodySchema = z
+  .object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: z.record(z.string().min(1).max(100), PicksSchema).optional() })
+  .refine((b) => b.backgroundId !== undefined || b.backgroundChoices !== undefined || b.backgroundFeatPicks !== undefined || b.raceChoices !== undefined || b.feats !== undefined || b.classChoices !== undefined, { message: "Немає виборів для збереження" });
+
+export const DraftChoicesSchema = z.object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: PicksSchema.optional() });
 
 export const FeatPrerequisiteSchema = z.object({
+  manualText: z.array(z.string().trim().min(1).max(8000)).max(30).optional(),
   level: z.number().int().min(1).max(20).optional(),
   scores: z.object({ abilities: z.array(z.enum(ABILITY_KEYS)).min(1).max(ABILITY_KEYS.length), min: z.number().int().min(1).max(30) }).optional(),
   text: z.string().trim().max(200).optional(),

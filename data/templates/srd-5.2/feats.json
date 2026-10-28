@@ -517,6 +517,132 @@
           ],
           "minLevel": 1,
           "maxLevel": 1
+        },
+        "grant": {
+          "uses": 1,
+          "rest": "long",
+          "castLevel": 1,
+          "via": "slotOrGrant"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_magic-initiate-cleric",
+    "name": "Magic Initiate (Cleric)",
+    "type": "origin",
+    "prerequisite": {},
+    "repeatable": true,
+    "description": "You gain the following benefits.\n\n**Two Cantrips.** You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).\n\n**Level One Spell.** Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.\n\n**Spell Change.** Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.",
+    "abilities": [
+      {
+        "id": "magic-initiate",
+        "name": "Magic Initiate",
+        "description": "You gain the following benefits.\n\n**Two Cantrips.** You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).\n\n**Level One Spell.** Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.\n\n**Spell Change.** Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Magic Initiate"
+          }
+        ]
+      }
+    ],
+    "choices": [
+      {
+        "id": "cantrips",
+        "label": "Two Cantrips",
+        "level": 1,
+        "count": 2,
+        "kind": "spell",
+        "spells": {
+          "lists": [
+            "Cleric"
+          ],
+          "minLevel": 0,
+          "maxLevel": 0
+        }
+      },
+      {
+        "id": "level-one-spell",
+        "label": "Level One Spell",
+        "level": 1,
+        "count": 1,
+        "kind": "spell",
+        "spells": {
+          "lists": [
+            "Cleric"
+          ],
+          "minLevel": 1,
+          "maxLevel": 1
+        },
+        "grant": {
+          "uses": 1,
+          "rest": "long",
+          "castLevel": 1,
+          "via": "slotOrGrant"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_magic-initiate-wizard",
+    "name": "Magic Initiate (Wizard)",
+    "type": "origin",
+    "prerequisite": {},
+    "repeatable": true,
+    "description": "You gain the following benefits.\n\n**Two Cantrips.** You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).\n\n**Level One Spell.** Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.\n\n**Spell Change.** Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.",
+    "abilities": [
+      {
+        "id": "magic-initiate",
+        "name": "Magic Initiate",
+        "description": "You gain the following benefits.\n\n**Two Cantrips.** You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).\n\n**Level One Spell.** Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.\n\n**Spell Change.** Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Magic Initiate"
+          }
+        ]
+      }
+    ],
+    "choices": [
+      {
+        "id": "cantrips",
+        "label": "Two Cantrips",
+        "level": 1,
+        "count": 2,
+        "kind": "spell",
+        "spells": {
+          "lists": [
+            "Wizard"
+          ],
+          "minLevel": 0,
+          "maxLevel": 0
+        }
+      },
+      {
+        "id": "level-one-spell",
+        "label": "Level One Spell",
+        "level": 1,
+        "count": 1,
+        "kind": "spell",
+        "spells": {
+          "lists": [
+            "Wizard"
+          ],
+          "minLevel": 1,
+          "maxLevel": 1
+        },
+        "grant": {
+          "uses": 1,
+          "rest": "long",
+          "castLevel": 1,
+          "via": "slotOrGrant"
         }
       }
     ]

@@ -274,11 +274,17 @@
 
 ## Follow-up у межах епіку: 4f-6 — міграція компедіумів 5etools JSON
 
-> Це запит користувача після початку виконання 4f-5a. Виконати після завершення поточного блоку 4f-5a; не включати в його acceptance чи підсумковий review. Імпорт потрібен гравцям, щоб перенести легально отримані компедіуми на платформу. Зовнішні копії комерційних книжок не завантажувати, не комітити й не розповсюджувати.
+> Це запит користувача після початку виконання 4f-5a. Виконувати лише після закриття 4f-5b та реалізації погодженого малого блоку backgrounds; не включати в acceptance чи підсумковий review 4f-5a/4f-5b. Імпорт потрібен гравцям, щоб перенести легально отримані компедіуми на платформу. Зовнішні копії комерційних книжок не завантажувати, не комітити й не розповсюджувати.
 
 **Дослідницький вхідний приклад (локальний, не комітити):** `/Users/silentfox/Downloads/1985 Games; Obojima - Tales from the Tall Grass.json` (2,350,334 байти). Його структура відповідає агрегованому 5etools brew JSON: `_meta.sources` описує джерело `O:TTG`, `_meta.edition` = `classic`; є масиви `subclass` (11), `subclassFeature` (73), `optionalfeature` (37), `background` (6), `race` (3), `subrace` (8), `feat` (20), `spell` (50), `baseitem` (155), `item` (235), `monster` (77), а також `adventure`/`book` і Foundry-специфічні доповнення. Запис містить значно більше типів, ніж поточні ресурси content API. Приклад служить лише для локального аналізу форми й покриття; тести використовують синтетичні мінімальні fixtures без книжкового тексту чи ілюстрацій.
 
 **Поточні точки інтеграції:** шаблон `srd:build` уже перетворює Open5e SRD JSON у доменні дані; кампанії мають bundle import/export; content API підтримує окремі ресурси units, spells, artifacts, races, feats, classes та інші типи; існує CSV-імпорт користувацького контенту. Дослідження має вирішити, що повторно використати, які дані зберігати як редагований контент, а де потрібен звіт про непідтримані поля. Не плутати імпорт компедіуму в кампанію з імпортом кампанії/bundle.
+
+**Актуалізація Task18,2026-10-24:** користувач після аудиту backgrounds явно попросив почати наступну задачу. Task18 досліджено, дизайн погоджено користувачем («так»); виконано backend Task19. Tasks20–21 ще не розпочато. Це не доказ проходження pending single-connection backgrounds live check; його ledger збережено. Backgrounds уже реалізовано як `backgroundsResource` поверх Choice/Picks з originFeatId/skillProficiencies/toolProficiencies/equipmentText; Character.background — біографія, спорядження/гроші видаються вручну. Паралельний механізм не створювати. **4f-6 — імпорт контенту; етап6 — AI, його не починати.**
+
+**Уточнена мета користувача:** JSON доповнює CSV/TSV і простий табличний JSON. Порожня кастомна кампанія → агрегований JSON → один preview/confirm → усі доступні бібліотеки, залежності й матеріали ДМ. Решта має конкретні next actions після імпорту. Obojima — лише приклад типового user JSON; жодних спеціальних overrides її скілів/правил. Наявність plain JSON у `parseJsonTable` не означає підтримку aggregate.
+
+**Дослідницькі висновки:** source ID прикладу — `ObojimaTallGrass`, `O:TTG` — abbreviation; classic у файлі не змінюється від новішої edition на сторінці видавця. Первинні schema-template прочитано на SHA `f2d995e92069a64f4e617b64e48e55d40f64a157`; це preprocessor templates. Name-only CSV resolver, template sourceId/sourceHash і глобальні prisma writers не можна напряму використати як source-aware atomic importer. Рекомендовано окремий адаптер+спільні tx guards, provenance поза template lineage, generic text fallback та actionable report. Schema/UX рішення погоджено; результати реалізації Task19 — нижче.
 
 ### Task 18: дослідити формат і затвердити мапування
 
@@ -287,45 +293,101 @@
 - Modify: цей план після висновків дослідження
 - Input: локальний Obojima JSON тільки для читання; [офіційний опис продукту](https://obojima.com/products/obojima-hardcover-book) й [первинні JSON-схеми 5etools](https://github.com/TheGiddyLimit/5etools-utils/tree/master/schema-template)
 
-- [ ] Зібрати інвентар фактичних полів і варіантів для пріоритетних категорій: `_meta`/джерела, `spell`, `monster`, `item`/`baseitem`, `race`/`subrace`, `background`, `feat`, `subclass`/`subclassFeature`, `optionalfeature`; окремо описати `*Fluff`, `foundry*`, `adventure`/`book` та інші масиви.
-- [ ] Зіставити поля з наявними Prisma/domain/content schemas та визначити: пряме мапування, розширення схеми, збереження оригінального структурованого payload, текстовий fallback або явне повідомлення «не імпортовано».
-- [ ] Перевірити ідентичність записів і посилань (`name` + `source`, `className`, `subclassSource`, copy/inherits, інші міжсутнісні refs), версію правил (`_meta.edition`) і дублі при повторному імпорті.
-- [ ] Визначити UX потоку: завантаження файлу, валідація/ліміти, попередній перегляд лічильників і попереджень, вибір категорій, підтвердження імпорту й підсумок; не додавати повний книжковий текст до логів/аналітики.
-- [ ] Зафіксувати межі прав: користувач відповідає за право імпортувати свій файл; зберігати джерельну атрибуцію, коли вона присутня; ніколи не завантажувати Obojima-приклад у seed, fixture, сховище чи репозиторій.
-- [ ] У design doc зафіксувати перший підтримуваний набір типів, поведінку пропусків/помилок, межі розміру/складності JSON і acceptance criteria; перелічити відкладені типи.
+- [x] Зібрати інвентар фактичних полів/варіантів пріоритетних категорій та інших root arrays; design §2–3, primary schemas pinned, read-only аналіз без книжкового тексту/ілюстрацій у repo/logs.
+- [x] Зіставити поля з Prisma/domain/content schemas; design §4–5: native/partial/skipped, потрібні schema extensions та tx integration. Повний original payload не зберігається.
+- [x] Background mapping до чинного ресурсу; design §6. Classic без ASI/origin, known skills/tools, Choice/Picks і manual equipment/currency;3/2/20 тільки за джерелом.
+- [x] Identity/ref/edition/reimport досліджено; design §7–9. Copy/inherits явно unsupported; template lineage не перевикористовується.
+- [x] UX preview/confirm/report/next actions визначено; design §8,10–11. JSON доповнює CSV, empty campaign і dependency closure охоплені.
+- [x] Межі прав/атрибуція/privacy зафіксовані; design §12. Комерційний приклад не імпортується й не стає fixture.
+- [x] Support set, skipped fields, limits і acceptance criteria визначено; design §5,10,13–14. Builder check проведено; важливі уточнення внесено в §5,7,9.
+- [x] Користувач погодив design doc та schema/UX/limits рішення відповіддю «так»; Task18 завершено.
 
 ### Task 19: побудувати адаптер 5etools JSON → доменний імпорт
+
+> Дизайн погоджено; backend Task19 реалізовано. Нові синтетичні регресії та storage integration перевіряють контракти нижче; UI/endpoints та повний user e2e належать Tasks20–21.
 
 **Files:**
 - Create: `lib/server/compendium-import/` чисті типи, валідатор, нормалізація source/ref і адаптери за результатом Task 18
 - Modify: `lib/server/content/` або спеціалізований імпортний сервіс, залежно від затвердженого дизайну
 - Test: синтетичні fixtures для підтримуваних категорій і граничних/непідтримуваних варіантів
+- Modify: `prisma/schema.prisma` + нова міграція (застосована лише до локальної constructor) для provenance та Spell.executionMode; `lib/schemas/{spells,classes,choices}.ts`, domain readers/types, `lib/server/templates/{bundle,import-bundle,remap-ids}.ts` і sync.
+- Modify: спільні content/rules/scenario writers для transaction-local guards і `withCampaignContentWrite`; spell conversion/snapshot/cast paths (`lib/utils/battle/spell/to-castable.ts`, `lib/utils/battle/spell/cast/`, `app/api/campaigns/[id]/battles/[battleId]/spell/`) для manual gate.
 
-- [ ] Безпечно розбирати один агрегований 5etools JSON об'єкт: перевіряти кореневий тип, `_meta`, розміри/глибину й масиви; відхиляти некоректний файл до будь-якого запису.
-- [ ] Перетворювати підтримані категорії в наявні resource schemas, зберігаючи source/source id, стабільний ключ повторного імпорту та взаємні посилання між сутностями.
-- [ ] Нормалізувати 5etools entry tags лише там, де є перевірене відповідне поле; оригінальні entries зберігати або показувати як текст там, де механіку неможливо перенести без втрат.
-- [ ] Явно звітувати про пропущені записи/поля з категорією й причиною; не вдавати, що Foundry-специфічна механіка, картинки або довільні `entries` стала повністю нативною механікою конструктора.
-- [ ] Імпортувати взаємозалежні записи в коректному порядку та транзакційно; повторний імпорт того самого source оновлює збіги за стабільним ключем без дублів і не стирає користувацькі записи іншого source.
-- [ ] Тести для пошкодженого JSON, дубльованих назв із різними sources, нерозв'язаних refs, unknown fields, edition metadata, повторного імпорту й rollback.
+**Контракти після погодження:** scanner/parse→source-aware normalized graph; plan→preview rows/coverage/issues/nextActions + signed digest; commit→atomic `CompendiumImportRun` report з idempotency. Пороги й semantics — design §7–11, не CSV defaults.
+
+- [x] RED→GREEN синтетичні tests UTF-8/root/duplicate keys/prototype/depth/size; default dispatch CSV/TSV/simple JSON/aggregate/bundle.3MiB/2000 selected nodes і3000000-byte request limit; no silent truncate.
+- [x] RED→GREEN усі category adapters з design §5: spells/units/artifacts/races/subraces/backgrounds/feats/classes/subclasses/features/owned optionalfeatures, book/adventure→DM notes, supporting references→readable materials. Без custom-book overrides або fake Ability.
+- [x] RED→GREEN provenance canonical identity/source+edition, original attribution, nested IDs, explicit bindings, missing source metadata, case collisions і keep-local baseline conflicts. sourceId/sourceHash template lineage не чіпати.
+- [x] RED→GREEN shared tx writer + Campaign lock у звичайних CRUD/CSV/rules/scenario/source-sync та importer; stale preview/concurrent edit/two confirms/rollback. Existing guards не обходити. Cache invalidation після commit.
+- [x] RED→GREEN manual spell gate у всіх cast/grant/item/monster paths до витрат ресурсів; snapshot та clone/source-sync не гублять executionMode. Feature.description та prerequisite.manualText проходять schemas/readers/transfers без fake automation.
+- [x] RED→GREEN optional official-SRD minimal dependency closure для порожньої кампанії; mixed edition тільки явно, no external downloads, no fake parent class, source-sync campaign attachment не створюється.
+
+- [x] Безпечно розбирати один агрегований 5etools JSON об'єкт: перевіряти кореневий тип, `_meta`, розміри/глибину й масиви; відхиляти некоректний файл до будь-якого запису.
+- [x] Перетворювати підтримані категорії в наявні resource schemas, зберігаючи source/source id, стабільний ключ повторного імпорту та взаємні посилання між сутностями.
+- [x] Background адаптувати до єдиного backgroundsResource; originFeatId розв’язувати після feats у межах того самого source/campaign. Посилання за name+source мають проходити чинний remap. Незнайдений або non-origin feat не підміняти довільною рисою; поведінку відмови/пропуску визначити в Task18 і перевірити тестом. Оновлення використаного background дотримується ASI409 guard; не змінювати персонажні picks або ручний інвентар під час імпорту контенту.
+- [x] Нормалізувати 5etools entry tags лише там, де є перевірене відповідне поле; оригінальні entries зберігати або показувати як текст там, де механіку неможливо перенести без втрат.
+- [x] Явно звітувати про пропущені записи/поля з категорією й причиною; не вдавати, що Foundry-специфічна механіка, картинки або довільні `entries` стала повністю нативною механікою конструктора.
+- [x] Імпортувати взаємозалежні записи в коректному порядку та транзакційно; повторний імпорт того самого source оновлює збіги за стабільним ключем без дублів і не стирає користувацькі записи іншого source.
+- [x] Тести для пошкодженого JSON, дубльованих назв із різними sources, нерозв'язаних refs, unknown fields, edition metadata, повторного імпорту й rollback.
+
+**Checkpoint Task19:** 7 Important із фінального review виправлено з RED→GREEN: nested ownership/reimport, feature-choice IDs, subclass acquisition level, campaign-wide bundle capacity, explicit exclusion unsupported rows, source-bound class features, known-edition local refs. Unit/regression:69 files/651 tests; local PostgreSQL connection_limit=1:3 storage tests (reimport, nested update, rollback). Перевірки lint/tsc/build та обмеження — у `.superpowers/sdd/2026-10-24-constructor-compendium/progress.md`. Не оголошувати весь 4f-6 готовим: користувацького upload flow ще немає.
 
 ### Task 20: додати UI попереднього перегляду й імпорту
+
+> Лише після погодження дизайну й Task19. Типовий шлях — один file/preview/confirm, не окремий імпорт бібліотек.
 
 **Files:**
 - Modify: кампанійний UI/налаштування контенту та API routes згідно design doc
 - Test: API authorization/validation, UI preview/select/summary
+- Modify: `components/content-import/{ContentImportWizard,ContentTransferButtons}.tsx`, `steps/FileStep.tsx`, `lib/hooks/content-import/`; додати campaign-level entry у порожній кампанії.
+- Create: окремі campaign-scoped compendium preview/confirm/report endpoints і UI; metadata/source-notes панелі бібліотек, class feature descriptions у листі, manual spell edit/use state.
 
-- [ ] Дозволити власнику/DM кампанії вибрати локальний JSON compendium і побачити джерела, edition, кількість записів за типами та попередження до імпорту.
-- [ ] Дозволити вибрати підтримані категорії, показувати непідтримані категорії окремо й пояснювати, які поля залишаться текстом або будуть пропущені.
-- [ ] Показувати підсумок створених/оновлених/пропущених записів і помилок після імпорту; повторна відправка того самого файлу має бути безпечною.
-- [ ] Перевірити розмір запиту, timeout/довгі файли, права кампанії, відсутність запису до підтвердження та відсутність витоку всього payload у server logs.
+- [x] RED→GREEN всі підтримувані categories selected default, dependency/rules diff visible, DM materials explicit; CSV/TSV/simple JSON працюють як раніше, aggregate не йде в column mapping/AI.
+- [x] RED→GREEN actor/campaign-bound preview digest, expiry15хв, confirm revalidation/409, unauthorized reads/writes; no campaign mutation before confirm. Reports після refresh без payload у logs/analytics/localStorage.
+- [x] RED→GREEN ready-to-import окремо від ready-to-play; concrete next actions для кожного partial/skipped/blocker, відкриття відповідного редактора/опису, ручна видача gear/gold. Не приховувати unsupported prereqs, manual spells або edition mismatch.
+
+- [x] Дозволити власнику/DM кампанії вибрати локальний JSON compendium і побачити джерела, edition, кількість записів за типами та попередження до імпорту.
+- [x] Дозволити вибрати підтримані категорії, показувати непідтримані категорії окремо й пояснювати, які поля залишаться текстом або будуть пропущені.
+- [x] Для backgrounds показувати, які ASI/навички/інструменти/origin feat перенесено структуровано, а що лишилося описом. Явно повідомляти про ручну видачу спорядження/грошей; не показувати це як втрату всього background. Якщо backgrounds обрано без залежних feats, preview показує залежність/помилку до запису згідно Task18.
+- [x] Показувати підсумок створених/оновлених/пропущених записів і помилок після імпорту; повторна відправка того самого файлу має бути безпечною.
+- [x] Перевірити розмір запиту, timeout/довгі файли, права кампанії, відсутність запису до підтвердження та відсутність витоку всього payload у server logs.
+
+**Checkpoint Task20 — 2026-10-24:** завершено у `284be148`. Кампанійний майстер і session-DM API використовують чинний Task19; локальний Worker, категорії/розділи, sources/edition/coverage, refs/залежності/конфлікти, rules diff, signed preview/confirm, звіти після refresh, source notes у редакторах, manual spell state й описи class features у листі. CSV/TSV/simple JSON збережено; aggregate оминає mapping/AI. Право використання файлу підтверджується явно; до confirm немає writes. Ліміти/приватність — за дизайном. HMAC `COMPENDIUM_PREVIEW_SECRET` обов’язковий (fail closed).
+
+Перевірки остаточного стану:11 файлів/64 тести; TypeScript exit0; scoped ESLint0errors/5warnings; diff checks exit0. Логи `.superpowers/sdd/2026-10-24-constructor-compendium/task20-*`. Full suite/build/browser/live і додаткове review не запускали за інструкцією користувача. Source-sync не переносить ScenarioPage: DM notes оновлюються JSON reimport/вручну. Backgrounds live checkpoint лишається pending, спорядження/гроші вручну. Далі окремий Task21 із синтетичним integration/e2e; весь4f-6 та AI не завершені.
 
 ### Task 21: інтеграційна перевірка з дозволеним компедіумом і документація
+
+> Лише синтетичні fixtures; локальний комерційний приклад не надсилати навіть у локальний live endpoint. Повний перелік acceptance — design §13.
 
 **Files:**
 - Modify: `docs/architecture/content-api.md`, user docs/handoff/status
 - Test/Run: синтетичний повний fixture; за наявності легального тестового матеріалу — позарепозиторний локальний live import
 
-- [ ] Побудувати один синтетичний fixture, що включає взаємопов'язані spell/monster/item/species/class-option приклади, 5etools tags і Foundry-розширення.
-- [ ] Перевірити імпорт у тимчасову локальну кампанію, повторний імпорт, відображення контенту в конструкторах/бібліотеках і коректний звіт про unsupported data.
-- [ ] Документувати очікувану форму JSON, підтримувані категорії, обмеження edition/механік, попередній перегляд і відповідальність користувача за право на файл.
-- [ ] Не використовувати наведений комерційний Obojima JSON як fixture чи live test без окремого дозволеного тестового середовища/матеріалу.
+- [x] Наскрізний синтетичний «empty custom campaign→all categories + DM notes→preview/confirm→usable libraries + next actions», повторний імпорт та duplicate confirmation. Нуль book-specific assumptions; CSV regression checks.
+- [x] Перевірити scenario notes privacy/versioning/search, source attribution, manual cast gate до ресурсів, nested feature descriptions і manual prerequisites; стан після clone/bundle/source-sync.
+- [x] Перевірити independent rows без відсутнього SRD, explicit dependency bootstrap за наявного шаблону, mixed edition confirmation і report actionable outcomes; ready-to-play не приховує блокери.
+
+- [x] Побудувати один синтетичний fixture, що включає взаємопов'язані spell/monster/item/species/class-option приклади, 5etools tags і Foundry-розширення.
+- [x] Додати синтетичні background cases: classic лише з навичками/описом; background з ASI та origin feat із вкладеним spell pick; різні sources з однаковою назвою; unresolved/non-origin feat; повторний імпорт; спроба зміни ASI використовуваного запису. Перевірити refs після clone/source-sync, вибір у персонажа й відсутність автоматичної видачі предметів/грошей або перезапису біографії.
+- [x] Перевірити імпорт у тимчасову локальну кампанію, повторний імпорт, відображення контенту в конструкторах/бібліотеках і коректний звіт про unsupported data.
+- [x] Документувати очікувану форму JSON, підтримувані категорії, обмеження edition/механік, попередній перегляд і відповідальність користувача за право на файл.
+- [x] Не використовувати наведений комерційний Obojima JSON як fixture чи live test без окремого дозволеного тестового середовища/матеріалу.
+
+
+## Task21 завершено локально — 2026-10-24
+
+4f-6 Tasks18–21 завершено: синтетичний fixture, integration/user e2e, чотири підтверджені виправлення та документація. [Інструкція користувача](../../guides/compendium-json-import.md) описує форму JSON, категорії, права/attribution, edition, preview/confirm/report, ручні механіки й ready-to-import окремо від ready-to-play.
+
+Докази попереднього перевірочного проходу (не повторні запуски під час документаційного завершення): `.superpowers/sdd/2026-10-24-constructor-compendium/task21/`:
+- `targeted-final.log`:6 файлів/42 тести; `integration-final.log`:1 файл/6 тестів real local constructor; `compatibility.log`:3 файли/27 тестів; `action-green.log`:2 файли/3 тести. Сумарно12 файлів/78 тестів; DB6/6 входять у цей підсумок.
+- `tsc-final.log`:exit0; `lint-final.log` і `lint-additions.log`:0errors/9 distinct non-null warnings. Full suite/build/нове review не запускали.
+- `browser-evidence.json`, `api-evidence.json`: upload→preview без writes→confirm (21 native rows, з них9 приватних нотаток;23 provenance), repeat unchanged/duplicate confirm, refresh report/source notes/manual editor/next action, private/no-store, stale/expiry409, auth401/cross-origin403, без payload у localStorage/logs чи AI/analytics запитів.
+- `integration-final.log`: конфлікти keep-local/overwrite, blockers/exclusion, приватні notes/search/version0→1, bundle clone/remap, scoped native source-sync зі збереженням ScenarioPages, explicit available SRD dependency/mixed edition, backgrounds Choice/Picks та used ASI409/rollback без зміни biography/gear/gold.
+- `cleanup-evidence.json`: власні тимчасові кампанії/користувачі видалено після ownership guards; harness зупинено; наявний SRD template збережено.
+
+Чотири дефекти усунено з окремими RED→GREEN: browser-facing same-origin за Host+protocol без forwarded-host; create SRD dependency із nested parent; coverage book/adventure containers; next-action за issue code/path до native editor. Докази RED збережено поряд; виправлення коду в документаційному проході не змінювалися.
+
+Успадковані перевірки scanner/limits/rollback/concurrency та інші докази Tasks19–20 залишаються їхніми checkpoints, не новими live перевірками Task21. Native spell Choice/Picks перевірено після явного налаштування чинним ресурсом: additionalSpells DSL лишається manual/UNSUPPORTED_FIELD. Gear/gold вручну. ScenarioPage source-sync не підтримується — JSON reimport/ручне оновлення. Відкладені missing-in-new-file inventory і searchText клонованих notes (лише заголовок) збережено.
+
+**Backgrounds pending single-connection live checkpoint ВІДКРИТИЙ**: синтетична compendium інтеграція його не закриває. Етап6 AI не починали. Міграцію20261107000000_compendium_import не редагували; комерційний JSON у цьому Task21 не читали/копіювали/імпортували. Лише feat/constructor і локальні коміти; без reset/stash, prod/prodcopy, push, merge-to-main чи deploy.

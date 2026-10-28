@@ -14,14 +14,14 @@ const byKind = (kind: string) => classChoices.filter((c) => c.kind === kind);
 const SPELL_LIST_COUNTS: Record<string, number> = { Wizard: 218, Sorcerer: 140, Bard: 130, Druid: 124, Cleric: 109, Warlock: 72, Ranger: 48, Paladin: 38 };
 
 describe("SRD 5.2 data: 4f-4", () => {
-  it("17 feats: 4 origin, 2 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable", () => {
+  it("19 feats: 6 origin, 2 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable", () => {
     const count = (type: string) => data.feats.filter((f) => f.type === type).length;
 
-    expect([count("origin"), count("general"), count("fightingStyle"), count("epicBoon")]).toEqual([4, 2, 4, 7]);
-    expect(data.feats.filter((f) => f.repeatable).map((f) => f.name).sort()).toEqual(["Ability Score Improvement", "Magic Initiate", "Skilled"]);
+    expect([count("origin"), count("general"), count("fightingStyle"), count("epicBoon")]).toEqual([6, 2, 4, 7]);
+    expect(data.feats.filter((f) => f.repeatable).map((f) => f.name).sort()).toEqual(["Ability Score Improvement", "Magic Initiate", "Magic Initiate (Cleric)", "Magic Initiate (Wizard)", "Skilled"]);
   });
 
-  it("race choices: 24 lineage options, 22 spells, every spell name exists", () => {
+  it("race choices: 24 lineage options, 42 spell references including breath shapes, every spell name exists", () => {
     const options = data.races.flatMap((r) => r.choices?.find((c) => c.lineage)?.options ?? []);
 
     const names = new Set(data.spells.map((s) => s.name));
@@ -29,14 +29,14 @@ describe("SRD 5.2 data: 4f-4", () => {
     const refs = options.flatMap((o) => o.spells ?? []);
 
     expect(options).toHaveLength(24);
-    expect(refs).toHaveLength(22);
+    expect(refs).toHaveLength(42);
     expect(refs.filter((s) => !names.has(s.spellId))).toEqual([]);
     expect(data.races.filter((r) => r.choices?.length).map((r) => r.name).sort()).toEqual(["Dragonborn", "Elf", "Gnome", "Goliath", "Human", "Tiefling"]);
   });
 
-  it("101 class choices: 67 feat, 7 expertise, 2 skill, 15 spell, 10 option", () => {
-    expect(classChoices).toHaveLength(101);
-    expect([byKind("feat").length, byKind("expertise").length, byKind("skill").length, byKind("spell").length, byKind("option").length]).toEqual([67, 7, 2, 15, 10]);
+  it("106 class choices: 67 feat, 7 expertise, 2 skill, 20 spell, 10 option", () => {
+    expect(classChoices).toHaveLength(106);
+    expect([byKind("feat").length, byKind("expertise").length, byKind("skill").length, byKind("spell").length, byKind("option").length]).toEqual([67, 7, 2, 20, 10]);
     expect(classChoices.filter((c) => c.id.startsWith("ability-score-improvement"))).toHaveLength(51);
     expect(classChoices.filter((c) => c.id === "epic-boon-19")).toHaveLength(12);
   });

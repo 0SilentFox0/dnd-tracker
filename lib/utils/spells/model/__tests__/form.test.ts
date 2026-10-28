@@ -23,6 +23,10 @@ const row: Spell = {
 };
 
 describe("форма заклинання", () => {
+  it("preserves reaction and long casting time through form and API payload", () => {
+    expect(formToPayload(spellToForm({ ...row, cost: "reaction", casting: { trigger: "when hit" } } as never))).toMatchObject({ cost: "reaction", casting: { trigger: "when hit" } });
+    expect(formToPayload(spellToForm({ ...row, cost: "long", casting: { rounds: 100, text: "10 minutes" } } as never))).toMatchObject({ cost: "long", casting: { rounds: 100, text: "10 minutes" } });
+  });
   it("preserves fixedDice and damageBonus when editing", () => {
     expect(formToPayload(spellToForm({ ...row, fixedDice: true, damageBonus: -3 }))).toMatchObject({ fixedDice: true, damageBonus: -3 });
   });
@@ -81,4 +85,7 @@ describe("форма заклинання", () => {
     expect(formToPayload(spellToForm({ ...row, level: 0 })).level).toBe(0);
     expect(spellLevelOptions().map((o) => o.value)).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
   });
+});
+it("keeps manual execution mode until DM explicitly configures mechanics", () => {
+  expect(formToPayload(spellToForm({ ...row, executionMode: "manual" }))).toMatchObject({ executionMode: "manual" });
 });

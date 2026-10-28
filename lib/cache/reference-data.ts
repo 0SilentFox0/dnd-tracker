@@ -113,3 +113,11 @@ export async function getCachedSummonPool(campaignId: string) {
     },
   )();
 }
+
+export async function getCachedBackgrounds(campaignId: string) {
+  return unstable_cache(
+    async () => prisma.background.findMany({ where: { campaignId }, orderBy: { name: "asc" } }),
+    [cacheTags.backgrounds(campaignId)],
+    { tags: [cacheTags.backgrounds(campaignId)], revalidate: REFERENCE_REVALIDATE_SECONDS },
+  )();
+}

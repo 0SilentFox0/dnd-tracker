@@ -29,7 +29,11 @@ function strip(ps: BattleParticipant[], casterId: string): { participants: Battl
 
   const ended = (e: ActiveEffect) => e.concentration?.castId === castId || (e.concentrationOf?.casterId === casterId && e.concentrationOf.castId === castId);
 
-  return { spellName, participants: ps.map((p) => removeEffects(p, ended).participant) };
+  return { spellName, participants: ps.map((p) => {
+    const next = removeEffects(p, ended).participant;
+
+    return p.basicInfo.id === casterId && next.battleData.pendingCast ? { ...next, battleData: { ...next.battleData, pendingCast: undefined } } : next;
+  }) };
 }
 
 export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: string): { participants: BattleParticipant[]; messages: string[] } {

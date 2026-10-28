@@ -1,4 +1,4 @@
-export const SYNC_TABLE_SCOPES = ["spellGroups", "races", "classes", "feats", "units", "spells", "mainSkills", "skills", "skillTrees", "artifactSets", "artifacts", "tracks"] as const;
+export const SYNC_TABLE_SCOPES = ["spellGroups", "races", "classes", "feats", "backgrounds", "units", "spells", "mainSkills", "skills", "skillTrees", "artifactSets", "artifacts", "tracks"] as const;
 
 export const SYNC_SCOPES = [...SYNC_TABLE_SCOPES, "rules", "settings"] as const;
 
@@ -11,6 +11,7 @@ export const SYNC_SCOPE_LABELS = {
   races: "Раси",
   classes: "Класи",
   feats: "Риси",
+  backgrounds: "Передісторії",
   units: "Юніти",
   spells: "Заклинання",
   mainSkills: "Основні скіли",

@@ -7,6 +7,13 @@ import { itemStatsColumns, ItemStatsSchema } from "@/lib/utils/items/item-stats"
 const FLAME_TONGUE = { unique: false, property: { appliesTo: { kinds: ["weapon" as const], bases: ["Longsword"] }, nameTemplate: "Flame Tongue {base}" }, attunement: true };
 
 describe("item stats in modifiers", () => {
+  it("allows zero-cost item spells without a charge pool and round-trips them", () => {
+    const item = { spells: [{ spellId: "light", cost: 0, castLevel: 0 }] };
+
+    expect(ItemStatsSchema.safeParse(item).success).toBe(true);
+    expect(itemStatsFromRow(itemStatsColumns(item))).toEqual(item);
+  });
+
   it("round-trips a property and a charged wand", () => {
     expect(itemStatsFromRow(itemStatsColumns(FLAME_TONGUE))).toEqual(FLAME_TONGUE);
 
@@ -48,5 +55,22 @@ describe("item stats in modifiers", () => {
     expect(ItemStatsSchema.safeParse({ consumable: true, charges: { max: 2, rest: "long" } }).success).toBe(false);
     expect(ItemStatsSchema.safeParse({ consumable: true, property: FLAME_TONGUE.property }).success).toBe(false);
     expect(ItemStatsSchema.safeParse({ consumable: true, charges: { max: 2, rest: null } }).success).toBe(true);
+  });
+
+  it("item spell records round-trip and reject duplicate or malformed definitions", () => {
+    const spells = [{ spellId: "spell-1", cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } }];
+
+    expect(itemStatsFromRow(itemStatsColumns({ spells }))).toEqual({ spells });
+    expect(ItemStatsSchema.safeParse({ spells: [{ spellId: "", cost: 0 }] }).success).toBe(false);
+    expect(ItemStatsSchema.safeParse({ spells: [spells[0], spells[0]] }).success).toBe(false);
+    expect(ItemStatsSchema.safeParse({ spells: [{ spellId: "spell-1", cost: 1, upcast: { maxLevel: 1, extraCost: 0 } }] }).success).toBe(false);
+    expect(ItemStatsSchema.safeParse({ spells: [{ spellId: "spell-1", cost: 1 }] }).success).toBe(false);
+  });
+
+  it("item parameters have a finite unique set of typed options", () => {
+    const parameter = { kind: "damageType" as const, options: [{ key: "fire", label: "Fire" }] };
+
+    expect(itemStatsFromRow(itemStatsColumns({ parameter }))).toEqual({ parameter });
+    expect(ItemStatsSchema.safeParse({ parameter: { ...parameter, options: [...parameter.options, ...parameter.options] } }).success).toBe(false);
   });
 });

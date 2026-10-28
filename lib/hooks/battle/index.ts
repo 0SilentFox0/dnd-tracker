@@ -40,6 +40,6 @@ export { type ParticipantClickInput, useParticipantClick } from "./useParticipan
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useSelectedParticipant } from "./useSelectedParticipant";
-export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
+export { useBonusSpells, useReactionSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
 export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

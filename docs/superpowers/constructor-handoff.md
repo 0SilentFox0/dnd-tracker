@@ -1,5 +1,11 @@
 # Конструктор кампаній — хендоф для нового контексту
 
+**Актуальне продовження 4f-6,2026-10-24:** після окремого дозволу перейти далі користувач погодив дизайн відповіддю «так». Task18 завершено, backend Task19 реалізовано в `lib/server/compendium-import/`: generic adapters, source-aware identity/refs, manual coverage, bounded parser, HMAC preview/atomic confirm, shared Campaign locks, provenance, explicit optional SRD dependency closure та bundle/sync transfer. Міграція `20261107000000_compendium_import` застосована лише до локальної constructor; не редагувати її, подальші schema fixes — новою міграцією. Backgrounds використовує існуючий backgroundsResource/Choice/Picks; спорядження та гроші вручну. Нема book-specific overrides чи повторного читання/імпорту комерційного прикладу.
+
+Task19 verification:69 files/651 unit/regression tests;3 real local PostgreSQL storage tests із connection_limit=1 (без дублів, незалежні підраси, rollback). Фінальний review:7 Important виправлено; подробиці, lint/tsc/build evidence й Minor deferrals — `.superpowers/sdd/2026-10-24-constructor-compendium/progress.md`. Source-sync не має scope ScenarioPage: DM notes переносяться bundle/clone, для оновлення потрібен JSON reimport/manual action із попередженням. **Наступна задача — Task20 (upload/preview/confirm/report UI та endpoints); Task20/21 ще не починали, user flow поки недоступний.** Pending backgrounds single-connection live check не підтверджений; дозвіл переходу не означає його проходження. Збережено сторонні HOMM-gate/SRD CSV та backgrounds зміни; немає push/main merge/deploy/prod/prodcopy чи етапу6 AI.
+
+Аудит закриття backgrounds (2026-10-24): збережений full suite1194/7694 і TypeScript exit0 підтверджені без повторного запуску тестів. Новий production build `closure-build-escalated.log` завершився exit0. Тимчасові backgrounds кампанію/користувача очищено, SRD-шаблон збережено. Pending single-connection PUT/PATCH live-сценарій із checkpoint не підтверджений; backgrounds не оголошено закритим, 4f-6/Task18 та AI не починали. Деталі й фінальний lint — у `.superpowers/sdd/2026-10-24-constructor-backgrounds/progress.md`; поточна заборона користувача на повторні тести діє.
+
 Скопіюй блок нижче як перше повідомлення в новій сесії Claude Code, відкритій у `/Users/silentfox/Work/dnd-tracker-constructor`.
 
 ---
@@ -46,6 +52,7 @@
 - Етап 4f-4 (відкладене): передісторії (після 4f-5), вибір параметра предмета при видачі, безкоштовний каст «1 / довгий» (лінії, Magic Initiate), Breath Weapon драконороджених, Weapon Mastery, метамагія/закляття як активні ефекти, Great Weapon Fighting/Savage Attacker, вибір характеристики заклинань лінії/риси, `skillChoices` класу як вибір, інструменти й мови, AI-контекст рис (`ai/tools/party.ts`), бейдж невибраних у списку персонажів ДМ, Paladin/Ranger 1-го рівня без слотів (`casterLevel` половинного заклинача з 2-го рівня — підготовлені заклинання недоступні до 2-го), правка ASI вручну ДМ між виборами (відкат може вийти за межі). Живий прогін 4f-4 (десктоп) A–H пройдено: сторінка «Риси» (17, фільтр), Elf (High Elf) Wizard зі списком чарівника (Fire Bolt є, Cure Wounds немає), заклинання лінії за рівнем, ASI 4 +2 СИЛ, «Обрати пізніше» → значок → вибір, відкат дельти, 422 понад 20, експертиза лише з майстерністю (+4 скритність), Metamagic 0/2, Invocations 0/3, Paladin 1 без значка, 409 у бою, 409 FEAT_IN_USE, HOMM без змін. Дрібне: значок невибраних з'являється після перезавантаження сторінки; повтор тексту помилки дубля риси тричі. Аудит транзакцій: усі колбеки `$transaction` працюють через `tx` (підвищення рівня виправлено d5397acd — глобальний клієнт усередині транзакції зависав би при connection_limit=1). /simplify відклав altitude-пункти й великі рефакторинги виборів (`simplify-applied.md` SDD 4f-4).
 - Розбіжність з main (не наша): balance/stats.ts рахує СК юніта як 8+майстерність без тіру.
 - Після всього епіку — окремий епік «доменні модулі» (запис у STATUS; до злиття конструктора не починати).
+- Після етапу 6, ПЕРЕД злиттям — обов’язковий шлюз сумісності HOMM: свіжа локальна `prodcopy` → еталон main / гілка (порожній diff учасника бою, листа й прев’ю атак для всіх героїв/юнітів/заклинань/артефактів) → battle-sweep кодом гілки → живий HOMM-прогін ДМ і гравця (лист, бій, схованка, передача артефакта, підвищення рівня). Міграції/backfill — тільки на локальній копії, еталон main зберегти до них. Повні вимоги: розділ «Обов’язковий шлюз після етапу 6» у `docs/superpowers/specs/2026-10-20-campaign-constructor-design.md`. До цього кроку prodcopy не чіпати; зараз ці запуски не виконувати.
 - Prod наприкінці епіку: свіжий бекап → злиття → деплой → `pnpm constructor:backfill --all --allow-remote` → `pnpm constructor:official-templates <prodHommId> --allow-remote` → PLATFORM_ADMIN_USER_IDS у Vercel; після деплою стрільби з main — перезасіяти юнітів бібліотеки на prod (Демониця отримує chainShot).
 
 **Оновлення для свіжого контексту (2026-10-23):** 4f-5a виконується в `/Users/silentfox/Work/dnd-tracker-constructor`, `feat/constructor`; останній коміт `9be20396`. Задачі 1–13 закомічені. Tasks 14–16 реалізовані, але ще НЕ закомічені: зміни у `scripts/srd/convert/*`, `scripts/srd/lib/*`, тести та згенеровані `data/templates/srd-5.2/{manifest,spell-groups,spells,units}.json`. Поточний pinned `pnpm srd:build` видав 149 заклинань Monster Actions / 488 заклинань загалом / 331 юніт, і task reports повідомляють 25 файлів / 165 тестів, TypeScript чистий, targeted ESLint має 4 non-null assertion warnings. Перевірити ці твердження перед комітом.
@@ -93,3 +100,80 @@ Tasks14–16 і Task17 docs ще НЕ закомічені. Task16 не закр
 - Докази збережено в `.superpowers/sdd/2026-10-23-constructor-4f5a-monsters/`: `review-fixes-report.md`, `review-fixes-import.log`, `task17-fixes-live.log`, `task17-browser.log`, screenshots, `scoped-rereview-simplify.md`. SDD не видаляти й не комітити. Тимчасовий dry-run скрипт перенесено туди з `scripts/srd/`.
 
 Далі — детальний дизайн і план 4f-5b на основі ескізу в спеку, без реалізації в цій частині. Майбутні 4f-6 Tasks 18–21 лишаються follow-up. Main, production і prodcopy не чіпали; push/merge/deploy не робили. Пам'ять поза worktree не оновлювали.
+
+
+## Обов’язкові дії після фази 6 (додано користувачем)
+
+Перед злиттям виконати всі 5 пунктів шлюзу сумісності HOMM зі спека: локальна копія prod з міграціями/backfill; скрипт порівняння main / feat/constructor з порожнім diff; battle-sweep на prodcopy; живий прогін ДМ і гравця; свіжий production backup перед деплоєм. Це майбутні обов’язкові роботи, наразі не виконані. Поточна заборона на main/prod/prodcopy й merge/deploy зберігається.
+
+
+## Актуальний checkpoint планування — 2026-10-24
+
+Користувач погодив дизайн backgrounds: `docs/superpowers/specs/2026-10-24-constructor-backgrounds-design.md`, включно з ручною видачею стартового спорядження/грошей. План Tasks1–6: `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`, передано на перегляд; реалізацію не починали. Використовуємо чинні Choice/Picks, окремий ресурс backgrounds, біографія незмінна. 4f-6 Tasks18–21 у плані 4f-5a актуалізовано під цей цільовий контракт; власний дизайн імпортера ще не затверджений. Ні 4f-6, ні етап6 AI не починати.
+
+4f-5b досі незакомічений: готові suite1186/7650, tsc/lint та live/browser докази в SDD не повторювати без причини. Стару session43300 нова сесія не знайшла, але її build-процес фактично ще працював. Помилкова повторна спроба отримала lock error; попередній build зупинено SIGTERM, його лог тепер завершується ELIFECYCLE без success. Escalated повторний build не стартував до переривання користувачем (окремого логу немає). **Успішний build не підтверджений; 4f-5b не оголошувати закритим.** Спочатку завершити цей checkpoint/коміт зі збереженням сторонніх HOMM-gate/SRD CSV правок, потім origin/main → feat/constructor перед реалізацією backgrounds. У цьому кроці змінено лише документацію, без DB/запусків перевірок продукту/комітів/push/merge/deploy.
+
+
+## Закриття 4f-5b — 2026-10-24
+
+4f-5b завершено: гранти героїв/предметів, джерела слотів, сувої, параметри предметів, Breath Weapon зі спільним пулом, умови типу істоти, reaction і long casting. SRD498 заклинань/333 артефакти; імпорт повторено без нових записів/помилок. Підтверджені перевірки:1186 файлів/7650 тестів; TypeScript exit0; ESLint0 errors/5 warnings; production build exit0 (`build-final-escalated.log`,38/38 сторінок). Попередні interrupted/lock запуски не використовуються як докази.
+
+Живі HTTP casts/resources/rest/наступні бої й браузер1440/390 пройдено; тестові кампанію/користувача видалено, власні Next/auth/Chrome зупинено, shared Docker constructor працює. Review:2 Important виправлено RED→GREEN, scoped rereview/simplify-equivalent завершені. Докази й повний ledger у `.superpowers/sdd/2026-10-23-constructor-4f5b/`, не видаляти. Підтримку й обмеження див. `data/templates/srd-5.2/coverage-4f5b.json` та фінальний checkpoint плану4f5b.
+
+Наступне: погоджені дизайн і план backgrounds від2026-10-24 (ручна видача спорядження/грошей); перед реалізацією origin/main → feat/constructor зі збереженням сторонніх змін. 4f-6 Tasks18–21 актуалізовані лише як майбутній план; власний дизайн імпортера лишається Task18. Ні 4f-6, ні етап6 AI не починали. Prod/prodcopy/main як ціль/push/merge-to-main/deploy не чіпали.
+
+## Поточна передача в чистий контекст — backgrounds, 2026-10-24
+
+4f-5b закрито комітом `4b58a639`; фінальний build exit0 підтверджений. `origin/main` оновлено fetch і вже входить у HEAD — incoming0. Дизайн і план backgrounds погоджені, реалізацію почато, але жодну задачу ще не оголошено завершеною і feature-комітів немає. Міграцію20261106000000_backgrounds застосовано тільки до constructor. Є частково реалізовані модель/CRUD/вибори/API/контентні реєстри й UI пікера; бібліотечні форми, SRD та фінальна перевірка ще попереду. Точний стан, RED/GREEN докази, відомі помилки й наступні кроки: `.superpowers/sdd/2026-10-24-constructor-backgrounds/progress.md` — **читати першим**. Користувач попросив передати роботу в чистий контекст; нових змін після checkpoint не робити. Сторонні HOMM-gate/SRD CSV документи зберегти. 4f-6 та етап6 не починати.
+
+
+## Актуальний checkpoint — Task20, 2026-10-24
+
+Task20 завершено: `284be148`, кампанійна сторінка `/campaigns/[id]/dm/compendium`, API `compendium/{preview,confirm,reports,entries,options}` поверх чинного Task19. Вибір категорій/розділів, sources/edition/coverage, refs/залежності/конфлікти, signed preview/confirm, збережені звіти після refresh, дії й переходи до редакторів, source notes/attribution, manual spell use/edit і описи class features у листі. CSV/TSV/simple JSON збережено; aggregate не проходить mapping/AI. До confirm записів немає; payload тільки в пам’яті вкладки, без logs/analytics/localStorage. HMAC `COMPENDIUM_PREVIEW_SECRET`≥32 символів обов’язковий, без нього API fail closed; локальний secret згенеровано без виводу, у Git лише порожній приклад.
+
+Докази:11 файлів/64 тести; TypeScript exit0; scoped ESLint0errors/5warnings; diff checks exit0. Логи й точний ledger — `.superpowers/sdd/2026-10-24-constructor-compendium/`; не повторювати без зміни відповідного коду. Full suite/build/browser/live/додаткове review для Task20 не запускали. Task19 має окремий перевірений checkpoint; його дослідження/рев’ю/міграцію повторно не виконували. Міграцію20261107000000_compendium_import не змінювали.
+
+Користувач дозволив закомітити всі наявні зміни логічними групами: backgrounds snapshot `c9577fec` (pending live), Task19 `f7972cfe`, збереження точних pinned fixtures `8fd1de4a`, Task20 `284be148`, SRD CSV/HOMM planning `391de941`, далі документація. Жодного reset/stash, push/merge/deploy. Усі коміти локально у feat/constructor.
+
+**Backgrounds не закрито:** pending single-connection live checkpoint не перезапускався, статус не змінений. Gear/gold лишаються ручними. ScenarioPage не має scope source-sync: матеріали ДМ оновлюються JSON reimport або вручну; bundle/clone підтримуються. Відкладені Task19 missing-in-new-file inventory і searchText notes не виправляли.
+
+**Далі — лише окремий Task21** (синтетичний дозволений compendium, integration/user e2e та документація), коли користувач доручить. Комерційний JSON у Downloads не читали/копіювали/імпортували. Task21 та етап6 AI не починали; весь4f-6 завершеним не вважати. Заборона на prod/prodcopy/merge-to-main/deploy чинна.
+
+## Task21 — передача після інтеграційної перевірки, 2026-10-24
+
+Перевірки Task21 виконані; **документація й локальні коміти ще не завершені**, Task21 поки не закривати. Читати останній розділ `.superpowers/sdd/2026-10-24-constructor-compendium/progress.md` першим: точні докази,4 RED→GREEN виправлення, межі й залишок. Поточні незакомічені зміни належать Task21 (стартове дерево було чистим).12 файлів/78 тестів сумарно в цільових командах, real local DB6/6, TypeScript exit0, scoped ESLint0errors/9 distinct non-null warnings. Браузерний upload/confirm і перевірки API/report/privacy завершені; повторювати їх без зміни відповідного коду не потрібно. Власні тимчасові кампанії/користувачі прибрані з ownership guard; Task21 harness зупинено, SRD збережено. Backgrounds pending single-connection live checkpoint відкритий, не запускався; stage6 AI не починався. Далі лише документація Task21 й логічні локальні коміти, без push/merge/deploy.
+
+
+## Task21 завершено локально — 2026-10-24
+
+4f-6 Tasks18–21 завершено: синтетичний fixture, integration/user e2e, чотири підтверджені виправлення та документація. [Інструкція користувача](../guides/compendium-json-import.md) описує форму JSON, категорії, права/attribution, edition, preview/confirm/report, ручні механіки й ready-to-import окремо від ready-to-play.
+
+Докази попереднього перевірочного проходу (не повторні запуски під час документаційного завершення): `.superpowers/sdd/2026-10-24-constructor-compendium/task21/`:
+- `targeted-final.log`:6 файлів/42 тести; `integration-final.log`:1 файл/6 тестів real local constructor; `compatibility.log`:3 файли/27 тестів; `action-green.log`:2 файли/3 тести. Сумарно12 файлів/78 тестів; DB6/6 входять у цей підсумок.
+- `tsc-final.log`:exit0; `lint-final.log` і `lint-additions.log`:0errors/9 distinct non-null warnings. Full suite/build/нове review не запускали.
+- `browser-evidence.json`, `api-evidence.json`: upload→preview без writes→confirm (21 native rows, з них9 приватних нотаток;23 provenance), repeat unchanged/duplicate confirm, refresh report/source notes/manual editor/next action, private/no-store, stale/expiry409, auth401/cross-origin403, без payload у localStorage/logs чи AI/analytics запитів.
+- `integration-final.log`: конфлікти keep-local/overwrite, blockers/exclusion, приватні notes/search/version0→1, bundle clone/remap, scoped native source-sync зі збереженням ScenarioPages, explicit available SRD dependency/mixed edition, backgrounds Choice/Picks та used ASI409/rollback без зміни biography/gear/gold.
+- `cleanup-evidence.json`: власні тимчасові кампанії/користувачі видалено після ownership guards; harness зупинено; наявний SRD template збережено.
+
+Чотири дефекти усунено з окремими RED→GREEN: browser-facing same-origin за Host+protocol без forwarded-host; create SRD dependency із nested parent; coverage book/adventure containers; next-action за issue code/path до native editor. Докази RED збережено поряд; виправлення коду в документаційному проході не змінювалися.
+
+Успадковані перевірки scanner/limits/rollback/concurrency та інші докази Tasks19–20 залишаються їхніми checkpoints, не новими live перевірками Task21. Native spell Choice/Picks перевірено після явного налаштування чинним ресурсом: additionalSpells DSL лишається manual/UNSUPPORTED_FIELD. Gear/gold вручну. ScenarioPage source-sync не підтримується — JSON reimport/ручне оновлення. Відкладені missing-in-new-file inventory і searchText клонованих notes (лише заголовок) збережено.
+
+**Backgrounds pending single-connection live checkpoint ВІДКРИТИЙ**: синтетична compendium інтеграція його не закриває. Етап6 AI не починали. Міграцію20261107000000_compendium_import не редагували; комерційний JSON у цьому Task21 не читали/копіювали/імпортували. Лише feat/constructor і локальні коміти; без reset/stash, prod/prodcopy, push, merge-to-main чи deploy.
+
+Локальні коміти Task21: `44a8ff5e` — чотири виправлення з регресіями; `57619315` — synthetic fixture та campaign integration. Документація/закриття — окрема наступна commit-група.
+
+
+## Backgrounds закрито — 2026-10-25
+
+Завершено останній pending single-connection live checkpoint у feat/constructor. Новий ізольований Next/auth harness задавав `connection_limit=1` для DATABASE_URL і DIRECT_URL після перевірки localhost:54322/constructor; production auth/Pusher вимкнено. `single-connection-closure/evidence.json` у backgrounds SDD:11 HTTP запитів, PUT select/repeat, invalid ASI422 без зміни стану, PATCH swap/repeat/remove/select, PUT remove. Перевірено повернення попередніх ASI, відсутність повторного нарахування, незмінні biography/inventory/manual skills/tools/classes. Усі очікувані200/422 підтверджені; зависання transaction refs не відтворилося. Код продукту не змінювався.
+
+Перший запуск перевірки після нічної паузи отримав500 на початковому GET через прострочений JWT локального harness; жоден PUT/PATCH тоді не виконувався. Сесію перевипущено перезапуском власного harness, після чого checkpoint пройдено. Це збій тестового оточення, не новий дефект backgrounds.
+
+`single-connection-closure/cleanup-result.json`: власні кампанія/користувач видалені після перевірки точного імені, email/displayName, єдиного DM та відсутності інших memberships; відсутність записів перевірено після видалення. Наявний SRD template із4 backgrounds збережено. Власний Next/auth harness зупинено, shared DB лишено працювати.
+
+Успадковані докази backgrounds, без повторних запусків: full-tests-final1194 файли/7694 тести (exit0), final-tsc-after-review exit0, tx-refs-green4 файли/19 тестів, closure-build-escalated успішний production build, browser1440/390 та попередні live сценарії, подвійний SRD import (повтор created0/errors0), review RED→GREEN і scoped фінальний огляд. Повний lint після виключення scratch мав3 formatting errors/176 warnings; саме3 errors виправлено, focused lint exit0. Новий full lint exit0 не заявляється.
+
+Реалізацію вже збережено в `c9577fec`, точні fixture bytes у `8fd1de4a`; документацію попереднього аудиту — `cf3ef1bd`. Шість запланованих feature-комітів замінено цими погодженими snapshot-групами, без переписування історії. Поточне закриття — окремий локальний documentation commit. Старі pending/«не починали» абзаци вище є історією; цей checkpoint їх замінює. 4f-6 також завершено окремим Task21, його докази не підміняють цей live checkpoint.
+
+Спорядження/золото видаються вручну; іншого рушія Choices/Picks не додано. Міграції не змінювалися. Етап6 AI не починався; prod/prodcopy/push/merge/deploy не виконувалися.

@@ -3,7 +3,15 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 
-export const SPELL_COSTS = ["action", "bonusAction"] as const;
+export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
+
+export const SpellCastingTimeSchema = z.object({
+  rounds: z.number().int().min(2).max(144000).optional(),
+  text: z.string().trim().min(1).max(500).optional(),
+  trigger: z.string().trim().min(1).max(1000).optional(),
+});
+
+export type SpellCastingTime = z.infer<typeof SpellCastingTimeSchema>;
 
 export const SpellCostSchema = z.enum(SPELL_COSTS);
 
@@ -52,8 +60,10 @@ export const SpellDiceSchema = z.number().int().min(0).max(40);
 export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
 
 export const SpellDefinitionSchema = z.object({
+  executionMode: z.enum(["native", "manual"]).optional(),
   dice: SpellDiceSchema,
   cost: SpellCostSchema,
+  casting: SpellCastingTimeSchema.optional(),
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,
   effects: z.array(EffectSchema),

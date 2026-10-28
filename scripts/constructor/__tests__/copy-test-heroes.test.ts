@@ -51,3 +51,10 @@ describe("missingPlayerIds", () => {
     expect(missingPlayerIds(["u1", "u2", "u1", "dm"], ["dm", "u2"])).toEqual(["u1"]);
   });
 });
+
+it("remaps background picks and refuses to carry a source campaign background", () => {
+  const hero = { knownSpells: [], personalSkillId: null, skillTreeProgress: {}, backgroundId: "bg", backgroundChoices: { gift: [{ id: "sp1" }] }, backgroundFeatPicks: { cantrip: [{ id: "sp1" }] } };
+
+  expect(mapHeroRefs(hero, null, [], new Map([...map, ["bg", "bg-new"]]))).toMatchObject({ backgroundId: "bg-new", backgroundChoices: { gift: [{ id: "sp1-new" }] }, backgroundFeatPicks: { cantrip: [{ id: "sp1-new" }] } });
+  expect(() => mapHeroRefs(hero, null, [], map)).toThrow(/передістор/i);
+});

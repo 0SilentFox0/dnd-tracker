@@ -14,6 +14,7 @@ import { writeCharacterLog } from "@/lib/server/characters/log";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { choicesStateOf, withClassPicks } from "@/lib/utils/characters/choices/picks";
 import type { ChoicesBody } from "@/types/choices";
 
@@ -28,7 +29,7 @@ export async function saveCharacterChoices(access: CampaignAccessResult, charact
 
   const { rules } = access.campaign;
 
-  const refs = await loadChoiceRefs(character.campaignId, character.race, { classMode: characterClassMode(rules, choicesStateOf(character).classes) });
+
 
   return prisma.$transaction(async (tx) => {
     await lockCharacters(tx, [character.id]);
@@ -39,7 +40,10 @@ export async function saveCharacterChoices(access: CampaignAccessResult, charact
 
     const before = choicesStateOf(row);
 
+    const refs = await loadChoiceRefs(row.campaignId, row.race, { classMode: characterClassMode(rules, before.classes), backgroundIds: [before.backgroundId, body.backgroundId], db: tx });
+
     const after = {
+      ...mergeBackground(before, body),
       raceChoices: body.raceChoices ?? before.raceChoices,
       feats: body.feats ?? before.feats,
       classes: body.classChoices ? withClassPicks(before.classes, body.classChoices) : before.classes,

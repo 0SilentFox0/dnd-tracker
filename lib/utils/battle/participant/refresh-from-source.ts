@@ -47,6 +47,7 @@ export function refreshFromSource(live: BattleParticipant, fresh: BattleParticip
       ...live.spellcasting,
       knownSpells: fresh.spellcasting.knownSpells,
       grants: fresh.spellcasting.grants,
+      slotSpells: fresh.spellcasting.slotSpells,
       spellSaveDC: fresh.spellcasting.spellSaveDC,
       spellAttackBonus: fresh.spellcasting.spellAttackBonus,
       spellcastingAbility: fresh.spellcasting.spellcastingAbility,

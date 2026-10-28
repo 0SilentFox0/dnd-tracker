@@ -18,25 +18,22 @@ export function spendCastCost(state: SpellCastState, cost: { slotKey: string; us
 
   const poolKey = cost.grant?.pool;
 
-  if (!cost.isDMCast && poolKey) {
+  if (!cost.isDMCast && poolKey && (cost.grant?.cost ?? 1) > 0) {
     const usage = caster.battleData.abilityUsage?.[poolKey] ?? { battle: 0, round: 0, turn: 0 };
 
     const amount = cost.grant?.cost ?? 1;
-
-    const pool = caster.battleData.pools?.[poolKey];
 
     caster = {
       ...caster,
       battleData: {
         ...caster.battleData,
         abilityUsage: { ...caster.battleData.abilityUsage, [poolKey]: { battle: usage.battle + amount, round: usage.round + amount, turn: usage.turn + amount, lastRound: state.flow.ctx.round } },
-        ...(pool && { pools: { ...caster.battleData.pools, [poolKey]: { ...pool, label: state.spell.name } } }),
       },
     };
   }
 
   if (!cost.isDMCast && !cost.isLegendaryCast) {
-    caster = state.spell.definition.cost === "bonusAction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(caster);
+    caster = state.spell.definition.cost === "reaction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedReaction: true } } : state.spell.definition.cost === "bonusAction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(caster);
   }
 
   put(state.flow, caster);
@@ -133,6 +130,8 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...meta,
     ...(applied.length > 0 && { appliedEffects: applied }),
     spellSlotUsed: state.castLevel,
+    ...(state.grant?.key && { spellGrantKey: state.grant.key }),
+    ...(state.grant?.label && { spellGrantLabel: state.grant.label }),
     ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
     ...(dealt > 0 && { totalDamage: dealt }),
     ...(healed > 0 && { totalHealing: healed }),

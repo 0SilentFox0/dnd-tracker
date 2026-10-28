@@ -17,6 +17,7 @@ const tx = vi.hoisted(() => ({
   inventoryLog: { createMany: vi.fn() },
   characterInventory: { upsert: vi.fn(), update: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
   artifact: { findFirst: vi.fn(), findMany: vi.fn() },
+    spell: { findMany: vi.fn() },
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -24,6 +25,7 @@ vi.mock("@/lib/db", () => ({
     character: { findUnique: vi.fn() },
     characterInventory: { findMany: vi.fn() },
     artifact: { findMany: vi.fn() },
+    spell: { findMany: vi.fn() },
     $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
   },
 }));

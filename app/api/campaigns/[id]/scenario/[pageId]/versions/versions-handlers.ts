@@ -4,6 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { restoreScenarioVersionSchema } from "@/lib/schemas/scenario";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { contentWrite, OWNED_SELECT, parseContent, SUMMARY_SELECT, toPage } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
@@ -40,6 +41,7 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
 
     if (body instanceof NextResponse) return body;
 
+    return await withCampaignContentWrite(campaignId, async () => {
     const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
@@ -62,6 +64,7 @@ export async function restoreVersionHandler(req: Request, campaignId: string, pa
     });
 
     return NextResponse.json(toPage(row));
+    });
   } catch (error) {
     return handleApiError(error, { action: "restore scenario version" });
   }

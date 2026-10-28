@@ -5,6 +5,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { characterInCampaign, loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { contentWrite, InvalidScenarioContentError, OWNED_SELECT, OWNED_WITH_CONTENT_SELECT, readContent, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
@@ -43,6 +44,7 @@ export async function saveScenarioContentHandler(req: Request, campaignId: strin
 
     if (Buffer.byteLength(JSON.stringify(body.content)) > SCENARIO_MAX_CONTENT_BYTES) return errorResponse(API_ERRORS.SCENARIO_TOO_LARGE, 413);
 
+    return await withCampaignContentWrite(campaignId, async () => {
     const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
@@ -59,6 +61,7 @@ export async function saveScenarioContentHandler(req: Request, campaignId: strin
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
     return NextResponse.json({ version: body.expectedVersion + 1 });
+    });
   } catch (error) {
     return handleApiError(error, { action: "save scenario page" });
   }
@@ -74,6 +77,7 @@ export async function updateScenarioMetaHandler(req: Request, campaignId: string
 
     if (body instanceof NextResponse) return body;
 
+    return await withCampaignContentWrite(campaignId, async () => {
     const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
 
     if (page instanceof NextResponse) return page;
@@ -89,6 +93,7 @@ export async function updateScenarioMetaHandler(req: Request, campaignId: string
     const row = await prisma.scenarioPage.update({ where: { id: pageId }, data: { ...body, ...(searchText !== undefined && { searchText }) }, select: SUMMARY_SELECT });
 
     return NextResponse.json(toSummary(row));
+    });
   } catch (error) {
     return handleApiError(error, { action: "update scenario page" });
   }
@@ -106,7 +111,11 @@ export async function deleteScenarioPageHandler(campaignId: string, pageId: stri
 
     const orphanUrls = await pendingSlideUrls(campaignId, pageId);
 
-    await prisma.scenarioPage.delete({ where: { id: pageId } });
+    await withCampaignContentWrite(campaignId, async () => {
+      await prisma.scenarioPage.delete({ where: { id: pageId } });
+
+      if (prisma.compendiumEntry) await prisma.compendiumEntry.deleteMany({ where: { campaignId, kind: "scenarioPages", localId: pageId } });
+    });
     await discardSlideFiles(campaignId, orphanUrls);
 
     return NextResponse.json({ ok: true });

@@ -1,13 +1,14 @@
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
-import type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
 
-export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+export type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
 export type SpellGroupRef = IdName & { color?: string | null; icon?: string | null };
 
 export interface Spell {
+  executionMode?: "native" | "manual";
   id: string;
   name: string;
   level: number;
@@ -17,6 +18,7 @@ export interface Spell {
   appearanceDescription?: string | null;
   dice: number;
   cost: string;
+  casting?: SpellCastingTime | null;
   targeting: unknown;
   resolution: unknown;
   spellEffects: unknown;
@@ -43,6 +45,7 @@ export interface SpellGroup {
 }
 
 export interface SpellFormData {
+  executionMode?: "native" | "manual";
   name: string;
   level: number;
   groupId: string | null;
@@ -50,6 +53,7 @@ export interface SpellFormData {
   description: string | null;
   appearanceDescription: string | null;
   cost: SpellCost;
+  casting?: SpellCastingTime;
   dice: number;
   targeting: SpellTargeting;
   resolution: SpellResolution;
@@ -70,8 +74,10 @@ export interface SpellFormData {
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */
 export interface SpellRules {
+  executionMode?: "native" | "manual";
   dice?: number;
   cost?: SpellCost;
+  casting?: SpellCastingTime;
   targeting?: SpellTargeting;
   resolution?: SpellResolution;
   spellEffects?: Effect[];

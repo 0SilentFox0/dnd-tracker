@@ -7,6 +7,8 @@ export const ITEM_CHARGES_KEY = "charges";
 
 export const ITEM_POOL_PREFIX = "pool:item:";
 
+export const GRANT_POOL_PREFIX = "pool:grant:";
+
 export const CONSUMABLE_POOL_PREFIX = "pool:consumable:";
 
 export const itemPoolKey = (ref: string) => `${ITEM_POOL_PREFIX}${ref}`;

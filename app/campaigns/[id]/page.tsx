@@ -20,7 +20,7 @@ import { parseRules } from "@/lib/utils/rules/schema";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
 
-const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "classes", "feats", "units", "artifacts", "music"]);
+const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "classes", "feats", "backgrounds", "units", "artifacts", "music"]);
 
 const LABEL = "text-sm text-hud-muted";
 
@@ -53,6 +53,7 @@ export default async function CampaignDetailPage({
     { path: "skill-trees", icon: GitBranch, title: "Дерева Прокачки", subtitle: "Налаштування дерев прокачки для рас" },
     { path: "races", icon: Shield, title: "Ігрові Раси", subtitle: "Управління расами та їх здібностями" },
     ...(classesEnabled ? [{ path: "classes", icon: GraduationCap, title: "Класи", subtitle: "Класи, підкласи і вміння за рівнями" }] : []),
+    ...(classesEnabled ? [{ path: "backgrounds", icon: Award, title: "Передісторії", subtitle: "Походження героя, навички й стартові вибори" }] : []),
     ...(classesEnabled ? [{ path: "feats", icon: Award, title: "Риси", subtitle: "Риси 5e: походження, загальні, стилі бою, епічні дари" }] : []),
     { path: "battles", icon: Swords, title: "Сцени Боїв", subtitle: "Створення та управління боями" },
     { path: "music", icon: Music, title: "Музика бою", subtitle: "Бібліотека треків для плеєра в бою" },
@@ -92,6 +93,8 @@ export default async function CampaignDetailPage({
           <OnboardingChecklist campaignId={id} />
         </PrefetchedQuery>
       )}
+
+      {isDM && <HudPanel><a className="underline" href={`/campaigns/${id}/dm/compendium`}>Імпорт JSON-компендіуму та збережені звіти</a><p>Наповніть кампанію одним JSON: бібліотеки, матеріали ДМ і наступні дії.</p></HudPanel>}
 
       <HudPanel>
         <HudSection

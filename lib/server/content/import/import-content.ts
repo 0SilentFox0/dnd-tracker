@@ -8,6 +8,7 @@ import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadNames } from "@/lib/server/content/import/names";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -56,7 +57,7 @@ function resolveRefs(record: ImportRecord, fields: readonly ImportField[], refs:
 
       const id = index?.ids.has(s) ? s : index?.byName.get(nameKey(s))?.[0];
 
-      if (!id) issues.push({ field: field.key, level: field.required ? "error" : "warning", message: `${field.label}: не знайдено «${s}» (${kindLabel})` });
+      if (!id) issues.push({ field: field.key, level: field.required || field.strictRef ? "error" : "warning", message: `${field.label}: не знайдено «${s}» (${kindLabel})` });
 
       return id;
     };
@@ -221,7 +222,19 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
     }
 
     try {
-      await writePlan(resource, actor, plan);
+      if (plan.op === "create" && resource.prepareCreate) plan.body = await resource.prepareCreate(actor, plan.body);
+
+      if (plan.op === "update" && resource.prepareUpdate) {
+        const current = await resource.find(actor, plan.existingId as string, "write");
+
+        if (!current) throw new ContentError(resource.notFound, 404);
+
+        plan.body = await resource.prepareUpdate(actor, current, plan.body);
+      }
+
+      if (deps === DEFAULT_IMPORT_DEPS || deps === OFFLINE_IMPORT_DEPS) await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan));
+      else await writePlan(resource, actor, plan);
+
       wrote = true;
       results.push(toResult(plan));
     } catch (error) {

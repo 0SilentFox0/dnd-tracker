@@ -110,3 +110,19 @@ describe("convertSpells", () => {
     expect([...slugs].sort()).toEqual(slugs);
   });
 });
+
+it("preserves reaction triggers and minute/hour casting times as executable timing", () => {
+  const source = loadOpen5e(FIXTURE_DIR);
+
+  const base = source.spells[0];
+
+  const data = { ...source, spells: [
+    { ...base, pk: "srd-2024_reaction-test", fields: { ...base.fields, casting_time: "reaction", reaction_condition: "when hit" } },
+    { ...base, pk: "srd-2024_long-test", fields: { ...base.fields, casting_time: "10minutes" } },
+  ] };
+
+  const out = convertSpells(data);
+
+  expect(out.find((s) => s.slug === "srd-2024_reaction-test")).toMatchObject({ cost: "reaction", casting: { trigger: "when hit" } });
+  expect(out.find((s) => s.slug === "srd-2024_long-test")).toMatchObject({ cost: "long", casting: { rounds: 100, text: "10minutes" } });
+});

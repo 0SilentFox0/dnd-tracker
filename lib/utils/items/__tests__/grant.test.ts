@@ -11,8 +11,9 @@ const rows = new Map(
     row("ls", "Longsword", "weapon", { unique: false }),
     row("ft", "Flame Tongue", "weapon", { unique: false, property: { appliesTo: { kinds: ["weapon"] }, nameTemplate: "Flame Tongue {base}" } }),
     row("ring", "Ring", "ring", { unique: false }),
-    row("pot", "Potion of Healing", "item", { unique: false, consumable: true }, "Regain 2d4 + 2 HP."),
+    row("pot", "Potion of Healing", "item", { unique: false, consumable: true, spells: [{ spellId: "spell-fire", cost: 1, castLevel: 3, dc: 15 }] }, "Regain 2d4 + 2 HP."),
     row("homm", "Меч", "weapon"),
+    row("resistance", "Armor of Resistance ({param})", "armor", { unique: false, parameter: { kind: "damageType", options: [{ key: "fire", label: "Fire" }] } }),
   ].map((r) => [r.id, r]),
 );
 
@@ -33,9 +34,17 @@ describe("planGrant", () => {
     expect(planGrant({ artifactId: "nope" }, rows)).toEqual({ ok: false, error: "ARTIFACT_NOT_FOUND" });
   });
 
+  it("parameter selection is required and validated before making a full ref", () => {
+    expect(planGrant({ artifactId: "resistance" }, rows)).toEqual({ ok: false, error: "ITEM_PARAMETER_REQUIRED" });
+    expect(planGrant({ artifactId: "resistance", parameter: "cold" }, rows)).toEqual({ ok: false, error: "ITEM_PARAMETER_INVALID" });
+    expect(planGrant({ artifactId: "resistance", parameter: "fire" }, rows)).toEqual({ ok: true, plan: { kind: "stash", ref: "resistance~fire", name: "Armor of Resistance (fire)" } });
+  });
+
   it("consumable → quantity (default 1, clamped 1–99)", () => {
-    expect(planGrant({ artifactId: "pot", quantity: 2 }, rows)).toEqual({ ok: true, plan: { kind: "consumable", artifactId: "pot", name: "Potion of Healing", description: "Regain 2d4 + 2 HP.", quantity: 2 } });
-    expect(planGrant({ artifactId: "pot" }, rows)).toMatchObject({ ok: true, plan: { quantity: 1 } });
-    expect(planGrant({ artifactId: "pot", quantity: 500 }, rows)).toMatchObject({ ok: true, plan: { quantity: 99 } });
+    expect(planGrant({ artifactId: "pot", quantity: 2 }, rows)).toEqual({ ok: false, error: "ITEM_SPELL_REQUIRED" });
+    expect(planGrant({ artifactId: "pot", quantity: 2, spellId: "spell-other" }, rows)).toEqual({ ok: false, error: "ITEM_SPELL_INVALID" });
+    expect(planGrant({ artifactId: "pot", quantity: 2, spellId: "spell-fire" }, rows)).toEqual({ ok: true, plan: { kind: "consumable", artifactId: "pot", name: "Potion of Healing", description: "Regain 2d4 + 2 HP.", quantity: 2, spellId: "spell-fire" } });
+    expect(planGrant({ artifactId: "pot", spellId: "spell-fire" }, rows)).toMatchObject({ ok: true, plan: { quantity: 1 } });
+    expect(planGrant({ artifactId: "pot", quantity: 500, spellId: "spell-fire" }, rows)).toMatchObject({ ok: true, plan: { quantity: 99 } });
   });
 });

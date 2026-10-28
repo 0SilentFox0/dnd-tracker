@@ -2,6 +2,7 @@ import "server-only";
 import type { AnyContentResource, ContentKind } from "@/lib/server/content/define-resource";
 import { artifactSetsResource } from "@/lib/server/content/resources/artifact-sets";
 import { artifactsResource } from "@/lib/server/content/resources/artifacts";
+import { backgroundsResource } from "@/lib/server/content/resources/backgrounds";
 import { classesResource } from "@/lib/server/content/resources/classes";
 import { featsResource } from "@/lib/server/content/resources/feats";
 import { mainSkillsResource } from "@/lib/server/content/resources/main-skills";
@@ -17,6 +18,7 @@ export const CONTENT_RESOURCES = {
   races: racesResource,
   classes: classesResource,
   feats: featsResource,
+  backgrounds: backgroundsResource,
   spells: spellsResource,
   "spell-groups": spellGroupsResource,
   "main-skills": mainSkillsResource,

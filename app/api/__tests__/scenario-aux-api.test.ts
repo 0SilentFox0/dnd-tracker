@@ -6,6 +6,7 @@ import * as apiAuth from "@/lib/utils/api/api-auth";
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] }),
     $queryRaw: vi.fn(),
     scenarioPage: { findUnique: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), findMany: vi.fn(async () => []), create: vi.fn(), deleteMany: vi.fn() },

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { SourceNotes } from "@/components/content-import/SourceNotes";
 import { FeatForm } from "@/components/feats/FeatForm";
 import { prisma } from "@/lib/db";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
@@ -14,5 +15,5 @@ export default async function EditFeatPage({ params }: { params: Promise<{ id: s
 
   if (!row) redirect(`/campaigns/${id}/dm/feats`);
 
-  return <FeatForm campaignId={id} feat={toFeatData(row)} />;
+  return <><SourceNotes campaignId={id} kind="feats" targetId={featId} /><FeatForm campaignId={id} feat={toFeatData(row)} /></>;
 }

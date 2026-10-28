@@ -4,7 +4,9 @@ import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, delegateO
 import { CONTENT_ID_RE, newContentId } from "./ids";
 import { collectKeysAndStrings, remapIds } from "./remap-ids";
 
+import { type CompendiumBundleDb,importCompendiumSection } from "@/lib/server/compendium-import/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
+import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
 
 const idCandidates = (bundle: Bundle) => new Set([...collectKeysAndStrings(bundle)].filter((s) => CONTENT_ID_RE.test(s)));
 
@@ -14,6 +16,12 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
   if (!parsed.success) throw new BundleInvalidError("Бандл має неправильний формат", parsed.error.issues);
 
   const bundle = parsed.data;
+
+  for (const background of bundle.backgrounds) {
+    const error = backgroundReferenceError({ originFeatId: background.originFeatId, choices: background.choices }, bundle.feats, new Set(bundle.spells.map((s) => s.id)));
+
+    if (error) throw new BundleInvalidError(error);
+  }
 
   const warnings: string[] = [];
 
@@ -27,6 +35,21 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
       seen.add(row.id);
       idMap.set(row.id, newContentId());
+    }
+  }
+
+  if (bundle.compendium) {
+    if (!tx.compendiumEntry || !tx.compendiumSource || !tx.scenarioPage) throw new BundleInvalidError("Сховище не підтримує provenance компедіуму");
+
+    for (const page of bundle.compendium.pages) {
+      if (idMap.has(page.id)) throw new BundleInvalidError("Дубльований id сторінки матеріалів");
+
+      idMap.set(page.id, newContentId());
+    }
+    for (const entry of bundle.compendium.entries) {
+      const target = entry.kind === "scenarioPages" ? bundle.compendium.pages : bundle[entry.kind === "spell-groups" ? "spellGroups" : entry.kind];
+
+      if (!target?.some((row) => row.id === entry.localId)) throw new BundleInvalidError("Provenance посилається на запис неправильного виду");
     }
   }
 
@@ -70,6 +93,8 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
   assertNoLeak(remappedRows, new Set(idMap.keys()));
 
   for (const { t, rows } of writes) if (rows.length > 0) await delegateOf(tx, t).createMany({ data: rows });
+
+  if (bundle.compendium) await importCompendiumSection(tx as CompendiumBundleDb, bundle.compendium, targetCampaignId, idMap);
 
   return { idMap, warnings, hashes };
 }

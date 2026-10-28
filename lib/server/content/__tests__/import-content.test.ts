@@ -10,7 +10,7 @@ vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
 import type { ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { createArtifactSchema, createArtifactSetSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
@@ -216,6 +216,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   "spell-groups": createSpellGroupSchema,
   races: createRaceSchema,
   classes: createClassSchema,
+  backgrounds: createBackgroundSchema,
   feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,
@@ -246,4 +247,18 @@ describe("compactImportReport", () => {
     expect(compact.omitted).toBe(1);
     expect(compact.counts.error).toBe(3);
   });
+});
+
+it("background import resolves origin names and rejects unresolved explicit origin refs", async () => {
+  const resourceForBackgrounds: AnyContentResource = { ...resource, schemas: { create: createBackgroundSchema, update: createBackgroundSchema } };
+
+  const deps: ImportDeps = { resource: () => resourceForBackgrounds, loadNames: async (_c, kind) => kind === "feats" ? [{ id: "f", name: "Alert" }] : [] };
+
+  const good = await importContent(actor, "backgrounds", { rows: [{ name: "Criminal", originFeatId: "Alert" }], mode: "create", dryRun: true }, deps);
+
+  expect(good.results[0].status).toBe("created");
+
+  const bad = await importContent(actor, "backgrounds", { rows: [{ name: "Sage", originFeatId: "missing" }], mode: "create", dryRun: true }, deps);
+
+  expect(bad.results[0].status).toBe("error");
 });

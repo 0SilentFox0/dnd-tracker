@@ -21,6 +21,7 @@ const DM_SECTIONS: Record<string, ScreenBackgroundName> = {
   characters: SCREEN_BACKGROUND.character,
   classes: SCREEN_BACKGROUND.races,
   feats: SCREEN_BACKGROUND.races,
+  backgrounds: SCREEN_BACKGROUND.races,
   "main-skills": SCREEN_BACKGROUND.skills,
   races: SCREEN_BACKGROUND.races,
   "skill-trees": SCREEN_BACKGROUND.skillTree,

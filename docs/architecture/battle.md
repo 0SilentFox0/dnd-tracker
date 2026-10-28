@@ -137,6 +137,8 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 
 ## 5e: риси й вибори (етап 4f-4)
 
+Передісторія — додатковий власник чинних Choice/Picks: `backgroundId`, `backgroundChoices`, `backgroundFeatPicks`; `Character.background` лишається біографією. Спільний `planChoices` розраховує ASI при виборі, заміні та знятті; `maxPerAbility` обмежує розподіл очок. PUT/PATCH читають refs через ту саму транзакцію, що й заблокований рядок персонажа. Навички та інструменти зливаються при читанні без зміни ручних полів. Origin feat передісторії використовує чинні вкладені picks, spell grants і pools; ключ гранту містить backgroundId та featId і не залежить від назви. Ручні спорядження/гроші імпорт або вибір передісторії не змінює.
+
 - **Модель** — `Choice` (`types/choices.ts`; Zod — `lib/schemas/choices.ts`): `kind` `option | feat | skill | expertise | abilityScore | spell`, `count` — число або колонка класу `{ scale }`, `level` (рівень у класі / загальний), `lineage` (лише раса, ≤ 1; назва опції → `Character.subrace`). Власники: `races.choices`, фічі класу/підкласу `{ level, abilities, choices }`, `feats.choices` (без виду `feat`). Піки — `Picks = Record<choiceId, ChoicePick[]>` у `Character.raceChoices`, `Character.classes[i].choices`, `Character.feats [{ id, picks?, source: origin | dm }]`.
 - **Чисті функції без zod** — `lib/utils/characters/choices/`: `resolveChoiceCount`, `validatePicks`, `visitPicks`, `pendingCount`, `abilityScoreDelta`/`capIssues`, `planChoices` (закриті вибори — `CHOICE_LOCKED`, права на риси ДМ, походження ≤ 1, межа ASI лише для характеристик з додатною дельтою), `choiceSelections` (групи вмінь для рушія), `prunePicks`.
 - **Збереження** — `resolveCharacterChoices` (`lib/server/characters/choices/`) для створення, чернетки, `PUT …/characters/[id]/choices` (ДМ або власник при `allowPlayerEdit`; 409 в активному бою; журнал `choices_edit`) і level-up з `choices` (без — як раніше). ASI пишеться в базові колонки дельтою в тій самій транзакції. Класовий PATCH ігнорує вхідні `classes[].choices` (`keepStoredPicks`).
@@ -154,6 +156,20 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Площі**: спільна `templateCells` обчислює клітинки для сервера й клієнта. `circle.exact` — диск (радіус 20 фт дає 49 клітинок), `emanation` відштовхується від усіх клітинок кастера й не потребує вибору `targetCell`. HOMM-коло без `exact` лишається квадратним.
 - **UI**: редактор юніта має статблок і таблицю заклинань, редактор заклинання — сталі кубики/бонус і точну площу; у бою показуються чуття й ресурси, режими легендарного касту та лігва.
 
+## 5e: гранти героя, предметні заклинання й час накладання (4f-5b)
+
+- Вибори раси/класу/риси містять `SpellGrantPolicy`; snapshot зберігає окремі `SpellGrant` зі стабільним ключем власника/вибору/опції/заклинання. Назви й порядок не впливають на витрати. `slotSpells` окремо визначає право каста слотами; наявність предметного гранту цього права не додає.
+- Cast API приймає `grantKey` або `slotKey`; неоднозначне джерело, застарілий ключ, недозволений рівень і нестача ресурсу відхиляються без списання. Ціну/підсилення/сталі DC та attack сервер бере зі snapshot. `item.spells` використовує спільний `pool:item:<ref>`; ціна 0 працює без пулу й за порожнього пулу. Сувій використовує `pool:consumable:<stackId>` та списує тільки вибраний стек.
+- Пули грантів зберігаються в `Character.resources.charges`; завершення бою переносить витрати, наступний snapshot їх відновлює. Короткий/довгий відпочинок очищає лише відповідні ресурси; витрачені сувої не відновлюються. ДМ може коригувати лічильники у діалозі ресурсів.
+- `cost: reaction` перевіряє власника, блокери й одну реакцію та дозволяє каст поза ходом. Умову реакції підтверджує користувач; уже оброблені влучання/події не переграються ретроактивно.
+- `cost: long`, `casting: { rounds, text?, trigger? }` та `battleData.pendingCast` описують підготовку. Початок/продовження потребує дії й концентрації кожного ходу; слот/заряд списується лише після успішного завершення. Втрата концентрації чи пропуск дії перериває підготовку. Лише ДМ може явно зарахувати решту часу через `castingRounds`.
+- Dragonborn має два Breath Weapon (конус 15 фт / лінія 30×5 фт) зі спільним proficiency/long пулом, CON DC, DEX/half і 1/2/3/4d10 на рівнях 1/5/11/17. Заміною однієї атаки керує ДМ; рушій витрачає дію.
+- Ref предмета має формат `<base>[+<property>][~<parameter>]`; усі читачі використовують канонічний parser/resolver. Параметр і вибране заклинання входять в ідентичність витратного стека та проходять import/export/remap. `targetCreatureType` перевіряється окремо для кожної цілі; невідомий тип не підходить, герой типово humanoid.
+- SRD: 498 заклинань, 333 артефакти; підтримані предмети та явно непідтримана проза перелічені в `data/templates/srd-5.2/coverage-4f5b.json`. Випадкове відновлення/знищення предметів та право читати сувій визначає ДМ. Реакції й тривале накладання мають runtime-підтримку.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
+
+
+Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.

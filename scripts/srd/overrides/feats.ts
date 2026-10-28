@@ -22,7 +22,7 @@ export const FEAT_MECHANICS: Record<string, FeatMechanics> = {
     abilities: ["note"],
     choices: [
       { id: "cantrips", label: "Two Cantrips", level: 1, count: 2, kind: "spell", spells: { lists: MI_LISTS, minLevel: 0, maxLevel: 0 } },
-      { id: "level-one-spell", label: "Level One Spell", level: 1, count: 1, kind: "spell", spells: { lists: MI_LISTS, minLevel: 1, maxLevel: 1 } },
+      { id: "level-one-spell", label: "Level One Spell", level: 1, count: 1, kind: "spell", spells: { lists: MI_LISTS, minLevel: 1, maxLevel: 1 }, grant: { uses: 1, rest: "long", castLevel: 1, via: "slotOrGrant" } },
     ],
   },
   "srd-2024_skilled": { abilities: [], choices: [{ id: "skills", label: "Skills", level: 1, count: 3, kind: "skill" }] },

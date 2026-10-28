@@ -19,6 +19,7 @@ export interface O5Spell {
   range: number | null;
   ritual: boolean;
   casting_time: string;
+  reaction_condition?: string | null;
   verbal: boolean;
   somatic: boolean;
   material: boolean;
@@ -139,6 +140,9 @@ export interface O5Feat { name: string; desc: string; type: string; prerequisite
 
 export interface O5FeatBenefit { name: string; desc: string; parent: string; type: string | null }
 
+export interface O5Background { name: string; desc: string }
+export interface O5BackgroundBenefit { name: string; desc: string; parent: string; type: string }
+
 export interface O5Document { name: string; licenses: string[] }
 
 export interface Open5eData {
@@ -162,6 +166,8 @@ export interface Open5eData {
   magicItems: Fixture<O5MagicItem>[];
   feats: Fixture<O5Feat>[];
   featBenefits: Fixture<O5FeatBenefit>[];
+  backgrounds: Fixture<O5Background>[];
+  backgroundBenefits: Fixture<O5BackgroundBenefit>[];
 }
 
 export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
@@ -185,6 +191,8 @@ export const OPEN5E_FILE_OF: Record<keyof Open5eData, Open5eFile> = {
   magicItems: "MagicItem",
   feats: "Feat",
   featBenefits: "FeatBenefit",
+  backgrounds: "Background",
+  backgroundBenefits: "BackgroundBenefit",
 };
 
 export const FIXTURE_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures");
@@ -195,7 +203,7 @@ export const FIXTURE_4F3_DIR = path.join(process.cwd(), "scripts", "srd", "__tes
 export const FIXTURE_4F4_DIR = path.join(process.cwd(), "scripts", "srd", "__tests__", "fixtures-4f4");
 
 // MagicItem arrived in 4f-3, feats in 4f-4: older fixture dirs do not carry them
-const OPTIONAL_FILES = new Set<Open5eFile>(["MagicItem", "Feat", "FeatBenefit"]);
+const OPTIONAL_FILES = new Set<Open5eFile>(["MagicItem", "Feat", "FeatBenefit", "Background", "BackgroundBenefit"]);
 
 export function loadOpen5e(dir: string): Open5eData {
   const read = (file: Open5eFile) => {

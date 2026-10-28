@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createBackgroundSchema, updateBackgroundSchema } from "@/lib/schemas/backgrounds";
+
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
@@ -22,12 +24,13 @@ const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
   spells: { create: createSpellSchema, update: updateSpellSchema },
   races: { create: createRaceSchema, update: updateRaceSchema },
   classes: { create: createClassSchema, update: updateClassSchema },
+  backgrounds: { create: createBackgroundSchema, update: updateBackgroundSchema },
   feats: { create: createFeatSchema, update: updateFeatSchema },
   units: { create: createUnitSchema, update: updateUnitSchema },
   artifacts: { create: createArtifactSchema, update: patchArtifactSchema },
 };
 
-const EXPECTED: Record<SrdKind, number> = { "spell-groups": 9, spells: 488, races: 9, classes: 12, feats: 17, units: 331, artifacts: 331 };
+const EXPECTED: Record<SrdKind, number> = { "spell-groups": 9, spells: 498, races: 9, classes: 12, feats: 19, backgrounds: 4, units: 331, artifacts: 333 };
 
 const actor: Actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session", scopes: null };
 

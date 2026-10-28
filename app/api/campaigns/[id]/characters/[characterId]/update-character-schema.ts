@@ -3,9 +3,11 @@ import { z } from "zod";
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
 import { HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
+import { BackgroundSelectionFields } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 
 export const updateCharacterSchema = z.object({
+  ...BackgroundSelectionFields,
   name: z.string().min(1).max(100).optional(),
   level: z.number().min(1).max(30).optional(),
   class: z.string().optional(),

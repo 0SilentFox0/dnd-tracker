@@ -5,11 +5,12 @@ import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { SpellListsSchema } from "@/lib/schemas/choices";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
-import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
+import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
 const spellFields = {
+  executionMode: z.enum(["native", "manual"]).optional(),
   name: z.string().min(1).max(SPELL_NAME_MAX),
   level: z.number().int().min(0).max(9),
   groupId: z.string().nullable(),
@@ -17,6 +18,7 @@ const spellFields = {
   description: z.string().nullable(),
   appearanceDescription: z.string().nullable(),
   cost: SpellCostSchema,
+  casting: SpellCastingTimeSchema.nullable().optional(),
   dice: SpellDiceSchema,
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,

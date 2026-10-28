@@ -7,12 +7,12 @@ import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
-import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { SpellCastingTime, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { Choice, FeatPrerequisite, FeatType } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
 
-export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "units", "artifacts"] as const;
+export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts"] as const;
 
 export type SrdKind = (typeof SRD_KINDS)[number];
 
@@ -24,7 +24,8 @@ export interface SpellRow {
   level: number;
   groupId: string;
   description: string;
-  cost: "action" | "bonusAction";
+  cost: SpellCost;
+  casting?: SpellCastingTime;
   dice: number;
   dieSides?: 4 | 6 | 8 | 10 | 12;
   concentration: boolean;
@@ -119,12 +120,15 @@ export interface FeatRow {
   choices: Choice[];
 }
 
+export interface BackgroundRow { slug: string; name: string; description: string; choices: Choice[]; skillProficiencies: DndSkill[]; toolProficiencies: string[]; originFeatId: string; equipmentText: string }
+
 export interface SrdData {
   "spell-groups": SpellGroupRow[];
   spells: SpellRow[];
   races: RaceRow[];
   classes: ClassRow[];
   feats: FeatRow[];
+  backgrounds: BackgroundRow[];
   units: UnitRow[];
   artifacts: ArtifactRow[];
 }

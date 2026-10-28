@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { useBackgrounds } from "@/lib/hooks/backgrounds";
 import { useClasses } from "@/lib/hooks/classes";
 import { useFeats } from "@/lib/hooks/feats";
 import { useRaces } from "@/lib/hooks/races";
@@ -14,6 +15,8 @@ export type ChoiceRefsView = ChoiceRefs & { ready: boolean; feats: FeatData[]; s
 
 export function useChoiceRefs(campaignId: string, raceName: string, opts: { enabled?: boolean } = {}): ChoiceRefsView {
   const enabled = opts.enabled ?? true;
+
+  const backgrounds = useBackgrounds(campaignId, { enabled });
 
   const races = useRaces(campaignId, { enabled });
 
@@ -31,7 +34,8 @@ export function useChoiceRefs(campaignId: string, raceName: string, opts: { enab
     const spellRefs: SpellRef[] = (spells.data ?? []).map((s) => ({ id: s.id, name: s.name, level: s.level, lists: s.lists ?? [] }));
 
     return {
-      ready: !!races.data && !!classes.data && !!feats.data && !!spells.data,
+      ready: !!backgrounds.data && !!races.data && !!classes.data && !!feats.data && !!spells.data,
+      backgroundsById: Object.fromEntries((backgrounds.data ?? []).map((b) => [b.id, b])),
       race: row && choices.length > 0 ? { id: row.id, name: row.name, choices } : null,
       classesById: Object.fromEntries((classes.data ?? []).map((c) => [c.id, c])),
       featsById: Object.fromEntries((feats.data ?? []).map((f) => [f.id, f])),
@@ -39,5 +43,5 @@ export function useChoiceRefs(campaignId: string, raceName: string, opts: { enab
       feats: feats.data ?? [],
       spells: spellRefs,
     };
-  }, [races.data, classes.data, feats.data, spells.data, raceName]);
+  }, [backgrounds.data, races.data, classes.data, feats.data, spells.data, raceName]);
 }

@@ -74,3 +74,19 @@ it("rejects unknown perform names and duplicate grant names in import planning",
 
   expect(result.results.map((r) => r.status)).toEqual(["error", "error"]);
 });
+
+it("imports item spell names and exports portable names", async () => {
+  const { createArtifactSchema, patchArtifactSchema } = await import("@/lib/schemas/artifacts");
+
+  let stored: Record<string, unknown> = {};
+
+  const resource = { schemas: { create: createArtifactSchema, update: patchArtifactSchema }, invalidates: [], create: async (_actor: Actor, body: Record<string, unknown>) => { stored = body;
+
+ return { id: "wand", ...body }; } } as unknown as AnyContentResource;
+
+  const result = await importContent(actor, "artifacts", { rows: [{ name: "Wand", slot: "item", item: { charges: { max: 7, rest: "long" }, spells: [{ spellId: "Longstrider", cost: 1 }] } }], mode: "create", dryRun: false }, { resource: () => resource, loadNames: async (_c, k) => k === "spells" ? spells : [] });
+
+  expect(result.counts.error).toBe(0);
+  expect(stored.item).toMatchObject({ spells: [{ spellId: "sp-longstrider" }] });
+  expect(recordToCells(IMPORT_SPECS.artifacts, stored, (kind, id) => kind === "spells" ? spells.find((s) => s.id === id)?.name : undefined).join("|")).toContain('"spellId":"Longstrider"');
+});

@@ -166,7 +166,7 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
             <button type="button" aria-label={`−1 ${ABILITY_LABELS[a]}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               −
             </button>
-            <button type="button" aria-label={`+1 ${ABILITY_LABELS[a]}`} disabled={value.length >= points || after + 1 > max} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <button type="button" aria-label={`+1 ${ABILITY_LABELS[a]}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               +
             </button>
             {after !== scores[a] && <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>}

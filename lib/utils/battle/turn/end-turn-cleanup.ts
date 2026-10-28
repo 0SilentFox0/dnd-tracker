@@ -1,4 +1,5 @@
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
+import { dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions/query";
 import { setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
@@ -8,6 +9,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 export interface SaveEndsContext {
   participants: BattleParticipant[];
+  round?: number;
   rules?: Ruleset;
   rng: () => number;
 }
@@ -15,7 +17,14 @@ export interface SaveEndsContext {
 export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: string[]; messages: string[] } {
   const rolled = saves ? rollSaveEnds(source, saves.participants, saves.rules, saves.rng) : { participant: source, messages: [] };
 
-  const p = rolled.participant;
+  let p = rolled.participant;
+
+  if (p.battleData.pendingCast && (!hasConcentration(p) || (saves?.round !== undefined && p.battleData.pendingCast.lastRound < saves.round))) {
+    const dropped = dropConcentration([p], p.basicInfo.id, "пропущено дію накладання");
+
+    p = { ...dropped.participants[0], battleData: { ...dropped.participants[0].battleData, pendingCast: undefined } };
+    rolled.messages.push(...dropped.messages);
+  }
 
   const { updatedEffects, expiredEffects } = decreaseEffectDurations(p);
 

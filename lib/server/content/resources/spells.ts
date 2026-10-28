@@ -10,7 +10,9 @@ import { type CreateSpellInput, createSpellSchema, type UpdateSpellInput,updateS
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { parseInput, toJsonInput } from "@/lib/server/content/errors";
+import { ContentError } from "@/lib/server/content/errors";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
+import { assertManualActivation } from "@/lib/utils/spells/model/execution";
 import { spellDefinitionColumns } from "@/lib/utils/spells/model/read";
 
 const withGroup = { spellGroup: true } as const;
@@ -39,6 +41,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
       data: {
         campaignId: actor.campaignId,
         name: data.name,
+        executionMode: data.executionMode,
         level: data.level,
         groupId: data.groupId || null,
         icon: data.icon || null,
@@ -49,18 +52,20 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         // legacy NOT NULL columns until a later migration; the new model never reads them
         type: "target",
         damageType: "damage",
-        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined, fixedDice: data.fixedDice ?? undefined, damageBonus: data.damageBonus ?? undefined }),
+        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, casting: data.casting ?? undefined, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined, fixedDice: data.fixedDice ?? undefined, damageBonus: data.damageBonus ?? undefined }),
       },
       include: withGroup,
     });
   },
   update: async (actor, existing, data) => {
+    try { assertManualActivation(existing.executionMode, data); } catch { throw new ContentError("Для автоматичного застосування явно налаштуйте всю механіку заклинання", 422); }
     await assertCampaignRefs(actor.campaignId, { spellGroup: data.groupId });
 
     return prisma.spell.update({
       where: { id: existing.id },
       data: {
         name: data.name,
+        executionMode: data.executionMode,
         level: data.level,
         groupId: data.groupId,
         icon: data.icon !== undefined ? data.icon || null : undefined,
@@ -68,6 +73,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         appearanceDescription: data.appearanceDescription,
         dice: data.dice,
         cost: data.cost,
+        casting: data.casting === null ? Prisma.DbNull : data.casting as Prisma.InputJsonValue | undefined,
         targeting: toJsonInput(data.targeting),
         resolution: toJsonInput(data.resolution),
         spellEffects: toJsonInput(data.spellEffects),

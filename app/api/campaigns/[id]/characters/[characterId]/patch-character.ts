@@ -9,6 +9,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
+import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { type ChoiceFields,resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
@@ -16,6 +18,8 @@ import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { mergeBackground } from "@/lib/utils/backgrounds/selection";
+import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
@@ -105,11 +109,21 @@ export async function patchCharacter(request: Request, campaignId: string, chara
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  const writeUpdate = (db: Pick<Prisma.TransactionClient, "character">, classes: typeof classesInput) =>
+  const changesBackground = data.backgroundId !== undefined || data.backgroundChoices !== undefined || data.backgroundFeatPicks !== undefined;
+
+  if (changesBackground) {
+    const inBattle = await rejectIfInActiveBattle(campaignId, [characterId]);
+
+    if (inBattle) return inBattle;
+  }
+
+  const writeUpdate = (db: Pick<Prisma.TransactionClient, "character">, classes: typeof classesInput, choiceFields?: ChoiceFields) =>
     db.character.update({
       where: { id: characterId },
       data: {
         ...data,
+        backgroundChoices: undefined,
+        backgroundFeatPicks: undefined,
         classes: classes as unknown as Prisma.InputJsonValue | undefined,
         avatar: avatar.avatar,
         level: computed.finalLevel,
@@ -124,21 +138,32 @@ export async function patchCharacter(request: Request, campaignId: string, chara
         ...(computed.skillTreeProgressUpdate !== undefined && { skillTreeProgress: computed.skillTreeProgressUpdate }),
         ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
         ...(fromClasses && { level: finalLevel }),
+        ...choiceFields,
         ...(classSeenLevel !== undefined && { seenLevel: classSeenLevel }),
       },
       include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
       omit: { notes: true },
     });
 
-  const updatedCharacter = data.classes
+  const updatedCharacter = data.classes || changesBackground
     ? await prisma.$transaction(async (tx) => {
         await lockCharacters(tx, [characterId]);
 
-        const fresh = await tx.character.findUnique({ where: { id: characterId }, select: { classes: true } });
+        const fresh = await tx.character.findUnique({ where: { id: characterId } });
 
-        return writeUpdate(tx, keepStoredPicks(data.classes ?? [], fresh?.classes ?? character.classes));
+        if (!fresh) return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const classes = data.classes ? keepStoredPicks(data.classes, fresh.classes) : undefined;
+
+        const before = choicesStateOf(fresh);
+
+        const resolved = changesBackground ? await resolveCharacterChoices({ db: tx, campaignId, rules: campaign.rules, isDM, character: { ...fresh, ...computed.abilityScores, level: finalLevel }, before, after: { ...before, ...mergeBackground(before, data), classes: classes ?? before.classes } }) : null;
+
+        if (resolved && !resolved.ok) return resolved.response;
+
+        return writeUpdate(tx, classes, resolved?.ok ? resolved.fields : undefined);
       })
     : await writeUpdate(prisma, classesInput);
 
-  return NextResponse.json(updatedCharacter);
+  return updatedCharacter instanceof NextResponse ? updatedCharacter : NextResponse.json(updatedCharacter);
 }

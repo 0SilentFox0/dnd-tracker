@@ -3,10 +3,12 @@ import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen, resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { maxSlotLevelFor } from "@/lib/utils/spells/class-slots";
+import type { BackgroundData } from "@/types/backgrounds";
 import type { Choice, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SpellRef } from "@/types/choices";
 import type { ClassColumn, GameClassData } from "@/types/classes";
 
 export interface ChoiceRefs {
+  backgroundsById?: Readonly<Record<string, BackgroundData>>;
   race: ChoiceRace | null;
   classesById: Readonly<Record<string, GameClassData>>;
   featsById: Readonly<Record<string, FeatData>>;
@@ -22,7 +24,7 @@ export interface PickVisit {
   maxSlotLevel?: number;
 }
 
-type WalkRefs = Pick<ChoiceRefs, "race" | "classesById" | "featsById">;
+type WalkRefs = Pick<ChoiceRefs, "race" | "classesById" | "featsById" | "backgroundsById">;
 
 export function visitPicks(state: ChoicesState, refs: WalkRefs, opts: { level: number; classMode: boolean }): PickVisit[] {
   const out: PickVisit[] = [];
@@ -33,7 +35,7 @@ export function visitPicks(state: ChoicesState, refs: WalkRefs, opts: { level: n
     if (feat) visitList(feat.choices, picks ?? {}, { open, level: opts.level, columns: [], owner: "feat" }, path);
   };
 
-  function visitList(defs: readonly Choice[], picks: Picks, at: { open: boolean; level: number; columns: readonly ClassColumn[]; owner: "race" | "class" | "feat"; maxSlotLevel?: number }, path: string) {
+  function visitList(defs: readonly Choice[], picks: Picks, at: { open: boolean; level: number; columns: readonly ClassColumn[]; owner: "race" | "class" | "feat" | "background"; maxSlotLevel?: number }, path: string) {
     for (const choice of defs) {
       const list = picks[choice.id] ?? [];
 
@@ -50,6 +52,14 @@ export function visitPicks(state: ChoicesState, refs: WalkRefs, opts: { level: n
   visitList(refs.race?.choices ?? [], state.raceChoices, { open: true, level: opts.level, columns: [], owner: "race" }, "raceChoices");
 
   if (!opts.classMode) return out;
+
+  const background = state.backgroundId ? refs.backgroundsById?.[state.backgroundId] : null;
+
+  if (background) {
+    visitList(background.choices, state.backgroundChoices ?? {}, { open: true, level: opts.level, columns: [], owner: "background" }, "backgroundChoices");
+
+    if (background.originFeatId) visitFeat(background.originFeatId, state.backgroundFeatPicks, true, "backgroundFeatPicks");
+  }
 
   for (const entry of state.classes) {
     const cls = refs.classesById[entry.classId];

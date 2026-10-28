@@ -20,6 +20,7 @@ export function FileStep({ wizard }: { wizard: ContentImportState }) {
           if (file) void wizard.actions.selectFile(file);
         }}
       />
+      <p>Багатокатегорійний JSON автоматично відкриє кампанійний майстер без колонок та AI.</p>
       <p className="text-xs text-hud-muted">Excel чи Google Таблиці: «Файл → Зберегти як → CSV (UTF-8)». Роздільник (кома, крапка з комою, табуляція) визначається сам.</p>
       <a className="text-sm underline" href={wizard.urls.example} download>
         Завантажити приклад CSV

@@ -52,6 +52,20 @@ describe("useContentImport", () => {
     expect(result.current.mapping.missing).toEqual([]);
   });
 
+  it("aggregate bypasses column mapping, AI and persistent mapping storage", async () => {
+    const { result } = setup();
+
+    const file = new File(['{"spell":[{"name":"Private synthetic", "source":"Test"}]}'], "synthetic.json");
+
+    await act(() => result.current.actions.selectFile(file));
+    expect(result.current.aggregateFile).toBe(file);
+    expect(result.current.step).toBe("file");
+    expect(api.getImportAiAvailability).not.toHaveBeenCalled();
+    expect(api.suggestImportMapping).not.toHaveBeenCalled();
+    expect(api.importContentRows).not.toHaveBeenCalled();
+    expect(window.localStorage.length).toBe(0);
+  });
+
   it("XLSX — помилка з підказкою, крок не змінюється", async () => {
     const { result } = setup();
 

@@ -1,7 +1,7 @@
 import { ArtifactModifierType, CARRIED_SLOTS, ItemModifierType } from "@/lib/constants/artifacts";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
-import { composedName, composeItemRow, type ItemRowLike } from "@/lib/utils/items/compose";
+import { composedName, composeItemRow, type ItemRowLike,parameterizedName } from "@/lib/utils/items/compose";
 import { isUniqueRow, itemStatsFromRow } from "@/lib/utils/items/item-row";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
 import { isComposedRef, parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
@@ -26,6 +26,22 @@ export interface ActiveItemRef {
   carried?: true;
 }
 
+const PARAM_KEYS = new Set(["name", "damageType", "creatureType", "types"]);
+
+const substituteParameter = (value: unknown, param: string): unknown => {
+  if (Array.isArray(value)) return value.map((entry) => substituteParameter(entry, param));
+
+  if (!isRecord(value)) return value;
+
+  return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, PARAM_KEYS.has(key) && typeof entry === "string" ? entry.replaceAll("{param}", param) : key === "types" && Array.isArray(entry) ? entry.map((type) => (typeof type === "string" ? type.replaceAll("{param}", param) : type)) : substituteParameter(entry, param)]));
+};
+
+const applyParameter = <R extends ItemRowLike>(row: R, param: string, ref: string): R => {
+  const name = parameterizedName(row.name, param);
+
+  return { ...row, id: ref, name, abilities: substituteParameter(row.abilities, param) as R["abilities"], modifiers: substituteParameter(row.modifiers, param) as R["modifiers"] };
+};
+
 export const getRow = <R>(rows: RowsById<R>, id: string): R | undefined => (rows instanceof Map ? rows.get(id) : (rows as Record<string, R>)[id]);
 
 const needsAttunement = (row: ItemRowLike, ref: string, opts: ItemResolveOptions) =>
@@ -42,17 +58,29 @@ const strip = <R extends ItemRowLike>(row: R): R => ({
 });
 
 export function resolveItemRow<R extends ItemRowLike>(ref: string, rowsById: RowsById<R>, opts: ItemResolveOptions = {}): R | null {
-  const direct = isComposedRef(ref) ? getRow(rowsById, ref) : undefined;
-
-  if (direct) return direct;
-
   const parsed = parseItemRef(ref);
+
+  if (!parsed) return null;
+
+  const direct = isComposedRef(ref) || parsed.param ? getRow(rowsById, ref) : undefined;
+
+  if (direct) return parsed.param && !itemStatsFromRow(direct)?.parameter?.options.some(({ key }) => key === parsed.param) ? null : direct;
 
   const base = parsed && getRow(rowsById, parsed.baseId);
 
   if (!parsed || !base || itemStatsFromRow(base)?.property) return null;
 
-  if (!parsed.propertyId) return needsAttunement(base, ref, opts) ? strip(base) : base;
+  if (!parsed.propertyId) {
+    const parameter = itemStatsFromRow(base)?.parameter;
+
+    if (parameter && !parsed.param) return null;
+
+    if (parsed.param && !parameter?.options.some(({ key }) => key === parsed.param)) return null;
+
+    const active = needsAttunement(base, ref, opts) ? strip(base) : base;
+
+    return parsed.param ? applyParameter(active, parsed.param, ref) : active;
+  }
 
   const property = getRow(rowsById, parsed.propertyId);
 
@@ -60,9 +88,19 @@ export function resolveItemRow<R extends ItemRowLike>(ref: string, rowsById: Row
 
   if (!property || !propertyStats?.property) return null;
 
+  const parameter = propertyStats.parameter ?? itemStatsFromRow(base)?.parameter;
+
+  if (parameter && !parsed.param) return null;
+
+  if (parsed.param && !parameter?.options.some(({ key }) => key === parsed.param)) return null;
+
   if (needsAttunement(property, ref, opts)) return { ...base, id: ref, name: composedName(base, property, propertyStats.property.nameTemplate) };
 
-  return composeItemRow(base, property);
+  const composed = composeItemRow(base, property);
+
+  if (!parsed.param) return composed;
+
+  return applyParameter(composed, parsed.param, ref);
 }
 
 export const resolveItemRows = <R extends ItemRowLike>(refs: readonly string[], rowsById: RowsById<R>, opts: ItemResolveOptions = {}): R[] =>

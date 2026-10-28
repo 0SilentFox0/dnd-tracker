@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import {
   type RaceModifier,
   RaceModifierSchema,
+  SpellCastingTimeSchema,
   type SpellCost,
   SpellCostSchema,
   type SpellDefinition,
@@ -18,8 +19,10 @@ import { type Effect, EffectSchema } from "@/lib/utils/abilities/schema";
 
 type SpellRulesRow = {
   id: string;
+  executionMode?: string | null;
   dice?: number | null;
   cost?: string | null;
+  casting?: unknown;
   targeting?: unknown;
   resolution?: unknown;
   spellEffects?: unknown;
@@ -106,8 +109,10 @@ function readSpell5e(row: SpellRulesRow) {
 
 export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
   return {
+    ...(row.executionMode === "manual" && { executionMode: "manual" as const }),
     dice: spellDiceCount(row),
     cost: spellCost(row),
+    ...(SpellCastingTimeSchema.safeParse(row.casting).success && { casting: SpellCastingTimeSchema.parse(row.casting) }),
     targeting: spellTargeting(row),
     resolution: spellResolution(row),
     effects: spellEffects(row),
@@ -121,8 +126,10 @@ export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
 
 export function spellDefinitionColumns(def: SpellDefinition) {
   return {
+    ...(def.executionMode && { executionMode: def.executionMode }),
     dice: def.dice,
     cost: def.cost,
+    casting: def.casting as Prisma.InputJsonValue | undefined,
     targeting: def.targeting as unknown as Prisma.InputJsonValue,
     resolution: def.resolution as unknown as Prisma.InputJsonValue,
     spellEffects: def.effects as unknown as Prisma.InputJsonValue,

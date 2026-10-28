@@ -69,7 +69,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending, { participants: order, rules, rng: rng ?? Math.random });
+    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending, { participants: order, rules, rng: rng ?? Math.random, round: scene.round });
 
     order = replaceParticipant(order, finished.participant);
 

@@ -8,7 +8,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { update: vi.fn(async () => ({})), findUnique: vi.fn() } } }));
+vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }), campaign: { update: vi.fn(async () => ({})), findUnique: vi.fn() } } }));
 
 const params = { params: Promise.resolve({ id: "c1" }) };
 

@@ -99,6 +99,53 @@ function readStats(raw: unknown): ItemStats | null {
 
   if (typeof raw.consumable === "boolean") out.consumable = raw.consumable;
 
+  if (raw.parameter !== undefined) {
+    if (!isRecord(raw.parameter) || !(raw.parameter.kind === "damageType" || raw.parameter.kind === "creatureType") || !Array.isArray(raw.parameter.options) || raw.parameter.options.length < 1 || raw.parameter.options.length > 50) return null;
+
+    const keys = new Set<string>();
+
+    const options: NonNullable<ItemStats["parameter"]>["options"] = [];
+
+    for (const option of raw.parameter.options) {
+      if (!isRecord(option) || typeof option.key !== "string" || !/^[a-z][a-z0-9_-]{0,39}$/.test(option.key) || typeof option.label !== "string" || !option.label.trim() || option.label.length > 60 || keys.has(option.key)) return null;
+
+      keys.add(option.key);
+      options.push({ key: option.key, label: option.label });
+    }
+    out.parameter = { kind: raw.parameter.kind, options };
+  }
+
+  if (raw.spells !== undefined) {
+    if (!Array.isArray(raw.spells) || raw.spells.length > 500) return null;
+
+    const ids = new Set<string>();
+
+    const spells: NonNullable<ItemStats["spells"]> = [];
+
+    for (const value of raw.spells) {
+      if (!isRecord(value) || typeof value.spellId !== "string" || !value.spellId.trim() || !isInt(value.cost, 0, 50) || ids.has(value.spellId)) return null;
+
+      ids.add(value.spellId);
+
+      if (value.castLevel !== undefined && !isInt(value.castLevel, 0, 9)) return null;
+
+      if (value.dc !== undefined && !isInt(value.dc, 1, 40)) return null;
+
+      if (value.attackBonus !== undefined && !isInt(value.attackBonus, -10, 30)) return null;
+
+      let upcast: { maxLevel: number; extraCost: number } | undefined;
+
+      if (value.upcast !== undefined) {
+        if (!isRecord(value.upcast) || !isInt(value.upcast.maxLevel, 1, 9) || !isInt(value.upcast.extraCost, 1, 50) || value.castLevel === undefined || value.upcast.maxLevel <= value.castLevel) return null;
+
+        upcast = { maxLevel: value.upcast.maxLevel, extraCost: value.upcast.extraCost };
+      }
+
+      spells.push({ spellId: value.spellId, cost: value.cost, ...(value.castLevel !== undefined && { castLevel: value.castLevel }), ...(value.dc !== undefined && { dc: value.dc }), ...(value.attackBonus !== undefined && { attackBonus: value.attackBonus }), ...(upcast && { upcast }) });
+    }
+    out.spells = spells;
+  }
+
   return out;
 }
 

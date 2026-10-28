@@ -1,6 +1,6 @@
 import { coreAbility, noteAbility } from "../lib/abilities";
 import { type Fixture, type O5SpeciesTrait, type Open5eData, slugTail } from "../lib/open5e";
-import type { RaceRow } from "../lib/types";
+import type { RaceRow,SpellRow } from "../lib/types";
 import { DROP_RACE_TRAITS, OPTION_ABILITIES, RACE_CHOICE_TRAITS, type RaceChoiceTrait } from "../overrides/race-choices";
 
 import type { Ability } from "@/lib/utils/abilities/schema";
@@ -61,7 +61,15 @@ function toOption(p: Parsed, raceTail: string, breath: boolean): ChoiceOption {
     ...(!extra && p.abilityName ? [noteAbility(choiceSlug(p.abilityName), p.abilityName, p.description)] : []),
   ];
 
-  return { id, name: p.name, description: p.description, abilities, ...(p.spells.length > 0 && { spells: p.spells }) };
+  const spells: NonNullable<ChoiceOption["spells"]> = breath && p.damage
+    ? (["Cone", "Line"] as const).map((shape) => ({ level: 1, spellId: `Breath Weapon (${capitalize(p.damage ?? "")}, ${shape})`, grant: { uses: "proficiency", rest: "long", castLevel: 0, dcAbility: "constitution", sharedPool: "breath-weapon" } }))
+    : p.spells.map((spell) => {
+      const castLevel = spell.level === 3 ? 1 : spell.level === 5 ? 2 : raceTail === "gnome" && spell.spellId === "Speak with Animals" ? 1 : undefined;
+
+      return { ...spell, ...(castLevel !== undefined && { grant: { uses: raceTail === "gnome" ? "proficiency" as const : 1, rest: "long" as const, castLevel, via: "slotOrGrant" as const } }) };
+    });
+
+  return { id, name: p.name, description: p.description, abilities, ...(spells.length > 0 && { spells }) };
 }
 
 function traitChoice(t: Fixture<O5SpeciesTrait>, spec: RaceChoiceTrait, raceTail: string): Choice {
@@ -96,4 +104,22 @@ export function applyRaceChoices(rows: RaceRow[], data: Open5eData): RaceRow[] {
 
     return { ...race, abilities: race.abilities.filter((a) => !drop.has(a.id)), ...(choices.length > 0 && { choices }) };
   });
+}
+
+export function convertBreathSpells(data: Open5eData): SpellRow[] {
+  const ancestry = data.speciesTraits.find((t) => t.pk === "srd-2024_dragonborn_draconic-ancestry");
+
+  if (!ancestry) return [];
+
+  const types = [...new Set(parseLineage(ancestry.fields.desc, "damage").map((p) => p.damage).filter((s): s is string => !!s))].sort();
+
+  return types.flatMap((damageType) => (["cone", "line"] as const).map((shape): SpellRow => ({
+    slug: `srd-2024_dragonborn-breath-${damageType}-${shape}`,
+    name: `Breath Weapon (${capitalize(damageType)}, ${capitalize(shape)})`,
+    description: "Форма обирається при кожному використанні: конус 15 фт або лінія 30 × 5 фт. DEX, половина шкоди при успіху; DC 8 + CON + майстерність. 1d10/2d10/3d10/4d10 на рівнях 1/5/11/17. Спільний ліміт: майстерність за довгий відпочинок. ДМ вручну враховує заміну однієї атаки; трекер витрачає дію.",
+    level: 0, groupId: "Evocation", cost: "action", dice: 1, dieSides: 10, concentration: false,
+    targeting: { kind: "template", shape, size: shape === "cone" ? 15 : 30, side: "enemy", maxTargets: 20, range: 5 },
+    resolution: { kind: "save", ability: "dexterity", onSuccess: "half" },
+    spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType, target: "eventTarget" }], lists: [],
+  })));
 }

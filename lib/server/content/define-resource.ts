@@ -4,7 +4,7 @@ import "server-only";
 import type { ReferenceKindValue } from "@/lib/cache/tags";
 import type { AccessLevel, Actor } from "@/lib/utils/api/actor";
 
-export type ContentKind = "units" | "races" | "classes" | "feats" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
+export type ContentKind = "units" | "races" | "classes" | "feats" | "backgrounds" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
 
 export type FindPurpose = "read" | "write";
 
@@ -34,6 +34,9 @@ export interface ContentResource<Row = unknown, Create = unknown, Update = unkno
   /** scoped to actor.campaignId; null when missing or in another campaign */
   find(actor: Actor, id: string, purpose: FindPurpose): Promise<Row | null>;
   toItem?(row: Row): unknown;
+  /** External preparation (e.g. image storage) runs before taking the content-write lock. */
+  prepareCreate?(actor: Actor, input: Create): Promise<Create>;
+  prepareUpdate?(actor: Actor, existing: Row, input: Update): Promise<Update>;
   create(actor: Actor, input: Create): Promise<Row>;
   update(actor: Actor, existing: Row, input: Update): Promise<Row>;
   remove(actor: Actor, existing: Row): Promise<void>;

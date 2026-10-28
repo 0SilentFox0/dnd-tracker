@@ -19,7 +19,7 @@ const classColorSchema = z.preprocess(
   z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір класу — у форматі #RRGGBB").nullable().optional(),
 );
 
-const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), abilities: AbilitiesSchema, choices: ClassChoicesSchema.optional() });
+const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), description: z.string().max(8000).optional(), abilities: AbilitiesSchema, choices: ClassChoicesSchema.optional() });
 
 const subclassSchema = z.object({
   id: z.string().min(1).max(40),

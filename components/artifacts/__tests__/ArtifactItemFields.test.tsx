@@ -11,6 +11,8 @@ const library = [
   { id: "rg", name: "Ring", slot: "ring", modifiers: [] },
 ];
 
+vi.mock("@/lib/hooks/spells", () => ({ useSpells: () => ({ data: [{ id: "fireball", name: "Fireball", level: 3 }] }) }));
+
 vi.mock("@/lib/hooks/artifacts", () => ({ useArtifactsList: () => ({ data: library }) }));
 
 import { ArtifactItemFields } from "../ArtifactItemFields";
@@ -57,4 +59,14 @@ describe("ArtifactItemFields", () => {
 
     expect(screen.queryByRole("switch", { name: "Властивість (видається разом із базою)" })).toBeNull();
   });
+});
+
+it("adds an item spell and a finite parameter through authoring controls", () => {
+  const onChange = vi.fn();
+
+  render(<ArtifactItemFields campaignId="c" name="Wand" slot="item" value={{ charges: { max: 7, rest: "long" } }} onChange={onChange} itemsEnabled />);
+  fireEvent.click(screen.getByRole("button", { name: "Додати заклинання предмета" }));
+  expect(onChange).toHaveBeenLastCalledWith({ charges: { max: 7, rest: "long" }, spells: [{ spellId: "fireball", cost: 1, castLevel: 3 }] });
+  fireEvent.change(screen.getByLabelText("Вид параметра предмета"), { target: { value: "damageType" } });
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ parameter: { kind: "damageType", options: [{ key: "fire", label: "fire" }] } }));
 });

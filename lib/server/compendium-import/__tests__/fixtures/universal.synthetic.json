@@ -1,0 +1,395 @@
+{
+  "_meta": {
+    "edition": "one",
+    "sources": [
+      {
+        "json": "SYN21",
+        "full": "Synthetic Task21 Compendium",
+        "authors": [
+          "Synthetic Author"
+        ],
+        "convertedBy": [
+          "Synthetic Converter"
+        ],
+        "version": "1.0",
+        "url": "https://example.test/synthetic"
+      },
+      {
+        "json": "OTHER21",
+        "full": "Synthetic Other Source",
+        "authors": [
+          "Synthetic Author"
+        ]
+      }
+    ]
+  },
+  "spell": [
+    {
+      "name": "Synthetic Ray",
+      "source": "SYN21",
+      "level": 0,
+      "school": "V",
+      "entries": [
+        "SYN21_PRIVATE_PAYLOAD Resolve {@b manually}; {@spell Synthetic Ray|SYN21}."
+      ],
+      "page": 7
+    }
+  ],
+  "monster": [
+    {
+      "name": "Synthetic Sentinel",
+      "source": "SYN21",
+      "ac": [
+        12
+      ],
+      "hp": {
+        "average": 9
+      },
+      "str": 10,
+      "dex": 12,
+      "con": 11,
+      "int": 8,
+      "wis": 10,
+      "cha": 6,
+      "cr": "1/4",
+      "action": [
+        {
+          "name": "Synthetic song",
+          "entries": [
+            "Resolve this fictional effect manually."
+          ]
+        }
+      ]
+    }
+  ],
+  "baseitem": [
+    {
+      "name": "Synthetic Staff",
+      "source": "SYN21",
+      "type": "M",
+      "weapon": true,
+      "dmg1": "1d6",
+      "dmgType": "B",
+      "weaponCategory": "simple",
+      "rarity": "none"
+    }
+  ],
+  "item": [
+    {
+      "name": "Synthetic Token",
+      "source": "SYN21",
+      "rarity": "common",
+      "entries": [
+        "A fictional keepsake."
+      ]
+    }
+  ],
+  "race": [
+    {
+      "name": "Synthetic People",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic ancestry."
+      ]
+    }
+  ],
+  "subrace": [
+    {
+      "name": "Synthetic Hills",
+      "source": "SYN21",
+      "raceName": "Synthetic People",
+      "raceSource": "SYN21",
+      "entries": [
+        "Synthetic lineage."
+      ]
+    }
+  ],
+  "feat": [
+    {
+      "name": "Synthetic Origin",
+      "source": "SYN21",
+      "category": "O",
+      "entries": [
+        "Synthetic gift."
+      ]
+    },
+    {
+      "name": "Synthetic Requirement",
+      "source": "SYN21",
+      "category": "G",
+      "prerequisite": [
+        {
+          "other": "DM verifies a fictional prerequisite"
+        }
+      ]
+    }
+  ],
+  "background": [
+    {
+      "name": "Synthetic Scholar",
+      "source": "SYN21",
+      "edition": "classic",
+      "skillProficiencies": [
+        {
+          "arcana": true
+        }
+      ],
+      "entries": [
+        "Classic skills, no invented ASI."
+      ]
+    },
+    {
+      "name": "Synthetic Wanderer",
+      "source": "SYN21",
+      "ability": [
+        {
+          "choose": {
+            "weighted": {
+              "from": [
+                "str",
+                "dex",
+                "wis"
+              ],
+              "weights": [
+                2,
+                1
+              ]
+            }
+          }
+        }
+      ],
+      "feats": [
+        {
+          "Synthetic Origin|SYN21": true
+        }
+      ],
+      "skillProficiencies": [
+        {
+          "history": true
+        }
+      ],
+      "toolProficiencies": [
+        {
+          "anyArtisansTool": 1
+        }
+      ],
+      "startingEquipment": [
+        {
+          "_": [
+            {
+              "value": 50
+            }
+          ]
+        }
+      ],
+      "entries": [
+        "Gear and currency are manual."
+      ]
+    },
+    {
+      "name": "Synthetic Scholar",
+      "source": "OTHER21",
+      "edition": "classic",
+      "entries": [
+        "Different source."
+      ]
+    }
+  ],
+  "class": [
+    {
+      "name": "Synthetic Adept",
+      "source": "SYN21",
+      "hd": {
+        "faces": 8
+      },
+      "proficiency": [
+        "int",
+        "wis"
+      ],
+      "classFeatures": [
+        "Synthetic Training|Synthetic Adept|SYN21|1|SYN21"
+      ]
+    }
+  ],
+  "classFeature": [
+    {
+      "name": "Synthetic Training",
+      "source": "SYN21",
+      "className": "Synthetic Adept",
+      "classSource": "SYN21",
+      "level": 1,
+      "entries": [
+        "Synthetic class description.",
+        {
+          "type": "options",
+          "count": 1,
+          "entries": [
+            {
+              "type": "refOptionalfeature",
+              "optionalfeature": "Synthetic Option|SYN21"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "optionalfeature": [
+    {
+      "name": "Synthetic Option",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic owned option."
+      ]
+    }
+  ],
+  "subclass": [
+    {
+      "name": "Synthetic Path",
+      "source": "SYN21",
+      "className": "Synthetic Adept",
+      "classSource": "SYN21",
+      "shortName": "Path",
+      "subclassFeatures": [
+        "Synthetic Insight|Synthetic Adept|SYN21|Path|SYN21|3|SYN21"
+      ]
+    }
+  ],
+  "subclassFeature": [
+    {
+      "name": "Synthetic Insight",
+      "source": "SYN21",
+      "className": "Synthetic Adept",
+      "classSource": "SYN21",
+      "subclassShortName": "Path",
+      "subclassSource": "SYN21",
+      "level": 3,
+      "entries": [
+        "Synthetic subclass description."
+      ]
+    }
+  ],
+  "book": [
+    {
+      "name": "Synthetic Handbook",
+      "source": "SYN21",
+      "id": "syn-book",
+      "contents": []
+    }
+  ],
+  "bookData": [
+    {
+      "id": "syn-book",
+      "source": "SYN21",
+      "data": [
+        {
+          "name": "Synthetic Chapter",
+          "entries": [
+            "SYN21_PRIVATE_PAYLOAD fictional DM book chapter."
+          ]
+        }
+      ]
+    }
+  ],
+  "adventure": [
+    {
+      "name": "Synthetic Journey",
+      "source": "SYN21",
+      "id": "syn-adventure"
+    }
+  ],
+  "adventureData": [
+    {
+      "id": "syn-adventure",
+      "source": "SYN21",
+      "data": [
+        {
+          "name": "Synthetic Scene",
+          "entries": [
+            "SYN21_PRIVATE_PAYLOAD fictional private adventure."
+          ]
+        }
+      ]
+    }
+  ],
+  "foundryFeat": [
+    {
+      "name": "Synthetic Foundry",
+      "source": "SYN21",
+      "system": {
+        "fictionalAutomation": true
+      }
+    }
+  ],
+  "monsterFluff": [
+    {
+      "name": "Synthetic Fluff",
+      "source": "SYN21",
+      "entries": [
+        "Unsupported synthetic fluff."
+      ]
+    }
+  ],
+  "table": [
+    {
+      "name": "Synthetic table",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "reward": [
+    {
+      "name": "Synthetic reward",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "condition": [
+    {
+      "name": "Synthetic condition",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "skill": [
+    {
+      "name": "Synthetic skill",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "language": [
+    {
+      "name": "Synthetic language",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "itemProperty": [
+    {
+      "name": "Synthetic itemProperty",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ],
+  "itemType": [
+    {
+      "name": "Synthetic itemType",
+      "source": "SYN21",
+      "entries": [
+        "Synthetic supporting reference."
+      ]
+    }
+  ]
+}

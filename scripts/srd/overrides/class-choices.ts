@@ -48,6 +48,8 @@ export const RESISTANCE_FEATURES: Record<string, string[]> = {
 
 /** вибори без вміння-носія в даних (рівень повторення фічі) */
 export const EXTRA_CHOICES: Record<string, Choice[]> = {
+  "srd-2024_warlock": [6, 7, 8, 9].map((level, i) => ({ id: `mystic-arcanum-${level}`, label: `Mystic Arcanum (${level})`, level: 11 + i * 2, count: 1, kind: "spell", spells: { lists: ["Warlock"], minLevel: level, maxLevel: level }, grant: { uses: 1, rest: "long", castLevel: level, via: "grant" } })),
+  "srd-2024_wizard": [{ id: "signature-spells", label: "Signature Spells", level: 20, count: 2, kind: "spell", spells: { lists: ["Wizard"], minLevel: 3, maxLevel: 3 }, grant: { uses: 1, rest: "short", castLevel: 3, via: "slotOrGrant" } }],
   "srd-2024_bard": [{ id: "expertise-9", label: "Expertise", level: 9, count: 2, kind: "expertise" }],
 };
 

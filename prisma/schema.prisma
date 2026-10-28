@@ -52,6 +52,7 @@ model Campaign {
   mainSkills      MainSkill[]
   races           Race[]
   classes         GameClass[]
+  backgrounds     Background[]
   feats           Feat[]
   scenarioPages   ScenarioPage[]
   skillTrees      SkillTree[]
@@ -65,6 +66,9 @@ model Campaign {
   aiThreads       AiThread[]
   aiProposals     AiProposal[]
   apiTokens       ApiToken[]
+  compendiumSources CompendiumSource[]
+  compendiumEntries CompendiumEntry[]
+  compendiumRuns    CompendiumImportRun[]
   inventoryLog    InventoryLog[]
   characterLog    CharacterLog[]
 
@@ -132,6 +136,10 @@ model Character {
   goals               Json                @default("[]")
   classes             Json                @default("[]")
   feats               Json                @default("[]")
+  backgroundId        String?
+  backgroundChoices   Json                @default("{}")
+  backgroundFeatPicks Json                @default("{}")
+  selectedBackground  Background?         @relation(fields: [backgroundId], references: [id], onDelete: Restrict)
   raceChoices         Json                @default("{}")
   resources           Json                @default("{}")
   inspiration         Boolean             @default(false)
@@ -150,6 +158,7 @@ model Character {
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
 
+  @@index([backgroundId])
   @@index([campaignId])
   @@index([controlledBy])
   @@map("characters")
@@ -206,6 +215,7 @@ model Spell {
   id                    String      @id @default(cuid())
   campaignId            String
   name                  String
+  executionMode         String      @default("native")
   level                 Int         @default(0)
   type                  String
   damageType            String
@@ -233,6 +243,7 @@ model Spell {
   damageDistribution    Json? // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
   dice                  Int         @default(0)
   cost                  String      @default("action")
+  casting               Json?
   targeting             Json        @default("{\"kind\":\"enemy\"}")
   resolution            Json        @default("{\"kind\":\"auto\"}")
   spellEffects          Json        @default("[]")
@@ -647,6 +658,79 @@ model Feat {
 
   @@index([campaignId, name])
   @@map("feats")
+}
+
+model Background {
+  id                  String    @id @default(cuid())
+  campaignId          String
+  name                String
+  icon                String?
+  description         String?
+  choices             Json      @default("[]")
+  skillProficiencies  Json      @default("[]")
+  toolProficiencies   Json      @default("[]")
+  originFeatId        String?
+  equipmentText       String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  sourceId            String?
+  sourceHash          String?
+  campaign            Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  characters          Character[]
+
+  @@index([campaignId, name])
+  @@index([originFeatId])
+  @@map("backgrounds")
+}
+
+model CompendiumSource {
+  id         String   @id @default(cuid())
+  campaignId String
+  sourceJson String
+  metadata   Json     @default("{}")
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, sourceJson])
+  @@map("compendium_sources")
+}
+
+model CompendiumEntry {
+  id             String   @id @default(cuid())
+  campaignId     String
+  canonicalKey   String
+  kind           String
+  localId        String
+  locator        Json     @default("[]")
+  edition        String
+  sourceJson     String
+  originalName   String
+  attribution    Json     @default("{}")
+  inputHash      String
+  adapterVersion String
+  baseline       Json
+  notes          String   @default("")
+  issues         Json     @default("[]")
+  bindings       Json     @default("{}")
+  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, canonicalKey])
+  @@index([campaignId, kind, localId])
+  @@map("compendium_entries")
+}
+
+model CompendiumImportRun {
+  id             String   @id @default(cuid())
+  campaignId     String
+  userId         String
+  idempotencyKey String
+  planHash       String
+  report         Json
+  createdAt      DateTime @default(now())
+  campaign       Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, idempotencyKey])
+  @@index([campaignId, createdAt])
+  @@map("compendium_import_runs")
 }
 
 model MainSkill {

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import type { Actor } from "@/lib/utils/api/actor";
 import type { Ruleset, RulesetPatch } from "@/lib/utils/rules/schema";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
@@ -27,6 +28,8 @@ export function readCampaignRules(actor: Actor): Promise<Ruleset> {
 export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Promise<Ruleset> {
   assertCan(actor, CONTENT_OPERATIONS["rules.update"].need);
 
+  return withCampaignContentWrite(actor.campaignId, async () => {
+
   const merged = mergeRules(await loadRules(actor.campaignId), patch);
 
   if (!merged.ok) throw new ContentError(API_ERRORS.INVALID_RULES, 400, merged.issues);
@@ -34,4 +37,5 @@ export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Pr
   await prisma.campaign.update({ where: { id: actor.campaignId }, data: { rules: merged.rules as Prisma.InputJsonObject } });
 
   return merged.rules;
+  });
 }

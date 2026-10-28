@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import { assertCan } from "@/lib/server/content/access";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { buildDiff } from "@/lib/server/templates/sync/diff";
@@ -26,7 +27,7 @@ export async function applySource(actor: Actor, body: SourceSyncApplyInput): Pro
       // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
       await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${actor.campaignId} FOR NO KEY UPDATE`;
 
-      return applySourceChanges(tx, actor.campaignId, body, actor);
+      return runContentWriteContext(actor.campaignId, tx, () => applySourceChanges(tx, actor.campaignId, body, actor));
     },
     APPLY_TX_OPTIONS,
   );

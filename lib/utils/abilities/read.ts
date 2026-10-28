@@ -87,12 +87,12 @@ export function classFeatureAbilities(features: unknown): ClassFeature[] {
   return features.flatMap((f): ClassFeature[] => {
     if (!f || typeof f !== "object") return [];
 
-    const { level, abilities, choices } = f as { level?: unknown; abilities?: unknown; choices?: unknown };
+    const { level, abilities, choices, description } = f as { level?: unknown; abilities?: unknown; choices?: unknown; description?: unknown };
 
     if (typeof level !== "number" || !Number.isInteger(level) || level < 1 || level > 20) return [];
 
     const list = readChoiceList(choices);
 
-    return [{ level, abilities: read({ id: `class-feature@${level}`, abilities }), ...(list.length > 0 && { choices: list }) }];
+    return [{ level, ...(typeof description === "string" && { description }), abilities: read({ id: `class-feature@${level}`, abilities }), ...(list.length > 0 && { choices: list }) }];
   });
 }

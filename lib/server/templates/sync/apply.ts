@@ -2,6 +2,8 @@ import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
+import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
+import { syncCompendiumProvenance } from "@/lib/server/compendium-import/sync";
 import { ContentError } from "@/lib/server/content/errors";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/assert-no-leak";
@@ -13,6 +15,8 @@ import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/contex
 import { indexOf } from "@/lib/server/templates/sync/index";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
+import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
+import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { readTreeJson } from "@/lib/utils/skills/progression";
 import type { SourceApplyResult, SyncRef } from "@/types/campaigns";
@@ -83,6 +87,8 @@ function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncIte
     const ref = clean[col];
 
     if (typeof ref === "string" && !map.has(ref)) {
+      if (t.key === "backgrounds") throw new ContentError(API_ERRORS.BACKGROUND_FEAT_INVALID, 422);
+
       warnings.push(`${t.key} ${item.name}: ${col} → null`);
       clean[col] = null;
     }
@@ -100,6 +106,18 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
     for (const i of selected.values()) {
       if (i.scope !== t.key || i.status !== "deletedInSource" || !i.localId) continue;
 
+      if (t.key === "backgrounds") {
+        const used = await db.character.findMany({ where: { campaignId: ctx.campaignId, backgroundId: i.localId }, select: { id: true } });
+
+        if (used.length) throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
+      }
+
+      if (t.key === "feats") {
+        const backgrounds = await db.background.findMany({ where: { campaignId: ctx.campaignId } });
+
+        if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+      }
+
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
     }
   }
@@ -113,6 +131,66 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
   const map = new Map(index.sourceToLocal);
 
   for (const i of selected.values()) if (i.status === "new" || i.status === "deletedLocally") map.set(i.key, newContentId());
+
+  // Validate the resulting graph before any writes, including refs to unchanged local rows.
+  const effective = new Map(ctx.target.rows.map((r) => [r.row.id, { table: r.table, row: r.row as Record<string, unknown> }]));
+
+  for (const item of selected.values()) {
+    if (item.status === "deletedInSource" && item.localId) effective.delete(item.localId);
+    else {
+      const src = index.sourceIndex.get(item.key);
+
+      const table = src && BUNDLE_TABLES.find((t) => t.key === src.table);
+
+      if (src && table) effective.set(item.localId ?? map.get(item.key)!, { table: src.table, row: { ...cleanRow(table, src.row, item, map, []), id: item.localId ?? map.get(item.key)! } });
+    }
+  }
+
+  const resulting = [...effective.values()];
+
+  const feats = resulting.filter((r) => r.table === "feats").map(({ row }) => ({ id: row.id, type: row.type }));
+
+  const spells = new Set(resulting.filter((r) => r.table === "spells").map((r) => r.row.id));
+
+  for (const { row } of resulting.filter((r) => r.table === "backgrounds")) {
+    const error = backgroundReferenceError({ originFeatId: row.originFeatId, choices: row.choices }, feats, spells);
+
+    if (error) {
+      const existed = ctx.target.rows.some((r) => r.table === "backgrounds" && r.row.id === row.id && r.row.originFeatId === row.originFeatId);
+
+      throw new ContentError(error, existed ? 409 : 422);
+    }
+  }
+
+  if ([...selected.values()].some((i) => i.scope === "backgrounds" || i.scope === "feats")) {
+    const characters = await db.character.findMany({ where: { campaignId: ctx.campaignId }, select: { backgroundId: true, backgroundChoices: true } });
+
+    const signature = (row: Record<string, unknown> | undefined, lookup: (id: string) => Record<string, unknown> | undefined) => [backgroundAsiRules(row?.choices), backgroundAsiRules(typeof row?.originFeatId === "string" ? lookup(row.originFeatId)?.choices : [])];
+
+    for (const character of characters) {
+      if (!character.backgroundId) continue;
+
+      const old = index.localById.get(character.backgroundId)?.row;
+
+      const next = effective.get(character.backgroundId)?.row;
+
+      if (!next) throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
+
+      if (JSON.stringify(signature(old, (id) => index.localById.get(id)?.row)) !== JSON.stringify(signature(next, (id) => effective.get(id)?.row))) throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
+
+      for (const id of collectKeysAndStrings(character.backgroundChoices)) {
+        const previous = index.localById.get(id);
+
+        if (previous?.table !== "feats") continue;
+
+        const updated = effective.get(id)?.row;
+
+        if (!updated) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+
+        if (JSON.stringify(backgroundAsiRules(previous.row.choices)) !== JSON.stringify(backgroundAsiRules(updated.choices))) throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
+      }
+    }
+  }
 
   const written: unknown[] = [];
 
@@ -129,6 +207,7 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
       written.push(data);
 
       if (item.localId) {
+
         const { count } = await delegateOf(db, t).updateMany({
           where: { id: item.localId, campaignId: ctx.campaignId },
           data: toPrismaJson({ ...data, sourceHash: item.sourceHash }, t),
@@ -148,6 +227,13 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
   await assertWritable(db, ctx, written, index.sourceIds, new Set(map.values()));
 
   await deleteRemoved(db, ctx, selected);
+
+  if (db.compendiumEntry && db.compendiumSource) {
+    await syncCompendiumProvenance(db as CompendiumBundleDb, ctx.sourceBundle.compendium, ctx.campaignId, map, new Set([...selected.values()].filter((i) => i.status !== "deletedInSource").map((i) => i.key)));
+    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
+  }
+
+  if (ctx.sourceBundle.compendium?.pages.length) warnings.push("Матеріали ДМ компедіуму не входять у scopes source-sync; оновіть їх повторним JSON-імпортом або вручну");
 
   return warnings;
 }

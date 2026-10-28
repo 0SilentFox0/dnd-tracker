@@ -37,6 +37,7 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
   hpAbove: { label: "HP ≥ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
   attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }, { value: "magic", label: "магія" }] }] },
   targetHasCondition: { label: "Ціль має стан", fields: [{ name: "condition", label: "Стан", input: "text" }] },
+  targetCreatureType: { label: "Тип істоти цілі", fields: [{ name: "types", label: "Типи істот", input: "strings" }] },
   targetRace: { label: "Раса цілі", fields: [{ name: "races", label: "Раси", input: "strings" }] },
   targetDead: { label: "Ціль мертва", fields: [] },
   actorIsEnemy: { label: "Виконавець події — ворог", fields: [] },
@@ -110,6 +111,8 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
       return eventAttackKind(ctx.event) === c.kind;
     case "targetHasCondition":
       return subjects("eventTarget", ctx).some((p) => hasEffectMarker(p, c.condition));
+    case "targetCreatureType":
+      return subjects("eventTarget", ctx).some((p) => !!p.abilities.creatureType && c.types.some((type) => type.trim().toLowerCase() === p.abilities.creatureType?.trim().toLowerCase()));
     case "targetRace":
       return subjects("eventTarget", ctx).some((p) => c.races.some((r) => r.trim().toLowerCase() === p.abilities.race.trim().toLowerCase()));
     case "targetDead":
@@ -146,4 +149,22 @@ export function conditionRequiresDeadTarget(c?: Condition): boolean {
   if (c.type === "all") return c.conditions.some(conditionRequiresDeadTarget);
 
   return c.type === "any" && c.conditions.every(conditionRequiresDeadTarget);
+}
+
+export function hasCreatureTypeCondition(c: Condition | undefined): boolean {
+  if (!c) return false;
+
+  if (c.type === "targetCreatureType") return true;
+
+  if (c.type === "not") return hasCreatureTypeCondition(c.condition);
+
+  return (c.type === "all" || c.type === "any") && c.conditions.some(hasCreatureTypeCondition);
+}
+
+export function conditionEventForTarget(event: AbilityEvent, targetId: string): AbilityEvent {
+  if ("targetIds" in event) return { ...event, targetIds: [targetId] };
+
+  if ("targetId" in event) return { ...event, targetId };
+
+  return { type: "spellCast", phase: "after", actorId: eventActorId(event) ?? "", targetIds: [targetId] };
 }

@@ -123,7 +123,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     <CharacterChoicesPanel
                       campaignId={campaignId}
                       characterId={characterId}
-                      initial={{ raceChoices: formData.choices?.raceChoices ?? {}, feats: formData.choices?.feats ?? [], classes: heroClasses }}
+                      initial={{ backgroundId: formData.choices?.backgroundId, backgroundChoices: formData.choices?.backgroundChoices, backgroundFeatPicks: formData.choices?.backgroundFeatPicks, raceChoices: formData.choices?.raceChoices ?? {}, feats: formData.choices?.feats ?? [], classes: heroClasses }}
                       hero={{ race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills, classMode: heroClassMode }}
                       onSaved={editor.dmActions.applyClassLevelUp}
                     />

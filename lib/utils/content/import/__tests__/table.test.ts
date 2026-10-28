@@ -102,3 +102,11 @@ describe("chunkRows", () => {
     expect(chunkRows([], 100, 250)).toEqual([]);
   });
 });
+
+describe("aggregate JSON dispatch", () => {
+  it("never offers column mapping for compendium categories or metadata", () => {
+    expect(() => parseTable('{"spell":[{"name":"Synthetic"}]}', "test.json")).toThrow("JSON_COMPENDIUM");
+    expect(() => parseTable('{"_meta":{"sources":[]},"unknown":[]}', "test.json")).toThrow("JSON_COMPENDIUM");
+    expect(parseTable('{"name":"Synthetic", "description":"simple"}', "test.json").rows).toHaveLength(1);
+  });
+});

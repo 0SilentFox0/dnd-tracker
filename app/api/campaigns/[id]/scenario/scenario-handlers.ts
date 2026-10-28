@@ -4,6 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_SCENE_LEGEND } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema } from "@/lib/schemas/scenario";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { characterInCampaign } from "@/lib/server/scenario/loaders";
 import { contentWrite, listPages, SUMMARY_SELECT, toSummary } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -35,6 +36,7 @@ export async function createScenarioHandler(req: Request, campaignId: string) {
 
     if (body instanceof NextResponse) return body;
 
+    return await withCampaignContentWrite(campaignId, async () => {
     if (!(await characterInCampaign(campaignId, body.characterId))) return errorResponse(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
 
     const content: ScenarioContent = { legend: body.kind === "scene" ? DEFAULT_SCENE_LEGEND : [], sections: [newSection(body.kind === "hero" ? "Історія" : "Розділ 1")] };
@@ -57,6 +59,7 @@ export async function createScenarioHandler(req: Request, campaignId: string) {
     });
 
     return NextResponse.json(toSummary(row), { status: 201 });
+    });
   } catch (error) {
     return handleApiError(error, { action: "create scenario page" });
   }

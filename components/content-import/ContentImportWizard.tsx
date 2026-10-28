@@ -4,6 +4,7 @@ import { ColumnsStep } from "./steps/ColumnsStep";
 import { FileStep } from "./steps/FileStep";
 import { PreviewStep } from "./steps/PreviewStep";
 import { ResultStep } from "./steps/ResultStep";
+import { CompendiumImport } from "./CompendiumImport";
 
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -65,6 +66,8 @@ export function ContentImportWizard({ campaignId, kind, open, onOpenChange }: Co
     ),
     result: <Button onClick={() => close(false)}>Готово</Button>,
   }[wizard.step];
+
+  if (wizard.aggregateFile) return <ResponsiveDialog hud size="lg" open={open} onOpenChange={close} title="Імпорт JSON-компендіуму"><CompendiumImport campaignId={campaignId} initialFile={wizard.aggregateFile} /></ResponsiveDialog>;
 
   return (
     <ResponsiveDialog hud size="lg" open={open} onOpenChange={close} title={`Імпорт: ${wizard.spec.label}`} description={STEP_HINT[wizard.step]} footer={footer}>

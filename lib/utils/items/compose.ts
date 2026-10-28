@@ -109,7 +109,13 @@ export function composeItemRow<R extends ItemRowLike>(base: R, property: R): R {
     p?.property?.overrides,
   );
 
-  const stats: ItemStats = { ...(b?.unique === false && { unique: false }), ...(p?.attunement && { attunement: true }), ...(p?.charges && { charges: p.charges }) };
+  const spells = [...(b?.spells ?? []), ...(p?.spells ?? [])];
+
+  const charges = p?.charges ?? b?.charges;
+
+  const parameter = p?.parameter ?? b?.parameter;
+
+  const stats: ItemStats = { ...(b?.unique === false && { unique: false }), ...(p?.attunement && { attunement: true }), ...(charges && { charges }), ...(parameter && { parameter }), ...(spells.length > 0 && { spells: [...new Map(spells.map((spell) => [spell.spellId, spell])).values()] }) };
 
   const prefixed = list(property.abilities).map((a) => (isRecord(a) && typeof a.id === "string" ? { ...a, id: `${PROPERTY_ABILITY_PREFIX}${a.id}` } : a));
 
@@ -126,3 +132,5 @@ export function composeItemRow<R extends ItemRowLike>(base: R, property: R): R {
     abilities: [...list(base.abilities), ...prefixed],
   };
 }
+
+export const parameterizedName = (name: string, param: string): string => name.includes("{param}") ? name.replaceAll("{param}", param) : `${name} (${param})`;

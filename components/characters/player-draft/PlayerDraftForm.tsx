@@ -102,7 +102,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                   <DropdownMenuItem onSelect={generate.all}>Усе</DropdownMenuItem>
                   <DropdownMenuItem onSelect={generate.name}>Ім&apos;я</DropdownMenuItem>
                   <DropdownMenuItem onSelect={generate.scores}>Характеристики</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={generate.backstory}>Передісторія</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={generate.backstory}>Біографія</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               {ai.available && (
@@ -186,7 +186,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
             <HudSection title="Історія">
               <div data-settled={settled("background")} className="hud-roll-fade flex flex-col gap-3" style={spinning("background") ? { opacity: 0 } : undefined}>
-                <Textarea aria-label="Передісторія" rows={6} maxLength={4000} value={values.background ?? ""} onChange={(e) => set("background", e.target.value)} placeholder="Розкажіть, хто ваш герой" />
+                <Textarea aria-label="Біографія" rows={6} maxLength={4000} value={values.background ?? ""} onChange={(e) => set("background", e.target.value)} placeholder="Розкажіть, хто ваш герой" />
 
                 {goals.length > 0 && (
                   <ul className="flex flex-col gap-2">

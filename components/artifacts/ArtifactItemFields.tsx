@@ -1,6 +1,7 @@
 "use client";
 
 import { ARMOR_CATEGORY_LABELS } from "@/components/artifacts/ArtifactArmorFields";
+import { ItemCastingFields } from "@/components/artifacts/ItemCastingFields";
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -165,6 +166,7 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
       {stats.property && <PropertyFields campaignId={campaignId} name={name} property={stats.property} onChange={(property) => set({ property })} />}
       {itemsEnabled && (
         <>
+          <ItemCastingFields campaignId={campaignId} value={stats} onChange={set} />
           <SwitchRow id="item-attunement" label="Потребує налаштування" checked={!!stats.attunement} onChange={(v) => set({ attunement: v || undefined })} />
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">

@@ -16,6 +16,19 @@ const cloud: SpellPick = { spellId: "cloud", level: 1, targetMode: "multi", need
 const aura: SpellPick = { spellId: "aura", level: 3, targetMode: "none", needsSaves: false, diceSlots: [] };
 
 describe("spellFlow", () => {
+  it("reconciles dice when item cast level or grant changes", () => {
+    const start = run({ type: "OPEN", casterId: "me", level: 2 }, { type: "PICK", pick: ray, grantKey: "wand" });
+
+    const up = spellFlow(start, { type: "SET_CAST_LEVEL", castLevel: 3, pick: { ...ray, diceSlots: [6, 6, 6] } });
+
+    const filled = [0, 1, 2].reduce((s, index) => spellFlow(s, { type: "SET_DAMAGE", index, value: 4 }), up);
+
+    expect(filled.damage).toEqual([4, 4, 4]);
+
+    const down = spellFlow(filled, { type: "SET_GRANT", grantKey: "other", pick: { ...ray, diceSlots: [6] } });
+
+    expect(down.damage).toEqual([undefined]);
+  });
   it("відкривається на сторінці кола; вибір спела → сторінка спела; TO_TARGETS → цілі", () => {
     const s = run({ type: "OPEN", casterId: "me", level: 2 }, { type: "PICK", pick: ray });
 

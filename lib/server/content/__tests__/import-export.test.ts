@@ -70,6 +70,17 @@ describe("exportCsv", () => {
     expect(readBack(csv, "spells").rows[0].value).toEqual({ name: "Куля", level: 3, dice: 8, dieSides: 6, cost: "action", concentration: false, targeting: { kind: "enemy" } });
   });
 
+  it("артефакт: параметри касту предмета зберігаються в JSON колонці", async () => {
+    const item = { charges: { max: 5, rest: "long" }, spells: [{ spellId: "s1", cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } }] };
+
+    const csv = await exportCsv(actor, "artifacts", { loadRecords: async () => [{ id: "wand", name: "Жезл", slot: "item", item }], loadNames });
+
+    const { rows } = readBack(csv, "artifacts");
+
+    expect(rows[0].issues).toEqual([]);
+    expect(rows[0].value.item).toEqual({ ...item, spells: [{ ...item.spells[0], spellId: "Вогонь, сильний" }] });
+  });
+
   it("токен без content:read — 403", async () => {
     await expect(exportCsv({ ...actor, via: "token", scopes: ["ai"] }, "units", { loadRecords: async () => [], loadNames })).rejects.toMatchObject({ status: 403 });
   });

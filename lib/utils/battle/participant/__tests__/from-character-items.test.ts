@@ -21,7 +21,8 @@ const ROWS = {
   ls: art("ls", "Longsword", "weapon", { unique: false }, { weapon: { damageDice: "1d8" } }),
   ft: art("ft", "Flame Tongue", "weapon", { unique: false, attunement: true, property: { appliesTo: { kinds: ["weapon"] }, nameTemplate: "Flame Tongue {base}" } }, { abilities: [{ id: "rider", name: "Flame", trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "note", text: "fire" }] }] }),
   dg: art("dg", "Dagger", "weapon", { unique: false }, { weapon: { damageDice: "1d4", traits: ["light"] }, abilities: [NOTE("dagger-note")] }),
-  ring: art("ring", "Ring of Protection", "ring", { unique: false }, { abilities: [NOTE("ring-note")] }),
+  ring: art("ring", "Ring of Protection", "ring", { unique: false, charges: { max: 3, rest: "long" }, spells: [{ spellId: "sp-item", cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } }] }, { abilities: [NOTE("ring-note")] }),
+  scroll: art("scroll", "Scroll", "item", { unique: false, consumable: true, spells: [{ spellId: "sp-scroll", cost: 1, castLevel: 3, dc: 15 }] }),
   homm: art("homm", "Шолом", "helmet", undefined, { abilities: [NOTE("homm-note")] }),
 };
 
@@ -79,6 +80,28 @@ describe("battle participant: item refs", () => {
 
     expect(keys(await build(items, inventory))).toContain("artifact:ring:ring-note");
     expect(keys(await build(DEFAULT_RULES, inventory))).not.toContain("artifact:ring:ring-note");
+  });
+
+  it("active item spell grants share the item's charges and are absent when inactive", async () => {
+    const active = await build(items, { equipped: {}, stash: ["ring"], attuned: [], items: [] });
+
+    expect(active.abilities.creatureType).toBe("humanoid");
+    expect(active.spellcasting.knownSpells).toContain("sp-item");
+    expect(active.spellcasting.slotSpells).not.toContain("sp-item");
+    expect(active.spellcasting.grants).toContainEqual({ spellId: "sp-item", key: "item:ring:spell:sp-item", label: "Ring of Protection", pool: "pool:item:ring", cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } });
+    expect(active.battleData.pools?.["pool:item:ring"]).toEqual({ label: "Ring of Protection", max: 3, rest: "long" });
+
+    const inactive = await build(DEFAULT_RULES, { equipped: {}, stash: ["ring"], attuned: [], items: [] });
+
+    expect(inactive.spellcasting.grants ?? []).toHaveLength(0);
+  });
+
+  it("a scroll grants only its stored spell with its own nonrestoring stack pool", async () => {
+    const p = await build(items, { equipped: {}, stash: [], attuned: [], items: [{ id: "scroll-stack", name: "Scroll", quantity: 2, consumable: true, artifactId: "scroll", spellId: "sp-scroll" }] });
+
+    expect(p.spellcasting.grants).toContainEqual({ spellId: "sp-scroll", key: "consumable:scroll-stack:spell:sp-scroll", label: "Scroll", pool: "pool:consumable:scroll-stack", cost: 1, castLevel: 3, dc: 15 });
+    expect(p.spellcasting.knownSpells).toContain("sp-scroll");
+    expect(p.battleData.pools?.["pool:consumable:scroll-stack"]).toEqual({ label: "Scroll", max: 2, rest: null });
   });
 
   it("HOMM: unique artifact as before, no pools key", async () => {

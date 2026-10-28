@@ -16,8 +16,9 @@ import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import { findHolder, uniqueConflict } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
+import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { isComposedRef, parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
-import { uniqueChecker } from "@/lib/utils/items/resolve";
+import { resolveItemRow, uniqueChecker } from "@/lib/utils/items/resolve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -90,7 +91,7 @@ export async function updateInventory(request: Request, campaignId: string, char
 
       // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
       const rows =
-        (rules.items.enabled || ids.some(isComposedRef)) && ids.length > 0
+        (rules.items.enabled || ids.some((ref) => isComposedRef(ref) || !!parseItemRef(ref)?.param)) && ids.length > 0
           ? new Map((await tx.artifact.findMany({ where: { id: { in: [...new Set(ids.flatMap(refArtifactIds))] }, campaignId }, select: { id: true, name: true, slot: true, modifiers: true } })).map((r) => [r.id, r]))
           : null;
 
@@ -99,6 +100,14 @@ export async function updateInventory(request: Request, campaignId: string, char
       if (uniqueConflict(ids, isUnique)) return errorResponse(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
 
       const checkIds = data.equipSlot ? (data.equipSlot.artifactId ? [data.equipSlot.artifactId] : []) : ids;
+
+      if (rows && checkIds.some((ref) => {
+        const parsed = parseItemRef(ref);
+
+        const owner = parsed && rows.get(parsed.propertyId ?? parsed.baseId);
+
+        return (!!parsed?.param || !!(owner && itemStatsFromRow(owner)?.parameter)) && !resolveItemRow(ref, rows);
+      })) return errorResponse("Недозволений або відсутній параметр предмета", 422);
 
       if (checkIds.length > 0) {
         const others = await tx.characterInventory.findMany({

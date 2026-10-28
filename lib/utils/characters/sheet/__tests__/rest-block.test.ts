@@ -45,6 +45,16 @@ describe("buildRestBlock", () => {
     });
   });
 
+  it("shows a spell grant's remaining uses and rest cadence", () => {
+    const grantKey = "pool:grant:feat%3Amagic-initiate:sp-guidance";
+
+    const hero = { ...p, battleData: { ...p.battleData, pools: { [grantKey]: { label: "Magic Initiate: Guidance", max: 1, rest: "long" as const } }, abilityUsage: { [grantKey]: { battle: 1, round: 0, turn: 0 } } } };
+
+    const block = buildRestBlock({ participant: hero, character: { level: 4, resources: { charges: { [grantKey]: { used: 1, rest: "long" } } } }, rules: rules({ persistResources: true }), maxLevel: 20 });
+
+    expect(block?.charges).toContainEqual({ key: grantKey, name: "Magic Initiate: Guidance", uses: 1, used: 1, rest: "long" });
+  });
+
   it("xp and inspiration without persisted resources", () => {
     expect(buildRestBlock({ participant: p, character: { level: 1, experience: 300, inspiration: true }, rules: rules({ xp: true, inspiration: true }), maxLevel: 20 })).toMatchObject({
       persist: false, hp: null, hitDice: [], charges: [], inspiration: true, xp: { value: 300, next: 300, levelUp: true },

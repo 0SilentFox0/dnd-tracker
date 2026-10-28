@@ -8,7 +8,7 @@ import { visitPicks } from "@/lib/utils/characters/choices/walk";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { DraftInput } from "@/types/characters";
 
-type DraftRow = { campaignId: string; race: string; raceChoices: unknown; feats: unknown; classes: unknown } & Record<AbilityKey, number>;
+type DraftRow = { backgroundId?: string | null; backgroundChoices?: unknown; backgroundFeatPicks?: unknown; campaignId: string; race: string; raceChoices: unknown; feats: unknown; classes: unknown } & Record<AbilityKey, number>;
 
 /** Форма чернетки показує базові бали: збережені вже містять приріст від піків, сервер додасть його знову при збереженні. */
 export async function draftEditInitial(row: DraftRow, rules: Ruleset): Promise<{ choices: DraftInput["choices"] | undefined; scores: Record<AbilityKey, number> }> {
@@ -22,7 +22,7 @@ export async function draftEditInitial(row: DraftRow, rules: Ruleset): Promise<{
 
   const classMode = characterClassMode(rules, state.classes);
 
-  const refs = await loadChoiceRefs(row.campaignId, row.race, { classMode });
+  const refs = await loadChoiceRefs(row.campaignId, row.race, { classMode, backgroundIds: [state.backgroundId] });
 
   const delta = abilityScoreDelta([], abilityPicksOf(visitPicks(state, refs, { level: 1, classMode })));
 

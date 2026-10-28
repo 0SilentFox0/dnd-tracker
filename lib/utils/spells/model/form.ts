@@ -30,9 +30,10 @@ export function defaultSpellForm(): SpellFormData {
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod, fixedDice: spell.fixedDice, damageBonus: spell.damageBonus });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, casting: spell.casting, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod, fixedDice: spell.fixedDice, damageBonus: spell.damageBonus });
 
   return {
+    executionMode: spell.executionMode,
     name: spell.name,
     level: spell.level,
     groupId: spell.groupId,
@@ -40,6 +41,7 @@ export function spellToForm(spell: Spell): SpellFormData {
     description: spell.description,
     appearanceDescription: spell.appearanceDescription ?? null,
     cost: def.cost,
+    casting: def.casting,
     dice: def.dice,
     targeting: def.targeting,
     resolution: def.resolution,

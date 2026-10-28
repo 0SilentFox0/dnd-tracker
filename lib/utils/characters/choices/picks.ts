@@ -1,3 +1,4 @@
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { hasPicks, readCharacterFeats, readPicks } from "@/lib/utils/characters/choices/read";
 import { isRecord } from "@/lib/utils/common/is-record";
 import type { DraftInput } from "@/types/characters";
@@ -16,7 +17,8 @@ function readEntries(raw: unknown): CharacterClassEntry[] {
   });
 }
 
-export const choicesStateOf = (row: { raceChoices?: unknown; feats?: unknown; classes?: unknown }): ChoicesState => ({
+export const choicesStateOf = (row: { backgroundId?: unknown; backgroundChoices?: unknown; backgroundFeatPicks?: unknown; raceChoices?: unknown; feats?: unknown; classes?: unknown }): ChoicesState => ({
+  ...backgroundFields(row),
   raceChoices: readPicks(row.raceChoices),
   feats: readCharacterFeats(row.feats),
   classes: readEntries(row.classes),
@@ -46,25 +48,28 @@ export function lineageName(race: ChoiceRace | null, picks: Picks): string | nul
 }
 
 export const draftChoicesState = (choices: DraftInput["choices"], classId: string | undefined): ChoicesState => ({
+  ...backgroundFields(choices ?? {}),
   raceChoices: choices?.raceChoices ?? {},
   feats: choices?.feats ?? [],
   classes: classId ? [{ classId, level: 1, ...(choices?.classChoices && { choices: choices.classChoices }) }] : [],
 });
 
 export const stateDraftChoices = (state: ChoicesState): NonNullable<DraftInput["choices"]> => ({
+  ...backgroundFields(state),
   raceChoices: state.raceChoices,
   feats: state.feats,
   ...(state.classes[0]?.choices && { classChoices: state.classes[0].choices }),
 });
 
 export const choicesBodyOf = (state: ChoicesState): ChoicesBody => ({
+  ...backgroundFields(state),
   raceChoices: state.raceChoices,
   feats: state.feats,
   classChoices: Object.fromEntries(state.classes.map((e) => [e.classId, e.choices ?? {}])),
 });
 
 /** Збережені вибори чернетки для форми: піки раси лише коли раса та сама, класу — лише коли той самий клас. */
-export function storedDraftChoices(row: { race: string; raceChoices?: unknown; feats?: unknown; classes?: unknown }, race: string, classId: string | undefined): DraftInput["choices"] | undefined {
+export function storedDraftChoices(row: { backgroundId?: unknown; backgroundChoices?: unknown; backgroundFeatPicks?: unknown; race: string; raceChoices?: unknown; feats?: unknown; classes?: unknown }, race: string, classId: string | undefined): DraftInput["choices"] | undefined {
   const state = choicesStateOf(row);
 
   const entry = state.classes[0];
@@ -73,7 +78,7 @@ export function storedDraftChoices(row: { race: string; raceChoices?: unknown; f
 
   const raceChoices = row.race === race ? state.raceChoices : {};
 
-  if (!hasPicks(raceChoices) && state.feats.length === 0 && !classChoices) return undefined;
+  if (!state.backgroundId && !hasPicks(raceChoices) && state.feats.length === 0 && !classChoices) return undefined;
 
-  return { raceChoices, feats: state.feats, ...(classChoices && { classChoices }) };
+  return { ...backgroundFields(state), raceChoices, feats: state.feats, ...(classChoices && { classChoices }) };
 }

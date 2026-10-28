@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useEditResources } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
-import { ITEM_POOL_PREFIX } from "@/lib/utils/items/pools";
+import { GRANT_POOL_PREFIX, ITEM_POOL_PREFIX } from "@/lib/utils/items/pools";
 import type { ResourcesEditBody, SheetRest } from "@/types/characters";
 
 const FORM_ID = "resources-edit-form";
@@ -28,7 +28,7 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const [exhaustion, setExhaustion] = useState(String(rest.exhaustion ?? 0));
 
-  const itemCharges = rest.charges.filter((c) => c.key.startsWith(ITEM_POOL_PREFIX));
+  const itemCharges = rest.charges.filter((c) => c.key.startsWith(ITEM_POOL_PREFIX) || c.key.startsWith(GRANT_POOL_PREFIX));
 
   const [spent, setSpent] = useState<Record<string, string>>(() => Object.fromEntries(itemCharges.map((c) => [c.key, String(c.used)])));
 

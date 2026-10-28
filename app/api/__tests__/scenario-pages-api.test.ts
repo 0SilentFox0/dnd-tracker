@@ -9,6 +9,7 @@ vi.mock("@/lib/ai/proposals", () => ({ pendingSlideUrls: vi.fn(async () => ["htt
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] }),
     scenarioPage: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn(), aggregate: vi.fn(), updateMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
     character: { findFirst: vi.fn() },

@@ -17,6 +17,15 @@ describe("ChoiceSchema", () => {
     expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "spell", spells: { lists: ["Wizard"], minLevel: 1, maxLevel: "slots" } }).success).toBe(true);
   });
 
+  it("validates grant policy only for spell choices and option spell entries", () => {
+    const grant = { uses: "proficiency", rest: "long", dcAbility: "constitution", via: "grant" };
+
+    expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "spell", spells: { lists: ["Wizard"], minLevel: 1, maxLevel: 3 }, grant }).success).toBe(true);
+    expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "skill", grant }).success).toBe(false);
+    expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "option", options: [option("a", { spells: [{ level: 1, spellId: "s", grant }] })] }).success).toBe(true);
+    expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "spell", spells: { lists: ["Wizard"], minLevel: 1, maxLevel: 3 }, grant: { uses: 0, rest: "long" } }).success).toBe(false);
+  });
+
   it("option ids unique, requires point to known options", () => {
     expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "option", options: [option("a"), option("a")] }).success).toBe(false);
     expect(ChoiceSchema.safeParse({ id: "x", label: "X", kind: "option", options: [option("a", { requires: ["b"] })] }).success).toBe(false);

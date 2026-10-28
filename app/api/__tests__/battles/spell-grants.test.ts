@@ -41,6 +41,126 @@ function casterOf(out: { participants: BattleParticipant[] }) {
 }
 
 describe("monster spell grants", () => {
+  it("prepares a long spell over turns and spends its grant only on completion", async () => {
+    const spell = { ...row, cost: "long", casting: { rounds: 3, text: "3 rounds" } } as Spell;
+
+    const caster = monster({ key: "long-source", pool, cost: 1 });
+
+    const mutate = createSpellMutation({ loadSpell: async () => spell, loadPool: async () => ({ units: [], races: [] }) });
+
+    const step = (p: BattleParticipant, round: number, finish = false) => {
+      const ctx = context({ participants: [p, goblin], rng: () => 0.5 });
+
+      ctx.scene.round = round;
+
+      return mutate(ctx, { casterId: "hero", spellId: row.id, grantKey: "long-source", targetIds: finish ? ["gob"] : [], diceRolls: finish ? [4] : [] });
+    };
+
+    const first = await step(caster, 1);
+
+    const preparing = casterOf(first);
+
+    expect(preparing.battleData.pendingCast).toMatchObject({ spellId: row.id, remainingRounds: 2, grantKey: "long-source" });
+    expect(preparing.battleData.abilityUsage?.[pool].battle).toBe(0);
+    expect(preparing.actionFlags.hasUsedAction).toBe(true);
+    await expect(step({ ...preparing, actionFlags: { ...preparing.actionFlags, hasUsedAction: false } }, 1)).rejects.toMatchObject({ code: "action_rejected" });
+
+    const second = casterOf(await step({ ...preparing, actionFlags: { ...preparing.actionFlags, hasUsedAction: false } }, 2));
+
+    expect(second.battleData.pendingCast?.remainingRounds).toBe(1);
+
+    const done = await step({ ...second, actionFlags: { ...second.actionFlags, hasUsedAction: false } }, 3, true);
+
+    expect(casterOf(done).battleData.pendingCast).toBeUndefined();
+    expect(casterOf(done).battleData.abilityUsage?.[pool].battle).toBe(1);
+    expect(done.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp).toBeLessThan(goblin.combatStats.currentHp);
+  });
+
+  it("casts a reaction outside the player's own turn and spends only the reaction", async () => {
+    const caster = monster({});
+
+    const reaction = { ...row, cost: "reaction", casting: { trigger: "when hit" } };
+
+    const mutation = createSpellMutation({ loadSpell: async () => reaction as Spell, loadPool: async () => ({ units: [], races: [] }) });
+
+    const out = await mutation(context({ participants: [goblin, caster], isDM: false, userId: "user-1", rng: () => 0.5 }), { casterId: "hero", spellId: row.id, targetIds: ["gob"], diceRolls: [4] });
+
+    expect(casterOf(out).actionFlags).toMatchObject({ hasUsedReaction: true, hasUsedAction: false });
+    await expect(cast({ ...caster, actionFlags: { ...caster.actionFlags, hasUsedReaction: true } }, {}, reaction as Spell)).rejects.toMatchObject({ code: "action_rejected" });
+  });
+
+  it("retains independent slot eligibility alongside an item-only grant", async () => {
+    const caster = monster({ key: "wand", pool, cost: 1 });
+
+    caster.spellcasting.knownSpells = [row.id];
+    caster.spellcasting.slotSpells = [row.id];
+    caster.spellcasting.spellSlots = { "1": { current: 2, max: 2 } };
+
+    const out = casterOf(await cast(caster, { slotKey: "1" }));
+
+    expect(out.spellcasting.spellSlots["1"].current).toBe(1);
+    expect(out.battleData.abilityUsage?.[pool].battle).toBe(0);
+  });
+
+  it("selects the requested grant source when two grants share one spell", async () => {
+    const first = "pool:grant:first";
+
+    const second = "pool:grant:second";
+
+    const caster = monster({ key: "first", pool: first, cost: 1 });
+
+    caster.spellcasting.grants = [
+      { spellId: row.id, key: "first", pool: first, cost: 1, label: "Racial" },
+      { spellId: row.id, key: "second", pool: second, cost: 1, label: "Feat" },
+    ];
+    caster.battleData.pools = { [first]: { label: "Racial", max: 1, rest: "long" }, [second]: { label: "Feat", max: 1, rest: "long" } };
+
+    const out = await cast(caster, { grantKey: "second" });
+
+    expect(casterOf(out).battleData.abilityUsage).toMatchObject({ [second]: { battle: 1 } });
+    expect(casterOf(out).battleData.abilityUsage?.[first]).toBeUndefined();
+    expect(out.events[0].details).toMatchObject({ actionDetails: { spellGrantKey: "second", spellGrantLabel: "Feat" } });
+  });
+
+  it("rejects an ambiguous grant request without spending either pool", async () => {
+    const caster = monster({ key: "first", pool: "pool:grant:first", cost: 1 });
+
+    caster.spellcasting.grants = [{ spellId: row.id, key: "first", pool: "pool:grant:first", cost: 1 }, { spellId: row.id, key: "second", pool: "pool:grant:second", cost: 1 }];
+
+    await expect(cast(caster)).rejects.toMatchObject({ code: "action_rejected" });
+    expect(caster.battleData.abilityUsage?.["pool:grant:first"]).toBeUndefined();
+  });
+
+  it("allows selecting an ordinary slot when the grant permits both paths", async () => {
+    const caster = monster({ key: "mi", pool: "pool:grant:mi", cost: 1, via: "slotOrGrant" });
+
+    caster.spellcasting.spellSlots = { "1": { max: 1, current: 1 } };
+    caster.spellcasting.knownSpells = [row.id];
+    caster.battleData.pools = { "pool:grant:mi": { label: "Magic Initiate", max: 1, rest: "long" } };
+
+    const out = await cast(caster, { slotKey: "1" });
+
+    expect(casterOf(out).spellcasting.spellSlots?.["1"].current).toBe(0);
+    expect(casterOf(out).battleData.abilityUsage?.["pool:grant:mi"]).toBeUndefined();
+  });
+
+  it("rejects a stale grant key", async () => {
+    await expect(cast(monster(), { grantKey: "stale" })).rejects.toMatchObject({ code: "action_rejected", message: "Джерело заклинання більше недоступне" });
+  });
+
+  it("derives a granted spell save DC from its configured ability", async () => {
+    const caster = monster({ dcAbility: "constitution" });
+
+    caster.spellcasting.spellSaveDC = 25;
+
+    const saveSpell = { ...row, resolution: { kind: "save", ability: "dexterity", onSuccess: "none" } } as unknown as Spell;
+
+    const out = await cast(caster, { saveRolls: [{ participantId: "gob", roll: 15 }] }, saveSpell);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp).toBe(goblin.combatStats.currentHp);
+    expect(out.events[0].resultText).toContain("СК 10");
+  });
+
   it("casts an at-will grant without slots or a duplicate knownSpells entry and spends the action", async () => {
     const out = await cast(monster());
 
@@ -49,11 +169,41 @@ describe("monster spell grants", () => {
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp).toBe(goblin.combatStats.currentHp - 4);
   });
 
-  it("spends the grant cost once and records the display name for recharge", async () => {
+  it("does not spend a consumable grant when cast validation rejects the target", async () => {
+    const caster = monster({ key: "consumable:stack:spell:breath", pool: "pool:consumable:stack", cost: 1, castLevel: 1, dc: 15 });
+
+    caster.battleData.pools = { "pool:consumable:stack": { label: "Scroll", max: 1, rest: null } };
+    await expect(cast(caster, { grantKey: "consumable:stack:spell:breath", targetIds: [] })).rejects.toMatchObject({ code: "invalid_target" });
+    expect(caster.battleData.abilityUsage?.["pool:consumable:stack"]?.battle ?? 0).toBe(0);
+  });
+
+  it("casts a zero-charge item grant with an exhausted pool without changing usage", async () => {
+    const caster = monster({ key: "free-item", pool, cost: 0 }, 2);
+
+    const out = casterOf(await cast(caster, { grantKey: "free-item" }));
+
+    expect(out.battleData.abilityUsage?.[pool]).toEqual(caster.battleData.abilityUsage?.[pool]);
+    expect(out.actionFlags.hasUsedAction).toBe(true);
+  });
+
+  it("spends grant charges once and preserves the resource pool label", async () => {
     const out = await cast(monster({ pool, cost: 2 }));
 
     expect(casterOf(out).battleData.abilityUsage?.[pool].battle).toBe(2);
-    expect(casterOf(out).battleData.pools?.[pool].label).toBe(row.name);
+    expect(casterOf(out).battleData.pools?.[pool].label).toBe(row.id);
+  });
+
+  it("charges the item's extra upcast cost and rejects a forged level", async () => {
+    const itemGrant = { key: "item:ring:spell:breath", pool, cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } };
+
+    const caster = monster(itemGrant);
+
+    caster.battleData.pools = { [pool]: { label: "Ring", max: 4, rest: "long" } };
+
+    const out = await cast(caster, { grantKey: itemGrant.key, castLevel: 3 });
+
+    expect(casterOf(out).battleData.abilityUsage?.[pool].battle).toBe(3);
+    await expect(cast(caster, { grantKey: itemGrant.key, castLevel: 4 })).rejects.toMatchObject({ code: "action_rejected" });
   });
 
   it("rejects the next cast when the battle limit is exhausted", async () => {

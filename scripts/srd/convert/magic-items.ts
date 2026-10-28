@@ -310,3 +310,5 @@ export function convertMagicUniques(data: Open5eData, gear: readonly ArtifactRow
 }
 
 export const convertMagicItems = (data: Open5eData, gear: readonly ArtifactRow[]): ArtifactRow[] => [...convertMagicProperties(data, gear), ...convertMagicUniques(data, gear)].sort(bySlug);
+
+export { applyItemCasting } from "./item-casting";

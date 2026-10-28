@@ -20,6 +20,12 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const def = spell.definition;
 
+  if (def.executionMode === "manual") {
+    const message = "Налаштуйте механіку заклинання або застосуйте його вручну";
+
+    return { success: false, casterUpdated: caster, allParticipantsUpdated: allParticipants, battleAction: actionOf(caster, spell, [], battleId, currentRound, message), summons: [], messages: [message] };
+  }
+
   const rng = params.rng ?? Math.random;
 
   const casterId = caster.basicInfo.id;
@@ -67,8 +73,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     castLevel,
     chosenCastLevel: params.castLevel,
     ability: abilityOf(spell),
+    grant: params.grant,
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
-    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster),
+    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility),
     attackBonus: params.grant?.attackBonus,
     actionModifiers,
     rng,

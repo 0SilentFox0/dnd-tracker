@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { scenarioSectionPatchSchema } from "@/lib/schemas/scenario";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, readContentStrict, toJson } from "@/lib/server/scenario/page-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -21,6 +22,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     if (body instanceof NextResponse) return body;
 
+    return await withCampaignContentWrite(campaignId, async () => {
     const page = await loadOwnedPage(campaignId, pageId, OWNED_WITH_CONTENT_SELECT);
 
     if (page instanceof NextResponse) return page;
@@ -39,6 +41,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
     return NextResponse.json({ version: page.version + 1, section: next.sections.find((s) => s.id === sectionId) });
+    });
   } catch (error) {
     if (error instanceof InvalidScenarioContentError) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
 

@@ -1,3 +1,4 @@
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
 import type { Choice, ChoicePick, ChoicesState, Picks } from "@/types/choices";
@@ -70,12 +71,21 @@ export function prunePicks(state: ChoicesState, refs: ChoiceRefs): { state: Choi
     return [f.picks ? { ...f, picks: prune(feat.choices, f.picks, refs, count, false) } : f];
   });
 
-  return { state: { raceChoices, feats, classes }, dropped: count.n };
+  const background = state.backgroundId ? refs.backgroundsById?.[state.backgroundId] : null;
+
+  const backgroundFeat = background?.originFeatId ? refs.featsById[background.originFeatId] : null;
+
+  const backgroundFields = state.backgroundId !== undefined ? {
+    backgroundChoices: prune(background?.choices ?? [], state.backgroundChoices ?? {}, refs, count, true),
+    backgroundFeatPicks: prune(backgroundFeat?.choices ?? [], state.backgroundFeatPicks ?? {}, refs, count, false),
+  } : {};
+
+  return { state: { ...state, ...backgroundFields, raceChoices, feats, classes }, dropped: count.n };
 }
 
 interface FormWithChoices {
   basicInfo: { classes?: CharacterClassEntry[] };
-  choices?: { raceChoices: Picks; feats: ChoicesState["feats"] };
+  choices?: Partial<Pick<ChoicesState, "backgroundId" | "backgroundChoices" | "backgroundFeatPicks">> & { raceChoices: Picks; feats: ChoicesState["feats"] };
 }
 
 /** Прибирає піки, яких більше немає в обраній расі/класі (зміна раси, реролл), перед відправкою форми. */
@@ -84,11 +94,11 @@ export function pruneFormChoices<T extends FormWithChoices>(data: T, refs: Choic
 
   if (!data.choices && !classes.some((e) => e.choices)) return data;
 
-  const { state } = prunePicks({ raceChoices: data.choices?.raceChoices ?? {}, feats: data.choices?.feats ?? [], classes }, refs);
+  const { state } = prunePicks({ ...data.choices, raceChoices: data.choices?.raceChoices ?? {}, feats: data.choices?.feats ?? [], classes }, refs);
 
   return {
     ...data,
-    ...(data.choices && { choices: { raceChoices: state.raceChoices, feats: state.feats } }),
+    ...(data.choices && { choices: { ...data.choices, ...backgroundFields(state), raceChoices: state.raceChoices, feats: state.feats } }),
     basicInfo: { ...data.basicInfo, ...(data.basicInfo.classes && { classes: state.classes }) },
   };
 }

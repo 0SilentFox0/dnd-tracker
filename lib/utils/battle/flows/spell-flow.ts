@@ -55,6 +55,8 @@ export interface SpellFlowState {
   saves: Record<string, number>;
   attacks: Record<string, number>;
   slotKey?: string;
+  grantKey?: string;
+  castLevel?: number;
   damage: (number | undefined)[];
   error?: string;
 }
@@ -63,8 +65,10 @@ export type SpellFlowAction =
   | { type: "OPEN"; casterId: string; level: number; levels?: number[] }
   | { type: "SPELLS_LOADED"; levels: number[] }
   | { type: "SET_LEVEL"; level: number }
-  | { type: "PICK"; pick: SpellPick; slotKey?: string }
+  | { type: "PICK"; pick: SpellPick; slotKey?: string; grantKey?: string; castLevel?: number }
   | { type: "SET_SLOT"; slotKey: string; pick: SpellPick }
+  | { type: "SET_GRANT"; grantKey: string; pick: SpellPick; castLevel?: number }
+  | { type: "SET_CAST_LEVEL"; castLevel: number; pick: SpellPick }
   | { type: "SET_ATTACK"; id: string; value: number | undefined }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }
@@ -112,6 +116,18 @@ export const canGoBack = (s: SpellFlowState): boolean => previousStep(s) !== nul
 const firstLevelWithSpells = (current: number, levels: number[]): number =>
   levels.length === 0 || levels.includes(current) ? current : Math.min(...levels);
 
+function reconcileSpellPick(s: SpellFlowState, pick: SpellPick, patch: Partial<SpellFlowState>): SpellFlowState {
+  const sameDice = s.pick?.diceSlots.length === pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === pick.diceSlots[i]);
+
+  const targetIds = pick.maxTargets === undefined ? s.targetIds : s.targetIds.slice(0, pick.maxTargets);
+
+  const kept = <T,>(rolls: Record<string, T>) => Object.fromEntries(Object.entries(rolls).filter(([id]) => targetIds.includes(id)));
+
+  const next: SpellFlowState = { ...s, ...patch, pick, targetIds, saves: kept(s.saves), attacks: kept(s.attacks), damage: sameDice ? s.damage : pick.diceSlots.map(() => undefined), error: undefined };
+
+  return next.step === "summary" && !rollsComplete(next) ? { ...next, step: "rolls" } : next;
+}
+
 export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState {
   switch (a.type) {
     case "OPEN":
@@ -125,27 +141,13 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
-    case "SET_SLOT": {
-      const sameDice = s.pick?.diceSlots.length === a.pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === a.pick.diceSlots[i]);
-
-      const targetIds = a.pick.maxTargets === undefined ? s.targetIds : s.targetIds.slice(0, a.pick.maxTargets);
-
-      const kept = <T,>(rolls: Record<string, T>) => Object.fromEntries(Object.entries(rolls).filter(([id]) => targetIds.includes(id)));
-
-      const next: SpellFlowState = {
-        ...s,
-        pick: a.pick,
-        slotKey: a.slotKey,
-        targetIds,
-        saves: kept(s.saves),
-        attacks: kept(s.attacks),
-        damage: sameDice ? s.damage : a.pick.diceSlots.map(() => undefined),
-        error: undefined,
-      };
-
-      return next.step === "summary" && !rollsComplete(next) ? { ...next, step: "rolls" } : next;
-    }
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+    case "SET_SLOT":
+      return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
+    case "SET_GRANT":
+      return reconcileSpellPick(s, a.pick, { grantKey: a.grantKey, castLevel: a.castLevel, slotKey: undefined });
+    case "SET_CAST_LEVEL":
+      return reconcileSpellPick(s, a.pick, { castLevel: a.castLevel });
     case "SET_ATTACK": {
       const { [a.id]: _cleared, ...rest } = s.attacks;
 
@@ -256,12 +258,15 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     ...(saves.length > 0 && { saveRolls: saves }),
     ...(attacks.length > 0 && { attackRolls: attacks }),
     ...(s.slotKey && { slotKey: s.slotKey }),
+    ...(s.grantKey && { grantKey: s.grantKey }),
+    ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
   };
 }
 
 export const spellDefinition = (s: BookSpell) => ({
   dice: s.dice ?? 0,
   cost: s.cost ?? "action",
+  casting: s.casting,
   targeting: s.targeting ?? ({ kind: "enemy" } as const),
   resolution: s.resolution ?? ({ kind: "auto" } as const),
 });

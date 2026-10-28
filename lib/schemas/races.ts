@@ -5,6 +5,7 @@ import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const passiveAbilitySchema = z
   .object({
+    creatureType: z.string().trim().min(1).max(60).optional(),
     name: z.string().optional(),
     icon: z.string().max(2000).optional(),
     description: z.string(),

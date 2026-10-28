@@ -1,5 +1,6 @@
 import { type Bundle, BUNDLE_TABLES, BundleInvalidError, delegateOf, pick, SETTINGS_SELECT, settingsOf, type TemplateDb } from "./bundle";
 
+import { type CompendiumBundleDb,exportCompendiumSection } from "@/lib/server/compendium-import/bundle";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 export async function exportCampaign(db: TemplateDb, campaignId: string): Promise<Bundle> {
@@ -25,6 +26,12 @@ export async function exportCampaign(db: TemplateDb, campaignId: string): Promis
     });
 
     bundle[t.key] = rows.map((row) => pick(row, t.columns));
+  }
+
+  if (db.compendiumEntry && db.compendiumSource && db.scenarioPage) {
+    const section = await exportCompendiumSection(db as CompendiumBundleDb, campaignId);
+
+    if (section) bundle.compendium = section;
   }
 
   return bundle as Bundle;

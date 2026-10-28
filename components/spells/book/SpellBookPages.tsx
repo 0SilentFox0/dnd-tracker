@@ -89,21 +89,22 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
           <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}</div>
         </div>
       </div>
+      {spell.executionMode === "manual" && <p role="status">Ручне заклинання: читайте опис і узгодьте застосування з ДМ. Автоматичне застосування недоступне до налаштування механіки.</p>}
       {spell.description && (
         <p className="mt-4 border-l-4 pl-4 text-[19px] font-medium italic leading-7 text-[#3b2716]" style={{ borderColor: spellSchoolColor(spell.spellGroup) }}>
           {spell.description}
         </p>
       )}
-      <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
+      {spell.executionMode !== "manual" && <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
         {[["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")], ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
             <span className="text-xs italic text-[#7a6650]">{a}</span>
             <span className="text-base">{b}</span>
           </div>
         ))}
-      </div>
+      </div>}
       {spell.appearanceDescription && <p className="mt-5 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.appearanceDescription}</p>}
-      <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, fx: spell.fx, rules: spell }} variant="book" className="clear-left mt-4" />
+      {spell.executionMode !== "manual" && <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, fx: spell.fx, rules: spell }} variant="book" className="clear-left mt-4" />}
       {children}
     </>
   );

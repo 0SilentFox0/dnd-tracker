@@ -14,6 +14,18 @@ describe("remapIds", () => {
     expect(input.a).toBe("cold1");
   });
 
+  it("remaps both item IDs while preserving the parameter", () => {
+    expect(remapIds({ equipped: { weapon: "cold1+cold2~fire" }, stash: ["cold1~cold"] }, map)).toEqual({ equipped: { weapon: "cnew1+cnew2~fire" }, stash: ["cnew1~cold"] });
+    expect([...collectKeysAndStrings("cold1+cold2~fire")]).toEqual(expect.arrayContaining(["cold1", "cold2"]));
+  });
+
+  it("remaps spell references inside the serialized itemStats record", () => {
+    const record = { type: "itemStats", value: JSON.stringify({ spells: [{ spellId: "cold1", cost: 1 }] }) };
+
+    expect(remapIds(record, map)).toEqual({ type: "itemStats", value: JSON.stringify({ spells: [{ spellId: "cnew1", cost: 1 }] }) });
+    expect([...collectKeysAndStrings(record)]).toContain("cold1");
+  });
+
   it("does not touch object keys", () => {
     expect(remapIds({ cold1: 1 }, map)).toEqual({ cold1: 1 });
   });

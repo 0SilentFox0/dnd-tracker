@@ -2,7 +2,7 @@ import { ABILITY_SHORT_LABELS, type AbilityKey, isAbilityKey } from "@/lib/const
 import { DND_SKILL_META, type DndSkill } from "@/lib/constants/skills";
 import type { FeatData, Picks } from "@/types/choices";
 
-export function describeFeatPicks(feat: FeatData, picks: Picks): string[] {
+export function describeFeatPicks(feat: Pick<FeatData, "choices">, picks: Picks): string[] {
   return feat.choices.flatMap((choice) => {
     const list = picks[choice.id] ?? [];
 

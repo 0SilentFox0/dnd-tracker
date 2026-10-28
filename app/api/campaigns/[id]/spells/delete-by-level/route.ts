@@ -3,12 +3,14 @@ import { NextResponse } from "next/server";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { afterContentCommit } from "@/lib/server/content/write-context";
 import { operationRoute } from "@/lib/utils/api/content-routes";
 
-export const DELETE = operationRoute(CONTENT_OPERATIONS["spells.delete-by-level"], async ({ actor, body }) => {
+export const DELETE = operationRoute(CONTENT_OPERATIONS["spells.delete-by-level"], async ({ actor, body }) => withCampaignContentWrite(actor.campaignId, async () => {
   const result = await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId, level: body.level } });
 
-  invalidateReference(ReferenceKind.SPELLS, actor.campaignId);
+  afterContentCommit(() => invalidateReference(ReferenceKind.SPELLS, actor.campaignId));
 
   return NextResponse.json({ ok: true, deleted: result.count });
-});
+}));

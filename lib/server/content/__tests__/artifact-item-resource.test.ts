@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
+  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
   artifact: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
   artifactSet: { findFirst: vi.fn() },
+  refs: vi.fn(async () => undefined),
 }));
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: db }));
+vi.mock("@/lib/server/campaigns/campaign-refs", () => ({ assertCampaignRefs: db.refs }));
 
 import { artifactsResource } from "@/lib/server/content/resources/artifacts";
 import { createContent, updateContent } from "@/lib/server/content/service";
@@ -25,6 +28,12 @@ describe("artifact item persistence", () => {
     await createContent(artifactsResource, actor, { name: "Dagger", slot: "weapon", weapon: { damageDice: "1d4" }, item: { unique: false } });
 
     expect(db.artifact.create.mock.calls[0][0].data.modifiers).toEqual([{ type: "damageDice", value: "1d4" }, ITEM]);
+  });
+
+  it("validates item spell references against the current campaign", async () => {
+    db.artifact.create.mockResolvedValue({ id: "wand" });
+    await createContent(artifactsResource, actor, { name: "Wand", slot: "item", item: { charges: { max: 3, rest: "long" }, spells: [{ spellId: "spell-local", cost: 1, castLevel: 1 }] } });
+    expect(db.refs).toHaveBeenCalledWith("c1", { artifactSet: undefined, spell: ["spell-local"] });
   });
 
   const patch = async (existing: object, data: object) => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ZodType } from "zod";
 
-import { createArtifactSchema, createArtifactSetSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema, createUnitSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema, createUnitSchema } from "@/lib/schemas";
 import { autoMap, IMPORT_KINDS, IMPORT_SPECS, normalizeHeader, transformRow } from "@/lib/utils/content/import";
 import type { ImportKind } from "@/types/content-import";
 
@@ -13,6 +13,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   "spell-groups": createSpellGroupSchema,
   races: createRaceSchema,
   classes: createClassSchema,
+  backgrounds: createBackgroundSchema,
   feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,

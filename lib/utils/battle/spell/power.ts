@@ -16,8 +16,10 @@ function spellcastingModifier(p: BattleParticipant): { mod: number; label: strin
   return { mod: p.abilities.modifiers[ability], label: labels[ability] };
 }
 
-export function spellSaveDc(caster: BattleParticipant): number {
-  return caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
+export function spellSaveDc(caster: BattleParticipant, ability?: keyof BattleParticipant["abilities"]["modifiers"]): number {
+  const modifier = ability ? caster.abilities.modifiers[ability] : spellcastingModifier(caster).mod;
+
+  return ability ? 8 + caster.abilities.proficiencyBonus + modifier : caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + modifier;
 }
 
 export function spellAttackBonus(caster: BattleParticipant): number {

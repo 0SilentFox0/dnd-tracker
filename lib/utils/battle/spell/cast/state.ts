@@ -5,7 +5,7 @@ import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
 
 export interface Outcome {
   skip: boolean;
@@ -26,6 +26,7 @@ export interface SpellCastState {
   castLevel: number;
   chosenCastLevel?: number;
   ability: ResolvedAbility;
+  grant?: SpellGrant;
   power: SpellPower;
   saveDc: number;
   attackBonus?: number;

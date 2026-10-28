@@ -1,5 +1,6 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CharacterType, type CharacterTypeValue, clampHeroInitiative, HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 import type { SpellSlotProgression } from "@/types/races";
@@ -77,8 +78,8 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
-    ...((character.raceChoices && Object.keys(character.raceChoices).length > 0) || (character.feats?.length ?? 0) > 0
-      ? { choices: { raceChoices: character.raceChoices ?? {}, feats: character.feats ?? [] } }
+    ...((character.backgroundId || character.raceChoices && Object.keys(character.raceChoices).length > 0) || (character.feats?.length ?? 0) > 0
+      ? { choices: { ...backgroundFields(character), raceChoices: character.raceChoices ?? {}, feats: character.feats ?? [] } }
       : {}),
   };
 }
@@ -145,6 +146,6 @@ export function formDataToCharacter(
     immunities: formData.roleplay.immunities,
     morale: formData.combatStats.morale,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
-    ...(formData.choices && { raceChoices: formData.choices.raceChoices, feats: formData.choices.feats }),
+    ...(formData.choices && { ...backgroundFields(formData.choices), raceChoices: formData.choices.raceChoices, feats: formData.choices.feats }),
   };
 }

@@ -4,10 +4,11 @@ import { z } from "zod";
 import { CONTENT_ID_RE } from "./ids";
 
 import type { SYNC_TABLE_SCOPES } from "@/lib/constants/source-sync";
+import { type CompendiumBundle, type CompendiumBundleDb,CompendiumBundleSchema } from "@/lib/server/compendium-import/bundle";
 
 export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
-type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
+type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
 
 export interface BundleTableDef {
   key: BundleTable;
@@ -25,6 +26,7 @@ const SCALAR_ENUMS = {
   Race: Prisma.RaceScalarFieldEnum,
   GameClass: Prisma.GameClassScalarFieldEnum,
   Feat: Prisma.FeatScalarFieldEnum,
+  Background: Prisma.BackgroundScalarFieldEnum,
   Unit: Prisma.UnitScalarFieldEnum,
   Spell: Prisma.SpellScalarFieldEnum,
   MainSkill: Prisma.MainSkillScalarFieldEnum,
@@ -40,6 +42,7 @@ const MODEL_TO_KEY: Record<keyof typeof SCALAR_ENUMS, BundleTable> = {
   Race: "races",
   GameClass: "classes",
   Feat: "feats",
+  Background: "backgrounds",
   Unit: "units",
   Spell: "spells",
   MainSkill: "mainSkills",
@@ -69,7 +72,7 @@ function table(key: BundleTable, model: keyof typeof SCALAR_ENUMS, delegate: Del
 
   const nullableJson = fields.filter((f) => f.type === "Json" && !f.isRequired && (columns as readonly string[]).includes(f.name)).map((f) => f.name);
 
-  return { key, model, delegate, columns, nullableJson, fks: deriveFks(fields) };
+  return { key, model, delegate, columns, nullableJson, fks: { ...deriveFks(fields), ...(model === "Background" && { originFeatId: "feats" as const }) } };
 }
 
 export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
@@ -77,6 +80,7 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("races", "Race", "race"),
   table("classes", "GameClass", "gameClass"),
   table("feats", "Feat", "feat"),
+  table("backgrounds", "Background", "background"),
   table("units", "Unit", "unit"),
   table("spells", "Spell", "spell"),
   table("mainSkills", "MainSkill", "mainSkill"),
@@ -101,9 +105,11 @@ export const BundleSchema = z.object({
   }),
   rules: z.unknown(),
   credits: z.string().max(10_000).nullable().optional(),
+  compendium: CompendiumBundleSchema.optional(),
   ...perTable(() => rowSchema),
   classes: rowSchema.default([]),
   feats: rowSchema.default([]),
+  backgrounds: rowSchema.default([]),
 }) as unknown as z.ZodType<Bundle>;
 
 export type Bundle = {
@@ -111,6 +117,7 @@ export type Bundle = {
   settings: { maxLevel: number; xpMultiplier: number; allowPlayerEdit: boolean; friendlyFire: boolean };
   rules: unknown;
   credits?: string | null;
+  compendium?: CompendiumBundle;
 } & Record<BundleTable, Array<Record<string, unknown> & { id: string }>>;
 
 export function emptyBundle(): Bundle {
@@ -124,8 +131,8 @@ export function emptyBundle(): Bundle {
 
 export type TemplateDb = Pick<
   Prisma.TransactionClient,
-  "spellGroup" | "race" | "gameClass" | "feat" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
->;
+  "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
+> & Partial<CompendiumBundleDb>;
 
 export class TemplateLeakError extends Error {}
 

@@ -55,6 +55,8 @@ export interface SpecialItem {
   quantity: number;
   consumable: boolean;
   artifactId?: string;
+  parameter?: string;
+  spellId?: string;
 }
 
 export type Purse = Record<Coin, number>;
@@ -90,7 +92,7 @@ export interface StashArtifact {
   gear?: true;
 }
 
-export type FreeArtifact = Omit<StashArtifact, "description" | "attunement" | "carried" | "charges"> & { property?: { nameTemplate?: string; bases: string[] }; consumable?: true };
+export type FreeArtifact = Omit<StashArtifact, "description" | "attunement" | "carried" | "charges"> & { property?: { nameTemplate?: string; bases: string[] }; parameter?: { kind: "damageType" | "creatureType"; options: Array<{ key: string; label: string }> }; spells?: Array<{ spellId: string; label: string; castLevel?: number }>; consumable?: true };
 
 export interface StashView {
   purse: Purse;

@@ -1,3 +1,4 @@
+import { classFeatureDescriptions } from "./feature-descriptions";
 import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from "./lines";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
@@ -139,7 +140,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     targets: { min: p.combatStats.minTargets ?? 1, max: p.combatStats.maxTargets ?? 1 },
     immunities: input.immunities,
     languages: strings(c.languages),
-    proficiencies: proficiencyList(c.proficiencies),
+    proficiencies: [...new Set([...proficiencyList(c.proficiencies), ...(input.choices?.selections.tools ?? [])])],
     attacks,
     bestToHit: attacks.length ? Math.max(...attacks.map((a) => a.toHit.total)) : null,
     saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
@@ -147,7 +148,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     hitDice: classEntries ? hitDiceLabel(classEntries) : null,
-    ...(classEntries && { classTable: classTableLines(classEntries) }),
+    ...(classEntries && { classTable: classTableLines(classEntries), classFeatureDescriptions: classFeatureDescriptions(classEntries) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),
     rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules: input.rules, maxLevel: input.maxLevel }),
@@ -162,6 +163,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
       choices: {
         pending: input.choices.pending,
         ...(input.choices.canEdit !== undefined && { canEdit: input.choices.canEdit }),
+        ...(input.choices.selections.background && { background: input.choices.selections.background }),
         lineage: input.choices.selections.lineage,
         feats: input.choices.selections.feats.map((f) => ({ key: f.key, id: f.feat.id, name: f.feat.name, type: f.feat.type, from: f.from, picks: describeFeatPicks(f.feat, f.picks) })),
         options: input.choices.selections.options,

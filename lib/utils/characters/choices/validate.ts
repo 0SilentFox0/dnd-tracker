@@ -106,7 +106,13 @@ function kindIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: s
     case "abilityScore": {
       const allowed = new Set<string>(choice.abilities ?? ABILITY_KEYS);
 
-      return picks.flatMap((p) => (allowed.has(p.id) ? [] : [choiceIssue(at, "CHOICE_UNKNOWN", p.id)]));
+      const issues = picks.flatMap((p) => (allowed.has(p.id) ? [] : [choiceIssue(at, "CHOICE_UNKNOWN", p.id)]));
+
+      const maxPerAbility = choice.maxPerAbility;
+
+      if (maxPerAbility && [...new Set(picks.map((p) => p.id))].some((id) => picks.filter((p) => p.id === id).length > maxPerAbility)) issues.push(choiceIssue(at, "CHOICE_COUNT", choice.label));
+
+      return issues;
     }
   }
 }

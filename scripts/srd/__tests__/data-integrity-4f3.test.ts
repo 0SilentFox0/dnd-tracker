@@ -19,9 +19,9 @@ const rows = data.artifacts.map(asRow);
 const usesCharges = (a: ArtifactRow) => (a.abilities ?? []).some((x) => x.limits?.pool?.key === "charges");
 
 describe("SRD 5.2 data: 4f-3", () => {
-  it("32 properties, 248 uniques, 51 non-unique gear", () => {
+  it("32 properties, 250 uniques (including two scroll levels), 51 non-unique gear", () => {
     expect(properties).toHaveLength(32);
-    expect(data.artifacts.filter((a) => !a.item?.property && (a.rarity !== "common" || a.item?.consumable))).toHaveLength(248);
+    expect(data.artifacts.filter((a) => !a.item?.property && (a.rarity !== "common" || a.item?.consumable))).toHaveLength(250);
     expect(data.artifacts.filter((a) => a.rarity === "common" && !a.item?.consumable).every((a) => a.item?.unique === false)).toBe(true);
   });
 

@@ -15,7 +15,7 @@ describe("resolveSchoolRefs", () => {
   });
 
   it("importSrdData passes rows through prepare in kind order", async () => {
-    const data = { "spell-groups": [{ slug: "g", name: "G" }], spells: [], races: [], classes: [{ slug: "c", name: "C" }], feats: [], units: [], artifacts: [] } as unknown as SrdData;
+    const data = { "spell-groups": [{ slug: "g", name: "G" }], spells: [], races: [], classes: [{ slug: "c", name: "C" }], feats: [], backgrounds: [], units: [], artifacts: [] } as unknown as SrdData;
 
     const seen: string[] = [];
 

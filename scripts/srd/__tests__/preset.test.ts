@@ -26,8 +26,8 @@ describe("SRD rules preset", () => {
 });
 
 describe("SRD source and credits", () => {
-  it("pins 17 Open5e files with md5 and a raw URL at the SHA", () => {
-    expect(Object.keys(OPEN5E_FILES)).toHaveLength(20);
+  it("pins 22 Open5e files with md5 and a raw URL at the SHA", () => {
+    expect(Object.keys(OPEN5E_FILES)).toHaveLength(22);
     expect(Object.values(OPEN5E_FILES).every((h) => /^[0-9a-f]{32}$/.test(h))).toBe(true);
     expect(open5eUrl("Spell")).toBe(`https://raw.githubusercontent.com/open5e/open5e-api/${OPEN5E_SHA}/data/v2/wizards-of-the-coast/srd-2024/Spell.json`);
   });

@@ -17,6 +17,7 @@ const LOADERS: Record<ImportKind, (campaignId: string) => Promise<IdName[]>> = {
   "spell-groups": (c) => prisma.spellGroup.findMany(args(c)),
   races: (c) => prisma.race.findMany(args(c)),
   classes: (c) => prisma.gameClass.findMany(args(c)),
+  backgrounds: (c) => prisma.background.findMany(args(c)),
   feats: (c) => prisma.feat.findMany(args(c)),
   artifacts: (c) => prisma.artifact.findMany(args(c)),
   "artifact-sets": (c) => prisma.artifactSet.findMany(args(c)),

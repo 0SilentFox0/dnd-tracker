@@ -47,7 +47,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   listFields: ["slot", "rarity", "setId"],
   idParam: "artifactId",
   label: "Артефакти",
-  description: "Артефакти: слот, рідкість, сет, зброя (damageBonus — +N до шкоди цією зброєю), броня 5e (armor — лише слот armor), предмет 5e (item: unique, property з appliesTo/nameTemplate, attunement, charges, consumable), бонуси (здібності).",
+  description: "Артефакти: слот, рідкість, сет, зброя (damageBonus — +N до шкоди цією зброєю), броня 5e (armor — лише слот armor), предмет 5e (item: unique, property з appliesTo/nameTemplate, attunement, charges, consumable і spells), бонуси (здібності).",
   path: "/artifacts",
   schemas: { create: createArtifactSchema, update: patchArtifactSchema },
   errors: [422],
@@ -57,8 +57,10 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   list: (actor) => readArtifactsList(actor.campaignId),
   find: (actor, id, purpose) => prisma.artifact.findFirst({ where: { id, campaignId: actor.campaignId }, ...(purpose === "read" && { include: withSet }) }),
   toItem: (row) => withAbilityIssues("artifact", row),
+  prepareCreate: async (actor, data) => data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) },
+  prepareUpdate: async (actor, existing, data) => data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, existing.id) },
   async create(actor, data) {
-    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId });
+    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 
     const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
 
@@ -81,7 +83,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   async update(actor, existing, data) {
     if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR) throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
 
-    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId });
+    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 
     const icon = data.icon === undefined ? undefined : data.icon === existing.icon ? data.icon : await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`);
 

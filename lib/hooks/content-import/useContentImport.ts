@@ -9,6 +9,7 @@ import { contentExampleUrl, getImportAiAvailability, importContentRows, suggestI
 import { downloadText } from "@/lib/utils/common/download-text";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { applyMapping, autoMap, chunkRows, IMPORT_LIMITS, IMPORT_SPECS, ImportFileError, missingRequired, parseTable } from "@/lib/utils/content/import";
+import { AggregateImportFileError } from "@/lib/utils/content/import/table";
 import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping } from "@/lib/utils/content/import/wizard";
 import type { ImportKind, ImportMapping, ImportMode, ImportRecord, ImportReport, ParsedTable } from "@/types/content-import";
 
@@ -18,6 +19,8 @@ type Part = { offset: number; report: ImportReport };
 
 export function useContentImport(campaignId: string, kind: ImportKind) {
   const spec = IMPORT_SPECS[kind];
+
+  const [aggregateFile, setAggregateFile] = useState<File | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -70,6 +73,10 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
       setAiNotes([]);
       setStep("columns");
     } catch (e) {
+      if (e instanceof AggregateImportFileError) { setAggregateFile(next);
+
+ return; }
+
       setError(e instanceof ImportFileError ? e.message : errorMessage(e, "Не вдалося прочитати файл"));
     }
   }
@@ -148,6 +155,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
   }
 
   function reset() {
+    setAggregateFile(null);
     setStep("file");
     setFile({ name: null, table: null });
     setMapping({});
@@ -168,6 +176,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
 
   return {
     spec,
+    aggregateFile,
     step,
     file,
     mapping: {

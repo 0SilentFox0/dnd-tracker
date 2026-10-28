@@ -5,7 +5,7 @@ import { findParticipant, isActive, isDormant, isEscaped, resolvedAbilitiesOf } 
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
-import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
 import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
@@ -147,7 +147,11 @@ export function collectModifiers(
       for (const ability of resolvedAbilitiesOf(source)) {
         if (ability.trigger.event !== "passive") continue;
 
-        if (ability.condition && !evaluateCondition(ability.condition, { owner: source, event: null, participants })) continue;
+        const targetId = "damage" in query ? query.damage.targetId : undefined;
+
+        const event = hasCreatureTypeCondition(ability.condition) && targetId ? { type: "spellCast" as const, phase: "before" as const, actorId: source.basicInfo.id, targetIds: [targetId] } : null;
+
+        if (ability.condition && !evaluateCondition(ability.condition, { owner: source, event, participants })) continue;
 
         const auraEntries: ModifierEntry[] = [];
 

@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
+import { createScopedDatabase } from "@/lib/server/content/write-context";
+
 /**
  * Supabase pooler (рекомендовано для serverless/Vercel):
  * - Host: pooler.supabase.co (або aws-*-*.pooler.supabase.com)
@@ -51,7 +53,7 @@ function withSafePoolLimits(databaseUrl?: string) {
   }
 }
 
-export const prisma =
+const basePrisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log:
@@ -67,4 +69,6 @@ export const prisma =
     // Prisma автоматично визначає це, але можна явно вказати
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = basePrisma;
+
+export const prisma = createScopedDatabase(basePrisma);

@@ -7729,6 +7729,28 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "mystic-arcanum-6",
+            "label": "Mystic Arcanum (6)",
+            "level": 11,
+            "count": 1,
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 6,
+              "maxLevel": 6
+            },
+            "grant": {
+              "uses": 1,
+              "rest": "long",
+              "castLevel": 6,
+              "via": "grant"
+            }
+          }
         ]
       },
       {
@@ -7766,6 +7788,28 @@
               }
             ]
           }
+        ],
+        "choices": [
+          {
+            "id": "mystic-arcanum-7",
+            "label": "Mystic Arcanum (7)",
+            "level": 13,
+            "count": 1,
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 7,
+              "maxLevel": 7
+            },
+            "grant": {
+              "uses": 1,
+              "rest": "long",
+              "castLevel": 7,
+              "via": "grant"
+            }
+          }
         ]
       },
       {
@@ -7784,6 +7828,28 @@
                 "text": "Mystic Arcanum"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "mystic-arcanum-8",
+            "label": "Mystic Arcanum (8)",
+            "level": 15,
+            "count": 1,
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 8,
+              "maxLevel": 8
+            },
+            "grant": {
+              "uses": 1,
+              "rest": "long",
+              "castLevel": 8,
+              "via": "grant"
+            }
           }
         ]
       },
@@ -7821,6 +7887,28 @@
                 "text": "Mystic Arcanum"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "mystic-arcanum-9",
+            "label": "Mystic Arcanum (9)",
+            "level": 17,
+            "count": 1,
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Warlock"
+              ],
+              "minLevel": 9,
+              "maxLevel": 9
+            },
+            "grant": {
+              "uses": 1,
+              "rest": "long",
+              "castLevel": 9,
+              "via": "grant"
+            }
           }
         ]
       },
@@ -8602,6 +8690,28 @@
                 "text": "Signature Spells"
               }
             ]
+          }
+        ],
+        "choices": [
+          {
+            "id": "signature-spells",
+            "label": "Signature Spells",
+            "level": 20,
+            "count": 2,
+            "kind": "spell",
+            "spells": {
+              "lists": [
+                "Wizard"
+              ],
+              "minLevel": 3,
+              "maxLevel": 3
+            },
+            "grant": {
+              "uses": 1,
+              "rest": "short",
+              "castLevel": 3,
+              "via": "slotOrGrant"
+            }
           }
         ]
       }

@@ -95,6 +95,30 @@
                   }
                 ]
               }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Acid, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Acid, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              }
             ]
           },
           {
@@ -131,6 +155,30 @@
                     "text": "Breath Weapon (Lightning)"
                   }
                 ]
+              }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Lightning, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Lightning, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
               }
             ]
           },
@@ -169,6 +217,30 @@
                   }
                 ]
               }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              }
             ]
           },
           {
@@ -205,6 +277,30 @@
                     "text": "Breath Weapon (Lightning)"
                   }
                 ]
+              }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Lightning, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Lightning, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
               }
             ]
           },
@@ -243,6 +339,30 @@
                   }
                 ]
               }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Acid, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Acid, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              }
             ]
           },
           {
@@ -279,6 +399,30 @@
                     "text": "Breath Weapon (Fire)"
                   }
                 ]
+              }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
               }
             ]
           },
@@ -317,6 +461,30 @@
                   }
                 ]
               }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Poison, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Poison, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              }
             ]
           },
           {
@@ -353,6 +521,30 @@
                     "text": "Breath Weapon (Fire)"
                   }
                 ]
+              }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Fire, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
               }
             ]
           },
@@ -391,6 +583,30 @@
                   }
                 ]
               }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Cold, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Cold, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              }
             ]
           },
           {
@@ -427,6 +643,30 @@
                     "text": "Breath Weapon (Cold)"
                   }
                 ]
+              }
+            ],
+            "spells": [
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Cold, Cone)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
+              },
+              {
+                "level": 1,
+                "spellId": "Breath Weapon (Cold, Line)",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 0,
+                  "dcAbility": "constitution",
+                  "sharedPool": "breath-weapon"
+                }
               }
             ]
           }
@@ -593,11 +833,23 @@
               },
               {
                 "level": 3,
-                "spellId": "Faerie Fire"
+                "spellId": "Faerie Fire",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Darkness"
+                "spellId": "Darkness",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           },
@@ -613,11 +865,23 @@
               },
               {
                 "level": 3,
-                "spellId": "Detect Magic"
+                "spellId": "Detect Magic",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Misty Step"
+                "spellId": "Misty Step",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           },
@@ -649,11 +913,23 @@
               },
               {
                 "level": 3,
-                "spellId": "Longstrider"
+                "spellId": "Longstrider",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Pass without Trace"
+                "spellId": "Pass without Trace",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           }
@@ -738,7 +1014,13 @@
               },
               {
                 "level": 1,
-                "spellId": "Speak with Animals"
+                "spellId": "Speak with Animals",
+                "grant": {
+                  "uses": "proficiency",
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           },
@@ -1256,11 +1538,23 @@
               },
               {
                 "level": 3,
-                "spellId": "Ray of Sickness"
+                "spellId": "Ray of Sickness",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Hold Person"
+                "spellId": "Hold Person",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           },
@@ -1293,11 +1587,23 @@
               },
               {
                 "level": 3,
-                "spellId": "False Life"
+                "spellId": "False Life",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Ray of Enfeeblement"
+                "spellId": "Ray of Enfeeblement",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           },
@@ -1330,11 +1636,23 @@
               },
               {
                 "level": 3,
-                "spellId": "Hellish Rebuke"
+                "spellId": "Hellish Rebuke",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 1,
+                  "via": "slotOrGrant"
+                }
               },
               {
                 "level": 5,
-                "spellId": "Darkness"
+                "spellId": "Darkness",
+                "grant": {
+                  "uses": 1,
+                  "rest": "long",
+                  "castLevel": 2,
+                  "via": "slotOrGrant"
+                }
               }
             ]
           }

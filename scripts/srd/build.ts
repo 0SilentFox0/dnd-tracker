@@ -1,7 +1,11 @@
 #!/usr/bin/env tsx
 // pnpm srd:build [--source <dir>]
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { magicVariants } from "./convert/magic-items";
 import { buildSrdData } from "./lib/build-data";
+import { coverage4f5b } from "./lib/coverage-4f5b";
 import { writeSrdData } from "./lib/data-files";
 import { fetchOpen5e, verifySourceDir } from "./lib/fetch";
 import { loadOpen5e } from "./lib/open5e";
@@ -17,6 +21,8 @@ async function main() {
   const data = buildSrdData(open5e);
 
   const manifest = writeSrdData(data, SRD_DATA_DIR, new Date().toISOString().slice(0, 10));
+
+  writeFileSync(join(SRD_DATA_DIR, "coverage-4f5b.json"), `${JSON.stringify(coverage4f5b(data), null, 2)}\n`);
 
   console.info(`SRD 5.2 → ${SRD_DATA_DIR}`);
 

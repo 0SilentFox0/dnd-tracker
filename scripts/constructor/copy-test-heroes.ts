@@ -10,7 +10,7 @@ import { remapIds } from "@/lib/server/templates/remap-ids";
 
 type IdMap = ReadonlyMap<string, string>;
 
-type HeroRefs = Pick<Character, "knownSpells" | "personalSkillId" | "skillTreeProgress">;
+type HeroRefs = Pick<Character, "knownSpells" | "personalSkillId" | "skillTreeProgress"> & Partial<Pick<Character, "backgroundId" | "backgroundChoices" | "backgroundFeatPicks">>;
 
 type InventoryRefs = Pick<CharacterInventory, "equipped" | "backpack" | "items">;
 
@@ -19,7 +19,14 @@ type SkillRowRefs = Pick<CharacterSkills, "skillTreeId" | "unlockedSkills">;
 export function mapHeroRefs(character: HeroRefs, inventory: InventoryRefs | null, skillRows: SkillRowRefs[], sourceIdToNew: IdMap) {
   const progress = character.skillTreeProgress && typeof character.skillTreeProgress === "object" ? character.skillTreeProgress : {};
 
+  const backgroundId = character.backgroundId ? sourceIdToNew.get(character.backgroundId) : null;
+
+  if (character.backgroundId && !backgroundId) throw new Error("Не знайдено передісторію в цільовій кампанії");
+
   return {
+    backgroundId,
+    backgroundChoices: remapIds(character.backgroundChoices ?? {}, sourceIdToNew),
+    backgroundFeatPicks: remapIds(character.backgroundFeatPicks ?? {}, sourceIdToNew),
     knownSpells: remapIds(character.knownSpells, sourceIdToNew),
     personalSkillId: character.personalSkillId ? (sourceIdToNew.get(character.personalSkillId) ?? character.personalSkillId) : null,
     skillTreeProgress: Object.fromEntries(Object.entries(progress).map(([key, value]) => [sourceIdToNew.get(key) ?? key, remapIds(value, sourceIdToNew)])),
@@ -47,6 +54,8 @@ async function buildSourceIdToNew(campaignId: string): Promise<Map<string, strin
   const select = { id: true, sourceId: true };
 
   const groups = await Promise.all([
+    prisma.background.findMany({ where, select }),
+    prisma.feat.findMany({ where, select }),
     prisma.spell.findMany({ where, select }),
     prisma.skill.findMany({ where, select }),
     prisma.skillTree.findMany({ where, select }),
@@ -91,6 +100,9 @@ async function main() {
       data: {
         ...character,
         campaignId: toId,
+        backgroundId: mapped.backgroundId,
+        backgroundChoices: mapped.backgroundChoices as Prisma.InputJsonValue,
+        backgroundFeatPicks: mapped.backgroundFeatPicks as Prisma.InputJsonValue,
         knownSpells: mapped.knownSpells as Prisma.InputJsonValue,
         personalSkillId: mapped.personalSkillId,
         skillTreeProgress: mapped.skillTreeProgress as Prisma.InputJsonValue,

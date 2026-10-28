@@ -33,6 +33,7 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
   "spell-groups": async (c) => asRecords(await prisma.spellGroup.findMany(query(c))),
   races: async (c) => asRecords((await prisma.race.findMany(query(c))).map((r) => ({ ...r, abilities: raceAbilities(r) }))),
   classes: async (c) => asRecords(await prisma.gameClass.findMany(query(c))),
+  backgrounds: async (c) => asRecords(await prisma.background.findMany(query(c))),
   feats: async (c) => asRecords((await prisma.feat.findMany(query(c))).map((r) => ({ ...r, abilities: featAbilities(r) }))),
   artifacts: async (c) =>
     asRecords((await prisma.artifact.findMany(query(c))).map((r) => ({ ...r, abilities: artifactAbilities(r), weapon: isWeaponSlot(r.slot) ? weaponStatsFromRow(r) : undefined, armor: r.slot === ArtifactSlot.ARMOR ? (armorStatsFromRow(r) ?? undefined) : undefined, item: itemStatsFromRow(r) ?? undefined }))),

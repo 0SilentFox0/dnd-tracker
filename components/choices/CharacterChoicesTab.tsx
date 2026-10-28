@@ -5,6 +5,7 @@ import { ChoicesEditor } from "./ChoicesEditor";
 import { LoadingState } from "@/components/common/states";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { useChoiceRefs } from "@/lib/hooks/characters";
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import type { CharacterFormData } from "@/types/characters";
 import type { ChoicesState } from "@/types/choices";
 
@@ -19,7 +20,7 @@ export function CharacterChoicesTab({ campaignId, form: { data, set }, classesEn
 
   const classes = (data.basicInfo.classes ?? []).filter((e) => e.classId);
 
-  const state: ChoicesState = { raceChoices: data.choices?.raceChoices ?? {}, feats: data.choices?.feats ?? [], classes };
+  const state: ChoicesState = { ...backgroundFields(data.choices ?? {}), raceChoices: data.choices?.raceChoices ?? {}, feats: data.choices?.feats ?? [], classes };
 
   const scores = Object.fromEntries(ABILITY_KEYS.map((k) => [k, data.abilityScores[k]])) as Record<AbilityKey, number>;
 
@@ -29,7 +30,7 @@ export function CharacterChoicesTab({ campaignId, form: { data, set }, classesEn
     <ChoicesEditor
       state={{
         data: state,
-        set: (next) => set((prev) => ({ ...prev, choices: { raceChoices: next.raceChoices, feats: next.feats }, basicInfo: { ...prev.basicInfo, classes: next.classes } })),
+        set: (next) => set((prev) => ({ ...prev, choices: { ...backgroundFields(next), raceChoices: next.raceChoices, feats: next.feats }, basicInfo: { ...prev.basicInfo, classes: next.classes } })),
       }}
       refs={refs}
       hero={{ level: data.basicInfo.level, scores, skills: data.skills.skills, classMode: classesEnabled && classes.length > 0 }}

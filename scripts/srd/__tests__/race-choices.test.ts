@@ -34,12 +34,16 @@ describe("race choices", () => {
 
   it("Gnome: bold paragraphs, italic spells", () => {
     expect(option("Gnome", "rock-gnome")?.spells).toEqual([{ level: 1, spellId: "Mending" }, { level: 1, spellId: "Prestidigitation" }]);
-    expect(option("Gnome", "forest-gnome")?.spells).toEqual([{ level: 1, spellId: "Minor Illusion" }, { level: 1, spellId: "Speak with Animals" }]);
+    expect(option("Gnome", "forest-gnome")?.spells).toMatchObject([{ level: 1, spellId: "Minor Illusion" }, { level: 1, spellId: "Speak with Animals", grant: { uses: "proficiency" } }]);
   });
 
   it("Tiefling: legacy resistance and spells", () => {
     expect(option("Tiefling", "infernal")).toMatchObject({ spells: [{ level: 1, spellId: "Fire Bolt" }, { level: 3, spellId: "Hellish Rebuke" }, { level: 5, spellId: "Darkness" }] });
     expect(option("Tiefling", "infernal")?.abilities[0].effects).toEqual([{ kind: "flag", flag: "resistance", damageType: "fire", percent: 50 }]);
+  });
+
+  it("Dragonborn breath grants both shapes with one shared pool", () => {
+    expect(option("Dragonborn", "red")?.spells).toEqual(["Cone", "Line"].map((shape) => ({ level: 1, spellId: `Breath Weapon (Fire, ${shape})`, grant: { uses: "proficiency", rest: "long", castLevel: 0, dcAbility: "constitution", sharedPool: "breath-weapon" } })));
   });
 
   it("Dragonborn: ten ancestries with resistance and a breath note; Damage Resistance trait removed", () => {
@@ -64,7 +68,7 @@ describe("race choices", () => {
     const options = races.flatMap((r) => r.choices?.find((c) => c.lineage)?.options ?? []);
 
     expect(options).toHaveLength(24);
-    expect(options.flatMap((o) => o.spells ?? [])).toHaveLength(22);
+    expect(options.flatMap((o) => o.spells ?? [])).toHaveLength(42);
 
     for (const r of races) if (r.choices) expect(RaceChoicesSchema.safeParse(r.choices).success, r.name).toBe(true);
   });

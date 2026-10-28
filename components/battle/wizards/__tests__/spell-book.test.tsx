@@ -7,6 +7,7 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 const lib = vi.hoisted(() => ({
   spells: [
+    { id: "ritual", name: "Тривале заклинання", level: 2, dice: 0, cost: "long", casting: { rounds: 10, text: "1 хвилина" }, targeting: { kind: "self" }, resolution: { kind: "auto" } },
     { id: "ray", name: "Палаючий промінь", level: 2, dice: 2, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } },
     { id: "bolt", name: "Крижаний спис", level: 1, dice: 3, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } },
     { id: "ball", name: "Вогняна куля", level: 2, dice: 4, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, spellGroup: { id: "chaos", name: "Хаос" } },
@@ -46,6 +47,28 @@ function Harness({ caster }: { caster: Parameters<typeof useSpellBook>[0] }) {
 describe("SpellBook", () => {
   afterEach(cleanup);
 
+  it("keeps an ordinary slot source beside an item-only grant", async () => {
+    const { wrapper, caster } = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 1, current: 1 } } });
+
+    caster.abilities.damageModel = "5e";
+    caster.spellcasting.slotSpells = ["ray"];
+    caster.spellcasting.grants = [{ spellId: "ray", key: "wand", label: "Wand", cost: 0 }];
+    render(<Harness caster={caster} />, { wrapper });
+    fireEvent.click(await screen.findByText("Палаючий промінь"));
+    expect(screen.getByRole("option", { name: /Слот/ })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /Wand/ })).toBeTruthy();
+  });
+
+  it("starts long casting without asking for targets or dice", async () => {
+    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ritual"], slots: { "2": { max: 1, current: 1 } } });
+
+    render(<Harness caster={caster} />, { wrapper });
+    fireEvent.click(await screen.findByText("Тривале заклинання"));
+    expect(screen.getByText(/10 раундів/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Почати накладання" }));
+    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ritual", targetIds: [], diceRolls: [] })));
+  });
+
   it("стрічки кіл зі слотами; сторінка кола; спел → цілі → кидки → підсумок → застосувати", async () => {
     const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray", "bolt", "ball", "light", "revive", "rebirth"], slots: { "1": { max: 3, current: 3 }, "2": { max: 3, current: 1 } } });
 
@@ -66,6 +89,74 @@ describe("SpellBook", () => {
     fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
 
     await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", targetIds: ["gob"], diceRolls: [4, 5] })));
+  });
+
+  it("вибирає слот або конкретне джерело гранту й блокує вичерпаний грант", async () => {
+    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 1, current: 1 } } });
+
+    const first = "pool:grant:race:elf:ray";
+
+    const second = "pool:grant:feat:mi:ray";
+
+    const hero = { ...caster, abilities: { ...caster.abilities, damageModel: "5e" as const }, spellcasting: { ...caster.spellcasting, grants: [{ spellId: "ray", key: "race:elf:ray", label: "Elf", via: "slotOrGrant" as const, pool: first, cost: 1 }, { spellId: "ray", key: "feat:mi:ray", label: "Magic Initiate", via: "slotOrGrant" as const, pool: second, cost: 1, castLevel: 2 }] }, battleData: { ...caster.battleData, pools: { [first]: { label: "Elf", max: 1, rest: "long" as const }, [second]: { label: "Magic Initiate", max: 1, rest: "long" as const } }, abilityUsage: { [first]: { battle: 1, round: 0, turn: 0 } } } };
+
+    render(<Harness caster={hero} />, { wrapper });
+
+    fireEvent.click(await screen.findByText("Палаючий промінь"));
+
+    const source = screen.getByLabelText("Джерело каста") as HTMLSelectElement;
+
+    expect([...source.options].map((o) => [o.textContent, o.disabled])).toEqual([["Оберіть джерело", true], ["Слот Коло 2", false], ["Elf · 0/1", true], ["Magic Initiate · 1/1", false]]);
+    fireEvent.change(source, { target: { value: `grant:feat:mi:ray` } });
+    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+    fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", grantKey: "feat:mi:ray", targetIds: ["gob"] })));
+  });
+
+  it("дозволяє обрати слот замість одного безкоштовного гранту", async () => {
+    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 1, current: 1 } } });
+
+    const hero = { ...caster, abilities: { ...caster.abilities, damageModel: "5e" as const }, spellcasting: { ...caster.spellcasting, grants: [{ spellId: "ray", key: "feat:mi:ray", label: "Magic Initiate", via: "slotOrGrant" as const, pool: "pool:grant:mi", cost: 1, castLevel: 2 }] }, battleData: { ...caster.battleData, pools: { "pool:grant:mi": { label: "Magic Initiate", max: 1, rest: "long" as const } } } };
+
+    render(<Harness caster={hero} />, { wrapper });
+    fireEvent.click(await screen.findByText("Палаючий промінь"));
+    fireEvent.change(screen.getByLabelText("Джерело каста"), { target: { value: "slot:2" } });
+    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+    fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+
+    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", slotKey: "2" })));
+    expect(castSpell.mock.calls[0][0]).not.toHaveProperty("grantKey");
+  });
+
+  it("обирає рівень гранту предмета для додаткових зарядів", async () => {
+    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray"] });
+
+    const pool = "pool:item:ring";
+
+    const hero = { ...caster, abilities: { ...caster.abilities, damageModel: "5e" as const }, spellcasting: { ...caster.spellcasting, grants: [{ spellId: "ray", key: "item:ring:spell:ray", label: "Кільце", pool, cost: 1, castLevel: 2, upcast: { maxLevel: 3, extraCost: 1 } }] }, battleData: { ...caster.battleData, pools: { [pool]: { label: "Кільце", max: 3, rest: "long" as const } } } };
+
+    render(<Harness caster={hero} />, { wrapper });
+    fireEvent.click(await screen.findByText("Палаючий промінь"));
+    fireEvent.change(screen.getByLabelText("Рівень каста"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+    fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Кубик 2 (d6)"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ grantKey: "item:ring:spell:ray", castLevel: 3 })));
   });
 
   it("закладки шкіл фільтрують сторінку кола; «Усі» групує за школами", async () => {

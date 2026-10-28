@@ -11,6 +11,8 @@ function prerequisiteOf(raw: unknown): FeatPrerequisite {
 
   const out: FeatPrerequisite = {};
 
+  if (Array.isArray(raw.manualText)) out.manualText = raw.manualText.filter((t): t is string => typeof t === "string");
+
   if (typeof raw.level === "number") out.level = raw.level;
 
   if (isRecord(raw.scores) && Array.isArray(raw.scores.abilities) && typeof raw.scores.min === "number") {

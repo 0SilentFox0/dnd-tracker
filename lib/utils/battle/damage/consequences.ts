@@ -70,7 +70,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 }
 
 function concentrationFallout(input: DamageConsequencesInput, participant: BattleParticipant, rules: Ruleset): { participant: BattleParticipant; participants: BattleParticipant[]; messages: string[] } | null {
-  if (!rules.concentration.enabled || input.amount <= 0 || !hasConcentration(participant)) return null;
+  if ((!rules.concentration.enabled && !participant.battleData.pendingCast) || input.amount <= 0 || !hasConcentration(participant)) return null;
 
   const r = concentrationCheck({ caster: participant, damage: input.amount, participants: input.participants, rules, rng: input.rng });
 

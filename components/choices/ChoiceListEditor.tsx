@@ -3,6 +3,7 @@
 import { Plus, Trash2 } from "lucide-react";
 
 import { ChoiceOptionsEditor } from "./ChoiceOptionsEditor";
+import { SpellGrantEditor } from "./SpellGrantEditor";
 
 import { useErrorTotals } from "@/components/classes/use-error-totals";
 import { HUD_SELECT_CLASS } from "@/components/hud/form";
@@ -11,13 +12,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, ABILITY_LABELS } from "@/lib/constants/abilities";
 import { CHOICE_KIND_LABELS, CHOICE_KINDS, FEAT_TYPE_LABELS, FEAT_TYPES } from "@/lib/constants/choices";
-import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
+import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { choiceSlug } from "@/lib/utils/characters/choices/slug";
 import { toggleItem } from "@/lib/utils/common/collections";
 import { parseCommaList } from "@/lib/utils/common/text";
-import type { Choice, ChoiceKind, ChoiceOwner, FeatType } from "@/types/choices";
+import type { Choice, ChoiceKind, ChoiceOwner } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
 interface ChoiceListEditorProps {
@@ -149,6 +150,9 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
             </div>
           )}
 
+          {choice.kind === "abilityScore" && <label className="block text-sm">Не більше +1 на одну характеристику
+            <Input type="number" min={1} max={4} aria-label="Ліміт на одну характеристику" value={choice.maxPerAbility ?? ""} onChange={(e) => update(i, { maxPerAbility: e.target.value ? Number(e.target.value) : undefined })} />
+          </label>}
           {choice.kind === "abilityScore" && (
             <div className="flex flex-wrap items-end gap-3 text-sm">
               {ABILITY_KEYS.map((a) => (
@@ -168,6 +172,7 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
             </div>
           )}
 
+          {choice.kind === "spell" && <SpellGrantEditor value={choice.grant} onChange={(grant) => update(i, { grant })} />}
           {choice.kind === "spell" && choice.spells && ((spellRule) => (
             <div className="flex flex-wrap items-end gap-3 text-sm">
               <label className="flex flex-1 items-center gap-2">

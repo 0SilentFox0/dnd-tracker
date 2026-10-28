@@ -26,7 +26,7 @@ export const stashActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("removeItem"), itemId: id }),
   z.object({ action: z.literal("stash"), slot: id }),
   z.object({ action: z.literal("equip"), artifactId: ref, slot: z.literal("shield").optional() }),
-  z.object({ action: z.literal("grant"), artifactId: id, baseId: id.optional(), quantity: z.number().int().min(ITEM_LIMITS.grantQuantity[0]).max(ITEM_LIMITS.grantQuantity[1]).optional() }),
+  z.object({ action: z.literal("grant"), artifactId: id, baseId: id.optional(), quantity: z.number().int().min(ITEM_LIMITS.grantQuantity[0]).max(ITEM_LIMITS.grantQuantity[1]).optional(), parameter: z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/).optional(), spellId: id.optional() }),
   z.object({ action: z.literal("revoke"), artifactId: ref }),
   z.object({ action: z.literal("attune"), ref }),
   z.object({ action: z.literal("unattune"), ref }),

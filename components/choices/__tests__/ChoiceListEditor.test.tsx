@@ -25,6 +25,15 @@ const json = () => JSON.parse(screen.getByTestId("json").textContent ?? "[]") as
 describe("ChoiceListEditor", () => {
   afterEach(cleanup);
 
+  it("edits the grant policy of a spell choice", () => {
+    render(<Harness owner="class" initial={[{ id: "signature", label: "Signature", level: 20, count: 2, kind: "spell", spells: { lists: ["Wizard"], minLevel: 3, maxLevel: 3 } }]} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Безкоштовний каст" }));
+    expect(json()[0].grant).toMatchObject({ uses: 1, rest: "long", via: "grant" });
+    fireEvent.change(screen.getByLabelText("Відпочинок гранту"), { target: { value: "short" } });
+    fireEvent.change(screen.getByLabelText("Коло гранту"), { target: { value: "3" } });
+    expect(json()[0].grant).toMatchObject({ rest: "short", castLevel: 3 });
+  });
+
   it("adds a choice and switches its kind", () => {
     render(<Harness owner="class" />);
 

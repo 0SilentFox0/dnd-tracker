@@ -55,7 +55,7 @@ describe("SpellDefinitionSchema", () => {
 
   it("відхиляє невідомий вид цілі, cost і save без ability", () => {
     expect(SpellTargetingSchema.safeParse({ kind: "nobody" }).success).toBe(false);
-    expect(SpellDefinitionSchema.safeParse({ ...base, cost: "reaction" }).success).toBe(false);
+    expect(SpellDefinitionSchema.safeParse({ ...base, cost: "unknown-cost" }).success).toBe(false);
     expect(SpellDefinitionSchema.safeParse({ ...base, resolution: { kind: "save", onSuccess: "half" } }).success).toBe(false);
   });
 
@@ -130,7 +130,7 @@ describe("readSpellDefinition", () => {
   it("невалідні dice і cost -> за замовчуванням з попередженням", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const def = readSpellDefinition({ id: "s", dice: 41, cost: "reaction" });
+    const def = readSpellDefinition({ id: "s", dice: 41, cost: "unknown-cost" });
 
     expect(def.dice).toBe(0);
     expect(def.cost).toBe("action");

@@ -96,3 +96,12 @@ describe("PUT choices", () => {
     expect((await put({})).status).toBe(400);
   });
 });
+
+it("loads choice references through the same transaction as the locked character", async () => {
+  const { loadChoiceRefs } = await import("@/lib/server/characters/choices/load-refs");
+
+  vi.clearAllMocks();
+  gate();
+  expect((await put({ raceChoices: {} })).status).toBe(200);
+  expect(vi.mocked(loadChoiceRefs).mock.calls[0][2]).toMatchObject({ db: prisma });
+});

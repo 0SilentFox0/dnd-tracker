@@ -4,6 +4,7 @@ import type { DraftData } from "./draft-schema";
 
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { type ChoiceFields, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { skillFlags } from "@/lib/utils/characters/choices/walk";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { CharacterClassEntry, GameClassData } from "@/types/classes";
@@ -28,6 +29,6 @@ export async function draftChoiceFields(input: { campaignId: string; rules: Rule
     isDM: false,
     character: { race: data.race, level: 1, skills, strength: data.strength, dexterity: data.dexterity, constitution: data.constitution, intelligence: data.intelligence, wisdom: data.wisdom, charisma: data.charisma },
     before: { raceChoices: {}, feats: [], classes: [] },
-    after: { raceChoices: data.choices.raceChoices ?? {}, feats: (data.choices.feats ?? []).filter((f) => f.source === "origin"), classes },
+    after: { ...backgroundFields(data.choices), raceChoices: data.choices.raceChoices ?? {}, feats: (data.choices.feats ?? []).filter((f) => f.source === "origin"), classes },
   });
 }

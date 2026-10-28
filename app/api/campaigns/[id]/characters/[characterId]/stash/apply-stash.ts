@@ -56,6 +56,10 @@ const GRANT_ERROR: Record<GrantError, { text: string; status: number }> = {
   ARTIFACT_NOT_FOUND: { text: API_ERRORS.ARTIFACT_NOT_FOUND, status: 404 },
   ITEM_PROPERTY_NEEDS_BASE: { text: API_ERRORS.ITEM_PROPERTY_NEEDS_BASE, status: 422 },
   ITEM_BASE_MISMATCH: { text: API_ERRORS.ITEM_BASE_MISMATCH, status: 422 },
+  ITEM_PARAMETER_REQUIRED: { text: "Оберіть параметр предмета", status: 422 },
+  ITEM_PARAMETER_INVALID: { text: "Недозволений параметр предмета", status: 422 },
+  ITEM_SPELL_REQUIRED: { text: "Оберіть заклинання предмета", status: 422 },
+  ITEM_SPELL_INVALID: { text: "Недозволене заклинання предмета", status: 422 },
 };
 
 export async function applyStash(request: Request, campaignId: string, characterId: string): Promise<NextResponse> {

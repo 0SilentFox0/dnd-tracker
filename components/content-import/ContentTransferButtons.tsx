@@ -28,6 +28,7 @@ export function ContentTransferButtons({ campaignId, kind }: { campaignId: strin
           Експорт CSV
         </a>
       </Button>
+      <a className="text-xs underline" href={`/campaigns/${campaignId}/dm/compendium`}>JSON-компендіум і звіти</a>
       {open && <ContentImportWizard campaignId={campaignId} kind={kind} open={open} onOpenChange={setOpen} />}
     </>
   );

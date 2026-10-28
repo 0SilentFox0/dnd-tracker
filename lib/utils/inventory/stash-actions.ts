@@ -9,7 +9,7 @@ import { isComposedRef } from "@/lib/utils/items/ref";
 import { heldRefs } from "@/lib/utils/items/resolve";
 import type { Purse, SpecialItem, StashState } from "@/types/inventory";
 
-type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean };
+type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean; parameter?: string; spellId?: string };
 
 export type StashAction =
   | { action: "spend"; amount: number; coin: Coin; note: string }
@@ -21,7 +21,7 @@ export type StashAction =
   | { action: "removeItem"; itemId: string }
   | { action: "stash"; slot: string }
   | { action: "equip"; artifactId: string; slot?: "shield" }
-  | { action: "grant"; artifactId: string; baseId?: string; quantity?: number }
+  | { action: "grant"; artifactId: string; baseId?: string; quantity?: number; parameter?: string; spellId?: string }
   | { action: "revoke"; artifactId: string }
   | { action: "attune"; ref: string }
   | { action: "unattune"; ref: string };
@@ -65,11 +65,13 @@ const ok = (state: StashState, kind: InventoryLogKindValue, delta: Record<string
 
 const fail = (error: StashErrorCode): StashResult => ({ ok: false, error });
 
-const itemFields = ({ name, description, quantity, consumable }: ItemFields) => ({
+const itemFields = ({ name, description, quantity, consumable, parameter, spellId }: ItemFields) => ({
   name,
   ...(description ? { description } : {}),
   quantity,
   consumable,
+  ...(parameter && { parameter }),
+  ...(spellId && { spellId }),
 });
 
 const named = (ref: string, name?: string) => (name && isComposedRef(ref) ? { artifactName: name } : {});
@@ -122,7 +124,7 @@ export function applyStashAction(
       const keepLink = (i: SpecialItem) => !!i.artifactId && (ctx.isDM !== false || a.quantity <= i.quantity);
 
       return ok(
-        { ...s, items: s.items.map((i) => (i.id === a.itemId ? { id: i.id, ...itemFields(a), ...(keepLink(i) && { artifactId: i.artifactId }) } : i)) },
+        { ...s, items: s.items.map((i) => (i.id === a.itemId ? { id: i.id, ...itemFields(a), ...(keepLink(i) && { artifactId: i.artifactId }), ...(i.parameter && { parameter: i.parameter }), ...(i.spellId && { spellId: i.spellId }) } : i)) },
         InventoryLogKind.ITEM_EDIT,
         { item: a.name, qty: a.quantity },
       );
@@ -187,13 +189,13 @@ export function applyStashAction(
       const plan = ctx.grant;
 
       if (plan?.kind === "consumable") {
-        const existing = s.items.find((i) => i.artifactId === plan.artifactId);
+        const existing = s.items.find((i) => i.artifactId === plan.artifactId && i.parameter === plan.parameter && i.spellId === plan.spellId);
 
         const items = existing
           ? s.items.map((i) => (i === existing ? { ...i, quantity: Math.min(ITEM_LIMITS.quantity, i.quantity + plan.quantity) } : i))
-          : [...s.items, { id: ctx.newItemId, name: plan.name, ...(plan.description && { description: plan.description }), quantity: plan.quantity, consumable: true, artifactId: plan.artifactId }];
+          : [...s.items, { id: ctx.newItemId, name: plan.name, ...(plan.description && { description: plan.description }), quantity: plan.quantity, consumable: true, artifactId: plan.artifactId, ...(plan.parameter && { parameter: plan.parameter }), ...(plan.spellId && { spellId: plan.spellId }) }];
 
-        return ok({ ...s, items }, InventoryLogKind.ITEM_ADD, { item: plan.name, qty: plan.quantity, artifactId: plan.artifactId });
+        return ok({ ...s, items }, InventoryLogKind.ITEM_ADD, { item: plan.name, qty: plan.quantity, artifactId: plan.artifactId, ...(plan.parameter && { parameter: plan.parameter }) });
       }
 
       const ref = plan?.ref ?? a.artifactId;

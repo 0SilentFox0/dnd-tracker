@@ -744,10 +744,72 @@
             "armor"
           ]
         },
-        "nameTemplate": "Armor of Resistance ({base})"
+        "nameTemplate": "Armor of Resistance ({base}) ({param})"
       },
-      "attunement": true
-    }
+      "attunement": true,
+      "parameter": {
+        "kind": "damageType",
+        "options": [
+          {
+            "key": "acid",
+            "label": "acid"
+          },
+          {
+            "key": "cold",
+            "label": "cold"
+          },
+          {
+            "key": "fire",
+            "label": "fire"
+          },
+          {
+            "key": "force",
+            "label": "force"
+          },
+          {
+            "key": "lightning",
+            "label": "lightning"
+          },
+          {
+            "key": "necrotic",
+            "label": "necrotic"
+          },
+          {
+            "key": "poison",
+            "label": "poison"
+          },
+          {
+            "key": "psychic",
+            "label": "psychic"
+          },
+          {
+            "key": "radiant",
+            "label": "radiant"
+          },
+          {
+            "key": "thunder",
+            "label": "thunder"
+          }
+        ]
+      }
+    },
+    "abilities": [
+      {
+        "id": "parameter-resistance",
+        "name": "Resistance ({param})",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "{param}",
+            "percent": 50
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_armor-of-vulnerability",
@@ -1762,7 +1824,45 @@
       "charges": {
         "max": 10,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Mage Armor",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 17
+        },
+        {
+          "spellId": "Shield",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 17
+        },
+        {
+          "spellId": "Tiny Hut",
+          "cost": 3,
+          "castLevel": 3,
+          "dc": 17
+        },
+        {
+          "spellId": "Private Sanctum",
+          "cost": 4,
+          "castLevel": 4,
+          "dc": 17
+        },
+        {
+          "spellId": "Resilient Sphere",
+          "cost": 4,
+          "castLevel": 4,
+          "dc": 17
+        },
+        {
+          "spellId": "Wall of Force",
+          "cost": 5,
+          "castLevel": 5,
+          "dc": 17
+        }
+      ]
     },
     "abilities": [
       {
@@ -2015,7 +2115,27 @@
       "charges": {
         "max": 7,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Daylight",
+          "cost": 1,
+          "castLevel": 3,
+          "dc": 18
+        },
+        {
+          "spellId": "Death Ward",
+          "cost": 2,
+          "castLevel": 4,
+          "dc": 18
+        },
+        {
+          "spellId": "Detect Magic",
+          "cost": 0,
+          "castLevel": 1,
+          "dc": 18
+        }
+      ]
     },
     "abilities": [
       {
@@ -2092,7 +2212,38 @@
         },
         "nameTemplate": "Dragon Slayer ({base})"
       }
-    }
+    },
+    "abilities": [
+      {
+        "id": "creature-rider",
+        "name": "Extra damage (dragon)",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "dragon"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "3d6",
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_dust-of-disappearance",
@@ -3016,7 +3167,38 @@
         },
         "nameTemplate": "Giant Slayer ({base})"
       }
-    }
+    },
+    "abilities": [
+      {
+        "id": "creature-rider",
+        "name": "Extra damage (giant)",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "giant"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "2d6",
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_glaive",
@@ -3493,6 +3675,37 @@
             "vsSpells": true
           }
         ]
+      },
+      {
+        "id": "creature-rider",
+        "name": "Extra damage (fiend, undead)",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "fiend",
+                "undead"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "2d10",
+            "damageType": "radiant",
+            "target": "eventTarget"
+          }
+        ]
       }
     ]
   },
@@ -3874,7 +4087,40 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "creature-rider",
+        "name": "Extra damage (fiend, undead)",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "fiend",
+                "undead"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "2d6",
+            "damageType": "radiant",
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_mace-of-smiting",
@@ -4979,7 +5225,52 @@
     "slot": "item",
     "item": {
       "unique": false,
-      "consumable": true
+      "consumable": true,
+      "parameter": {
+        "kind": "damageType",
+        "options": [
+          {
+            "key": "acid",
+            "label": "acid"
+          },
+          {
+            "key": "cold",
+            "label": "cold"
+          },
+          {
+            "key": "fire",
+            "label": "fire"
+          },
+          {
+            "key": "force",
+            "label": "force"
+          },
+          {
+            "key": "lightning",
+            "label": "lightning"
+          },
+          {
+            "key": "necrotic",
+            "label": "necrotic"
+          },
+          {
+            "key": "poison",
+            "label": "poison"
+          },
+          {
+            "key": "psychic",
+            "label": "psychic"
+          },
+          {
+            "key": "radiant",
+            "label": "radiant"
+          },
+          {
+            "key": "thunder",
+            "label": "thunder"
+          }
+        ]
+      }
     },
     "abilities": [
       {
@@ -5455,8 +5746,70 @@
     "rarity": "rare",
     "slot": "ring",
     "item": {
-      "unique": false
-    }
+      "unique": false,
+      "parameter": {
+        "kind": "damageType",
+        "options": [
+          {
+            "key": "acid",
+            "label": "acid"
+          },
+          {
+            "key": "cold",
+            "label": "cold"
+          },
+          {
+            "key": "fire",
+            "label": "fire"
+          },
+          {
+            "key": "force",
+            "label": "force"
+          },
+          {
+            "key": "lightning",
+            "label": "lightning"
+          },
+          {
+            "key": "necrotic",
+            "label": "necrotic"
+          },
+          {
+            "key": "poison",
+            "label": "poison"
+          },
+          {
+            "key": "psychic",
+            "label": "psychic"
+          },
+          {
+            "key": "radiant",
+            "label": "radiant"
+          },
+          {
+            "key": "thunder",
+            "label": "thunder"
+          }
+        ]
+      }
+    },
+    "abilities": [
+      {
+        "id": "parameter-resistance",
+        "name": "Resistance ({param})",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "{param}",
+            "percent": 50
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_ring-of-shooting-stars",
@@ -6265,6 +6618,620 @@
     }
   },
   {
+    "slug": "srd-2024_spell-scroll-0",
+    "name": "Spell Scroll (Cantrip)",
+    "description": "A Spell Scroll (Cantrip) or Spell Scroll (Level 1) is a magic item that bears the words of a cantrip or level 1 spell, respectively, determined by the scroll's creator. If the spell is on your class's spell list, you can read the scroll and cast the spell using its normal casting time and without providing any Material components. If the spell requires a saving throw or an attack roll, the spell save DC is 13, and the attack bonus is +5. The scroll disintegrates when the casting is completed.\nПраво читати сувій визначає ДМ. Автоматизовано каст, DC та списання.",
+    "rarity": "common",
+    "slot": "item",
+    "item": {
+      "unique": false,
+      "consumable": true,
+      "spells": [
+        {
+          "spellId": "Acid Splash",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Chill Touch",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Dancing Lights",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Druidcraft",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Eldritch Blast",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Elementalism",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Fire Bolt",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Guidance",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Light",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Mage Hand",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Mending",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Message",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Minor Illusion",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Poison Spray",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Prestidigitation",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Produce Flame",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Ray of Frost",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Resistance",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Sacred Flame",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Shillelagh",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Shocking Grasp",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Sorcerous Burst",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Spare the Dying",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Starry Wisp",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Thaumaturgy",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "True Strike",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Vicious Mockery",
+          "cost": 1,
+          "castLevel": 0,
+          "dc": 13,
+          "attackBonus": 5
+        }
+      ]
+    }
+  },
+  {
+    "slug": "srd-2024_spell-scroll-1",
+    "name": "Spell Scroll (Level 1)",
+    "description": "A Spell Scroll (Cantrip) or Spell Scroll (Level 1) is a magic item that bears the words of a cantrip or level 1 spell, respectively, determined by the scroll's creator. If the spell is on your class's spell list, you can read the scroll and cast the spell using its normal casting time and without providing any Material components. If the spell requires a saving throw or an attack roll, the spell save DC is 13, and the attack bonus is +5. The scroll disintegrates when the casting is completed.\nПраво читати сувій визначає ДМ. Автоматизовано каст, DC та списання.",
+    "rarity": "common",
+    "slot": "item",
+    "item": {
+      "unique": false,
+      "consumable": true,
+      "spells": [
+        {
+          "spellId": "Alarm",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Animal Friendship",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Bane",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Bless",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Burning Hands",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Charm Person",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Chromatic Orb",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Color Spray",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Command",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Comprehend Languages",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Create or Destroy Water",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Cure Wounds",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Detect Evil and Good",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Detect Magic",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Detect Poison and Disease",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Disguise Self",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Dissonant Whispers",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Divine Favor",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Divine Smite",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Ensnaring Strike",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Entangle",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Expeditious Retreat",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Faerie Fire",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "False Life",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Feather Fall",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Find Familiar",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Floating Disk",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Fog Cloud",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Goodberry",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Grease",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Guiding Bolt",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Healing Word",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Hellish Rebuke",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Heroism",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Hex",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Hideous Laughter",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Hunter's Mark",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Ice Knife",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Identify",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Illusory Script",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Inflict Wounds",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Jump",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Longstrider",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Mage Armor",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Magic Missile",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Protection from Evil and Good",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Purify Food and Drink",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Ray of Sickness",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Sanctuary",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Searing Smite",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Shield",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Shield of Faith",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Silent Image",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Sleep",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Speak with Animals",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Thunderwave",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        },
+        {
+          "spellId": "Unseen Servant",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
+        }
+      ]
+    }
+  },
+  {
     "slug": "srd-2024_spellguard-shield",
     "name": "Spellguard Shield",
     "description": "While holding this Shield, you have Advantage on saving throws against spells and other magical effects, and spell attack rolls have Disadvantage against you.",
@@ -6382,7 +7349,24 @@
       "charges": {
         "max": 10,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Burning Hands",
+          "cost": 1,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Fireball",
+          "cost": 3,
+          "castLevel": 3
+        },
+        {
+          "spellId": "Wall of Fire",
+          "cost": 4,
+          "castLevel": 4
+        }
+      ]
     },
     "abilities": [
       {
@@ -6434,7 +7418,29 @@
       "charges": {
         "max": 10,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Cone of Cold",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Fog Cloud",
+          "cost": 1,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Ice Storm",
+          "cost": 4,
+          "castLevel": 4
+        },
+        {
+          "spellId": "Wall of Ice",
+          "cost": 4,
+          "castLevel": 6
+        }
+      ]
     },
     "abilities": [
       {
@@ -6486,7 +7492,19 @@
       "charges": {
         "max": 10,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Lesser Restoration",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Mass Cure Wounds",
+          "cost": 5,
+          "castLevel": 5
+        }
+      ]
     },
     "abilities": [
       {
@@ -6535,7 +7553,44 @@
       "charges": {
         "max": 20,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Cone of Cold",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Globe of Invulnerability",
+          "cost": 6,
+          "castLevel": 6
+        },
+        {
+          "spellId": "Hold Monster",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Levitate",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Magic Missile",
+          "cost": 1,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Ray of Enfeeblement",
+          "cost": 1,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Wall of Force",
+          "cost": 5,
+          "castLevel": 5
+        }
+      ]
     },
     "abilities": [
       {
@@ -6649,7 +7704,19 @@
       "charges": {
         "max": 10,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Giant Insect",
+          "cost": 4,
+          "castLevel": 4
+        },
+        {
+          "spellId": "Insect Plague",
+          "cost": 5,
+          "castLevel": 5
+        }
+      ]
     },
     "abilities": [
       {
@@ -6698,7 +7765,94 @@
       "charges": {
         "max": 50,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Arcane Lock",
+          "cost": 0,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Conjure Elemental",
+          "cost": 7,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Detect Magic",
+          "cost": 0,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Dispel Magic",
+          "cost": 3,
+          "castLevel": 3
+        },
+        {
+          "spellId": "Enlarge/Reduce",
+          "cost": 0,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Flaming Sphere",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Ice Storm",
+          "cost": 4,
+          "castLevel": 4
+        },
+        {
+          "spellId": "Invisibility",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Knock",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Light",
+          "cost": 0,
+          "castLevel": 0
+        },
+        {
+          "spellId": "Mage Hand",
+          "cost": 0,
+          "castLevel": 0
+        },
+        {
+          "spellId": "Passwall",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Plane Shift",
+          "cost": 7,
+          "castLevel": 7
+        },
+        {
+          "spellId": "Protection from Evil and Good",
+          "cost": 0,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Telekinesis",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Wall of Fire",
+          "cost": 4,
+          "castLevel": 4
+        },
+        {
+          "spellId": "Web",
+          "cost": 2,
+          "castLevel": 2
+        }
+      ]
     },
     "abilities": [
       {
@@ -6773,7 +7927,49 @@
       "charges": {
         "max": 6,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Animal Friendship",
+          "cost": 1,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Awaken",
+          "cost": 5,
+          "castLevel": 5
+        },
+        {
+          "spellId": "Barkskin",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Locate Animals or Plants",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Pass without Trace",
+          "cost": 2,
+          "castLevel": 2
+        },
+        {
+          "spellId": "Speak with Animals",
+          "cost": 1,
+          "castLevel": 1
+        },
+        {
+          "spellId": "Speak with Plants",
+          "cost": 3,
+          "castLevel": 3
+        },
+        {
+          "spellId": "Wall of Thorns",
+          "cost": 6,
+          "castLevel": 6
+        }
+      ]
     },
     "abilities": [
       {
@@ -6946,7 +8142,39 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "creature-rider",
+        "name": "Extra damage (undead)",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "undead"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "1d8",
+            "damageType": "radiant",
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_talisman-of-pure-good",
@@ -7246,7 +8474,21 @@
       "charges": {
         "max": 7,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Hold Monster",
+          "cost": 5,
+          "castLevel": 5,
+          "dc": 17
+        },
+        {
+          "spellId": "Hold Person",
+          "cost": 2,
+          "castLevel": 2,
+          "dc": 17
+        }
+      ]
     },
     "abilities": [
       {
@@ -7357,7 +8599,19 @@
       "charges": {
         "max": 7,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Fireball",
+          "cost": 1,
+          "castLevel": 3,
+          "dc": 15,
+          "upcast": {
+            "maxLevel": 5,
+            "extraCost": 1
+          }
+        }
+      ]
     },
     "abilities": [
       {
@@ -7394,7 +8648,19 @@
       "charges": {
         "max": 7,
         "rest": "long"
-      }
+      },
+      "spells": [
+        {
+          "spellId": "Lightning Bolt",
+          "cost": 1,
+          "castLevel": 3,
+          "dc": 15,
+          "upcast": {
+            "maxLevel": 5,
+            "extraCost": 1
+          }
+        }
+      ]
     },
     "abilities": [
       {

@@ -8,6 +8,7 @@ export type HitDie = 6 | 8 | 10 | 12;
 
 export interface ClassFeature {
   level: number;
+  description?: string;
   abilities: Ability[];
   choices?: Choice[];
 }

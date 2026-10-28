@@ -185,11 +185,18 @@ export interface BattleParticipantAbilities {
 
 export interface SpellGrant {
   spellId: string;
+  /** стабільне джерело каста (відокремлено від spellId) */
+  key?: string;
+  label?: string;
+  via?: "grant" | "slotOrGrant";
   pool?: string;
   cost?: number;
   castLevel?: number;
   dc?: number;
+  dcAbility?: AbilityKey;
+  rest?: "short" | "long";
   attackBonus?: number;
+  upcast?: { maxLevel: number; extraCost: number };
   legendaryOnly?: true;
 }
 
@@ -349,6 +356,7 @@ export interface BattleParticipantSpellcasting {
   spellAttackBonus?: number;
   spellSlots: StoredSpellSlots;
   knownSpells: string[]; // масив ID заклинань
+  slotSpells?: string[]; // незалежне право слотного каста, без знання лише з предметів/грантів
   grants?: SpellGrant[];
 }
 
@@ -379,6 +387,7 @@ export interface AbilityPool {
 }
 
 export interface BattleParticipantBattleData {
+  pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];

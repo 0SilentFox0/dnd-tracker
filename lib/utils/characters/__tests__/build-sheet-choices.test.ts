@@ -35,6 +35,7 @@ const selections: ChoiceSelections = {
   skills: ["perception"],
   expertise: ["stealth"],
   spells: [{ spellId: "sp1", label: "Лінія: Wood Elf" }],
+  spellGrants: [], slotSpells: [],
   feats: [{ key: "class:r.asi.0", feat: asi, picks: { asi: [{ id: "dexterity" }, { id: "dexterity" }] }, from: "Rogue 4" }],
   options: [{ owner: "Rogue", label: "Expertise", names: ["Stealth"] }],
   lineage: "Wood Elf",

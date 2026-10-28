@@ -1,7 +1,7 @@
 import { z, type ZodType } from "zod";
 
 import "server-only";
-import { ChoiceSchema } from "@/lib/schemas/choices";
+import { ChoiceSchema, FeatPrerequisiteSchema, SpellGrantPolicySchema } from "@/lib/schemas/choices";
 import { ClassColumnSchema } from "@/lib/schemas/classes";
 import { UnitSpellcastingSchema, UnitSpellGrantSchema, UnitStatblockSchema } from "@/lib/schemas/units";
 import { AbilitySchema, LimitsSchema } from "@/lib/utils/abilities/schema/ability";
@@ -15,6 +15,7 @@ import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { capitalize } from "@/lib/utils/common/text";
 import { ItemStatsSchema } from "@/lib/utils/items/item-stats";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
+import { SpellCastingTimeSchema, SpellCostSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 export const pascal = (s: string) => s.split(/[^a-zA-Z0-9]+/).filter(Boolean).map(capitalize).join("");
 
@@ -25,6 +26,11 @@ export const effectKind = (s: ZodType) => [...(s._zod as unknown as { propValues
 
 export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [AbilitySchema, "Ability"],
+  [SpellGrantPolicySchema, "SpellGrantPolicy"],
+  [SpellCastingTimeSchema, "SpellCastingTime"],
+  [SpellCostSchema, "SpellCost"],
+  [SpellResolutionSchema, "SpellResolution"],
+  [SpellTargetingSchema, "SpellTargeting"],
   [TriggerSchema, "Trigger"],
   [ConditionSchema, "Condition"],
   [LimitsSchema, "AbilityLimits"],
@@ -43,6 +49,7 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [ItemStatsSchema, "ItemStats"],
   [ClassColumnSchema, "ClassColumn"],
   [ChoiceSchema, "Choice"],
+  [FeatPrerequisiteSchema, "FeatPrerequisite"],
   [RulesetPatchSchema, "RulesetPatch"],
   [UnitStatblockSchema, "UnitStatblock"],
   [UnitSpellcastingSchema, "UnitSpellcasting"],
