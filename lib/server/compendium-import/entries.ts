@@ -60,9 +60,9 @@ export function renderEntries(value: unknown, path = "entries"): { text: string;
 
     if (rendered) return rendered;
 
-    const safe = Object.fromEntries(Object.entries(v).filter(([k]) => !/^(?:foundry|href|url|font)/i.test(k)));
+    if (typeof type !== "string") issues.push(issue("UNSUPPORTED_ENTRY", at));
 
-    return Object.keys(safe).length ? JSON.stringify(safe) : "";
+    return "";
   }
 
   const rendered = walk(value, path);

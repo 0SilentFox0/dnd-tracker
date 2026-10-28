@@ -73,6 +73,20 @@ describe("nested feature characterization", () => {
     expect(result.embedded).toEqual({ subclassFeature: 1, optionalfeature: 0 });
   });
 
+  it("renders a child feature referenced by UID inline and counts it as embedded", () => {
+    const parent = { name: "Path", source: "T", className: "Mage", classSource: "T", subclassShortName: "School", subclassSource: "T", level: 3, entries: ["Intro", { type: "refSubclassFeature", subclassFeature: "Child|Mage|T|School|T|3" }] };
+
+    const child = { ...parent, name: "Child", entries: ["Child text"] };
+
+    const result = adaptCompendium({ _meta: meta, subclass: [{ name: "School", shortName: "School", source: "T", className: "Mage", classSource: "T", subclassFeatures: ["Path|Mage|T|School|T|3"] }], subclassFeature: [parent, child] });
+
+    const description = JSON.stringify(result.entries[0].body);
+
+    expect(description).toContain("Child text");
+    expect(description).not.toContain("Child|Mage");
+    expect(result.embedded?.subclassFeature).toBe(2);
+  });
+
   it("keeps optional count, IDs, descriptions, issue order and unique embedded count", () => {
     const owner = `${canonicalKey("class", "Mage", "T", "one")}.classFeatures`;
 

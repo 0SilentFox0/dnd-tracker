@@ -24,6 +24,13 @@ describe("generic compendium adapters", () => {
     expect(result.issues.map((i) => i.code)).toContain("UNSUPPORTED_ENTRY");
   });
 
+  it("never renders an unknown entry shape as raw JSON", () => {
+    const result = renderEntries([{ type: "mystery", payload: { a: 1 } }, { payload: 2 }]);
+
+    expect(result.text).toBe("");
+    expect(result.issues.map((i) => i.code)).toEqual(["UNSUPPORTED_ENTRY", "UNSUPPORTED_ENTRY"]);
+  });
+
   it("imports classic backgrounds without invented ASI or origin feats", () => {
     const result = adaptCompendium({ _meta: { edition: "classic" }, background: [{ ...source, entries: ["Synthetic description"], skillProficiencies: [{ arcana: true, "custom|Test": true }], toolProficiencies: [{ anyArtisansTool: 1 }], startingEquipment: [{ _: [{ value: 50 }] }] }] });
 

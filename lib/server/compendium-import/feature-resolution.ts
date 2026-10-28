@@ -122,13 +122,40 @@ function collectChoices(scope: FeatureScope, entries: unknown, parts: string[]):
   return choices;
 }
 
+const REF_KEYS = { refSubclassFeature: "subclassFeature", refClassFeature: "classFeature" } as const;
+
+// A child feature that the parent only references by UID is rendered inline as a named block.
+function inlineFeatureRefs(context: FeatureResolutionContext, value: unknown, edition: Edition, depth = 0): unknown {
+  const { root, embedded } = context;
+
+  if (Array.isArray(value)) return value.map((v) => inlineFeatureRefs(context, v, edition, depth));
+
+  if (!value || typeof value !== "object") return value;
+
+  const o = value as JsonRecord;
+
+  const kind = REF_KEYS[str(o.type) as keyof typeof REF_KEYS];
+
+  if (kind && depth < 3) {
+    const [child] = findFeatureRows(root, kind, str(o[kind]).split("|"), edition);
+
+    if (!child) return value;
+
+    embedded[kind] = (embedded[kind] ?? 0) + 1;
+
+    return { type: "entries", name: str(child.name), entries: inlineFeatureRefs(context, child.entries, edition, depth + 1) };
+  }
+
+  return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, inlineFeatureRefs(context, v, edition, depth)]));
+}
+
 function resolveFeature(context: FeatureResolutionContext, kind: Kind, ownerPath: string, i: number, parts: string[], row: JsonRecord): JsonRecord {
   const { root, editionFallback, issues, embedded } = context;
 
   embedded[kind] = (embedded[kind] ?? 0) + 1;
   issues.push(issue("MANUAL_CLASS_FEATURE", ownerPath, "warning", "Особливість перенесено як опис; застосовуйте її правила вручну"));
 
-  const rendered = renderEntries(row.entries, `${kind}.${i}`);
+  const rendered = renderEntries(inlineFeatureRefs(context, row.entries, effectiveEdition(row.edition, editionFallback)), `${kind}.${i}`);
 
   const featureContext: AdapterContext = { root, inputKind: kind, path: ownerPath, source: str(row.source), edition: effectiveEdition(row.edition, editionFallback), key: ownerPath, issues };
 
