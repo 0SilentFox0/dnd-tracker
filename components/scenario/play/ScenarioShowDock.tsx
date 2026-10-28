@@ -8,9 +8,11 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { ShowButton } from "@/components/show/stage/show-ui";
 import { ShowDeckStrip } from "@/components/show/stage/ShowDeckStrip";
 import { ShowTransport } from "@/components/show/stage/ShowTransport";
+import { ShowWorldControls } from "@/components/world/show/ShowWorldControls";
 import { useNotify } from "@/lib/hooks/common";
 import { type ScenarioPlay, useShowDockExpanded } from "@/lib/hooks/scenario";
 import { useShowAudioHost, useShowKeys } from "@/lib/hooks/show";
+import { useWorldMaps } from "@/lib/hooks/world";
 import { hasPlayBindings } from "@/lib/utils/scenario/play";
 import { showsCover, visibleSlide } from "@/lib/utils/show/player-view";
 import type { ScenarioContent } from "@/types/scenario";
@@ -21,18 +23,22 @@ const scrollToRow = (rowId: string) => document.getElementById(`row-${rowId}`)?.
 export function ScenarioShowDock({ campaignId, pageId, content, play }: { campaignId: string; pageId: string; content: ScenarioContent; play: ScenarioPlay }) {
   const { show } = play.lookup;
 
-  if (!hasPlayBindings(content) && !show?.deckId && !show?.battle) return null;
+  if (!hasPlayBindings(content) && !show?.deckId && !show?.battle && !show?.world) return null;
 
   return <DockBody campaignId={campaignId} pageId={pageId} play={play} />;
 }
 
 /** Що зараз бачать гравці; клік — до рядка зі слайдом. */
-function OnScreen({ show, onLocate }: { show: ShowState | null; onLocate?: () => void }) {
+function OnScreen({ campaignId, show, onLocate }: { campaignId: string; show: ShowState | null; onLocate?: () => void }) {
+  const { data: maps } = useWorldMaps(campaignId);
+
   const cover = showsCover(show);
 
   const image = visibleSlide(show)?.imageUrl;
 
-  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
+  const mapName = show?.world && maps?.find((m) => m.id === show.world?.mapId)?.name;
+
+  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : show?.world ? `🗺 Карта${mapName ? `: ${mapName}` : ""}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
 
   return (
     <button type="button" className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined} disabled={!onLocate} title={onLocate ? "До рядка зі слайдом" : undefined} onClick={onLocate}>
@@ -66,7 +72,7 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
     <AudioPlayerProvider host={host}>
       <div className="sb-show-dock">
         <div className="sb-show-bar sans">
-          <OnScreen show={show} onLocate={current ? () => scrollToRow(current.id) : undefined} />
+          <OnScreen campaignId={campaignId} show={show} onLocate={current ? () => scrollToRow(current.id) : undefined} />
           <div className="sb-show-controls">
             <div className="sb-show-audio">
               <AudioDock placement="corner" defaultExpanded={false} />
@@ -83,6 +89,7 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
         {expanded && (
           <div className="sb-show-body sans">
             <ShowDeckStrip campaignId={campaignId} show={show} control={play.control} sceneId={pageId} />
+            <ShowWorldControls campaignId={campaignId} show={show} control={play.control} />
           </div>
         )}
       </div>
