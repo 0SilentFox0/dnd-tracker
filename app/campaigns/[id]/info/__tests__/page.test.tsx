@@ -13,7 +13,7 @@ vi.mock("next/cache", () => ({ unstable_cache: (fn: () => unknown) => fn }));
 const access = vi.hoisted(() => ({ rules: {} as unknown }));
 
 vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignMember: vi.fn(async () => ({ isDM: false, campaign: { rules: access.rules } })) }));
-vi.mock("@/lib/cache/reference-data", () => ({ REFERENCE_REVALIDATE_SECONDS: 300, getCachedClasses: vi.fn(async () => [{ id: "k1", name: "Воїн", hitDie: 10, features: [{ level: 1, abilities: [{ id: "sw", name: "Second Wind", description: "Heal", trigger: { event: "passive" }, effects: [] }] }] }]) }));
+vi.mock("@/lib/cache/reference-data", () => ({ REFERENCE_REVALIDATE_SECONDS: 300, getCachedClasses: vi.fn(async () => [{ id: "k1", name: "Воїн", hitDie: 10, features: [{ level: 1, description: "Heal", abilities: [] }] }]) }));
 vi.mock("@/lib/db", () => ({ prisma: { skill: { findMany: (a: unknown) => findMany(a) }, spell: { findMany: vi.fn(async () => []) }, artifact: { findMany: vi.fn(async () => []) }, artifactSet: { findMany: vi.fn(async () => []) }, characterInventory: { findMany: vi.fn(async () => []) } } }));
 vi.mock("@/components/campaigns/info/InfoReferenceClient", () => ({ InfoReferenceClient: () => null }));
 
@@ -60,7 +60,7 @@ describe("сторінка info", () => {
     access.rules = {};
 
     expect(props?.skills).toEqual([]);
-    expect(props?.classes).toEqual([expect.objectContaining({ name: "Воїн", features: [{ level: 1, name: "Second Wind", description: "Heal" }] })]);
+    expect(props?.classes).toEqual([expect.objectContaining({ name: "Воїн", features: [{ level: 1, name: null, description: "Heal" }] })]);
   });
 
   it("без класів передає classes: null", async () => {
