@@ -127,3 +127,24 @@
   .atlas-compass { animation: none; }
   .atlas-seal, .atlas-label, .atlas-zone-area { transition: none; }
 }
+
+.atlas-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  overflow: hidden;
+  cursor: pointer;
+  pointer-events: auto;
+  font-weight: 700;
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+  border: 1.5px solid var(--atlas-paper);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+.atlas-hero-own {
+  box-shadow: 0 0 0 2px var(--color-hud-gold-bright, #ffe08a), 0 0 0 4px var(--atlas-ink), 0 0 12px 3px rgba(255, 224, 138, 0.7);
+}

@@ -4,6 +4,8 @@ import { type PointerEvent, type ReactNode, useRef, useState } from "react";
 import Image from "next/image";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 
+import { WorldFog } from "./WorldFog";
+import { WorldHeroes } from "./WorldHeroes";
 import { WorldPins } from "./WorldPins";
 import { WorldZones } from "./WorldZones";
 
@@ -14,7 +16,7 @@ import { useElementSize, useReducedMotion, useViewport } from "@/lib/hooks/commo
 import type { WorldTool } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
 import { fitBox, toMapPoint } from "@/lib/utils/world/geometry";
-import type { MapPoint, WorldMapDetail } from "@/types/world";
+import type { MapPoint, RevealShape, WorldHero, WorldMapDetail } from "@/types/world";
 
 const ZOOM_STEP = 1.5;
 
@@ -25,14 +27,16 @@ export interface WorldMapViewProps {
   selectedId?: string | null;
   draft?: MapPoint[];
   tool?: WorldTool;
-  handlers?: { onMapClick?(p: MapPoint): void; onMapDoubleClick?(p: MapPoint): void; onMarkerClick?(id: string): void; onMarkerDrag?(id: string, p: MapPoint): void };
+  handlers?: { onMapClick?(p: MapPoint): void; onMapDoubleClick?(p: MapPoint): void; onMarkerClick?(id: string): void; onMarkerDrag?(id: string, p: MapPoint): void; onHeroClick?(id: string): void };
+  fog?: { shapes: RevealShape[]; radius: number };
+  heroes?: WorldHero[];
   overlay?: ReactNode;
   hint?: ReactNode;
   compact?: boolean;
   className?: string;
 }
 
-export function WorldMapView({ detail, selectedId, draft, tool = "select", handlers = {}, overlay, hint, compact = false, className }: WorldMapViewProps) {
+export function WorldMapView({ detail, selectedId, draft, tool = "select", handlers = {}, fog, heroes, overlay, hint, compact = false, className }: WorldMapViewProps) {
   const { map, markers } = detail;
 
   const { ref: outerRef, size } = useElementSize<HTMLDivElement>();
@@ -121,9 +125,11 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
                 }}
               />
               </div>
+              {heroes?.length ? <WorldHeroes heroes={heroes} zoom={zoom} onHeroClick={handlers.onHeroClick} /> : null}
               {overlay}
             </div>
             ) : null}
+            {fog && size.width > 0 ? <WorldFog shapes={fog.shapes} radius={fog.radius} box={box} zoom={zoom} offset={offset} still={still} /> : null}
           </div>
       </div>
       {hint ? <div className="pointer-events-none absolute right-2 bottom-2 left-2 z-10 flex justify-center max-lg:bottom-3 lg:top-2 lg:bottom-auto">{hint}</div> : null}
