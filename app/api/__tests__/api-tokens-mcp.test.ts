@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/mcp/route";
 import { hashToken } from "@/lib/ai/api-tokens";
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
@@ -13,6 +12,8 @@ const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 
 vi.mock("@/lib/server/content/resources", async () => {
   const { z } = await import("zod");
+
+  const { API_ERRORS } = await import("@/lib/constants/api-errors");
 
   const { defineResource } = await import("@/lib/server/content/define-resource");
 
