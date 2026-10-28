@@ -182,6 +182,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/scenario/mentions', methods: ['GET'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario', methods: ['GET', 'POST'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario/search', methods: ['GET'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
+  { route: 'campaigns/[id]/show/puzzle', methods: ['POST'], task: 0, adapter: 'show/puzzle, player route without assistant adapter', state: "planned" },
   { route: 'campaigns/[id]/show', methods: ['GET', 'POST'], task: 12, adapter: 'show/decks', state: "active" },
   { route: 'campaigns/[id]/skill-trees/[treeId]', methods: ['PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/skill-trees', methods: ['GET'], task: 5, adapter: 'content', state: "active" },
