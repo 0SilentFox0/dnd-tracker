@@ -128,4 +128,39 @@ describe("TravelPanel", () => {
 
     expect(await screen.findByText(/Town, короткий відпочинок/)).toBeTruthy();
   });
+
+  it("reports the destination map after Enter", async () => {
+    const onMoved = vi.fn();
+
+    vi.mocked(api.enterMarker).mockResolvedValue({ ok: true, positions: [{ id: "h1", name: "Aria", avatar: null, mapId: "m2", x: 0.5, y: 0.5, own: false }] });
+    renderPanel({ selectedMarker: marker({ childMapId: "m2" }), onMoved });
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(screen.getByRole("button", { name: /Зайти/ }));
+
+    await waitFor(() => expect(onMoved).toHaveBeenCalledWith({ kind: "enter", fromMapId: "m1", destMapId: "m2" }));
+  });
+
+  it("reports a plain move as travel on the same map", async () => {
+    const onMoved = vi.fn();
+
+    vi.mocked(api.travelHeroes).mockResolvedValue({ ok: true, positions: [{ id: "h1", name: "Aria", avatar: null, mapId: "m1", x: 0.3, y: 0.6, own: false }] });
+    renderPanel({ onMoved });
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(move());
+
+    await waitFor(() => expect(onMoved).toHaveBeenCalledWith({ kind: "travel", fromMapId: "m1", destMapId: "m1" }));
+  });
+
+  it("does not report a failed move", async () => {
+    const onMoved = vi.fn();
+
+    vi.mocked(api.travelHeroes).mockRejectedValue(new Error("boom"));
+    renderPanel({ onMoved });
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(move());
+
+    await waitFor(() => expect(move().disabled).toBe(false));
+
+    expect(onMoved).not.toHaveBeenCalled();
+  });
 });

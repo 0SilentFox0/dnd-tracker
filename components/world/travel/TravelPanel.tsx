@@ -6,7 +6,7 @@ import { TravelLog } from "./TravelLog";
 
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { type RosterHero, useTravelPanel } from "@/lib/hooks/world";
+import { type RosterHero, type TravelMoved, useTravelPanel } from "@/lib/hooks/world";
 import type { MapPoint, TravelRest, WorldMarker } from "@/types/world";
 
 const RESTS: { value: TravelRest; label: string }[] = [
@@ -23,10 +23,11 @@ export interface TravelPanelProps {
   target: MapPoint | null;
   selectedMarker: WorldMarker | null;
   onPickTarget(): void;
+  onMoved?(e: TravelMoved): void;
 }
 
-export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker, onPickTarget }: TravelPanelProps) {
-  const panel = useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker });
+export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker, onPickTarget, onMoved }: TravelPanelProps) {
+  const panel = useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker, onMoved });
 
   return (
     <HudPanel as="div" className="flex flex-col gap-3">

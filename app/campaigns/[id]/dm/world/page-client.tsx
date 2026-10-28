@@ -17,24 +17,23 @@ import { WorldMapSettings } from "@/components/world/editor/WorldMapSettings";
 import { WorldMarkerPanel } from "@/components/world/editor/WorldMarkerPanel";
 import { WorldToolbar, WorldToolHint } from "@/components/world/editor/WorldToolbar";
 import { CompassRose } from "@/components/world/marker-icons";
+import { TargetMark } from "@/components/world/travel/TargetMark";
 import { TravelPanel } from "@/components/world/travel/TravelPanel";
 import { WorldMapView } from "@/components/world/WorldMapView";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
-import { useHeroEyes, useMapDrawing, useRemoveMarker, useWorldEditor, useWorldHeroes, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
+import { type TravelMoved, useHeroEyes, useMapDrawing, useMoveTarget, useRemoveMarker, useWorldEditor, useWorldHeroes, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import { viewToMapProps } from "@/lib/utils/world/view-props";
-import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
+import type { CreateWorldMarkerData, MapPoint, Polygon, WorldMarker } from "@/types/world";
 
 const ENTRY_COMPASS = { width: "3.2%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
+
+const NO_MARKERS: WorldMarker[] = [];
 
 const FRAME_HEIGHT = "lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col";
 
 const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:min-h-0 lg:flex-1";
-
-function TargetMark({ point }: { point: MapPoint }) {
-  return <span aria-hidden className="atlas-draft-dot pointer-events-none" style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%`, transform: "translate(-50%, -50%)" }} />;
-}
 
 export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const router = useRouter();
@@ -45,7 +44,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
 
   const maps = useWorldMaps(campaignId);
 
-  const detail = useWorldMap(campaignId, mapId);
+  const detail = useWorldMap(campaignId, mapId, { keepPrevious: true });
 
   const editor = useWorldEditor(campaignId, mapId);
 
@@ -55,7 +54,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
 
   const [selectedId, select] = useState<string | null>(null);
 
-  const [travelTarget, setTravelTarget] = useState<{ point: MapPoint; markerId: string | null } | null>(null);
+  const moveTarget = useMoveTarget(detail.data?.markers ?? NO_MARKERS);
 
   const [creating, setCreating] = useState(false);
 
@@ -72,6 +71,8 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
       // create's errorText already notified
     }
   };
+
+  const { reset: resetTarget } = moveTarget;
 
   const drawing = useMapDrawing({
     onPoint: (p) => void createMarker({ kind: "point", x: p.x, y: p.y, name: "Нова точка", icon: "landmark" }),
@@ -91,7 +92,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
     onEntry: (p: MapPoint) => {
       if (mapId) void editor.map.update.mutateOk({ id: mapId, data: { entryX: p.x, entryY: p.y } });
     },
-    onMove: (p: MapPoint) => setTravelTarget({ point: p, markerId: null }),
+    onMove: moveTarget.pickPoint,
   }, !eyes.asHeroId);
 
   const { tool, setTool } = drawing;
@@ -112,15 +113,17 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
   );
 
   const openMap = useCallback(
-    (id: string | null) => {
+    (id: string | null, { keepTool = false }: { keepTool?: boolean } = {}) => {
       select(null);
       setSettingsOpen(false);
       setRedrawId(null);
-      setTravelTarget(null);
-      setTool("select");
+      resetTarget();
+
+      if (!keepTool) setTool("select");
+
       router.replace(id ? `${pathname}?map=${id}` : pathname);
     },
-    [router, pathname, setTool],
+    [router, pathname, setTool, resetTarget],
   );
 
   const changeEyes = (heroId: string | null) => {
@@ -211,18 +214,14 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                                   onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)),
                                   onMarkerClick: (id) => {
                                     if (tool === "select") select(id);
-                                    else if (tool === "move") {
-                                      const m = d.markers.find((x) => x.id === id);
-
-                                      if (m) setTravelTarget({ point: { x: m.x, y: m.y }, markerId: id });
-                                    }
+                                    else if (tool === "move") moveTarget.pickMarker(id);
                                   },
                                   onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
                                 }}
                                 overlay={
                                   <>
                                     <CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />
-                                    {travelTarget ? <TargetMark point={travelTarget.point} /> : null}
+                                    {moveTarget.point ? <TargetMark point={moveTarget.point} /> : null}
                                   </>
                                 }
                               />
@@ -235,9 +234,10 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                                 mapId={d.map.id}
                                 heroes={roster.heroes}
                                 onMapIds={(d.heroes ?? []).map((h) => h.id)}
-                                target={travelTarget?.point ?? null}
-                                selectedMarker={d.markers.find((m) => m.id === travelTarget?.markerId) ?? null}
+                                target={moveTarget.point}
+                                selectedMarker={moveTarget.marker}
                                 onPickTarget={() => setTool("move")}
+                                onMoved={(e: TravelMoved) => e.kind !== "travel" && openMap(e.destMapId, { keepTool: true })}
                               />
                             </div>
                           ) : null}

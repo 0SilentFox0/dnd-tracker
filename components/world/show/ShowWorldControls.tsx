@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Map as MapIcon, Presentation } from "lucide-react";
+import { Footprints, Map as MapIcon, Presentation } from "lucide-react";
 
 import { SHOW_TONE, ShowButton } from "@/components/show/stage/show-ui";
+import { WorldTravelDialog } from "@/components/world/show/WorldTravelDialog";
 import { WorldMapLink } from "@/components/world/WorldMapLink";
 import type { ShowControl } from "@/lib/hooks/show";
-import { useWorldMap, useWorldMaps } from "@/lib/hooks/world";
+import { type TravelMoved, useWorldMap, useWorldMaps } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
 import { mapPath } from "@/lib/utils/world/tree";
 import type { ShowState } from "@/types/show";
@@ -26,6 +27,8 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
   const [mapPick, setMapPick] = useState<Pick | null>(null);
 
   const [focusPick, setFocusPick] = useState<(Pick & { mapId: string }) | null>(null);
+
+  const [travelOpen, setTravelOpen] = useState(false);
 
   const root = maps?.find((m) => !m.parentMapId);
 
@@ -49,6 +52,10 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
     setFocusPick({ base: shownMapId, mapId: mapId as string, id });
 
     if (showing) send(id || undefined);
+  };
+
+  const followTravel = (e: TravelMoved) => {
+    if (e.kind !== "travel" && shownMapId === e.fromMapId) void control.send({ action: "world", mapId: e.destMapId });
   };
 
   return (
@@ -79,6 +86,11 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
           <span className="text-xs">До слайдів</span>
         </ShowButton>
       )}
+      <ShowButton aria-label="Подорож" title="Перемістити героїв по карті" disabled={!mapId} onClick={() => setTravelOpen(true)}>
+        <Footprints className="size-4" />
+        <span className="text-xs">Подорож</span>
+      </ShowButton>
+      {mapId && <WorldTravelDialog campaignId={campaignId} mapId={mapId} open={travelOpen} onOpenChange={setTravelOpen} onMoved={followTravel} />}
       <WorldLink campaignId={campaignId} />
     </div>
   );

@@ -11,6 +11,14 @@ import type { ShowState } from "@/types/show";
 import type { WorldMapSummary } from "@/types/world";
 
 vi.mock("@/lib/api/world", () => ({ getWorldMaps: vi.fn(), getWorldMap: vi.fn() }));
+vi.mock("@/components/world/show/WorldTravelDialog", () => ({
+  WorldTravelDialog: (p: { open: boolean; onMoved(e: unknown): void }) =>
+    p.open ? (
+      <button type="button" onClick={() => p.onMoved({ kind: "enter", fromMapId: "m1", destMapId: "m2" })}>
+        moved
+      </button>
+    ) : null,
+}));
 vi.mock("@/components/world/WorldMapLink", () => ({ WorldMapLink: () => <a href="/dm/world">Карта світу</a> }));
 
 afterEach(cleanup);
@@ -100,5 +108,23 @@ describe("ShowWorldControls", () => {
 
     expect(await screen.findByText("Карта світу")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Вивести карту гравцям" })).toBeNull();
+  });
+
+  it("після «Зайти» при показі на карті-джерелі шле world на карту призначення", async () => {
+    const c = setup(show({ world: { mapId: "m1" } }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Подорож" }));
+    fireEvent.click(screen.getByRole("button", { name: "moved" }));
+
+    expect(c.send).toHaveBeenCalledWith({ action: "world", mapId: "m2" });
+  });
+
+  it("при показі в слайдах подорож показ не чіпає", async () => {
+    const c = setup(show());
+
+    fireEvent.click(await screen.findByRole("button", { name: "Подорож" }));
+    fireEvent.click(screen.getByRole("button", { name: "moved" }));
+
+    expect(c.send).not.toHaveBeenCalled();
   });
 });
