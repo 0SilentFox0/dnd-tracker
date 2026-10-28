@@ -18,6 +18,7 @@ import {
   applyMark,
   applyRestoreSpellSlot,
   CONDITION_LABELS,
+  conditionLabel,
   describeGrantAction,
 } from "./state";
 import {
@@ -98,7 +99,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
+      `${conditionLabel(e.condition)}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [

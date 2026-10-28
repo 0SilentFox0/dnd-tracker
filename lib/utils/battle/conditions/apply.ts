@@ -1,6 +1,6 @@
 import { releaseGrapples } from "./grapple-links";
 import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "./query";
-import { CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffectInput } from "./registry";
+import { CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffectInput, customConditionDef, customConditionInput } from "./registry";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
@@ -8,6 +8,7 @@ import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { type CustomConditionKey,isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { DODGE_KEY_PREFIX } from "@/lib/utils/battle/actions/effects";
 import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -15,8 +16,10 @@ import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
+export type ConditionKey = Condition5eKey | CustomConditionKey;
+
 export interface ApplyCondition5eOptions {
-  key: Condition5eKey;
+  key: ConditionKey;
   rounds: number;
   permanent?: boolean;
   levels?: number;
@@ -34,8 +37,8 @@ export interface ApplyCondition5eResult {
   blocked: boolean;
 }
 
-function immune(ps: BattleParticipant[], id: string, key: Condition5eKey): boolean {
-  return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
+function immune(ps: BattleParticipant[], id: string, key: ConditionKey): boolean {
+  return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || (f.conditions as string[]).includes(key));
 }
 
 function dropConcentrationIfIncapacitated(ps: BattleParticipant[], targetId: string): { participants: BattleParticipant[]; messages: string[] } {
@@ -65,17 +68,21 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   if (!target) return { participants: ps, messages: [], blocked: false };
 
-  const def = CONDITION_5E_REGISTRY[opts.key];
+  const custom = isCustomConditionKey(opts.key) ? customConditionDef(opts.key, opts.rules) : undefined;
+
+  if (isCustomConditionKey(opts.key) && !custom) return { participants: ps, messages: [`${opts.sourceName}: стан не визначено в правилах кампанії`], blocked: false };
 
   if (immune(ps, targetId, opts.key)) return { participants: ps, messages: [`⛔ ${opts.sourceName}: ${target.basicInfo.name} — імунітет`], blocked: true };
 
   const variant = opts.rules?.conditions.exhaustion ?? DEFAULT_RULES_EDITION;
 
-  const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${def.label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
+  const label = custom ? custom.name : CONDITION_5E_REGISTRY[opts.key as Condition5eKey].label;
+
+  const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
 
   const hadHalved = target.battleData.activeEffects.some((e) => e.exhaustionHpHalved);
 
-  const input = conditionEffectInput(opts.key, { ...opts, exhaustion: variant });
+  const input = custom ? customConditionInput(custom, { ...opts, exhaustion: variant }) : conditionEffectInput(opts.key as Condition5eKey, { ...opts, exhaustion: variant });
 
   let next = upsertTimedEffect(target, input, opts.round);
 

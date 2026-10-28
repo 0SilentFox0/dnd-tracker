@@ -49,6 +49,8 @@ export const CONDITION_KEYS = [
   "disable_melee_attacks",
   "disable_ranged_attacks",
   "disable_spell_casting",
+  "no_hostile_spells",
+  "no_damage_dealt",
   EffectMarker.SKIP_ACTION,
   EffectMarker.IMMOBILIZED,
 ] as const;
@@ -74,6 +76,12 @@ export const CONDITION_5E_KEYS = [
 export type Condition5eKey = (typeof CONDITION_5E_KEYS)[number];
 
 export const isCondition5eKey = (key: unknown): key is Condition5eKey => (CONDITION_5E_KEYS as readonly unknown[]).includes(key);
+
+export const CUSTOM_CONDITION_KEY_RE = /^custom:[a-z0-9-]{1,40}$/;
+
+export type CustomConditionKey = `custom:${string}`;
+
+export const isCustomConditionKey = (key: unknown): key is CustomConditionKey => typeof key === "string" && CUSTOM_CONDITION_KEY_RE.test(key);
 
 export type AnyConditionKey = (typeof CONDITION_KEYS)[number] | Condition5eKey;
 

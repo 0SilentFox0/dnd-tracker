@@ -14,7 +14,7 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityLabelFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { findEffectMarker } from "@/lib/utils/battle/participant/state";
+import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
@@ -199,7 +199,11 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const unhalvedDamage = resistanceResult.finalDamage + totalAdditionalDamage;
 
-  const totalFinalDamage = params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
+  const pacified = dealsNoDamage(attacker);
+
+  const totalFinalDamage = pacified ? 0 : params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
+
+  if (pacified) damageCalculation.breakdown.push("🕊 стан: не завдає шкоди = 0");
 
   if (dmgMult !== 1) damageSteps.push({ label: "Частка шкоди", side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
 

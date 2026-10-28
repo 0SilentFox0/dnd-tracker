@@ -28,7 +28,7 @@ import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
-import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import { pacifiedBlock, resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { systemEvent } from "@/lib/utils/battle/store";
@@ -127,6 +127,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       order = replaceParticipant(prepared.participants, caster);
     } else if (data.castingRounds !== undefined) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST);
 
+    const pacified = pacifiedBlock(order, caster, definition.targeting, data.targetIds);
+
+    if (pacified) throw new BattleRuleError("action_rejected", pacified);
+
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
       targetCell: data.targetCell,
@@ -135,6 +139,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     });
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
+
+    const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds);
+
+    if (pacifiedHit) throw new BattleRuleError("action_rejected", pacifiedHit);
 
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
@@ -224,7 +232,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
         const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 
-        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration });
+        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration, casterId: caster.basicInfo.id });
 
         return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
       },

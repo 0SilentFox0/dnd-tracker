@@ -177,7 +177,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         </div>
       </div>
 
-      <ConditionsDialog participant={conditions.target} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
       <LegendaryActionDialog participant={legendary.target} onClose={legendary.close} />
 
       {open && (

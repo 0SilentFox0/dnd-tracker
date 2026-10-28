@@ -9,10 +9,11 @@ interface ZoneHazardInput {
   round: number;
   spellDamage?: TerrainDamage;
   concentrationOf?: TerrainDamage["concentrationOf"];
+  casterId?: string;
 }
 
 /** Мапа з небезпекою, яку лишає zone-закляття шаблоном, або null. */
-export function spellZoneHazard({ map, spell, cells, round, spellDamage, concentrationOf }: ZoneHazardInput): BattleMapConfig | null {
+export function spellZoneHazard({ map, spell, cells, round, spellDamage, concentrationOf, casterId }: ZoneHazardInput): BattleMapConfig | null {
   const { targeting } = spell.definition;
 
   const zone = targeting.kind === "template" ? targeting.zone : undefined;
@@ -28,6 +29,6 @@ export function spellZoneHazard({ map, spell, cells, round, spellDamage, concent
     kind: "hazard",
     label: zone.label ?? spell.name,
     untilRound: round + zone.rounds - 1,
-    ...(spellDamage && { damage: { ...spellDamage, spellId: spell.id, ...(concentrationOf && { concentrationOf }) } }),
+    ...(spellDamage && { damage: { ...spellDamage, spellId: spell.id, ...(casterId && { casterId }), ...(concentrationOf && { concentrationOf }) } }),
   });
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, DICE_RE, STAT_KEYS, type StatKey } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, STAT_KEYS, type StatKey } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { DND_SKILLS } from "@/lib/constants/skills";
@@ -13,6 +13,7 @@ export {
   CONDITION_KEYS,
   type Condition5eKey,
   type ConditionImmunityKey,
+  type CustomConditionKey,
   DYNAMIC_STATS,
   isBakedStat,
   isStaticEffect,
@@ -71,6 +72,8 @@ const flagBase = { kind: z.literal("flag"), ...timed };
 export const AbilityKeySchema = z.enum(ABILITY_KEYS);
 
 export const AnyConditionSchema = z.enum([...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+
+export const CustomConditionKeySchema = z.string().regex(CUSTOM_CONDITION_KEY_RE) as unknown as z.ZodType<CustomConditionKey>;
 
 const DndSkillSchema = z.enum(DND_SKILLS);
 
@@ -207,7 +210,7 @@ const CharmSchema = z.object({ kind: z.literal("charm"), duration: DurationSchem
 
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
-  condition: AnyConditionSchema,
+  condition: z.union([AnyConditionSchema, CustomConditionKeySchema]),
   duration: DurationSchema,
   levels: z.number().int().min(1).max(6).optional(),
   saveEnds: z.object({ ability: AbilityKeySchema }).optional(),
@@ -283,6 +286,8 @@ export const BASE_EFFECTS = [
   HelpSchema,
   PushSchema,
 ] as const;
+
+export const StaticEffectSchema = z.discriminatedUnion("kind", [ModifyStatSchema, DamageBonusSchema, FlagSchema]);
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);
 

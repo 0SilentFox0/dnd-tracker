@@ -12,6 +12,7 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
@@ -305,6 +306,19 @@ function hostile(targeting: SpellTargetingDef): boolean {
   if (targeting.kind === "area" || targeting.kind === "template") return targeting.side === "enemy";
 
   return HOSTILE_KINDS.has(targeting.kind);
+}
+
+/** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
+export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): string | null {
+  if (!hasEffectMarker(caster, "no_hostile_spells")) return null;
+
+  const hitsEnemy = targetIds.some((id) => {
+    const t = ps.find((p) => p.basicInfo.id === id);
+
+    return !!t && t.basicInfo.side !== caster.basicInfo.side;
+  });
+
+  return hostile(targeting) || hitsEnemy ? API_ERRORS.BATTLE_CASTER_PACIFIED : null;
 }
 
 export function resolveSpellTargets(

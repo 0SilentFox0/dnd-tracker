@@ -459,7 +459,7 @@ describe("spell mutation", () => {
       const terrain = out.scene?.map?.terrain ?? {};
 
       expect(Object.keys(terrain).sort()).toEqual(["2:3", "2:4", "2:5", "2:6", "2:7", "2:8"]);
-      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire", spellId: "s1" } });
+      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire", spellId: "s1", casterId: "hero" } });
       expect(out.events).toHaveLength(1);
       expect(diffTerrain(map.terrain, out.scene?.map?.terrain)?.set?.[0].keys).toHaveLength(6);
     });

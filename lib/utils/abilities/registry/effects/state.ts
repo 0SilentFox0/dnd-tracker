@@ -1,4 +1,4 @@
-import { CONDITION_LABELS } from "../labels";
+import { CONDITION_LABELS, conditionLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
@@ -8,10 +8,10 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
-import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
-import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
+import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
@@ -61,9 +61,9 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
-export { CONDITION_LABELS };
+export { CONDITION_LABELS, conditionLabel };
 
-function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
+function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
   const owner = findParticipant(input.participants, input.ownerId);
@@ -97,7 +97,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
-  if (isCondition5eKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+  if (isCondition5eKey(effect.condition) || isCustomConditionKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
 
   const condition = effect.condition;
 

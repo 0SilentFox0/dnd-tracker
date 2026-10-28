@@ -279,6 +279,8 @@ export interface TerrainDamage {
   type: string;
   /** Небезпека від заклинання: імунітет і опори до заклинань діють, як при касті */
   spellId?: string;
+  /** Кастер зони: зі станом «не завдає шкоди» зона шкоди не заподіює */
+  casterId?: string;
   /** Небезпека тримається, поки кастер концентрується на закляттi castId */
   concentrationOf?: { casterId: string; castId: string };
 }

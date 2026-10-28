@@ -12,7 +12,8 @@ import { SelectField } from "@/components/ui/select-field";
 import { ABILITY_OPTIONS, type AbilityKey } from "@/lib/constants/abilities";
 import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import type { BattleConditionsBody } from "@/lib/hooks/battles";
-import { CONDITION_5E_KEYS, CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffects, MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
+import { CONDITION_5E_KEYS, CONDITION_5E_REGISTRY, conditionEffects, type ConditionKey, MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const FORM_ID = "conditions-form";
@@ -30,6 +31,7 @@ interface ConditionsDialogProps {
   onClose: () => void;
   onSubmit: (body: BattleConditionsBody) => void;
   isPending?: boolean;
+  custom?: Ruleset["conditions"]["custom"];
 }
 
 export function ConditionsDialog({ participant, ...rest }: ConditionsDialogProps) {
@@ -38,8 +40,8 @@ export function ConditionsDialog({ participant, ...rest }: ConditionsDialogProps
   return <ConditionsDialogBody key={participant.basicInfo.id} participant={participant} {...rest} />;
 }
 
-function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: ConditionsDialogProps & { participant: BattleParticipant }) {
-  const [selected, setSelected] = useState<Condition5eKey>(CONDITION_5E_KEYS[0]);
+function ConditionsDialogBody({ participant, onClose, onSubmit, isPending, custom = [] }: ConditionsDialogProps & { participant: BattleParticipant }) {
+  const [selected, setSelected] = useState<ConditionKey>(CONDITION_5E_KEYS[0]);
 
   const [rounds, setRounds] = useState("");
 
@@ -114,6 +116,9 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: Con
         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label="Стан">
           {CONDITION_5E_KEYS.map((key) => (
             <OptionButton key={key} role="radio" checked={selected === key} onClick={() => setSelected(key)} title={CONDITION_5E_REGISTRY[key].label} note={CONDITION_5E_REGISTRY[key].description} />
+          ))}
+          {custom.map((c) => (
+            <OptionButton key={c.key} role="radio" checked={selected === c.key} onClick={() => setSelected(c.key as ConditionKey)} title={c.name} note={c.description} />
           ))}
         </div>
 

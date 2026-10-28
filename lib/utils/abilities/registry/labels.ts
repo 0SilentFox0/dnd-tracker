@@ -1,5 +1,6 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, CustomConditionKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import { isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -73,10 +74,14 @@ export const CONDITION_LABELS: Record<AnyConditionKey, string> = {
   disable_melee_attacks: "без ближніх атак",
   disable_ranged_attacks: "без дальніх атак",
   disable_spell_casting: "без заклинань",
+  no_hostile_spells: "без ворожих заклинань",
+  no_damage_dealt: "не завдає шкоди",
   skip_action: "втрата дії",
   immobilized: "знерухомлений",
   ...Object.fromEntries(Object.entries(CONDITION_5E_REGISTRY).map(([k, d]) => [k, d.label.toLowerCase()])) as Record<Condition5eKey, string>,
 };
+
+export const conditionLabel = (key: AnyConditionKey | CustomConditionKey): string => (isCustomConditionKey(key) ? key.slice("custom:".length) : CONDITION_LABELS[key]);
 
 const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) =>
   typeof uses === "number" ? `${uses} ${pluralUk(uses, ["раз", "рази", "разів"])}` : `${"formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`} разів`;

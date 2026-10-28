@@ -7,6 +7,7 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyFlowDamage, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { bothOnMap, cellsOf, footprintDistance } from "@/lib/utils/battle/grid";
+import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
 import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
@@ -68,6 +69,12 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   const planned = applyBalanceDamageMultiplier(state.caster, Math.floor((raw * share) / 100)).damage;
 
   if (planned <= 0) return;
+
+  if (dealsNoDamage(getP(flow, casterIdOf(state)))) {
+    flow.messages.push(`🕊 ${state.caster.basicInfo.name}: не завдає шкоди (${spell.name})`);
+
+    return;
+  }
 
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 
