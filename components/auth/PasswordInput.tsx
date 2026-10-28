@@ -1,6 +1,7 @@
 "use client";
 
 import { type ComponentProps, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Eye, EyeOff } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ interface PasswordInputProps extends Omit<ComponentProps<typeof Input>, "type"> 
 }
 
 export function PasswordInput({ label, error, description, id, ...props }: PasswordInputProps) {
+  const t = useTranslations("auth");
+
   const [visible, setVisible] = useState(false);
 
   const inputId = id ?? `password-${props.name}`;
@@ -24,7 +27,7 @@ export function PasswordInput({ label, error, description, id, ...props }: Passw
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Сховати пароль" : "Показати пароль"}
+          aria-label={visible ? t("password.hide") : t("password.show")}
           aria-pressed={visible}
           className="absolute inset-y-0 right-0 grid w-10 place-items-center text-hud-muted hover:text-hud-gold"
         >

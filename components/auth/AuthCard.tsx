@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import { HudPage, HudPanel } from "@/components/hud/page";
 
@@ -11,6 +14,8 @@ interface AuthCardProps {
 }
 
 export function AuthCard({ title, description, error, children, footer }: AuthCardProps) {
+  const t = useTranslations("auth");
+
   return (
     <HudPage width="md" className="flex min-h-[80vh] items-center justify-center">
       <HudPanel className="w-full max-w-sm space-y-4">
@@ -20,7 +25,7 @@ export function AuthCard({ title, description, error, children, footer }: AuthCa
         </div>
         {error && (
           <div role="alert" className="rounded-md border border-hud-danger bg-[rgba(208,112,92,.1)] p-3 text-sm text-hud-danger">
-            Помилка: {error}
+            {t("common.errorPrefix", { message: error })}
           </div>
         )}
         {children}

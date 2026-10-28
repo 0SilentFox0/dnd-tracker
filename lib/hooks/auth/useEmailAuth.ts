@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { localeApi } from "@/lib/api/locale";
 import { AFTER_SIGN_IN_PATH, RESET_PASSWORD_PATH } from "@/lib/constants/auth";
 import { LOCALE_CHANGE_EVENT } from "@/lib/i18n/client-locale-provider";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { NewPasswordValues, SignInValues, SignUpValues } from "@/lib/schemas/auth";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage, safeNextPath } from "@/lib/utils/auth";
@@ -23,6 +24,8 @@ function callbackUrl(next?: string): string {
 }
 
 function useRequestState() {
+  const t = useTranslator("auth");
+
   const [pending, setPending] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -34,11 +37,11 @@ function useRequestState() {
     try {
       const failure = await request();
 
-      if (failure) setError(authErrorMessage(failure));
+      if (failure) setError(authErrorMessage(failure, t));
 
       return !failure;
     } catch (e) {
-      setError(authErrorMessage(e instanceof Error ? e : null));
+      setError(authErrorMessage(e instanceof Error ? e : null, t));
 
       return false;
     } finally {
@@ -214,9 +217,11 @@ export function useRedirectIfSignedIn() {
 }
 
 export function useAuthUrlError(): string | null {
+  const t = useTranslator("auth");
+
   const params = useSearchParams();
 
   const code = params.get("error_code") ?? params.get("error");
 
-  return code ? authErrorMessage(code) : null;
+  return code ? authErrorMessage(code, t) : null;
 }

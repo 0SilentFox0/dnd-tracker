@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
-
+import { authMetadata } from "@/app/(auth)/auth-metadata";
 import { SignUpScreen } from "@/components/auth/AuthScreens";
 
-export const metadata: Metadata = { title: "Реєстрація — D&D Combat Tracker" };
+export const generateMetadata = () => authMetadata("signUp.title");
 
 export default function SignUpPage() {
   return <SignUpScreen />;
