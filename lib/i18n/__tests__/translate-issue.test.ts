@@ -4,8 +4,7 @@ import { z } from "zod";
 import type { Locale } from "../config";
 import { makeT } from "../test/mock-t";
 import { translateIssue } from "../translate-issue";
-
-import "../zod-errors";
+import { zodErrorMap } from "../zod-errors";
 
 const getTranslator = async (locale: Locale) =>
   (await vi.importActual<typeof import("../translator")>("../translator")).getTranslator(locale);
@@ -42,9 +41,9 @@ describe("translateIssue", () => {
   });
 });
 
-describe("zod customError", () => {
+describe("zodErrorMap", () => {
   const issueOf = (schema: z.ZodType, value: unknown) => {
-    const result = schema.safeParse(value);
+    const result = schema.safeParse(value, { error: zodErrorMap });
 
     return result.success ? undefined : result.error.issues[0];
   };
@@ -65,5 +64,9 @@ describe("zod customError", () => {
     const issue = issueOf(z.string().min(8), "abc") as { message: string; minimum: number };
 
     expect(translateIssue(await getTranslator("en"), issue)).toBe("At least 8 characters");
+  });
+
+  it("does not leak into schemas parsed without the map", () => {
+    expect(z.string().min(1).safeParse("").error?.issues[0].message).not.toMatch(/^validation\./);
   });
 });

@@ -12,7 +12,7 @@ export async function LocaleScope({ namespaces, children }: { namespaces: readon
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <HtmlLang locale={locale} />
+      <HtmlLang locale={locale} lock />
       {children}
     </NextIntlClientProvider>
   );

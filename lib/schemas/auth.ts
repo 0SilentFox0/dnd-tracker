@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import "@/lib/i18n/zod-errors";
 import { PASSWORD_MIN_LENGTH } from "@/lib/constants/auth";
 
 const email = z.string().trim().toLowerCase().pipe(z.email("validation.email"));

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
+import { LocaleSwitcher } from "@/components/common/LocaleSwitcher";
 import { HudPage, HudPanel } from "@/components/hud/page";
 
 interface AuthCardProps {
@@ -19,6 +20,9 @@ export function AuthCard({ title, description, error, children, footer }: AuthCa
   return (
     <HudPage width="md" className="flex min-h-[80vh] items-center justify-center">
       <HudPanel className="w-full max-w-sm space-y-4">
+        <div className="flex justify-end">
+          <LocaleSwitcher />
+        </div>
         <div className="space-y-1">
           <h1 className="hud-sc text-2xl text-hud-ink">{title}</h1>
           {description && <p className="text-sm text-hud-muted">{description}</p>}

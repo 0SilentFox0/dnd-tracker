@@ -1,6 +1,6 @@
-import { z } from "zod";
+type Issue = { code: string; minimum?: unknown; origin?: string; format?: string };
 
-export function zodIssueKey(issue: { code: string; minimum?: unknown; origin?: string; format?: string }): string | undefined {
+export function zodIssueKey(issue: Issue): string | undefined {
   switch (issue.code) {
     case "too_small":
       return issue.minimum === 1 && issue.origin !== "number" ? "validation.required" : "validation.minLength";
@@ -15,10 +15,8 @@ export function zodIssueKey(issue: { code: string; minimum?: unknown; origin?: s
   }
 }
 
-z.config({
-  customError: (issue) => {
-    const key = zodIssueKey(issue);
+export function zodErrorMap(issue: Issue): { message: string } | undefined {
+  const key = zodIssueKey(issue);
 
-    return key ? { message: key } : undefined;
-  },
-});
+  return key ? { message: key } : undefined;
+}

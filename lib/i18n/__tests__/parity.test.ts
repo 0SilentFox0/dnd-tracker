@@ -14,7 +14,8 @@ function flatten(tree: Tree, prefix = ""): Record<string, string> {
     const path = prefix ? `${prefix}.${key}` : key;
 
     if (typeof value === "string") out[path] = value;
-    else Object.assign(out, flatten(value as Tree, path));
+    else if (value && typeof value === "object" && !Array.isArray(value)) Object.assign(out, flatten(value as Tree, path));
+    else throw new Error(`non-string leaf: ${path}`);
   }
 
   return out;
@@ -60,6 +61,10 @@ export function findDrift(base: Tree, other: Tree): string[] {
 }
 
 describe("detects drift", () => {
+  it("fails loudly on a non-string leaf", () => {
+    expect(() => findDrift({ a: "x" }, { a: 1 as unknown as string })).toThrow(/non-string leaf: a/);
+  });
+
   it("reports missing, extra and argument mismatches", () => {
     const uk = { a: "x", n: { count: "{count, plural, one {# шт} other {# шт}}" }, gone: "y" };
 

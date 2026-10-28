@@ -24,11 +24,11 @@ import { FixedLocaleProvider } from "@/lib/i18n/fixed-locale-provider";
 import { getTranslator, type Translator } from "@/lib/i18n/translator";
 import { cn } from "@/lib/utils";
 
-function LandingNav({ t }: { t: Translator }) {
+function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-[#0b0908]/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Brand />
+        <Brand locale={locale} />
         <nav aria-label={t("nav.aria")} className="hidden items-center gap-6 md:flex">
           {keysOf(t, "nav.items").map((id) => (
             <a key={id} href={`#${id}`} className="hud-sc text-sm text-hud-bone transition hover:text-hud-gold-strong">
@@ -61,11 +61,11 @@ function LandingNav({ t }: { t: Translator }) {
   );
 }
 
-function LandingFooter({ t }: { t: Translator }) {
+function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
   return (
     <footer className="border-t border-hud-rule px-4 py-8 text-sm text-[#b3a893]">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <Brand />
+        <Brand locale={locale} />
         <p>
           {t("footer.tagline")} · {new Date().getFullYear()}
         </p>
@@ -92,7 +92,7 @@ export async function LandingPage({ locale }: { locale: Locale }) {
     <FixedLocaleProvider locale={locale}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildLandingJsonLd(t, locale)).replace(/</g, "\\u003c") }} />
       <div data-landing lang={locale} className={cn(HUD_SURFACE, "min-h-screen bg-[#0b0908]")}>
-        <LandingNav t={t} />
+        <LandingNav t={t} locale={locale} />
         <main>
           <Hero t={t} />
           <Problem t={t} />
@@ -105,7 +105,7 @@ export async function LandingPage({ locale }: { locale: Locale }) {
           <Faq t={t} />
           <FinalCta t={t} />
         </main>
-        <LandingFooter t={t} />
+        <LandingFooter t={t} locale={locale} />
       </div>
     </FixedLocaleProvider>
   );

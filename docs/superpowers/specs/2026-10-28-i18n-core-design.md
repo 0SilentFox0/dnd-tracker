@@ -50,11 +50,11 @@
 Root layout статичний: клієнтський `ClientLocaleProvider` (мова з cookie після монтування) обслуговує лише лінивий chrome (`Header`, діалоги, error/not-found) і містить `common`+`validation` обох мов. Динамічні сегменти (campaigns, settings, help, `(auth)`) обгортають свої namespace у `LocaleScope`. Серверний код бере все через `getTranslations`.
 
 ### Визначення мови
-Порядок: cookie `NEXT_LOCALE` → `Accept-Language` → `uk`. `User.locale` на кожному запиті не читається (зайвий запит, egress). Профіль синхронізується з cookie: перемикач мови пише в обидва місця, а при вході cookie виставляється з `User.locale`. Міграція `users.locale String?` expand-only. Cookie `httpOnly: false` (її читає клієнтський провайдер). Перемикач — у шапці застосунку й на лендингу (там додатково перемикає `/` ↔ `/en`). Після міграції на prod нічого не запускається в межах цієї задачі.
+Порядок: cookie `NEXT_LOCALE` → `Accept-Language` → `uk`. `User.locale` на кожному запиті не читається (зайвий запит, egress). Профіль синхронізується з cookie: перемикач мови пише в обидва місця, а при вході cookie виставляється з `User.locale`. Міграція `users.locale String?` expand-only. Cookie `httpOnly: false` (її читає клієнтський провайдер). Перемикач — у шапці застосунку й на лендингу (там додатково перемикає `/` ↔ `/uk` повним завантаженням). Після міграції на prod нічого не запускається в межах цієї задачі.
 
 ### `<html lang>`, SEO, формати
 - Root layout не читає cookies/headers, щоб лендинг лишився статичним (`landing-auth.md`). `<html lang="uk">` статичний, `HtmlLang` оновлює атрибут на клієнті.
-- Лендинг на двох статичних URL: `/` (`uk`) і `/en` (`en`); `proxy.ts` робить rewrite `/` → `/en` за cookie або `Accept-Language`. Додаємо `canonical` і `hreflang`; `sitemap` містить `/en`. Для `/en` початковий HTML має `lang="uk"` — компроміс. Решта застосунку без префікса в URL.
+- Лендинг на двох статичних URL: `/` (`en`, x-default) і `/uk` (`uk`); `proxy.ts` робить rewrite `/` → `/uk` за cookie або `Accept-Language`. Додаємо `canonical` і `hreflang`; `sitemap` містить обидва. Початковий HTML має `lang="uk"` — компроміс. Решта застосунку без префікса в URL.
 - Дати й числа: `useFormatter`/`getFormatter`; наявні `toLocaleDateString("uk-UA")` замінюються в частині свого домену.
 
 ### API-межа
