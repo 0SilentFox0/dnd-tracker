@@ -22,6 +22,7 @@ describe("NewCampaignForm default template", () => {
     vi.mocked(getTemplates).mockResolvedValue({ official: [card("srd", "5e SRD 5.2"), card("heroes", "Heroes"), card("empty", "Порожня")], mine: [] } as never);
     render(<QueryClientProvider client={new QueryClient()}><ConfirmProvider><NewCampaignForm /></ConfirmProvider></QueryClientProvider>);
     await waitFor(() => expect((screen.getByRole("button", { name: "Створити кампанію" }) as HTMLButtonElement).disabled).toBe(false));
+    expect(screen.getByRole("combobox", { name: "Шаблон" }).textContent).toContain("Порожня");
     fireEvent.change(screen.getByLabelText(/Назва кампанії/), { target: { value: "Test" } });
     fireEvent.click(screen.getByRole("button", { name: "Створити кампанію" }));
     await waitFor(() => expect(createCampaign).toHaveBeenCalled());
