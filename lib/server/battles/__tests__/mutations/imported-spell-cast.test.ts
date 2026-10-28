@@ -91,4 +91,24 @@ describe("imported native spells cast through the real spell mutation", () => {
     expect(out.events).toHaveLength(1);
     expect(part(out, "gob").combatStats.currentHp).toBe(60);
   });
+
+  it("area save damage lists each creature's share next to the total", async () => {
+    const spell = { ...imported({ entries: ["Each creature in the area must make a Dexterity saving throw, taking {@damage 2d6} fire damage on a failed save, or half as much damage on a successful one."], damageInflict: ["fire"], savingThrow: ["dexterity"] }), targeting: { kind: "area", side: "enemy", maxTargets: 2 } } as unknown as Spell;
+
+    const gob2 = { ...foe, basicInfo: { ...foe.basicInfo, id: "gob2", name: "Gob2" } } as BattleParticipant;
+
+    const out = await cast(spell, { targetIds: ["gob", "gob2"], diceRolls: [6, 6], saveRolls: [{ participantId: "gob", roll: 2 }, { participantId: "gob2", roll: 19 }] }, [caster, foe, gob2]);
+
+    expect(part(out, "gob").combatStats.currentHp).toBe(48);
+    expect(part(out, "gob2").combatStats.currentHp).toBe(54);
+    expect(JSON.stringify(out.events[0])).toMatch(/шкода: 18 \(.* 12, Gob2 6\)/);
+  });
+
+  it("a plain spell accepts a castLevel equal to its own level without an item grant", async () => {
+    const spell = imported({ entries: ["Make a ranged spell attack. On a hit, the target takes {@damage 1d8} fire damage."], damageInflict: ["fire"], spellAttack: ["R"] });
+
+    const out = await cast(spell, { slotKey: "2", castLevel: 2, diceRolls: [8], attackRolls: [{ participantId: "gob", roll: 18 }] });
+
+    expect(part(out, "gob").combatStats.currentHp).toBe(52);
+  });
 });

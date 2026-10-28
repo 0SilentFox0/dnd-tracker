@@ -109,7 +109,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (chosen && !chosen.ok) throw new BattleRuleError("action_rejected", chosen.error);
 
-    const castLevel = data.castLevel ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
+    const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
     if (definition.cost === "long" && !free && !data.preview) {
       if (!grant && spellNeedsSlot(spell.level) && (caster.spellcasting.spellSlots[data.slotKey ?? spellSlotKey(caster, spell.level)]?.current ?? 0) <= 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
