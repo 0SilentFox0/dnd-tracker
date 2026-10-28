@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useState } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { mockMatchMedia } from "./match-media";
@@ -209,5 +209,50 @@ describe("ResponsiveDialog size md", () => {
 
     render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Атака" size="md" hud>x</ResponsiveDialog>);
     expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
+  });
+
+  describe.each([false, true])("фокус і роль (mobile=%s)", (mobile) => {
+    function Harness({ role }: { role?: "alertdialog" }) {
+      const [open, setOpen] = useState(false);
+
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>відкрити</button>
+          <ResponsiveDialog {...base} open={open} onOpenChange={setOpen} role={role}>вміст</ResponsiveDialog>
+        </>
+      );
+    }
+
+    it("після Esc фокус повертається на елемент, що відкрив діалог", async () => {
+      mockMatchMedia(mobile);
+      render(<Harness />);
+
+      const opener = screen.getByRole("button", { name: "відкрити" });
+
+      opener.focus();
+      fireEvent.click(opener);
+      await screen.findByRole("dialog");
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+      await waitFor(() => {
+        const sheet = document.querySelector("[data-slot=sheet]");
+
+        if (sheet) fireEvent.animationEnd(sheet);
+
+        expect(document.activeElement).toBe(opener);
+      });
+    });
+
+    it("role=alertdialog, за замовчуванням dialog", async () => {
+      mockMatchMedia(mobile);
+
+      const { unmount } = render(<Harness />);
+
+      fireEvent.click(screen.getByRole("button", { name: "відкрити" }));
+      expect(await screen.findByRole("dialog")).toBeInTheDocument();
+      unmount();
+      render(<Harness role="alertdialog" />);
+      fireEvent.click(screen.getByRole("button", { name: "відкрити" }));
+      expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
+    });
   });
 });

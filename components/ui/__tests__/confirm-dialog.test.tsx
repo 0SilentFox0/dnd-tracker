@@ -59,7 +59,7 @@ describe("useConfirm", () => {
     act(() => {
       p = confirm({ title: "Вийти?" });
     });
-    fireEvent.keyDown(await screen.findByRole("dialog"), { key: "Escape" });
+    fireEvent.keyDown(await screen.findByRole("alertdialog"), { key: "Escape" });
     await expect(p).resolves.toBe(false);
   });
 
@@ -97,7 +97,7 @@ describe("useConfirm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Сервер недоступний");
     fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
     await expect(p).resolves.toBe(true);
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   });
 
   it("розмонтування провайдера з відкритим підтвердженням → false", async () => {
@@ -139,7 +139,7 @@ describe("useConfirm", () => {
     expect(await screen.findByText("Оберіть хоча б одного учасника")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: NOTICE_TITLE })).toBeInTheDocument();
 
-    const describedBy = screen.getByRole("dialog").getAttribute("aria-describedby");
+    const describedBy = screen.getByRole("alertdialog").getAttribute("aria-describedby");
 
     expect(describedBy).toBeTruthy();
     expect(document.getElementById(describedBy ?? "")).toHaveTextContent("Оберіть хоча б одного учасника");
@@ -178,8 +178,8 @@ describe("useConfirm", () => {
     act(() => {
       void confirm({ title: "Видалити?" });
     });
-    await screen.findByRole("dialog");
-    expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-describedby");
+    await screen.findByRole("alertdialog");
+    expect(screen.getByRole("alertdialog")).not.toHaveAttribute("aria-describedby");
     expect(warn).not.toHaveBeenCalled();
     expect(error).not.toHaveBeenCalled();
     warn.mockRestore();

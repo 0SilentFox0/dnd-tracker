@@ -78,7 +78,7 @@ describe("навігація артефактів", () => {
     render(<ArtifactDeleteButton campaignId="c1" artifactId="a1" />, { wrapper });
 
     fireEvent.click(screen.getByTitle("Видалити артефакт"));
-    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити" }));
 
     await waitFor(() => expect(deleteArtifact).toHaveBeenCalledWith("c1", "a1"));
     expect(nav.calls).toEqual([]);

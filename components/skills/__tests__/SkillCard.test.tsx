@@ -115,7 +115,7 @@ describe("SkillCard", () => {
     fireEvent.pointerDown(screen.getByLabelText("Меню дій"), { button: 0, ctrlKey: false, pointerType: "mouse" });
     fireEvent.click(await screen.findByRole("menuitem", { name: /Видалити/ }));
 
-    return screen.findByRole("dialog");
+    return screen.findByRole("alertdialog");
   };
 
   it("видаляє після підтвердження", async () => {

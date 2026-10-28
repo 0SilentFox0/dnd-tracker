@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { Drawer } from "vaul";
 
 import "@/components/hud/hud.css";
@@ -34,10 +34,11 @@ export interface ResponsiveDialogProps {
   dismissible?: boolean;
   className?: string;
   hud?: boolean;
+  role?: "dialog" | "alertdialog";
   children?: ReactNode;
 }
 
-export function ResponsiveDialog({ open, onOpenChange, title, description, footer, size = "md", dismissible = true, className, hud = false, children }: ResponsiveDialogProps) {
+export function ResponsiveDialog({ open, onOpenChange, title, description, footer, size = "md", dismissible = true, className, hud = false, role = "dialog", children }: ResponsiveDialogProps) {
   const isMobile = useIsMobile();
 
   const nested = useContext(InsideSheet);
@@ -45,6 +46,23 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
   const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
 
   const body = <HudPortalClassProvider value={hud ? HUD_SURFACE : null}>{children}</HudPortalClassProvider>;
+
+  const opener = useRef<HTMLElement | null>(null);
+
+  const rememberOpener = () => {
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  };
+
+  const restoreOpener = (e: Event) => {
+    const el = opener.current;
+
+    opener.current = null;
+
+    if (el?.isConnected) {
+      e.preventDefault();
+      el.focus();
+    }
+  };
 
   const handleOpenChange = (next: boolean) => {
     if (!next && !dismissible) return;
@@ -60,7 +78,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
         <Drawer.Portal>
           {/* the closing overlay and sheet stay mounted for the exit animation; let taps through to the page */}
           <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=closed]:pointer-events-none!" />
-          <Drawer.Content data-slot="sheet" {...(description ? {} : { "aria-describedby": undefined })} className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!", hudClass, sheetClasses(className))}>
+          <Drawer.Content data-slot="sheet" role={role} onOpenAutoFocus={rememberOpener} onCloseAutoFocus={restoreOpener} {...(description ? {} : { "aria-describedby": undefined })} className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!", hudClass, sheetClasses(className))}>
             <div data-slot="sheet-handle" aria-hidden className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted" />
             <div className="space-y-1 px-4 pt-3 pb-2">
               <Drawer.Title className={cn("text-lg font-semibold leading-tight", hud && HUD_TITLE)}>{title}</Drawer.Title>
@@ -87,6 +105,9 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
+        role={role}
+        onOpenAutoFocus={rememberOpener}
+        onCloseAutoFocus={restoreOpener}
         {...(description ? {} : { "aria-describedby": undefined })}
         className={cn("flex flex-col overflow-hidden", SIZE_CLASS[size], hudClass, desktopClasses(className))}
         showCloseButton={dismissible}

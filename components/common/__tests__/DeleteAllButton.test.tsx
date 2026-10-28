@@ -23,7 +23,7 @@ describe("DeleteAllButton", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити всі" }));
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
 
     expect(within(dialog).getByText("Видалити всі юніти?")).toBeTruthy();
     expect(within(dialog).getByText("Буде видалено 3 юнітів.")).toBeTruthy();

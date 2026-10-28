@@ -10,6 +10,7 @@ describe("formatDamageStep", () => {
     [{ kind: "percent", value: 25, after: 12 }, "+25% → 12"],
     [{ kind: "percent", value: -50, after: 6 }, "-50% → 6"],
     [{ kind: "multiplier", value: 0.5, after: 3 }, "×0.5 → 3"],
+    [{ kind: "multiplier", value: 0.6935483870967742, after: 3 }, "×0.69 → 3"],
     [{ kind: "immunity", value: 0, after: 0 }, "імунітет → 0"],
   ] as const)("%o → %s", (step, text) => {
     expect(formatDamageStep(step)).toBe(text);
