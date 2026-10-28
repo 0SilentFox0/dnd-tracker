@@ -335,3 +335,53 @@ describe("заглушка (curtain / cover)", () => {
     expect(ended).not.toHaveProperty("curtain");
   });
 });
+
+describe("applyShowCommand world", () => {
+  const world = { action: "world", mapId: "m1" } as const;
+
+  it("creates a state with seq 1 from nothing", () => {
+    expect(ok(applyShowCommand(null, world, ctx))).toMatchObject({ world: { mapId: "m1" }, seq: 1, slide: null });
+  });
+
+  it("drops the curtain and keeps deck, slide, cover, audio and battle", () => {
+    const cover = { deckId: "d1", slide: s(1) };
+
+    const battle = { id: "b1", name: "Бій" };
+
+    const prev = showing(1, { curtain: true, cover, audio: audio(), battle });
+
+    const next = ok(applyShowCommand(prev, { ...world, focusMarkerId: "k1" }, ctx));
+
+    expect(next).toMatchObject({ deckId: "d1", slide: deck.slides[1], cover, battle, world: { mapId: "m1", focusMarkerId: "k1" }, seq: 5 });
+    expect(next.audio).toEqual(prev.audio);
+    expect(next.curtain).toBeUndefined();
+  });
+
+  it("returns prev for the same target", () => {
+    const prev = ok(applyShowCommand(null, world, ctx));
+
+    expect(ok(applyShowCommand(prev, world, ctx))).toBe(prev);
+  });
+
+  it("worldOff: no-op without world, fails without state, removes world", () => {
+    const plain = showing(0);
+
+    expect(ok(applyShowCommand(plain, { action: "worldOff" }, ctx))).toBe(plain);
+    expect(applyShowCommand(null, { action: "worldOff" }, ctx)).toMatchObject({ ok: false });
+
+    const off = ok(applyShowCommand(showing(0, { world: { mapId: "m1" } }), { action: "worldOff" }, ctx));
+
+    expect(off.seq).toBe(5);
+    expect(off).not.toHaveProperty("world");
+  });
+
+  it("open, next and end drop the world; curtain keeps it", () => {
+    const prev = showing(0, { world: { mapId: "m1" } });
+
+    expect(ok(applyShowCommand(prev, { action: "open", deckId: "d1" }, ctx)).world).toBeUndefined();
+    expect(ok(applyShowCommand(prev, { action: "next" }, ctx)).world).toBeUndefined();
+    expect(ok(applyShowCommand(showing(2, { world: { mapId: "m1" } }), { action: "next" }, ctx)).world).toBeUndefined();
+    expect(ok(applyShowCommand(prev, { action: "end" }, ctx)).world).toBeUndefined();
+    expect(ok(applyShowCommand(prev, { action: "curtain", on: true }, ctx)).world).toEqual({ mapId: "m1" });
+  });
+});

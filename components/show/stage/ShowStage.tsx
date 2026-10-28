@@ -5,16 +5,17 @@ import Image from "next/image";
 import { ShowWaiting } from "./ShowWaiting";
 import { SlideCaption } from "./SlideCaption";
 
+import { ShowWorldStage } from "@/components/world/show/ShowWorldStage";
 import { SLIDE_CROSSFADE_MS } from "@/lib/constants/show";
 import { useSlideLayers } from "@/lib/hooks/show";
 import { cn } from "@/lib/utils";
 import { isSupabaseStorageUrl } from "@/lib/utils/common/image-url";
-import { visibleSlide } from "@/lib/utils/show/player-view";
+import { stageMode, visibleSlide } from "@/lib/utils/show/player-view";
 import type { ShowState } from "@/types/show";
 
 const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
 
-export function ShowStage({ show }: { show: ShowState | null }) {
+export function ShowStage({ show, campaignId, isDM = false }: { show: ShowState | null; campaignId: string; isDM?: boolean }) {
   const current = visibleSlide(show);
 
   const layers = useSlideLayers(current);
@@ -31,6 +32,7 @@ export function ShowStage({ show }: { show: ShowState | null }) {
         </div>
       ))}
       {current ? <SlideCaption key={current.id} slide={current} /> : !show?.battle && <ShowWaiting paused={!!show?.curtain} />}
+      {show?.world && stageMode(show) === "world" && <ShowWorldStage campaignId={campaignId} world={show.world} isDM={isDM} />}
       <div data-slide-preload aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
         {show?.nextImageUrl && <Image {...imageProps(show.nextImageUrl)} alt="" loading="eager" />}
         {show?.cover && current?.id !== show.cover.slide.id && <Image {...imageProps(show.cover.slide.imageUrl)} alt="" loading="eager" />}

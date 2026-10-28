@@ -5,13 +5,17 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { MAX_WORLD_MAPS } from "@/lib/constants/world";
 import { prisma } from "@/lib/db";
 import { createWorldMapSchema, updateWorldMapSchema } from "@/lib/schemas/world";
+import { clearShowWorld } from "@/lib/server/show/show-store";
 import { listWorldMaps, orphanedImagesOfSubtree, readWorldMapDetail, toWorldMap } from "@/lib/server/world/map-store";
+import { listPublicMapNotes } from "@/lib/server/world/note-store";
 import { listHeroesOnMap } from "@/lib/server/world/travel-store";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { ownedWorldMapPath, removeWorldMapFiles } from "@/lib/supabase/world-map-storage";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { withDM } from "@/lib/utils/api/as-dm";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { subtreeMapIds } from "@/lib/utils/world/tree";
 
 export const ownedMap = (campaignId: string, mapId: string) => loadOwned(prisma.worldMap.findUnique({ where: { id: mapId } }), campaignId, API_ERRORS.WORLD_MAP_NOT_FOUND);
 
@@ -29,6 +33,21 @@ export async function deleteSubtreeWithFiles(campaignId: string, rootMapId: stri
   await remove();
 
   if (urls.length > 0) after(() => removeWorldMapFiles(campaignId, urls));
+}
+
+/** Видалення піддерева: показ більше не може вказувати на його карти й маркери. */
+export function clearShowAfterDelete(campaignId: string, gone: { mapIds: string[]; markerIds: string[] }) {
+  after(() => clearShowWorld(campaignId, gone));
+}
+
+export async function subtreeTargets(campaignId: string, rootMapId: string) {
+  const rows = await prisma.worldMap.findMany({ where: { campaignId }, select: { id: true, parentMarker: { select: { mapId: true } } } });
+
+  const mapIds = subtreeMapIds(rows.map((r) => ({ id: r.id, parentMapId: r.parentMarker?.mapId ?? null })), rootMapId);
+
+  const markers = await prisma.worldMarker.findMany({ where: { mapId: { in: mapIds } }, select: { id: true } });
+
+  return { mapIds, markerIds: markers.map((m) => m.id) };
 }
 
 export function listWorldMapsHandler(campaignId: string) {
@@ -71,7 +90,7 @@ export function createWorldMapHandler(req: Request, campaignId: string) {
 }
 
 export function getWorldMapHandler(campaignId: string, mapId: string) {
-  return withDM(campaignId, "get world map", async () => {
+  return withDM(campaignId, "get world map", async (access) => {
     const owned = await ownedMap(campaignId, mapId);
 
     if (owned instanceof NextResponse) return owned;
@@ -80,7 +99,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
     if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
-    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId) });
+    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId), notes: await listPublicMapNotes(mapId, access.userId) });
   });
 }
 
@@ -108,6 +127,8 @@ export function updateWorldMapHandler(req: Request, campaignId: string, mapId: s
       if (stillUsed === 0) after(() => removeWorldMapFiles(campaignId, [owned.imageUrl]));
     }
 
+    publishWorldChanged(campaignId, mapId);
+
     return NextResponse.json(toWorldMap(updated));
   });
 }
@@ -118,7 +139,12 @@ export function deleteWorldMapHandler(campaignId: string, mapId: string) {
 
     if (owned instanceof NextResponse) return owned;
 
+    const gone = await subtreeTargets(campaignId, mapId);
+
     await deleteSubtreeWithFiles(campaignId, mapId, () => prisma.worldMap.delete({ where: { id: mapId } }));
+
+    clearShowAfterDelete(campaignId, gone);
+    publishWorldChanged(campaignId, null);
 
     return NextResponse.json({ ok: true });
   });

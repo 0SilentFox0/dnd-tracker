@@ -57,6 +57,17 @@ describe("WorldMapView", () => {
     expect(screen.getByRole("button", { name: "Forest" })).toBeTruthy();
   });
 
+  it("keeps the hint at the top so it never covers the bottom-right zoom buttons", () => {
+    render(<WorldMapView detail={detail([])} hint={<p>підказка</p>} />);
+
+    const wrap = screen.getByText("підказка").parentElement as HTMLElement;
+
+    expect(wrap.className).toContain("top-2");
+    expect(wrap.className).toContain("right-2");
+    expect(wrap.className).toContain("left-2");
+    expect(wrap.className).not.toContain("bottom-");
+  });
+
   it("clicking the background reports a normalised point", () => {
     const onMapClick = vi.fn();
 

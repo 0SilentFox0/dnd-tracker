@@ -8,6 +8,12 @@ import { useWorldTravel } from "./useWorldTravel";
 
 import type { MapPoint, TravelRest, WorldMarker } from "@/types/world";
 
+export interface TravelMoved {
+  kind: "travel" | "enter" | "exit";
+  fromMapId: string;
+  destMapId: string;
+}
+
 interface Options {
   campaignId: string;
   mapId: string;
@@ -15,9 +21,10 @@ interface Options {
   onMapIds: string[];
   target: MapPoint | null;
   selectedMarker: WorldMarker | null;
+  onMoved?(e: TravelMoved): void;
 }
 
-export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker }: Options) {
+export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, selectedMarker, onMoved }: Options) {
   const [picked, setPicked] = useState<string[]>([]);
 
   const [rest, setRest] = useState<TravelRest>("none");
@@ -44,6 +51,13 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
     void action().finally(() => (busy.current = false));
   };
 
+  // mutation errors are already notified by useCrudMutation
+  const moved = async (kind: TravelMoved["kind"], request: Promise<{ positions: { mapId: string }[] }>) => {
+    const result = await request.catch(() => null);
+
+    if (result) onMoved?.({ kind, fromMapId: mapId, destMapId: result.positions[0]?.mapId ?? mapId });
+  };
+
   const ready = selected.length > 0 && !isPending;
 
   const nested = !!maps.data?.find((m) => m.id === mapId)?.parentMarkerId;
@@ -66,13 +80,13 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
     canExit,
     canAct: ready,
     move: () => {
-      if (ready && target) run(() => travel.mutateOk({ mapId, characterIds: selected, to: target, toMarkerId: selectedMarker?.id, rest }));
+      if (ready && target) run(() => moved("travel", travel.mutateAsync({ mapId, characterIds: selected, to: target, toMarkerId: selectedMarker?.id, rest })));
     },
     enterMarker: () => {
-      if (ready && selectedMarker && childMapId) run(() => enter.mutateOk({ markerId: selectedMarker.id, characterIds: selected, rest }));
+      if (ready && selectedMarker && childMapId) run(() => moved("enter", enter.mutateAsync({ markerId: selectedMarker.id, characterIds: selected, rest })));
     },
     exitMap: () => {
-      if (canExit) run(() => exit.mutateOk({ mapId, characterIds: selected, rest }));
+      if (canExit) run(() => moved("exit", exit.mutateAsync({ mapId, characterIds: selected, rest })));
     },
   };
 }

@@ -1,6 +1,6 @@
 import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleBrief } from "@/types/battle";
-import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
+import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
 
 /** current — позиція показу на цьому слайді; active — і гравці його бачать (не під заглушкою). */
@@ -22,7 +22,9 @@ export const boundDeckIds = (content: ScenarioContent): string[] => [...new Set(
 
 export const hasBattleBindings = (content: ScenarioContent) => content.sections.some((s) => s.rows.some((r) => r.battleId));
 
-export const hasPlayBindings = (content: ScenarioContent) => content.sections.some((s) => s.rows.some((r) => r.slide || r.battleId));
+export const hasPlayBindings = (content: ScenarioContent) => content.sections.some((s) => s.marker || s.rows.some((r) => r.slide || r.battleId || r.marker));
+
+export const markerOnScreen = (ref: ScenarioMarkerRef, show: ShowState | null): boolean => show?.world?.mapId === ref.mapId && show.world.focusMarkerId === ref.markerId && !show.curtain;
 
 export function rowSlideState(row: ScenarioRow, lookup: PlayLookup): RowSlideState {
   if (!row.slide) return { kind: "none" };

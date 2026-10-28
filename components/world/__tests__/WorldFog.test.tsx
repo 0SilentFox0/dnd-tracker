@@ -1,9 +1,8 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldFog } from "../WorldFog";
-import { WorldHeroes } from "../WorldHeroes";
 import { WorldMapView } from "../WorldMapView";
 
 import type { RevealShape, WorldHero, WorldMapDetail } from "@/types/world";
@@ -97,30 +96,9 @@ describe("WorldMapView layers", () => {
   it("renders the fog canvas and heroes when given", () => {
     const onHeroClick = vi.fn();
 
-    const { container } = render(<WorldMapView detail={detail} fog={{ shapes, radius: 0.05 }} heroes={[hero({ id: "a", name: "A" }), hero({ id: "b", name: "B" })]} handlers={{ onHeroClick }} />);
+    const { container } = render(<WorldMapView detail={detail} fog={{ shapes, radius: 0.05 }} heroes={[hero({ id: "a", name: "A", x: 0.2 }), hero({ id: "b", name: "B", x: 0.8 })]} handlers={{ onHeroClick }} />);
 
     expect(container.querySelector("canvas")).not.toBeNull();
     expect(screen.getAllByRole("button", { name: /^[AB]$/ })).toHaveLength(2);
-  });
-});
-
-describe("WorldHeroes", () => {
-  it("marks the own hero and reports clicks", () => {
-    const onHeroClick = vi.fn();
-
-    render(<WorldHeroes zoom={2} heroes={[hero({ id: "a", name: "Арвен", own: true }), hero({ id: "b", name: "Борін" })]} onHeroClick={onHeroClick} />);
-
-    expect(screen.getByRole("button", { name: "Арвен" }).dataset.own).toBe("true");
-    expect(screen.getByRole("button", { name: "Арвен" }).style.transform).toContain("scale(0.5)");
-
-    fireEvent.pointerUp(screen.getByRole("button", { name: "Борін" }));
-
-    expect(onHeroClick).toHaveBeenCalledWith("b");
-  });
-
-  it("falls back to the initial for a non-image avatar string", () => {
-    render(<WorldHeroes zoom={1} heroes={[hero({ name: "Арвен", avatar: "not-an-url" })]} />);
-
-    expect(screen.getByRole("button", { name: "Арвен" }).textContent).toBe("А");
   });
 });

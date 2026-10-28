@@ -40,6 +40,7 @@ export interface WorldMapDetail {
   map: WorldMap;
   markers: WorldMarker[];
   heroes?: WorldHero[];
+  notes?: WorldNote[];
 }
 
 export type CreateWorldMapData = { name: string; imageUrl: string; width: number; height: number; parentMarkerId?: string };
@@ -85,6 +86,13 @@ export interface WorldNote {
   mine: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Pusher `world-changed`: без назв, координат і нотаток. */
+export interface WorldChangedEvent {
+  campaignId: string;
+  mapId: string | null;
+  seq: number;
 }
 
 export interface WorldView {

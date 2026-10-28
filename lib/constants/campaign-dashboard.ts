@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { BookOpen, Gem, GitBranch, Images, Map as MapIcon, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
 
 export type DashboardGroupKey = "game" | "heroes" | "libraries" | "player";
 
@@ -42,6 +42,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
 export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "my-character", href: (id) => `/campaigns/${id}/character`, icon: User, title: "Мій персонаж", subtitle: "Перегляд та редагування персонажа", keywords: ["герой", "лист"], group: "player" },
   { key: "player-show", href: (id) => `/campaigns/${id}/show`, icon: Images, title: "Показ", subtitle: "Слайди й музику від ДМ під час гри", keywords: ["слайди"], group: "player" },
+  { key: "player-world", href: (id) => `/campaigns/${id}/world`, icon: MapIcon, title: "Карта", subtitle: "Ваші герої й відкриті місця світу", keywords: ["світ", "мапа"], group: "player" },
   { key: "info", href: info, icon: BookOpen, title: "Довідник", subtitle: "Скіли, заклинання й артефакти: як діють і в кого що.", keywords: ["довідка", "інформація", "правила"], group: "player" },
 ];
 

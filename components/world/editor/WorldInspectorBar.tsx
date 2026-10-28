@@ -1,8 +1,9 @@
 "use client";
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
-import { ChevronRight, Crosshair, ImageUp, Map as MapIcon, MapPinned, NotebookPen, PenLine, Trash2, X } from "lucide-react";
+import { ChevronRight, Crosshair, ImageUp, Map as MapIcon, MapPinned, MessagesSquare, NotebookPen, PenLine, Trash2, X } from "lucide-react";
 
+import { DmMarkerNotes } from "./DmMarkerNotes";
 import { ICON_OPTIONS,markerIcon } from "./marker-icon-options";
 import { NewWorldMapDialog } from "./NewWorldMapDialog";
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -175,6 +176,17 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         </PopoverTrigger>
         <PopoverContent className={cn(POPOVER, "w-72")}>
           <Textarea aria-label="Нотатка ДМ" rows={5} value={note} maxLength={WORLD_DM_NOTE_MAX} onChange={(e) => setNote(e.target.value)} onBlur={commitNote} />
+        </PopoverContent>
+      </Popover>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button type="button" className={CHIP}>
+            <MessagesSquare className="size-4" aria-hidden />
+            Нотатки гравців
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className={cn(POPOVER, "max-h-96 w-80 overflow-y-auto")}>
+          <DmMarkerNotes marker={marker} />
         </PopoverContent>
       </Popover>
       <span className="ml-auto flex shrink-0 items-center gap-2">

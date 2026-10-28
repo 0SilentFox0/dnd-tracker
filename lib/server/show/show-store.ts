@@ -5,11 +5,11 @@ import { prisma } from "@/lib/db";
 import { SHOW_STATE_EVENT, showChannelName } from "@/lib/pusher/channels";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
-import { withoutBattle } from "@/lib/utils/show/show-command";
+import { withoutBattle, withoutWorldTargets } from "@/lib/utils/show/show-command";
 import type { BattleAudioState } from "@/types/audio";
-import type { ShowBattle, ShowCover, ShowEvent, ShowState, Slide } from "@/types/show";
+import type { ShowBattle, ShowCover, ShowEvent, ShowState, ShowWorld, Slide } from "@/types/show";
 
-const SHOW_SELECT = { deckId: true, deckTitle: true, slide: true, nextImageUrl: true, audio: true, battle: true, cover: true, curtain: true, seq: true } as const;
+const SHOW_SELECT = { deckId: true, deckTitle: true, slide: true, nextImageUrl: true, audio: true, battle: true, cover: true, curtain: true, world: true, seq: true } as const;
 
 type ShowRow = Prisma.CampaignShowGetPayload<{ select: typeof SHOW_SELECT }>;
 
@@ -23,6 +23,7 @@ export function toShowState(row: ShowRow): ShowState {
     ...(row.battle ? { battle: row.battle as unknown as ShowBattle } : {}),
     ...(row.cover ? { cover: row.cover as unknown as ShowCover } : {}),
     ...(row.curtain ? { curtain: true as const } : {}),
+    ...(row.world ? { world: row.world as unknown as ShowWorld } : {}),
     seq: row.seq,
   };
 }
@@ -37,7 +38,7 @@ const json = (v: unknown) => (v === null ? Prisma.DbNull : (v as Prisma.InputJso
 
 /** Оптимістичне блокування за seq; рядок створюється лише першим записом і ніколи не видаляється. */
 export async function writeShowState(campaignId: string, prev: ShowState | null, next: ShowState): Promise<boolean> {
-  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, seq: next.seq };
+  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, world: json(next.world ?? null), seq: next.seq };
 
   if (!prev) {
     const { count } = await prisma.campaignShow.createMany({ data: [{ campaignId, ...data }], skipDuplicates: true });
@@ -57,12 +58,12 @@ export function publishShow(campaignId: string, show: ShowState): Promise<void> 
   return safePusherTrigger(pusherServer, showChannelName(campaignId), SHOW_STATE_EVENT, event, { action: "show state" });
 }
 
-const CLEAR_BATTLE_ATTEMPTS = 3;
+const CLEAR_ATTEMPTS = 3;
 
 /** Бій завершено — виклик «До бою!» для нього знімається; помилки лише логуються. */
 export async function clearShowBattle(campaignId: string, battleId: string): Promise<void> {
   try {
-    for (let attempt = 0; attempt < CLEAR_BATTLE_ATTEMPTS; attempt++) {
+    for (let attempt = 0; attempt < CLEAR_ATTEMPTS; attempt++) {
       const show = await readShowState(campaignId);
 
       const next = withoutBattle(show, battleId);
@@ -77,5 +78,26 @@ export async function clearShowBattle(campaignId: string, battleId: string): Pro
     }
   } catch (error) {
     console.error("[show] clear battle call failed", error);
+  }
+}
+
+/** Показану карту чи фокус-маркер видалено — показ їх більше не згадує; помилки лише логуються. */
+export async function clearShowWorld(campaignId: string, gone: { mapIds: string[]; markerIds: string[] }): Promise<void> {
+  try {
+    for (let attempt = 0; attempt < CLEAR_ATTEMPTS; attempt++) {
+      const show = await readShowState(campaignId);
+
+      const next = withoutWorldTargets(show, gone);
+
+      if (!show || !next) return;
+
+      if (await writeShowState(campaignId, show, next)) {
+        await publishShow(campaignId, next);
+
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("[show] clear world failed", error);
   }
 }

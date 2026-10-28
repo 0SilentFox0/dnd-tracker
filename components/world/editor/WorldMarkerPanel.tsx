@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MapPinned, PenLine } from "lucide-react";
 
+import { DmMarkerNotes } from "./DmMarkerNotes";
 import { ICON_OPTIONS,markerIcon } from "./marker-icon-options";
 import { NewWorldMapDialog } from "./NewWorldMapDialog";
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -89,6 +90,11 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
           </label>
         </div>
       </HudSection>
+      {detail ? (
+        <HudSection title="Нотатки гравців">
+          <DmMarkerNotes marker={marker} />
+        </HudSection>
+      ) : null}
       <HudSection title="Вкладена карта">
         {marker.childMapId ? (
           <Button type="button" variant="outline" onClick={() => openMap(marker.childMapId)} className="w-full gap-2">

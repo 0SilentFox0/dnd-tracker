@@ -1,20 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Image as ImageIcon, Swords, X } from "lucide-react";
+import { Image as ImageIcon, MapPin, Swords, X } from "lucide-react";
 
 import { BattlePickerDialog } from "./BattlePickerDialog";
+import { MarkerPickerDialog } from "./MarkerPickerDialog";
 import { SlidePickerDialog } from "./SlidePickerDialog";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { MarkerChip } from "@/components/scenario/MarkerChip";
 import { useBattleBriefs } from "@/lib/hooks/battles";
 import { useDeck } from "@/lib/hooks/show";
-import type { ScenarioRow, ScenarioRowSlide } from "@/types/scenario";
+import type { ScenarioMarkerRef, ScenarioRow, ScenarioRowSlide } from "@/types/scenario";
 
-type Props = { campaignId: string; pageId: string; row: ScenarioRow; onChange: { slide(v: ScenarioRowSlide | undefined): void; battle(v: string | undefined): void } };
+type Props = { campaignId: string; pageId: string; row: ScenarioRow; onChange: { slide(v: ScenarioRowSlide | undefined): void; battle(v: string | undefined): void; marker(v: ScenarioMarkerRef | undefined): void } };
 
 export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
-  const [picking, setPicking] = useState<"slide" | "battle" | null>(null);
+  const [picking, setPicking] = useState<"slide" | "battle" | "marker" | null>(null);
 
   const { data: deck } = useDeck(campaignId, row.slide?.deckId ?? null);
 
@@ -64,8 +66,16 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
           <Swords className="size-3.5" /> Бій
         </button>
       )}
+      {row.marker ? (
+        <MarkerChip campaignId={campaignId} marker={row.marker} onRemove={() => onChange.marker(undefined)} />
+      ) : (
+        <button type="button" className="toggle" aria-label="Прив'язати місце" onClick={() => setPicking("marker")}>
+          <MapPin className="size-3.5" /> Місце
+        </button>
+      )}
       <SlidePickerDialog campaignId={campaignId} pageId={pageId} open={picking === "slide"} onOpenChange={(v) => setPicking(v ? "slide" : null)} onPick={onChange.slide} />
       <BattlePickerDialog campaignId={campaignId} open={picking === "battle"} onOpenChange={(v) => setPicking(v ? "battle" : null)} onPick={onChange.battle} />
+      {picking === "marker" && <MarkerPickerDialog campaignId={campaignId} open onOpenChange={(v) => setPicking(v ? "marker" : null)} onPick={onChange.marker} />}
     </div>
   );
 }

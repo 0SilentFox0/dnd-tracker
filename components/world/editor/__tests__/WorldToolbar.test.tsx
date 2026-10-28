@@ -93,4 +93,16 @@ describe("WorldToolHint", () => {
 
     expect(screen.getByRole("status").textContent).toContain("двічі клікніть");
   });
+
+  it("puts the extras on their own full-width row below lg, inline on lg", () => {
+    renderBar(drawing(), null, undefined, <span>eyes</span>);
+
+    const row = screen.getByText("eyes").parentElement as HTMLElement;
+
+    expect(row.getAttribute("data-slot")).toBe("toolbar-extras");
+    expect(row.className).toContain("border-t");
+    expect(row.className).toContain("lg:border-t-0");
+    expect(row.parentElement?.className).toContain("flex-col");
+    expect(row.parentElement?.className).toContain("lg:flex-row");
+  });
 });

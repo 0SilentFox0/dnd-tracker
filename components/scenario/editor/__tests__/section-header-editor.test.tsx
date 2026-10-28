@@ -19,16 +19,16 @@ describe("SectionHeaderEditor", () => {
   it("показує автоматичну іконку і дозволяє обрати іншу або повернути авто", async () => {
     const onIcon = vi.fn();
 
-    const actions = { onTitle: vi.fn(), onMove: vi.fn(), onRemove: vi.fn(), onIcon };
+    const actions = { onTitle: vi.fn(), onMove: vi.fn(), onRemove: vi.fn(), onIcon, onMarker: vi.fn() };
 
-    const { container, rerender } = render(<SectionHeaderEditor section={section} actions={actions} />);
+    const { container, rerender } = render(<SectionHeaderEditor campaignId="c" section={section} actions={actions} />);
 
     expect(container.querySelector("[data-section-icon]")?.getAttribute("data-section-icon")).toBe("battle");
     open();
     fireEvent.click(await screen.findByRole("menuitem", { name: /Відпочинок/ }));
     expect(onIcon).toHaveBeenCalledWith("rest");
 
-    rerender(<SectionHeaderEditor section={{ ...section, icon: "rest" }} actions={actions} />);
+    rerender(<SectionHeaderEditor campaignId="c" section={{ ...section, icon: "rest" }} actions={actions} />);
     open();
     fireEvent.click(await screen.findByRole("menuitem", { name: /Автоматично/ }));
     expect(onIcon).toHaveBeenLastCalledWith(undefined);

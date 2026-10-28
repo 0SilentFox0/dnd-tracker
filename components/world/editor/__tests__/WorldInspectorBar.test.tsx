@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -6,7 +7,7 @@ import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldInspectorBar } from "../WorldInspectorBar";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import type { WorldMarker } from "@/types/world";
+import type { WorldMarker, WorldNote } from "@/types/world";
 
 vi.mock("@/lib/hooks/world/useWorldMapUpload", () => ({ useWorldMapUpload: () => ({ upload: vi.fn(), discard: vi.fn(), uploading: false }) }));
 
@@ -24,10 +25,10 @@ const marker = (over: Partial<WorldMarker> = {}): WorldMarker => ({
 
 const map = { id: "m1", name: "Світ", parentMarkerId: null, parentMapId: null, imageUrl: "u", width: 800, height: 600, fogEnabled: true, revealRadius: 0.05, entryX: 0.5, entryY: 0.5, updatedAt: "" };
 
-const renderBar = ({ m, open = true, onClose = vi.fn() }: { m?: WorldMarker; open?: boolean; onClose?: () => void } = {}) => {
+const renderBar = ({ m, open = true, onClose = vi.fn(), notes = [] }: { m?: WorldMarker; open?: boolean; onClose?: () => void; notes?: WorldNote[] } = {}) => {
   const ctx = {
     campaignId: "c1",
-    detail: { map, markers: m ? [m] : [] },
+    detail: { map, markers: m ? [m] : [], notes },
     maps: [map, { ...map, id: "m2", name: "Вкладена", parentMapId: "m1" }],
     selectedId: m?.id ?? null,
     select: vi.fn(),
@@ -41,7 +42,9 @@ const renderBar = ({ m, open = true, onClose = vi.fn() }: { m?: WorldMarker; ope
 
   renderWithConfirm(
     <WorldEditorContext.Provider value={ctx}>
-      <WorldInspectorBar open={open} onClose={onClose} />
+      <QueryClientProvider client={new QueryClient()}>
+        <WorldInspectorBar open={open} onClose={onClose} />
+      </QueryClientProvider>
     </WorldEditorContext.Provider>,
   );
 
@@ -123,6 +126,17 @@ describe("WorldInspectorBar", () => {
     fireEvent.keyDown(screen.getByLabelText("Нотатка ДМ"), { key: "Escape" });
 
     await waitFor(() => expect(update).toHaveBeenCalledWith({ id: "k1", data: { dmNote: "секрет" } }));
+  });
+
+  it("lets the DM moderate players' notes from the popover", async () => {
+    const note: WorldNote = { id: "n1", markerId: "k1", authorUserId: "u", authorName: "Олег", characterId: null, visibility: "public", text: "Бачив дракона", mine: false, createdAt: "", updatedAt: "" };
+
+    renderBar({ m: marker(), notes: [note] });
+
+    fireEvent.click(screen.getByRole("button", { name: /Нотатки гравців/ }));
+
+    expect(await screen.findByText("Бачив дракона")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Видалити нотатку" })).toBeTruthy();
   });
 
   it("deletes only after confirmation", async () => {

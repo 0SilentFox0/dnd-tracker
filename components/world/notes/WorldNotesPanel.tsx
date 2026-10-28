@@ -76,32 +76,30 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
         ))}
       </ul>
 
-      {isDM ? null : (
-        <form
-          className="flex flex-col gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void panel.submit();
-          }}
-        >
-          <Textarea aria-label="Нова нотатка" value={panel.text} onChange={(e) => panel.setText(e.target.value)} placeholder={panel.tab === "private" ? "Тільки для вас" : "Бачать усі гравці"} />
-          <div className="flex flex-wrap items-center gap-2">
-            {heroes.length > 1 ? (
-              <select aria-label="Від імені героя" value={panel.characterId} onChange={(e) => panel.setCharacterId(e.target.value)} className="h-9 rounded-md border border-hud-rule bg-black/40 px-2 text-sm text-hud-ink">
-                {heroes.map((h) => (
-                  <option key={h.id} value={h.id}>
-                    {h.name}
-                  </option>
-                ))}
-              </select>
-            ) : null}
-            <span className={panel.remaining < 0 ? "text-xs text-destructive" : "text-xs text-hud-muted"}>{panel.remaining}</span>
-            <Button type="submit" size="sm" className="ml-auto" disabled={!panel.canSubmit}>
-              Додати
-            </Button>
-          </div>
-        </form>
-      )}
+      <form
+        className="flex flex-col gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void panel.submit();
+        }}
+      >
+        <Textarea aria-label="Нова нотатка" value={panel.text} onChange={(e) => panel.setText(e.target.value)} placeholder={isDM ? "Бачать усі гравці" : panel.tab === "private" ? "Тільки для вас" : "Бачать усі гравці"} />
+        <div className="flex flex-wrap items-center gap-2">
+          {!isDM && heroes.length > 1 ? (
+            <select aria-label="Від імені героя" value={panel.characterId} onChange={(e) => panel.setCharacterId(e.target.value)} className="h-9 rounded-md border border-hud-rule bg-black/40 px-2 text-sm text-hud-ink">
+              {heroes.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <span className={panel.remaining < 0 ? "text-xs text-destructive" : "text-xs text-hud-muted"}>{panel.remaining}</span>
+          <Button type="submit" size="sm" className="ml-auto" disabled={!panel.canSubmit}>
+            Додати
+          </Button>
+        </div>
+      </form>
     </HudPanel>
   );
 }

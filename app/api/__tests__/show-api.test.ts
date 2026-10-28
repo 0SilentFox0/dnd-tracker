@@ -18,6 +18,8 @@ vi.mock("@/lib/db", () => ({
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
     slideDeck: { findFirst: vi.fn() },
     battleScene: { findFirst: vi.fn() },
+    worldMap: { findFirst: vi.fn() },
+    worldMarker: { findFirst: vi.fn() },
     campaignTrack: { findMany: vi.fn(async () => []) },
   },
 }));
@@ -143,5 +145,58 @@ describe("show API", () => {
     const res = await post({ action: "next" });
 
     expect((await res.json()).show).not.toHaveProperty("battle");
+  });
+
+  describe("world", () => {
+    it("world: карта чужої кампанії — 404 без запису", async () => {
+      vi.mocked(prisma.worldMap.findFirst).mockResolvedValue(null);
+
+      expect((await post({ action: "world", mapId: "other" })).status).toBe(404);
+      expect(vi.mocked(prisma.worldMap.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "other", campaignId: "c1" } });
+      expect(prisma.campaignShow.createMany).not.toHaveBeenCalled();
+    });
+
+    it("world: маркер з іншої карти — 404", async () => {
+      vi.mocked(prisma.worldMap.findFirst).mockResolvedValue({ id: "m1" } as never);
+      vi.mocked(prisma.worldMarker.findFirst).mockResolvedValue(null);
+
+      expect((await post({ action: "world", mapId: "m1", focusMarkerId: "k2" })).status).toBe(404);
+      expect(vi.mocked(prisma.worldMarker.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "k2", mapId: "m1" } });
+    });
+
+    it("world: пишеться в рядок і йде в Pusher без назв", async () => {
+      vi.mocked(prisma.worldMap.findFirst).mockResolvedValue({ id: "m1" } as never);
+      vi.mocked(prisma.worldMarker.findFirst).mockResolvedValue({ id: "k1" } as never);
+
+      const res = await post({ action: "world", mapId: "m1", focusMarkerId: "k1" });
+
+      expect((await res.json()).show).toMatchObject({ world: { mapId: "m1", focusMarkerId: "k1" }, seq: 1 });
+      expect(vi.mocked(prisma.campaignShow.createMany).mock.calls[0][0]).toMatchObject({ data: [{ world: { mapId: "m1", focusMarkerId: "k1" } }] });
+
+      await Promise.all(afterCallbacks.map((cb) => cb()));
+      expect(trigger).toHaveBeenCalledWith("private-show-c1", "show-state", expect.objectContaining({ show: expect.objectContaining({ world: { mapId: "m1", focusMarkerId: "k1" } }) }));
+    });
+
+    it("гравець не може світ — 403", async () => {
+      vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);
+
+      expect((await post({ action: "world", mapId: "m1" })).status).toBe(403);
+      expect((await post({ action: "worldOff" })).status).toBe(403);
+    });
+
+    it("worldOff знімає world, GET його віддає", async () => {
+      const row = { deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, world: { mapId: "m1" }, seq: 2 };
+
+      vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(row as never);
+
+      const { GET } = await import("@/app/api/campaigns/[id]/show/route");
+
+      expect((await (await GET(new Request("http://x"), { params: Promise.resolve({ id: "c1" }) })).json()).show.world).toEqual({ mapId: "m1" });
+
+      const res = await post({ action: "worldOff" });
+
+      expect((await res.json()).show).toMatchObject({ seq: 3 });
+      expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ data: { seq: 3 } });
+    });
   });
 });

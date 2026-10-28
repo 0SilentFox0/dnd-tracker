@@ -86,4 +86,5 @@ export interface HeroHpValue {
 export interface PlayerDashboardData {
   hero: DashboardHero | null;
   activeBattle: { battleId: string; hp: HeroHpValue } | null;
+  hasWorld: boolean;
 }

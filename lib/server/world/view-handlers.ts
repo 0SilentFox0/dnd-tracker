@@ -53,9 +53,16 @@ export async function viewHandler(req: Request, campaignId: string) {
 
     const heroIds = heroes.map((h) => h.id);
 
-    const { allMaps, positions, reveals, root, allowed: known } = await readViewerScope(campaignId, heroIds);
+    const [{ allMaps, positions, reveals, root, allowed: known }, shown] = await Promise.all([
+      readViewerScope(campaignId, heroIds),
+      access.isDM ? null : prisma.campaignShow.findUnique({ where: { campaignId }, select: { world: true } }),
+    ]);
 
     const allowed = asHero ? new Set(allMaps.map((m) => m.id)) : known;
+
+    const shownMapId = (shown?.world as { mapId?: string } | null | undefined)?.mapId;
+
+    if (shownMapId) allowed.add(shownMapId);
 
     const heroMap = positions.find((p) => heroIds.includes(p.characterId))?.mapId;
 

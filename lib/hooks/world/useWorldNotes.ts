@@ -6,9 +6,9 @@ import { worldKeys } from "./keys";
 
 import { createWorldNote, deleteWorldNote, updateWorldNote } from "@/lib/api/world";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { CreateWorldNoteData, WorldNote, WorldView } from "@/types/world";
+import type { CreateWorldNoteData, WorldMapDetail, WorldNote, WorldView } from "@/types/world";
 
-type Snapshot = [readonly unknown[], WorldView | undefined][];
+type Snapshot = [readonly unknown[], WorldView | WorldMapDetail | undefined][];
 
 export function useWorldNotes(campaignId: string, mapId: string | null) {
   const queryClient = useQueryClient();
@@ -17,12 +17,20 @@ export function useWorldNotes(campaignId: string, mapId: string | null) {
 
   const invalidateKeys = () => [worldKeys.viewAll(campaignId), ...(mapId ? [worldKeys.map(campaignId, mapId)] : [])];
 
-  const patchNotes = (fn: (notes: WorldNote[]) => WorldNote[]) => queryClient.setQueriesData<WorldView>(viewFilter, (v) => (v ? { ...v, notes: fn(v.notes) } : v));
+  const mapKey = mapId ? worldKeys.map(campaignId, mapId) : null;
+
+  const patchNotes = (fn: (notes: WorldNote[]) => WorldNote[]) => {
+    queryClient.setQueriesData<WorldView>(viewFilter, (v) => (v ? { ...v, notes: fn(v.notes) } : v));
+
+    if (mapKey) queryClient.setQueryData<WorldMapDetail>(mapKey, (d) => (d?.notes ? { ...d, notes: fn(d.notes) } : d));
+  };
 
   const snapshot = async (): Promise<Snapshot> => {
     await queryClient.cancelQueries(viewFilter);
 
-    return queryClient.getQueriesData<WorldView>(viewFilter);
+    const mapData = mapKey ? ([[mapKey, queryClient.getQueryData<WorldMapDetail>(mapKey)]] as Snapshot) : [];
+
+    return [...queryClient.getQueriesData<WorldView>(viewFilter), ...mapData];
   };
 
   const restore = (_e: unknown, _v: unknown, prev: Snapshot | undefined) => prev?.forEach(([key, data]) => queryClient.setQueryData(key, data));

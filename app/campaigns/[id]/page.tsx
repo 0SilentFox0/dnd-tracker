@@ -13,6 +13,8 @@ import { readDmDashboard, readPlayerDashboard } from "@/lib/server/campaigns/das
 import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
 import { pluralUk } from "@/lib/utils/common/plural";
 
+const HIDDEN_WITHOUT_WORLD = ["player-world"];
+
 const LABEL = "text-sm text-hud-muted";
 
 export default async function CampaignDetailPage({
@@ -43,7 +45,7 @@ export default async function CampaignDetailPage({
         <div className="min-w-0 space-y-4">
           {dm && <DmNextSteps campaignId={id} data={dm} />}
           {player && <PlayerHeroCard campaignId={id} data={player} />}
-          <DashboardGroups campaignId={id} isDM={isDM} pendingDrafts={dm?.pendingDrafts ?? 0} />
+          <DashboardGroups campaignId={id} isDM={isDM} pendingDrafts={dm?.pendingDrafts ?? 0} hiddenKeys={player?.hasWorld ? undefined : HIDDEN_WITHOUT_WORLD} />
         </div>
 
         <div className="space-y-4">

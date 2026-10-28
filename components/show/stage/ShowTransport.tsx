@@ -34,7 +34,7 @@ export function ShowTransport({ campaignId, show, control }: { campaignId: strin
       <ShowButton aria-pressed={!!show?.curtain} aria-label="Заглушка" title="Заглушка замість слайда (B)" disabled={control.pending} onClick={() => void control.send({ action: "curtain" })}>
         <EyeOff className="size-4" />
       </ShowButton>
-      <ShowButton tone="danger" aria-label="Завершити показ" title="Завершити показ" disabled={control.pending || (!running && !show?.battle)} onClick={() => void end()}>
+      <ShowButton tone="danger" aria-label="Завершити показ" title="Завершити показ" disabled={control.pending || (!running && !show?.battle && !show?.world)} onClick={() => void end()}>
         <Square className="size-4" />
       </ShowButton>
     </div>
