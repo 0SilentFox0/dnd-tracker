@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-export function HudTile({ href, icon, title, subtitle }: { href: string; icon?: ReactNode; title: ReactNode; subtitle?: ReactNode }) {
+export function HudTile({ href, icon, title, subtitle, compact }: { href: string; icon?: ReactNode; title: ReactNode; subtitle?: ReactNode; compact?: boolean }) {
   return (
-    <Link href={href} className="flex items-center gap-3 rounded-lg bg-[rgba(20,16,12,.85)] p-3 shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_rgba(230,194,90,.18)]">
-      {icon && <span className="metal-bronze flex size-10 shrink-0 items-center justify-center rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] text-[#e8d6b0] shadow-[inset_0_0_0_2px_var(--m2)]">{icon}</span>}
+    <Link href={href} className={`flex min-w-0 items-center gap-3 rounded-lg bg-[rgba(20,16,12,.85)] ${compact ? "p-2" : "p-3"} shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_rgba(230,194,90,.18)]`}>
+      {icon && <span className={`metal-bronze flex ${compact ? "size-8" : "size-10"} shrink-0 items-center justify-center rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] text-[#e8d6b0] shadow-[inset_0_0_0_2px_var(--m2)]`}>{icon}</span>}
       <span className="min-w-0">
-        <span className="hud-sc block truncate text-[15px] text-hud-ink">{title}</span>
-        {subtitle && <span className="block truncate text-xs text-hud-muted">{subtitle}</span>}
+        <span className={`hud-sc block ${compact ? "line-clamp-2" : "truncate"} text-[15px] text-hud-ink`}>{title}</span>
+        {subtitle && !compact && <span className="block truncate text-xs text-hud-muted">{subtitle}</span>}
       </span>
     </Link>
   );
