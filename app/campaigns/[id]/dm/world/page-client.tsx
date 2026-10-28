@@ -11,9 +11,9 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { NewWorldMapDialog } from "@/components/world/editor/NewWorldMapDialog";
 import { WorldBreadcrumbs } from "@/components/world/editor/WorldBreadcrumbs";
 import { WorldEditorContext, type WorldEditorCtx } from "@/components/world/editor/WorldEditorContext";
+import { WorldInspectorBar } from "@/components/world/editor/WorldInspectorBar";
 import { WorldMapSettings } from "@/components/world/editor/WorldMapSettings";
 import { WorldMarkerPanel } from "@/components/world/editor/WorldMarkerPanel";
-import { WorldSidePanel } from "@/components/world/editor/WorldSidePanel";
 import { WorldToolbar, WorldToolHint } from "@/components/world/editor/WorldToolbar";
 import { CompassRose } from "@/components/world/marker-icons";
 import { WorldMapView } from "@/components/world/WorldMapView";
@@ -25,7 +25,9 @@ import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
 
 const ENTRY_COMPASS = { width: "3.2%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
 
-const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-12rem)]";
+const FRAME_HEIGHT = "lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col";
+
+const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:min-h-0 lg:flex-1";
 
 export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const router = useRouter();
@@ -135,7 +137,9 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
 
                   const panel = marker ? <WorldMarkerPanel /> : <WorldMapSettings key={d.map.id} />;
 
-                  const sheetOpen = !isDesktop && tool === "select" && (!!marker || settingsOpen);
+                  const panelOpen = tool === "select" && (!!marker || settingsOpen);
+
+                  const sheetOpen = !isDesktop && panelOpen;
 
                   return (
                     <>
@@ -145,10 +149,11 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                         actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>}
                         className="max-md:p-2 max-md:[&_h1]:sr-only"
                       />
-                      <div className="mb-2">
-                        <WorldToolbar drawing={drawing} onSettings={() => setSettingsOpen(true)} />
-                      </div>
-                      <div className={`relative ${MAP_HEIGHT}`}>
+                      <div className={FRAME_HEIGHT}>
+                        <div className="mb-2 shrink-0">
+                          <WorldToolbar drawing={drawing} onSettings={() => setSettingsOpen(true)} inspector={isDesktop ? <WorldInspectorBar open={panelOpen} onClose={closePanel} /> : undefined} />
+                        </div>
+                        <div className={`relative ${MAP_HEIGHT}`}>
                         <WorldMapView
                           key={d.map.id}
                           detail={d}
@@ -165,11 +170,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                           }}
                           overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
                         />
-                        {isDesktop ? (
-                          <WorldSidePanel open={tool === "select" && (!!marker || settingsOpen)} onClose={closePanel}>
-                            {panel}
-                          </WorldSidePanel>
-                        ) : null}
+                        </div>
                       </div>
                       {isDesktop ? null : (
                         <ResponsiveDialog
