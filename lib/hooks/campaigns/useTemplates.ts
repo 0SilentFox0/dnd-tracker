@@ -7,24 +7,18 @@ import { campaignKeys } from "./keys";
 
 import { getTemplates } from "@/lib/api/templates";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
-import type { TemplateList, TemplateSelection } from "@/types/campaigns";
-
-const EMPTY_TEMPLATE_NAME = "Порожня";
+import type { TemplateSelection } from "@/types/campaigns";
 
 export function useTemplates() {
   return useQuery({ queryKey: campaignKeys.templates(), queryFn: getTemplates, staleTime: REFERENCE_STALE_MS });
 }
-
-const defaultSelection = (templates: TemplateList | undefined): TemplateSelection => ({
-  templateId: templates?.official.find((t) => t.name === EMPTY_TEMPLATE_NAME)?.id ?? null,
-});
 
 export function useTemplateSelection() {
   const templates = useTemplates();
 
   const [chosen, setChosen] = useState<TemplateSelection | null>(null);
 
-  const selection = chosen ?? defaultSelection(templates.data);
+  const selection = chosen ?? { templateId: null };
 
   const all = [...(templates.data?.official ?? []), ...(templates.data?.mine ?? [])];
 

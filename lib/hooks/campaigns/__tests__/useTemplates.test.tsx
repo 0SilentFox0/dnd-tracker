@@ -10,7 +10,7 @@ import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 
 vi.mock("@/lib/api/templates", () => ({ getTemplates: vi.fn() }));
 
-const list = { official: [{ id: "o1", name: "Порожня", description: null, visibility: "official", counts: {} }], mine: [] };
+const list = { official: [{ id: "o1", name: "Heroes", description: null, visibility: "official", counts: {} }], mine: [] };
 
 const setup = () => {
   const client = new QueryClient();
@@ -32,12 +32,13 @@ describe("useTemplates", () => {
     expect(client.getQueryData(campaignKeys.templates())).toEqual(list);
   });
 
-  it("за замовчуванням обирає «Порожня»", async () => {
+  it("за замовчуванням — без шаблону", async () => {
     vi.mocked(getTemplates).mockResolvedValue(list);
 
     const { result } = renderHook(() => useTemplateSelection(), { wrapper: setup().wrapper });
 
-    await waitFor(() => expect(result.current.selection).toEqual({ templateId: "o1" }));
-    expect(result.current.name).toBe("Порожня");
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.selection).toEqual({ templateId: null });
+    expect(result.current.name).toBeUndefined();
   });
 });

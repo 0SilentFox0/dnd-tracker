@@ -144,11 +144,11 @@
 
 ## Офіційні шаблони на prod
 
-Створені 2026-10-28 власником `876ac574-8d80-41c1-9afa-ff7b1aec377b` (`aspizhav@gmail.com`): «5e SRD 5.2» `cmvs6bwhb0001eyice69s0db8` (331 юніт, 498 заклинань, 333 артефакти), «Heroes» `cmvs6njcw0001ey7c7ivm833p` (клон HOMM5 `cmuylhk0c0001ia06lg5eommv`: 153/54/24, без персонажів і боїв), «Порожня» `cmvs6nkp00005ey7ccv9x4hq9`.
+Створені 2026-10-28 власником `876ac574-8d80-41c1-9afa-ff7b1aec377b` (`aspizhav@gmail.com`): «5e SRD 5.2» `cmvs6bwhb0001eyice69s0db8` (331 юніт, 498 заклинань, 333 артефакти), «Heroes» `cmvs6njcw0001ey7c7ivm833p` (клон HOMM5 `cmuylhk0c0001ia06lg5eommv`: 153/54/24, без персонажів і боїв). Шаблон «Порожня» не існує: за замовчуванням і для порожньої кампанії — опція «Без шаблону» (`templateId: null`); Тимчасово створений `cmvs6nkp00005ey7ccv9x4hq9` видалено з prod.
 
 - **Порядок:** репетиція на `prodcopy` → свіжий бекап (`scripts/db/backup-database.sh` з `BACKUP_DATABASE_URL="$DIRECT_URL"`) → `pnpm constructor:srd-template --owner <id> --allow-remote` → `pnpm constructor:official-templates <hommId> --owner <id> --allow-remote`; prod-змінні з `.env.production-db.local` експортуються в середовище.
 - **Не використовувати форму без `--env-file`:** ключі Supabase лежать лише в `.env.local`, без них артефакти SRD падають з `Missing NEXT_PUBLIC_SUPABASE_URL`. `--env-file` не перекриває вже задані змінні, тож `DATABASE_URL` з prod-файлу лишається.
-- **Повторний запуск:** SRD оновлює за назвами, Heroes/Порожня друкують «вже існує»; скрипти довго пишуть у prod (SRD ≈ кілька хвилин).
+- **Повторний запуск:** SRD оновлює за назвами, Heroes друкує «вже існує»; скрипти довго пишуть у prod (SRD ≈ кілька хвилин).
 - **Іконки Heroes** посилаються на префікс HOMM5 у сховищі; кеш довідника — до 300 с (`REFERENCE_REVALIDATE_SECONDS`), шаблони з'являються в майстрі не одразу.
 - `PLATFORM_ADMIN_USER_IDS` у Vercel Production = id власника; діє з наступним деплоєм.
 
