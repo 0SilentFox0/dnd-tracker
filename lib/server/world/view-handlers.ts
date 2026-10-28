@@ -13,6 +13,22 @@ import type { HeroPosition, RevealShape } from "@/types/world";
 
 const viewQuery = worldViewQuerySchema.partial({ mapId: true });
 
+export async function readViewerScope(campaignId: string, heroIds: string[]) {
+  const [allMaps, positionRows, revealRows] = await Promise.all([
+    listWorldMaps(campaignId),
+    prisma.worldPosition.findMany({ where: { campaignId } }),
+    heroIds.length > 0 ? prisma.worldReveal.findMany({ where: { characterId: { in: heroIds } }, select: { mapId: true, characterId: true, shape: true } }) : [],
+  ]);
+
+  const positions: HeroPosition[] = positionRows.map((p) => ({ characterId: p.characterId, mapId: p.mapId, x: p.x, y: p.y }));
+
+  const reveals = revealRows.map((r) => ({ mapId: r.mapId, characterId: r.characterId, shape: r.shape as RevealShape }));
+
+  const root = allMaps.find((m) => !m.parentMarkerId);
+
+  return { allMaps, positions, reveals, root, allowed: knownMapIds(allMaps, heroIds, positions, reveals, root?.id) };
+}
+
 export async function viewHandler(req: Request, campaignId: string) {
   try {
     const access = await requireCampaignAccess(campaignId);
@@ -37,19 +53,9 @@ export async function viewHandler(req: Request, campaignId: string) {
 
     const heroIds = heroes.map((h) => h.id);
 
-    const [allMaps, positionRows, revealRows] = await Promise.all([
-      listWorldMaps(campaignId),
-      prisma.worldPosition.findMany({ where: { campaignId } }),
-      heroIds.length > 0 ? prisma.worldReveal.findMany({ where: { characterId: { in: heroIds } }, select: { mapId: true, characterId: true, shape: true } }) : [],
-    ]);
+    const { allMaps, positions, reveals, root, allowed: known } = await readViewerScope(campaignId, heroIds);
 
-    const positions: HeroPosition[] = positionRows.map((p) => ({ characterId: p.characterId, mapId: p.mapId, x: p.x, y: p.y }));
-
-    const reveals = revealRows.map((r) => ({ mapId: r.mapId, characterId: r.characterId, shape: r.shape as RevealShape }));
-
-    const root = allMaps.find((m) => !m.parentMarkerId);
-
-    const allowed = asHero ? new Set(allMaps.map((m) => m.id)) : knownMapIds(allMaps, heroIds, positions, reveals, root?.id);
+    const allowed = asHero ? new Set(allMaps.map((m) => m.id)) : known;
 
     const heroMap = positions.find((p) => heroIds.includes(p.characterId))?.mapId;
 
