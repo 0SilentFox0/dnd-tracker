@@ -259,11 +259,11 @@ export const materialPage: Adapter = (row, ctx) => {
 
   ctx.issues.push(...rendered.issues);
 
-  const text = rendered.text || stableJson(row);
+  const text = rendered.text;
 
   const id = nestedId(ctx.key);
 
-  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || "Матеріали", played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] } }] }] };
+  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || "Матеріали", played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: text ? [{ type: "paragraph", content: [{ type: "text", text }] }] : [] } }] }] };
 
   return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "" };
 };

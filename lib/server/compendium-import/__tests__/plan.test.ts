@@ -118,6 +118,20 @@ describe("source aware atomic import plan", () => {
     expect(plan.writes).toHaveLength(1);
   });
 
+  it("drops warnings of excluded entries from the plan", () => {
+    const adapted = adaptCompendium({ _meta: { edition: "one", sources: [{ json: "T" }] }, feat: [{ name: "Odd", source: "T", strange: 1 }, { name: "Fine", source: "T", other: 2 }] });
+
+    const excludedKeys = adapted.entries.filter((r) => r.name === "Odd").map((r) => r.key);
+
+    const all = buildImportPlan(adapted, { campaignId: "c", existing: [] });
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], excludedKeys });
+
+    expect(all.warnings.some((w) => w.path.includes("strange"))).toBe(true);
+    expect(plan.warnings.some((w) => w.path.includes("strange"))).toBe(false);
+    expect(plan.warnings.some((w) => w.path.includes("other"))).toBe(true);
+  });
+
   it("does not report LOCAL_CONFLICT when the stored nested subclass only gained schema defaults", () => {
     const meta = { edition: "classic", sources: [{ json: "T" }] };
 

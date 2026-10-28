@@ -70,6 +70,7 @@ function reconcile(body: JsonRecord, existing: ExistingEntry | undefined, entry:
 }
 
 interface PlanState {
+  excludedPaths: string[];
   context: PlanContext;
   writes: PlannedWrite[];
   errors: ImportIssue[];
@@ -315,7 +316,7 @@ function createPlanState(adapted: AdaptedCompendium, context: PlanContext): Plan
 
   const ids = new Map(entries.map((e) => [e.key, existing.get(e.key)?.missing ? fresh(e.key) : existing.get(e.key)?.localId ?? fresh(e.key)]));
 
-  return { context, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map() };
+  return { context, excludedPaths, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map() };
 }
 
 export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext): ImportPlan {
@@ -326,7 +327,7 @@ export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext
 
   const { writes, errors } = ps;
 
-  const warnings = [...adapted.issues.filter((i) => i.severity !== "error"), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
+  const warnings = [...adapted.issues.filter((i) => i.severity !== "error" && !ps.excludedPaths.some((p) => i.path === p || i.path.startsWith(`${p}.`))), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
 
   return { writes, errors, warnings, hash: digest({ version: ADAPTER_VERSION, writes, errors, baseline: context.existing.map((r) => [r.key, r.localId, r.body]), bindings: context.bindings ?? {}, settingsHash: context.settingsHash }) };
 }
