@@ -24,6 +24,12 @@ const defaultAttacks = (names: Ruleset["defaultAttacks"], fiveE: boolean): Extra
   { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
+const weaponCategoryOf = (description: string | null | undefined): ExtractedAttack["weaponCategory"] => {
+  const m = /^\s*(simple|martial)\b/i.exec(description ?? "");
+
+  return m ? (m[1].toLowerCase() as "simple" | "martial") : undefined;
+};
+
 export function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
   artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
@@ -200,6 +206,7 @@ function extractWeaponAttacks(
       ...(versatileDice && { versatileDice }),
       ...(isOffHand && { hand: "off" as const }),
       ...(damageBonus !== 0 && { damageBonus }),
+      ...(fiveE && weaponCategoryOf(weapon.description) && { weaponCategory: weaponCategoryOf(weapon.description) }),
     });
   }
 

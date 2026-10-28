@@ -1,6 +1,7 @@
-import { CORE_ACTION_REGISTRY, type CoreActionKey } from "./registry";
+import { CORE_ACTION_REGISTRY, type CoreActionDef, type CoreActionKey } from "./registry";
 
-import { isActive, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
@@ -13,6 +14,14 @@ export interface CoreActionAvailability {
 }
 
 const STAND_UP_COST_DIVISOR = 2;
+
+const CUNNING_ACTIONS: readonly CoreActionKey[] = ["dash", "disengage", "hide"];
+
+export function coreActionCost(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[]): CoreActionDef["cost"] {
+  const { cost } = CORE_ACTION_REGISTRY[key];
+
+  return cost === "action" && CUNNING_ACTIONS.includes(key) && findFlags(withSelf(participants, actor), actor.basicInfo.id, "cunningAction").length > 0 ? "bonusAction" : cost;
+}
 
 export const isAttackAction = (key: CoreActionKey) => key === "grapple" || key === "shove";
 
@@ -55,7 +64,11 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
 }
 
 export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): CoreActionAvailability {
-  if (CORE_ACTION_REGISTRY[key].cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: "Дію вже витрачено" };
+  const cost = coreActionCost(key, actor, participants);
+
+  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: "Бонусну дію вже використано" };
+
+  if (cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: "Дію вже витрачено" };
 
   const reason = validateCoreAction(key, actor, participants, map);
 

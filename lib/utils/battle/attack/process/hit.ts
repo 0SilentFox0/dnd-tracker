@@ -76,6 +76,10 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   settleDowned(flow, targetId, attackerId);
 
+  const hpBeforeHit = getP(flow, targetId).combatStats.currentHp;
+
+  const messagesBeforeHit = flow.messages.length;
+
   fire(flow, {
     type: "hit",
     actorId: attackerId,
@@ -85,6 +89,10 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
     ...eventRollMode(p.attackRoll),
   });
+
+  const abilityDamage = Math.max(0, hpBeforeHit - getP(flow, targetId).combatStats.currentHp);
+
+  const abilityLines = abilityDamage > 0 ? abilityDamageLines(flow.messages.slice(messagesBeforeHit), getP(flow, targetId).basicInfo.name, abilityDamage) : [];
 
   applyFireWave(flow, attackerId, targetId, hitDamage.totalFinalDamage);
 
@@ -108,7 +116,31 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 
-  return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
+  if (abilityDamage <= 0) return { hitDamage, vampirismHeal: vampirism.vampirismHeal };
+
+  const total = hitDamage.damageCalculation.totalDamage + abilityDamage;
+
+  return {
+    hitDamage: {
+      ...hitDamage,
+      physicalDamage: hitDamage.physicalDamage + abilityDamage,
+      totalFinalDamage: hitDamage.totalFinalDamage + abilityDamage,
+      damageCalculation: { ...hitDamage.damageCalculation, totalDamage: total, breakdown: [...hitDamage.damageCalculation.breakdown, ...abilityLines] },
+    },
+    vampirismHeal: vampirism.vampirismHeal,
+  };
+}
+
+const ABILITY_HIT_LINE = /^💥 (.+?): .+ −(\d+) HP$/;
+
+function abilityDamageLines(messages: string[], targetName: string, total: number): string[] {
+  const lines = messages.flatMap((m) => {
+    const match = ABILITY_HIT_LINE.exec(m);
+
+    return match && m.includes(`${match[1]}: ${targetName} −`) ? [`${match[1]}: +${match[2]}`] : [];
+  });
+
+  return lines.length > 0 ? lines : [`Вміння: +${total}`];
 }
 
 function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, hitDamage: number): void {

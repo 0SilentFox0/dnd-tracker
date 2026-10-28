@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { retaliate, retaliateTimes, swordUnit } from "./helpers";
+import { retaliate, retaliateTimes, SWORD, swordUnit } from "./helpers";
 
 import { extraRetaliations, fireWave } from "@/data/library/unit-abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -9,7 +9,9 @@ import { makeEffect, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtu
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -18,6 +20,23 @@ const defender = (abilities?: ResolvedAbility[]) => swordUnit("d", ParticipantSi
 const attacker = () => swordUnit("a", ParticipantSide.ALLY);
 
 const startTurn = (d: BattleParticipant) => processStartOfTurn(d, 2, [attacker(), d]).participant;
+
+describe("перемикач rules.actions.retaliation", () => {
+  const off = parseRules({ actions: { retaliation: false } });
+
+  it("вимкнено: ціль не відповідає і не витрачає реакцію", () => {
+    const res = resolveRetaliation({ participants: [attacker(), defender()], attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85), rules: off });
+
+    expect(res).toBeNull();
+  });
+
+  it("увімкнено (і за відсутності правил): відповідає, як раніше", () => {
+    const on = parseRules({});
+
+    expect(resolveRetaliation({ participants: [attacker(), defender()], attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85), rules: on })).not.toBeNull();
+    expect(retaliate([attacker(), defender()])).not.toBeNull();
+  });
+});
 
 describe("відсіч і втрачена реакція", () => {
   it("no_reaction на початку ходу блокує відсіч", () => {

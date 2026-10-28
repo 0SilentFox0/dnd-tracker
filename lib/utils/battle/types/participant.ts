@@ -28,6 +28,7 @@ export type ExtractedAttack = {
   versatileDice?: string;
   hand?: "off";
   damageBonus?: number;
+  weaponCategory?: "simple" | "martial";
 };
 
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{

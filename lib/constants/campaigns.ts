@@ -28,6 +28,8 @@ export interface DmSection {
   subtitle?: string;
   templateVisible: boolean;
   requiresClasses?: boolean;
+  /** skill libraries have no use in 5e class campaigns */
+  hiddenWithClasses?: boolean;
   /** campaign page tile: in every kind, only on templates, or none (menu only) */
   tile: "all" | "template" | "none";
 }
@@ -38,8 +40,8 @@ export const DM_SECTIONS: readonly DmSection[] = [
   { path: "units", label: "Юніти", title: "NPC Юніти", icon: Skull, subtitle: "Управління мобами та юнітами", templateVisible: true, tile: "all" },
   { path: "spells", label: "Заклинання", icon: Sparkles, subtitle: "База заклинань кампанії", templateVisible: true, tile: "all" },
   { path: "artifacts", label: "Артефакти", icon: Gem, subtitle: "Управління артефактами та сетами", templateVisible: true, tile: "all" },
-  { path: "skills", label: "Скіли", title: "Бібліотека Скілів", icon: BookOpen, subtitle: "Управління скілами та їх ефектами", templateVisible: true, tile: "all" },
-  { path: "skill-trees", label: "Дерева прокачки", title: "Дерева Прокачки", icon: GitBranch, subtitle: "Налаштування дерев прокачки для рас", templateVisible: true, tile: "all" },
+  { path: "skills", label: "Скіли", title: "Бібліотека Скілів", icon: BookOpen, subtitle: "Управління скілами та їх ефектами", templateVisible: true, hiddenWithClasses: true, tile: "all" },
+  { path: "skill-trees", label: "Дерева прокачки", title: "Дерева Прокачки", icon: GitBranch, subtitle: "Налаштування дерев прокачки для рас", templateVisible: true, hiddenWithClasses: true, tile: "all" },
   { path: "races", label: "Раси", title: "Ігрові Раси", icon: Shield, subtitle: "Управління расами та їх здібностями", templateVisible: true, tile: "all" },
   { path: "classes", label: "Класи", icon: GraduationCap, subtitle: "Класи, підкласи і вміння за рівнями", templateVisible: true, requiresClasses: true, tile: "all" },
   { path: "backgrounds", label: "Передісторії", icon: Award, subtitle: "Походження героя, навички й стартові вибори", templateVisible: true, requiresClasses: true, tile: "all" },
@@ -60,7 +62,7 @@ interface DmSectionContext {
 }
 
 export const dmSectionsFor = ({ isTemplate, classesEnabled }: DmSectionContext): DmSection[] =>
-  DM_SECTIONS.filter((s) => (!isTemplate || s.templateVisible) && (!s.requiresClasses || classesEnabled));
+  DM_SECTIONS.filter((s) => (!isTemplate || s.templateVisible) && (!s.requiresClasses || classesEnabled) && !(s.hiddenWithClasses && classesEnabled));
 
 export const dmTilesFor = (ctx: DmSectionContext): DmSection[] =>
   dmSectionsFor(ctx).filter((s) => s.tile === "all" || (s.tile === "template" && ctx.isTemplate));

@@ -105,20 +105,20 @@ export function spentSlots(p: BattleParticipant): Record<string, number> {
 
 function battleCharges(prev: CharacterResources["charges"], p: BattleParticipant): CharacterResources["charges"] {
   const perRest = [
-    ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, rest: a.limits.perRest.rest }] : [])),
+    ...p.battleData.resolvedAbilities.flatMap((a) => (a.limits?.perRest ? [{ key: a.key, rest: a.limits.perRest.rest, regain: a.limits.perRest.shortRegain }] : [])),
     ...Object.entries(p.battleData.pools ?? {})
       .filter(([key]) => !isConsumablePool(key))
-      .map(([key, pool]) => ({ key, rest: pool.rest })),
+      .map(([key, pool]) => ({ key, rest: pool.rest, regain: undefined })),
   ];
 
   const own = new Set(perRest.map((a) => a.key));
 
   const kept = Object.entries(prev ?? {}).filter(([k]) => !own.has(k));
 
-  const used = perRest.flatMap(({ key, rest }) => {
+  const used = perRest.flatMap(({ key, rest, regain }) => {
     const n = p.battleData.abilityUsage?.[key]?.battle ?? 0;
 
-    return n > 0 ? [[key, { used: n, rest }] as const] : [];
+    return n > 0 ? [[key, { used: n, rest, ...(regain && { regain }) }] as const] : [];
   });
 
   return Object.fromEntries([...kept, ...used]);

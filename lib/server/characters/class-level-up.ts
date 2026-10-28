@@ -3,11 +3,12 @@ import type { Character } from "@prisma/client";
 import { z } from "zod";
 
 import "server-only";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, multiclassRequirementMessage } from "@/lib/constants/api-errors";
 import { PicksSchema } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { applyClasses, type ClassesApplied } from "@/lib/server/characters/apply-classes";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { multiclassBlockedBy } from "@/lib/utils/characters/classes/multiclass";
 import { nextClassEntries } from "@/lib/utils/characters/level-up/class-level-up";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 
@@ -35,7 +36,7 @@ export async function readLevelUpPick(request: Request): Promise<LevelUpPick | N
 
 interface ClassLevelUpInput {
   campaign: { id: string; maxLevel: number; rules: Ruleset };
-  character: Pick<Character, "classes" | "spellcastingAbility">;
+  character: Pick<Character, "classes" | "spellcastingAbility" | "strength" | "dexterity" | "constitution" | "intelligence" | "wisdom" | "charisma">;
   pick: LevelUpPick;
 }
 
@@ -66,6 +67,14 @@ export async function classLevelUp({ campaign, character, pick }: ClassLevelUpIn
   });
 
   if (!applied.ok) return errorResponse(applied.error, applied.status);
+
+  const byId = applied.classesById;
+
+  if (!existing && byId?.[pick.classId]) {
+    const blocked = multiclassBlockedBy(entries.flatMap((e) => byId[e.classId] ?? []), byId[pick.classId], character);
+
+    if (blocked) return errorResponse(multiclassRequirementMessage(blocked), 422);
+  }
 
   const raised = next.find((e) => e.classId === pick.classId);
 

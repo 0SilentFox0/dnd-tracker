@@ -59,6 +59,8 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if ((!provoked && input.attackRoll.isCriticalFail) || input.criticalEffect?.effect.type === "ignore_reactions") return null;
 
+  if (input.rules?.actions.retaliation === false && !provoked) return null;
+
   const defender = findParticipant(participants, defenderId);
 
   const attacker = findParticipant(participants, attackerId);
