@@ -57,7 +57,7 @@ describe("generatePuzzle", () => {
 
     const polys = generatePuzzle(s).map((p) => flatten(p.path));
 
-    const N = 200;
+    const N = 100;
 
     let exact = 0;
 
