@@ -252,7 +252,6 @@ export interface CharacterSheet {
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
   classTable?: string[];
-  classFeatureDescriptions?: Array<{ source: string; level: number; description: string }>;
   classProgression?: ClassProgression[];
   pact: { level: number; max: number; current: number } | null;
   slots: { level: number; count: number; current: number }[];

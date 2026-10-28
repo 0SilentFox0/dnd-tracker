@@ -33,7 +33,6 @@ describe("SkillsTab class map", () => {
   it("renders the map instead of the old feature list and opens choices on pick", () => {
     current.sheet = {
       ...sheetFixture,
-      classFeatureDescriptions: [{ source: "Old", level: 1, description: "x" }],
       classProgression: [buildClassProgression(cls, { classId: "f", level: 4 })],
       choices: { pending: 1, canEdit: true, lineage: null, feats: [], options: [], spellSources: {}, expertise: [] },
     };
