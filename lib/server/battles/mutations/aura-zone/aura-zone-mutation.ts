@@ -18,7 +18,7 @@ export type AuraZoneBody = z.infer<typeof auraZoneSchema>;
 
 export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody): MutationResult {
   const owner = requireActor(ctx, data.participantId, {
-    missing: "Учасника немає в бою",
+    missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
     forbidden: API_ERRORS.FORBIDDEN,
     inactive: { code: "participant_dead", message: "Учасник не може діяти" },
   });

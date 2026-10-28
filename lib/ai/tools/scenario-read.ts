@@ -4,7 +4,7 @@ import { AiToolError, defineTool } from "./define";
 
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
-import { scenarioPageNotInCampaignMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { searchScenarioPages } from "@/lib/server/scenario/search";
@@ -28,7 +28,7 @@ export function contentToMarkdown(title: string, content: ScenarioContent, secti
 export async function loadPageForAi(campaignId: string, pageId: string) {
   const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { id: true, title: true, kind: true, content: true } });
 
-  if (!page) throw new AiToolError(scenarioPageNotInCampaignMessage(pageId));
+  if (!page) throw new AiToolError(API_ERRORS.SCENARIO_PAGE_NOT_IN_CAMPAIGN, { id: pageId });
 
   return { ...page, content: readContent(page.content) };
 }

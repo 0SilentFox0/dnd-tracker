@@ -1,8 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack, withoutBattle } from "../show-command";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { ShowState, Slide } from "@/types/show";

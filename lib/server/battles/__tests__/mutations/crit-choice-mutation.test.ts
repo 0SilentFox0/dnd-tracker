@@ -1,8 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin as baseGoblin, hero as baseHero } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, BattleStatus } from "@/lib/constants/battle";
 import { critChoiceSchema } from "@/lib/schemas";
 import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";

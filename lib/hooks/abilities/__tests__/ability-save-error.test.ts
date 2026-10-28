@@ -1,7 +1,7 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { ApiError } from "@/lib/api/client";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { abilitySaveError } from "@/lib/hooks/abilities";
 
 describe("abilitySaveError", () => {

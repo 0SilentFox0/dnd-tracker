@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AiToolError, defineTool } from "./define";
 
 import "server-only";
-import { characterNotInCampaignMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ACTIVE_CHARACTER, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { readContent } from "@/lib/server/scenario/page-store";
@@ -53,7 +53,7 @@ export const readCharacterTool = defineTool({
       },
     });
 
-    if (!c) throw new AiToolError(characterNotInCampaignMessage(id));
+    if (!c) throw new AiToolError(API_ERRORS.CHARACTER_NOT_IN_CAMPAIGN, { id });
 
     const bio = await prisma.scenarioPage.findFirst({ where: { campaignId: ctx.campaignId, characterId: id, kind: "hero" }, select: { content: true } });
 

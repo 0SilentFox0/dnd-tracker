@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { discardSlideFiles } from "@/lib/ai/proposal-media";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -93,7 +94,7 @@ describe("scenario pages API", () => {
     const res = await GET(req("GET"), params({ pageId: "p1" }));
 
     expect(res.status).toBe(500);
-    expect((await res.json()).error).toMatch(/пошкоджено/);
+    expect((await res.json()).errorKey).toBe(API_ERRORS.SCENARIO_CONTENT_INVALID);
   });
 
   it("PUT з правильною версією: знімок, version+1, searchText перераховано", async () => {

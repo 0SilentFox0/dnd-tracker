@@ -14,5 +14,10 @@
   "app/error.tsx",
   "app/not-found.tsx",
   "app/campaigns/**/loading.tsx",
-  "app/settings/password/**"
+  "app/settings/password/**",
+  "lib/utils/api/**",
+  "lib/server/content/errors.ts",
+  "lib/api/client.ts",
+  "lib/constants/api-errors.ts",
+  "lib/zod/**"
 ]

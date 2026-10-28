@@ -1,7 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 vi.mock("@/lib/db", async () => {
   const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");

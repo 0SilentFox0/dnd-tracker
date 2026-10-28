@@ -1,6 +1,6 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { assertExecutionScope, requireDmMember } from "@/lib/server/battles/guards";
 import type { Actor } from "@/lib/utils/api/actor";
 

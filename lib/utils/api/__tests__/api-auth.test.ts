@@ -1,9 +1,9 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM } from "../api-auth";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
 
 const getUser = vi.hoisted(() => vi.fn());

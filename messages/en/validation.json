@@ -6,5 +6,7 @@
   "invalid": "Invalid value",
   "passwordMismatch": "Passwords do not match",
   "min": "At least {minimum}",
-  "max": "At most {maximum}"
+  "max": "At most {maximum}",
+  "itemConsumableConflict": "A consumable item cannot be a property and does not recharge",
+  "youtubeUrlInvalid": "Could not recognize the YouTube link"
 }

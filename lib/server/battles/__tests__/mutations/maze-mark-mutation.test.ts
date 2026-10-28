@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { mazeMarkMutation, mazeMarkSchema } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { markColor } from "@/lib/utils/battle/modes/maze";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
-import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { MazeConfig } from "@/types/battle";
@@ -58,7 +58,7 @@ describe("maze-mark mutation", () => {
     );
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(MAZE_TEXTS.dark);
+    expect((await res.json()).error).toBe(API_ERRORS.MAZE_DARK);
     expect(mutate).not.toHaveBeenCalled();
   });
 });

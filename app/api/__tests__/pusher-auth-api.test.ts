@@ -1,6 +1,6 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { battleChannelName, showChannelName, userChannelName } from "@/lib/pusher/channels";
 
 const authorizeChannel = vi.hoisted(() => vi.fn(() => ({ auth: "signed" })));

@@ -14,7 +14,14 @@ import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate
 
 export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
 
-export class AiToolError extends Error {}
+export class AiToolError extends Error {
+  constructor(
+    message: string,
+    readonly params?: ErrorParams,
+  ) {
+    super(message);
+  }
+}
 
 export type AiToolDef = {
   name: string;
@@ -84,9 +91,7 @@ export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput
     if (error instanceof ContentError || error instanceof AiToolError) {
       const t = await requestTranslator();
 
-      const params = error instanceof ContentError ? error.params : undefined;
-
-      return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
+      return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params: error.params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
     }
 
     console.error(`tool ${def.name} failed`);

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/server/characters/choices/load-refs", () => ({ loadChoiceRefs: vi.fn() }));
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { characterClassMode, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
@@ -36,7 +37,7 @@ describe("resolveCharacterChoices", () => {
     if (result.ok) return;
 
     expect(result.response.status).toBe(422);
-    expect(await result.response.json()).toMatchObject({ error: expect.stringContaining("Навичка"), issues: [{ code: "SKILL_NOT_ALLOWED", path: "raceChoices.keen-senses" }] });
+    expect(await result.response.json()).toMatchObject({ error: `${API_ERRORS.SKILL_NOT_ALLOWED} ${JSON.stringify({ detail: ": arcana" })}`, issues: [{ code: "SKILL_NOT_ALLOWED", path: "raceChoices.keen-senses" }] });
   });
 
   it("reapplying ASI choices has zero delta; swapping only moves the selected points", async () => {

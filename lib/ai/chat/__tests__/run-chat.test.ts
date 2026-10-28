@@ -2,6 +2,8 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 vi.mock("@/lib/ai/threads", () => ({ loadThread: vi.fn(), loadMessages: vi.fn(async () => []), appendMessage: vi.fn() }));
 vi.mock("@/lib/ai/credentials", () => {
   class AiKeyUnreadableError extends Error {}
@@ -142,7 +144,7 @@ describe("runChat", () => {
     const res = await runChat(args);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toContain("збережіть ключ заново");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_KEY_UNREADABLE);
   });
 
   it("інструменти отримують сигнал, що спрацьовує разом із клієнтським abort", async () => {
@@ -193,7 +195,7 @@ describe("runChat", () => {
     const res = await runChat(args);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toContain("Додайте ключ");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_KEY_MISSING);
   });
 
   it("помилка провайдера → український текст у стрімі, без тексту оригіналу", async () => {
@@ -205,7 +207,7 @@ describe("runChat", () => {
 
     const body = await (await runChat(args, { model: failing })).text();
 
-    expect(body).toContain("Ключ недійсний");
+    expect(body).toContain(API_ERRORS.AI_KEY_INVALID);
     expect(body).not.toContain("sk-test");
   });
 

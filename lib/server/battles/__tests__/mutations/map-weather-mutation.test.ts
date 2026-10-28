@@ -1,8 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { CLEAR_WEATHER_LABEL, WEATHER_KINDS, WEATHER_LABELS } from "@/lib/constants/battle-weather";
 import { mapWeatherMutation, mapWeatherSchema } from "@/lib/server/battles/mutations/map-weather/map-weather-mutation";

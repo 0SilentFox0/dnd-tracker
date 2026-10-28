@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { attackBodySchema } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
@@ -52,7 +53,7 @@ describe("темрява в лабіринті", () => {
 
       const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedByMode: true, schema, mutate }, body);
 
-      expect(out).toMatchObject({ status: 422, json: { code: "action_rejected", error: MAZE_TEXTS.dark } });
+      expect(out).toMatchObject({ status: 422, json: { code: "action_rejected", error: API_ERRORS.MAZE_DARK } });
       expect(mutate).not.toHaveBeenCalled();
     }
   });
@@ -71,7 +72,7 @@ describe("темрява в лабіринті", () => {
   });
 
   it("власний крок гравця в темряві — відмова; розстановка ДМ — дозволена", () => {
-    expect(() => moveMutation(ctx(mapOf()), { participantId: "hero", to: { x: 0, y: 1 } })).toThrow(expect.objectContaining({ code: "action_rejected", message: MAZE_TEXTS.dark }));
+    expect(() => moveMutation(ctx(mapOf()), { participantId: "hero", to: { x: 0, y: 1 } })).toThrow(expect.objectContaining({ code: "action_rejected", message: API_ERRORS.MAZE_DARK }));
 
     const dm = ctx(mapOf(), { userId: "dm", isDM: true, scene: { ...context().scene, turnIndex: 1 } });
 

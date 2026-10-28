@@ -1,7 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bodyErrorMessage, campaignGet, campaignRequest, request } from "../client";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 describe("campaignRequest", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -35,7 +36,7 @@ describe("bodyErrorMessage / request errors", () => {
 
   it("error + issues — повідомлення з деталями", () => {
     expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
-      "Некоректні дані запиту: Required; Too short",
+      `${API_ERRORS.INVALID_BODY}: Required; Too short`,
     );
   });
 
@@ -47,7 +48,7 @@ describe("bodyErrorMessage / request errors", () => {
     ];
 
     expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues }, "x")).toBe(
-      "Некоректні дані запиту: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x",
+      `${API_ERRORS.INVALID_BODY}: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x`,
     );
   });
 

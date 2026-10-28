@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { CONTENT_ID_RE } from "./ids";
 
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { SYNC_TABLE_SCOPES } from "@/lib/constants/source-sync";
 import { type CompendiumBundle, type CompendiumBundleDb,CompendiumBundleSchema } from "@/lib/server/compendium-import/bundle";
 
@@ -142,6 +143,7 @@ export class BundleInvalidError extends Error {
   constructor(
     message: string,
     public issues?: unknown,
+    public params?: ErrorParams,
   ) {
     super(message);
   }

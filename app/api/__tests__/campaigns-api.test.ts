@@ -1,9 +1,9 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { beforeEach,describe, expect, it, vi } from "vitest";
 
 import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules";

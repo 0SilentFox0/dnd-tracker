@@ -1,8 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/mcp/route";
 import { hashToken } from "@/lib/ai/api-tokens";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));

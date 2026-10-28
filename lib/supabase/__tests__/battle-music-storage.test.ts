@@ -1,6 +1,6 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import {
   createTrackUploadTicket,
   removeTrackFile,
@@ -52,7 +52,7 @@ describe("battle-music storage", () => {
     expect(await verifyUploadedTrack(PATH)).toEqual({ ok: true, value: `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}` });
 
     bucketApi.info.mockResolvedValueOnce({ data: { size: 20_000_000, contentType: "audio/mpeg" }, error: null });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: "Потрібен файл MP3 або M4A до 10 МБ" });
+    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
     expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
 
     bucketApi.info.mockResolvedValueOnce({ data: null, error: { message: "not found" } });

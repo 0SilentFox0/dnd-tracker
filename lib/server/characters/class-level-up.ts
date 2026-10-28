@@ -65,7 +65,7 @@ export async function classLevelUp({ campaign, character, pick }: ClassLevelUpIn
     spellcastingAbility: character.spellcastingAbility,
   });
 
-  if (!applied.ok) return errorResponse(applied.error, applied.status);
+  if (!applied.ok) return errorResponse(applied.error, applied.status, undefined, applied.params);
 
   const raised = next.find((e) => e.classId === pick.classId);
 

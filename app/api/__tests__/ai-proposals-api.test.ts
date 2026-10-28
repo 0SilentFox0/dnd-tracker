@@ -1,4 +1,3 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -6,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as preloadedModule1 from "@/app/api/campaigns/[id]/ai/ai-handlers";
 import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route";
 import * as preloadedModule2 from "@/app/api/campaigns/[id]/ai/proposals/route";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";

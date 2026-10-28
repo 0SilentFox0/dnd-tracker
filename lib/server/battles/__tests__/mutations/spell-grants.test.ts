@@ -1,9 +1,9 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { Spell } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 import { context, goblin, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";

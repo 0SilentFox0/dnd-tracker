@@ -36,7 +36,7 @@ export async function resolveCharacterChoices(input: {
 
   const plan = planChoices({ before: input.before, after: input.after, refs, classMode, isDM: input.isDM, level: input.character.level, scores, skills: input.character.skills });
 
-  if (!plan.ok) return { ok: false, response: errorResponse(plan.message, plan.status, plan.issues), error: new ContentError(plan.message, plan.status, plan.issues) };
+  if (!plan.ok) return { ok: false, response: errorResponse(plan.message, plan.status, plan.issues, plan.params), error: new ContentError(plan.message, plan.status, plan.issues, plan.params) };
 
   return {
     ok: true,

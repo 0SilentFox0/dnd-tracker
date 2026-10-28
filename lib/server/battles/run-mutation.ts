@@ -41,7 +41,7 @@ export function battleErrorResponse(err: unknown): NextResponse {
   if (err instanceof ContentError) return apiErrorJson({ error: err.message, params: err.params }, { status: err.status });
 
   if (err instanceof BattleRuleError) {
-    return apiErrorJson({ code: err.code, error: err.message }, { status: 422 });
+    return apiErrorJson({ code: err.code, error: err.message, params: err.params }, { status: 422 });
   }
 
   console.error("[battle-pipeline] unexpected error", err);

@@ -1,5 +1,4 @@
 // @vitest-environment happy-dom
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { renderToString } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -40,7 +39,7 @@ describe("ScenarioShowDock", () => {
   it("рендериться при прив'язці або запущеному показі", () => {
     const { unmount } = render(<ScenarioShowDock campaignId="c" pageId="pg" content={bound} play={play(null)} />);
 
-    expect(screen.getByText(API_ERRORS.SHOW_NOT_RUNNING)).toBeTruthy();
+    expect(screen.getByText("Показ не запущено")).toBeTruthy();
     unmount();
 
     render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: "d", deckTitle: "Д", slide: { id: "s1", imageUrl: "https://x/a.webp", title: "Собор" }, nextImageUrl: null, audio: null, seq: 1 })} />);

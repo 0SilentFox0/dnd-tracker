@@ -1,7 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { errorMessage } from "../error-message";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 describe("errorMessage", () => {
   it("текст помилки або запасний", () => {

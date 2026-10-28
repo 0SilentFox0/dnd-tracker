@@ -1,6 +1,8 @@
 import { lookup } from "node:dns/promises";
 import { BlockList, isIP } from "node:net";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 export class SafeFetchError extends Error {}
 
 const MAX_REDIRECTS = 3;
@@ -114,21 +116,21 @@ export async function assertPublicHttpsUrl(rawUrl: string, signal?: AbortSignal)
   try {
     url = new URL(rawUrl);
   } catch {
-    throw new SafeFetchError("Невалідне посилання");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INVALID_URL);
   }
 
   if (url.protocol !== "https:") {
-    throw new SafeFetchError("Дозволені лише https-посилання");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_HTTPS_ONLY);
   }
 
   const host = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
 
   if (host === "localhost" || host.endsWith(".localhost")) {
-    throw new SafeFetchError("Посилання на внутрішню адресу заборонене");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
   }
 
   if (isIP(host)) {
-    if (isPrivateIp(host)) throw new SafeFetchError("Посилання на внутрішню адресу заборонене");
+    if (isPrivateIp(host)) throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
 
     return url;
   }
@@ -138,13 +140,13 @@ export async function assertPublicHttpsUrl(rawUrl: string, signal?: AbortSignal)
   try {
     addrs = await withSignal(lookup(host, { all: true }), signal);
   } catch {
-    if (signal?.aborted) throw new SafeFetchError("Час очікування завантаження вичерпано");
+    if (signal?.aborted) throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TIMEOUT);
 
-    throw new SafeFetchError("Не вдалося визначити адресу сервера");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_DNS_FAILED);
   }
 
   if (addrs.length === 0 || addrs.some((a) => isPrivateIp(a.address))) {
-    throw new SafeFetchError("Посилання на внутрішню адресу заборонене");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
   }
 
   return url;
@@ -174,7 +176,7 @@ export async function safeFetchBuffer(
 
         await res.body?.cancel().catch(() => {});
 
-        if (!loc) throw new SafeFetchError(`Не вдалося завантажити зображення (${res.status})`);
+        if (!loc) throw new SafeFetchError(API_ERRORS.SAFE_FETCH_FAILED);
 
         current = new URL(loc, url).toString();
 
@@ -191,7 +193,7 @@ export async function safeFetchBuffer(
 
       if (len && parseInt(len, 10) > opts.maxBytes) {
         await res.body?.cancel().catch(() => {});
-        throw new SafeFetchError("Файл завеликий (макс. 5 МБ)");
+        throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TOO_LARGE);
       }
 
       const chunks: Uint8Array[] = [];
@@ -210,7 +212,7 @@ export async function safeFetchBuffer(
 
           if (total > opts.maxBytes) {
             await reader.cancel().catch(() => {});
-            throw new SafeFetchError("Файл завеликий (макс. 5 МБ)");
+            throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TOO_LARGE);
           }
 
           chunks.push(value);
@@ -220,13 +222,13 @@ export async function safeFetchBuffer(
       return { status: res.status, contentType: res.headers.get("content-type"), body: Buffer.concat(chunks) };
     }
 
-    throw new SafeFetchError("Забагато перенаправлень");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TOO_MANY_REDIRECTS);
   } catch (e) {
     if (e instanceof SafeFetchError) throw e;
 
-    if (controller.signal.aborted) throw new SafeFetchError("Час очікування завантаження вичерпано");
+    if (controller.signal.aborted) throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TIMEOUT);
 
-    throw new SafeFetchError("Не вдалося завантажити зображення");
+    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_FAILED);
   } finally {
     clearTimeout(timer);
   }

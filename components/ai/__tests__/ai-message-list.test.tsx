@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { AiMessageList } from "@/components/ai/AiMessageList";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 describe("AiMessageList", () => {
   it("текст, чип інструменту з параметром, помилка", () => {
@@ -13,7 +13,7 @@ describe("AiMessageList", () => {
           { id: "1", role: "user", parts: [{ type: "text", text: "Хто такий Фенікс?" }] },
           { id: "2", role: "assistant", parts: [{ type: "tool-search_reference", toolCallId: "c1", state: "output-available", input: { kind: "unit", query: "Фенікс" }, output: "[]" }, { type: "text", text: "Птах вогню." }] },
         ] as never}
-        error=API_ERRORS.AI_RATE_LIMIT
+        error={API_ERRORS.AI_RATE_LIMIT}
         onRedo={() => {}}
       />,
     );

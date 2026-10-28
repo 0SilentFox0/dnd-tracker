@@ -7,12 +7,12 @@
  * які короткозамикають до processAttack.
  */
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { findAttack, requestedTargetIds } from "../request";
 import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";

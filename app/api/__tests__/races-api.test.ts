@@ -32,6 +32,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 import * as one from "@/app/api/campaigns/[id]/races/[raceId]/route";
 import * as list from "@/app/api/campaigns/[id]/races/route";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const ctx = { params: Promise.resolve({ id: "c1" }) };
 
@@ -129,7 +130,7 @@ describe("races API", () => {
     const res = (await one.PATCH(req("PATCH", { name: "ЕЛЬФ" }), ctxOne)) as NextResponse;
 
     expect(res.status).toBe(409);
-    expect(((await getResponseJson(res)) as { error: string }).error).toBe("Раса «ЕЛЬФ» уже є в кампанії");
+    expect(((await getResponseJson(res)) as { error: string }).error).toBe(`${API_ERRORS.RACE_NAME_TAKEN} ${JSON.stringify({ name: "ЕЛЬФ" })}`);
     expect(db.race.update).not.toHaveBeenCalled();
     expect(db.character.updateMany).not.toHaveBeenCalled();
     expect(db.skillTree.updateMany).not.toHaveBeenCalled();

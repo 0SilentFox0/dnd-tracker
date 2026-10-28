@@ -34,7 +34,7 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
     spellcastingAbility: data.spellcastingAbility ?? null,
   });
 
-  if (!applied.ok) throw new ContentError(applied.error, applied.status);
+  if (!applied.ok) throw new ContentError(applied.error, applied.status, undefined, applied.params);
 
   const fromClasses = applied.data;
 

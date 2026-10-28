@@ -21,9 +21,9 @@ export interface PlanInput {
 
 export type PlanResult =
   | { ok: true; state: ChoicesState; subrace: string | null | undefined; scores: Partial<Record<AbilityKey, number>> }
-  | { ok: false; status: 403 | 422; code: ChoiceErrorCode; message: string; issues: ChoiceIssue[] };
+  | { ok: false; status: 403 | 422; code: ChoiceErrorCode; message: string; params?: ChoiceIssue["params"]; issues: ChoiceIssue[] };
 
-const failWith = (status: 403 | 422, issues: ChoiceIssue[]): PlanResult => ({ ok: false, status, code: issues[0].code, message: issues[0].message, issues });
+const failWith = (status: 403 | 422, issues: ChoiceIssue[]): PlanResult => ({ ok: false, status, code: issues[0].code, message: issues[0].message, params: issues[0].params, issues });
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a ?? []) === JSON.stringify(b ?? []);
 
@@ -40,7 +40,7 @@ export function planChoices(input: PlanInput): PlanResult {
 
   if (after.backgroundId && (!classMode || !background)) return failWith(422, [choiceIssue("backgroundId", !classMode ? "CHOICES_NEED_CLASSES" : "CHOICE_UNKNOWN")]);
 
-  if (background && after.feats.some((f) => f.source === "origin")) return failWith(422, [choiceIssue("feats", "ORIGIN_FEAT_ONLY_ONE", API_ERRORS.ORIGIN_FEAT_FROM_BACKGROUND)]);
+  if (background && after.feats.some((f) => f.source === "origin")) return failWith(422, [{ path: "feats", code: "ORIGIN_FEAT_ONLY_ONE", message: API_ERRORS.ORIGIN_FEAT_FROM_BACKGROUND }]);
 
   const dmFeats = (s: ChoicesState) => s.feats.filter((f) => f.source === "dm");
 

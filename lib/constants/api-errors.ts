@@ -388,6 +388,32 @@ export const API_ERRORS = {
   ITEM_SPELL_DUPLICATE: "errors.itemSpellDuplicate",
   ITEM_UPCAST_NEEDS_CAST_LEVEL: "errors.itemUpcastNeedsCastLevel",
   ITEM_UPCAST_MAX_BELOW_BASE: "errors.itemUpcastMaxBelowBase",
+  CLASS_NAME_TAKEN: "errors.classNameTaken",
+  FEAT_NAME_TAKEN: "errors.featNameTaken",
+  RACE_NAME_TAKEN: "errors.raceNameTaken",
+  BACKGROUND_NAME_TAKEN: "errors.backgroundNameTaken",
+  SUBCLASS_TOO_EARLY: "errors.subclassTooEarly",
+  MAX_LEVEL_EXCEEDED: "errors.maxLevelExceeded",
+  CHARACTER_MAX_LEVEL_REACHED: "errors.characterMaxLevelReached",
+  BATTLE_NOT_IN_CAMPAIGN: "errors.battleNotInCampaign",
+  CHARACTER_NOT_IN_CAMPAIGN: "errors.characterNotInCampaign",
+  SCENARIO_PAGE_NOT_IN_CAMPAIGN: "errors.scenarioPageNotInCampaign",
+  REFERENCE_ENTRY_MISSING: "errors.referenceEntryMissing",
+  BUNDLE_DUPLICATE_ID: "errors.bundleDuplicateId",
+  BUNDLE_FOREIGN_CONTENT: "errors.bundleForeignContent",
+  CONDITION_IMMUNE: "errors.conditionImmune",
+  CONDITION_ABSENT: "errors.conditionAbsent",
+  ABILITY_COOLDOWN: "errors.abilityCooldown",
+  BATTLE_STATE_CHANGED: "errors.battleStateChanged",
+  MAZE_DARK: "errors.mazeDark",
+  SAFE_FETCH_INVALID_URL: "errors.safeFetchInvalidUrl",
+  SAFE_FETCH_HTTPS_ONLY: "errors.safeFetchHttpsOnly",
+  SAFE_FETCH_INTERNAL_URL: "errors.safeFetchInternalUrl",
+  SAFE_FETCH_TIMEOUT: "errors.safeFetchTimeout",
+  SAFE_FETCH_DNS_FAILED: "errors.safeFetchDnsFailed",
+  SAFE_FETCH_TOO_LARGE: "errors.safeFetchTooLarge",
+  SAFE_FETCH_TOO_MANY_REDIRECTS: "errors.safeFetchTooManyRedirects",
+  SAFE_FETCH_FAILED: "errors.safeFetchFailed",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
@@ -396,34 +422,9 @@ export type ErrorParams = Record<string, string | number>;
 
 export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
   [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
+  [API_ERRORS.TRACK_LIMIT]: { max: MAX_TRACKS_PER_CAMPAIGN },
+  [API_ERRORS.TRACK_FILE_INVALID]: { formats: TRACK_FORMATS_LABEL, maxMb: MAX_TRACK_MB },
+  [API_ERRORS.DECK_SLIDES_LIMIT]: { max: MAX_SLIDES_PER_DECK },
+  [API_ERRORS.DECK_LIMIT]: { max: MAX_DECKS_PER_CAMPAIGN },
+  [API_ERRORS.SLIDE_FILE_INVALID]: { maxMb: MAX_SLIDE_MB },
 };
-
-export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
-
-export const featNameTakenMessage = (name: string) => `Риса «${name}» уже є в кампанії`;
-
-export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;
-
-export const subclassTooEarlyMessage = (level: number) => `Підклас доступний з рівня ${level}`;
-
-export const maxLevelMessage = (max: number) => `Максимальний рівень кампанії — ${max}`;
-
-export const battleNotInCampaignMessage = (id: string) => `Бою ${id} немає в цій кампанії`;
-
-export const characterMaxLevelReachedMessage = (max: number) => `Персонаж досяг максимального рівня ${max}`;
-
-export const backgroundNameTakenMessage = (name: string) => `Передісторія «${name}» вже існує`;
-
-export const bundleDuplicateIdMessage = (key: string, id: string) => `Дубльований id у ${key}: ${id}`;
-
-export const characterNotInCampaignMessage = (id: string) => `Персонажа ${id} немає в цій кампанії`;
-
-export const referenceEntryMissingMessage = (kind: string, id: string) => `Запису ${kind} ${id} немає в довіднику кампанії`;
-
-export const scenarioPageNotInCampaignMessage = (id: string) => `Сторінки ${id} немає в цій кампанії`;
-
-export const conditionImmuneMessage = (name: string) => `${name}: імунітет до цього стану`;
-
-export const conditionAbsentMessage = (name: string) => `${name}: такого стану немає`;
-
-export const abilityCooldownMessage = (rounds: number) => `Перезарядка: ще ${rounds} р.`;

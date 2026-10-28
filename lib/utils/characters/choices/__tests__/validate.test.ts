@@ -1,8 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { describe, expect, it } from "vitest";
 
 import { featsById, scores, sorcerer, spellsById } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { DndSkill } from "@/lib/constants/skills";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";

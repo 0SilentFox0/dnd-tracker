@@ -3,12 +3,13 @@
  * і structured лог з контекстом.
  */
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { Prisma } from "@prisma/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { handleApiError } from "../error-handler";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 describe("handleApiError", () => {
   const consoleErrorSpy = vi

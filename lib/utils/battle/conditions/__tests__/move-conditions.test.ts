@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
@@ -46,7 +47,7 @@ describe("наляканий і рух", () => {
 
     const ctx = { ...base, meta: { ...base.meta, map } };
 
-    expect(() => moveMutation(ctx, { participantId: "hero", to: { x: 5, y: 2 } })).toThrow("Наляканий");
+    expect(() => moveMutation(ctx, { participantId: "hero", to: { x: 5, y: 2 } })).toThrow(API_ERRORS.BATTLE_FRIGHTENED_NO_APPROACH);
     expect(() => moveMutation(ctx, { participantId: "hero", to: { x: 3, y: 2 } })).not.toThrow();
   });
 });

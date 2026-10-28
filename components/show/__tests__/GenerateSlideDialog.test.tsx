@@ -1,5 +1,4 @@
 // @vitest-environment happy-dom
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -73,7 +72,7 @@ describe("генерація слайда", () => {
   });
 
   it("помилка показується в діалозі", async () => {
-    vi.mocked(generateSlideImage).mockRejectedValue(new Error(API_ERRORS.AI_IMAGE_REJECTED));
+    vi.mocked(generateSlideImage).mockRejectedValue(new Error("Провайдер відхилив запит (фільтр безпеки) — змініть опис"));
 
     render(<GenerateSlideDialog campaignId="c1" open onOpenChange={vi.fn()} onAdd={vi.fn()} />, { wrapper: wrap(openai) });
 

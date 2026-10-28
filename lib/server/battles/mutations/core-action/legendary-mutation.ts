@@ -1,5 +1,5 @@
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
-import { abilityCooldownMessage,API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -74,7 +74,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const wait = cooldownLeft(actor, ability, round);
 
-    if (wait > 0) throw new BattleRuleError("ability_limit", abilityCooldownMessage(wait));
+    if (wait > 0) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_COOLDOWN, { rounds: wait });
 
     if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 

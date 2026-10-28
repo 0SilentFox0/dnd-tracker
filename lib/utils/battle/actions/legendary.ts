@@ -1,5 +1,6 @@
 import { reject } from "./errors";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
@@ -25,7 +26,7 @@ export interface LegendaryAttackInput {
 export function legendaryAttack(input: LegendaryAttackInput): { participants: BattleParticipant[]; action: BattleAction; attackName: string } {
   const { participants, actorId, targetId, map, rules, round, rng, battleId } = input;
 
-  const actor = findParticipant(participants, actorId) ?? reject("Учасника немає в бою");
+  const actor = findParticipant(participants, actorId) ?? reject(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
   const attack = actor.battleData.attacks[input.attackIndex] ?? reject("У учасника немає такої атаки");
 

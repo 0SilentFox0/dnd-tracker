@@ -1,5 +1,4 @@
 // @vitest-environment happy-dom
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,6 +6,7 @@ import { NewWorldMapDialog } from "../NewWorldMapDialog";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const upload = vi.fn();
 

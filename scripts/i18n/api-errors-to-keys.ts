@@ -4,7 +4,9 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const SOURCE = "lib/constants/api-errors.ts";
+
 const CLIENT_SHOWN: Record<string, string> = { YOUTUBE_URL_INVALID: "validation", ITEM_CONSUMABLE_CONFLICT: "validation" };
+
 const TEMPLATE_PARAMS: Record<string, string> = {
   MAX_TRACKS_PER_CAMPAIGN: "max",
   MAX_SLIDES_PER_DECK: "max",
@@ -33,7 +35,7 @@ const entries: Entry[] = [];
 const rewritten = lines.map((line) => {
   const match = line.match(/^(\s+)([A-Z0-9_]+): (["`])(.*)\3,$/);
 
-  if (!match || !/[Ѐ-ӿ]/.test(match[4])) return line;
+  if (!match || !/[\u0400-\u04FF]/.test(match[4])) return line;
 
   const [, indent, name, quote, raw] = match;
 
@@ -108,7 +110,7 @@ for (const file of files) {
 
   if (!used.size) continue;
 
-  if (!/\bAPI_ERRORS\b[^;]*from "@\/lib\/constants\/api-errors"|import \{[^}]*API_ERRORS[^}]*\} from "@\/lib\/constants\/api-errors"/s.test(src)) {
+  if (!/import \{[^}]*\bAPI_ERRORS\b[^}]*\} from "@\/lib\/constants\/api-errors"/.test(src)) {
     const existing = src.match(/import \{([^}]*)\} from "@\/lib\/constants\/api-errors";/);
 
     if (existing) src = src.replace(existing[0], `import {${existing[1].trimEnd()}, API_ERRORS } from "@/lib/constants/api-errors";`);

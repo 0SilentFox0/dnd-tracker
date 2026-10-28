@@ -1,7 +1,8 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { checkRateLimit, rateLimitResponse } from "../rate-limit";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const limitMock = vi.fn();
 
