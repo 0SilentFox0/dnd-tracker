@@ -5,7 +5,7 @@ import { Edit, X } from "lucide-react";
 
 import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
 import { SkillCard, type SkillCardActions } from "@/components/skills/list/SkillCard";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
 import type { Skill } from "@/types/skills";
 
 export interface SkillGroupAccordionItemProps {
@@ -39,7 +39,7 @@ export function SkillGroupAccordionItem({
   return (
     <GroupAccordionItem
       value={groupName}
-      title={groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}
+      title={groupDisplayName(groupName, t("skills.group.ungrouped"))}
       countLabel={t("skills.group.count", { count: totalSkills })}
       accent={accent}
       className="rounded-lg overflow-hidden"

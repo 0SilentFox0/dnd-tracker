@@ -24,6 +24,7 @@
     "spellUpgrade": "Spell upgrade:"
   },
   "group": {
+    "ungrouped": "No main skill",
     "removeAll": "Delete all skills in the group",
     "count": "{count} {count, plural, one {skill} other {skills}}"
   },

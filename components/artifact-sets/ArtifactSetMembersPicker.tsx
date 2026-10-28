@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { ArtifactSlot } from "@/lib/constants/artifacts";
+import { ARTIFACT_SLOT_VALUES, type ArtifactSlot } from "@/lib/constants/artifacts";
 import type { ArtifactListItem } from "@/types/artifacts";
 
 export interface ArtifactSetMembersPickerProps {
@@ -44,7 +44,7 @@ export function ArtifactSetMembersPicker({
                 <span className="font-medium">{a.name}</span>
                 <span className="text-muted-foreground">
                   {" "}
-                  — {t(`slots.${a.slot as ArtifactSlot}`)}
+                  — {(ARTIFACT_SLOT_VALUES as readonly string[]).includes(a.slot) ? t(`slots.${a.slot as ArtifactSlot}`) : a.slot}
                 </span>
               </span>
             </label>

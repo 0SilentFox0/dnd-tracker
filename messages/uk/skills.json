@@ -24,6 +24,7 @@
     "spellUpgrade": "Покращення спела:"
   },
   "group": {
+    "ungrouped": "Без основного навику",
     "removeAll": "Видалити всі скіли з групи",
     "count": "{count} {count, plural, one {скіл} few {скіли} many {скілів} other {скілів}}"
   },

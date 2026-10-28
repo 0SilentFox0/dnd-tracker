@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_SLOT_VALUES, type ArtifactRarity } from "@/lib/constants/artifacts";
+import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES, type ArtifactRarity } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 import type { ArtifactCardData } from "@/types/artifacts";
@@ -38,7 +38,7 @@ export function ArtifactCard({
 
   const notify = useNotify();
 
-  const rarityLabel = artifact.rarity ? t(`rarity.${artifact.rarity as ArtifactRarity}`) : null;
+  const rarityLabel = artifact.rarity ? ((ARTIFACT_RARITY_VALUES as readonly string[]).includes(artifact.rarity) ? t(`rarity.${artifact.rarity as ArtifactRarity}`) : artifact.rarity) : null;
 
   const update = useUpdateArtifact(campaignId);
 

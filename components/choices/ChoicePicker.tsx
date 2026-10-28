@@ -7,6 +7,7 @@ import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP, type AbilityKey } from
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { spellLevelName } from "@/lib/constants/spells";
 import { useTranslator } from "@/lib/i18n/use-translator";
+import { MULTICLASS_SKILLS_ID } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { featPrerequisiteMet } from "@/lib/utils/characters/choices/validate";
 import type { Choice, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
@@ -57,7 +58,7 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
 
   const header = (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="hud-sc text-sm text-hud-ink">{choice.label}</span>
+      <span className="hud-sc text-sm text-hud-ink">{choice.id === MULTICLASS_SKILLS_ID ? t("picker.multiclassSkills") : choice.label}</span>
       <span className="text-xs text-hud-muted">{`${value.length} / ${target}`}</span>
     </div>
   );

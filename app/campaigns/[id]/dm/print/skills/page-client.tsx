@@ -6,7 +6,7 @@ import { Printer } from "lucide-react";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { Button } from "@/components/ui/button";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
 import { PLACEMENT_UNPLACED, skillPlacements } from "@/lib/utils/skills/progression";
 import {
   convertGroupedSkillsToArray,
@@ -35,6 +35,8 @@ export function PrintSkillsPageClient({
   skillTrees,
 }: PrintSkillsPageClientProps) {
   const t = useTranslations("skills.print");
+
+  const tGroup = useTranslations("skills.group");
 
   const positions = useMemo(
     () => skillPlacements(skillTrees),
@@ -105,7 +107,7 @@ export function PrintSkillsPageClient({
             >
               <div className="flex items-center gap-2 py-1.5">
                 <div className="leading-tight">
-                  <h2 className="text-base font-semibold">{groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}</h2>
+                  <h2 className="text-base font-semibold">{groupDisplayName(groupName, tGroup("ungrouped"))}</h2>
                   {mainSkill?.spellGroupName && (
                     <p className="text-xs text-muted-foreground">
                       {t("school", { group: mainSkill.spellGroupName })}

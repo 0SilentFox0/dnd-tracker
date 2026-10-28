@@ -77,6 +77,7 @@
     "sharedPoolAria": "Спільний пул гранту"
   },
   "picker": {
+    "multiclassSkills": "Навички мультикласу",
     "notFound": "Вибір не знайдено — буде прибрано при збереженні",
     "fromLevel": "З рівня {level}",
     "requires": "Потребує: {list}",
