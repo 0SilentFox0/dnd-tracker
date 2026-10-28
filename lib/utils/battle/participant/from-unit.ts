@@ -6,6 +6,7 @@ import { loadUnitRace } from "./load-race";
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { UNIT_SPELL_SLOTS } from "@/lib/constants/battle-balance";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
@@ -42,6 +43,8 @@ export async function createBattleParticipantFromUnit(
       type?: AttackType;
       range?: string;
       properties?: string;
+      traits?: WeaponTrait[];
+      versatileDice?: string;
     }>) || [];
 
   const battleAttacks = attacks.map((attack, index) => {
@@ -81,6 +84,8 @@ export async function createBattleParticipantFromUnit(
       maxTargets: a.maxTargets,
       damageDistribution: a.damageDistribution,
       guaranteedDamage: a.guaranteedDamage,
+      ...(attack.traits && { traits: attack.traits }),
+      ...(attack.versatileDice && { versatileDice: attack.versatileDice }),
     };
   });
 

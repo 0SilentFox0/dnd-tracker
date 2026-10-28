@@ -5,6 +5,7 @@ export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
 export { useCssVarHeight } from "./useCssVarHeight";
 export { useDebouncedValue } from "./useDebouncedValue";
+export { type DiceRollerPick, type DiceRollResult, ROLLER_MAX_COUNT, ROLLER_SIDES, useDiceRoller } from "./useDiceRoller";
 export type { UseFileImportReturn } from "./useFileImport";
 export { useFileImport } from "./useFileImport";
 export { useFlip } from "./useFlip";

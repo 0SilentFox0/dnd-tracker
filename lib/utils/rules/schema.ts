@@ -18,6 +18,7 @@ const sections = {
     critOn: z.number().int().min(2).max(20).default(20),
     fumbleOn: z.number().int().min(0).max(5).default(1),
     effects: z.boolean().default(true),
+    doubleDice: z.boolean().default(false),
     disabledSuccess: z.array(z.string()).default([]),
     disabledFail: z.array(z.string()).default([]),
   }),

@@ -7,6 +7,7 @@ import {
   SpellCostSchema,
   type SpellDefinition,
   SpellDiceSchema,
+  SpellDieSidesSchema,
   type SpellResolution,
   SpellResolutionSchema,
   type SpellTargeting,
@@ -26,6 +27,10 @@ type SpellRulesRow = {
   stackable?: boolean | null;
   maxStacks?: number | null;
   concentration?: boolean | null;
+  dieSides?: number | null;
+  upcastDice?: number | null;
+  upcastTargets?: number | null;
+  addAbilityMod?: boolean | null;
 };
 
 const DEFAULT_TARGETING: SpellTargeting = { kind: "enemy" };
@@ -78,6 +83,23 @@ export const spellRaceModifiers = (row: SpellRulesRow): RaceModifier[] => readLi
 
 const readMaxStacks = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 10 ? (v as number) : undefined);
 
+const readCount = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 10 ? (v as number) : undefined);
+
+function readSpell5e(row: SpellRulesRow) {
+  const dieSides = SpellDieSidesSchema.safeParse(row.dieSides);
+
+  const upcastDice = readCount(row.upcastDice);
+
+  const upcastTargets = readCount(row.upcastTargets);
+
+  return {
+    ...(dieSides.success && { dieSides: dieSides.data }),
+    ...(upcastDice !== undefined && { upcastDice }),
+    ...(upcastTargets !== undefined && { upcastTargets }),
+    ...(row.addAbilityMod === true && { addAbilityMod: true }),
+  };
+}
+
 export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
   return {
     dice: spellDiceCount(row),
@@ -89,6 +111,7 @@ export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
     stackable: row.stackable === true,
     maxStacks: row.stackable === true ? readMaxStacks(row.maxStacks) : undefined,
     ...(row.concentration === true && { concentration: true }),
+    ...readSpell5e(row),
   };
 }
 
@@ -103,5 +126,9 @@ export function spellDefinitionColumns(def: SpellDefinition) {
     stackable: def.stackable === true,
     maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
     concentration: def.concentration === true,
+    dieSides: def.dieSides ?? null,
+    upcastDice: def.upcastDice ?? null,
+    upcastTargets: def.upcastTargets ?? null,
+    addAbilityMod: def.addAbilityMod ?? null,
   };
 }

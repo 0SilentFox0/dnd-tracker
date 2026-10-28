@@ -8,7 +8,9 @@ import { useBattleScene } from "./useBattleScene";
 import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
+import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
@@ -30,7 +32,13 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const order = scene.battle.initiativeOrder;
 
-  const attacks = useMemo(() => attacker?.battleData.attacks ?? [], [attacker]);
+  const attackPools = useMemo(() => {
+    const all = attacker?.battleData.attacks ?? [];
+
+    return { main: all.filter((a) => a.hand !== "off"), off: all.filter((a) => a.hand === "off") };
+  }, [attacker]);
+
+  const attacks = state.offHand ? attackPools.off : attackPools.main;
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
@@ -66,7 +74,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
         if (!target) return [];
 
-        const full = computeDamageBreakdown({ attacker, target, attack, damageRolls: s.damage, allParticipants: order, isCritical: s.outcome === "crit" }).steps;
+        const full = computeDamageBreakdown({ attacker, target, attack, damageRolls: s.damage, allParticipants: order, isCritical: s.outcome === "crit", rules: scene.battle.rules }).steps;
 
         const shown = hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer), scene.battle.knowledge);
 
@@ -120,7 +128,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     if (!attacker || !attack || !target) return "miss";
 
-    const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound);
+    const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound, map);
 
     const crit = scene.battle.rules?.criticals ?? DEFAULT_RULES.criticals;
 
@@ -213,34 +221,40 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
     rollMode: currentMode,
     forcedMode: currentStrike?.forced,
+    offHand: !!state.offHand,
+    counter: attacker && !state.offHand ? attackCounter(attacker, order) : null,
     canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
   };
 
   const actions = {
-    open: (targetId?: string, attackId?: string) => {
-      const first = attacks[0];
+    open: (targetId?: string, attackId?: string, opts: { offHand?: boolean } = {}) => {
+      const offHand = !!opts.offHand;
+
+      const pool = offHand ? attackPools.off : attackPools.main;
+
+      const first = pool[0];
 
       if (!first) return;
 
       const target = targetId ? byId(targetId) : undefined;
 
       if (!target) {
-        dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(first) });
+        dispatch({ type: "OPEN", weaponCount: pool.length, ...describe(first), ...(offHand && { offHand }) });
         preselectAll(first);
 
         return;
       }
 
-      const chosen = (attackId && attacks.find((a) => (a.id ?? a.name) === attackId)) || first;
+      const chosen = (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) || first;
 
-      const picked = attacks.length === 1 || !!attackId;
+      const picked = pool.length === 1 || !!attackId;
 
-      dispatch({ type: "OPEN", weaponCount: attacks.length, ...describe(chosen), targetIds: [target.basicInfo.id], picked });
+      dispatch({ type: "OPEN", weaponCount: pool.length, ...describe(chosen), targetIds: [target.basicInfo.id], picked, ...(offHand && { offHand }) });
 
       if (picked) {
-        if (attacks.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
+        if (pool.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
 
-        const forced = attacker ? forcedModeOf(predictAttack(attacker, target, chosen, order, scene.battle.currentRound)) : undefined;
+        const forced = attacker ? forcedModeOf(predictAttack(attacker, target, chosen, order, scene.battle.currentRound, map)) : undefined;
 
         dispatch({ type: "CONFIRM_TARGETS", forced: { [target.basicInfo.id]: forced } });
       }
@@ -256,7 +270,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         state.targetIds.map((id) => {
           const t = byId(id);
 
-          return [id, attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound)) : undefined];
+          return [id, attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound, map)) : undefined];
         }),
       );
 
@@ -278,5 +292,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     close: () => dispatch({ type: "CLOSE" }),
   };
 
-  return { state, view, actions };
+  const doubled = state.step === "damage" && currentStrike?.outcome === "crit" && critDoublesDice(scene.battle.rules, true);
+
+  return { state: doubled ? { ...state, diceSlots: [...state.diceSlots, ...state.diceSlots] } : state, view, actions };
 }

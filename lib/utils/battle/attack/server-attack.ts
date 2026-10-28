@@ -1,6 +1,7 @@
 import { buildOffTurnAction, type BuildOffTurnParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
+import { critDamageRolls, critDoublesDice } from "./crit-dice";
 import { applyCriticalEffect, critFlavorFor } from "./critical";
 import { calculateAttackRoll } from "./roll";
 
@@ -44,7 +45,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const second = rollDie(20, rng);
 
-  const roll = calculateAttackRoll(getP(flow, attackerId), attack, first, second, second, { participants: flow.ps, targetId, rng, rules: flow.ctx.rules });
+  const roll = calculateAttackRoll(getP(flow, attackerId), attack, first, second, second, { participants: flow.ps, targetId, rng, rules: flow.ctx.rules, map: flow.ctx.map });
 
   if (roll.secondRoll) flow.messages.push(`🎲 ${LABELS[label].noun}, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
 
@@ -59,7 +60,11 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
   let hit: BuildOffTurnParams["hit"] = null;
 
   if (isHit) {
-    const damageRolls = rollGroups(parseDiceLenient(heroAttackDamageParts(getP(flow, attackerId), attack).formula).groups, rng);
+    const formula = heroAttackDamageParts(getP(flow, attackerId), attack).formula;
+
+    const single = rollGroups(parseDiceLenient(formula).groups, rng);
+
+    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
 
     const { hitDamage } = resolveHit({
       flow,

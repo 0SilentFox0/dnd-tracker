@@ -6,10 +6,14 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncButton";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { CampaignKind, CampaignStatus } from "@/lib/constants/campaigns";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
+import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
+import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
 import { pluralUk } from "@/lib/utils/common/plural";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -32,7 +36,11 @@ export default async function CampaignDetailPage({
 
   const classesEnabled = parseRules(campaign.rules).classes.enabled;
 
-  const pendingDrafts = isDM ? await prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0;
+  const [pendingDrafts, onboarding] = await Promise.all([
+    isDM ? prisma.character.count({ where: { campaignId: id, status: CharacterStatus.PENDING } }) : 0,
+    // онбординг не має валити сторінку кампанії
+    readCampaignOnboarding(id, user.id, isDM).catch(() => null),
+  ]);
 
   const allDmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
@@ -76,6 +84,12 @@ export default async function CampaignDetailPage({
         </HudPanel>
       )}
 
+      {!isTemplate && (
+        <PrefetchedQuery queryKey={onboardingKeys.campaign(id)} data={onboarding}>
+          <OnboardingChecklist campaignId={id} />
+        </PrefetchedQuery>
+      )}
+
       <HudPanel>
         <HudSection
           title="Налаштування кампанії"
@@ -103,7 +117,7 @@ export default async function CampaignDetailPage({
               <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
             </div>
             {!isTemplate && (
-              <div>
+              <div id="invite" className="scroll-mt-20">
                 <p className={`${LABEL} mb-2`}>Код запрошення</p>
                 <InviteCodeDisplay inviteCode={campaign.inviteCode} />
               </div>

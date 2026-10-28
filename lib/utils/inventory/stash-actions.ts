@@ -3,6 +3,7 @@ import { gainCoins, spendCoins } from "./money";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { type Coin, InventoryLogKind, type InventoryLogKindValue } from "@/lib/constants/inventory";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
+import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import type { Purse, SpecialItem, StashState } from "@/types/inventory";
 
 type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean };
@@ -16,7 +17,7 @@ export type StashAction =
   | { action: "useItem"; itemId: string }
   | { action: "removeItem"; itemId: string }
   | { action: "stash"; slot: string }
-  | { action: "equip"; artifactId: string }
+  | { action: "equip"; artifactId: string; slot?: "shield" }
   | { action: "grant"; artifactId: string }
   | { action: "revoke"; artifactId: string };
 
@@ -59,7 +60,7 @@ const itemFields = ({ name, description, quantity, consumable }: ItemFields) => 
   consumable,
 });
 
-export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId: string; artifactSlotType?: string }): StashResult {
+export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId: string; artifactSlotType?: string; artifact?: { slot: string; bonuses?: unknown; modifiers?: unknown }; classesEnabled?: boolean }): StashResult {
   switch (a.action) {
     case "spend": {
       const purse = spendCoins(s.purse, a.amount, a.coin);
@@ -127,7 +128,10 @@ export function applyStashAction(s: StashState, a: StashAction, ctx: { newItemId
     case "equip": {
       if (!s.stash.includes(a.artifactId)) return fail(StashError.NOT_IN_STASH);
 
-      const cell = ARTIFACT_GRID_9.find((c) => c.slotType === ctx.artifactSlotType);
+      const cell =
+        a.slot === "shield"
+          ? ctx.artifact && canEquipOffHand(ctx.artifact, !!ctx.classesEnabled) && ARTIFACT_GRID_9.find((c) => c.key === a.slot)
+          : ARTIFACT_GRID_9.find((c) => c.slotType === ctx.artifactSlotType);
 
       if (!cell) return fail(StashError.NO_SLOT_FOR_ARTIFACT);
 

@@ -74,6 +74,7 @@ Details in `docs/architecture/`; read the file before changing the subsystem.
 - **Abilities** ([abilities.md](docs/architecture/abilities.md)): engine reads bonuses only via `collectModifiers`/`runAbilities`, the `abilities` column only via `lib/utils/abilities/read.ts`.
 - **Show/music** ([show.md](docs/architecture/show.md)): `campaign_shows` rows are never deleted, `seq` only grows.
 - **AI** ([ai.md](docs/architecture/ai.md)): the provider key never leaves the server (no logs/errors/responses); scenario changes only via `ai_proposals` + apply; a new tool = file in `lib/ai/tools` + row in `AI_TOOLS` (serves both chat and `/api/mcp`).
+- **Onboarding** ([onboarding.md](docs/architecture/onboarding.md)): checklist progress is derived from DB facts, never stored; `user_onboarding_flags` holds only dismissed/seen keys. A user-facing feature adds an entry to `lib/onboarding/whats-new.ts` (and a hint/help article when it adds a screen).
 
 ### Path alias & imports
 

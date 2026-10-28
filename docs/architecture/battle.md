@@ -82,6 +82,20 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Кола заклинань 0–9** по всьому стеку (Zod, форми, `SlotGrid`, `.circle-0…9`); кантрип = коло 0. Обмеження HOMM (раса 1–5, крива до рівня 10, відкриття кіл школою) лишаються даними HOMM.
 - **Підвищення рівня** (`POST …/level-up`, ДМ): у режимі класів тіло `{ classId, subclassId? }` — наявний клас або мультиклас; підклас обов'язковий на `subclassLevel` і заборонений раніше; `campaign.maxLevel` — на суму; випадкового +1 до характеристики немає; слоти перераховуються.
 
+## 5e: атаки й заклинання
+
+Режим 5e для героя вмикає `abilities.damageModel: "5e"` (`from-character.ts`, коли клас резолвиться); без нього — HOMM-шкода, кидки й валідація без змін (герой кампанії з `classes.enabled`, але без класів, лишається HOMM).
+
+- **Характеристика й модифікатор** — `lib/utils/battle/attack/ability.ts` (`isFiveE`, `hasTrait`, `attackAbilityFor`, `attackRollModifier`, `attackDamageModifier`). Формула шкоди 5e = кубик зброї (+ кубик `versatileDice`, коли клітинка «Щит» порожня) + модифікатор; без кубиків героя й рівня. Метальна зброя лишається ближньою. Безоружний удар героя 5e (`default-melee`) = плоска «1» + Сил; дальня атака без зброї лишається без кубиків (лише модифікатор).
+- **Властивості зброї** (`lib/constants/weapon-traits.ts`): `light`, `finesse`, `twoHanded`, `versatile`, `reach`, `thrown`, `ammunition`. У артефакті — модифікатор `traits` (рядок через кому) + `versatileDice`; у юніта — поля атаки. Текстове `properties` — лише примітка.
+- **Досяжність і дальність** — `grid/attack-reach.ts`: `meleeReachCells` (2 клітинки зі зброєю `reach`), `rangeBands` («80/320»), `rangeDisadvantageReasons` (`bonus.ts`: «Далека дистанція», «Ворог поруч»). Атаки по можливості (`actions/opportunity.ts`) використовують ту саму досяжність.
+- **Додаткова атака** — стат `attacksPerAction`; `attack/attacks-left.ts` (`spendAttack`, `canAttackFromPool`, `attacksLeft`, `attackedWithLight`). Атака з лічильника не витрачає ні дію, ні пул HOMM `pendingExtraActions`; захоплення/штовхання беруть з того ж пулу; скидання — `turn/turn-state.ts`.
+- **Друга рука** — `offHand: true` у запиті атаки: бонусна дія, легка ближня зброя з клітинки «Щит» (`hand: "off"`, id `<id>:off`), потрібна попередня атака легкою; без прапорця `twoWeaponFighting` модифікатор шкоди не додається. `canEquipOffHand` (`lib/utils/artifacts/off-hand.ts`) перевіряє вдягання (stash і `update-inventory`, лише змінена клітинка щита); помилки `OFF_HAND_*` у `api-errors.ts`.
+- **Криті** — `rules.criticals.doubleDice`: сервер (`attack/crit-dice.ts`) докидає відсутній другий набір кубиків і позначає його в лозі; без прапорця прев'ю лишається ×2 (HOMM).
+- **Заклинання**: `casterSpellDice(caster, spell, castLevel?)`, кантрип масштабується `spellDice5e` (×1/2/3/4 на рівнях 1/5/11/17), підсилення слотом — `upcastDice` на крок і `upcastTargets` (одиночна ціль: 1+N×кроків; площа/шаблон: `maxTargets`+N×кроків). Слот обирається `slotKey` у запиті касту (`spell/slot.ts`, `resolveChosenSlot`; нижче кола, порожній чи відсутній слот → 422; HOMM-герой із `slotKey` = автовибір). `castLevel` пишеться в `actionDetails` лише за явного вибору слота.
+- **Атака заклинанням** — `resolution: "attack"`: кидок проти AC (`attackRolls` у запиті), крит додає кубики з `doubleDice`; цілі не-вороги — автоматично.
+- **UI**: лічильник «Атака N/M», «Атака другою рукою» у `BonusActionPicker`, вибір слота в `SpellCastDialog` (лише 5e), d20-поля для атаки заклинанням.
+
 ## Changing battle behavior
 
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.

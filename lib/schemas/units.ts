@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { AttackType } from "@/lib/constants/battle";
+import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 export const unitAttackSchema = z.object({
@@ -15,6 +16,8 @@ export const unitAttackSchema = z.object({
   maxTargets: z.number().min(1).max(20).optional(),
   damageDistribution: z.array(z.number().min(0).max(100)).optional(),
   guaranteedDamage: z.number().min(0).optional(),
+  traits: z.array(z.enum(WEAPON_TRAITS)).max(7).optional(),
+  versatileDice: z.string().trim().max(30).optional(),
 });
 
 export const unitAvatarSchema = z.preprocess(

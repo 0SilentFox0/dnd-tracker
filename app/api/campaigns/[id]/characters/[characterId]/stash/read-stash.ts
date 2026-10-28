@@ -6,10 +6,11 @@ import { prisma } from "@/lib/db";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
+import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
 import type { StashArtifact, StashView } from "@/types/inventory";
 
-const artifactSelect = { id: true, name: true, icon: true, rarity: true, slot: true, description: true } as const;
+const artifactSelect = { id: true, name: true, icon: true, rarity: true, slot: true, description: true, bonuses: true, modifiers: true } as const;
 
 type InventoryRow = { equipped: unknown; stash: unknown; items: unknown; gold: number; silver: number; copper: number };
 
@@ -18,7 +19,9 @@ export async function buildStashView(tx: Prisma.TransactionClient, campaignId: s
 
   const found = stash.length ? await tx.artifact.findMany({ where: { campaignId, id: { in: stash } }, select: artifactSelect }) : [];
 
-  const byId = new Map<string, StashArtifact>(found.map((a) => [a.id, a]));
+  const byId = new Map<string, StashArtifact>(
+    found.map(({ bonuses, modifiers, ...a }) => [a.id, { ...a, ...(canEquipOffHand({ slot: a.slot, bonuses, modifiers }, true) && { light: true }) }]),
+  );
 
   const view: StashView = {
     purse: { gp: inventory?.gold ?? 0, sp: inventory?.silver ?? 0, cp: inventory?.copper ?? 0 },

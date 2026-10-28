@@ -461,3 +461,27 @@ describe("шаблон і дальність", () => {
     expect(spellTargetInRange(map, hero, placed("x", ParticipantSide.ENEMY), 5)).toBe(true);
   });
 });
+
+describe("SET_SLOT", () => {
+  it("prunes save and attack rolls of targets that no longer fit", () => {
+    const wide: SpellPick = { spellId: "x", level: 1, targetMode: "multi", needsSaves: true, needsAttackRolls: true, diceSlots: [8], maxTargets: 3 };
+
+    const s = run(
+      { type: "OPEN", casterId: "me", level: 1 },
+      { type: "PICK", pick: wide },
+      { type: "TO_TARGETS" },
+      { type: "TOGGLE_TARGET", id: "a" },
+      { type: "TOGGLE_TARGET", id: "b" },
+      { type: "TOGGLE_TARGET", id: "c" },
+      { type: "SET_SAVE", id: "a", value: 5 },
+      { type: "SET_SAVE", id: "c", value: 7 },
+      { type: "SET_ATTACK", id: "a", value: 11 },
+      { type: "SET_ATTACK", id: "c", value: 13 },
+      { type: "SET_SLOT", slotKey: "1", pick: { ...wide, maxTargets: 1 } },
+    );
+
+    expect(s.targetIds).toEqual(["a"]);
+    expect(s.saves).toEqual({ a: 5 });
+    expect(s.attacks).toEqual({ a: 11 });
+  });
+});

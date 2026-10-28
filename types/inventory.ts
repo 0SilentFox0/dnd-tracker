@@ -80,6 +80,7 @@ export interface StashArtifact {
   rarity: string | null;
   slot: string;
   description: string | null;
+  light?: boolean;
 }
 
 export type FreeArtifact = Omit<StashArtifact, "description">;

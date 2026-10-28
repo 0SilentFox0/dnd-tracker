@@ -18,6 +18,7 @@ import { findHolder } from "@/lib/utils/artifacts/ownership";
 import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
 import { canStashAction } from "@/lib/utils/inventory/permissions";
 import { applyStashAction, StashError, type StashErrorCode } from "@/lib/utils/inventory/stash-actions";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { EquippedItems, StashState } from "@/types/inventory";
 
 const STASH_ERROR_TEXT: Record<StashErrorCode, string> = {
@@ -67,12 +68,23 @@ export async function applyStash(request: Request, campaignId: string, character
 
     let artifactSlotType: string | undefined;
 
+    let artifact: { slot: string; bonuses: unknown; modifiers: unknown } | undefined;
+
+    let classesEnabled = false;
+
     if (data.action === "equip" || data.action === "grant") {
-      const artifact = await tx.artifact.findFirst({ where: { id: data.artifactId, campaignId }, select: { slot: true } });
+      const found = await tx.artifact.findFirst({ where: { id: data.artifactId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
 
-      if (!artifact) return errorResponse(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
+      if (!found) return errorResponse(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
 
-      artifactSlotType = artifact.slot;
+      artifact = found;
+      artifactSlotType = found.slot;
+
+      if (data.action === "equip" && data.slot) {
+        const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
+
+        classesEnabled = parseRules(campaign?.rules).classes.enabled;
+      }
     }
 
     if (data.action === "grant") {
@@ -89,7 +101,7 @@ export async function applyStash(request: Request, campaignId: string, character
       if (holder) return errorResponse(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${all.find((o) => o.characterId === holder)?.character.name ?? ""}`, 409);
     }
 
-    const result = applyStashAction(state, data, { newItemId: randomUUID(), artifactSlotType });
+    const result = applyStashAction(state, data, { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled });
 
     if (!result.ok) return errorResponse(STASH_ERROR_TEXT[result.error], 400);
 

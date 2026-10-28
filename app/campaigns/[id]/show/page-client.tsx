@@ -2,6 +2,7 @@
 
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
+import { DiceRoller } from "@/components/common/DiceRoller";
 import { FullscreenButton } from "@/components/show/stage/FullscreenButton";
 import { ShowBattleCall } from "@/components/show/stage/ShowBattleCall";
 import { ShowControlPanel } from "@/components/show/stage/ShowControlPanel";
@@ -28,7 +29,8 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
         <div className="relative min-h-[60dvh] flex-1">
           <ShowStage show={show} />
           {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
-          <div className="absolute right-3 top-3 z-20">
+          <div className="absolute right-3 top-3 z-20 flex gap-2">
+            {!isDM && <DiceRoller />}
             <FullscreenButton />
           </div>
           <div className="absolute left-3 top-3 z-30">

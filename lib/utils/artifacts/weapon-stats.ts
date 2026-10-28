@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ArtifactModifierType } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
+import { parseWeaponTraits, WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 
 export { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 
@@ -14,11 +15,13 @@ export const WeaponStatsSchema = z.object({
   attackBonus: z.number().int().min(-20).max(20).optional(),
   minTargets: z.number().int().min(1).max(20).optional(),
   maxTargets: z.number().int().min(1).max(20).optional(),
+  traits: z.array(z.enum(WEAPON_TRAITS)).max(7).optional(),
+  versatileDice: z.string().trim().max(30).optional(),
 });
 
 export type WeaponStats = z.infer<typeof WeaponStatsSchema>;
 
-const STRING_FIELDS = ["damageDice", "damageType", "attackType", "range", "properties"] as const;
+const STRING_FIELDS = ["damageDice", "damageType", "attackType", "range", "properties", "versatileDice"] as const;
 
 const NUMBER_FIELDS = ["minTargets", "maxTargets"] as const;
 
@@ -34,6 +37,8 @@ export function weaponStatsColumns(stats: WeaponStats): { bonuses: Record<string
     if (value !== undefined && value !== "") modifiers.push({ type: key, value: String(value) });
   }
 
+  if (stats.traits?.length) modifiers.push({ type: ArtifactModifierType.TRAITS, value: stats.traits.join(",") });
+
   return { bonuses: stats.attackBonus ? { attackBonus: stats.attackBonus } : {}, modifiers };
 }
 
@@ -46,6 +51,12 @@ export function weaponStatsFromRow(row: { bonuses?: unknown; modifiers?: unknown
     const { type, value } = m as { type?: unknown; value?: unknown };
 
     if (typeof type !== "string" || !MODIFIER_TYPES.has(type) || value == null || value === "") continue;
+
+    if (type === ArtifactModifierType.TRAITS) {
+      out.traits = parseWeaponTraits(value);
+
+      continue;
+    }
 
     out[type] = (NUMBER_FIELDS as readonly string[]).includes(type) ? Number(value) : String(value);
   }

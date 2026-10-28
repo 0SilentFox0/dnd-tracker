@@ -43,10 +43,11 @@ export interface AttackFlowState {
   results: AttackOutcomeSummary[];
   /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
   picked?: boolean;
+  offHand?: boolean;
 }
 
 export type AttackFlowAction =
-  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[]; picked?: boolean }
+  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[]; picked?: boolean; offHand?: boolean }
   | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
   | { type: "CHANGE_WEAPON" }
   | { type: "TOGGLE_TARGET"; id: string }
@@ -78,7 +79,7 @@ const prevHit = (strikes: Strike[], before: number) => {
 export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
   switch (a.type) {
     case "OPEN":
-      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets), ...(a.picked && { picked: true }) };
+      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets), ...(a.picked && { picked: true }), ...(a.offHand && { offHand: true }) };
     case "SELECT_WEAPON":
       return { ...s, step: "target", attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: s.targetIds.slice(0, a.maxTargets) };
     case "CHANGE_WEAPON":
@@ -167,7 +168,7 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
   const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
 
-  const base = { attackerId, attackId: s.attackId, ...(manual && { rollMode: s.mode }), endTurn: false };
+  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(manual && { rollMode: s.mode }), endTurn: false };
 
   if (s.strikes.length === 1) {
     const [st] = s.strikes;

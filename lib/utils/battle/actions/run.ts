@@ -1,13 +1,14 @@
-import { standUpCost, validateCoreAction } from "./availability";
+import { isAttackAction, standUpCost, validateCoreAction } from "./availability";
 import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect } from "./effects";
 import { reject } from "./errors";
 import { runEscape, runGrapple, runShove } from "./grapple";
 import { pickMeleeAttack, reactionBlocker } from "./reaction";
-import { CORE_ACTION_REGISTRY } from "./registry";
+import { CORE_ACTION_REGISTRY, type CoreActionKey } from "./registry";
 import type { CoreActionBody } from "./schema";
 
 import { findParticipant, isActive, isAttackable, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { type TimedEffectInput, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { canAttackFromPool, spendFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { assertAttackAllowed } from "@/lib/utils/battle/attack-phase/request";
@@ -43,10 +44,12 @@ const TIMED_ACTIONS = {
   dodge: { icon: "🌀", effect: dodgeEffect },
 } as const satisfies Record<string, { icon: string; effect: (id: string) => TimedEffectInput }>;
 
-function spendAction(actor: BattleParticipant): BattleParticipant {
-  if (actor.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", "Дію вже витрачено");
+function spendAction(actor: BattleParticipant, participants: BattleParticipant[], key: CoreActionKey): BattleParticipant {
+  const attack = isAttackAction(key);
 
-  return applyMainActionUsed(actor);
+  if (!(attack && canAttackFromPool(actor)) && actor.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", "Дію вже витрачено");
+
+  return attack ? spendFromPool(actor, participants) : applyMainActionUsed(actor);
 }
 
 export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
@@ -62,7 +65,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const name = actor.basicInfo.name;
 
-  const spent = def.cost === "action" ? spendAction(actor) : actor;
+  const spent = def.cost === "action" ? spendAction(actor, participants, body.action) : actor;
 
   const invalid = validateCoreAction(body.action, actor, participants, map, "targetId" in body ? body.targetId : undefined);
 
@@ -143,7 +146,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const disabled = getDisabledAttackKinds(actor);
 
-  const attack = pickMeleeAttack(actor) ?? actor.battleData.attacks.find((a) => !disabled[attackKindOf(a.type)]);
+  const attack = pickMeleeAttack(actor) ?? actor.battleData.attacks.find((a) => a.hand !== "off" && !disabled[attackKindOf(a.type)]);
 
   if (!attack) return reject("У учасника немає атаки");
 

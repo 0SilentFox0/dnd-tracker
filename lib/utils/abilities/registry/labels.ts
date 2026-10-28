@@ -10,6 +10,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   critThreshold: "поріг криту",
   actionsPerTurn: "дії за хід",
   savingThrow: "рятівні кидки",
+  attacksPerAction: "Атак за дію «Атака»",
   initiative: "ініціатива",
   maxHp: "макс. HP",
   speed: "швидкість",

@@ -25,7 +25,7 @@ export const DAMAGE_FILTER_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"
 
 export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
 
-export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn", "savingThrow"] as const;
+export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn", "savingThrow", "attacksPerAction"] as const;
 
 export const BAKED_STATS = [
   "initiative",

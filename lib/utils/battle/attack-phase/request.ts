@@ -1,6 +1,8 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
+import { hasTrait, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control";
@@ -23,6 +25,7 @@ export interface AttackRequest {
   disadvantageRoll?: number;
   rollMode?: "normal" | "advantage" | "disadvantage";
   damageRolls: number[];
+  offHand?: boolean;
 }
 
 export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targetIds">): string[] {
@@ -31,10 +34,16 @@ export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targe
   return data.targetId ? [data.targetId] : [];
 }
 
-export function findAttack(attacker: BattleParticipant, attackId: string | undefined): BattleAttack | undefined {
+export function findAttack(attacker: BattleParticipant, attackId: string | undefined, offHand?: boolean): BattleAttack | undefined {
   const { attacks } = attacker.battleData;
 
-  return (attackId ? attacks.find((a) => a.id === attackId || a.name === attackId) : undefined) ?? attacks[0];
+  if (offHand) {
+    const named = attackId ? attacks.find((a) => a.id === attackId || a.name === attackId) : undefined;
+
+    return named?.hand === "off" ? named : attacks.find((a) => a.hand === "off");
+  }
+
+  return (attackId ? attacks.find((a) => a.id === attackId || a.name === attackId) : undefined) ?? attacks.find((a) => a.hand !== "off");
 }
 
 export function assertAttackAllowed(attacker: BattleParticipant, attack: BattleAttack, targets: BattleParticipant[]): void {
@@ -49,6 +58,18 @@ export function assertAttackAllowed(attacker: BattleParticipant, attack: BattleA
   if (targets.some((t) => charmers.includes(t.basicInfo.id))) {
     throw new BattleRuleError("invalid_target", `${attacker.basicInfo.name} не може атакувати того, хто його зачарував`);
   }
+}
+
+function assertOffHand(attacker: BattleParticipant, attack: BattleAttack): void {
+  if (attacker.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", API_ERRORS.BONUS_ACTION_USED);
+
+  if (!attacker.battleData.attackedWithLight) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NEEDS_ATTACK);
+
+  if (hasTrait(attack, "twoHanded")) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_TWO_HANDED);
+
+  if (attackKindOf(attack.type) !== AttackType.MELEE) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_MELEE);
+
+  if (!hasTrait(attack, "light")) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_LIGHT);
 }
 
 export interface ValidatedAttackRequest {
@@ -89,11 +110,16 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
     throw new BattleRuleError("action_rejected", "Зараз не хід атакуючого");
   }
 
-  if (attacker.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
+  if (data.offHand && !isFiveE(attacker)) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_ALLOWED);
 
-  const attack = findAttack(attacker, data.attackId);
+  if (!data.offHand && attacker.actionFlags.hasUsedAction && !canAttackFromPool(attacker)) throw new BattleRuleError("action_used", API_ERRORS.ACTION_USED);
 
-  if (!attack) throw new BattleRuleError("action_rejected", "У атакуючого немає доступної атаки");
+  const attack = findAttack(attacker, data.attackId, data.offHand);
+
+  if (!attack) throw new BattleRuleError("action_rejected", data.offHand ? API_ERRORS.NO_OFF_HAND_WEAPON : "У атакуючого немає доступної атаки");
+
+  if (data.offHand) assertOffHand(attacker, attack);
+  else if (attack.hand === "off") throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NEEDS_ATTACK);
 
   assertAttackAllowed(attacker, attack, chosenTargets);
 

@@ -1,4 +1,5 @@
 import { AttackType } from "@/lib/constants/battle";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 
 export interface UnitAttack {
@@ -15,6 +16,8 @@ export interface UnitAttack {
   damageDistribution?: number[];
   // applied even on a miss
   guaranteedDamage?: number;
+  traits?: WeaponTrait[];
+  versatileDice?: string;
 }
 
 export interface Unit {

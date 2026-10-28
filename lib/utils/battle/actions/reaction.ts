@@ -17,5 +17,5 @@ export const canReact = (p: BattleParticipant) => reactionBlocker(p) === null;
 export function pickMeleeAttack(p: BattleParticipant): BattleAttack | null {
   if (getDisabledAttackKinds(p).melee) return null;
 
-  return p.battleData.attacks.find((a) => attackKindOf(a.type) === AttackType.MELEE) ?? null;
+  return p.battleData.attacks.find((a) => a.hand !== "off" && attackKindOf(a.type) === AttackType.MELEE) ?? null;
 }

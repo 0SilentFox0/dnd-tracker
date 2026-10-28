@@ -12,9 +12,9 @@ import { applyResistanceForAdditional } from "./damage";
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { attackAbilityLabelFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
-import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
@@ -70,7 +70,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
   const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
   const statModifier =
-    getAttackAbilityModifier(updatedAttacker.abilities, attack.type);
+    attackDamageModifier(updatedAttacker, attack, allParticipants);
 
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
 
@@ -85,7 +85,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(updatedAttacker, attack, damageRolls),
       actionModifiers: params.actionModifiers,
-      statLabel: attackAbilityLabel(updatedAttacker.abilities, attack.type),
+      statLabel: attackAbilityLabelFor(updatedAttacker, attack),
     },
   );
 

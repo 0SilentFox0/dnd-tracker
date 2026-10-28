@@ -130,7 +130,7 @@ describe("readSpellDefinition", () => {
   it("невалідні dice і cost -> за замовчуванням з попередженням", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const def = readSpellDefinition({ id: "s", dice: 25, cost: "reaction" });
+    const def = readSpellDefinition({ id: "s", dice: 41, cost: "reaction" });
 
     expect(def.dice).toBe(0);
     expect(def.cost).toBe("action");

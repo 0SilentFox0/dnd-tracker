@@ -5,15 +5,17 @@ import { handleMiss } from "./miss";
 
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
+import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
+import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
-import { applyMainActionUsed, getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { BattleAction } from "@/types/battle";
 
@@ -27,12 +29,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     d20Roll,
     advantageRoll,
     disadvantageRoll,
-    damageRolls,
     allParticipants,
     currentRound,
     battleId,
     damageMultiplier,
   } = params;
+
+  let { damageRolls } = params;
+
+  let damageFrom = params.serverRolled?.damageFrom;
 
   const attackerId = attacker.basicInfo.id;
 
@@ -47,7 +52,11 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const existedBefore = activeEffectIds(flow.ps);
 
   // дія витрачається до подій атаки: «оновлення дії» від вбивства чи «+1 дія» мають пережити цей удар
-  if (!params.actionSpent) put(flow, applyMainActionUsed(getP(flow, attackerId)));
+  if (!params.actionSpent) {
+    const attacker = getP(flow, attackerId);
+
+    put(flow, params.offHand ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, attack));
+  }
 
   const consume = (r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult => {
     flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
@@ -65,7 +74,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -81,6 +90,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     rng: flow.ctx.rng,
     manualMode: params.rollMode,
     rules: flow.ctx.rules,
+    map: flow.ctx.map,
   });
 
   const second = rolled.secondRoll;
@@ -89,7 +99,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${rolled.chosenD20}`);
   }
 
-  const slots = damageDiceSlots(getP(flow, attackerId), attack);
+  let slots = damageDiceSlots(getP(flow, attackerId), attack);
 
   const withRollDetails = <T extends { actionDetails: BattleAction["actionDetails"] }>(action: T): T => {
     if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
@@ -106,7 +116,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       ...(second && { second, chosenD20: attackRoll.chosenD20 }),
       damage,
       slots,
-      damageServerFrom: params.serverRolled?.damageFrom,
+      damageServerFrom: damageFrom,
     });
 
     return action;
@@ -152,6 +162,16 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     appendHpChanges(r.battleAction, before, flow.ps);
 
     return consume(r, false);
+  }
+
+  if (critDoublesDice(flow.ctx.rules, attackRoll.isCritical)) {
+    const doubled = critDamageRolls({ formula: heroAttackDamageParts(getP(flow, attackerId), attack).formula, rolls: damageRolls, rng: flow.ctx.rng });
+
+    if (doubled.serverRolled.length > 0) damageFrom = Math.min(damageFrom ?? damageRolls.length, damageRolls.length);
+
+    damageRolls = doubled.rolls;
+    slots = [...slots, ...slots];
+    flow.messages.push(`🎲 крит: кубики шкоди подвоєно${doubled.serverRolled.length ? ` (сервер: ${doubled.serverRolled.join(", ")})` : ""}`);
   }
 
   const { hitDamage, vampirismHeal } = resolveHit({

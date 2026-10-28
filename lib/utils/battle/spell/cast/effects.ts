@@ -77,7 +77,9 @@ export function applyTo(state: SpellCastState, effect: Effect, effectIndex: numb
 
   if (outcome.skip || (outcome.factor < 1 && !usesRoll(effect))) return;
 
-  const roll = Math.floor(baseFor(state, effect) * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
+  const base = baseFor(state, effect) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
+
+  const roll = Math.floor(base * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
 
   if (effect.kind === "dealDamage") dealSpellDamage(state, effect, id, roll, index);
   else runEffect(state, effect, effectIndex, [id], roll);

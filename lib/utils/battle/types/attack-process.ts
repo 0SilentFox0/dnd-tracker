@@ -24,6 +24,8 @@ export interface ProcessAttackParams {
   bonusLabel?: string;
   /** Наступні удари залпу: основну дію вже витратив перший удар */
   actionSpent?: boolean;
+  /** Атака другою рукою: витрачає бонусну дію, а не дію/лічильник атак */
+  offHand?: boolean;
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;

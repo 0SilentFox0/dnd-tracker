@@ -1,5 +1,6 @@
 "use client";
 
+import { WeaponTraitsField } from "@/components/common/WeaponTraitsField";
 import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ const TEXT_FIELDS: Array<{ key: TextKey; label: string; placeholder: string }> =
   { key: "damageDice", label: "Кубики шкоди", placeholder: "1d8" },
   { key: "damageType", label: "Тип шкоди", placeholder: "slashing, fire…" },
   { key: "range", label: "Дальність", placeholder: "5 ft" },
-  { key: "properties", label: "Властивості", placeholder: "finesse, two-handed…" },
+  { key: "properties", label: "Примітка", placeholder: "магічна, срібна…" },
 ];
 
 const NUMBER_FIELDS: Array<{ key: NumberKey; label: string }> = [
@@ -64,6 +65,11 @@ export function ArtifactWeaponFields({ value, onChange }: { value: WeaponStats; 
           />
         </div>
       </div>
+      <WeaponTraitsField
+        idPrefix="weapon"
+        value={value}
+        onChange={onChange}
+      />
       <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
         {NUMBER_FIELDS.map((f) => (
           <div key={f.key} className="flex flex-col justify-end space-y-1">

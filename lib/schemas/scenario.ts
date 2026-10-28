@@ -49,7 +49,7 @@ const unique = (ids: string[]) => new Set(ids).size === ids.length;
 
 export const scenarioContentSchema: z.ZodType<ScenarioContent> = z
   .object({
-    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80) })).max(SCENARIO_MAX_LEGEND),
+    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80), color: z.string().regex(/^#[0-9a-f]{6}$/i).optional() })).max(SCENARIO_MAX_LEGEND),
     sections: z.array(sectionSchema).max(200),
   })
   .refine((c) => unique(c.sections.map((s) => s.id)) && unique(c.sections.flatMap((s) => s.rows.map((r) => r.id))), { message: "Дубльовані id розділів або рядків" });

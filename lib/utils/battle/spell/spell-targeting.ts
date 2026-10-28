@@ -4,6 +4,7 @@ import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
@@ -11,6 +12,7 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -120,6 +122,8 @@ export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: str
 export interface SpellMapContext {
   map: BattleMapConfig | null;
   targetCell?: GridPoint;
+  castLevel?: number;
+  upcastTargets?: number;
 }
 
 const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef["kind"]> = new Set(["ally", "enemy", "allyDead", "area", "template"]);
@@ -257,7 +261,9 @@ function resolveRaw(
         return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0]).map((p) => p.basicInfo.id) };
       }
 
-      const skill = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
+      const base = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
+
+      const skill = multi ? base : { ...base, maxTargets: base.maxTargets + upcastExtra(caster, spell, mapCtx) };
 
       if (!validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
 
@@ -265,6 +271,9 @@ function resolveRaw(
     }
   }
 }
+
+const upcastExtra = (caster: BattleParticipant, spell: SpellRef, mapCtx?: SpellMapContext): number =>
+  isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets ? mapCtx.upcastTargets * upcastSteps(spell.level, mapCtx.castLevel) : 0;
 
 const HOSTILE_KINDS = new Set(["enemy", "area", "template", "allEnemies"]);
 
@@ -282,7 +291,11 @@ export function resolveSpellTargets(
   chosenIds: string[],
   mapCtx?: SpellMapContext,
 ): SpellTargetResolution {
-  const res = resolveRaw(ps, caster, spell, targeting, chosenIds, mapCtx);
+  const extra = upcastExtra(caster, spell, mapCtx);
+
+  const widened = extra > 0 && (targeting.kind === "area" || targeting.kind === "template") ? { ...targeting, maxTargets: targeting.maxTargets + extra } : targeting;
+
+  const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
 
   const charmers = conditionSourceIds(caster, "charmed");
 

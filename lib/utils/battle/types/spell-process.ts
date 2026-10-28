@@ -1,6 +1,7 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
 
@@ -23,8 +24,12 @@ export interface CastSpellParams {
   battleId: string;
   diceRolls: number[];
   saveRolls?: Array<{ participantId: string; roll: number }>;
+  attackRolls?: Array<{ participantId: string; roll: number }>;
+  dice?: SpellDice;
   /** DM накладає з сайдбару — не витрачати spell slot */
   isDMCast?: boolean;
+  slotKey?: string;
+  castLevel?: number;
   rng?: () => number;
   map?: BattleMapConfig | null;
   rules?: Ruleset;

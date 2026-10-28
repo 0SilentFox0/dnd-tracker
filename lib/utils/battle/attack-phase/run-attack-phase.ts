@@ -9,6 +9,7 @@ import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/ut
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
+import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -101,6 +102,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       disadvantageRoll: second,
       rollMode: data.rollMode,
       actionSpent: i > 0,
+      offHand: data.offHand,
       damageRolls: strikeDice.rolls,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
@@ -115,7 +117,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
     });
 
-    if (attackResult.success) dice.hit();
+    if (attackResult.success) dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;

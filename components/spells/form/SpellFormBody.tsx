@@ -10,6 +10,7 @@ import { SpellFormPowerFields } from "./SpellFormPowerFields";
 
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import type { IdName } from "@/types/common";
 
 export interface SpellFormBodyProps {
@@ -34,6 +35,8 @@ export function SpellFormBody({
 }: SpellFormBodyProps) {
   const { data: formData, set: setFormData } = form;
 
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
+
   const tabs: HudTab<SpellFormTabId>[] = [
     {
       id: SPELL_FORM_TAB.basic,
@@ -43,7 +46,7 @@ export function SpellFormBody({
     {
       id: SPELL_FORM_TAB.roll,
       label: "Сила",
-      content: <SpellFormPowerFields formData={formData} setFormData={setFormData} />,
+      content: <SpellFormPowerFields formData={formData} setFormData={setFormData} classesEnabled={classesEnabled} />,
     },
     {
       id: SPELL_FORM_TAB.effects,

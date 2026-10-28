@@ -8,6 +8,7 @@ import { useFxEnabled } from "./useFxEnabled";
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm, usePageHidden } from "@/lib/hooks/common";
+import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
 import { checkReturnToStart } from "@/lib/utils/battle/grid";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
@@ -156,6 +157,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     moraleResult,
     status: {
       actionUsed: participant.actionFlags.hasUsedAction,
+      attackLeft: canAttackFromPool(participant),
       bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
       bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
       skipped: moraleResult === "skip",

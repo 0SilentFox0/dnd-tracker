@@ -9,5 +9,7 @@ export function resetTurnState(p: BattleParticipant): BattleParticipant["battleD
     returnedThisTurn: undefined,
     extraMovement: undefined,
     readied: undefined,
+    attacksLeft: undefined,
+    attackedWithLight: undefined,
   };
 }

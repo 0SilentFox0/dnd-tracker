@@ -137,7 +137,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   campaignId={campaignId}
                   characterId={characterId}
                   equipped={equipped}
-                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
+                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null, modifiers: a.modifiers }))}
                   holders={holders}
                   onEquippedChange={setEquipped}
                 />

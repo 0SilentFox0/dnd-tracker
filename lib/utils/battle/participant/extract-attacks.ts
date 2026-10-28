@@ -13,12 +13,14 @@ import {
 } from "./artifact-utils";
 
 import { AttackType } from "@/lib/constants/battle";
+import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
 import { prisma } from "@/lib/db";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 
+// 5e: безоружний удар = 1 + Сил (плоска «1»)
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
-const defaultAttacks = (names: Ruleset["defaultAttacks"]): ExtractedAttack[] => [
-  { id: "default-melee", name: names.meleeName, type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+const defaultAttacks = (names: Ruleset["defaultAttacks"], fiveE: boolean): ExtractedAttack[] => [
+  { id: "default-melee", name: names.meleeName, type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: fiveE ? "1" : "", damageType: "physical" },
   { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
@@ -26,15 +28,17 @@ export async function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
   preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
   names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
+  opts: { fiveE?: boolean } = {},
 ): Promise<ExtractedAttack[]> {
-  const weapons = await extractWeaponAttacks(character, preloadedArtifactsById);
+  const weapons = await extractWeaponAttacks(character, preloadedArtifactsById, !!opts.fiveE);
 
-  return [...weapons, ...defaultAttacks(names).filter((d) => !weapons.some((w) => w.type === d.type))];
+  return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
 
 async function extractWeaponAttacks(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+  preloadedArtifactsById: Record<string, Prisma.ArtifactGetPayload<object>> | undefined,
+  fiveE: boolean,
 ): Promise<ExtractedAttack[]> {
   const attacks: ExtractedAttack[] = [];
 
@@ -96,6 +100,10 @@ async function extractWeaponAttacks(
     }
   }
 
+  const shieldId = fiveE && typeof equipped.shield === "string" ? equipped.shield : null;
+
+  if (shieldId) weaponIds.push(shieldId);
+
   if (weaponIds.length === 0) {
     return attacks;
   }
@@ -111,8 +119,15 @@ async function extractWeaponAttacks(
         },
       });
 
+  const shieldCellEmpty = !equipped.shield;
+
   for (const weapon of potentialWeapons) {
+    const isOffHand = shieldId !== null && weapon.id === shieldId;
+
+    if (isOffHand && weapon.slot !== "weapon") continue;
+
     if (
+      !isOffHand &&
       weapon.slot !== "weapon" &&
       weapon.slot !== "mainHand" &&
       weapon.slot !== "offHand" &&
@@ -157,14 +172,22 @@ async function extractWeaponAttacks(
       attackType = AttackType.RANGED;
     }
 
+    const traits = fiveE ? parseWeaponTraits(getOptionalModifierValue(modifiers, ArtifactModifierType.TRAITS)) : [];
+
+    const versatileDice = fiveE ? getOptionalModifierValue(modifiers, ArtifactModifierType.VERSATILE_DICE) : undefined;
+
+    const thrownMelee = traits.includes("thrown");
+
+    const useVersatile = fiveE && !isOffHand && traits.includes("versatile") && !!versatileDice && shieldCellEmpty;
+
     attacks.push({
-      id: weapon.id,
+      id: isOffHand ? `${weapon.id}:off` : weapon.id,
       name: weapon.name,
-      type: (attackType === AttackType.RANGED
+      type: (attackType === AttackType.RANGED && !thrownMelee
         ? AttackType.RANGED
         : AttackType.MELEE) as ExtractedAttack["type"],
       attackBonus,
-      damageDice,
+      damageDice: useVersatile ? versatileDice : damageDice,
       damageType,
       range: rangeVal,
       properties: getOptionalModifierValue(
@@ -179,6 +202,9 @@ async function extractWeaponAttacks(
         parseInt(
           getModifierValue(modifiers, ArtifactModifierType.MAX_TARGETS, "0"),
         ) || undefined,
+      ...(traits.length > 0 && { traits }),
+      ...(versatileDice && { versatileDice }),
+      ...(isOffHand && { hand: "off" as const }),
     });
   }
 

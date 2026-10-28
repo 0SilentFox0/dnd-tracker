@@ -1,5 +1,6 @@
 "use client";
 
+import { WeaponTraitsField } from "@/components/common/WeaponTraitsField";
 import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -89,10 +90,10 @@ export function UnitAttack({
           />
           <LabeledInput
             id={`attack-properties-${index}`}
-            label="Властивості (опц.)"
+            label="Примітка (опц.)"
             value={attack.properties || ""}
             onChange={(e) => onChange({ ...attack, properties: e.target.value })}
-            placeholder="Finesse, reach"
+            placeholder="магічна, срібна"
           />
           <div>
             <Label htmlFor={`attack-target-type-${index}`}>Ціль (Target/AOE)</Label>
@@ -112,6 +113,11 @@ export function UnitAttack({
             />
           </div>
         </div>
+        <WeaponTraitsField
+          idPrefix={`attack-${index}`}
+          value={attack}
+          onChange={onChange}
+        />
         <div className="grid grid-cols-3 items-end gap-2">
           <LabeledInput
             id={`attack-bonus-${index}`}

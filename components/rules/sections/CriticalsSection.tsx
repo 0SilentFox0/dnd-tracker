@@ -63,6 +63,11 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
         <p className="mt-2 text-xs text-hud-muted">
           Подвоєння шкоди при криті — це ефект таблиці (“{DOUBLE_DAMAGE_NAME}”). Якщо вимкнути таблиці або цей ефект, крит лише позначається, без додаткової шкоди.
         </p>
+        <div className="mt-3 flex items-center gap-3">
+          <Switch id="rules-crit-double-dice" checked={c.doubleDice} onCheckedChange={(doubleDice) => set({ doubleDice })} />
+          <Label htmlFor="rules-crit-double-dice">Подвоєння кубиків на криті</Label>
+        </div>
+        <p className="mt-2 text-xs text-hud-muted">Крит подвоює кубики шкоди (зброя, атака заклинанням); модифікатори не подвоюються.</p>
       </RulesSection>
       <EffectList title="Ефекти криту" prefix="rules-crit-success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
       <EffectList title="Ефекти провалу" prefix="rules-crit-fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />

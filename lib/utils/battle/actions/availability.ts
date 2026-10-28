@@ -1,6 +1,7 @@
 import { CORE_ACTION_REGISTRY, type CoreActionKey } from "./registry";
 
 import { isActive, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
+import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
@@ -12,6 +13,8 @@ export interface CoreActionAvailability {
 }
 
 const STAND_UP_COST_DIVISOR = 2;
+
+export const isAttackAction = (key: CoreActionKey) => key === "grapple" || key === "shove";
 
 export const standUpCost = (p: BattleParticipant) => Math.ceil(baseMovement(p) / STAND_UP_COST_DIVISOR);
 
@@ -52,7 +55,7 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
 }
 
 export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): CoreActionAvailability {
-  if (CORE_ACTION_REGISTRY[key].cost === "action" && actor.actionFlags.hasUsedAction) return { ok: false, reason: "Дію вже витрачено" };
+  if (CORE_ACTION_REGISTRY[key].cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: "Дію вже витрачено" };
 
   const reason = validateCoreAction(key, actor, participants, map);
 

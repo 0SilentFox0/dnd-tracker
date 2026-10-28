@@ -1,6 +1,6 @@
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
-import type { RaceModifier, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
 
 export type { RaceModifier, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
@@ -24,6 +24,10 @@ export interface Spell {
   stackable?: boolean;
   maxStacks?: number | null;
   concentration?: boolean;
+  dieSides?: number | null;
+  upcastDice?: number | null;
+  upcastTargets?: number | null;
+  addAbilityMod?: boolean | null;
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
 }
@@ -51,6 +55,10 @@ export interface SpellFormData {
   stackable: boolean;
   maxStacks: number | null;
   concentration?: boolean;
+  dieSides?: number | null;
+  upcastDice?: number | null;
+  upcastTargets?: number | null;
+  addAbilityMod?: boolean;
   fx: SpellFx;
 }
 
@@ -64,6 +72,10 @@ export interface SpellRules {
   stackable?: boolean;
   maxStacks?: number | null;
   concentration?: boolean;
+  dieSides?: SpellDefinition["dieSides"];
+  upcastDice?: number;
+  upcastTargets?: number;
+  addAbilityMod?: boolean;
 }
 
 export type BookSpell = SpellRules & {

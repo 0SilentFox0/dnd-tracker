@@ -7,6 +7,7 @@ import { aimInRange, apexOf, isCenteredTemplate, templateAimAllowed, templateAre
 
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
@@ -86,7 +87,7 @@ export function centreCell(p: BattleParticipant): GridPoint {
 }
 
 export function canStartAttack(p: BattleParticipant | null): p is BattleParticipant {
-  return !!p && (p.battleData.attacks ?? []).length > 0 && (!p.actionFlags.hasUsedAction || (p.battleData.pendingExtraActions ?? 0) > 0);
+  return !!p && (p.battleData.attacks ?? []).length > 0 && (!p.actionFlags.hasUsedAction || (p.battleData.pendingExtraActions ?? 0) > 0 || canAttackFromPool(p));
 }
 
 function enemyAt(participants: BattleParticipant[], of: BattleParticipant | null, key: string): BattleParticipant | undefined {

@@ -1,6 +1,7 @@
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
@@ -19,6 +20,10 @@ export function spellSaveDc(caster: BattleParticipant): number {
   return caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
 }
 
+export function spellAttackBonus(caster: BattleParticipant): number {
+  return caster.spellcasting.spellAttackBonus ?? caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
+}
+
 export interface SpellPower {
   heal: number;
   damage: number;
@@ -31,6 +36,7 @@ export function computeSpellPower(input: {
   rolls: number[];
   participants: BattleParticipant[];
   extra?: StaticEffect[];
+  addAbilityMod?: boolean;
 }): SpellPower {
   const { caster, rolls } = input;
 
@@ -52,7 +58,11 @@ export function computeSpellPower(input: {
     if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${sum} (${signed(Math.floor((sum * e.percent) / 100))})`);
   }
 
-  const raw = heal + mods.flat + percentBonus;
+  const abilityMod = isFiveE(caster) && input.addAbilityMod ? spellcastingModifier(caster) : null;
+
+  if (abilityMod) breakdown.push(`+ мод. ${abilityMod.label} (${signed(abilityMod.mod)})`);
+
+  const raw = heal + mods.flat + percentBonus + (abilityMod?.mod ?? 0);
 
   const mult = heroMagicMultiplier(caster);
 
@@ -60,5 +70,5 @@ export function computeSpellPower(input: {
 
   if (mult !== 1) breakdown.push(`× ${mult} (${archetypeLabel(caster)}) = ${damage}`);
 
-  return { heal, damage, breakdown };
+  return { heal: heal + (abilityMod?.mod ?? 0), damage, breakdown };
 }

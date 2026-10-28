@@ -22,12 +22,16 @@ export function defaultSpellForm(): SpellFormData {
     stackable: false,
     maxStacks: null,
     concentration: false,
+    dieSides: null,
+    upcastDice: null,
+    upcastTargets: null,
+    addAbilityMod: false,
     fx: {},
   };
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod });
 
   return {
     name: spell.name,
@@ -45,12 +49,23 @@ export function spellToForm(spell: Spell): SpellFormData {
     stackable: def.stackable === true,
     maxStacks: def.maxStacks ?? null,
     concentration: def.concentration === true,
+    dieSides: def.dieSides ?? null,
+    upcastDice: def.upcastDice ?? null,
+    upcastTargets: def.upcastTargets ?? null,
+    addAbilityMod: def.addAbilityMod === true,
     fx: parseSpellFx(spell.fx) ?? {},
   };
 }
 
+const formDice5e = (form: SpellFormData) => ({
+  dieSides: form.dieSides ?? undefined,
+  upcastDice: form.upcastDice ?? undefined,
+  upcastTargets: form.upcastTargets ?? undefined,
+  addAbilityMod: form.addAbilityMod || undefined,
+});
+
 export function formToPayload(form: SpellFormData) {
-  const parsed = createSpellSchema.parse({ ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null });
+  const parsed = createSpellSchema.parse({ ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null, addAbilityMod: form.addAbilityMod || null });
 
   return { ...parsed, level: form.level };
 }
@@ -59,7 +74,7 @@ export function formToPayload(form: SpellFormData) {
 export function spellFormError(form: SpellFormData): string | null {
   if (!form.name.trim()) return "Вкажіть назву заклинання";
 
-  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers, stackable: form.stackable, maxStacks: form.stackable ? (form.maxStacks ?? undefined) : undefined, concentration: form.concentration });
+  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers, stackable: form.stackable, maxStacks: form.stackable ? (form.maxStacks ?? undefined) : undefined, concentration: form.concentration, ...formDice5e(form) });
 
   if (parsed.success) return null;
 

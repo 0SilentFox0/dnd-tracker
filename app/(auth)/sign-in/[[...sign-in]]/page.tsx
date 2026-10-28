@@ -1,5 +1,9 @@
-import { GoogleAuthForm } from "@/components/auth/GoogleAuthForm";
+import type { Metadata } from "next";
+
+import { SignInScreen } from "@/components/auth/AuthScreens";
+
+export const metadata: Metadata = { title: "Вхід — D&D Combat Tracker" };
 
 export default function SignInPage() {
-  return <GoogleAuthForm mode="sign-in" />;
+  return <SignInScreen />;
 }

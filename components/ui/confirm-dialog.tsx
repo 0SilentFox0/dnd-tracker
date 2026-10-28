@@ -1,11 +1,14 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 import { Button } from "@/components/ui/button";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ConfirmContext, type ConfirmOptions } from "@/lib/hooks/common/confirm-context";
 import { errorMessage } from "@/lib/utils/common/error-message";
+
+// loaded on the first confirm() so pages that never ask (the landing) skip Radix Dialog + vaul
+const ResponsiveDialog = dynamic(() => import("@/components/ui/responsive-dialog").then((m) => m.ResponsiveDialog));
 
 type Pending = ConfirmOptions & { resolve: (ok: boolean) => void; detach?: () => void };
 
@@ -81,6 +84,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
+      {shown && (
       <ResponsiveDialog
         hud
         open={pending !== null}
@@ -108,6 +112,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           </p>
         ) : null}
       </ResponsiveDialog>
+      )}
     </ConfirmContext.Provider>
   );
 }

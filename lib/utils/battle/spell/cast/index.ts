@@ -16,7 +16,7 @@ import type { AbilityEvent } from "@/types/abilities";
 const DEFAULT_CONCENTRATION_ROUNDS = 10;
 
 export function castSpell(params: CastSpellParams): CastSpellResult {
-  const { caster, spell, targetIds, allParticipants, currentRound, battleId, diceRolls, saveRolls = [], isDMCast = false } = params;
+  const { caster, spell, targetIds, allParticipants, currentRound, battleId, diceRolls, saveRolls = [], attackRolls = [], isDMCast = false } = params;
 
   const def = spell.definition;
 
@@ -30,7 +30,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const before = flow.ps;
 
-  const info = { spellId: spell.id, school: spell.groupId, level: spell.level };
+  const castLevel = params.castLevel ?? spell.level;
+
+  const info = { spellId: spell.id, school: spell.groupId, level: spell.level, ...(params.castLevel !== undefined && { castLevel }) };
 
   const targetsBefore = targetIds.flatMap((id) => findParticipant(before, id) ?? []);
 
@@ -38,7 +40,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const readyCaster = getP(flow, casterId);
 
-  const slotKey = spellSlotKey(readyCaster, spell.level);
+  const slotKey = params.slotKey ?? spellSlotKey(readyCaster, spell.level);
 
   const slot = readyCaster.spellcasting.spellSlots[slotKey];
 
@@ -62,12 +64,18 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     targetIds,
     touchedIds: new Set(targetIds),
     info,
+    castLevel,
+    chosenCastLevel: params.castLevel,
     ability: abilityOf(spell),
-    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId] }),
+    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod }),
     saveDc: spellSaveDc(readyCaster),
     actionModifiers,
     rng,
     saveRolls,
+    attackRolls,
+    diceCount: params.dice?.count ?? 0,
+    diceSides: params.dice?.sides ?? 0,
+    attacks: [],
     saves: [],
     damageSteps: {},
     outcomes: new Map(),

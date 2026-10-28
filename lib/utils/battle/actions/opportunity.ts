@@ -5,6 +5,7 @@ import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions";
 import { cellsOf, footprint, footprintDistance, isOnMap, sizeOf } from "@/lib/utils/battle/grid";
+import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -57,8 +58,6 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
     const toCells = footprint(path[i], size);
 
     for (const { id, reach } of enemies) {
-      if (footprintDistance(fromCells, reach) > 1 || footprintDistance(toCells, reach) <= 1) continue;
-
       const e = findParticipant(flow.ps, id);
 
       if (!e || !canProvoke(e, moverId)) continue;
@@ -66,6 +65,10 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
       const attack = pickMeleeAttack(e);
 
       if (!attack) continue;
+
+      const range = meleeReachCells(e, attack);
+
+      if (footprintDistance(fromCells, reach) > range || footprintDistance(toCells, reach) <= range) continue;
 
       const mover = findParticipant(flow.ps, moverId) ?? mover0;
 

@@ -1,13 +1,15 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { casterSpellDice, upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
 import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
+import { PACT_KEY, slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { SpellCastData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -31,7 +33,15 @@ export interface SpellPick {
   /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
   chain?: SpellChain;
   needsSaves: boolean;
+  needsAttackRolls?: boolean;
   diceSlots: number[];
+}
+
+export interface SlotOption {
+  key: string;
+  label: string;
+  castLevel: number;
+  left: number;
 }
 
 export interface SpellFlowState {
@@ -43,6 +53,8 @@ export interface SpellFlowState {
   targetIds: string[];
   aim?: GridPoint;
   saves: Record<string, number>;
+  attacks: Record<string, number>;
+  slotKey?: string;
   damage: (number | undefined)[];
   error?: string;
 }
@@ -51,7 +63,9 @@ export type SpellFlowAction =
   | { type: "OPEN"; casterId: string; level: number; levels?: number[] }
   | { type: "SPELLS_LOADED"; levels: number[] }
   | { type: "SET_LEVEL"; level: number }
-  | { type: "PICK"; pick: SpellPick }
+  | { type: "PICK"; pick: SpellPick; slotKey?: string }
+  | { type: "SET_SLOT"; slotKey: string; pick: SpellPick }
+  | { type: "SET_ATTACK"; id: string; value: number | undefined }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }
   | { type: "PICK_TARGET"; id: string }
@@ -66,9 +80,9 @@ export type SpellFlowAction =
   | { type: "FAIL"; error: string }
   | { type: "CLOSE" };
 
-export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, damage: [] };
+export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, attacks: {}, damage: [] };
 
-const needsRolls = (p: SpellPick) => p.needsSaves || p.diceSlots.length > 0;
+const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
@@ -105,7 +119,32 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_LEVEL":
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
-      return { ...s, step: "spell", pick: a.pick, targetIds: [], aim: undefined, saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+    case "SET_SLOT": {
+      const sameDice = s.pick?.diceSlots.length === a.pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === a.pick.diceSlots[i]);
+
+      const targetIds = a.pick.maxTargets === undefined ? s.targetIds : s.targetIds.slice(0, a.pick.maxTargets);
+
+      const kept = <T,>(rolls: Record<string, T>) => Object.fromEntries(Object.entries(rolls).filter(([id]) => targetIds.includes(id)));
+
+      const next: SpellFlowState = {
+        ...s,
+        pick: a.pick,
+        slotKey: a.slotKey,
+        targetIds,
+        saves: kept(s.saves),
+        attacks: kept(s.attacks),
+        damage: sameDice ? s.damage : a.pick.diceSlots.map(() => undefined),
+        error: undefined,
+      };
+
+      return next.step === "summary" && !rollsComplete(next) ? { ...next, step: "rolls" } : next;
+    }
+    case "SET_ATTACK": {
+      const { [a.id]: _cleared, ...rest } = s.attacks;
+
+      return { ...s, attacks: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
+    }
     case "TO_TARGETS":
       if (!s.pick) return s;
 
@@ -192,6 +231,8 @@ export function withChainTargets(s: SpellFlowState, chainIds: string[]): SpellFl
 export function spellPayload(s: SpellFlowState): SpellCastData {
   const saves = Object.entries(s.saves).map(([participantId, roll]) => ({ participantId, roll }));
 
+  const attacks = s.pick?.needsAttackRolls ? Object.entries(s.attacks).filter(([id]) => s.targetIds.includes(id)).map(([participantId, roll]) => ({ participantId, roll })) : [];
+
   return {
     casterId: s.casterId as string,
     spellId: s.pick?.spellId as string,
@@ -199,6 +240,8 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     ...(s.pick?.targetMode === "template" && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
+    ...(attacks.length > 0 && { attackRolls: attacks }),
+    ...(s.slotKey && { slotKey: s.slotKey }),
   };
 }
 
@@ -225,19 +268,39 @@ export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
 
 const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
 
-export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null): SpellPick {
+export function slotOptions(caster: BattleParticipant | null, spellLevel: number): SlotOption[] {
+  const slots = caster?.spellcasting?.spellSlots;
+
+  if (!caster || !slots || !isFiveE(caster) || spellLevel < 1) return [];
+
+  return slotRestoreOrder(slots).flatMap((key) => {
+    const castLevel = slotLevel(slots, key);
+
+    const left = slots[key]?.current ?? 0;
+
+    if (castLevel < spellLevel || left <= 0) return [];
+
+    return [{ key, castLevel, left, label: key === PACT_KEY ? `Пакт · коло ${castLevel}` : `Коло ${castLevel}` }];
+  });
+}
+
+export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null, opts: { castLevel?: number } = {}): SpellPick {
   const def = spellDefinition(s);
 
   const { targeting } = def;
 
   const onMap = !!map && !!caster && isOnMap(caster);
 
-  const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
+  const base = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
+
+  const extra = caster && isFiveE(caster) && opts.castLevel !== undefined && s.upcastTargets ? s.upcastTargets * upcastSteps(s.level, opts.castLevel) : 0;
+
+  const skill = base.mode === "single" && extra > 0 ? { mode: "area" as const, maxTargets: 1 + extra } : base;
 
   const skillRadius: SkillRadius | undefined =
-    onMap && skill.mode === "area" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
+    onMap && base.mode === "area" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { side: targeting.kind, maxTargets: base.maxTargets } : undefined;
 
-  const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets } : undefined;
+  const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets + extra } : undefined;
 
   const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && SKILL_AREA_TEMPLATE;
 
@@ -247,11 +310,11 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const targetMode: SpellPick["targetMode"] = template ? "template" : auto ? "none" : isMulti ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
 
-  const maxTargets = template ? undefined : isMulti ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
+  const maxTargets = template ? undefined : isMulti ? targeting.maxTargets + extra : skill.mode === "area" ? skill.maxTargets : undefined;
 
   const range = "range" in targeting ? targeting.range : undefined;
 
-  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
+  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice }, opts.castLevel) : { count: def.dice, sides: 6 };
 
   return {
     spellId: s.id,
@@ -265,6 +328,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(chain && { chain }),
     ...(range !== undefined && { range }),
     needsSaves: def.resolution.kind === "save" && !auto,
+    ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
     diceSlots: Array.from({ length: dice.count }, () => dice.sides),
   };
 }
@@ -308,10 +372,12 @@ export function spellSlotsLeft(caster: BattleParticipant | null, level: number, 
 
 export const casterUsesUniversalSlot = (caster: BattleParticipant | null): boolean => !!caster && spellSlotKey(caster, 1) === "universal";
 
-export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean }): string | null {
+export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean; chosen?: string }): string | null {
   if (!spellNeedsSlot(spell.level)) return null;
 
   if (opts.free) return "Вільний каст DM — слот не витрачається.";
+
+  if (opts.chosen) return `Витратить слот: ${opts.chosen}.`;
 
   return opts.universal ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(spell.level)} кола.`;
 }

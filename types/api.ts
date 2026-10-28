@@ -159,6 +159,7 @@ export interface AttackData {
   rollMode?: "normal" | "advantage" | "disadvantage";
   damageRolls: number[];
   attackId?: string;
+  offHand?: boolean;
 }
 
 export interface MoraleCheckData {
@@ -223,7 +224,9 @@ export interface SpellCastData {
   targetCell?: GridPoint;
   diceRolls: number[];
   saveRolls?: Array<{ participantId: string; roll: number }>;
+  attackRolls?: Array<{ participantId: string; roll: number }>;
   free?: boolean;
+  slotKey?: string;
 }
 
 // Skill Trees API

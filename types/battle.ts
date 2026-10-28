@@ -5,6 +5,7 @@ import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICU
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { DndSkill } from "@/lib/constants/skills";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
@@ -111,6 +112,9 @@ export interface BattleAttack {
   damageDistribution?: number[];
   /** Гарантована шкода — застосовується навіть при промаху. */
   guaranteedDamage?: number;
+  traits?: WeaponTrait[];
+  versatileDice?: string;
+  hand?: "off";
 }
 
 /**
@@ -138,6 +142,7 @@ export interface BattleParticipantBasicInfo {
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
+  damageModel?: "5e";
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
   baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
@@ -348,6 +353,10 @@ export interface BattleParticipantBattleData {
   artifactSets?: SetProgress[];
   /** Пул додаткових дій: поповнюється ефектом grantAction, а на початку власного ходу скидається до суми actionsPerTurn; споживається при використанні основної дії */
   pendingExtraActions?: number;
+  /** Атаки дії «Атака», що лишилися цього ходу */
+  attacksLeft?: number;
+  /** Цього ходу була атака дією легкою ближньою зброєю основної руки */
+  attackedWithLight?: boolean;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
@@ -516,6 +525,7 @@ export interface BattleAction {
     spellName?: string;
     spellFx?: SpellFx;
     spellLevel?: number;
+    castLevel?: number;
     spellSlotUsed?: number;
     /** Приклик юніта після касту */
     summonedUnitTemplateId?: string;
@@ -530,6 +540,7 @@ export interface BattleAction {
       rolls?: number[];
       autoFail?: boolean;
     }>;
+    spellAttacks?: Array<{ participantId: string; roll: number; total: number; ac: number; hit: boolean; crit: boolean }>;
     // Для лікування:
     healingRolls?: Array<{
       dice: string;

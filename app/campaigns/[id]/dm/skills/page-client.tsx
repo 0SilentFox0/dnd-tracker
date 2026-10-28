@@ -6,6 +6,7 @@ import { Printer, Sparkles } from "lucide-react";
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
           </>
         }
       />
+      <OnboardingHint id="dm.skills" />
 
       {isLoading && skills.length === 0 ? (
         <LoadingState rows={6} label="Завантаження скілів…" />

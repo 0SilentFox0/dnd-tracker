@@ -121,6 +121,8 @@ export enum ArtifactModifierType {
   PROPERTIES = "properties",
   MIN_TARGETS = "minTargets",
   MAX_TARGETS = "maxTargets",
+  TRAITS = "traits",
+  VERSATILE_DICE = "versatileDice",
 }
 
 export const DEFAULT_ARTIFACT_MODIFIERS = {

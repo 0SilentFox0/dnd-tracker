@@ -74,7 +74,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
 
   const victims = participants.filter((p) => p.basicInfo.id !== participantId && isTargetable(p));
 
-  const attack = berserker.battleData.attacks[0];
+  const attack = berserker.battleData.attacks.find((a) => a.hand !== "off");
 
   if (cannotAct || victims.length === 0 || !attack || attackDisabled(attack.type)) {
     const reason = cannotAct ? "втрачає дію" : "нікого не може атакувати";

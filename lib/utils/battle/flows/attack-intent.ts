@@ -24,10 +24,11 @@ export interface TurnAttackStatus {
   phase: string;
   actionUsed: boolean;
   skipped: boolean;
+  attackLeft?: boolean;
 }
 
-export function turnAllowsAttack({ phase, actionUsed, skipped }: TurnAttackStatus): boolean {
-  return phase === "acting" && !actionUsed && !skipped;
+export function turnAllowsAttack({ phase, actionUsed, skipped, attackLeft }: TurnAttackStatus): boolean {
+  return phase === "acting" && (!actionUsed || !!attackLeft) && !skipped;
 }
 
 export function canConsumeIntent(intent: AttackIntent, turn: TurnPoint & TurnAttackStatus & { heroId: string }): boolean {

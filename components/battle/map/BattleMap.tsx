@@ -30,6 +30,7 @@ import {
   isFallen,
   isMoveMark,
   mapSize,
+  MIN_TAP_CELL_PX,
   parseCellKey,
   playableBounds,
   tokenBox,
@@ -439,9 +440,13 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone });
+  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone, minCell: MIN_TAP_CELL_PX });
 
-  const scrolls = phone && fit.height > avail.height + 0.5;
+  const scrollsX = fit.width > avail.width + 0.5;
+
+  const scrollsY = fit.height > avail.height + 0.5;
+
+  const scrolls = scrollsX || scrollsY;
 
   const { zoom, offset, bind, containerRef, wasDragged } = useMapViewport({ panLocked: painting || !!modeTools?.panLocked, wheelScrolls: scrolls });
 
@@ -496,7 +501,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
   useEffect(() => {
     const outer = outerRef.current;
 
-    if (!phone || !currentId || !outer || outer.scrollHeight <= outer.clientHeight) return;
+    if (!currentId || !outer || !scrolls) return;
 
     const token = [...(containerRef.current?.querySelectorAll<HTMLElement>('[data-fx-anchor="map"]') ?? [])].find((el) => el.dataset.fxParticipant === currentId);
 
@@ -508,16 +513,21 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
     const dy = t.top < o.top ? t.top - o.top : t.bottom > o.bottom ? t.bottom - o.bottom : 0;
 
-    if (dy !== 0) outer.scrollBy({ top: dy, behavior: "smooth" });
-    // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
-  }, [phone, currentId, containerRef, scrolls]);
+    const dx = t.left < o.left ? t.left - o.left : t.right > o.right ? t.right - o.right : 0;
 
-  // свайп угору-вниз віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
-  const touch = phone && scrolls && zoom === 1 && !painting ? "touch-pan-y" : "touch-none";
+    if (dy !== 0 || dx !== 0) outer.scrollBy({ top: dy, left: dx, behavior: "smooth" });
+    // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
+  }, [currentId, containerRef, scrolls]);
+
+  // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
+  const touch = scrolls && zoom === 1 && !painting ? cn(scrollsX && "touch-pan-x", scrollsY && "touch-pan-y") : "touch-none";
 
   return (
-    // висока карта на телефоні прокручується свайпом угору-вниз; по центру вона обрізала б верх без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
-    <div ref={outerRef} className={cn("flex h-full w-full justify-center", phone && "overflow-y-auto [scrollbar-gutter:stable]", scrolls ? "items-start" : "items-center", className)}>
+    // карта, більша за екран, прокручується; по центру вона обрізала б край без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
+    <div
+      ref={outerRef}
+      className={cn("flex h-full w-full", (phone || scrolls) && "overflow-auto", phone && "[scrollbar-gutter:stable]", scrollsX ? "justify-start" : "justify-center", scrollsY ? "items-start" : "items-center", className)}
+    >
     <div
       ref={containerRef}
       data-fx-clip

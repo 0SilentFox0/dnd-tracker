@@ -11,6 +11,7 @@ export interface Outcome {
   skip: boolean;
   factor: number;
   raceMultiplier: number;
+  critExtra?: number;
 }
 
 export interface SpellCastState {
@@ -21,13 +22,19 @@ export interface SpellCastState {
   targetIds: string[];
   /** Цілі каста й усі, кого зачепили власні ефекти заклинання — без тих, кого змінили лише тригери. */
   touchedIds: Set<string>;
-  info: { spellId: string; school: string | null; level: number };
+  info: { spellId: string; school: string | null; level: number; castLevel?: number };
+  castLevel: number;
+  chosenCastLevel?: number;
   ability: ResolvedAbility;
   power: SpellPower;
   saveDc: number;
   actionModifiers: Record<string, StaticEffect[]>;
   rng: () => number;
   saveRolls: Array<{ participantId: string; roll: number }>;
+  attackRolls: Array<{ participantId: string; roll: number }>;
+  diceCount: number;
+  diceSides: number;
+  attacks: NonNullable<BattleAction["actionDetails"]["spellAttacks"]>;
   saves: NonNullable<BattleAction["actionDetails"]["savingThrows"]>;
   damageSteps: Record<string, DamageStep[]>;
   outcomes: Map<string, Outcome>;

@@ -7,7 +7,7 @@
 - Витрата монет із решею — `lib/utils/inventory/money.ts`. `grant`, `revoke`, `setMoney` — лише DM.
 - `inventory_log` лише додається (рядки не змінюються й не видаляються). Види: `money_*`, `item_*`, `artifact_stash|equip|unequip|grant|revoke|transfer`. Підписи — `components/character-profile/stash/describe-log.ts`; журнал читається курсором (`stash/log`).
 - Передача артефакта іншому герою кладе його в підсумок отримувача (`artifacts/transfer`).
-- DM-форма інвентарю (`PATCH …/inventory`, `equipSlot`): артефакт, що був у слоті, не губиться, а йде в кінець підсумку; запис журналу — `artifact_equip` (з `swappedArtifactId`) або `artifact_unequip` («знято в підсумок (DM)»), коли слот очищено.
+- DM-форма інвентарю (`PATCH …/inventory`, `equipSlot`): артефакт, що був у слоті, не губиться, а йде в кінець підсумку; запис журналу — `artifact_equip` (з `swappedArtifactId`) або `artifact_unequip` («знято в підсумок (DM)»), коли слот очищено. Нове розміщення не-щитового артефакта в клітинку «Щит» відхиляється (422, `OFF_HAND_EQUIP`) незалежно від режиму класів (виняток — легка ближня зброя, коли класи ввімкнені); уже збережені значення клітинки приймаються без змін.
 - Клієнт: `useStash` (`lib/hooks/…`) — `staleTime`, `setQueryData` з відповіді POST, інвалідація листа/ростера/довідника лише для дій, що це зачіпають. Вільні артефакти для видачі — окремий DM-ендпоінт `stash/free-artifacts`, що вантажиться лише при відкритому діалозі.
 
 ## Чернетки гравця

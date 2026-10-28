@@ -1,56 +1,42 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { useNotify } from "@/lib/hooks/common";
 import { createClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/utils/auth";
 
-export type GoogleAuthMode = "sign-in" | "sign-up";
-
-const FAILURE: Record<GoogleAuthMode, string> = { "sign-in": "Помилка при вході", "sign-up": "Помилка при реєстрації" };
-
-export function useGoogleOAuth(mode: GoogleAuthMode) {
+export function useGoogleOAuth() {
   const notify = useNotify();
-
-  const router = useRouter();
 
   const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState(false);
 
-  const supabase = useMemo(() => createClient(), []);
-
-  const errorParam = searchParams.get("error");
-
-  const error = errorParam ? decodeURIComponent(errorParam) : null;
-
-  useEffect(() => {
-    void supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.push("/campaigns");
-    });
-  }, [router, supabase]);
-
   const start = async () => {
+    setLoading(true);
+
     try {
-      setLoading(true);
+      const redirectTo = new URL("/auth/callback", window.location.origin);
 
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      });
+      const next = searchParams.get("next");
 
-      if (oauthError) {
-        console.error(FAILURE[mode], oauthError);
-        void notify(oauthError.message?.includes("provider is not enabled") ? "Google OAuth не налаштований. Будь ласка, зверніться до адміністратора." : `${FAILURE[mode]}: ${oauthError.message}`);
+      if (next) redirectTo.searchParams.set("next", next);
+
+      const { error } = await createClient().auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectTo.toString() } });
+
+      if (error) {
+        console.error("Google OAuth", error);
+        void notify(authErrorMessage(error));
       }
     } catch (err) {
-      console.error(FAILURE[mode], err);
-      void notify(`${FAILURE[mode]}: ${err instanceof Error ? err.message : "Невідома помилка"}`);
+      console.error("Google OAuth", err);
+      void notify(authErrorMessage(err instanceof Error ? err : null));
     } finally {
       setLoading(false);
     }
   };
 
-  return { loading, error, start };
+  return { loading, start };
 }

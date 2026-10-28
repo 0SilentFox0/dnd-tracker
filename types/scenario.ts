@@ -55,6 +55,7 @@ export interface ScenarioSection {
 export interface LegendEntry {
   kind: LegendKind;
   label: string;
+  color?: string;
 }
 
 export interface ScenarioContent {

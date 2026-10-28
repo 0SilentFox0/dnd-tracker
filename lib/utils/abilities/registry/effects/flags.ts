@@ -225,6 +225,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     describe: (e) => `майстерність у навичках${skillsText(e.skills)}`,
   },
   autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
+  twoWeaponFighting: plain("Бій двома зброями", "модифікатор до шкоди другої руки"),
   proneDefense: plain("Захист повалених", "ближні атаки по цілі з перевагою, дальні — з недоліком"),
   conditionImmunity: {
     label: "Імунітет до станів",

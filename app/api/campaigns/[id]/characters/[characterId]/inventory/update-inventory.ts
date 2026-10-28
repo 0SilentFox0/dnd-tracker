@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
+import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
@@ -13,8 +13,10 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
+import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { EquippedItems } from "@/types/inventory";
 
 const inventoryItemSchema = z.object({ name: z.string(), quantity: z.number().optional() }).passthrough();
@@ -62,6 +64,18 @@ export async function updateInventory(request: Request, campaignId: string, char
 
       displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
       nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
+    }
+
+    const shieldId = nextEquipped?.shield;
+
+    if (typeof shieldId === "string" && shieldId && shieldId !== (current?.equipped as EquippedItems | undefined)?.shield) {
+      const shieldArtifact = await tx.artifact.findFirst({ where: { id: shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
+
+      if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
+        const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
+
+        if (!canEquipOffHand(shieldArtifact, parseRules(campaign?.rules).classes.enabled)) return errorResponse(API_ERRORS.OFF_HAND_EQUIP, 422);
+      }
     }
 
     if (nextEquipped) {

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
-import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
+import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
@@ -23,6 +23,10 @@ const spellFields = {
   stackable: z.boolean(),
   maxStacks: z.number().int().min(1).max(10).nullable(),
   concentration: z.boolean(),
+  dieSides: SpellDieSidesSchema.nullable(),
+  upcastDice: z.number().int().min(0).max(10).nullable(),
+  upcastTargets: z.number().int().min(0).max(10).nullable(),
+  addAbilityMod: z.boolean().nullable(),
   fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
 };
 
@@ -41,6 +45,10 @@ export const createSpellSchema = z.object({
   stackable: spellFields.stackable.default(false),
   maxStacks: spellFields.maxStacks.optional(),
   concentration: spellFields.concentration.default(false),
+  dieSides: spellFields.dieSides.optional(),
+  upcastDice: spellFields.upcastDice.optional(),
+  upcastTargets: spellFields.upcastTargets.optional(),
+  addAbilityMod: spellFields.addAbilityMod.optional(),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;

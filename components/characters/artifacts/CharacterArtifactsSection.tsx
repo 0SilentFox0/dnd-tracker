@@ -6,8 +6,10 @@ import Image from "next/image";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
+import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactOption {
@@ -15,6 +17,7 @@ export interface ArtifactOption {
   name: string;
   slot: string;
   icon?: string | null;
+  modifiers?: unknown;
 }
 
 interface CharacterArtifactsSectionProps {
@@ -33,6 +36,8 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
   const notify = useNotify();
 
   const equip = useEquipArtifact(campaignId, characterId);
+
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
@@ -61,7 +66,12 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
 
             const current = equippedId ? artifacts.find((a) => a.id === equippedId) : undefined;
 
-            const available = artifacts.filter((a) => a.slot === cell.slotType || (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON));
+            const available = artifacts.filter(
+              (a) =>
+                a.slot === cell.slotType ||
+                (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON) ||
+                (cell.slotType === ArtifactSlot.SHIELD && canEquipOffHand(a, classesEnabled)),
+            );
 
             return (
               <DropdownMenu key={cell.key}>

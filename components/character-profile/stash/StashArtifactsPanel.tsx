@@ -11,6 +11,7 @@ import { HudSection } from "@/components/hud/form";
 import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ARTIFACT_RARITY_COLOR, ArtifactSlot,artifactSlotLabel } from "@/lib/constants/artifacts";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useStashAction } from "@/lib/hooks/characters";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,8 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
   const { campaignId, characterId } = useProfile();
 
   const action = useStashAction(campaignId, characterId);
+
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
   const confirm = useConfirm();
 
@@ -63,6 +66,9 @@ export function StashArtifactsPanel({ view, canAct, isDM }: StashArtifactsPanelP
               {canAct && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {a.slot !== ArtifactSlot.ITEM && <Button size="sm" variant="outline" disabled={action.isPending} onClick={() => void run({ action: "equip", artifactId: a.id })}>Вдягнути</Button>}
+                  {classesEnabled && a.light && (
+                    <Button size="sm" variant="outline" disabled={action.isPending} onClick={() => void run({ action: "equip", artifactId: a.id, slot: "shield" })}>У другу руку</Button>
+                  )}
                   <Button size="sm" variant="outline" onClick={() => setTransfer(a)}>Передати</Button>
                   {isDM && <Button size="sm" variant="outline" onClick={() => revoke(a)}>Забрати</Button>}
                 </div>

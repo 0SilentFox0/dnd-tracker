@@ -6,6 +6,7 @@ import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -14,6 +15,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
+import { resolveChosenSlot, spellNeedsSlot } from "@/lib/utils/battle/spell/slot";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
@@ -78,13 +80,24 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
     }
 
-    const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, { map: ctx.meta.map, targetCell: data.targetCell });
+    const chosen = !free && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
+
+    if (chosen && !chosen.ok) throw new BattleRuleError("action_rejected", chosen.error);
+
+    const castLevel = chosen?.ok ? chosen.castLevel : undefined;
+
+    const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
+      map: ctx.meta.map,
+      targetCell: data.targetCell,
+      castLevel,
+      upcastTargets: definition.upcastTargets,
+    });
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
     const rng = ctx.rng ?? Math.random;
 
-    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId });
+    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice }, castLevel);
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
     const diceRolls = data.preview && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
@@ -102,7 +115,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       battleId: ctx.scene.id,
       diceRolls,
       saveRolls: trusted,
+      attackRolls: data.attackRolls,
+      dice: expected,
       isDMCast: free,
+      ...(chosen?.ok && { slotKey: data.slotKey, castLevel }),
       rng,
       map: ctx.meta.map,
       rules: ctx.meta.rules,

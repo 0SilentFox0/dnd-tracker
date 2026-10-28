@@ -8,7 +8,7 @@ import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { rollDie } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
   attacker: BattleParticipant,
@@ -16,7 +16,7 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null } = {},
 ): AttackRollResult {
   const c = (opts.rules ?? DEFAULT_RULES).criticals;
 

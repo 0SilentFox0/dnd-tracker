@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { AttackType } from "@/lib/constants/battle";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { GameClassData } from "@/types/classes";
 
@@ -21,6 +22,9 @@ export type ExtractedAttack = {
   properties?: string;
   minTargets?: number;
   maxTargets?: number;
+  traits?: WeaponTrait[];
+  versatileDice?: string;
+  hand?: "off";
 };
 
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{

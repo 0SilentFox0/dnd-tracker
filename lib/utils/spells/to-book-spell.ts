@@ -17,6 +17,10 @@ interface BookSpellRow {
   spellEffects?: unknown;
   stackable?: boolean;
   maxStacks?: number | null;
+  dieSides?: number | null;
+  upcastDice?: number | null;
+  upcastTargets?: number | null;
+  addAbilityMod?: boolean | null;
   fx?: unknown;
 }
 
@@ -29,6 +33,10 @@ export function spellRules(def: SpellDefinition): SpellRules {
     resolution: def.resolution,
     spellEffects: def.effects,
     ...(def.stackable && { stackable: true, maxStacks: def.maxStacks ?? null }),
+    ...(def.dieSides && { dieSides: def.dieSides }),
+    ...(def.upcastDice !== undefined && { upcastDice: def.upcastDice }),
+    ...(def.upcastTargets !== undefined && { upcastTargets: def.upcastTargets }),
+    ...(def.addAbilityMod && { addAbilityMod: true }),
   };
 }
 

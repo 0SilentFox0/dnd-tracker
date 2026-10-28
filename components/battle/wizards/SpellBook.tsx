@@ -2,6 +2,7 @@
 
 import { Swords } from "lucide-react";
 
+import { SlotSelect } from "./spellbook/SlotSelect";
 import { SpellAimPanel } from "./spellbook/SpellAimPanel";
 import { SpellCastDialog } from "./spellbook/SpellCastDialog";
 
@@ -36,7 +37,8 @@ export function SpellBook({ book }: { book: Book }) {
     <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6">
       <SpellDetail spell={selected} formula={view.formulaOf(selected)}>
         {widening && <p role="note" className="mt-4 border-l-4 border-[#7a2a1f] bg-[#7a2a1f]/10 py-2 pl-3 pr-2 text-base font-semibold text-[#7a2a1f]">{widening.note}</p>}
-        <button type="button" disabled={(selected.level > 0 && view.slotLeft(selected.level) === 0) || view.costUsed(selected)} onClick={actions.toTargets} className={cn(seal, "mt-auto")}>
+        {state.step === "spell" && <div className="mt-4"><SlotSelect book={book} /></div>}
+        <button type="button" disabled={(selected.level > 0 && (view.noSlot(selected) || (!view.slot.options.length && view.slotLeft(selected.level) === 0))) || view.costUsed(selected)} onClick={actions.toTargets} className={cn(seal, "mt-auto")}>
           <Swords className="size-5" />{targetsLabel(state.pick?.targetMode)}
         </button>
       </SpellDetail>

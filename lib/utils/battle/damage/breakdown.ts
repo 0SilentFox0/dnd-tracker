@@ -4,14 +4,16 @@ import type {
 } from "../types/damage-breakdown";
 import { applyBalanceDamageMultiplier } from "./balance-multiplier";
 import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
-import { heroDamageContext } from "./hero-damage";
+import { heroAttackDamageParts, heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
 import { applyWeaponFlat } from "./weapon-flat";
 
 import { AttackType } from "@/lib/constants/battle";
+import { attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { diceCount } from "@/lib/utils/common/dice";
 import type { DamageStep } from "@/types/battle";
 
 export type {
@@ -29,9 +31,20 @@ export function computeDamageBreakdown(
     damageRolls,
     allParticipants,
     isCritical = false,
+    rules,
   } = params;
 
-  const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
+  const doubleDice = critDoublesDice(rules, isCritical);
+
+  const set = doubleDice ? diceCount(heroAttackDamageParts(attacker, attack).formula) : 0;
+
+  const hasSecondSet = set > 0 && damageRolls.length >= 2 * set;
+
+  const sum = (rolls: number[]) => rolls.reduce((total, roll) => total + roll, 0);
+
+  const baseDamage = doubleDice && set > 0 && !hasSecondSet ? sum(damageRolls) * 2 : sum(damageRolls);
+
+  const contextRolls = hasSecondSet ? damageRolls.slice(0, set) : damageRolls;
 
   const typeStr = String(attack.type ?? "").toLowerCase();
 
@@ -41,7 +54,7 @@ export function computeDamageBreakdown(
     ? AttackType.MELEE
     : AttackType.RANGED;
 
-  const statModifier = getAttackAbilityModifier(attacker.abilities, isMelee ? AttackType.MELEE : AttackType.RANGED);
+  const statModifier = attackDamageModifier(attacker, attack, allParticipants);
 
   const additionalDamageModifiers: Array<{ type: string; value: number }> = [];
 
@@ -54,7 +67,8 @@ export function computeDamageBreakdown(
       allParticipants,
       targetId: target.basicInfo.id,
       additionalDamage: additionalDamageModifiers,
-      ...heroDamageContext(attacker, attack, damageRolls),
+      ...heroDamageContext(attacker, attack, contextRolls),
+      ...(isFiveE(attacker) && { statLabel: attackAbilityLabelFor(attacker, attack) }),
     },
   );
 
@@ -64,7 +78,7 @@ export function computeDamageBreakdown(
 
   const steps: DamageStep[] = [...damageCalculation.steps];
 
-  if (isCritical) {
+  if (isCritical && !doubleDice) {
     totalDamage *= 2;
     breakdown.push(`──────────`);
     breakdown.push(`× 2 (крит) = ${totalDamage} урону`);

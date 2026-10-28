@@ -9,8 +9,10 @@ export const spellSchema = z.object({
   targetCell: mapCellSchema.optional(),
   diceRolls: z.array(z.number()).default([]),
   saveRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
+  attackRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
   preview: z.boolean().optional(),
   free: z.boolean().optional(),
+  slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
 });
 
 export type SpellRequestData = z.infer<typeof spellSchema>;

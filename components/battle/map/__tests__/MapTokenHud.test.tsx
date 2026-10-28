@@ -17,9 +17,9 @@ const unit = (hp: number, size = 1) => ({ ...base, basicInfo: { ...base.basicInf
 const effect = (name: string, fxElement: string, extra: Partial<ActiveEffect> = {}) =>
   ({ id: name, name, type: "debuff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], fxElement, ...extra }) as unknown as ActiveEffect;
 
-const hud = (over: { hp?: number; size?: number; exact?: boolean; effects?: ActiveEffect[] } = {}) =>
+const hud = (over: { hp?: number; size?: number; exact?: boolean; effects?: ActiveEffect[]; px?: number; onReturn?: () => void } = {}) =>
   render(
-    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} box={{ cx: 50, cy: 50, size: 100 * (over.size ?? 1) }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={0.8} exact={over.exact ?? true} raised={false} effects={over.effects} />,
+    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} box={{ cx: 50, cy: 50, size: 100 * (over.size ?? 1) }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={over.px ?? 0.8} exact={over.exact ?? true} raised={false} effects={over.effects} onReturn={over.onReturn} />,
   );
 
 const q = (c: HTMLElement, sel: string) => c.querySelector<HTMLElement>(sel) as HTMLElement;
@@ -79,6 +79,28 @@ describe("MapTokenHud bar", () => {
 
     expect(q(small, "[data-map-hud-strip]").textContent).toContain("Огр");
     expect(nameFont(small)).toBeLessThan(nameFont(big));
+  });
+});
+
+describe("MapTokenHud fit", () => {
+  it("середня клітинка — лише тонка смуга без тексту", () => {
+    const { container } = hud({ px: 0.5 });
+
+    expect(container.querySelector("[data-map-hud-name]")).toBeNull();
+    expect(q(container, "[data-map-hud-bar]").textContent).toBe("");
+  });
+
+  it("дрібна клітинка — HUD прибраний повністю, щоб не закривати жетон", () => {
+    const { container } = hud({ px: 0.15 });
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("дрібна клітинка з кнопкою повернення — кнопка лишається, плашки немає", () => {
+    const { container } = hud({ px: 0.15, onReturn: vi.fn() });
+
+    expect(container.querySelector("[data-map-return]")).not.toBeNull();
+    expect(container.querySelector("[data-map-hud-strip]")).toBeNull();
   });
 });
 

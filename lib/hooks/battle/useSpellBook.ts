@@ -6,10 +6,12 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import {
   buildSpellPick,
   casterUsesUniversalSlot,
   initialSpellFlow,
+  slotOptions,
   spellAimTargets,
   spellDefinition,
   spellFlow,
@@ -253,7 +255,16 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const wideningOf = (s: BookSpell) => spellWidening(order, caster, s, onMap);
 
-  const formulaOf = (s: BookSpell): string => (caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null }) : "");
+  const castLevelOf = (s: BookSpell): number | undefined => {
+    if (!caster || !flow.slotKey || flow.pick?.spellId !== s.id) return undefined;
+
+    return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)?.castLevel;
+  };
+
+  const formulaOf = (s: BookSpell): string =>
+    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice }, castLevelOf(s)) : "";
+
+  const slotChoices = selected && !free ? slotOptions(caster, selected.level) : [];
 
   const send = useEffectEvent(async () => {
     if (!caster) return;
@@ -280,7 +291,10 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     universalSlot,
     free,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
-    slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot }),
+    slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
+    slot: { options: slotChoices, value: state.slotKey },
+    noSlot: (s: BookSpell) => (caster && isFiveE(caster) ? !free && s.level > 0 && slotOptions(caster, s.level).length === 0 : false),
+    attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => !!caster && !free && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
   };
 
@@ -291,7 +305,17 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
       if (who) dispatch({ type: "OPEN", casterId: who.basicInfo.id, level: level ?? firstUsable(who), levels });
     },
     setLevel: (level: number) => dispatch({ type: "SET_LEVEL", level }),
-    pick: (s: BookSpell) => dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map) }),
+    pick: (s: BookSpell) => {
+      const first = free ? undefined : slotOptions(caster, s.level)[0];
+
+      dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map, { castLevel: first?.castLevel }), ...(first && { slotKey: first.key }) });
+    },
+    setSlot: (key: string) => {
+      const option = selected && slotChoices.find((o) => o.key === key);
+
+      if (selected && option) dispatch({ type: "SET_SLOT", slotKey: key, pick: buildSpellPick(order, caster, selected, map, { castLevel: option.castLevel }) });
+    },
+    setAttack: (id: string, v: number | undefined) => dispatch({ type: "SET_ATTACK", id, value: v }),
     toTargets: () => dispatch({ type: "TO_TARGETS" }),
     toggleTarget: (id: string) => {
       const target = order.find((p) => p.basicInfo.id === id);
@@ -307,7 +331,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     },
     setSave: (id: string, v: number | undefined) => dispatch({ type: "SET_SAVE", id, value: v }),
     setDamage: (i: number, v: number | undefined) => dispatch({ type: "SET_DAMAGE", index: i, value: v }),
-    aiDamage: () => state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides, cryptoRandom) })),
+    aiDamage: () => {
+      state.pick?.diceSlots.forEach((sides, i) => dispatch({ type: "SET_DAMAGE", index: i, value: rollDie(sides, cryptoRandom) }));
+
+      if (state.pick?.needsAttackRolls) state.targetIds.forEach((id) => state.attacks[id] === undefined && dispatch({ type: "SET_ATTACK", id, value: rollDie(20, cryptoRandom) }));
+    },
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),

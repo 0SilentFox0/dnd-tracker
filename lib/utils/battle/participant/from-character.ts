@@ -65,7 +65,15 @@ export async function createBattleParticipantFromCharacter(
 
   const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
-  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks);
+  const classEntries = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
+
+  const entries = classEntries?.success ? classEntries.data : [];
+
+  const resolvedEntries = entries.length > 0 ? resolveClassEntries(entries, await loadClassesById(character.campaignId, context)) : [];
+
+  const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
+
+  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses });
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
@@ -80,14 +88,6 @@ export async function createBattleParticipantFromCharacter(
     baseKnownSpells,
     context,
   );
-
-  const classEntries = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
-
-  const entries = classEntries?.success ? classEntries.data : [];
-
-  const resolvedEntries = entries.length > 0 ? resolveClassEntries(entries, await loadClassesById(character.campaignId, context)) : [];
-
-  const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
 
   const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context, resolvedClasses ?? undefined);
 
@@ -158,6 +158,7 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
       raceId: (race as { id?: string } | null)?.id,
       moraleCap: moraleCapFromRules(rules),
+      ...(resolvedClasses && { damageModel: "5e" as const }),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,

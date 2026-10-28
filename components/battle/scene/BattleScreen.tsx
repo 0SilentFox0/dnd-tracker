@@ -11,6 +11,7 @@ import { MobileBattleLayout } from "./MobileBattleLayout";
 import { AudioDock } from "@/components/audio/AudioDock";
 import { BattleAudioProvider } from "@/components/battle/audio/BattleAudioProvider";
 import { hudFontClassName } from "@/components/hud";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
@@ -95,6 +96,7 @@ export function BattleScreen() {
     <BattleAudioProvider>
       {battle.status === BattleStatus.PREPARED ? (
         <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
+          {isDM && <OnboardingHint id="dm.battle-scene" className="mx-auto mt-3 max-w-md" />}
           <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
           <CornerStack>
             <AudioDock placement="corner" />
@@ -107,6 +109,8 @@ export function BattleScreen() {
           {battle.status === BattleStatus.COMPLETED && <BattleResultScreen />}
           <div ref={setNotices} data-notice-stack className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto">
             <BattleToast />
+            {/* не над мапою у свій хід і не для глядачів; ДМ бачить свою підказку на підготовці */}
+            {!isDM && hero && !isMyTurn && <OnboardingHint id="player.battle" />}
           </div>
           {Desktop && (
             <CornerStack>

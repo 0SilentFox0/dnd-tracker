@@ -30,6 +30,7 @@ export const attackBodySchema = z
     disadvantageRoll: z.number().min(1).max(20).optional(),
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     damageRolls: z.array(z.number()).default([]),
+    offHand: z.boolean().optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(
@@ -46,7 +47,7 @@ export type AttackBody = z.infer<typeof attackBodySchema>;
 function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "endTurn">): void {
   const attacker = findParticipant(ctx.participants, data.attackerId);
 
-  const attack = attacker && findAttack(attacker, data.attackId);
+  const attack = attacker && findAttack(attacker, data.attackId, data.offHand);
 
   // без атакуючого чи атаки помилку дасть сама фаза атаки
   if (!attacker || !attack) return;

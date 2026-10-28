@@ -2,9 +2,10 @@ import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
+import { attackDamageModifier, attackRollModifier } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
@@ -36,7 +37,9 @@ export function armorTotal(p: BattleParticipant): SheetTotal {
 export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAttack {
   const type = attackKindOf(attack.type);
 
-  const statMod = getAttackAbilityModifier(p.abilities, type);
+  const statMod = attackDamageModifier(p, attack);
+
+  const hitMod = attackRollModifier(p, attack);
 
   const avg = averageAttackDamage(p, attack, [p]);
 
@@ -45,7 +48,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
   const hitMods = collectModifiers([p], p.basicInfo.id, { stat: "attackBonus", attackKind: type });
 
   const toHitLines: SheetLine[] = [
-    { label: `${avg.statLabel}${star}`, value: signed(statMod), source: "ability" },
+    { label: `${avg.statLabel}${star}`, value: signed(hitMod), source: "ability" },
     { label: "Майстерність", value: signed(p.abilities.proficiencyBonus), source: "proficiency" },
     ...(attack.attackBonus ? [{ label: "Зброя", value: signed(attack.attackBonus), source: "weapon" as const }] : []),
     ...hitMods.entries.filter((e) => e.flat).map((e) => ({ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) })),
