@@ -11,6 +11,17 @@ describe("scenario schemas", () => {
     expect(scenarioContentSchema.safeParse(content(["s1", "s2"])).success).toBe(true);
   });
 
+  it("приймає marker у розділі й рядку, відкидає порожній markerId", () => {
+    const c = content(["s1"]) as { sections: Record<string, unknown>[] };
+
+    (c.sections[0] as { marker?: unknown }).marker = { mapId: "w", markerId: "m" };
+    ((c.sections[0].rows as Record<string, unknown>[])[0]).marker = { mapId: "w", markerId: "m" };
+    expect(scenarioContentSchema.safeParse(c).success).toBe(true);
+
+    ((c.sections[0].rows as Record<string, unknown>[])[0]).marker = { mapId: "w", markerId: "" };
+    expect(scenarioContentSchema.safeParse(c).success).toBe(false);
+  });
+
   it("відкидає невідомий тип вузла", () => {
     const bad = content(["s1"]);
 

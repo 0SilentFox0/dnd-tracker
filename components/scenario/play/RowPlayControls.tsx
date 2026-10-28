@@ -1,13 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Play, Swords } from "lucide-react";
+import { MapPin, Play, Swords } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { MarkerChip } from "@/components/scenario/MarkerChip";
 import { BATTLE_STATUS_LABEL, BattleStatus } from "@/lib/constants/battle";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
-import { battleAction, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
-import type { ScenarioRow } from "@/types/scenario";
+import { battleAction, markerOnScreen, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import type { ScenarioMarkerRef, ScenarioRow } from "@/types/scenario";
+
+export function MarkerPlay({ campaignId, marker, play }: { campaignId: string; marker: ScenarioMarkerRef; play: ScenarioPlay }) {
+  const onScreen = markerOnScreen(marker, play.lookup.show);
+
+  return (
+    <MarkerChip
+      campaignId={campaignId}
+      marker={marker}
+      action={(available) =>
+        onScreen ? (
+          <span className="sb-bind-live">● На екрані</span>
+        ) : (
+          <button type="button" className="toggle" aria-label="Показати на карті" disabled={!available || play.pending} onClick={() => play.showMarker(marker)}>
+            <MapPin className="size-3" /> Показати на карті
+          </button>
+        )
+      }
+    />
+  );
+}
 
 export function RowPlayControls({ campaignId, row, play }: { campaignId: string; row: ScenarioRow; play: ScenarioPlay }) {
   const slide = rowSlideState(row, play.lookup);
@@ -16,7 +37,7 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
 
   const action = battleAction(battle);
 
-  if (slide.kind === "none" && battle.kind === "none") return null;
+  if (slide.kind === "none" && battle.kind === "none" && !row.marker) return null;
 
   return (
     <div className="sb-play sans">
@@ -33,6 +54,7 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
           )}
         </span>
       )}
+      {row.marker && <MarkerPlay campaignId={campaignId} marker={row.marker} play={play} />}
       {slide.kind === "loading" && <span className="sb-bind sb-missing">Слайд…</span>}
       {slide.kind === "missing" && <span className="sb-bind sb-missing">Слайд недоступний</span>}
       {battle.kind === "missing" && <span className="sb-bind sb-missing">Бій недоступний</span>}

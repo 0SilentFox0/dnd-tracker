@@ -1,6 +1,6 @@
 import { EMPTY_DOC } from "./doc";
 
-import type { ScenarioContent, ScenarioRow, ScenarioRowSlide, ScenarioSection } from "@/types/scenario";
+import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow, ScenarioRowSlide, ScenarioSection } from "@/types/scenario";
 
 export const newId = () => crypto.randomUUID().replaceAll("-", "").slice(0, 10);
 
@@ -60,7 +60,7 @@ export function moveRow(c: ScenarioContent, sectionId: string, rowId: string, di
   return rows ? mapSection(c, sectionId, (s) => ({ ...s, rows })) : c;
 }
 
-function without(row: ScenarioRow, key: "slide" | "battleId"): ScenarioRow {
+function without<T extends object>(row: T, key: keyof T): T {
   const next = { ...row };
 
   delete next[key];
@@ -73,3 +73,9 @@ export const setRowSlide = (c: ScenarioContent, sectionId: string, rowId: string
 
 export const setRowBattle = (c: ScenarioContent, sectionId: string, rowId: string, battleId: string | undefined): ScenarioContent =>
   mapSection(c, sectionId, (s) => ({ ...s, rows: s.rows.map((r) => (r.id !== rowId ? r : battleId ? { ...r, battleId } : without(r, "battleId"))) }));
+
+export const setRowMarker = (c: ScenarioContent, sectionId: string, rowId: string, marker: ScenarioMarkerRef | undefined): ScenarioContent =>
+  mapSection(c, sectionId, (s) => ({ ...s, rows: s.rows.map((r) => (r.id !== rowId ? r : marker ? { ...r, marker } : without(r, "marker"))) }));
+
+export const setSectionMarker = (c: ScenarioContent, sectionId: string, marker: ScenarioMarkerRef | undefined): ScenarioContent =>
+  mapSection(c, sectionId, (s) => (marker ? { ...s, marker } : without(s, "marker")));

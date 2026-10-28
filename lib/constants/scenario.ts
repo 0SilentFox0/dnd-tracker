@@ -3,7 +3,7 @@ export const PAGE_KINDS = ["scene", "hero", "note"] as const;
 export const PAGE_STATUSES = ["draft", "ready", "personal"] as const;
 export const CALLOUT_KINDS = ["choice", "shadow", "check", "event", "artifact", "token", "hero", "goal", "confide"] as const;
 export const LEGEND_KINDS = ["read", "choice", "token", "artifact", "shadow", "check", "notes"] as const;
-export const MENTION_TYPES = ["unit", "artifact", "character", "spell", "battle"] as const;
+export const MENTION_TYPES = ["unit", "artifact", "character", "spell", "battle", "marker"] as const;
 export const NODE_TYPES = [
   "doc", "paragraph", "text", "heading", "hardBreak", "bulletList", "orderedList", "listItem",
   "readAloud", "say", "callout", "token", "mention", "table", "tableRow", "tableCell", "tableHeader",
@@ -29,7 +29,7 @@ export const LEGEND_LABELS: Record<(typeof LEGEND_KINDS)[number], string> = {
   read: "Читати вголос і події", choice: "Вибір гравців", token: "Жетон", artifact: "Міні-квест і артефакт",
   shadow: "Тіньова лінія", check: "Перевірка уважності", notes: "Нотатки майстра",
 };
-export const MENTION_LABELS: Record<(typeof MENTION_TYPES)[number], string> = { unit: "Юніт", artifact: "Артефакт", character: "Персонаж", spell: "Заклинання", battle: "Бій" };
+export const MENTION_LABELS: Record<(typeof MENTION_TYPES)[number], string> = { unit: "Юніт", artifact: "Артефакт", character: "Персонаж", spell: "Заклинання", battle: "Бій", marker: "Місце" };
 
 export const DEFAULT_SCENE_LEGEND: { kind: (typeof LEGEND_KINDS)[number]; label: string }[] = LEGEND_KINDS.map((kind) => ({ kind, label: LEGEND_LABELS[kind] }));
 export const SECTION_ICON_KEYS = ["scene", "battle", "secret", "choice", "journey", "dialogue", "rest", "prep"] as const;

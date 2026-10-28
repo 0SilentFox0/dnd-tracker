@@ -13,7 +13,7 @@ import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowS
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { battleAction, boundDeckIds, currentSlideRow, hasBattleBindings, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { BattleBrief } from "@/types/battle";
-import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
+import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow } from "@/types/scenario";
 import type { Slide } from "@/types/show";
 
 export interface ScenarioPlay {
@@ -23,6 +23,7 @@ export interface ScenarioPlay {
   currentRow: ScenarioRow | null;
   /** Рядок для «Наступний рядок»; null — далі слайдів немає. */
   nextRow: ScenarioRow | null;
+  showMarker(ref: ScenarioMarkerRef): void;
   runBattle(row: ScenarioRow): void;
   pending: boolean;
   control: ShowControl;
@@ -95,6 +96,7 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
 
       if (row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
     },
+    showMarker: ({ mapId, markerId }) => void control.send({ action: "world", mapId, focusMarkerId: markerId }),
     currentRow: currentSlideRow(content, lookup),
     nextRow: nextSlideRow(content, lookup),
     runBattle: (row) => battleRun.mutate(row),
