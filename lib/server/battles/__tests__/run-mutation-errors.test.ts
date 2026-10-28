@@ -40,4 +40,12 @@ describe("battleErrorResponse translates at the boundary", () => {
     expect((await battleErrorResponse(new BattleAccessError(403, API_ERRORS.FORBIDDEN)).json()).errorKey).toBe(API_ERRORS.FORBIDDEN);
     expect((await battleErrorResponse(new Error("boom")).json()).errorKey).toBe(API_ERRORS.INTERNAL);
   });
+
+  it("429 carries errorKey, retryAfterSeconds and Retry-After", async () => {
+    const res = battleErrorResponse(new BattleOperationError(429, API_ERRORS.TOO_MANY_REQUESTS, undefined, { allowed: false, count: 31, limit: 30, retryAfterSeconds: 4 }));
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("4");
+    expect(await res.json()).toMatchObject({ errorKey: API_ERRORS.TOO_MANY_REQUESTS, retryAfterSeconds: 4 });
+  });
 });

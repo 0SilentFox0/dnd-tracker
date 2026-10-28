@@ -169,6 +169,7 @@ describe("rateLimitResponse", () => {
     const body = await res.json();
 
     expect(body.error).toBe(API_ERRORS.TOO_MANY_REQUESTS);
+    expect(body.errorKey).toBe(API_ERRORS.TOO_MANY_REQUESTS);
     expect(body.retryAfterSeconds).toBe(7);
   });
 });
